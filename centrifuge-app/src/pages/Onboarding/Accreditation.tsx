@@ -1,17 +1,32 @@
 import { Button, Checkbox, Stack, Text } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
 import * as React from 'react'
+import { boolean, object } from 'yup'
 import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { OnboardingUser } from '../../types'
 import { useVerifyAccreditation } from './queries/useVerifyAccreditation'
 
+const validationSchema = object({
+  isAccredited: boolean().oneOf([true], 'You must confirm that you are an accredited investor'),
+})
+
 export const Accreditation = () => {
-  const [isAccredited, setIsAccredited] = React.useState(false)
   const { onboardingUser, previousStep, nextStep } = useOnboarding<NonNullable<OnboardingUser>>()
 
   const isCompleted = !!onboardingUser.globalSteps.verifyAccreditation?.completed
 
   const { mutate: verifyAccreditation, isLoading } = useVerifyAccreditation()
+
+  const formik = useFormik({
+    initialValues: {
+      isAccredited: isCompleted,
+    },
+    validationSchema,
+    onSubmit: () => {
+      verifyAccreditation()
+    },
+  })
 
   return (
     <>
@@ -38,12 +53,13 @@ export const Accreditation = () => {
         </Stack>
 
         <Checkbox
-          checked={isCompleted || isAccredited}
-          onChange={() => setIsAccredited((current) => !current)}
+          {...formik.getFieldProps('isAccredited')}
           label={
             <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>I confirm that I am an accredited investor</Text>
           }
           disabled={isCompleted || isLoading}
+          errorMessage={formik.errors.isAccredited}
+          checked={formik.values.isAccredited}
         />
       </Content>
 
@@ -53,9 +69,9 @@ export const Accreditation = () => {
         </Button>
         <Button
           onClick={() => {
-            isCompleted ? nextStep() : verifyAccreditation()
+            isCompleted ? nextStep() : formik.handleSubmit()
           }}
-          disabled={isCompleted ? false : isLoading || !isAccredited}
+          disabled={isLoading}
           loading={isLoading}
           loadingMessage="Verifying"
         >

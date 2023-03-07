@@ -17,14 +17,14 @@ import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
 import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geographyCodes'
 import { useVerifyBusiness } from './queries/useVerifyBusiness'
 
-const businessVerificationInput = object({
-  email: string().email().required(),
-  businessName: string().required(),
-  registrationNumber: string().required(),
-  jurisdictionCode: string().required(),
+const validationSchema = object({
+  email: string().email('Please enter a valid email address').required('Please enter an email address'),
+  businessName: string().required('Please enter the business name'),
+  registrationNumber: string().required('Please enter the business registration number'),
+  jurisdictionCode: string().required('Please select the business country of incorporation'),
   regionCode: string().when('jurisdictionCode', {
     is: (jurisdictionCode: string) => jurisdictionCode === 'us' || jurisdictionCode === 'ca',
-    then: string().required(),
+    then: string().required('Please select your region code'),
   }),
 })
 
@@ -49,8 +49,7 @@ export const BusinessInformation = () => {
     onSubmit: (values) => {
       verifyBusinessInformation(values)
     },
-    validationSchema: businessVerificationInput,
-    validateOnMount: true,
+    validationSchema,
   })
 
   const { mutate: verifyBusinessInformation, isLoading, isError } = useVerifyBusiness()
@@ -59,13 +58,12 @@ export const BusinessInformation = () => {
     if (formik.values.jurisdictionCode === 'us') {
       return (
         <Select
-          name="regionCode"
-          label="State of incorporation*"
+          {...formik.getFieldProps('regionCode')}
+          label="State of incorporation"
           placeholder="Select a state"
           options={formatGeographyCodes(US_STATE_CODES)}
           disabled={isLoading || isCompleted}
-          onChange={(event) => formik.setFieldValue('regionCode', event.target.value)}
-          value={formik.values.regionCode}
+          errorMessage={formik.touched.regionCode ? formik.errors.regionCode : undefined}
         />
       )
     }
@@ -73,13 +71,12 @@ export const BusinessInformation = () => {
     if (formik.values.jurisdictionCode === 'ca') {
       return (
         <Select
-          name="regionCode"
-          label="Province of incorporation*"
+          {...formik.getFieldProps('regionCode')}
+          label="Province of incorporation"
           placeholder="Select a province"
           options={formatGeographyCodes(CA_PROVINCE_CODES)}
           disabled={isLoading || isCompleted}
-          onChange={(event) => formik.setFieldValue('regionCode', event.target.value)}
-          value={formik.values.regionCode}
+          errorMessage={formik.touched.regionCode ? formik.errors.regionCode : undefined}
         />
       )
     }
@@ -104,27 +101,25 @@ export const BusinessInformation = () => {
         <Fieldset>
           <Box position="relative">
             <TextInput
-              id="email"
+              {...formik.getFieldProps('email')}
               label="Email address"
               placeholder="Enter email address"
               disabled={isLoading || isCompleted}
-              onChange={formik.handleChange}
-              value={formik.values.email}
+              errorMessage={formik.touched.email ? formik.errors.email : undefined}
             />
             <ValidEmailTooltip />
           </Box>
 
           <TextInput
-            id="businessName"
+            {...formik.getFieldProps('businessName')}
             label="Legal entity name"
             placeholder="Enter entity name"
             disabled={isLoading || isCompleted}
-            onChange={formik.handleChange}
-            value={formik.values.businessName}
+            errorMessage={formik.touched.businessName ? formik.errors.businessName : undefined}
           />
 
           <Select
-            name="jurisdictionCode"
+            {...formik.getFieldProps('jurisdictionCode')}
             label="Country of incorporation"
             placeholder="Select a country"
             options={formatGeographyCodes(KYB_COUNTRY_CODES)}
@@ -136,17 +131,16 @@ export const BusinessInformation = () => {
                 regionCode: '',
               })
             }}
-            value={formik.values.jurisdictionCode}
+            errorMessage={formik.touched.jurisdictionCode ? formik.errors.jurisdictionCode : undefined}
           />
           {renderRegionCodeSelect()}
 
           <TextInput
-            id="registrationNumber"
+            {...formik.getFieldProps('registrationNumber')}
             label="Registration number"
             placeholder="0000"
             disabled={isLoading || isCompleted}
-            onChange={formik.handleChange}
-            value={formik.values.registrationNumber}
+            errorMessage={formik.touched.registrationNumber ? formik.errors.registrationNumber : undefined}
           />
         </Fieldset>
       </Content>
@@ -157,10 +151,10 @@ export const BusinessInformation = () => {
         </Button>
         <Button
           onClick={() => {
-            isCompleted ? nextStep() : formik.submitForm()
+            isCompleted ? nextStep() : formik.handleSubmit()
           }}
           loading={isLoading}
-          disabled={isLoading || !formik.isValid}
+          disabled={isLoading}
           loadingMessage="Verifying"
         >
           Next

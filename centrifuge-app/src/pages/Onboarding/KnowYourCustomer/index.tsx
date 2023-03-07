@@ -7,12 +7,15 @@ import { useVerifyIdentity } from '../queries/useVerifyIdentity'
 import { IdentityVerification } from './IdentityVerification'
 import { SignerVerification } from './SignerVerification'
 
-const signerInput = object({
-  name: string().required(),
-  dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
-  countryOfCitizenship: string().required(),
-  countryOfResidency: string().required(),
-  isAccurate: boolean().oneOf([true]),
+const validationSchema = object({
+  name: string().required('Please enter a name'),
+  dateOfBirth: date()
+    .required('Please enter a date of birth')
+    .min(new Date(1900, 0, 1), 'Date of birth must be after 1900')
+    .max(new Date(), 'Date of birth must be in the past'),
+  countryOfCitizenship: string().required('Please select a country of citizenship'),
+  countryOfResidency: string().required('Please select a country of residency'),
+  isAccurate: boolean().oneOf([true], 'You must confirm that the information is accurate'),
 })
 
 export const KnowYourCustomer = () => {
@@ -35,7 +38,7 @@ export const KnowYourCustomer = () => {
     onSubmit: (values) => {
       startKYC(values)
     },
-    validationSchema: signerInput,
+    validationSchema,
     validateOnMount: true,
   })
 
