@@ -1,6 +1,8 @@
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
+import { onboardingBucket } from '../database'
 import { getPoolById } from '../utils/centrifuge'
+import { HttpsError } from '../utils/httpsError'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string
@@ -8,11 +10,10 @@ export type UpdateInvestorStatusPayload = {
   trancheId: string
 }
 
-export const sendDocuments = async (
+export const sendDocumentsMessage = async (
   walletAddress: string,
   poolId: string,
   trancheId: string,
-  taxInfo: any,
   signedAgreement: any
 ) => {
   const { metadata } = await getPoolById(poolId)
@@ -21,12 +22,20 @@ export const sendDocuments = async (
     expiresIn: '7d',
   })
 
+  const taxInfoFile = await onboardingBucket.file(`tax-information/${walletAddress}.pdf`)
+  const [taxInfoExists] = await taxInfoFile.exists()
+
+  if (!taxInfoExists) {
+    throw new HttpsError(400, 'Tax info not found')
+  }
+  const taxInfoPDF = await taxInfoFile.download()
+
   const message = {
     personalizations: [
       {
         to: [
           {
-            email: metadata?.pool?.issuer?.email || 'jp@k-f.co', // TODO: remove, obvs
+            email: metadata?.pool?.issuer?.email,
           },
         ],
         dynamic_template_data: {
@@ -43,17 +52,17 @@ export const sendDocuments = async (
     template_id: templateIds.updateInvestorStatus,
     from: {
       name: 'Centrifuge',
-      email: `hello@centrifuge.io`,
+      email: `noreply@centrifuge.io`,
     },
     attachments: [
       {
-        content: taxInfo,
+        content: taxInfoPDF[0].toString('base64'),
         filename: 'tax-info.pdf',
         type: 'application/pdf',
         disposition: 'attachment',
       },
       {
-        content: signedAgreement,
+        content: Buffer.from(signedAgreement).toString('base64'),
         filename: 'pool-agreement.pdf',
         type: 'application/pdf',
         disposition: 'attachment',

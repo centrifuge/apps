@@ -1,7 +1,7 @@
-import { Box, Button, DateInput, Select, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Select, TextInput } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
-import { date, object, string } from 'yup'
+import { object, string } from 'yup'
 import {
   ActionBar,
   AlertBusinessVerification,
@@ -22,7 +22,6 @@ const businessVerificationInput = object({
   businessName: string().required(),
   registrationNumber: string().required(),
   jurisdictionCode: string().required(),
-  incorporationDate: date().required().max(new Date()),
   regionCode: string().when('jurisdictionCode', {
     is: (jurisdictionCode: string) => jurisdictionCode === 'us' || jurisdictionCode === 'ca',
     then: string().required(),
@@ -45,7 +44,6 @@ export const BusinessInformation = () => {
       registrationNumber: onboardingUser?.registrationNumber || '',
       jurisdictionCode:
         (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode || '') ?? '',
-      incorporationDate: onboardingUser?.incorporationDate || '',
       regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
     onSubmit: (values) => {
@@ -150,14 +148,6 @@ export const BusinessInformation = () => {
             disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
             value={formik.values.registrationNumber}
-          />
-
-          <DateInput
-            id="incorporationDate"
-            label="Business incorporation date"
-            disabled={isLoading || isCompleted}
-            onChange={formik.handleChange}
-            value={formik.values.incorporationDate}
           />
         </Fieldset>
       </Content>

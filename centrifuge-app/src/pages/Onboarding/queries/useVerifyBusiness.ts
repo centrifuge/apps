@@ -8,7 +8,6 @@ type BusinessInformation = {
   registrationNumber: string
   jurisdictionCode: string
   regionCode: string
-  incorporationDate: string
 }
 
 export const useVerifyBusiness = () => {
@@ -27,7 +26,6 @@ export const useVerifyBusiness = () => {
             values.jurisdictionCode === 'us' || values.jurisdictionCode === 'ca'
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
-          incorporationDate: values.incorporationDate,
           trancheId: pool.trancheId,
           poolId: pool.id,
           dryRun: true,

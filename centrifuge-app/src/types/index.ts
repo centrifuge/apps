@@ -113,7 +113,6 @@ export type EntityUser = {
   walletAddress: string
   businessName: string
   email: string
-  incorporationDate: string
   jurisdictionCode: string
   registrationNumber: string
   ultimateBeneficialOwners: UltimateBeneficialOwner[]

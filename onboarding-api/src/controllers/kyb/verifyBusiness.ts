@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { bool, date, InferType, object, string } from 'yup'
+import { bool, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
@@ -13,7 +13,6 @@ const verifyBusinessInput = object({
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML
-  incorporationDate: date().required(), // used for AML
   registrationNumber: string().required(),
   jurisdictionCode: string().required(), // country of incorporation
 })
@@ -26,7 +25,7 @@ export const verifyBusinessController = async (
     await validateInput(req.body, verifyBusinessInput)
     const {
       walletAddress,
-      body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
+      body: { jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
     const entityDoc = await userCollection.doc(req.walletAddress).get()
@@ -43,7 +42,6 @@ export const verifyBusinessController = async (
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
       aml_for_businesses: {
         business_name: businessName,
-        business_incorporation_date: incorporationDate,
       },
     }
     const businessAML = await shuftiProRequest(req, payloadAML, { dryRun })
@@ -74,7 +72,6 @@ export const verifyBusinessController = async (
       businessName,
       ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
       registrationNumber,
-      incorporationDate,
       jurisdictionCode,
       globalSteps: {
         verifyBusiness: { completed: !!(kybVerified && businessAmlVerified), timeStamp: new Date().toISOString() },
