@@ -48,7 +48,7 @@ export const Menu: React.FC<Props> = () => {
       alignItems={['center', 'center', 'stretch']}
     >
       <NavigationItem
-        label="Investments"
+        label="Pools"
         href="/investments"
         icon={<IconInvestments />}
         active={pathname.includes('investments')}
