@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
-  Thumbnail
+  Thumbnail,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
@@ -167,7 +167,7 @@ export function PoolDetailOverview({
                 secondaryHeader={
                   <Shelf gap={6}>
                     <LabelValueStack
-                      label={<Tooltips variant="secondary" type="protection" />}
+                      label={<Tooltips variant="secondary" type="subordination" />}
                       value={formatPercentage(token.protection)}
                     />
                     <LabelValueStack
