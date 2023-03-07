@@ -191,11 +191,11 @@ const tooltipText = {
     body: 'Allows to manage pool configuration and manage other admins.',
   },
   noTranchProtection: {
-    label: 'Min. protection',
+    label: 'Min. subordination',
     body: 'The first, most junior tranche is not protected by subordinated tranches.',
   },
   tranchProtection: {
-    label: 'Min. protection',
+    label: 'Min. subordination',
     body: 'Minimum protection required for this tranche by all subordinated tranches.',
   },
   variableTranchInterest: {
