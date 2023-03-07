@@ -35,40 +35,59 @@ export const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ paylo
 type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string; precision?: number }
 
 export const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, currency, precision }) => {
-  const theme = useTheme()
   if (payload && payload?.length > 0) {
     return (
-      <Stack
-        bg="backgroundPage"
-        p="1"
-        style={{
-          boxShadow: `1px 3px 6px ${theme.colors.borderSecondary}`,
-        }}
-        minWidth="180px"
-        gap="4px"
-      >
-        <Text variant="label2" fontWeight="500">
-          {formatDate(payload[0].payload.day)}
-        </Text>
-        {payload.map((item) => {
-          return (
-            <Shelf key={item.dataKey} gap="4px" justifyContent="space-between">
-              <Shelf gap="4px" alignItems="center">
-                <Box width="11px" height="11px" borderRadius="100%" backgroundColor={item.color} />
-                <Text variant="label2">{item.name}</Text>
-              </Shelf>
-              <Text alignSelf="flex-end" textAlign="right" variant="label2">
-                {typeof item.value !== 'number'
-                  ? formatBalance(item.value[1] - item.value[0], currency, precision)
-                  : item.unit === 'percent'
-                  ? formatPercentage(item.value)
-                  : formatBalance(item.value, currency, precision)}
-              </Text>
-            </Shelf>
-          )
-        })}
-      </Stack>
+      <TooltipContainer>
+        <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
+        {payload.map(({ dataKey, name, color, value, unit }, index) => (
+          <TooltipEntry name={name} color={color} key={`${dataKey}${index}`}>
+            {typeof value !== 'number'
+              ? formatBalance(value[1] - value[0], currency, precision)
+              : unit === 'percent'
+              ? formatPercentage(value)
+              : formatBalance(value, currency, precision)}
+          </TooltipEntry>
+        ))}
+      </TooltipContainer>
     )
   }
   return null
+}
+
+export function TooltipContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <Stack
+      bg="backgroundPage"
+      p={1}
+      style={{
+        boxShadow: '1px 3px 6px rgba(0, 0, 0, .15)',
+      }}
+      minWidth="180px"
+      gap="4px"
+    >
+      {children}
+    </Stack>
+  )
+}
+
+export function TooltipTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <Text variant="label2" fontWeight="500">
+      {children}
+    </Text>
+  )
+}
+
+export function TooltipEntry({ name, color, children }: { name: string; color?: string; children: React.ReactNode }) {
+  return (
+    <Shelf gap="4px" justifyContent="space-between">
+      <Shelf gap="4px" alignItems="center">
+        <Box width="11px" height="11px" borderRadius="100%" backgroundColor={color} />
+        <Text variant="label2">{name}</Text>
+      </Shelf>
+      <Text alignSelf="flex-end" textAlign="right" variant="label2">
+        {children}
+      </Text>
+    </Shelf>
+  )
 }
