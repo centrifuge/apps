@@ -36,7 +36,7 @@ export const validate = {
   executiveSummary: combine(required(), mimeType('application/pdf'), maxFileSize(5 * MB)),
   website: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
   forum: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
-  email: pattern(/@/, 'Not a valid email address'),
+  email: combine(pattern(/@/, 'Not a valid email address'), required()),
   issuerDetailTitle: combine(required(), maxLength(50)),
   issuerDetailBody: combine(required(), maxLength(3000)),
 

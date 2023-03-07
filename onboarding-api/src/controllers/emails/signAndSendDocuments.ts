@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
-import { sendDocuments } from '../../emails/sendDocuments'
+import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
@@ -60,23 +60,7 @@ export const signAndSendDocumentsController = async (
       `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
     )
 
-    const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}.pdf`)
-
-    const [taxInfoExists] = await taxInfo.exists()
-
-    if (!taxInfoExists) {
-      throw new HttpsError(400, 'Tax info not found')
-    }
-
-    const taxInfoPDF = await taxInfo.download()
-
-    await sendDocuments(
-      walletAddress,
-      poolId,
-      trancheId,
-      taxInfoPDF[0].toString('base64'),
-      Buffer.from(signedAgreementPDF).toString('base64')
-    )
+    await sendDocumentsMessage(walletAddress, poolId, trancheId, signedAgreementPDF)
 
     const updatedUser: Subset<OnboardingUser> = {
       poolSteps: {
