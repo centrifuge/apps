@@ -1,8 +1,7 @@
-import { Shelf } from '@centrifuge/fabric'
+import { AnchorButton, Box, Shelf, Spinner } from '@centrifuge/fabric'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { Container, Content, ContentHeader, Header, Layout } from '../../components/Onboarding'
-import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
 import { useUpdateInvestorStatus } from './queries/useUpdateInvestorStatus'
 
@@ -31,6 +30,11 @@ export const UpdateInvestorStatus: React.FC = () => {
                     : undefined
                 }
               />
+              <Box>
+                <AnchorButton href="/" variant="primary">
+                  Return to Centrifuge App
+                </AnchorButton>
+              </Box>
             </>
           ) : (
             <Shelf height="100%" justifyContent="center" alignItems="center">
