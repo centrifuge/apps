@@ -63,7 +63,7 @@ export const updateInvestorStatusController = async (
         ...user.poolSteps,
         [poolId]: {
           [trancheId]: {
-            ...user.poolSteps[poolId][trancheId].signAgreement,
+            ...user.poolSteps[poolId][trancheId],
             status: {
               status,
               timeStamp: new Date().toISOString(),
