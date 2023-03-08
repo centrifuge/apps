@@ -31,7 +31,7 @@ export const sendVerifyEmailController = async (
     }
 
     if (email && email !== user.email) {
-      await validateAndWriteToFirestore(walletAddress, { email }, 'entity', ['email'])
+      await validateAndWriteToFirestore(walletAddress, { email }, user.investorType, ['email'])
     }
     const freshUserData = await fetchUser(walletAddress)
     await sendVerifyEmailMessage(freshUserData)

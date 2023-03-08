@@ -20,12 +20,12 @@ export const getUnsignedAgreementController = async (
 
     const [unsignedAgreementExists] = await unsignedAgreement.exists()
 
-    if (unsignedAgreementExists) {
-      const pdf = await unsignedAgreement.download()
-      return res.send({ unsignedAgreement: pdf[0] })
+    if (!unsignedAgreementExists) {
+      throw new HttpError(400, 'Agreement not found')
     }
 
-    throw new HttpError(400, 'Agreement not found')
+    const pdf = await unsignedAgreement.download()
+    return res.send({ unsignedAgreement: pdf[0] })
   } catch (e) {
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })

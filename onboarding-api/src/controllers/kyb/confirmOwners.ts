@@ -45,11 +45,11 @@ export const confirmOwnersController = async (
 
     const verifyEntity: Subset<EntityUser> = {
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
-      globalSteps: { ...user.globalSteps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
+      globalSteps: { confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
     await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', [
-      'globalSteps',
+      'globalSteps.confirmOwners',
       'ultimateBeneficialOwners',
     ])
 

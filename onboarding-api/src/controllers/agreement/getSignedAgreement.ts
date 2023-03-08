@@ -24,12 +24,12 @@ export const getSignedAgreementController = async (
 
     const [signedAgreementExists] = await signedAgreement.exists()
 
-    if (signedAgreementExists) {
-      const pdf = await signedAgreement.download()
-      return res.send({ signedAgreement: pdf[0] })
+    if (!signedAgreementExists) {
+      throw new HttpError(400, 'Agreement not found')
     }
 
-    throw new HttpError(400, 'Agreement not found')
+    const pdf = await signedAgreement.download()
+    return res.send({ signedAgreement: pdf[0] })
   } catch (e) {
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })

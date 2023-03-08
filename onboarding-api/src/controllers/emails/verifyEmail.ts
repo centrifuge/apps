@@ -34,10 +34,10 @@ export const verifyEmailController = async (
     }
 
     const globalSteps: Subset<EntityUser> = {
-      globalSteps: { ...user.globalSteps, verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
+      globalSteps: { verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(payload.walletAddress, globalSteps, 'entity', ['globalSteps'])
+    await validateAndWriteToFirestore(payload.walletAddress, globalSteps, 'entity', ['globalSteps.verifyEmail'])
     return res.status(204).send()
   } catch (e) {
     const error = reportHttpError(e)

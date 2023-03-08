@@ -32,14 +32,13 @@ export const setVerifiedIdentityController = async (
 
     const updatedUser: Subset<OnboardingUser> = {
       globalSteps: {
-        ...user.globalSteps,
         verifyIdentity: {
           completed: true,
           timeStamp: new Date().toISOString(),
         },
       },
     }
-    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps'])
+    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps.verifyIdentity'])
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
