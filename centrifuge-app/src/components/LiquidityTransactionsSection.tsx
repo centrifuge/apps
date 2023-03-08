@@ -116,7 +116,7 @@ export function LiquidityTransactionsSection({
           data={chartData}
           names={dataNames}
           colors={dataColors}
-          xAxisLabel="Latest epoch"
+          xAxisLabel="Latest order"
           currency={pool.currency.symbol}
         />
       ) : (

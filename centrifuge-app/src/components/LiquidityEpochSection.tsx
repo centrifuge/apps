@@ -7,7 +7,6 @@ import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'
 import { EpochList } from './EpochList'
 import { PageSection } from './PageSection'
-import { Tooltips } from './Tooltips'
 
 type LiquidityEpochSectionProps = {
   pool: Pool
@@ -15,9 +14,11 @@ type LiquidityEpochSectionProps = {
 
 function ExtraInfo({ children }: { children?: React.ReactNode }) {
   return (
-    <Shelf mb={2} gap={1}>
+    <Shelf as="p" mb={2} gap={1}>
       <IconInfo size={16} />
-      <Text variant="body3">{children}</Text>
+      <Text as="small" variant="body3">
+        {children}
+      </Text>
     </Shelf>
   )
 }
@@ -43,11 +44,11 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
     useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
-    'Close epoch',
+    'Close order',
     (cent) => cent.pools.closeEpoch,
     {
       onSuccess: () => {
-        console.log('Epoch closed successfully')
+        console.log('Order closed successfully')
       },
     }
   )
@@ -70,22 +71,43 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   return (
     <PageSection
-      title={`Epoch ${pool.epoch.current}`}
+      title="Order overview"
       titleAddition={<Text variant="body2">{epochTimeRemaining ? 'Ongoing' : 'Minimum duration ended'}</Text>}
       headerRight={
         <Shelf gap="1">
-          {!epochTimeRemaining && !ordersLocked && <Text variant="body2">No orders locked</Text>}
-          {ordersLocked && ordersFullyExecutable && <Text variant="body2">Orders executable</Text>}
-          {ordersLocked && ordersPartiallyExecutable && <Text variant="body2">Orders partially executable</Text>}
-          {ordersLocked && noOrdersExecutable && <Text variant="body2">No orders executable</Text>}
-          {epochTimeRemaining && <Tooltips type="epochTimeRemaining" label={epochTimeRemaining} />}
+          {!epochTimeRemaining && !ordersLocked && (
+            <Text as="small" variant="body2">
+              No orders locked
+            </Text>
+          )}
+          {ordersLocked && ordersFullyExecutable && (
+            <Text as="small" variant="body2">
+              Orders executable
+            </Text>
+          )}
+          {ordersLocked && ordersPartiallyExecutable && (
+            <Text as="small" variant="body2">
+              Orders partially executable
+            </Text>
+          )}
+          {ordersLocked && noOrdersExecutable && (
+            <Text as="small" variant="body2">
+              No orders executable
+            </Text>
+          )}
+          {epochTimeRemaining && (
+            <Text as="small" variant="body2">
+              Pending orders can be executed in {epochTimeRemaining}
+            </Text>
+          )}
+
           <Button
             small
             variant="secondary"
             onClick={closeEpoch}
             disabled={!pool || loadingClose || !!epochTimeRemaining}
             loading={loadingClose}
-            loadingMessage={loadingClose ? 'Closing epoch...' : ''}
+            loadingMessage={loadingClose ? 'Closing…' : ''}
           >
             Close
           </Button>

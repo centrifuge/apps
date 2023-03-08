@@ -93,7 +93,7 @@ function TooltipContent({ payload, currency }: TooltipProps<any, any> & { curren
             {formatDate(payload[0].payload.date)}
           </Text>
           <br />
-          Epoch {payload[0].payload.xAxis}
+          Order {payload[0].payload.xAxis}
         </TooltipTitle>
         {payload.map(({ dataKey, name, color, value }, index) => (
           <TooltipEntry name={name} color={color} key={`${dataKey}${index}`}>
