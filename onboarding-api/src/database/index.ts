@@ -157,7 +157,7 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
     }
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpError(400, error?.message || 'Validation error')
+    throw new HttpError(400, error?.message || 'Validation or write error')
   }
 }
 
