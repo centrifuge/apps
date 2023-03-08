@@ -14,10 +14,10 @@ import { updateInvestorStatusController } from './controllers/user/updateInvesto
 import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
+import { fileUploadMiddleware } from './middleware/fileUpload'
 import { rateLimiter } from './middleware/rateLimiter'
 import { verifyJw3t } from './middleware/verifyJw3t'
 const express = require('express')
-import fileUpload = require('express-fileupload')
 
 dotenv.config()
 
@@ -32,7 +32,7 @@ onboarding.get('/getUser', verifyJw3t, getUserController)
 onboarding.post('/startKyc', verifyJw3t, startKycController)
 onboarding.post('/setVerifiedIdentity', verifyJw3t, setVerifiedIdentityController)
 
-onboarding.post('/uploadTaxInfo', verifyJw3t, fileUpload(), uploadTaxInfoController)
+onboarding.post('/uploadTaxInfo', verifyJw3t, fileUploadMiddleware, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyJw3t, verifyAccreditationController)
 onboarding.get('/getTaxInfo', verifyJw3t, getTaxInfoController)
 
