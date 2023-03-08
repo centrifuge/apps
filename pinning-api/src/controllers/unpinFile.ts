@@ -2,18 +2,18 @@ import { Request, Response } from 'express'
 import { unpinFile } from '../utils/api'
 
 function sanitizeString(str: string) {
-  // Remove non-alphanumeric characters
-  str = str.replace(/[^a-z0-9]/gi, '')
-  // Escape HTML entities
-  str = str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;')
-
-  return str
+  return (
+    str
+      // Remove non-alphanumeric characters
+      .replace(/[^a-z0-9]/gi, '')
+      // Escape HTML entities
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
+  )
 }
 
 export default async (req: Request, res: Response) => {
