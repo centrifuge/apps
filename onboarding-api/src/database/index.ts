@@ -119,7 +119,7 @@ export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
 
 export const storage = new Storage()
-export const onboardingBucket = storage.bucket('onboarding-api-dev')
+export const onboardingBucket = storage.bucket('onboarding-api')
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {
@@ -157,18 +157,16 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
     }
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpError(400, error.message)
+    throw new HttpError(400, error?.message || 'Validation error')
   }
 }
 
 /**
  *
- * @param signedAgreement signed agreement pdf
- * @param walletAddress wallet address of investor
- * @param poolId poolId of the pool
- * @param trancheId trancheId of the tranche
+ * @param document document as Uint8Array to be uploaded
+ * @param path path to the file in the bucket
  */
-export const writeToOnboardingBucket = async (document: Uint8Array, path: string) => {
+export const writeToOnboardingBucket = async (document: Uint8Array, path: string): Promise<boolean> => {
   try {
     const blob = onboardingBucket.file(path)
     const blobStream = blob.createWriteStream({
@@ -187,6 +185,6 @@ export const writeToOnboardingBucket = async (document: Uint8Array, path: string
     })
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpError(400, error.message)
+    throw new HttpError(400, error?.message || 'Error uploading to bucket')
   }
 }
