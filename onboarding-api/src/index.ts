@@ -14,6 +14,7 @@ import { updateInvestorStatusController } from './controllers/user/updateInvesto
 import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
+import { rateLimiter } from './middleware/rateLimiter'
 import { verifyJw3t } from './middleware/verifyJw3t'
 const express = require('express')
 import fileUpload = require('express-fileupload')
@@ -22,10 +23,10 @@ dotenv.config()
 
 const onboarding = express()
 
-onboarding.options('*', corsMiddleware)
-
+onboarding.use(rateLimiter)
 onboarding.use(corsMiddleware)
 
+onboarding.options('*', corsMiddleware)
 onboarding.get('/getUser', verifyJw3t, getUserController)
 
 onboarding.post('/startKyc', verifyJw3t, startKycController)
