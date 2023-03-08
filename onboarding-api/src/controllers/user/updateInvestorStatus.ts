@@ -6,7 +6,7 @@ import { UpdateInvestorStatusPayload } from '../../emails/sendDocumentsMessage'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
 import { addInvestorToMemberList } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { verifyJwt } from '../../utils/verifyJwt'
@@ -44,18 +44,18 @@ export const updateInvestorStatusController = async (
     })
 
     if (incompleteSteps.length > 0) {
-      throw new HttpsError(
+      throw new HttpError(
         400,
         `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
       )
     }
 
     if (user.poolSteps[poolId][trancheId].status.status !== 'pending') {
-      throw new HttpsError(400, 'Investor status may have already been updated')
+      throw new HttpError(400, 'Investor status may have already been updated')
     }
 
     if (!user.poolSteps?.[poolId][trancheId].signAgreement.completed) {
-      throw new HttpsError(400, 'Argeements must be signed before investor status can invest')
+      throw new HttpError(400, 'Argeements must be signed before investor status can invest')
     }
 
     const updatedUser: Subset<OnboardingUser> = {
@@ -81,15 +81,11 @@ export const updateInvestorStatusController = async (
       return res.status(204).send()
     } else if (user?.email && status === 'rejected') {
       await sendRejectInvestorMessage(user.email, poolId)
-      throw new HttpsError(400, 'Investor has been rejected')
+      throw new HttpError(400, 'Investor has been rejected')
     }
-    throw new HttpsError(400, 'Investor status may have already been updated')
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+    throw new HttpError(400, 'Investor status may have already been updated')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

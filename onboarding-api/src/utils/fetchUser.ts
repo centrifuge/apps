@@ -1,5 +1,5 @@
 import { OnboardingUser, userCollection } from '../database'
-import { HttpsError } from './httpsError'
+import { HttpError } from './httpError'
 
 type Options = { suppressError?: boolean }
 
@@ -18,6 +18,6 @@ export async function fetchUser<T>(walletAddress: string, options?: OptionsOrNev
     return userDoc.data() as UserOrNull<T>
   } catch (error) {
     console.error('Firestore error:', JSON.stringify(error))
-    throw new HttpsError(401, 'Not allowed')
+    throw new HttpError(401, 'Not allowed')
   }
 }

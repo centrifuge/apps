@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { IndividualUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
 
@@ -23,7 +23,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     const userData = userDoc.data() as OnboardingUser
 
     if (!userDoc.exists && (!body.poolId || !body.trancheId)) {
-      throw new HttpsError(400, 'trancheId and poolId required for individual kyc')
+      throw new HttpError(400, 'trancheId and poolId required for individual kyc')
     }
 
     if (
@@ -32,11 +32,11 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       !userData.globalSteps.verifyBusiness.completed &&
       !userData.globalSteps.confirmOwners.completed
     ) {
-      throw new HttpsError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
+      throw new HttpError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
     }
 
     if (userData.globalSteps.verifyIdentity.completed) {
-      throw new HttpsError(400, 'Identity already verified')
+      throw new HttpError(400, 'Identity already verified')
     }
 
     const kycReference = `KYC_${Math.random()}`
@@ -138,12 +138,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     }
     const kyc = await shuftiProRequest(req, payloadKYC)
     return res.send({ ...kyc })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

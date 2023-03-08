@@ -3,7 +3,7 @@ import { bool, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
 
@@ -31,11 +31,11 @@ export const verifyBusinessController = async (
     const entityDoc = await userCollection.doc(req.walletAddress).get()
     const entityData = entityDoc.data() as OnboardingUser
     if (entityDoc.exists && entityData.investorType !== 'entity') {
-      throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
+      throw new HttpError(400, 'Verify business is only available for investorType "entity"')
     }
 
     if (entityDoc.exists && entityData.investorType === 'entity' && entityData.globalSteps?.verifyBusiness.completed) {
-      throw new HttpsError(400, 'Business already verified')
+      throw new HttpError(400, 'Business already verified')
     }
 
     const payloadAML = {
@@ -105,12 +105,8 @@ export const verifyBusinessController = async (
     await sendVerifyEmailMessage(user)
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).json({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

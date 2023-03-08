@@ -2,7 +2,7 @@ import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
 import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
-import { HttpsError } from '../utils/httpsError'
+import { HttpError } from '../utils/httpError'
 import { Subset } from '../utils/types'
 
 dotenv.config()
@@ -157,7 +157,7 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
     }
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpsError(400, error.message)
+    throw new HttpError(400, error.message)
   }
 }
 
@@ -187,6 +187,6 @@ export const writeToOnboardingBucket = async (document: Uint8Array, path: string
     })
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpsError(400, error.message)
+    throw new HttpError(400, error.message)
   }
 }
