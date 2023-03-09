@@ -30,9 +30,9 @@ const tooltipText = {
     label: 'APY',
     body: 'The Annual Percentage Yield ("APY") of a token is calculated as the effective annualized return of the pool\'s token price.',
   },
-  protection: {
-    label: 'Protection',
-    body: 'The risk protection is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
+  subordination: {
+    label: 'Subordination',
+    body: 'The subordination is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
   },
   currency: {
     label: 'override',
@@ -207,11 +207,11 @@ const tooltipText = {
     body: 'Redemption in a pool means withdrawal of investment by the lender.',
   },
   noTranchProtection: {
-    label: 'Min. protection',
+    label: 'Min. subordination',
     body: 'The first, most junior tranche is not protected by subordinated tranches.',
   },
   tranchProtection: {
-    label: 'Min. protection',
+    label: 'Min. subordination',
     body: 'Minimum protection required for this tranche by all subordinated tranches.',
   },
   variableTranchInterest: {
