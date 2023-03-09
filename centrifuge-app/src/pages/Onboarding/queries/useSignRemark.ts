@@ -1,7 +1,8 @@
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { UseMutateFunction } from 'react-query'
 import { switchMap } from 'rxjs'
-import { useOnboarding } from '../../../components/OnboardingProvider'
+import { OnboardingPool, useOnboarding } from '../../../components/OnboardingProvider'
+import { OnboardingUser } from '../../../types'
 
 export const useSignRemark = (
   sendDocumentsToIssuer: UseMutateFunction<
@@ -14,10 +15,10 @@ export const useSignRemark = (
     unknown
   >
 ) => {
-  const { pool } = useOnboarding()
+  const { pool } = useOnboarding<OnboardingUser, NonNullable<OnboardingPool>>()
 
-  const poolId = pool?.id as string
-  const trancheId = pool?.trancheId as string
+  const poolId = pool.id
+  const trancheId = pool.trancheId
 
   const mutation = useCentrifugeTransaction(
     'sign remark',

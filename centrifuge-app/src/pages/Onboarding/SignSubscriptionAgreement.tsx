@@ -1,7 +1,8 @@
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
+import { OnboardingUser } from '../../types'
 import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
 import { useSignRemark } from './queries/useSignRemark'
 import { useUnsignedAgreement } from './queries/useUnsignedAgreement'
@@ -13,12 +14,15 @@ type Props = {
 
 export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
   const [isAgreed, setIsAgreed] = React.useState(false)
-  const { onboardingUser, pool, previousStep, nextStep } = useOnboarding()
+  const { onboardingUser, pool, previousStep, nextStep } = useOnboarding<
+    NonNullable<OnboardingUser>,
+    NonNullable<OnboardingPool>
+  >()
 
-  const poolId = pool?.id as string
-  const trancheId = pool?.trancheId as string
+  const poolId = pool.id
+  const trancheId = pool.trancheId
 
-  const hasSignedAgreement = !!onboardingUser?.poolSteps[poolId]?.[trancheId].signAgreement.completed
+  const hasSignedAgreement = !!onboardingUser.poolSteps[poolId][trancheId].signAgreement.completed
 
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)

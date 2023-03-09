@@ -7,17 +7,19 @@ import { useAuth } from './AuthProvider'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
-type OnboardingPool = {
-  trancheId: string
-  id: string
-  name: string
-  symbol: string
-}
+export type OnboardingPool =
+  | {
+      trancheId: string
+      id: string
+      name: string
+      symbol: string
+    }
+  | undefined
 
-interface OnboardingContextType<T> {
-  onboardingUser: T | null
+interface OnboardingContextType<User, Pool> {
+  onboardingUser: User
   refetchOnboardingUser: () => void
-  pool: OnboardingPool | undefined
+  pool: Pool
   activeStep: number
   setActiveStep: React.Dispatch<React.SetStateAction<number>>
   nextStep: () => void
@@ -26,7 +28,7 @@ interface OnboardingContextType<T> {
   setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
 }
 
-const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser> | null>(null)
+const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser, OnboardingPool> | null>(null)
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const {
@@ -109,8 +111,11 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   )
 }
 
-export const useOnboarding = <T extends OnboardingUser = OnboardingUser>() => {
-  const ctx = React.useContext(OnboardingContext) as OnboardingContextType<T>
+export const useOnboarding = <
+  User extends OnboardingUser = OnboardingUser,
+  Pool extends OnboardingPool = OnboardingPool
+>() => {
+  const ctx = React.useContext(OnboardingContext) as OnboardingContextType<User, Pool>
   if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
 }
