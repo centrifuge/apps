@@ -1,15 +1,4 @@
-import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
-import {
-  AnchorButton,
-  Button,
-  IconExternalLink,
-  InteractiveCard,
-  Shelf,
-  Stack,
-  Text,
-  TextWithPlaceholder,
-  Thumbnail
-} from '@centrifuge/fabric'
+import { Button, InteractiveCard, Shelf, Stack, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { ActionsRef, InvestRedeem } from '../../../components/InvestRedeem/InvestRedeem'
@@ -26,7 +15,6 @@ import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
-import { TinlakePool } from '../../../utils/tinlake/useTinlakePools'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -95,7 +83,6 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const network = isTinlakePool ? ((pool as TinlakePool).network === 'goerli' ? 5 : 1) : 'centrifuge'
 
   const pageSummaryData = [
     {
@@ -141,8 +128,6 @@ export function PoolDetailOverview({
     hasScrolledToToken.current = true
   }
 
-  const explorer = useGetExplorerUrl(network)
-
   return (
     <>
       <PageSummary data={pageSummaryData} />
@@ -167,7 +152,7 @@ export function PoolDetailOverview({
                 secondaryHeader={
                   <Shelf gap={6}>
                     <LabelValueStack
-                      label={<Tooltips variant="secondary" type="protection" />}
+                      label={<Tooltips variant="secondary" type="subordination" />}
                       value={formatPercentage(token.protection)}
                     />
                     <LabelValueStack
@@ -212,20 +197,7 @@ export function PoolDetailOverview({
           ))}
         </Stack>
       </PageSection>
-      <PageSection
-        title="Issuer"
-        headerRight={
-          <AnchorButton
-            variant="secondary"
-            icon={IconExternalLink}
-            href={explorer.address('')} // TODO: Add issuer address
-            target="_blank"
-            small
-          >
-            View pool account
-          </AnchorButton>
-        }
-      >
+      <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />
       </PageSection>
       {!isTinlakePool && (

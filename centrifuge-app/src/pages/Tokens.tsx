@@ -80,7 +80,7 @@ const TokenOverview: React.FC = () => {
     <Stack gap={0} flex={1} mb="6">
       <PageHeader
         subtitle={`Pools and tokens${config.network === 'centrifuge' ? ' of real-world assets' : ''}`}
-        title="Investments"
+        title="Pools"
         actions={<MenuSwitch />}
       />
       {tokens?.length ? (

@@ -1,7 +1,8 @@
 import { AnchorButton, Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router-dom'
-import { useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingUser } from '../../types'
 
 type Props = {
   signedAgreementUrl: string | undefined
@@ -9,16 +10,23 @@ type Props = {
 
 export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   const history = useHistory()
-  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding()
+  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding<
+    NonNullable<OnboardingUser>,
+    NonNullable<OnboardingPool>
+  >()
 
-  const onboardingStatus = onboardingUser?.poolSteps?.[pool.id]?.[pool.trancheId].status.status
+  const poolId = pool.id
+  const trancheId = pool.trancheId
+  const poolName = pool.name
+
+  const onboardingStatus = onboardingUser.poolSteps[poolId][trancheId].status.status
 
   const onFocus = () => {
     refetchOnboardingUser()
   }
 
   React.useEffect(() => {
-    if (onboardingUser?.poolSteps[pool.id]?.[pool.trancheId]?.status.status === 'pending') {
+    if (onboardingUser.poolSteps[poolId][trancheId].status.status === 'pending') {
       window.addEventListener('focus', onFocus)
     } else {
       window.removeEventListener('focus', onFocus)
@@ -28,20 +36,20 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
       window.removeEventListener('focus', onFocus)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingUser?.poolSteps[pool.id]?.[pool.trancheId]?.status.status])
+  }, [onboardingUser, pool])
 
   if (onboardingStatus === 'approved') {
     return (
       <Stack gap={4}>
         <Box>
           <Text fontSize={5}>Onboarding complete!</Text>
-          <Text>You have succesfully completed the onboarding for {pool.title}</Text>
+          <Text>You have succesfully completed the onboarding for {poolName}</Text>
         </Box>
         <Shelf gap="2">
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
             View subscription agreement
           </AnchorButton>
-          <Button onClick={() => history.push(`/investments/${pool.id}`)}>Invest</Button>
+          <Button onClick={() => history.push(`/investments/${poolId}`)}>Invest</Button>
         </Shelf>
       </Stack>
     )

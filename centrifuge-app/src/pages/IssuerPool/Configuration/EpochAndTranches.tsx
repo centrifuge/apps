@@ -53,7 +53,7 @@ export const EpochAndTranches: React.FC = () => {
     },
     {
       align: 'right',
-      header: 'Min. protection',
+      header: 'Min. subordination',
       cell: (token: Row) => (token.minRiskBuffer ? formatPercentage(token.minRiskBuffer) : '-'),
       flex: '3',
     },

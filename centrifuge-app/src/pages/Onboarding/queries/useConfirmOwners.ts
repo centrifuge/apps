@@ -9,7 +9,7 @@ type UltimateBeneficialOwner = {
 
 export const useConfirmOwners = () => {
   const { authToken } = useAuth()
-  const { refetchOnboardingUser, pool, nextStep } = useOnboarding()
+  const { refetchOnboardingUser, nextStep } = useOnboarding()
 
   const mutation = useMutation(
     async (ultimateBeneficialOwners: UltimateBeneficialOwner[]) => {
@@ -17,8 +17,6 @@ export const useConfirmOwners = () => {
         method: 'POST',
         body: JSON.stringify({
           ultimateBeneficialOwners,
-          poolId: pool.id,
-          trancheId: pool.trancheId,
         }),
         headers: {
           Authorization: `Bearer ${authToken}`,

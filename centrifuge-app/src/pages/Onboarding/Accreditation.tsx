@@ -1,13 +1,14 @@
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingUser } from '../../types'
 import { useVerifyAccreditation } from './queries/useVerifyAccreditation'
 
 export const Accreditation = () => {
   const [isAccredited, setIsAccredited] = React.useState(false)
-  const { onboardingUser, previousStep, nextStep } = useOnboarding()
+  const { onboardingUser, previousStep, nextStep } = useOnboarding<NonNullable<OnboardingUser>>()
 
-  const isCompleted = !!onboardingUser?.globalSteps?.verifyAccreditation?.completed
+  const isCompleted = !!onboardingUser.globalSteps.verifyAccreditation?.completed
 
   const { mutate: verifyAccreditation, isLoading } = useVerifyAccreditation()
 
