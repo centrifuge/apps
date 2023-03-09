@@ -1,6 +1,5 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
+import { useCentrifuge, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
