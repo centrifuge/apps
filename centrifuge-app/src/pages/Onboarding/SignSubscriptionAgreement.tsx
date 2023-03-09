@@ -1,7 +1,8 @@
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
+import { OnboardingUser } from '../../types'
 import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
 import { useSignRemark } from './queries/useSignRemark'
 import { useUnsignedAgreement } from './queries/useUnsignedAgreement'
@@ -13,19 +14,25 @@ type Props = {
 
 export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
   const [isAgreed, setIsAgreed] = React.useState(false)
-  const { onboardingUser, pool, previousStep, nextStep } = useOnboarding()
+  const { onboardingUser, pool, previousStep, nextStep } = useOnboarding<
+    NonNullable<OnboardingUser>,
+    NonNullable<OnboardingPool>
+  >()
+
+  const poolId = pool.id
+  const trancheId = pool.trancheId
+
+  const hasSignedAgreement = !!onboardingUser.poolSteps[poolId][trancheId].signAgreement.completed
 
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
   const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useUnsignedAgreement()
 
-  const isCompleted = onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreement.completed
-
   React.useEffect(() => {
-    if (isCompleted) {
+    if (hasSignedAgreement) {
       setIsAgreed(true)
     }
-  }, [isCompleted])
+  }, [hasSignedAgreement])
 
   const isAgreementFetched = React.useMemo(
     () => isUnsignedAgreementFetched || isSignedAgreementFetched,
@@ -47,22 +54,22 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
         style={{
           cursor: 'pointer',
         }}
-        checked={isCompleted || isAgreed}
+        checked={hasSignedAgreement || isAgreed}
         onChange={() => setIsAgreed((current) => !current)}
         label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the agreement</Text>}
-        disabled={isSigningTransaction || isSending || isCompleted}
+        disabled={isSigningTransaction || isSending || hasSignedAgreement}
       />
       <Shelf gap="2">
         <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
         <Button
-          onClick={isCompleted ? () => nextStep() : () => signRemark([])}
+          onClick={hasSignedAgreement ? () => nextStep() : () => signRemark([])}
           loadingMessage="Signing"
           loading={isSigningTransaction || isSending}
           disabled={!isAgreed || isSigningTransaction || isSending}
         >
-          {isCompleted ? 'Next' : 'Sign'}
+          {hasSignedAgreement ? 'Next' : 'Sign'}
         </Button>
       </Shelf>
     </Stack>

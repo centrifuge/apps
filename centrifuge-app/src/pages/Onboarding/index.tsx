@@ -1,11 +1,12 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
-import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
+import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory, useLocation } from 'react-router-dom'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
 import { InvestorTypes } from '../../types'
+import { usePool } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
 import { BusinessInformation } from './BusinessInformation'
@@ -21,8 +22,34 @@ import { TaxInfo } from './TaxInfo'
 const [_, WordMark] = config.logo
 
 export const OnboardingPage: React.FC = () => {
-  const { onboardingUser, activeStep, setActiveStep, isLoadingStep } = useOnboarding()
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
+  const { search } = useLocation()
+  const poolId = new URLSearchParams(search).get('poolId')
+  const trancheId = new URLSearchParams(search).get('trancheId')
+  const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool } = useOnboarding()
+
+  const history = useHistory()
+  const poolDetails = usePool(poolId || '', false)
+
+  React.useEffect(() => {
+    if (!poolId || !trancheId) {
+      return history.push('/onboarding')
+    }
+
+    // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
+    const trancheDetails = poolDetails?.tranches.find((tranche) => tranche.id === trancheId)
+
+    if (trancheDetails) {
+      return setPool({
+        id: poolId,
+        trancheId,
+        name: trancheDetails.currency.name,
+        symbol: trancheDetails.currency.symbol,
+      })
+    }
+
+    return history.push('/onboarding')
+  }, [poolId, setPool, trancheId, history, poolDetails])
 
   const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
 
@@ -39,8 +66,11 @@ export const OnboardingPage: React.FC = () => {
           <Box as={Link} to="/" width={110}>
             <WordMark />
           </Box>
-
-          <Box pt={1}>Pool</Box>
+          {pool?.symbol && (
+            <Box pt={1}>
+              <Thumbnail type="token" size="large" label={pool.symbol} />
+            </Box>
+          )}
         </Shelf>
         <Box width="300px">
           <WalletMenu />
