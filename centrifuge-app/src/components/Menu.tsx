@@ -48,14 +48,16 @@ export const Menu: React.FC<Props> = () => {
       alignItems={['center', 'center', 'stretch']}
     >
       <NavigationItem
-        label="Investments"
+        label="Pools"
         href="/investments"
         icon={<IconInvestments />}
         active={pathname.includes('investments')}
         stacked={!isXLarge}
       />
 
-      <NavigationItem label="NFTs" href="/nfts" icon={<IconNft />} stacked={!isXLarge} />
+      {config.network !== 'centrifuge' && (
+        <NavigationItem label="NFTs" href="/nfts" icon={<IconNft />} stacked={!isXLarge} />
+      )}
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <Collapsible label="Issuer" icon={<IconUser />} defaultOpen={isXLarge} stacked={!isXLarge}>
