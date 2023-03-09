@@ -1,7 +1,8 @@
 import { AnchorButton, Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router-dom'
-import { useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingUser } from '../../types'
 
 type Props = {
   signedAgreementUrl: string | undefined
@@ -9,11 +10,11 @@ type Props = {
 
 export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   const history = useHistory()
-  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding()
+  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding<OnboardingUser, NonNullable<OnboardingPool>>()
 
-  const poolId = pool?.id as string
-  const trancheId = pool?.trancheId as string
-  const poolName = pool?.name as string
+  const poolId = pool.id
+  const trancheId = pool.trancheId
+  const poolName = pool.name
 
   const onboardingStatus = onboardingUser?.poolSteps[poolId][trancheId].status.status
 
