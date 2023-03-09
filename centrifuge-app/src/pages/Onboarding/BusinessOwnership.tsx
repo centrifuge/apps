@@ -74,7 +74,10 @@ const BusinessOwnershipInlineFeedback = () => {
   return (
     <Notification type="alert">
       Unable to confirm business ownership or business ownership has already been confirmed. Please try again or contact
-      support@centrifuge.io.
+      <a href="mailto:support@centrifuge.io?subject=Onboarding confirm business ownership&body=I’m reaching out about…">
+        support@centrifuge.io
+      </a>
+      .
     </Notification>
   )
 }
