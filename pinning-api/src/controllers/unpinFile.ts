@@ -1,20 +1,6 @@
 import { Request, Response } from 'express'
 import { unpinFile } from '../utils/api'
-
-function sanitizeString(str: string) {
-  return (
-    str
-      // Remove non-alphanumeric characters
-      .replace(/[^a-z0-9]/gi, '')
-      // Escape HTML entities
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;')
-  )
-}
+const xss = require('xss')
 
 export default async (req: Request, res: Response) => {
   try {
@@ -22,7 +8,7 @@ export default async (req: Request, res: Response) => {
     if (req.method !== 'DELETE' || !hash || typeof hash !== 'string') {
       return res.status(400).send('Bad request: hash is required')
     }
-    const sanatizedHash = sanitizeString(hash)
+    const sanatizedHash = xss(hash)
     await unpinFile(sanatizedHash)
     return res.status(201)
   } catch (e) {

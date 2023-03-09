@@ -13164,6 +13164,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cssfilter@npm:0.0.10":
+  version: 0.0.10
+  resolution: "cssfilter@npm:0.0.10"
+  checksum: 0a5cdc209e35ff0db9b0271846162ad9c0fdd7e612b217b88cfe6f1da5428b156369f17bab7f5f32f9d49b66daec912c188ef836735f499d87cafd824f3e9308
+  languageName: node
+  linkType: hard
+
 "csso@npm:^4.0.2":
   version: 4.2.0
   resolution: "csso@npm:4.2.0"
@@ -22131,6 +22138,7 @@ fsevents@^1.2.7:
     form-data: ^4.0.0
     npm-run-all: ^4.1.5
     typescript: ^4.8.3
+    xss: ^1.0.14
   languageName: unknown
   linkType: soft
 
@@ -27760,6 +27768,18 @@ fsevents@^1.2.7:
   version: 1.8.0
   resolution: "xmlhttprequest@npm:1.8.0"
   checksum: 67ee586d0d84d78f151a24ee2953c9cb5f3deeaf3b63e447cb424c7154c9daca241a76433143aa11cb9de8390f9d50e445c41ec16ecd0845f4fcb202fc4dfbd2
+  languageName: node
+  linkType: hard
+
+"xss@npm:^1.0.14":
+  version: 1.0.14
+  resolution: "xss@npm:1.0.14"
+  dependencies:
+    commander: ^2.20.3
+    cssfilter: 0.0.10
+  bin:
+    xss: bin/xss
+  checksum: 09d5e7547df49503b73f368892ab441d805b6a81aa3287e5c31de2d64590458b7e99841d082282ce71080dcfe493e27a1df612348bfb14e2242f31f439f3fde6
   languageName: node
   linkType: hard
 
