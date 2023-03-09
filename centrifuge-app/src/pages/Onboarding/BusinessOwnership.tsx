@@ -47,7 +47,7 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
   return (
     <>
       <Notification type="alert">
-        Please verify your email address. Email sent to {email}. If you did not receive any email{' '}
+        Please verify your email address. Email sent to {email}. If you did not receive an email,{' '}
         <button onClick={() => setIsConfirmResendEmailVerificationDialogOpen(true)}>send again</button> or{' '}
         <button onClick={() => setIsEditOnboardingEmailAddressDialogOpen(true)}>edit email</button>. Otherwise contact{' '}
         <a href="mailto:support@centrifuge.io?subject=Onboarding email verification&body=I’m reaching out about…">
