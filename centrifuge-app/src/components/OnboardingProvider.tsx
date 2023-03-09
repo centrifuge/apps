@@ -112,10 +112,10 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 }
 
 export const useOnboarding = <
-  T extends OnboardingUser = OnboardingUser,
-  P extends OnboardingPool = OnboardingPool
+  User extends OnboardingUser = OnboardingUser,
+  Pool extends OnboardingPool = OnboardingPool
 >() => {
-  const ctx = React.useContext(OnboardingContext) as OnboardingContextType<T, P>
+  const ctx = React.useContext(OnboardingContext) as OnboardingContextType<User, Pool>
   if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
 }
