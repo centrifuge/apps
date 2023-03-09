@@ -98,8 +98,7 @@ export const BusinessInformation = () => {
 
         <ContentHeader
           title="Provide information about your business"
-          body="Please verify email address, legal entity name, business incorporation date and country of incorporation and
-      registration number."
+          body="Please enter email address, legal entity name, country of incorporation and registration number."
         />
 
         <Fieldset>
