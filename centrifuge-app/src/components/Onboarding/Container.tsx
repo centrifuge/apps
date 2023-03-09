@@ -11,10 +11,9 @@ type ContainerProps = {
 }
 
 const Close = styled(Link)`
-  position: sticky;
-  top: ${({ theme }) => theme.space[3]}px;
-  right: ${({ theme }) => theme.space[3]}px;
-  grid-area: close;
+  position: absolute;
+  top: 0;
+  right: 0;
   width: ${({ theme }) => theme.sizes.iconMedium}px;
   height: ${({ theme }) => theme.sizes.iconMedium}px;
   border-radius: ${({ theme }) => theme.radii.tooltip}px;
@@ -47,9 +46,11 @@ export function Container({ children, aside, isLoading, closeable = true }: Cont
         ) : (
           <>
             {closeable && (
-              <Close to="/" title="Go to main page">
-                <IconX color="textPrimary" size="iconMedium" />
-              </Close>
+              <Box position="sticky" top={3} right={3} gridArea="close" width={0} height={0} overflow="visible">
+                <Close to="/" title="Go to main page">
+                  <IconX color="textPrimary" size="iconMedium" />
+                </Close>
+              </Box>
             )}
 
             {aside && (
