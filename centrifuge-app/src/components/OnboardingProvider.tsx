@@ -17,7 +17,7 @@ export type OnboardingPool =
   | undefined
 
 interface OnboardingContextType<User, Pool> {
-  onboardingUser: User | null
+  onboardingUser: User
   refetchOnboardingUser: () => void
   pool: Pool
   activeStep: number

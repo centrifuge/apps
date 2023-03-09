@@ -10,20 +10,23 @@ type Props = {
 
 export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   const history = useHistory()
-  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding<OnboardingUser, NonNullable<OnboardingPool>>()
+  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding<
+    NonNullable<OnboardingUser>,
+    NonNullable<OnboardingPool>
+  >()
 
   const poolId = pool.id
   const trancheId = pool.trancheId
   const poolName = pool.name
 
-  const onboardingStatus = onboardingUser?.poolSteps[poolId][trancheId].status.status
+  const onboardingStatus = onboardingUser.poolSteps[poolId][trancheId].status.status
 
   const onFocus = () => {
     refetchOnboardingUser()
   }
 
   React.useEffect(() => {
-    if (onboardingUser?.poolSteps[poolId][trancheId].status.status === 'pending') {
+    if (onboardingUser.poolSteps[poolId][trancheId].status.status === 'pending') {
       window.addEventListener('focus', onFocus)
     } else {
       window.removeEventListener('focus', onFocus)
