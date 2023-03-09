@@ -207,7 +207,7 @@ export function FileUpload({
               </Stack>
 
               <Text as="span" variant="body2" textAlign="center" color="textDisabled">
-                Upload PDF, docx, etc. up to 1 MB
+                Supported file type: .pdf
               </Text>
             </>
           )}

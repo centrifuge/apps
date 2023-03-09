@@ -76,6 +76,7 @@ export const TaxInfo = () => {
               disabled={isLoading || isCompleted}
               file={taxInfo || null}
               validate={validateFileUpload}
+              accept=".pdf"
             />
           )}
         </Box>
