@@ -29,25 +29,27 @@ export const OnboardingPage: React.FC = () => {
   const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool } = useOnboarding()
 
   const history = useHistory()
-  const { tranches } = usePool(poolId || '')
+  const poolDetails = usePool(poolId || '', false)
 
   React.useEffect(() => {
-    if (tranches.length && poolId && trancheId) {
-      // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
-      const trancheDetails = tranches.find((tranche) => tranche.id === trancheId)
+    if (!poolId || !trancheId) {
+      return history.push('/onboarding')
+    }
 
-      if (trancheDetails) {
-        return setPool({
-          id: poolId,
-          trancheId,
-          name: trancheDetails.currency.name,
-          symbol: trancheDetails.currency.symbol,
-        })
-      }
+    // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
+    const trancheDetails = poolDetails?.tranches.find((tranche) => tranche.id === trancheId)
+
+    if (trancheDetails) {
+      return setPool({
+        id: poolId,
+        trancheId,
+        name: trancheDetails.currency.name,
+        symbol: trancheDetails.currency.symbol,
+      })
     }
 
     return history.push('/onboarding')
-  }, [poolId, setPool, trancheId, history, tranches])
+  }, [poolId, setPool, trancheId, history, poolDetails])
 
   const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
 
