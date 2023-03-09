@@ -40,7 +40,6 @@ import { usePool } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
 import { LoadBoundary } from '../LoadBoundary'
-import { useOnboarding } from '../OnboardingProvider'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { InvestRedeemProvider, useInvestRedeem } from './InvestRedeemProvider'
@@ -177,7 +176,6 @@ type InnerProps = {
 function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
-  const { setPool } = useOnboarding()
   const history = useHistory()
 
   let actualView = view
@@ -262,7 +260,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
           )}
         </>
       ) : (
-        // TODO: Link to onboarding and show whether onboarding is in progress
+        // TODO: Show whether onboarding is in progress
         <Stack gap={2}>
           <Text variant="body3">
             New Silver tokens are available to U.S. and Non-U.S. persons. U.S. persons must be verified “accredited
@@ -270,17 +268,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
             <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#requirements">Learn more</AnchorTextLink>
           </Text>
           <Stack px={1}>
-            <Button
-              onClick={() => {
-                setPool({
-                  id: state.poolId,
-                  trancheId: state.trancheId,
-                  symbol: state.trancheCurrency?.symbol ?? '',
-                  title: state.trancheCurrency?.name ?? '',
-                })
-                history.push('/onboarding')
-              }}
-            >
+            <Button onClick={() => history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)}>
               Onboard to {state.trancheCurrency?.symbol ?? 'token'}
             </Button>
           </Stack>

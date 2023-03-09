@@ -6,6 +6,9 @@ export const useSignAndSendDocuments = () => {
   const { refetchOnboardingUser, pool, nextStep } = useOnboarding()
   const { authToken } = useAuth()
 
+  const poolId = pool?.id as string
+  const trancheId = pool?.trancheId as string
+
   const mutation = useMutation(
     async (transactionInfo: { extrinsicHash: string; blockNumber: string }) => {
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAndSendDocuments`, {
@@ -16,8 +19,8 @@ export const useSignAndSendDocuments = () => {
         },
         body: JSON.stringify({
           transactionInfo,
-          trancheId: pool.trancheId,
-          poolId: pool.id,
+          trancheId,
+          poolId,
         }),
         credentials: 'include',
       })

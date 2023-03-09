@@ -4,7 +4,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 
-type CurrencyMeta = Pick<CurrencyMetadata, 'decimals' | 'symbol' | 'name'>
+type CurrencyMeta = Pick<CurrencyMetadata, 'decimals' | 'symbol'>
 
 export type InvestRedeemAction =
   | 'invest'
@@ -22,7 +22,7 @@ export type InvestRedeemState = {
   isAllowedToInvest?: boolean
   isPoolBusy: boolean
   isFirstInvestment: boolean
-  nativeCurrency?: Partial<CurrencyMeta>
+  nativeCurrency?: CurrencyMeta
   poolCurrency?: CurrencyMeta
   trancheCurrency?: CurrencyMeta
   capacity: Decimal

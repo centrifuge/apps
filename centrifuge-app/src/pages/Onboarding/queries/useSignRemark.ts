@@ -16,6 +16,9 @@ export const useSignRemark = (
 ) => {
   const { pool } = useOnboarding()
 
+  const poolId = pool?.id as string
+  const trancheId = pool?.trancheId as string
+
   const mutation = useCentrifugeTransaction(
     'sign remark',
     (cent) => () =>
@@ -25,7 +28,7 @@ export const useSignRemark = (
           switchMap((api) =>
             cent.wrapSignAndSend(
               api,
-              api.tx.system.remark(`Signed subscription agreement for pool: ${pool.id} tranche: ${pool.trancheId}`)
+              api.tx.system.remark(`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
             )
           )
         ),

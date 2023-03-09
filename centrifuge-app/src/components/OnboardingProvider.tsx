@@ -8,22 +8,22 @@ import { useAuth } from './AuthProvider'
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 type OnboardingPool = {
-  title: string
   trancheId: string
   id: string
+  name: string
   symbol: string
 }
 
 interface OnboardingContextType<T> {
   onboardingUser: T | null
   refetchOnboardingUser: () => void
-  pool: OnboardingPool
+  pool: OnboardingPool | undefined
   activeStep: number
   setActiveStep: React.Dispatch<React.SetStateAction<number>>
   nextStep: () => void
   previousStep: () => void
   isLoadingStep: boolean
-  setPool: React.Dispatch<React.SetStateAction<OnboardingPool>>
+  setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
 }
 
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser> | null>(null)
@@ -35,12 +35,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
-  const [pool, setPool] = React.useState<OnboardingPool>({
-    title: '',
-    trancheId: '',
-    id: '',
-    symbol: '',
-  })
+  const [pool, setPool] = React.useState<OnboardingPool>()
 
   const nextStep = () => setActiveStep((current) => current + 1)
   const previousStep = () => setActiveStep((current) => current - 1)
