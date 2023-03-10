@@ -11,8 +11,6 @@ type Individual = 'individual'
 type Entity = 'entity'
 export type InvestorType = Individual | Entity
 
-export type SupportedNetworks = 'polkadot'
-
 const uboSchema = object({
   name: string().required(),
   dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
@@ -20,9 +18,10 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
+type SupportedNetworks = 'polkadot'
 const walletSchema = object({
   address: string().required(),
-  network: string().required().default('polkadot') as StringSchema<SupportedNetworks>,
+  network: string().required() as StringSchema<SupportedNetworks>,
 })
 
 const poolSpecificStepsSchema = object({

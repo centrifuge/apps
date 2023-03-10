@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { bool, InferType, object, string } from 'yup'
-import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { EntityUser, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
@@ -28,13 +28,12 @@ export const verifyBusinessController = async (
       body: { jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
-    const entityDoc = await userCollection.doc(req.walletAddress).get()
-    const entityData = entityDoc.data() as OnboardingUser
-    if (entityDoc.exists && entityData.investorType !== 'entity') {
+    const existingUser = await fetchUser(walletAddress, { suppressError: true })
+    if (existingUser && existingUser.investorType !== 'entity') {
       throw new HttpError(400, 'Verify business is only available for investorType "entity"')
     }
 
-    if (entityDoc.exists && entityData.investorType === 'entity' && entityData.globalSteps?.verifyBusiness.completed) {
+    if (existingUser && existingUser.investorType === 'entity' && existingUser.globalSteps?.verifyBusiness.completed) {
       throw new HttpError(400, 'Business already verified')
     }
 

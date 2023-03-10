@@ -8,14 +8,14 @@ type UserOrNull<T> = T extends Options ? OnboardingUser | null : OnboardingUser
 
 export async function fetchUser<T>(walletAddress: string, options?: OptionsOrNever<T>): Promise<UserOrNull<T>> {
   try {
-    const userDoc = await userCollection.doc(walletAddress).get()
-    if (!userDoc.exists) {
+    const userSnapshot = await userCollection.where('wallet.address', '==', walletAddress).get()
+    if (userSnapshot.empty) {
       if (options && options.suppressError) {
         return null as UserOrNull<T>
       }
       throw new Error("User doesn't exist")
     }
-    return userDoc.data() as UserOrNull<T>
+    return userSnapshot.docs.map((doc) => doc.data())[0] as UserOrNull<T>
   } catch (error) {
     console.error('Firestore error:', JSON.stringify(error))
     throw new HttpError(401, 'Not allowed')
