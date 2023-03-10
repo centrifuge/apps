@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { IndividualUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { IndividualUser, validateAndWriteToFirestore } from '../../database'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
@@ -19,23 +20,23 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     const { walletAddress, body } = req
     await validateInput(req.body, kycInput)
 
-    const userDoc = await userCollection.doc(walletAddress).get()
-    const userData = userDoc.data() as OnboardingUser
+    const user = await fetchUser(walletAddress, { suppressError: true })
 
-    if (!userDoc.exists && (!body.poolId || !body.trancheId)) {
+    if (!user && (!body.poolId || !body.trancheId)) {
       throw new HttpError(400, 'trancheId and poolId required for individual kyc')
     }
 
     if (
-      userData.investorType === 'entity' &&
-      !userData.globalSteps.verifyEmail.completed &&
-      !userData.globalSteps.verifyBusiness.completed &&
-      !userData.globalSteps.confirmOwners.completed
+      user &&
+      user.investorType === 'entity' &&
+      !user.globalSteps.verifyEmail.completed &&
+      !user.globalSteps.verifyBusiness.completed &&
+      !user.globalSteps.confirmOwners.completed
     ) {
       throw new HttpError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
     }
 
-    if (userData.globalSteps.verifyIdentity.completed) {
+    if (user && user.globalSteps.verifyIdentity.completed) {
       throw new HttpError(400, 'Identity already verified')
     }
 
@@ -105,7 +106,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     const payloadKYC = {
       reference: kycReference,
       callback_url: '',
-      email: userData.email ?? '',
+      email: user?.email ?? '',
       country: body.countryOfCitizenship,
       language: 'EN',
       redirect_url: '',
