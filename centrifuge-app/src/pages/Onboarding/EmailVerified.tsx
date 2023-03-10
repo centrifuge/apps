@@ -18,7 +18,10 @@ export const EmailVerified: React.FC = () => {
         <Content>
           {data || error ? (
             <>
-              <ContentHeader title={data ? 'Thanks for verifying your email' : 'An error occurred'} />
+              <ContentHeader
+                title={data ? 'Thanks for verifying your email' : 'An error occurred'}
+                body={data ? 'You can continue with onboarding in the other tab.' : undefined}
+              />
               {data && (
                 <Box>
                   <IconCheckCircle color="statusOk" size="iconLarge" />
