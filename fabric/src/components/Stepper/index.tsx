@@ -1,7 +1,7 @@
 import * as React from 'react'
+import styled from 'styled-components'
 import { Box } from '../Box'
-import { Flex } from '../Flex'
-import { Shelf } from '../Shelf'
+import { Grid } from '../Grid'
 import { Text } from '../Text'
 
 type EnrichedStepProps = {
@@ -34,46 +34,99 @@ const getStepColor = (isActive: boolean, empty: boolean) => {
   return 'transparent'
 }
 
+const counterSize = 28
+const spaceDefault = 30
+const spaceActive = 80
+
+const List = styled(Box)`
+  list-style: none;
+  counter-reset: step-counter;
+`
+
+const ListItem = styled(Grid)<{ isActive?: boolean; empty?: boolean; isFinal?: boolean }>`
+  --duration: 0.15s;
+  counter-increment: step-counter;
+
+  position: relative;
+  place-content: center;
+  place-items: center;
+  justify-items: start;
+  transition: margin-bottom var(--duration);
+
+  &::before {
+    content: counter(step-counter);
+    width: ${counterSize}px;
+    height: ${counterSize}px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: ${({ empty, isActive, theme }) => theme.colors[getStepColor(!!isActive, !!empty)]};
+    border: 2px solid;
+    border-color: ${({ theme, isActive }) => (isActive ? theme.colors.textPrimary : theme.colors.borderPrimary)};
+    border-radius: 50%;
+    color: ${({ theme, isActive }) => (isActive ? theme.colors.backgroundPrimary : theme.colors.borderPrimary)};
+    transition: background-color var(--duration) linear, border-color var(--duration) linear,
+      color var(--duration) linear;
+  }
+
+  &::after {
+    content: '';
+    display: ${({ isFinal }) => (isFinal ? 'none' : 'block')};
+    position: absolute;
+    top: 100%;
+    left: ${counterSize * 0.5}px;
+    height: ${({ isActive, isFinal }) => (isActive && !isFinal ? spaceActive : spaceDefault)}px;
+    width: 2px;
+    background-color: ${({ theme, isActive }) => (isActive ? theme.colors.textPrimary : theme.colors.borderPrimary)};
+    transition: height var(--duration), background-color var(--duration) linear;
+  }
+`
+
+const Hitearea = styled.button`
+  --offset: 10px;
+
+  position: absolute;
+  top: calc(var(--offset) * -1);
+  left: calc(var(--offset) * -1);
+  width: calc(100% + var(--offset) * 2);
+  height: calc(100% + var(--offset) * 2);
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.input}px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: ${({ theme }) => `2px solid ${theme.colors.accentPrimary}`};
+  }
+`
+
 export const Step = (props: StepProps & EnrichedStepProps) => {
   const { isActive, count, isFinal, activeStep, label, empty, setActiveStep, maxStep } = props
+  const isClickable = (count as number) + 1 < (activeStep as number) || (count as number) + 1 <= (maxStep as number)
 
   return (
-    <>
-      <Shelf
-        style={{ cursor: setActiveStep ? 'pointer' : 'default' }}
-        gap={2}
-        onClick={() => {
-          if ((count as number) + 1 < (activeStep as number) || (count as number) + 1 <= (maxStep as number)) {
-            setActiveStep && setActiveStep((count as number) + 1)
-          }
-        }}
-      >
-        <Flex
-          backgroundColor={getStepColor(!!isActive, !!empty)}
-          border="2px solid"
-          borderColor={isActive ? 'textPrimary' : 'borderPrimary'}
-          minWidth="28px"
-          height="28px"
-          justifyContent="center"
-          alignItems="center"
-          borderRadius="50px"
-          color={isActive ? 'backgroundPrimary' : 'borderPrimary'}
-        >
-          {empty ? '' : (count as number) + 1}
-        </Flex>
-        <Flex justifyContent="center" alignItems="center" maxHeight="28px" height="28px">
-          <Text fontSize="18px">{label}</Text>
-        </Flex>
-      </Shelf>
-      {!isFinal && (
-        <Box
-          height={(activeStep as number) - 1 > (count as number) ? '30px' : '80px'}
-          width="2px"
-          backgroundColor={isActive ? 'textPrimary' : 'borderPrimary'}
-          marginLeft="13px"
+    <ListItem
+      forwardedAs="li"
+      gridTemplateColumns={`${counterSize}px 1fr`}
+      gap={2}
+      height={counterSize}
+      mb={isActive && !isFinal ? spaceActive : spaceDefault}
+      {...{ empty, isActive, isFinal }}
+    >
+      <Text as="h3" fontSize={18} lineHeight={1.2}>
+        {label}
+      </Text>
+      {!empty && isClickable && setActiveStep && (
+        <Hitearea
+          title={`Step ${(count as number) + 1}`}
+          onClick={() => {
+            setActiveStep((count as number) + 1)
+          }}
         />
       )}
-    </>
+    </ListItem>
   )
 }
 
@@ -91,9 +144,7 @@ const flattenReactChildren = (childrenNodes: React.ReactNode): React.ReactNode[]
 
 export const Stepper = (props: StepperProps) => {
   const steps = flattenReactChildren(props.children)
-
   const stepsCount = steps.length
-
   const maxStep = React.useRef(1)
 
   React.useEffect(() => {
@@ -117,5 +168,9 @@ export const Stepper = (props: StepperProps) => {
     return step
   })
 
-  return <Box>{stepItems}</Box>
+  return (
+    <List as="ol" role="list">
+      {stepItems}
+    </List>
+  )
 }
