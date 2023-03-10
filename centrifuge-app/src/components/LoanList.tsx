@@ -1,5 +1,5 @@
 import { Loan } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
@@ -11,7 +11,6 @@ import { useNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Row = Loan & {
   idSortKey: number

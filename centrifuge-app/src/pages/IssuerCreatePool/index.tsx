@@ -1,28 +1,38 @@
 import { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Button, CurrencyInput, FileUpload, Grid, Select, Text, TextInput, Thumbnail } from '@centrifuge/fabric'
+import { useBalances, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  FileUpload,
+  Grid,
+  Select,
+  Text,
+  TextInput,
+  TextWithPlaceholder,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { filter, lastValueFrom } from 'rxjs'
-import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
-import { useBalances } from '../../utils/useBalances'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
+import { usePools } from '../../utils/usePools'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
+import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
 import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
@@ -85,6 +95,7 @@ export type CreatePoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo'
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
+  details: IssuerDetail[]
 }
 
 const initialValues: CreatePoolValues = {
@@ -96,6 +107,7 @@ const initialValues: CreatePoolValues = {
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   podEndpoint: config.defaultPodUrl ?? '',
+  listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_NEW_POOLS,
 
   issuerName: '',
   issuerLogo: null,
@@ -105,6 +117,7 @@ const initialValues: CreatePoolValues = {
   website: '',
   forum: '',
   email: '',
+  details: [],
 
   tranches: [createEmptyTranche(true)],
   riskGroups: [createEmptyRiskGroup()],
@@ -123,15 +136,17 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
 }
 
 const CreatePoolForm: React.VFC = () => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
   const currencies = usePoolCurrencies()
+  const pools = usePools()
   const history = useHistory()
   const balances = useBalances(address)
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [preimageHash, setPreimageHash] = React.useState('')
+  const [createdPoolId, setCreatedPoolId] = React.useState('')
 
   React.useEffect(() => {
     // If the hash can't be found on Pinata the request can take a long time to time out
@@ -139,6 +154,20 @@ const CreatePoolForm: React.VFC = () => {
     // Set a deadline for how long we're willing to wait on a stored issuer
     setTimeout(() => setWaitingForStoredIssuer(false), 10000)
   }, [])
+
+  React.useEffect(() => {
+    if (storedIssuer) setWaitingForStoredIssuer(false)
+  }, [storedIssuer])
+
+  React.useEffect(() => {
+    if (createdPoolId && pools?.find((p) => p.id === createdPoolId)) {
+      // Redirecting only when we find the newly created pool in the data from usePools
+      // Otherwise the Issue Overview page will throw an error when it can't find the pool
+      // It can take a second for the new data to come in after creating the pool
+      history.push(`/issuer/${createdPoolId}`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pools, createdPoolId])
 
   const txMessage = {
     immediate: 'Create pool',
@@ -152,7 +181,7 @@ const CreatePoolForm: React.VFC = () => {
       onSuccess: (args) => {
         const [, poolId] = args
         if (config.poolCreationType === 'immediate') {
-          history.push(`/issuer/${poolId}`)
+          setCreatedPoolId(poolId)
         }
       },
     }
@@ -277,7 +306,7 @@ const CreatePoolForm: React.VFC = () => {
         .getEvents()
         .pipe(
           filter(({ api, events }) => {
-            const event = events.find(({ event }) => api.events.democracy.PreimageNoted.is(event))
+            const event = events.find(({ event }) => api.events.preimage.PreimageNoted.is(event))
             const parsedEvent = event?.toJSON() as any
             // the events api returns a few events for the event PreimageNoted where the data looks different everytime
             // when data is a tuple and the length is 3, it may be safe to extract the first value as the preimage hash
@@ -303,7 +332,7 @@ const CreatePoolForm: React.VFC = () => {
     <>
       <PreimageHashDialog preimageHash={preimageHash} open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
       <FormikProvider value={form}>
-        <Form ref={formRef}>
+        <Form ref={formRef} noValidate>
           <PageHeader
             icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
             title={form.values.poolName || 'New Pool'}
@@ -362,8 +391,9 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="assetClass" validate={validate.assetClass}>
                   {({ field, meta, form }: FieldProps) => (
                     <Select
+                      name="assetClass"
                       label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                      onSelect={(v) => form.setFieldValue('assetClass', v)}
+                      onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
@@ -377,8 +407,9 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="currency" validate={validate.currency}>
                   {({ field, form, meta }: FieldProps) => (
                     <Select
+                      name="currency"
                       label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
-                      onSelect={(v) => form.setFieldValue('currency', v)}
+                      onChange={(event) => form.setFieldValue('currency', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}

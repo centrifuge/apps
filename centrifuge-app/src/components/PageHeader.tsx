@@ -20,6 +20,7 @@ type Props = {
   actions?: React.ReactNode
   icon?: React.ReactNode
   border?: boolean
+  children?: React.ReactNode
 }
 
 export const PageHeader: React.FC<Props> = ({
@@ -46,7 +47,7 @@ export const PageHeader: React.FC<Props> = ({
         boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,
       }}
     >
-      <Shelf px={3} py="20px" justifyContent="space-between" alignItems="center" backgroundColor="backgroundPage">
+      <Shelf px={[2, 3]} py="20px" justifyContent="space-between" alignItems="center" backgroundColor="backgroundPage">
         <Shelf gap={2}>
           {icon}
           <Stack gap={0}>

@@ -1,0 +1,7 @@
+# Each line is a file pattern followed by one or more owners.
+# * @global-owner
+.github/workflows/ @gpmayorga
+.github/actions/ @gpmayorga
+
+.github/workflows/ @sophialittlejohn
+.github/actions/ @sophialittlejohn

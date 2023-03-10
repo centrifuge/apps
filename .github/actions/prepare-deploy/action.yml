@@ -1,0 +1,94 @@
+name: Env strategy
+description: 'Determine functions name, URL and GHA environment secrets'
+
+inputs:
+  app_base_name:
+    description: "app name you're deploying"
+    required: true
+  deploy_to:
+    description: "(Optional) Manual trigger to deploy"
+    required: false
+outputs:
+  function_name: 
+    description: "App name with environment appended"
+    value: ${{ steps.naming.outputs.function_name}}
+  front_url: 
+    description: "Full URL for your front-end piece"
+    value: ${{ steps.naming.outputs.front_url }}
+  gh_env:  
+    description: "Github actions environment to use for deployment"
+    value: ${{ steps.setenv.outputs.gh_env }} 
+  env_name:  
+    description: "Name of environment to deploy to"
+    value: ${{ steps.naming.outputs.env_name }} 
+
+runs:
+  using: composite
+  steps:
+    - id: setenv
+      shell: bash
+      # Set Alatair and Centrifuge to deploy in the prod Gcloud account
+      # both will require approval to use the GCE prod secrets
+      run: |
+        echo "Discover GH environment for deploy:"
+        if  ${{ contains(inputs.deploy_to, 'altair') ||
+              contains(inputs.deploy_to, 'staging') ||
+              contains(inputs.deploy_to, 'production') }}; then
+          echo "gh_env=production" >> $GITHUB_OUTPUT
+        fi 
+
+    - name: Set artifact names based on environment
+      id: naming
+      shell: bash
+      # Follow deployment strategy from 
+      # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments    
+      run: |
+        echo "Set app name based on env strategy"
+        if ${{ inputs.deploy_to == 'production' }}; then
+          # PRODUCTION
+          echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
+          echo "front_url=app.centrifuge.io" >> $GITHUB_OUTPUT
+          echo "env_name=production" >> $GITHUB_OUTPUT        
+        elif ${{ inputs.deploy_to == 'altair' }}; then
+          # ALTAIR
+          echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
+          echo "front_url=app.altair.centrifuge.io" >> $GITHUB_OUTPUT
+          echo "env_name=altair" >> $GITHUB_OUTPUT
+        elif ${{ inputs.deploy_to == 'staging' }}; then
+          # STAGING
+          echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
+          echo "front_url=app.staging.centrifuge.io" >> $GITHUB_OUTPUT
+          echo "env_name=production" >> $GITHUB_OUTPUT
+          # env_name is production because it needs to use the prod variable files inside each app
+        elif  ${{ github.ref == 'refs/tags/rc*' }}; then
+          # CATALYST
+          echo "function_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-catalyst.k-f.dev" >> $GITHUB_OUTPUT
+          echo "env_name=catalyst" >> $GITHUB_OUTPUT
+        elif ${{ contains(inputs.deploy_to, 'demo') }}; then
+          # DEMO
+          echo "function_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-demo.k-f.dev" >> $GITHUB_OUTPUT
+          echo "env_name=demo" >> $GITHUB_OUTPUT
+        elif  ${{ github.ref == 'refs/heads/main' }}; then
+          # DEV
+          echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-dev.k-f.dev" >> $GITHUB_OUTPUT
+          echo "env_name=development" >> $GITHUB_OUTPUT          
+        elif ${{ github.event_name == 'pull_request' }}; then
+          # PR
+          echo "function_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.dev" >> $GITHUB_OUTPUT
+          echo "env_name=development" >> $GITHUB_OUTPUT
+        else
+          echo "::error title=No env to deploy::Workflow called from non-deployable branch/tag"
+        fi
+    
+    - name: debug outputs
+      shell: bash
+      run: |
+        echo "URL ${{ steps.naming.outputs.front_url }}"
+        echo "App name: ${{ steps.naming.outputs.function_name }}"
+        echo "Env name: ${{ steps.naming.outputs.env_name }}"
+        echo "GH env: ${{ steps.setenv.outputs.gh_env }}"
+        

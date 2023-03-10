@@ -1,12 +1,15 @@
 [build]
   base = "centrifuge-app"
-  command = "yarn build:all"
+  command = "yarn build"
   publish = "build"
   environment = { NETLIFY_USE_YARN = "true" }
   functions = "functions"
 
 [dev]
   command = "yarn start:app"
+  port = 8888
+  targetPort = 3000
+  autoLaunch = false
 
 [[redirects]]
   from = "/*"

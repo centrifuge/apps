@@ -1,7 +1,7 @@
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { Box, Grid, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
@@ -10,7 +10,6 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
-import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { collectionMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
@@ -33,7 +32,7 @@ const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
   } = useRouteMatch<{ cid: string }>()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const collection = useCollection(collectionId)
   const nfts = useNFTs(collectionId)
   const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)

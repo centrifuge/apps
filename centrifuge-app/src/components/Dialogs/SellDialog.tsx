@@ -1,10 +1,9 @@
+import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { Button, CurrencyInput, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useBalance } from '../../utils/useBalance'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { ButtonGroup } from '../ButtonGroup'
-import { useWeb3 } from '../Web3Provider'
 
 const e18 = new BN(10).pow(new BN(18))
 
@@ -20,10 +19,10 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [price, setPrice] = React.useState<number | ''>()
   const [touched, setTouched] = React.useState(false)
-  const { selectedAccount } = useWeb3()
+  const { substrate } = useWallet()
   const balance = useBalance()
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!substrate.selectedAccount?.address
 
   const {
     execute: doTransaction,

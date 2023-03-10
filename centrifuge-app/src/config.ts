@@ -1,10 +1,10 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
-import { LogoAltairText } from './components/LogoAltair'
-import { LogoCentrifuge } from './components/LogoCentrifuge'
+import { LogoAltair, LogoAltairText } from './components/LogoAltair'
+import { LogoCentrifuge, LogoCentrifugeText } from './components/LogoCentrifuge'
 
 export const FEATURED_COLLECTIONS = [
   '3410462771',
@@ -59,7 +59,7 @@ const darkTheme: DefaultTheme = {
 
 type EnvironmentConfig = {
   name: string
-  logo: React.ComponentType<any>
+  logo: React.ComponentType<any>[]
   network: 'altair' | 'centrifuge'
   themes: {
     light: DefaultTheme
@@ -69,19 +69,18 @@ type EnvironmentConfig = {
   baseCurrency: 'AUSD'
   assetClasses: string[]
   defaultAssetClass: string
-  tokensPageSubtitle: string
   defaultLoanType: LoanInfo['type']
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
   defaultPodUrl: string
 }
 
-const poolCreationType: TransactionOptions['createType'] = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
-const defaultPodUrl: string = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
+const poolCreationType = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
+const defaultPodUrl = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
-  logo: LogoAltairText,
+  logo: [LogoAltair, LogoAltairText],
   network: 'altair',
   themes: {
     light: lightTheme,
@@ -91,7 +90,6 @@ const ALTAIR: EnvironmentConfig = {
   baseCurrency: 'AUSD',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
-  tokensPageSubtitle: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
@@ -100,7 +98,7 @@ const ALTAIR: EnvironmentConfig = {
 
 const CENTRIFUGE: EnvironmentConfig = {
   name: 'Centrifuge App',
-  logo: LogoCentrifuge,
+  logo: [LogoCentrifuge, LogoCentrifugeText],
   network: 'centrifuge',
   themes: {
     light: lightTheme,
@@ -116,11 +114,31 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Project Finance',
   ],
   defaultAssetClass: 'Consumer Credit',
-  tokensPageSubtitle: 'Tokens of real-world assets',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,
 }
 
-export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE
+const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
+
+const goerliConfig = {
+  rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
+  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+  tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
+  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
+}
+const mainnetConfig = {
+  rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
+  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+  tinlakeUrl: 'https://tinlake.centrifuge.io',
+  poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
+}
+
+export const ethConfig = {
+  network: ethNetwork,
+  multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
+  ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),
+}
+
+export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : CENTRIFUGE

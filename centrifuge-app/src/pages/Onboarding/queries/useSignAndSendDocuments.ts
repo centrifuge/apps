@@ -1,0 +1,43 @@
+import { useMutation } from 'react-query'
+import { useAuth } from '../../../components/AuthProvider'
+import { OnboardingPool, useOnboarding } from '../../../components/OnboardingProvider'
+import { OnboardingUser } from '../../../types'
+
+export const useSignAndSendDocuments = () => {
+  const { refetchOnboardingUser, pool, nextStep } = useOnboarding<OnboardingUser, NonNullable<OnboardingPool>>()
+  const { authToken } = useAuth()
+
+  const poolId = pool.id
+  const trancheId = pool.trancheId
+
+  const mutation = useMutation(
+    async (transactionInfo: { extrinsicHash: string; blockNumber: string }) => {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAndSendDocuments`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          transactionInfo,
+          trancheId,
+          poolId,
+        }),
+        credentials: 'include',
+      })
+
+      if (response.status === 201) {
+        return response
+      }
+      throw response.statusText
+    },
+    {
+      onSuccess: () => {
+        refetchOnboardingUser()
+        nextStep()
+      },
+    }
+  )
+
+  return mutation
+}

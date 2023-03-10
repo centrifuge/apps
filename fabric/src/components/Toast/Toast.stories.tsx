@@ -1,5 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import { Toast } from '.'
 import { IconExternalLink } from '../..'
 import { Button } from '../Button'
@@ -11,10 +11,15 @@ export default {
 } as ComponentMeta<typeof Toast>
 
 type ToastStory = ComponentStory<typeof Toast>
-const Template: ToastStory = ({ status, ...args }) => (
+const Template: ToastStory = (args) => (
   <Stack gap={4}>
     {['info', 'pending', 'ok', 'warning', 'critical'].map((status) => (
-      <Toast {...args} status={status as any} action={<Button variant="tertiary" icon={IconExternalLink} />} />
+      <Toast
+        {...args}
+        status={status as any}
+        action={<Button variant="tertiary" icon={IconExternalLink} />}
+        key={status}
+      />
     ))}
   </Stack>
 )

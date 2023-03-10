@@ -28,6 +28,9 @@ export type Key =
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
   | 'editPoolConfig'
+  | 'poolReporting'
+  | 'editPoolVisibility'
+  | 'showTinlakePools'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -52,6 +55,16 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     alwaysShow: true,
   },
+  showTinlakePools: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  poolReporting: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
   persistDebugFlags: {
     type: 'checkbox',
     default: !!localStorage.getItem('debugFlags'),
@@ -60,5 +73,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   showUnusedFlags: {
     type: 'checkbox',
     default: false,
+  },
+  editPoolVisibility: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
   },
 }

@@ -2,7 +2,7 @@ import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyle = createGlobalStyle`
 	html, body, #root, #root>div[data-overlay-container] {
-		height: 100vh;
+		min-height: 100vh;
 		font-family: Inter, sans-serif;
 	}
 	* {
@@ -22,5 +22,9 @@ export const GlobalStyle = createGlobalStyle`
 	input[type='search']::-webkit-search-results-button,
 	input[type='search']::-webkit-search-results-decoration {
 	  -webkit-appearance: none;
+	}
+
+	ul {
+		list-style: none;
 	}
 `

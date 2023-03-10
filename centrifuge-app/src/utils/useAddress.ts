@@ -1,7 +1,7 @@
+import { useAddress as useWalletAddress } from '@centrifuge/centrifuge-react'
 import { useDebugFlags } from '../components/DebugFlags'
-import { useWeb3 } from '../components/Web3Provider'
 
-export function useAddress() {
-  const { selectedAccount, proxy } = useWeb3()
-  return (useDebugFlags().address as string) || proxy?.delegator || selectedAccount?.address
+export function useAddress(typeOverride?: 'substrate' | 'evm') {
+  const address = useWalletAddress(typeOverride)
+  return (useDebugFlags().address as string) || address
 }

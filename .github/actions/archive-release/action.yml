@@ -1,0 +1,53 @@
+name: Archive staging artifact
+description: archive artifacts to the release
+inputs:
+  name:
+    description: name of the app - determines the zip file name
+    required: true
+  path:
+    description: path to the files to ZIP for upload
+    required: true    
+
+    
+runs:
+  using: composite
+  steps:  
+
+      - name: ZIP ${{ inputs.name }}
+        shell: bash
+        run: zip -r  "${{ inputs.name }}.zip"  ./${{ inputs.path }}/ 1> /dev/null
+
+# This action will fail if the calling workflow is not a release
+# ncipollo/release-action expects an existing release to be updated, and it needs to be a draft/pre-release
+      - name: upload ${{ inputs.name }} to release tag ${{ github.ref_name }}
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # @v1
+        # https://github.com/ncipollo/release-action
+        with:
+          tag: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          artifacts: "${{ inputs.name }}.zip"
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifactContentType: zip
+          omitBodyDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+          updateOnlyUnreleased: true # When allowUpdates is enabled, this will fail the action if the release it is updating is not a draft or a prerelease.
+          
+
+    # Alernative: archive in a gcloud bucket:
+      # - name: Auth gcloud
+      #   id: gauth
+      #   uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+      #   with:
+      #     workload_identity_provider: '${{ secrets.GWIP }}'
+      #     service_account: '${{ secrets.GSA }}'
+      # # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      # - name: 'Set up Cloud SDK'
+      #   uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1 
+
+      # - name: Archive ${{ inputs.name }} in gcloud bucket
+      #   run: |
+      #     echo "Archiving ${{ inputs.name }} in gs://staging-releases/${{ inputs.name }}"
+      #     gsutil -m rsync -d -c -r ${{ inputs.name }}/ gs://staging-releases/${{ github.ref_name }}/${{ inputs.name }}/

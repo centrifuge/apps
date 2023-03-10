@@ -1,5 +1,5 @@
 import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import React from 'react'
+import * as React from 'react'
 import { daysBetween, formatAge } from './date'
 import { Dec } from './Decimal'
 import { useLoans } from './useLoans'

@@ -1,7 +1,8 @@
 import { Card, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
+import { DataTableProps } from './DataTable'
 
-export const DataTableGroup: React.FC = ({ children }) => {
+export function DataTableGroup({ children }: { children: React.ReactElement<DataTableProps>[] }) {
   return (
     <Stack as={Card} gap="3">
       {React.Children.map(children, (child, index) => {

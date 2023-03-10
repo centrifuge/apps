@@ -1,37 +1,60 @@
 import { isWeb3Injected } from '@polkadot/extension-dapp'
-import { getWalletBySource, getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
-import { Wallet, WalletAccount } from '@subwallet/wallet-connect/types'
+import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
+import { Wallet } from '@subwallet/wallet-connect/types'
+import { Web3ReactState } from '@web3-react/types'
+import { WalletConnect } from '@web3-react/walletconnect'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
+import { ReplacedError, useAsyncCallback } from '../../hooks/useAsyncCallback'
 import { useCentrifuge } from '../CentrifugeProvider'
-
-type Account = WalletAccount
-
-type Proxy = { delegator: string; types: string[] }
+import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
+import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
+import { getStore } from './evm/utils'
+import { Account, Proxy, State } from './types'
+import { useConnectEagerly } from './useConnectEagerly'
+import { Action, getPersisted, persist, useWalletStateInternal } from './useWalletState'
+import { useGetNetworkName } from './utils'
+import { WalletDialog } from './WalletDialog'
 
 type WalletContextType = {
-  accounts: Account[] | null
-  selectedAccount: Account | null
-  isConnecting: boolean
-  isWeb3Injected: boolean
-  connect: (source?: string) => Promise<void>
+  connectedType: 'evm' | 'substrate' | null
+  connectedNetwork: State['walletDialog']['network']
+  connectedNetworkName: string | null
+  dispatch: (action: Action) => void
+  showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
+  showAccounts: () => void
+  walletDialog: State['walletDialog']
+  connect: (wallet: Wallet | EvmConnectorMeta, chainId?: number) => Promise<Account[] | string[] | undefined>
   disconnect: () => void
-  selectAccount: (address: string) => void
-  selectedWallet: Wallet | null
-  selectProxy: (address: string | null) => void
-  proxy: Proxy | null
-  proxies: Record<string, Proxy[]> | undefined
+  pendingConnect: {
+    isConnecting: boolean
+    isError: boolean
+    wallet: Wallet | EvmConnectorMeta | null
+  }
+  substrate: {
+    accounts: Account[] | null
+    selectedAccount: Account | null
+    selectedAddress: string | null
+    selectProxy: (address: string | null) => void
+    isWeb3Injected: boolean
+    selectAccount: (address: string) => void
+    selectedWallet: Wallet | null
+    proxy: Proxy | null
+    proxies: Record<string, Proxy[]> | undefined
+    subscanUrl?: string
+  }
+  evm: Pick<Web3ReactState, 'chainId' | 'accounts'> & {
+    connectors: EvmConnectorMeta[]
+    chains: EvmChains
+    selectedWallet: EvmConnectorMeta | null
+    selectedAddress: string | null
+  }
 }
 
 const WalletContext = React.createContext<WalletContextType>(null as any)
 
 export const wallets = getWallets()
-
-const PERSIST_KEY = 'centrifugeWalletPersist'
-const PERSISTED_EXTENSION_KEY = 'centrifugeWalletPersistedExtension'
-const PERSISTED_ADDRESS_KEY = 'centrifugeWalletPersistedAddress'
-const PERSISTED_PROXY_KEY = 'centrifugeWalletPersistedProxy'
 
 export function useWallet() {
   const ctx = React.useContext(WalletContext)
@@ -39,38 +62,68 @@ export function useWallet() {
   return ctx
 }
 
-export function useAddress() {
-  const { selectedAccount, proxy } = useWallet()
-  return proxy?.delegator || selectedAccount?.address
+export function useAddress(typeOverride?: 'substrate' | 'evm') {
+  const { connectedType, evm, substrate } = useWallet()
+  const type = typeOverride ?? connectedType
+  if (type === 'evm') {
+    return evm.accounts?.[0]
+  }
+  return substrate.proxy?.delegator || substrate.selectedAccount?.address
 }
-
-let triedEager = false
 
 type WalletProviderProps = {
   children: React.ReactNode
+  evmChains?: EvmChains
+  evmAdditionalConnectors?: EvmConnectorMeta[]
+  subscanUrl?: string
 }
 
-export function WalletProvider({ children }: WalletProviderProps) {
-  const [accounts, setAccounts] = React.useState<Account[] | null>(null)
-  const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
-  const [proxyAddress, setProxyAddress] = React.useState<string | null>(null)
-  const [isConnecting, setIsConnecting] = React.useState(false)
-  const [selectedWallet, setSelectedWallet] = React.useState<Wallet | null>(null)
+let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
+
+export function WalletProvider({
+  children,
+  evmChains = {
+    1: {
+      urls: ['https://cloudflare-eth.com'],
+    },
+  },
+  evmAdditionalConnectors,
+  subscanUrl,
+}: WalletProviderProps) {
+  if (!evmChains[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
+  const evmConnectors =
+    cachedEvmConnectors || (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), evmAdditionalConnectors))
+
+  const [state, dispatch] = useWalletStateInternal(evmConnectors)
+
   const unsubscribeRef = React.useRef<(() => void) | null>()
+
+  React.useEffect(
+    () => () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current()
+        unsubscribeRef.current = null
+      }
+    },
+    []
+  )
+
   const cent = useCentrifuge()
   const { data: proxies } = useQuery(
-    ['proxies', accounts?.map((acc) => acc.address)],
+    ['proxies', state.substrate.accounts?.map((acc) => acc.address)],
     () =>
-      firstValueFrom(cent.proxies.getMultiUserProxies([accounts!.map((acc) => acc.address)])).then((proxies) => {
-        return Object.fromEntries(
-          Object.entries(proxies).map(([delegatee, ps]) => [
-            cent.utils.formatAddress(delegatee),
-            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
-          ])
-        )
-      }),
+      firstValueFrom(cent.proxies.getMultiUserProxies([state.substrate.accounts!.map((acc) => acc.address)])).then(
+        (proxies) => {
+          return Object.fromEntries(
+            Object.entries(proxies).map(([delegatee, ps]) => [
+              cent.utils.formatAddress(delegatee),
+              ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+            ])
+          )
+        }
+      ),
     {
-      enabled: !!accounts?.length,
+      enabled: !!state.substrate.accounts?.length,
       staleTime: Infinity,
     }
   )
@@ -81,139 +134,162 @@ export function WalletProvider({ children }: WalletProviderProps) {
       address: cent.utils.formatAddress(acc.address),
     }))
 
-    setAccounts(mappedAccounts)
-    const persistedAddress = localStorage.getItem(PERSISTED_ADDRESS_KEY)
-    const persistedProxy = localStorage.getItem(PERSISTED_PROXY_KEY)
+    const { address: persistedAddress, proxy: persistedProxy } = getPersisted()
     const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
     const address = matchingAccount || mappedAccounts[0]?.address
-    setSelectedAccountAddress(address)
-    if (matchingAccount && persistedProxy) {
-      setProxyAddress(persistedProxy)
-    }
-    localStorage.setItem(PERSISTED_ADDRESS_KEY, address ?? '')
+    dispatch({
+      type: 'substrateSetState',
+      payload: {
+        accounts: mappedAccounts,
+        selectedAccountAddress: address,
+        proxyAddress: (matchingAccount && persistedProxy) || null,
+      },
+    })
   }
 
+  const selectAccount = React.useCallback((address: string) => {
+    dispatch({ type: 'substrateSetState', payload: { selectedAccountAddress: address, proxyAddress: null } })
+  }, [])
+
+  const selectProxy = React.useCallback((proxyAddress: string | null) => {
+    dispatch({ type: 'substrateSetState', payload: { proxyAddress } })
+  }, [])
+
+  const {
+    execute: setPendingConnect,
+    args: connectingArgs,
+    isLoading: isConnectingByInteraction,
+    isError: isConnectError,
+  } = useAsyncCallback((_: EvmConnectorMeta | Wallet, cb: () => Promise<Account[] | string[] | undefined>) => cb(), {
+    throwOnReplace: true,
+  })
+
+  const connectSubstrate = React.useCallback(async (wallet: Wallet) => {
+    unsubscribeRef.current?.()
+
+    if (!wallet?.installed) throw new Error('Wallet not available')
+
+    const accounts = await setPendingConnect(wallet, async () => {
+      try {
+        const allAccounts = await wallet.getAccounts()
+        if (!allAccounts) throw new Error('Failed to get accounts')
+
+        setFilteredAccounts(allAccounts)
+        dispatch({ type: 'substrateSetState', payload: { selectedWallet: wallet } })
+        dispatch({ type: 'setConnectedType', payload: 'substrate' })
+
+        unsubscribeRef.current = await wallet.subscribeAccounts(setFilteredAccounts)
+
+        return allAccounts
+      } catch (error) {
+        if (error instanceof ReplacedError) return
+        console.error(error)
+        throw error
+      }
+    })
+    return accounts
+  }, [])
+
+  const connectEvm = React.useCallback(async (wallet: EvmConnectorMeta, chainId?: number) => {
+    const { connector } = wallet
+    try {
+      const accounts = await setPendingConnect(wallet, async () => {
+        await (connector instanceof WalletConnect
+          ? connector.activate(chainId)
+          : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))
+        return getStore(wallet.connector).getState().accounts
+      })
+
+      dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
+      dispatch({ type: 'setConnectedType', payload: 'evm' })
+
+      return accounts
+    } catch (error) {
+      if (error instanceof ReplacedError) return
+      console.error(error)
+      throw error
+    }
+  }, [])
+
+  const connect = React.useCallback(async (wallet: Wallet | EvmConnectorMeta, chainId?: number) => {
+    if ('connector' in wallet) {
+      return connectEvm(wallet, chainId)
+    }
+    return connectSubstrate(wallet)
+  }, [])
+
   const disconnect = React.useCallback(async () => {
-    setAccounts(null)
-    setSelectedAccountAddress(null)
-    setIsConnecting(false)
-    setProxyAddress(null)
-    setSelectedWallet(null)
-    localStorage.removeItem(PERSIST_KEY)
-    localStorage.removeItem(PERSISTED_EXTENSION_KEY)
-    localStorage.removeItem(PERSISTED_ADDRESS_KEY)
-    localStorage.removeItem(PERSISTED_PROXY_KEY)
+    evmConnectors.forEach((connectorMeta) => {
+      if (connectorMeta.connector?.deactivate) {
+        connectorMeta.connector.deactivate()
+      } else {
+        connectorMeta.connector.resetState()
+      }
+    })
+
+    persist(null)
     if (unsubscribeRef.current) {
       unsubscribeRef.current()
       unsubscribeRef.current = null
     }
+
+    dispatch({ type: 'reset' })
   }, [])
 
-  const connect = React.useCallback(async (source?: string) => {
-    unsubscribeRef.current?.()
-    setIsConnecting(true)
+  const isTryingToConnectEagerly = useConnectEagerly(connect, dispatch, evmConnectors)
+  const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
+  const getNetworkName = useGetNetworkName(evmChains)
 
-    try {
-      const wallet = source ? getWalletBySource(source) : wallets.find((w) => w.installed)
-      if (!wallet?.installed) throw new Error('Wallet not available')
-      setSelectedWallet(wallet)
-
-      await wallet.enable()
-
-      const unsub = await wallet.subscribeAccounts((allAccounts) => {
-        if (!allAccounts) throw new Error('No accounts')
-        setFilteredAccounts(allAccounts)
-      })
-      unsubscribeRef.current = unsub as any
-
-      localStorage.setItem(PERSIST_KEY, '1')
-      localStorage.setItem(PERSISTED_EXTENSION_KEY, wallet.extensionName)
-    } catch (e) {
-      console.error(e)
-      localStorage.removeItem(PERSIST_KEY)
-      localStorage.removeItem(PERSISTED_EXTENSION_KEY)
-      localStorage.removeItem(PERSISTED_ADDRESS_KEY)
-      localStorage.removeItem(PERSISTED_PROXY_KEY)
-      throw e
-    } finally {
-      setIsConnecting(false)
-    }
-  }, [])
-
-  const selectAccount = React.useCallback((address: string) => {
-    setSelectedAccountAddress(address)
-    localStorage.setItem(PERSISTED_ADDRESS_KEY, address)
-    setProxyAddress(null)
-  }, [])
-
-  const selectProxy = React.useCallback((address: string | null) => {
-    setProxyAddress(address)
-    localStorage.setItem(PERSISTED_PROXY_KEY, address ?? '')
-  }, [])
-
-  async function tryReconnect() {
-    const source = localStorage.getItem(PERSISTED_EXTENSION_KEY)!
-    // This script might have loaded quicker than the wallet extension,
-    // so we'll wait up to 2 seconds for it to load
-    let i = 8
-    let hasWallet = false
-    while (i--) {
-      const wallet = getWalletBySource(source)
-      if (wallet?.installed) {
-        hasWallet = true
-        break
-      }
-      await new Promise((res) => setTimeout(res, 250))
-    }
-    if (hasWallet) {
-      connect(source)
-    }
-  }
-
-  React.useEffect(() => {
-    if (!triedEager && localStorage.getItem(PERSIST_KEY)) {
-      tryReconnect()
-    }
-    triedEager = true
-
-    return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current()
-        unsubscribeRef.current = null
-      }
-    }
-  }, [])
-
-  const ctx: WalletContextType = React.useMemo(
-    () => ({
-      accounts,
-      selectedAccount: accounts?.find((acc) => acc.address === selectedAccountAddress) ?? null,
-      isConnecting,
-      isWeb3Injected,
+  const ctx: WalletContextType = React.useMemo(() => {
+    const selectedSubstrateAccount =
+      state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null
+    const connectedNetwork =
+      state.connectedType === 'evm' ? state.evm.chainId! : state.connectedType === 'substrate' ? 'centrifuge' : null
+    return {
+      connectedType: state.connectedType,
+      connectedNetwork,
+      connectedNetworkName: connectedNetwork ? getNetworkName(connectedNetwork) : null,
+      dispatch,
+      showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
+        dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),
+      showAccounts: () => dispatch({ type: 'showWalletDialogAccounts', payload: { network: state.evm.chainId } }),
+      walletDialog: state.walletDialog,
+      pendingConnect: {
+        isConnecting,
+        isError: isConnectError,
+        wallet: connectingArgs?.[0] ?? null,
+      },
       connect,
       disconnect,
-      selectedWallet,
-      selectAccount,
-      selectProxy,
-      proxy:
-        selectedAccountAddress && proxyAddress && proxies
-          ? proxies[selectedAccountAddress]?.find((p) => p.delegator === proxyAddress) ?? null
-          : null,
-      proxies,
-    }),
-    [
-      accounts,
-      isConnecting,
-      connect,
-      disconnect,
-      selectedWallet,
-      selectAccount,
-      selectProxy,
-      selectedAccountAddress,
-      proxyAddress,
-      proxies,
-    ]
+      substrate: {
+        ...state.substrate,
+        selectedAccount: selectedSubstrateAccount,
+        selectedAddress: selectedSubstrateAccount?.address ?? null,
+        isWeb3Injected,
+        selectAccount,
+        selectProxy,
+        proxy:
+          state.substrate.selectedAccountAddress && state.substrate.proxyAddress && proxies
+            ? proxies[state.substrate.selectedAccountAddress]?.find(
+                (p) => p.delegator === state.substrate.proxyAddress
+              ) ?? null
+            : null,
+        proxies,
+        subscanUrl,
+      },
+      evm: {
+        ...state.evm,
+        selectedAddress: state.evm.accounts?.[0] ?? null,
+        connectors: evmConnectors,
+        chains: evmChains,
+      },
+    }
+  }, [connect, disconnect, selectAccount, selectProxy, proxies, state, isConnectError, isConnecting])
+
+  return (
+    <WalletContext.Provider value={ctx}>
+      {children}
+      <WalletDialog evmChains={evmChains} />
+    </WalletContext.Provider>
   )
-
-  return <WalletContext.Provider value={ctx}>{children}</WalletContext.Provider>
 }

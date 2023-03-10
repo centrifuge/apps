@@ -1,16 +1,15 @@
 import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
+import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { WalletAccount } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
-import { useCentrifuge } from '../components/CentrifugeProvider'
-import { useWeb3 } from '../components/Web3Provider'
 
 type TxOptions = Pick<TransactionOptions, 'paymentInfo'>
 
 export function useTransactionFeeEstimate<T extends Array<any>>(
   transactionCallback: (centrifuge: Centrifuge) => (args: T, options: TransactionOptions) => Observable<any>
 ) {
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet().substrate
   const cent = useCentrifuge()
   const [txFee, setTxFee] = React.useState<number | undefined>(undefined)
 

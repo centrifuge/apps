@@ -27,7 +27,7 @@ const ScrollContainer = styled(Stack)`
   }
 `
 
-export const MenuItemGroup: React.FC = ({ children }) => {
+export const MenuItemGroup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <>
       <MenuDivider borderColor="borderSecondary" />
@@ -51,7 +51,8 @@ export type MenuItemProps = {
   sublabel?: string
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
-} & PropsOf<typeof MenuItemButton>
+} & PropsOf<typeof MenuItemButton> &
+  React.HTMLAttributes<HTMLButtonElement>
 
 export const MenuItem: React.FC<MenuItemProps> = ({
   label,
@@ -94,11 +95,11 @@ const MenuItemButton = styled.button`
 
   &:hover,
   &:focus-visible {
-    background-color: ${({ theme }) => theme.colors.accentPrimary};
-    color: ${({ theme }) => theme.colors.textInverted};
-    * {
-      color: ${({ theme }) => theme.colors.textInverted};
-    }
+    background-color: ${({ theme }) => theme.colors.backgroundSecondary};
+  }
+
+  &:focus-visible {
+    color: ${({ theme }) => theme.colors.accentPrimary};
   }
 `
 

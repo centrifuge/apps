@@ -1,33 +1,41 @@
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
-import { IconChevronDown, IconChevronRight, IconChevronUp } from '../../icon'
+import { IconChevronRight } from '../../icon'
 import { Box } from '../Box'
 import { VisualButton } from '../Button'
 import { Card, CardProps } from '../Card'
+import { Collapsible, CollapsibleChevron } from '../Collapsible'
 import { Shelf } from '../Shelf'
+import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-export type InteractiveCardProps = {
+type OwnProps = {
   variant?: 'collapsible' | 'button' | 'default'
   icon?: React.ReactNode
   title: React.ReactNode
   titleAddition?: React.ReactNode
+  subtitle?: React.ReactNode
   secondaryHeader?: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLButtonElement>
+  isOpen?: boolean
+  children?: React.ReactNode
 }
 
-export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'variant'>> = ({
+export type InteractiveCardProps = OwnProps & Omit<CardProps, 'variant'>
+
+export const InteractiveCard: React.FC<InteractiveCardProps> = ({
   variant = 'default',
   icon,
   title,
   titleAddition,
   secondaryHeader,
+  subtitle,
   children,
   onClick,
   ...rest
 }) => {
   const [hovered, setHovered] = React.useState(false)
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(rest.isOpen ?? false)
   const theme = useTheme()
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
@@ -52,26 +60,27 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
         <Shelf gap={1}>
           {icon}
           <Shelf gap={1} rowGap={0} alignItems="baseline" flexWrap="wrap">
-            <Text variant="heading2" color={variant === 'default' ? 'textPrimary' : 'textInteractive'}>
-              {title}
-            </Text>
-            <Text variant="body2">{titleAddition}</Text>
+            <Stack>
+              <Shelf gap={1} rowGap={0} alignItems="baseline" flexWrap="wrap">
+                <Text variant="heading3" color={variant === 'default' ? 'textPrimary' : 'textInteractive'}>
+                  {title}
+                </Text>
+                <Text variant="body2">{titleAddition}</Text>
+              </Shelf>
+              {subtitle && <Text variant="heading6">{subtitle}</Text>}
+            </Stack>
           </Shelf>
         </Shelf>
         <Box my="-10px">
-          <VisualButton
-            variant="tertiary"
-            active={hovered}
-            icon={
-              variant === 'default'
-                ? undefined
-                : variant === 'button'
-                ? IconChevronRight
-                : open
-                ? IconChevronUp
-                : IconChevronDown
-            }
-          />
+          {variant !== 'collapsible' ? (
+            <VisualButton
+              variant="tertiary"
+              active={hovered}
+              icon={variant === 'default' ? undefined : IconChevronRight}
+            />
+          ) : (
+            <VisualButton variant="tertiary" active={hovered} icon={<CollapsibleChevron open={open} />} />
+          )}
         </Box>
       </Header>
       {secondaryHeader && (
@@ -84,20 +93,39 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
           {secondaryHeader}
         </Box>
       )}
-      {(variant !== 'collapsible' || open) && children && (
-        <Box
-          p={2}
-          backgroundColor={variant === 'collapsible' ? 'backgroundSecondary' : undefined}
-          borderBottomLeftRadius="card"
-          borderBottomRightRadius="card"
-          style={{
-            boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}`,
-          }}
-        >
-          {children}
-        </Box>
-      )}
+
+      {children &&
+        (variant === 'collapsible' ? (
+          <Collapsible open={open}>
+            <Content backgroundColor="backgroundSecondary">{children}</Content>
+          </Collapsible>
+        ) : (
+          <Content>{children}</Content>
+        ))}
     </Card>
+  )
+}
+
+type ContentProps = {
+  backgroundColor?: string
+  children: React.ReactNode
+}
+
+function Content({ backgroundColor = 'none', children }: ContentProps) {
+  const { colors } = useTheme()
+
+  return (
+    <Box
+      p={2}
+      backgroundColor={backgroundColor}
+      borderBottomLeftRadius="card"
+      borderBottomRightRadius="card"
+      style={{
+        boxShadow: `0 -1px 0 ${colors.borderSecondary}`,
+      }}
+    >
+      {children}
+    </Box>
   )
 }
 

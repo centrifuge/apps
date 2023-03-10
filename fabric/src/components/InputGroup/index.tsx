@@ -3,7 +3,7 @@ import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-export type InputGroupProps = { label?: string; disabled?: boolean; errorMessage?: string }
+export type InputGroupProps = { label?: string; disabled?: boolean; errorMessage?: string; children?: React.ReactNode }
 
 export const InputGroup: React.FC<InputGroupProps> = ({ label, disabled, errorMessage, children }) => {
   return (

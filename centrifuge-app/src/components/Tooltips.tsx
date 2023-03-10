@@ -3,9 +3,9 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
 
-const ValueLockedTooltipBody: React.VFC = () => {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
+const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
+  const { pid: poolIdParam } = useParams<{ pid: string }>()
+  const pool = usePool(poolId || poolIdParam)
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
@@ -30,9 +30,9 @@ const tooltipText = {
     label: 'APY',
     body: 'The Annual Percentage Yield ("APY") of a token is calculated as the effective annualized return of the pool\'s token price.',
   },
-  protection: {
-    label: 'Protection',
-    body: 'The risk protection is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
+  subordination: {
+    label: 'Subordination',
+    body: 'The subordination is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
   },
   currency: {
     label: 'override',
@@ -190,19 +190,52 @@ const tooltipText = {
     label: 'Pool',
     body: 'Allows to manage pool configuration and manage other admins.',
   },
+  origination: {
+    label: 'Origination',
+    body: 'Origination is the process by which the issuer finances a new asset.',
+  },
+  repayment: {
+    label: 'Repayment',
+    body: 'Repayment is a structured repaying of funds that have been given to the issuer over a period of time, typically alongside a payment of interest.',
+  },
+  investment: {
+    label: 'Investment',
+    body: 'An investment is an asset or item acquired with the goal of generating income or appreciation.',
+  },
+  redemption: {
+    label: 'Redemption',
+    body: 'Redemption in a pool means withdrawal of investment by the lender.',
+  },
+  noTranchProtection: {
+    label: 'Min. subordination',
+    body: 'The first, most junior tranche is not protected by subordinated tranches.',
+  },
+  tranchProtection: {
+    label: 'Min. subordination',
+    body: 'Minimum protection required for this tranche by all subordinated tranches.',
+  },
+  variableTranchInterest: {
+    label: 'Interest rate',
+    body: 'The first, most junior tranche receives a variable return.',
+  },
+  fixedTranchInterest: {
+    label: 'Fixed interest rate',
+    body: 'Fixed interest rate (APR) this tranche accrues on deployed capital.',
+  },
 }
 
-type TooltipsProps = {
+export type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string
+  props?: any
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary', props }) => {
   const { label, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
-    <FabricTooltip body={body}>
+    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body}>
       <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
         {labelOverride || label}
       </Text>

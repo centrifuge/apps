@@ -1,8 +1,18 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Box, IconAlertCircle, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import {
+  Box,
+  IconAlertCircle,
+  IconNft,
+  InteractiveCard,
+  Shelf,
+  Stack,
+  Text,
+  TextWithPlaceholder,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
-import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
@@ -11,9 +21,7 @@ import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
-import { usePodAuth, usePodDocument } from '../../components/PodAuthProvider'
 import { PodAuthSection } from '../../components/PodAuthSection'
-import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
@@ -25,8 +33,11 @@ import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/us
 import { useMetadata } from '../../utils/useMetadata'
 import { useNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset, usePermissions } from '../../utils/usePermissions'
+import { usePod } from '../../utils/usePod'
+import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
+import { FinancingRepayment } from './FinancingRepayment'
 import { PricingForm } from './PricingForm'
 import { RiskGroupValues } from './RiskGroupValues'
 import { getMatchingRiskGroupIndex, LOAN_TYPE_LABELS } from './utils'
@@ -42,8 +53,8 @@ export const LoanPage: React.FC = () => {
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
-  const pool = usePool(pid)
-  const address = useAddress()
+  const pool = usePool(pid) as Pool
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrowAsset(pid, aid)
   const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
@@ -79,7 +90,7 @@ const Loan: React.FC = () => {
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
   const podUrl = poolMetadata?.pod?.url
-  const { isLoggedIn } = usePodAuth(podUrl)
+  const { isLoggedIn } = usePod(podUrl)
   const { data: document } = usePodDocument(podUrl, documentId)
 
   const publicData = nftMetadata?.properties
@@ -142,6 +153,17 @@ const Loan: React.FC = () => {
                 },
               ]}
             />
+
+            <PageSection title="Financing & repayment cash flow">
+              <Shelf gap={3} flexWrap="wrap">
+                <FinancingRepayment
+                  drawDownDate={loan.originationDate ? formatDate(loan.originationDate) : null}
+                  closingDate={loan.status === 'Closed' ? formatDate(loan.lastUpdated) : null}
+                  totalFinanced={formatBalance(loan.totalBorrowed, pool.currency)}
+                  totalRepaid={formatBalance(loan.totalRepaid, pool.currency)}
+                />
+              </Shelf>
+            </PageSection>
 
             <PageSection title="Pricing">
               <Shelf gap={3} flexWrap="wrap">

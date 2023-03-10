@@ -1,15 +1,14 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Select, Stack } from '@centrifuge/fabric'
 import { Field, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { truncateText } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
@@ -29,7 +28,7 @@ type FormValues = {
 const CreateLoanFromNFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const pools = usePools()
   const [redirect, setRedirect] = React.useState<string>()
@@ -110,11 +109,12 @@ const CreateLoanFromNFT: React.FC = () => {
               <Field name="poolId">
                 {({ field, form }: any) => (
                   <Select
+                    name="poolId"
                     placeholder="Select a pool"
                     label="Pool"
                     options={poolSelectOptions}
                     value={field.value}
-                    onSelect={(v) => form.setFieldValue('poolId', v)}
+                    onChange={(event) => form.setFieldValue('poolId', event.target.value)}
                     disabled={isLoading}
                   />
                 )}

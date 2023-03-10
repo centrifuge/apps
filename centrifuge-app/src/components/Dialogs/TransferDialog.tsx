@@ -1,9 +1,9 @@
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Dialog, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { useAddress } from '../../utils/useAddress'
 import { useBalance } from '../../utils/useBalance'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { isSameAddress } from '../../utils/web3'
 import { ButtonGroup } from '../ButtonGroup'
 
@@ -19,7 +19,7 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [address, setAddress] = React.useState('')
   const [touched, setTouched] = React.useState(false)
-  const connectedAddress = useAddress()
+  const connectedAddress = useAddress('substrate')
   const balance = useBalance()
 
   const isConnected = !!connectedAddress

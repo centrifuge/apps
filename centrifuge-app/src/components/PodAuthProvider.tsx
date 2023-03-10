@@ -1,127 +1,154 @@
+import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
-import { useQuery } from 'react-query'
-import { useCentrifuge } from './CentrifugeProvider'
-import { useWeb3 } from './Web3Provider'
+import { useMutation, useQuery } from 'react-query'
 
-const PodAuthContext = React.createContext<{
-  tokens: Record<string, { signed: string; payload: any } | undefined>
-  login: (address: string, onBehalfOf: string) => Promise<void>
+const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'PodAdmin']
+
+export const PodAuthContext = React.createContext<{
+  session?: { signed: string; payload: any } | null
+  login: () => void
+  isLoggingIn: boolean
 }>(null as any)
 
-function getPersisted() {
-  try {
-    return JSON.parse(sessionStorage.getItem('podAuth') ?? '')
-  } catch {
-    return {}
-  }
-}
-
-export const PodAuthProvider: React.FC = ({ children }) => {
-  const [tokens, setTokens] = React.useState<Record<string, { signed: string; payload: any } | undefined>>(getPersisted)
-  const { selectedWallet, proxies } = useWeb3()
+export function PodAuthProvider({ children }: { children?: React.ReactNode }) {
+  const { selectedWallet, proxy, selectedAccount } = useWallet().substrate
   const cent = useCentrifuge()
 
-  React.useEffect(() => {
-    sessionStorage.setItem('podAuth', JSON.stringify(tokens))
-  }, [tokens])
-
-  React.useEffect(() => {
-    function handleStorage(e: StorageEvent) {
-      setTokens((prev) => {
-        try {
-          if (e.key === 'podAuth') {
-            return JSON.parse(e.newValue ?? '{}')
+  const { data: session, refetch: refetchSession } = useQuery(
+    ['session', selectedAccount?.address, proxy?.delegator],
+    async () => {
+      if (selectedAccount?.address) {
+        if (proxy) {
+          const rawItem = sessionStorage.getItem(`centrifuge-auth-${selectedAccount.address}-${proxy.delegator}`)
+          if (rawItem) {
+            return JSON.parse(rawItem)
           }
-          return prev
-        } catch {
-          return prev
+        } else {
+          const rawItem = sessionStorage.getItem(`centrifuge-auth-${selectedAccount.address}`)
+          if (rawItem) {
+            return JSON.parse(rawItem)
+          }
         }
-      })
-    }
-    window.addEventListener('storage', handleStorage)
-    return () => window.removeEventListener('storage', handleStorage)
-  }, [])
-
-  const login = React.useCallback(
-    async (address: string, onBehalfOf: string) => {
-      const proxy = proxies?.[address]?.find((p) => p.delegator === onBehalfOf)
-      const type = proxy?.types.includes('Any') ? 'any' : proxy?.types.includes('PodAuth') ? 'pod_auth' : 'node_admin'
-      // @ts-expect-error Signer type version mismatch
-      const { payload, token } = await cent.pod.signToken([address, onBehalfOf, type, selectedWallet?.signer])
-      setTokens((prev) => ({ ...prev, [`${address}-${onBehalfOf}`]: { signed: token, payload } }))
+      }
     },
-    [selectedWallet?.signer, cent, proxies]
+    { enabled: !!selectedAccount?.address }
   )
+
+  const { mutate: login, isLoading: isLoggingIn } = useMutation(async () => {
+    try {
+      if (selectedAccount?.address && selectedWallet?.signer) {
+        const { address } = selectedAccount
+
+        if (proxy) {
+          const proxyType = proxy?.types.includes('Any')
+            ? 'Any'
+            : proxy?.types.includes('PodAuth')
+            ? 'PodAuth'
+            : 'PodAdmin'
+
+          // @ts-expect-error Signer type version mismatch
+          const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer, {
+            onBehalfOf: proxy.delegator,
+            proxyType,
+          })
+
+          if (token) {
+            const isAuthorizedProxy = await cent.auth.verifyProxy(address, proxy.delegator, AUTHORIZED_POD_PROXY_TYPES)
+
+            if (isAuthorizedProxy) {
+              sessionStorage.setItem(
+                `centrifuge-auth-${selectedAccount.address}-${proxy.delegator}`,
+                JSON.stringify({ signed: token, payload })
+              )
+              refetchSession()
+            }
+          }
+        } else {
+          // @ts-expect-error Signer type version mismatch
+          const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer)
+
+          if (token) {
+            sessionStorage.setItem(
+              `centrifuge-auth-${selectedAccount.address}`,
+              JSON.stringify({ signed: token, payload })
+            )
+            refetchSession()
+          }
+        }
+      }
+    } catch {}
+  })
 
   const ctx = React.useMemo(
     () => ({
-      tokens,
+      session,
       login,
+      isLoggingIn,
     }),
-    [tokens, login]
+    [session, login, isLoggingIn]
   )
 
   return <PodAuthContext.Provider value={ctx}>{children}</PodAuthContext.Provider>
 }
 
-export function usePodAuth(podUrl?: string | null | undefined) {
+export function useAuth() {
   const ctx = React.useContext(PodAuthContext)
-  if (!ctx) throw new Error('usePodAuth must be used within PodAuthProvider')
-  const { selectedAccount, proxy } = useWeb3()
-  const address = selectedAccount?.address
-  const token = ctx.tokens[`${address}-${proxy?.delegator}`]
-  const expiry = Number(token?.payload?.expires_at ?? 0) * 1000
-  const hasValidToken = expiry > Date.now()
-  const cent = useCentrifuge()
-  const [isSigning, setIsSigning] = React.useState(false)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  const { selectedAccount } = useWallet().substrate
 
-  const {
-    data: account,
-    isLoading: isAccountLoading,
-    error,
-  } = useQuery(['podAccount', podUrl, token, hasValidToken], () => cent.pod.getSelf([podUrl!, token!.signed]), {
-    enabled: !!podUrl && !!token && hasValidToken,
-    staleTime: Infinity,
-    retry: 1,
-    refetchOnWindowFocus: false,
-  })
-
-  async function login() {
-    if (!address) return
-    setIsSigning(true)
-    try {
-      await ctx.login(address, proxy?.delegator ?? address)
-    } finally {
-      setIsSigning(false)
-    }
-  }
-
-  React.useEffect(() => {
-    setIsSigning(false)
-  }, [address, proxy?.delegator])
-
-  return {
-    tokens: ctx.tokens,
-    token: hasValidToken ? token : null,
-    login,
-    canLogIn: !!address,
-    isLoggingIn: isAccountLoading || isSigning,
-    isLoggedIn: hasValidToken && !!account,
-    loginError: hasValidToken ? error : null,
-  }
-}
-
-export function usePodDocument(podUrl: string | null | undefined, documentId: string | undefined) {
-  const { token } = usePodAuth(podUrl)
   const cent = useCentrifuge()
 
-  const query = useQuery(
-    ['podDocument', podUrl, documentId, token],
-    () => cent.pod.getCommittedDocument([podUrl!, token!.signed, documentId!]),
+  const { session } = ctx
+
+  const authToken = session?.signed ? session.signed : ''
+
+  const { refetch: refetchAuth, data } = useQuery(
+    ['authToken', authToken],
+    async () => {
+      try {
+        const { verified, payload } = await cent.auth.verify(authToken!)
+
+        const onBehalfOf = payload.on_behalf_of
+        const address = payload.address
+
+        if (verified) {
+          if (payload.on_behalf_of) {
+            const isVerifiedProxy = await cent.auth.verifyProxy(address, onBehalfOf, AUTHORIZED_POD_PROXY_TYPES)
+
+            if (isVerifiedProxy.verified) {
+              return {
+                verified: true,
+                payload,
+              }
+            }
+          } else {
+            return {
+              verified: true,
+              payload,
+            }
+          }
+        }
+
+        return {
+          verified: false,
+        }
+      } catch {
+        return {
+          verified: false,
+        }
+      }
+    },
     {
-      enabled: !!podUrl && !!documentId && !!token,
+      enabled: !!selectedAccount && !!authToken,
+      staleTime: Infinity,
+      retry: 1,
     }
   )
 
-  return query
+  return {
+    authToken,
+    isAuth: data?.verified,
+    login: ctx.login,
+    refetchAuth,
+  }
 }

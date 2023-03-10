@@ -1,0 +1,45 @@
+name: Build and upload functions code
+description: 'Build a generic function usin yarn build and archiving the results'
+
+inputs:
+  app_name:
+    description: "function folder"
+    required: true
+  artifact_name:
+    description: artifact name to upload
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+      with:
+        node-version: '16'
+        cache: yarn
+
+    - name: Install Dependencies
+      working-directory: ${{ inputs.app_name }}
+      shell: sh
+      # env:
+      #   NODE_ENV: production
+      run: yarn install --immutable
+
+    - name: Lint
+      working-directory: ${{ inputs.app_name }}
+      shell: sh
+      run: yarn lint
+
+    - name: Build ${{ inputs.app_name }}
+      working-directory: ${{ inputs.app_name }}
+      shell: sh
+      # env:
+      #   NODE_ENV: production      
+      # run: ${{ inputs.build_cmd }}
+      run: yarn build
+
+    - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
+      with: 
+        name: ${{ inputs.artifact_name || inputs.app_name }}
+        path: ./${{ inputs.app_name }}/dist
+        if-no-files-found: error  

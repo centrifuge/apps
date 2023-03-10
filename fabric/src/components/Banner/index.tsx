@@ -1,5 +1,5 @@
 import { useModal, useOverlay } from '@react-aria/overlays'
-import React from 'react'
+import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { IconX } from '../../icon'
 import { Button } from '../Button'
@@ -11,6 +11,7 @@ type BannerProps = {
   title: string | React.ReactElement
   isOpen?: boolean
   onClose?: () => void
+  children?: React.ReactNode
 }
 
 export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => {
@@ -20,7 +21,15 @@ export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => 
   const { modalProps } = useModal()
 
   return props.isOpen ? (
-    <Shelf position="fixed" zIndex={theme.zIndices.overlay} bottom="24px" left="0" right="0" justifyContent="center">
+    <Shelf
+      position="fixed"
+      zIndex={theme.zIndices.overlay}
+      bottom="24px"
+      left="0"
+      right="0"
+      justifyContent="center"
+      px={2}
+    >
       <Stack
         {...overlayProps}
         {...modalProps}

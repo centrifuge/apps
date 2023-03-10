@@ -1,14 +1,14 @@
-import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { CurrencyMetadata, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
+import { Eththumbnail } from './EthThumbnail'
 
 export type TokenTableData = {
-  poolMetadata?: string
+  poolMetadata?: string | Partial<PoolMetadata>
   yield: number | null
   protection: number
   capacity: number
@@ -17,6 +17,7 @@ export type TokenTableData = {
   id: string
   seniority: number
   poolId: string
+  poolCurrency: string
 }
 
 type Props = {
@@ -54,7 +55,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Value locked" />,
-    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.currency.symbol),
+    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.poolCurrency),
     flex: '4',
     sortKey: 'valueLocked',
   },
@@ -62,7 +63,7 @@ const columns: Column[] = [
     header: <SortableTableHeader label="Capacity" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2" fontWeight={600} color={token.capacity > 0 ? 'statusOk' : 'statusWarning'}>
-        {formatBalanceAbbreviated(token.capacity, token.currency.symbol)}
+        {formatBalanceAbbreviated(token.capacity, token.poolCurrency)}
       </Text>
     ),
     flex: '4',
@@ -94,25 +95,20 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 }
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
   return (
-    <Shelf gap="2" overflow="hidden">
-      <Thumbnail label={token.currency.symbol} size="small" />
-      <TextWithPlaceholder
-        isLoading={isLoading}
-        variant="body2"
-        color="textPrimary"
-        fontWeight={600}
-        textOverflow="ellipsis"
-      >
-        {metadata?.pool?.name} {token.currency.name}
-      </TextWithPlaceholder>
+    <Shelf gap="2">
+      <Eththumbnail show={token.poolId.startsWith('0x')} size="small">
+        <Thumbnail label={token.currency.symbol} size="small" />
+      </Eththumbnail>
+      <Text variant="body2" color="textPrimary" fontWeight={600} textOverflow="ellipsis">
+        {token.currency.name}
+      </Text>
     </Shelf>
   )
 }
 
 const AssetClass: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
+  const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
     <TextWithPlaceholder isLoading={isLoading} variant="body2">
       {metadata?.pool?.asset.class}

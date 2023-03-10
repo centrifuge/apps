@@ -1,4 +1,5 @@
 import { CurrencyBalance, findBalance, Loan as LoanType, LoanInfo } from '@centrifuge/centrifuge-js'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -7,8 +8,6 @@ import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { useBalances } from '../../utils/useBalances'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { usePool } from '../../utils/usePools'
@@ -26,7 +25,7 @@ const SEC_PER_DAY = 24 * 60 * 60
 
 export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
-  const address = useAddress()
+  const address = useAddress('substrate')
   const balances = useBalances(address)
   const balance = balances ? findBalance(balances.currencies, pool.currency.key)!.balance.toDecimal() : Dec(0)
   const { current: availableFinancing, initial: initialCeiling } = useAvailableFinancing(loan.poolId, loan.id)

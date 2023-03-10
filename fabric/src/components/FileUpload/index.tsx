@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import * as React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import { IconFileText } from '../..'
 import IconAlertCircle from '../../icon/IconAlertCircle'
@@ -106,7 +106,7 @@ const Spinner = styled(IconSpinner)`
   animation: ${rotate} 600ms linear infinite;
 `
 
-type FileUploadProps = {
+export type FileUploadProps = {
   file?: File | string | null
   onFileChange?: (file: File | null) => void
   onClear?: () => void
@@ -131,10 +131,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   placeholder,
   label,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useControlledState<File | string | null>(null, fileProp, onFileChange)
-  const [error, setError] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+  const [dragOver, setDragOver] = React.useState(false)
 
   const errorMessage = errorMessageProp || error
 

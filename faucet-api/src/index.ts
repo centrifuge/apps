@@ -8,7 +8,6 @@ import { Request, Response } from 'express'
 dotenv.config()
 
 const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
-const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'https://demo.app.cntrfg.com'
 
 const ONE_AUSD = new BN(10).pow(new BN(12))
 const ONE_DEVEL = new BN(10).pow(new BN(18))
@@ -19,10 +18,18 @@ const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
 
 const MAX_API_REQUESTS_PER_WALLET = 100
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
-const WALLET_ADDRESS_LENGTH = 48
 
-const firestore = new Firestore()
+const firestore = new Firestore({
+  projectId: 'peak-vista-185616',
+})
 const wsProvider = new WsProvider(URL)
+
+const centrifugeDomains = [
+  /^(https:\/\/.*cntrfg\.com)/,
+  /^(https:\/\/.*centrifuge\.io)/,
+  /^(https:\/\/.*altair\.network)/,
+  /^(https:\/\/.*k-f\.dev)/,
+]
 
 function hexToBN(value: string | number) {
   if (typeof value === 'number') return new BN(value)
@@ -30,10 +37,19 @@ function hexToBN(value: string | number) {
 }
 
 async function faucet(req: Request, res: Response) {
-  res.set('Access-Control-Allow-Origin', CORS_ORIGIN)
+  console.log('faucet running')
+
+  const origin = req.get('origin') || ''
+  const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
+  const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
+  if (isCentrifugeDomain || isLocalhost) {
+    res.set('Access-Control-Allow-Origin', origin)
+    res.set('Access-Control-Allow-Methods', ['GET'])
+  } else {
+    return res.status(405).send('Not allowed')
+  }
+
   try {
-    console.log('faucet running')
-    // even if cors fails the request completes
     if (req.method === 'OPTIONS') {
       res.set('Access-Control-Allow-Methods', 'GET')
       res.set('Access-Control-Allow-Headers', 'Content-Type')
@@ -42,7 +58,7 @@ async function faucet(req: Request, res: Response) {
     }
     const { address } = req.query
 
-    if (!address || (address as string).length !== WALLET_ADDRESS_LENGTH) {
+    if (!address) {
       return res.status(400).send('Invalid address param')
     }
 
@@ -94,7 +110,9 @@ async function faucet(req: Request, res: Response) {
 
     const keyring = new Keyring({ type: 'sr25519' })
     console.log('signing and sending tx')
-    const hash = await txBatch.signAndSend(keyring.addFromUri('//Alice'))
+    const hash = URL.includes('demo')
+      ? await txBatch.signAndSend(keyring.addFromUri(process.env.SEED_HEX as string))
+      : await txBatch.signAndSend(keyring.addFromUri('//Alice'))
     console.log('signed and sent tx')
     api.disconnect()
     return res.status(200).json({ hash })
@@ -104,5 +122,4 @@ async function faucet(req: Request, res: Response) {
   }
 }
 
-exports.faucetDev = faucet
-exports.faucetDemo = faucet
+exports.faucet = faucet

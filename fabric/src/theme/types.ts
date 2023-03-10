@@ -39,7 +39,11 @@ type ColorValue = string
 
 type ThemeColors = {
   [k in ColorName]: ColorValue
-} & { accentScale: Record<number, string> }
+} & {
+  accentScale: Record<number, string>
+  yellowScale: Record<number, string>
+  blueScale: Record<number, string>
+}
 
 // Lengths
 
@@ -50,7 +54,7 @@ export type ThemeBreakpoints = BreakpointValue[] & {
   [k in BreakpointName]: BreakpointValue
 }
 
-type SizeName = 'dialog' | 'container' | 'iconSmall' | 'iconMedium' | 'iconLarge'
+type SizeName = 'dialog' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge'
 type SizeValue = string | number
 
 type ThemeSizes = {

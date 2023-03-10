@@ -1,5 +1,5 @@
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { useParams } from 'react-router'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
@@ -24,45 +24,43 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
       trancheStates?.map((day) => {
         return {
           day: new Date(day.timestamp),
-          tokenPrice: day.price.toDecimal().toNumber(),
+          tokenPrice: day.tokenPrice.toDecimal().toNumber(),
         }
       }) || []
     )
   }, [trancheStates])
 
-  if (trancheStates && trancheStates?.length < 1) return <Spinner>Loading</Spinner>
+  if (!trancheStates || trancheStates?.length === 1) return <Spinner />
 
-  return (
+  return data && data.length > 0 ? (
     <Stack>
       <CustomLegend data={data[data.length - 1]} poolId={poolId} />
       <Shelf gap="4" width="100%" color="textSecondary">
-        {data?.length ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={data} margin={{ left: -30, top: 2 }} reverseStackOrder>
-              <XAxis
-                dataKey="day"
-                tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
-                tickLine={false}
-                interval={data.length < 18 || data.length > 30 ? 0 : 1}
-              />
-              <YAxis
-                tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
-                tickFormatter={(tick: number) => {
-                  return tick.toFixed(2)
-                }}
-                domain={['dataMin - 0.2', 'dataMax + 0.2']}
-              />
-              <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} precision={4} />} />
-              <Line dot={false} dataKey="tokenPrice" stroke={theme.colors.accentPrimary} name="Pool value" />
-            </ComposedChart>
-          </ResponsiveContainer>
-        ) : (
-          <Text variant="label1">No data yet</Text>
-        )}
+        <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+          <ComposedChart data={data} margin={{ left: -30, top: 2 }} reverseStackOrder>
+            <XAxis
+              dataKey="day"
+              tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
+              tickLine={false}
+              interval={data.length < 18 || data.length > 30 ? 0 : 1}
+            />
+            <YAxis
+              tickLine={false}
+              style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
+              tickFormatter={(tick: number) => {
+                return tick.toFixed(2)
+              }}
+              domain={['dataMin - 0.2', 'dataMax + 0.2']}
+            />
+            <CartesianGrid stroke={theme.colors.borderSecondary} />
+            <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} precision={4} />} />
+            <Line dot={false} dataKey="tokenPrice" stroke={theme.colors.accentPrimary} name="Pool value" />
+          </ComposedChart>
+        </ResponsiveContainer>
       </Shelf>
     </Stack>
+  ) : (
+    <Text variant="label1">Data unavailable</Text>
   )
 }
 

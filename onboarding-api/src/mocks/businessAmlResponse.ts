@@ -1,0 +1,47 @@
+export const businessAmlMockResponse = {
+  event: 'verification.accepted',
+  verification_data: {
+    aml_for_business: {
+      business_incorporation_date: '2021-03-11',
+      business_name: 'Test corp AG',
+    },
+  },
+  verification_result: {
+    aml_for_businesses: 1,
+  },
+  country: null,
+  email: null,
+  reference: 'BUSINESS_AML_REQUEST_0.46017966963015966',
+  info: {
+    agent: {
+      is_phone: false,
+      browser_name: '',
+      device_name: '0',
+      platform_name: '',
+      is_desktop: false,
+      useragent: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
+    },
+    geolocation: {
+      currency: 'USD',
+      continent_name: 'North America',
+      longitude: '',
+      ip: '',
+      country_name: '',
+      capital: '',
+      country_code: 'US',
+      postal_code: '',
+      metro_code: '',
+      continent_code: '',
+      region_name: '',
+      ip_type: '',
+      asn: '',
+      latitude: '',
+      host: '',
+      city: '',
+      isp: '',
+      region_code: '',
+      timezone: 'America/New_York',
+      rdns: '',
+    },
+  },
+}

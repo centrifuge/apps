@@ -1,0 +1,73 @@
+import * as jwt from 'jsonwebtoken'
+import { sendEmail, templateIds } from '.'
+import { onboardingBucket } from '../database'
+import { getPoolById } from '../utils/centrifuge'
+import { HttpError } from '../utils/httpError'
+
+export type UpdateInvestorStatusPayload = {
+  poolId: string
+  walletAddress: string
+  trancheId: string
+}
+
+export const sendDocumentsMessage = async (
+  walletAddress: string,
+  poolId: string,
+  trancheId: string,
+  signedAgreement: any
+) => {
+  const { metadata } = await getPoolById(poolId)
+  const payload: UpdateInvestorStatusPayload = { walletAddress, poolId, trancheId }
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: '7d',
+  })
+
+  const taxInfoFile = await onboardingBucket.file(`tax-information/${walletAddress}.pdf`)
+  const [taxInfoExists] = await taxInfoFile.exists()
+
+  if (!taxInfoExists) {
+    throw new HttpError(400, 'Tax info not found')
+  }
+  const taxInfoPDF = await taxInfoFile.download()
+
+  const message = {
+    personalizations: [
+      {
+        to: [
+          {
+            email: metadata?.pool?.issuer?.email,
+          },
+        ],
+        dynamic_template_data: {
+          rejectLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
+            token
+          )}&status=rejected`,
+          approveLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
+            token
+          )}&status=approved`,
+          disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
+        },
+      },
+    ],
+    template_id: templateIds.updateInvestorStatus,
+    from: {
+      name: 'Centrifuge',
+      email: `noreply@centrifuge.io`,
+    },
+    attachments: [
+      {
+        content: taxInfoPDF[0].toString('base64'),
+        filename: 'tax-info.pdf',
+        type: 'application/pdf',
+        disposition: 'attachment',
+      },
+      {
+        content: Buffer.from(signedAgreement).toString('base64'),
+        filename: 'pool-agreement.pdf',
+        type: 'application/pdf',
+        disposition: 'attachment',
+      },
+    ],
+  }
+  await sendEmail(message)
+}

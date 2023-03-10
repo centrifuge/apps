@@ -4,7 +4,9 @@ import { mapResponsive } from '../../utils/styled'
 import { Box, BoxProps } from '../Box'
 import { Grid, GridProps } from '../Grid'
 
-export const LayoutGrid: React.FC<Omit<GridProps, 'columns' | 'equalColumns' | 'gap'>> = ({ children, ...rest }) => {
+export type LayoutGridProps = Omit<GridProps, 'columns' | 'equalColumns' | 'gap'>
+
+export const LayoutGrid: React.FC<LayoutGridProps> = ({ children, ...rest }) => {
   return (
     <Grid columns={[4, 4, 8, 12]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']} {...rest}>
       {children}

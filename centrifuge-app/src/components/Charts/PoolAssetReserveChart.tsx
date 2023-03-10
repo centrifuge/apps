@@ -1,8 +1,9 @@
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { useParams } from 'react-router'
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
+import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { Tooltips } from '../Tooltips'
@@ -20,18 +21,19 @@ const PoolAssetReserveChart: React.VFC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolStates = useDailyPoolStates(poolId)
   const pool = usePool(poolId)
+  const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
 
   const data: ChartData[] = React.useMemo(() => {
     return (
       poolStates?.map((day) => {
-        const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
+        const assetValue = day.poolState.portfolioValuation.toDecimal().toNumber()
         const poolValue = day.poolValue.toDecimal().toNumber()
         return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
       }) || []
     )
   }, [poolStates])
 
-  if (poolStates && poolStates?.length < 1) return <Text variant="body2">No data available</Text>
+  if (poolStates && poolStates?.length < 1 && poolAge > 0) return <Text variant="body2">No data available</Text>
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayPoolValue = pool?.value.toDecimal().toNumber() || 0

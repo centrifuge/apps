@@ -1,4 +1,5 @@
 import { isSameAddress, PoolRoles } from '@centrifuge/centrifuge-js'
+import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Checkbox, Grid, IconMinusCircle, SearchInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import { encodeAddress } from '@polkadot/util-crypto'
@@ -6,13 +7,10 @@ import { Field, FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { Tooltips } from '../../../components/Tooltips'
-import { useWeb3 } from '../../../components/Web3Provider'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePoolPermissions } from '../../../utils/usePools'
 import { truncate } from '../../../utils/web3'
 
@@ -32,7 +30,7 @@ export const Admins: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolPermissions = usePoolPermissions(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet().substrate
   const me = selectedAccount?.address && encodeAddress(selectedAccount?.address)
 
   const initialValues: PoolMetadataInput = React.useMemo(

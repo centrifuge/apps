@@ -4,7 +4,7 @@ import { OverlayTriggerState, useOverlayTriggerState } from '@react-stately/over
 import * as React from 'react'
 import { Positioner } from '../Positioner'
 
-type Props = {
+type PopoverProps = {
   renderTrigger: (
     props: React.HTMLAttributes<HTMLButtonElement>,
     ref: React.RefObject<HTMLDivElement>,
@@ -17,7 +17,7 @@ type Props = {
   ) => React.ReactElement
 }
 
-export const Popover: React.FC<Props> = ({ renderTrigger, renderContent }) => {
+export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent }) => {
   const state = useOverlayTriggerState({})
   const overlayRef = React.useRef<HTMLDivElement>(null)
   const triggerRef = React.useRef<HTMLDivElement>(null)
@@ -25,11 +25,11 @@ export const Popover: React.FC<Props> = ({ renderTrigger, renderContent }) => {
   // Get props for the trigger and overlay. This also handles
   // hiding the overlay when a parent element of the trigger scrolls
   // (which invalidates the popover positioning).
-  const { triggerProps: triggerAriaProps, overlayProps: overlayAriaProps } = useOverlayTrigger(
-    { type: 'dialog' },
-    state,
-    triggerRef
-  )
+  const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    triggerProps: { onPress, ...triggerAriaProps },
+    overlayProps: overlayAriaProps,
+  } = useOverlayTrigger({ type: 'dialog' }, state, triggerRef)
 
   const { overlayProps: overlayBehaviorProps } = useOverlay(
     {
@@ -42,7 +42,7 @@ export const Popover: React.FC<Props> = ({ renderTrigger, renderContent }) => {
 
   return (
     <>
-      {renderTrigger({ ...triggerAriaProps, onClick: () => state.open() }, triggerRef, state)}
+      {renderTrigger({ ...triggerAriaProps, onClick: () => state.toggle() }, triggerRef, state)}
       {state.isOpen && (
         <Positioner
           isShown

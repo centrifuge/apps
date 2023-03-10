@@ -1,8 +1,18 @@
-import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import {
+  Box,
+  Button,
+  IconArrowRight,
+  IconNft,
+  IconPlus,
+  Shelf,
+  Stack,
+  Text,
+  TextWithPlaceholder,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { RemoveListingDialog } from '../components/Dialogs/RemoveListingDialog'
 import { SellDialog } from '../components/Dialogs/SellDialog'
 import { TransferDialog } from '../components/Dialogs/TransferDialog'
@@ -12,7 +22,6 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
-import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
@@ -31,7 +40,7 @@ export const NFTPage: React.FC = () => {
 
 const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const nft = useNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)

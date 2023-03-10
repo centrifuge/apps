@@ -44,7 +44,7 @@ export function useCentrifugeQuery<T = any>(
           resetOnSuccess: true,
         }),
         catchError((error) => {
-          console.error('useCentrifugeQuery: query threw an error: ', error)
+          console.error(`useCentrifugeQuery: query threw an error for key ${key}: `, error)
           if (throwErrors) throw error
           return of(null)
         }),
@@ -81,9 +81,9 @@ export function useCentrifugeQuery<T = any>(
     const sub = $source.subscribe({
       next: (data) => {
         if (data) {
-          const cached = queryClient.getQueryData<T>(['queryData', ...key, true])
+          const cached = queryClient.getQueryData<T>(['queryData', centKey, ...key, true])
           if (cached !== data) {
-            queryClient.setQueryData<T>(['queryData', ...key, true], data)
+            queryClient.setQueryData<T>(['queryData', centKey, ...key, true], data)
           }
         }
       },

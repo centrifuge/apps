@@ -1,7 +1,7 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, of } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 
 export function useIdentity(address?: string) {
   const centrifuge = useCentrifuge()

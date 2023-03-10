@@ -7,6 +7,7 @@ type Props = {
     label: React.ReactNode
     value: React.ReactNode
   }[]
+  children?: React.ReactNode
 }
 
 export const PageSummary: React.FC<Props> = ({ data, children }) => {
@@ -15,7 +16,7 @@ export const PageSummary: React.FC<Props> = ({ data, children }) => {
     <Shelf
       bg={theme.colors.backgroundSecondary}
       gap="6"
-      pl="6"
+      pl={[2, 6]}
       py="3"
       style={{
         boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,

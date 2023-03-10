@@ -1,16 +1,14 @@
 import { getRandomUint } from '@centrifuge/centrifuge-js'
-import { Box, Button, Shelf, Text } from '@centrifuge/fabric'
+import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { Box, Button, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { combineLatest, EMPTY, expand, filter, firstValueFrom, map, take } from 'rxjs'
 import { useTheme } from 'styled-components'
-import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { useAddress } from '../../utils/useAddress'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useIsPoolAdmin, usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
@@ -26,7 +24,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const isPoolAdmin = useIsPoolAdmin(pid)
   const { execute: executeInitialise, isLoading: isInitialiseLoading } = useCentrifugeTransaction(

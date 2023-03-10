@@ -1,7 +1,9 @@
 import { Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { LiquiditySection } from '../../../components/LiquiditySection'
+import { useTheme } from 'styled-components'
+import { LiquidityEpochSection } from '../../../components/LiquidityEpochSection'
+import { LiquidityTransactionsSection } from '../../../components/LiquidityTransactionsSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageSection } from '../../../components/PageSection'
@@ -25,7 +27,7 @@ export const PoolDetailLiquidityTab: React.FC = () => {
       sidebar={
         <Stack gap={2}>
           {isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}
-          <PoolDetailSideBar selectedToken={null} setSelectedToken={() => {}} />
+          <PoolDetailSideBar />
         </Stack>
       }
     >
@@ -40,6 +42,9 @@ export const PoolDetailLiquidityTab: React.FC = () => {
 export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
+  const { colors } = useTheme()
+
+  if (!pool) return null
 
   const pageSummaryData = [
     {
@@ -52,19 +57,40 @@ export const PoolDetailLiquidity: React.FC = () => {
     },
   ]
 
-  if (!pool) return null
-
   return (
     <>
       <PageSummary data={pageSummaryData}></PageSummary>
-      <PageSection title="Reserve vs. cash drag">
-        <Stack height="290px">
-          <React.Suspense fallback={<Spinner />}>
-            <ReserveCashDragChart />
-          </React.Suspense>
-        </Stack>
-      </PageSection>
-      <LiquiditySection pool={pool} />
+      {!('addresses' in pool) && (
+        <>
+          <PageSection title="Reserve vs. cash drag">
+            <Stack height="290px">
+              <React.Suspense fallback={<Spinner />}>
+                <ReserveCashDragChart />
+              </React.Suspense>
+            </Stack>
+          </PageSection>
+
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Repayments & originations"
+            dataKeys={['sumBorrowedAmount', 'sumRepaidAmount']}
+            dataNames={['Repayment', 'Origination']}
+            dataColors={[colors.blueScale[200], colors.blueScale[400]]}
+            tooltips={['repayment', 'origination']}
+          />
+
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Investments & redemptions"
+            dataKeys={['sumInvestedAmount', 'sumRedeemedAmount']}
+            dataNames={['Investment', 'Redemption']}
+            dataColors={[colors.statusOk, colors.statusCritical]}
+            tooltips={['investment', 'redemption']}
+          />
+
+          <LiquidityEpochSection pool={pool} />
+        </>
+      )}
     </>
   )
 }

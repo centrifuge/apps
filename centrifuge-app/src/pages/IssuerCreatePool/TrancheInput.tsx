@@ -1,7 +1,7 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
-import React from 'react'
+import * as React from 'react'
 import { createEmptyTranche } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
@@ -97,14 +97,24 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                 />
                 {index === juniorTrancheIndex ? (
                   <>
-                    <TextInput label="Min. protection" value="-" rightElement="%" disabled />
-                    <TextInput label="Interest rate" value="-" rightElement="%" disabled />
+                    <TextInput
+                      label={<Tooltips type="noTranchProtection" variant="secondary" />}
+                      value="-"
+                      rightElement="%"
+                      disabled
+                    />
+                    <TextInput
+                      label={<Tooltips type="variableTranchInterest" variant="secondary" />}
+                      value="-"
+                      rightElement="%"
+                      disabled
+                    />
                   </>
                 ) : (
                   <>
                     <FieldWithErrorMessage
                       as={NumberInput}
-                      label="Min. protection"
+                      label={<Tooltips type="tranchProtection" variant="secondary" />}
                       placeholder="0.00"
                       rightElement="%"
                       name={`tranches.${index}.minRiskBuffer`}
@@ -112,7 +122,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                     />
                     <FieldWithErrorMessage
                       as={NumberInput}
-                      label="Fixed interest"
+                      label={<Tooltips type="fixedTranchInterest" variant="secondary" />}
                       placeholder="0.00"
                       rightElement="%"
                       name={`tranches.${index}.interestRate`}

@@ -1,10 +1,10 @@
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { Dec } from '../utils/Decimal'
 import { useAddress } from '../utils/useAddress'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
 
@@ -18,7 +18,7 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const balance = useBalance()
   const nft = useNFT(collectionId, nftId)
 

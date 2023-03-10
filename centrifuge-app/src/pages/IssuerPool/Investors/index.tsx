@@ -1,4 +1,5 @@
-import { findBalance, Tranche } from '@centrifuge/centrifuge-js'
+import { findBalance, Pool, Token } from '@centrifuge/centrifuge-js'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Button,
   Grid,
@@ -11,6 +12,7 @@ import {
   Shelf,
   Stack,
   Text,
+  TextWithPlaceholder,
 } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
@@ -19,12 +21,9 @@ import { DataTable } from '../../../components/DataTable'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../../components/TextWithPlaceholder'
 import { useAddress } from '../../../utils/useAddress'
-import { useBalances } from '../../../utils/useBalances'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePermissions } from '../../../utils/usePermissions'
-import { useOrder, usePool, usePoolMetadata } from '../../../utils/usePools'
+import { useOrder, usePool } from '../../../utils/usePools'
 import { IssuerPoolHeader } from '../Header'
 
 export const IssuerPoolInvestorsPage: React.FC = () => {
@@ -40,7 +39,7 @@ export const IssuerPoolInvestorsPage: React.FC = () => {
 
 const IssuerPoolInvestors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const canEditInvestors = address && permissions?.pools[poolId]?.roles.includes('MemberListAdmin')
 
@@ -66,17 +65,16 @@ export const Investors: React.FC = () => {
     .filter(([, till]) => new Date(till).getTime() - Date.now() > SevenDaysMs)
     .map(([tid]) => tid)
 
-  const pool = usePool(poolId)
-  const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
+  const pool = usePool(poolId) as Pool
 
   function toggleAllowed(trancheId: string) {
     if (!validAddress) return
     const isAllowed = allowedTranches.includes(trancheId)
-    const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
+    const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
     const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
 
     if (isAllowed) {
-      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]]])
+      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]])
     } else {
       execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []])
     }
@@ -84,7 +82,10 @@ export const Investors: React.FC = () => {
   }
 
   return (
-    <PageSection title="Investor status" subtitle="Display investor status, and add or remove from Investor whitelist.">
+    <PageSection
+      title="Investor status"
+      subtitle="Display investor status, and add or remove from investor memberlist."
+    >
       <Stack gap={2}>
         <Grid columns={2} equalColumns gap={4} alignItems="center">
           <SearchInput
@@ -106,14 +107,14 @@ export const Investors: React.FC = () => {
               <Text variant="label2" color="statusOk">
                 <Shelf gap={1}>
                   <IconCheckCircle size="20px" />
-                  <span>Address whitelisted</span>
+                  <span>Address added to memberlist</span>
                 </Shelf>
               </Text>
             ) : permissions && !allowedTranches.length ? (
               <Text variant="label2" color="statusWarning">
                 <Shelf gap={1}>
                   <IconAlertCircle size="20px" />
-                  <span>Address not whitelisted</span>
+                  <span>Address not in memberlist</span>
                 </Shelf>
               </Text>
             ) : null)
@@ -126,23 +127,23 @@ export const Investors: React.FC = () => {
               {
                 align: 'left',
                 header: 'Token',
-                cell: (row: Tranche) => (
-                  <TextWithPlaceholder isLoading={metadataIsLoading} textOverflow="ellipsis" variant="body2">
-                    {metadata?.tranches?.[row.id]?.name}
-                  </TextWithPlaceholder>
+                cell: (row: Token) => (
+                  <Text textOverflow="ellipsis" variant="body2">
+                    {row.currency.name}
+                  </Text>
                 ),
                 flex: '1',
               },
               {
                 align: 'left',
                 header: 'Investment',
-                cell: (row: Tranche) => <InvestedCell address={validAddress} poolId={poolId} trancheId={row.id} />,
+                cell: (row: Token) => <InvestedCell address={validAddress} poolId={poolId} trancheId={row.id} />,
                 flex: '1',
               },
               {
                 header: '',
                 align: 'right',
-                cell: (row: Tranche) => {
+                cell: (row: Token) => {
                   const isAllowed = allowedTranches.includes(row.id)
 
                   return (
@@ -153,7 +154,7 @@ export const Investors: React.FC = () => {
                       loading={isTransactionPending && pendingTrancheId === row.id}
                       small
                     >
-                      {isAllowed ? 'Remove from whitelist' : 'Add to whitelist'}
+                      {isAllowed ? 'Remove from memberlist' : 'Add to memberlist'}
                     </Button>
                   )
                 },

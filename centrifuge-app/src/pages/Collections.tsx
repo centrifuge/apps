@@ -1,6 +1,6 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Button, IconPlus, LayoutGrid, LayoutGridItem, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/Dialogs/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
@@ -27,7 +27,7 @@ const COUNT_PER_PAGE = 12
 
 const Collections: React.FC = () => {
   const [createOpen, setCreateOpen] = React.useState(false)
-  const address = useAddress()
+  const address = useAddress('substrate')
   const collections = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const accountNfts = useAccountNfts(address, false)

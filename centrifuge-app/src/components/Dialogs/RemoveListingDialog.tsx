@@ -1,11 +1,9 @@
+import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useBalance } from '../../utils/useBalance'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useNFT } from '../../utils/useNFTs'
 import { ButtonGroup } from '../ButtonGroup'
-import { useCentrifuge } from '../CentrifugeProvider'
-import { useWeb3 } from '../Web3Provider'
 
 type Props = {
   open: boolean
@@ -17,12 +15,12 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const { selectedAccount } = useWeb3()
+  const { substrate } = useWallet()
   const balance = useBalance()
   const centrifuge = useCentrifuge()
   const nft = useNFT(collectionId, nftId)
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!substrate.selectedAccount?.address
 
   const {
     execute: doTransaction,

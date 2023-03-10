@@ -4,7 +4,7 @@ import IconNftThumbnail from '../../icon/IconNftThumbnail'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-type ThumbnailProps = {
+export type ThumbnailProps = {
   label: string
   type?: 'token' | 'pool' | 'asset' | 'nft'
   size?: 'small' | 'large'
@@ -18,7 +18,7 @@ export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
         <IconNftThumbnail
           color="backgroundThumbnail"
           size={props.size === 'large' ? 'iconLarge' : 'iconMedium'}
-          // @ts-expect-error
+          // @ts-expect-error doesn't recognize CSS custom properties
           style={{ '--secondary': theme.colors.textInverted }}
         />
       ) : (

@@ -1,10 +1,10 @@
 import { AccountTokenBalance } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Thumbnail } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../utils/formatting'
+import { find } from '../utils/helpers'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   investments: AccountTokenBalance[]
@@ -50,15 +50,13 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
 
 const Token: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
-  const { data: metadata, isLoading } = usePoolMetadata(pool)
-  const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
+  const tranche = find(pool?.tranches, (t) => t.id === investment.trancheId)
   return (
     <Shelf gap="2">
-      <Thumbnail label={trancheMeta?.symbol || ''} size="small" />
-      <TextWithPlaceholder isLoading={isLoading} variant="body2" color="textPrimary" fontWeight={600}>
-        {metadata?.pool?.name} {trancheMeta?.name}
-      </TextWithPlaceholder>
+      <Thumbnail label={tranche?.currency?.symbol || ''} size="small" />
+      <Text variant="body2" color="textPrimary" fontWeight={600}>
+        {tranche?.currency?.name}
+      </Text>
     </Shelf>
   )
 }
@@ -71,16 +69,14 @@ const AssetClass: React.VFC<{ investment: AccountTokenBalance }> = ({ investment
 
 const TokenBalance: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
-  const { data: metadata } = usePoolMetadata(pool)
-  const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
+  const tranche = find(pool?.tranches, (t) => t.id === investment.trancheId)
 
-  return <>{formatBalance(investment.balance.toFloat(), trancheMeta?.symbol)}</>
+  return <>{formatBalance(investment.balance.toFloat(), tranche?.currency?.symbol)}</>
 }
 
 const TokenValue: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
-  const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
+  const tranche = pool?.tranches && find(pool?.tranches, (t) => t.id === investment.trancheId)
 
   return (
     <>{formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice?.toFloat() ?? 1), pool?.currency.symbol)}</>

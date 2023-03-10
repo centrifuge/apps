@@ -9,7 +9,7 @@ type GroupedProps = {
   lastGroupIndex?: number
 }
 
-type Props<T> = {
+export type DataTableProps<T = any> = {
   data: Array<T>
   columns: Column[]
   keyField?: string
@@ -17,6 +17,7 @@ type Props<T> = {
   defaultSortKey?: string
   defaultSortOrder?: OrderBy
   rounded?: boolean
+  hoverable?: boolean
   summary?: T
 } & GroupedProps
 
@@ -28,6 +29,7 @@ export type Column = {
   align?: string
   flex?: string
   sortKey?: string
+  width?: string
 }
 const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
@@ -44,11 +46,12 @@ export const DataTable = <T extends Record<string, any>>({
   onRowClicked,
   defaultSortKey,
   rounded = true,
+  hoverable = false,
   summary,
   groupIndex,
   lastGroupIndex,
   defaultSortOrder = 'desc',
-}: Props<T>) => {
+}: DataTableProps<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )
@@ -96,13 +99,19 @@ export const DataTable = <T extends Record<string, any>>({
         {sortedData?.map((row, i) => (
           <Row
             rounded={rounded}
+            hoverable={hoverable}
             as={onRowClicked ? Link : 'div'}
             to={onRowClicked && (() => onRowClicked(row))}
             key={keyField ? row[keyField] : i}
             tabIndex={onRowClicked ? 0 : undefined}
           >
             {columns.map((col, index) => (
-              <DataCol variant="body2" style={{ flex: col.flex }} align={col?.align} key={index}>
+              <DataCol
+                variant="body2"
+                style={{ flex: col.width !== undefined ? 'auto' : col.flex, width: col.width }}
+                align={col?.align}
+                key={index}
+              >
                 {col.cell(row, i)}
               </DataCol>
             ))}
@@ -124,7 +133,7 @@ export const DataTable = <T extends Record<string, any>>({
 }
 
 const Row = styled(Shelf)<any>`
-  ${({ rounded, as: comp }) =>
+  ${({ rounded, hoverable, as: comp }) =>
     css({
       height: '48px',
       width: '100%',
@@ -140,6 +149,10 @@ const Row = styled(Shelf)<any>`
           ? {
               backgroundColor: 'secondarySelectedBackground',
               cursor: 'pointer',
+            }
+          : hoverable
+          ? {
+              backgroundColor: 'secondarySelectedBackground',
             }
           : undefined,
       '&:focus-visible': {

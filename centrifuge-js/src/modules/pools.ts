@@ -7,8 +7,14 @@ import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxj
 import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
-import { SubqueryPoolSnapshot, SubqueryTrancheSnapshot } from '../types/subquery'
-import { getRandomUint, isSameAddress } from '../utils'
+import {
+  InvestorTransactionType,
+  SubqueryEpoch,
+  SubqueryInvestorTransaction,
+  SubqueryPoolSnapshot,
+  SubqueryTrancheSnapshot,
+} from '../types/subquery'
+import { getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
 
@@ -285,13 +291,14 @@ type WrittenOff = {
 type WriteOffStatus = null | WrittenOff | WrittenOfByAdmin
 
 type InterestAccrual = {
+  interestRatePerSec: string
   accumulatedRate: string
   referenceCount: number
 }
 
 // type from chain
 type LoanData = {
-  status: LoanStatus
+  status: { [key in LoanStatus]: any }
   collateral: [collectionId: string, nftId: string]
 }
 
@@ -327,6 +334,7 @@ export type DefaultLoan = {
   status: 'Created'
   id: string
   poolId: string
+  closedAt: null
   asset: {
     collectionId: string
     nftId: string
@@ -344,6 +352,7 @@ export type ActiveLoan = {
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
   lastUpdated: string
+  closedAt: null
   originationDate: string
   loanInfo: LoanInfo
   adminWrittenOff?: boolean
@@ -365,6 +374,7 @@ export type ClosedLoan = {
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
   lastUpdated: string
+  closedAt: string
   originationDate?: string | null
   loanInfo: LoanInfo
   writeOffStatus: WriteOffStatus
@@ -393,14 +403,24 @@ export type TrancheInput = {
   minRiskBuffer?: BN
 }
 
+export type DailyTrancheState = {
+  id: string
+  price: null | Price
+  fulfilledInvestOrders: CurrencyBalance
+  fulfilledRedeemOrders: CurrencyBalance
+  outstandingInvestOrders: CurrencyBalance
+  outstandingRedeemOrders: CurrencyBalance
+}
+
 export type DailyPoolState = {
   poolState: {
-    netAssetValue: CurrencyBalance
+    portfolioValuation: CurrencyBalance
     totalReserve: CurrencyBalance
   }
   poolValue: CurrencyBalance
   currency: string
   timestamp: string
+  tranches: { [trancheId: string]: DailyTrancheState }
 }
 
 interface TrancheFormValues {
@@ -419,6 +439,11 @@ interface RiskGroupFormValues {
   discountRate: number | ''
 }
 
+export type IssuerDetails = {
+  title: string
+  body: string
+}
+
 export interface PoolMetadataInput {
   // details
   poolIcon: { uri: string; mime: string } | null
@@ -429,6 +454,7 @@ export interface PoolMetadataInput {
   epochHours: number | ''
   epochMinutes: number | ''
   podEndpoint: string
+  listed?: boolean
 
   // issuer
   issuerName: string
@@ -439,6 +465,7 @@ export interface PoolMetadataInput {
   website: string
   forum: string
   email: string
+  details?: IssuerDetails[]
 
   // tranche
   tranches: TrancheFormValues[]
@@ -464,9 +491,10 @@ export type PoolMetadata = {
     }
     links: {
       executiveSummary: { uri: string; mime: string } | null
-      forum: string
-      website: string
+      forum?: string
+      website?: string
     }
+    details?: IssuerDetails[]
     status: PoolStatus
     listed: boolean
   }
@@ -476,9 +504,8 @@ export type PoolMetadata = {
   tranches: Record<
     string,
     {
-      name: string
-      symbol: string
-      minInitialInvestment: string
+      icon?: { uri: string; mime: string } | null
+      minInitialInvestment?: string
     }
   >
   loanTemplates?: {
@@ -568,7 +595,7 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         : 'Residual',
       metadata: {
-        tokenName: metadata.tranches[i].tokenName,
+        tokenName: `${metadata.poolName} ${metadata.tranches[i].tokenName}`,
         tokenSymbol: metadata.tranches[i].symbolName,
       },
     }))
@@ -576,6 +603,7 @@ export function getPoolsModule(inst: Centrifuge) {
     return inst.getApi().pipe(
       switchMap((api) =>
         api.query.ormlAssetRegistry.metadata(currency).pipe(
+          take(1),
           switchMap((rawCurrencyMeta) => {
             const currencyMeta = rawCurrencyMeta.toHuman() as AssetCurrencyData
             return pinPoolMetadata(metadata, poolId, currencyMeta.decimals, options)
@@ -583,7 +611,7 @@ export function getPoolsModule(inst: Centrifuge) {
           switchMap((pinnedMetadata) => {
             let submittable
             if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-              submittable = api.tx.pools.create(
+              submittable = api.tx.poolRegistry.register(
                 admin,
                 poolId,
                 trancheInput,
@@ -594,7 +622,7 @@ export function getPoolsModule(inst: Centrifuge) {
             } else {
               submittable = api.tx.utility.batchAll([
                 api.tx.uniques.create(collectionId, LoanPalletAccountId),
-                api.tx.pools.create(
+                api.tx.poolRegistry.register(
                   inst.getSignerAddress(),
                   poolId,
                   trancheInput,
@@ -615,13 +643,13 @@ export function getPoolsModule(inst: Centrifuge) {
             }
             if (options?.createType === 'propose') {
               const proposalSubmittable = api.tx.utility.batchAll([
-                api.tx.democracy.notePreimage(submittable.method.toHex()),
-                api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
+                api.tx.preimage.notePreimage(submittable.method.toHex()),
+                api.tx.democracy.propose({ Inline: submittable.method.hash }, api.consts.democracy.minimumDeposit),
               ])
               return inst.wrapSignAndSend(api, proposalSubmittable, options)
             }
             if (options?.createType === 'notePreimage') {
-              const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
+              const preimageSubmittable = api.tx.preimage.notePreimage(submittable.method.toHex())
               return inst.wrapSignAndSend(api, preimageSubmittable, options)
             }
             return inst.wrapSignAndSend(api, submittable, options)
@@ -673,8 +701,6 @@ export function getPoolsModule(inst: Centrifuge) {
     const tranchesById: PoolMetadata['tranches'] = {}
     metadata.tranches.forEach((tranche, index) => {
       tranchesById[computeTrancheId(index, poolId)] = {
-        name: tranche.tokenName,
-        symbol: tranche.symbolName,
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
       }
     })
@@ -696,8 +722,9 @@ export function getPoolsModule(inst: Centrifuge) {
           forum: metadata.forum,
           website: metadata.website,
         },
+        details: metadata.details,
         status: 'open',
-        listed: true,
+        listed: metadata.listed ?? true,
       },
       pod: {
         url: metadata.podEndpoint ?? null,
@@ -744,7 +771,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.update(poolId, { minEpochTime, tranches, maxNavAge })
+        const submittable = api.tx.poolRegistry.update(poolId, { minEpochTime, tranches, maxNavAge })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -793,7 +820,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.setMaxReserve(poolId, maxReserve.toString())
+        const submittable = api.tx.poolSystem.setMaxReserve(poolId, maxReserve.toString())
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -806,7 +833,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const $pinnedMetadata = inst.metadata.pinJson(metadata)
     return combineLatest([$api, $pinnedMetadata]).pipe(
       switchMap(([api, pinnedMetadata]) => {
-        const submittable = api.tx.pools.setMetadata(poolId, pinnedMetadata.ipfsHash)
+        const submittable = api.tx.poolRegistry.setMetadata(poolId, pinnedMetadata.ipfsHash)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -886,12 +913,15 @@ export function getPoolsModule(inst: Centrifuge) {
           ])
           const submittable = api.tx.utility.batchAll([
             api.tx.loans.updateNav(poolId),
-            api.tx.pools.closeEpoch(poolId),
-            api.tx.pools.submitSolution(poolId, trancheSolution),
+            api.tx.poolSystem.closeEpoch(poolId),
+            api.tx.poolSystem.submitSolution(poolId, trancheSolution),
           ])
           return inst.wrapSignAndSend(api, submittable, options)
         }
-        const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
+        const submittable = api.tx.utility.batchAll([
+          api.tx.loans.updateNav(poolId),
+          api.tx.poolSystem.closeEpoch(poolId),
+        ])
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -903,7 +933,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.executeEpoch(poolId)
+        const submittable = api.tx.poolSystem.executeEpoch(poolId)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -953,7 +983,7 @@ export function getPoolsModule(inst: Centrifuge) {
           tranche.invest.perquintill,
           tranche.redeem.perquintill,
         ])
-        const submittable = api.tx.pools.submitSolution(poolId, solution)
+        const submittable = api.tx.poolSystem.submitSolution(poolId, solution)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -968,8 +998,8 @@ export function getPoolsModule(inst: Centrifuge) {
       return $api.pipe(
         switchMap((api) => {
           const submittable = api.tx.utility.batchAll([
-            api.tx.pools.collectInvestments([poolId, trancheId]),
-            api.tx.pools.collectRedemptions([poolId, trancheId]),
+            api.tx.investments.collectInvestments([poolId, trancheId]),
+            api.tx.investments.collectRedemptions([poolId, trancheId]),
           ])
           return inst.wrapSignAndSend(api, submittable, options)
         })
@@ -995,8 +1025,8 @@ export function getPoolsModule(inst: Centrifuge) {
             .flatMap((tranche) => {
               // TODO: Only collect orders that are cleared
               return [
-                api.tx.pools.collectInvestments([poolId, tranche.id]),
-                api.tx.pools.collectRedemptions([poolId, tranche.id]),
+                api.tx.investments.collectInvestments([poolId, tranche.id]),
+                api.tx.investments.collectRedemptions([poolId, tranche.id]),
               ]
             })
             .filter(Boolean)
@@ -1143,17 +1173,18 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function priceLoan(
-    args: [poolId: string, loanId: string, interestRatePerSec: string, loanInfoInput: LoanInfoInput],
+    args: [poolId: string, loanId: string, interestRatePerSec: Rate, loanInfoInput: LoanInfoInput],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, ratePerSec, loanInfoInput] = args
+    const ratePerYear = Rate.fromFloat(new Rate(ratePerSec).toApr().toDecimalPlaces(4))
     const loanInfoFields = LOAN_FIELDS[loanInfoInput.type]
     const loanInfo = loanInfoFields.map((key) => (LOAN_INPUT_TRANSFORM as any)[key]((loanInfoInput as any)[key]))
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, {
+        const submittable = api.tx.loans.price(poolId, loanId, ratePerYear, {
           [loanInfoInput.type]: loanInfo,
         })
         return inst.wrapSignAndSend(api, submittable, options)
@@ -1232,15 +1263,15 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.pools.Created.is(event) ||
-            api.events.pools.Updated.is(event) ||
-            api.events.pools.MaxReserveSet.is(event) ||
-            api.events.pools.MetadataSet.is(event) ||
-            api.events.pools.EpochClosed.is(event) ||
-            api.events.pools.EpochExecuted.is(event) ||
+            api.events.poolSystem.PoolCreated.is(event) ||
+            api.events.poolSystem.PoolUpdated.is(event) ||
+            api.events.poolSystem.MaxReserveSet.is(event) ||
+            api.events.poolRegistry.MetadataSet.is(event) ||
+            api.events.poolSystem.EpochClosed.is(event) ||
+            api.events.poolSystem.EpochExecuted.is(event) ||
             api.events.investments.InvestOrderUpdated.is(event) ||
             api.events.investments.RedeemOrderUpdated.is(event) ||
-            api.events.pools.SolutionSubmitted.is(event)
+            api.events.poolSystem.SolutionSubmitted.is(event)
         )
         return !!event
       })
@@ -1263,22 +1294,24 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(
         (api) =>
           combineLatest([
-            api.query.pools.pool.entries(),
+            api.query.poolSystem.pool.entries(),
+            api.query.poolRegistry.poolMetadata.entries(),
             api.query.loans.poolNAV.entries(),
-            api.query.pools.epochExecution.entries(),
+            api.query.poolSystem.epochExecution.entries(),
             api.query.loans.poolToLoanNftClass.entries(),
             getCurrencies(),
           ]),
-        (api, [rawPools, rawNavs, rawEpochExecutions, rawLoanColIds, currencies]) => ({
+        (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, rawLoanColIds, currencies]) => ({
           api,
           rawPools,
+          rawMetadatas,
           rawNavs,
           rawEpochExecutions,
           rawLoanColIds,
           currencies,
         })
       ),
-      switchMap(({ api, rawPools, rawNavs, rawEpochExecutions, rawLoanColIds, currencies }) => {
+      switchMap(({ api, rawPools, rawMetadatas, rawNavs, rawEpochExecutions, rawLoanColIds, currencies }) => {
         if (!rawPools.length) return of([])
 
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
@@ -1308,15 +1341,21 @@ export function getPoolsModule(inst: Centrifuge) {
           return acc
         }, {} as Record<string, string>)
 
-        // read pools, poolIds and metadata from observable
+        const metadataMap = rawMetadatas.reduce((acc, [key, metadataValue]) => {
+          const poolId = formatPoolKey(key as StorageKey<[u32]>)
+          const metadata = (metadataValue.toHuman() as { metadata: string }).metadata
+          acc[poolId] = metadata
+          return acc
+        }, {} as Record<string, string>)
+
+        // read pools, poolIds and currencies from observable
         const pools = rawPools.map(([poolKeys, poolValue]) => {
           const data = poolValue.toJSON() as PoolDetailsData
-          const { metadata, currency } = poolValue.toHuman() as any
+          const { currency } = poolValue.toHuman() as any
           data.currency = parseCurrencyKey(currency)
           return {
             id: formatPoolKey(poolKeys as any), // poolId
             data, // pool data
-            metadata, // pool metadata
           }
         })
 
@@ -1347,7 +1386,8 @@ export function getPoolsModule(inst: Centrifuge) {
             const blockNumber = block.header.number.toNumber()
 
             const mappedPools = pools.map((poolObj, poolIndex) => {
-              const { data: pool, id: poolId, metadata } = poolObj
+              const { data: pool, id: poolId } = poolObj
+              const metadata = metadataMap[poolId]
               const navData = navMap[poolId]
               const epochExecution = epochExecutionMap[poolId]
               const loanCollectionId = loanCollectionIdMap[poolId]
@@ -1436,7 +1476,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
                   status: getEpochStatus(epochExecution, blockNumber),
                   challengePeriodEnd: epochExecution?.challengePeriodEnd,
-                  challengeTime: api.consts.pools.challengeTime.toJSON() as number, // in blocks
+                  challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 parameters: {
                   ...pool.parameters,
@@ -1490,7 +1530,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const [poolId] = args
     return inst.getApi().pipe(
       switchMap((api) =>
-        api.query.pools.pool(poolId).pipe(
+        api.query.poolSystem.pool(poolId).pipe(
           switchMap((rawPool) => {
             const pool = rawPool.toHuman() as any
             return api.query.ormlAssetRegistry.metadata(pool.currency).pipe(
@@ -1514,27 +1554,51 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getDailyPoolStates(args: [poolId: string]) {
-    const [poolId] = args
+  function getDailyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
 
-    const $query = inst.getSubqueryObservable<{ poolSnapshots: { nodes: SubqueryPoolSnapshot[] } }>(
-      `query($poolId: String!) {
+    const $query = inst.getSubqueryObservable<{
+      poolSnapshots: { nodes: SubqueryPoolSnapshot[] }
+      trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
         poolSnapshots(
           orderBy: BLOCK_NUMBER_ASC,
           filter: { 
             id: { startsWith: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to }
           }) {
           nodes {
             id
             timestamp
             totalReserve
-            netAssetValue
+            portfolioValuation
+          }
+        }
+        trancheSnapshots(
+          orderBy: BLOCK_NUMBER_ASC,
+          filter: { 
+            id: { startsWith: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }) {
+          nodes {
+            id
+            trancheId
+            timestamp
+            tokenSupply
+            tokenPrice
+            sumOutstandingInvestOrdersByPeriod
+            sumOutstandingRedeemOrdersByPeriod
+            sumFulfilledInvestOrdersByPeriod
+            sumFulfilledRedeemOrdersByPeriod
           }
         }
       }
       `,
       {
         poolId,
+        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
       }
     )
 
@@ -1544,16 +1608,91 @@ export function getPoolsModule(inst: Centrifuge) {
           queryData?.poolSnapshots.nodes.map((state) => {
             const poolState = {
               id: state.id,
-              netAssetValue: new CurrencyBalance(state.netAssetValue, currency.decimals),
+              portfolioValuation: new CurrencyBalance(state.portfolioValuation, currency.decimals),
               totalReserve: new CurrencyBalance(state.totalReserve, currency.decimals),
             }
             const poolValue = new CurrencyBalance(
-              new BN(state?.netAssetValue || '0').add(new BN(state?.totalReserve || '0')),
+              new BN(state?.portfolioValuation || '0').add(new BN(state?.totalReserve || '0')),
               currency.decimals
             )
-            return { ...state, poolState, poolValue }
+
+            // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
+            const trancheSnapshotsToday = queryData?.trancheSnapshots.nodes.filter(
+              (t) => t.timestamp === state.timestamp
+            )
+
+            let tranches: { [trancheId: string]: DailyTrancheState } = {}
+            trancheSnapshotsToday.forEach((tranche) => {
+              const tid = tranche.trancheId.split('-')[1]
+              tranches[tid] = {
+                id: tranche.trancheId,
+                price: tranche.tokenPrice ? new Price(tranche.tokenPrice) : null,
+                fulfilledInvestOrders: new CurrencyBalance(tranche.sumFulfilledInvestOrdersByPeriod, currency.decimals),
+                fulfilledRedeemOrders: new CurrencyBalance(tranche.sumFulfilledRedeemOrdersByPeriod, currency.decimals),
+                outstandingInvestOrders: new CurrencyBalance(
+                  tranche.sumOutstandingInvestOrdersByPeriod,
+                  currency.decimals
+                ),
+                outstandingRedeemOrders: new CurrencyBalance(
+                  tranche.sumOutstandingRedeemOrdersByPeriod,
+                  currency.decimals
+                ),
+              }
+            })
+
+            return { ...state, poolState, poolValue, tranches }
           }) as unknown as DailyPoolState[],
         ]
+      })
+    )
+  }
+
+  function getPoolLiquidityTransactions(args: [pool: Pool, fromEpoch: number, toEpoch: number]) {
+    const [pool, fromEpoch, toEpoch] = args
+    const $query = inst.getSubqueryObservable<{ epoches: { nodes: SubqueryEpoch[] } }>(
+      `query($poolId: String!, $fromEpoch: Int!, $toEpoch: Int!) {
+        epoches(
+          filter: {
+            poolId: { equalTo: $poolId },
+            index: { greaterThanOrEqualTo: $fromEpoch },
+            and: { index: { lessThanOrEqualTo: $toEpoch }}
+          },
+          orderBy: INDEX_ASC
+        ) {
+          nodes {
+            id
+            index
+            openedAt
+            closedAt
+            executedAt
+            sumBorrowedAmount
+            sumRepaidAmount
+            sumInvestedAmount
+            sumRedeemedAmount
+          }
+        }
+      }`,
+      { poolId: pool.id, fromEpoch, toEpoch },
+      false
+    )
+
+    return $query.pipe(
+      map((data) => {
+        return data!.epoches.nodes.map((node) => ({
+          ...node,
+          sumBorrowedAmount: node.sumBorrowedAmount
+            ? new CurrencyBalance(node.sumBorrowedAmount, pool.currency.decimals)
+            : undefined,
+          sumRepaidAmount: node.sumRepaidAmount
+            ? new CurrencyBalance(node.sumRepaidAmount, pool.currency.decimals)
+            : undefined,
+          sumInvestedAmount: node.sumInvestedAmount
+            ? new CurrencyBalance(node.sumInvestedAmount, pool.currency.decimals)
+            : undefined,
+          sumRedeemedAmount: node.sumRedeemedAmount
+            ? new CurrencyBalance(node.sumRedeemedAmount, pool.currency.decimals)
+            : undefined,
+        }))
       })
     )
   }
@@ -1568,7 +1707,7 @@ export function getPoolsModule(inst: Centrifuge) {
             trancheId: { includes: $trancheId },
           }) {
           nodes {
-            price
+            tokenPrice
             blockNumber
             timestamp
             trancheId
@@ -1592,10 +1731,107 @@ export function getPoolsModule(inst: Centrifuge) {
         return data.trancheSnapshots.nodes.map((state) => {
           return {
             ...state,
-            price: new Price(state.price),
+            tokenPrice: new Price(state.tokenPrice),
           }
         })
       })
+    )
+  }
+
+  function getMonthlyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
+    return getDailyPoolStates(args).pipe(
+      map((poolStates) => {
+        if (!poolStates) return []
+        // group by month
+        // todo: find last of each month
+        let poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
+        poolStates.forEach((poolState) => {
+          const monthYear = new Date(poolState.timestamp).getMonth() + '-' + new Date(poolState.timestamp).getFullYear()
+          if (monthYear in poolStatesByMonth) {
+            poolStatesByMonth[monthYear] = [...poolStatesByMonth[monthYear], poolState]
+          } else {
+            poolStatesByMonth[monthYear] = [poolState]
+          }
+        })
+
+        return Object.values(poolStatesByMonth).map((statesOneMonth) => {
+          let base = statesOneMonth[statesOneMonth.length - 1]
+          // todo: sum aggregated values (e.g. tranches.fulfilledInvestOrders)
+
+          return base
+        })
+      })
+    )
+  }
+
+  function getInvestorTransactions(args: [poolId: string, trancheId?: string, from?: Date, to?: Date]) {
+    const [poolId, trancheId, from, to] = args
+    const $api = inst.getApi()
+
+    const $query = inst.getSubqueryObservable<{
+      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
+    }>(
+      `query($poolId: String!, $trancheId: String, $from: Datetime!, $to: Datetime!) {
+        investorTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: { 
+            poolId: { equalTo: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to },
+            trancheId: { isNull: false, endsWith: $trancheId }
+          }) {
+          nodes {
+            id
+            timestamp
+            accountId
+            poolId
+            trancheId
+            epochNumber
+            type
+            tokenAmount
+            currencyAmount
+            tokenPrice
+            transactionFee
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        trancheId,
+        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+      }
+    )
+
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([$query, api.query.poolSystem.pool(poolId).pipe(take(1)), getCurrencies()]).pipe(
+          switchMap(([queryData, poolValue, currencies]) => {
+            const pool = poolValue.toHuman() as unknown as PoolDetailsData
+            const currency = findCurrency(currencies, pool.currency)!
+            const currencyDecimals = currency.decimals
+
+            return [
+              queryData?.investorTransactions.nodes.map((tx) => {
+                return {
+                  id: tx.id,
+                  timestamp: new Date(tx.timestamp),
+                  accountId: tx.accountId,
+                  trancheId: tx.trancheId,
+                  epochNumber: tx.epochNumber,
+                  type: tx.type as InvestorTransactionType,
+                  currencyAmount: tx.currencyAmount
+                    ? new CurrencyBalance(tx.currencyAmount, currencyDecimals)
+                    : undefined,
+                  tokenAmount: tx.tokenAmount ? new CurrencyBalance(tx.tokenAmount, currencyDecimals) : undefined,
+                  tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
+                  transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
+                }
+              }) as unknown as any[], // TODO: add typing
+            ]
+          })
+        )
+      )
     )
   }
 
@@ -1607,6 +1843,7 @@ export function getPoolsModule(inst: Centrifuge) {
       }))
     )
   }
+
   function getCurrencies() {
     return inst.getApi().pipe(
       switchMap((api) => api.query.ormlAssetRegistry.metadata.entries()),
@@ -1732,7 +1969,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return inst.getApi().pipe(
       switchMap(
-        (api) => api.query.pools.pool(poolId),
+        (api) => api.query.poolSystem.pool(poolId),
         (api, pool) => ({ api, pool })
       ),
       switchMap(({ api, pool: rawPool }) => {
@@ -1810,25 +2047,23 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap(
-        (api) => combineLatest([api.query.loans.activeLoans(poolId), api.query.pools.pool(poolId)]).pipe(take(1)),
+        (api) => combineLatest([api.query.loans.activeLoans(poolId), api.query.poolSystem.pool(poolId)]).pipe(take(1)),
         (api, [activeLoanValues, poolValue]) => ({ api, activeLoanValues, poolValue })
       ),
       switchMap(({ api, activeLoanValues, poolValue }) => {
-        const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
-        const interestAccrualKeys = activeLoanData.map((activeLoan) => hexToBN(activeLoan.interestRatePerSec))
-        const $interestAccrual = api.query.interestAccrual.rate.multi(interestAccrualKeys).pipe(take(1))
+        const $rates = api.query.interestAccrual.rates().pipe(take(1))
         const $interestLastUpdated = api.query.interestAccrual.lastUpdated().pipe(take(1))
         const $currencyMeta = api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency).pipe(take(1))
         return combineLatest([
           api.query.loans.loan.entries(poolId),
           of(activeLoanValues),
           api.query.loans.closedLoans.entries(poolId),
-          $interestAccrual,
+          $rates,
           $interestLastUpdated,
           $currencyMeta,
         ])
       }),
-      map(([loanValues, activeLoanValues, closedLoansValues, interestAccrual, interestLastUpdated, rawCurrency]) => {
+      map(([loanValues, activeLoanValues, closedLoansValues, rateValues, interestLastUpdated, rawCurrency]) => {
         const currency = rawCurrency.toHuman() as AssetCurrencyData
         const loans = (loanValues as any[]).map(([key, value]) => {
           const loan = value.toJSON() as unknown as LoanData
@@ -1837,6 +2072,9 @@ export function getPoolsModule(inst: Centrifuge) {
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
             status: getLoanStatus(loan),
+            closedAt: loan.status.Closed?.closed_at
+              ? new Date(loan.status.Closed?.closed_at * 1000).toISOString()
+              : null,
             asset: {
               collectionId: collectionId.toString(),
               nftId: hexToBN(nftId).toString(),
@@ -1845,9 +2083,11 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
-        const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset'>>>(
-          (prev, activeLoan, index) => {
-            const interestData = interestAccrual[index].toJSON() as InterestAccrual
+        const rates = rateValues.toJSON() as InterestAccrual[]
+
+        const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset' | 'closedAt'>>>(
+          (prev, activeLoan) => {
+            const interestData = rates.find((rate) => rate.interestRatePerSec === activeLoan.interestRatePerSec)
             const mapped = {
               id: String(activeLoan.loanId),
               poolId,
@@ -1875,7 +2115,7 @@ export function getPoolsModule(inst: Centrifuge) {
         )
 
         const closedLoans = (closedLoansValues as any[]).reduce<
-          Record<string, Omit<ClosedLoan, 'status' | 'asset' | 'adminWrittenOff'>>
+          Record<string, Omit<ClosedLoan, 'status' | 'asset' | 'adminWrittenOff' | 'closedAt'>>
         >((prev, [key, value]) => {
           const closedLoan = value.toJSON() as ClosedLoanData
           const loanId = formatLoanKey(key as StorageKey<[u32, u32]>)
@@ -2087,7 +2327,7 @@ export function getPoolsModule(inst: Centrifuge) {
             const id = String(getRandomUint())
             if (triesLeft <= 0) return EMPTY
 
-            return api.query.pools.pool(id).pipe(
+            return api.query.poolSystem.pool(id).pipe(
               map((res) => ({ api, id: res.toJSON() === null ? id : null, triesLeft: triesLeft - 1 })),
               take(1)
             )
@@ -2135,9 +2375,12 @@ export function getPoolsModule(inst: Centrifuge) {
     adminWriteOff,
     getAvailablePoolId,
     getDailyPoolStates,
+    getMonthlyPoolStates,
+    getInvestorTransactions,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
+    getPoolLiquidityTransactions,
   }
 }
 

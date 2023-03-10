@@ -1,5 +1,5 @@
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { useParams } from 'react-router'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
@@ -24,7 +24,7 @@ const ReserveCashDragChart: React.VFC = () => {
 
   const data: ChartData[] =
     poolStates?.map((day) => {
-      const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
+      const assetValue = day.poolState.portfolioValuation.toDecimal().toNumber()
       const reserve = day.poolState.totalReserve.toDecimal().toNumber()
       const cashDrag = (reserve / (reserve + assetValue)) * 100
       return { day: new Date(day.timestamp), cashDrag: cashDrag || 0, reserve }
