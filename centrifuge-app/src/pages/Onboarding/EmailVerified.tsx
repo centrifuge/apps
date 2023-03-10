@@ -20,7 +20,7 @@ export const EmailVerified: React.FC = () => {
             <>
               <ContentHeader
                 title={data ? 'Thanks for verifying your email' : 'An error occurred'}
-                body={data ? 'You can continue with onboarding in the other tab.' : undefined}
+                body={data ? 'Please return to the original tab to continue with the onboarding process.' : undefined}
               />
               {data && (
                 <Box>
