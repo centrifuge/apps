@@ -71,7 +71,7 @@ export const StyledButton = styled.span<StyledProps>(
   },
   ({ $variant, $disabled, $small, $active, $iconOnly, $loading, theme }) => {
     const isTertiaryIcon = $variant === 'tertiary' && $iconOnly
-    const variant = $variant === 'wallet' ? 'secondary' : $variant
+    const variant = $variant //=== 'wallet' ? 'secondary' : $variant
     const variantToken = variant[0].toUpperCase().concat(variant.slice(1))
     const bg = `backgroundButton${variantToken}`
     const bgFocus = `backgroundButton${variantToken}Focus`
@@ -92,8 +92,12 @@ export const StyledButton = styled.span<StyledProps>(
 
     return css({
       color: $disabled ? fgDisabled : $active ? fgHover : fg,
-      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon ? bgHover : bg,
-      borderColor: $disabled ? borderDisabled : $active && !isTertiaryIcon ? borderHover : border,
+      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon && variant !== 'wallet' ? bgHover : bg,
+      borderColor: $disabled
+        ? borderDisabled
+        : $active && !isTertiaryIcon && variant !== 'wallet'
+        ? borderHover
+        : border,
       borderWidth: 1,
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
@@ -105,13 +109,13 @@ export const StyledButton = styled.span<StyledProps>(
         color: fgHover,
         backgroundColor: isTertiaryIcon ? undefined : bgHover,
         borderColor: isTertiaryIcon ? undefined : borderHover,
-        boxShadow: variant === 'secondary' ? 'buttonActive' : 'none',
+        boxShadow: variant === 'secondary' ? 'buttonActive' : variant === 'wallet' ? 'cardInteractive' : 'none',
       },
       '&:active': {
         color: fgPressed,
         backgroundColor: isTertiaryIcon ? undefined : bgPressed,
         borderColor: isTertiaryIcon ? undefined : borderPressed,
-        boxShadow: variant !== 'tertiary' ? 'buttonActive' : 'none',
+        boxShadow: variant === 'wallet' ? 'cardInteractive' : variant !== 'tertiary' ? 'buttonActive' : 'none',
       },
 
       'a:focus-visible &, button:focus-visible &': {

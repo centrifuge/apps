@@ -55,6 +55,7 @@ const lightColors = {
   textButtonSecondaryHover: 'black',
   textButtonSecondaryPressed: 'black',
   textButtonSecondaryDisabled: grayScale[600],
+
   borderButtonSecondary: grayScale[300],
   borderButtonSecondaryFocus: 'black',
   borderButtonSecondaryHover: grayScale[300],
@@ -77,6 +78,23 @@ const lightColors = {
   borderButtonTertiaryHover: 'transparent',
   borderButtonTertiaryPressed: centrifugeBlue,
   borderButtonTertiaryDisabled: 'transparent',
+
+  backgroundButtonWallet: 'white',
+  backgroundButtonWalletFocus: grayScale[80],
+  backgroundButtonWalletHover: grayScale[80],
+  backgroundButtonWalletPressed: 'white',
+  backgroundButtonWalletDisabled: 'transparent',
+  textButtonWallet: 'black',
+  textButtonWalletFocus: 'black',
+  textButtonWalletHover: 'black',
+  textButtonWalletPressed: 'black',
+  textButtonWalletDisabled: grayScale[600],
+  borderButtonWallet: grayScale[300],
+  borderButtonWalletFocus: 'black',
+  borderButtonWalletHover: 'transparent',
+  borderButtonWalletPressed: grayScale[80],
+  borderButtonWalletDisabled: grayScale[300],
+  shadowButtonWalletPressed: 'black',
 }
 
 export const modeLight = {
