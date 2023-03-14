@@ -2,16 +2,17 @@ import { AnchorButton, Box, Button } from '@centrifuge/fabric'
 import * as React from 'react'
 import { ActionBar, Content, ContentHeader, FileUpload } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
+import { OnboardingUser } from '../../types'
 import { useTaxInfo } from './queries/useTaxInfo'
 import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
 
 export const TaxInfo = () => {
-  const { onboardingUser, previousStep, nextStep } = useOnboarding()
+  const { onboardingUser, previousStep, nextStep } = useOnboarding<NonNullable<OnboardingUser>>()
   const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
   const { data: taxInfoData } = useTaxInfo()
   const { mutate: uploadTaxInfo, isLoading } = useUploadTaxInfo(taxInfo)
 
-  const isCompleted = !!onboardingUser?.globalSteps?.verifyTaxInfo?.completed
+  const isCompleted = !!onboardingUser.globalSteps.verifyTaxInfo.completed
 
   const validateFileUpload = (file: File) => {
     if (file.type !== 'application/pdf') {
@@ -24,7 +25,7 @@ export const TaxInfo = () => {
   }
 
   const taxForm = React.useMemo(() => {
-    if (onboardingUser?.investorType === 'individual' && onboardingUser?.countryOfCitizenship !== 'us') {
+    if (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship !== 'us') {
       return {
         type: 'W-8BEN',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
@@ -32,7 +33,7 @@ export const TaxInfo = () => {
       }
     }
 
-    if (onboardingUser?.investorType === 'entity' && !onboardingUser?.jurisdictionCode.startsWith('us')) {
+    if (onboardingUser.investorType === 'entity' && !onboardingUser.jurisdictionCode.startsWith('us')) {
       return {
         type: 'W-8BEN-E',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',

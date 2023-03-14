@@ -10,19 +10,21 @@ export const useSignedAgreement = () => {
   const { selectedAccount } = useWallet().substrate
 
   const [hasSignedAgreement, setHasSignedAgreement] = React.useState(false)
+
+  const poolId = pool?.id as string
+  const trancheId = pool?.trancheId as string
+
   React.useEffect(() => {
-    if (onboardingUser) {
-      setHasSignedAgreement(onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreement.completed)
+    if (onboardingUser && poolId && trancheId) {
+      setHasSignedAgreement(onboardingUser.poolSteps[poolId]?.[trancheId].signAgreement.completed)
     }
-  }, [onboardingUser, pool.id, pool.trancheId])
+  }, [onboardingUser, poolId, trancheId])
 
   const query = useQuery(
-    ['signed-subscription-agreement', selectedAccount?.address, pool.id, pool.trancheId],
+    ['signed-subscription-agreement', selectedAccount?.address, pool?.id, pool?.trancheId],
     async () => {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getSignedAgreement?poolId=${pool.id}&trancheId=${
-          pool.trancheId
-        }`,
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getSignedAgreement?poolId=${poolId}&trancheId=${trancheId}`,
         {
           method: 'GET',
           headers: {
@@ -42,7 +44,7 @@ export const useSignedAgreement = () => {
       return URL.createObjectURL(documentBlob)
     },
     {
-      enabled: hasSignedAgreement,
+      enabled: hasSignedAgreement && !!pool,
       refetchOnWindowFocus: false,
     }
   )

@@ -1,8 +1,10 @@
-import { Box, Step, Stepper } from '@centrifuge/fabric'
+import { Box, Step, Stepper, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 import { Container, Header, Layout } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
+import { usePool } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
 import { BusinessInformation } from './BusinessInformation'
@@ -15,8 +17,34 @@ import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 import { TaxInfo } from './TaxInfo'
 
 export const OnboardingPage: React.FC = () => {
-  const { onboardingUser, activeStep, setActiveStep, isLoadingStep } = useOnboarding()
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
+  const { search } = useLocation()
+  const poolId = new URLSearchParams(search).get('poolId')
+  const trancheId = new URLSearchParams(search).get('trancheId')
+  const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool } = useOnboarding()
+
+  const history = useHistory()
+  const poolDetails = usePool(poolId || '', false)
+
+  React.useEffect(() => {
+    if (!poolId || !trancheId) {
+      return history.push('/onboarding')
+    }
+
+    // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
+    const trancheDetails = poolDetails?.tranches.find((tranche) => tranche.id === trancheId)
+
+    if (trancheDetails) {
+      return setPool({
+        id: poolId,
+        trancheId,
+        name: trancheDetails.currency.name,
+        symbol: trancheDetails.currency.symbol,
+      })
+    }
+
+    return history.push('/onboarding')
+  }, [poolId, setPool, trancheId, history, poolDetails])
 
   const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
 
@@ -29,7 +57,11 @@ export const OnboardingPage: React.FC = () => {
   return (
     <Layout>
       <Header>
-        <Box pt={1}>Pool</Box>
+        {pool?.symbol && (
+          <Box pt={1}>
+            <Thumbnail type="token" size="large" label={pool.symbol} />
+          </Box>
+        )}
       </Header>
 
       <Container
