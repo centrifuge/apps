@@ -37,7 +37,7 @@ export const InvestorType = ({ investorType, setInvestorType }: Props) => {
     <>
       <Content>
         <ContentHeader
-          title={Start onboarding to {pool ? pool.name : 'Centrifuge'}}
+          title={`Start onboarding to ${pool ? pool.name : 'Centrifuge'}`}
           body="If you are a U.S. investor, it is only possible to onboard when you are an accredited investor."
         />
         <Grid columns={2} equalColumns gap={2}>
