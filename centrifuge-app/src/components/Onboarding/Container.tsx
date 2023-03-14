@@ -70,8 +70,8 @@ export function Container({ children, aside, isLoading, closeable = true }: Cont
               </Box>
             )}
 
-            {/* 
-              This container expects exactly one or two children. 
+            {/*
+              This container expects exactly one or two children.
               The second child will always be aligned at the bottom.
             */}
             <Grid

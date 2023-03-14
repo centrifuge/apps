@@ -1,5 +1,7 @@
 import { Box, Button, Checkbox, Shelf, Spinner, Text } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
 import * as React from 'react'
+import { boolean, object } from 'yup'
 import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
@@ -13,8 +15,11 @@ type Props = {
   isSignedAgreementFetched: boolean
 }
 
+const validationSchema = object({
+  isAgreed: boolean().oneOf([true], 'You must agree to the agreement'),
+})
+
 export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
-  const [isAgreed, setIsAgreed] = React.useState(false)
   const { onboardingUser, pool, previousStep, nextStep } = useOnboarding<
     NonNullable<OnboardingUser>,
     NonNullable<OnboardingPool>
@@ -23,7 +28,17 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const poolId = pool.id
   const trancheId = pool.trancheId
 
-  const hasSignedAgreement = !!onboardingUser.poolSteps[poolId][trancheId].signAgreement.completed
+  const hasSignedAgreement = !!onboardingUser.poolSteps[poolId]?.[trancheId].signAgreement.completed
+
+  const formik = useFormik({
+    initialValues: {
+      isAgreed: hasSignedAgreement,
+    },
+    validationSchema,
+    onSubmit: () => {
+      signRemark([])
+    },
+  })
 
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
@@ -31,8 +46,9 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
 
   React.useEffect(() => {
     if (hasSignedAgreement) {
-      setIsAgreed(true)
+      formik.setFieldValue('isAgreed', true)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasSignedAgreement])
 
   const isAgreementFetched = React.useMemo(
@@ -73,14 +89,15 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
         </Box>
 
         <Checkbox
-          checked={hasSignedAgreement || isAgreed}
-          onChange={() => setIsAgreed((current) => !current)}
+          {...formik.getFieldProps('isAgreed')}
+          checked={formik.values.isAgreed}
           label={
             <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
               I hereby agree to the terms of the subscription agreement
             </Text>
           }
           disabled={isSigningTransaction || isSending || hasSignedAgreement}
+          errorMessage={formik.errors.isAgreed}
         />
       </Content>
 
@@ -89,10 +106,10 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
           Back
         </Button>
         <Button
-          onClick={hasSignedAgreement ? () => nextStep() : () => signRemark([])}
+          onClick={hasSignedAgreement ? () => nextStep() : () => formik.handleSubmit()}
           loadingMessage="Signing"
           loading={isSigningTransaction || isSending}
-          disabled={!isAgreed || isSigningTransaction || isSending}
+          disabled={isSigningTransaction || isSending}
         >
           {hasSignedAgreement ? 'Next' : 'Sign'}
         </Button>

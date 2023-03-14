@@ -1,14 +1,22 @@
 import { Button, Grid, Text } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
+import * as React from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
+import { object, string } from 'yup'
 import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
+import { ValidationToast } from '../../components/ValidationToast'
 import { InvestorTypes } from '../../types'
 
 type Props = {
   investorType: InvestorTypes | undefined
   setInvestorType: Dispatch<SetStateAction<InvestorTypes | undefined>>
 }
+
+const validationSchema = object({
+  investorType: string().required('Please choose an investor type'),
+})
 
 const CustomButton = styled(Text)<{ selected: boolean }>`
   appearance: none;
@@ -31,10 +39,21 @@ const CustomButton = styled(Text)<{ selected: boolean }>`
 export const InvestorType = ({ investorType, setInvestorType }: Props) => {
   const { onboardingUser, previousStep, nextStep, pool } = useOnboarding()
 
+  const formik = useFormik({
+    initialValues: {
+      investorType,
+    },
+    validationSchema,
+    onSubmit: () => {
+      nextStep()
+    },
+  })
+
   const isDisabled = onboardingUser?.investorType ? true : false
 
   return (
     <>
+      {formik.errors.investorType && <ValidationToast label={formik.errors.investorType} />}
       <Content>
         <ContentHeader
           title={`Start onboarding to ${pool ? pool.name : 'Centrifuge'}`}
@@ -44,7 +63,10 @@ export const InvestorType = ({ investorType, setInvestorType }: Props) => {
           <CustomButton
             forwardedAs="button"
             variant="heading3"
-            onClick={() => setInvestorType('individual')}
+            onClick={() => {
+              formik.setFieldValue('investorType', 'individual')
+              setInvestorType('individual')
+            }}
             selected={investorType === 'individual'}
             disabled={isDisabled}
           >
@@ -54,7 +76,10 @@ export const InvestorType = ({ investorType, setInvestorType }: Props) => {
           <CustomButton
             forwardedAs="button"
             variant="heading3"
-            onClick={() => setInvestorType('entity')}
+            onClick={() => {
+              formik.setFieldValue('investorType', 'entity')
+              setInvestorType('entity')
+            }}
             selected={investorType === 'entity'}
             disabled={isDisabled}
           >
@@ -67,9 +92,7 @@ export const InvestorType = ({ investorType, setInvestorType }: Props) => {
         <Button onClick={() => previousStep()} variant="secondary">
           Back
         </Button>
-        <Button onClick={() => nextStep()} disabled={!investorType}>
-          Next
-        </Button>
+        <Button onClick={() => formik.handleSubmit()}>Next</Button>
       </ActionBar>
     </>
   )

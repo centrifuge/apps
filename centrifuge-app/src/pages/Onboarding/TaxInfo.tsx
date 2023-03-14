@@ -1,18 +1,33 @@
 import { AnchorButton, Box, Button } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
 import * as React from 'react'
+import { mixed, object } from 'yup'
 import { ActionBar, Content, ContentHeader, FileUpload } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { OnboardingUser } from '../../types'
 import { useTaxInfo } from './queries/useTaxInfo'
 import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
 
+const validationSchema = object({
+  taxInfo: mixed().required('Please upload a tax form'),
+})
+
 export const TaxInfo = () => {
   const { onboardingUser, previousStep, nextStep } = useOnboarding<NonNullable<OnboardingUser>>()
-  const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
   const { data: taxInfoData } = useTaxInfo()
-  const { mutate: uploadTaxInfo, isLoading } = useUploadTaxInfo(taxInfo)
+  const { mutate: uploadTaxInfo, isLoading } = useUploadTaxInfo()
 
   const isCompleted = !!onboardingUser.globalSteps.verifyTaxInfo.completed
+
+  const formik = useFormik({
+    initialValues: {
+      taxInfo: undefined,
+    },
+    validationSchema,
+    onSubmit: (values: { taxInfo: File | undefined }) => {
+      uploadTaxInfo(values.taxInfo)
+    },
+  })
 
   const validateFileUpload = (file: File) => {
     if (file.type !== 'application/pdf') {
@@ -73,9 +88,10 @@ export const TaxInfo = () => {
             </Box>
           ) : (
             <FileUpload
-              onFileChange={(file) => setTaxInfo(file as File)}
+              onFileChange={(file) => formik.setFieldValue('taxInfo', file)}
               disabled={isLoading || isCompleted}
-              file={taxInfo || null}
+              file={formik.values.taxInfo || null}
+              errorMessage={formik.errors.taxInfo}
               validate={validateFileUpload}
               accept=".pdf"
             />
@@ -89,9 +105,9 @@ export const TaxInfo = () => {
         </Button>
         <Button
           onClick={() => {
-            isCompleted ? nextStep() : uploadTaxInfo()
+            isCompleted ? nextStep() : formik.handleSubmit()
           }}
-          disabled={isCompleted ? false : isLoading || !taxInfo}
+          disabled={isLoading}
           loading={isLoading}
           loadingMessage="Uploading"
         >
