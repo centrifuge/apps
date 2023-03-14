@@ -1,12 +1,21 @@
-import { Box, Button, Card, Flex, InlineFeedback, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Select, TextInput } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
+import * as React from 'react'
 import { object, string } from 'yup'
+import {
+  ActionBar,
+  AlertBusinessVerification,
+  Content,
+  ContentHeader,
+  Fieldset,
+  NotificationBar,
+  ValidEmailTooltip,
+} from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
 import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
 import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geographyCodes'
 import { useVerifyBusiness } from './queries/useVerifyBusiness'
-import { StyledInlineFeedback } from './StyledInlineFeedback'
 
 const businessVerificationInput = object({
   email: string().email().required(),
@@ -19,25 +28,9 @@ const businessVerificationInput = object({
   }),
 })
 
-const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) => {
-  if (isError) {
-    return (
-      <StyledInlineFeedback>
-        <InlineFeedback status="warning">
-          <Text fontSize="14px">
-            Unable to verify business information or business has already been verified. Please try again or contact
-            support@centrifuge.io.
-          </Text>
-        </InlineFeedback>
-      </StyledInlineFeedback>
-    )
-  }
-
-  return null
-}
-
 export const BusinessInformation = () => {
   const { onboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
+  const [errorClosed, setErrorClosed] = React.useState(false)
 
   const isUSOrCA =
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
@@ -95,25 +88,32 @@ export const BusinessInformation = () => {
   }
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <BusinessInformationInlineFeedback isError={isError} />
-        <Text fontSize={5}>Provide information about your business</Text>
-        <Text fontSize={2}>
-          Please verify email address, legal entity name, business incorporation date and country of incorporation and
-          registration number.
-        </Text>
-      </Box>
-      <Shelf gap={4}>
-        <Stack gap={2} width="493px">
-          <TextInput
-            id="email"
-            label="Email address"
-            placeholder="Enter email address"
-            disabled={isLoading || isCompleted}
-            onChange={formik.handleChange}
-            value={formik.values.email}
-          />
+    <>
+      <Content>
+        {isError && !errorClosed && (
+          <NotificationBar>
+            <AlertBusinessVerification onClose={() => setErrorClosed(true)} />
+          </NotificationBar>
+        )}
+
+        <ContentHeader
+          title="Provide information about your business"
+          body="Please enter email address, legal entity name, country of incorporation and registration number."
+        />
+
+        <Fieldset>
+          <Box position="relative">
+            <TextInput
+              id="email"
+              label="Email address"
+              placeholder="Enter email address"
+              disabled={isLoading || isCompleted}
+              onChange={formik.handleChange}
+              value={formik.values.email}
+            />
+            <ValidEmailTooltip />
+          </Box>
+
           <TextInput
             id="businessName"
             label="Legal entity name"
@@ -122,6 +122,7 @@ export const BusinessInformation = () => {
             onChange={formik.handleChange}
             value={formik.values.businessName}
           />
+
           <Select
             name="jurisdictionCode"
             label="Country of incorporation"
@@ -147,27 +148,10 @@ export const BusinessInformation = () => {
             onChange={formik.handleChange}
             value={formik.values.registrationNumber}
           />
-        </Stack>
-        <Flex alignSelf="flex-start">
-          <Card
-            width="260px"
-            p={2}
-            style={{
-              backgroundColor: 'black',
-            }}
-          >
-            <Stack gap={1}>
-              <Text size="12px" fontWeight="600" color="white">
-                Please enter a valid email
-              </Text>
-              <Text size="12px" color="white">
-                Your email will be verified. Please make sure you have access to confirm.
-              </Text>
-            </Stack>
-          </Card>
-        </Flex>
-      </Shelf>
-      <Shelf gap={2}>
+        </Fieldset>
+      </Content>
+
+      <ActionBar>
         <Button onClick={() => previousStep()} disabled={isLoading} variant="secondary">
           Back
         </Button>
@@ -181,7 +165,7 @@ export const BusinessInformation = () => {
         >
           Next
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

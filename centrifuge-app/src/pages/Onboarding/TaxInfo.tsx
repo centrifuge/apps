@@ -1,5 +1,6 @@
-import { AnchorButton, Box, Button, FileUpload, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Button } from '@centrifuge/fabric'
 import * as React from 'react'
+import { ActionBar, Content, ContentHeader, FileUpload } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { OnboardingUser } from '../../types'
 import { useTaxInfo } from './queries/useTaxInfo'
@@ -28,6 +29,7 @@ export const TaxInfo = () => {
       return {
         type: 'W-8BEN',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
+        label: 'www.irs.gov/pub/irs-pdf/fw8ben.pdf',
       }
     }
 
@@ -35,27 +37,34 @@ export const TaxInfo = () => {
       return {
         type: 'W-8BEN-E',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',
+        label: 'www.irs.gov/pub/irs-pdf/fw8bene.pdf',
       }
     }
 
     return {
       type: 'W9',
       url: 'https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+      label: 'www.irs.gov/pub/irs-pdf/fw9.pdf',
     }
   }, [onboardingUser])
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>Tax information</Text>
-        <Stack gap={4}>
-          <Text fontSize={2}>
-            Please complete and upload a {taxForm.type} form. The form can be found at{' '}
-            <a href={taxForm.url} target="_blank" rel="noreferrer">
-              {taxForm.url}
-            </a>
-            .
-          </Text>
+    <>
+      <Content>
+        <ContentHeader
+          title="Tax information"
+          body={
+            <>
+              Please complete and upload a {taxForm.type} form. The form can be found at{' '}
+              <a href={taxForm.url} target="_blank" rel="noreferrer">
+                {taxForm.label}
+              </a>
+              .
+            </>
+          }
+        />
+
+        <Box>
           {isCompleted ? (
             <Box>
               <AnchorButton variant="secondary" href={taxInfoData} target="__blank">
@@ -64,30 +73,31 @@ export const TaxInfo = () => {
             </Box>
           ) : (
             <FileUpload
-              placeholder="Upload file"
-              onFileChange={(file) => setTaxInfo(file)}
+              onFileChange={(file) => setTaxInfo(file as File)}
               disabled={isLoading || isCompleted}
               file={taxInfo || null}
               validate={validateFileUpload}
+              accept=".pdf"
             />
           )}
-          <Shelf gap="2">
-            <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
-              Back
-            </Button>
-            <Button
-              onClick={() => {
-                isCompleted ? nextStep() : uploadTaxInfo()
-              }}
-              disabled={isCompleted ? false : isLoading || !taxInfo}
-              loading={isLoading}
-              loadingMessage="Uploading"
-            >
-              Next
-            </Button>
-          </Shelf>
-        </Stack>
-      </Box>
-    </Stack>
+        </Box>
+      </Content>
+
+      <ActionBar>
+        <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
+          Back
+        </Button>
+        <Button
+          onClick={() => {
+            isCompleted ? nextStep() : uploadTaxInfo()
+          }}
+          disabled={isCompleted ? false : isLoading || !taxInfo}
+          loading={isLoading}
+          loadingMessage="Uploading"
+        >
+          Next
+        </Button>
+      </ActionBar>
+    </>
   )
 }
