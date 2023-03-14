@@ -1,6 +1,7 @@
-import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Grid, Text } from '@centrifuge/fabric'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
 
@@ -9,29 +10,21 @@ type Props = {
   setInvestorType: Dispatch<SetStateAction<InvestorTypes | undefined>>
 }
 
-const InvestorTypeButton = styled(Button)<{ selected: boolean }>`
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-  width: 457px;
-  height: 60px;
-  border-radius: 8px;
+const CustomButton = styled(Text)<{ selected: boolean }>`
+  appearance: none;
+  padding: 1.1em 2em;
+  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+  text-align: center;
+  background-color: ${({ theme, selected }) =>
+    selected ? theme.colors.borderPrimary : theme.colors.backgroundPrimary};
+  border: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
+  border-radius: ${({ theme }) => theme.radii.card}px;
+  box-shadow: none;
+  transition: background-color 150ms linear;
 
-  > span {
-    background-color: ${(props) => (props.selected ? '#e0e0e0' : 'white')};
-    border-color: #e0e0e0;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-
-    &:active {
-      box-shadow: none;
-      border-color: #e0e0e0;
-      background-color: ${(props) => (props.selected ? '#e0e0e0' : '#d8d8d8')};
-    }
-
-    &:hover {
-      background-color: ${(props) => (props.selected ? '#e0e0e0' : '#d8d8d8')};
-      border-color: transparent;
-    }
+  &:active,
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.borderPrimary};
   }
 `
 
@@ -41,34 +34,43 @@ export const InvestorType = ({ investorType, setInvestorType }: Props) => {
   const isDisabled = onboardingUser?.investorType ? true : false
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>Start onboarding to {pool ? pool.name : 'Centrifuge'}</Text>
-        <Stack gap={2} py={6}>
-          <InvestorTypeButton
+    <>
+      <Content>
+        <ContentHeader
+          title={`Start onboarding to ${pool ? pool.name : 'Centrifuge'}`}
+          body="If you are a U.S. investor, it is only possible to onboard when you are an accredited investor."
+        />
+        <Grid columns={2} equalColumns gap={2}>
+          <CustomButton
+            forwardedAs="button"
+            variant="heading3"
             onClick={() => setInvestorType('individual')}
             selected={investorType === 'individual'}
             disabled={isDisabled}
           >
-            <Text variant="heading3">Individual</Text>
-          </InvestorTypeButton>
-          <InvestorTypeButton
+            Individual
+          </CustomButton>
+
+          <CustomButton
+            forwardedAs="button"
+            variant="heading3"
             onClick={() => setInvestorType('entity')}
             selected={investorType === 'entity'}
             disabled={isDisabled}
           >
-            <Text variant="heading3">Entity</Text>
-          </InvestorTypeButton>
-        </Stack>
-        <Shelf gap="2">
-          <Button onClick={() => previousStep()} variant="secondary">
-            Back
-          </Button>
-          <Button onClick={() => nextStep()} disabled={!investorType}>
-            Next
-          </Button>
-        </Shelf>
-      </Box>
-    </Stack>
+            Entity
+          </CustomButton>
+        </Grid>
+      </Content>
+
+      <ActionBar>
+        <Button onClick={() => previousStep()} variant="secondary">
+          Back
+        </Button>
+        <Button onClick={() => nextStep()} disabled={!investorType}>
+          Next
+        </Button>
+      </ActionBar>
+    </>
   )
 }

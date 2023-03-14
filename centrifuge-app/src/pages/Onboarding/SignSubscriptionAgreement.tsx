@@ -1,5 +1,6 @@
-import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, Shelf, Spinner, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
 import { OnboardingUser } from '../../types'
@@ -40,26 +41,50 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   )
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>Sign subscription agreement</Text>
-        <Text fontSize={2}>Complete subscription agreement</Text>
-        {isAgreementFetched && (
-          <Box overflowY="scroll" height="500px">
+    <>
+      <Content>
+        <ContentHeader title="Sign subscription agreement" body="Complete subscription agreement" />
+
+        <Box
+          position="relative"
+          overflowY="auto"
+          minHeight="30vh"
+          maxHeight="500px"
+          borderWidth={isAgreementFetched ? 1 : 0}
+          borderColor="borderPrimary"
+          borderStyle="solid"
+          borderRadius="tooltip"
+        >
+          {isAgreementFetched ? (
             <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
-          </Box>
-        )}
-      </Box>
-      <Checkbox
-        style={{
-          cursor: 'pointer',
-        }}
-        checked={hasSignedAgreement || isAgreed}
-        onChange={() => setIsAgreed((current) => !current)}
-        label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the agreement</Text>}
-        disabled={isSigningTransaction || isSending || hasSignedAgreement}
-      />
-      <Shelf gap="2">
+          ) : (
+            <Shelf
+              position="absolute"
+              top={0}
+              left={0}
+              width="100%"
+              height="100%"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Spinner size="iconLarge" />
+            </Shelf>
+          )}
+        </Box>
+
+        <Checkbox
+          checked={hasSignedAgreement || isAgreed}
+          onChange={() => setIsAgreed((current) => !current)}
+          label={
+            <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
+              I hereby agree to the terms of the subscription agreement
+            </Text>
+          }
+          disabled={isSigningTransaction || isSending || hasSignedAgreement}
+        />
+      </Content>
+
+      <ActionBar>
         <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
@@ -71,7 +96,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
         >
           {hasSignedAgreement ? 'Next' : 'Sign'}
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

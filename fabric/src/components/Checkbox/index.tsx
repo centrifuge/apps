@@ -76,6 +76,7 @@ const StyledCheckbox = styled.input`
   height: 18px;
   align-self: center;
   margin: -20px 0;
+  cursor: pointer;
 
   &:focus-visible + span {
     display: block;
