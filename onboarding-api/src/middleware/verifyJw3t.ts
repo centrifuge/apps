@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { centrifuge } from '../utils/centrifuge'
-import { HttpsError } from '../utils/httpsError'
+import { HttpError } from '../utils/httpError'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
@@ -26,6 +26,6 @@ export async function verifyJw3t(req: Request, res: Response, next: NextFunction
     next()
   } catch (error) {
     console.log('Invalid jw3t token', JSON.stringify(error))
-    throw new HttpsError(401, 'Invalid token')
+    throw new HttpError(401, 'Invalid token')
   }
 }

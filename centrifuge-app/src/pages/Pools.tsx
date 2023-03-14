@@ -48,7 +48,7 @@ const Pools: React.FC = () => {
   return (
     <Stack gap={0} flex={1}>
       <PageHeader
-        title="Investments"
+        title="Pools"
         subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
         actions={<MenuSwitch />}
       />

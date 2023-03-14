@@ -6,6 +6,9 @@ import { PropsOf } from '../../helpers'
 
 const Pill = styled.button<{ variant?: 'small' | 'regular' }>(
   css({
+    display: 'inline-block',
+    appearance: 'none',
+    border: 0,
     color: 'textPrimary',
     whiteSpace: 'nowrap',
     cursor: 'pointer',

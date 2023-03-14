@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { bool, InferType, object } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
 
@@ -22,32 +22,27 @@ export const setVerifiedIdentityController = async (
     const user = await fetchUser(walletAddress)
 
     if (user.globalSteps.verifyIdentity.completed) {
-      throw new HttpsError(400, 'Unable to process request')
+      throw new HttpError(400, 'Unable to process request')
     }
 
     const status = await shuftiProRequest(req, { reference: user.kycReference }, { path: 'status', dryRun })
     if (status.event !== 'verification.accepted') {
-      throw new HttpsError(400, `Failed because ${status.reference} is in "${status.event}" state`)
+      throw new HttpError(400, `Failed because ${status.reference} is in "${status.event}" state`)
     }
 
     const updatedUser: Subset<OnboardingUser> = {
       globalSteps: {
-        ...user.globalSteps,
         verifyIdentity: {
           completed: true,
           timeStamp: new Date().toISOString(),
         },
       },
     }
-    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps'])
+    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps.verifyIdentity'])
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

@@ -43,7 +43,7 @@ export const InvestorType = ({ investorType, setInvestorType }: Props) => {
   return (
     <Stack gap={4}>
       <Box>
-        <Text fontSize={5}>Start onboarding to {pool.title}</Text>
+        <Text fontSize={5}>Start onboarding to {pool ? pool.name : 'Centrifuge'}</Text>
         <Stack gap={2} py={6}>
           <InvestorTypeButton
             onClick={() => setInvestorType('individual')}

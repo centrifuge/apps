@@ -2,7 +2,7 @@ import { firstValueFrom } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { centrifuge } from './centrifuge'
-import { HttpsError } from './httpsError'
+import { HttpError } from './HttpError'
 
 export const validateRemark = async (
   transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
@@ -15,6 +15,6 @@ export const validateRemark = async (
   const actualRemark = extrinsic?.method.args[0].toHuman()
 
   if (actualRemark !== expectedRemark) {
-    throw new HttpsError(400, 'Invalid remark')
+    throw new HttpError(400, 'Invalid remark')
   }
 }
