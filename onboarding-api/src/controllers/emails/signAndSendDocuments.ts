@@ -33,6 +33,7 @@ export const signAndSendDocumentsController = async (
     await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
 
     if (
+      user?.poolSteps[poolId] &&
       !user?.poolSteps[poolId]?.[trancheId]?.signAgreement.completed &&
       user?.poolSteps[poolId]?.[trancheId]?.status.status !== null
     ) {
