@@ -42,11 +42,12 @@ const poolSpecificStepsSchema = object({
 
 const poolStepsSchema = lazy((value) => {
   const poolId = Object.keys(value)[0]
-  if (typeof poolId !== 'string') throw new Error('Bad poolId')
+  if (poolId && typeof poolId !== 'string') throw new Error('Bad poolId')
+  if (!poolId) return object({})
   return object({
     [poolId]: lazy((value) => {
       const trancheId = Object.keys(value)[0]
-      if (typeof trancheId !== 'string') throw new Error('Bad trancheId')
+      if (trancheId && typeof trancheId !== 'string') throw new Error('Bad trancheId')
       return object({
         [trancheId]: poolSpecificStepsSchema,
       })

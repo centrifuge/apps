@@ -38,7 +38,7 @@ export const updateInvestorStatusController = async (
         if (user.investorType === 'entity' && user.jurisdictionCode?.startsWith('us')) {
           return !step?.completed
         }
-        return true
+        return false
       }
       return !step?.completed
     })
@@ -63,7 +63,7 @@ export const updateInvestorStatusController = async (
         ...user.poolSteps,
         [poolId]: {
           [trancheId]: {
-            ...user.poolSteps[poolId][trancheId].signAgreement,
+            ...user.poolSteps[poolId][trancheId],
             status: {
               status,
               timeStamp: new Date().toISOString(),
