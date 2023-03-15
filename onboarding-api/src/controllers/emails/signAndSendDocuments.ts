@@ -3,7 +3,7 @@ import { InferType, object, string } from 'yup'
 import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
@@ -33,17 +33,18 @@ export const signAndSendDocumentsController = async (
     await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
 
     if (
+      user?.poolSteps[poolId] &&
       !user?.poolSteps[poolId]?.[trancheId]?.signAgreement.completed &&
       user?.poolSteps[poolId]?.[trancheId]?.status.status !== null
     ) {
-      throw new HttpsError(400, 'User must sign document before documents can be sent to issuer')
+      throw new HttpError(400, 'User must sign document before documents can be sent to issuer')
     }
 
     const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
     const [unsignedAgreementExists] = await unsignedAgreement.exists()
 
     if (!unsignedAgreementExists) {
-      throw new HttpsError(400, 'Agreement not found')
+      throw new HttpError(400, 'Agreement not found')
     }
 
     const pdfDoc = await signAndAnnotateAgreement(
@@ -84,12 +85,8 @@ export const signAndSendDocumentsController = async (
     await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
     const freshUserData = fetchUser(walletAddress)
     return res.status(201).send({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send({ error: 'An unexpected error occured' })
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

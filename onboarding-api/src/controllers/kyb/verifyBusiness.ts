@@ -3,15 +3,15 @@ import { bool, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
 
 const verifyBusinessInput = object({
   dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
-  poolId: string().required(),
-  trancheId: string().required(),
+  poolId: string(),
+  trancheId: string(),
   businessName: string().required(), // used for AML
   registrationNumber: string().required(),
   jurisdictionCode: string().required(), // country of incorporation
@@ -31,11 +31,11 @@ export const verifyBusinessController = async (
     const entityDoc = await userCollection.doc(req.walletAddress).get()
     const entityData = entityDoc.data() as OnboardingUser
     if (entityDoc.exists && entityData.investorType !== 'entity') {
-      throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
+      throw new HttpError(400, 'Verify business is only available for investorType "entity"')
     }
 
     if (entityDoc.exists && entityData.investorType === 'entity' && entityData.globalSteps?.verifyBusiness.completed) {
-      throw new HttpsError(400, 'Business already verified')
+      throw new HttpError(400, 'Business already verified')
     }
 
     const payloadAML = {
@@ -81,36 +81,35 @@ export const verifyBusinessController = async (
         verifyAccreditation: { completed: false, timeStamp: null },
         verifyTaxInfo: { completed: false, timeStamp: null },
       },
-      poolSteps: {
-        [poolId]: {
-          [trancheId]: {
-            signAgreement: {
-              completed: false,
-              timeStamp: null,
-              transactionInfo: {
-                extrinsicHash: null,
-                blockNumber: null,
+      poolSteps:
+        poolId && trancheId
+          ? {
+              [poolId]: {
+                [trancheId]: {
+                  signAgreement: {
+                    completed: false,
+                    timeStamp: null,
+                    transactionInfo: {
+                      extrinsicHash: null,
+                      blockNumber: null,
+                    },
+                  },
+                  status: {
+                    status: null,
+                    timeStamp: null,
+                  },
+                },
               },
-            },
-            status: {
-              status: null,
-              timeStamp: null,
-            },
-          },
-        },
-      },
+            }
+          : {},
     }
 
     await validateAndWriteToFirestore(walletAddress, user, 'entity')
     await sendVerifyEmailMessage(user)
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).json({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

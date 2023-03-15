@@ -26,6 +26,7 @@ import css from '@styled-system/css'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
@@ -175,6 +176,7 @@ type InnerProps = {
 function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
+  const history = useHistory()
 
   let actualView = view
   if (state.order) {
@@ -258,7 +260,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
           )}
         </>
       ) : (
-        // TODO: Link to onboarding and show whether onboarding is in progress
+        // TODO: Show whether onboarding is in progress
         <Stack gap={2}>
           <Text variant="body3">
             New Silver tokens are available to U.S. and Non-U.S. persons. U.S. persons must be verified “accredited
@@ -266,7 +268,9 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
             <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#requirements">Learn more</AnchorTextLink>
           </Text>
           <Stack px={1}>
-            <Button>Onboard to {state.trancheCurrency?.symbol ?? 'token'}</Button>
+            <Button onClick={() => history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)}>
+              Onboard to {state.trancheCurrency?.symbol ?? 'token'}
+            </Button>
           </Stack>
         </Stack>
       )}

@@ -2,7 +2,7 @@ import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
 import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
-import { HttpsError } from '../utils/httpsError'
+import { HttpError } from '../utils/httpError'
 import { Subset } from '../utils/types'
 
 dotenv.config()
@@ -42,11 +42,12 @@ const poolSpecificStepsSchema = object({
 
 const poolStepsSchema = lazy((value) => {
   const poolId = Object.keys(value)[0]
-  if (typeof poolId !== 'string') throw new Error('Bad poolId')
+  if (poolId && typeof poolId !== 'string') throw new Error('Bad poolId')
+  if (!poolId) return object({})
   return object({
     [poolId]: lazy((value) => {
       const trancheId = Object.keys(value)[0]
-      if (typeof trancheId !== 'string') throw new Error('Bad trancheId')
+      if (trancheId && typeof trancheId !== 'string') throw new Error('Bad trancheId')
       return object({
         [trancheId]: poolSpecificStepsSchema,
       })
@@ -119,7 +120,7 @@ export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
 
 export const storage = new Storage()
-export const onboardingBucket = storage.bucket('onboarding-api-dev')
+export const onboardingBucket = storage.bucket('centrifuge-onboarding-api-dev') // TODO: make an env variable
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {
@@ -157,18 +158,16 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
     }
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpsError(400, error.message)
+    throw new HttpError(400, error?.message || 'Validation or write error')
   }
 }
 
 /**
  *
- * @param signedAgreement signed agreement pdf
- * @param walletAddress wallet address of investor
- * @param poolId poolId of the pool
- * @param trancheId trancheId of the tranche
+ * @param document document as Uint8Array to be uploaded
+ * @param path path to the file in the bucket
  */
-export const writeToOnboardingBucket = async (document: Uint8Array, path: string) => {
+export const writeToOnboardingBucket = async (document: Uint8Array, path: string): Promise<boolean> => {
   try {
     const blob = onboardingBucket.file(path)
     const blobStream = blob.createWriteStream({
@@ -187,6 +186,6 @@ export const writeToOnboardingBucket = async (document: Uint8Array, path: string
     })
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpsError(400, error.message)
+    throw new HttpError(400, error?.message || 'Error uploading to bucket')
   }
 }

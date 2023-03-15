@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
 import { onboardingBucket } from '../database'
 import { getPoolById } from '../utils/centrifuge'
-import { HttpsError } from '../utils/httpsError'
+import { HttpError } from '../utils/httpError'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string
@@ -26,7 +26,7 @@ export const sendDocumentsMessage = async (
   const [taxInfoExists] = await taxInfoFile.exists()
 
   if (!taxInfoExists) {
-    throw new HttpsError(400, 'Tax info not found')
+    throw new HttpError(400, 'Tax info not found')
   }
   const taxInfoPDF = await taxInfoFile.download()
 

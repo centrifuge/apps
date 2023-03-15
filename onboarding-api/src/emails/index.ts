@@ -1,5 +1,5 @@
 import * as sendgridMail from '@sendgrid/mail'
-import { HttpsError } from '../utils/httpsError'
+import { HttpError } from '../utils/httpError'
 
 export const templateIds = {
   verifyEmail: 'd-624f08ad697943929064772c0ac2aca1',
@@ -19,6 +19,6 @@ export const sendEmail = async (message: any) => {
   } catch (error) {
     console.log('email error', JSON.stringify(error))
     // @ts-expect-error error typing
-    throw new HttpsError(400, error?.message || 'Unable to send email verification')
+    throw new HttpError(400, error?.message || 'Unable to send email verification')
   }
 }
