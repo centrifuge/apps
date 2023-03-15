@@ -121,7 +121,7 @@ function ConnectedMenu() {
                 </Shelf>
               </Shelf>
 
-              <Stack gap={0} px={2} pb={1}>
+              <Stack gap={0} mt={1} px={2} pb={1}>
                 <Text variant="label2" textAlign="center" color="textPrimary">
                   Balance
                 </Text>
