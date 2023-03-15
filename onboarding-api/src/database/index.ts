@@ -18,7 +18,7 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
-type SupportedNetworks = 'polkadot'
+type SupportedNetworks = 'substrate' | 'ethereum'
 const walletSchema = object({
   address: string().required(),
   network: string().required() as StringSchema<SupportedNetworks>,

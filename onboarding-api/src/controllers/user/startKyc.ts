@@ -46,7 +46,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         investorType: 'individual',
         wallet: {
           address: walletAddress,
-          network: 'polkadot',
+          network: 'substrate',
         },
         kycReference,
         name: body.name,
