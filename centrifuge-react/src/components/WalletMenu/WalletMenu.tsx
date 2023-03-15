@@ -59,8 +59,8 @@ function ConnectedMenu() {
       : balances
       ? [balances.native.balance, balances.native.currency.symbol]
       : []
-  const explorer = connectedNetwork && useGetExplorerUrl(connectedNetwork)
-  const subScanUrl = explorer && explorer.address(address)
+  const explorer = useGetExplorerUrl(connectedNetwork ?? undefined)
+  const subScanUrl = explorer.address(address, connectedNetwork ?? undefined)
 
   return (
     <Popover
