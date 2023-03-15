@@ -6,7 +6,7 @@ import { useTheme } from 'styled-components'
 export const MenuSwitch: React.VFC = () => {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
 
   const links = [
     { to: `${basePath}`, label: 'Pools' },

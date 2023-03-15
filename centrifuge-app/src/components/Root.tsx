@@ -4,7 +4,7 @@ import {
   EvmChains,
   TransactionProvider,
   TransactionToasts,
-  WalletProvider
+  WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
@@ -171,16 +171,16 @@ const Routes: React.VFC = () => {
       <Route path="/issuer/:pid">
         <IssuerPoolPage />
       </Route>
-      <Route path="/investments/:pid/assets/:aid">
+      <Route path="/pools/:pid/assets/:aid">
         <LoanPage />
       </Route>
-      <Route path="/investments/tokens">
+      <Route path="/pools/tokens">
         <TokenOverviewPage />
       </Route>
-      <Route path="/investments/:pid">
+      <Route path="/pools/:pid">
         <PoolDetailPage />
       </Route>
-      <Route path="/investments">
+      <Route path="/pools">
         <PoolsPage />
       </Route>
       <Route path="/disclaimer">
@@ -198,7 +198,7 @@ const Routes: React.VFC = () => {
         <UpdateInvestorStatus />
       </Route>
       <Route exact path="/">
-        <Redirect to="/investments" />
+        <Redirect to="/pools" />
       </Route>
       <Route>
         <NotFoundPage />

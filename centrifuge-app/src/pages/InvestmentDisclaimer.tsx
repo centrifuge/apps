@@ -14,7 +14,7 @@ export const InvestmentDisclaimerPage: React.FC = () => {
           open={isOpen}
           onClose={() => {
             setIsOpen(false)
-            history.push('/investments')
+            history.push('/pools')
           }}
         />
       </Stack>
