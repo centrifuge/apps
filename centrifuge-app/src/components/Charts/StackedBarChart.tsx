@@ -1,4 +1,3 @@
-import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import {
   Bar,
@@ -52,7 +51,7 @@ export function StackedBarChart({ data, names, colors, xAxisLabel, currency }: S
             tickLine={false}
             axisLine={false}
             tickFormatter={(tick: number, index: number) =>
-              xAxisLabel && index === data.length - 1 ? xAxisLabel : tick.toString()
+              xAxisLabel && index === data.length - 1 ? xAxisLabel : formatDate(tick, { year: '2-digit' })
             }
           />
 
@@ -88,13 +87,7 @@ function TooltipContent({ payload, currency }: TooltipProps<any, any> & { curren
   if (payload && payload?.length > 0) {
     return (
       <TooltipContainer>
-        <TooltipTitle>
-          <Text variant="label2" color={theme.colors.textDisabled}>
-            {formatDate(payload[0].payload.date)}
-          </Text>
-          <br />
-          Order {payload[0].payload.xAxis}
-        </TooltipTitle>
+        <TooltipTitle>{formatDate(payload[0].payload.date)}</TooltipTitle>
         {payload.map(({ dataKey, name, color, value }, index) => (
           <TooltipEntry name={name} color={color} key={`${dataKey}${index}`}>
             {formatBalance(Math.abs(value), currency)}

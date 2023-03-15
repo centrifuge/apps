@@ -60,7 +60,7 @@ export function LiquidityTransactionsSection({
   const chartData: StackedBarChartProps['data'] = React.useMemo(() => {
     return (
       data?.map((entry) => ({
-        xAxis: entry.index,
+        xAxis: new Date(entry.closedAt).getTime(),
         top: entry[dataKeys[0]]?.toDecimal().toNumber() || 0,
         bottom: entry[dataKeys[1]]?.toDecimal().toNumber() || 0,
         date: entry.closedAt,
@@ -116,7 +116,7 @@ export function LiquidityTransactionsSection({
           data={chartData}
           names={dataNames}
           colors={dataColors}
-          xAxisLabel="Latest order"
+          xAxisLabel="Latest day"
           currency={pool.currency.symbol}
         />
       ) : (
