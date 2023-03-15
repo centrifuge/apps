@@ -1263,15 +1263,15 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.poolSystem.PoolCreated.is(event) ||
-            api.events.poolSystem.PoolUpdated.is(event) ||
-            api.events.poolSystem.MaxReserveSet.is(event) ||
+            api.events.poolRegistry.Registered.is(event) ||
             api.events.poolRegistry.MetadataSet.is(event) ||
+            api.events.poolSystem.Updated.is(event) ||
+            api.events.poolSystem.MaxReserveSet.is(event) ||
             api.events.poolSystem.EpochClosed.is(event) ||
             api.events.poolSystem.EpochExecuted.is(event) ||
+            api.events.poolSystem.SolutionSubmitted.is(event) ||
             api.events.investments.InvestOrderUpdated.is(event) ||
-            api.events.investments.RedeemOrderUpdated.is(event) ||
-            api.events.poolSystem.SolutionSubmitted.is(event)
+            api.events.investments.RedeemOrderUpdated.is(event)
         )
         return !!event
       })

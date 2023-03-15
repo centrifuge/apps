@@ -5,7 +5,7 @@ type Props = {
 }
 
 export const IdentityVerification = ({ verificationURL }: Props) => (
-  <Box height="500px">
+  <Box height="100%">
     <iframe
       dataset-removable="true"
       name="shuftipro-iframe"

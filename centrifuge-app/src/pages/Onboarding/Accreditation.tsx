@@ -1,68 +1,83 @@
-import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Checkbox, Stack, Text } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
 import * as React from 'react'
+import { boolean, object } from 'yup'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { OnboardingUser } from '../../types'
 import { useVerifyAccreditation } from './queries/useVerifyAccreditation'
 
+const validationSchema = object({
+  isAccredited: boolean().oneOf([true], 'You must confirm that you are an accredited investor'),
+})
+
 export const Accreditation = () => {
-  const [isAccredited, setIsAccredited] = React.useState(false)
   const { onboardingUser, previousStep, nextStep } = useOnboarding<NonNullable<OnboardingUser>>()
 
   const isCompleted = !!onboardingUser.globalSteps.verifyAccreditation?.completed
 
   const { mutate: verifyAccreditation, isLoading } = useVerifyAccreditation()
 
+  const formik = useFormik({
+    initialValues: {
+      isAccredited: isCompleted,
+    },
+    validationSchema,
+    onSubmit: () => {
+      verifyAccreditation()
+    },
+  })
+
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>Accredited investor assesment</Text>
-        <Stack gap={3}>
-          <Text fontSize={2}>
-            Following is the criteria for being an accredited investor, as per the SEC publications:
+    <>
+      <Content>
+        <ContentHeader
+          title="Accredited investor assessment"
+          body="Following is the criteria for being an accredited investor, as per the SEC publications:"
+        />
+
+        <Stack as="ul" gap={2} style={{ listStyle: 'disc' }}>
+          <Text as="li" variant="body1">
+            An annual income of $200,000 or greater ($300,000 in case of joint partners with a spouse) and proof of
+            maintaining the same yearly
           </Text>
-          <Text>
-            <ul style={{ listStyle: 'disc' }}>
-              <Stack gap={2}>
-                <li>
-                  An annual income of $200,000 or greater ($300,000 in case of joint partners with a spouse) and proof
-                  of maintaining the same yearly
-                </li>
-                <li>
-                  Net worth greater than $1 million either as a sole owner or with a joint partner, excluding residence{' '}
-                </li>
-                <li>In the case of a trust, a total of $5 million in assets is required</li>
-                <li>An organization with all shareholders being accredited investors</li>
-              </Stack>
-            </ul>
+          <Text as="li" variant="body1">
+            Net worth greater than $1 million either as a sole owner or with a joint partner, excluding residence
+          </Text>
+          <Text as="li" variant="body1">
+            In the case of a trust, a total of $5 million in assets is required
+          </Text>
+          <Text as="li" variant="body1">
+            An organization with all shareholders being accredited investors
           </Text>
         </Stack>
-      </Box>
-      <Checkbox
-        style={{
-          cursor: 'pointer',
-        }}
-        checked={isCompleted || isAccredited}
-        onChange={() => setIsAccredited((current) => !current)}
-        label={
-          <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>I confirm that I am an accredited investor</Text>
-        }
-        disabled={isCompleted || isLoading}
-      />
-      <Shelf gap="2">
+
+        <Checkbox
+          {...formik.getFieldProps('isAccredited')}
+          label={
+            <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>I confirm that I am an accredited investor</Text>
+          }
+          disabled={isCompleted || isLoading}
+          errorMessage={formik.errors.isAccredited}
+          checked={formik.values.isAccredited}
+        />
+      </Content>
+
+      <ActionBar>
         <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
           Back
         </Button>
         <Button
           onClick={() => {
-            isCompleted ? nextStep() : verifyAccreditation()
+            isCompleted ? nextStep() : formik.handleSubmit()
           }}
-          disabled={isCompleted ? false : isLoading || !isAccredited}
+          disabled={isLoading}
           loading={isLoading}
           loadingMessage="Verifying"
         >
           Next
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

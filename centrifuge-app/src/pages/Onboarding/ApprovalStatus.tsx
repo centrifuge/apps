@@ -1,6 +1,7 @@
-import { AnchorButton, Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Button, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router-dom'
+import { Content, ContentHeader } from '../../components/Onboarding'
 import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { OnboardingUser } from '../../types'
 
@@ -40,52 +41,56 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
 
   if (onboardingStatus === 'approved') {
     return (
-      <Stack gap={4}>
-        <Box>
-          <Text fontSize={5}>Onboarding complete!</Text>
-          <Text>You have succesfully completed the onboarding for {poolName}</Text>
-        </Box>
+      <Content>
+        <ContentHeader
+          title="Onboarding complete!"
+          body={<>You have succesfully completed the onboarding for {poolName}</>}
+        />
         <Shelf gap="2">
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
             View subscription agreement
           </AnchorButton>
           <Button onClick={() => history.push(`/investments/${poolId}`)}>Invest</Button>
         </Shelf>
-      </Stack>
+      </Content>
     )
   }
 
   if (onboardingStatus === 'rejected') {
     return (
-      <Stack gap={4}>
-        <Box>
-          <Text fontSize={5}>Something went wrong with your onboarding profile.</Text>
-          <Text>
-            Please contact <a href="mailto:support@centrifuge.io">support@centrifuge.io</a> for more information
-          </Text>
-        </Box>
+      <Content>
+        <ContentHeader
+          title="Something went wrong with your onboarding profile."
+          body={
+            <>
+              Please contact <a href="mailto:support@centrifuge.io">support@centrifuge.io</a> for more information
+            </>
+          }
+        />
+
         <Box>
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
             View subscription agreement
           </AnchorButton>
         </Box>
-      </Stack>
+      </Content>
     )
   }
 
   if (onboardingStatus === 'pending') {
     return (
-      <Stack gap={4}>
-        <Box>
-          <Text fontSize={5}>Onboarding almost complete!</Text>
-          <Text>Your documents and profile have been sent to the issuer for approval.</Text>
-        </Box>
+      <Content>
+        <ContentHeader
+          title="Onboarding almost complete!"
+          body="Your documents and profile have been sent to the issuer for approval."
+        />
+
         <Box>
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
             View subscription agreement
           </AnchorButton>
         </Box>
-      </Stack>
+      </Content>
     )
   }
 

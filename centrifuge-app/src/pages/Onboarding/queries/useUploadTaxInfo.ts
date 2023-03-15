@@ -2,12 +2,12 @@ import { useMutation } from 'react-query'
 import { useAuth } from '../../../components/AuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
-export const useUploadTaxInfo = (taxInfo: File | null) => {
+export const useUploadTaxInfo = () => {
   const { authToken } = useAuth()
   const { refetchOnboardingUser, nextStep } = useOnboarding()
 
   const mutation = useMutation(
-    async () => {
+    async (taxInfo?: File) => {
       if (taxInfo) {
         const formData = new FormData()
         formData.append('taxInfo', taxInfo)
