@@ -34,8 +34,7 @@ export function useGetExplorerUrl(network?: Network) {
       try {
         const evmUrl = getEvmUrl(networkOverride)
         return (evmUrl ? new URL(`/address/${address}`, evmUrl) : new URL(`/account/${address}`, subscanUrl)).toString()
-      } catch (error) {
-        console.warn(error)
+      } catch {
         return ''
       }
     },
@@ -43,8 +42,7 @@ export function useGetExplorerUrl(network?: Network) {
       try {
         const evmUrl = getEvmUrl(networkOverride)
         return (evmUrl ? new URL(`/tx/${hash}`, evmUrl) : new URL(`/extrinsic/${hash}`, subscanUrl)).toString()
-      } catch (error) {
-        console.warn(error)
+      } catch {
         return ''
       }
     },
