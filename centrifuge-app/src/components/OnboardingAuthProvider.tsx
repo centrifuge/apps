@@ -1,4 +1,6 @@
+import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
+import { Signer } from '@polkadot/types/types'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 import { SiweMessage } from 'siwe'
@@ -40,97 +42,16 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
 
   const { mutate: login, isLoading: isLoggingIn } = useMutation(async () => {
     try {
-      // authenticate a substrate wallet
       if (selectedAccount?.address && selectedWallet?.signer) {
-        const { address } = selectedAccount
-
-        if (proxy) {
-          // @ts-expect-error Signer type version mismatch
-          const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer, {
-            onBehalfOf: proxy.delegator,
-          })
-
-          if (token) {
-            const isAuthorizedProxy = await cent.auth.verifyProxy(
-              address,
-              proxy.delegator,
-              AUTHORIZED_ONBOARDING_PROXY_TYPES
-            )
-
-            if (isAuthorizedProxy) {
-              const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ jw3tToken: token }),
-              })
-              const authToken = await authTokenRes.json()
-              sessionStorage.setItem(
-                `centrifuge-onboarding-auth-${selectedAccount.address}-${proxy.delegator}`,
-                JSON.stringify({ signed: authToken.token, payload })
-              )
-              refetchSession()
-            }
-          }
-        } else {
-          // @ts-expect-error Signer type version mismatch
-          const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer)
-
-          if (token) {
-            const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-              body: JSON.stringify({ jw3tToken: token }),
-            })
-            const authToken = await authTokenRes.json()
-            sessionStorage.setItem(
-              `centrifuge-onboarding-auth-${selectedAccount.address}`,
-              JSON.stringify({ signed: authToken.token, payload })
-            )
-            refetchSession()
-          }
-        }
-      } else if (selectedAddress) {
-        // authenticate an evm wallet
-        const signer = provider?.getSigner()
-        const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`)
-        const nonce = await nonceRes.json()
-        const domain = window.location.host
-        const origin = window.location.origin
-        const message = new SiweMessage({
-          domain,
-          address: selectedAddress,
-          statement: 'This is THE message',
-          uri: origin,
-          version: '1',
-          chainId: 1,
-          nonce: nonce.nonce,
-        })
-        const siweMessage = message.prepareMessage()
-        const signedMessage = await signer?.signMessage(siweMessage)
-        const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({ message, signature: signedMessage }),
-        })
-        const token = await tokenRes.json()
-        if (token) {
-          sessionStorage.setItem(
-            `centrifuge-onboarding-auth-${selectedAddress}`,
-            JSON.stringify({ signed: token.token, payload: message })
-          )
-          refetchSession()
-        }
+        // @ts-expect-error signer is not typed correctly
+        await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer, cent, proxy)
+      } else if (selectedAddress && provider?.getSigner()) {
+        await loginWithEvm(selectedAddress, provider.getSigner())
       }
-    } catch {}
+    } catch {
+    } finally {
+      refetchSession()
+    }
   })
 
   const ctx = React.useMemo(
@@ -146,6 +67,10 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
 }
 
 export function useOnboardingAuth() {
+  const {
+    substrate: { selectedAccount },
+    evm: { selectedAddress },
+  } = useWallet()
   const ctx = React.useContext(OnboardingAuthContext)
   if (!ctx) throw new Error('useOnboardingAuth must be used within OnboardingAuthProvider')
   const { session } = ctx
@@ -180,7 +105,7 @@ export function useOnboardingAuth() {
       }
     },
     {
-      enabled: true,
+      enabled: !!selectedAccount?.address || !!selectedAddress,
       retry: 1,
     }
   )
@@ -191,5 +116,86 @@ export function useOnboardingAuth() {
     login: ctx.login,
     refetchAuth,
     isAuthFetched: isFetched,
+  }
+}
+
+const loginWithSubstrate = async (address: string, signer: Signer, cent: Centrifuge, proxy?: any) => {
+  if (proxy) {
+    // @ts-expect-error Signer type version mismatch
+    const { token, payload } = await cent.auth.generateJw3t(address, signer, {
+      onBehalfOf: proxy.delegator,
+    })
+
+    if (token) {
+      const isAuthorizedProxy = await cent.auth.verifyProxy(address, proxy.delegator, AUTHORIZED_ONBOARDING_PROXY_TYPES)
+
+      if (isAuthorizedProxy) {
+        const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ jw3tToken: token }),
+        })
+        const authToken = await authTokenRes.json()
+        sessionStorage.setItem(
+          `centrifuge-onboarding-auth-${address}-${proxy.delegator}`,
+          JSON.stringify({ signed: authToken.token, payload })
+        )
+      }
+    }
+  } else {
+    // @ts-expect-error Signer type version mismatch
+    const { token, payload } = await cent.auth.generateJw3t(address, signer)
+
+    if (token) {
+      const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ jw3tToken: token }),
+      })
+      const authToken = await authTokenRes.json()
+      sessionStorage.setItem(
+        `centrifuge-onboarding-auth-${address}`,
+        JSON.stringify({ signed: authToken.token, payload })
+      )
+    }
+  }
+}
+
+const loginWithEvm = async (address: string, signer: any) => {
+  const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`)
+  const nonce = await nonceRes.json()
+  const domain = window.location.host
+  const origin = window.location.origin
+  const message = new SiweMessage({
+    domain,
+    address: address,
+    statement: 'This is THE message',
+    uri: origin,
+    version: '1',
+    chainId: 1,
+    nonce: nonce.nonce,
+  })
+  const siweMessage = message.prepareMessage()
+  const signedMessage = await signer?.signMessage(siweMessage)
+  const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ message, signature: signedMessage }),
+  })
+  const token = await tokenRes.json()
+  if (token) {
+    sessionStorage.setItem(
+      `centrifuge-onboarding-auth-${address}`,
+      JSON.stringify({ signed: token.token, payload: message })
+    )
   }
 }
