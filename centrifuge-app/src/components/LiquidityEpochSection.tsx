@@ -108,7 +108,7 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
             loading={loadingClose}
             loadingMessage={loadingClose ? 'Executing order…' : ''}
           >
-            Execution order
+            Start order execution
           </Button>
         </Shelf>
       }
