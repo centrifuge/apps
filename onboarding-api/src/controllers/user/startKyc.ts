@@ -27,7 +27,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     }
 
     if (
-      userData.investorType === 'entity' &&
+      userData?.investorType === 'entity' &&
       !userData.globalSteps.verifyEmail.completed &&
       !userData.globalSteps.verifyBusiness.completed &&
       !userData.globalSteps.confirmOwners.completed
@@ -35,7 +35,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       throw new HttpError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
     }
 
-    if (userData.globalSteps.verifyIdentity.completed) {
+    if (userData?.globalSteps.verifyIdentity.completed) {
       throw new HttpError(400, 'Identity already verified')
     }
 
@@ -105,7 +105,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     const payloadKYC = {
       reference: kycReference,
       callback_url: '',
-      email: userData.email ?? '',
+      email: userData?.email ?? '',
       country: body.countryOfCitizenship,
       language: 'EN',
       redirect_url: '',
