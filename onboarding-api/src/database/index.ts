@@ -18,11 +18,16 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
-type SupportedNetworks = 'substrate' | 'ethereum'
-const walletSchema = object({
-  address: string().required(),
-  network: string().required() as StringSchema<SupportedNetworks>,
-})
+export type SupportedNetworks = 'substrate' | 'evm'
+const walletSchema = array()
+  .of(
+    object({
+      address: string().required(),
+      network: string().required() as StringSchema<SupportedNetworks>,
+    })
+  )
+  .required()
+export type Wallet = InferType<typeof walletSchema>
 
 const poolSpecificStepsSchema = object({
   signAgreement: object({
@@ -144,6 +149,7 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   schemaKey: keyof typeof schemas,
   mergeFields?: T
 ) => {
+  // TODO: find primary key for account based on wallet before writing to firestore
   try {
     const { collection, schema } = schemas[schemaKey]
     if (typeof mergeFields !== 'undefined') {

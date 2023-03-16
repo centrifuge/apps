@@ -1,19 +1,14 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useAuth } from '../../components/AuthProvider'
 import { DataSharingAgreementDialog } from '../../components/Dialogs/DataSharingAgreementDialog'
+import { useOnboardingAuth } from '../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../components/OnboardingProvider'
-
-const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const LinkWallet = () => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = React.useState(false)
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = React.useState(false)
   const { nextStep } = useOnboarding()
-
-  const { selectedAccount } = useWallet().substrate
-  const { login, isAuth } = useAuth()
+  const { login, isAuth } = useOnboardingAuth()
 
   return (
     <Stack gap={4}>
@@ -58,10 +53,7 @@ export const LinkWallet = () => {
         {isAuth ? (
           <Button onClick={() => nextStep()}>Next</Button>
         ) : (
-          <Button
-            disabled={!selectedAccount || !isAgreedToDataSharingAgreement}
-            onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
-          >
+          <Button disabled={!isAgreedToDataSharingAgreement} onClick={() => login()}>
             Link your wallet
           </Button>
         )}

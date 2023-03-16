@@ -17,10 +17,10 @@ const kycInput = object({
 
 export const startKycController = async (req: Request<any, any, InferType<typeof kycInput>>, res: Response) => {
   try {
-    const { walletAddress, body } = req
+    const { wallet, body } = req
     await validateInput(req.body, kycInput)
 
-    const user = await fetchUser(walletAddress, { suppressError: true })
+    const user = await fetchUser(wallet, { suppressError: true })
 
     if (!user && (!body.poolId || !body.trancheId)) {
       throw new HttpError(400, 'trancheId and poolId required for individual kyc')
@@ -44,10 +44,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     if (body.poolId && body.trancheId) {
       const updatedUserData: IndividualUser = {
         investorType: 'individual',
-        wallet: {
-          address: walletAddress,
-          network: 'substrate',
-        },
+        wallet: [req.wallet],
         kycReference,
         name: body.name,
         dateOfBirth: body.dateOfBirth,
@@ -85,7 +82,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         },
         email: null,
       }
-      await validateAndWriteToFirestore(walletAddress, updatedUserData, 'individual')
+      await validateAndWriteToFirestore(wallet.address, updatedUserData, 'individual')
     } else {
       const updatedUser = {
         name: body.name,
@@ -94,7 +91,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         dateOfBirth: body.dateOfBirth,
         kycReference,
       }
-      await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', [
+      await validateAndWriteToFirestore(wallet.address, updatedUser, 'entity', [
         'name',
         'countryOfCitizenship',
         'countryOfResidency',

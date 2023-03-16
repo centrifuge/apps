@@ -29,6 +29,7 @@
     "jw3t": "^1.0.8",
     "node-fetch": "2.6.7",
     "pdf-lib": "^1.17.1",
+    "siwe": "2.1.3",
     "yup": "^0.32.11"
   },
   "devDependencies": {

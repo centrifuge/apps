@@ -16,10 +16,10 @@ export const getSignedAgreementController = async (
   try {
     await validateInput(req.query, getSignedAgreementInput)
     const { poolId, trancheId } = req.query
-    const { walletAddress } = req
+    const { wallet } = req
 
     const signedAgreement = await onboardingBucket.file(
-      `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+      `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
     )
 
     const [signedAgreementExists] = await signedAgreement.exists()

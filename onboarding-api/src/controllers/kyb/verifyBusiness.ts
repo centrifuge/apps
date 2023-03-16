@@ -24,11 +24,11 @@ export const verifyBusinessController = async (
   try {
     await validateInput(req.body, verifyBusinessInput)
     const {
-      walletAddress,
+      wallet,
       body: { jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
-    const existingUser = await fetchUser(walletAddress, { suppressError: true })
+    const existingUser = await fetchUser(wallet, { suppressError: true })
     if (existingUser && existingUser.investorType !== 'entity') {
       throw new HttpError(400, 'Verify business is only available for investorType "entity"')
     }
@@ -59,10 +59,7 @@ export const verifyBusinessController = async (
     const user: EntityUser = {
       investorType: 'entity',
       kycReference: '',
-      wallet: {
-        address: walletAddress,
-        network: req.walletAddress.startsWith('0x') ? 'ethereum' : 'substrate',
-      },
+      wallet: [req.wallet],
       name: null,
       dateOfBirth: null,
       countryOfCitizenship: null,
@@ -100,9 +97,9 @@ export const verifyBusinessController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, user, 'entity')
-    await sendVerifyEmailMessage(user)
-    const freshUserData = await fetchUser(walletAddress)
+    await validateAndWriteToFirestore(wallet.address, user, 'entity')
+    await sendVerifyEmailMessage(user, wallet)
+    const freshUserData = await fetchUser(wallet)
     return res.status(200).json({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

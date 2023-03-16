@@ -1,6 +1,9 @@
 import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
+import { generateNonceController } from './controllers/auth/generateNonce'
+import { refreshTokenController } from './controllers/auth/refreshToken'
+import { verifyWalletController } from './controllers/auth/verifyWallet'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { signAndSendDocumentsController } from './controllers/emails/signAndSendDocuments'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
@@ -16,7 +19,7 @@ import { verifyAccreditationController } from './controllers/user/verifyAccredit
 import { corsMiddleware } from './middleware/cors'
 import { fileUploadMiddleware } from './middleware/fileUpload'
 import { rateLimiter } from './middleware/rateLimiter'
-import { verifyJw3t } from './middleware/verifyJw3t'
+import { verifyAuth } from './middleware/verifyAuth'
 const express = require('express')
 
 dotenv.config()
@@ -27,23 +30,27 @@ onboarding.use(rateLimiter)
 onboarding.use(corsMiddleware)
 
 onboarding.options('*', corsMiddleware)
-onboarding.get('/getUser', verifyJw3t, getUserController)
+onboarding.post('/verifyWallet', verifyWalletController)
+onboarding.post('/refresh', refreshTokenController)
+onboarding.get('/nonce', generateNonceController)
 
-onboarding.post('/startKyc', verifyJw3t, startKycController)
-onboarding.post('/setVerifiedIdentity', verifyJw3t, setVerifiedIdentityController)
+onboarding.get('/getUser', verifyAuth, getUserController)
 
-onboarding.post('/uploadTaxInfo', verifyJw3t, fileUploadMiddleware, uploadTaxInfoController)
-onboarding.post('/verifyAccreditation', verifyJw3t, verifyAccreditationController)
-onboarding.get('/getTaxInfo', verifyJw3t, getTaxInfoController)
+onboarding.post('/startKyc', verifyAuth, startKycController)
+onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
 
-onboarding.post('/verifyBusiness', verifyJw3t, verifyBusinessController)
-onboarding.post('/confirmOwners', verifyJw3t, confirmOwnersController)
+onboarding.post('/uploadTaxInfo', verifyAuth, fileUploadMiddleware, uploadTaxInfoController)
+onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
+onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 
-onboarding.get('/getUnsignedAgreement', verifyJw3t, getUnsignedAgreementController)
-onboarding.get('/getSignedAgreement', verifyJw3t, getSignedAgreementController)
+onboarding.post('/verifyBusiness', verifyAuth, verifyBusinessController)
+onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
 
-onboarding.post('/sendVerifyEmail', verifyJw3t, sendVerifyEmailController)
-onboarding.post('/signAndSendDocuments', verifyJw3t, signAndSendDocumentsController)
+onboarding.get('/getUnsignedAgreement', verifyAuth, getUnsignedAgreementController)
+onboarding.get('/getSignedAgreement', verifyAuth, getSignedAgreementController)
+
+onboarding.post('/sendVerifyEmail', verifyAuth, sendVerifyEmailController)
+onboarding.post('/signAndSendDocuments', verifyAuth, signAndSendDocumentsController)
 onboarding.get('/verifyEmail', verifyEmailController)
 
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)

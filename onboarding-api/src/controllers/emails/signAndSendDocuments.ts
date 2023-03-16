@@ -26,9 +26,9 @@ export const signAndSendDocumentsController = async (
     await validateInput(req.body, signAndSendDocumentsInput)
 
     const { poolId, trancheId, transactionInfo } = req.body
-    const { walletAddress } = req
+    const { wallet } = req
 
-    const user = await fetchUser(walletAddress)
+    const user = await fetchUser(wallet)
 
     await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
 
@@ -48,7 +48,7 @@ export const signAndSendDocumentsController = async (
 
     const pdfDoc = await signAndAnnotateAgreement(
       unsignedAgreement,
-      walletAddress,
+      wallet.address,
       transactionInfo,
       user?.name as string
     )
@@ -57,10 +57,10 @@ export const signAndSendDocumentsController = async (
 
     await writeToOnboardingBucket(
       signedAgreementPDF,
-      `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+      `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
     )
 
-    await sendDocumentsMessage(walletAddress, poolId, trancheId, signedAgreementPDF)
+    await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
 
     const updatedUser: Subset<OnboardingUser> = {
       poolSteps: {
@@ -81,8 +81,8 @@ export const signAndSendDocumentsController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
-    const freshUserData = fetchUser(walletAddress)
+    await validateAndWriteToFirestore(wallet.address, updatedUser, 'entity', ['poolSteps'])
+    const freshUserData = fetchUser(wallet)
     return res.status(201).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

@@ -1,3 +1,4 @@
+import { Request } from 'express'
 import { OnboardingUser, userCollection } from '../database'
 import { HttpError } from './httpError'
 
@@ -6,9 +7,9 @@ type Options = { suppressError?: boolean }
 type OptionsOrNever<T> = T extends Options ? T : never
 type UserOrNull<T> = T extends Options ? OnboardingUser | null : OnboardingUser
 
-export async function fetchUser<T>(walletAddress: string, options?: OptionsOrNever<T>): Promise<UserOrNull<T>> {
+export async function fetchUser<T>(wallet: Request['wallet'], options?: OptionsOrNever<T>): Promise<UserOrNull<T>> {
   try {
-    const userSnapshot = await userCollection.where('wallet.address', '==', walletAddress).get()
+    const userSnapshot = await userCollection.where(`wallet`, 'array-contains', wallet).get()
     if (userSnapshot.empty) {
       if (options && options.suppressError) {
         return null as UserOrNull<T>

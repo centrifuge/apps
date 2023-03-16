@@ -4,9 +4,11 @@ import { HttpError, reportHttpError } from '../../utils/httpError'
 
 export const getTaxInfoController = async (req: Request, res: Response) => {
   try {
-    const { walletAddress } = req
+    const {
+      wallet: { address },
+    } = req
 
-    const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}.pdf`)
+    const taxInfo = await onboardingBucket.file(`tax-information/${address}.pdf`)
 
     const [taxInfoExists] = await taxInfo.exists()
 
