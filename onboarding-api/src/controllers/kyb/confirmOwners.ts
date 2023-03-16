@@ -48,7 +48,7 @@ export const confirmOwnersController = async (
       globalSteps: { confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(wallet.address, verifyEntity, 'entity', [
+    await validateAndWriteToFirestore(wallet, verifyEntity, 'entity', [
       'globalSteps.confirmOwners',
       'ultimateBeneficialOwners',
     ])

@@ -1,6 +1,7 @@
 import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
+import { Request } from 'express'
 import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
 import { HttpError } from '../utils/httpError'
 import { Subset } from '../utils/types'
@@ -121,7 +122,7 @@ export type IndividualUser = InferType<typeof individualUserSchema>
 export type OnboardingUser = IndividualUser | EntityUser
 
 export const firestore = new Firestore()
-export const userCollection = firestore.collection(`onboarding-users`)
+export const userCollection = firestore.collection(`onboarding-users-temp`)
 
 export const storage = new Storage()
 export const onboardingBucket = storage.bucket('centrifuge-onboarding-api-dev') // TODO: make an env variable
@@ -145,21 +146,26 @@ const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
  * @param mergeFields optional, pass a value to update data in an existing collection
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
-  key: string,
+  wallet: Request['wallet'],
   data: T extends 'undefined' ? OnboardingUser : Subset<OnboardingUser>,
   schemaKey: keyof typeof schemas,
   mergeFields?: T
 ) => {
-  // TODO: find primary key for account based on wallet before writing to firestore
   try {
     const { collection, schema } = schemas[schemaKey]
+    // mergeFields implies that the user has already been created
     if (typeof mergeFields !== 'undefined') {
       const mergeValidations = (mergeFields as string[]).map((field) => schema.validateAt(field, data))
+      const userSnapshot = await userCollection.where(`wallet`, 'array-contains', wallet).get()
+      if (userSnapshot.empty) {
+        throw new Error('User not found')
+      }
+      const key = userSnapshot.docs[0].id
       await Promise.all(mergeValidations)
       await collection.doc(key).set(data, { mergeFields: mergeFields as string[] })
     } else {
       await schema.validate(data)
-      await collection.doc(key).set(data)
+      await collection.doc(wallet.address).set(data)
     }
   } catch (error) {
     // @ts-expect-error error typing

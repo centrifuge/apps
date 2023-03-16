@@ -37,7 +37,7 @@ export const verifyEmailController = async (
       globalSteps: { verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(payload.wallet.address, globalSteps, 'entity', ['globalSteps.verifyEmail'])
+    await validateAndWriteToFirestore(payload.wallet, globalSteps, 'entity', ['globalSteps.verifyEmail'])
     return res.status(204).send()
   } catch (e) {
     const error = reportHttpError(e)

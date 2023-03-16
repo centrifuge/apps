@@ -100,7 +100,7 @@ export const verifyBusinessController = async (
           : {},
     }
 
-    await validateAndWriteToFirestore(wallet.address, user, 'entity')
+    await validateAndWriteToFirestore(wallet, user, 'entity')
     await sendVerifyEmailMessage(user, wallet)
     const freshUserData = await fetchUser(wallet)
     return res.status(200).json({ ...freshUserData })

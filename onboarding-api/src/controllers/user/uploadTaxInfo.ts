@@ -34,7 +34,7 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
       },
     }
 
-    await validateAndWriteToFirestore(wallet.address, updatedUser, 'entity', ['globalSteps.verifyTaxInfo'])
+    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyTaxInfo'])
 
     const freshUserData = await fetchUser(wallet)
     return res.status(200).send({ ...freshUserData })

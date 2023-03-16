@@ -29,7 +29,7 @@ export const verifyAccreditationController = async (req: Request, res: Response)
         },
       },
     }
-    await validateAndWriteToFirestore(req.wallet.address, updatedUser, 'entity', ['globalSteps'])
+    await validateAndWriteToFirestore(req.wallet, updatedUser, 'entity', ['globalSteps'])
     const freshUserData = await fetchUser(req.wallet)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
