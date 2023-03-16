@@ -70,7 +70,7 @@ const LoanSidebar: React.FC = () => {
 
 const Loan: React.FC = () => {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const pool = usePool(poolId)
   const loan = useLoan(poolId, assetId)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)

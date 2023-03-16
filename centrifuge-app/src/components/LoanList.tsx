@@ -66,7 +66,7 @@ const columns: Column[] = [
 
 export const LoanList: React.FC<Props> = ({ loans }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const rows: Row[] = loans.map((loan) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
