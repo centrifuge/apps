@@ -55,6 +55,7 @@ const darkColors = {
   textButtonSecondaryHover: 'white',
   textButtonSecondaryPressed: 'white',
   textButtonSecondaryDisabled: grayScale[600],
+
   borderButtonSecondary: grayScale[600],
   borderButtonSecondaryFocus: 'white',
   borderButtonSecondaryHover: grayScale[600],
@@ -77,6 +78,23 @@ const darkColors = {
   borderButtonTertiaryHover: 'transparent',
   borderButtonTertiaryPressed: yellowScale[500],
   borderButtonTertiaryDisabled: 'transparent',
+
+  backgroundButtonWallet: 'black',
+  backgroundButtonWalletFocus: grayScale[900],
+  backgroundButtonWalletHover: grayScale[900],
+  backgroundButtonWalletPressed: 'black',
+  backgroundButtonWalletDisabled: 'transparent',
+  textButtonWallet: 'white',
+  textButtonWalletFocus: 'white',
+  textButtonWalletHover: 'white',
+  textButtonWalletPressed: 'white',
+  textButtonWalletDisabled: grayScale[600],
+  borderButtonWallet: grayScale[600],
+  borderButtonWalletFocus: 'white',
+  borderButtonWalletHover: grayScale[400],
+  borderButtonWalletPressed: 'white',
+  borderButtonWalletDisabled: grayScale[600],
+  shadowButtonWalletPressed: 'white',
 }
 
 export const modeDark = {

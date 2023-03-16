@@ -51,6 +51,7 @@ export type MenuItemProps = {
   sublabel?: string
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
+  minHeight?: string | number
 } & PropsOf<typeof MenuItemButton> &
   React.HTMLAttributes<HTMLButtonElement>
 
@@ -59,11 +60,12 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   sublabel,
   icon: IconComp,
   iconRight: IconRightComp,
+  minHeight = '48px',
   ...buttonProps
 }) => {
   return (
     <MenuItemButton {...buttonProps}>
-      <Shelf gap={1} px={2} py={1} minHeight="48px">
+      <Shelf gap={1} px={2} py={1} minHeight={minHeight}>
         {IconComp && isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp}
         <Stack alignItems="flex-start">
           <Text variant="interactive1" color="inherit">
