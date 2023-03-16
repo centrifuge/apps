@@ -150,9 +150,9 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
           <DataTable data={redemptions} columns={columns} summary={summaryRedemptions} />
         </DataTableGroup>
       </Stack>
-      <Text variant="body3" color="textSecondary">
-        An epoch is a period of locking investments and redemptions.{' '}
-        <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
+      <Text as="small" variant="body3" color="textSecondary">
+        <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink> about how orders are
+        processed.
       </Text>
     </Stack>
   )

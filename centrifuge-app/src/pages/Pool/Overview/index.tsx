@@ -1,3 +1,4 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, InteractiveCard, Shelf, Stack, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
@@ -83,6 +84,7 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
+  const { showWallets, connectedType } = useWallet()
 
   const pageSummaryData = [
     {
@@ -178,7 +180,12 @@ export function PoolDetailOverview({
                     {setSelectedToken && (
                       <Button
                         variant="secondary"
-                        onClick={() => setSelectedToken(token.id)}
+                        onClick={() => {
+                          if (!connectedType) {
+                            showWallets()
+                          }
+                          setSelectedToken(token.id)
+                        }}
                         style={{ marginLeft: 'auto' }}
                       >
                         Invest

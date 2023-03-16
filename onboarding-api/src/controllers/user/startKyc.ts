@@ -20,23 +20,22 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     const { wallet, body } = req
     await validateInput(req.body, kycInput)
 
-    const user = await fetchUser(wallet, { suppressError: true })
+    const userData = await fetchUser(wallet, { suppressError: true })
 
-    if (!user && (!body.poolId || !body.trancheId)) {
+    if (!userData && (!body.poolId || !body.trancheId)) {
       throw new HttpError(400, 'trancheId and poolId required for individual kyc')
     }
 
     if (
-      user &&
-      user.investorType === 'entity' &&
-      !user.globalSteps.verifyEmail.completed &&
-      !user.globalSteps.verifyBusiness.completed &&
-      !user.globalSteps.confirmOwners.completed
+      userData?.investorType === 'entity' &&
+      !userData.globalSteps.verifyEmail.completed &&
+      !userData.globalSteps.verifyBusiness.completed &&
+      !userData.globalSteps.confirmOwners.completed
     ) {
       throw new HttpError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
     }
 
-    if (user && user.globalSteps.verifyIdentity.completed) {
+    if (userData?.globalSteps.verifyIdentity.completed) {
       throw new HttpError(400, 'Identity already verified')
     }
 
@@ -103,7 +102,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     const payloadKYC = {
       reference: kycReference,
       callback_url: '',
-      email: user?.email ?? '',
+      email: userData?.email ?? '',
       country: body.countryOfCitizenship,
       language: 'EN',
       redirect_url: '',

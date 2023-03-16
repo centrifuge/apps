@@ -46,11 +46,12 @@ const poolSpecificStepsSchema = object({
 
 const poolStepsSchema = lazy((value) => {
   const poolId = Object.keys(value)[0]
-  if (typeof poolId !== 'string') throw new Error('Bad poolId')
+  if (poolId && typeof poolId !== 'string') throw new Error('Bad poolId')
+  if (!poolId) return object({})
   return object({
     [poolId]: lazy((value) => {
       const trancheId = Object.keys(value)[0]
-      if (typeof trancheId !== 'string') throw new Error('Bad trancheId')
+      if (trancheId && typeof trancheId !== 'string') throw new Error('Bad trancheId')
       return object({
         [trancheId]: poolSpecificStepsSchema,
       })
@@ -123,7 +124,7 @@ export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
 
 export const storage = new Storage()
-export const onboardingBucket = storage.bucket('onboarding-api')
+export const onboardingBucket = storage.bucket('centrifuge-onboarding-api-dev') // TODO: make an env variable
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {

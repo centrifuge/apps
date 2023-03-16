@@ -7,7 +7,6 @@ import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'
 import { EpochList } from './EpochList'
 import { PageSection } from './PageSection'
-import { Tooltips } from './Tooltips'
 
 type LiquidityEpochSectionProps = {
   pool: Pool
@@ -15,9 +14,11 @@ type LiquidityEpochSectionProps = {
 
 function ExtraInfo({ children }: { children?: React.ReactNode }) {
   return (
-    <Shelf mb={2} gap={1}>
+    <Shelf as="p" mb={2} gap={1}>
       <IconInfo size={16} />
-      <Text variant="body3">{children}</Text>
+      <Text as="small" variant="body3">
+        {children}
+      </Text>
     </Shelf>
   )
 }
@@ -43,11 +44,11 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
     useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
-    'Close epoch',
+    'Start order execution',
     (cent) => cent.pools.closeEpoch,
     {
       onSuccess: () => {
-        console.log('Epoch closed successfully')
+        console.log('Started order execution successfully')
       },
     }
   )
@@ -70,41 +71,62 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   return (
     <PageSection
-      title={`Epoch ${pool.epoch.current}`}
-      titleAddition={<Text variant="body2">{epochTimeRemaining ? 'Ongoing' : 'Minimum duration ended'}</Text>}
+      title="Order overview"
       headerRight={
         <Shelf gap="1">
-          {!epochTimeRemaining && !ordersLocked && <Text variant="body2">No orders locked</Text>}
-          {ordersLocked && ordersFullyExecutable && <Text variant="body2">Orders executable</Text>}
-          {ordersLocked && ordersPartiallyExecutable && <Text variant="body2">Orders partially executable</Text>}
-          {ordersLocked && noOrdersExecutable && <Text variant="body2">No orders executable</Text>}
-          {epochTimeRemaining && <Tooltips type="epochTimeRemaining" label={epochTimeRemaining} />}
+          {!epochTimeRemaining && !ordersLocked && (
+            <Text as="small" variant="body2">
+              No orders locked
+            </Text>
+          )}
+          {ordersLocked && ordersFullyExecutable && (
+            <Text as="small" variant="body2">
+              Orders executable
+            </Text>
+          )}
+          {ordersLocked && ordersPartiallyExecutable && (
+            <Text as="small" variant="body2">
+              Orders partially executable
+            </Text>
+          )}
+          {ordersLocked && noOrdersExecutable && (
+            <Text as="small" variant="body2">
+              No orders executable
+            </Text>
+          )}
+          {epochTimeRemaining && (
+            <Text as="small" variant="body2">
+              Pending orders can be executed in {epochTimeRemaining}
+            </Text>
+          )}
+
           <Button
             small
             variant="secondary"
             onClick={closeEpoch}
             disabled={!pool || loadingClose || !!epochTimeRemaining}
             loading={loadingClose}
-            loadingMessage={loadingClose ? 'Closing epoch...' : ''}
+            loadingMessage={loadingClose ? 'Executing order…' : ''}
           >
-            Close
+            Start order execution
           </Button>
         </Shelf>
       }
     >
       {!epochTimeRemaining && !ordersLocked && (
-        <ExtraInfo>The epoch is continuing until orders have been locked and can be executed.</ExtraInfo>
+        <ExtraInfo>The collection of orders is continuing until orders have been locked and can be executed.</ExtraInfo>
       )}
       {ordersLocked && ordersPartiallyExecutable && (
         <ExtraInfo>
-          The epoch continues until all orders can be executed. Close the epoch to partially execute orders and lock the
-          remaining orders into the following epoch.
+          The collection of orders continues until all orders can be executed. Start the execution of the orders to
+          partially execute orders and lock the remaining orders into the next cycle of order executions.
         </ExtraInfo>
       )}
       {!ordersLocked && noOrdersExecutable && (
         <ExtraInfo>
           The pool currently may be oversubscribed for additional investments or there is insufficient liquidity
-          available for redemptions. Closing of the epoch will not ensure execution of pending orders.
+          available for redemptions. Closing of the collection of orders epoch will not ensure execution of pending
+          orders.
         </ExtraInfo>
       )}
       <EpochList pool={pool} />
@@ -134,7 +156,7 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   return (
     <PageSection
-      title={`Epoch ${pool.epoch.current}`}
+      title="Order overview"
       titleAddition={<Text variant="body2">In submission period</Text>}
       headerRight={
         <Button
@@ -143,7 +165,7 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
           onClick={submitSolution}
           disabled={loadingSolution || !isFeasible}
           loading={loadingSolution}
-          loadingMessage={loadingSolution ? 'Submitting solution...' : ''}
+          loadingMessage={loadingSolution ? 'Submitting solution…' : ''}
         >
           Submit solution
         </Button>
@@ -165,7 +187,7 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
   const { minutesRemaining, minutesTotal } = useChallengeTimeCountdown(pool.id)
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
-    'Execute epoch',
+    'Execute order',
     (cent) => cent.pools.executeEpoch
   )
 
@@ -176,8 +198,8 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   return (
     <PageSection
-      title={`Epoch ${pool.epoch.current}`}
-      titleAddition={<Text variant="body2">Closing</Text>}
+      title="Order overview"
+      titleAddition={<Text variant="body2">Order executing</Text>}
       headerRight={
         <Button
           small
@@ -187,13 +209,13 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
           loading={minutesRemaining > 0 || loadingExecution}
           loadingMessage={
             minutesRemaining > 0
-              ? `${minutesRemaining} minutes until execution...`
+              ? `${minutesRemaining} minutes until execution…`
               : loadingExecution
-              ? 'Closing epoch...'
+              ? 'Executing order…'
               : ''
           }
         >
-          Execute epoch
+          Start order execution
         </Button>
       }
     >

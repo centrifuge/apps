@@ -36,7 +36,7 @@ import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePermissions } from '../../utils/usePermissions'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
 import { LoadBoundary } from '../LoadBoundary'
@@ -177,6 +177,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const history = useHistory()
+  const { data: metadata } = usePoolMetadata(pool)
 
   let actualView = view
   if (state.order) {
@@ -263,9 +264,11 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
         // TODO: Show whether onboarding is in progress
         <Stack gap={2}>
           <Text variant="body3">
-            New Silver tokens are available to U.S. and Non-U.S. persons. U.S. persons must be verified “accredited
-            investors”.{' '}
-            <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#requirements">Learn more</AnchorTextLink>
+            {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
+            verified “accredited investors”.{' '}
+            <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
+              Learn more
+            </AnchorTextLink>
           </Text>
           <Stack px={1}>
             <Button onClick={() => history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)}>

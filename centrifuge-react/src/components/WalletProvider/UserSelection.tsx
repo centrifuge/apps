@@ -69,9 +69,10 @@ export function UserSelection({ network, wallet }: UserSelectionProps) {
 export type NetworkIconProps = {
   network: Exclude<UserSelectionProps['network'], null>
   size?: FabricTheme['sizes']['iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge']
+  disabled?: boolean
 }
 
-function useNeworkIcon(network: NetworkIconProps['network']) {
+export function useNeworkIcon(network: NetworkIconProps['network']) {
   const { evm } = useWallet()
   const src = network === 'centrifuge' ? centrifugeLogo : evm.chains[network]?.iconUrl ?? ''
   return src

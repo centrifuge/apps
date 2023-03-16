@@ -16,7 +16,7 @@ type Props = {
 
 export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const { pid } = useParams<{ pid: string }>()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
@@ -31,7 +31,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       subtitle={
         <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
       }
-      parent={{ to: `/investments${state?.token ? '/tokens' : ''}`, label: state?.token ? 'Tokens' : 'Pools' }}
+      parent={{ to: `/pools${state?.token ? '/tokens' : ''}`, label: state?.token ? 'Tokens' : 'Pools' }}
       icon={
         <Eththumbnail show={isTinlakePool}>
           {metadata?.pool?.icon ? (

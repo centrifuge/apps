@@ -15,7 +15,7 @@ export const signAndAnnotateAgreement = async (
   const lastPage = pages[pages.length - 1]
 
   firstPage.drawText(
-    `Signed by ${walletAddress} on the Centrifuge parachain
+    `Signed by ${walletAddress} on Centrifuge 
 Block: ${transactionInfo.blockNumber}
 Extrinsic Hash: ${transactionInfo.extrinsicHash}`,
     {
