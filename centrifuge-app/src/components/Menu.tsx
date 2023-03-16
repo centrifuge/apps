@@ -49,9 +49,9 @@ export const Menu: React.FC<Props> = () => {
     >
       <NavigationItem
         label="Pools"
-        href="/investments"
+        href="/pools"
         icon={<IconInvestments />}
-        active={pathname.includes('investments')}
+        active={pathname.includes('pools')}
         stacked={!isXLarge}
       />
 

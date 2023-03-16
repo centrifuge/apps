@@ -22,7 +22,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
   const cent = useCentrifuge()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
 
   const address = useAddress('substrate')
   const permissions = usePermissions(address)

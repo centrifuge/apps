@@ -78,7 +78,7 @@ const columns: Column[] = [
 ]
 
 export const TokenList: React.FC<Props> = ({ tokens }) => {
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
 
   return (
     <DataTable
