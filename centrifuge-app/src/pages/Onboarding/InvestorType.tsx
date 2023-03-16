@@ -21,7 +21,7 @@ const validationSchema = object({
 const CustomButton = styled(Text)<{ selected: boolean }>`
   appearance: none;
   padding: 1.1em 2em;
-  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   text-align: center;
   background-color: ${({ theme, selected }) =>
     selected ? theme.colors.borderPrimary : theme.colors.backgroundPrimary};
@@ -32,7 +32,7 @@ const CustomButton = styled(Text)<{ selected: boolean }>`
 
   &:active,
   &:hover {
-    background-color: ${({ theme }) => theme.colors.borderPrimary};
+    background-color: ${({ theme, disabled }) => (disabled ? 'none' : theme.colors.borderPrimary)};
   }
 `
 
