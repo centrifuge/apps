@@ -30,7 +30,7 @@ type Props = {
 
 const title = {
   accounts: 'Choose account',
-  wallets: 'Choose wallet',
+  wallets: 'Connect wallet',
 }
 
 export function WalletDialog({ evmChains }: Props) {
@@ -75,7 +75,7 @@ export function WalletDialog({ evmChains }: Props) {
 
         {view === 'wallets' ? (
           <>
-            <SelectionStep step={1} title="Network">
+            <SelectionStep step={1} title="Choose network">
               <SelectButton
                 logo={<Logo icon={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
@@ -102,7 +102,7 @@ export function WalletDialog({ evmChains }: Props) {
 
             <Box as="hr" borderStyle="solid" borderWidth={0} borderTopWidth={1} borderColor="borderPrimary" />
 
-            <SelectionStep step={2} title="Wallet" disabled={!(shownWallets?.length > 0)}>
+            <SelectionStep step={2} title="Choose wallet" disabled={!(shownWallets?.length > 0)}>
               {shownWallets.map((wallet) =>
                 wallet.installed ? (
                   <SelectButton
