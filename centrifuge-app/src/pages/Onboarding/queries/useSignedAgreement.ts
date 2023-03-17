@@ -1,11 +1,11 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { useQuery } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 export const useSignedAgreement = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { pool, onboardingUser } = useOnboarding()
   const { selectedAccount } = useWallet().substrate
 

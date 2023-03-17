@@ -1,6 +1,6 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
-import { Signer } from '@polkadot/types/types'
+import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 import { SiweMessage } from 'siwe'
@@ -43,7 +43,6 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
   const { mutate: login, isLoading: isLoggingIn } = useMutation(async () => {
     try {
       if (selectedAccount?.address && selectedWallet?.signer) {
-        // @ts-expect-error signer is not typed correctly
         await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer, cent, proxy)
       } else if (selectedAddress && provider?.getSigner()) {
         await loginWithEvm(selectedAddress, provider.getSigner())
@@ -119,7 +118,7 @@ export function useOnboardingAuth() {
   }
 }
 
-const loginWithSubstrate = async (address: string, signer: Signer, cent: Centrifuge, proxy?: any) => {
+const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cent: Centrifuge, proxy?: any) => {
   if (proxy) {
     // @ts-expect-error Signer type version mismatch
     const { token, payload } = await cent.auth.generateJw3t(address, signer, {

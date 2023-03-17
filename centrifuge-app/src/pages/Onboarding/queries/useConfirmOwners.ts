@@ -1,5 +1,5 @@
 import { useMutation } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 type UltimateBeneficialOwner = {
@@ -8,7 +8,7 @@ type UltimateBeneficialOwner = {
 }
 
 export const useConfirmOwners = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser, nextStep } = useOnboarding()
 
   const mutation = useMutation(

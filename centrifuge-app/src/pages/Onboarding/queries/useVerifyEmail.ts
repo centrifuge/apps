@@ -1,9 +1,9 @@
 import { useQuery } from 'react-query'
 import { useLocation } from 'react-router-dom'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 
 export const useVerifyEmail = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { search } = useLocation()
   const token = new URLSearchParams(search).get('token')
 
