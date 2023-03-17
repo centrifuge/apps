@@ -105,7 +105,7 @@ export function useOnboardingAuth() {
       }
     },
     {
-      enabled: !!selectedAccount?.address || !!selectedAddress,
+      enabled: (!!selectedAccount?.address || !!selectedAddress) && !!authToken,
       retry: 1,
     }
   )

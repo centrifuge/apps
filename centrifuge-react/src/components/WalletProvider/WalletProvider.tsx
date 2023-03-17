@@ -212,6 +212,7 @@ export function WalletProvider({
   }, [])
 
   const connect = React.useCallback(async (wallet: Wallet | EvmConnectorMeta, chainId?: number) => {
+    disconnect()
     if ('connector' in wallet) {
       return connectEvm(wallet, chainId)
     }

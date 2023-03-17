@@ -34,15 +34,15 @@ export const LinkWallet = () => {
   })
 
   React.useEffect(() => {
-    if (selectedAccount || selectedAddress) {
+    if (selectedAccount?.address || selectedAddress) {
       formik.setFieldValue('hasSelectedWallet', true, false)
     }
 
-    if (!selectedAccount || !selectedAddress) {
+    if (!selectedAccount?.address && !selectedAddress) {
       formik.setFieldValue('hasSelectedWallet', false, false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAccount, selectedAddress])
+  }, [selectedAccount?.address, selectedAddress])
 
   return (
     <>
@@ -86,7 +86,7 @@ export const LinkWallet = () => {
 
       <ActionBar>
         {isAuth ? (
-          <Button onClick={() => nextStep()}>Next</Button>
+          <Button onClick={nextStep}>Next</Button>
         ) : (
           <Button
             onClick={() => {
