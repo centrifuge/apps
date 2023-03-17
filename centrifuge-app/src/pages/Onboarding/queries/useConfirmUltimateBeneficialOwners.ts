@@ -7,7 +7,7 @@ type UltimateBeneficialOwner = {
   dateOfBirth: string
 }
 
-export const useConfirmOwners = () => {
+export const useConfirmUltimateBeneficialOwners = () => {
   const { authToken } = useAuth()
   const { refetchOnboardingUser, nextStep } = useOnboarding()
 
