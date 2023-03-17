@@ -5,13 +5,8 @@ import { centrifuge } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
 
 export const verifyWalletController = async (req: Request, res: Response) => {
-  const { message } = req.body
   try {
-    const jwtToken = message ? await verifyEthWallet(req) : await verifySubstrateWallet(req)
-    const payload = {
-      address: jwtToken,
-      network: message ? 'evm' : 'substrate',
-    }
+    const payload = req.body.jw3tToken ? await verifySubstrateWallet(req) : await verifyEthWallet(req)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '30d',
     })
@@ -40,11 +35,17 @@ async function verifySubstrateWallet(req: Request) {
       throw new Error()
     }
   }
-  return address
+  return {
+    address,
+    network: 'substrate',
+  }
 }
 
 async function verifyEthWallet(req: Request) {
   const { message, signature } = req.body
   const decodedMessage = await new SiweMessage(message).verify({ signature })
-  return decodedMessage.data.address
+  return {
+    address: decodedMessage.data.address,
+    network: 'evm',
+  }
 }
