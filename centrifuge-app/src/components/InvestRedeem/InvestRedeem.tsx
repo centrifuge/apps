@@ -178,6 +178,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
   const pool = usePool(state.poolId)
   const history = useHistory()
   const { data: metadata } = usePoolMetadata(pool)
+  const { showWallets, connectedType } = useWallet()
 
   let actualView = view
   if (state.order) {
@@ -195,12 +196,16 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
         <Box pb={1}>
           <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
         </Box>
-        <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-          {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
-        </TextWithPlaceholder>
-        <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-          {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
-        </TextWithPlaceholder>
+        {connectedType && (
+          <>
+            <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
+              {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
+              {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
+            </TextWithPlaceholder>
+          </>
+        )}
         <Box bleedX={2} mt={1} alignSelf="stretch">
           <Divider borderColor="borderSecondary" />
         </Box>
@@ -219,7 +224,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
           onChange={(event) => setTrancheId(event.target.value as any)}
         />
       )}
-      {state.isDataLoading ? (
+      {connectedType && state.isDataLoading ? (
         <Spinner />
       ) : state.isAllowedToInvest ? (
         <>
@@ -271,8 +276,16 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
             </AnchorTextLink>
           </Text>
           <Stack px={1}>
-            <Button onClick={() => history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)}>
-              Onboard to {state.trancheCurrency?.symbol ?? 'token'}
+            <Button
+              onClick={() => {
+                if (!connectedType) {
+                  showWallets()
+                } else {
+                  history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
+                }
+              }}
+            >
+              {connectedType ? `Onboard to ${state.trancheCurrency?.symbol ?? 'token'}` : 'Connect to invest'}
             </Button>
           </Stack>
         </Stack>

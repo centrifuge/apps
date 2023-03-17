@@ -22,7 +22,7 @@ import { ValidationToast } from '../../components/ValidationToast'
 import { EntityUser } from '../../types'
 import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
 import { RESIDENCY_COUNTRY_CODES } from './geographyCodes'
-import { useConfirmOwners } from './queries/useConfirmOwners'
+import { useConfirmUltimateBeneficialOwners } from './queries/useConfirmUltimateBeneficialOwners'
 
 const validationSchema = object({
   ultimateBeneficialOwners: array(
@@ -99,11 +99,12 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
   )
 }
 
-const BusinessOwnershipInlineFeedback = () => {
+const UltimateBeneficialOwnerInlineFeedback = () => {
   return (
     <Notification type="alert">
-      Unable to confirm business ownership or business ownership has already been confirmed. Please try again or contact
-      <a href="mailto:support@centrifuge.io?subject=Onboarding confirm business ownership&body=I’m reaching out about…">
+      Unable to confirm ultimate beneficial owners or ultimate beneficial owners have already been confirmed. Please try
+      again or contact
+      <a href="mailto:support@centrifuge.io?subject=Onboarding confirm ultimate beneficial owners&body=I’m reaching out about…">
         support@centrifuge.io
       </a>
       .
@@ -111,13 +112,13 @@ const BusinessOwnershipInlineFeedback = () => {
   )
 }
 
-export const BusinessOwnership = () => {
+export const UltimateBeneficialOwners = () => {
   const { onboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
 
   const isCompleted = !!onboardingUser?.globalSteps.confirmOwners.completed
   const isEmailVerified = !!onboardingUser?.globalSteps.verifyEmail.completed
 
-  const { mutate: upsertBusinessOwnership, isLoading, isError } = useConfirmOwners()
+  const { mutate: confirmUltimateBeneficialOwners, isLoading, isError } = useConfirmUltimateBeneficialOwners()
 
   return (
     <Formik
@@ -134,7 +135,7 @@ export const BusinessOwnership = () => {
         isEmailVerified,
       }}
       onSubmit={(values) => {
-        upsertBusinessOwnership(values.ultimateBeneficialOwners)
+        confirmUltimateBeneficialOwners(values.ultimateBeneficialOwners)
       }}
       validationSchema={validationSchema}
     >
@@ -144,11 +145,11 @@ export const BusinessOwnership = () => {
           <Content>
             <NotificationBar>
               <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
-              {isError && <BusinessOwnershipInlineFeedback />}
+              {isError && <UltimateBeneficialOwnerInlineFeedback />}
             </NotificationBar>
 
             <ContentHeader
-              title="Confirm business ownership"
+              title="Confirm ultimate beneficial owners"
               body="Add the names of any individuals who own or control more than than 25% of the company. If no person does,
         please add the largest shareholder."
             />
@@ -251,7 +252,7 @@ export const BusinessOwnership = () => {
                       >
                         <Shelf alignItems="center" gap="4px">
                           <IconPlus size={16} />
-                          <Text>Add beneficial owner</Text>
+                          <Text>Add ultimate beneficial owner</Text>
                         </Shelf>
                       </Button>
                     </Box>
@@ -270,7 +271,7 @@ export const BusinessOwnership = () => {
                     label={
                       <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
                         I confirm that all the information provided is true and accurate, and I have identified all the
-                        beneficial owners with more than 25% ownership.
+                        ultimate beneficial owners with more than 25% ownership.
                       </Text>
                     }
                     errorMessage={meta.touched ? meta.error : undefined}

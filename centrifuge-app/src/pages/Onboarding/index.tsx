@@ -8,13 +8,13 @@ import { usePool } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
 import { BusinessInformation } from './BusinessInformation'
-import { BusinessOwnership } from './BusinessOwnership'
 import { InvestorType } from './InvestorType'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
 import { useSignedAgreement } from './queries/useSignedAgreement'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 import { TaxInfo } from './TaxInfo'
+import { UltimateBeneficialOwners } from './UltimateBeneficialOwners'
 
 export const OnboardingPage: React.FC = () => {
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
@@ -82,7 +82,7 @@ export const OnboardingPage: React.FC = () => {
             {investorType === 'entity' && (activeStep > 2 || !!onboardingUser?.investorType) && (
               <>
                 <Step label="Business information" />
-                <Step label="Business ownership" />
+                <Step label="Confirm ultimate beneficial owners" />
                 <Step label="Authorized signer verification" />
                 <Step label="Tax information" />
                 {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode.startsWith('us') && (
@@ -101,7 +101,7 @@ export const OnboardingPage: React.FC = () => {
         {investorType === 'entity' && (
           <>
             {activeStep === 3 && <BusinessInformation />}
-            {activeStep === 4 && <BusinessOwnership />}
+            {activeStep === 4 && <UltimateBeneficialOwners />}
             {activeStep === 5 && <KnowYourCustomer />}
             {activeStep === 6 && <TaxInfo />}
             {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us') ? (

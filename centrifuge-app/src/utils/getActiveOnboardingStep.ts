@@ -74,17 +74,19 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId?:
     if (verifyBusiness.completed) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
   }
 
-  if (investorType === 'individual') {
+  if (investorType === 'individual' && countryOfCitizenship) {
     if (countryOfCitizenship === 'us') {
       if (hasSignedAgreement) return INDIVIDUAL_US_STEPS.COMPLETE
       if (verifyAccreditation.completed) return INDIVIDUAL_US_STEPS.SIGN_AGREEMENT
       if (verifyTaxInfo.completed) return INDIVIDUAL_US_STEPS.VERIFY_ACCREDITATION
+      if (verifyIdentity.completed) return BASE_INDIVIDUAL_STEPS.VERIFY_TAX_INFO
     } else {
       if (hasSignedAgreement) return INDIVIDUAL_NON_US_STEPS.COMPLETE
       if (verifyTaxInfo.completed) return INDIVIDUAL_NON_US_STEPS.SIGN_AGREEMENT
+      if (verifyIdentity.completed) return BASE_INDIVIDUAL_STEPS.VERIFY_TAX_INFO
     }
 
-    if (verifyIdentity.completed) return BASE_INDIVIDUAL_STEPS.VERIFY_TAX_INFO
+    return BASE_INDIVIDUAL_STEPS.VERIFY_IDENTITY
   }
 
   return 1
