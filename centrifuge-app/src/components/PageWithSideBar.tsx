@@ -1,7 +1,8 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, WalletMenu } from '@centrifuge/centrifuge-react'
+import { useBalances, useWallet, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
@@ -28,6 +29,10 @@ export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
 export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
   const isMedium = useIsAboveBreakpoint('M')
+  const { connectedType } = useWallet()
+  const { pid: poolId } = useParams<{ pid: string }>()
+
+  const isTinlakePool = poolId?.startsWith('0x')
 
   const theme = useTheme()
   const balances = useBalances(useAddress('substrate'))
@@ -36,6 +41,13 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
   const aUSD = balances && balances.currencies.find((curr) => curr.currency.key === 'AUSD')
   const hasLowAusdBalance =
     (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currency.decimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
+
+  const shouldRenderFaucet =
+    connectedType === 'substrate' &&
+    !isTinlakePool &&
+    import.meta.env.REACT_APP_FAUCET_URL &&
+    hasLowDevelBalance &&
+    hasLowAusdBalance
 
   return (
     <Grid
@@ -134,7 +146,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
                 <WalletMenu />
               </Stack>
 
-              {import.meta.env.REACT_APP_FAUCET_URL && hasLowDevelBalance && hasLowAusdBalance && <Faucet />}
+              {shouldRenderFaucet && <Faucet />}
 
               <LoadBoundary>{sidebar}</LoadBoundary>
             </Stack>
