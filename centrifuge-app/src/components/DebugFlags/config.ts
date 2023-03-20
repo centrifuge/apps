@@ -30,7 +30,6 @@ export type Key =
   | 'editPoolConfig'
   | 'poolReporting'
   | 'editPoolVisibility'
-  | 'showTinlakePools'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -51,11 +50,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     alwaysShow: true,
   },
   editPoolConfig: {
-    type: 'checkbox',
-    default: false,
-    alwaysShow: true,
-  },
-  showTinlakePools: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

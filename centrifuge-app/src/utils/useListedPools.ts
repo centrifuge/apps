@@ -1,7 +1,6 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import * as React from 'react'
-import { useDebugFlags } from '../components/DebugFlags'
 import { useAddress } from '../utils/useAddress'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
@@ -13,7 +12,6 @@ const sign = (n: BN) => (n.isZero() ? 0 : n.isNeg() ? -1 : 1)
 export function useListedPools() {
   const pools = usePools()
   const tinlakePools = useTinlakePools()
-  const { showTinlakePools } = useDebugFlags()
 
   const address = useAddress('substrate')
   const permissions = usePermissions(address)
@@ -23,7 +21,7 @@ export function useListedPools() {
   const [listedPools, listedTokens] = React.useMemo(
     () => {
       const poolVisibilities = pools?.map(({ id }) => !!permissions?.pools[id]) ?? []
-      const listedTinlakePools = showTinlakePools ? tinlakePools.data?.pools ?? [] : []
+      const listedTinlakePools = tinlakePools.data?.pools ?? []
       const listedTinlakeTokens = listedTinlakePools.flatMap((p) => p.tranches)
       const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed || poolVisibilities[i]) ?? []
       const listedTokens = listedPools.flatMap((p) => p.tranches)
