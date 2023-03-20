@@ -66,7 +66,7 @@ type EnvironmentConfig = {
     dark: DefaultTheme
   }
   defaultTheme: 'light' | 'dark'
-  baseCurrency: 'AUSD'
+  baseCurrency: 'USD'
   assetClasses: string[]
   defaultAssetClass: string
   defaultLoanType: LoanInfo['type']
@@ -87,7 +87,7 @@ const ALTAIR: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'dark',
-  baseCurrency: 'AUSD',
+  baseCurrency: 'USD',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
@@ -105,7 +105,7 @@ const CENTRIFUGE: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'light',
-  baseCurrency: 'AUSD',
+  baseCurrency: 'USD',
   assetClasses: [
     'Consumer Credit',
     'Corporate Credit',
