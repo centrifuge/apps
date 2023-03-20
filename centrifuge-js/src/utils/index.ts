@@ -1,4 +1,5 @@
-import { addressEq } from '@polkadot/util-crypto'
+import { u8aToHex } from '@polkadot/util'
+import { addressEq, decodeAddress } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Dec } from './Decimal'
@@ -104,4 +105,8 @@ export function isLoanPalletAccount(address?: string | Uint8Array) {
 
 export function getDateYearsFromNow(years: number) {
   return new Date(new Date().setFullYear(new Date().getFullYear() + years))
+}
+
+export function addressToHex(addr: string) {
+  return u8aToHex(decodeAddress(addr))
 }
