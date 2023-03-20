@@ -72,7 +72,7 @@ export function InvestRedeem({ networks = ['centrifuge'], ...rest }: Props) {
           networks.length > 1 ? 'networks' : 'network'
         }. To be able to invest and redeem you need to switch the network.`}
       >
-        <InvestRedeemState {...rest} />
+        <InvestRedeemState networks={networks} {...rest} />
       </ConnectionGuard>
     </LoadBoundary>
   )
@@ -165,7 +165,7 @@ function InvestRedeemState(props: Props) {
   )
 }
 
-type InnerProps = {
+type InnerProps = Props & {
   poolId: string
   trancheId: string
   view: 'invest' | 'redeem' | 'start'
@@ -173,7 +173,7 @@ type InnerProps = {
   setTrancheId: React.Dispatch<string>
 }
 
-function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
+function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const history = useHistory()
@@ -279,7 +279,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
             <Button
               onClick={() => {
                 if (!connectedType) {
-                  showWallets()
+                  showWallets(networks?.length === 1 ? networks[0] : undefined)
                 } else {
                   history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
                 }
