@@ -31,16 +31,16 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
   const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances()
   const { data: nativeBalance, refetch: refetchBalance, isLoading: isBalanceLoading } = useNativeBalance()
   const { data: permissions, isLoading: isPermissionsLoading } = useTinlakePermissions(poolId, address)
-  const trancheInvestment = investment![seniority]
-  const { disburse, order } = trancheInvestment
+  const trancheInvestment = investment?.[seniority]
+  const { disburse, order } = trancheInvestment ?? {}
   const trancheBalance =
-    balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
+    balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() || Dec(0)
   const poolCurrencyBalance =
     (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
 
-  const price = tranche.tokenPrice?.toDecimal() ?? Dec(1)
-  const investToCollect = trancheInvestment.disburse.payoutTokenAmount
-  const pendingRedeem = trancheInvestment.disburse.remainingRedeemToken
+  const price = tranche.tokenPrice?.toDecimal() || Dec(1)
+  const investToCollect = trancheInvestment?.disburse.payoutTokenAmount || Dec(0)
+  const pendingRedeem = trancheInvestment?.disburse.remainingRedeemToken || Dec(0)
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
   const investmentValue = combinedBalance.mul(price)
 
@@ -90,33 +90,35 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     isDataLoading: isBalancesLoading || isBalanceLoading || isPermissionsLoading,
     isAllowedToInvest: permissions?.[seniority].inMemberlist,
     isPoolBusy: isCalculatingOrders,
-    isFirstInvestment: Object.values(order).every((v) => Dec(v).isZero()),
+    isFirstInvestment: Object.values(order || {}).every((v) => Dec(v).isZero()),
     nativeCurrency: getChainInfo(evm.chains, evm.chainId!).nativeCurrency,
     trancheCurrency: tranche.currency,
     poolCurrency: pool.currency,
     capacity: tranche.capacity.toDecimal(),
     minInitialInvestment: new CurrencyBalance(
-      trancheMeta?.minInitialInvestment ?? 0,
+      trancheMeta?.minInitialInvestment || 0,
       pool.currency.decimals
     ).toDecimal(),
-    nativeBalance: nativeBalance?.toDecimal() ?? Dec(0),
+    nativeBalance: nativeBalance?.toDecimal() || Dec(0),
     poolCurrencyBalance: poolCurrencyBalance,
-    poolCUrrencyBalanceWithPending: poolCurrencyBalance.add(disburse.remainingInvestCurrency),
+    poolCUrrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
     trancheBalance,
     trancheBalanceWithPending: combinedBalance,
     investmentValue,
     tokenPrice: price,
     order: {
-      investCurrency: order.investCurrency,
-      redeemToken: order.redeemToken,
-      payoutCurrencyAmount: disburse.payoutCurrencyAmount,
-      payoutTokenAmount: disburse.payoutTokenAmount,
-      remainingInvestCurrency: disburse.remainingInvestCurrency,
-      remainingRedeemToken: disburse.remainingRedeemToken,
+      investCurrency: order?.investCurrency || Dec(0),
+      redeemToken: order?.redeemToken || Dec(0),
+      payoutCurrencyAmount: disburse?.payoutCurrencyAmount || Dec(0),
+      payoutTokenAmount: disburse?.payoutTokenAmount || Dec(0),
+      remainingInvestCurrency: disburse?.remainingInvestCurrency || Dec(0),
+      remainingRedeemToken: disburse?.remainingRedeemToken || Dec(0),
     },
-    needsToCollectBeforeOrder: !disburse.payoutCurrencyAmount.add(disburse.payoutTokenAmount).isZero(),
-    needsPoolCurrencyApproval: trancheInvestment.poolCurrencyAllowance.isZero(),
-    needsTrancheTokenApproval: trancheInvestment.tokenAllowance.isZero(),
+    needsToCollectBeforeOrder: !(disburse?.payoutCurrencyAmount || Dec(0))
+      .add(disburse?.payoutTokenAmount || 0)
+      .isZero(),
+    needsPoolCurrencyApproval: !!trancheInvestment?.poolCurrencyAllowance.isZero(),
+    needsTrancheTokenApproval: !!trancheInvestment?.tokenAllowance.isZero(),
     pendingAction,
     pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
   }
