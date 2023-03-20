@@ -19,6 +19,10 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
     connect,
   } = useWallet()
 
+  if (!connectedNetwork) {
+    return <>{children}</>
+  }
+
   if (connectedNetwork && networks.includes(connectedNetwork)) return <>{children}</>
 
   function switchNetwork(target: Network) {
