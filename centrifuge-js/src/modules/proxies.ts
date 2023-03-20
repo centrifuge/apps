@@ -5,6 +5,8 @@ import { Account } from '../types'
 import { addressToHex } from '../utils'
 
 export function getProxiesModule(inst: CentrifugeBase) {
+  // TODO: Probably remove this as getting all proxies from the chain could potentially be quite a lot of data
+  // Used as a fallback for when the SubQuery is down
   function getAllProxies() {
     const $api = inst.getApi()
 
