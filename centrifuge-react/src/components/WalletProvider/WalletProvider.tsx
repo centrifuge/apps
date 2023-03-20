@@ -110,20 +110,17 @@ export function WalletProvider({
 
   const cent = useCentrifuge()
   const { data: proxies } = useQuery(
-    ['proxies', state.substrate.accounts?.map((acc) => acc.address)],
+    ['allProxies'],
     () =>
-      firstValueFrom(cent.proxies.getMultiUserProxies([state.substrate.accounts!.map((acc) => acc.address)])).then(
-        (proxies) => {
-          return Object.fromEntries(
-            Object.entries(proxies).map(([delegatee, ps]) => [
-              cent.utils.formatAddress(delegatee),
-              ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
-            ])
-          )
-        }
-      ),
+      firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
+        return Object.fromEntries(
+          Object.entries(proxies).map(([delegatee, ps]) => [
+            cent.utils.formatAddress(delegatee),
+            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+          ])
+        )
+      }),
     {
-      enabled: !!state.substrate.accounts?.length,
       staleTime: Infinity,
     }
   )
