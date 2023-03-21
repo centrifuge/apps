@@ -28,7 +28,7 @@ dotenv.config()
 const onboarding = express()
 
 onboarding.use(rateLimiter)
-onboarding.use(cookieParser())
+onboarding.use(cookieParser(process.env.COOKIE_SECRET))
 onboarding.use(corsMiddleware)
 
 onboarding.options('*', corsMiddleware)

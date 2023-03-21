@@ -28,7 +28,7 @@ export const authenticateWalletController = async (
     await validateInput(req.body, verifyWalletInput)
     const payload = !!req.body.jw3tToken ? await verifySubstrateWallet(req) : await verifyEthWallet(req, res)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '30d',
+      expiresIn: '10d',
     })
     return res.json({ token })
   } catch (e) {
@@ -63,7 +63,7 @@ async function verifySubstrateWallet(req: Request) {
 
 async function verifyEthWallet(req: Request, res: Response) {
   try {
-    const key = req.cookies['onboarding-auth']
+    const key = req.signedCookies['onboarding-auth']
     const [nonce, address] = key.split('-')
     const { message, signature } = req.body
     message.nonce = nonce

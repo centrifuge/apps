@@ -28,7 +28,8 @@ export const generateNonceController = async (
       sameSite: 'strict',
       path: '/',
       domain: centrifugeHosts.includes(req.hostname) ? req.hostname : undefined,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 12), // 12 hours
+      signed: true,
     })
     return res.status(200).send({ nonce })
   } catch (e) {
