@@ -33,7 +33,6 @@ import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
-import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
@@ -118,7 +117,7 @@ export const Root: React.VFC = () => {
             <DemoBanner />
             <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
-                <AuthProvider>
+                <OnboardingAuthProvider>
                   <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                     <TransactionProvider>
                       <TransactionToasts />
@@ -129,7 +128,7 @@ export const Root: React.VFC = () => {
                       </Router>
                     </TransactionProvider>
                   </DebugFlags>
-                </AuthProvider>
+                </OnboardingAuthProvider>
               </PodAuthProvider>
             </WalletProvider>
           </CentrifugeProvider>
@@ -188,11 +187,9 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingAuthProvider>
-          <OnboardingProvider>
-            <OnboardingPage />
-          </OnboardingProvider>
-        </OnboardingAuthProvider>
+        <OnboardingProvider>
+          <OnboardingPage />
+        </OnboardingProvider>
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
