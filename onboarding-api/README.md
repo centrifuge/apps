@@ -24,15 +24,16 @@ Authorization: Bearer <jwt-signed-token>
 
 For EVM wallets:
 
-1. Use the library [siwe](https://docs.login.xyz/sign-in-with-ethereum/quickstart-guide/creating-siwe-messages) to sign and generate a message and signature
-2. `POST /verifyWallet` with `body { message, signature }` will return the access token to be included in each request
+1. Generate a unique nonce by hitting the endpoint `POST /nonce` with `body { address }`. The request will set an httpOnly cookie which will automatically be sent in step 3.
+2. Use the library [siwe](https://docs.login.xyz/sign-in-with-ethereum/quickstart-guide/creating-siwe-messages) to sign and generate a message and signature. Be sure to use the nonce fetched in the previous step and the same address to create and sign the siwe message.
+3. Send a `POST /authenticateWallet` with `body { message, signature }` to get the access token to be included in each request.
 
 For Substrate wallets:
 
 1. Use the library [jw3t](https://github.com/hamidra/jw3t) to generate a signed jw3t token
-2. `POST /verifyWallet` with `body { jwtToken }` will return the access token
+2. `POST /authenticateWallet` with `body { jwtToken }` will return the access token
 
-To extend the access token `GET /refresh` with the `Authorization: Bearer <jwt-token>` header
+To verify the token is not expired, call the `/verify` endpoint
 
 ### `POST: /verifyBusiness`
 

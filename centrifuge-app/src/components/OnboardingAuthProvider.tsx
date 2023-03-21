@@ -83,7 +83,7 @@ export function useOnboardingAuth() {
     ['auth', authToken],
     async () => {
       try {
-        const refreshTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/refresh`, {
+        const verifiedRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verify`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -91,10 +91,9 @@ export function useOnboardingAuth() {
           },
           credentials: 'include',
         })
-        if (refreshTokenRes.status === 200) {
-          const refreshToken = await refreshTokenRes.json()
-          // TODO: set the new token in session storage
-          return { verified: !!refreshToken }
+        if (verifiedRes.status === 200) {
+          const verified = (await verifiedRes.json()).verified
+          return { verified }
         }
         return { verified: false }
       } catch (error) {
@@ -129,7 +128,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
       const isAuthorizedProxy = await cent.auth.verifyProxy(address, proxy.delegator, AUTHORIZED_ONBOARDING_PROXY_TYPES)
 
       if (isAuthorizedProxy) {
-        const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
+        const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -137,6 +136,9 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
           credentials: 'include',
           body: JSON.stringify({ jw3tToken: token }),
         })
+        if (authTokenRes.status !== 200) {
+          throw new Error('Failed to authenticate wallet')
+        }
         const authToken = await authTokenRes.json()
         sessionStorage.setItem(
           `centrifuge-onboarding-auth-${address}-${proxy.delegator}`,
@@ -149,7 +151,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
     const { token, payload } = await cent.auth.generateJw3t(address, signer)
 
     if (token) {
-      const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
+      const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,6 +159,9 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
         credentials: 'include',
         body: JSON.stringify({ jw3tToken: token }),
       })
+      if (authTokenRes.status !== 200) {
+        throw new Error('Failed to authenticate wallet')
+      }
       const authToken = await authTokenRes.json()
       sessionStorage.setItem(
         `centrifuge-onboarding-auth-${address}`,
@@ -167,14 +172,21 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
 }
 
 const loginWithEvm = async (address: string, signer: any) => {
-  const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`)
+  const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ address }),
+  })
   const nonce = await nonceRes.json()
   const domain = window.location.host
   const origin = window.location.origin
   const message = new SiweMessage({
     domain,
     address: address,
-    statement: 'This is THE message',
+    statement: 'Please sign to authenticate your wallet',
     uri: origin,
     version: '1',
     chainId: 1,
@@ -182,7 +194,7 @@ const loginWithEvm = async (address: string, signer: any) => {
   })
   const siweMessage = message.prepareMessage()
   const signedMessage = await signer?.signMessage(siweMessage)
-  const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyWallet`, {
+  const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -190,6 +202,9 @@ const loginWithEvm = async (address: string, signer: any) => {
     credentials: 'include',
     body: JSON.stringify({ message, signature: signedMessage }),
   })
+  if (tokenRes.status !== 200) {
+    throw new Error('Failed to authenticate wallet')
+  }
   const token = await tokenRes.json()
   if (token) {
     sessionStorage.setItem(

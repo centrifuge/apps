@@ -1,9 +1,10 @@
+const cookieParser = require('cookie-parser')
 import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
+import { authenticateWalletController } from './controllers/auth/authenticateWallet'
 import { generateNonceController } from './controllers/auth/generateNonce'
-import { refreshTokenController } from './controllers/auth/refreshToken'
-import { verifyWalletController } from './controllers/auth/verifyWallet'
+import { verifyTokenController } from './controllers/auth/verifyToken'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { signAndSendDocumentsController } from './controllers/emails/signAndSendDocuments'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
@@ -27,12 +28,13 @@ dotenv.config()
 const onboarding = express()
 
 onboarding.use(rateLimiter)
+onboarding.use(cookieParser())
 onboarding.use(corsMiddleware)
 
 onboarding.options('*', corsMiddleware)
-onboarding.post('/verifyWallet', verifyWalletController)
-onboarding.post('/refresh', refreshTokenController)
-onboarding.get('/nonce', generateNonceController)
+onboarding.post('/authenticateWallet', authenticateWalletController)
+onboarding.post('/verify', verifyTokenController)
+onboarding.post('/nonce', generateNonceController)
 
 onboarding.get('/getUser', verifyAuth, getUserController)
 
