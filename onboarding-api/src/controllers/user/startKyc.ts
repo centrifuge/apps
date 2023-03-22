@@ -8,6 +8,7 @@ import { validateInput } from '../../utils/validateInput'
 
 const kycInput = object({
   name: string().required(),
+  email: string().email(),
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(),
   countryOfResidency: string().required(),
@@ -22,8 +23,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
 
     const userData = await fetchUser(wallet, { suppressError: true })
 
-    if (!userData && (!body.poolId || !body.trancheId)) {
-      throw new HttpError(400, 'trancheId and poolId required for individual kyc')
+    if (!userData && !body.email) {
+      throw new HttpError(400, 'email required for individual kyc')
     }
 
     if (
@@ -40,7 +41,23 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     }
 
     const kycReference = `KYC_${Math.random()}`
-    if (body.poolId && body.trancheId) {
+
+    if (userData) {
+      const updatedUser = {
+        name: body.name,
+        countryOfCitizenship: body.countryOfCitizenship,
+        countryOfResidency: body.countryOfResidency,
+        dateOfBirth: body.dateOfBirth,
+        kycReference,
+      }
+      await validateAndWriteToFirestore(wallet, updatedUser, 'entity', [
+        'name',
+        'countryOfCitizenship',
+        'countryOfResidency',
+        'dateOfBirth',
+        'kycReference',
+      ])
+    } else {
       const updatedUserData: IndividualUser = {
         investorType: 'individual',
         wallet: [req.wallet],
@@ -61,42 +78,30 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
           verifyAccreditation: { completed: false, timeStamp: null },
           verifyTaxInfo: { completed: false, timeStamp: null },
         },
-        poolSteps: {
-          [body.poolId]: {
-            [body.trancheId]: {
-              signAgreement: {
-                completed: false,
-                timeStamp: null,
-                transactionInfo: {
-                  extrinsicHash: null,
-                  blockNumber: null,
+        poolSteps:
+          body.poolId && body.trancheId
+            ? {
+                [body.poolId]: {
+                  [body.trancheId]: {
+                    signAgreement: {
+                      completed: false,
+                      timeStamp: null,
+                      transactionInfo: {
+                        extrinsicHash: null,
+                        blockNumber: null,
+                      },
+                    },
+                    status: {
+                      status: null,
+                      timeStamp: null,
+                    },
+                  },
                 },
-              },
-              status: {
-                status: null,
-                timeStamp: null,
-              },
-            },
-          },
-        },
-        email: null,
+              }
+            : {},
+        email: body.email as string,
       }
       await validateAndWriteToFirestore(wallet, updatedUserData, 'individual')
-    } else {
-      const updatedUser = {
-        name: body.name,
-        countryOfCitizenship: body.countryOfCitizenship,
-        countryOfResidency: body.countryOfResidency,
-        dateOfBirth: body.dateOfBirth,
-        kycReference,
-      }
-      await validateAndWriteToFirestore(wallet, updatedUser, 'entity', [
-        'name',
-        'countryOfCitizenship',
-        'countryOfResidency',
-        'dateOfBirth',
-        'kycReference',
-      ])
     }
 
     const payloadKYC = {

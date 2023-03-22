@@ -12,6 +12,7 @@ export type OnboardingPool =
       name: string
       symbol: string
     }
+  | null
   | undefined
 
 interface OnboardingContextType<User, Pool> {
@@ -62,7 +63,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
           throw new Error()
         }
 
-        return response.json()
+        try {
+          const json = await response.json()
+
+          return json
+        } catch (error) {
+          return null
+        }
       }
     },
     {

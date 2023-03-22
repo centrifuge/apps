@@ -7,16 +7,20 @@ import { useVerifyIdentity } from '../queries/useVerifyIdentity'
 import { IdentityVerification } from './IdentityVerification'
 import { SignerVerification } from './SignerVerification'
 
-const validationSchema = object({
-  name: string().required('Please enter a name'),
-  dateOfBirth: date()
-    .required('Please enter a date of birth')
-    .min(new Date(1900, 0, 1), 'Date of birth must be after 1900')
-    .max(new Date(), 'Date of birth must be in the past'),
-  countryOfCitizenship: string().required('Please select a country of citizenship'),
-  countryOfResidency: string().required('Please select a country of residency'),
-  isAccurate: boolean().oneOf([true], 'You must confirm that the information is accurate'),
-})
+const getValidationSchema = (investorType: 'individual' | 'entity') =>
+  object({
+    name: string().required('Please enter a name'),
+    dateOfBirth: date()
+      .required('Please enter a date of birth')
+      .min(new Date(1900, 0, 1), 'Date of birth must be after 1900')
+      .max(new Date(), 'Date of birth must be in the past'),
+    countryOfCitizenship: string().required('Please select a country of citizenship'),
+    countryOfResidency: string().required('Please select a country of residency'),
+    isAccurate: boolean().oneOf([true], 'You must confirm that the information is accurate'),
+    ...(investorType === 'individual' && {
+      email: string().email('Please enter a valid email address').required('Please enter an email address'),
+    }),
+  })
 
 export const KnowYourCustomer = () => {
   const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
@@ -25,7 +29,11 @@ export const KnowYourCustomer = () => {
 
   const { onboardingUser, refetchOnboardingUser } = useOnboarding()
 
+  const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
+
   const isCompleted = !!onboardingUser?.globalSteps?.verifyIdentity.completed
+
+  const validationSchema = getValidationSchema(investorType)
 
   const formik = useFormik({
     initialValues: {
@@ -34,6 +42,7 @@ export const KnowYourCustomer = () => {
       countryOfCitizenship: onboardingUser?.countryOfCitizenship || '',
       countryOfResidency: onboardingUser?.countryOfResidency || '',
       isAccurate: !!isCompleted,
+      email: investorType === 'individual' ? onboardingUser?.email || '' : undefined,
     },
     onSubmit: (values) => {
       startKYC(values)

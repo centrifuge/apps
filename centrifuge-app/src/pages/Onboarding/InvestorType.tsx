@@ -1,6 +1,5 @@
 import { Button, Grid, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
-import * as React from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 import { object, string } from 'yup'

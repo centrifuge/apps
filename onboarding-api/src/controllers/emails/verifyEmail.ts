@@ -24,11 +24,6 @@ export const verifyEmailController = async (
     const payload = verifyJwt<VerifyEmailPayload>(token)
     const user = await fetchUser(payload.wallet)
 
-    // individual users don't have email addresses yet
-    if (user.investorType !== 'entity') {
-      throw new HttpError(400, 'Bad request')
-    }
-
     if (user.globalSteps.verifyEmail.completed) {
       throw new HttpError(400, 'Email already verified')
     }
