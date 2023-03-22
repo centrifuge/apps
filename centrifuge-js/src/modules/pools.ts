@@ -21,8 +21,6 @@ import { Dec } from '../utils/Decimal'
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 
-const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
-
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
@@ -196,7 +194,7 @@ type PoolDetailsData = {
 }
 
 type NAVDetailsData = {
-  latest: string
+  value: string
   lastUpdated: number
 }
 
@@ -242,7 +240,6 @@ export type Pool = {
   createdAt: string | null
   tranches: Token[]
   isInitialised: boolean
-  loanCollectionId: string | null
   reserve: {
     max: CurrencyBalance
     available: CurrencyBalance
@@ -583,7 +580,7 @@ export function getPoolsModule(inst: Centrifuge) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata] = args
+    const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
 
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
@@ -621,7 +618,6 @@ export function getPoolsModule(inst: Centrifuge) {
               )
             } else {
               submittable = api.tx.utility.batchAll([
-                api.tx.uniques.create(collectionId, LoanPalletAccountId),
                 api.tx.poolRegistry.register(
                   inst.getSignerAddress(),
                   poolId,
@@ -638,7 +634,6 @@ export function getPoolsModule(inst: Centrifuge) {
                     PoolRole: 'LoanAdmin',
                   }
                 ),
-                api.tx.loans.initialisePool(poolId, collectionId),
               ])
             }
             if (options?.createType === 'propose') {
@@ -660,16 +655,15 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function initialisePool(
-    args: [admin: string, poolId: string, loanCollectionId: string, collateralCollectionId?: string],
+    args: [admin: string, poolId: string, collateralCollectionId?: string],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, loanCollectionId, collateralCollectionId] = args
+    const [admin, poolId, collateralCollectionId] = args
 
     return inst.getApi().pipe(
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll(
           [
-            api.tx.uniques.create(loanCollectionId, LoanPalletAccountId),
             collateralCollectionId && api.tx.uniques.create(collateralCollectionId, admin),
             api.tx.permissions.add(
               { PoolRole: 'PoolAdmin' },
@@ -679,7 +673,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 PoolRole: 'LoanAdmin',
               }
             ),
-            api.tx.loans.initialisePool(poolId, loanCollectionId),
           ].filter(Boolean)
         )
         return inst.wrapSignAndSend(api, submittable, options)
@@ -1296,29 +1289,27 @@ export function getPoolsModule(inst: Centrifuge) {
           combineLatest([
             api.query.poolSystem.pool.entries(),
             api.query.poolRegistry.poolMetadata.entries(),
-            api.query.loans.poolNAV.entries(),
+            api.query.loans.portfolioValuation.entries(),
             api.query.poolSystem.epochExecution.entries(),
-            api.query.loans.poolToLoanNftClass.entries(),
             getCurrencies(),
           ]),
-        (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, rawLoanColIds, currencies]) => ({
+        (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies]) => ({
           api,
           rawPools,
           rawMetadatas,
           rawNavs,
           rawEpochExecutions,
-          rawLoanColIds,
           currencies,
         })
       ),
-      switchMap(({ api, rawPools, rawMetadatas, rawNavs, rawEpochExecutions, rawLoanColIds, currencies }) => {
+      switchMap(({ api, rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies }) => {
         if (!rawPools.length) return of([])
 
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const nav = navValue.toJSON() as unknown as NAVDetailsData
           acc[poolId] = {
-            latest: nav ? nav.latest : '0',
+            latest: nav ? nav.value : '0',
             lastUpdated: nav ? nav.lastUpdated : 0,
           }
           return acc
@@ -1333,13 +1324,6 @@ export function getPoolsModule(inst: Centrifuge) {
           }
           return acc
         }, {} as Record<string, Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>>)
-
-        const loanCollectionIdMap = rawLoanColIds.reduce((acc, [key, value]) => {
-          const poolId = formatPoolKey(key as StorageKey<[u32]>)
-          const colId = (value.toHuman() as string).replace(/\D/g, '')
-          acc[poolId] = colId
-          return acc
-        }, {} as Record<string, string>)
 
         const metadataMap = rawMetadatas.reduce((acc, [key, metadataValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
@@ -1390,7 +1374,6 @@ export function getPoolsModule(inst: Centrifuge) {
               const metadata = metadataMap[poolId]
               const navData = navMap[poolId]
               const epochExecution = epochExecutionMap[poolId]
-              const loanCollectionId = loanCollectionIdMap[poolId]
               const currency = findCurrency(currencies, pool.currency)!
 
               const poolValue = new CurrencyBalance(
@@ -1409,8 +1392,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 createdAt: null,
                 metadata,
                 currency,
-                isInitialised: !!loanCollectionId,
-                loanCollectionId: loanCollectionId ?? null,
+                isInitialised: true,
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
                   const trancheKeyIndex = trancheIdToIndex[trancheId]

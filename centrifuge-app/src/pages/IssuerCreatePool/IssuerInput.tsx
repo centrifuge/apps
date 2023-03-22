@@ -76,7 +76,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       <FieldWithErrorMessage
         name="website"
         as={TextInput}
-        label="Website"
+        label="Website*"
         placeholder="https://..."
         validate={validate.website}
       />
