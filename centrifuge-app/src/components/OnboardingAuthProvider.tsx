@@ -134,7 +134,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({ jw3tToken: token }),
+          body: JSON.stringify({ jw3t: token }),
         })
         if (authTokenRes.status !== 200) {
           throw new Error('Failed to authenticate wallet')
@@ -157,7 +157,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ jw3tToken: token }),
+        body: JSON.stringify({ jw3t: token }),
       })
       if (authTokenRes.status !== 200) {
         throw new Error('Failed to authenticate wallet')

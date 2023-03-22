@@ -22,7 +22,7 @@ export const generateNonceController = async (
   try {
     await validateInput(req.body, generateNonceInput)
     const nonce = generateNonce()
-    res.cookie('onboarding-auth', `${nonce}-${req.body.address}`, {
+    res.cookie(`onboarding-auth-${req.body.address.toLowerCase()}`, `${nonce}`, {
       secure: !(process.env.COLLATOR_WSS_URL.includes('demo') || process.env.COLLATOR_WSS_URL.includes('dev')),
       httpOnly: true,
       sameSite: 'strict',

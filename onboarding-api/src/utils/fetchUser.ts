@@ -11,7 +11,7 @@ export async function fetchUser<T>(wallet: Request['wallet'], options?: OptionsO
   try {
     const userSnapshot = await userCollection.where(`wallet`, 'array-contains', wallet).get()
     if (userSnapshot.empty) {
-      if (options && options.suppressError) {
+      if (options?.suppressError) {
         return null as UserOrNull<T>
       }
       throw new Error("User doesn't exist")

@@ -17,7 +17,7 @@ const verifyWalletInput = object({
     version: string(),
   }),
   signature: string(),
-  jw3tToken: string(),
+  jw3t: string(),
 })
 
 export const authenticateWalletController = async (
@@ -26,7 +26,7 @@ export const authenticateWalletController = async (
 ) => {
   try {
     await validateInput(req.body, verifyWalletInput)
-    const payload = req.body.jw3tToken ? await verifySubstrateWallet(req) : await verifyEthWallet(req, res)
+    const payload = req.body.jw3t ? await verifySubstrateWallet(req) : await verifyEthWallet(req, res)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '10d',
     })
@@ -39,7 +39,7 @@ export const authenticateWalletController = async (
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 async function verifySubstrateWallet(req: Request) {
-  const token = req.body.jw3tToken
+  const token = req.body.jw3t
   const { verified, payload } = await centrifuge.auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
@@ -63,23 +63,21 @@ async function verifySubstrateWallet(req: Request) {
 
 async function verifyEthWallet(req: Request, res: Response) {
   try {
-    const key = req.signedCookies['onboarding-auth']
-    const [nonce, address] = key.split('-')
+    const nonce = req.signedCookies[`onboarding-auth-${req.body.message.address.toLowerCase()}`]
     const { message, signature } = req.body
     message.nonce = nonce
 
-    if (nonce !== message.nonce || address !== message.address) {
+    if (nonce !== message.nonce || req.body.message.address !== message.address) {
       throw new Error('Invalid message')
     }
 
     const decodedMessage = await new SiweMessage(message).verify({ signature })
+    res.clearCookie('onboarding-auth')
     return {
       address: decodedMessage.data.address,
       network: 'evm',
     }
   } catch (error) {
     throw new Error('Invalid message or signature')
-  } finally {
-    res.clearCookie('onboarding-auth')
   }
 }

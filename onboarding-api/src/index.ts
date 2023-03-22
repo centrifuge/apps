@@ -28,13 +28,16 @@ dotenv.config()
 const onboarding = express()
 
 onboarding.use(rateLimiter)
-onboarding.use(cookieParser(process.env.COOKIE_SECRET))
 onboarding.use(corsMiddleware)
+onboarding.use(cookieParser(process.env.COOKIE_SECRET))
 
 onboarding.options('*', corsMiddleware)
 onboarding.post('/authenticateWallet', authenticateWalletController)
 onboarding.post('/verify', verifyTokenController)
 onboarding.post('/nonce', generateNonceController)
+
+onboarding.post('/sendVerifyEmail', verifyAuth, sendVerifyEmailController)
+onboarding.get('/verifyEmail', verifyEmailController)
 
 onboarding.get('/getUser', verifyAuth, getUserController)
 
@@ -50,10 +53,7 @@ onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
 
 onboarding.get('/getUnsignedAgreement', verifyAuth, getUnsignedAgreementController)
 onboarding.get('/getSignedAgreement', verifyAuth, getSignedAgreementController)
-
-onboarding.post('/sendVerifyEmail', verifyAuth, sendVerifyEmailController)
 onboarding.post('/signAndSendDocuments', verifyAuth, signAndSendDocumentsController)
-onboarding.get('/verifyEmail', verifyEmailController)
 
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
 
