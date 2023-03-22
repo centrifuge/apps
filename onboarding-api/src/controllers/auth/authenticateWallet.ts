@@ -26,7 +26,7 @@ export const authenticateWalletController = async (
 ) => {
   try {
     await validateInput(req.body, verifyWalletInput)
-    const payload = !!req.body.jw3tToken ? await verifySubstrateWallet(req) : await verifyEthWallet(req, res)
+    const payload = req.body.jw3tToken ? await verifySubstrateWallet(req) : await verifyEthWallet(req, res)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '10d',
     })

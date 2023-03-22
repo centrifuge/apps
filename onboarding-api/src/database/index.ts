@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv'
 import { Request } from 'express'
 import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
 import { HttpError } from '../utils/httpError'
-import { Subset } from '../utils/types'
+import { Subset, SupportedNetworks } from '../utils/types'
 
 dotenv.config()
 
@@ -19,7 +19,6 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
-export type SupportedNetworks = 'substrate' | 'evm'
 const walletSchema = array()
   .of(
     object({
