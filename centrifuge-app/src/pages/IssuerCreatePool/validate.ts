@@ -34,7 +34,7 @@ export const validate = {
   issuerDescription: combine(minLength(100), maxLength(1000)),
   issuerLogo: combineAsync(imageFile(), maxFileSize(1 * MB), maxImageSize(480, 480)),
   executiveSummary: combine(required(), mimeType('application/pdf'), maxFileSize(5 * MB)),
-  website: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
+  website: combine(required(), pattern(/^https?:\/\/.{4,}/, 'Not a valid URL')),
   forum: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
   email: combine(pattern(/@/, 'Not a valid email address'), required()),
   issuerDetailTitle: combine(required(), maxLength(50)),
