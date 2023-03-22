@@ -5,8 +5,6 @@ import { OnboardingUser } from '../types'
 import { getActiveOnboardingStep } from '../utils/getActiveOnboardingStep'
 import { useOnboardingAuth } from './OnboardingAuthProvider'
 
-const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
-
 export type OnboardingPool =
   | {
       trancheId: string
