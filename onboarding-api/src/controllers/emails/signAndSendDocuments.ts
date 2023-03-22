@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
+import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
@@ -40,21 +40,14 @@ export const signAndSendDocumentsController = async (
       throw new HttpError(400, 'User must sign document before documents can be sent to issuer')
     }
 
-    const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
-    const [unsignedAgreementExists] = await unsignedAgreement.exists()
-
-    if (!unsignedAgreementExists) {
-      throw new HttpError(400, 'Agreement not found')
-    }
-
-    const pdfDoc = await signAndAnnotateAgreement(
-      unsignedAgreement,
-      wallet.address,
+    const signedAgreementPDF = await signAndAnnotateAgreement({
+      poolId,
+      trancheId,
+      walletAddress: wallet.address,
       transactionInfo,
-      user?.name as string
-    )
-
-    const signedAgreementPDF = await pdfDoc.save()
+      name: user.name as string,
+      email: user.email as string,
+    })
 
     await writeToOnboardingBucket(
       signedAgreementPDF,

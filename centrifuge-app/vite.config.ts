@@ -21,6 +21,7 @@ export default defineConfig({
       // ensure all packages are converted to ES6 for rollup bundle
       include: [/node_modules/],
     },
+    sourcemap: true,
   },
   resolve: {
     // resolve every package version to the one in this projects package.json

@@ -20,6 +20,7 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
   try {
     await validateTaxInfoFile(req.body)
     const { wallet } = req
+    // make sure user exists
     const user = await fetchUser(wallet)
 
     await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${wallet.address}.pdf`)
