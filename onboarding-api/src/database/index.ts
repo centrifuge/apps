@@ -121,7 +121,7 @@ export type IndividualUser = InferType<typeof individualUserSchema>
 export type OnboardingUser = IndividualUser | EntityUser
 
 export const firestore = new Firestore()
-export const userCollection = firestore.collection(`onboarding-users-temp`)
+export const userCollection = firestore.collection(`onboarding-users`)
 
 export const storage = new Storage()
 export const onboardingBucket = storage.bucket('centrifuge-onboarding-api-dev') // TODO: make an env variable
