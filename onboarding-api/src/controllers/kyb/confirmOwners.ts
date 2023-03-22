@@ -25,8 +25,8 @@ export const confirmOwnersController = async (
 ) => {
   try {
     await validateInput(req.body, confirmOwnersInput)
-    const { walletAddress } = req
-    const user = await fetchUser(walletAddress)
+    const { wallet } = req
+    const user = await fetchUser(wallet)
     if (user.investorType !== 'entity') {
       throw new HttpError(404, 'Business not found')
     }
@@ -48,12 +48,12 @@ export const confirmOwnersController = async (
       globalSteps: { confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', [
+    await validateAndWriteToFirestore(wallet, verifyEntity, 'entity', [
       'globalSteps.confirmOwners',
       'ultimateBeneficialOwners',
     ])
 
-    const freshUserData = await fetchUser(walletAddress)
+    const freshUserData = await fetchUser(wallet)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

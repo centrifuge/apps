@@ -22,7 +22,7 @@ export const verifyEmailController = async (
       query: { token },
     } = req
     const payload = verifyJwt<VerifyEmailPayload>(token)
-    const user = await fetchUser(payload.walletAddress)
+    const user = await fetchUser(payload.wallet)
 
     // individual users don't have email addresses yet
     if (user.investorType !== 'entity') {
@@ -37,7 +37,7 @@ export const verifyEmailController = async (
       globalSteps: { verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(payload.walletAddress, globalSteps, 'entity', ['globalSteps.verifyEmail'])
+    await validateAndWriteToFirestore(payload.wallet, globalSteps, 'entity', ['globalSteps.verifyEmail'])
     return res.status(204).send()
   } catch (e) {
     const error = reportHttpError(e)

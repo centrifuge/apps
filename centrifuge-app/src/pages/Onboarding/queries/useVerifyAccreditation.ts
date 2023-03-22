@@ -1,9 +1,9 @@
 import { useMutation } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 export const useVerifyAccreditation = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser, nextStep } = useOnboarding()
 
   const mutation = useMutation(

@@ -1,5 +1,5 @@
 import { useMutation } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 type BusinessInformation = {
@@ -11,7 +11,7 @@ type BusinessInformation = {
 }
 
 export const useVerifyBusiness = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser, pool, nextStep } = useOnboarding()
 
   const mutation = useMutation(

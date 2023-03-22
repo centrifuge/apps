@@ -17,10 +17,10 @@ export const sendVerifyEmailController = async (
   try {
     await validateInput(req.body, sendVerifyEmailInput)
     const {
-      walletAddress,
+      wallet,
       body: { email },
     } = req
-    const user = await fetchUser(walletAddress)
+    const user = await fetchUser(wallet)
 
     if (!user.email) {
       throw new HttpError(400, 'Bad request')
@@ -31,10 +31,10 @@ export const sendVerifyEmailController = async (
     }
 
     if (email && email !== user.email) {
-      await validateAndWriteToFirestore(walletAddress, { email }, user.investorType, ['email'])
+      await validateAndWriteToFirestore(wallet, { email }, user.investorType, ['email'])
     }
-    const freshUserData = await fetchUser(walletAddress)
-    await sendVerifyEmailMessage(freshUserData)
+    const freshUserData = await fetchUser(wallet)
+    await sendVerifyEmailMessage(freshUserData, wallet)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

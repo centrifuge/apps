@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { IndividualUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { IndividualUser, validateAndWriteToFirestore } from '../../database'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
@@ -16,13 +17,12 @@ const kycInput = object({
 
 export const startKycController = async (req: Request<any, any, InferType<typeof kycInput>>, res: Response) => {
   try {
-    const { walletAddress, body } = req
+    const { wallet, body } = req
     await validateInput(req.body, kycInput)
 
-    const userDoc = await userCollection.doc(walletAddress).get()
-    const userData = userDoc.data() as OnboardingUser
+    const userData = await fetchUser(wallet, { suppressError: true })
 
-    if (!userDoc.exists && (!body.poolId || !body.trancheId)) {
+    if (!userData && (!body.poolId || !body.trancheId)) {
       throw new HttpError(400, 'trancheId and poolId required for individual kyc')
     }
 
@@ -43,10 +43,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     if (body.poolId && body.trancheId) {
       const updatedUserData: IndividualUser = {
         investorType: 'individual',
-        wallet: {
-          address: walletAddress,
-          network: 'polkadot',
-        },
+        wallet: [req.wallet],
         kycReference,
         name: body.name,
         dateOfBirth: body.dateOfBirth,
@@ -84,7 +81,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         },
         email: null,
       }
-      await validateAndWriteToFirestore(walletAddress, updatedUserData, 'individual')
+      await validateAndWriteToFirestore(wallet, updatedUserData, 'individual')
     } else {
       const updatedUser = {
         name: body.name,
@@ -93,7 +90,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         dateOfBirth: body.dateOfBirth,
         kycReference,
       }
-      await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', [
+      await validateAndWriteToFirestore(wallet, updatedUser, 'entity', [
         'name',
         'countryOfCitizenship',
         'countryOfResidency',

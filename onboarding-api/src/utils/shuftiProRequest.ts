@@ -5,7 +5,10 @@ import { kybMockResponse } from '../mocks/kybResponse'
 import { HttpError } from './HttpError'
 
 export const shuftiProRequest = async (_req: Request, payload: any, options?: { dryRun?: boolean; path?: string }) => {
-  if (options?.dryRun) {
+  if (
+    options?.dryRun &&
+    (process.env.COLLATOR_WSS_URL.includes('demo') || process.env.COLLATOR_WSS_URL.includes('development'))
+  ) {
     if (payload.reference.startsWith('BUSINESS_AML_REQUEST')) {
       return businessAmlMockResponse
     } else if (payload.reference.startsWith('KYB_REQUEST')) {
