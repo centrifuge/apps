@@ -8,7 +8,6 @@ import { usePool } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
 import { BusinessInformation } from './BusinessInformation'
-import { GlobalStatus } from './GlobalStatus'
 import { InvestorType } from './InvestorType'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
@@ -29,7 +28,6 @@ export const OnboardingPage: React.FC = () => {
 
   React.useEffect(() => {
     if (!poolId || !trancheId) {
-      setPool(null)
       return history.push('/onboarding')
     }
 
@@ -45,7 +43,6 @@ export const OnboardingPage: React.FC = () => {
       })
     }
 
-    setPool(null)
     return history.push('/onboarding')
   }, [poolId, setPool, trancheId, history, poolDetails])
 
@@ -78,14 +75,8 @@ export const OnboardingPage: React.FC = () => {
                 <Step label="Identity verification" />
                 <Step label="Tax information" />
                 {onboardingUser?.countryOfCitizenship === 'us' && <Step label="Accreditation" />}
-                {pool ? (
-                  <>
-                    <Step label="Sign subscription agreement" />
-                    <Step label="Status" />
-                  </>
-                ) : (
-                  <Step label="Status" />
-                )}
+                <Step label="Sign subscription agreement" />
+                <Step label="Status" />
               </>
             )}
             {investorType === 'entity' && (activeStep > 2 || !!onboardingUser?.investorType) && (
@@ -97,14 +88,8 @@ export const OnboardingPage: React.FC = () => {
                 {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode.startsWith('us') && (
                   <Step label="Accreditation" />
                 )}
-                {pool ? (
-                  <>
-                    <Step label="Sign subscription agreement" />
-                    <Step label="Status" />
-                  </>
-                ) : (
-                  <Step label="Status" />
-                )}
+                <Step label="Sign subscription agreement" />
+                <Step label="Status" />
               </>
             )}
             {activeStep < 3 && !onboardingUser?.investorType && <Step empty />}
@@ -122,22 +107,15 @@ export const OnboardingPage: React.FC = () => {
             {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us') ? (
               <>
                 {activeStep === 7 && <Accreditation />}
-                {pool ? (
-                  <>
-                    {activeStep === 8 && (
-                      <SignSubscriptionAgreement
-                        isSignedAgreementFetched={isSignedAgreementFetched}
-                        signedAgreementUrl={signedAgreementData as string}
-                      />
-                    )}
-
-                    {activeStep === 9 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
-                  </>
-                ) : (
-                  activeStep === 8 && <GlobalStatus />
+                {activeStep === 8 && (
+                  <SignSubscriptionAgreement
+                    isSignedAgreementFetched={isSignedAgreementFetched}
+                    signedAgreementUrl={signedAgreementData as string}
+                  />
                 )}
+                {activeStep === 9 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
-            ) : pool ? (
+            ) : (
               <>
                 {activeStep === 7 && (
                   <SignSubscriptionAgreement
@@ -147,8 +125,6 @@ export const OnboardingPage: React.FC = () => {
                 )}
                 {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
-            ) : (
-              activeStep === 7 && <GlobalStatus />
             )}
           </>
         )}
@@ -159,21 +135,15 @@ export const OnboardingPage: React.FC = () => {
             {onboardingUser?.investorType === 'individual' && onboardingUser.countryOfCitizenship === 'us' ? (
               <>
                 {activeStep === 5 && <Accreditation />}
-                {pool ? (
-                  <>
-                    {activeStep === 6 && (
-                      <SignSubscriptionAgreement
-                        isSignedAgreementFetched={isSignedAgreementFetched}
-                        signedAgreementUrl={signedAgreementData}
-                      />
-                    )}
-                    {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
-                  </>
-                ) : (
-                  activeStep === 6 && <GlobalStatus />
+                {activeStep === 6 && (
+                  <SignSubscriptionAgreement
+                    isSignedAgreementFetched={isSignedAgreementFetched}
+                    signedAgreementUrl={signedAgreementData}
+                  />
                 )}
+                {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
-            ) : pool ? (
+            ) : (
               <>
                 {activeStep === 5 && (
                   <SignSubscriptionAgreement
@@ -183,8 +153,6 @@ export const OnboardingPage: React.FC = () => {
                 )}
                 {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
-            ) : (
-              activeStep === 5 && <GlobalStatus />
             )}
           </>
         )}

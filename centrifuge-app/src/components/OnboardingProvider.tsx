@@ -12,7 +12,6 @@ export type OnboardingPool =
       name: string
       symbol: string
     }
-  | null
   | undefined
 
 interface OnboardingContextType<User, Pool> {
@@ -63,13 +62,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
           throw new Error()
         }
 
-        try {
-          const json = await response.json()
-
-          return json
-        } catch (error) {
-          return null
-        }
+        return response.json()
       }
     },
     {
@@ -85,7 +78,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       return setActiveStep(1)
     }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
-    if (!isConnecting && isOnboardingUserFetched && !isAuth) {
+    if (!isConnecting && isAuthFetched && !isAuth) {
       return setActiveStep(1)
     }
 

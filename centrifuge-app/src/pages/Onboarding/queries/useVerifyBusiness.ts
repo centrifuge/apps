@@ -26,7 +26,8 @@ export const useVerifyBusiness = () => {
             values.jurisdictionCode === 'us' || values.jurisdictionCode === 'ca'
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
-          ...(pool && { poolId: pool.id, trancheId: pool.trancheId }),
+          trancheId: pool?.trancheId,
+          poolId: pool?.id,
           dryRun: true,
         }),
         headers: {
