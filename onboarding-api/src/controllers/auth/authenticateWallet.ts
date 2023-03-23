@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
-import { SiweMessage } from 'siwe'
-import { InferType, object, string } from 'yup'
+import { InferType, number, object, string } from 'yup'
 import { centrifuge } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
@@ -13,7 +12,7 @@ const verifyWalletInput = object({
     uri: string(),
     statement: string(),
     address: string(),
-    chainId: string(),
+    chainId: number(),
     version: string(),
   }),
   signature: string(),
@@ -65,16 +64,20 @@ async function verifyEthWallet(req: Request, res: Response) {
   try {
     const nonce = req.signedCookies[`onboarding-auth-${req.body.message.address.toLowerCase()}`]
     const { message, signature } = req.body
-    message.nonce = nonce
 
     if (nonce !== message.nonce || req.body.message.address !== message.address) {
       throw new Error('Invalid message')
     }
 
-    const decodedMessage = await new SiweMessage(message).verify({ signature })
+    const decodedMessage = await req.ssx.login?.(message, signature, false, false, message.nonce)
+
+    if (!decodedMessage?.session) {
+      throw new Error('Invalid message')
+    }
+
     res.clearCookie(`onboarding-auth-${req.body.message.address}`)
     return {
-      address: decodedMessage.data.address,
+      address: decodedMessage.session.address,
       network: 'evm',
     }
   } catch (error) {

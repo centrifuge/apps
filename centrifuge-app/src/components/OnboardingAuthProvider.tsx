@@ -1,9 +1,10 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
+import { Web3Provider } from '@ethersproject/providers'
+import { SSX } from '@spruceid/ssx'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { SiweMessage } from 'siwe'
 
 export const OnboardingAuthContext = React.createContext<{
   session?: { signed: string; payload: any } | null
@@ -44,8 +45,8 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
     try {
       if (selectedAccount?.address && selectedWallet?.signer) {
         await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer, cent, proxy)
-      } else if (selectedAddress && provider?.getSigner()) {
-        await loginWithEvm(selectedAddress, provider.getSigner())
+      } else if (selectedAddress && provider) {
+        await loginWithEvm(selectedAddress, provider)
       }
     } catch {
     } finally {
@@ -171,7 +172,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
   }
 }
 
-const loginWithEvm = async (address: string, signer: any) => {
+const loginWithEvm = async (address: string, provider: Web3Provider) => {
   const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
     method: 'POST',
     headers: {
@@ -180,27 +181,36 @@ const loginWithEvm = async (address: string, signer: any) => {
     credentials: 'include',
     body: JSON.stringify({ address }),
   })
-  const nonce = await nonceRes.json()
+  const { nonce } = await nonceRes.json()
   const domain = window.location.host
   const origin = window.location.origin
-  const message = new SiweMessage({
+
+  const message = {
     domain,
-    address: address,
+    address,
     statement: 'Please sign to authenticate your wallet',
     uri: origin,
     version: '1',
     chainId: 1,
-    nonce: nonce.nonce,
+    nonce,
+    issuedAt: new Date().toISOString(),
+  }
+
+  const ssx = new SSX({
+    providers: {
+      web3: { driver: provider },
+    },
+    siweConfig: message,
   })
-  const siweMessage = message.prepareMessage()
-  const signedMessage = await signer?.signMessage(siweMessage)
+  const { signature } = await ssx.signIn()
+
   const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({ message, signature: signedMessage }),
+    body: JSON.stringify({ message, signature }),
   })
   if (tokenRes.status !== 200) {
     throw new Error('Failed to authenticate wallet')

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import { generateNonce } from 'siwe'
 import { InferType, object, string } from 'yup'
 import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
@@ -21,7 +20,12 @@ export const generateNonceController = async (
 ) => {
   try {
     await validateInput(req.body, generateNonceInput)
-    const nonce = generateNonce()
+    const nonce = req.ssx.generateNonce?.()
+
+    if (!nonce) {
+      throw new Error('Could not generate nonce')
+    }
+
     res.cookie(`onboarding-auth-${req.body.address.toLowerCase()}`, `${nonce}`, {
       secure: !(process.env.COLLATOR_WSS_URL.includes('demo') || process.env.COLLATOR_WSS_URL.includes('dev')),
       httpOnly: true,

@@ -1,4 +1,5 @@
 const cookieParser = require('cookie-parser')
+import { SSXExpressMiddleware, SSXServer } from '@spruceid/ssx-server'
 import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
@@ -25,11 +26,15 @@ const express = require('express')
 
 dotenv.config()
 
-const onboarding = express()
+const ssx = new SSXServer({
+  signingKey: process.env.JWT_SECRET,
+})
 
+const onboarding = express()
 onboarding.use(rateLimiter)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))
+onboarding.use(SSXExpressMiddleware(ssx))
 
 onboarding.options('*', corsMiddleware)
 onboarding.post('/authenticateWallet', authenticateWalletController)
