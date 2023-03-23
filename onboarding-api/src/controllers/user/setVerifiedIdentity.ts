@@ -17,9 +17,9 @@ export const setVerifiedIdentityController = async (
   try {
     const {
       body: { dryRun },
-      wallet,
+      walletAddress,
     } = { ...req }
-    const user = await fetchUser(wallet)
+    const user = await fetchUser(walletAddress)
 
     if (user.globalSteps.verifyIdentity.completed) {
       throw new HttpError(400, 'Unable to process request')
@@ -38,8 +38,8 @@ export const setVerifiedIdentityController = async (
         },
       },
     }
-    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyIdentity'])
-    const freshUserData = await fetchUser(wallet)
+    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps.verifyIdentity'])
+    const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

@@ -4,7 +4,7 @@ import { reportHttpError } from '../../utils/httpError'
 
 export const getUserController = async (req: Request, res: Response) => {
   try {
-    const user = await fetchUser(req.wallet, { suppressError: true })
+    const user = await fetchUser(req.walletAddress, { suppressError: true })
     return res.send(user)
   } catch (e) {
     const error = reportHttpError(e)

@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useMutation } from 'react-query'
-import { useOnboardingAuth } from '../OnboardingAuthProvider'
+import { useAuth } from '../AuthProvider'
 import { useOnboarding } from '../OnboardingProvider'
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
 }
 
 export const ConfirmResendEmailVerificationDialog = ({ isDialogOpen, setIsDialogOpen }: Props) => {
-  const { authToken } = useOnboardingAuth()
+  const { authToken } = useAuth()
   const { refetchOnboardingUser } = useOnboarding()
 
   const { mutate: sendVerifyEmail, isLoading } = useMutation(

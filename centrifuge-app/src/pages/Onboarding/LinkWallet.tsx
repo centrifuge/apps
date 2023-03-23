@@ -3,10 +3,12 @@ import { Button, Checkbox, Shelf, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, object } from 'yup'
+import { useAuth } from '../../components/AuthProvider'
 import { DataSharingAgreementDialog } from '../../components/Dialogs/DataSharingAgreementDialog'
 import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
-import { useOnboardingAuth } from '../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../components/OnboardingProvider'
+
+const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 const validationSchema = object({
   isAgreedToDataSharingAgreement: boolean().oneOf([true], 'You must agree to the data sharing agreement'),
@@ -16,11 +18,9 @@ const validationSchema = object({
 export const LinkWallet = () => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = React.useState(false)
   const { nextStep } = useOnboarding()
-  const { login, isAuth } = useOnboardingAuth()
-  const {
-    evm: { selectedAddress },
-    substrate: { selectedAccount },
-  } = useWallet()
+
+  const { selectedAccount } = useWallet().substrate
+  const { login, isAuth } = useAuth()
 
   const formik = useFormik({
     initialValues: {
@@ -29,20 +29,20 @@ export const LinkWallet = () => {
     },
     validationSchema,
     onSubmit: () => {
-      login()
+      login(AUTHORIZED_ONBOARDING_PROXY_TYPES)
     },
   })
 
   React.useEffect(() => {
-    if (selectedAccount?.address || selectedAddress) {
+    if (selectedAccount) {
       formik.setFieldValue('hasSelectedWallet', true, false)
     }
 
-    if (!selectedAccount?.address && !selectedAddress) {
+    if (!selectedAccount) {
       formik.setFieldValue('hasSelectedWallet', false, false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAccount?.address, selectedAddress])
+  }, [selectedAccount])
 
   return (
     <>
@@ -86,7 +86,7 @@ export const LinkWallet = () => {
 
       <ActionBar>
         {isAuth ? (
-          <Button onClick={nextStep}>Next</Button>
+          <Button onClick={() => nextStep()}>Next</Button>
         ) : (
           <Button
             onClick={() => {

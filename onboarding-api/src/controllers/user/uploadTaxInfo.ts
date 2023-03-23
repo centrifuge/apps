@@ -19,11 +19,11 @@ const validateTaxInfoFile = async (file: Buffer) => {
 export const uploadTaxInfoController = async (req: Request, res: Response) => {
   try {
     await validateTaxInfoFile(req.body)
-    const { wallet } = req
+    const { walletAddress } = req
     // make sure user exists
-    await fetchUser(wallet)
+    await fetchUser(walletAddress)
 
-    await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${wallet.address}.pdf`)
+    await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${walletAddress}.pdf`)
 
     const updatedUser: Subset<OnboardingUser> = {
       globalSteps: {
@@ -34,9 +34,9 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
       },
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyTaxInfo'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['globalSteps.verifyTaxInfo'])
 
-    const freshUserData = await fetchUser(wallet)
+    const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

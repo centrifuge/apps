@@ -1,16 +1,17 @@
 import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
-import { Request } from 'express'
 import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
 import { HttpError } from '../utils/httpError'
-import { Subset, SupportedNetworks } from '../utils/types'
+import { Subset } from '../utils/types'
 
 dotenv.config()
 
 type Individual = 'individual'
 type Entity = 'entity'
 export type InvestorType = Individual | Entity
+
+export type SupportedNetworks = 'polkadot'
 
 const uboSchema = object({
   name: string().required(),
@@ -19,15 +20,10 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
-const walletSchema = array()
-  .of(
-    object({
-      address: string().required(),
-      network: string().required() as StringSchema<SupportedNetworks>,
-    })
-  )
-  .required()
-export type Wallet = InferType<typeof walletSchema>
+const walletSchema = object({
+  address: string().required(),
+  network: string().required().default('polkadot') as StringSchema<SupportedNetworks>,
+})
 
 const poolSpecificStepsSchema = object({
   signAgreement: object({
@@ -145,26 +141,20 @@ const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
  * @param mergeFields optional, pass a value to update data in an existing collection
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
-  wallet: Request['wallet'],
+  key: string,
   data: T extends 'undefined' ? OnboardingUser : Subset<OnboardingUser>,
   schemaKey: keyof typeof schemas,
   mergeFields?: T
 ) => {
   try {
     const { collection, schema } = schemas[schemaKey]
-    // mergeFields implies that the user has already been created
     if (typeof mergeFields !== 'undefined') {
       const mergeValidations = (mergeFields as string[]).map((field) => schema.validateAt(field, data))
-      const userSnapshot = await userCollection.where(`wallet`, 'array-contains', wallet).get()
-      if (userSnapshot.empty) {
-        throw new Error('User not found')
-      }
-      const key = userSnapshot.docs[0].id
       await Promise.all(mergeValidations)
       await collection.doc(key).set(data, { mergeFields: mergeFields as string[] })
     } else {
       await schema.validate(data)
-      await collection.doc(wallet.address).set(data)
+      await collection.doc(key).set(data)
     }
   } catch (error) {
     // @ts-expect-error error typing

@@ -1,9 +1,9 @@
 import { useQuery } from 'react-query'
-import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
+import { useAuth } from '../../../components/AuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 export const useUnsignedAgreement = () => {
-  const { authToken } = useOnboardingAuth()
+  const { authToken } = useAuth()
   const { pool, onboardingUser } = useOnboarding()
 
   const poolId = pool?.id as string

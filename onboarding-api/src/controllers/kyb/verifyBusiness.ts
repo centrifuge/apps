@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { bool, InferType, object, string } from 'yup'
-import { EntityUser, validateAndWriteToFirestore } from '../../database'
+import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
@@ -24,16 +24,17 @@ export const verifyBusinessController = async (
   try {
     await validateInput(req.body, verifyBusinessInput)
     const {
-      wallet,
+      walletAddress,
       body: { jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
-    const existingUser = await fetchUser(wallet, { suppressError: true })
-    if (existingUser && existingUser.investorType !== 'entity') {
+    const entityDoc = await userCollection.doc(req.walletAddress).get()
+    const entityData = entityDoc.data() as OnboardingUser
+    if (entityDoc.exists && entityData.investorType !== 'entity') {
       throw new HttpError(400, 'Verify business is only available for investorType "entity"')
     }
 
-    if (existingUser && existingUser.investorType === 'entity' && existingUser.globalSteps?.verifyBusiness.completed) {
+    if (entityDoc.exists && entityData.investorType === 'entity' && entityData.globalSteps?.verifyBusiness.completed) {
       throw new HttpError(400, 'Business already verified')
     }
 
@@ -59,7 +60,10 @@ export const verifyBusinessController = async (
     const user: EntityUser = {
       investorType: 'entity',
       kycReference: '',
-      wallet: [req.wallet],
+      wallet: {
+        address: walletAddress,
+        network: 'polkadot',
+      },
       name: null,
       dateOfBirth: null,
       countryOfCitizenship: null,
@@ -100,9 +104,9 @@ export const verifyBusinessController = async (
           : {},
     }
 
-    await validateAndWriteToFirestore(wallet, user, 'entity')
-    await sendVerifyEmailMessage(user, wallet)
-    const freshUserData = await fetchUser(wallet)
+    await validateAndWriteToFirestore(walletAddress, user, 'entity')
+    await sendVerifyEmailMessage(user)
+    const freshUserData = await fetchUser(walletAddress)
     return res.status(200).json({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

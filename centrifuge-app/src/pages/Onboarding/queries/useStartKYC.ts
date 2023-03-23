@@ -1,5 +1,5 @@
 import { useMutation } from 'react-query'
-import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
+import { useAuth } from '../../../components/AuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 type Indentity = {
@@ -10,7 +10,7 @@ type Indentity = {
 }
 
 export const useStartKYC = () => {
-  const { authToken } = useOnboardingAuth()
+  const { authToken } = useAuth()
   const { pool, onboardingUser } = useOnboarding()
 
   const mutation = useMutation(async (values: Indentity) => {

@@ -8,15 +8,10 @@ export type Subset<K> = {
     : K[attr]
 }
 
-export type SupportedNetworks = 'substrate' | 'evm'
-
 declare global {
   export namespace Express {
     export interface Request {
-      wallet: {
-        address: string
-        network: SupportedNetworks
-      }
+      walletAddress: string
     }
   }
   export namespace NodeJS {

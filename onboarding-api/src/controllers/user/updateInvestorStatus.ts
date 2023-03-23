@@ -26,8 +26,8 @@ export const updateInvestorStatusController = async (
       query: { token, status },
     } = req
     const payload = verifyJwt<UpdateInvestorStatusPayload>(token)
-    const { poolId, trancheId, wallet } = payload
-    const user = await fetchUser(wallet)
+    const { poolId, trancheId, walletAddress } = payload
+    const user = await fetchUser(walletAddress)
 
     const incompleteSteps = Object.entries(user.globalSteps).filter(([name, step]) => {
       if (name === 'verifyAccreditation') {
@@ -73,10 +73,10 @@ export const updateInvestorStatusController = async (
       },
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['poolSteps'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
 
     if (user?.email && status === 'approved') {
-      await addInvestorToMemberList(wallet.address, poolId, trancheId)
+      await addInvestorToMemberList(walletAddress, poolId, trancheId)
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
       return res.status(204).send()
     } else if (user?.email && status === 'rejected') {

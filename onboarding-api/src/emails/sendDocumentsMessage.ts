@@ -1,28 +1,28 @@
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
-import { onboardingBucket, Wallet } from '../database'
+import { onboardingBucket } from '../database'
 import { getPoolById } from '../utils/centrifuge'
 import { HttpError } from '../utils/httpError'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string
-  wallet: Wallet[0]
+  walletAddress: string
   trancheId: string
 }
 
 export const sendDocumentsMessage = async (
-  wallet: Wallet[0],
+  walletAddress: string,
   poolId: string,
   trancheId: string,
   signedAgreement: any
 ) => {
   const { metadata } = await getPoolById(poolId)
-  const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
+  const payload: UpdateInvestorStatusPayload = { walletAddress, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '7d',
   })
 
-  const taxInfoFile = await onboardingBucket.file(`tax-information/${wallet.address}.pdf`)
+  const taxInfoFile = await onboardingBucket.file(`tax-information/${walletAddress}.pdf`)
   const [taxInfoExists] = await taxInfoFile.exists()
 
   if (!taxInfoExists) {
