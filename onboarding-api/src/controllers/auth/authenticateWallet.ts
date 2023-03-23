@@ -72,7 +72,7 @@ async function verifyEthWallet(req: Request, res: Response) {
     }
 
     const decodedMessage = await new SiweMessage(message).verify({ signature })
-    res.clearCookie(`onboarding-auth-${req.body.message.address}`)
+    res.clearCookie('onboarding-auth')
     return {
       address: decodedMessage.data.address,
       network: 'evm',
