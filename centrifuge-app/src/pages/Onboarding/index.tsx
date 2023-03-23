@@ -2,13 +2,13 @@ import { Box, Step, Stepper, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { Container, Header, Layout } from '../../components/Onboarding'
-import { ChoosePool } from '../../components/Onboarding/ChoosePool'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
 import { usePool } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
 import { BusinessInformation } from './BusinessInformation'
+import { GlobalStatus } from './GlobalStatus'
 import { InvestorType } from './InvestorType'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
@@ -84,7 +84,7 @@ export const OnboardingPage: React.FC = () => {
                     <Step label="Status" />
                   </>
                 ) : (
-                  <Step label="Choose pool" />
+                  <Step label="Status" />
                 )}
               </>
             )}
@@ -103,7 +103,7 @@ export const OnboardingPage: React.FC = () => {
                     <Step label="Status" />
                   </>
                 ) : (
-                  <Step label="Choose pool" />
+                  <Step label="Status" />
                 )}
               </>
             )}
@@ -134,7 +134,7 @@ export const OnboardingPage: React.FC = () => {
                     {activeStep === 9 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
-                  activeStep === 8 && <ChoosePool />
+                  activeStep === 8 && <GlobalStatus />
                 )}
               </>
             ) : pool ? (
@@ -148,7 +148,7 @@ export const OnboardingPage: React.FC = () => {
                 {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (
-              activeStep === 7 && <ChoosePool />
+              activeStep === 7 && <GlobalStatus />
             )}
           </>
         )}
@@ -170,7 +170,7 @@ export const OnboardingPage: React.FC = () => {
                     {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
-                  activeStep === 6 && <ChoosePool />
+                  activeStep === 6 && <GlobalStatus />
                 )}
               </>
             ) : pool ? (
@@ -184,7 +184,7 @@ export const OnboardingPage: React.FC = () => {
                 {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (
-              activeStep === 5 && <ChoosePool />
+              activeStep === 5 && <GlobalStatus />
             )}
           </>
         )}

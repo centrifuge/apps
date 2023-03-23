@@ -1,16 +1,16 @@
 import { Button } from '@centrifuge/fabric'
 import { useHistory } from 'react-router-dom'
-import { ActionBar, Content, ContentHeader } from '.'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 
-export const ChoosePool = () => {
+export const GlobalStatus = () => {
   const history = useHistory()
 
   return (
     <>
       <Content>
         <ContentHeader
-          title="Choose a pool"
-          body="Your identity has been verified. Click the button below to view the pools available for investment."
+          title="Thanks for verifying your identity"
+          body="Please click the button below to access the pools available for investment."
         />
       </Content>
 

@@ -85,7 +85,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       return setActiveStep(1)
     }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
-    if (!isConnecting && isAuthFetched && !isAuth) {
+    if (!isConnecting && isOnboardingUserFetched && !isAuth) {
       return setActiveStep(1)
     }
 
