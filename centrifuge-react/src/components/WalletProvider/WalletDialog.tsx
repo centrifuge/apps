@@ -20,7 +20,7 @@ import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { isMetaMaskWallet } from './evm/utils'
 import { Logo, SelectAnchor, SelectButton } from './SelectButton'
-import { SelectionStep } from './SelectionStep'
+import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
 import { UserSelection } from './UserSelection'
 import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
 import { useWallet, wallets } from './WalletProvider'
@@ -43,6 +43,7 @@ export function WalletDialog({ evmChains }: Props) {
     showWallets,
     connect: doConnect,
     evm,
+    scopedNetwork,
   } = ctx
 
   const getNetworkName = useGetNetworkName()
@@ -72,6 +73,14 @@ export function WalletDialog({ evmChains }: Props) {
     }
   }
 
+  function walletButtonMuted() {
+    return Boolean(
+      scopedNetwork &&
+        ((selectedNetwork === 'centrifuge' && scopedNetwork !== 'substrate') ||
+          (typeof selectedNetwork === 'number' && scopedNetwork !== 'evm'))
+    )
+  }
+
   return (
     <Dialog title={view ? title[view] : undefined} isOpen={!!view} onClose={close}>
       <Stack gap={4}>
@@ -79,11 +88,16 @@ export function WalletDialog({ evmChains }: Props) {
 
         {view === 'wallets' ? (
           <>
-            <SelectionStep step={1} title="Choose network">
+            <SelectionStep
+              step={1}
+              title="Choose network"
+              tooltip={scopedNetwork && <SelectionStepTooltip type={scopedNetwork} />}
+            >
               <SelectButton
                 logo={<Logo icon={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
                 active={selectedNetwork === 'centrifuge'}
+                muted={Boolean(scopedNetwork && scopedNetwork !== 'substrate')}
               >
                 {getNetworkName('centrifuge')}
               </SelectButton>
@@ -97,6 +111,7 @@ export function WalletDialog({ evmChains }: Props) {
                     logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
                     onClick={() => showWallets(Number(chainId))}
                     active={selectedNetwork === Number(chainId)}
+                    muted={Boolean(scopedNetwork && scopedNetwork !== 'evm')}
                   >
                     {info.name}
                   </SelectButton>
@@ -123,6 +138,7 @@ export function WalletDialog({ evmChains }: Props) {
                     }}
                     loading={isConnecting && wallet === pendingWallet}
                     active={selectedWallet === wallet}
+                    muted={walletButtonMuted()}
                   >
                     {getWalletLabel(wallet)}
                   </SelectButton>
@@ -132,6 +148,7 @@ export function WalletDialog({ evmChains }: Props) {
                     href={wallet.installUrl}
                     logo={<Logo icon={getWalletIcon(wallet)} />}
                     iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
+                    muted={walletButtonMuted()}
                   >
                     {getWalletLabel(wallet)}
                   </SelectAnchor>

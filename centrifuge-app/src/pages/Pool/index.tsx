@@ -1,12 +1,22 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router'
+import { Route, Switch, useParams, useRouteMatch } from 'react-router'
 import { PoolDetailAssetsTab } from './Assets'
 import { PoolDetailLiquidityTab } from './Liquidity'
 import { PoolDetailOverviewTab } from './Overview'
 import { PoolDetailReportingTab } from './Reporting'
 
 export const PoolDetailPage: React.FC = () => {
+  const { pid } = useParams<{ pid: string }>()
+  const isTinlakePool = pid.startsWith('0x')
+  const { setScopedNetwork } = useWallet()
   const { path } = useRouteMatch()
+
+  React.useEffect(() => {
+    setScopedNetwork(isTinlakePool ? 'evm' : 'substrate')
+    return () => setScopedNetwork(null)
+  }, [])
+
   return (
     <Switch>
       <Route path={`${path}/reporting`} component={PoolDetailReportingTab} />

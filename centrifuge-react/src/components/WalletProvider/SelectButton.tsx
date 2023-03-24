@@ -8,13 +8,14 @@ type SelectButtonProps = {
   onClick?: () => void
   href?: string
   disabled?: boolean
+  muted?: boolean
   loading?: boolean
   logo?: React.ReactNode
   children: React.ReactNode
   iconRight?: React.ReactNode
 }
 
-const Root = styled(Box)<{ disabled: boolean }>`
+const Root = styled(Box)<{ disabled: boolean; muted?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -22,7 +23,7 @@ const Root = styled(Box)<{ disabled: boolean }>`
   appearance: none;
   outline: none;
 
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+  opacity: ${({ disabled, muted }) => (disabled || muted ? 0.2 : 1)};
   cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
   pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 
@@ -36,7 +37,13 @@ const Root = styled(Box)<{ disabled: boolean }>`
   }
 `
 
-export function SelectButton({ active = false, onClick, disabled = false, ...restProps }: SelectButtonProps) {
+export function SelectButton({
+  active = false,
+  onClick,
+  disabled = false,
+  muted = false,
+  ...restProps
+}: SelectButtonProps) {
   return (
     <Root
       onClick={onClick}
@@ -48,13 +55,20 @@ export function SelectButton({ active = false, onClick, disabled = false, ...res
       borderRadius="input"
       textAlign="center"
       backgroundColor={active ? 'backgroundSecondary' : 'backgroundPrimary'}
+      muted={muted}
     >
       <Content {...restProps} />
     </Root>
   )
 }
 
-export function SelectAnchor({ active = false, href, disabled = false, ...restProps }: SelectButtonProps) {
+export function SelectAnchor({
+  active = false,
+  href,
+  disabled = false,
+  muted = false,
+  ...restProps
+}: SelectButtonProps) {
   return (
     <Root
       as="a"
@@ -64,6 +78,7 @@ export function SelectAnchor({ active = false, href, disabled = false, ...restPr
       borderRadius="input"
       disabled={disabled}
       backgroundColor={active ? 'backgroundSecondary' : 'backgroundPrimary'}
+      muted={muted}
     >
       <Content {...restProps} />
     </Root>

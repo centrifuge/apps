@@ -21,6 +21,10 @@ type WalletContextType = {
   connectedType: 'evm' | 'substrate' | null
   connectedNetwork: State['walletDialog']['network']
   connectedNetworkName: string | null
+
+  scopedNetwork: 'evm' | 'substrate' | null
+  setScopedNetwork: (scopedNetwork: 'evm' | 'substrate' | null) => void
+
   dispatch: (action: Action) => void
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
@@ -238,6 +242,8 @@ export function WalletProvider({
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
   const getNetworkName = useGetNetworkName(evmChains)
 
+  const [scopedNetwork, setScopedNetwork] = React.useState<WalletContextType['scopedNetwork']>(null)
+
   const ctx: WalletContextType = React.useMemo(() => {
     const selectedSubstrateAccount =
       state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null
@@ -247,6 +253,8 @@ export function WalletProvider({
       connectedType: state.connectedType,
       connectedNetwork,
       connectedNetworkName: connectedNetwork ? getNetworkName(connectedNetwork) : null,
+      scopedNetwork,
+      setScopedNetwork,
       dispatch,
       showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
         dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),
