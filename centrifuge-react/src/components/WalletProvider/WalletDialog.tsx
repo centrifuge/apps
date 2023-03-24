@@ -9,6 +9,7 @@ import {
   IconDownload,
   MenuItemGroup,
   Stack,
+  Text,
 } from '@centrifuge/fabric'
 import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -134,6 +135,19 @@ export function WalletDialog({ evmChains }: Props) {
                 )
               )}
             </SelectionStep>
+
+            <Text as="p" variant="body3" textAlign="center">
+              Need help connecting a wallet?{' '}
+              <Text
+                as="a"
+                href="https://docs.centrifuge.io/use/setup-wallet/"
+                target="_blank"
+                rel="noopener noreferrer"
+                textDecoration="underline"
+              >
+                Read our FAQ
+              </Text>
+            </Text>
           </>
         ) : (
           <>
