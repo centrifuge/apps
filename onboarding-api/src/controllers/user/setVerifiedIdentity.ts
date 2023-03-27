@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { bool, InferType, object } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
@@ -17,9 +18,9 @@ export const setVerifiedIdentityController = async (
   try {
     const {
       body: { dryRun },
-      walletAddress,
+      wallet,
     } = { ...req }
-    const user = await fetchUser(walletAddress)
+    const user = await fetchUser(wallet)
 
     if (user.globalSteps.verifyIdentity.completed) {
       throw new HttpError(400, 'Unable to process request')
@@ -38,8 +39,11 @@ export const setVerifiedIdentityController = async (
         },
       },
     }
-    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps.verifyIdentity'])
-    const freshUserData = await fetchUser(walletAddress)
+    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyIdentity'])
+    if (user.investorType === 'individual') {
+      await sendVerifyEmailMessage(user, wallet)
+    }
+    const freshUserData = await fetchUser(wallet)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

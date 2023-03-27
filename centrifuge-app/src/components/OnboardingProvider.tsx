@@ -3,9 +3,7 @@ import * as React from 'react'
 import { useQuery } from 'react-query'
 import { OnboardingUser } from '../types'
 import { getActiveOnboardingStep } from '../utils/getActiveOnboardingStep'
-import { useAuth } from './AuthProvider'
-
-const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+import { useOnboardingAuth } from './OnboardingAuthProvider'
 
 export type OnboardingPool =
   | {
@@ -14,6 +12,7 @@ export type OnboardingPool =
       name: string
       symbol: string
     }
+  | null
   | undefined
 
 interface OnboardingContextType<User, Pool> {
@@ -35,7 +34,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     pendingConnect: { isConnecting },
     substrate: { selectedAccount },
   } = useWallet()
-  const { isAuth, isAuthFetched, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { isAuth, isAuthFetched, authToken } = useOnboardingAuth()
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const [pool, setPool] = React.useState<OnboardingPool>()
 
@@ -64,7 +63,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
           throw new Error()
         }
 
-        return response.json()
+        try {
+          const json = await response.json()
+
+          return json
+        } catch (error) {
+          return null
+        }
       }
     },
     {
@@ -80,7 +85,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       return setActiveStep(1)
     }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
-    if (!isConnecting && isAuthFetched && !isAuth) {
+    if (!isConnecting && isOnboardingUserFetched && !isAuth) {
       return setActiveStep(1)
     }
 

@@ -6,7 +6,7 @@ import { Subset } from '../../utils/types'
 
 export const verifyAccreditationController = async (req: Request, res: Response) => {
   try {
-    const user = await fetchUser(req.walletAddress)
+    const user = await fetchUser(req.wallet)
 
     if (user.globalSteps.verifyAccreditation.completed) {
       throw new HttpError(400, 'Unable to process request')
@@ -29,8 +29,8 @@ export const verifyAccreditationController = async (req: Request, res: Response)
         },
       },
     }
-    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps'])
-    const freshUserData = await fetchUser(req.walletAddress)
+    await validateAndWriteToFirestore(req.wallet, updatedUser, 'entity', ['globalSteps'])
+    const freshUserData = await fetchUser(req.wallet)
     return res.status(200).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

@@ -1,5 +1,5 @@
 import { useMutation } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 type BusinessInformation = {
@@ -11,7 +11,7 @@ type BusinessInformation = {
 }
 
 export const useVerifyBusiness = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser, pool, nextStep } = useOnboarding()
 
   const mutation = useMutation(
@@ -26,8 +26,7 @@ export const useVerifyBusiness = () => {
             values.jurisdictionCode === 'us' || values.jurisdictionCode === 'ca'
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
-          trancheId: pool?.trancheId,
-          poolId: pool?.id,
+          ...(pool && { poolId: pool.id, trancheId: pool.trancheId }),
           dryRun: true,
         }),
         headers: {

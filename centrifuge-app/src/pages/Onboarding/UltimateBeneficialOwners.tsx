@@ -144,7 +144,9 @@ export const UltimateBeneficialOwners = () => {
           {errors.isEmailVerified && <ValidationToast label={errors.isEmailVerified} />}
           <Content>
             <NotificationBar>
-              <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
+              {!isCompleted && (
+                <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
+              )}
               {isError && <UltimateBeneficialOwnerInlineFeedback />}
             </NotificationBar>
 

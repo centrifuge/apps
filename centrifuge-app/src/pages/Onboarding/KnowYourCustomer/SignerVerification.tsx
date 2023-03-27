@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, DateInput, Select, Text, TextInput } from '@centrifuge/fabric'
 import { FormikProps } from 'formik'
-import { ActionBar, Content, ContentHeader, Fieldset } from '../../../components/Onboarding'
+import { ActionBar, Content, ContentHeader, Fieldset, ValidEmailTooltip } from '../../../components/Onboarding'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
 import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES } from '../geographyCodes'
@@ -8,6 +8,7 @@ import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES } from '../geographyCodes'
 type Props = {
   formik: FormikProps<{
     name: string
+    email: string | undefined
     dateOfBirth: string
     countryOfCitizenship: string
     countryOfResidency: string
@@ -48,6 +49,18 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
             disabled={isLoading || isCompleted}
             errorMessage={formik.touched.name ? formik.errors.name : undefined}
           />
+          {investorType === 'individual' && (
+            <Box position="relative">
+              <TextInput
+                {...formik.getFieldProps('email')}
+                label="Email address"
+                placeholder="Enter email address"
+                disabled={isLoading || isCompleted}
+                errorMessage={formik.touched.email ? formik.errors.email : undefined}
+              />
+              <ValidEmailTooltip />
+            </Box>
+          )}
           <DateInput
             {...formik.getFieldProps('dateOfBirth')}
             label="Date of Birth"

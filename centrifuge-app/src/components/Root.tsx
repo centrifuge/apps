@@ -33,12 +33,12 @@ import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
-import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
+import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
 import { PodAuthProvider } from './PodAuthProvider'
 
@@ -117,7 +117,7 @@ export const Root: React.VFC = () => {
             <DemoBanner />
             <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
-                <AuthProvider>
+                <OnboardingAuthProvider>
                   <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                     <TransactionProvider>
                       <TransactionToasts />
@@ -128,7 +128,7 @@ export const Root: React.VFC = () => {
                       </Router>
                     </TransactionProvider>
                   </DebugFlags>
-                </AuthProvider>
+                </OnboardingAuthProvider>
               </PodAuthProvider>
             </WalletProvider>
           </CentrifugeProvider>

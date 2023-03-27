@@ -1,11 +1,11 @@
 import { useMutation } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { OnboardingPool, useOnboarding } from '../../../components/OnboardingProvider'
 import { OnboardingUser } from '../../../types'
 
 export const useSignAndSendDocuments = () => {
   const { refetchOnboardingUser, pool, nextStep } = useOnboarding<OnboardingUser, NonNullable<OnboardingPool>>()
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
 
   const poolId = pool.id
   const trancheId = pool.trancheId

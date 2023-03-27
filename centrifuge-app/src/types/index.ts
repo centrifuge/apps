@@ -128,6 +128,7 @@ type IndividualUser = {
   investorType: 'individual'
   walletAddress: string
   name: string
+  email: string
   dateOfBirth: string
   countryOfCitizenship: string
   countryOfResidency: string

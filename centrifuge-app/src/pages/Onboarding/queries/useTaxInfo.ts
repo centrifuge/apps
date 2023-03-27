@@ -1,10 +1,10 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 export const useTaxInfo = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { selectedAccount } = useWallet().substrate
   const { onboardingUser } = useOnboarding()
 
