@@ -53,7 +53,7 @@ export const validate = {
   advanceRate: combine(required(), positiveNumber(), max(100)),
   fee: combine(required(), positiveNumber(), max(100), maxDecimals(2)),
   probabilityOfDefault: combine(required(), nonNegativeNumber(), max(100)),
-  discountRate: combine(required(), positiveNumber(), max(100)),
+  discountRate: combine(required(), nonNegativeNumber(), max(100)),
   lossGivenDefault: combine(required(), nonNegativeNumber(), max(100)),
 
   // write-off groups
