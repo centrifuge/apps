@@ -32,7 +32,6 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
-import { PodConfig } from '../IssuerPool/Configuration/PodConfig'
 import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
 import { TrancheSection } from './TrancheInput'
@@ -434,7 +433,6 @@ const CreatePoolForm: React.VFC = () => {
           <TrancheSection />
         </Form>
       </FormikProvider>
-      <PodConfig />
     </>
   )
 }
