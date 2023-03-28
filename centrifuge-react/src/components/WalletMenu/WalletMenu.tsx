@@ -18,7 +18,7 @@ import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
-import { formatBalance, formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
+import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
@@ -126,7 +126,7 @@ function ConnectedMenu() {
                   Balance
                 </Text>
                 <Text fontSize={22} fontWeight={500} textAlign="center">
-                  {balance && formatBalance(balance, symbol, 2)}
+                  {balance && formatBalanceAbbreviated(balance, symbol)}
                 </Text>
               </Stack>
             </MenuItemGroup>
