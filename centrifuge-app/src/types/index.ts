@@ -43,7 +43,6 @@ export type LoanTemplate = {
   name: string
   options: {
     assetClasses: string[]
-    loanTypes: ('BulletLoan' | 'CreditLine' | 'CreditLineWithMaturity')[]
     description: boolean
     image: boolean
   }

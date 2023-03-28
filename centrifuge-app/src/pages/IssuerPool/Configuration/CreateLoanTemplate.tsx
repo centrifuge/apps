@@ -17,7 +17,6 @@ const initialSchemaJSON = `{
   "name":"Example asset template",
   "options":{
     "assetClasses":[],
-    "loanTypes":[],
     "description":true,
     "image":true
   },

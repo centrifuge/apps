@@ -1,4 +1,4 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
   Transaction,
   useCentrifuge,
@@ -23,7 +23,7 @@ import {
 import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
-import { lastValueFrom, switchMap } from 'rxjs'
+import { lastValueFrom } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
@@ -41,6 +41,7 @@ import { usePod } from '../../../utils/usePod'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
+import { PricingInput } from './PricingInput'
 
 export const IssuerCreateLoanPage: React.FC = () => {
   return (
@@ -50,18 +51,29 @@ export const IssuerCreateLoanPage: React.FC = () => {
   )
 }
 
-type FormValues = {
+export type CreateLoanFormValues = {
   image: File | null
   description: string
   assetName: string
   templateId: string
   attributes: Record<string, string | number>
+  pricing: {
+    valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
+    maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+    value: number | ''
+    maturityDate: string
+    advanceRate: number | ''
+    interestRate: number | ''
+    probabilityOfDefault: number | ''
+    lossGivenDefault: number | ''
+    discountRate: number | ''
+  }
 }
 
 type Attribute = LoanTemplate['sections'][0]['attributes'][0]
 type TemplateFieldProps<T extends string> = Attribute & { type: T; name: string }
 
-const CurrencyField: React.VFC<TemplateFieldProps<'currency'>> = ({ name, label, currencySymbol }) => {
+function CurrencyField({ name, label, currencySymbol }: TemplateFieldProps<'currency'>) {
   const form = useFormikContext()
   return (
     <Field name={name} validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))} key={label}>
@@ -83,11 +95,11 @@ const CurrencyField: React.VFC<TemplateFieldProps<'currency'>> = ({ name, label,
   )
 }
 
-const DecimalField: React.VFC<TemplateFieldProps<'decimal'>> = ({ name, label }) => {
+function DecimalField({ name, label }: TemplateFieldProps<'decimal'>) {
   return <FieldWithErrorMessage name={name} as={NumberInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...attr }) => {
+function StringField({ name, label, ...attr }: TemplateFieldProps<'string'>) {
   if ('options' in attr) {
     return (
       <Field name={name} validate={required()} key={label}>
@@ -110,11 +122,11 @@ const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...
   return <FieldWithErrorMessage name={name} as={TextInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const TimestampField: React.VFC<TemplateFieldProps<'timestamp'>> = ({ name, label }) => {
+function TimestampField({ name, label }: TemplateFieldProps<'timestamp'>) {
   return <FieldWithErrorMessage name={name} as={DateInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const PercentageField: React.VFC<TemplateFieldProps<'percentage'>> = ({ name, label }) => {
+function PercentageField({ name, label }: TemplateFieldProps<'percentage'>) {
   return (
     <FieldWithErrorMessage
       name={name}
@@ -138,7 +150,7 @@ const templateFields = {
 
 // 'integer' | 'decimal' | 'string' | 'bytes' | 'timestamp' | 'monetary'
 
-const IssuerCreateLoan: React.FC = () => {
+function IssuerCreateLoan() {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
@@ -177,18 +189,41 @@ const IssuerCreateLoan: React.FC = () => {
     }
   )
 
-  const form = useFormik<FormValues>({
+  const form = useFormik<CreateLoanFormValues>({
     initialValues: {
       image: null,
       description: '',
       assetName: '',
       templateId: '',
       attributes: {},
+      pricing: {
+        valuationMethod: 'outstandingDebt',
+        maxBorrowAmount: 'upToTotalBorrowed',
+        value: '',
+        maturityDate: '',
+        advanceRate: '',
+        interestRate: '',
+        probabilityOfDefault: '',
+        lossGivenDefault: '',
+        discountRate: '',
+      },
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken) return
+      const { decimals } = pool.currency
+      const pricingInfo = {
+        valuationMethod: values.pricing.valuationMethod,
+        maxBorrowAmount: values.pricing.maxBorrowAmount,
+        value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+        maturityDate: new Date(values.pricing.maturityDate),
+        advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+        interestRate: Rate.fromPercent(values.pricing.interestRate),
+        probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
+        lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
+        discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
+      } as const
 
-      const txId = Math.random().toString(36).substr(2)
+      const txId = Math.random().toString(36).substring(2)
 
       const tx: Transaction = {
         id: txId,
@@ -245,7 +280,10 @@ const IssuerCreateLoan: React.FC = () => {
 
         // Sign createLoan transaction
         const submittable = await lastValueFrom(
-          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 100 })
+          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
+            signOnly: true,
+            era: 100,
+          })
         )
 
         updateTransaction(txId, { status: 'pending' })
@@ -332,6 +370,9 @@ const IssuerCreateLoan: React.FC = () => {
                   </Field>
                 </Grid>
               </PageSection>
+              <PageSection title="Pricing">
+                <PricingInput poolId={pid} />
+              </PageSection>
               {selectedTemplateMetadata?.sections.map((section) => (
                 <PageSection
                   title={section.name}
@@ -401,7 +442,7 @@ function labelToKey(label: string) {
   return label.toLowerCase().replaceAll(/\s/g, '_')
 }
 
-function valuesToPodAttributes(values: FormValues['attributes'], template: LoanTemplate) {
+function valuesToPodAttributes(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
   return Object.fromEntries(
     template.sections.flatMap((section) =>
       section.attributes.map((attr) => {

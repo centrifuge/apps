@@ -32,9 +32,9 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
+import { PodConfig } from '../IssuerPool/Configuration/PodConfig'
 import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
-import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -60,14 +60,6 @@ export interface Tranche {
   minRiskBuffer: number | ''
   minInvestment: number | ''
 }
-export interface RiskGroupInput {
-  groupName: string
-  advanceRate: number | ''
-  fee: number | ''
-  probabilityOfDefault: number | ''
-  lossGivenDefault: number | ''
-  discountRate: number | ''
-}
 export interface WriteOffGroupInput {
   days: number | ''
   writeOff: number | ''
@@ -80,15 +72,6 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
   interestRate: junior ? '' : 0,
   minRiskBuffer: junior ? '' : 0,
   minInvestment: 0,
-})
-
-export const createEmptyRiskGroup = (): RiskGroupInput => ({
-  groupName: '',
-  advanceRate: '',
-  fee: '',
-  probabilityOfDefault: '',
-  lossGivenDefault: '',
-  discountRate: '',
 })
 
 export type CreatePoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo' | 'executiveSummary'> & {
@@ -120,7 +103,6 @@ const initialValues: CreatePoolValues = {
   details: [],
 
   tranches: [createEmptyTranche(true)],
-  riskGroups: [createEmptyRiskGroup()],
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
@@ -450,10 +432,9 @@ const CreatePoolForm: React.VFC = () => {
           </PageSection>
 
           <TrancheSection />
-
-          <RiskGroupsSection />
         </Form>
       </FormikProvider>
+      <PodConfig />
     </>
   )
 }
