@@ -62,14 +62,6 @@ export const PoolDetailLiquidity: React.FC = () => {
       <PageSummary data={pageSummaryData}></PageSummary>
       {!('addresses' in pool) && (
         <>
-          <PageSection title="Reserve vs. cash drag">
-            <Stack height="290px">
-              <React.Suspense fallback={<Spinner />}>
-                <ReserveCashDragChart />
-              </React.Suspense>
-            </Stack>
-          </PageSection>
-
           <LiquidityTransactionsSection
             pool={pool}
             title="Repayments & originations"
@@ -89,6 +81,14 @@ export const PoolDetailLiquidity: React.FC = () => {
           />
 
           <LiquidityEpochSection pool={pool} />
+
+          <PageSection title="Reserve vs. cash drag">
+            <Stack height="290px">
+              <React.Suspense fallback={<Spinner />}>
+                <ReserveCashDragChart />
+              </React.Suspense>
+            </Stack>
+          </PageSection>
         </>
       )}
     </>
