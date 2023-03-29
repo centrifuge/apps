@@ -28,7 +28,7 @@ export const LoanTemplates: React.FC = () => {
     const meta = templateMetadata[i].data
     const metaMeta = poolMetadata?.loanTemplates?.[i]
     return {
-      name: meta?.name ?? `Template ${i + 1}`,
+      name: meta?.name ?? `Version ${i + 1}`,
       createdAt: metaMeta?.createdAt ? new Date(metaMeta?.createdAt) : null,
       id,
     }
@@ -39,7 +39,7 @@ export const LoanTemplates: React.FC = () => {
       title="Asset templates"
       headerRight={
         <RouterLinkButton to={`/issuer/${poolId}/configuration/create-asset-template`} variant="secondary" small>
-          {tableData.length ? 'Add another' : 'Add'}
+          {tableData.length ? 'Update template' : 'Create'}
         </RouterLinkButton>
       }
     >
@@ -49,7 +49,7 @@ export const LoanTemplates: React.FC = () => {
         columns={[
           {
             align: 'left',
-            header: 'Template name',
+            header: 'Asset template',
             cell: (row: Row) => (
               <Text fontWeight="600" color="textInteractive">
                 {row.name}

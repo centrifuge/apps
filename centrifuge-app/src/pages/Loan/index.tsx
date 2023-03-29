@@ -16,7 +16,7 @@ import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../../types'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
+import { formatBalance, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -133,22 +133,26 @@ const Loan: React.FC = () => {
       )}
       {loan && nft && (
         <>
-          {templateData?.sections?.map((section, i) => (
-            <PageSection title={section.name} titleAddition={section.public ? undefined : 'Private'} key={i}>
-              {section.public || document ? (
-                <Shelf gap={6} flexWrap="wrap">
-                  {section.attributes.map((attr) => {
-                    const key = labelToKey(attr.label)
-                    const value = section.public ? publicData[key] : privateData[key]
-                    const formatted = value ? formatValue(value, attr) : '-'
-                    return <LabelValueStack label={attr.label} value={formatted} key={key} />
-                  })}
-                </Shelf>
-              ) : !section.public && !isLoggedIn && podUrl ? (
-                <PodAuthSection podUrl={podUrl} buttonLabel="Authenticate to view" />
-              ) : null}
-            </PageSection>
-          ))}
+          {templateData?.sections?.map((section, i) => {
+            const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
+            return (
+              <PageSection title={section.name} titleAddition={isPublic ? undefined : 'Private'} key={i}>
+                {isPublic || document ? (
+                  <Shelf gap={6} flexWrap="wrap">
+                    {section.attributes.map((key) => {
+                      const attribute = templateData.attributes?.[key]
+                      if (!attribute) return null
+                      const value = publicData[key] ?? privateData[key]
+                      const formatted = value ? formatValue(value, attribute) : '-'
+                      return <LabelValueStack label={attribute.label} value={formatted} key={key} />
+                    })}
+                  </Shelf>
+                ) : !isPublic && !isLoggedIn && podUrl ? (
+                  <PodAuthSection podUrl={podUrl} buttonLabel="Authenticate to view" />
+                ) : null}
+              </PageSection>
+            )
+          })}
           <PageSection title="NFT">
             <InteractiveCard
               icon={<Thumbnail label="nft" type="nft" />}
@@ -225,23 +229,20 @@ const Loan: React.FC = () => {
   )
 }
 
-function labelToKey(label: string) {
-  return label.toLowerCase().replaceAll(/\s/g, '_')
-}
-
 function formatValue(value: any, attr: LoanTemplateAttribute) {
-  switch (attr.type) {
-    case 'string':
-      return value
-    case 'percentage':
-      return formatPercentage(value, true)
-    case 'decimal':
-      return value.toLocaleString('en')
+  switch (attr.input.type) {
+    case 'number':
+      return (
+        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals).toFloat() : Number(value)
+      ).toLocaleString('en')
     case 'currency':
-      return formatBalance(new CurrencyBalance(value.match(/^[\d.]+/)[0], attr.currencyDecimals), attr.currencySymbol)
-    case 'timestamp':
+      return formatBalance(
+        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals) : Number(value),
+        attr.input.symbol
+      )
+    case 'date':
       return formatDate(value)
     default:
-      return ''
+      return value
   }
 }
