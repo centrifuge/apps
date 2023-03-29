@@ -10,7 +10,6 @@ import { CreateLoanFormValues } from './CreateLoan'
 export function PricingInput({ poolId }: { poolId: string }) {
   const { values } = useFormikContext<CreateLoanFormValues>()
   const pool = usePool(poolId)
-  console.log('values.pricing.valuationMethod', values.pricing.valuationMethod)
   return (
     <Grid columns={[1, 2, 2, 3]} gap={2} rowGap={3}>
       <Field name="pricing.valuationMethod">
