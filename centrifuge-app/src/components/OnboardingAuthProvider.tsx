@@ -181,13 +181,14 @@ const loginWithEvm = async (address: string, signer: any) => {
   })
   const { nonce } = await nonceRes.json()
   const domain = window.location.host
+  const origin = window.location.origin
 
   const message = `${domain} wants you to sign in with your Ethereum account:
 ${address}
 
 Please sign to authenticate your wallet
 
-URI: ${domain}
+URI: ${origin}
 Version: 1
 Chain ID: 1
 Nonce: ${nonce}
