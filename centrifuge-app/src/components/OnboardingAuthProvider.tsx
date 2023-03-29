@@ -190,7 +190,7 @@ Please sign to authenticate your wallet
 
 URI: ${origin}
 Version: 1
-Chain ID: 1
+Chain ID: ${import.meta.env.REACT_APP_TINLAKE_NETWORK === 'mainnet' ? 1 : 5 /* goerli */}
 Nonce: ${nonce}
 Issued At: ${new Date().toISOString()}`
 
