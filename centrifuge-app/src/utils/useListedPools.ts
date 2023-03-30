@@ -5,6 +5,7 @@ import { useAddress } from '../utils/useAddress'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
+import { getPoolTVL } from './getPoolTVL'
 import { useTinlakePools } from './tinlake/useTinlakePools'
 
 const sign = (n: BN) => (n.isZero() ? 0 : n.isNeg() ? -1 : 1)
@@ -27,9 +28,7 @@ export function useListedPools() {
       const listedTokens = listedPools.flatMap((p) => p.tranches)
 
       return [
-        [...listedPools, ...listedTinlakePools].sort((a, b) =>
-          sign(b.tranches.at(-1)!.capacity.sub(a.tranches.at(-1)!.capacity))
-        ),
+        [...listedPools, ...listedTinlakePools].sort((a, b) => getPoolTVL(b) - getPoolTVL(a)),
         [...listedTokens, ...listedTinlakeTokens].sort((a, b) => sign(b.capacity.sub(a.capacity))),
       ]
     },
