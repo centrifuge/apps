@@ -22,6 +22,7 @@ export const primaryButton = css<{ isActive?: boolean; stacked?: boolean }>`
   grid-template-rows: ${({ stacked }) => (stacked ? '20px 1fr' : '1fr')};
   grid-auto-flow: ${({ stacked }) => (stacked ? 'column' : 'row')};
   justify-items: ${({ stacked }) => (stacked ? 'center' : 'start')};
+  align-items: center;
   padding: ${({ theme }) => theme.space[1]}px;
 
   background-color: ${({ isActive, theme }) => (isActive ? theme.colors.secondarySelectedBackground : 'transparent')};

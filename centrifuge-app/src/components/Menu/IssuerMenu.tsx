@@ -1,6 +1,6 @@
 import { Box, IconChevronDown, IconChevronRight, IconUser, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useLocation } from 'react-router'
+import { useRouteMatch } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import { baseButton, primaryButton } from './styles'
 
@@ -20,10 +20,8 @@ const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
 `
 
 export function IssuerMenu({ defaultOpen = false, poolIds = [], stacked, children }: IssuerMenuProps) {
-  const { pathname } = useLocation()
-  const [_, path, poolid] = pathname.split('/')
-  const isActive = React.useMemo(() => path === 'issuer' && poolIds.includes(poolid), [pathname, poolIds])
-
+  const match = useRouteMatch<{ pid: string }>('/issuer/:pid')
+  const isActive = match && poolIds.includes(match.params.pid)
   const [open, setOpen] = React.useState(defaultOpen)
   const { space } = useTheme()
   const fullWidth = `calc(100vw - 2 * ${space[1]}px)`
