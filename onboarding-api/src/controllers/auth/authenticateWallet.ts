@@ -7,15 +7,9 @@ import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
 const verifyWalletInput = object({
-  message: object({
-    nonce: string(),
-    domain: string(),
-    uri: string(),
-    statement: string(),
-    address: string(),
-    chainId: string(),
-    version: string(),
-  }),
+  message: string(),
+  address: string(),
+  nonce: string(),
   signature: string(),
   jw3t: string(),
 })
@@ -63,16 +57,16 @@ async function verifySubstrateWallet(req: Request) {
 
 async function verifyEthWallet(req: Request, res: Response) {
   try {
-    const nonce = req.signedCookies[`onboarding-auth-${req.body.message.address.toLowerCase()}`]
-    const { message, signature } = req.body
-    message.nonce = nonce
+    const { message, signature, address, nonce } = req.body
 
-    if (nonce !== message.nonce || req.body.message.address !== message.address) {
-      throw new Error('Invalid message')
+    const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
+
+    if (!cookieNonce || cookieNonce !== nonce) {
+      throw new Error('Invalid nonce')
     }
 
     const decodedMessage = await new SiweMessage(message).verify({ signature })
-    res.clearCookie(`onboarding-auth-${req.body.message.address}`)
+    res.clearCookie(`onboarding-auth-${address}`)
     return {
       address: decodedMessage.data.address,
       network: 'evm',

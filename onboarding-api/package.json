@@ -27,7 +27,7 @@
     "express-rate-limit": "^6.7.0",
     "file-type": "^18.2.0",
     "jsonwebtoken": "^9.0.0",
-    "jw3t": "^1.0.8",
+    "jw3t": "^1.0.10",
     "node-fetch": "2.6.7",
     "pdf-lib": "^1.17.1",
     "siwe": "2.1.3",
