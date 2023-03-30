@@ -16,7 +16,7 @@ export const useSignedAgreement = () => {
 
   React.useEffect(() => {
     if (onboardingUser && poolId && trancheId) {
-      setHasSignedAgreement(!!onboardingUser.poolSteps[poolId]?.[trancheId].signAgreement.completed)
+      setHasSignedAgreement(!!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed)
     }
   }, [onboardingUser, poolId, trancheId])
 

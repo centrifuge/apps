@@ -73,7 +73,7 @@ jobs:
         shell: bash
         env:
           # https://github.com/actions/runner-images/issues/70#issuecomment-1191708172
-          NODE_OPTIONS: "--max_old_space_size=8192" 
+          NODE_OPTIONS: "--max_old_space_size=4096" 
         run: |
           yarn build:fabric 
           yarn build:centjs 

@@ -7,6 +7,7 @@ import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessag
 import { addInvestorToMemberList } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { signSubscriptionAcceptance } from '../../utils/signSubscriptionAcceptance'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { verifyJwt } from '../../utils/verifyJwt'
@@ -74,7 +75,14 @@ export const updateInvestorStatusController = async (
     }
 
     if (user?.email && status === 'approved') {
+      await signSubscriptionAcceptance({
+        poolId,
+        trancheId,
+        walletAddress: wallet.address,
+        investorName: user.name as string,
+      })
       await addInvestorToMemberList(wallet.address, poolId, trancheId)
+      // TODO: include signed subscription agreement
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
       await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
       return res.status(200).send({ poolId, trancheId })

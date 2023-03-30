@@ -31,7 +31,7 @@ export const setVerifiedIdentityController = async (
       throw new HttpError(400, `Failed because ${status.reference} is in "${status.event}" state`)
     }
 
-    const address = status.verification_data?.address?.full_address || ''
+    const address = status.verification_data?.address?.full_address || null
 
     const updatedUser: Subset<OnboardingUser> = {
       address,

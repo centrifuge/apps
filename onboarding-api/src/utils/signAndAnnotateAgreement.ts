@@ -44,10 +44,10 @@ export const signAndAnnotateAgreement = async ({
     unsignedAgreementPdfDoc,
     unsignedAgreementPdfDoc.getPageIndices()
   )
-  const [signedAgreementCopiedPage] = await signedAgreement.copyPages(signaturePagePdfDoc, [0])
+  const [signaturePageCopy] = await signedAgreement.copyPages(signaturePagePdfDoc, [0])
 
   unsignedAgreementCopiedPages.forEach((page) => signedAgreement.addPage(page))
-  signedAgreement.addPage(signedAgreementCopiedPage)
+  signedAgreement.addPage(signaturePageCopy)
 
   const pages = signedAgreement.getPages()
 
