@@ -52,7 +52,7 @@ export function WalletDialog({ evmChains }: Props) {
     selectedNetwork === 'centrifuge'
       ? sortCentrifugeWallets(wallets)
       : selectedNetwork
-      ? sortEvmWallets([...evm.connectors.filter((c) => c.shown)])
+      ? sortEvmWallets(evm.connectors.filter((c) => c.shown))
       : []
 
   function close() {
