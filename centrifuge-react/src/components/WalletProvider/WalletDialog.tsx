@@ -43,7 +43,7 @@ export function WalletDialog({ evmChains }: Props) {
     showWallets,
     connect: doConnect,
     evm,
-    scopedNetwork,
+    scopedNetworks,
   } = ctx
 
   const getNetworkName = useGetNetworkName()
@@ -75,9 +75,9 @@ export function WalletDialog({ evmChains }: Props) {
 
   function walletButtonMuted() {
     return Boolean(
-      scopedNetwork &&
-        ((selectedNetwork === 'centrifuge' && scopedNetwork !== 'substrate') ||
-          (typeof selectedNetwork === 'number' && scopedNetwork !== 'evm'))
+      scopedNetworks &&
+        ((selectedNetwork === 'centrifuge' && !scopedNetworks.includes('centrifuge')) ||
+          (typeof selectedNetwork === 'number' && scopedNetworks.includes('centrifuge')))
     )
   }
 
@@ -91,13 +91,13 @@ export function WalletDialog({ evmChains }: Props) {
             <SelectionStep
               step={1}
               title="Choose network"
-              tooltip={scopedNetwork && <SelectionStepTooltip type={scopedNetwork} />}
+              tooltip={scopedNetworks && <SelectionStepTooltip networks={scopedNetworks} />}
             >
               <SelectButton
                 logo={<Logo icon={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
                 active={selectedNetwork === 'centrifuge'}
-                muted={Boolean(scopedNetwork && scopedNetwork !== 'substrate')}
+                muted={Boolean(scopedNetworks && !scopedNetworks.includes('centrifuge'))}
               >
                 {getNetworkName('centrifuge')}
               </SelectButton>
@@ -111,7 +111,7 @@ export function WalletDialog({ evmChains }: Props) {
                     logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
                     onClick={() => showWallets(Number(chainId))}
                     active={selectedNetwork === Number(chainId)}
-                    muted={Boolean(scopedNetwork && scopedNetwork !== 'evm')}
+                    muted={Boolean(scopedNetworks && scopedNetworks.includes('centrifuge'))}
                   >
                     {info.name}
                   </SelectButton>

@@ -1,6 +1,8 @@
+import { useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { Grid, IconInfoFilled, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
+import { Network } from './types'
 
 type SelectionStepProps = {
   step: number
@@ -42,16 +44,17 @@ const StyledTooltip = styled(Tooltip)`
   vertical-align: middle;
 `
 
-export function SelectionStepTooltip({ type }: { type: 'evm' | 'substrate' }) {
-  const networkName = {
-    evm: 'Ethereum',
-    substrate: 'Centrifuge',
-  }
+export function SelectionStepTooltip({ networks }: { networks: Network[] }) {
+  // @ts-ignore
+  const listFormatter = new Intl.ListFormat('en')
+  const getNetworkName = useGetNetworkName()
 
   return (
     <StyledTooltip
       title="Network selection"
-      body={`This pool only supports investing and redeeming from the ${networkName[type]} network`}
+      body={`This pool only supports investing and redeeming from the ${listFormatter.format(
+        networks.map(getNetworkName)
+      )} ${networks.length > 1 ? 'networks' : 'network'}`}
     >
       <IconInfoFilled size="iconSmall" color="textSecondary" />
     </StyledTooltip>

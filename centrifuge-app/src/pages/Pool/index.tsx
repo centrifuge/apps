@@ -1,6 +1,7 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { Route, Switch, useParams, useRouteMatch } from 'react-router'
+import { ethConfig } from '../../config'
 import { PoolDetailAssetsTab } from './Assets'
 import { PoolDetailLiquidityTab } from './Liquidity'
 import { PoolDetailOverviewTab } from './Overview'
@@ -9,13 +10,13 @@ import { PoolDetailReportingTab } from './Reporting'
 export const PoolDetailPage: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
   const isTinlakePool = pid.startsWith('0x')
-  const { setScopedNetwork } = useWallet()
+  const { setScopedNetworks } = useWallet()
   const { path } = useRouteMatch()
 
   React.useEffect(() => {
-    setScopedNetwork(isTinlakePool ? 'evm' : 'substrate')
+    setScopedNetworks(isTinlakePool ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge'])
 
-    return () => setScopedNetwork(null)
+    return () => setScopedNetworks(null)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
