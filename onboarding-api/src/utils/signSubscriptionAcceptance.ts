@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts } from 'pdf-lib'
-import { onboardingBucket, writeToOnboardingBucket } from '../database'
+import { onboardingBucket } from '../database'
+import { getPoolById } from './centrifuge'
 import { HttpError } from './httpError'
 
 type SignatureInfo = {
@@ -47,10 +48,11 @@ export const signSubscriptionAcceptance = async ({ poolId, trancheId, walletAddr
 
   const lastPage = pages[pages.length - 1]
 
+  const { metadata } = await getPoolById(poolId)
+
   // TODO: get issuer rep name
   const issuerRepName = 'Jane Issuer'
-  // TODO: get pool name
-  const issuerName = 'Some pool'
+  const issuerName = metadata?.pool.name
 
   const timesNewRoman = await countersignedAgreement.embedFont(StandardFonts.TimesRoman)
 
@@ -87,8 +89,5 @@ export const signSubscriptionAcceptance = async ({ poolId, trancheId, walletAddr
 
   const countersignedAgreementPDF = await countersignedAgreement.save()
 
-  await writeToOnboardingBucket(
-    countersignedAgreementPDF,
-    `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
-  )
+  return countersignedAgreementPDF
 }
