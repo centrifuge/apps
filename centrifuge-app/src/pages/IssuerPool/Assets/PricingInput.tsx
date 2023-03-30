@@ -35,8 +35,8 @@ export function PricingInput({ poolId }: { poolId: string }) {
             onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
             errorMessage={meta.touched && meta.error ? meta.error : undefined}
             options={[
-              { value: 'upToTotalBorrowed', label: 'upToTotalBorrowed' },
-              { value: 'upToOutstandingDebt', label: 'upToOutstandingDebt' },
+              { value: 'upToTotalBorrowed', label: 'Up to total borrowed' },
+              { value: 'upToOutstandingDebt', label: 'Up to outstanding debt' },
             ]}
             placeholder="Choose borrow restriction"
           />
