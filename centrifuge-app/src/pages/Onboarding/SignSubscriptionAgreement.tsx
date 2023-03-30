@@ -28,7 +28,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const poolId = pool.id
   const trancheId = pool.trancheId
 
-  const hasSignedAgreement = !!onboardingUser.poolSteps[poolId]?.[trancheId].signAgreement.completed
+  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
 
   const formik = useFormik({
     initialValues: {
