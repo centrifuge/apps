@@ -180,7 +180,7 @@ export function useConstants() {
         minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toHuman()),
         maxTranches: Number(api.consts.poolSystem.maxTranches.toHuman()),
         challengeTime: Number(api.consts.poolSystem.challengeTime.toHuman()),
-        maxWriteOffGroups: Number(api.consts.loans.maxWriteOffGroups.toHuman()),
+        maxWriteOffPolicySize: Number(api.consts.loans.maxWriteOffPolicySize.toHuman()),
       }
     },
     {

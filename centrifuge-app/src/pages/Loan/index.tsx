@@ -1,16 +1,6 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  IconAlertCircle,
-  IconNft,
-  InteractiveCard,
-  Shelf,
-  Stack,
-  Text,
-  TextWithPlaceholder,
-  Thumbnail,
-} from '@centrifuge/fabric'
+import { Box, IconNft, InteractiveCard, Shelf, Stack, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { Identity } from '../../components/Identity'
@@ -23,11 +13,10 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { Tooltips } from '../../components/Tooltips'
-import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../../types'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
+import { formatBalance, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -38,9 +27,7 @@ import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
-import { PricingForm } from './PricingForm'
-import { RiskGroupValues } from './RiskGroupValues'
-import { getMatchingRiskGroupIndex, LOAN_TYPE_LABELS } from './utils'
+import { PricingValues } from './PricingValues'
 
 export const LoanPage: React.FC = () => {
   return (
@@ -53,17 +40,11 @@ export const LoanPage: React.FC = () => {
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
-  const pool = usePool(pid) as Pool
   const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrowAsset(pid, aid)
-  const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
 
-  if (loan && pool && loan?.status === 'Created' && canPrice) {
-    return <PricingForm loan={loan} pool={pool} />
-  }
-
-  if (!loan || loan.status === 'Created' || !permissions || !canBorrow) return null
+  if (!loan || loan.status === 'Closed' || !permissions || !canBorrow) return null
 
   return <FinanceForm loan={loan} />
 }
@@ -100,8 +81,6 @@ const Loan: React.FC = () => {
     ? Object.fromEntries(Object.entries(document.attributes).map(([key, obj]: any) => [key, obj.value]))
     : {}
 
-  const riskGroupIndex = loan && poolMetadata?.riskGroups && getMatchingRiskGroupIndex(loan, poolMetadata.riskGroups)
-
   return (
     <Stack>
       <PageHeader
@@ -115,100 +94,65 @@ const Loan: React.FC = () => {
           </TextWithPlaceholder>
         }
       />
-      {loan &&
-        pool &&
-        (loan.status !== 'Created' ? (
-          <>
-            <PageSummary
-              data={[
-                {
-                  label: <Tooltips type="assetType" />,
-                  value: LOAN_TYPE_LABELS[loan.loanInfo.type],
-                },
-                {
-                  label: <Tooltips type="riskGroup" />,
-                  value: (
-                    <TextWithPlaceholder isLoading={metadataIsLoading}>
-                      {riskGroupIndex != null && riskGroupIndex > -1
-                        ? poolMetadata?.riskGroups?.[riskGroupIndex]?.name || `Risk group ${riskGroupIndex + 1}`
-                        : 'n/a'}
-                    </TextWithPlaceholder>
-                  ),
-                },
-                {
-                  label: <Tooltips type="collateralValue" />,
-                  value: formatBalance(loan.loanInfo.value, pool?.currency.symbol),
-                },
-                {
-                  label: <Tooltips type="availableFinancing" />,
-                  value: !availableFinancing.isZero()
-                    ? formatBalance(availableFinancing, pool?.currency.symbol)
-                    : 'n/a',
-                },
-                {
-                  label: <Tooltips type="outstanding" />,
-                  value: loan?.outstandingDebt?.gtn(0)
-                    ? formatBalance(loan.outstandingDebt, pool?.currency.symbol)
-                    : 'n/a',
-                },
-              ]}
-            />
+      {loan && pool && (
+        <>
+          <PageSummary
+            data={[
+              {
+                label: <Tooltips type="collateralValue" />,
+                value: formatBalance(loan.pricing.value, pool?.currency.symbol),
+              },
+              {
+                label: <Tooltips type="availableFinancing" />,
+                value: formatBalance(availableFinancing, pool?.currency.symbol),
+              },
+              {
+                label: <Tooltips type="outstanding" />,
+                value: 'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt, pool?.currency.symbol) : 'n/a',
+              },
+            ]}
+          />
 
-            <PageSection title="Financing & repayment cash flow">
-              <Shelf gap={3} flexWrap="wrap">
-                <FinancingRepayment
-                  drawDownDate={loan.originationDate ? formatDate(loan.originationDate) : null}
-                  closingDate={loan.status === 'Closed' ? formatDate(loan.lastUpdated) : null}
-                  totalFinanced={formatBalance(loan.totalBorrowed, pool.currency)}
-                  totalRepaid={formatBalance(loan.totalRepaid, pool.currency)}
-                />
-              </Shelf>
-            </PageSection>
+          <PageSection title="Financing & repayment cash flow">
+            <Shelf gap={3} flexWrap="wrap">
+              <FinancingRepayment
+                drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
+                closingDate={null}
+                totalFinanced={formatBalance('totalBorrowed' in loan ? loan.totalBorrowed : 0, pool.currency)}
+                totalRepaid={formatBalance('totalBorrowed' in loan ? loan.totalRepaid : 0, pool.currency)}
+              />
+            </Shelf>
+          </PageSection>
 
-            <PageSection title="Pricing">
-              <Shelf gap={3} flexWrap="wrap">
-                <RiskGroupValues
-                  values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
-                  loanType={loan?.loanInfo ? loan.loanInfo.type : config.defaultLoanType}
-                  showMaturityDate
-                />
-              </Shelf>
-            </PageSection>
-          </>
-        ) : (
-          <>
-            <PageSummary
-              data={[
-                { label: 'Asset type', value: '-' },
-                { label: 'Risk group', value: '-' },
-                { label: 'Collateral value', value: '-' },
-              ]}
-            />
-            <PageSection title="Price">
-              <Shelf gap={1} justifyContent="center">
-                <IconAlertCircle size="iconSmall" /> <Text variant="body3">The asset has not been priced yet</Text>
-              </Shelf>
-            </PageSection>
-          </>
-        ))}
+          <PageSection title="Pricing">
+            <Shelf gap={3} flexWrap="wrap">
+              <PricingValues loan={loan} />
+            </Shelf>
+          </PageSection>
+        </>
+      )}
       {loan && nft && (
         <>
-          {templateData?.sections?.map((section, i) => (
-            <PageSection title={section.name} titleAddition={section.public ? undefined : 'Private'} key={i}>
-              {section.public || document ? (
-                <Shelf gap={6} flexWrap="wrap">
-                  {section.attributes.map((attr) => {
-                    const key = labelToKey(attr.label)
-                    const value = section.public ? publicData[key] : privateData[key]
-                    const formatted = value ? formatValue(value, attr) : '-'
-                    return <LabelValueStack label={attr.label} value={formatted} key={key} />
-                  })}
-                </Shelf>
-              ) : !section.public && !isLoggedIn && podUrl ? (
-                <PodAuthSection podUrl={podUrl} buttonLabel="Authenticate to view" />
-              ) : null}
-            </PageSection>
-          ))}
+          {templateData?.sections?.map((section, i) => {
+            const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
+            return (
+              <PageSection title={section.name} titleAddition={isPublic ? undefined : 'Private'} key={i}>
+                {isPublic || document ? (
+                  <Shelf gap={6} flexWrap="wrap">
+                    {section.attributes.map((key) => {
+                      const attribute = templateData.attributes?.[key]
+                      if (!attribute) return null
+                      const value = publicData[key] ?? privateData[key]
+                      const formatted = value ? formatValue(value, attribute) : '-'
+                      return <LabelValueStack label={attribute.label} value={formatted} key={key} />
+                    })}
+                  </Shelf>
+                ) : !isPublic && !isLoggedIn && podUrl ? (
+                  <PodAuthSection podUrl={podUrl} buttonLabel="Authenticate to view" />
+                ) : null}
+              </PageSection>
+            )
+          })}
           <PageSection title="NFT">
             <InteractiveCard
               icon={<Thumbnail label="nft" type="nft" />}
@@ -285,23 +229,20 @@ const Loan: React.FC = () => {
   )
 }
 
-function labelToKey(label: string) {
-  return label.toLowerCase().replaceAll(/\s/g, '_')
-}
-
 function formatValue(value: any, attr: LoanTemplateAttribute) {
-  switch (attr.type) {
-    case 'string':
-      return value
-    case 'percentage':
-      return formatPercentage(value, true)
-    case 'decimal':
-      return value.toLocaleString('en')
+  switch (attr.input.type) {
+    case 'number':
+      return (
+        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals).toFloat() : Number(value)
+      ).toLocaleString('en')
     case 'currency':
-      return formatBalance(new CurrencyBalance(value.match(/^[\d.]+/)[0], attr.currencyDecimals), attr.currencySymbol)
-    case 'timestamp':
+      return formatBalance(
+        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals) : Number(value),
+        attr.input.symbol
+      )
+    case 'date':
       return formatDate(value)
     default:
-      return ''
+      return value
   }
 }
