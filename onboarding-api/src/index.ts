@@ -32,6 +32,7 @@ onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))
 
 onboarding.options('*', corsMiddleware)
+
 onboarding.post('/authenticateWallet', authenticateWalletController)
 onboarding.post('/verify', verifyTokenController)
 onboarding.post('/nonce', generateNonceController)

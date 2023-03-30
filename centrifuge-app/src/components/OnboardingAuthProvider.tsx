@@ -207,6 +207,7 @@ Issued At: ${new Date().toISOString()}`
     throw new Error('Failed to authenticate wallet')
   }
   const token = await tokenRes.json()
+
   if (token) {
     sessionStorage.setItem(
       `centrifuge-onboarding-auth-${address}`,
