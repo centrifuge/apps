@@ -73,7 +73,7 @@ export const updateInvestorStatusController = async (
       },
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['poolSteps'])
+    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType['poolSteps'])
 
     if (user?.email && status === 'approved') {
       await addInvestorToMemberList(wallet.address, poolId, trancheId)
