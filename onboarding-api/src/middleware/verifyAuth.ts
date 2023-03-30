@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
-import { SupportedNetworks } from '../database'
 import { HttpError } from '../utils/httpError'
+import { SupportedNetworks } from '../utils/types'
 
 export const verifyAuth = async (req: Request, _res: Response, next: NextFunction) => {
   const { authorization } = req.headers
