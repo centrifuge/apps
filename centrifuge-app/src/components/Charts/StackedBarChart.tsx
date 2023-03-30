@@ -83,7 +83,6 @@ const TooltipCursor = (({ x, width, ...rest }: CursorProps) => {
 }) as React.FC
 
 function TooltipContent({ payload, currency }: TooltipProps<any, any> & { currency: string }) {
-  const theme = useTheme()
   if (payload && payload?.length > 0) {
     return (
       <TooltipContainer>
