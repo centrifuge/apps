@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
-import { SupportedNetworks } from '../../database'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { SupportedNetworks } from '../../utils/types'
 
 export const verifyTokenController = async (req: Request, res: Response) => {
   try {
