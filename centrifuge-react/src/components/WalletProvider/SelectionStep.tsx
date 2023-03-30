@@ -1,8 +1,8 @@
-import { useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { Grid, IconInfoFilled, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Network } from './types'
+import { useGetNetworkName } from './utils'
 
 type SelectionStepProps = {
   step: number
