@@ -23,9 +23,9 @@ export const generateNonceController = async (
     await validateInput(req.body, generateNonceInput)
     const nonce = generateNonce()
     res.cookie(`onboarding-auth-${req.body.address.toLowerCase()}`, `${nonce}`, {
-      secure: !(process.env.COLLATOR_WSS_URL.includes('demo') || process.env.COLLATOR_WSS_URL.includes('dev')),
+      secure: true,
       httpOnly: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       path: '/',
       domain: centrifugeHosts.includes(req.hostname) ? req.hostname : undefined,
       expires: new Date(Date.now() + 1000 * 60 * 60 * 12), // 12 hours
