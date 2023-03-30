@@ -1,5 +1,4 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
-import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
@@ -69,7 +68,6 @@ type EnvironmentConfig = {
   baseCurrency: 'USD'
   assetClasses: string[]
   defaultAssetClass: string
-  defaultLoanType: LoanInfo['type']
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
   defaultPodUrl: string
@@ -90,7 +88,6 @@ const ALTAIR: EnvironmentConfig = {
   baseCurrency: 'USD',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
-  defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,
@@ -114,7 +111,6 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Project Finance',
   ],
   defaultAssetClass: 'Consumer Credit',
-  defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,
