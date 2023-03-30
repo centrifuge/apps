@@ -26,7 +26,6 @@ export function useListedPools() {
       const listedTinlakeTokens = listedTinlakePools.flatMap((p) => p.tranches)
       const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed || poolVisibilities[i]) ?? []
       const listedTokens = listedPools.flatMap((p) => p.tranches)
-      console.log('listedTokens', listedTokens)
 
       return [
         [...listedPools, ...listedTinlakePools].sort((a, b) => getPoolTVL(b) - getPoolTVL(a)),
