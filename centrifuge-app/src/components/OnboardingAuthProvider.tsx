@@ -3,7 +3,6 @@ import { useCentrifuge, useEvmProvider, useWallet } from '@centrifuge/centrifuge
 import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { SiweMessage } from 'siwe'
 
 export const OnboardingAuthContext = React.createContext<{
   session?: { signed: string; payload: any } | null
@@ -180,27 +179,29 @@ const loginWithEvm = async (address: string, signer: any) => {
     credentials: 'include',
     body: JSON.stringify({ address }),
   })
-  const nonce = await nonceRes.json()
+  const { nonce } = await nonceRes.json()
   const domain = window.location.host
   const origin = window.location.origin
-  const message = new SiweMessage({
-    domain,
-    address: address,
-    statement: 'Please sign to authenticate your wallet',
-    uri: origin,
-    version: '1',
-    chainId: 1,
-    nonce: nonce.nonce,
-  })
-  const siweMessage = message.prepareMessage()
-  const signedMessage = await signer?.signMessage(siweMessage)
+
+  const message = `${domain} wants you to sign in with your Ethereum account:
+${address}
+
+Please sign to authenticate your wallet
+
+URI: ${origin}
+Version: 1
+Chain ID: ${import.meta.env.REACT_APP_TINLAKE_NETWORK === 'mainnet' ? 1 : 5 /* goerli */}
+Nonce: ${nonce}
+Issued At: ${new Date().toISOString()}`
+
+  const signedMessage = await signer?.signMessage(message)
   const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({ message, signature: signedMessage }),
+    body: JSON.stringify({ message, signature: signedMessage, address, nonce }),
   })
   if (tokenRes.status !== 200) {
     throw new Error('Failed to authenticate wallet')
