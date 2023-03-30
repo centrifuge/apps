@@ -187,42 +187,38 @@ function SubstrateAccounts({ onClose }: { onClose: () => void }) {
   if (!accounts) return null
 
   return (
-    <>
-      <Card maxHeight="50vh" style={{ overflow: 'auto' }}>
-        {accounts.map((acc) => (
-          <React.Fragment key={acc.address}>
-            <MenuItemGroup>
+    <Card maxHeight="50vh" style={{ overflow: 'auto' }}>
+      {accounts.map((acc) => (
+        <MenuItemGroup key={acc.address}>
+          <AccountButton
+            address={acc.address}
+            icon={<AccountIcon id={acc.address} />}
+            label={<AccountName account={acc} />}
+            onClick={() => {
+              onClose()
+              selectAccount(acc.address)
+            }}
+            selected={selectedAccount?.address === acc.address && !proxy}
+          />
+
+          {proxies?.[acc.address]?.map((p, index) => (
+            <MenuItemGroup key={`${p.delegator}${index}`}>
               <AccountButton
-                address={acc.address}
-                icon={<AccountIcon id={acc.address} />}
-                label={<AccountName account={acc} />}
+                address={p.delegator}
+                icon={<AccountIcon id={p.delegator} />}
+                label={<AccountName account={acc} delegator={p.delegator} />}
+                proxyRights={p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}
                 onClick={() => {
                   onClose()
-                  selectAccount(acc.address)
+                  if (acc.address !== selectedAccount?.address) selectAccount(acc.address)
+                  selectProxy(p.delegator)
                 }}
-                selected={selectedAccount?.address === acc.address && !proxy}
+                selected={selectedAccount?.address === acc.address && proxy?.delegator === p.delegator}
               />
             </MenuItemGroup>
-
-            {proxies?.[acc.address]?.map((p, index) => (
-              <MenuItemGroup key={`${p.delegator}${index}`}>
-                <AccountButton
-                  address={p.delegator}
-                  icon={<AccountIcon id={p.delegator} />}
-                  label={<AccountName account={acc} delegator={p.delegator} />}
-                  proxyRights={p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}
-                  onClick={() => {
-                    onClose()
-                    if (acc.address !== selectedAccount?.address) selectAccount(acc.address)
-                    selectProxy(p.delegator)
-                  }}
-                  selected={selectedAccount?.address === acc.address && proxy?.delegator === p.delegator}
-                />
-              </MenuItemGroup>
-            ))}
-          </React.Fragment>
-        ))}
-      </Card>
-    </>
+          ))}
+        </MenuItemGroup>
+      ))}
+    </Card>
   )
 }
