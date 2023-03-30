@@ -2,7 +2,7 @@ import { PoolRoles } from '@centrifuge/centrifuge-js'
 import { computeMultisig, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
 import { useAddress } from './useAddress'
-import { useLoanNft } from './useNFTs'
+import { useLoan } from './useLoans'
 import { usePool, usePoolMetadata } from './usePools'
 import { isSameAddress } from './web3'
 
@@ -38,8 +38,9 @@ export function useCanBorrow(poolId: string) {
 export function useCanBorrowAsset(poolId: string, assetId: string) {
   const address = useAddress('substrate')
   const hasBorrowPermission = useCanBorrow(poolId)
-  const loanNft = useLoanNft(poolId, assetId)
-  const isLoanOwner = isSameAddress(loanNft?.owner, address)
+  const loan = useLoan(poolId, assetId)
+  const borrower = loan && 'borrower' in loan ? loan?.borrower : undefined
+  const isLoanOwner = isSameAddress(borrower, address)
   const canBorrow = hasBorrowPermission && isLoanOwner
 
   return !!canBorrow

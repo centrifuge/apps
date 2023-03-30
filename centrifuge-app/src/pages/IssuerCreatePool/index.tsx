@@ -39,7 +39,6 @@ import { PodConfig } from '../IssuerPool/Configuration/PodConfig'
 import { AdminMultisigSection } from './AdminMultisig'
 import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
-import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -65,14 +64,6 @@ export interface Tranche {
   minRiskBuffer: number | ''
   minInvestment: number | ''
 }
-export interface RiskGroupInput {
-  groupName: string
-  advanceRate: number | ''
-  fee: number | ''
-  probabilityOfDefault: number | ''
-  lossGivenDefault: number | ''
-  discountRate: number | ''
-}
 export interface WriteOffGroupInput {
   days: number | ''
   writeOff: number | ''
@@ -85,15 +76,6 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
   interestRate: junior ? '' : 0,
   minRiskBuffer: junior ? '' : 0,
   minInvestment: 0,
-})
-
-export const createEmptyRiskGroup = (): RiskGroupInput => ({
-  groupName: 'A',
-  advanceRate: 90,
-  fee: 10,
-  probabilityOfDefault: 10,
-  lossGivenDefault: 10,
-  discountRate: 10,
 })
 
 export type CreatePoolValues = Omit<
@@ -130,7 +112,6 @@ const initialValues: CreatePoolValues = {
   details: [],
 
   tranches: [createEmptyTranche(true)],
-  riskGroups: [createEmptyRiskGroup()],
   adminMultisig: {
     signers: [''],
     threshold: 1,
@@ -588,8 +569,6 @@ function CreatePoolForm() {
           </PageSection>
 
           <TrancheSection />
-
-          <RiskGroupsSection />
 
           <AdminMultisigSection deposit={deposit} />
           <PodConfig />

@@ -1,4 +1,4 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
   Transaction,
   useCentrifuge,
@@ -20,7 +20,7 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
@@ -30,17 +30,17 @@ import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
-import { LoanTemplate } from '../../../types'
+import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
-import { useCollateralCollectionId } from '../../../utils/useNFTs'
 import { usePod } from '../../../utils/usePod'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { combine, max, maxLength, positiveNumber, required } from '../../../utils/validation'
+import { combine, maxLength, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
+import { PricingInput } from './PricingInput'
 
 export const IssuerCreateLoanPage: React.FC = () => {
   return (
@@ -50,103 +50,116 @@ export const IssuerCreateLoanPage: React.FC = () => {
   )
 }
 
-type FormValues = {
+export type CreateLoanFormValues = {
   image: File | null
   description: string
   assetName: string
   templateId: string
   attributes: Record<string, string | number>
-}
-
-type Attribute = LoanTemplate['sections'][0]['attributes'][0]
-type TemplateFieldProps<T extends string> = Attribute & { type: T; name: string }
-
-const CurrencyField: React.VFC<TemplateFieldProps<'currency'>> = ({ name, label, currencySymbol }) => {
-  const form = useFormikContext()
-  return (
-    <Field name={name} validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))} key={label}>
-      {({ field, meta }: FieldProps) => {
-        return (
-          <CurrencyInput
-            {...field}
-            variant="small"
-            label={`${label}*`}
-            errorMessage={meta.touched ? meta.error : undefined}
-            currency={currencySymbol}
-            placeholder="0.00"
-            name={name}
-            onChange={(value) => form.setFieldValue(name, value)}
-          />
-        )
-      }}
-    </Field>
-  )
-}
-
-const DecimalField: React.VFC<TemplateFieldProps<'decimal'>> = ({ name, label }) => {
-  return <FieldWithErrorMessage name={name} as={NumberInput} label={`${label}*`} validate={required()} key={label} />
-}
-
-const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...attr }) => {
-  if ('options' in attr) {
-    return (
-      <Field name={name} validate={required()} key={label}>
-        {({ field, form, meta }: any) => (
-          <Select
-            name={name}
-            placeholder="Select one"
-            label={`${label}*`}
-            options={attr.options.map((o) => ({ label: o, value: o }))}
-            value={field.value ?? ''}
-            onChange={(event) => {
-              form.setFieldValue(name, event.target.value)
-            }}
-            errorMessage={meta.error}
-          />
-        )}
-      </Field>
-    )
+  pricing: {
+    valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
+    maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+    value: number | ''
+    maturityDate: string
+    advanceRate: number | ''
+    interestRate: number | ''
+    probabilityOfDefault: number | ''
+    lossGivenDefault: number | ''
+    discountRate: number | ''
   }
-
-  return <FieldWithErrorMessage name={name} as={TextInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const TimestampField: React.VFC<TemplateFieldProps<'timestamp'>> = ({ name, label }) => {
-  return <FieldWithErrorMessage name={name} as={DateInput} label={`${label}*`} validate={required()} key={label} />
-}
+type TemplateFieldProps = LoanTemplateAttribute & { name: string }
 
-const PercentageField: React.VFC<TemplateFieldProps<'percentage'>> = ({ name, label }) => {
-  return (
-    <FieldWithErrorMessage
-      name={name}
-      as={NumberInput}
-      label={`${label}*`}
-      validate={required()}
-      placeholder="0.00"
-      rightElement="%"
-      key={label}
-    />
-  )
-}
-
-const templateFields = {
-  currency: CurrencyField,
-  decimal: DecimalField,
-  string: StringField,
-  timestamp: TimestampField,
-  percentage: PercentageField,
+function TemplateField({ label, name, input }: TemplateFieldProps) {
+  switch (input.type) {
+    case 'single-select':
+      return (
+        <Field name={name} validate={required()} key={label}>
+          {({ field, form }: any) => (
+            <Select
+              placeholder="Select one"
+              label={`${label}*`}
+              options={input.options.map((o) => (typeof o === 'string' ? { label: o, value: o } : o))}
+              value={field.value ?? ''}
+              onChange={(event) => {
+                form.setFieldValue(name, event.target.value)
+              }}
+            />
+          )}
+        </Field>
+      )
+    case 'currency': {
+      return (
+        <Field name={name} validate={combine(required(), positiveNumber())} key={label}>
+          {({ field, meta, form }: FieldProps) => {
+            return (
+              <CurrencyInput
+                {...field}
+                variant="small"
+                label={`${label}*`}
+                errorMessage={meta.touched ? meta.error : undefined}
+                currency={input.symbol}
+                placeholder="0.00"
+                onChange={(value) => form.setFieldValue(name, value)}
+                min={input.min}
+                max={input.max}
+              />
+            )
+          }}
+        </Field>
+      )
+    }
+    case 'number':
+      return (
+        <FieldWithErrorMessage
+          name={name}
+          as={NumberInput}
+          label={`${label}*`}
+          placeholder={input.placeholder}
+          validate={required()}
+          rightElement={input.unit}
+          min={input.min}
+          max={input.max}
+        />
+      )
+    case 'date':
+      return (
+        <FieldWithErrorMessage
+          name={name}
+          as={DateInput}
+          label={`${label}*`}
+          placeholder={input.placeholder}
+          validate={required()}
+          min={input.min}
+          max={input.max}
+        />
+      )
+    default: {
+      const { type, ...rest } = input.type as any
+      return (
+        <FieldWithErrorMessage
+          name={name}
+          as={type === 'textarea' ? TextAreaInput : TextInput}
+          label={`${label}*`}
+          validate={required()}
+          {...rest}
+        />
+      )
+    }
+  }
 }
 
 // 'integer' | 'decimal' | 'string' | 'bytes' | 'timestamp' | 'monetary'
 
-const IssuerCreateLoan: React.FC = () => {
+function IssuerCreateLoan() {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
   const history = useHistory()
   const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
-  const collateralCollectionId = useCollateralCollectionId(pid)
+  const collateralCollectionId = pid
   const { selectedAccount, selectedProxies } = useWallet().substrate
   const { addTransaction, updateTransaction } = useTransactions()
 
@@ -178,18 +191,41 @@ const IssuerCreateLoan: React.FC = () => {
     }
   )
 
-  const form = useFormik<FormValues>({
+  const form = useFormik<CreateLoanFormValues>({
     initialValues: {
       image: null,
       description: '',
       assetName: '',
       templateId: '',
       attributes: {},
+      pricing: {
+        valuationMethod: 'outstandingDebt',
+        maxBorrowAmount: 'upToTotalBorrowed',
+        value: '',
+        maturityDate: '',
+        advanceRate: '',
+        interestRate: '',
+        probabilityOfDefault: '',
+        lossGivenDefault: '',
+        discountRate: '',
+      },
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken) return
+      const { decimals } = pool.currency
+      const pricingInfo = {
+        valuationMethod: values.pricing.valuationMethod,
+        maxBorrowAmount: values.pricing.maxBorrowAmount,
+        value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+        maturityDate: new Date(values.pricing.maturityDate),
+        advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+        interestRate: Rate.fromPercent(values.pricing.interestRate),
+        probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
+        lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
+        discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
+      } as const
 
-      const txId = Math.random().toString(36).substr(2)
+      const txId = Math.random().toString(36).substring(2)
 
       const tx: Transaction = {
         id: txId,
@@ -218,9 +254,9 @@ const IssuerCreateLoan: React.FC = () => {
           },
         ])
 
-        const publicAttributes = selectedTemplateMetadata.sections
-          .filter((section) => section.public)
-          .flatMap((section) => section.attributes.map(({ label }) => labelToKey(label)))
+        const publicAttributes = Object.entries(selectedTemplateMetadata.attributes)
+          .filter(([, attr]) => attr.public)
+          .map(([key]) => key)
         publicAttributes.push('_template')
 
         const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
@@ -246,7 +282,10 @@ const IssuerCreateLoan: React.FC = () => {
 
         // Sign createLoan transaction
         const submittable = await lastValueFrom(
-          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 100 })
+          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
+            signOnly: true,
+            era: 100,
+          })
         )
 
         updateTransaction(txId, { status: 'pending' })
@@ -333,17 +372,25 @@ const IssuerCreateLoan: React.FC = () => {
                   </Field>
                 </Grid>
               </PageSection>
+              <PageSection title="Pricing">
+                <PricingInput poolId={pid} />
+              </PageSection>
               {selectedTemplateMetadata?.sections.map((section) => (
                 <PageSection
                   title={section.name}
-                  titleAddition={section.public ? 'Public' : 'Private'}
+                  titleAddition={
+                    section.attributes.some((key) => selectedTemplateMetadata?.attributes?.[key]?.public)
+                      ? 'Public'
+                      : 'Private'
+                  }
                   key={section.name}
                 >
                   <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-                    {section.attributes?.map((attr) => {
-                      const Comp = templateFields[attr.type] as React.VFC<any>
-                      const name = `attributes.${labelToKey(attr.label)}`
-                      return <Comp {...attr} name={name} key={attr.label} />
+                    {section.attributes?.map((key) => {
+                      const attr = selectedTemplateMetadata?.attributes[key]
+                      if (!attr) return null
+                      const name = `attributes.${key}`
+                      return <TemplateField {...attr} name={name} key={key} />
                     })}
                   </Grid>
                 </PageSection>
@@ -398,18 +445,14 @@ const IssuerCreateLoan: React.FC = () => {
   )
 }
 
-function labelToKey(label: string) {
-  return label.toLowerCase().replaceAll(/\s/g, '_')
-}
-
-function valuesToPodAttributes(values: FormValues['attributes'], template: LoanTemplate) {
+function valuesToPodAttributes(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
   return Object.fromEntries(
     template.sections.flatMap((section) =>
-      section.attributes.map((attr) => {
-        const key = labelToKey(attr.label)
+      section.attributes.map((key) => {
+        const attr = template.attributes[key]
         const value = values[key]
-        switch (attr.type) {
-          case 'timestamp':
+        switch (attr.input.type) {
+          case 'date':
             return [
               key,
               {
@@ -418,33 +461,37 @@ function valuesToPodAttributes(values: FormValues['attributes'], template: LoanT
               },
             ]
           case 'currency': {
-            const formatted = CurrencyBalance.fromFloat(value, attr.currencyDecimals).toString()
+            const formatted = attr.input.decimals
+              ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+              : String(value)
             return [
               key,
               {
                 type: 'monetary',
                 value: formatted,
                 monetary_value: {
-                  ID: attr.currencySymbol,
+                  ID: attr.input.symbol,
                   Value: formatted,
                   ChainID: 1,
                 },
               },
             ]
           }
-          case 'percentage':
+          case 'number':
             return [
               key,
               {
-                type: 'decimal',
-                value: String(value),
+                type: attr.input.decimals ? 'integer' : 'decimal',
+                value: attr.input.decimals
+                  ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+                  : String(value),
               },
             ]
           default:
             return [
               key,
               {
-                type: attr.type,
+                type: 'string',
                 value: String(value),
               },
             ]
