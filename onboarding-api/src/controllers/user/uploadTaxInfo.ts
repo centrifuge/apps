@@ -20,8 +20,7 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
   try {
     await validateTaxInfoFile(req.body)
     const { wallet } = req
-    // make sure user exists
-    await fetchUser(wallet)
+    const user = await fetchUser(wallet)
 
     await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${wallet.address}.pdf`)
 
@@ -34,7 +33,7 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
       },
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyTaxInfo'])
+    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['globalSteps.verifyTaxInfo'])
 
     const freshUserData = await fetchUser(wallet)
     return res.status(200).send({ ...freshUserData })

@@ -39,7 +39,7 @@ export const setVerifiedIdentityController = async (
         },
       },
     }
-    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyIdentity'])
+    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['globalSteps.verifyIdentity'])
     if (user.investorType === 'individual') {
       await sendVerifyEmailMessage(user, wallet)
     }

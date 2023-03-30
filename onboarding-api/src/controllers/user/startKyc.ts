@@ -27,6 +27,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       throw new HttpError(400, 'email required for individual kyc')
     }
 
+    // entity user will already be created when starting KYC
     if (
       userData?.investorType === 'entity' &&
       !userData.globalSteps.verifyEmail.completed &&
@@ -58,7 +59,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         'kycReference',
       ])
     } else {
-      const updatedUserData: IndividualUser = {
+      const newUser: IndividualUser = {
         investorType: 'individual',
         wallet: [req.wallet],
         kycReference,
@@ -101,7 +102,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
             : {},
         email: body.email as string,
       }
-      await validateAndWriteToFirestore(wallet, updatedUserData, 'individual')
+      await validateAndWriteToFirestore(wallet, newUser, 'individual')
     }
 
     const payloadKYC = {
