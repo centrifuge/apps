@@ -14,17 +14,16 @@ export type TooltipProps = TextProps & {
 }
 
 const StyledTrigger = styled(Text)`
+  position: relative;
+  width: fit-content;
   padding: 0;
   border: 0;
   appearance: none;
   background: transparent;
-  position: relative;
   cursor: pointer;
   text-align: left;
   font-weight: 400;
   font-family: ${({ theme }) => theme.fonts.standard};
-  position: relative;
-  width: fit-content;
   text-decoration: underline dotted ${({ theme }) => theme.colors.textSecondary};
   text-underline-offset: 3px;
 `
