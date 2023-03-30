@@ -5,10 +5,10 @@ import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/Transactions'
-import { useWallet } from '../components/WalletProvider'
+import { CombinedSubstrateAccount, useWallet } from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
-type TxOptions = Pick<TransactionOptions, 'createType'>
+type TxOptions = Pick<TransactionOptions, 'createType'> & { account?: CombinedSubstrateAccount }
 
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
@@ -17,7 +17,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
   const { showWallets, substrate, walletDialog } = useWallet()
-  const { selectedAccount, proxy } = substrate
+  const { selectedAccount, selectedProxies, selectedMultisig } = substrate
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
@@ -26,9 +26,6 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   async function doTransaction(selectedAccount: WalletAccount, id: string, args: T, txOptions?: TxOptions) {
     try {
       const connectedCent = cent.connect(selectedAccount?.address, selectedAccount?.signer as any)
-      if (proxy) {
-        connectedCent.setProxy(proxy.delegator)
-      }
       const api = await cent.getApiPromise()
 
       const transaction = transactionCallback(connectedCent)
@@ -38,6 +35,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       let txError: any = null
       const lastResult = await lastValueFrom(
         transaction(args, {
+          multisig: selectedMultisig || undefined,
+          proxy: selectedProxies?.map((p) => p.delegator),
           ...txOptions,
           onStatusChange: (result) => {
             const errors = result.events.filter(({ event }) => {

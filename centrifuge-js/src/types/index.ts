@@ -11,6 +11,8 @@ export type TransactionOptions = {
   onStatusChange?: (result: ISubmittableResult) => void
   createType?: 'immediate' | 'propose' | 'notePreimage'
   dryRun?: boolean
+  proxy?: string | string[]
+  multisig?: { signers: string[]; threshold: number }
 }
 
 export type Account = HexString | string | Uint8Array

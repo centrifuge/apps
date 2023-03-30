@@ -1,6 +1,6 @@
-import { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { useBalances, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { CurrencyBalance, isSameAddress, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { useBalances, useCentrifuge, useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -13,10 +13,12 @@ import {
   TextWithPlaceholder,
   Thumbnail,
 } from '@centrifuge/fabric'
+import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
+import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { filter, lastValueFrom } from 'rxjs'
+import { combineLatest, filter, lastValueFrom, switchMap } from 'rxjs'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
@@ -24,14 +26,17 @@ import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
+import { useCreatePoolFee } from '../../utils/useCreatePoolFee'
 import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
-import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
+import { PodConfig } from '../IssuerPool/Configuration/PodConfig'
+import { AdminMultisigSection } from './AdminMultisig'
 import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
 import { RiskGroupsSection } from './RiskGroupsInput'
@@ -75,35 +80,40 @@ export interface WriteOffGroupInput {
 }
 
 export const createEmptyTranche = (junior?: boolean): Tranche => ({
-  tokenName: '',
-  symbolName: '',
+  tokenName: 'Junior',
+  symbolName: 'TPP1JUN',
   interestRate: junior ? '' : 0,
   minRiskBuffer: junior ? '' : 0,
   minInvestment: 0,
 })
 
 export const createEmptyRiskGroup = (): RiskGroupInput => ({
-  groupName: '',
-  advanceRate: '',
-  fee: '',
-  probabilityOfDefault: '',
-  lossGivenDefault: '',
-  discountRate: '',
+  groupName: 'A',
+  advanceRate: 90,
+  fee: 10,
+  probabilityOfDefault: 10,
+  lossGivenDefault: 10,
+  discountRate: 10,
 })
 
-export type CreatePoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo' | 'executiveSummary'> & {
+export type CreatePoolValues = Omit<
+  PoolMetadataInput,
+  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig'
+> & {
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
   details: IssuerDetail[]
+  adminMultisigEnabled: boolean
+  adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
 }
 
 const initialValues: CreatePoolValues = {
   poolIcon: null,
-  poolName: '',
+  poolName: 'Test Proxy Pool 3',
   assetClass: DEFAULT_ASSET_CLASS,
-  currency: '',
-  maxReserve: '',
+  currency: 'AUSD',
+  maxReserve: 10000,
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   podEndpoint: config.defaultPodUrl ?? '',
@@ -116,11 +126,16 @@ const initialValues: CreatePoolValues = {
   executiveSummary: null,
   website: '',
   forum: '',
-  email: '',
+  email: 'onno+spam@k-f.co',
   details: [],
 
   tranches: [createEmptyTranche(true)],
   riskGroups: [createEmptyRiskGroup()],
+  adminMultisig: {
+    signers: [''],
+    threshold: 1,
+  },
+  adminMultisigEnabled: false,
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
@@ -135,10 +150,11 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
   return uri ? <img src={uri} width={40} height={40} alt="" /> : <Thumbnail label={children} type="pool" size="large" />
 }
 
-const CreatePoolForm: React.VFC = () => {
+function CreatePoolForm() {
   const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
   const currencies = usePoolCurrencies()
+  const { chainDecimals } = useCentrifugeConsts()
   const pools = usePools()
   const history = useHistory()
   const balances = useBalances(address)
@@ -175,14 +191,114 @@ const CreatePoolForm: React.VFC = () => {
     notePreimage: 'Note preimage',
   }
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    txMessage[config.poolCreationType || 'immediate'],
-    (cent) => cent.pools.createPool,
+    `${txMessage[config.poolCreationType || 'immediate']} 2/2`,
+    (cent) =>
+      (
+        args: [
+          collateralCollectionId: string,
+          transferToMultisig: BN,
+          aoProxy: string,
+          admin: string,
+          poolId: string,
+          collectionId: string,
+          tranches: TrancheInput[],
+          currency: CurrencyKey,
+          maxReserve: BN,
+          metadata: PoolMetadataInput
+        ],
+        options
+      ) => {
+        const [collateralCollectionId, transferToMultisig, aoProxy, admin] = args
+        const { adminMultisig } = args[9]
+        const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
+        const poolArgs = args.slice(3) as any
+        return combineLatest([cent.getApi(), cent.pools.createPool(poolArgs, { batch: true })]).pipe(
+          switchMap(([api, poolSubmittable]) => {
+            const manager = multisigAddr ?? address
+            const otherMultisigSigners =
+              multisigAddr && sortAddresses(adminMultisig.signers.filter((addr) => !isSameAddress(addr, address!)))
+            const proxiedPoolCreate = api.tx.proxy.proxy(admin, undefined, poolSubmittable)
+            console.log('poolSubmittable', poolSubmittable, proxiedPoolCreate)
+            console.log('adminMultisig!.signers', adminMultisig?.signers, otherMultisigSigners)
+            const submittable = api.tx.utility.batchAll(
+              [
+                api.tx.balances.transfer(
+                  admin,
+                  new CurrencyBalance(api.consts.proxy.proxyDepositFactor, chainDecimals).add(transferToMultisig)
+                ),
+                api.tx.balances.transfer(
+                  aoProxy,
+                  new CurrencyBalance(api.consts.proxy.proxyDepositFactor, chainDecimals).add(
+                    new CurrencyBalance(api.consts.uniques.collectionDeposit, chainDecimals)
+                  )
+                ),
+                manager !== address &&
+                  api.tx.proxy.proxy(
+                    admin,
+                    undefined,
+                    api.tx.utility.batchAll([
+                      api.tx.proxy.addProxy(manager, 'Any', 0),
+                      api.tx.proxy.removeProxy(address, 'Any', 0),
+                    ])
+                  ),
+                api.tx.proxy.proxy(
+                  aoProxy,
+                  undefined,
+                  api.tx.utility.batchAll([
+                    api.tx.uniques.create(collateralCollectionId, aoProxy),
+                    api.tx.proxy.addProxy(admin, 'Any', 0),
+                    api.tx.proxy.removeProxy(address, 'Any', 0),
+                  ])
+                ),
+                multisigAddr
+                  ? api.tx.multisig.approveAsMulti(
+                      adminMultisig.threshold,
+                      otherMultisigSigners,
+                      null,
+                      proxiedPoolCreate.method.hash,
+                      paymentInfo!.weight
+                    )
+                  : proxiedPoolCreate,
+              ].filter(Boolean)
+            )
+            return cent.wrapSignAndSend(api, submittable, options)
+          })
+        )
+      },
     {
       onSuccess: (args) => {
-        const [, poolId] = args
+        const [, , , poolId] = args
         if (config.poolCreationType === 'immediate') {
           setCreatedPoolId(poolId)
         }
+      },
+    }
+  )
+
+  const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
+    `${txMessage[config.poolCreationType || 'immediate']} 1/2`,
+    (cent) => {
+      return (_: [nextTx: (adminProxy: string, aoProxy: string) => void], options) =>
+        cent.getApi().pipe(
+          switchMap((api) => {
+            const submittable = api.tx.utility.batchAll([
+              api.tx.proxy.createPure('Any', 0, 0),
+              api.tx.proxy.createPure('Any', 0, 1),
+            ])
+            return cent.wrapSignAndSend(api, submittable, options)
+          })
+        )
+    },
+    {
+      onSuccess: async ([nextTx], result) => {
+        const api = await centrifuge.getApiPromise()
+        const events = result.events.filter(({ event }) => api.events.proxy.PureCreated.is(event))
+        console.log('result', result, result.events)
+        if (!events) return
+        const { pure } = (events[0].toHuman() as any).event.data
+        const { pure: pure2 } = (events[1].toHuman() as any).event.data
+
+        nextTx(pure, pure2)
       },
     }
   )
@@ -236,14 +352,22 @@ const CreatePoolForm: React.VFC = () => {
     },
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
-      if (!currencies) return
+      if (!currencies || !address || !paymentInfo) return
+
       const metadataValues: PoolMetadataInput = { ...values } as any
-      if (!address) return
+
+      metadataValues.adminMultisig = values.adminMultisigEnabled
+        ? {
+            ...values.adminMultisig,
+            signers: sortAddresses([address, ...values.adminMultisig.signers]),
+          }
+        : undefined
 
       const currency = currencies.find((c) => c.symbol === values.currency)!
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
+      const collateralCollectionId = await centrifuge.nfts.getAvailableCollectionId()
       if (!values.poolIcon || !values.executiveSummary) {
         return
       }
@@ -271,23 +395,30 @@ const CreatePoolForm: React.VFC = () => {
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
-      createPoolTx(
-        [
-          address,
-          poolId,
-          collectionId,
-          tranches,
-          currency.key,
-          CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
-          metadataValues,
-        ],
-        { createType: config.poolCreationType }
-      )
+      createProxies([
+        (aoProxy, adminProxy) => {
+          createPoolTx(
+            [
+              collateralCollectionId,
+              CurrencyBalance.fromFloat(createDeposit, chainDecimals),
+              aoProxy,
+              adminProxy,
+              poolId,
+              collectionId,
+              tranches,
+              currency.key,
+              CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
+              metadataValues,
+            ],
+            { createType: config.poolCreationType }
+          )
+        },
+      ])
 
       setSubmitting(false)
     },
   })
-
+  console.log('form.values', form.values)
   React.useEffect(() => {
     if (!isStoredIssuerLoading && storedIssuer && waitingForStoredIssuer) {
       if (storedIssuer.name) {
@@ -326,7 +457,11 @@ const CreatePoolForm: React.VFC = () => {
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
-  const { proposeFee } = useProposalEstimate(form?.values)
+  const { proposeFee, poolDeposit, proxyDeposit, paymentInfo, collectionDeposit } = useCreatePoolFee(form?.values)
+  const createDeposit = (proposeFee?.toDecimal() ?? Dec(0))
+    .add(poolDeposit.toDecimal())
+    .add(collectionDeposit.toDecimal())
+  const deposit = createDeposit.add(proxyDeposit.toDecimal())
 
   return (
     <>
@@ -343,16 +478,19 @@ const CreatePoolForm: React.VFC = () => {
             }
             actions={
               <>
-                {proposeFee && (
-                  <Text variant="body3">
-                    Deposit required: ~{formatBalance(proposeFee, balances?.native.currency.symbol, 1)}
-                  </Text>
-                )}
+                <Text variant="body3">
+                  Deposit required: {formatBalance(deposit, balances?.native.currency.symbol, 1)}
+                </Text>
+
                 <Button variant="secondary" onClick={() => history.goBack()}>
                   Cancel
                 </Button>
 
-                <Button loading={form.isSubmitting || transactionIsPending} type="submit">
+                <Button
+                  loading={form.isSubmitting || createProxiesIsPending || transactionIsPending}
+                  type="submit"
+                  loadingMessage={`Creating pool ${form.isSubmitting || createProxiesIsPending ? '1/2' : '2/2'}`}
+                >
                   Create
                 </Button>
               </>
@@ -452,6 +590,9 @@ const CreatePoolForm: React.VFC = () => {
           <TrancheSection />
 
           <RiskGroupsSection />
+
+          <AdminMultisigSection deposit={deposit} />
+          <PodConfig />
         </Form>
       </FormikProvider>
     </>

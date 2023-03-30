@@ -1,7 +1,8 @@
-import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useBalance } from '../../utils/useBalance'
+import { Dec } from '../../utils/Decimal'
+import { useAddress } from '../../utils/useAddress'
 import { useNFT } from '../../utils/useNFTs'
 import { ButtonGroup } from '../ButtonGroup'
 
@@ -16,7 +17,8 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const { substrate } = useWallet()
-  const balance = useBalance()
+  const address = useAddress('substrate')
+  const balances = useBalances(address)
   const centrifuge = useCentrifuge()
   const nft = useNFT(collectionId, nftId)
 
@@ -52,7 +54,8 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
     onClose()
   }
 
-  const balanceLow = !balance || balance < TRANSFER_FEE_ESTIMATE
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
+  const balanceLow = balanceDec.lt(TRANSFER_FEE_ESTIMATE)
 
   const disabled = balanceLow
 
@@ -73,7 +76,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
           <Shelf justifyContent="space-between">
             {balanceLow && (
               <Text variant="label1" color="criticalForeground">
-                Your balance is too low ({(balance || 0).toFixed(2)} AIR)
+                Your balance is too low ({(balanceDec || 0).toFixed(2)} AIR)
               </Text>
             )}
             <ButtonGroup ml="auto">

@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Dialog,
   IconAlertCircle,
   IconArrowRight,
@@ -181,48 +182,51 @@ const PROXY_TYPE_LABELS = {
 
 function SubstrateAccounts({ onClose }: { onClose: () => void }) {
   const {
-    substrate: { accounts, selectAccount, selectProxy, selectedAccount, proxy, proxies },
+    substrate: { combinedAccounts, selectAccount, selectedCombinedAccount },
   } = useWallet()
+  const [showAdditional, setShowAdditional] = React.useState(true)
 
-  if (!accounts) return null
+  if (!combinedAccounts) return null
 
   return (
     <>
       <Card maxHeight="50vh" style={{ overflow: 'auto' }}>
-        {accounts.map((acc) => (
-          <React.Fragment key={acc.address}>
-            <MenuItemGroup>
-              <AccountButton
-                address={acc.address}
-                icon={<AccountIcon id={acc.address} />}
-                label={<AccountName account={acc} />}
-                onClick={() => {
-                  onClose()
-                  selectAccount(acc.address)
-                }}
-                selected={selectedAccount?.address === acc.address && !proxy}
-              />
-            </MenuItemGroup>
-
-            {proxies?.[acc.address]?.map((p, index) => (
-              <MenuItemGroup key={`${p.delegator}${index}`}>
-                <AccountButton
-                  address={p.delegator}
-                  icon={<AccountIcon id={p.delegator} />}
-                  label={<AccountName account={acc} delegator={p.delegator} />}
-                  proxyRights={p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}
-                  onClick={() => {
-                    onClose()
-                    if (acc.address !== selectedAccount?.address) selectAccount(acc.address)
-                    selectProxy(p.delegator)
-                  }}
-                  selected={selectedAccount?.address === acc.address && proxy?.delegator === p.delegator}
-                />
-              </MenuItemGroup>
-            ))}
-          </React.Fragment>
-        ))}
+        {combinedAccounts
+          .filter((acc) => showAdditional || (!acc.proxies && !acc.multisig))
+          .map((acc) => {
+            const actingAddress = acc.proxies?.at(-1)?.delegator || acc.multisig?.address || acc.signingAccount.address
+            return (
+              <React.Fragment key={acc.signingAccount.address}>
+                <MenuItemGroup>
+                  <AccountButton
+                    address={actingAddress}
+                    icon={<AccountIcon id={actingAddress} />}
+                    label={<AccountName account={acc.signingAccount} proxies={acc.proxies} />}
+                    onClick={() => {
+                      onClose()
+                      selectAccount(
+                        acc.signingAccount.address,
+                        acc.proxies?.map((p) => p.delegator),
+                        acc.multisig?.address
+                      )
+                    }}
+                    selected={acc === selectedCombinedAccount}
+                    proxyRights={acc.proxies?.[0].types
+                      .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
+                      .join(' / ')}
+                    multisig={acc.multisig}
+                  />
+                </MenuItemGroup>
+              </React.Fragment>
+            )
+          })}
       </Card>
+      <Checkbox
+        style={{ marginTop: 10 }}
+        checked={showAdditional}
+        onChange={(e) => setShowAdditional(e.target.checked)}
+        label="Show proxies and multisigs"
+      />
     </>
   )
 }

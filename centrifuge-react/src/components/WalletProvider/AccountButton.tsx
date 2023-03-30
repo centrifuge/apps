@@ -5,6 +5,8 @@ import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
+import { useCentrifuge } from '../CentrifugeProvider'
+import { ComputedMultisig, Proxy } from './types'
 import { useWallet } from './WalletProvider'
 
 type AccountButtonProps = {
@@ -14,6 +16,7 @@ type AccountButtonProps = {
   icon: React.ReactNode
   selected?: boolean
   onClick: () => void
+  multisig?: ComputedMultisig
 }
 
 const Root = styled(Shelf)<{ selected: boolean }>`
@@ -38,12 +41,21 @@ const IdenticonWrapper = styled.span`
   pointer-events: none;
 `
 
-export function AccountButton({ address, label, proxyRights, icon, selected = false, onClick }: AccountButtonProps) {
+export function AccountButton({
+  address,
+  label,
+  proxyRights,
+  icon,
+  selected = false,
+  onClick,
+  multisig,
+}: AccountButtonProps) {
   const { connectedType } = useWallet()
   const balances = useBalances(connectedType === 'substrate' ? address : undefined)
   const balance = balances
     ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol)
     : undefined
+  const cent = useCentrifuge()
 
   return (
     <Root
@@ -62,9 +74,25 @@ export function AccountButton({ address, label, proxyRights, icon, selected = fa
 
       <Box as="span" flexGrow={2}>
         {label}
-
+        {multisig && (
+          <Text as="div" variant="label2" color="inherit">
+            <Box
+              as="span"
+              display="inline-block"
+              verticalAlign="middle"
+              width="5px"
+              height="5px"
+              mr="3px"
+              mt="-2px"
+              borderRadius="50%"
+              backgroundColor="accentPrimary"
+              opacity={0.5}
+            />
+            Multisig: {truncateAddress(cent.utils.formatAddress(multisig.address))}
+          </Text>
+        )}
         {proxyRights && (
-          <Text as="span" variant="label2" color="inherit">
+          <Text as="div" variant="label2" color="inherit">
             <Box
               as="span"
               display="inline-block"
@@ -101,7 +129,8 @@ export function AccountIcon({ id }: { id: string }) {
   )
 }
 
-export function AccountName({ account, delegator }: { account: WalletAccount; delegator?: string }) {
+export function AccountName({ account, proxies }: { account: WalletAccount; proxies?: Proxy[] }) {
+  const cent = useCentrifuge()
   return (
     <Text as="span" variant="body2" fontWeight={300} style={{ display: 'block' }}>
       {account.name && (
@@ -111,14 +140,14 @@ export function AccountName({ account, delegator }: { account: WalletAccount; de
           </Text>{' '}
         </>
       )}
-      {delegator && (
-        <>
+      {proxies?.map((p) => (
+        <React.Fragment key={p.delegator}>
           <Text as="span" color="textDisabled">
             |
           </Text>{' '}
-          {truncateAddress(delegator)}
-        </>
-      )}
+          {truncateAddress(cent.utils.formatAddress(p.delegator))}{' '}
+        </React.Fragment>
+      ))}
     </Text>
   )
 }

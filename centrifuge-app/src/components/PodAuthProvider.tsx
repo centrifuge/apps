@@ -11,9 +11,10 @@ export const PodAuthContext = React.createContext<{
 }>(null as any)
 
 export function PodAuthProvider({ children }: { children?: React.ReactNode }) {
-  const { selectedWallet, proxy, selectedAccount } = useWallet().substrate
+  const { selectedWallet, selectedProxies, selectedAccount } = useWallet().substrate
   const cent = useCentrifuge()
 
+  const proxy = selectedProxies?.at(-1)
   const { data: session, refetch: refetchSession } = useQuery(
     ['session', selectedAccount?.address, proxy?.delegator],
     async () => {

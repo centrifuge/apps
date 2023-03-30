@@ -4,6 +4,7 @@ import { Signer } from '@polkadot/types/types'
 import { CentrifugeBase, UserProvidedConfig } from './CentrifugeBase'
 import { getAuthModule } from './modules/auth'
 import { getMetadataModule } from './modules/metadata'
+import { getMultisigModule } from './modules/multisig'
 import { getNftsModule } from './modules/nfts'
 import { getPodModule } from './modules/pod'
 import { getPoolsModule } from './modules/pools'
@@ -22,6 +23,7 @@ export class Centrifuge extends CentrifugeBase {
   pod = getPodModule()
   auth = getAuthModule(this)
   tinlake = getTinlakeModule(this)
+  multisig = getMultisigModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)

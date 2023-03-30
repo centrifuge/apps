@@ -1,5 +1,6 @@
 import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import { useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
@@ -151,22 +152,21 @@ export function usePendingCollectMulti(poolId: string, trancheIds?: string[], ad
   return result
 }
 
-export function usePoolPermissions(poolId?: string) {
-  const [result] = useCentrifugeQuery(['poolPermissions', poolId], (cent) => cent.pools.getPoolPermissions([poolId!]), {
-    enabled: !!poolId,
-  })
-
-  return result
-}
-
 export function usePoolMetadata(
   pool?: { metadata?: string } | { id: string; metadata?: string | Partial<PoolMetadata> }
 ) {
+  const { substrate } = useWallet()
   const data = useMetadata<PoolMetadata>(typeof pool?.metadata === 'string' ? pool.metadata : undefined)
   const tinlakeData = useQuery(
     ['tinlakeMetadata', pool && 'id' in pool && pool.id],
     () => pool?.metadata as PoolMetadata
   )
+  useEffect(() => {
+    if (data.data?.adminMultisig) {
+      substrate.addMultisig(data.data?.adminMultisig)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.data])
   return typeof pool?.metadata === 'string' ? data : tinlakeData
 }
 

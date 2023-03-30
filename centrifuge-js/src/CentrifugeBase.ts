@@ -4,6 +4,7 @@ import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
 import { ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
+import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
 import {
   bufferCount,
@@ -13,7 +14,6 @@ import {
   filter,
   firstValueFrom,
   from,
-  lastValueFrom,
   map,
   mergeWith,
   Observable,
@@ -29,6 +29,7 @@ import {
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { TransactionOptions } from './types'
+import { isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
 
@@ -48,7 +49,7 @@ export type Config = {
   signingAddress?: AddressOrPair
   evmSigner?: JsonRpcSigner
   printExtrinsics?: boolean
-  proxy?: string
+  proxy?: string | string[]
   debug?: boolean
 }
 
@@ -127,7 +128,24 @@ export class CentrifugeBase {
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
-    if (options?.batch) return of(submittable)
+    let actualSubmittable = submittable
+
+    if (options?.batch) return of(actualSubmittable)
+
+    const proxy = this.config.proxy || options?.proxy
+    if (proxy && !options?.sendOnly) {
+      actualSubmittable = (Array.isArray(proxy) ? proxy : [proxy]).reduceRight(
+        (acc, delegator) => api.tx.proxy.proxy(delegator, undefined, acc),
+        actualSubmittable
+      )
+    }
+
+    if (options?.multisig) {
+      const otherSigners = sortAddresses(
+        options.multisig.signers.filter((signer) => !isSameAddress(signer, this.getSignerAddress()))
+      )
+      actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
+    }
 
     if (this.config.printExtrinsics) {
       if (submittable.method.method === 'batchAll' || submittable.method.method === 'batch') {
@@ -151,25 +169,18 @@ export class CentrifugeBase {
     const { signer, signingAddress } = this.getSigner()
 
     try {
-      let actualSubmittable = submittable
-      if (this.config.proxy && !options?.sendOnly) {
-        actualSubmittable = api.tx.proxy.proxy(this.config.proxy, undefined, submittable)
-      }
-
       const $paymentInfo = submittable.paymentInfo(signingAddress)
       const $balances = api.query.system.account(signingAddress)
 
       if (options?.paymentInfo) {
-        return lastValueFrom(
-          $paymentInfo.pipe(
-            map((paymentInfoRaw) => {
-              const paymentInfo = paymentInfoRaw.toJSON() as PaymentInfo
-              return {
-                ...paymentInfo,
-                partialFee: new CurrencyBalance(paymentInfo.partialFee, api.registry.chainDecimals[0]),
-              }
-            })
-          )
+        return $paymentInfo.pipe(
+          map((paymentInfoRaw) => {
+            const paymentInfo = paymentInfoRaw.toJSON() as any
+            return {
+              ...paymentInfo,
+              partialFee: new CurrencyBalance(hexToBn(paymentInfo.partialFee), api.registry.chainDecimals[0]),
+            }
+          })
         )
       }
 
@@ -378,7 +389,7 @@ export class CentrifugeBase {
     return signingAddress as string
   }
 
-  setProxy(proxyAccount: string) {
+  setProxy(proxyAccount: string | string[]) {
     this.config.proxy = proxyAccount
   }
 

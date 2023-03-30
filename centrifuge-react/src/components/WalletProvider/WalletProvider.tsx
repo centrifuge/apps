@@ -1,3 +1,4 @@
+import { addressToHex } from '@centrifuge/centrifuge-js'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -11,7 +12,7 @@ import { useCentrifuge } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
 import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
 import { getStore } from './evm/utils'
-import { Account, Proxy, State } from './types'
+import { CombinedSubstrateAccount, ComputedMultisig, Multisig, Proxy, State, SubstrateAccount } from './types'
 import { useConnectEagerly } from './useConnectEagerly'
 import { Action, getPersisted, persist, useWalletStateInternal } from './useWalletState'
 import { useGetNetworkName } from './utils'
@@ -25,7 +26,7 @@ type WalletContextType = {
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
   walletDialog: State['walletDialog']
-  connect: (wallet: Wallet | EvmConnectorMeta, chainId?: number) => Promise<Account[] | string[] | undefined>
+  connect: (wallet: Wallet | EvmConnectorMeta, chainId?: number) => Promise<SubstrateAccount[] | string[] | undefined>
   disconnect: () => void
   pendingConnect: {
     isConnecting: boolean
@@ -33,16 +34,20 @@ type WalletContextType = {
     wallet: Wallet | EvmConnectorMeta | null
   }
   substrate: {
-    accounts: Account[] | null
-    selectedAccount: Account | null
-    selectedAddress: string | null
-    selectProxy: (address: string | null) => void
-    isWeb3Injected: boolean
-    selectAccount: (address: string) => void
-    selectedWallet: Wallet | null
-    proxy: Proxy | null
+    accounts: SubstrateAccount[] | null
     proxies: Record<string, Proxy[]> | undefined
+    multisigs: ComputedMultisig[]
+    combinedAccounts: CombinedSubstrateAccount[] | null
+    selectedAccount: SubstrateAccount | null
+    selectedAddress: string | null
+    selectedWallet: Wallet | null
+    selectedProxies: Proxy[] | null
+    selectedMultisig: ComputedMultisig | null
+    selectedCombinedAccount: CombinedSubstrateAccount | null
+    selectAccount: (address: string, proxies?: string[] | null, multisig?: string | null) => void
+    addMultisig: (multisig: Multisig) => void
     subscanUrl?: string
+    isWeb3Injected: boolean
   }
   evm: Pick<Web3ReactState, 'chainId' | 'accounts'> & {
     connectors: EvmConnectorMeta[]
@@ -68,7 +73,7 @@ export function useAddress(typeOverride?: 'substrate' | 'evm') {
   if (type === 'evm') {
     return evm.accounts?.[0]
   }
-  return substrate.proxy?.delegator || substrate.selectedAccount?.address
+  return substrate.selectedCombinedAccount?.actingAddress
 }
 
 type WalletProviderProps = {
@@ -108,9 +113,8 @@ export function WalletProvider({
     []
   )
 
-  const cent = useCentrifuge()
-  const { data: proxies } = useQuery(
-    ['allProxies'],
+  /*
+  ['allProxies'],
     () =>
       firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
         return Object.fromEntries(
@@ -120,18 +124,40 @@ export function WalletProvider({
           ])
         )
       }),
+      */
+  const cent = useCentrifuge()
+  const { data: proxies } = useQuery(
+    ['proxies', state.substrate.accounts?.map((acc) => acc.address), state.substrate.multisigs.map((m) => m.address)],
+    () =>
+      firstValueFrom(
+        cent.proxies.getMultiUserProxies([
+          (state.substrate.accounts || [])
+            .map((acc) => acc.address)
+            .concat(state.substrate.multisigs.map((m) => m.address)),
+        ])
+      ),
     {
       staleTime: Infinity,
     }
   )
 
-  function setFilteredAccounts(accounts: Account[]) {
+  const delegatees = [...new Set(Object.values(proxies ?? {})?.flatMap((p) => p.map((d) => d.delegator)))]
+  const { data: nestedProxies } = useQuery(
+    ['proxiesNested', delegatees],
+    () => firstValueFrom(cent.proxies.getMultiUserProxies([delegatees])),
+    {
+      enabled: !!Object.keys(proxies ?? {})?.length,
+      staleTime: Infinity,
+    }
+  )
+
+  function setFilteredAccounts(accounts: SubstrateAccount[]) {
     const mappedAccounts = accounts.map((acc) => ({
       ...acc,
-      address: cent.utils.formatAddress(acc.address),
+      address: addressToHex(acc.address),
     }))
 
-    const { address: persistedAddress, proxy: persistedProxy } = getPersisted()
+    const { address: persistedAddress, proxy: persistedProxy, multisig: persistedMultisig } = getPersisted()
     const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
     const address = matchingAccount || mappedAccounts[0]?.address
     dispatch({
@@ -139,17 +165,22 @@ export function WalletProvider({
       payload: {
         accounts: mappedAccounts,
         selectedAccountAddress: address,
-        proxyAddress: (matchingAccount && persistedProxy) || null,
+        multisigAddress: (matchingAccount && persistedMultisig) ?? null,
+        proxyAddresses:
+          matchingAccount && persistedProxy
+            ? Array.isArray(persistedProxy)
+              ? persistedProxy
+              : [persistedProxy]
+            : null,
       },
     })
   }
 
-  const selectAccount = React.useCallback((address: string) => {
-    dispatch({ type: 'substrateSetState', payload: { selectedAccountAddress: address, proxyAddress: null } })
-  }, [])
-
-  const selectProxy = React.useCallback((proxyAddress: string | null) => {
-    dispatch({ type: 'substrateSetState', payload: { proxyAddress } })
+  const selectAccount = React.useCallback((address: string, proxies?: string[] | null, multisig?: string | null) => {
+    dispatch({
+      type: 'substrateSetState',
+      payload: { selectedAccountAddress: address, proxyAddresses: proxies ?? null, multisigAddress: multisig ?? null },
+    })
   }, [])
 
   const {
@@ -157,9 +188,12 @@ export function WalletProvider({
     args: connectingArgs,
     isLoading: isConnectingByInteraction,
     isError: isConnectError,
-  } = useAsyncCallback((_: EvmConnectorMeta | Wallet, cb: () => Promise<Account[] | string[] | undefined>) => cb(), {
-    throwOnReplace: true,
-  })
+  } = useAsyncCallback(
+    (_: EvmConnectorMeta | Wallet, cb: () => Promise<SubstrateAccount[] | string[] | undefined>) => cb(),
+    {
+      throwOnReplace: true,
+    }
+  )
 
   const connectSubstrate = React.useCallback(async (wallet: Wallet) => {
     unsubscribeRef.current?.()
@@ -239,6 +273,46 @@ export function WalletProvider({
   const getNetworkName = useGetNetworkName(evmChains)
 
   const ctx: WalletContextType = React.useMemo(() => {
+    const combinedProxies = { ...proxies, ...nestedProxies }
+    const combinedSubstrateAccounts =
+      state.substrate.accounts?.flatMap((account) => {
+        const { address } = account
+        const multisigs = state.substrate.multisigs.filter((multi) =>
+          multi.signers.find((signer) => signer === address)
+        )
+        const accounts: CombinedSubstrateAccount[] = [{ signingAccount: account, actingAddress: account.address }]
+
+        const directProxies: Proxy[][] = []
+        findProxySequences(combinedProxies, directProxies, [], address)
+        accounts.push(
+          ...directProxies.map((p) => ({ signingAccount: account, proxies: p, actingAddress: p.at(-1)!.delegator }))
+        )
+
+        multisigs.forEach((multi) => {
+          accounts.push({ signingAccount: account, multisig: multi, actingAddress: multi.address })
+          const multisigProxies: Proxy[][] = []
+          findProxySequences(combinedProxies, multisigProxies, [], multi.address)
+          accounts.push(
+            ...multisigProxies.map((p) => ({
+              signingAccount: account,
+              proxies: p,
+              multisig: multi,
+              actingAddress: p.at(-1)!.delegator,
+            }))
+          )
+        })
+
+        return accounts
+      }) ?? null
+    const selectedCombinedAccount = combinedSubstrateAccounts?.find(
+      (acc) =>
+        state.substrate.selectedAccountAddress === acc.signingAccount.address &&
+        state.substrate.multisigAddress == acc.multisig?.address &&
+        ((!acc.proxies && !state.substrate.proxyAddresses) ||
+          (acc.proxies?.length === state.substrate.proxyAddresses?.length &&
+            acc.proxies!.every((p, i) => p.delegator === state.substrate.proxyAddresses?.[i])))
+    )
+
     const selectedSubstrateAccount =
       state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null
     const connectedNetwork =
@@ -255,34 +329,43 @@ export function WalletProvider({
       pendingConnect: {
         isConnecting,
         isError: isConnectError,
-        wallet: connectingArgs?.[0] ?? null,
+        wallet: connectingArgs?.[0] || null,
       },
       connect,
       disconnect,
       substrate: {
         ...state.substrate,
+        combinedAccounts: combinedSubstrateAccounts,
         selectedAccount: selectedSubstrateAccount,
-        selectedAddress: selectedSubstrateAccount?.address ?? null,
+        selectedAddress: selectedSubstrateAccount?.address || null,
+        selectedCombinedAccount: selectedCombinedAccount || null,
         isWeb3Injected,
         selectAccount,
-        selectProxy,
-        proxy:
-          state.substrate.selectedAccountAddress && state.substrate.proxyAddress && proxies
-            ? proxies[state.substrate.selectedAccountAddress]?.find(
-                (p) => p.delegator === state.substrate.proxyAddress
-              ) ?? null
-            : null,
-        proxies,
+        addMultisig: (multisig) => {
+          dispatch({
+            type: 'substrateAddMultisig',
+            payload: multisig,
+          })
+        },
+        selectedProxies: selectedCombinedAccount?.proxies || null,
+        selectedMultisig: selectedCombinedAccount?.multisig || null,
+        proxies: combinedProxies,
         subscanUrl,
       },
       evm: {
         ...state.evm,
-        selectedAddress: state.evm.accounts?.[0] ?? null,
+        selectedAddress: state.evm.accounts?.[0] || null,
         connectors: evmConnectors,
         chains: evmChains,
       },
     }
-  }, [connect, disconnect, selectAccount, selectProxy, proxies, state, isConnectError, isConnecting])
+  }, [connect, disconnect, selectAccount, proxies, nestedProxies, state, isConnectError, isConnecting])
+
+  React.useEffect(() => {
+    if (ctx.substrate.selectedAddress && !ctx.substrate.selectedCombinedAccount && nestedProxies) {
+      ctx.substrate.selectAccount(ctx.substrate.selectedAddress)
+    }
+  }, [ctx])
 
   return (
     <WalletContext.Provider value={ctx}>
@@ -290,4 +373,13 @@ export function WalletProvider({
       <WalletDialog evmChains={evmChains} />
     </WalletContext.Provider>
   )
+}
+
+function findProxySequences(proxies: Record<string, Proxy[]>, acc: Proxy[][], curSeq: Proxy[], delegatee: string) {
+  if (!proxies[delegatee]) return
+  proxies[delegatee].forEach((nextProxy) => {
+    const seq = [...curSeq, nextProxy]
+    acc.push(seq)
+    findProxySequences(proxies, acc, seq, nextProxy.delegator)
+  })
 }

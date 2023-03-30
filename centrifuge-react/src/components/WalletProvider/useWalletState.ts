@@ -1,7 +1,12 @@
+import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { EvmConnectorMeta } from './evm/connectors'
 import { useConnectorState } from './evm/utils'
-import { State } from './types'
+import { Multisig, State } from './types'
+import { computeMultisig } from './utils'
+
+const PERSIST_KEY = 'centrifugeWalletPersist_v2'
+const SUBSTRATE_MULTISIGS_PERSIST_KEY = 'centrifugeWalletPersistMultisigs'
 
 const initialState: State = {
   connectedType: null,
@@ -16,8 +21,20 @@ const initialState: State = {
   substrate: {
     accounts: null,
     selectedAccountAddress: null,
-    proxyAddress: null,
+    proxyAddresses: null,
     selectedWallet: null,
+    multisigAddress: null,
+    multisigs: getPersistedMultisigs().map(computeMultisig),
+    //   .concat
+    // [
+    //   {
+    //     signers: [
+    //       '5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy',
+    //       '5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y',
+    //     ],
+    //     threshold: 2,
+    //   },
+    // ].map(computeMultisig)
   },
 }
 export type Action =
@@ -38,6 +55,10 @@ export type Action =
   | {
       type: 'substrateSetState'
       payload: Partial<State['substrate']>
+    }
+  | {
+      type: 'substrateAddMultisig'
+      payload: Multisig
     }
   | {
       type: 'evmSetState'
@@ -82,6 +103,19 @@ function reducer(state: State, action: Action): State {
           ...action.payload,
         },
       }
+    case 'substrateAddMultisig': {
+      if (!action.payload.signers.every((addr) => isAddress(addr))) return state
+
+      const newMulti = computeMultisig(action.payload)
+      if (state.substrate.multisigs.find((m) => m.address === newMulti.address)) return state
+      return {
+        ...state,
+        substrate: {
+          ...state.substrate,
+          multisigs: [...state.substrate.multisigs, computeMultisig(action.payload)],
+        },
+      }
+    }
     case 'evmSetState':
       return {
         ...state,
@@ -101,18 +135,33 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-const PERSIST_KEY = 'centrifugeWalletPersist'
 type PersistState = {
   type: 'substrate' | 'evm'
   wallet: string
   address: string
-  proxy?: string | null
+  proxy?: string[] | null
+  multisig?: string | null
   chainId?: number
+}
+
+export function getPersistedMultisigs(): Multisig[] {
+  try {
+    return JSON.parse(localStorage.getItem(SUBSTRATE_MULTISIGS_PERSIST_KEY) ?? '[]')
+  } catch {
+    return []
+  }
+}
+export function persistMultisigs(multisigs?: Multisig[]) {
+  if (!multisigs) {
+    localStorage.removeItem(SUBSTRATE_MULTISIGS_PERSIST_KEY)
+  } else {
+    localStorage.setItem(SUBSTRATE_MULTISIGS_PERSIST_KEY, JSON.stringify(multisigs))
+  }
 }
 
 export function getPersisted(): Partial<PersistState> {
   try {
-    return JSON.parse(localStorage.getItem(PERSIST_KEY) ?? '{}') as PersistState
+    return JSON.parse(localStorage.getItem(PERSIST_KEY) ?? '{}')
   } catch {
     return {}
   }
@@ -158,10 +207,12 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
           type: 'substrate',
           wallet: state.substrate.selectedWallet?.extensionName,
           address: state.substrate.selectedAccountAddress,
-          proxy: state.substrate.proxyAddress,
+          proxy: state.substrate.proxyAddresses,
+          multisig: state.substrate.multisigAddress,
         })
       }
     }
+    persistMultisigs(state.substrate.multisigs)
   }, [state])
 
   return [state, dispatch] as const

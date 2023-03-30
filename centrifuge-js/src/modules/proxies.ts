@@ -1,7 +1,7 @@
 import { encodeAddress } from '@polkadot/util-crypto'
 import { map, switchMap } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
-import { Account } from '../types'
+import { Account, TransactionOptions } from '../types'
 import { addressToHex } from '../utils'
 
 export function getProxiesModule(inst: CentrifugeBase) {
@@ -47,12 +47,13 @@ export function getProxiesModule(inst: CentrifugeBase) {
     return inst.getApi().pipe(
       switchMap((api) => {
         return inst.getSubqueryObservable<{
-          proxies: { nodes: { delegator: string; proxyType: string }[] }
+          proxies: { nodes: { delegator: string; delegatee: string; proxyType: string }[] }
         }>(
           `query($address: String!) {
           proxies(filter: { delegatee: { equalTo: $address }}) {
             nodes {
               delegator
+              delegatee
               proxyType
             }
           }
@@ -64,13 +65,15 @@ export function getProxiesModule(inst: CentrifugeBase) {
         )
       }),
       map((data) => {
-        const proxies: Record<string, { delegator: string; types: string[] }> = {}
+        const proxies: Record<string, { delegator: string; delegatee: string; types: string[] }> = {}
         data?.proxies.nodes.forEach((node) => {
-          if (proxies[node.delegator]) {
-            proxies[node.delegator].types.push(node.proxyType)
+          const delegator = addressToHex(node.delegator)
+          if (proxies[delegator]) {
+            proxies[delegator].types.push(node.proxyType)
           } else {
-            proxies[node.delegator] = {
-              delegator: node.delegator,
+            proxies[delegator] = {
+              delegator,
+              delegatee: addressToHex(node.delegatee),
               types: [node.proxyType],
             }
           }
@@ -105,14 +108,16 @@ export function getProxiesModule(inst: CentrifugeBase) {
         )
       }),
       map((data) => {
-        const proxiesByUser: Record<string, { delegator: string; types: string[] }[]> = {}
+        const proxiesByUser: Record<string, { delegator: string; delegatee: string; types: string[] }[]> = {}
         data?.proxies.nodes.forEach((node) => {
-          const index = proxiesByUser[node.delegatee]?.findIndex((p) => p.delegator === node.delegator)
+          const delegatee = addressToHex(node.delegatee)
+          const index = proxiesByUser[delegatee]?.findIndex((p) => p.delegator === node.delegator)
           if (index > -1) {
-            proxiesByUser[node.delegatee][index].types.push(node.proxyType)
+            proxiesByUser[delegatee][index].types.push(node.proxyType)
           } else {
-            ;(proxiesByUser[node.delegatee] || (proxiesByUser[node.delegatee] = [])).push({
-              delegator: node.delegator,
+            ;(proxiesByUser[delegatee] || (proxiesByUser[delegatee] = [])).push({
+              delegator: addressToHex(node.delegator),
+              delegatee,
               types: [node.proxyType],
             })
           }
@@ -121,10 +126,57 @@ export function getProxiesModule(inst: CentrifugeBase) {
       })
     )
   }
+  function createPure(_args: [], options?: TransactionOptions) {
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.proxy.createPure('Any', 0, 0)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function addDelegate(args: [delegate: Account, proxyTypes: string[]], options?: TransactionOptions) {
+    const [delegate, proxyTypes] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        let submittable
+        if (proxyTypes.length === 1) {
+          submittable = api.tx.proxy.addProxy(delegate, proxyTypes[0], 0)
+        } else {
+          submittable = api.tx.utility.batchAll(proxyTypes.map((t) => api.tx.proxy.addProxy(delegate, t, 0)))
+        }
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function removeDelegate(args: [delegate: Account, proxyTypes: string[]], options?: TransactionOptions) {
+    const [delegate, proxyTypes] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        let submittable
+        if (proxyTypes.length === 1) {
+          submittable = api.tx.proxy.removeProxy(delegate, proxyTypes[0], 0)
+        } else {
+          submittable = api.tx.utility.batchAll(proxyTypes.map((t) => api.tx.proxy.removeProxy(delegate, t, 0)))
+        }
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
 
   return {
     getUserProxies,
     getMultiUserProxies,
     getAllProxies,
+    createPure,
+    addDelegate,
+    removeDelegate,
   }
 }

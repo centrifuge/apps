@@ -14,7 +14,7 @@ import {
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
-import { getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
+import { addressToHex, getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
 
@@ -467,6 +467,11 @@ export interface PoolMetadataInput {
   // tranche
   tranches: TrancheFormValues[]
   riskGroups: RiskGroupFormValues[]
+
+  adminMultisig?: {
+    signers: string[]
+    threshold: number
+  }
 }
 
 export type PoolStatus = 'open' | 'upcoming' | 'hidden'
@@ -517,6 +522,10 @@ export type PoolMetadata = {
     lossGivenDefault: string
     discountRate: string
   }[]
+  adminMultisig?: {
+    signers: string[]
+    threshold: number
+  }
   // Not yet implemented
   // onboarding: {
   //   live: boolean
@@ -619,7 +628,7 @@ export function getPoolsModule(inst: Centrifuge) {
             } else {
               submittable = api.tx.utility.batchAll([
                 api.tx.poolRegistry.register(
-                  inst.getSignerAddress(),
+                  admin,
                   poolId,
                   trancheInput,
                   currency,
@@ -698,7 +707,7 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     })
 
-    const formattedMetadata = {
+    const formattedMetadata: PoolMetadata = {
       version: 1,
       pool: {
         name: metadata.poolName,
@@ -731,6 +740,7 @@ export function getPoolsModule(inst: Centrifuge) {
         lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
         discountRate: Rate.fromAprPercent(group.discountRate).toString(),
       })),
+      adminMultisig: metadata.adminMultisig,
     }
 
     return inst.metadata.pinJson(formattedMetadata)
@@ -1122,7 +1132,7 @@ export function getPoolsModule(inst: Centrifuge) {
           map((permissionsData) => {
             const roles: { [account: string]: PoolRoles } = {}
             permissionsData.forEach((value, i) => {
-              const account = poolKeys[i][0]
+              const account = addressToHex(poolKeys[i][0])
               const permissions = value.toJSON() as any
               roles[account] = {
                 roles: (

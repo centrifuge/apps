@@ -91,16 +91,17 @@ const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...
   if ('options' in attr) {
     return (
       <Field name={name} validate={required()} key={label}>
-        {({ field, form }: any) => (
+        {({ field, form, meta }: any) => (
           <Select
             name={name}
             placeholder="Select one"
             label={`${label}*`}
             options={attr.options.map((o) => ({ label: o, value: o }))}
-            value={field.value}
+            value={field.value ?? ''}
             onChange={(event) => {
               form.setFieldValue(name, event.target.value)
             }}
+            errorMessage={meta.error}
           />
         )}
       </Field>
@@ -146,7 +147,7 @@ const IssuerCreateLoan: React.FC = () => {
   const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
   const collateralCollectionId = useCollateralCollectionId(pid)
-  const { selectedAccount, proxy } = useWallet().substrate
+  const { selectedAccount, selectedProxies } = useWallet().substrate
   const { addTransaction, updateTransaction } = useTransactions()
 
   const { isAuth, authToken } = useAuth()
@@ -239,8 +240,8 @@ const IssuerCreateLoan: React.FC = () => {
         updateTransaction(txId, { status: 'unconfirmed' })
 
         const connectedCent = centrifuge.connect(selectedAccount!.address, selectedAccount!.signer as any)
-        if (proxy) {
-          connectedCent.setProxy(proxy.delegator)
+        if (selectedProxies) {
+          connectedCent.setProxy(selectedProxies.map((p) => p.delegator))
         }
 
         // Sign createLoan transaction
