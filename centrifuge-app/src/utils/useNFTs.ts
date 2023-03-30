@@ -22,11 +22,6 @@ export function useNFT(collectionId?: string | null, nftId?: string, suspense = 
   return result
 }
 
-export function useCollateralCollectionId(poolId: string) {
-  const collateralCollectionId = poolId
-  return collateralCollectionId
-}
-
 export function useAccountNfts(address?: string, suspense = true) {
   const [result] = useCentrifugeQuery(['accountNfts', address], (cent) => cent.nfts.getAccountNfts([address!]), {
     suspense,

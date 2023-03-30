@@ -62,7 +62,9 @@ export function PricingInput({ poolId }: { poolId: string }) {
         name="pricing.maturityDate"
         label="Maturity date*"
         type="date"
+        // Min one day from now
         min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+        // Max 5 years from now
         max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
       />
       <FieldWithErrorMessage
@@ -100,20 +102,6 @@ export function PricingInput({ poolId }: { poolId: string }) {
             name="pricing.lossGivenDefault"
             validate={validate.lossGivenDefault}
           />
-          {/* <TextInput
-            label={<Tooltips type="riskAdjustment" variant="secondary" />}
-            disabled
-            value={Math.max(
-              Math.min(
-                (Number(values.pricing.probabilityOfDefault) / 100) *
-                  (Number(values.pricing.lossGivenDefault) / 100) *
-                  100,
-                100
-              ),
-              0
-            ).toFixed(2)}
-            rightElement="%"
-          /> */}
           <FieldWithErrorMessage
             as={NumberInput}
             label={<Tooltips type="discountRate" variant="secondary" label="Discount rate*" />}

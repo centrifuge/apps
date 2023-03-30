@@ -36,7 +36,6 @@ import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
-import { useCollateralCollectionId } from '../../../utils/useNFTs'
 import { usePod } from '../../../utils/usePod'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, maxLength, positiveNumber, required } from '../../../utils/validation'
@@ -160,7 +159,7 @@ function IssuerCreateLoan() {
   const history = useHistory()
   const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
-  const collateralCollectionId = useCollateralCollectionId(pid)
+  const collateralCollectionId = pid
   const { selectedAccount, proxy } = useWallet().substrate
   const { addTransaction, updateTransaction } = useTransactions()
 

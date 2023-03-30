@@ -25,11 +25,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
   const address = useAddress('substrate')
   const balances = useBalances(address)
   const balance = balances ? findBalance(balances.currencies, pool.currency.key)!.balance.toDecimal() : Dec(0)
-  const {
-    current: availableFinancing,
-    initial: initialCeiling,
-    debtWithMargin,
-  } = useAvailableFinancing(loan.poolId, loan.id)
+  const { current: availableFinancing, debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => cent.pools.financeLoan,
