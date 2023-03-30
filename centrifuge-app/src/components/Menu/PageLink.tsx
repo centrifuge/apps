@@ -1,6 +1,6 @@
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useLocation } from 'react-router'
+import { useRouteMatch } from 'react-router'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
 import { baseButton, primaryButton } from './styles'
@@ -16,10 +16,10 @@ type PageLinkProps = LinkProps & {
 }
 
 export function PageLink({ stacked = false, to, children }: PageLinkProps) {
-  const { pathname } = useLocation()
+  const match = useRouteMatch(to as string)
 
   return (
-    <Root forwardedAs={Link} to={to} variant="interactive1" isActive={pathname === to} stacked={stacked}>
+    <Root forwardedAs={Link} to={to} variant="interactive1" isActive={Boolean(match)} stacked={stacked}>
       {children}
     </Root>
   )
