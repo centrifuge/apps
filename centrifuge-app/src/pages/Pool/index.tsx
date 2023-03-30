@@ -14,7 +14,10 @@ export const PoolDetailPage: React.FC = () => {
 
   React.useEffect(() => {
     setScopedNetwork(isTinlakePool ? 'evm' : 'substrate')
+
     return () => setScopedNetwork(null)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
