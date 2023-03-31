@@ -48,7 +48,6 @@ export const addInvestorToMemberList = async (walletAddress: string, poolId: str
   // )
   const proxiedSubmittable = api.tx.proxy.proxy(PROXY_ADDRESS, undefined, submittable)
   const hash = await proxiedSubmittable.signAndSend(signer)
-  console.log('🚀 ~ hash:', hash)
   await api.disconnect()
   return hash
 }
