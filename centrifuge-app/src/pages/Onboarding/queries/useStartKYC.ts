@@ -29,7 +29,6 @@ export const useStartKYC = () => {
           dateOfBirth: values.dateOfBirth,
           countryOfCitizenship: values.countryOfCitizenship,
           countryOfResidency: values.countryOfResidency,
-          ...(investorType === 'individual' && pool && { poolId: pool.id, trancheId: pool.trancheId }),
           ...(investorType === 'individual' && { email: values.email }),
         }),
       })

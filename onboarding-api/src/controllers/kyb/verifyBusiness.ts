@@ -10,8 +10,6 @@ import { validateInput } from '../../utils/validateInput'
 const verifyBusinessInput = object({
   dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
-  poolId: string(),
-  trancheId: string(),
   businessName: string().required(), // used for AML
   registrationNumber: string().required(),
   jurisdictionCode: string().required(), // country of incorporation
@@ -77,27 +75,7 @@ export const verifyBusinessController = async (
         verifyAccreditation: { completed: false, timeStamp: null },
         verifyTaxInfo: { completed: false, timeStamp: null },
       },
-      poolSteps:
-        poolId && trancheId
-          ? {
-              [poolId]: {
-                [trancheId]: {
-                  signAgreement: {
-                    completed: false,
-                    timeStamp: null,
-                    transactionInfo: {
-                      extrinsicHash: null,
-                      blockNumber: null,
-                    },
-                  },
-                  status: {
-                    status: null,
-                    timeStamp: null,
-                  },
-                },
-              },
-            }
-          : {},
+      poolSteps: {},
     }
 
     await validateAndWriteToFirestore(wallet, user, 'entity')

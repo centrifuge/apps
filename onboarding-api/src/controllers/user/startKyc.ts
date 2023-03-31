@@ -12,8 +12,6 @@ const kycInput = object({
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(),
   countryOfResidency: string().required(),
-  poolId: string(),
-  trancheId: string(),
 })
 
 export const startKycController = async (req: Request<any, any, InferType<typeof kycInput>>, res: Response) => {
@@ -79,27 +77,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
           verifyAccreditation: { completed: false, timeStamp: null },
           verifyTaxInfo: { completed: false, timeStamp: null },
         },
-        poolSteps:
-          body.poolId && body.trancheId
-            ? {
-                [body.poolId]: {
-                  [body.trancheId]: {
-                    signAgreement: {
-                      completed: false,
-                      timeStamp: null,
-                      transactionInfo: {
-                        extrinsicHash: null,
-                        blockNumber: null,
-                      },
-                    },
-                    status: {
-                      status: null,
-                      timeStamp: null,
-                    },
-                  },
-                },
-              }
-            : {},
+        poolSteps: {},
         email: body.email as string,
       }
       await validateAndWriteToFirestore(wallet, newUser, 'individual')
