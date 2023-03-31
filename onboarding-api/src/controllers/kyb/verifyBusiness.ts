@@ -23,7 +23,7 @@ export const verifyBusinessController = async (
     await validateInput(req.body, verifyBusinessInput)
     const {
       wallet,
-      body: { jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
+      body: { jurisdictionCode, registrationNumber, businessName, email, dryRun },
     } = { ...req }
 
     const existingUser = await fetchUser(wallet, { suppressError: true })
