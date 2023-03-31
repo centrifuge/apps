@@ -2,6 +2,7 @@ import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { onboardingBucket } from '../database'
+import { getPoolById } from './centrifuge'
 import { HttpError } from './httpError'
 
 interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
@@ -18,6 +19,10 @@ export const signAndAnnotateAgreement = async ({
   name,
   email,
 }: SignatureInfo) => {
+  const { metadata } = await getPoolById(poolId)
+
+  const issuerName = metadata?.pool.name
+
   const signedAgreement = await PDFDocument.create()
 
   const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
@@ -70,26 +75,32 @@ Extrinsic Hash: ${transactionInfo.extrinsicHash}`,
 
   lastPage.drawText(walletAddress, {
     x: 72,
-    y: 618,
+    y: 582,
+    size: 12,
+  })
+
+  lastPage.drawText(issuerName, {
+    x: 107,
+    y: 471,
     size: 12,
   })
 
   lastPage.drawText(name, {
-    x: 182,
-    y: 445,
-    size: 20,
+    x: 204,
+    y: 376,
+    size: 12,
   })
 
   lastPage.drawText(email, {
-    x: 139,
-    y: 423,
-    size: 20,
+    x: 151,
+    y: 344,
+    size: 12,
   })
 
   lastPage.drawText(new Date().toISOString(), {
-    x: 98,
-    y: 392,
-    size: 20,
+    x: 103,
+    y: 310,
+    size: 12,
   })
 
   const signedAgreementPDF = await signedAgreement.save()
