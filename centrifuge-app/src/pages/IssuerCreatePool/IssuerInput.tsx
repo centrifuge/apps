@@ -29,7 +29,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
           validate={validate.issuerRepName}
           name="issuerRepName"
           as={TextInput}
-          label={<Tooltips type="issuerRepName" label="Name of issuer representative*" variant="secondary" />}
+          label={<Tooltips type="issuerRepName" label="Legal name of issuer representative*" variant="secondary" />}
           placeholder="Full name..."
           maxLength={100}
           disabled={waitingForStoredIssuer}

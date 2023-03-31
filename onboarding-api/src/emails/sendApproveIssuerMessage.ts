@@ -1,4 +1,4 @@
-import { sendEmail } from '.'
+import { sendEmail, templateIds } from '.'
 import { getPoolById } from '../utils/centrifuge'
 
 export const sendApproveIssuerMessage = async (
@@ -18,8 +18,13 @@ export const sendApproveIssuerMessage = async (
             email: metadata?.pool?.issuer?.email,
           },
         ],
+        dynamic_template_data: {
+          poolName: metadata?.pool.name,
+          tokenName: trancheName,
+        },
       },
     ],
+    template_id: templateIds.investorApprovedIssuer,
     from: {
       name: 'Centrifuge',
       email: `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,

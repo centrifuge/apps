@@ -224,7 +224,7 @@ const tooltipText = {
   },
   issuerRepName: {
     label: 'Issuer representive name',
-    body: 'This is the full name of the authorized representive of the pool.',
+    body: 'This is the full legal name of the authorized representive of the pool.',
   },
 }
 
