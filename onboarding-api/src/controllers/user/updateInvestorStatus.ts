@@ -78,7 +78,7 @@ export const updateInvestorStatusController = async (
     if (user?.email && status === 'approved') {
       await addInvestorToMemberList(wallet.address, poolId, trancheId)
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
-      return res.status(204).send()
+      return res.status(200).send({ poolId, trancheId })
     } else if (user?.email && status === 'rejected') {
       await sendRejectInvestorMessage(user.email, poolId)
       throw new HttpError(400, 'Investor has been rejected')

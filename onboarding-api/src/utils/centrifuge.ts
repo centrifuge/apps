@@ -28,7 +28,7 @@ export const addInvestorToMemberList = async (walletAddress: string, poolId: str
   await cryptoWaitReady()
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 })
   // both Dave and Alice can execute the proxy call because they have been added to the pure proxy
-  const signer = keyring.addFromUri('//Dave')
+  const signer = keyring.addFromUri('//Alice') // TODO: setup with pure proxy account
   const api = await ApiPromise.create({ provider: new WsProvider(process.env.COLLATOR_WSS_URL) })
   const submittable = api.tx.permissions.add(
     { PoolRole: 'MemberListAdmin' },
