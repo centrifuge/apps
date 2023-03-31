@@ -1,3 +1,4 @@
+// limited list 81 (only supported by shufti)
 export const KYB_COUNTRY_CODES = {
   ae_az: 'Abu Dhabi (UAE)',
   al: 'Albania',
@@ -86,6 +87,7 @@ export const KYB_COUNTRY_CODES = {
   vn: 'Viet Nam',
 }
 
+// almost whole world countries (supported by shufti)
 export const KYC_COUNTRY_CODES = {
   af: 'Afghanistan',
   ax: 'Aland Islands',
@@ -336,6 +338,7 @@ export const KYC_COUNTRY_CODES = {
   zw: 'Zimbabwe',
 }
 
+// all existing countries (no limits)
 export const RESIDENCY_COUNTRY_CODES = {
   af: 'Afghanistan',
   ax: 'Aland Islands',
@@ -589,6 +592,7 @@ export const RESIDENCY_COUNTRY_CODES = {
   zw: 'Zimbabwe',
 }
 
+// ============ states in north america
 export const CA_PROVINCE_CODES = {
   nb: 'New Brunswick',
   nl: 'Newfoundland and Labrador',

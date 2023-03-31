@@ -7,9 +7,9 @@ import { InvestorTypes } from '../../types'
 import { usePool } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
-import { BusinessInformation } from './BusinessInformation'
 import { GlobalStatus } from './GlobalStatus'
 import { InvestorType } from './InvestorType'
+import { KnowYourBusiness } from './KnowYourBusiness'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
 import { useSignedAgreement } from './queries/useSignedAgreement'
@@ -115,7 +115,7 @@ export const OnboardingPage: React.FC = () => {
         {activeStep === 2 && <InvestorType investorType={investorType} setInvestorType={setInvestorType} />}
         {investorType === 'entity' && (
           <>
-            {activeStep === 3 && <BusinessInformation />}
+            {activeStep === 3 && <KnowYourBusiness />}
             {activeStep === 4 && <UltimateBeneficialOwners />}
             {activeStep === 5 && <KnowYourCustomer />}
             {activeStep === 6 && <TaxInfo />}

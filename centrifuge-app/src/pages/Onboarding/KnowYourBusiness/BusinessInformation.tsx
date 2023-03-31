@@ -1,7 +1,6 @@
 import { Box, Button, Select, TextInput } from '@centrifuge/fabric'
-import { useFormik } from 'formik'
+import { FormikProps } from 'formik'
 import * as React from 'react'
-import { object, string } from 'yup'
 import {
   ActionBar,
   AlertBusinessVerification,
@@ -10,49 +9,28 @@ import {
   Fieldset,
   NotificationBar,
   ValidEmailTooltip,
-} from '../../components/Onboarding'
-import { useOnboarding } from '../../components/OnboardingProvider'
-import { EntityUser } from '../../types'
-import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
-import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geographyCodes'
-import { useVerifyBusiness } from './queries/useVerifyBusiness'
+} from '../../../components/Onboarding'
+import { useOnboarding } from '../../../components/OnboardingProvider'
+import { EntityUser } from '../../../types'
+import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
+import { CA_PROVINCE_CODES, RESIDENCY_COUNTRY_CODES, US_STATE_CODES } from '../geographyCodes'
 
-const validationSchema = object({
-  email: string().email('Please enter a valid email address').required('Please enter an email address'),
-  businessName: string().required('Please enter the business name'),
-  registrationNumber: string().required('Please enter the business registration number'),
-  jurisdictionCode: string().required('Please select the business country of incorporation'),
-  regionCode: string().when('jurisdictionCode', {
-    is: (jurisdictionCode: string) => jurisdictionCode === 'us' || jurisdictionCode === 'ca',
-    then: string().required('Please select your region code'),
-  }),
-})
+type Props = {
+  formik: FormikProps<{
+    businessName: string
+    email: string
+    registrationNumber: string
+    jurisdictionCode: string //keyof typeof RESIDENCY_COUNTRY_CODES
+    regionCode: string // keyof typeof US_STATE_CODES | keyof typeof CA_PROVINCE_CODES
+  }>
+  isLoading: boolean
+  isError: boolean
+}
 
-export const BusinessInformation = () => {
+export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
   const { onboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
   const [errorClosed, setErrorClosed] = React.useState(false)
-
-  const isUSOrCA =
-    onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
-
   const isCompleted = !!onboardingUser?.globalSteps?.verifyBusiness.completed
-
-  const formik = useFormik({
-    initialValues: {
-      businessName: onboardingUser?.businessName || '',
-      email: onboardingUser?.email || '',
-      registrationNumber: onboardingUser?.registrationNumber || '',
-      jurisdictionCode:
-        (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode || '') ?? '',
-      regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
-    },
-    onSubmit: (values) => {
-      verifyBusinessInformation(values)
-    },
-    validationSchema,
-  })
-
-  const { mutate: verifyBusinessInformation, isLoading, isError } = useVerifyBusiness()
 
   const renderRegionCodeSelect = () => {
     if (formik.values.jurisdictionCode === 'us') {
@@ -122,7 +100,7 @@ export const BusinessInformation = () => {
             {...formik.getFieldProps('jurisdictionCode')}
             label="Country of incorporation"
             placeholder="Select a country"
-            options={formatGeographyCodes(KYB_COUNTRY_CODES)}
+            options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES)}
             disabled={isLoading || isCompleted}
             onChange={(event) => {
               formik.setValues({
