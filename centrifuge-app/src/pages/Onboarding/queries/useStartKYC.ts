@@ -12,7 +12,7 @@ type Indentity = {
 
 export const useStartKYC = () => {
   const { authToken } = useOnboardingAuth()
-  const { pool, onboardingUser, refetchOnboardingUser } = useOnboarding()
+  const { onboardingUser, refetchOnboardingUser } = useOnboarding()
 
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
