@@ -6,7 +6,7 @@ The Onboarding API can be used to onboard as an entity or as an individual.
 
 `globalSteps` are steps that only have to be completed once and can be reused for many pools. It includes the steps necessary to verify the identity of the investor. Entities must complete 2 additional steps.
 
-`poolSteps` are the steps an investor must complete for every pool they wish to invest in. The steps are considered complete when the issuer approves the investors to be whitelisted. The approval will trigger a transaction to give the investor MemberListAdmin permission for the given pool (not available for Tinlake pools yet)
+`poolSteps` are the steps an investor must complete for every pool they wish to invest in. The steps are considered complete when the issuer approves the investors to be whitelisted. The approval will trigger a transaction to give the investor `TrancheInvestor` permission for the given pool (not available for Tinlake pools yet)
 
 ### Onboarding For Individuals
 
