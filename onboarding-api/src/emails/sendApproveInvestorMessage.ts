@@ -32,8 +32,8 @@ export const sendApproveInvestorMessage = async (
     },
     attachments: [
       {
-        ccontent: Buffer.from(countersignedAgreementPDF).toString('base64'),
-        filename: `${metadata.pool.name?.replaceAll(' ', '-')}-subscription-agreement.pdf`,
+        content: Buffer.from(countersignedAgreementPDF).toString('base64'),
+        filename: `${trancheName?.replaceAll(' ', '-')}-subscription-agreement.pdf`,
         type: 'application/pdf',
         disposition: 'attachment',
       },

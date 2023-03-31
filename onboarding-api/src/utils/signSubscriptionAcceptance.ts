@@ -50,17 +50,17 @@ export const signSubscriptionAcceptance = async ({ poolId, trancheId, walletAddr
 
   const { metadata, pool } = await getPoolById(poolId)
 
-  const issuerName = metadata?.pool.name
-  const issuerRepName = metadata?.pool.repName
-  const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name
+  const issuerRepName = metadata?.pool.issuer.repName
+
+  const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name as string
 
   const timesNewRoman = await countersignedAgreement.embedFont(StandardFonts.TimesRoman)
 
   const { width } = lastPage.getSize()
 
-  lastPage.drawText(`${issuerName} ${trancheName}`, {
+  lastPage.drawText(trancheName, {
     font: timesNewRoman,
-    x: width - 75 - timesNewRoman.widthOfTextAtSize(`${issuerName} ${trancheName}`, 12),
+    x: width - 75 - timesNewRoman.widthOfTextAtSize(trancheName, 12),
     y: 702,
     size: 12,
   })

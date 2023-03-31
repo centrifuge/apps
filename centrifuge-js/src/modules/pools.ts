@@ -2307,6 +2307,7 @@ export function getPoolsModule(inst: Centrifuge) {
     repayLoanPartially,
     repayAndCloseLoan,
     closeLoan,
+    getPool,
     getPools,
     getBalances,
     getOrder,

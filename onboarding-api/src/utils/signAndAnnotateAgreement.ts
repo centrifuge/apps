@@ -19,9 +19,8 @@ export const signAndAnnotateAgreement = async ({
   name,
   email,
 }: SignatureInfo) => {
-  const { metadata } = await getPoolById(poolId)
-
-  const issuerName = metadata?.pool.name
+  const { pool } = await getPoolById(poolId)
+  const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name as string
 
   const signedAgreement = await PDFDocument.create()
 
@@ -79,7 +78,7 @@ Extrinsic Hash: ${transactionInfo.extrinsicHash}`,
     size: 12,
   })
 
-  lastPage.drawText(issuerName, {
+  lastPage.drawText(trancheName, {
     x: 107,
     y: 471,
     size: 12,

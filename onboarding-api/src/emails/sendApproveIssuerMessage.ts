@@ -19,7 +19,6 @@ export const sendApproveIssuerMessage = async (
           },
         ],
         dynamic_template_data: {
-          poolName: metadata?.pool.name,
           tokenName: trancheName,
         },
       },
@@ -31,11 +30,8 @@ export const sendApproveIssuerMessage = async (
     },
     attachments: [
       {
-        ccontent: Buffer.from(countersignedAgreementPDF).toString('base64'),
-        filename: `${walletAddress}-${metadata.pool.name?.replaceAll(' ', '-')}-${trancheName?.replaceAll(
-          ' ',
-          '-'
-        )}-subscription-agreement.pdf`,
+        content: Buffer.from(countersignedAgreementPDF).toString('base64'),
+        filename: `${walletAddress}-${trancheName?.replaceAll(' ', '-')}-subscription-agreement.pdf`,
         type: 'application/pdf',
         disposition: 'attachment',
       },
