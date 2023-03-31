@@ -27,7 +27,7 @@ export const sendApproveIssuerMessage = async (
     template_id: templateIds.investorApprovedIssuer,
     from: {
       name: 'Centrifuge',
-      email: `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,
+      email: `noreply@centrifuge.io`,
     },
     attachments: [
       {
