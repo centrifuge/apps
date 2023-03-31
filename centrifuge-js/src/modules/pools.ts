@@ -396,6 +396,7 @@ export interface PoolMetadataInput {
 
   // issuer
   issuerName: string
+  issuerRepName: string
   issuerLogo?: { uri: string; mime: string } | null
   issuerDescription: string
 
@@ -421,6 +422,7 @@ export type PoolMetadata = {
       class: string
     }
     issuer: {
+      repName: string
       name: string
       description: string
       email: string

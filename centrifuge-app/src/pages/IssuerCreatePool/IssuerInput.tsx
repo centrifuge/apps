@@ -26,6 +26,17 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
+          validate={validate.issuerRepName}
+          name="issuerRepName"
+          as={TextInput}
+          label={<Tooltips type="issuerRepName" label="Name of issuer representative*" variant="secondary" />}
+          placeholder="Full name..."
+          maxLength={100}
+          disabled={waitingForStoredIssuer}
+        />
+      </Box>
+      <Box gridColumn={['span 1', 'span 2']}>
+        <FieldWithErrorMessage
           validate={validate.issuerDescription}
           name="issuerDescription"
           as={TextAreaInput}
