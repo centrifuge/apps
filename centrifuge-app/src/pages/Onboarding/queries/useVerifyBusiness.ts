@@ -12,7 +12,7 @@ type BusinessInformation = {
 
 export const useVerifyBusiness = () => {
   const { authToken } = useOnboardingAuth()
-  const { refetchOnboardingUser, pool, nextStep } = useOnboarding()
+  const { refetchOnboardingUser, nextStep } = useOnboarding()
 
   const mutation = useMutation(
     async (values: BusinessInformation) => {
@@ -26,8 +26,7 @@ export const useVerifyBusiness = () => {
             values.jurisdictionCode === 'us' || values.jurisdictionCode === 'ca'
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
-          ...(pool && { poolId: pool.id, trancheId: pool.trancheId }),
-          dryRun: true,
+          dryRun: true, // TODO: set this as debug flag option
         }),
         headers: {
           Authorization: `Bearer ${authToken}`,

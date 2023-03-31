@@ -1,5 +1,34 @@
 # Centrifuge Onboarding API V2
 
+Onboard to centrifuge app as an entity or individual to invest in pools. KYB/KYC managed externally by [ShuftiPro](https://shuftipro.com/).
+
+The Onboarding API can be used to onboard as an entity or as an individual.
+
+`globalSteps` are steps that only have to be completed once and can be reused for many pools. It includes the steps necessary to verify the identity of the investor. Entities must complete 2 additional steps.
+
+`poolSteps` are the steps an investor must complete for every pool they wish to invest in. The steps are considered complete when the issuer approves the investors to be whitelisted. The approval will trigger a transaction to give the investor `TrancheInvestor` permission for the given pool (not available for Tinlake pools yet)
+
+### Onboarding For Individuals
+
+Individual onboarding must complete the following **global steps**:
+
+1. verify their identity through ShuftiPros KYC check (`/startKyc` and `/setVerifiedIdentity`)
+2. if they are a US based investor they must verify that they are accredited (`/verifyAccreditation`)
+3. provide tax information (`/uploadTaxInfo`)
+4. verify their email (`/verifyEmail`)
+
+And the following **pool/tranche steps**:
+
+1. sign the agreement between the issuer and the potential investor (`/signAndSendDocuments`)
+2. wait for approval from issuer (`/updateInvestorStatus`)
+
+### Onboarding For Entities
+
+Entities onboarding must complete then same steps as an individual and a few additional steps
+
+1. verify business information for KYB and AML checks (`/verifyBusiness`)
+2. confirm the ultimate beneficial owners of the business (`/confirmOwners`)
+
 ## Development
 
 1. Install dependencies `yarn install`
@@ -13,6 +42,8 @@
 5. Start dev server with `yarn develop` [localhost:8080]
 
 ## API
+
+[Postman documentation](https://restless-shadow-832962.postman.co/workspace/Centrifuge-Onboarding~e1f28c05-747e-4f73-9b33-605bb79ce238/collection/3605507-54b6d640-8c74-4879-8393-1761ae56d705?action=share&creator=3605507)
 
 Every endpoint expects a jwt signed bearer token to be passed in the headers.
 
@@ -49,8 +80,6 @@ KYB and AML verification. Creates the entity user.
     businessName: string
     registrationNumber: string
     jurisdictionCode: string // e.g us_az
-    trancheId: string
-    poolId: string
     dryRun?: boolean // mock KYB and AML
 }
 ```
@@ -132,8 +161,6 @@ Sets the ultimate beneficial owners for the entity.
   name: string,
   dateOfBirth: string,
   countryOfCitizenship: string
-  poolId?: string // pass poolId only for KYC step 1
-	trancheId?: string // pass trancheId only for KYC step 1
 }
 ```
 
