@@ -284,6 +284,7 @@ export type CreatedLoan = {
   id: string
   poolId: string
   pricing: PricingInfo
+  borrower: string
   asset: {
     collectionId: string
     nftId: string
@@ -300,6 +301,7 @@ export type ActiveLoan = {
   id: string
   poolId: string
   pricing: PricingInfo
+  borrower: string
   asset: {
     collectionId: string
     nftId: string
