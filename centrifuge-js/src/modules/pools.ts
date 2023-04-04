@@ -20,7 +20,6 @@ import { Dec } from '../utils/Decimal'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
-const RateBN = new BN(10).pow(new BN(27))
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
 
