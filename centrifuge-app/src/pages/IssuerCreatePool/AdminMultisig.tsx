@@ -81,8 +81,8 @@ export function AdminMultisigSection({ deposit }: { deposit: Decimal }) {
                   label="Threshold"
                   type="number"
                   min="1"
-                  max={adminMultisig.signers.length}
-                  validate={combine(integer(), positiveNumber(), max(adminMultisig.signers.length))}
+                  max={adminMultisig.signers.length + 1}
+                  validate={combine(integer(), positiveNumber(), max(adminMultisig.signers.length + 1))}
                 />
               </Stack>
             </>

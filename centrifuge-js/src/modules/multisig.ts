@@ -43,6 +43,7 @@ function computeMultisigInfo(
           }
         }
       } else {
+        console.log('c', c)
         const foundHash = (c.args?.call_hash as Uint8Array).toString()
         if (foundHash === hash) {
           result = {
@@ -65,7 +66,7 @@ function computeMultisigInfo(
   }
 
   getCallResult(c)
-
+  console.log('callResult ', result, c)
   if (!result) return null
 
   const { name, callData } = result
@@ -139,18 +140,23 @@ export function getMultisigModule(inst: CentrifugeBase) {
           hash: (key.toHuman() as Array<string>)[1],
           info: data.toJSON() as unknown as PendingMultisigInfo,
         }))
+        console.log('pending', pending)
         return combineLatest([of(null), ...pending.map((p) => inst.getBlockByBlockNumber(p.info.when.height))]).pipe(
           map(([, ...signedBlocks]) => {
+            console.log('signedBlocks', signedBlocks)
             return signedBlocks
               .map((signedBlock, i) => {
                 const { info, hash } = pending[i]
                 const ext = signedBlock.block.extrinsics[info.when.index]
                 const decoded = parseGenericCall(ext.method as GenericCall, ext.registry)
-                return computeMultisigInfo(decoded, hash, ext.registry, {
+                console.log('decoded', decoded)
+                const inf = computeMultisigInfo(decoded, hash, ext.registry, {
                   ...info,
                   approvals: info.approvals.map((addr) => addressToHex(addr)),
                   depositor: addressToHex(info.depositor),
                 })
+                console.log('inf', inf)
+                return inf
               })
               .filter(Boolean) as PendingMultisigData[]
           })

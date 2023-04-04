@@ -7,7 +7,7 @@ import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationT
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { useAddress } from '../../utils/useAddress'
-import { useIsPoolAdmin, usePermissions } from '../../utils/usePermissions'
+import { usePermissions, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -24,18 +24,20 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
 
   const address = useAddress('substrate')
   const permissions = usePermissions(address)
-  const isPoolAdmin = useIsPoolAdmin(pid)
+
+  // const hasSomeAdminRole = useSuitableAccounts({
+  //   poolId: pid,
+  //   poolRole: ['PoolAdmin', 'LoanAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'Borrower'],
+  // }).length > 0
+
+  const [poolAdmin] = useSuitableAccounts({ poolId: pid, poolRole: ['PoolAdmin'] })
+
   const { execute: executeInitialise, isLoading: isInitialiseLoading } = useCentrifugeTransaction(
     'Initialise pool',
     (cent) => cent.pools.initialisePool
   )
 
   if (!pool || !permissions) return null
-
-  const configurePermission = permissions.pools[pid]?.roles.includes('PoolAdmin')
-
-  const investPermission =
-    permissions.pools[pid]?.roles.includes('PoolAdmin') || permissions.pools[pid]?.roles.includes('MemberListAdmin')
 
   async function initialisePool() {
     const id = await cent.nfts.getAvailableCollectionId()
@@ -76,7 +78,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
           !pool.isInitialised ? (
             <>
               <Text variant="body2">Pool is not yet initialised</Text>
-              {isPoolAdmin && (
+              {poolAdmin && (
                 <Button small onClick={initialisePool} loading={isInitialiseLoading}>
                   Initialise Pool
                 </Button>
@@ -98,10 +100,8 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
             <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
-            {investPermission && <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>}
-            {configurePermission && (
-              <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
-            )}
+            <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/access`}>Access</NavigationTabsItem>
           </NavigationTabs>
         </Shelf>

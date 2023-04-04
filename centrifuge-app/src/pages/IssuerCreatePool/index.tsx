@@ -1,6 +1,12 @@
 import { CurrencyBalance, isSameAddress, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { useBalances, useCentrifuge, useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  useBalances,
+  useCentrifuge,
+  useCentrifugeConsts,
+  useCentrifugeTransaction,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -133,6 +139,9 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
 
 function CreatePoolForm() {
   const address = useAddress('substrate')
+  const {
+    substrate: { addMultisig },
+  } = useWallet()
   const centrifuge = useCentrifuge()
   const currencies = usePoolCurrencies()
   const { chainDecimals } = useCentrifugeConsts()
@@ -178,21 +187,20 @@ function CreatePoolForm() {
         args: [
           collateralCollectionId: string,
           transferToMultisig: BN,
-          aoProxy: string,
           admin: string,
           poolId: string,
           collectionId: string,
           tranches: TrancheInput[],
           currency: CurrencyKey,
           maxReserve: BN,
-          metadata: PoolMetadataInput
+          metadata: PoolMetadataInput,
+          aoProxy: string
         ],
         options
       ) => {
-        const [collateralCollectionId, transferToMultisig, aoProxy, admin] = args
-        const { adminMultisig } = args[9]
+        const [collateralCollectionId, transferToMultisig, admin, , , , , , { adminMultisig }, aoProxy] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
-        const poolArgs = args.slice(3) as any
+        const poolArgs = args.slice(2) as any
         return combineLatest([cent.getApi(), cent.pools.createPool(poolArgs, { batch: true })]).pipe(
           switchMap(([api, poolSubmittable]) => {
             const manager = multisigAddr ?? address
@@ -232,16 +240,18 @@ function CreatePoolForm() {
                   ])
                 ),
                 multisigAddr
-                  ? api.tx.multisig.approveAsMulti(
-                      adminMultisig.threshold,
-                      otherMultisigSigners,
-                      null,
-                      proxiedPoolCreate.method.hash,
-                      paymentInfo!.weight
-                    )
+                  ? // ? api.tx.multisig.approveAsMulti(
+                    //     adminMultisig.threshold,
+                    //     otherMultisigSigners,
+                    //     null,
+                    //     proxiedPoolCreate.method.hash,
+                    //     paymentInfo!.weight
+                    //   )
+                    api.tx.multisig.asMulti(adminMultisig.threshold, otherMultisigSigners, null, proxiedPoolCreate, 0)
                   : proxiedPoolCreate,
               ].filter(Boolean)
             )
+            console.log('proxiedPoolCreate', proxiedPoolCreate)
             return cent.wrapSignAndSend(api, submittable, options)
           })
         )
@@ -375,6 +385,10 @@ function CreatePoolForm() {
       ]
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
+
+      if (metadataValues.adminMultisig) {
+        addMultisig(metadataValues.adminMultisig)
+      }
 
       createProxies([
         (aoProxy, adminProxy) => {

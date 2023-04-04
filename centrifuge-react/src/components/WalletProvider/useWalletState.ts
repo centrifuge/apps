@@ -25,16 +25,6 @@ const initialState: State = {
     selectedWallet: null,
     multisigAddress: null,
     multisigs: getPersistedMultisigs().map(computeMultisig),
-    //   .concat
-    // [
-    //   {
-    //     signers: [
-    //       '5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy',
-    //       '5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y',
-    //     ],
-    //     threshold: 2,
-    //   },
-    // ].map(computeMultisig)
   },
 }
 export type Action =
@@ -104,10 +94,13 @@ function reducer(state: State, action: Action): State {
         },
       }
     case 'substrateAddMultisig': {
+      console.log('ubstrateAddMultisig')
       if (!action.payload.signers.every((addr) => isAddress(addr))) return state
 
       const newMulti = computeMultisig(action.payload)
+      console.log('new multi', newMulti, action)
       if (state.substrate.multisigs.find((m) => m.address === newMulti.address)) return state
+      console.log('aaddd the multi', newMulti, action)
       return {
         ...state,
         substrate: {
@@ -214,6 +207,21 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
     }
     persistMultisigs(state.substrate.multisigs)
   }, [state])
+
+  // React.useEffect(() => {
+  //   Promise.resolve().then(() =>
+  //     dispatch({
+  //       type: 'substrateAddMultisig',
+  //       payload: {
+  //         signers: [
+  //           'kAKbmHS8q5ceJHQgfAGwYtuhTTNxEAra5WRtsPnai1jSeNoUD',
+  //           'kAJy3k3GUNt14LfK8Uht37kN1LUehTnoQHGMt98i6Erf4xzSD',
+  //         ],
+  //         threshold: 2,
+  //       },
+  //     })
+  //   )
+  // }, [])
 
   return [state, dispatch] as const
 }

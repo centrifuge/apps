@@ -365,6 +365,7 @@ export function WalletProvider({
     if (ctx.substrate.selectedAddress && !ctx.substrate.selectedCombinedAccount && nestedProxies) {
       ctx.substrate.selectAccount(ctx.substrate.selectedAddress)
     }
+    console.log('ctx.substrate.combinedAccounts', ctx.substrate.combinedAccounts, state, ctx)
   }, [ctx])
 
   return (

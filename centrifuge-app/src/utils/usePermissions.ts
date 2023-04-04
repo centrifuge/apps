@@ -46,11 +46,8 @@ export function useCanBorrowAsset(poolId: string, assetId: string) {
   return !!canBorrow
 }
 
-export function useIsPoolAdmin(poolId: string) {
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
-
-  return !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin'))
+export function useCanActAsPoolAdmin(poolId: string) {
+  return useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] }).length > 0
 }
 
 export function useLiquidityAdmin(poolId: string) {
@@ -60,16 +57,49 @@ export function useLiquidityAdmin(poolId: string) {
   return !!(address && permissions?.pools[poolId]?.roles.includes('LiquidityAdmin'))
 }
 
-export function useSuitableAccountForTx({
+export function useSuitableAccounts({
   actingAddress,
-  poolRoles,
+  poolId,
+  poolRole,
+  proxyType,
 }: {
-  actingAddress?: string
-  poolRoles?: PoolRoles['roles'][0] | { TrancheInvestor: string }
+  actingAddress?: string[]
+  poolId?: string
+  poolRole?: (PoolRoles['roles'][0] | { TrancheInvestor: string })[]
+  proxyType?: string[] | ((accountProxyTypes: string[]) => boolean)
 }) {
   const {
-    substrate: { selectAccount, combinedAccounts },
+    substrate: { selectedAccount, combinedAccounts },
   } = useWallet()
+  const permissions = usePoolPermissions(poolId)
+  const accounts = (combinedAccounts ?? [])?.filter((acc) => {
+    if (acc.signingAccount.address !== selectedAccount?.address) return false
+    if (actingAddress && !actingAddress.includes(acc.actingAddress)) return false
+    if (
+      acc.proxies &&
+      !acc.proxies.every(
+        (p) =>
+          p.types.includes('Any') ||
+          (proxyType &&
+            (typeof proxyType === 'function' ? proxyType(p.types) : p.types.some((t) => proxyType.includes(t))))
+      )
+    )
+      return false
+
+    if (
+      poolRole &&
+      !poolRole.some((role) =>
+        typeof role === 'string'
+          ? permissions?.[acc.actingAddress]?.roles.includes(role)
+          : !!permissions?.[acc.actingAddress]?.tranches[role.TrancheInvestor]
+      )
+    )
+      return false
+
+    return true
+  })
+
+  return accounts
 }
 
 export function usePoolAccess(poolId: string) {

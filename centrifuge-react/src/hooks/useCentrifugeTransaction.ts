@@ -1,6 +1,5 @@
 import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { ISubmittableResult } from '@polkadot/types/types'
-import { WalletAccount } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -17,15 +16,22 @@ export function useCentrifugeTransaction<T extends Array<any>>(
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
   const { showWallets, substrate, walletDialog } = useWallet()
-  const { selectedAccount, selectedProxies, selectedMultisig } = substrate
+  const { selectedCombinedAccount } = substrate
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
   const pendingTransaction = React.useRef<{ id: string; args: T; options?: TxOptions }>()
 
-  async function doTransaction(selectedAccount: WalletAccount, id: string, args: T, txOptions?: TxOptions) {
+  async function doTransaction(
+    selectedCombinedAccount: CombinedSubstrateAccount,
+    id: string,
+    args: T,
+    txOptions?: TxOptions
+  ) {
+    const account = txOptions?.account || selectedCombinedAccount
+    console.log('account', account)
     try {
-      const connectedCent = cent.connect(selectedAccount?.address, selectedAccount?.signer as any)
+      const connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
       const api = await cent.getApiPromise()
 
       const transaction = transactionCallback(connectedCent)
@@ -35,8 +41,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       let txError: any = null
       const lastResult = await lastValueFrom(
         transaction(args, {
-          multisig: selectedMultisig || undefined,
-          proxy: selectedProxies?.map((p) => p.delegator),
+          multisig: account.multisig,
+          proxy: account.proxies?.map((p) => p.delegator),
           ...txOptions,
           onStatusChange: (result) => {
             const errors = result.events.filter(({ event }) => {
@@ -113,11 +119,11 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     addOrUpdateTransaction(tx)
     setLastId(id)
 
-    if (!selectedAccount) {
+    if (!selectedCombinedAccount) {
       pendingTransaction.current = { id, args, options }
       showWallets('centrifuge')
     } else {
-      doTransaction(selectedAccount, id, args, options)
+      doTransaction(selectedCombinedAccount, id, args, options)
     }
     return id
   }
@@ -129,8 +135,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       if (walletDialog.view !== null) return
       pendingTransaction.current = undefined
 
-      if (selectedAccount) {
-        doTransaction(selectedAccount, id, args, options)
+      if (selectedCombinedAccount) {
+        doTransaction(selectedCombinedAccount, id, args, options)
       } else {
         updateTransaction(id, { status: 'failed', failedReason: 'No account connected' })
       }

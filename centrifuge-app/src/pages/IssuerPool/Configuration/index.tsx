@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useIsPoolAdmin } from '../../../utils/usePermissions'
+import { useCanActAsPoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { Admins } from './Admins'
 import { Details } from './Details'
@@ -27,12 +27,11 @@ export const IssuerPoolConfigurationPage: React.FC = () => {
 
 const IssuerPoolConfiguration: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isPoolAdmin = useIsPoolAdmin(poolId)
   const { editPoolConfig } = useDebugFlags()
 
   return (
     <Stack>
-      {isPoolAdmin && (
+      {useCanActAsPoolAdmin(poolId) && (
         <>
           <Details />
           <Issuer />

@@ -10,7 +10,7 @@ import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { Tooltips } from '../../../components/Tooltips'
-import { usePoolPermissions } from '../../../utils/usePermissions'
+import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { AddAddressInput } from './AddAddressInput'
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
@@ -30,6 +30,9 @@ export const Admins: React.FC = () => {
   const [isEditing, setIsEditing] = React.useState(false)
   const { selectedAccount } = useWallet().substrate
   const me = selectedAccount?.address && encodeAddress(selectedAccount?.address)
+
+  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
+  console.log('suitableAccounts', suitableAccounts)
 
   const initialValues: PoolMetadataInput = React.useMemo(
     () => ({
@@ -59,7 +62,7 @@ export const Admins: React.FC = () => {
         setIsEditing(false)
         return
       }
-      execute([poolId, add, remove])
+      execute([poolId, add, remove], { account: suitableAccounts[0] })
     },
   })
 

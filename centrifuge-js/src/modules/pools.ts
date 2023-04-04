@@ -12,7 +12,7 @@ import {
   SubqueryEpoch,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
-  SubqueryTrancheSnapshot,
+  SubqueryTrancheSnapshot
 } from '../types/subquery'
 import { addressToHex, getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
@@ -453,14 +453,6 @@ export type PoolMetadata = {
     id: string
     createdAt: string
   }[]
-  riskGroups: {
-    name: string | undefined
-    advanceRate: string
-    interestRatePerSec: string
-    probabilityOfDefault: string
-    lossGivenDefault: string
-    discountRate: string
-  }[]
   adminMultisig?: {
     signers: string[]
     threshold: number
@@ -524,11 +516,13 @@ export function getPoolsModule(inst: Centrifuge) {
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
-      metadata: PoolMetadataInput
+      metadata: PoolMetadataInput,
+      assetOriginator?: string,
+      collateralCollectionId?: string
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
+    const [admin, poolId, , tranches, currency, maxReserve, metadata, assetOriginator, collateralCollectionId] = args
 
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
@@ -554,48 +548,68 @@ export function getPoolsModule(inst: Centrifuge) {
             return pinPoolMetadata(metadata, poolId, currencyMeta.decimals, options)
           }),
           switchMap((pinnedMetadata) => {
-            let submittable
+            let tx
+            const poolTx = api.tx.poolRegistry.register(
+              admin,
+              poolId,
+              trancheInput,
+              currency,
+              maxReserve.toString(),
+              pinnedMetadata.ipfsHash
+            )
             if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-              submittable = api.tx.poolRegistry.register(
-                admin,
-                poolId,
-                trancheInput,
-                currency,
-                maxReserve.toString(),
-                pinnedMetadata.ipfsHash
-              )
+              tx = poolTx
             } else {
-              submittable = api.tx.utility.batchAll([
-                api.tx.poolRegistry.register(
-                  admin,
-                  poolId,
-                  trancheInput,
-                  currency,
-                  maxReserve.toString(),
-                  pinnedMetadata.ipfsHash
-                ),
-                api.tx.permissions.add(
-                  { PoolRole: 'PoolAdmin' },
-                  admin,
-                  { Pool: poolId },
-                  {
-                    PoolRole: 'LoanAdmin',
-                  }
-                ),
-              ])
+              tx = api.tx.utility.batchAll(
+                [
+                  poolTx,
+                  (metadata.adminMultisig ? metadata.adminMultisig.signers : [admin]).map((addr) =>
+                    ['MemberListAdmin', 'LiquidityAdmin'].map((role) =>
+                      api.tx.permissions.add(
+                        { PoolRole: 'PoolAdmin' },
+                        addr,
+                        { Pool: poolId },
+                        {
+                          PoolRole: role,
+                        }
+                      )
+                    )
+                  ),
+                  [
+                    'Borrower',
+                    'LoanAdmin',
+                    {
+                      TrancheInvestor: [
+                        Object.keys(metadata.tranches)[0],
+                        Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60),
+                      ],
+                    },
+                  ].map((role) =>
+                    api.tx.permissions.add(
+                      { PoolRole: 'PoolAdmin' },
+                      assetOriginator || admin,
+                      { Pool: poolId },
+                      {
+                        PoolRole: role,
+                      }
+                    )
+                  ),
+                  collateralCollectionId && api.tx.uniques.create(collateralCollectionId, assetOriginator || admin)
+                ].flat().filter(Boolean)
+              )
             }
             if (options?.createType === 'propose') {
-              const proposalSubmittable = api.tx.utility.batchAll([
-                api.tx.preimage.notePreimage(submittable.method.toHex()),
-                api.tx.democracy.propose({ Inline: submittable.method.hash }, api.consts.democracy.minimumDeposit),
+              const proposalTx = api.tx.utility.batchAll([
+                api.tx.preimage.notePreimage(tx.method.toHex()),
+                api.tx.democracy.propose({ Inline: tx.method.hash }, api.consts.democracy.minimumDeposit),
               ])
-              return inst.wrapSignAndSend(api, proposalSubmittable, options)
+              return inst.wrapSignAndSend(api, proposalTx, options)
             }
             if (options?.createType === 'notePreimage') {
-              const preimageSubmittable = api.tx.preimage.notePreimage(submittable.method.toHex())
-              return inst.wrapSignAndSend(api, preimageSubmittable, options)
+              const preimageTx = api.tx.preimage.notePreimage(tx.method.toHex())
+              return inst.wrapSignAndSend(api, preimageTx, options)
             }
-            return inst.wrapSignAndSend(api, submittable, options)
+            return inst.wrapSignAndSend(api, tx, options)
           })
         )
       )
@@ -603,25 +617,49 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function initialisePool(
-    args: [admin: string, poolId: string, collateralCollectionId?: string],
+    args: [admin: string, poolId: string, metadata: Pick<PoolMetadata, 'adminMultisig'|'tranches'>, assetOriginator?: string, collateralCollectionId?: string, ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collateralCollectionId] = args
+    const [admin, poolId,metadata, assetOriginator,
+      collateralCollectionId,
+      ] = args
 
     return inst.getApi().pipe(
       switchMap((api) => {
-        const submittable = api.tx.utility.batchAll(
-          [
-            collateralCollectionId && api.tx.uniques.create(collateralCollectionId, admin),
+        const submittable = api.tx.utility.batchAll([
+          (metadata.adminMultisig ? metadata.adminMultisig.signers : [admin]).map((addr) =>
+          ['MemberListAdmin', 'LiquidityAdmin'].map((role) =>
             api.tx.permissions.add(
               { PoolRole: 'PoolAdmin' },
-              admin,
+              addr,
               { Pool: poolId },
               {
-                PoolRole: 'LoanAdmin',
+                PoolRole: role,
               }
-            ),
-          ].filter(Boolean)
+            )
+          )
+        ),
+        [
+          'Borrower',
+          'LoanAdmin',
+          {
+            TrancheInvestor: [
+              Object.keys(metadata.tranches)[0],
+              Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60),
+            ],
+          },
+        ].map((role) =>
+          api.tx.permissions.add(
+            { PoolRole: 'PoolAdmin' },
+            assetOriginator || admin,
+            { Pool: poolId },
+            {
+              PoolRole: role,
+            }
+          )
+        ),
+        collateralCollectionId && api.tx.uniques.create(collateralCollectionId, assetOriginator || admin)
+      ].flat().filter(Boolean).filter(Boolean)
         )
         return inst.wrapSignAndSend(api, submittable, options)
       })
@@ -1817,9 +1855,14 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.ormlTokens.accounts.entries(address),
           api.query.system.account(address),
           getCurrencies(),
+          // (api.rpc as any).rewards.computeReward(
+          //   ['Liquidity', { Tranche: ['872535177', '0x58c4a52c1f0d239f1ff53f7f13875b3d'] }],
+          //   address
+          // ),
         ]).pipe(
           take(1),
           map(([rawBalances, nativeBalance, currencies]) => {
+            // console.log('reward', reward)
             const balances = {
               tranches: [] as AccountTokenBalance[],
               currencies: [] as AccountCurrencyBalance[],

@@ -2,7 +2,7 @@ import type { JsonRpcSigner } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
-import { ISubmittableResult, Signer } from '@polkadot/types/types'
+import { DefinitionRpc, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
@@ -87,9 +87,23 @@ const parachainTypes = {
     leafHash: 'Hash',
     sortedHashes: 'Vec<Hash>',
   },
+  PoolId: 'u64',
+  TrancheId: '[u8; 16]',
+  RewardDomain: {
+    _enum: ['Block', 'Liquidity'],
+  },
+  CurrencyId: {
+    _enum: {
+      Native: 'Native',
+      Tranche: '(PoolId, TrancheId)',
+      KSM: 'KSM',
+      AUSD: 'AUSD',
+      ForeignAsset: 'u32',
+    },
+  },
 }
 
-const parachainRpcMethods = {
+const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
   pools: {
     trancheTokenPrices: {
       description: 'Retrieve prices for all tranches',
@@ -100,6 +114,32 @@ const parachainRpcMethods = {
         },
       ],
       type: 'Vec<u128>',
+    },
+  },
+  rewards: {
+    listCurrencies: {
+      description: 'List reward currencies',
+      params: [
+        {
+          name: 'account_id',
+          type: 'AccountId',
+        },
+      ],
+      type: 'u128',
+    },
+    computeReward: {
+      description: 'Compute reward',
+      params: [
+        {
+          name: 'currency_id',
+          type: '(RewardDomain,CurrencyId)',
+        },
+        {
+          name: 'account_id',
+          type: 'AccountId',
+        },
+      ],
+      type: 'u128',
     },
   },
 }
@@ -144,6 +184,7 @@ export class CentrifugeBase {
       const otherSigners = sortAddresses(
         options.multisig.signers.filter((signer) => !isSameAddress(signer, this.getSignerAddress()))
       )
+      console.log('multisig callData', actualSubmittable.method.toHex())
       actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
     }
 

@@ -76,6 +76,7 @@ function ConnectedMenu() {
     }
   )
   const [multisigDialogOpen, setMultisigDialogOpen] = React.useState(false)
+  console.log('pendingMultisigs', pendingMultisigs, ctx.substrate.selectedCombinedAccount)
 
   return (
     <Popover
