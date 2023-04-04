@@ -2021,7 +2021,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 ? new Rate(hexToBN(discount.probabilityOfDefault))
                 : undefined,
               lossGivenDefault: discount?.lossGivenDefault ? new Rate(hexToBN(discount.lossGivenDefault)) : undefined,
-              discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate).sub(RateBN)) : undefined,
+              discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
 
               interestRate: new Rate(hexToBN(loan.info.interestRate)),
             },
