@@ -38,7 +38,7 @@ import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
 import { usePod } from '../../../utils/usePod'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { combine, maxLength, positiveNumber, required } from '../../../utils/validation'
+import { combine, max, maxLength, min, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
 import { PricingInput } from './PricingInput'
 
@@ -54,7 +54,6 @@ export type CreateLoanFormValues = {
   image: File | null
   description: string
   assetName: string
-  templateId: string
   attributes: Record<string, string | number>
   pricing: {
     valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
@@ -91,7 +90,11 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
       )
     case 'currency': {
       return (
-        <Field name={name} validate={combine(required(), positiveNumber())} key={label}>
+        <Field
+          name={name}
+          validate={combine(required(), positiveNumber(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
+          key={label}
+        >
           {({ field, meta, form }: FieldProps) => {
             return (
               <CurrencyInput
@@ -117,7 +120,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
           as={NumberInput}
           label={`${label}*`}
           placeholder={input.placeholder}
-          validate={required()}
+          validate={combine(required(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
           rightElement={input.unit}
           min={input.min}
           max={input.max}
@@ -196,7 +199,6 @@ function IssuerCreateLoan() {
       image: null,
       description: '',
       assetName: '',
-      templateId: '',
       attributes: {},
       pricing: {
         valuationMethod: 'outstandingDebt',
@@ -211,7 +213,7 @@ function IssuerCreateLoan() {
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken) return
+      if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken || !selectedTemplateMetadata) return
       const { decimals } = pool.currency
       const pricingInfo = {
         valuationMethod: values.pricing.valuationMethod,
@@ -236,7 +238,7 @@ function IssuerCreateLoan() {
       addTransaction(tx)
 
       const attributes = valuesToPodAttributes(values.attributes, selectedTemplateMetadata) as any
-      attributes._template = { type: 'string', value: form.values.templateId }
+      attributes._template = { type: 'string', value: selectedTemplate!.value }
 
       let imageMetadataHash
       if (values.image) {
@@ -306,11 +308,13 @@ function IssuerCreateLoan() {
   const templateMetadata = useMetadataMulti(templateIds)
 
   const templateSelectOptions = templateIds.map((id, i) => ({
-    label: truncateText((templateMetadata[i].data as LoanTemplate)?.name ?? `Template ${i + 1}`, 30),
+    label: truncateText((templateMetadata[i].data as LoanTemplate)?.name ?? `Version ${i + 1}`, 30),
     value: id,
   }))
 
-  const selectedTemplateMetadata = templateMetadata[templateIds.findIndex((id) => id === form.values.templateId)]
+  const selectedTemplate = templateSelectOptions.at(-1)
+
+  const selectedTemplateMetadata = templateMetadata[templateIds.findIndex((id) => id === selectedTemplate?.value)]
     ?.data as LoanTemplate
 
   const formRef = React.useRef<HTMLFormElement>(null)
@@ -335,7 +339,7 @@ function IssuerCreateLoan() {
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isPending} disabled={!form.values.templateId}>
+                  <Button type="submit" loading={isPending} disabled={!selectedTemplateMetadata}>
                     Create
                   </Button>
                 </>
@@ -354,22 +358,13 @@ function IssuerCreateLoan() {
                     placeholder=""
                     maxLength={100}
                   />
-                  <Field name="templateId" validate={required()}>
-                    {({ field, form, meta }: any) => (
-                      <Select
-                        name="templateId"
-                        placeholder="Select template"
-                        label="Asset template"
-                        options={templateSelectOptions}
-                        value={field.value}
-                        onChange={(event) => {
-                          form.setFieldValue('templateId', event.target.value)
-                        }}
-                        errorMessage={meta.touched ? meta.error : undefined}
-                        disabled={isPending}
-                      />
-                    )}
-                  </Field>
+                  <TextInput
+                    value={selectedTemplate?.label}
+                    name="templateId"
+                    label="Asset template"
+                    placeholder=""
+                    disabled
+                  />
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">
