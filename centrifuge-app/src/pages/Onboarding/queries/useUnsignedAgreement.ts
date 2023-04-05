@@ -9,7 +9,7 @@ export const useUnsignedAgreement = () => {
   const poolId = pool?.id as string
   const trancheId = pool?.trancheId as string
 
-  const hasSignedAgreement = !!onboardingUser?.poolSteps[poolId]?.[trancheId].signAgreement.completed
+  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
 
   const query = useQuery(
     ['unsigned-subscription-agreement', poolId, trancheId],

@@ -24,8 +24,8 @@ export const useUpdateInvestorStatus = () => {
         }
       )
 
-      if (response.status === 204) {
-        return response
+      if (response.status === 200) {
+        return response.json()
       }
       throw response.statusText
     },
