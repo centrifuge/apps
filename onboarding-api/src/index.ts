@@ -8,6 +8,7 @@ import { verifyTokenController } from './controllers/auth/verifyToken'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { signAndSendDocumentsController } from './controllers/emails/signAndSendDocuments'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
+import { KYBCallbackController } from './controllers/kyb/callback'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { startKYBController } from './controllers/kyb/startKYB'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
@@ -46,6 +47,8 @@ onboarding.post('/startKyc', verifyAuth, startKycController)
 onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
 
 onboarding.post('/startKyb', verifyAuth, startKYBController)
+onboarding.post('/kyb-callback', KYBCallbackController)
+onboarding.get('/kyb-callback', KYBCallbackController)
 
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUploadMiddleware, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)

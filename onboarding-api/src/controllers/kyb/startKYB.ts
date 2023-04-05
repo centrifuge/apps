@@ -36,6 +36,10 @@ export const startKYBController = async (req: Request<any, any, InferType<typeof
       reference: kybReference,
       email: body.email,
       country: body.jurisdictionCode,
+
+      // https://ra.shuftipro.com/questionnaire-docs/request
+      // redirect_url: 'https://cdpn.io/pen/debug/vYVBvQZ',
+      callback_url: 'http://localhost:8080/kyb-callback', //  ?reference=<kybReference>
     }
 
     const kyb = await shuftiProRequest(req, payloadKYB)
