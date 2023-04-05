@@ -17,7 +17,6 @@ import { config } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { CreateLoanFromNFTPage } from '../pages/CreateLoanFromNFT'
 import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
@@ -143,9 +142,6 @@ const Routes: React.VFC = () => {
     <Switch>
       <Route path="/nfts/collection/:cid/object/mint">
         <MintNFTPage />
-      </Route>
-      <Route path="/nfts/collection/:cid/object/:nftid/new-asset">
-        <CreateLoanFromNFTPage />
       </Route>
       <Route path="/nfts/collection/:cid/object/:nftid">
         <NFTPage />

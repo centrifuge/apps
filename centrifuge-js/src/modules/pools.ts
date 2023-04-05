@@ -20,7 +20,6 @@ import { Dec } from '../utils/Decimal'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
-const RateBN = new BN(10).pow(new BN(27))
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
 
@@ -284,6 +283,7 @@ export type CreatedLoan = {
   id: string
   poolId: string
   pricing: PricingInfo
+  borrower: string
   asset: {
     collectionId: string
     nftId: string
@@ -300,6 +300,7 @@ export type ActiveLoan = {
   id: string
   poolId: string
   pricing: PricingInfo
+  borrower: string
   asset: {
     collectionId: string
     nftId: string
@@ -1113,7 +1114,7 @@ export function getPoolsModule(inst: Centrifuge) {
               discountedCashFlow: {
                 probabilityOfDefault: infoInput.probabilityOfDefault.toString(),
                 lossGivenDefault: infoInput.lossGivenDefault.toString(),
-                discountRate: infoInput.discountRate.add(RateBN).toString(),
+                discountRate: infoInput.discountRate.toString(),
               },
             },
 
@@ -2000,7 +2001,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const currency = rawCurrency.toHuman() as AssetCurrencyData
         const rates = rateValues.toJSON() as InterestAccrual[]
 
-        function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData, status: Loan['status']) {
+        function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
           const { info } = loan
           const [collectionId, nftId] = info.collateral
           const discount =
@@ -2021,12 +2022,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 ? new Rate(hexToBN(discount.probabilityOfDefault))
                 : undefined,
               lossGivenDefault: discount?.lossGivenDefault ? new Rate(hexToBN(discount.lossGivenDefault)) : undefined,
-              discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate).sub(RateBN)) : undefined,
+              discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
 
-              interestRate:
-                status === 'Created'
-                  ? new Rate(hexToBN(loan.info.interestRate))
-                  : Rate.fromFloat(new Rate(hexToBN(loan.info.interestRate)).toApr()),
+              interestRate: new Rate(hexToBN(loan.info.interestRate)),
             },
           }
         }
@@ -2035,7 +2033,7 @@ export function getPoolsModule(inst: Centrifuge) {
           const loan = value.toJSON() as unknown as CreatedLoanData
           const nil = new CurrencyBalance(0, currency.decimals)
           return {
-            ...getSharedLoanInfo(loan, 'Created'),
+            ...getSharedLoanInfo(loan),
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
             status: 'Created',
@@ -2051,12 +2049,12 @@ export function getPoolsModule(inst: Centrifuge) {
           ([loan]: [ActiveLoanData, number]) => {
             const interestData = rates.find((rate) => rate.interestRatePerSec === loan.info.interestRate)
             const writeOffStatus = {
-              penaltyInterestRate: Rate.fromFloat(new Rate(hexToBN(loan.writeOffStatus.penalty)).fractionToApr()),
+              penaltyInterestRate: new Rate(hexToBN(loan.writeOffStatus.penalty)),
               percentage: new Rate(hexToBN(loan.writeOffStatus.percentage)),
             }
 
             return {
-              ...getSharedLoanInfo(loan, 'Active'),
+              ...getSharedLoanInfo(loan),
               id: hexToBN(loan.loanId).toString(),
               poolId,
               status: 'Active',
@@ -2079,7 +2077,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const closedLoans: ClosedLoan[] = (closedLoanValues as any[]).map(([key, value]) => {
           const loan = value.toJSON() as unknown as ClosedLoanData
           return {
-            ...getSharedLoanInfo(loan, 'Closed'),
+            ...getSharedLoanInfo(loan),
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
             status: 'Closed',
@@ -2109,7 +2107,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return writeOffGroups.map((g) => {
           return {
             overdueDays: g.overdueDays as number,
-            penaltyInterestRate: Rate.fromFloat(new Rate(hexToBN(g.penalty)).fractionToApr()),
+            penaltyInterestRate: new Rate(hexToBN(g.penalty)),
             percentage: new Rate(hexToBN(g.percentage)),
           }
         })
