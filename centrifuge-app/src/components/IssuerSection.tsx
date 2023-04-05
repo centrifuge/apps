@@ -95,7 +95,7 @@ export function IssuerSection({ metadata }: IssuerSectionProps) {
           )}
         </Stack>
       </Shelf>
-      {metadata?.pool?.details?.length && <Accordion items={metadata?.pool?.details} mt={4} />}
+      {!!metadata?.pool?.details?.length && <Accordion items={metadata?.pool?.details} mt={4} />}
     </>
   )
 }

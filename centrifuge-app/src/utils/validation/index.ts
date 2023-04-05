@@ -29,8 +29,22 @@ export const positiveNumber = (err?: CustomError) => (val?: any) => {
   return Number.isFinite(num) && num > 0 ? '' : getError(`Value must be positive`, err, num)
 }
 
+export const maxDecimals = (decimals: number, err?: CustomError) => (val?: any) => {
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return Number.isFinite(num) && roundToFraction(num, decimals) === num
+    ? ''
+    : getError(`Max ${decimals} decimals`, err, num)
+}
+
+const roundToFraction = (n: number, d: number) => Math.round(n * Math.pow(10, d)) / Math.pow(10, d)
+
 export const integer = (err?: CustomError) => (val?: any) =>
   Number.isFinite(val) && Math.floor(val) === val ? '' : getError(`Value must whole number`, err, val)
+
+export const min = (minValue: number, err?: CustomError) => (val?: any) => {
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return num >= minValue ? '' : getError(`Value needs to be larger than ${minValue}`, err, num)
+}
 
 export const max = (maxValue: number, err?: CustomError) => (val?: any) => {
   const num = val instanceof Decimal ? val.toNumber() : val
