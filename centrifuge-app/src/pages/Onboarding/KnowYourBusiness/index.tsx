@@ -3,6 +3,7 @@ import * as React from 'react'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { KYB_COUNTRY_CODES } from '../geographyCodes'
+import { useStartKYB } from '../queries/useStartKYB'
 import { useVerifyBusiness } from '../queries/useVerifyBusiness'
 import { BusinessInformation } from './BusinessInformation'
 import { IdentityVerification } from './IdentityVerification'
@@ -16,6 +17,7 @@ export function KnowYourBusiness() {
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
 
   const { mutate: verifyBusinessInformation, isLoading, isError } = useVerifyBusiness()
+  const { mutate: startKYB, data: startKYBData, isLoading: isStartKYBLoading } = useStartKYB()
 
   const formik = useFormik({
     initialValues: {
@@ -28,7 +30,8 @@ export function KnowYourBusiness() {
     },
     onSubmit: (values) => {
       if (!(values.jurisdictionCode in KYB_COUNTRY_CODES)) {
-        nextKnowYourBusinessStep()
+        startKYB(values)
+        // nextKnowYourBusinessStep()
       } else {
         // verifyBusinessInformation(values)
       }
@@ -37,24 +40,23 @@ export function KnowYourBusiness() {
   })
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
+    console.log('event ==========', event.origin)
     if (event.origin === 'https://app.shuftipro.com') {
+      console.log('event from shufti iframe', event)
       // setVerifiedIdentity()
     }
   }
 
   React.useEffect(() => {
+    console.log('EventListener added')
     window.addEventListener('message', handleVerifiedIdentity)
 
     return () => {
+      console.log('EventListener removed')
       window.removeEventListener('message', handleVerifiedIdentity)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  // const { mutate: startKYC, data: startKYCData, isLoading: isStartKYCLoading } = useStartKYC()
-  const startKYBData = {
-    verification_url: null,
-  }
 
   React.useEffect(() => {
     if (startKYBData?.verification_url) {
@@ -67,11 +69,7 @@ export function KnowYourBusiness() {
   }
 
   if (activeKnowYourBusinessStep === 1) {
-    return (
-      <IdentityVerification
-        verificationURL={startKYBData.verification_url || 'https://fr.wikipedia.org/wiki/Main_Page'}
-      />
-    )
+    return <IdentityVerification verificationURL={startKYBData!.verification_url} />
   }
 
   return null
