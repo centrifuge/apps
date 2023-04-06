@@ -74,7 +74,7 @@ type PoolOnboardingSteps = {
         completed: boolean
         timeStamp: string | null
         transactionInfo: {
-          extrinsicHash: string | null
+          txHash: string | null
           blockNumber: string | null
         }
       }

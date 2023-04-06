@@ -1,3 +1,4 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Checkbox, Shelf, Spinner, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
@@ -24,6 +25,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     NonNullable<OnboardingUser>,
     NonNullable<OnboardingPool>
   >()
+  const { connectedType } = useWallet()
 
   const poolId = pool.id
   const trancheId = pool.trancheId
@@ -36,7 +38,10 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     },
     validationSchema,
     onSubmit: () => {
-      signRemark([])
+      if (connectedType === 'substrate') {
+        signRemark([])
+      }
+      signRemark([`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`])
     },
   })
 
