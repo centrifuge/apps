@@ -231,7 +231,8 @@ Sets the ultimate beneficial owners for the entity.
             "timeStamp": "2023-01-23T20:56:50.039Z",
             "transactionInfo": {
                 "blockNumber": null,
-                "extrinsicHash": null
+                "txHash": null
+                "network": "ethereum"
               }
           }
         }
@@ -336,7 +337,7 @@ Sets the ultimate beneficial owners for the entity.
               "completed": false,
               "transactionInfo": {
                 "blockNumber": null,
-                "extrinsicHash": null
+                "txHash": null
               }
             }
           }

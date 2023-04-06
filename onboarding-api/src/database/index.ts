@@ -29,14 +29,18 @@ const walletSchema = array()
   .required()
 export type Wallet = InferType<typeof walletSchema>
 
+export const transactionInfoSchema = object({
+  txHash: string().required(),
+  blockNumber: string().required(),
+  network: string().required() as StringSchema<SupportedNetworks>,
+})
+export type TransactionInfo = InferType<typeof transactionInfoSchema>
+
 const poolSpecificStepsSchema = object({
   signAgreement: object({
     completed: bool(),
     timeStamp: string().nullable(),
-    transactionInfo: object({
-      extrinsicHash: string().nullable(),
-      blockNumber: string().nullable(),
-    }),
+    transactionInfo: transactionInfoSchema,
   }),
   status: object({
     status: mixed().nullable().oneOf(['approved', 'rejected', 'pending', null]),

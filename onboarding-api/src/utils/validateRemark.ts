@@ -9,9 +9,7 @@ export const validateRemark = async (
   expectedRemark: string
 ) => {
   const block = await firstValueFrom(centrifuge.getBlockByBlockNumber(Number(transactionInfo.blockNumber)))
-  const extrinsic = block?.block.extrinsics.find(
-    (extrinsic) => extrinsic.hash.toString() === transactionInfo.extrinsicHash
-  )
+  const extrinsic = block?.block.extrinsics.find((extrinsic) => extrinsic.hash.toString() === transactionInfo.txHash)
   const actualRemark = extrinsic?.method.args[0].toHuman()
 
   if (actualRemark !== expectedRemark) {

@@ -14,6 +14,7 @@ export const useSignRemark = (
     {
       txHash: string
       blockNumber: string
+      network: 'evm' | 'substrate'
     },
     unknown
   >
@@ -44,7 +45,7 @@ export const useSignRemark = (
         const txHash = result.txHash.toHex()
         // @ts-expect-error
         const blockNumber = result.blockNumber.toString()
-        await sendDocumentsToIssuer({ txHash, blockNumber })
+        await sendDocumentsToIssuer({ txHash, blockNumber, network: 'substrate' })
       },
     }
   )
@@ -63,7 +64,11 @@ export const useSignRemark = (
         `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
       )
       const finalizedTx = await result.wait()
-      await sendDocumentsToIssuer({ txHash: result.hash, blockNumber: finalizedTx.blockNumber.toString() })
+      await sendDocumentsToIssuer({
+        txHash: result.hash,
+        blockNumber: finalizedTx.blockNumber.toString(),
+        network: 'evm',
+      })
       setIsEvmTxLoading(false)
     } catch (e) {
       console.log(e)

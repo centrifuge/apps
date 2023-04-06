@@ -1,10 +1,11 @@
 import { File } from '@google-cloud/storage'
 import { PDFDocument } from 'pdf-lib'
+import { TransactionInfo } from '../database'
 
 export const signAndAnnotateAgreement = async (
   unsignedAgreement: File,
   walletAddress: string,
-  transactionInfo: { blockNumber: string; extrinsicHash: string },
+  transactionInfo: TransactionInfo,
   name: string
 ) => {
   const pdf = await unsignedAgreement.download()
@@ -17,7 +18,9 @@ export const signAndAnnotateAgreement = async (
   firstPage.drawText(
     `Signed by ${walletAddress} on Centrifuge 
 Block: ${transactionInfo.blockNumber}
-Extrinsic Hash: ${transactionInfo.extrinsicHash}`,
+Transaction Hash: ${transactionInfo.txHash}
+Network: ${transactionInfo.network}
+`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,

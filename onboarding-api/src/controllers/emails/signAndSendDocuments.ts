@@ -1,6 +1,12 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
+import {
+  onboardingBucket,
+  OnboardingUser,
+  transactionInfoSchema,
+  validateAndWriteToFirestore,
+  writeToOnboardingBucket,
+} from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
@@ -12,10 +18,7 @@ import { validateRemark } from '../../utils/validateRemark'
 export const signAndSendDocumentsInput = object({
   poolId: string().required(),
   trancheId: string().required(),
-  transactionInfo: object({
-    extrinsicHash: string().required(),
-    blockNumber: string().required(),
-  }).required(),
+  transactionInfo: transactionInfoSchema.required(),
 })
 
 export const signAndSendDocumentsController = async (

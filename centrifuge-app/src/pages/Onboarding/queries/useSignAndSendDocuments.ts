@@ -11,7 +11,7 @@ export const useSignAndSendDocuments = () => {
   const trancheId = pool.trancheId
 
   const mutation = useMutation(
-    async (transactionInfo: { txHash: string; blockNumber: string }) => {
+    async (transactionInfo: { txHash: string; blockNumber: string; network: 'evm' | 'substrate' }) => {
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAndSendDocuments`, {
         method: 'POST',
         headers: {
