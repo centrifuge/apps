@@ -9,7 +9,7 @@ const centrifugeDomains = [
 
 export const corsMiddleware = cors({
   origin: (origin, callback) => {
-    console.log('>> origin in cors', origin)
+    console.log('<< origin in cors', origin)
     const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
     const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
     const isShuftiDomain = /^https:\/\/app\.shuftipro\.com/.test(origin)
