@@ -14,7 +14,7 @@ export const corsMiddleware = cors({
     const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
     const isShuftiDomain = /^https:\/\/app\.shuftipro\.com/.test(origin)
 
-    if (isLocalhost || isCentrifugeDomain || isShuftiDomain || origin === 'undefined') {
+    if (isLocalhost || isCentrifugeDomain || isShuftiDomain || origin === undefined) {
       callback(null, true)
     } else {
       callback(new Error(`Not allowed by CORS, ${origin}`))
