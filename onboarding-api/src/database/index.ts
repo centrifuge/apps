@@ -32,7 +32,6 @@ export type Wallet = InferType<typeof walletSchema>
 export const transactionInfoSchema = object({
   txHash: string().required(),
   blockNumber: string().required(),
-  network: string().required() as StringSchema<SupportedNetworks>,
 })
 export type TransactionInfo = InferType<typeof transactionInfoSchema>
 

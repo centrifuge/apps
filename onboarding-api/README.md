@@ -232,7 +232,6 @@ Sets the ultimate beneficial owners for the entity.
             "transactionInfo": {
                 "blockNumber": null,
                 "txHash": null
-                "network": "ethereum"
               }
           }
         }

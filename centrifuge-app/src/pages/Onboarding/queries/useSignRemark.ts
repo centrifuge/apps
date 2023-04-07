@@ -14,7 +14,6 @@ export const useSignRemark = (
     {
       txHash: string
       blockNumber: string
-      network: 'evm' | 'substrate'
     },
     unknown
   >
@@ -45,7 +44,7 @@ export const useSignRemark = (
         const txHash = result.txHash.toHex()
         // @ts-expect-error
         const blockNumber = result.blockNumber.toString()
-        await sendDocumentsToIssuer({ txHash, blockNumber, network: 'substrate' })
+        await sendDocumentsToIssuer({ txHash, blockNumber })
       },
     }
   )
@@ -53,8 +52,7 @@ export const useSignRemark = (
   const signEvmRemark = async () => {
     setIsEvmTxLoading(true)
     try {
-      // TODO: get contract from env variable
-      const remarkerContract = new Contract('0x6E395641087a4938861d7ada05411e3146175F58', RemarkerAbi)
+      const remarkerContract = new Contract(import.meta.env.REACT_APP_REMARKER_CONTRACT, RemarkerAbi)
       if (!evmProvider?.getSigner()) {
         throw new Error('Signer may not be set')
       }
@@ -67,7 +65,6 @@ export const useSignRemark = (
       await sendDocumentsToIssuer({
         txHash: result.hash,
         blockNumber: finalizedTx.blockNumber.toString(),
-        network: 'evm',
       })
       setIsEvmTxLoading(false)
     } catch (e) {

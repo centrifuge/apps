@@ -33,7 +33,11 @@ export const signAndSendDocumentsController = async (
 
     const user = await fetchUser(wallet)
 
-    await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
+    await validateRemark(
+      req.wallet,
+      transactionInfo,
+      `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
+    )
 
     if (
       user?.poolSteps[poolId] &&

@@ -19,7 +19,6 @@ export const signAndAnnotateAgreement = async (
     `Signed by ${walletAddress} on Centrifuge 
 Block: ${transactionInfo.blockNumber}
 Transaction Hash: ${transactionInfo.txHash}
-Network: ${transactionInfo.network}
 `,
     {
       x: 30,

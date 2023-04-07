@@ -76,7 +76,6 @@ type PoolOnboardingSteps = {
         transactionInfo: {
           txHash: string | null
           blockNumber: string | null
-          network: 'evm' | 'substrate'
         }
       }
       status: {
