@@ -25,18 +25,18 @@ export const validateRemark = async (
     if (actualRemark !== expectedRemark) {
       throw new HttpError(400, 'Invalid remark')
     }
-  }
+  } else {
+    const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
+    const contract = new Contract(REMARKER_CONTRACT, RemarkerAbi).connect(provider)
+    const filteredEvents = await contract.queryFilter(
+      'Remarked',
+      transactionInfo.blockNumber,
+      transactionInfo.blockNumber
+    )
 
-  const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
-  const contract = new Contract(REMARKER_CONTRACT, RemarkerAbi).connect(provider)
-  const filteredEvents = await contract.queryFilter(
-    'Remarked',
-    transactionInfo.blockNumber,
-    transactionInfo.blockNumber
-  )
-
-  const [sender, actualRemark] = filteredEvents.flatMap((ev) => ev.args?.map((arg) => arg.toString()))
-  if (actualRemark !== expectedRemark || sender !== wallet.address) {
-    throw new HttpError(400, 'Invalid remark')
+    const [sender, actualRemark] = filteredEvents.flatMap((ev) => ev.args?.map((arg) => arg.toString()))
+    if (actualRemark !== expectedRemark || sender !== wallet.address) {
+      throw new HttpError(400, 'Invalid remark')
+    }
   }
 }
