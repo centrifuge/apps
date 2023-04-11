@@ -79,7 +79,7 @@ export const updateInvestorStatusController = async (
       await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
       return res.status(200).send({ poolId, trancheId })
     } else if (user?.email && status === 'rejected') {
-      await sendRejectInvestorMessage(user.email, poolId)
+      await sendRejectInvestorMessage(user.email, poolId, wallet)
       await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
       throw new HttpError(400, 'Investor has been rejected')
     }

@@ -3,6 +3,7 @@ import { sendEmail, templateIds } from '.'
 import { onboardingBucket, Wallet } from '../database'
 import { getPoolById } from '../utils/centrifuge'
 import { HttpError } from '../utils/httpError'
+import { getTinlakePoolById } from '../utils/tinlake'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string
@@ -16,7 +17,8 @@ export const sendDocumentsMessage = async (
   trancheId: string,
   signedAgreement: any
 ) => {
-  const { metadata, pool } = await getPoolById(poolId)
+  const { metadata, pool } =
+    wallet.network === 'substrate' ? await getPoolById(poolId, wallet) : await getTinlakePoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '7d',

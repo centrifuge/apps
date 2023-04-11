@@ -2,7 +2,9 @@ import Centrifuge from '@centrifuge/centrifuge-js'
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { Keyring } from '@polkadot/keyring'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
+import { Request } from 'express'
 import { firstValueFrom } from 'rxjs'
+import { HttpError } from './httpError'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
 const PROXY_ADDRESS = process.env.MEMBERLIST_ADMIN_PURE_PROXY
@@ -14,14 +16,18 @@ export const centrifuge = new Centrifuge({
   printExtrinsics: true,
 })
 
-export const getPoolById = async (poolId: string) => {
-  const pools = await firstValueFrom(centrifuge.pools.getPools())
-  const pool = pools.find((p) => p.id === poolId)
-  const metadata = await firstValueFrom(centrifuge.metadata.getMetadata(pool?.metadata!))
-  if (!metadata) {
-    throw new Error(`Pool metadata not found for pool ${poolId}`)
+export const getPoolById = async (poolId: string, wallet: Request['wallet']) => {
+  if (wallet.network === 'substrate') {
+    const pools = await firstValueFrom(centrifuge.pools.getPools())
+    const pool = pools.find((p) => p.id === poolId)
+    const metadata = await firstValueFrom(centrifuge.metadata.getMetadata(pool?.metadata!))
+    if (!metadata) {
+      throw new Error(`Pool metadata not found for pool ${poolId}`)
+    }
+    return { pool, metadata }
+  } else {
+    throw new HttpError(400, 'Pools not supported for tinlake pools')
   }
-  return { pool, metadata }
 }
 
 export const addInvestorToMemberList = async (walletAddress: string, poolId: string, trancheId: string) => {

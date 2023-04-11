@@ -1,8 +1,9 @@
+import { Request } from 'express'
 import { sendEmail, templateIds } from '.'
 import { getPoolById } from '../utils/centrifuge'
 
-export const sendRejectInvestorMessage = async (to: string, poolId: string) => {
-  const { metadata } = await getPoolById(poolId)
+export const sendRejectInvestorMessage = async (to: string, poolId: string, wallet: Request['wallet']) => {
+  const { metadata } = await getPoolById(poolId, wallet)
   const message = {
     personalizations: [
       {
