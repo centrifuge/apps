@@ -1,6 +1,7 @@
 import { Firestore } from '@google-cloud/firestore'
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import Keyring from '@polkadot/keyring'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
@@ -107,7 +108,7 @@ async function faucet(req: Request, res: Response) {
       api.tx.tokens.transfer(address, { Native: true }, ONE_THOUSAND_DEVEL.toString()),
       api.tx.tokens.transfer(address, { AUSD: true }, TEN_THOUSAND_AUSD.toString()),
     ])
-
+    await cryptoWaitReady()
     const keyring = new Keyring({ type: 'sr25519' })
     console.log('signing and sending tx')
     const hash = URL.includes('demo')
