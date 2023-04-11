@@ -18,7 +18,7 @@ export const sendDocumentsMessage = async (
   signedAgreement: any
 ) => {
   const { metadata, pool } =
-    wallet.network === 'substrate' ? await getPoolById(poolId, wallet) : await getTinlakePoolById(poolId)
+    wallet.network === 'substrate' ? await getPoolById(poolId) : await getTinlakePoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '7d',

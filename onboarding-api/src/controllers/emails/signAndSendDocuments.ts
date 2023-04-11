@@ -8,12 +8,13 @@ import {
   writeToOnboardingBucket,
 } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
+import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
+import { validateEvmRemark } from '../../utils/tinlake'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
-import { validateRemark } from '../../utils/validateRemark'
 
 export const signAndSendDocumentsInput = object({
   poolId: string().required(),
@@ -33,11 +34,13 @@ export const signAndSendDocumentsController = async (
 
     const user = await fetchUser(wallet)
 
-    await validateRemark(
-      req.wallet,
-      transactionInfo,
-      `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
-    )
+    const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
+
+    if (wallet.network === 'substrate') {
+      await validateRemark(transactionInfo, remark)
+    } else {
+      await validateEvmRemark(req.wallet, transactionInfo, remark)
+    }
 
     if (
       user?.poolSteps[poolId] &&

@@ -2,8 +2,9 @@ import Centrifuge from '@centrifuge/centrifuge-js'
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { Keyring } from '@polkadot/keyring'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
-import { Request } from 'express'
 import { firstValueFrom } from 'rxjs'
+import { InferType } from 'yup'
+import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { HttpError } from './httpError'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
@@ -16,18 +17,14 @@ export const centrifuge = new Centrifuge({
   printExtrinsics: true,
 })
 
-export const getPoolById = async (poolId: string, wallet: Request['wallet']) => {
-  if (wallet.network === 'substrate') {
-    const pools = await firstValueFrom(centrifuge.pools.getPools())
-    const pool = pools.find((p) => p.id === poolId)
-    const metadata = await firstValueFrom(centrifuge.metadata.getMetadata(pool?.metadata!))
-    if (!metadata) {
-      throw new Error(`Pool metadata not found for pool ${poolId}`)
-    }
-    return { pool, metadata }
-  } else {
-    throw new HttpError(400, 'Pools not supported for tinlake pools')
+export const getPoolById = async (poolId: string) => {
+  const pools = await firstValueFrom(centrifuge.pools.getPools())
+  const pool = pools.find((p) => p.id === poolId)
+  const metadata = await firstValueFrom(centrifuge.metadata.getMetadata(pool?.metadata!))
+  if (!metadata) {
+    throw new Error(`Pool metadata not found for pool ${poolId}`)
   }
+  return { pool, metadata }
 }
 
 export const addInvestorToMemberList = async (walletAddress: string, poolId: string, trancheId: string) => {
@@ -57,4 +54,17 @@ export const addInvestorToMemberList = async (walletAddress: string, poolId: str
   const hash = await proxiedSubmittable.signAndSend(signer)
   await api.disconnect()
   return hash
+}
+
+export const validateRemark = async (
+  transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
+  expectedRemark: string
+) => {
+  const block = await firstValueFrom(centrifuge.getBlockByBlockNumber(Number(transactionInfo.blockNumber)))
+  const extrinsic = block?.block.extrinsics.find((extrinsic) => extrinsic.hash.toString() === transactionInfo.txHash)
+  const actualRemark = extrinsic?.method.args[0].toHuman()
+
+  if (actualRemark !== expectedRemark) {
+    throw new HttpError(400, 'Invalid remark')
+  }
 }
