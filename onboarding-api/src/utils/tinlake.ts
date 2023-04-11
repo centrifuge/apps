@@ -94,12 +94,14 @@ const ETH_NETWORK = process.env.EVM_NETWORK || 'mainnet'
 const goerliConfig = {
   rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+  remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
   poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
 }
 const mainnetConfig = {
   rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+  remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
   poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
 }
@@ -169,10 +171,9 @@ export const validateEvmRemark = async (
 ) => {
   const EVM_NETWORK = process.env.EVM_NETWORK
   const INFURA_KEY = process.env.INFURA_KEY
-  const REMARKER_CONTRACT = process.env.REMARKER_CONTRACT
 
   const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
-  const contract = new Contract(REMARKER_CONTRACT, RemarkerAbi).connect(provider)
+  const contract = new Contract(ethConfig.remarkerAddress, RemarkerAbi).connect(provider)
   const filteredEvents = await contract.queryFilter(
     'Remarked',
     Number(transactionInfo.blockNumber),
