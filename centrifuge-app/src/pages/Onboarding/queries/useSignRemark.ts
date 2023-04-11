@@ -2,6 +2,7 @@ import { useCentrifugeTransaction, useEvmProvider, useTransactions, useWallet } 
 import { Contract } from '@ethersproject/contracts'
 import React from 'react'
 import { UseMutateFunction } from 'react-query'
+import { ethConfig } from '../../../config'
 import RemarkerAbi from './abi/Remarker.abi.json'
 
 export const useSignRemark = (
@@ -40,7 +41,7 @@ export const useSignRemark = (
     })
     try {
       const [message] = args
-      const remarkerContract = new Contract(import.meta.env.REACT_APP_REMARKER_CONTRACT, RemarkerAbi)
+      const remarkerContract = new Contract(ethConfig.remarkerAddress, RemarkerAbi)
       if (!evmProvider?.getSigner()) {
         throw new Error('Signer may not be set')
       }
