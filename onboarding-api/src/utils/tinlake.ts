@@ -22,12 +22,12 @@ interface PoolMedia {
   tin?: string
 }
 
-export interface JuniorInvestor {
+interface JuniorInvestor {
   name: string
   address: string
 }
 
-export interface PoolMetadataDetails {
+interface PoolMetadataDetails {
   name: string
   shortName?: string
   slug: string
@@ -53,7 +53,7 @@ interface BasePool {
   metadata: PoolMetadataDetails
 }
 
-export interface ActivePool extends BasePool {
+interface ActivePool extends BasePool {
   addresses: {
     TINLAKE_CURRENCY: string
     ROOT_CONTRACT: string
