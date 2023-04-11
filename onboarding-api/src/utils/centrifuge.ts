@@ -5,7 +5,7 @@ import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { firstValueFrom } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
-import { HttpError } from './httpError'
+import { HttpError, reportHttpError } from './httpError'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
 const PROXY_ADDRESS = process.env.MEMBERLIST_ADMIN_PURE_PROXY
@@ -60,11 +60,12 @@ export const validateRemark = async (
   transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
   expectedRemark: string
 ) => {
-  const block = await firstValueFrom(centrifuge.getBlockByBlockNumber(Number(transactionInfo.blockNumber)))
-  const extrinsic = block?.block.extrinsics.find((extrinsic) => extrinsic.hash.toString() === transactionInfo.txHash)
-  const actualRemark = extrinsic?.method.args[0].toHuman()
-
-  if (actualRemark !== expectedRemark) {
+  try {
+    await firstValueFrom(
+      centrifuge.remark.validateRemark(transactionInfo.blockNumber, transactionInfo.txHash, expectedRemark)
+    )
+  } catch (error) {
+    reportHttpError(error)
     throw new HttpError(400, 'Invalid remark')
   }
 }
