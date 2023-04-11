@@ -31,7 +31,6 @@ declare global {
       RELAY_WSS_URL: string
       INFURA_KEY: string
       EVM_NETWORK: string
-      REMARKER_CONTRACT: string
     }
   }
 }
