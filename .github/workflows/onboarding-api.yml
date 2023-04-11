@@ -4,7 +4,7 @@ on:
     branches:
       - main
     tags:
-      - "release*"
+      - "rc*"
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
