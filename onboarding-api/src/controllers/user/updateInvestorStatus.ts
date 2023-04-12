@@ -8,7 +8,7 @@ import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessag
 import { addInvestorToMemberList } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
-import { signSubscriptionAcceptance } from '../../utils/signSubscriptionAcceptance'
+import { signAcceptanceAsIssuer } from '../../utils/signAcceptanceAsIssuer'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { verifyJwt } from '../../utils/verifyJwt'
@@ -76,7 +76,7 @@ export const updateInvestorStatusController = async (
     }
 
     if (user?.email && status === 'approved') {
-      const countersignedAgreementPDF = await signSubscriptionAcceptance({
+      const countersignedAgreementPDF = await signAcceptanceAsIssuer({
         poolId,
         trancheId,
         walletAddress: wallet.address,

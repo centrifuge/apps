@@ -11,7 +11,7 @@ interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
   email: string
 }
 
-export const signAndAnnotateAgreement = async ({
+export const annotateAgreementAndSignAsInvestor = async ({
   poolId,
   trancheId,
   transactionInfo,

@@ -10,7 +10,7 @@ type SignatureInfo = {
   investorName: string
 }
 
-export const signSubscriptionAcceptance = async ({ poolId, trancheId, walletAddress, investorName }: SignatureInfo) => {
+export const signAcceptanceAsIssuer = async ({ poolId, trancheId, walletAddress, investorName }: SignatureInfo) => {
   const countersignedAgreement = await PDFDocument.create()
 
   const signedAgreement = await onboardingBucket.file(

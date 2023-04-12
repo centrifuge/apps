@@ -2,9 +2,9 @@ import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
+import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
-import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { validateRemark } from '../../utils/validateRemark'
@@ -39,7 +39,7 @@ export const signAndSendDocumentsController = async (
       throw new HttpError(400, 'User has already signed the agreement')
     }
 
-    const signedAgreementPDF = await signAndAnnotateAgreement({
+    const signedAgreementPDF = await annotateAgreementAndSignAsInvestor({
       poolId,
       trancheId,
       walletAddress: wallet.address,
