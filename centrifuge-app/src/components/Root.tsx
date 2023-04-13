@@ -28,6 +28,7 @@ import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { OnboardingPage } from '../pages/Onboarding'
 import { EmailVerified } from '../pages/Onboarding/EmailVerified'
+import { RedirectUrl } from '../pages/Onboarding/KnowYourBusiness/RedirectUrl'
 import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
@@ -191,6 +192,10 @@ const Routes: React.VFC = () => {
           <OnboardingPage />
         </OnboardingProvider>
       </Route>
+      <Route exact path="/onboarding/redirect-url">
+        <RedirectUrl />
+      </Route>
+
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
       </Route>

@@ -10,7 +10,7 @@ import { signAndSendDocumentsController } from './controllers/emails/signAndSend
 import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { KYBCallbackController } from './controllers/kyb/callback'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
-import { startKYBController } from './controllers/kyb/startKYB'
+import { startKYBController } from './controllers/kyb/startKyb'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
@@ -23,6 +23,7 @@ import { corsMiddleware } from './middleware/cors'
 import { fileUploadMiddleware } from './middleware/fileUpload'
 import { rateLimiter } from './middleware/rateLimiter'
 import { verifyAuth } from './middleware/verifyAuth'
+
 const express = require('express')
 
 dotenv.config()
@@ -48,7 +49,7 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 
 onboarding.post('/startKyb', verifyAuth, startKYBController)
 onboarding.post('/kyb-callback', KYBCallbackController)
-// onboarding.get('/kyb-callback', KYBCallbackController)
+onboarding.get('/kyb-callback', KYBCallbackController)
 
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUploadMiddleware, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)

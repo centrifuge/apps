@@ -62,6 +62,7 @@ const poolStepsSchema = lazy((value) => {
 const globalStepsSchema = object({
   verifyBusiness: object({
     completed: bool(),
+    manualReview: bool(),
     timeStamp: string().nullable(),
   }),
   verifyEmail: object({

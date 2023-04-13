@@ -12,7 +12,7 @@ export type Indentity = {
 type DocumentTypes = ('id_card' | 'driving_license' | 'passport' | 'bank_statement')[]
 
 export type KYBResponse = {
-  reference: string
+  reference: `KYB_${string}`
   event: `request.${'pending' | 'accepted' | 'declined'}`
   verification_url: string
   email: string | null

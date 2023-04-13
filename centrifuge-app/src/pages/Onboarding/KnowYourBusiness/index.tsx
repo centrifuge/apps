@@ -1,5 +1,6 @@
 import { useFormik } from 'formik'
 import * as React from 'react'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { KYB_COUNTRY_CODES } from '../geographyCodes'
@@ -12,7 +13,7 @@ import { validationSchema } from './validationSchema'
 export function KnowYourBusiness() {
   const [activeKnowYourBusinessStep, setActiveKnowYourBusinessStep] = React.useState<number>(0)
   const nextKnowYourBusinessStep = () => setActiveKnowYourBusinessStep((current) => current + 1)
-  const { onboardingUser, refetchOnboardingUser } = useOnboarding<EntityUser>()
+  const { onboardingUser, refetchOnboardingUser, nextStep } = useOnboarding<EntityUser>()
   const isUSOrCA =
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
 
@@ -28,31 +29,33 @@ export function KnowYourBusiness() {
         (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode || '') ?? '',
       regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
-    onSubmit: (values) => {
-      if (!(values.jurisdictionCode in KYB_COUNTRY_CODES)) {
+    onSubmit: async (values) => {
+      const manualReview = !(values.jurisdictionCode in KYB_COUNTRY_CODES)
+      await verifyBusinessInformation({ ...values, manualReview })
+
+      if (manualReview) {
         startKYB(values)
-        // nextKnowYourBusinessStep()
       } else {
-        // verifyBusinessInformation(values)
+        nextStep()
       }
     },
     validationSchema,
   })
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
-    console.log('event ==========', event.origin)
-    if (event.origin === 'https://app.shuftipro.com') {
-      console.log('event from shufti iframe', event)
-      // setVerifiedIdentity()
+    if (event.data === 'manual.onboarding.completed') {
+      nextStep()
+      // set 'manualReview' to 'true'
+      // verifyBusinessInformation(values)
     }
   }
 
+  const { authToken } = useOnboardingAuth()
+
   React.useEffect(() => {
-    console.log('EventListener added')
     window.addEventListener('message', handleVerifiedIdentity)
 
     return () => {
-      console.log('EventListener removed')
       window.removeEventListener('message', handleVerifiedIdentity)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -13,6 +13,7 @@ const verifyBusinessInput = object({
   businessName: string().required(), // used for AML
   registrationNumber: string().required(),
   jurisdictionCode: string().required(), // country of incorporation
+  manualReview: bool().required(),
 })
 
 export const verifyBusinessController = async (
@@ -23,7 +24,7 @@ export const verifyBusinessController = async (
     await validateInput(req.body, verifyBusinessInput)
     const {
       wallet,
-      body: { jurisdictionCode, registrationNumber, businessName, email, dryRun },
+      body: { jurisdictionCode, registrationNumber, businessName, email, manualReview, dryRun },
     } = { ...req }
 
     const existingUser = await fetchUser(wallet, { suppressError: true })
@@ -68,7 +69,11 @@ export const verifyBusinessController = async (
       registrationNumber,
       jurisdictionCode,
       globalSteps: {
-        verifyBusiness: { completed: !!(kybVerified && businessAmlVerified), timeStamp: new Date().toISOString() },
+        verifyBusiness: {
+          completed: !manualReview && !!(kybVerified && businessAmlVerified),
+          manualReview,
+          timeStamp: new Date().toISOString(),
+        },
         verifyEmail: { completed: false, timeStamp: null },
         confirmOwners: { completed: false, timeStamp: null },
         verifyIdentity: { completed: false, timeStamp: null },

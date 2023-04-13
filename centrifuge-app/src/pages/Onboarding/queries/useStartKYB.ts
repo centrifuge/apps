@@ -5,9 +5,7 @@ import { Indentity, KYBResponse } from '../KnowYourBusiness/declarations'
 
 export const useStartKYB = () => {
   const { authToken } = useOnboardingAuth()
-  const { pool, onboardingUser, refetchOnboardingUser } = useOnboarding()
-
-  const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
+  const { refetchOnboardingUser } = useOnboarding()
 
   const mutation = useMutation(
     async (values: Indentity) => {
@@ -19,12 +17,8 @@ export const useStartKYB = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          businessName: values.businessName,
           email: values.email,
-          registrationNumber: values.registrationNumber,
           jurisdictionCode: values.jurisdictionCode,
-          // todo: check if 'regionCode' can ever be relevant
-          ...(values.regionCode ? { regionCode: values.regionCode } : {}),
         }),
       })
 
@@ -34,7 +28,7 @@ export const useStartKYB = () => {
     {
       onSuccess: () => {
         console.log('onSuccess callback in "useStartKYB"')
-        // refetchOnboardingUser()
+        refetchOnboardingUser()
       },
     }
   )

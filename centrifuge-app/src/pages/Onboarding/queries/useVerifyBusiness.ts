@@ -8,6 +8,7 @@ type BusinessInformation = {
   registrationNumber: string
   jurisdictionCode: string
   regionCode: string
+  manualReview?: boolean
 }
 
 export const useVerifyBusiness = () => {
@@ -27,6 +28,7 @@ export const useVerifyBusiness = () => {
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
           dryRun: true, // TODO: set this as debug flag option
+          manualReview: values?.manualReview ?? false,
         }),
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -48,7 +50,7 @@ export const useVerifyBusiness = () => {
     {
       onSuccess: () => {
         refetchOnboardingUser()
-        nextStep()
+        // nextStep()
       },
     }
   )

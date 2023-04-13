@@ -108,6 +108,7 @@ type IndividualUserSteps = {
 export interface EntityOnboardingSteps extends IndividualUserSteps {
   verifyBusiness: {
     completed: boolean
+    manualReview: boolean
     timeStamp: string
   }
   confirmOwners: {
