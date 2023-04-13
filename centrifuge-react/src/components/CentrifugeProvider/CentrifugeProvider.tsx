@@ -57,6 +57,10 @@ export function useCentrifugeConsts() {
     },
     uniques: {
       collectionDeposit: new CurrencyBalance(consts.uniques.collectionDeposit, chainDecimals),
+      itemDeposit: new CurrencyBalance(consts.uniques.itemDeposit, chainDecimals),
+      metadataDepositBase: new CurrencyBalance(consts.uniques.metadataDepositBase, chainDecimals),
+      attributeDepositBase: new CurrencyBalance(consts.uniques.attributeDepositBase, chainDecimals),
+      depositPerByte: new CurrencyBalance(consts.uniques.depositPerByte, chainDecimals),
     },
     poolSystem: {
       poolDeposit: new CurrencyBalance(consts.poolSystem.poolDeposit, chainDecimals),

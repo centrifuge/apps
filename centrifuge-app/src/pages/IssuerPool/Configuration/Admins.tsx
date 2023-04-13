@@ -24,15 +24,14 @@ type PoolMetadataInput = {
 }
 type Row = Admin & { index: number }
 
-export const Admins: React.FC = () => {
+export function Admins() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolPermissions = usePoolPermissions(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
   const { selectedAccount } = useWallet().substrate
   const me = selectedAccount?.address && encodeAddress(selectedAccount?.address)
 
-  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
-  console.log('suitableAccounts', suitableAccounts)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const initialValues: PoolMetadataInput = React.useMemo(
     () => ({
@@ -62,7 +61,7 @@ export const Admins: React.FC = () => {
         setIsEditing(false)
         return
       }
-      execute([poolId, add, remove], { account: suitableAccounts[0] })
+      execute([poolId, add, remove], { account })
     },
   })
 

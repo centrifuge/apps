@@ -11,6 +11,7 @@ import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
@@ -20,7 +21,7 @@ type Values = Pick<
   'issuerName' | 'issuerLogo' | 'issuerDescription' | 'executiveSummary' | 'website' | 'forum' | 'email'
 >
 
-export const Issuer: React.FC = () => {
+export function Issuer() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
@@ -28,6 +29,7 @@ export const Issuer: React.FC = () => {
   const cent = useCentrifuge()
   const prefetchMetadata = usePrefetchMetadata()
   const { data: logoFile } = useFile(metadata?.pool?.issuer?.logo?.uri, 'logo')
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const initialValues: Values = React.useMemo(
     () => ({
@@ -93,7 +95,7 @@ export const Issuer: React.FC = () => {
         },
       }
 
-      execute([poolId, newPoolMetadata])
+      execute([poolId, newPoolMetadata], { account })
       actions.setSubmitting(false)
     },
   })

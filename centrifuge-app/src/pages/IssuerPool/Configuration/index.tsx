@@ -1,5 +1,4 @@
 import { Stack } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -14,7 +13,7 @@ import { LoanTemplates } from './LoanTemplates'
 import { PoolConfig } from './PoolConfig'
 import { WriteOffGroups } from './WriteOffGroups'
 
-export const IssuerPoolConfigurationPage: React.FC = () => {
+export function IssuerPoolConfigurationPage() {
   return (
     <PageWithSideBar>
       <IssuerPoolHeader />
@@ -25,7 +24,7 @@ export const IssuerPoolConfigurationPage: React.FC = () => {
   )
 }
 
-const IssuerPoolConfiguration: React.FC = () => {
+function IssuerPoolConfiguration() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const { editPoolConfig } = useDebugFlags()
 

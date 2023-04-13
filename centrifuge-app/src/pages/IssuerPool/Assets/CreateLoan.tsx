@@ -2,9 +2,9 @@ import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
   Transaction,
   useCentrifuge,
+  useCentrifugeConsts,
   useCentrifugeTransaction,
   useTransactions,
-  useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -20,6 +20,7 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
@@ -31,9 +32,9 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
-import { useAddress } from '../../../utils/useAddress'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadata } from '../../../utils/useMetadata'
+import { usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePodAuth } from '../../../utils/usePodAuth'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, min, positiveNumber, required } from '../../../utils/validation'
@@ -67,6 +68,8 @@ export type CreateLoanFormValues = {
 }
 
 type TemplateFieldProps = LoanTemplateAttribute & { name: string }
+
+const NFT_DATA_BYTES = 43 + 48 + 65 // document_id attribute + document_version attribute + metadata
 
 function TemplateField({ label, name, input }: TemplateFieldProps) {
   switch (input.type) {
@@ -158,11 +161,21 @@ function IssuerCreateLoan() {
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
   const history = useHistory()
-  const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
-  const collateralCollectionId = pid
-  const { selectedAccount, selectedProxies } = useWallet().substrate
+
   const { addTransaction, updateTransaction } = useTransactions()
+  const {
+    uniques: { itemDeposit, metadataDepositBase, attributeDepositBase, depositPerByte },
+  } = useCentrifugeConsts()
+  const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
+  const { assetOriginators } = usePoolAccess(pid)
+  const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
+    ?.collateralCollections[0]?.id
+
+  const deposit = itemDeposit
+    .add(metadataDepositBase)
+    .add(attributeDepositBase.mul(new BN(2)))
+    .add(depositPerByte.mul(new BN(NFT_DATA_BYTES)))
 
   const { isAuthed, token } = usePodAuth(pid)
 
@@ -209,7 +222,7 @@ function IssuerCreateLoan() {
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !isAuthed || !token || !templateMetadata) return
+      if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
       const { decimals } = pool.currency
       const pricingInfo = {
         valuationMethod: values.pricing.valuationMethod,
@@ -248,7 +261,7 @@ function IssuerCreateLoan() {
           token,
           {
             attributes,
-            writeAccess: [address],
+            writeAccess: [account.actingAddress],
           },
         ])
 
@@ -263,7 +276,7 @@ function IssuerCreateLoan() {
           {
             documentId,
             collectionId: collateralCollectionId,
-            owner: address,
+            owner: account.actingAddress,
             publicAttributes,
             name: values.assetName,
             description: values.description,
@@ -273,16 +286,15 @@ function IssuerCreateLoan() {
 
         updateTransaction(txId, { status: 'unconfirmed' })
 
-        const connectedCent = centrifuge.connect(selectedAccount!.address, selectedAccount!.signer as any)
-        if (selectedProxies) {
-          connectedCent.setProxy(selectedProxies.map((p) => p.delegator))
-        }
+        const connectedCent = centrifuge.connect(account.signingAccount.address, account.signingAccount.signer as any)
 
         // Sign createLoan transaction
         const submittable = await lastValueFrom(
           connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
             signOnly: true,
             era: 100,
+            proxy: account.proxies?.map((p) => p.delegator),
+            multisig: account.multisig,
           })
         )
 
@@ -293,6 +305,7 @@ function IssuerCreateLoan() {
         // Send the signed createLoan transaction
         doTransaction([submittable], undefined, txId)
       } catch (e) {
+        console.error(e)
         updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create document NFT' })
       }
 
@@ -326,7 +339,11 @@ function IssuerCreateLoan() {
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isPending} disabled={!templateMetadata}>
+                  <Button
+                    type="submit"
+                    loading={isPending}
+                    disabled={!templateMetadata || !account || !collateralCollectionId}
+                  >
                     Create
                   </Button>
                 </>
