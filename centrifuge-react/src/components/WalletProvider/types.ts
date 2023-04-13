@@ -15,7 +15,7 @@ export type Proxy = { delegator: string; delegatee: string; types: string[] }
 
 export type EvmChainId = number
 
-export type Network = 'centrifuge' | number
+export type Network = 'centrifuge' | EvmChainId
 
 export type State = {
   connectedType: 'evm' | 'substrate' | null

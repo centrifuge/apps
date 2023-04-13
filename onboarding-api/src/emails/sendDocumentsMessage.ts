@@ -16,7 +16,7 @@ export const sendDocumentsMessage = async (
   trancheId: string,
   signedAgreement: any
 ) => {
-  const { metadata } = await getPoolById(poolId)
+  const { metadata, pool } = await getPoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '7d',
@@ -41,10 +41,10 @@ export const sendDocumentsMessage = async (
         dynamic_template_data: {
           rejectLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
             token
-          )}&status=rejected`,
+          )}&status=rejected&metadata=${pool?.metadata}`,
           approveLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
             token
-          )}&status=approved`,
+          )}&status=approved&metadata=${pool?.metadata}`,
           disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
         },
       },

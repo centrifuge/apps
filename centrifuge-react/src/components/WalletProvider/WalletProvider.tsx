@@ -12,7 +12,7 @@ import { useCentrifuge } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
 import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
 import { getStore } from './evm/utils'
-import { CombinedSubstrateAccount, Proxy, State, SubstrateAccount } from './types'
+import { CombinedSubstrateAccount, Network, Proxy, State, SubstrateAccount } from './types'
 import { useConnectEagerly } from './useConnectEagerly'
 import { Action, getPersisted, persist, useWalletStateInternal } from './useWalletState'
 import { useGetNetworkName } from './utils'
@@ -22,6 +22,8 @@ type WalletContextType = {
   connectedType: 'evm' | 'substrate' | null
   connectedNetwork: State['walletDialog']['network']
   connectedNetworkName: string | null
+  scopedNetworks: Network[] | null
+  setScopedNetworks: (scopedNetwork: Network[] | null) => void
   dispatch: (action: Action) => void
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
@@ -272,6 +274,8 @@ export function WalletProvider({
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
   const getNetworkName = useGetNetworkName(evmChains)
 
+  const [scopedNetworks, setScopedNetworks] = React.useState<WalletContextType['scopedNetworks']>(null)
+
   const ctx: WalletContextType = React.useMemo(() => {
     const combinedProxies = { ...proxies, ...nestedProxies }
     const combinedSubstrateAccounts =
@@ -321,6 +325,8 @@ export function WalletProvider({
       connectedType: state.connectedType,
       connectedNetwork,
       connectedNetworkName: connectedNetwork ? getNetworkName(connectedNetwork) : null,
+      scopedNetworks,
+      setScopedNetworks,
       dispatch,
       showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
         dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),

@@ -10,6 +10,7 @@ import {
   IconDownload,
   MenuItemGroup,
   Stack,
+  Text,
 } from '@centrifuge/fabric'
 import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -20,9 +21,9 @@ import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { isMetaMaskWallet } from './evm/utils'
 import { Logo, SelectAnchor, SelectButton } from './SelectButton'
-import { SelectionStep } from './SelectionStep'
+import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
 import { UserSelection } from './UserSelection'
-import { useGetNetworkName } from './utils'
+import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
 import { useWallet, wallets } from './WalletProvider'
 
 type Props = {
@@ -43,13 +44,17 @@ export function WalletDialog({ evmChains }: Props) {
     showWallets,
     connect: doConnect,
     evm,
+    scopedNetworks,
   } = ctx
 
   const getNetworkName = useGetNetworkName()
 
-  const shownWallets = (
-    selectedNetwork === 'centrifuge' ? [...wallets] : selectedNetwork ? [...evm.connectors.filter((c) => c.shown)] : []
-  ).sort((wallet) => (wallet.installed ? -1 : 1))
+  const shownWallets =
+    selectedNetwork === 'centrifuge'
+      ? sortCentrifugeWallets(wallets)
+      : selectedNetwork
+      ? sortEvmWallets(evm.connectors.filter((c) => c.shown))
+      : []
 
   function close() {
     dispatch({ type: 'closeWalletDialog' })
@@ -69,6 +74,14 @@ export function WalletDialog({ evmChains }: Props) {
     }
   }
 
+  function walletButtonMuted() {
+    return Boolean(
+      scopedNetworks &&
+        ((selectedNetwork === 'centrifuge' && !scopedNetworks.includes('centrifuge')) ||
+          (typeof selectedNetwork === 'number' && scopedNetworks.includes('centrifuge')))
+    )
+  }
+
   return (
     <Dialog title={view ? title[view] : undefined} isOpen={!!view} onClose={close}>
       <Stack gap={4}>
@@ -76,11 +89,16 @@ export function WalletDialog({ evmChains }: Props) {
 
         {view === 'wallets' ? (
           <>
-            <SelectionStep step={1} title="Choose network">
+            <SelectionStep
+              step={1}
+              title="Choose network"
+              tooltip={scopedNetworks && <SelectionStepTooltip networks={scopedNetworks} />}
+            >
               <SelectButton
                 logo={<Logo icon={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
                 active={selectedNetwork === 'centrifuge'}
+                muted={Boolean(scopedNetworks && !scopedNetworks.includes('centrifuge'))}
               >
                 {getNetworkName('centrifuge')}
               </SelectButton>
@@ -94,6 +112,7 @@ export function WalletDialog({ evmChains }: Props) {
                     logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
                     onClick={() => showWallets(Number(chainId))}
                     active={selectedNetwork === Number(chainId)}
+                    muted={Boolean(scopedNetworks && scopedNetworks.includes('centrifuge'))}
                   >
                     {info.name}
                   </SelectButton>
@@ -120,6 +139,7 @@ export function WalletDialog({ evmChains }: Props) {
                     }}
                     loading={isConnecting && wallet === pendingWallet}
                     active={selectedWallet === wallet}
+                    muted={walletButtonMuted()}
                   >
                     {getWalletLabel(wallet)}
                   </SelectButton>
@@ -129,12 +149,26 @@ export function WalletDialog({ evmChains }: Props) {
                     href={wallet.installUrl}
                     logo={<Logo icon={getWalletIcon(wallet)} />}
                     iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
+                    muted={walletButtonMuted()}
                   >
                     {getWalletLabel(wallet)}
                   </SelectAnchor>
                 )
               )}
             </SelectionStep>
+
+            <Text as="p" variant="body3" textAlign="center">
+              Need help connecting a wallet?{' '}
+              <Text
+                as="a"
+                href="https://docs.centrifuge.io/use/setup-wallet/"
+                target="_blank"
+                rel="noopener noreferrer"
+                textDecoration="underline"
+              >
+                Read our FAQ
+              </Text>
+            </Text>
           </>
         ) : (
           <>

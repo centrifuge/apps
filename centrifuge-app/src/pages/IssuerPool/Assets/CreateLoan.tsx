@@ -30,14 +30,13 @@ import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
-import { truncateText } from '../../../utils/formatting'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
-import { useMetadataMulti } from '../../../utils/useMetadata'
+import { useMetadata } from '../../../utils/useMetadata'
 import { usePodAuth } from '../../../utils/usePodAuth'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { combine, maxLength, positiveNumber, required } from '../../../utils/validation'
+import { combine, max, maxLength, min, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
 import { PricingInput } from './PricingInput'
 
@@ -53,7 +52,6 @@ export type CreateLoanFormValues = {
   image: File | null
   description: string
   assetName: string
-  templateId: string
   attributes: Record<string, string | number>
   pricing: {
     valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
@@ -90,7 +88,11 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
       )
     case 'currency': {
       return (
-        <Field name={name} validate={combine(required(), positiveNumber())} key={label}>
+        <Field
+          name={name}
+          validate={combine(required(), positiveNumber(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
+          key={label}
+        >
           {({ field, meta, form }: FieldProps) => {
             return (
               <CurrencyInput
@@ -116,7 +118,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
           as={NumberInput}
           label={`${label}*`}
           placeholder={input.placeholder}
-          validate={required()}
+          validate={combine(required(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
           rightElement={input.unit}
           min={input.min}
           max={input.max}
@@ -193,7 +195,6 @@ function IssuerCreateLoan() {
       image: null,
       description: '',
       assetName: '',
-      templateId: '',
       attributes: {},
       pricing: {
         valuationMethod: 'outstandingDebt',
@@ -208,7 +209,7 @@ function IssuerCreateLoan() {
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !isAuthed || !token) return
+      if (!podUrl || !collateralCollectionId || !address || !isAuthed || !token || !templateMetadata) return
       const { decimals } = pool.currency
       const pricingInfo = {
         valuationMethod: values.pricing.valuationMethod,
@@ -232,8 +233,8 @@ function IssuerCreateLoan() {
       }
       addTransaction(tx)
 
-      const attributes = valuesToPodAttributes(values.attributes, selectedTemplateMetadata) as any
-      attributes._template = { type: 'string', value: form.values.templateId }
+      const attributes = valuesToPodAttributes(values.attributes, templateMetadata as any) as any
+      attributes._template = { type: 'string', value: templateId }
 
       let imageMetadataHash
       if (values.image) {
@@ -251,7 +252,7 @@ function IssuerCreateLoan() {
           },
         ])
 
-        const publicAttributes = Object.entries(selectedTemplateMetadata.attributes)
+        const publicAttributes = Object.entries(templateMetadata.attributes!)
           .filter(([, attr]) => attr.public)
           .map(([key]) => key)
         publicAttributes.push('_template')
@@ -300,15 +301,8 @@ function IssuerCreateLoan() {
   })
 
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
-  const templateMetadata = useMetadataMulti(templateIds)
-
-  const templateSelectOptions = templateIds.map((id, i) => ({
-    label: truncateText((templateMetadata[i].data as LoanTemplate)?.name ?? `Template ${i + 1}`, 30),
-    value: id,
-  }))
-
-  const selectedTemplateMetadata = templateMetadata[templateIds.findIndex((id) => id === form.values.templateId)]
-    ?.data as LoanTemplate
+  const templateId = templateIds.at(-1)
+  const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
@@ -332,7 +326,7 @@ function IssuerCreateLoan() {
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isPending} disabled={!form.values.templateId}>
+                  <Button type="submit" loading={isPending} disabled={!templateMetadata}>
                     Create
                   </Button>
                 </>
@@ -351,40 +345,22 @@ function IssuerCreateLoan() {
                     placeholder=""
                     maxLength={100}
                   />
-                  <Field name="templateId" validate={required()}>
-                    {({ field, form, meta }: any) => (
-                      <Select
-                        name="templateId"
-                        placeholder="Select template"
-                        label="Asset template"
-                        options={templateSelectOptions}
-                        value={field.value}
-                        onChange={(event) => {
-                          form.setFieldValue('templateId', event.target.value)
-                        }}
-                        errorMessage={meta.touched ? meta.error : undefined}
-                        disabled={isPending}
-                      />
-                    )}
-                  </Field>
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">
                 <PricingInput poolId={pid} />
               </PageSection>
-              {selectedTemplateMetadata?.sections.map((section) => (
+              {templateMetadata?.sections?.map((section) => (
                 <PageSection
                   title={section.name}
                   titleAddition={
-                    section.attributes.some((key) => selectedTemplateMetadata?.attributes?.[key]?.public)
-                      ? 'Public'
-                      : 'Private'
+                    section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public) ? 'Public' : 'Private'
                   }
                   key={section.name}
                 >
                   <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
                     {section.attributes?.map((key) => {
-                      const attr = selectedTemplateMetadata?.attributes[key]
+                      const attr = templateMetadata?.attributes?.[key]
                       if (!attr) return null
                       const name = `attributes.${key}`
                       return <TemplateField {...attr} name={name} key={key} />
@@ -393,10 +369,10 @@ function IssuerCreateLoan() {
                 </PageSection>
               ))}
 
-              {(selectedTemplateMetadata?.options.image || selectedTemplateMetadata?.options.description) && (
+              {(templateMetadata?.options?.image || templateMetadata?.options?.description) && (
                 <PageSection title="Description" titleAddition="Optional">
                   <Stack gap={3}>
-                    {selectedTemplateMetadata.options.image && (
+                    {templateMetadata.options.image && (
                       <Field name="image" validate={validate.nftImage}>
                         {({ field, meta, form }: FieldProps) => (
                           <ImageUpload
@@ -412,7 +388,7 @@ function IssuerCreateLoan() {
                         )}
                       </Field>
                     )}
-                    {selectedTemplateMetadata.options.description && (
+                    {templateMetadata.options.description && (
                       <FieldWithErrorMessage
                         name="description"
                         as={TextAreaInput}

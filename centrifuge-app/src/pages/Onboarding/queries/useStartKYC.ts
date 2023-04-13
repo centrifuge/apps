@@ -12,7 +12,7 @@ type Indentity = {
 
 export const useStartKYC = () => {
   const { authToken } = useOnboardingAuth()
-  const { pool, onboardingUser, refetchOnboardingUser } = useOnboarding()
+  const { onboardingUser, refetchOnboardingUser } = useOnboarding()
 
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
@@ -29,7 +29,6 @@ export const useStartKYC = () => {
           dateOfBirth: values.dateOfBirth,
           countryOfCitizenship: values.countryOfCitizenship,
           countryOfResidency: values.countryOfResidency,
-          ...(investorType === 'individual' && pool && { poolId: pool.id, trancheId: pool.trancheId }),
           ...(investorType === 'individual' && { email: values.email }),
         }),
       })

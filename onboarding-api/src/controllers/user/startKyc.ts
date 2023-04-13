@@ -12,8 +12,6 @@ const kycInput = object({
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(),
   countryOfResidency: string().required(),
-  poolId: string(),
-  trancheId: string(),
 })
 
 export const startKycController = async (req: Request<any, any, InferType<typeof kycInput>>, res: Response) => {
@@ -27,6 +25,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       throw new HttpError(400, 'email required for individual kyc')
     }
 
+    // entity user will already be created when starting KYC
     if (
       userData?.investorType === 'entity' &&
       !userData.globalSteps.verifyEmail.completed &&
@@ -58,7 +57,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         'kycReference',
       ])
     } else {
-      const updatedUserData: IndividualUser = {
+      const newUser: IndividualUser = {
         investorType: 'individual',
         wallet: [req.wallet],
         kycReference,
@@ -78,30 +77,10 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
           verifyAccreditation: { completed: false, timeStamp: null },
           verifyTaxInfo: { completed: false, timeStamp: null },
         },
-        poolSteps:
-          body.poolId && body.trancheId
-            ? {
-                [body.poolId]: {
-                  [body.trancheId]: {
-                    signAgreement: {
-                      completed: false,
-                      timeStamp: null,
-                      transactionInfo: {
-                        extrinsicHash: null,
-                        blockNumber: null,
-                      },
-                    },
-                    status: {
-                      status: null,
-                      timeStamp: null,
-                    },
-                  },
-                },
-              }
-            : {},
+        poolSteps: {},
         email: body.email as string,
       }
-      await validateAndWriteToFirestore(wallet, updatedUserData, 'individual')
+      await validateAndWriteToFirestore(wallet, newUser, 'individual')
     }
 
     const payloadKYC = {

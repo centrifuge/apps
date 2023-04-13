@@ -73,14 +73,14 @@ export const updateInvestorStatusController = async (
       },
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['poolSteps'])
-
     if (user?.email && status === 'approved') {
       await addInvestorToMemberList(wallet.address, poolId, trancheId)
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
-      return res.status(204).send()
+      await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
+      return res.status(200).send({ poolId, trancheId })
     } else if (user?.email && status === 'rejected') {
       await sendRejectInvestorMessage(user.email, poolId)
+      await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
       throw new HttpError(400, 'Investor has been rejected')
     }
     throw new HttpError(400, 'Investor status may have already been updated')

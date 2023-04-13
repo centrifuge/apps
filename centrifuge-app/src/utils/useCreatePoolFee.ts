@@ -38,6 +38,7 @@ export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' 
   } = useCentrifugeConsts()
   const { selectedAccount } = useWallet().substrate
   const centrifuge = useCentrifuge()
+  const currencies = useCurrencies()
 
   // Retrieve the submittable with data currently in the form to see how much the transaction would cost
   // Only for when the pool creation goes via democracy
@@ -100,7 +101,7 @@ export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getProposeFee = React.useCallback(
     debounce((values: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) => {
-      if (!selectedAccount) return
+      if (!selectedAccount || !currencies) return
 
       const noJuniorTranches = values.tranches.slice(1)
       const tranches = [
@@ -117,7 +118,7 @@ export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' 
         '1234567890',
         '1234567890',
         tranches,
-        'ausd',
+        currencies[0].key,
         CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
         { ...mockMetadata, tranches } as any,
       ] as CreatePoolArgs)

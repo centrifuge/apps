@@ -1,6 +1,8 @@
+import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { CentrifugeContext } from '../CentrifugeProvider/CentrifugeProvider'
 import { EvmChains, getChainInfo } from './evm/chains'
+import { EvmConnectorMeta } from './evm/connectors'
 import { Network } from './types'
 import { useWallet } from './WalletProvider'
 
@@ -48,4 +50,30 @@ export function useGetExplorerUrl(network?: Network) {
       }
     },
   }
+}
+
+export function sortCentrifugeWallets(wallets: Wallet[]) {
+  const order = {
+    talisman: 1,
+    'subwallet-js': 2,
+    'polkadot-js': 3,
+  }
+
+  return wallets
+    .filter(({ extensionName }) => order[extensionName])
+    .sort((a, b) => order[a.extensionName] - order[b.extensionName])
+    .concat(wallets.filter(({ extensionName }) => !order[extensionName]))
+}
+
+export function sortEvmWallets(wallets: EvmConnectorMeta[]) {
+  const order = {
+    metamask: 1,
+    walletconnect: 2,
+    coinbase: 3,
+  }
+
+  return wallets
+    .filter(({ id }) => order[id])
+    .sort((a, b) => order[a.id] - order[b.id])
+    .concat(wallets.filter(({ id }) => !order[id]))
 }
