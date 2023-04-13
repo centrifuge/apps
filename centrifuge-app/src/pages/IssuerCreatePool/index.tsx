@@ -112,7 +112,7 @@ const initialValues: CreatePoolValues = {
   issuerDescription: '',
 
   executiveSummary: null,
-  website: '',
+  website: 'http://google.com',
   forum: '',
   email: 'onno+spam@k-f.co',
   details: [],
@@ -234,7 +234,7 @@ function CreatePoolForm() {
                   aoProxy,
                   undefined,
                   api.tx.utility.batchAll([
-                    api.tx.uniques.create(collateralCollectionId, aoProxy),
+                    // api.tx.uniques.create(collateralCollectionId, aoProxy),
                     api.tx.proxy.addProxy(admin, 'Any', 0),
                     api.tx.proxy.removeProxy(address, 'Any', 0),
                   ])
@@ -396,7 +396,6 @@ function CreatePoolForm() {
             [
               collateralCollectionId,
               CurrencyBalance.fromFloat(createDeposit, chainDecimals),
-              aoProxy,
               adminProxy,
               poolId,
               collectionId,
@@ -404,6 +403,7 @@ function CreatePoolForm() {
               currency.key,
               CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
               metadataValues,
+              aoProxy,
             ],
             { createType: config.poolCreationType }
           )
@@ -413,7 +413,7 @@ function CreatePoolForm() {
       setSubmitting(false)
     },
   })
-  console.log('form.values', form.values)
+  console.log('form', form)
   React.useEffect(() => {
     if (!isStoredIssuerLoading && storedIssuer && waitingForStoredIssuer) {
       if (storedIssuer.name) {

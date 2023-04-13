@@ -1,4 +1,4 @@
-import { addressToHex } from '@centrifuge/centrifuge-js'
+import { addressToHex, ComputedMultisig, Multisig } from '@centrifuge/centrifuge-js'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -12,7 +12,7 @@ import { useCentrifuge } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
 import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
 import { getStore } from './evm/utils'
-import { CombinedSubstrateAccount, ComputedMultisig, Multisig, Proxy, State, SubstrateAccount } from './types'
+import { CombinedSubstrateAccount, Proxy, State, SubstrateAccount } from './types'
 import { useConnectEagerly } from './useConnectEagerly'
 import { Action, getPersisted, persist, useWalletStateInternal } from './useWalletState'
 import { useGetNetworkName } from './utils'
@@ -143,7 +143,7 @@ export function WalletProvider({
 
   const delegatees = [...new Set(Object.values(proxies ?? {})?.flatMap((p) => p.map((d) => d.delegator)))]
   const { data: nestedProxies } = useQuery(
-    ['proxiesNested', delegatees],
+    ['nestedProxies', delegatees],
     () => firstValueFrom(cent.proxies.getMultiUserProxies([delegatees])),
     {
       enabled: !!Object.keys(proxies ?? {})?.length,

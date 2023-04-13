@@ -5,8 +5,7 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { config } from '../../../config'
-import { useAddress } from '../../../utils/useAddress'
-import { usePermissions } from '../../../utils/usePermissions'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { PoolDetailAssets } from '../../Pool/Assets'
 import { IssuerPoolHeader } from '../Header'
 
@@ -23,13 +22,12 @@ export const IssuerPoolAssetPage: React.FC = () => {
 
 const PoolDetailAssetsSideBar: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
-  const borrowerPermission = permissions?.pools[pid]?.roles.includes('Borrower')
+
+  const suitableAccounts = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
 
   return (
     <Stack px={8}>
-      {borrowerPermission && config.useDocumentNfts && (
+      {suitableAccounts.length > 0 && config.useDocumentNfts && (
         <RouterLinkButton to={`/issuer/${pid}/assets/create`} small>
           Create asset
         </RouterLinkButton>

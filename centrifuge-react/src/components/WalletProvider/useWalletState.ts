@@ -1,9 +1,9 @@
+import { computeMultisig, Multisig } from '@centrifuge/centrifuge-js'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { EvmConnectorMeta } from './evm/connectors'
 import { useConnectorState } from './evm/utils'
-import { Multisig, State } from './types'
-import { computeMultisig } from './utils'
+import { State } from './types'
 
 const PERSIST_KEY = 'centrifugeWalletPersist_v2'
 const SUBSTRATE_MULTISIGS_PERSIST_KEY = 'centrifugeWalletPersistMultisigs'

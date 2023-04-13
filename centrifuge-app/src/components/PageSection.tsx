@@ -3,7 +3,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 type Props = {
-  title?: string
+  title?: React.ReactNode
   titleAddition?: React.ReactNode
   subtitle?: string
   headerRight?: React.ReactNode

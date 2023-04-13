@@ -40,7 +40,6 @@ import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
-import { PodAuthProvider } from './PodAuthProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,20 +115,18 @@ export const Root: React.VFC = () => {
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
             <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
-              <PodAuthProvider>
-                <OnboardingAuthProvider>
-                  <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <Router>
-                        <LoadBoundary>
-                          <Routes />
-                        </LoadBoundary>
-                      </Router>
-                    </TransactionProvider>
-                  </DebugFlags>
-                </OnboardingAuthProvider>
-              </PodAuthProvider>
+              <OnboardingAuthProvider>
+                <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                  <TransactionProvider>
+                    <TransactionToasts />
+                    <Router>
+                      <LoadBoundary>
+                        <Routes />
+                      </LoadBoundary>
+                    </Router>
+                  </TransactionProvider>
+                </DebugFlags>
+              </OnboardingAuthProvider>
             </WalletProvider>
           </CentrifugeProvider>
         </FabricProvider>

@@ -28,7 +28,6 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
@@ -36,7 +35,7 @@ import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
-import { usePod } from '../../../utils/usePod'
+import { usePodAuth } from '../../../utils/usePodAuth'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, maxLength, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -163,12 +162,10 @@ function IssuerCreateLoan() {
   const { selectedAccount, selectedProxies } = useWallet().substrate
   const { addTransaction, updateTransaction } = useTransactions()
 
-  const { isAuth, authToken } = useAuth()
+  const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const podUrl = poolMetadata?.pod?.url
-
-  const { isLoggedIn } = usePod(podUrl)
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
@@ -211,7 +208,7 @@ function IssuerCreateLoan() {
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken) return
+      if (!podUrl || !collateralCollectionId || !address || !isAuthed || !token) return
       const { decimals } = pool.currency
       const pricingInfo = {
         valuationMethod: values.pricing.valuationMethod,
@@ -247,7 +244,7 @@ function IssuerCreateLoan() {
       try {
         const { documentId } = await centrifuge.pod.createDocument([
           podUrl,
-          authToken,
+          token,
           {
             attributes,
             writeAccess: [address],
@@ -261,7 +258,7 @@ function IssuerCreateLoan() {
 
         const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
           podUrl,
-          authToken,
+          token,
           {
             documentId,
             collectionId: collateralCollectionId,
@@ -290,7 +287,7 @@ function IssuerCreateLoan() {
 
         updateTransaction(txId, { status: 'pending' })
 
-        await centrifuge.pod.awaitJob([podUrl, authToken, jobId])
+        await centrifuge.pod.awaitJob([podUrl, token, jobId])
 
         // Send the signed createLoan transaction
         doTransaction([submittable], undefined, txId)
@@ -330,7 +327,7 @@ function IssuerCreateLoan() {
             title="Create asset"
             subtitle={poolMetadata?.pool?.name}
             actions={
-              isLoggedIn && (
+              isAuthed && (
                 <>
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
@@ -342,7 +339,7 @@ function IssuerCreateLoan() {
               )
             }
           />
-          {isLoggedIn ? (
+          {isAuthed ? (
             <>
               <PageSection titleAddition="Select a template to enter the asset details.">
                 <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
@@ -430,7 +427,7 @@ function IssuerCreateLoan() {
             </>
           ) : podUrl ? (
             <Box py={8}>
-              <PodAuthSection podUrl={podUrl} message="You need to be logged in to create assets" />
+              <PodAuthSection poolId={pid} message="You need to be logged in to create assets" />
             </Box>
           ) : (
             !poolMetadataIsLoading && (

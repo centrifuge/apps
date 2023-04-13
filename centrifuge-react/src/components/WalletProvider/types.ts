@@ -1,5 +1,6 @@
-import { Wallet, WalletAccount } from '@subwallet/wallet-connect/types'
-import { EvmConnectorMeta } from './evm/connectors'
+import type { ComputedMultisig } from '@centrifuge/centrifuge-js'
+import type { Wallet, WalletAccount } from '@subwallet/wallet-connect/types'
+import type { EvmConnectorMeta } from './evm/connectors'
 
 export type SubstrateAccount = WalletAccount
 
@@ -15,13 +16,6 @@ export type Proxy = { delegator: string; delegatee: string; types: string[] }
 export type EvmChainId = number
 
 export type Network = 'centrifuge' | number
-
-export type Multisig = {
-  signers: string[]
-  threshold: number
-}
-
-export type ComputedMultisig = Multisig & { address: string }
 
 export type State = {
   connectedType: 'evm' | 'substrate' | null

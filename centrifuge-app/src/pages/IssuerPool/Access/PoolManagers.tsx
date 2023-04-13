@@ -1,5 +1,5 @@
-import { addressToHex, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { ComputedMultisig, computeMultisig, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { addressToHex, ComputedMultisig, computeMultisig, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconMinusCircle, NumberInput, Stack, Text } from '@centrifuge/fabric'
 import { FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'

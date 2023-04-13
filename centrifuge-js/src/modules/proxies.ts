@@ -1,5 +1,5 @@
 import { encodeAddress } from '@polkadot/util-crypto'
-import { map, switchMap } from 'rxjs/operators'
+import { filter, map, repeatWhen, switchMap } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 import { addressToHex } from '../utils'
@@ -9,6 +9,12 @@ export function getProxiesModule(inst: CentrifugeBase) {
   // Used as a fallback for when the SubQuery is down
   function getAllProxies() {
     const $api = inst.getApi()
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.proxy.PureCreated.is(event))
+        return !!event
+      })
+    )
 
     return $api.pipe(
       switchMap((api) => api.query.proxy.proxies.entries()),
@@ -37,7 +43,8 @@ export function getProxiesModule(inst: CentrifugeBase) {
             }
           })
         return proxiesByDelegate
-      })
+      }),
+      repeatWhen(() => $events)
     )
   }
 
@@ -111,17 +118,19 @@ export function getProxiesModule(inst: CentrifugeBase) {
         const proxiesByUser: Record<string, { delegator: string; delegatee: string; types: string[] }[]> = {}
         data?.proxies.nodes.forEach((node) => {
           const delegatee = addressToHex(node.delegatee)
-          const index = proxiesByUser[delegatee]?.findIndex((p) => p.delegator === node.delegator)
+          const delegator = addressToHex(node.delegator)
+          const index = proxiesByUser[delegatee]?.findIndex((p) => p.delegator === delegator)
           if (index > -1) {
             proxiesByUser[delegatee][index].types.push(node.proxyType)
           } else {
             ;(proxiesByUser[delegatee] || (proxiesByUser[delegatee] = [])).push({
-              delegator: addressToHex(node.delegator),
+              delegator,
               delegatee,
               types: [node.proxyType],
             })
           }
         })
+        console.log('roxiesByUser', proxiesByUser)
         return proxiesByUser
       })
     )

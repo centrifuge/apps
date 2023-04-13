@@ -23,16 +23,6 @@ const mockMetadata = {
   forum: '',
   email: 'user@k-f.co',
   details: [],
-  riskGroups: [
-    {
-      groupName: 'A',
-      advanceRate: 100,
-      fee: 12,
-      probabilityOfDefault: 12,
-      lossGivenDefault: 12,
-      discountRate: 12,
-    },
-  ],
 }
 
 type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
@@ -99,7 +89,7 @@ export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' 
         setPaymentInfo(val?.[1] as any)
       },
       error: (error) => {
-        console.log('error', error)
+        console.error('getProposeFee error', error)
       },
     })
     return () => {

@@ -1,4 +1,4 @@
-import { PendingMultisigData } from '@centrifuge/centrifuge-js'
+import { ComputedMultisig, PendingMultisigData } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -25,7 +25,7 @@ import { useCentrifugeTransaction } from '../../hooks/useCentrifugeTransaction'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
-import { ComputedMultisig, useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
+import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
 import { useNeworkIcon } from '../WalletProvider/UserSelection'
@@ -76,7 +76,6 @@ function ConnectedMenu() {
     }
   )
   const [multisigDialogOpen, setMultisigDialogOpen] = React.useState(false)
-  console.log('pendingMultisigs', pendingMultisigs, ctx.substrate.selectedCombinedAccount)
 
   return (
     <Popover

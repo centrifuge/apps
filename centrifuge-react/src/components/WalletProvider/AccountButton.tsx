@@ -1,3 +1,4 @@
+import { ComputedMultisig } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import { WalletAccount } from '@subwallet/wallet-connect/types'
@@ -6,7 +7,7 @@ import styled, { useTheme } from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useCentrifuge } from '../CentrifugeProvider'
-import { ComputedMultisig, Proxy } from './types'
+import { Proxy } from './types'
 import { useWallet } from './WalletProvider'
 
 type AccountButtonProps = {

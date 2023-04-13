@@ -29,7 +29,7 @@ import {
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { TransactionOptions } from './types'
-import { isSameAddress } from './utils'
+import { computeMultisig, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
 
@@ -172,9 +172,16 @@ export class CentrifugeBase {
 
     if (options?.batch) return of(actualSubmittable)
 
-    const proxy = this.config.proxy || options?.proxy
+    const proxy = options?.proxy || this.config.proxy
+    const proxies = Array.isArray(proxy) ? proxy : [proxy]
+    let transferTx
+    if (options?.transferToActingAccount && (options?.multisig || options?.proxy)) {
+      const multi = options?.multisig && computeMultisig(options.multisig)
+      transferTx = api.tx.balances.transfer(proxies.at(-1) || multi?.address, options.transferToActingAccount)
+    }
+
     if (proxy && !options?.sendOnly) {
-      actualSubmittable = (Array.isArray(proxy) ? proxy : [proxy]).reduceRight(
+      actualSubmittable = proxies.reduceRight(
         (acc, delegator) => api.tx.proxy.proxy(delegator, undefined, acc),
         actualSubmittable
       )
@@ -186,6 +193,10 @@ export class CentrifugeBase {
       )
       console.log('multisig callData', actualSubmittable.method.toHex())
       actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
+    }
+
+    if (transferTx) {
+      actualSubmittable = api.tx.utility.batchAll([transferTx, actualSubmittable])
     }
 
     if (this.config.printExtrinsics) {

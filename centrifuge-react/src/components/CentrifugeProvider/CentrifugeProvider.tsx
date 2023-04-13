@@ -1,5 +1,6 @@
 import Centrifuge, { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { UserProvidedConfig } from '@centrifuge/centrifuge-js/dist/CentrifugeBase'
+import { ApiRx } from '@polkadot/api'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 
@@ -28,7 +29,7 @@ export function useCentrifugeKey() {
   return ctx.key
 }
 
-export function useCentrifugeApi() {
+export function useCentrifugeApi(): ApiRx {
   const cent = useCentrifuge()
   const centKey = useCentrifugeKey()
 
@@ -37,6 +38,7 @@ export function useCentrifugeApi() {
     staleTime: Infinity,
   })
 
+  // @ts-ignore type mismatch
   return api!
 }
 
@@ -58,6 +60,13 @@ export function useCentrifugeConsts() {
     },
     poolSystem: {
       poolDeposit: new CurrencyBalance(consts.poolSystem.poolDeposit, chainDecimals),
+    },
+    keystore: {
+      keyDeposit: CurrencyBalance.fromFloat(100, chainDecimals),
+    },
+    identity: {
+      basicDeposit: new CurrencyBalance(consts.identity.basicDeposit, chainDecimals),
+      fieldDeposit: new CurrencyBalance(consts.identity.fieldDeposit, chainDecimals),
     },
   }
 }

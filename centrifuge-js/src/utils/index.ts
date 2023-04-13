@@ -1,7 +1,9 @@
 import { u8aToHex } from '@polkadot/util'
-import { addressEq, decodeAddress } from '@polkadot/util-crypto'
+import { addressEq, createKeyMulti, decodeAddress, sortAddresses } from '@polkadot/util-crypto'
+import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
+import { ComputedMultisig, Multisig } from '../types'
 import { Dec } from './Decimal'
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
@@ -109,4 +111,33 @@ export function getDateYearsFromNow(years: number) {
 
 export function addressToHex(addr: string) {
   return u8aToHex(decodeAddress(addr))
+}
+
+export function computeTrancheId(trancheIndex: number, poolId: string) {
+  const a = new BN(trancheIndex).toArray('le', 8)
+  const b = new BN(poolId).toArray('le', 8)
+  const data = Uint8Array.from(a.concat(b))
+
+  return toHex(hash(data, 16))
+}
+
+function toHex(data: Uint8Array) {
+  const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+  const out = []
+
+  for (let i = 0; i < data.length; i++) {
+    out.push(hex[(data[i] >> 4) & 0xf])
+    out.push(hex[data[i] & 0xf])
+  }
+  return `0x${out.join('')}`
+}
+
+// Computes multisig address and sorts signers
+export function computeMultisig(multisig: Multisig): ComputedMultisig {
+  const address = u8aToHex(createKeyMulti(multisig.signers, multisig.threshold))
+  return {
+    address,
+    signers: sortAddresses(multisig.signers).map(addressToHex),
+    threshold: multisig.threshold,
+  }
 }

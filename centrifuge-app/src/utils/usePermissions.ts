@@ -1,7 +1,9 @@
-import { PoolRoles } from '@centrifuge/centrifuge-js'
-import { computeMultisig, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import { addressToHex, Collection, computeMultisig, PoolRoles } from '@centrifuge/centrifuge-js'
+import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
+import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
 import { useAddress } from './useAddress'
+import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
 import { usePool, usePoolMetadata } from './usePools'
 import { isSameAddress } from './web3'
@@ -116,15 +118,94 @@ export function usePoolAccess(poolId: string) {
   const aoProxies =
     (admin &&
       proxies?.[admin]
-        ?.filter((p) => p.types.includes('Any') && poolPermissions[p.delegator]?.roles.includes('Borrower'))
+        ?.filter((p) => p.types.includes('Any')) //  && poolPermissions[p.delegator]?.roles.includes('Borrower')
         .map((p) => p.delegator)) ||
     null
+  const collections = useCollections()
+
+  const aoCollateralCollections: Record<string, Collection[]> = {}
+  aoProxies?.forEach((ao) => {
+    aoCollateralCollections[ao] = (collections || [])?.filter((col) => col.issuer === ao)
+  })
+
+  const [isAoSetUp] = useCentrifugeQuery(
+    ['aoSetup', aoProxies],
+    (cent) => {
+      const $events = cent.getEvents().pipe(
+        filter(({ api, events }) => {
+          const event = events.find(({ event }) => api.events.keystore.KeyAdded.is(event))
+          return !!event
+        })
+      )
+      return cent.getApi().pipe(
+        switchMap((api) => combineLatest(aoProxies!.map((addr) => api.query.keystore.keys.entries(addr)))),
+        map((keyData) => {
+          const values = (keyData as any[]).map((data) => data.length > 0)
+          return values
+        }),
+        repeatWhen(() => $events)
+      )
+    },
+    {
+      enabled: !!aoProxies?.length,
+    }
+  )
+  const [aoDelegates] = useCentrifugeQuery(
+    ['proxyDelegates', aoProxies],
+    (cent) =>
+      cent.getApi().pipe(
+        switchMap((api) => api.queryMulti(aoProxies!.map((addr) => [api.query.proxy.proxies, addr]))),
+        map((proxiesData) => {
+          const values = (proxiesData as any[]).map((data) => data[0].toJSON())
+
+          const delegatesByAO: { delegator: string; delegatee: string; types: string[] }[][] = []
+          aoProxies!.forEach((delegator, i) => {
+            const proxiesByDelegate: Record<string, { delegator: string; delegatee: string; types: string[] }> = {}
+            const delegates = values[i]
+            delegates.forEach((node: any) => {
+              const delegatee = addressToHex(node.delegate)
+              if (delegatee === admin) return
+              if (proxiesByDelegate[delegatee]) {
+                proxiesByDelegate[delegatee].types.push(node.proxyType)
+              } else {
+                proxiesByDelegate[delegatee] = {
+                  delegator,
+                  delegatee,
+                  types: [node.proxyType],
+                }
+              }
+            })
+            delegatesByAO.push(Object.values(proxiesByDelegate))
+          })
+
+          console.log('delegatesData', proxiesData, delegatesByAO)
+          return delegatesByAO
+        })
+      ),
+    {
+      enabled: !!aoProxies?.length,
+    }
+  )
+
+  console.log('aoProxies', aoProxies, isAoSetUp, aoCollateralCollections)
+
   return {
     admin,
     multisig: useMemo(
       () => (metadata?.adminMultisig && computeMultisig(metadata.adminMultisig)) || null,
       [metadata?.adminMultisig]
     ),
-    aoProxies,
+    assetOriginators: useMemo(
+      () =>
+        aoProxies?.map((addr, i) => ({
+          address: addr,
+          isSetUp: !!isAoSetUp?.[i],
+          collateralCollections: aoCollateralCollections[addr],
+          permissions: poolPermissions?.[addr] || { roles: [], tranches: {} },
+          delegates: aoDelegates?.[i].filter((p) => !p.types.includes('PodOperation')) || [],
+        })) || [],
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [collections, aoDelegates, isAoSetUp, poolPermissions]
+    ),
   }
 }

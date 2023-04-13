@@ -456,7 +456,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           minInitialInvestment: '5000000000000000000000',
         },
       },
-      riskGroups: [],
     }
 
     function getEpochStatus(): 'challengePeriod' | 'submissionPeriod' | 'ongoing' | 'executionPeriod' {

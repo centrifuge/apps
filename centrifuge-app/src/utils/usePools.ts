@@ -196,3 +196,10 @@ export function useWriteOffGroups(poolId: string) {
 
   return result
 }
+
+export function usePodUrl(poolId: string) {
+  const pool = usePool(poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
+  const podUrl = poolMetadata?.pod?.url
+  return podUrl
+}
