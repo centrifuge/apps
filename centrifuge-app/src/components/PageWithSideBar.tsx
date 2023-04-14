@@ -12,6 +12,7 @@ import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
 import { LogoLink } from './LogoLink'
 import { Menu } from './Menu'
+import { OnboardingStatus } from './OnboardingStatus'
 
 type Props = {
   sidebar?: React.ReactNode
@@ -31,7 +32,6 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
   const isMedium = useIsAboveBreakpoint('M')
   const { connectedType } = useWallet()
   const { pid: poolId } = useParams<{ pid: string }>()
-
   const isTinlakePool = poolId?.startsWith('0x')
 
   const theme = useTheme()
@@ -87,7 +87,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           <Shelf justifyContent="space-between">
             <LogoLink />
             <Stack gap={4}>
-              <WalletMenu />
+              <WalletMenu menuItems={[<OnboardingStatus />]} />
             </Stack>
           </Shelf>
         ) : (
@@ -143,7 +143,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           ) : (
             <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
               <Stack mb={9} px={8} gap={4}>
-                <WalletMenu />
+                <WalletMenu menuItems={[<OnboardingStatus />]} />
               </Stack>
 
               {shouldRenderFaucet && <Faucet />}

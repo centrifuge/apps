@@ -117,16 +117,18 @@ export const Root: React.VFC = () => {
             <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
                 <OnboardingAuthProvider>
-                  <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <Router>
-                        <LoadBoundary>
-                          <Routes />
-                        </LoadBoundary>
-                      </Router>
-                    </TransactionProvider>
-                  </DebugFlags>
+                  <OnboardingProvider>
+                    <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                      <TransactionProvider>
+                        <TransactionToasts />
+                        <Router>
+                          <LoadBoundary>
+                            <Routes />
+                          </LoadBoundary>
+                        </Router>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </OnboardingProvider>
                 </OnboardingAuthProvider>
               </PodAuthProvider>
             </WalletProvider>
@@ -183,9 +185,9 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingProvider>
-          <OnboardingPage />
-        </OnboardingProvider>
+        {/* <OnboardingProvider> */}
+        <OnboardingPage />
+        {/* </OnboardingProvider> */}
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />

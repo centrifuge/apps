@@ -1,5 +1,6 @@
 import css from '@styled-system/css'
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { VisualButton, VisualButtonProps } from './VisualButton'
 
@@ -24,10 +25,19 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
   loadingMessage,
   children,
   active,
+  href,
   ...anchorProps
 }) => {
+  const isExternal = !href?.startsWith('/')
+
   return (
-    <StyledAnchor $disabled={loading || disabled} rel="noopener noreferrer" {...anchorProps}>
+    <StyledAnchor
+      $disabled={loading || disabled}
+      as={isExternal ? 'a' : Link}
+      {...(!isExternal ? { to: href } : {})}
+      rel={isExternal ? 'noopener noreferrer' : undefined}
+      {...anchorProps}
+    >
       <VisualButton
         variant={variant}
         small={small}

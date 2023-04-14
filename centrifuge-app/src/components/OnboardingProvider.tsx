@@ -27,6 +27,8 @@ interface OnboardingContextType<User, Pool> {
   setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
 }
 
+export type VerificationStatus = 'unverified' | 'pending' | 'verified'
+
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser, OnboardingPool> | null>(null)
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
@@ -123,4 +125,16 @@ export const useOnboarding = <
   const ctx = React.useContext(OnboardingContext) as OnboardingContextType<User, Pool>
   if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
+}
+
+export const useVerificationStatus = (): VerificationStatus => {
+  const { onboardingUser } = useOnboarding()
+
+  return onboardingUser
+    ? Object.values(onboardingUser.globalSteps)
+        .map(({ completed }) => completed)
+        .includes(false)
+      ? 'pending'
+      : 'verified'
+    : 'unverified'
 }
