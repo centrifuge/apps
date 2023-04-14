@@ -11,6 +11,7 @@ export default defineConfig({
       ignored: ['!../centrifuge-js/dist/**', '!../fabric/dist/**'],
     },
     port: 3000,
+    cors: true,
   },
   envPrefix: 'REACT_APP_',
   envDir: '.env-config',

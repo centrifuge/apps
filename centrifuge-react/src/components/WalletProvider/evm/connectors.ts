@@ -50,22 +50,6 @@ export function getEvmConnectors(
 
   return [
     {
-      id: 'metamask',
-      title: 'MetaMask',
-      installUrl: 'https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn',
-      logo: {
-        src: metamaskLogo,
-        alt: 'MetaMask',
-      },
-      connector: metaMask,
-      get installed() {
-        return isInjected() && !isCoinbaseWallet()
-      },
-      get shown() {
-        return !isMobile() || this.installed
-      },
-    },
-    {
       id: 'gnosis-safe',
       title: 'Gnosis Safe',
       installUrl: '',
@@ -81,6 +65,23 @@ export function getEvmConnectors(
         return false
       },
     },
+    {
+      id: 'metamask',
+      title: 'MetaMask',
+      installUrl: 'https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn',
+      logo: {
+        src: metamaskLogo,
+        alt: 'MetaMask',
+      },
+      connector: metaMask,
+      get installed() {
+        return isInjected() && !isCoinbaseWallet()
+      },
+      get shown() {
+        return !isMobile() || this.installed
+      },
+    },
+
     {
       id: 'walletconnect',
       title: 'WalletConnect',
