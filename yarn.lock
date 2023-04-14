@@ -1775,14 +1775,14 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^4.32.0
     "@typescript-eslint/parser": ^4.32.0
     "@walletconnect/ethereum-provider": ^1
-    "@web3-react/coinbase-wallet": 8.0.34-beta.0
+    "@web3-react/coinbase-wallet": 8.1.2-beta.0
     "@web3-react/core": 8.1.2-beta.0
-    "@web3-react/empty": 8.0.20-beta.0
-    "@web3-react/gnosis-safe": ^8.1.2-beta.0
-    "@web3-react/metamask": 8.0.29-beta.0
-    "@web3-react/store": 8.0.25-beta.0
-    "@web3-react/types": 8.0.20-beta.0
-    "@web3-react/walletconnect": 8.0.36-beta.0
+    "@web3-react/empty": 8.1.2-beta.0
+    "@web3-react/gnosis-safe": 8.1.2-beta.0
+    "@web3-react/metamask": 8.1.2-beta.0
+    "@web3-react/store": 8.1.2-beta.0
+    "@web3-react/types": 8.1.2-beta.0
+    "@web3-react/walletconnect": 8.1.2-beta.0
     babel-loader: 8.1.0
     bn.js: ^5.2.1
     buffer: ^6.0.3
@@ -9196,7 +9196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@walletconnect/ethereum-provider@npm:^1":
+"@walletconnect/ethereum-provider@npm:^1, @walletconnect/ethereum-provider@npm:^1.7.8":
   version: 1.8.0
   resolution: "@walletconnect/ethereum-provider@npm:1.8.0"
   dependencies:
@@ -9388,14 +9388,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/coinbase-wallet@npm:8.0.34-beta.0":
-  version: 8.0.34-beta.0
-  resolution: "@web3-react/coinbase-wallet@npm:8.0.34-beta.0"
+"@web3-react/coinbase-wallet@npm:8.1.2-beta.0":
+  version: 8.1.2-beta.0
+  resolution: "@web3-react/coinbase-wallet@npm:8.1.2-beta.0"
   dependencies:
-    "@web3-react/types": ^8.0.20-beta.0
+    "@web3-react/types": ^8.1.2-beta.0
   peerDependencies:
     "@coinbase/wallet-sdk": ^3.0.4
-  checksum: d1cc2764111ace5b9e791f3204cd988f633df0d2a5731713d827b2ca1a68e5e934d26a58c5b39642a60e673a93c96448cd8d9163f9729194242110bc273e44fb
+  checksum: 6e37851dfd628d0b22e1a3983b1a7438d077f0bd5adecb06898df37b5277f20466a3c9e239c4d2ca5319b7c3d832ca98ab6fc6530d8b8f3fa78f6d436c2cb4bc
   languageName: node
   linkType: hard
 
@@ -9416,16 +9416,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/empty@npm:8.0.20-beta.0":
-  version: 8.0.20-beta.0
-  resolution: "@web3-react/empty@npm:8.0.20-beta.0"
+"@web3-react/empty@npm:8.1.2-beta.0":
+  version: 8.1.2-beta.0
+  resolution: "@web3-react/empty@npm:8.1.2-beta.0"
   dependencies:
-    "@web3-react/types": ^8.0.20-beta.0
-  checksum: 2191213672bd2010f4ef3b1839f0d088b25184c30e04c029f32ef62a602cd111e1d4fff79093ffb3cfad4207e04daee122c559784085e8d3a86d665d44120625
+    "@web3-react/types": ^8.1.2-beta.0
+  checksum: 1fc210bcdde5e2dce53c9ec9b09a578d2db5c3deecf8cc99b6d00157f61651f6a1815526eaa978eaad8273e3f72d9382645ab2eaa6d059dc9d71a3f5c3392d89
   languageName: node
   linkType: hard
 
-"@web3-react/gnosis-safe@npm:^8.1.2-beta.0":
+"@web3-react/gnosis-safe@npm:8.1.2-beta.0":
   version: 8.1.2-beta.0
   resolution: "@web3-react/gnosis-safe@npm:8.1.2-beta.0"
   dependencies:
@@ -9436,28 +9436,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/metamask@npm:8.0.29-beta.0":
-  version: 8.0.29-beta.0
-  resolution: "@web3-react/metamask@npm:8.0.29-beta.0"
+"@web3-react/metamask@npm:8.1.2-beta.0":
+  version: 8.1.2-beta.0
+  resolution: "@web3-react/metamask@npm:8.1.2-beta.0"
   dependencies:
     "@metamask/detect-provider": ^1.2.0
-    "@web3-react/types": ^8.0.20-beta.0
-  checksum: 2e0692072af033d50099d444bd423b45ccd7962b63a0d04353da91cefee5e069d67d2d4132760c87894b1b1b50a56a8328d99020b8d8c2847454bbd3c216fba7
+    "@web3-react/types": ^8.1.2-beta.0
+  checksum: 83088d5eacb7dacefc3366071c76e9cf5605580a2830ce02ac47dee09f388d6606fd9ddb2d48fe7cbbe3adea5da63412c2091cf8668fb02c29daf2fa85409700
   languageName: node
   linkType: hard
 
-"@web3-react/store@npm:8.0.25-beta.0":
-  version: 8.0.25-beta.0
-  resolution: "@web3-react/store@npm:8.0.25-beta.0"
-  dependencies:
-    "@ethersproject/address": ^5
-    "@web3-react/types": ^8.0.20-beta.0
-    zustand: ^4.0.0-rc.0
-  checksum: fc8e0f8476fcb149717b705ad0075b5a0fb3e0515985307fb8b6198340107f60df70c8a0a842776e127ec577e6646bd8550730f3e6a21300a7f957f7796dbad9
-  languageName: node
-  linkType: hard
-
-"@web3-react/store@npm:^8.1.2-beta.0":
+"@web3-react/store@npm:8.1.2-beta.0, @web3-react/store@npm:^8.1.2-beta.0":
   version: 8.1.2-beta.0
   resolution: "@web3-react/store@npm:8.1.2-beta.0"
   dependencies:
@@ -9468,16 +9457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/types@npm:8.0.20-beta.0, @web3-react/types@npm:^8.0.20-beta.0":
-  version: 8.0.20-beta.0
-  resolution: "@web3-react/types@npm:8.0.20-beta.0"
-  dependencies:
-    zustand: ^4.0.0-rc.0
-  checksum: 5cbc13b7c67b303e4a65c11f95c3b1b66f277f70e1d57e2b94a8147fab6d9352f8b3ade344c535a6bbb09c050d11933ee99e7809383c36fa72a79a528cd90298
-  languageName: node
-  linkType: hard
-
-"@web3-react/types@npm:^8.1.2-beta.0":
+"@web3-react/types@npm:8.1.2-beta.0, @web3-react/types@npm:^8.1.2-beta.0":
   version: 8.1.2-beta.0
   resolution: "@web3-react/types@npm:8.1.2-beta.0"
   dependencies:
@@ -9486,15 +9466,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/walletconnect@npm:8.0.36-beta.0":
-  version: 8.0.36-beta.0
-  resolution: "@web3-react/walletconnect@npm:8.0.36-beta.0"
+"@web3-react/walletconnect@npm:8.1.2-beta.0":
+  version: 8.1.2-beta.0
+  resolution: "@web3-react/walletconnect@npm:8.1.2-beta.0"
   dependencies:
-    "@web3-react/types": ^8.0.20-beta.0
-    eventemitter3: ^4.0.7
-  peerDependencies:
     "@walletconnect/ethereum-provider": ^1.7.8
-  checksum: c6752c553d5c6a269a0ae9c1e53ff1bb3480062c2738d6df87f695a64dbe4fafc68248ade812bd46b17a94ade29e23c9113dc934d4f33b290510f598741dff57
+    "@web3-react/types": ^8.1.2-beta.0
+    eventemitter3: ^4.0.7
+  checksum: 7258e2ddefe665937f7186fb7e8d23b56e13b2469dbbcd0ad9991607604d64bb5eabe76f67b638c9e89f80f9831d7ebe404728aea3c2043670e2ee961cea510b
   languageName: node
   linkType: hard
 
@@ -27907,7 +27886,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"zustand@npm:^4.0.0-rc.0, zustand@npm:^4.3.5":
+"zustand@npm:^4.3.5":
   version: 4.3.6
   resolution: "zustand@npm:4.3.6"
   dependencies:

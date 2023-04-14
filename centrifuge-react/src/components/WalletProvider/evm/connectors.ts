@@ -2,7 +2,6 @@ import coinbasewalletLogo from '@centrifuge/fabric/assets/logos/coinbasewallet.s
 import metamaskLogo from '@centrifuge/fabric/assets/logos/metamask.svg'
 import walletconnectLogo from '@centrifuge/fabric/assets/logos/walletconnect.svg'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
-import { initializeConnector } from '@web3-react/core'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
@@ -47,8 +46,7 @@ export function getEvmConnectors(
         },
       })
   )
-  const [gnosisSafe] = initializeConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
-  // const [gnosisSafe] = createConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
+  const [gnosisSafe] = createConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
 
   return [
     {
