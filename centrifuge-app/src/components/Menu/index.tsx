@@ -1,31 +1,17 @@
 import { Box, IconInvestments, IconNft, Menu as Panel, MenuItemGroup, Shelf, Stack } from '@centrifuge/fabric'
-import * as React from 'react'
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
-import { usePermissions } from '../../utils/usePermissions'
-import { usePools } from '../../utils/usePools'
+import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { IssuerMenu } from './IssuerMenu'
 import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
 export function Menu() {
-  const allPools = usePools(false)
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
+  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isXLarge = useIsAboveBreakpoint('XL')
-
-  const pools = React.useMemo(() => {
-    if (!allPools || !permissions) {
-      return []
-    }
-
-    return allPools.filter(
-      ({ id }) =>
-        permissions.pools[id]?.roles.includes('PoolAdmin') || permissions.pools[id]?.roles.includes('MemberListAdmin')
-    )
-  }, [allPools, permissions])
+  const address = useAddress('substrate')
 
   return (
     <Shelf

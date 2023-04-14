@@ -13,11 +13,12 @@ export const OnboardingAuthContext = React.createContext<{
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export function OnboardingAuthProvider({ children }: { children: React.ReactNode }) {
-  const { selectedWallet, proxy, selectedAccount } = useWallet().substrate
+  const { selectedWallet, selectedProxies, selectedAccount } = useWallet().substrate
   const { selectedAddress } = useWallet().evm
   const cent = useCentrifuge()
   const provider = useEvmProvider()
   const walletAddress = selectedAccount?.address ?? selectedAddress
+  const proxy = selectedProxies?.[0]
 
   const { data: session, refetch: refetchSession } = useQuery(
     ['session', selectedAccount?.address, proxy?.delegator, selectedAddress],

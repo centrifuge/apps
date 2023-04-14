@@ -192,7 +192,6 @@ export type Pool = {
   value: CurrencyBalance
   createdAt: string | null
   tranches: Token[]
-  isInitialised: boolean
   reserve: {
     max: CurrencyBalance
     available: CurrencyBalance
@@ -516,13 +515,11 @@ export function getPoolsModule(inst: Centrifuge) {
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
-      metadata: PoolMetadataInput,
-      assetOriginator?: string,
-      collateralCollectionId?: string
+      metadata: PoolMetadataInput
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, metadata, assetOriginator, collateralCollectionId] = args
+    const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
 
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
@@ -563,13 +560,15 @@ export function getPoolsModule(inst: Centrifuge) {
               tx = api.tx.utility.batchAll(
                 [
                   poolTx,
-                  api.tx.permissions.add(
-                    { PoolRole: 'PoolAdmin' },
-                    admin,
-                    { Pool: poolId },
-                    {
-                      PoolRole: 'MemberListAdmin',
-                    }
+                  ['MemberListAdmin', 'LoanAdmin'].map((role) =>
+                    api.tx.permissions.add(
+                      { PoolRole: 'PoolAdmin' },
+                      admin,
+                      { Pool: poolId },
+                      {
+                        PoolRole: role,
+                      }
+                    )
                   ),
                   metadata.adminMultisig?.signers.map((signer) =>
                     ['MemberListAdmin', 'LiquidityAdmin'].map((role) =>
@@ -583,26 +582,6 @@ export function getPoolsModule(inst: Centrifuge) {
                       )
                     )
                   ),
-                  // [
-                  //   'Borrower',
-                  //   'LoanAdmin',
-                  //   {
-                  //     TrancheInvestor: [
-                  //       computeTrancheId(0, poolId),
-                  //       Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60),
-                  //     ],
-                  //   },
-                  // ].map((role) =>
-                  //   api.tx.permissions.add(
-                  //     { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
-                  //     assetOriginator || admin,
-                  //     { Pool: poolId },
-                  //     {
-                  //       PoolRole: role,
-                  //     }
-                  //   )
-                  // ),
-                  // collateralCollectionId && api.tx.uniques.create(collateralCollectionId, assetOriginator || admin),
                 ]
                   .flat(2)
                   .filter(Boolean)
@@ -627,34 +606,30 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function initialisePool(
-    args: [
-      admin: string,
-      poolId: string,
-      metadata: Pick<PoolMetadata, 'adminMultisig' | 'tranches'>,
-      assetOriginator?: string,
-      collateralCollectionId?: string
-    ],
+    args: [poolId: string, admin: string, metadata: Pick<PoolMetadata, 'adminMultisig'>],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, metadata, assetOriginator, collateralCollectionId] = args
+    const [admin, poolId, metadata] = args
 
     return inst.getApi().pipe(
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll(
           [
-            api.tx.permissions.add(
-              { PoolRole: 'PoolAdmin' },
-              admin,
-              { Pool: poolId },
-              {
-                PoolRole: 'MemberListAdmin',
-              }
+            ['MemberListAdmin', 'LoanAdmin'].map((role) =>
+              api.tx.permissions.add(
+                { PoolRole: 'PoolAdmin' },
+                admin,
+                { Pool: poolId },
+                {
+                  PoolRole: role,
+                }
+              )
             ),
-            metadata.adminMultisig?.signers.map((addr) =>
+            metadata.adminMultisig?.signers.map((signer) =>
               ['MemberListAdmin', 'LiquidityAdmin'].map((role) =>
                 api.tx.permissions.add(
                   { PoolRole: 'PoolAdmin' },
-                  addr,
+                  signer,
                   { Pool: poolId },
                   {
                     PoolRole: role,
@@ -662,25 +637,8 @@ export function getPoolsModule(inst: Centrifuge) {
                 )
               )
             ),
-            // [
-            //   'Borrower',
-            //   'LoanAdmin',
-            //   {
-            //     TrancheInvestor: [computeTrancheId(0, poolId), Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)],
-            //   },
-            // ].map((role) =>
-            //   api.tx.permissions.add(
-            //     { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
-            //     assetOriginator || admin,
-            //     { Pool: poolId },
-            //     {
-            //       PoolRole: role,
-            //     }
-            //   )
-            // ),
-            // collateralCollectionId && api.tx.uniques.create(collateralCollectionId, assetOriginator || admin),
           ]
-            .flat()
+            .flat(2)
             .filter(Boolean)
         )
         return inst.wrapSignAndSend(api, submittable, options)
@@ -1409,7 +1367,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 createdAt: null,
                 metadata,
                 currency,
-                isInitialised: true,
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
                   const trancheKeyIndex = trancheIdToIndex[trancheId]

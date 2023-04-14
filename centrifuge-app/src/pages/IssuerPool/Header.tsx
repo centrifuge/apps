@@ -6,8 +6,7 @@ import { useTheme } from 'styled-components'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
-import { useAddress } from '../../utils/useAddress'
-import { usePermissions, useSuitableAccounts } from '../../utils/usePermissions'
+import { usePoolPermissions, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -22,15 +21,9 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
 
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
-
-  // const hasSomeAdminRole = useSuitableAccounts({
-  //   poolId: pid,
-  //   poolRole: ['PoolAdmin', 'LoanAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'Borrower'],
-  // }).length > 0
-
   const [poolAdmin] = useSuitableAccounts({ poolId: pid, poolRole: ['PoolAdmin'] })
+  const permissions = usePoolPermissions(pid)
+  const shouldInitialise = !permissions?.[poolAdmin?.actingAddress]?.roles.includes('LoanAdmin')
 
   const { execute: executeInitialise, isLoading: isInitialiseLoading } = useCentrifugeTransaction(
     'Initialise pool',
@@ -40,8 +33,8 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   if (!pool || !permissions) return null
 
   async function initialisePool() {
-    const id = await cent.nfts.getAvailableCollectionId()
-    executeInitialise([address!, pid, id])
+    if (!metadata) return
+    executeInitialise([pid, poolAdmin.actingAddress, metadata!], { account: poolAdmin })
   }
 
   return (
@@ -75,14 +68,12 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
         }
         border={false}
         actions={
-          !pool.isInitialised ? (
+          poolAdmin && shouldInitialise ? (
             <>
               <Text variant="body2">Pool is not yet initialised</Text>
-              {poolAdmin && (
-                <Button small onClick={initialisePool} loading={isInitialiseLoading}>
-                  Initialise Pool
-                </Button>
-              )}
+              <Button small onClick={initialisePool} loading={isInitialiseLoading}>
+                Initialise Pool
+              </Button>
             </>
           ) : (
             actions

@@ -1,11 +1,11 @@
 import { addressToHex, Collection, computeMultisig, PoolRoles } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentrifugeQueries, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
 import { useAddress } from './useAddress'
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
-import { usePool, usePoolMetadata } from './usePools'
+import { usePool, usePoolMetadata, usePools } from './usePools'
 import { isSameAddress } from './web3'
 
 export function usePermissions(address?: string) {
@@ -21,6 +21,44 @@ export function usePoolPermissions(poolId?: string) {
   })
 
   return result
+}
+
+export function useUserPermissionsMulti(addresses: string[]) {
+  const [results] = useCentrifugeQueries(
+    addresses.map((address) => ({
+      queryKey: ['permissions', address],
+      queryCallback: (cent) => cent.pools.getUserPermissions([address!]),
+    }))
+  )
+
+  return results
+}
+
+// Better name welcomed lol
+export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
+  const {
+    substrate: { combinedAccounts },
+  } = useWallet()
+  const actingAddresses = [...new Set(combinedAccounts?.map((acc) => acc.actingAddress))]
+  const permissionResults = useUserPermissionsMulti(actingAddresses)
+
+  const poolIds = new Set(
+    permissionResults
+      .map((permissions) =>
+        Object.entries(permissions?.pools || {}).map(([poolId, roles]) => (roles.roles.length ? poolId : []))
+      )
+      .flat(2)
+  )
+
+  const pools = usePools(false)
+  const filtered = pools?.filter((p) => poolIds.has(p.id))
+
+  return filtered
+
+  // const hasSomeAdminRole = useSuitableAccounts({
+  //   poolId: pid,
+  //   poolRole: ['PoolAdmin', 'LoanAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'Borrower'],
+  // }).length > 0
 }
 
 // Returns whether the connected address can borrow from a pool in principle
