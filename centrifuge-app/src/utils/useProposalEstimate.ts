@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import * as React from 'react'
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
 import { config } from '../config'
+import { useCurrencies } from './useCurrencies'
 
 const mockMetadata = {
   poolIcon: '0x',
