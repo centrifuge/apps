@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import * as React from 'react'
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
 import { config } from '../config'
+import { useCurrencies } from './useCurrencies'
 
 const mockMetadata = {
   poolIcon: '0x',
@@ -43,6 +44,7 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
   const [chainDecimals, setChainDecimals] = React.useState(18)
   const { selectedAccount } = useWallet().substrate
   const centrifuge = useCentrifuge()
+  const currencies = useCurrencies()
 
   // Retrieve the submittable with data currently in the form to see how much the transaction would cost
   // Only for when the pool creation goes via democracy
@@ -97,7 +99,7 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getProposeFee = React.useCallback(
     debounce((values: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) => {
-      if (!selectedAccount) return
+      if (!selectedAccount || !currencies) return
 
       const noJuniorTranches = values.tranches.slice(1)
       const tranches = [
@@ -114,7 +116,7 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
         '1234567890',
         '1234567890',
         tranches,
-        'ausd',
+        currencies[0].key,
         CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
         { ...mockMetadata, tranches } as any,
       ] as CreatePoolArgs)

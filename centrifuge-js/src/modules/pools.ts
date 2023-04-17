@@ -2047,7 +2047,10 @@ export function getPoolsModule(inst: Centrifuge) {
 
         const activeLoans: ActiveLoan[] = (activeLoanValues.toJSON() as any[]).map(
           ([loan]: [ActiveLoanData, number]) => {
-            const interestData = rates.find((rate) => rate.interestRatePerSec === loan.info.interestRate)
+            const loanRate = new Rate(hexToBN(loan.info.interestRate)).toDecimal().toString()
+            const interestData = rates.find(
+              (rate) => new Rate(hexToBN(rate.interestRatePerSec)).toApr().toDecimalPlaces(4).toString() === loanRate
+            )
             const writeOffStatus = {
               penaltyInterestRate: new Rate(hexToBN(loan.writeOffStatus.penalty)),
               percentage: new Rate(hexToBN(loan.writeOffStatus.percentage)),
@@ -2067,7 +2070,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 loan,
                 currency.decimals,
                 interestLastUpdated.toJSON() as number,
-                interestData?.accumulatedRate
+                interestData
               ),
               normalizedDebt: new CurrencyBalance(hexToBN(loan.normalizedDebt), currency.decimals),
             }
@@ -2330,11 +2333,11 @@ function getOutstandingDebt(
   loan: ActiveLoanData,
   currencyDecimals: number,
   lastUpdated: number,
-  accumulatedRate?: InterestAccrual['accumulatedRate']
+  accrual?: InterestAccrual
 ) {
-  if (!accumulatedRate) return new CurrencyBalance(0, currencyDecimals)
-  const accRate = new Rate(hexToBN(accumulatedRate)).toDecimal()
-  const rate = new Rate(hexToBN(loan.info.interestRate)).toDecimal()
+  if (!accrual) return new CurrencyBalance(0, currencyDecimals)
+  const accRate = new Rate(hexToBN(accrual.accumulatedRate)).toDecimal()
+  const rate = new Rate(hexToBN(accrual.interestRatePerSec)).toDecimal()
   const normalizedDebt = new CurrencyBalance(hexToBN(loan.normalizedDebt), currencyDecimals).toDecimal()
   const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
 

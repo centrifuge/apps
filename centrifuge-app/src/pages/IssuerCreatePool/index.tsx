@@ -16,7 +16,7 @@ import {
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { filter, lastValueFrom } from 'rxjs'
+import { lastValueFrom, tap } from 'rxjs'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
@@ -286,17 +286,13 @@ const CreatePoolForm: React.VFC = () => {
       const $events = centrifuge
         .getEvents()
         .pipe(
-          filter(({ api, events }) => {
-            const event = events.find(({ event }) => api.events.preimage.PreimageNoted.is(event))
+          tap(({ api, events }) => {
+            const event = events.find(({ event }) => api.events.preimage.Noted.is(event))
             const parsedEvent = event?.toJSON() as any
-            // the events api returns a few events for the event PreimageNoted where the data looks different everytime
-            // when data is a tuple and the length is 3, it may be safe to extract the first value as the preimage hash
-            if (parsedEvent?.event?.data?.length === 3) {
-              console.info('Preimage hash: ', parsedEvent.event.data[0])
-              setPreimageHash(parsedEvent.event.data[0])
-              setIsDialogOpen(true)
-            }
-            return !!event
+            if (!parsedEvent) return false
+            console.info('Preimage hash: ', parsedEvent.event.data[0])
+            setPreimageHash(parsedEvent.event.data[0])
+            setIsDialogOpen(true)
           })
         )
         .subscribe()
