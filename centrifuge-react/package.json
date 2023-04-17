@@ -70,7 +70,6 @@
     "@types/bn.js": "^5",
     "@walletconnect/ethereum-provider": "^1",
     "@web3-react/coinbase-wallet": "8.1.2-beta.0",
-    "@web3-react/core": "8.1.2-beta.0",
     "@web3-react/empty": "8.1.2-beta.0",
     "@web3-react/gnosis-safe": "8.1.2-beta.0",
     "@web3-react/metamask": "8.1.2-beta.0",

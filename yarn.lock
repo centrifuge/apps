@@ -1776,7 +1776,6 @@ __metadata:
     "@typescript-eslint/parser": ^4.32.0
     "@walletconnect/ethereum-provider": ^1
     "@web3-react/coinbase-wallet": 8.1.2-beta.0
-    "@web3-react/core": 8.1.2-beta.0
     "@web3-react/empty": 8.1.2-beta.0
     "@web3-react/gnosis-safe": 8.1.2-beta.0
     "@web3-react/metamask": 8.1.2-beta.0
@@ -2657,7 +2656,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/providers@npm:5.7.2, @ethersproject/providers@npm:^5, @ethersproject/providers@npm:^5.6.0":
+"@ethersproject/providers@npm:5.7.2, @ethersproject/providers@npm:^5.6.0":
   version: 5.7.2
   resolution: "@ethersproject/providers@npm:5.7.2"
   dependencies:
@@ -9399,23 +9398,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/core@npm:8.1.2-beta.0":
-  version: 8.1.2-beta.0
-  resolution: "@web3-react/core@npm:8.1.2-beta.0"
-  dependencies:
-    "@ethersproject/providers": ^5
-    "@web3-react/store": ^8.1.2-beta.0
-    "@web3-react/types": ^8.1.2-beta.0
-    zustand: ^4.3.5
-  peerDependencies:
-    react: ">=16.8"
-  dependenciesMeta:
-    "@ethersproject/providers":
-      optional: true
-  checksum: 1cf193446edb608a1cddc086653e089778da7cfd90d36b989f49ce4af1e04cd78cffb904aae3c656b91f8abbdd8ebe6e12da5b4c66746c1a3f9284bf9eee5d49
-  languageName: node
-  linkType: hard
-
 "@web3-react/empty@npm:8.1.2-beta.0":
   version: 8.1.2-beta.0
   resolution: "@web3-react/empty@npm:8.1.2-beta.0"
@@ -9446,7 +9428,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/store@npm:8.1.2-beta.0, @web3-react/store@npm:^8.1.2-beta.0":
+"@web3-react/store@npm:8.1.2-beta.0":
   version: 8.1.2-beta.0
   resolution: "@web3-react/store@npm:8.1.2-beta.0"
   dependencies:
