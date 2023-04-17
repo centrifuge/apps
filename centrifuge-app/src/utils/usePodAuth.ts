@@ -4,7 +4,7 @@ import { useMutation, useQuery } from 'react-query'
 import { useSuitableAccounts } from './usePermissions'
 import { usePodUrl } from './usePools'
 
-const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'PodAdmin']
+// const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'PodAdmin']
 
 export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAccount) {
   const { selectedCombinedAccount } = useWallet().substrate

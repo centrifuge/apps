@@ -83,6 +83,7 @@ type Row = {
   index: number
 }
 
+// TODO: Edit withdraw address for restricted transfers
 function AOForm({
   access,
   assetOriginator: ao,
@@ -144,7 +145,7 @@ function AOForm({
       ) => {
         const [
           name,
-          withdrawAddress,
+          ,
           addedPermissions = [],
           addedAddresses = [],
           removedAddresses = [],

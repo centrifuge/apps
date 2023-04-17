@@ -1,17 +1,14 @@
-import { addressToHex } from '@centrifuge/centrifuge-js'
-import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Button, NumberInput, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { createKeyMulti, isAddress } from '@polkadot/util-crypto'
-import Decimal from 'decimal.js-light'
 import { FieldArray, useFormikContext } from 'formik'
 import { CreatePoolValues } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { useAddress } from '../../utils/useAddress'
-import { useBalance } from '../../utils/useBalance'
 import { address as validAddress, combine, integer, max, positiveNumber, required } from '../../utils/validation'
 
-export function AdminMultisigSection({ deposit }: { deposit: Decimal }) {
+export function AdminMultisigSection() {
   const address = useAddress('substrate')
   const form = useFormikContext<CreatePoolValues>()
   const cent = useCentrifuge()
@@ -19,14 +16,6 @@ export function AdminMultisigSection({ deposit }: { deposit: Decimal }) {
   const multiAddress = adminMultisig.signers.every((addr) => isAddress(addr))
     ? cent.utils.formatAddress(createKeyMulti([address!, ...adminMultisig.signers], adminMultisig.threshold))
     : null
-  const multisigBalance = useBalance(multiAddress ?? '')
-  console.log(
-    'balance',
-    multisigBalance,
-    isAddress(adminMultisig.signers[0]) && addressToHex(adminMultisig.signers[0]),
-    isAddress(adminMultisig.signers[0]),
-    multiAddress
-  )
 
   return (
     <FieldArray name="adminMultisig.signers">
@@ -48,10 +37,6 @@ export function AdminMultisigSection({ deposit }: { deposit: Decimal }) {
             <>
               <Stack gap={2}>
                 <Text>Multisig address: {multiAddress}</Text>
-                <Text>
-                  Multisig balance: {multisigBalance ? formatBalance(multisigBalance, undefined, 2) : 0} (required:{' '}
-                  {formatBalance(deposit, undefined, 2)} )
-                </Text>
                 {adminMultisig.signers.map((_, i) => (
                   <Shelf gap={1}>
                     <FieldWithErrorMessage

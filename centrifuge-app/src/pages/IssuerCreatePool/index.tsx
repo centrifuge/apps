@@ -185,20 +185,19 @@ function CreatePoolForm() {
     (cent) =>
       (
         args: [
-          collateralCollectionId: string,
           transferToMultisig: BN,
+          aoProxy: string,
           admin: string,
           poolId: string,
           collectionId: string,
           tranches: TrancheInput[],
           currency: CurrencyKey,
           maxReserve: BN,
-          metadata: PoolMetadataInput,
-          aoProxy: string
+          metadata: PoolMetadataInput
         ],
         options
       ) => {
-        const [collateralCollectionId, transferToMultisig, admin, , , , , , { adminMultisig }, aoProxy] = args
+        const [transferToMultisig, aoProxy, admin, , , , , , { adminMultisig }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
         const poolArgs = args.slice(2) as any
         return combineLatest([cent.getApi(), cent.pools.createPool(poolArgs, { batch: true })]).pipe(
@@ -394,8 +393,8 @@ function CreatePoolForm() {
         (aoProxy, adminProxy) => {
           createPoolTx(
             [
-              collateralCollectionId,
               CurrencyBalance.fromFloat(createDeposit, chainDecimals),
+              aoProxy,
               adminProxy,
               poolId,
               collectionId,
@@ -403,7 +402,6 @@ function CreatePoolForm() {
               currency.key,
               CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
               metadataValues,
-              aoProxy,
             ],
             { createType: config.poolCreationType }
           )
@@ -580,7 +578,7 @@ function CreatePoolForm() {
 
           <TrancheSection />
 
-          <AdminMultisigSection deposit={deposit} />
+          <AdminMultisigSection />
           <PodConfig />
         </Form>
       </FormikProvider>
