@@ -185,9 +185,7 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        {/* <OnboardingProvider> */}
         <OnboardingPage />
-        {/* </OnboardingProvider> */}
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
