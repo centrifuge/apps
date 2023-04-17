@@ -136,7 +136,7 @@ export const getTinlakePoolById = async (poolId: string) => {
       name: poolData.metadata.name,
       issuer: {
         name: poolData.metadata.attributes?.Issuer ?? '',
-        email: poolData.metadata?.issuerEmail ?? 'sophia@k-f.co',
+        email: poolData.metadata?.issuerEmail ?? 'info@centrifuge.io',
       },
     },
   }
