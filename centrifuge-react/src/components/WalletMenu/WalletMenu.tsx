@@ -1,5 +1,7 @@
 import {
   Box,
+  IconAnchor,
+  IconButton,
   IconCopy,
   IconExternalLink,
   IconPower,
@@ -24,7 +26,6 @@ import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils
 import { Logo } from '../WalletProvider/SelectButton'
 import { useNeworkIcon } from '../WalletProvider/UserSelection'
 import { getWalletIcon, getWalletLabel } from '../WalletProvider/WalletDialog'
-import { ActionAnchor, ActionButton } from './Actions'
 import { ConnectButton } from './ConnectButton'
 
 type WalletMenuProps = {
@@ -109,18 +110,18 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                 </Shelf>
 
                 <Shelf alignItems="center" gap="2px">
-                  <ActionButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
+                  <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
                     <IconCopy />
-                  </ActionButton>
+                  </IconButton>
                   {subScanUrl && (
-                    <ActionAnchor
+                    <IconAnchor
                       href={subScanUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       title={`View account on ${subScanUrl}`}
                     >
                       <IconExternalLink />
-                    </ActionAnchor>
+                    </IconAnchor>
                   )}
                 </Shelf>
               </Shelf>

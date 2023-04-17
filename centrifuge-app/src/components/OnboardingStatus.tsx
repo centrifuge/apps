@@ -1,6 +1,6 @@
-import { ActionLink } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
+  iconActionStyles,
   IconClockForward,
   IconExternalLink,
   IconShieldCheck,
@@ -8,7 +8,13 @@ import {
   Stack,
   Text,
 } from '@centrifuge/fabric'
+import { Link } from 'react-router-dom'
+import styled from 'styled-components'
 import { useVerificationStatus } from './OnboardingProvider'
+
+const ActionLink = styled(Link)`
+  ${iconActionStyles}
+`
 
 export function OnboardingStatus() {
   const status = useVerificationStatus()

@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 
-export const baseStyles = css`
+export const iconActionStyles = css`
   --size: 22px;
 
   appearance: none;
@@ -32,14 +31,10 @@ export const baseStyles = css`
     color: ${({ theme }) => theme.colors.accentPrimary};
   }
 `
-export const ActionAnchor = styled.a`
-  ${baseStyles}
+export const IconAnchor = styled.a`
+  ${iconActionStyles}
 `
 
-export const ActionLink = styled(Link)`
-  ${baseStyles}
-`
-
-export const ActionButton = styled.button`
-  ${baseStyles}
+export const IconButton = styled.button`
+  ${iconActionStyles}
 `
