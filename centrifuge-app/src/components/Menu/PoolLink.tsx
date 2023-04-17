@@ -22,7 +22,7 @@ type PoolLinkProps = {
 
 export function PoolLink({ pool }: PoolLinkProps) {
   const match = useRouteMatch<{ pid: string }>('/issuer/:pid')
-  const { data: metadata, isLoading } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
 
   return (
     <Root

@@ -101,6 +101,7 @@ export const entityUserSchema = object({
   countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
   globalSteps: globalStepsSchema,
   poolSteps: poolStepsSchema,
+  address: string().nullable().default(null),
 })
 
 export const individualUserSchema = object({
@@ -114,6 +115,7 @@ export const individualUserSchema = object({
   countryOfResidency: string().required(), // TODO: validate with list of countries
   globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'verifyEmail']),
   poolSteps: poolStepsSchema,
+  address: string().nullable().default(null),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>

@@ -6,6 +6,7 @@ export const templateIds = {
   updateInvestorStatus: 'd-42fe587e381345ecb52dd072c299a499',
   investorApproved: 'd-36a4418ce4144d71bfc327e907cf6c49',
   investorRejected: 'd-279cfc9465054ec580f27c043f2744c6',
+  investorApprovedIssuer: 'd-4450c4ea803a4c24b0960310667d98d6',
 }
 
 export const sendEmail = async (message: any) => {

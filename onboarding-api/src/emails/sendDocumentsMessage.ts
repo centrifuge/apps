@@ -14,7 +14,7 @@ export const sendDocumentsMessage = async (
   wallet: Wallet[0],
   poolId: string,
   trancheId: string,
-  signedAgreement: any
+  signedAgreement: Uint8Array
 ) => {
   const { metadata, pool } = await getPoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
