@@ -84,7 +84,7 @@ export const signAndSendDocumentsController = async (
     }
 
     await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
-    const freshUserData = fetchUser(wallet)
+    const freshUserData = await fetchUser(wallet)
     return res.status(201).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)
