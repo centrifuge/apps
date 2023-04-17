@@ -13,20 +13,22 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 ## Preparing Envs (e.g when the dev chain data is reset)
 
-Frontend:
+### Frontend
 
 1. Create pools for initial data
 2. Create proxy for POD authentication
 
-Faucet:
+### Faucet
 
 1. Add a valid seed hex to `faucet-api/env-vars/demo.secrets`
 2. Fund the account wallet with aUSD and DEVEL/DEMO
 
-Onboarding API:
+### Onboarding API
 
 1. Add subdocs for new pools and tranches in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/subscription-agreements/<poolId>/<trancheId>.pdf`
-2. Onboarding API whitelisting:
+2. Add the acceptance page in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/acceptance-page.pdf`
+3. Add the signature page in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/signature-page.pdf`
+4. Onboarding API whitelisting:
    a. Create an account to control the pure proxy and add it’s seed phrase to the secret env variables
    b. Create the pure proxy using the account created in step one
    c. Go to explorer and find the tx that creates the pure proxy, copy the randomly generated address and paste into env variables

@@ -32,6 +32,7 @@ export const validate = {
   currency: required(),
 
   issuerName: combine(required(), maxLength(100)),
+  issuerRepName: combine(required(), maxLength(100)),
   issuerDescription: combine(minLength(100), maxLength(1000)),
   issuerLogo: combineAsync(imageFile(), maxFileSize(1 * MB), maxImageSize(480, 480)),
   executiveSummary: combine(required(), mimeType('application/pdf'), maxFileSize(5 * MB)),
