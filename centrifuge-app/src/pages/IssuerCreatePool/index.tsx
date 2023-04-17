@@ -252,7 +252,7 @@ function CreatePoolForm() {
               ].filter(Boolean)
             )
             console.log('proxiedPoolCreate', proxiedPoolCreate)
-            return cent.wrapSignAndSend(api, submittable, options)
+            return cent.wrapSignAndSend(api, submittable, { ...options, multisig: undefined, proxy: [] })
           })
         )
       },
@@ -343,7 +343,7 @@ function CreatePoolForm() {
     },
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
-      if (!currencies || !address || !paymentInfo) return
+      if (!currencies || !address) return
 
       const metadataValues: PoolMetadataInput = { ...values } as any
 
@@ -448,7 +448,7 @@ function CreatePoolForm() {
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
-  const { proposeFee, poolDeposit, proxyDeposit, paymentInfo, collectionDeposit } = useCreatePoolFee(form?.values)
+  const { proposeFee, poolDeposit, proxyDeposit, collectionDeposit } = useCreatePoolFee(form?.values)
   const createDeposit = (proposeFee?.toDecimal() ?? Dec(0))
     .add(poolDeposit.toDecimal())
     .add(collectionDeposit.toDecimal())

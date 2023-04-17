@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useCanActAsPoolAdmin } from '../../../utils/usePermissions'
+import { usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { AssetOriginators } from './AssetOriginators'
 import { PoolManagers } from './PoolManagers'
@@ -24,7 +24,7 @@ const IssuerPoolAccess: React.FC = () => {
 
   return (
     <Stack>
-      {useCanActAsPoolAdmin(poolId) && (
+      {!!usePoolAdmin(poolId) && (
         <>
           <PoolManagers poolId={poolId} />
           <AssetOriginators poolId={poolId} />

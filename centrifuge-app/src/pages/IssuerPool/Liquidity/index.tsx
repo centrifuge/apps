@@ -9,7 +9,7 @@ import { IssuerPoolHeader } from '../Header'
 
 export const IssuerPoolLiquidityPage: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isLiquidityAdmin = useLiquidityAdmin(poolId)
+  const isLiquidityAdmin = !!useLiquidityAdmin(poolId)
 
   return (
     <PageWithSideBar sidebar={isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}>

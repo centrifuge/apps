@@ -2,11 +2,10 @@ import { addressToHex, Collection, computeMultisig, PoolRoles } from '@centrifug
 import { useCentrifugeQueries, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
-import { useAddress } from './useAddress'
+import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
 import { usePool, usePoolMetadata, usePools } from './usePools'
-import { isSameAddress } from './web3'
 
 export function usePermissions(address?: string) {
   const [result] = useCentrifugeQuery(['permissions', address], (cent) => cent.pools.getUserPermissions([address!]), {
@@ -63,38 +62,31 @@ export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
 
 // Returns whether the connected address can borrow from a pool in principle
 export function useCanBorrow(poolId: string) {
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
-  const { selectedProxies } = useWallet().substrate
-  const proxy = selectedProxies?.at(-1)
-  const canBorrow =
-    permissions?.pools[poolId]?.roles.includes('Borrower') &&
-    (!proxy || proxy.types.includes('Borrow') || proxy.types.includes('Any'))
-
-  return !!canBorrow
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] })
+  return !!account
 }
 
 // Returns whether the connected address can borrow against a specific asset from a pool
 export function useCanBorrowAsset(poolId: string, assetId: string) {
-  const address = useAddress('substrate')
-  const hasBorrowPermission = useCanBorrow(poolId)
+  return !!useBorrower(poolId, assetId)
+}
+export function useBorrower(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
-  const borrower = loan && 'borrower' in loan ? loan?.borrower : undefined
-  const isLoanOwner = isSameAddress(borrower, address)
-  const canBorrow = hasBorrowPermission && isLoanOwner
-
-  return !!canBorrow
+  const borrower = loan && 'borrower' in loan ? loan?.borrower : ''
+  return useSuitableAccounts({
+    poolId,
+    poolRole: ['Borrower'],
+    actingAddress: [borrower],
+    proxyType: ['Borrow'],
+  })[0]
 }
 
-export function useCanActAsPoolAdmin(poolId: string) {
-  return useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] }).length > 0
+export function usePoolAdmin(poolId: string) {
+  return useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })[0]
 }
 
 export function useLiquidityAdmin(poolId: string) {
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
-
-  return !!(address && permissions?.pools[poolId]?.roles.includes('LiquidityAdmin'))
+  return useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })[0]
 }
 
 export function useSuitableAccounts({
@@ -105,7 +97,7 @@ export function useSuitableAccounts({
 }: {
   actingAddress?: string[]
   poolId?: string
-  poolRole?: (PoolRoles['roles'][0] | { TrancheInvestor: string })[]
+  poolRole?: (PoolRoles['roles'][0] | { trancheInvestor: string })[]
   proxyType?: string[] | ((accountProxyTypes: string[]) => boolean)
 }) {
   const {
@@ -131,7 +123,7 @@ export function useSuitableAccounts({
       !poolRole.some((role) =>
         typeof role === 'string'
           ? permissions?.[acc.actingAddress]?.roles.includes(role)
-          : !!permissions?.[acc.actingAddress]?.tranches[role.TrancheInvestor]
+          : !!permissions?.[acc.actingAddress]?.tranches[role.trancheInvestor]
       )
     )
       return false
@@ -147,22 +139,17 @@ export function usePoolAccess(poolId: string) {
     substrate: { proxies },
   } = useWallet()
   const poolPermissions = usePoolPermissions(poolId)
-  console.log('poolPermissions', poolPermissions)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const admin =
-    poolPermissions &&
-    Object.entries(poolPermissions).find(([, poolRoles]) => poolRoles.roles.includes('PoolAdmin'))?.[0]
-  const aoProxies =
-    (admin &&
-      proxies?.[admin]
-        ?.filter((p) => p.types.includes('Any')) //  && poolPermissions[p.delegator]?.roles.includes('Borrower')
-        .map((p) => p.delegator)) ||
-    null
+  const [admin, adminPermissions] =
+    (poolPermissions &&
+      Object.entries(poolPermissions).find(([, poolRoles]) => poolRoles.roles.includes('PoolAdmin'))) ||
+    []
+  const aoProxies = (admin && proxies?.[admin]?.filter((p) => p.types.includes('Any')).map((p) => p.delegator)) || []
   const collections = useCollections()
 
   const aoCollateralCollections: Record<string, Collection[]> = {}
-  aoProxies?.forEach((ao) => {
+  aoProxies.forEach((ao) => {
     aoCollateralCollections[ao] = (collections || [])?.filter((col) => col.issuer === ao)
   })
 
@@ -176,7 +163,7 @@ export function usePoolAccess(poolId: string) {
         })
       )
       return cent.getApi().pipe(
-        switchMap((api) => combineLatest(aoProxies!.map((addr) => api.query.keystore.keys.entries(addr)))),
+        switchMap((api) => combineLatest(aoProxies.map((addr) => api.query.keystore.keys.entries(addr)))),
         map((keyData) => {
           const values = (keyData as any[]).map((data) => data.length > 0)
           return values
@@ -185,19 +172,19 @@ export function usePoolAccess(poolId: string) {
       )
     },
     {
-      enabled: !!aoProxies?.length,
+      enabled: !!aoProxies.length,
     }
   )
   const [aoDelegates] = useCentrifugeQuery(
     ['proxyDelegates', aoProxies],
     (cent) =>
       cent.getApi().pipe(
-        switchMap((api) => api.queryMulti(aoProxies!.map((addr) => [api.query.proxy.proxies, addr]))),
+        switchMap((api) => api.queryMulti(aoProxies.map((addr) => [api.query.proxy.proxies, addr]))),
         map((proxiesData) => {
           const values = (proxiesData as any[]).map((data) => data[0].toJSON())
 
           const delegatesByAO: { delegator: string; delegatee: string; types: string[] }[][] = []
-          aoProxies!.forEach((delegator, i) => {
+          aoProxies.forEach((delegator, i) => {
             const proxiesByDelegate: Record<string, { delegator: string; delegatee: string; types: string[] }> = {}
             const delegates = values[i]
             delegates.forEach((node: any) => {
@@ -216,16 +203,38 @@ export function usePoolAccess(poolId: string) {
             delegatesByAO.push(Object.values(proxiesByDelegate))
           })
 
-          console.log('delegatesData', proxiesData, delegatesByAO)
           return delegatesByAO
         })
       ),
     {
-      enabled: !!aoProxies?.length,
+      enabled: !!aoProxies.length,
     }
   )
 
-  console.log('aoProxies', aoProxies, isAoSetUp, aoCollateralCollections)
+  const storedAdminRoles = {
+    address: admin || '',
+    roles: Object.fromEntries(adminPermissions?.roles.map((role) => [role, true]) || []),
+  }
+  const storedManagerPermissions =
+    poolPermissions && metadata?.adminMultisig?.signers
+      ? Object.entries(poolPermissions)
+          .filter(([addr, p]) => p.roles.length && metadata.adminMultisig!.signers.includes(addr))
+          .map(([address, permissions]) => ({
+            address,
+            roles: Object.fromEntries(permissions.roles.map((role) => [role, true])),
+          }))
+      : []
+  const missingAdminPermissions = diffPermissions(
+    [storedAdminRoles],
+    [{ address: storedAdminRoles.address, roles: { MemberListAdmin: true } }]
+  ).add
+  const missingManagerPermissions = diffPermissions(
+    storedManagerPermissions,
+    metadata?.adminMultisig?.signers?.map((address) => ({
+      address,
+      roles: { MemberListAdmin: true, LiquidityAdmin: true },
+    })) || []
+  ).add
 
   return {
     admin,
@@ -233,15 +242,19 @@ export function usePoolAccess(poolId: string) {
       () => (metadata?.adminMultisig && computeMultisig(metadata.adminMultisig)) || null,
       [metadata?.adminMultisig]
     ),
+    adminPermissions,
+    missingPermissions: [...missingAdminPermissions, ...missingManagerPermissions],
+    missingAdminPermissions,
+    missingManagerPermissions,
     assetOriginators: useMemo(
       () =>
-        aoProxies?.map((addr, i) => ({
+        aoProxies.map((addr, i) => ({
           address: addr,
           isSetUp: !!isAoSetUp?.[i],
           collateralCollections: aoCollateralCollections[addr],
           permissions: poolPermissions?.[addr] || { roles: [], tranches: {} },
           delegates: aoDelegates?.[i].filter((p) => !p.types.includes('PodOperation')) || [],
-        })) || [],
+        })),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [collections, aoDelegates, isAoSetUp, poolPermissions]
     ),

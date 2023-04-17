@@ -7,7 +7,9 @@ import { Transaction, useTransaction, useTransactions } from '../components/Tran
 import { CombinedSubstrateAccount, useWallet } from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
-type TxOptions = Pick<TransactionOptions, 'createType'> & { account?: CombinedSubstrateAccount }
+export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
+  account?: CombinedSubstrateAccount
+}
 
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
@@ -20,13 +22,13 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
-  const pendingTransaction = React.useRef<{ id: string; args: T; options?: TxOptions }>()
+  const pendingTransaction = React.useRef<{ id: string; args: T; options?: CentrifugeTransactionOptions }>()
 
   async function doTransaction(
     selectedCombinedAccount: CombinedSubstrateAccount,
     id: string,
     args: T,
-    txOptions?: TxOptions
+    txOptions?: CentrifugeTransactionOptions
   ) {
     const account = txOptions?.account || selectedCombinedAccount
     console.log('account', account)
@@ -107,7 +109,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     }
   }
 
-  function execute(args: T, options?: TxOptions, idOverride?: string) {
+  function execute(args: T, options?: CentrifugeTransactionOptions, idOverride?: string) {
     const id = idOverride ?? Math.random().toString(36).substr(2)
     const tx: Transaction = {
       id,

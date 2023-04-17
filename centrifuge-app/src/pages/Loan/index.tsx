@@ -17,11 +17,10 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../../types'
 import { formatDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
-import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useNFT } from '../../utils/useNFTs'
-import { useCanBorrowAsset, usePermissions } from '../../utils/usePermissions'
+import { useCanBorrowAsset } from '../../utils/usePermissions'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
@@ -39,11 +38,9 @@ export const LoanPage: React.FC = () => {
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
   const canBorrow = useCanBorrowAsset(pid, aid)
 
-  if (!loan || loan.status === 'Closed' || !permissions || !canBorrow) return null
+  if (!loan || loan.status === 'Closed' || !canBorrow) return null
 
   return <FinanceForm loan={loan} />
 }

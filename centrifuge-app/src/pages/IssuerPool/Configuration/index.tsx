@@ -3,7 +3,7 @@ import { useParams } from 'react-router'
 import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useCanActAsPoolAdmin } from '../../../utils/usePermissions'
+import { usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { Admins } from './Admins'
 import { Details } from './Details'
@@ -30,7 +30,7 @@ function IssuerPoolConfiguration() {
 
   return (
     <Stack>
-      {useCanActAsPoolAdmin(poolId) && (
+      {!!usePoolAdmin(poolId) && (
         <>
           <Details />
           <Issuer />

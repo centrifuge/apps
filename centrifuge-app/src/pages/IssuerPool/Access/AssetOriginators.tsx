@@ -13,7 +13,7 @@ import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { useIdentity } from '../../../utils/useIdentity'
 import { usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
-import { usePool } from '../../../utils/usePools'
+import { required } from '../../../utils/validation'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { diffPermissions } from '../Configuration/Admins'
 import { PodConfig } from '../Configuration/PodConfig'
@@ -28,21 +28,24 @@ type AOFormValues = {
 }
 
 export function AssetOriginators({ poolId }: { poolId: string }) {
-  const data = usePoolAccess(poolId)
-  const pool = usePool(poolId)
+  const access = usePoolAccess(poolId)
   const {
     proxy: { proxyDepositBase, proxyDepositFactor },
   } = useCentrifugeConsts()
 
-  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
-  console.log('usePoolAccess', data)
+  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'], actingAddress: [access.admin || ''] })
 
   const { execute: createAO, isLoading: createAOIsPending } = useCentrifugeTransaction(
     'Create Asset Originator',
     (cent) => (_args: [], options?: TransactionOptions) => {
-      return combineLatest([cent.getApi(), cent.proxies.createPure([], { batch: true })]).pipe(
-        switchMap(([api, createTx]) => {
+      return combineLatest([
+        cent.getApi(),
+        cent.proxies.createPure([], { batch: true }),
+        cent.pools.updatePoolRoles([poolId, access.missingAdminPermissions, []], { batch: true }),
+      ]).pipe(
+        switchMap(([api, createTx, permissionTx]) => {
           const tx = api.tx.utility.batchAll([
+            ...permissionTx.method.args[0],
             api.tx.balances.transfer(suitableAccounts[0].actingAddress, proxyDepositBase.add(proxyDepositFactor)),
             createTx,
           ])
@@ -67,8 +70,8 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
         </Button>
       }
     >
-      {data.assetOriginators.map((ao) => (
-        <AOForm assetOriginator={ao} poolId={poolId} />
+      {access.assetOriginators.map((ao) => (
+        <AOForm access={access} assetOriginator={ao} poolId={poolId} />
       ))}
       <PodConfig />
     </PageSection>
@@ -81,9 +84,11 @@ type Row = {
 }
 
 function AOForm({
+  access,
   assetOriginator: ao,
   poolId,
 }: {
+  access: ReturnType<typeof usePoolAccess>
   assetOriginator: ReturnType<typeof usePoolAccess>['assetOriginators'][0]
   poolId: string
 }) {
@@ -150,7 +155,9 @@ function AOForm({
 
         return combineLatest([
           cent.getApi(),
-          cent.pools.updatePoolRoles([poolId, addedPermissions, []], { batch: true }),
+          cent.pools.updatePoolRoles([poolId, [...access.missingPermissions, ...addedPermissions], []], {
+            batch: true,
+          }),
         ]).pipe(
           switchMap(([api, permissionTx]) => {
             const numProxyTypesPerHotWallet = 3
@@ -305,7 +312,7 @@ function AOForm({
                   loading={isLoading}
                   loadingMessage={isLoading ? 'Pending...' : undefined}
                   key="done"
-                  // disabled={!hasChanges || !account}
+                  disabled={!hasChanges || !account}
                 >
                   Done
                 </Button>
@@ -320,7 +327,15 @@ function AOForm({
           {!ao.isSetUp && isEditing && (
             <Stack gap={2}>
               <FieldWithErrorMessage
-                // validate={required()}
+                validate={required()}
+                name="documentKey"
+                as={TextInput}
+                label="Document Signing Key"
+                placeholder="0x..."
+                maxLength={66}
+              />
+              <FieldWithErrorMessage
+                validate={required()}
                 name="p2pKey"
                 as={TextInput}
                 label="P2P Discovery Key"
@@ -328,24 +343,16 @@ function AOForm({
                 maxLength={66}
               />
               <FieldWithErrorMessage
-                // validate={required()}
-                name="documentKey"
+                validate={required()}
+                name="podOperator"
                 as={TextInput}
-                label="Document Signing Key"
+                label="Pod Operator Account ID"
                 placeholder="0x..."
                 maxLength={66}
               />
             </Stack>
           )}
 
-          <FieldWithErrorMessage
-            // validate={required()}
-            name="podOperator"
-            as={TextInput}
-            label="Pod Operator Account"
-            placeholder="0x..."
-            maxLength={66}
-          />
           {isEditing && <FieldWithErrorMessage name="name" as={TextInput} label="Name" placeholder="" maxLength={32} />}
           <FieldArray name="delegates">
             {(fldArr) => (

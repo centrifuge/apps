@@ -1,12 +1,11 @@
-import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
-import { usePoolPermissions, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -20,22 +19,6 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const theme = useTheme()
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
-
-  const [poolAdmin] = useSuitableAccounts({ poolId: pid, poolRole: ['PoolAdmin'] })
-  const permissions = usePoolPermissions(pid)
-  const shouldInitialise = !permissions?.[poolAdmin?.actingAddress]?.roles.includes('LoanAdmin')
-
-  const { execute: executeInitialise, isLoading: isInitialiseLoading } = useCentrifugeTransaction(
-    'Initialise pool',
-    (cent) => cent.pools.initialisePool
-  )
-
-  if (!pool || !permissions) return null
-
-  async function initialisePool() {
-    if (!metadata) return
-    executeInitialise([pid, poolAdmin.actingAddress, metadata!], { account: poolAdmin })
-  }
 
   return (
     <>
@@ -67,18 +50,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
           )
         }
         border={false}
-        actions={
-          poolAdmin && shouldInitialise ? (
-            <>
-              <Text variant="body2">Pool is not yet initialised</Text>
-              <Button small onClick={initialisePool} loading={isInitialiseLoading}>
-                Initialise Pool
-              </Button>
-            </>
-          ) : (
-            actions
-          )
-        }
+        actions={actions}
       >
         <Shelf
           px={PAGE_GUTTER}

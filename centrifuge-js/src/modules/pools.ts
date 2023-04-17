@@ -520,7 +520,6 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
-
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
@@ -545,8 +544,7 @@ export function getPoolsModule(inst: Centrifuge) {
             return pinPoolMetadata(metadata, poolId, currencyMeta.decimals, options)
           }),
           switchMap((pinnedMetadata) => {
-            let tx
-            const poolTx = api.tx.poolRegistry.register(
+            const tx = api.tx.poolRegistry.register(
               admin,
               poolId,
               trancheInput,
@@ -554,39 +552,6 @@ export function getPoolsModule(inst: Centrifuge) {
               maxReserve.toString(),
               pinnedMetadata.ipfsHash
             )
-            if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-              tx = poolTx
-            } else {
-              tx = api.tx.utility.batchAll(
-                [
-                  poolTx,
-                  ['MemberListAdmin', 'LoanAdmin'].map((role) =>
-                    api.tx.permissions.add(
-                      { PoolRole: 'PoolAdmin' },
-                      admin,
-                      { Pool: poolId },
-                      {
-                        PoolRole: role,
-                      }
-                    )
-                  ),
-                  metadata.adminMultisig?.signers.map((signer) =>
-                    ['MemberListAdmin', 'LiquidityAdmin'].map((role) =>
-                      api.tx.permissions.add(
-                        { PoolRole: 'PoolAdmin' },
-                        signer,
-                        { Pool: poolId },
-                        {
-                          PoolRole: role,
-                        }
-                      )
-                    )
-                  ),
-                ]
-                  .flat(2)
-                  .filter(Boolean)
-              )
-            }
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
                 api.tx.preimage.notePreimage(tx.method.toHex()),
@@ -602,47 +567,6 @@ export function getPoolsModule(inst: Centrifuge) {
           })
         )
       )
-    )
-  }
-
-  function initialisePool(
-    args: [poolId: string, admin: string, metadata: Pick<PoolMetadata, 'adminMultisig'>],
-    options?: TransactionOptions
-  ) {
-    const [admin, poolId, metadata] = args
-
-    return inst.getApi().pipe(
-      switchMap((api) => {
-        const submittable = api.tx.utility.batchAll(
-          [
-            ['MemberListAdmin', 'LoanAdmin'].map((role) =>
-              api.tx.permissions.add(
-                { PoolRole: 'PoolAdmin' },
-                admin,
-                { Pool: poolId },
-                {
-                  PoolRole: role,
-                }
-              )
-            ),
-            metadata.adminMultisig?.signers.map((signer) =>
-              ['MemberListAdmin', 'LiquidityAdmin'].map((role) =>
-                api.tx.permissions.add(
-                  { PoolRole: 'PoolAdmin' },
-                  signer,
-                  { Pool: poolId },
-                  {
-                    PoolRole: role,
-                  }
-                )
-              )
-            ),
-          ]
-            .flat(2)
-            .filter(Boolean)
-        )
-        return inst.wrapSignAndSend(api, submittable, options)
-      })
     )
   }
 
@@ -2316,7 +2240,6 @@ export function getPoolsModule(inst: Centrifuge) {
 
   return {
     createPool,
-    initialisePool,
     updatePool,
     setMaxReserve,
     setMetadata,

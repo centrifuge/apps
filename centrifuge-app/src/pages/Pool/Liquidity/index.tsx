@@ -21,7 +21,7 @@ const ReserveCashDragChart = React.lazy(() => import('../../../components/Charts
 
 export const PoolDetailLiquidityTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isLiquidityAdmin = useLiquidityAdmin(poolId)
+  const isLiquidityAdmin = !!useLiquidityAdmin(poolId)
   return (
     <PageWithSideBar
       sidebar={

@@ -10,7 +10,6 @@ const mockMetadata = {
   poolIcon: '0x',
   poolName: 'More Pool Poolios',
   assetClass: 'Corporate Credit',
-  currency: 'ausd',
   maxReserve: 1,
   epochHours: 23,
   epochMinutes: 50,
@@ -28,7 +27,7 @@ const mockMetadata = {
 
 type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
 
-export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) {
+export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' | 'maxReserve'>) {
   const [proposeFee, setProposeFee] = React.useState<CurrencyBalance | null>(null)
   const [paymentInfo, setPaymentInfo] = React.useState<{ weight: number; partialFee: CurrencyBalance } | null>(null)
   const {
@@ -101,7 +100,7 @@ export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' 
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getProposeFee = React.useCallback(
-    debounce((values: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) => {
+    debounce((values: Pick<PoolMetadataInput, 'tranches' | 'maxReserve'>) => {
       if (!selectedAccount || !currencies) return
 
       const noJuniorTranches = values.tranches.slice(1)

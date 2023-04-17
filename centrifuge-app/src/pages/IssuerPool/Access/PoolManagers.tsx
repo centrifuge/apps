@@ -10,7 +10,6 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { Identity } from '../../../components/Identity'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
-import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePoolAccess, usePoolPermissions } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, integer, max, positiveNumber } from '../../../utils/validation'
@@ -24,19 +23,18 @@ type PoolManagersInput = {
 type Row = { address: string; index: number }
 
 export function PoolManagers({ poolId }: { poolId: string }) {
-  const data = usePoolAccess(poolId)
+  const access = usePoolAccess(poolId)
   const pool = usePool(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
   const poolPermissions = usePoolPermissions(poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const prefetchMetadata = usePrefetchMetadata()
 
   const initialValues: PoolManagersInput = React.useMemo(
     () => ({
-      signers: data.multisig?.signers || [],
-      threshold: data.multisig?.threshold || 1,
+      signers: access.multisig?.signers || [],
+      threshold: access.multisig?.threshold || 1,
     }),
-    [data?.multisig]
+    [access?.multisig]
   )
 
   const storedManagerPermissions = poolPermissions
@@ -64,7 +62,10 @@ export function PoolManagers({ poolId }: { poolId: string }) {
         return combineLatest([
           cent.getApi(),
           cent.pools.setMetadata([poolId, newMetadata as any], { batch: true }),
-          cent.pools.updatePoolRoles([poolId, permissionChanges.add, permissionChanges.remove], { batch: true }),
+          cent.pools.updatePoolRoles(
+            [poolId, [...access.missingAdminPermissions, ...permissionChanges.add], permissionChanges.remove],
+            { batch: true }
+          ),
         ]).pipe(
           switchMap(([api, metadataTx, permissionTx]) => {
             console.log('newMetadata', newMetadata)
@@ -73,7 +74,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
               metadataTx,
               ...permissionTx.method.args[0],
               api.tx.proxy.addProxy(newMultisig.address, 'Any', 0),
-              api.tx.proxy.removeProxy(data.multisig!.address, 'Any', 0),
+              api.tx.proxy.removeProxy(access.multisig!.address, 'Any', 0),
             ])
             return cent.wrapSignAndSend(api, tx, options)
           })
@@ -131,7 +132,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
 
   console.log('hasChanges', hasChanges)
 
-  if (!data.multisig) return null
+  if (!access.multisig) return null
 
   return (
     <FormikProvider value={form}>
