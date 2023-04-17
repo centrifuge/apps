@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 
 export const baseStyles = css`
@@ -32,6 +33,10 @@ export const baseStyles = css`
   }
 `
 export const ActionAnchor = styled.a`
+  ${baseStyles}
+`
+
+export const ActionLink = styled(Link)`
   ${baseStyles}
 `
 
