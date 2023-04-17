@@ -130,11 +130,20 @@ export const useOnboarding = <
 export const useVerificationStatus = (): VerificationStatus => {
   const { onboardingUser } = useOnboarding()
 
-  return onboardingUser
-    ? Object.values(onboardingUser.globalSteps)
-        .map(({ completed }) => completed)
-        .includes(false)
-      ? 'pending'
-      : 'verified'
-    : 'unverified'
+  if (!onboardingUser) {
+    return 'unverified'
+  }
+
+  const requiredGlobalSteps = Object.keys(onboardingUser.globalSteps).filter((globalStep) => {
+    if (
+      (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship === 'us') ||
+      (onboardingUser.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us'))
+    ) {
+      return true
+    } else {
+      return globalStep !== 'verifyAccreditation'
+    }
+  }) as Array<keyof typeof onboardingUser.globalSteps>
+
+  return requiredGlobalSteps.every((step) => onboardingUser.globalSteps[step].completed) ? 'verified' : 'pending'
 }
