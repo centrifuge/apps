@@ -80,8 +80,6 @@ export const PoolDetailLiquidity: React.FC = () => {
             tooltips={['investment', 'redemption']}
           />
 
-          <LiquidityEpochSection pool={pool} />
-
           <PageSection title="Reserve vs. cash drag">
             <Stack height="290px">
               <React.Suspense fallback={<Spinner />}>
@@ -89,6 +87,8 @@ export const PoolDetailLiquidity: React.FC = () => {
               </React.Suspense>
             </Stack>
           </PageSection>
+
+          <LiquidityEpochSection pool={pool} />
         </>
       )}
     </>

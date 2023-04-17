@@ -1,17 +1,16 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import {
-  onboardingBucket,
   OnboardingUser,
   transactionInfoSchema,
   validateAndWriteToFirestore,
   writeToOnboardingBucket,
 } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
+import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
 import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
-import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
 import { validateEvmRemark } from '../../utils/tinlake'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
@@ -43,28 +42,20 @@ export const signAndSendDocumentsController = async (
     }
 
     if (
-      user?.poolSteps[poolId] &&
-      !user?.poolSteps[poolId]?.[trancheId]?.signAgreement.completed &&
-      user?.poolSteps[poolId]?.[trancheId]?.status.status !== null
+      user.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
+      user.poolSteps?.[poolId]?.[trancheId]?.status.status !== null
     ) {
-      throw new HttpError(400, 'User must sign document before documents can be sent to issuer')
+      throw new HttpError(400, 'User has already signed the agreement')
     }
 
-    const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
-    const [unsignedAgreementExists] = await unsignedAgreement.exists()
-
-    if (!unsignedAgreementExists) {
-      throw new HttpError(400, 'Agreement not found')
-    }
-
-    const pdfDoc = await signAndAnnotateAgreement(
-      unsignedAgreement,
-      wallet.address,
+    const signedAgreementPDF = await annotateAgreementAndSignAsInvestor({
+      poolId,
+      trancheId,
+      walletAddress: wallet.address,
       transactionInfo,
-      user?.name as string
-    )
-
-    const signedAgreementPDF = await pdfDoc.save()
+      name: user.name as string,
+      email: user.email as string,
+    })
 
     await writeToOnboardingBucket(
       signedAgreementPDF,

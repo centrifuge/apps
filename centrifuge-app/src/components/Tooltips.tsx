@@ -222,6 +222,10 @@ const tooltipText = {
     label: 'Fixed interest rate',
     body: 'Fixed interest rate (APR) this tranche accrues on deployed capital.',
   },
+  issuerRepName: {
+    label: 'Issuer representive name',
+    body: 'This is the full legal name of the authorized representive of the pool.',
+  },
 }
 
 export type TooltipsProps = {
