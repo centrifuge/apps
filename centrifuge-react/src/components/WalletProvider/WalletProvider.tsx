@@ -75,7 +75,7 @@ export function useAddress(typeOverride?: 'substrate' | 'evm') {
   if (type === 'evm') {
     return evm.accounts?.[0]
   }
-  return substrate.selectedCombinedAccount?.actingAddress
+  return substrate.selectedCombinedAccount?.actingAddress || substrate.selectedAccount?.address
 }
 
 type WalletProviderProps = {
@@ -83,6 +83,7 @@ type WalletProviderProps = {
   evmChains?: EvmChains
   evmAdditionalConnectors?: EvmConnectorMeta[]
   subscanUrl?: string
+  showAdvancedAccounts?: boolean
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
@@ -96,6 +97,7 @@ export function WalletProvider({
   },
   evmAdditionalConnectors,
   subscanUrl,
+  showAdvancedAccounts,
 }: WalletProviderProps) {
   if (!evmChains[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
   const evmConnectors =
@@ -159,7 +161,7 @@ export function WalletProvider({
       address: addressToHex(acc.address),
     }))
 
-    const { address: persistedAddress, proxy: persistedProxy, multisig: persistedMultisig } = getPersisted()
+    const { address: persistedAddress } = getPersisted()
     const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
     const address = matchingAccount || mappedAccounts[0]?.address
     dispatch({
@@ -167,13 +169,8 @@ export function WalletProvider({
       payload: {
         accounts: mappedAccounts,
         selectedAccountAddress: address,
-        multisigAddress: (matchingAccount && persistedMultisig) ?? null,
-        proxyAddresses:
-          matchingAccount && persistedProxy
-            ? Array.isArray(persistedProxy)
-              ? persistedProxy
-              : [persistedProxy]
-            : null,
+        multisigAddress: null,
+        proxyAddresses: null,
       },
     })
   }
@@ -244,13 +241,18 @@ export function WalletProvider({
     }
   }, [])
 
-  const connect = React.useCallback(async (wallet: Wallet | EvmConnectorMeta, chainId?: number) => {
-    disconnect()
-    if ('connector' in wallet) {
-      return connectEvm(wallet, chainId)
-    }
-    return connectSubstrate(wallet)
-  }, [])
+  const connect = React.useCallback(
+    async (wallet: Wallet | EvmConnectorMeta, chainId?: number, disconnectFirst = true) => {
+      if (disconnectFirst) {
+        disconnect()
+      }
+      if ('connector' in wallet) {
+        return connectEvm(wallet, chainId)
+      }
+      return connectSubstrate(wallet)
+    },
+    []
+  )
 
   const disconnect = React.useCallback(async () => {
     evmConnectors.forEach((connectorMeta) => {
@@ -270,7 +272,11 @@ export function WalletProvider({
     dispatch({ type: 'reset' })
   }, [])
 
-  const isTryingToConnectEagerly = useConnectEagerly(connect, dispatch, evmConnectors)
+  const isTryingToConnectEagerly = useConnectEagerly(
+    (wallet) => connect(wallet, undefined, false),
+    dispatch,
+    evmConnectors
+  )
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
   const getNetworkName = useGetNetworkName(evmChains)
 
@@ -316,6 +322,7 @@ export function WalletProvider({
           (acc.proxies?.length === state.substrate.proxyAddresses?.length &&
             acc.proxies!.every((p, i) => p.delegator === state.substrate.proxyAddresses?.[i])))
     )
+    null
 
     const selectedSubstrateAccount =
       state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null
@@ -344,7 +351,8 @@ export function WalletProvider({
         combinedAccounts: combinedSubstrateAccounts,
         selectedAccount: selectedSubstrateAccount,
         selectedAddress: selectedSubstrateAccount?.address || null,
-        selectedCombinedAccount: selectedCombinedAccount || null,
+        selectedCombinedAccount:
+          ((state.substrate.multisigAddress || state.substrate.proxyAddresses) && selectedCombinedAccount) || null,
         isWeb3Injected,
         selectAccount,
         addMultisig: (multisig) => {
@@ -367,17 +375,10 @@ export function WalletProvider({
     }
   }, [connect, disconnect, selectAccount, proxies, nestedProxies, state, isConnectError, isConnecting])
 
-  React.useEffect(() => {
-    if (ctx.substrate.selectedAddress && !ctx.substrate.selectedCombinedAccount && nestedProxies) {
-      ctx.substrate.selectAccount(ctx.substrate.selectedAddress)
-    }
-    console.log('ctx.substrate.combinedAccounts', ctx.substrate.combinedAccounts, state, ctx)
-  }, [ctx])
-
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog evmChains={evmChains} />
+      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} />
     </WalletContext.Provider>
   )
 }

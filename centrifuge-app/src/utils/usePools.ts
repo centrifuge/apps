@@ -152,6 +152,8 @@ export function usePendingCollectMulti(poolId: string, trancheIds?: string[], ad
   return result
 }
 
+const addedMultisigs = new WeakSet()
+
 export function usePoolMetadata(
   pool?: { metadata?: string } | { id: string; metadata?: string | Partial<PoolMetadata> }
 ) {
@@ -162,8 +164,9 @@ export function usePoolMetadata(
     () => pool?.metadata as PoolMetadata
   )
   useEffect(() => {
-    if (data.data?.adminMultisig) {
-      substrate.addMultisig(data.data?.adminMultisig)
+    if (data.data?.adminMultisig && !addedMultisigs.has(data.data?.adminMultisig)) {
+      substrate.addMultisig(data.data.adminMultisig)
+      addedMultisigs.add(data.data.adminMultisig)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.data])

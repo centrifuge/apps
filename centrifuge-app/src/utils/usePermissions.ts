@@ -85,21 +85,15 @@ export function usePoolAdmin(poolId: string) {
   return useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })[0]
 }
 
-export function useLiquidityAdmin(poolId: string) {
-  return useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })[0]
-}
-
-export function useSuitableAccounts({
-  actingAddress,
-  poolId,
-  poolRole,
-  proxyType,
-}: {
+type SuitableConfig = {
   actingAddress?: string[]
   poolId?: string
   poolRole?: (PoolRoles['roles'][0] | { trancheInvestor: string })[]
   proxyType?: string[] | ((accountProxyTypes: string[]) => boolean)
-}) {
+}
+
+export function useSuitableAccounts(config: SuitableConfig) {
+  const { actingAddress, poolId, poolRole, proxyType } = config
   const {
     substrate: { selectedAccount, combinedAccounts },
   } = useWallet()
@@ -175,16 +169,17 @@ export function usePoolAccess(poolId: string) {
       enabled: !!aoProxies.length,
     }
   )
-  const [aoDelegates] = useCentrifugeQuery(
-    ['proxyDelegates', aoProxies],
-    (cent) =>
-      cent.getApi().pipe(
-        switchMap((api) => api.queryMulti(aoProxies.map((addr) => [api.query.proxy.proxies, addr]))),
+  const [delegates] = useCentrifugeQuery(
+    ['proxyDelegates', [admin, ...aoProxies]],
+    (cent) => {
+      const addresses = [admin!, ...aoProxies]
+      return cent.getApi().pipe(
+        switchMap((api) => api.queryMulti(addresses.map((addr) => [api.query.proxy.proxies, addr]))),
         map((proxiesData) => {
           const values = (proxiesData as any[]).map((data) => data[0].toJSON())
 
-          const delegatesByAO: { delegator: string; delegatee: string; types: string[] }[][] = []
-          aoProxies.forEach((delegator, i) => {
+          const result: { delegator: string; delegatee: string; types: string[] }[][] = []
+          addresses.forEach((delegator, i) => {
             const proxiesByDelegate: Record<string, { delegator: string; delegatee: string; types: string[] }> = {}
             const delegates = values[i]
             delegates.forEach((node: any) => {
@@ -200,37 +195,45 @@ export function usePoolAccess(poolId: string) {
                 }
               }
             })
-            delegatesByAO.push(Object.values(proxiesByDelegate))
+            result.push(Object.values(proxiesByDelegate))
           })
 
-          return delegatesByAO
+          return result
         })
-      ),
+      )
+    },
     {
-      enabled: !!aoProxies.length,
+      enabled: !!aoProxies.length && !!admin,
     }
   )
+  const [adminDelegates, ...aoDelegates] = delegates || []
 
   const storedAdminRoles = {
     address: admin || '',
     roles: Object.fromEntries(adminPermissions?.roles.map((role) => [role, true]) || []),
   }
-  const storedManagerPermissions =
-    poolPermissions && metadata?.adminMultisig?.signers
+  const storedManagerPermissions = poolPermissions
+    ? metadata?.adminMultisig?.signers
       ? Object.entries(poolPermissions)
-          .filter(([addr, p]) => p.roles.length && metadata.adminMultisig!.signers.includes(addr))
+          .filter(
+            ([addr, p]) =>
+              p.roles.length &&
+              (metadata.adminMultisig!.signers.includes(addr) ||
+                adminDelegates.find((p) => p.types.includes('Any') && p.delegatee === addr))
+          )
           .map(([address, permissions]) => ({
             address,
             roles: Object.fromEntries(permissions.roles.map((role) => [role, true])),
           }))
       : []
+    : []
   const missingAdminPermissions = diffPermissions(
     [storedAdminRoles],
     [{ address: storedAdminRoles.address, roles: { MemberListAdmin: true } }]
   ).add
   const missingManagerPermissions = diffPermissions(
     storedManagerPermissions,
-    metadata?.adminMultisig?.signers?.map((address) => ({
+    (metadata?.adminMultisig?.signers || adminDelegates?.map((p) => p.delegatee))?.map((address) => ({
       address,
       roles: { MemberListAdmin: true, LiquidityAdmin: true },
     })) || []
@@ -253,7 +256,7 @@ export function usePoolAccess(poolId: string) {
           isSetUp: !!isAoSetUp?.[i],
           collateralCollections: aoCollateralCollections[addr],
           permissions: poolPermissions?.[addr] || { roles: [], tranches: {} },
-          delegates: aoDelegates?.[i].filter((p) => !p.types.includes('PodOperation')) || [],
+          delegates: aoDelegates?.[i]?.filter((p) => !p.types.includes('PodOperation')) || [],
         })),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [collections, aoDelegates, isAoSetUp, poolPermissions]

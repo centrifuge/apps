@@ -30,6 +30,8 @@ export type Key =
   | 'editPoolConfig'
   | 'poolReporting'
   | 'editPoolVisibility'
+  | 'showAdvancedAccounts'
+  | 'editAdminConfig'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -54,6 +56,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     alwaysShow: true,
   },
+  editAdminConfig: {
+    type: 'checkbox',
+    default: false,
+  },
   poolReporting: {
     type: 'checkbox',
     default: false,
@@ -69,6 +75,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editPoolVisibility: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  showAdvancedAccounts: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

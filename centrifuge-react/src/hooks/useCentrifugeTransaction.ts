@@ -4,7 +4,7 @@ import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/Transactions'
-import { CombinedSubstrateAccount, useWallet } from '../components/WalletProvider'
+import { CombinedSubstrateAccount, SubstrateAccount, useWallet } from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
 export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
@@ -18,19 +18,25 @@ export function useCentrifugeTransaction<T extends Array<any>>(
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
   const { showWallets, substrate, walletDialog } = useWallet()
-  const { selectedCombinedAccount } = substrate
+  const { selectedCombinedAccount, selectedAccount } = substrate
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
   const pendingTransaction = React.useRef<{ id: string; args: T; options?: CentrifugeTransactionOptions }>()
 
   async function doTransaction(
-    selectedCombinedAccount: CombinedSubstrateAccount,
+    selectedCombinedAccount: CombinedSubstrateAccount | null,
+    selectedAccount: SubstrateAccount,
     id: string,
     args: T,
     txOptions?: CentrifugeTransactionOptions
   ) {
-    const account = txOptions?.account || selectedCombinedAccount
+    const account = selectedCombinedAccount ||
+      txOptions?.account || {
+        signingAccount: selectedAccount,
+        multisig: undefined,
+        proxies: undefined,
+      }
     console.log('account', account)
     try {
       const connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
@@ -121,11 +127,11 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     addOrUpdateTransaction(tx)
     setLastId(id)
 
-    if (!selectedCombinedAccount) {
+    if (!selectedAccount) {
       pendingTransaction.current = { id, args, options }
       showWallets('centrifuge')
     } else {
-      doTransaction(selectedCombinedAccount, id, args, options)
+      doTransaction(selectedCombinedAccount, selectedAccount, id, args, options)
     }
     return id
   }
@@ -137,8 +143,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       if (walletDialog.view !== null) return
       pendingTransaction.current = undefined
 
-      if (selectedCombinedAccount) {
-        doTransaction(selectedCombinedAccount, id, args, options)
+      if (selectedAccount) {
+        doTransaction(selectedCombinedAccount, selectedAccount, id, args, options)
       } else {
         updateTransaction(id, { status: 'failed', failedReason: 'No account connected' })
       }

@@ -130,7 +130,6 @@ export function getProxiesModule(inst: CentrifugeBase) {
             })
           }
         })
-        console.log('roxiesByUser', proxiesByUser)
         return proxiesByUser
       })
     )

@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Card,
-  Checkbox,
   Dialog,
   IconAlertCircle,
   IconArrowRight,
@@ -28,6 +27,7 @@ import { useWallet, wallets } from './WalletProvider'
 
 type Props = {
   evmChains: EvmChains
+  showAdvancedAccounts?: boolean
 }
 
 const title = {
@@ -35,7 +35,7 @@ const title = {
   wallets: 'Connect wallet',
 }
 
-export function WalletDialog({ evmChains }: Props) {
+export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
   const ctx = useWallet()
   const {
     pendingConnect: { isConnecting, wallet: pendingWallet, isError: isConnectError },
@@ -172,7 +172,7 @@ export function WalletDialog({ evmChains }: Props) {
           </>
         ) : (
           <>
-            <SubstrateAccounts onClose={close} />
+            <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
 
             <Box mt={1}>
               <Button
@@ -214,11 +214,10 @@ const PROXY_TYPE_LABELS = {
   PermissionManagement: 'Manage permissions',
 }
 
-function SubstrateAccounts({ onClose }: { onClose: () => void }) {
+function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => void; showAdvancedAccounts?: boolean }) {
   const {
-    substrate: { combinedAccounts, selectAccount, selectedCombinedAccount },
+    substrate: { combinedAccounts, selectAccount, selectedCombinedAccount, selectedAddress },
   } = useWallet()
-  const [showAdditional, setShowAdditional] = React.useState(true)
 
   if (!combinedAccounts) return null
 
@@ -226,7 +225,7 @@ function SubstrateAccounts({ onClose }: { onClose: () => void }) {
     <>
       <Card maxHeight="50vh" style={{ overflow: 'auto' }}>
         {combinedAccounts
-          .filter((acc) => showAdditional || (!acc.proxies && !acc.multisig))
+          .filter((acc) => showAdvancedAccounts || (!acc.proxies && !acc.multisig))
           .map((acc) => {
             const actingAddress = acc.proxies?.at(-1)?.delegator || acc.multisig?.address || acc.signingAccount.address
             return (
@@ -244,7 +243,13 @@ function SubstrateAccounts({ onClose }: { onClose: () => void }) {
                         acc.multisig?.address
                       )
                     }}
-                    selected={acc === selectedCombinedAccount}
+                    selected={
+                      acc === selectedCombinedAccount ||
+                      (!selectedCombinedAccount &&
+                        selectedAddress === acc.signingAccount.address &&
+                        !acc.multisig &&
+                        !acc.proxies)
+                    }
                     proxyRights={acc.proxies?.[0].types
                       .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
                       .join(' / ')}
@@ -255,12 +260,6 @@ function SubstrateAccounts({ onClose }: { onClose: () => void }) {
             )
           })}
       </Card>
-      <Checkbox
-        style={{ marginTop: 10 }}
-        checked={showAdditional}
-        onChange={(e) => setShowAdditional(e.target.checked)}
-        label="Show proxies and multisigs"
-      />
     </>
   )
 }

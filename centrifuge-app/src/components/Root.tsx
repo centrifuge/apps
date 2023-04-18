@@ -91,8 +91,9 @@ const evmChains: EvmChains = {
   },
 }
 
-export const Root: React.VFC = () => {
+export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
+  const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
 
   return (
     <>
@@ -113,9 +114,18 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
+            <WalletProvider
+              evmChains={evmChains}
+              subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+              showAdvancedAccounts={showAdvancedAccounts}
+            >
               <OnboardingAuthProvider>
-                <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                <DebugFlags
+                  onChange={(state) => {
+                    setIsThemeToggled(!!state.alternativeTheme)
+                    setShowAdvancedAccounts(!!state.showAdvancedAccounts)
+                  }}
+                >
                   <TransactionProvider>
                     <TransactionToasts />
                     <Router>
@@ -134,7 +144,7 @@ export const Root: React.VFC = () => {
   )
 }
 
-const Routes: React.VFC = () => {
+function Routes() {
   return (
     <Switch>
       <Route path="/nfts/collection/:cid/object/mint">

@@ -2,7 +2,7 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import { useLiquidityAdmin } from '../utils/usePermissions'
+import { useSuitableAccounts } from '../utils/usePermissions'
 import { usePool } from '../utils/usePools'
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
 }
 
 export function MaxReserveForm({ poolId }: Props) {
-  const account = useLiquidityAdmin(poolId)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })
   const pool = usePool(poolId)
 
   const { execute: setMaxReserveTx, isLoading } = useCentrifugeTransaction(

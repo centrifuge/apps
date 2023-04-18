@@ -132,8 +132,6 @@ type PersistState = {
   type: 'substrate' | 'evm'
   wallet: string
   address: string
-  proxy?: string[] | null
-  multisig?: string | null
   chainId?: number
 }
 
@@ -200,8 +198,6 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
           type: 'substrate',
           wallet: state.substrate.selectedWallet?.extensionName,
           address: state.substrate.selectedAccountAddress,
-          proxy: state.substrate.proxyAddresses,
-          multisig: state.substrate.multisigAddress,
         })
       }
     }
