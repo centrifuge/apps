@@ -24,7 +24,8 @@ export const annotateAgreementAndSignAsInvestor = async ({
 
   const signedAgreement = await PDFDocument.create()
 
-  const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
+  // TODO: make subscription agreements pool and tranche specific
+  const unsignedAgreement = await onboardingBucket.file('subscription-agreements/generic_subscription_agreement.pdf')
   const [unsignedAgreementExists] = await unsignedAgreement.exists()
 
   if (!unsignedAgreementExists) {
