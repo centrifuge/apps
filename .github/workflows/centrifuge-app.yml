@@ -125,6 +125,7 @@ jobs:
           bucket_url: ${{ needs.build-app.outputs.front_url }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
+          cors_config: ./apps/.github/actions/deploy-gcs/centrifuge-app-cors.json
     outputs:
       bucket_url: ${{ needs.build-app.outputs.front_url }}
       gh_env: ${{ needs.build-app.outputs.gh_env }}
@@ -141,6 +142,7 @@ jobs:
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
         with:
+          comment_tag: pr_preview_url
           message: |
             PR deployed in Google Cloud
             URL: https://${{ needs.deploy-app.outputs.bucket_url }}

@@ -17,7 +17,14 @@ import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
 
 type Values = Pick<
   CreatePoolValues,
-  'issuerName' | 'issuerLogo' | 'issuerDescription' | 'executiveSummary' | 'website' | 'forum' | 'email'
+  | 'issuerName'
+  | 'issuerRepName'
+  | 'issuerLogo'
+  | 'issuerDescription'
+  | 'executiveSummary'
+  | 'website'
+  | 'forum'
+  | 'email'
 >
 
 export const Issuer: React.FC = () => {
@@ -32,6 +39,7 @@ export const Issuer: React.FC = () => {
   const initialValues: Values = React.useMemo(
     () => ({
       issuerName: metadata?.pool?.issuer?.name ?? '',
+      issuerRepName: metadata?.pool?.issuer?.repName ?? '',
       issuerLogo: logoFile ?? null,
       issuerDescription: metadata?.pool?.issuer?.description ?? '',
       executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : ('' as any),
@@ -78,6 +86,7 @@ export const Issuer: React.FC = () => {
           ...oldMetadata.pool,
           issuer: {
             name: values.issuerName,
+            repName: values.issuerRepName,
             description: values.issuerDescription,
             email: values.email,
             logo:

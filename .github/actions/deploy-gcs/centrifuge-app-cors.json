@@ -1,0 +1,7 @@
+[
+  {
+    "origin": ["https://app.safe.global"],
+    "method": ["GET"],
+    "responseHeader": ["Content-Type", "X-Requested-With", "Authorization"]
+  }
+]

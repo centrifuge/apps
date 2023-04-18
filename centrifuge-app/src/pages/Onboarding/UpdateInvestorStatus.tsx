@@ -2,12 +2,8 @@ import { AnchorButton, Box, Shelf, Spinner } from '@centrifuge/fabric'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { Container, Content, ContentHeader, Header, Layout } from '../../components/Onboarding'
-import { config } from '../../config'
 import { usePoolMetadata } from '../../utils/usePools'
 import { useUpdateInvestorStatus } from './queries/useUpdateInvestorStatus'
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const [_, WordMark] = config.logo
 
 export const UpdateInvestorStatus: React.FC = () => {
   const { search } = useLocation()
