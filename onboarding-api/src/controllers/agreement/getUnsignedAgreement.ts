@@ -15,8 +15,9 @@ export const getUnsignedAgreementController = async (
 ) => {
   try {
     await validateInput(req.query, getUnsignedAgreementInput)
-    const { poolId, trancheId } = req.query
-    const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
+    // const { poolId, trancheId } = req.query
+    // TODO: make subscription agreements pool and tranche specific
+    const unsignedAgreement = await onboardingBucket.file('subscription-agreements/generic_subscription_agreement.pdf')
 
     const [unsignedAgreementExists] = await unsignedAgreement.exists()
 

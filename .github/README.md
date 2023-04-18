@@ -25,7 +25,10 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 ### Onboarding API
 
-1. Add subdocs for new pools and tranches in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/subscription-agreements/<poolId>/<trancheId>.pdf`
+<!-- TODO: make subdocs pool and tranche specific
+1. Add subdocs for new pools and tranches in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/subscription-agreements/<poolId>/<trancheId>.pdf` -->
+
+1. Add a subdoc in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/subscription-agreements/generic_subscription_agreement.pdf`
 2. Add the acceptance page in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/acceptance-page.pdf`
 3. Add the signature page in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/signature-page.pdf`
 4. Onboarding API whitelisting:
