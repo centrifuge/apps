@@ -115,13 +115,13 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   }
 
   const actions: InvestRedeemActions = {
-    invest: doAction('invest', (newOrder: BN) => [poolId, trancheId, newOrder], { account }),
-    redeem: doAction('redeem', (newOrder: BN) => [poolId, trancheId, newOrder], { account }),
+    invest: doAction('invest', (newOrder: BN) => [poolId, trancheId, newOrder], { account, forceProxyType: 'Invest' }),
+    redeem: doAction('redeem', (newOrder: BN) => [poolId, trancheId, newOrder], { account, forceProxyType: 'Invest' }),
     collect: () => {},
     approvePoolCurrency: () => {},
     approveTrancheToken: () => {},
-    cancelInvest: doAction('cancelInvest', () => [poolId, trancheId, new BN(0)], { account }),
-    cancelRedeem: doAction('cancelRedeem', () => [poolId, trancheId, new BN(0)], { account }),
+    cancelInvest: doAction('cancelInvest', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
+    cancelRedeem: doAction('cancelRedeem', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
   }
 
   const hooks = {

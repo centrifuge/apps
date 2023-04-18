@@ -33,6 +33,8 @@ import { computeMultisig, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
 
+type ProxyType = string
+
 export type Config = {
   network: 'altair' | 'centrifuge'
   centrifugeWsUrl: string
@@ -49,7 +51,7 @@ export type Config = {
   signingAddress?: AddressOrPair
   evmSigner?: JsonRpcSigner
   printExtrinsics?: boolean
-  proxy?: string | string[]
+  proxies?: ([delegator: string, forceProxyType?: ProxyType] | string)[]
   debug?: boolean
 }
 
@@ -172,17 +174,19 @@ export class CentrifugeBase {
 
     if (options?.batch) return of(actualSubmittable)
 
-    const proxy = options?.proxy || this.config.proxy
-    const proxies = Array.isArray(proxy) ? proxy : [proxy]
+    const proxies = (options?.proxies || this.config.proxies)?.map((p) =>
+      Array.isArray(p) ? p : ([p, undefined] as const)
+    )
+
     let transferTx
-    if (options?.transferToActingAccount && (options?.multisig || options?.proxy)) {
+    if (options?.transferToActingAccount && (options?.multisig || proxies)) {
       const multi = options?.multisig && computeMultisig(options.multisig)
-      transferTx = api.tx.balances.transfer(proxies.at(-1) || multi?.address, options.transferToActingAccount)
+      transferTx = api.tx.balances.transfer(proxies?.at(-1)?.[0] || multi?.address, options.transferToActingAccount)
     }
 
-    if (proxy && !options?.sendOnly) {
+    if (proxies && !options?.sendOnly) {
       actualSubmittable = proxies.reduceRight(
-        (acc, delegator) => api.tx.proxy.proxy(delegator, undefined, acc),
+        (acc, [delegator, forceProxyType]) => api.tx.proxy.proxy(delegator, forceProxyType, acc),
         actualSubmittable
       )
     }
@@ -198,6 +202,7 @@ export class CentrifugeBase {
     if (transferTx) {
       actualSubmittable = api.tx.utility.batchAll([transferTx, actualSubmittable])
     }
+    console.log('actualSubmittable', actualSubmittable)
 
     if (this.config.printExtrinsics) {
       if (submittable.method.method === 'batchAll' || submittable.method.method === 'batch') {
@@ -441,11 +446,11 @@ export class CentrifugeBase {
     return signingAddress as string
   }
 
-  setProxy(proxyAccount: string | string[]) {
-    this.config.proxy = proxyAccount
+  setProxies(proxies: Config['proxies']) {
+    this.config.proxies = proxies
   }
 
-  clearProxy() {
-    this.config.proxy = undefined
+  clearProxies() {
+    this.config.proxies = undefined
   }
 }

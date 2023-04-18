@@ -293,7 +293,7 @@ function IssuerCreateLoan() {
           connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
             signOnly: true,
             era: 100,
-            proxy: account.proxies?.map((p) => p.delegator),
+            proxies: account.proxies?.map((p) => [p.delegator, p.types.includes('Borrow') ? 'Borrow' : undefined]),
             multisig: account.multisig,
           })
         )

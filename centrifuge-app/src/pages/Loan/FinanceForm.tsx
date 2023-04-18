@@ -57,7 +57,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
   )
 
   function repayAll() {
-    doRepayAllTransaction([loan.poolId, loan.id], { account })
+    doRepayAllTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })
   }
 
   const financeForm = useFormik<FinanceValues>({
@@ -66,7 +66,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doFinanceTransaction([loan.poolId, loan.id, amount], { account })
+      doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -78,7 +78,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doRepayTransaction([loan.poolId, loan.id, amount], { account })
+      doRepayTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,

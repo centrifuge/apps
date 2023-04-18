@@ -2,6 +2,7 @@ import { AddressOrPair } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import { HexString } from '@polkadot/util/types'
 import BN from 'bn.js'
+import { Config } from '../CentrifugeBase'
 
 export type TransactionOptions = {
   batch?: boolean
@@ -12,7 +13,7 @@ export type TransactionOptions = {
   onStatusChange?: (result: ISubmittableResult) => void
   createType?: 'immediate' | 'propose' | 'notePreimage'
   dryRun?: boolean
-  proxy?: string | string[]
+  proxies?: Config['proxies']
   multisig?: { signers: string[]; threshold: number }
   transferToActingAccount?: BN
 }
