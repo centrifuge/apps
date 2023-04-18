@@ -32,7 +32,9 @@ const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUs
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const {
     pendingConnect: { isConnecting },
-    substrate: { selectedAccount },
+    substrate: { selectedAccount: substrateAccount },
+    evm: { selectedAddress: evmAddress },
+    connectedType,
   } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useOnboardingAuth()
   const [activeStep, setActiveStep] = React.useState<number>(0)
@@ -74,14 +76,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     },
     {
       refetchOnWindowFocus: false,
-      enabled: !!selectedAccount,
+      enabled: connectedType === 'evm' ? !!evmAddress : !!substrateAccount,
       retry: 1,
     }
   )
 
   React.useEffect(() => {
     // tried to connect but no wallet is connected
-    if (!isConnecting && !selectedAccount) {
+    if (!isConnecting && !(substrateAccount || evmAddress)) {
       return setActiveStep(1)
     }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
@@ -95,7 +97,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount, pool])
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, substrateAccount, evmAddress, pool])
 
   return (
     <OnboardingContext.Provider
