@@ -9,7 +9,7 @@ type PositionerProps = {
   overlayRef: React.RefObject<HTMLElement>
   placement?: AriaPositionProps['placement']
   offset?: number
-  render: (props: React.HTMLAttributes<Element>) => React.ReactElement
+  render: (props: React.HTMLAttributes<Element> & { placement: AriaPositionProps['placement'] }) => React.ReactElement
 }
 
 const PositionerInner: React.FC<PositionerProps> = ({
@@ -29,7 +29,7 @@ const PositionerInner: React.FC<PositionerProps> = ({
     isOpen: isShown,
   })
 
-  return render(overlayProps)
+  return render({ ...overlayProps, placement })
 }
 
 export const Positioner: React.FC<PositionerProps> = (props) => {

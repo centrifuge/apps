@@ -1,5 +1,7 @@
+import { AriaPositionProps } from '@react-aria/overlays'
 import { useTooltip, useTooltipTrigger } from '@react-aria/tooltip'
 import { useTooltipTriggerState } from '@react-stately/tooltip'
+import css, { CssFunctionReturnType } from '@styled-system/css'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Positioner } from '../Positioner'
@@ -28,6 +30,93 @@ const StyledTrigger = styled(Text)`
   text-underline-offset: 3px;
 `
 
+const offset = 20
+const placements: {
+  [key in AriaPositionProps['placement'] as string]: CssFunctionReturnType
+} = {
+  bottom: css({
+    top: 'calc( var(--size) * -1)',
+    left: 'calc(50% - var(--size))',
+  }),
+  'bottom left': css({
+    top: 'calc( var(--size) * -1)',
+    left: offset,
+  }),
+  'bottom right': css({
+    top: 'calc( var(--size) * -1)',
+    right: offset,
+  }),
+  'bottom start': css({
+    top: 'calc( var(--size) * -1)',
+    left: offset,
+  }),
+  'bottom end': css({
+    top: 'calc( var(--size) * -1)',
+    right: offset,
+  }),
+
+  top: css({
+    bottom: 'calc( var(--size) * -1)',
+    left: 'calc(50% - var(--size))',
+  }),
+  'top left': css({
+    bottom: 'calc( var(--size) * -1)',
+    left: offset,
+  }),
+  'top right': css({
+    bottom: 'calc( var(--size) * -1)',
+    right: offset,
+  }),
+  'top start': css({
+    bottom: 'calc( var(--size) * -1)',
+    left: offset,
+  }),
+  'top end': css({
+    bottom: 'calc( var(--size) * -1)',
+    right: offset,
+  }),
+
+  left: css({
+    top: 'calc(50% - var(--size))',
+    right: 'calc( var(--size) * -1)',
+  }),
+  'left top': css({
+    top: offset,
+    right: 'calc( var(--size) * -1)',
+  }),
+  'left bottom': css({
+    bottom: offset,
+    right: 'calc( var(--size) * -1)',
+  }),
+
+  right: css({
+    top: 'calc(50% - var(--size))',
+    left: 'calc( var(--size) * -1)',
+  }),
+  'right top': css({
+    top: offset,
+    left: 'calc( var(--size) * -1)',
+  }),
+  'right bottom': css({
+    bottom: offset,
+    left: 'calc( var(--size) * -1)',
+  }),
+}
+
+const Container = styled(Stack)<{ placement: AriaPositionProps['placement'] }>`
+  filter: ${({ theme }) => `drop-shadow(${theme.shadows.cardInteractive})`};
+
+  &::before {
+    --size: 5px;
+
+    content: '';
+    position: absolute;
+    ${({ placement }) => placements[placement!]}
+    border: ${({ theme }) => `var(--size) solid ${theme.colors.backgroundPrimary}`};
+    transform: rotate(-45deg);
+  }
+`
+
 export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disabled, delay = 1000, ...textProps }) => {
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const overlayRef = React.useRef<HTMLDivElement>(null)
@@ -49,23 +138,20 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
           targetRef={triggerRef}
           overlayRef={overlayRef}
           placement="top"
-          render={(positionProps) => (
-            <Stack
+          render={({ placement, ...rest }) => (
+            <Container
               {...tooltipElementProps}
-              {...positionProps}
+              {...rest}
               ref={overlayRef}
-              backgroundColor="backgroundInverted"
+              backgroundColor="backgroundPrimary"
               p={1}
               borderRadius="tooltip"
               width={220}
+              placement={placement}
             >
-              <Text variant="label2" color="textInverted">
-                {title}
-              </Text>
-              <Text variant="body3" color="textInverted">
-                {body}
-              </Text>
-            </Stack>
+              {!!title && <Text variant="label2">{title}</Text>}
+              <Text variant="body3">{body}</Text>
+            </Container>
           )}
         />
       )}
