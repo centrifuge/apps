@@ -38,7 +38,6 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         multisig: undefined,
         proxies: undefined,
       }
-    console.log('account', account)
     try {
       const connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
       const api = await cent.getApiPromise()

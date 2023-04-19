@@ -202,7 +202,6 @@ export class CentrifugeBase {
     if (transferTx) {
       actualSubmittable = api.tx.utility.batchAll([transferTx, actualSubmittable])
     }
-    console.log('actualSubmittable', actualSubmittable)
 
     if (this.config.printExtrinsics) {
       if (submittable.method.method === 'batchAll' || submittable.method.method === 'batch') {

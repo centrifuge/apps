@@ -94,13 +94,10 @@ function reducer(state: State, action: Action): State {
         },
       }
     case 'substrateAddMultisig': {
-      console.log('ubstrateAddMultisig')
       if (!action.payload.signers.every((addr) => isAddress(addr))) return state
 
       const newMulti = computeMultisig(action.payload)
-      console.log('new multi', newMulti, action)
       if (state.substrate.multisigs.find((m) => m.address === newMulti.address)) return state
-      console.log('aaddd the multi', newMulti, action)
       return {
         ...state,
         substrate: {

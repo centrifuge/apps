@@ -16,7 +16,6 @@ import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
-import { usePoolPermissions } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -85,8 +84,6 @@ export function PoolDetailOverview({
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const { showWallets, connectedType } = useWallet()
-  const poolPermissions = usePoolPermissions(poolId)
-  console.log('poolPermissions', poolPermissions)
 
   const pageSummaryData = [
     {

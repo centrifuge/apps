@@ -98,10 +98,10 @@ export type CreatePoolValues = Omit<
 
 const initialValues: CreatePoolValues = {
   poolIcon: null,
-  poolName: 'Test Proxy Pool 3',
+  poolName: '',
   assetClass: DEFAULT_ASSET_CLASS,
-  currency: 'AUSD',
-  maxReserve: 10000,
+  currency: '',
+  maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   podEndpoint: config.defaultPodUrl ?? '',
@@ -112,9 +112,9 @@ const initialValues: CreatePoolValues = {
   issuerDescription: '',
 
   executiveSummary: null,
-  website: 'http://google.com',
+  website: '',
   forum: '',
-  email: 'onno+spam@k-f.co',
+  email: '',
   details: [],
 
   tranches: [createEmptyTranche(true)],
