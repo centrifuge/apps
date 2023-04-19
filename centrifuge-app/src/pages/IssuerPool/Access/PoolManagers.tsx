@@ -1,26 +1,22 @@
-import { addressToHex, ComputedMultisig, computeMultisig, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { ComputedMultisig, computeMultisig, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconMinusCircle, NumberInput, Stack, Text } from '@centrifuge/fabric'
-import { FieldArray, Form, FormikProvider, useFormik } from 'formik'
+import { Button } from '@centrifuge/fabric'
+import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { DataTable } from '../../../components/DataTable'
-import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
-import { Identity } from '../../../components/Identity'
-import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { usePoolAccess, usePoolPermissions } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { combine, integer, max, positiveNumber } from '../../../utils/validation'
-import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { diffPermissions } from '../Configuration/Admins'
+import { MultisigForm } from './MultisigForm'
 
-type PoolManagersInput = {
-  signers: string[]
-  threshold: number
+export type PoolManagersInput = {
+  adminMultisig: {
+    signers: string[]
+    threshold: number
+  }
 }
-type Row = { address: string; index: number }
 
 export function PoolManagers({ poolId }: { poolId: string }) {
   const access = usePoolAccess(poolId)
@@ -31,15 +27,17 @@ export function PoolManagers({ poolId }: { poolId: string }) {
 
   const initialValues: PoolManagersInput = React.useMemo(
     () => ({
-      signers: access.multisig?.signers || [],
-      threshold: access.multisig?.threshold || 1,
+      adminMultisig: {
+        signers: access.multisig?.signers || [],
+        threshold: access.multisig?.threshold || 1,
+      },
     }),
     [access?.multisig]
   )
 
   const storedManagerPermissions = poolPermissions
     ? Object.entries(poolPermissions)
-        .filter(([addr, p]) => p.roles.length && initialValues.signers.includes(addr))
+        .filter(([addr, p]) => p.roles.length && initialValues.adminMultisig.signers.includes(addr))
         .map(([address, permissions]) => ({
           address,
           roles: Object.fromEntries(permissions.roles.map((role) => [role, true])),
@@ -68,8 +66,6 @@ export function PoolManagers({ poolId }: { poolId: string }) {
           ),
         ]).pipe(
           switchMap(([api, metadataTx, permissionTx]) => {
-            console.log('newMetadata', newMetadata)
-            console.log('permissionChanges', permissionChanges, permissionTx)
             const tx = api.tx.utility.batchAll([
               metadataTx,
               ...permissionTx.method.args[0],
@@ -92,7 +88,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
     onSubmit: (values, actions) => {
       if (!metadata || !poolPermissions) return
       actions.setSubmitting(false)
-      const newMultisig = computeMultisig(values)
+      const newMultisig = computeMultisig(values.adminMultisig)
 
       const newPoolMetadata: PoolMetadata = {
         ...(metadata as PoolMetadata),
@@ -106,7 +102,10 @@ export function PoolManagers({ poolId }: { poolId: string }) {
         newMultisig,
         diffPermissions(
           storedManagerPermissions,
-          values.signers.map((address) => ({ address, roles: { MemberListAdmin: true, LiquidityAdmin: true } })),
+          values.adminMultisig.signers.map((address) => ({
+            address,
+            roles: { MemberListAdmin: true, LiquidityAdmin: true },
+          })),
           ['LiquidityAdmin', 'MemberListAdmin']
         ),
         newPoolMetadata,
@@ -121,14 +120,11 @@ export function PoolManagers({ poolId }: { poolId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, isEditing])
 
-  const rows = React.useMemo(() => form.values.signers.map((a, i) => ({ address: a, index: i })), [form.values.signers])
-
-  console.log('rows', rows, form.values.signers)
-
+  const { adminMultisig } = form.values
   const hasChanges =
-    form.values.threshold !== initialValues.threshold ||
-    form.values.signers.length !== initialValues.signers.length ||
-    !form.values.signers.every((s) => initialValues.signers.includes(s))
+    adminMultisig.threshold !== initialValues.adminMultisig.threshold ||
+    adminMultisig.signers.length !== initialValues.adminMultisig.signers.length ||
+    !adminMultisig.signers.every((s) => initialValues.adminMultisig.signers.includes(s))
 
   console.log('hasChanges', hasChanges)
 
@@ -139,7 +135,6 @@ export function PoolManagers({ poolId }: { poolId: string }) {
       <Form>
         <PageSection
           title="Pool managers"
-          subtitle="Add/remove addresses as pool managers, which can add investors and manage the reserve."
           headerRight={
             isEditing ? (
               <ButtonGroup variant="small">
@@ -164,63 +159,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
             )
           }
         >
-          <FieldArray name="signers">
-            {(fldArr) => (
-              <Stack gap={3}>
-                <DataTable
-                  data={rows}
-                  columns={[
-                    {
-                      align: 'left',
-                      header: 'Address',
-                      cell: (row: Row) => (
-                        <Text variant="body2">
-                          <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />
-                        </Text>
-                      ),
-                      flex: '3',
-                    },
-                    {
-                      header: '',
-                      cell: (row: Row) =>
-                        isEditing && (
-                          <Button
-                            variant="tertiary"
-                            icon={IconMinusCircle}
-                            onClick={() => fldArr.remove(row.index)}
-                            disabled={isLoading}
-                          />
-                        ),
-                      flex: '0 0 72px',
-                    },
-                  ]}
-                />
-                {isEditing ? (
-                  <Box maxWidth={150}>
-                    <FieldWithErrorMessage
-                      as={NumberInput}
-                      label="Threshold"
-                      type="number"
-                      min="1"
-                      max={form.values.signers.length}
-                      validate={combine(integer(), positiveNumber(), max(form.values.signers.length))}
-                      name="threshold"
-                    />
-                  </Box>
-                ) : (
-                  <LabelValueStack label="Threshold" value={initialValues.threshold} />
-                )}
-                {isEditing && !isLoading && (
-                  <AddAddressInput
-                    existingAddresses={form.values.signers}
-                    onAdd={(address) => {
-                      fldArr.push(addressToHex(address))
-                    }}
-                  />
-                )}
-              </Stack>
-            )}
-          </FieldArray>
+          <MultisigForm isEditing={isEditing} isLoading={isLoading} />
         </PageSection>
       </Form>
     </FormikProvider>

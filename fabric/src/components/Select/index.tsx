@@ -9,12 +9,13 @@ import { Text } from '../Text'
 export type SelectOptionItem = {
   label: string
   value: string
+  disabled?: boolean
 }
 
 export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   options: SelectOptionItem[]
   label?: string | React.ReactElement
-  placeholder: string
+  placeholder?: string
   errorMessage?: string
 }
 
@@ -57,11 +58,13 @@ export const Select: React.FC<SelectProps> = ({ options, label, placeholder, err
           <>
             <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
             <StyledSelect disabled={disabled} {...rest}>
-              <option value="" disabled>
-                {placeholder}
-              </option>
+              {placeholder && (
+                <option value="" disabled>
+                  {placeholder}
+                </option>
+              )}
               {options.map((option, index) => (
-                <option key={`${index}${option.value}`} value={option.value}>
+                <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
                   {option.label}
                 </option>
               ))}

@@ -119,7 +119,7 @@ const initialValues: CreatePoolValues = {
 
   tranches: [createEmptyTranche(true)],
   adminMultisig: {
-    signers: [''],
+    signers: [],
     threshold: 1,
   },
   adminMultisigEnabled: false,
@@ -206,8 +206,6 @@ function CreatePoolForm() {
             const otherMultisigSigners =
               multisigAddr && sortAddresses(adminMultisig.signers.filter((addr) => !isSameAddress(addr, address!)))
             const proxiedPoolCreate = api.tx.proxy.proxy(admin, undefined, poolSubmittable)
-            console.log('poolSubmittable', poolSubmittable, proxiedPoolCreate)
-            console.log('adminMultisig!.signers', adminMultisig?.signers, otherMultisigSigners)
             const submittable = api.tx.utility.batchAll(
               [
                 api.tx.balances.transfer(
@@ -233,20 +231,12 @@ function CreatePoolForm() {
                   aoProxy,
                   undefined,
                   api.tx.utility.batchAll([
-                    // api.tx.uniques.create(collateralCollectionId, aoProxy),
                     api.tx.proxy.addProxy(admin, 'Any', 0),
                     api.tx.proxy.removeProxy(address, 'Any', 0),
                   ])
                 ),
                 multisigAddr
-                  ? // ? api.tx.multisig.approveAsMulti(
-                    //     adminMultisig.threshold,
-                    //     otherMultisigSigners,
-                    //     null,
-                    //     proxiedPoolCreate.method.hash,
-                    //     paymentInfo!.weight
-                    //   )
-                    api.tx.multisig.asMulti(adminMultisig.threshold, otherMultisigSigners, null, proxiedPoolCreate, 0)
+                  ? api.tx.multisig.asMulti(adminMultisig.threshold, otherMultisigSigners, null, proxiedPoolCreate, 0)
                   : proxiedPoolCreate,
               ].filter(Boolean)
             )
@@ -283,7 +273,6 @@ function CreatePoolForm() {
       onSuccess: async ([nextTx], result) => {
         const api = await centrifuge.getApiPromise()
         const events = result.events.filter(({ event }) => api.events.proxy.PureCreated.is(event))
-        console.log('result', result, result.events)
         if (!events) return
         const { pure } = (events[0].toHuman() as any).event.data
         const { pure: pure2 } = (events[1].toHuman() as any).event.data
@@ -303,6 +292,7 @@ function CreatePoolForm() {
       const tokenSymbols = new Set<string>()
       let prevInterest = Infinity
       let prevRiskBuffer = 0
+
       values.tranches.forEach((t, i) => {
         if (tokenNames.has(t.tokenName)) {
           errors = setIn(errors, `tranches.${i}.tokenName`, 'Tranche names must be unique')
@@ -349,7 +339,7 @@ function CreatePoolForm() {
       metadataValues.adminMultisig = values.adminMultisigEnabled
         ? {
             ...values.adminMultisig,
-            signers: sortAddresses([address, ...values.adminMultisig.signers]),
+            signers: sortAddresses(values.adminMultisig.signers),
           }
         : undefined
 
@@ -357,7 +347,6 @@ function CreatePoolForm() {
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
-      const collateralCollectionId = await centrifuge.nfts.getAvailableCollectionId()
       if (!values.poolIcon || !values.executiveSummary) {
         return
       }
@@ -411,7 +400,7 @@ function CreatePoolForm() {
       setSubmitting(false)
     },
   })
-  console.log('form', form)
+
   React.useEffect(() => {
     if (!isStoredIssuerLoading && storedIssuer && waitingForStoredIssuer) {
       if (storedIssuer.name) {

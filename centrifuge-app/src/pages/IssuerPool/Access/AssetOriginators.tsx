@@ -16,7 +16,6 @@ import { usePoolAccess, useSuitableAccounts } from '../../../utils/usePermission
 import { required } from '../../../utils/validation'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { diffPermissions } from '../Configuration/Admins'
-import { PodConfig } from '../Configuration/PodConfig'
 
 type AOFormValues = {
   withdrawAddress: string
@@ -73,7 +72,6 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
       {access.assetOriginators.map((ao) => (
         <AOForm access={access} assetOriginator={ao} poolId={poolId} />
       ))}
-      <PodConfig />
     </PageSection>
   )
 }
@@ -325,78 +323,105 @@ function AOForm({
             )
           }
         >
-          {!ao.isSetUp && isEditing && (
-            <Stack gap={2}>
-              <FieldWithErrorMessage
-                validate={required()}
-                name="documentKey"
-                as={TextInput}
-                label="Document Signing Key"
-                placeholder="0x..."
-                maxLength={66}
-              />
-              <FieldWithErrorMessage
-                validate={required()}
-                name="p2pKey"
-                as={TextInput}
-                label="P2P Discovery Key"
-                placeholder="0x..."
-                maxLength={66}
-              />
-              <FieldWithErrorMessage
-                validate={required()}
-                name="podOperator"
-                as={TextInput}
-                label="Pod Operator Account ID"
-                placeholder="0x..."
-                maxLength={66}
-              />
-            </Stack>
-          )}
-
-          {isEditing && <FieldWithErrorMessage name="name" as={TextInput} label="Name" placeholder="" maxLength={32} />}
-          <FieldArray name="delegates">
-            {(fldArr) => (
-              <Stack gap={3}>
-                <DataTable
-                  data={rows}
-                  columns={[
-                    {
-                      align: 'left',
-                      header: 'Address',
-                      cell: (row: Row) => (
-                        <Text variant="body2">
-                          <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />
-                        </Text>
-                      ),
-                      flex: '3',
-                    },
-                    {
-                      header: '',
-                      cell: (row: Row) =>
-                        isEditing && (
-                          <Button
-                            variant="tertiary"
-                            icon={IconMinusCircle}
-                            onClick={() => fldArr.remove(row.index)}
-                            disabled={isLoading}
-                          />
-                        ),
-                      flex: '0 0 72px',
-                    },
-                  ]}
+          <Stack gap={4}>
+            {!ao.isSetUp && isEditing && (
+              <Stack gap={2}>
+                <Text as="h3" variant="heading4">
+                  POD Setup
+                </Text>
+                <Text as="p" variant="body2" color="textSecondary">
+                  Values that need to be set in order to be able to authenticate with the POD and create assets
+                </Text>
+                <FieldWithErrorMessage
+                  validate={required()}
+                  name="documentKey"
+                  as={TextInput}
+                  label="Document Signing Key"
+                  placeholder="0x..."
+                  maxLength={66}
                 />
-                {isEditing && !isLoading && (
-                  <AddAddressInput
-                    existingAddresses={form.values.delegates}
-                    onAdd={(address) => {
-                      fldArr.push(addressToHex(address))
-                    }}
-                  />
-                )}
+                <FieldWithErrorMessage
+                  validate={required()}
+                  name="p2pKey"
+                  as={TextInput}
+                  label="P2P Discovery Key"
+                  placeholder="0x..."
+                  maxLength={66}
+                />
+                <FieldWithErrorMessage
+                  validate={required()}
+                  name="podOperator"
+                  as={TextInput}
+                  label="Pod Operator Account ID"
+                  placeholder="0x..."
+                  maxLength={66}
+                />
               </Stack>
             )}
-          </FieldArray>
+
+            <Stack gap={2}>
+              <Text as="h3" variant="heading4">
+                Delegates
+              </Text>
+              <Text as="p" variant="body2" color="textSecondary">
+                Add or remove addresses which can originate assets and invest in the junior tranche.
+              </Text>
+              <FieldArray name="delegates">
+                {(fldArr) => (
+                  <Stack gap={3}>
+                    <DataTable
+                      data={rows}
+                      columns={[
+                        {
+                          align: 'left',
+                          header: 'Address(es)',
+                          cell: (row: Row) => (
+                            <Text variant="body2">
+                              <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
+                            </Text>
+                          ),
+                          flex: '3',
+                        },
+                        {
+                          header: '',
+                          cell: (row: Row) =>
+                            isEditing && (
+                              <Button
+                                variant="tertiary"
+                                icon={IconMinusCircle}
+                                onClick={() => fldArr.remove(row.index)}
+                                disabled={isLoading}
+                              />
+                            ),
+                          flex: '0 0 72px',
+                        },
+                      ]}
+                    />
+                    {isEditing && !isLoading && (
+                      <AddAddressInput
+                        existingAddresses={form.values.delegates}
+                        onAdd={(address) => {
+                          fldArr.push(addressToHex(address))
+                        }}
+                      />
+                    )}
+                  </Stack>
+                )}
+              </FieldArray>
+            </Stack>
+
+            {isEditing && (
+              <Stack gap={2}>
+                <Text as="h3" variant="heading4">
+                  Identity
+                </Text>
+                <Text as="p" variant="body2" color="textSecondary">
+                  Set the name of the AO account to recognize it on-chain
+                </Text>
+                <FieldWithErrorMessage name="name" as={TextInput} label="Name" placeholder="" maxLength={32} />
+              </Stack>
+            )}
+          </Stack>
         </PageSection>
       </Form>
     </FormikProvider>

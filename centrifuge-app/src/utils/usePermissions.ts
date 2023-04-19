@@ -219,7 +219,7 @@ export function usePoolAccess(poolId: string) {
             ([addr, p]) =>
               p.roles.length &&
               (metadata.adminMultisig!.signers.includes(addr) ||
-                adminDelegates.find((p) => p.types.includes('Any') && p.delegatee === addr))
+                adminDelegates?.find((p) => p.types.includes('Any') && p.delegatee === addr))
           )
           .map(([address, permissions]) => ({
             address,

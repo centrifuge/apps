@@ -5,7 +5,7 @@ import * as React from 'react'
 export function useFocusInvalidInput(form: FormikProps<any>, ref: React.RefObject<HTMLFormElement | null>) {
   React.useEffect(() => {
     if (form.submitCount === 0) return
-    const nodes = ref.current?.querySelectorAll<HTMLInputElement>('input,textarea')
+    const nodes = ref.current?.querySelectorAll<HTMLInputElement>('input,textarea,select')
     if (!nodes?.length) return
     for (const node of nodes) {
       if (!node.name) continue

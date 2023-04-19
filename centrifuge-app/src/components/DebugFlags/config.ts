@@ -54,7 +54,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   editPoolConfig: {
     type: 'checkbox',
     default: false,
-    alwaysShow: true,
   },
   editAdminConfig: {
     type: 'checkbox',
@@ -63,7 +62,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   poolReporting: {
     type: 'checkbox',
     default: false,
-    alwaysShow: true,
   },
   persistDebugFlags: {
     type: 'checkbox',
@@ -77,7 +75,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   editPoolVisibility: {
     type: 'checkbox',
     default: false,
-    alwaysShow: true,
   },
   showAdvancedAccounts: {
     type: 'checkbox',

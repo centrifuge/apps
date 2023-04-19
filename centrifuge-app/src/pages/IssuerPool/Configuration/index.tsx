@@ -5,7 +5,6 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
-import { Admins } from './Admins'
 import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
@@ -36,7 +35,6 @@ function IssuerPoolConfiguration() {
           <Issuer />
           <EpochAndTranches />
           <WriteOffGroups />
-          <Admins />
           <LoanTemplates />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>

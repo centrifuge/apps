@@ -4,7 +4,6 @@ import { Button, Checkbox, IconMinusCircle, Stack, Text } from '@centrifuge/fabr
 import { encodeAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { useParams } from 'react-router'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
@@ -24,8 +23,7 @@ type PoolMetadataInput = {
 }
 type Row = Admin & { index: number }
 
-export function Admins() {
-  const { pid: poolId } = useParams<{ pid: string }>()
+export function Admins({ poolId }: { poolId: string }) {
   const poolPermissions = usePoolPermissions(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
   const { selectedAccount } = useWallet().substrate
@@ -150,19 +148,6 @@ export function Admins() {
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.Borrower`}
-                          as={Checkbox}
-                          type="checkbox"
-                          disabled={!isEditing || isLoading}
-                        />
-                      ),
-                      flex: '2',
-                    },
-                    {
-                      align: 'center',
-                      header: <Tooltips type="pricing" variant="secondary" />,
-                      cell: (row: Row) => (
-                        <Field
-                          name={`admins.${row.index}.roles.PricingAdmin`}
                           as={Checkbox}
                           type="checkbox"
                           disabled={!isEditing || isLoading}
