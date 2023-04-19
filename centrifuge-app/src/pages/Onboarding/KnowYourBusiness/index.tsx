@@ -22,21 +22,21 @@ export function KnowYourBusiness() {
 
   const formik = useFormik({
     initialValues: {
-      businessName: onboardingUser?.businessName || '',
-      email: onboardingUser?.email || '',
-      registrationNumber: onboardingUser?.registrationNumber || '',
+      businessName: onboardingUser?.businessName || 'foo bar',
+      email: onboardingUser?.email || 'ben@k-f.co',
+      registrationNumber: onboardingUser?.registrationNumber || '22',
       jurisdictionCode:
-        (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode || '') ?? '',
+        (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode || 'ky') ?? '',
       regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
     onSubmit: async (values) => {
       const manualReview = !(values.jurisdictionCode in KYB_COUNTRY_CODES)
-      await verifyBusinessInformation({ ...values, manualReview })
+      // await verifyBusinessInformation({ ...values, manualReview })
 
       if (manualReview) {
         startKYB(values)
       } else {
-        nextStep()
+        // nextStep()
       }
     },
     validationSchema,
@@ -44,7 +44,7 @@ export function KnowYourBusiness() {
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
     if (event.data === 'manual.onboarding.completed') {
-      nextStep()
+      // nextStep()
       // set 'manualReview' to 'true'
       // verifyBusinessInformation(values)
     }
