@@ -1758,14 +1758,9 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.ormlTokens.accounts.entries(address),
           api.query.system.account(address),
           getCurrencies(),
-          // (api.rpc as any).rewards.computeReward(
-          //   ['Liquidity', { Tranche: ['872535177', '0x58c4a52c1f0d239f1ff53f7f13875b3d'] }],
-          //   address
-          // ),
         ]).pipe(
           take(1),
           map(([rawBalances, nativeBalance, currencies]) => {
-            // console.log('reward', reward)
             const balances = {
               tranches: [] as AccountTokenBalance[],
               currencies: [] as AccountCurrencyBalance[],
