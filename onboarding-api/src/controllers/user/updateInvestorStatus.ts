@@ -9,6 +9,7 @@ import { addInvestorToMemberList } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { signAcceptanceAsIssuer } from '../../utils/signAcceptanceAsIssuer'
+import { addTinlakeInvestorToMemberList } from '../../utils/tinlake'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { verifyJwt } from '../../utils/verifyJwt'
@@ -88,7 +89,11 @@ export const updateInvestorStatusController = async (
         `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
       )
 
-      await addInvestorToMemberList(wallet.address, poolId, trancheId)
+      if (wallet.network === 'substrate') {
+        await addInvestorToMemberList(wallet.address, poolId, trancheId)
+      } else {
+        await addTinlakeInvestorToMemberList(wallet.address, poolId, trancheId)
+      }
       await sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF)
       await sendApproveIssuerMessage(wallet.address, poolId, trancheId, countersignedAgreementPDF)
       await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
