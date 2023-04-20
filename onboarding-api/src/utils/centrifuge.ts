@@ -3,6 +3,9 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { Keyring } from '@polkadot/keyring'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { firstValueFrom } from 'rxjs'
+import { InferType } from 'yup'
+import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
+import { HttpError, reportHttpError } from './httpError'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
 const PROXY_ADDRESS = process.env.MEMBERLIST_ADMIN_PURE_PROXY
@@ -51,4 +54,18 @@ export const addInvestorToMemberList = async (walletAddress: string, poolId: str
   const hash = await proxiedSubmittable.signAndSend(signer)
   await api.disconnect()
   return hash
+}
+
+export const validateRemark = async (
+  transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
+  expectedRemark: string
+) => {
+  try {
+    await firstValueFrom(
+      centrifuge.remark.validateRemark(transactionInfo.blockNumber, transactionInfo.txHash, expectedRemark)
+    )
+  } catch (error) {
+    reportHttpError(error)
+    throw new HttpError(400, 'Invalid remark')
+  }
 }

@@ -1,21 +1,24 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
+import {
+  OnboardingUser,
+  transactionInfoSchema,
+  validateAndWriteToFirestore,
+  writeToOnboardingBucket,
+} from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
+import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
+import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
-import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
+import { validateEvmRemark } from '../../utils/tinlake'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
-import { validateRemark } from '../../utils/validateRemark'
 
 export const signAndSendDocumentsInput = object({
   poolId: string().required(),
   trancheId: string().required(),
-  transactionInfo: object({
-    extrinsicHash: string().required(),
-    blockNumber: string().required(),
-  }).required(),
+  transactionInfo: transactionInfoSchema.required(),
 })
 
 export const signAndSendDocumentsController = async (
@@ -30,31 +33,29 @@ export const signAndSendDocumentsController = async (
 
     const user = await fetchUser(wallet)
 
-    await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
+    const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
+
+    if (wallet.network === 'substrate') {
+      await validateRemark(transactionInfo, remark)
+    } else {
+      await validateEvmRemark(req.wallet, transactionInfo, remark)
+    }
 
     if (
-      user?.poolSteps[poolId] &&
-      !user?.poolSteps[poolId]?.[trancheId]?.signAgreement.completed &&
-      user?.poolSteps[poolId]?.[trancheId]?.status.status !== null
+      user.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
+      user.poolSteps?.[poolId]?.[trancheId]?.status.status !== null
     ) {
-      throw new HttpError(400, 'User must sign document before documents can be sent to issuer')
+      throw new HttpError(400, 'User has already signed the agreement')
     }
 
-    const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
-    const [unsignedAgreementExists] = await unsignedAgreement.exists()
-
-    if (!unsignedAgreementExists) {
-      throw new HttpError(400, 'Agreement not found')
-    }
-
-    const pdfDoc = await signAndAnnotateAgreement(
-      unsignedAgreement,
-      wallet.address,
+    const signedAgreementPDF = await annotateAgreementAndSignAsInvestor({
+      poolId,
+      trancheId,
+      walletAddress: wallet.address,
       transactionInfo,
-      user?.name as string
-    )
-
-    const signedAgreementPDF = await pdfDoc.save()
+      name: user.name as string,
+      email: user.email as string,
+    })
 
     await writeToOnboardingBucket(
       signedAgreementPDF,
@@ -83,7 +84,7 @@ export const signAndSendDocumentsController = async (
     }
 
     await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
-    const freshUserData = fetchUser(wallet)
+    const freshUserData = await fetchUser(wallet)
     return res.status(201).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

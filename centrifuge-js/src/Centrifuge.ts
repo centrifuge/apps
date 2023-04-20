@@ -8,6 +8,7 @@ import { getNftsModule } from './modules/nfts'
 import { getPodModule } from './modules/pod'
 import { getPoolsModule } from './modules/pools'
 import { getProxiesModule } from './modules/proxies'
+import { getRemarkModule } from './modules/remark'
 import { getTinlakeModule } from './modules/tinlake'
 import { getTokensModule } from './modules/tokens'
 import { getUtilsModule } from './modules/utils'
@@ -22,6 +23,7 @@ export class Centrifuge extends CentrifugeBase {
   pod = getPodModule()
   auth = getAuthModule(this)
   tinlake = getTinlakeModule(this)
+  remark = getRemarkModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)

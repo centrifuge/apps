@@ -1,12 +1,14 @@
 import { Request, Response } from 'express'
 import { InferType, object, string, StringSchema } from 'yup'
-import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMessage'
+import { sendApproveIssuerMessage } from '../../emails/sendApproveIssuerMessage'
 import { UpdateInvestorStatusPayload } from '../../emails/sendDocumentsMessage'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
 import { addInvestorToMemberList } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { signAcceptanceAsIssuer } from '../../utils/signAcceptanceAsIssuer'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { verifyJwt } from '../../utils/verifyJwt'
@@ -74,8 +76,21 @@ export const updateInvestorStatusController = async (
     }
 
     if (user?.email && status === 'approved') {
+      const countersignedAgreementPDF = await signAcceptanceAsIssuer({
+        poolId,
+        trancheId,
+        walletAddress: wallet.address,
+        investorName: user.name as string,
+      })
+
+      await writeToOnboardingBucket(
+        countersignedAgreementPDF,
+        `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
+      )
+
       await addInvestorToMemberList(wallet.address, poolId, trancheId)
-      await sendApproveInvestorMessage(user.email, poolId, trancheId)
+      await sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF)
+      await sendApproveIssuerMessage(wallet.address, poolId, trancheId, countersignedAgreementPDF)
       await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
       return res.status(200).send({ poolId, trancheId })
     } else if (user?.email && status === 'rejected') {
