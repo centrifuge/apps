@@ -22,10 +22,7 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
   try {
     // TODO: check if possible to use Buf.from()
     const token = btoa(`${process.env.SHUFTI_PRO_CLIENT_ID}:${process.env.SHUFTI_PRO_SECRET_KEY}`)
-    // const token = Buffer.from(
-    //   `${process.env.SHUFTI_PRO_CLIENT_ID}:${process.env.SHUFTI_PRO_SECRET_KEY}`,
-    //   'utf-8'
-    // ).toString('base64')
+
     const shuftiRes = await fetch(`https://api.shuftipro.com/${options?.path ?? ''}`, {
       method: 'post',
       headers: {
