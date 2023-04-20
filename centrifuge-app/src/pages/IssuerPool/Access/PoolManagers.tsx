@@ -6,7 +6,7 @@ import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { PageSection } from '../../../components/PageSection'
-import { usePoolAccess, usePoolPermissions } from '../../../utils/usePermissions'
+import { usePoolAccess, usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { diffPermissions } from '../Configuration/Admins'
 import { MultisigForm } from './MultisigForm'
@@ -23,6 +23,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
   const pool = usePool(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
   const poolPermissions = usePoolPermissions(poolId)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
   const { data: metadata } = usePoolMetadata(pool)
 
   const initialValues: PoolManagersInput = React.useMemo(
@@ -98,18 +99,21 @@ export function PoolManagers({ poolId }: { poolId: string }) {
         },
       }
 
-      execute([
-        newMultisig,
-        diffPermissions(
-          storedManagerPermissions,
-          values.adminMultisig.signers.map((address) => ({
-            address,
-            roles: { MemberListAdmin: true, LiquidityAdmin: true },
-          })),
-          ['LiquidityAdmin', 'MemberListAdmin']
-        ),
-        newPoolMetadata,
-      ])
+      execute(
+        [
+          newMultisig,
+          diffPermissions(
+            storedManagerPermissions,
+            values.adminMultisig.signers.map((address) => ({
+              address,
+              roles: { MemberListAdmin: true, LiquidityAdmin: true },
+            })),
+            ['LiquidityAdmin', 'MemberListAdmin']
+          ),
+          newPoolMetadata,
+        ],
+        { account }
+      )
     },
   })
 
@@ -125,8 +129,6 @@ export function PoolManagers({ poolId }: { poolId: string }) {
     adminMultisig.threshold !== initialValues.adminMultisig.threshold ||
     adminMultisig.signers.length !== initialValues.adminMultisig.signers.length ||
     !adminMultisig.signers.every((s) => initialValues.adminMultisig.signers.includes(s))
-
-  console.log('hasChanges', hasChanges)
 
   if (!access.multisig) return null
 

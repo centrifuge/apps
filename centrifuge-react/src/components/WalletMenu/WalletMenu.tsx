@@ -1,8 +1,5 @@
-import { ComputedMultisig, PendingMultisigData } from '@centrifuge/centrifuge-js'
 import {
   Box,
-  Button,
-  Dialog,
   IconCopy,
   IconExternalLink,
   IconPower,
@@ -14,14 +11,11 @@ import {
   Shelf,
   Stack,
   Text,
-  Thumbnail,
   WalletButton,
 } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
-import { useCentrifugeQuery } from '../../hooks/useCentrifugeQuery'
-import { useCentrifugeTransaction } from '../../hooks/useCentrifugeTransaction'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
@@ -68,15 +62,6 @@ function ConnectedMenu() {
   const explorer = useGetExplorerUrl(connectedNetwork ?? undefined)
   const subScanUrl = explorer.address(address, connectedNetwork ?? undefined)
 
-  const [pendingMultisigs] = useCentrifugeQuery(
-    ['pendingMultisig', ctx.substrate.selectedMultisig?.address],
-    (cent) => cent.multisig.getPendingTransactions([ctx.substrate.selectedMultisig!.address]),
-    {
-      enabled: !!ctx.substrate.selectedMultisig?.address,
-    }
-  )
-  const [multisigDialogOpen, setMultisigDialogOpen] = React.useState(false)
-
   return (
     <Popover
       renderTrigger={(props, ref, state) => (
@@ -103,14 +88,6 @@ function ConnectedMenu() {
             }
             {...props}
           />
-
-          {ctx.substrate.selectedMultisig && (
-            <MultisigDialog
-              open={multisigDialogOpen}
-              onClose={() => setMultisigDialogOpen(false)}
-              multisig={ctx.substrate.selectedMultisig}
-            />
-          )}
         </Stack>
       )}
       renderContent={(props, ref, state) => (
@@ -201,16 +178,6 @@ function ConnectedMenu() {
               )}
             </MenuItemGroup>
 
-            {pendingMultisigs && pendingMultisigs?.length > 0 && (
-              <MenuItem
-                label="Multisig approvals"
-                icon={<Thumbnail type="token" size="small" label={pendingMultisigs.length.toString()} />}
-                onClick={() => {
-                  state.close()
-                  setMultisigDialogOpen(true)
-                }}
-              />
-            )}
             <MenuItemGroup>
               <MenuItem
                 label="Disconnect"
@@ -226,59 +193,5 @@ function ConnectedMenu() {
         </Box>
       )}
     />
-  )
-}
-
-function MultisigDialog({
-  open,
-  onClose,
-  multisig,
-}: {
-  open: boolean
-  onClose: () => void
-  multisig: ComputedMultisig
-}) {
-  const [pendingMultisigs] = useCentrifugeQuery(['pendingMultisig', multisig.address], (cent) =>
-    cent.multisig.getPendingTransactions([multisig.address])
-  )
-  return (
-    <Dialog isOpen={open} onClose={onClose}>
-      <Stack gap={3}>
-        <>
-          <Text variant="heading2" as="h2">
-            Pending Multisig Approvals
-          </Text>
-          {pendingMultisigs?.map((data) => (
-            <PendingMultisig data={data} multisig={multisig} />
-          ))}
-        </>
-      </Stack>
-    </Dialog>
-  )
-}
-
-function PendingMultisig({ data, multisig }: { data: PendingMultisigData; multisig: ComputedMultisig }) {
-  const { substrate } = useWallet()
-  const { execute: doTransaction, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    'Approve or cancel',
-    (cent) => cent.multisig.approveOrCancel
-  )
-  console.log('data.call?.toHuman()', data.call?.toHuman(), data.callData)
-  return (
-    <Stack gap={2}>
-      {data.hash}
-      {data.name}
-      <Shelf>
-        {data.info.approvals.includes(substrate.selectedAccount!.address) ? (
-          <Button disabled={transactionIsPending} onClick={() => doTransaction([data.hash, multisig, undefined, true])}>
-            Cancel
-          </Button>
-        ) : (
-          <Button disabled={transactionIsPending} onClick={() => doTransaction([data.hash, multisig])}>
-            Approve
-          </Button>
-        )}
-      </Shelf>
-    </Stack>
   )
 }

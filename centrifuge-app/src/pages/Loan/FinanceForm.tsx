@@ -229,7 +229,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
             <Button
               variant="secondary"
               loading={isCloseLoading}
-              onClick={() => doCloseTransaction([loan.poolId, loan.id])}
+              onClick={() => doCloseTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })}
             >
               Close
             </Button>

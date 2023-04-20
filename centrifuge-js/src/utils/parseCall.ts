@@ -15,8 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { GenericCall, Struct } from '@polkadot/types'
-import { Registry } from '@polkadot/types-codec/types/registry'
-import { Codec } from '@polkadot/types/types'
+import { Codec, Registry } from '@polkadot/types/types'
 
 export interface ISanitizedCall {
   [key: string]: unknown
@@ -94,7 +93,7 @@ export function parseGenericCall(genericCall: GenericCall, registry: Registry): 
         // serialize to a polkadot-js Call and parse so it is not a hex blob.
         try {
           const call = registry.createType('Call', argument.toHex())
-          newArgs[paramName] = parseGenericCall(call as any, registry)
+          newArgs[paramName] = parseGenericCall(call, registry)
         } catch {
           newArgs[paramName] = argument
         }

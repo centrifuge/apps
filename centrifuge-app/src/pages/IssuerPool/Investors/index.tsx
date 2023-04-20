@@ -21,14 +21,16 @@ import { DataTable } from '../../../components/DataTable'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { PendingMultisigs } from '../../../components/PendingMultisigs'
 import { useAddress } from '../../../utils/useAddress'
-import { usePermissions } from '../../../utils/usePermissions'
+import { usePermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useOrder, usePool } from '../../../utils/usePools'
 import { IssuerPoolHeader } from '../Header'
 
-export const IssuerPoolInvestorsPage: React.FC = () => {
+export function IssuerPoolInvestorsPage() {
+  const { pid: poolId } = useParams<{ pid: string }>()
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<PendingMultisigs poolId={poolId} />}>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolInvestors />
@@ -37,7 +39,7 @@ export const IssuerPoolInvestorsPage: React.FC = () => {
   )
 }
 
-const IssuerPoolInvestors: React.FC = () => {
+function IssuerPoolInvestors() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const address = useAddress('substrate')
   const permissions = usePermissions(address)
@@ -48,12 +50,13 @@ const IssuerPoolInvestors: React.FC = () => {
 
 const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
 
-export const Investors: React.FC = () => {
+export function Investors() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [address, setAddress] = React.useState('')
   const validAddress = isAddress(address) ? address : undefined
   const permissions = usePermissions(validAddress)
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['MemberListAdmin'] })
 
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Update investor',
@@ -74,9 +77,9 @@ export const Investors: React.FC = () => {
     const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
 
     if (isAllowed) {
-      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]])
+      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]], { account })
     } else {
-      execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []])
+      execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []], { account })
     }
     setPendingTrancheId(trancheId)
   }
@@ -168,11 +171,7 @@ export const Investors: React.FC = () => {
   )
 }
 
-const InvestedCell: React.FC<{ address: string; poolId: string; trancheId: string }> = ({
-  poolId,
-  trancheId,
-  address,
-}) => {
+function InvestedCell({ poolId, trancheId, address }: { address: string; poolId: string; trancheId: string }) {
   const order = useOrder(poolId, trancheId, address)
   const balances = useBalances(address)
   const hasBalance = balances && findBalance(balances.tranches, { Tranche: [poolId, trancheId] })

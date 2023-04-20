@@ -5,6 +5,7 @@ import * as React from 'react'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'
+import { useSuitableAccounts } from '../utils/usePermissions'
 import { EpochList } from './EpochList'
 import { PageSection } from './PageSection'
 
@@ -43,6 +44,7 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
   const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
     useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
+  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Start order execution',
     (cent) => cent.pools.closeEpoch,
@@ -56,7 +58,10 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
   const closeEpoch = async () => {
     if (!pool) return
     const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
-    closeEpochTx([pool.id, batchCloseAndSolution])
+    closeEpochTx([pool.id, batchCloseAndSolution], {
+      account,
+      forceProxyType: ['Borrow', 'Invest'],
+    })
   }
 
   const ordersLocked = !epochTimeRemaining && sumOfLockedInvestments.add(sumOfLockedRedemptions).gt(0)
@@ -136,6 +141,7 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
 
 const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
   const [isFeasible, setIsFeasible] = React.useState(true)
+  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const { execute: submitSolutionTx, isLoading: loadingSolution } = useCentrifugeTransaction(
     'Submit solution',
     (cent) => cent.pools.submitSolution,
@@ -151,7 +157,7 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   const submitSolution = async () => {
     if (!pool) return
-    submitSolutionTx([pool.id])
+    submitSolutionTx([pool.id], { account, forceProxyType: ['Borrow', 'Invest'] })
   }
 
   return (
@@ -186,6 +192,7 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 
 const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
   const { minutesRemaining, minutesTotal } = useChallengeTimeCountdown(pool.id)
+  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute order',
     (cent) => cent.pools.executeEpoch
@@ -193,7 +200,7 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   const executeEpoch = () => {
     if (!pool) return
-    executeEpochTx([pool.id])
+    executeEpochTx([pool.id], { account, forceProxyType: ['Borrow', 'Invest'] })
   }
 
   return (

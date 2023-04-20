@@ -9,7 +9,7 @@ import { PalletError } from '../utils/errors'
 
 export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
   account?: CombinedSubstrateAccount
-  forceProxyType?: string
+  forceProxyType?: string | string[]
 }
 
 export function useCentrifugeTransaction<T extends Array<any>>(
@@ -52,7 +52,11 @@ export function useCentrifugeTransaction<T extends Array<any>>(
           multisig: account.multisig,
           proxies: account.proxies?.map((p) => [
             p.delegator,
-            p.types.includes(txOptions?.forceProxyType!) ? txOptions?.forceProxyType : undefined,
+            txOptions?.forceProxyType
+              ? (Array.isArray(txOptions.forceProxyType) ? txOptions.forceProxyType : [txOptions.forceProxyType]).find(
+                  (type) => p.types.includes(type)
+                )
+              : undefined,
           ]),
           ...txOptions,
           onStatusChange: (result) => {

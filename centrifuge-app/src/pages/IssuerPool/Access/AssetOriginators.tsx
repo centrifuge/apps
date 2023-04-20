@@ -32,7 +32,7 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
     proxy: { proxyDepositBase, proxyDepositFactor },
   } = useCentrifugeConsts()
 
-  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'], actingAddress: [access.admin || ''] })
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'], actingAddress: [access.admin || ''] })
 
   const { execute: createAO, isLoading: createAOIsPending } = useCentrifugeTransaction(
     'Create Asset Originator',
@@ -45,7 +45,7 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
         switchMap(([api, createTx, permissionTx]) => {
           const tx = api.tx.utility.batchAll([
             ...permissionTx.method.args[0],
-            api.tx.balances.transfer(suitableAccounts[0].actingAddress, proxyDepositBase.add(proxyDepositFactor)),
+            api.tx.balances.transfer(account.actingAddress, proxyDepositBase.add(proxyDepositFactor)),
             createTx,
           ])
           return cent.wrapSignAndSend(api, tx, options)
@@ -60,10 +60,10 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
       headerRight={
         <Button
           variant="secondary"
-          onClick={() => createAO([], { account: suitableAccounts[0] })}
+          onClick={() => createAO([], { account })}
           small
           loading={createAOIsPending}
-          disabled={!suitableAccounts[0]}
+          disabled={!account}
         >
           Create new
         </Button>
@@ -92,10 +92,7 @@ function AOForm({
   poolId: string
 }) {
   const [isEditing, setIsEditing] = React.useState(false)
-  const suitableAccounts = useSuitableAccounts({ poolId, actingAddress: [ao.address] }).filter(
-    (a) => a.proxies?.length === 2
-  )
-  const account = suitableAccounts[0]
+  const [account] = useSuitableAccounts({ poolId, actingAddress: [ao.address] }).filter((a) => a.proxies?.length === 2)
   const identity = useIdentity(ao.address)
   const cent = useCentrifuge()
   const {
@@ -399,7 +396,7 @@ function AOForm({
                     />
                     {isEditing && !isLoading && (
                       <AddAddressInput
-                        existingAddresses={form.values.delegates}
+                        existingAddresses={[...form.values.delegates, ao.address]}
                         onAdd={(address) => {
                           fldArr.push(addressToHex(address))
                         }}
