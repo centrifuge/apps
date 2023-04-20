@@ -108,6 +108,7 @@ const initialValues: CreatePoolValues = {
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_NEW_POOLS,
 
   issuerName: '',
+  issuerRepName: '',
   issuerLogo: null,
   issuerDescription: '',
 
@@ -405,6 +406,9 @@ function CreatePoolForm() {
     if (!isStoredIssuerLoading && storedIssuer && waitingForStoredIssuer) {
       if (storedIssuer.name) {
         form.setFieldValue('issuerName', storedIssuer.name, false)
+      }
+      if (storedIssuer.repName) {
+        form.setFieldValue('issuerRepName', storedIssuer.repName, false)
       }
       if (storedIssuer.description) {
         form.setFieldValue('issuerDescription', storedIssuer.description, false)

@@ -41,8 +41,11 @@ export const LiquidityEpochSection: React.FC<LiquidityEpochSectionProps> = ({ po
 }
 
 const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
-  const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
-    useLiquidity(pool.id)
+  const {
+    sumOfLockedInvestments,
+    sumOfLockedRedemptions,
+    // sumOfExecutableInvestments, sumOfExecutableRedemptions
+  } = useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
   const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
@@ -57,29 +60,29 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   const closeEpoch = async () => {
     if (!pool) return
-    const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
-    closeEpochTx([pool.id, batchCloseAndSolution], {
+    // const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
+    closeEpochTx([pool.id, false], {
       account,
       forceProxyType: ['Borrow', 'Invest'],
     })
   }
 
   const ordersLocked = !epochTimeRemaining && sumOfLockedInvestments.add(sumOfLockedRedemptions).gt(0)
-  const ordersPartiallyExecutable =
-    (sumOfExecutableInvestments.gt(0) && sumOfExecutableInvestments.lt(sumOfLockedInvestments)) ||
-    (sumOfExecutableRedemptions.gt(0) && sumOfExecutableRedemptions.lt(sumOfLockedRedemptions))
-  const ordersFullyExecutable =
-    sumOfLockedInvestments.equals(sumOfExecutableInvestments) &&
-    sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
-  const noOrdersExecutable =
-    !ordersFullyExecutable && sumOfExecutableInvestments.eq(0) && sumOfExecutableRedemptions.eq(0)
+  // const ordersPartiallyExecutable =
+  //   (sumOfExecutableInvestments.gt(0) && sumOfExecutableInvestments.lt(sumOfLockedInvestments)) ||
+  //   (sumOfExecutableRedemptions.gt(0) && sumOfExecutableRedemptions.lt(sumOfLockedRedemptions))
+  // const ordersFullyExecutable =
+  //   sumOfLockedInvestments.equals(sumOfExecutableInvestments) &&
+  //   sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+  // const noOrdersExecutable =
+  //   !ordersFullyExecutable && sumOfExecutableInvestments.eq(0) && sumOfExecutableRedemptions.eq(0)
 
   return (
     <PageSection
       title="Order overview"
       headerRight={
         <Shelf gap="1">
-          {!epochTimeRemaining && !ordersLocked && (
+          {/* {!epochTimeRemaining && !ordersLocked && (
             <Text as="small" variant="body2">
               No orders locked
             </Text>
@@ -103,7 +106,7 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
             <Text as="small" variant="body2">
               Pending orders can be executed in {epochTimeRemaining}
             </Text>
-          )}
+          )} */}
 
           <Button
             small
@@ -119,9 +122,10 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
       }
     >
       {!epochTimeRemaining && !ordersLocked && (
-        <ExtraInfo>The collection of orders is continuing until orders have been locked and can be executed.</ExtraInfo>
+        // <ExtraInfo>The collection of orders is continuing until orders have been locked and can be executed.</ExtraInfo>
+        <ExtraInfo>The collection of orders is continuing until orders have been locked.</ExtraInfo>
       )}
-      {ordersLocked && ordersPartiallyExecutable && (
+      {/* {ordersLocked && ordersPartiallyExecutable && (
         <ExtraInfo>
           The collection of orders continues until all orders can be executed. Start the execution of the orders to
           partially execute orders and lock the remaining orders into the next cycle of order executions.
@@ -133,58 +137,59 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
           available for redemptions. Closing of the collection of orders epoch will not ensure execution of pending
           orders.
         </ExtraInfo>
-      )}
+      )} */}
       <EpochList pool={pool} />
     </PageSection>
   )
 }
 
 const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
-  const [isFeasible, setIsFeasible] = React.useState(true)
-  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
-  const { execute: submitSolutionTx, isLoading: loadingSolution } = useCentrifugeTransaction(
-    'Submit solution',
-    (cent) => cent.pools.submitSolution,
-    {
-      onSuccess: () => {
-        console.log('Solution successfully submitted')
-      },
-      onError: () => {
-        setIsFeasible(false)
-      },
-    }
-  )
+  // const [isFeasible, setIsFeasible] = React.useState(true)
+  // const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
+  // const { execute: submitSolutionTx, isLoading: loadingSolution } = useCentrifugeTransaction(
+  //   'Submit solution',
+  //   (cent) => cent.pools.submitSolution,
+  //   {
+  //     onSuccess: () => {
+  //       console.log('Solution successfully submitted')
+  //     },
+  //     onError: () => {
+  //       setIsFeasible(false)
+  //     },
+  //   }
+  // )
 
-  const submitSolution = async () => {
-    if (!pool) return
-    submitSolutionTx([pool.id], { account, forceProxyType: ['Borrow', 'Invest'] })
-  }
+  // const submitSolution = async () => {
+  //   if (!pool) return
+  //   submitSolutionTx([pool.id], { account, forceProxyType: ['Borrow', 'Invest'] })
+  // }
 
   return (
     <PageSection
       title="Order overview"
-      titleAddition={<Text variant="body2">In submission period</Text>}
+      titleAddition={<Text variant="body2">In submission period, please submit a solution manually</Text>}
       headerRight={
         <Button
           small
           variant="primary"
-          onClick={submitSolution}
-          disabled={loadingSolution || !isFeasible}
-          loading={loadingSolution}
-          loadingMessage={loadingSolution ? 'Submitting solution…' : ''}
+          // onClick={submitSolution}
+          disabled={true}
+          // disabled={loadingSolution || !isFeasible}
+          // loading={loadingSolution}
+          // loadingMessage={loadingSolution ? 'Submitting solution…' : ''}
         >
           Submit solution
         </Button>
       }
     >
-      {!isFeasible && (
+      {/* {!isFeasible && (
         <Shelf mb={2} gap={1}>
           <IconInfo size={16} />
           <Text variant="body3">
             The solution provided by the system is not feasible. Please submit a solution manually.
           </Text>
         </Shelf>
-      )}
+      )} */}
       <EpochList pool={pool} />
     </PageSection>
   )
@@ -206,7 +211,7 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
   return (
     <PageSection
       title="Order overview"
-      titleAddition={<Text variant="body2">Order executing</Text>}
+      titleAddition={<Text variant="body2">{loadingExecution && 'Order executing'}</Text>}
       headerRight={
         <Button
           small

@@ -415,6 +415,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         },
         issuer: {
           name: p.metadata.attributes?.Issuer ?? '',
+          repName: p.metadata.description ?? '',
           description: p.metadata.description ?? '',
           email: p.metadata?.issuerEmail ?? '',
           logo: p.metadata.media?.logo

@@ -74,7 +74,7 @@ type PoolOnboardingSteps = {
         completed: boolean
         timeStamp: string | null
         transactionInfo: {
-          extrinsicHash: string | null
+          txHash: string | null
           blockNumber: string | null
         }
       }
@@ -117,6 +117,7 @@ export interface EntityOnboardingSteps extends IndividualUserSteps {
 }
 
 export type EntityUser = {
+  address: string | null
   investorType: 'entity'
   walletAddress: string
   businessName: string
@@ -133,6 +134,7 @@ export type EntityUser = {
 }
 
 type IndividualUser = {
+  address: string | null
   investorType: 'individual'
   walletAddress: string
   name: string

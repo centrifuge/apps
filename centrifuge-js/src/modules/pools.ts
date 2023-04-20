@@ -394,6 +394,7 @@ export interface PoolMetadataInput {
 
   // issuer
   issuerName: string
+  issuerRepName: string
   issuerLogo?: { uri: string; mime: string } | null
   issuerDescription: string
 
@@ -424,6 +425,7 @@ export type PoolMetadata = {
       class: string
     }
     issuer: {
+      repName: string
       name: string
       description: string
       email: string
@@ -596,6 +598,7 @@ export function getPoolsModule(inst: Centrifuge) {
         asset: { class: metadata.assetClass },
         issuer: {
           name: metadata.issuerName,
+          repName: metadata.issuerRepName,
           description: metadata.issuerDescription,
           email: metadata.email,
           logo: metadata.issuerLogo,
@@ -1626,7 +1629,7 @@ export function getPoolsModule(inst: Centrifuge) {
         // todo: find last of each month
         const poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
         poolStates.forEach((poolState) => {
-          const monthYear = new Date(poolState.timestamp).getMonth() + '-' + new Date(poolState.timestamp).getFullYear()
+          const monthYear = `${new Date(poolState.timestamp).getMonth()}-${new Date(poolState.timestamp).getFullYear()}`
           if (monthYear in poolStatesByMonth) {
             poolStatesByMonth[monthYear] = [...poolStatesByMonth[monthYear], poolState]
           } else {
@@ -1635,7 +1638,7 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         return Object.values(poolStatesByMonth).map((statesOneMonth) => {
-          let base = statesOneMonth[statesOneMonth.length - 1]
+          const base = statesOneMonth[statesOneMonth.length - 1]
           // todo: sum aggregated values (e.g. tranches.fulfilledInvestOrders)
 
           return base
@@ -2253,6 +2256,7 @@ export function getPoolsModule(inst: Centrifuge) {
     repayLoanPartially,
     repayAndCloseLoan,
     closeLoan,
+    getPool,
     getPools,
     getBalances,
     getOrder,

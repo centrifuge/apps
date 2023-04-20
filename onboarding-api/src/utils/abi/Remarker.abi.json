@@ -1,0 +1,25 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "sender", "type": "address" },
+      { "indexed": false, "internalType": "string", "name": "message", "type": "string" }
+    ],
+    "name": "Remarked",
+    "type": "event"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "_message", "type": "string" }],
+    "name": "remark",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "message", "type": "string" }],
+    "name": "remarkWithEvent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

@@ -29,14 +29,17 @@ const walletSchema = array()
   .required()
 export type Wallet = InferType<typeof walletSchema>
 
+export const transactionInfoSchema = object({
+  txHash: string().required(),
+  blockNumber: string().required(),
+})
+export type TransactionInfo = InferType<typeof transactionInfoSchema>
+
 const poolSpecificStepsSchema = object({
   signAgreement: object({
     completed: bool(),
     timeStamp: string().nullable(),
-    transactionInfo: object({
-      extrinsicHash: string().nullable(),
-      blockNumber: string().nullable(),
-    }),
+    transactionInfo: transactionInfoSchema,
   }),
   status: object({
     status: mixed().nullable().oneOf(['approved', 'rejected', 'pending', null]),
@@ -101,6 +104,7 @@ export const entityUserSchema = object({
   countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
   globalSteps: globalStepsSchema,
   poolSteps: poolStepsSchema,
+  address: string().nullable().default(null),
 })
 
 export const individualUserSchema = object({
@@ -114,6 +118,7 @@ export const individualUserSchema = object({
   countryOfResidency: string().required(), // TODO: validate with list of countries
   globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'verifyEmail']),
   poolSteps: poolStepsSchema,
+  address: string().nullable().default(null),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>
