@@ -1,21 +1,24 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
+import {
+  OnboardingUser,
+  transactionInfoSchema,
+  validateAndWriteToFirestore,
+  writeToOnboardingBucket,
+} from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
+import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { validateEvmRemark } from '../../utils/tinlake'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
-import { validateRemark } from '../../utils/validateRemark'
 
 export const signAndSendDocumentsInput = object({
   poolId: string().required(),
   trancheId: string().required(),
-  transactionInfo: object({
-    extrinsicHash: string().required(),
-    blockNumber: string().required(),
-  }).required(),
+  transactionInfo: transactionInfoSchema.required(),
 })
 
 export const signAndSendDocumentsController = async (
@@ -30,7 +33,13 @@ export const signAndSendDocumentsController = async (
 
     const user = await fetchUser(wallet)
 
-    await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
+    const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
+
+    if (wallet.network === 'substrate') {
+      await validateRemark(transactionInfo, remark)
+    } else {
+      await validateEvmRemark(req.wallet, transactionInfo, remark)
+    }
 
     if (
       user.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
@@ -75,7 +84,7 @@ export const signAndSendDocumentsController = async (
     }
 
     await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
-    const freshUserData = fetchUser(wallet)
+    const freshUserData = await fetchUser(wallet)
     return res.status(201).send({ ...freshUserData })
   } catch (e) {
     const error = reportHttpError(e)

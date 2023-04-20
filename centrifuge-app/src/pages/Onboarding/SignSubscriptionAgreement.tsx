@@ -24,7 +24,6 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     NonNullable<OnboardingUser>,
     NonNullable<OnboardingPool>
   >()
-
   const poolId = pool.id
   const trancheId = pool.trancheId
 
@@ -36,7 +35,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     },
     validationSchema,
     onSubmit: () => {
-      signRemark([])
+      signRemark([`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`])
     },
   })
 
