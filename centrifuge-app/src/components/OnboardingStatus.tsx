@@ -1,5 +1,4 @@
 import {
-  AnchorButton,
   iconActionStyles,
   IconClockForward,
   IconExternalLink,
@@ -11,6 +10,7 @@ import {
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { useVerificationStatus } from './OnboardingProvider'
+import { RouterLinkButton } from './RouterLinkButton'
 
 const ActionLink = styled(Link)`
   ${iconActionStyles}
@@ -26,9 +26,9 @@ export function OnboardingStatus() {
       </Text>
 
       {status === 'unverified' ? (
-        <AnchorButton href="/onboarding" small>
+        <RouterLinkButton to="/onboarding" small>
           Verify identity
-        </AnchorButton>
+        </RouterLinkButton>
       ) : (
         <Shelf as="span" gap={1}>
           {status === 'pending' ? <IconClockForward size="iconSmall" /> : <IconShieldCheck size="iconSmall" />}
