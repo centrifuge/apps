@@ -16,7 +16,6 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 ### Frontend
 
 1. Create pools for initial data
-2. Create proxy for POD authentication
 
 ### Faucet
 
@@ -37,6 +36,18 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
    c. Go to explorer and find the tx that creates the pure proxy, copy the randomly generated address and paste into env variables
    d. Fund both the proxy and the controlling account
    e. In each pool give the pure proxy whitelisting permission - this can only be done by the pool admin
+
+### Asset Originator POD Access
+
+When setting up an Asset Originator for a pool, the account on the POD needs to be manually created
+
+1. Create AO on the Access tab of the Issuers Pool page
+2. Copy the address of the newly created AO proxy
+3. Get a jw3t auth token. Needs to be signed as Eve on behalf of Eve with proxy type `PodAdmin`. Example token: `ewogImFsZ29yaXRobSI6ICJzcjI1NTE5IiwKICJ0b2tlbl90eXBlIjogIkpXM1QiLAogImFkZHJlc3NfdHlwZSI6ICJzczU4Igp9.ewogImFkZHJlc3MiOiAiNUhHaldBZUZEZkZDV1BzakZRZFZWMk1zdnoyWHRNa3R2Z29jRVpjQ2o2OGtVTWF3IiwKICJpc3N1ZWRfYXQiOiAiMTY4MTk5Mzc4MCIsCiAiZXhwaXJlc19hdCI6ICIxOTk3MzUzNzgwIiwKICJvbl9iZWhhbGZfb2YiOiAiNUhHaldBZUZEZkZDV1BzakZRZFZWMk1zdnoyWHRNa3R2Z29jRVpjQ2o2OGtVTWF3IiwKICJub3RfYmVmb3JlIjogIjE2ODE5OTM3ODAiLAogInByb3h5X3R5cGUiOiAiUG9kQWRtaW4iCn0.-BJ7Y6WurKYwesCMfkTrudsH5ZVseMviVNdZ0kFZmEnAtAYvdxqxN56aVwRR5QvEjK8Of4TVtY_-oPK4hP7Dhg`
+4. Call `https://pod.development.cntrfg.com/v2/accounts/generate` (More details about the request here: https://app.swaggerhub.com/apis/centrifuge.io/cent-node/2.1.0#/Accounts/generate_account_v2)
+5. Copy `document_signing_public_key`, `p2p_public_signing_key` and `pod_operator_account_id` of the returned result and paste those in the AO section on the Access tab
+6. Add hot wallets to the AO
+7. The hot wallets should now be able to authenticate with the POD and create assets
 
 ## Notes
 

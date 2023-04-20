@@ -41,7 +41,6 @@ import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
 import { truncate } from '../../utils/web3'
-import { PodConfig } from '../IssuerPool/Configuration/PodConfig'
 import { AdminMultisigSection } from './AdminMultisig'
 import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
@@ -572,7 +571,6 @@ function CreatePoolForm() {
           <TrancheSection />
 
           <AdminMultisigSection />
-          <PodConfig />
         </Form>
       </FormikProvider>
     </>
