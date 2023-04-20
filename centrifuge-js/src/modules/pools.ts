@@ -459,27 +459,13 @@ export type PoolMetadata = {
     lossGivenDefault: string
     discountRate: string
   }[]
-  // Not yet implemented
-  // onboarding: {
-  //   live: boolean
-  //   agreements: {
-  //     name: string
-  //     provider: 'docusign'
-  //     providerTemplateId: string
-  //     tranche: string
-  //     country: 'us | non-us'
-  //   }[]
-  //   issuer: {
-  //     name: string
-  //     email: string
-  //     restrictedCountryCodes: string[]
-  //     minInvestmentCurrency: number
-  //     nonSolicitationNotice: 'all' | 'non-us' | 'none'
-  //   }
-  // }
-  // bot: {
-  //   channelId: string
-  // }
+  onboarding?: {
+    agreements: {
+      [trancheId: string]: {
+        ipfsHash: string
+      }
+    }
+  }
 }
 
 type AssetCurrencyData = {

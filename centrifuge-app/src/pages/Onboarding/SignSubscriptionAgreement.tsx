@@ -1,3 +1,4 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, Checkbox, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
@@ -6,9 +7,9 @@ import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
 import { OnboardingUser } from '../../types'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
 import { useSignRemark } from './queries/useSignRemark'
-import { useUnsignedAgreement } from './queries/useUnsignedAgreement'
 
 type Props = {
   signedAgreementUrl: string | undefined
@@ -19,6 +20,8 @@ const validationSchema = object({
   isAgreed: boolean().oneOf([true], 'You must agree to the agreement'),
 })
 
+const GENERIC_SUBSCRIPTION_AGREEMENT = 'QmYuPPQuuc9ezYQtgTAupLDcLCBn9ZJgsPjG7mUx7qbN8G'
+
 export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
   const { onboardingUser, pool, previousStep, nextStep } = useOnboarding<
     NonNullable<OnboardingUser>,
@@ -26,6 +29,9 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   >()
   const poolId = pool.id
   const trancheId = pool.trancheId
+  const poolData = usePool(poolId)
+  const { data: poolMetadata } = usePoolMetadata(poolData)
+  const centrifuge = useCentrifuge()
 
   const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
 
@@ -41,7 +47,10 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
 
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
-  const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useUnsignedAgreement()
+
+  const unsignedAgreementUrl = poolMetadata?.onboarding?.agreements[trancheId]
+    ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[trancheId].ipfsHash)
+    : centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
 
   React.useEffect(() => {
     if (hasSignedAgreement) {
@@ -49,11 +58,6 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasSignedAgreement])
-
-  const isAgreementFetched = React.useMemo(
-    () => isUnsignedAgreementFetched || isSignedAgreementFetched,
-    [isSignedAgreementFetched, isUnsignedAgreementFetched]
-  )
 
   return (
     <>
@@ -66,13 +70,13 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             overflowY="auto"
             minHeight="30vh"
             maxHeight="500px"
-            borderWidth={isAgreementFetched ? 1 : 0}
+            borderWidth={unsignedAgreementUrl ? 1 : 0}
             borderColor="borderPrimary"
             borderStyle="solid"
             borderRadius="tooltip"
           >
-            {isAgreementFetched ? (
-              <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
+            {unsignedAgreementUrl ? (
+              <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementUrl) as string} />
             ) : (
               <Shelf
                 position="absolute"
@@ -88,9 +92,9 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             )}
           </Box>
 
-          {!!isAgreementFetched && (
+          {!!unsignedAgreementUrl && (
             <AnchorButton
-              href={signedAgreementUrl ?? unsignedAgreementData}
+              href={signedAgreementUrl ?? unsignedAgreementUrl}
               download={`subscription-agreement-pool-${pool.id}.pdf`}
               variant="tertiary"
               icon={IconDownload}

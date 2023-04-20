@@ -1,8 +1,9 @@
+import fetch from 'node-fetch'
 import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { onboardingBucket } from '../database'
-import { getPoolById } from './centrifuge'
+import { centrifuge, getPoolById } from './centrifuge'
 import { HttpError } from './httpError'
 
 interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
@@ -10,6 +11,8 @@ interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
   walletAddress: string
   email: string
 }
+
+const GENERIC_SUBSCRIPTION_AGREEMENT = 'QmYuPPQuuc9ezYQtgTAupLDcLCBn9ZJgsPjG7mUx7qbN8G'
 
 export const annotateAgreementAndSignAsInvestor = async ({
   poolId,
@@ -21,16 +24,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
 }: SignatureInfo) => {
   const { pool } = await getPoolById(poolId)
   const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name as string
-
-  const signedAgreement = await PDFDocument.create()
-
-  // TODO: make subscription agreements pool and tranche specific
-  const unsignedAgreement = await onboardingBucket.file('subscription-agreements/generic_subscription_agreement.pdf')
-  const [unsignedAgreementExists] = await unsignedAgreement.exists()
-
-  if (!unsignedAgreementExists) {
-    throw new HttpError(400, 'Agreement not found')
-  }
+  const { metadata } = await getPoolById(poolId)
 
   const signaturePage = await onboardingBucket.file('signature-page.pdf')
   const [signaturePageExists] = await signaturePage.exists()
@@ -39,12 +33,17 @@ export const annotateAgreementAndSignAsInvestor = async ({
     throw new HttpError(400, 'Signature page not found')
   }
 
-  const unsignedAgreementPdf = await unsignedAgreement.download()
-  const unsignedAgreementPdfDoc = await PDFDocument.load(unsignedAgreementPdf[0])
+  const unsignedAgreementUrl = metadata?.onboarding?.agreements[trancheId]
+    ? centrifuge.metadata.parseMetadataUrl(metadata?.onboarding?.agreements[trancheId].ipfsHash)
+    : centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+  const unsignedAgreementRes = await fetch(unsignedAgreementUrl)
+  const unsignedAgreement = Buffer.from(await unsignedAgreementRes.arrayBuffer())
+  const unsignedAgreementPdfDoc = await PDFDocument.load(unsignedAgreement)
 
   const signaturePagePdf = await signaturePage.download()
   const signaturePagePdfDoc = await PDFDocument.load(signaturePagePdf[0])
 
+  const signedAgreement = await PDFDocument.create()
   const unsignedAgreementCopiedPages = await signedAgreement.copyPages(
     unsignedAgreementPdfDoc,
     unsignedAgreementPdfDoc.getPageIndices()
@@ -62,7 +61,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
   firstPage.drawText(
     `Signed by ${walletAddress} on Centrifuge
 Block: ${transactionInfo.blockNumber}
-Extrinsic Hash: ${transactionInfo.extrinsicHash}`,
+Transaction Hash: ${transactionInfo.txHash}`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,

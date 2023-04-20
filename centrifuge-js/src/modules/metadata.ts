@@ -82,4 +82,3 @@ export function getMetadataModule(inst: Centrifuge) {
 
   return { getMetadata, parseMetadataUrl, pinFile, pinJson, unpinFile }
 }
-
