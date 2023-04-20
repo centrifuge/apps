@@ -147,9 +147,14 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
               p={1}
               borderRadius="tooltip"
               width={220}
+              gap="3px"
               placement={placement}
             >
-              {!!title && <Text variant="label2">{title}</Text>}
+              {!!title && (
+                <Text variant="body3" fontWeight={600}>
+                  {title}
+                </Text>
+              )}
               <Text variant="body3">{body}</Text>
             </Container>
           )}
