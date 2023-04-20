@@ -66,7 +66,6 @@ function computeMultisigInfo(
   }
 
   getCallResult(c)
-  console.log('callResult ', result, c)
   if (!result) return null
 
   const { name, callData } = result

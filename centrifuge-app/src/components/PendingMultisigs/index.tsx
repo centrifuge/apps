@@ -1,6 +1,6 @@
 import { ComputedMultisig, computeMultisig, PendingMultisigData } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQuery, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
-import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { Box, Button, Card, Dialog, Divider, Stack, Text, TextAreaInput } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -9,7 +9,6 @@ export function PendingMultisigs({ poolId }: { poolId: string }) {
   const [multisigDialogOpen, setMultisigDialogOpen] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const ctx = useWallet()
 
   const multisig = metadata?.adminMultisig && computeMultisig(metadata.adminMultisig)
   // const multisig = computeMultisig({
@@ -34,9 +33,14 @@ export function PendingMultisigs({ poolId }: { poolId: string }) {
       {account && multisig && pendingMultisigs && pendingMultisigs?.length > 0 && (
         <>
           <MultisigDialog open={multisigDialogOpen} onClose={() => setMultisigDialogOpen(false)} multisig={multisig} />
-          <Button onClick={() => setMultisigDialogOpen(true)} variant="secondary">
-            View {pendingMultisigs.length} pending multisig approval{pendingMultisigs.length > 0 && 's'}
-          </Button>
+          <Stack as={Card} p={2} gap={2}>
+            <Text>
+              {pendingMultisigs.length} pending multisig approval{pendingMultisigs.length > 0 && 's'}
+            </Text>
+            <Button onClick={() => setMultisigDialogOpen(true)} variant="secondary">
+              View
+            </Button>
+          </Stack>
         </>
       )}
     </>
@@ -56,14 +60,14 @@ function MultisigDialog({
     cent.multisig.getPendingTransactions([multisig.address])
   )
   return (
-    <Dialog isOpen={open} onClose={onClose}>
+    <Dialog isOpen={open} onClose={onClose} title="Pending Multisig Approvals">
       <Stack gap={3}>
         <>
-          <Text variant="heading2" as="h2">
-            Pending Multisig Approvals
-          </Text>
-          {pendingMultisigs?.map((data) => (
-            <PendingMultisig data={data} multisig={multisig} />
+          {pendingMultisigs?.map((data, i) => (
+            <>
+              {i > 0 && <Divider />}
+              <PendingMultisig data={data} multisig={multisig} />
+            </>
           ))}
         </>
       </Stack>
@@ -77,22 +81,76 @@ function PendingMultisig({ data, multisig }: { data: PendingMultisigData; multis
     'Approve or cancel',
     (cent) => cent.multisig.approveOrCancel
   )
-  console.log('data.call?.toHuman()', data.call?.toHuman(), data.callData)
+  const api = useCentrifugeApi()
+  const callDataNeeded = !data.callData
+  const [callHex, setCallHex] = React.useState('')
+
+  const [callFromInput, inputValid] = React.useMemo(() => {
+    if (!callHex) return [null, false]
+    try {
+      const call = api.createType('Call', callHex)
+
+      return [call, call.hash.eq(data.hash)]
+    } catch {
+      return [null, false]
+    }
+  }, [api, callHex, data.hash])
+
+  const call = data.call || (inputValid && callFromInput)
+
+  const callString = React.useMemo(() => {
+    if (!call) return ''
+    try {
+      return JSON.stringify(call.toHuman(), null, 2)
+    } catch {
+      return ''
+    }
+  }, [call])
+
+  console.log('data', data, call)
+
   return (
-    <Stack gap={2}>
-      {data.hash}
-      {data.name}
-      <Shelf>
-        {data.info.approvals.includes(substrate.selectedAccount!.address) ? (
-          <Button disabled={transactionIsPending} onClick={() => doTransaction([data.hash, multisig, undefined, true])}>
-            Cancel
-          </Button>
-        ) : (
-          <Button disabled={transactionIsPending} onClick={() => doTransaction([data.hash, multisig])}>
+    <Stack gap={2} alignItems="flex-start">
+      <Text style={{ overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        Call hash: {data.hash}
+      </Text>
+      {data.info.approvals.includes(substrate.selectedAccount!.address) ? (
+        <Button disabled={transactionIsPending} onClick={() => doTransaction([data.hash, multisig, undefined, true])}>
+          Reject
+        </Button>
+      ) : (
+        <>
+          {callDataNeeded && (
+            <>
+              <TextAreaInput
+                label="Call data"
+                placeholder="0x..."
+                value={callHex}
+                onChange={(e) => setCallHex(e.target.value)}
+              />
+              {callHex && !inputValid && (
+                <Text variant="label2" color="statusCritical">
+                  Calldata doesn't match hash
+                </Text>
+              )}
+            </>
+          )}
+          {callString && (
+            <details>
+              <summary>Call details</summary>
+              <Box maxHeight="300px" overflowY="auto">
+                <pre style={{ whiteSpace: 'pre-wrap' }}>{callString}</pre>
+              </Box>
+            </details>
+          )}
+          <Button
+            disabled={transactionIsPending}
+            onClick={() => doTransaction([data.hash, multisig, callDataNeeded ? callHex : undefined])}
+          >
             Approve
           </Button>
-        )}
-      </Shelf>
+        </>
+      )}
     </Stack>
   )
 }
