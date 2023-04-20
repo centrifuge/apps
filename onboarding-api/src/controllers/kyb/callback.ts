@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+const crypto = require('crypto')
 
 type VerificationState = 1 | 0 | null
 
@@ -29,74 +30,31 @@ type RequestBody = {
   }
 }
 
-const crypto = require('crypto')
-
 export const KYBCallbackController = async (req: Request<any, any, RequestBody, any>, res: Response) => {
   const { headers, body } = req
-  console.log('res: ', req.body)
 
   if (headers.signature) {
-    const hashedSecretKey = crypto.createHash('sha256').update(SHUFTI_PRO_SECRET_KEY).digest('hex')
-
-    const hash = crypto
-      .createHash('sha256')
-      // .update(`${JSON.stringify(body)}${SHUFTI_PRO_SECRET_KEY}`)
-      .update(`[object Response]${SHUFTI_PRO_SECRET_KEY}`)
-      .digest('hex')
-
-    // console.log('signature: ', headers.signature)
-    // console.log('hash: ', hash)
-    // console.log('hash equals signature', hash === headers.signature)
+    const isValidRequest = isValidShuftiRequest(body, headers.signature)
+    console.log('isValidRequest', isValidRequest)
   }
 
   return res.status(200).end()
 }
 
-const exampleRequest = {
-  reference: 'KYB_0.21503711327067587',
-  event: 'review.pending',
-  email: 'ben@k-f.co',
-  country: 'KY',
-  verification_data: {},
-  verification_result: {
-    proof_stores: {
-      articles_of_association: 1,
-      certificate_of_incorporation: 1,
-      proof_of_address: 1,
-      register_of_directors: 1,
-      register_of_shareholders: 1,
-      signed_and_dated_ownership_structure: 1,
-    },
-  },
-  info: {
-    agent: {
-      is_desktop: true,
-      is_phone: false,
-      device_name: 'Macintosh',
-      browser_name: 'Chrome 111.0.0.0',
-      platform_name: 'Mac OS 10.15.7',
-    },
-    geolocation: {
-      host: '',
-      ip: '85.149.0.0',
-      rdns: '85.149.0.0',
-      asn: '1234',
-      isp: 'Lorem',
-      country_name: 'Netherlands',
-      country_code: 'NL',
-      region_name: 'South Holland',
-      region_code: 'ZH',
-      city: 'Voorburg',
-      postal_code: '2511',
-      continent_name: 'Europe',
-      continent_code: 'EU',
-      latitude: '52.077980041504',
-      longitude: '4.3173198699951',
-      metro_code: '',
-      timezone: 'Europe/Amsterdam',
-      ip_type: 'ipv4',
-      capital: 'Amsterdam',
-      currency: 'EUR',
-    },
-  },
+function isValidShuftiRequest(body: RequestBody, signature: string | string[]) {
+  const requestBody = JSON.stringify(body)
+    //  escape all `/`
+    .replace(/\//g, '\\/')
+
+    // replace greek characters with unicodes
+    .replace(/\u00f4/g, '\\u00f4')
+    .replace(/\u00fa/g, '\\u00fa')
+    .replace(/\u039a/g, '\\u039a')
+    .replace(/\u039d/g, '\\u039d')
+    .replace(/\u03a4/g, '\\u03a4')
+    .replace(/\u0399/g, '\\u0399')
+
+  const hash = crypto.createHash('sha256').update(`${requestBody}${process.env.SHUFTI_PRO_SECRET_KEY}`).digest('hex')
+
+  return hash === signature
 }

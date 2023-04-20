@@ -37,7 +37,7 @@ export const startKYBController = async (req: Request<any, any, InferType<typeof
 
       // https://ra.shuftipro.com/questionnaire-docs/request
       // callback_url: 'https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-pr1297/kyb-callback',
-      callback_url: 'https://little-snakes-refuse-85-149-106-77.loca.lt/kyb-callback',
+      callback_url: 'https://public-keys-stay-85-149-106-77.loca.lt/kyb-callback',
       redirect_url: 'http://localhost:3000/onboarding/redirect-url',
     }
 
