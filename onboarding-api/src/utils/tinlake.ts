@@ -103,9 +103,6 @@ const mainnetConfig = {
   remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
   poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b',
-  rwaMarket: {
-    permissionManagerContractAddress: '',
-  },
 }
 
 export const ethConfig = {
