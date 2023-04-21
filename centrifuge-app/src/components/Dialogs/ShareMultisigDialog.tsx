@@ -1,5 +1,5 @@
 import { Multisig } from '@centrifuge/centrifuge-js'
-import { Button, Dialog, IconCopy, IconSend, Shelf, TextInput } from '@centrifuge/fabric'
+import { Button, Dialog, IconCopy, IconSend, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { ButtonGroup } from '../ButtonGroup'
 
@@ -29,21 +29,29 @@ export function ShareMultisigDialog({ multisig, hash, callData, open, onClose }:
   }
 
   return (
-    <Dialog isOpen={open} onClose={onClose} title="Share link for other multisig signers">
-      <Shelf gap={1}>
-        <TextInput
-          style={{
-            cursor: 'copy',
-          }}
-          onClick={() => copyToClipboard(shareUrl)}
-          value={shareUrl}
-          readOnly
-        />
-        <ButtonGroup>
-          <Button variant="tertiary" icon={IconCopy} onClick={() => copyToClipboard(shareUrl)} />
-          {navigator.share && <Button variant="tertiary" icon={IconSend} onClick={() => navigator.share(shareData)} />}
-        </ButtonGroup>
-      </Shelf>
+    <Dialog isOpen={open} onClose={onClose} title="Share link with other multisig signers">
+      <Stack gap={2}>
+        <Text variant="body2">Share the link below with the other multisig signers to finalize the transaction</Text>
+        <Shelf gap={1}>
+          <TextInput
+            style={{
+              cursor: 'copy',
+            }}
+            onClick={(e: any) => {
+              copyToClipboard(shareUrl)
+              e.target.select()
+            }}
+            value={shareUrl}
+            readOnly
+          />
+          <ButtonGroup>
+            <Button variant="tertiary" icon={IconCopy} onClick={() => copyToClipboard(shareUrl)} />
+            {navigator.share && (
+              <Button variant="tertiary" icon={IconSend} onClick={() => navigator.share(shareData)} />
+            )}
+          </ButtonGroup>
+        </Shelf>
+      </Stack>
     </Dialog>
   )
 }
