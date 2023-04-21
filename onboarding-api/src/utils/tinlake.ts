@@ -96,7 +96,7 @@ const INFURA_KEY = process.env.INFURA_KEY
 
 const goerliConfig = {
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
-  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmRJpVeHkGwZakaQaW6UF2rgRYtL8a3qwZ2c57eB9bZ2iX', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xaEcFA11fE9601c1B960661d7083A08A5df7c1947',
 }
 const mainnetConfig = {
