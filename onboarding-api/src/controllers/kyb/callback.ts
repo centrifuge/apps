@@ -127,8 +127,5 @@ async function fetchSignedAgreement(wallet: Request['wallet'], poolId: string, t
   }
 
   const pdf = await signedAgreement.download()
-  const test = Uint8Array.from(pdf[0])
-  console.log('test', test)
-  return null
-  // return Uint8Array.from(pdf[0])
+  return Uint8Array.from(pdf[0])
 }
