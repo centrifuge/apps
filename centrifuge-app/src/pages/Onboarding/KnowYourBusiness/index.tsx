@@ -42,7 +42,7 @@ export function KnowYourBusiness() {
   })
 
   const handleManualBusinessReview = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com' && event.data === 'manual.onboarding.completed') {
+    if (event.data === 'manual.onboarding.completed') {
       setManualKybReference('123')
     }
   }
@@ -55,12 +55,6 @@ export function KnowYourBusiness() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  React.useEffect(() => {
-    if (verifyBusinessData?.verification_url) {
-      nextKnowYourBusinessStep()
-    }
-  }, [verifyBusinessData, refetchOnboardingUser])
 
   if (activeKnowYourBusinessStep === 0) {
     return <BusinessInformation formik={formik} isLoading={isLoading} isError={isError} />

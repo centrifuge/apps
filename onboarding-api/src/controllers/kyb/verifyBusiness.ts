@@ -30,11 +30,11 @@ export const verifyBusinessController = async (
 
     const userData = (await fetchUser(wallet, { suppressError: true })) as EntityUser
 
-    if (userData.globalSteps.verifyBusiness.completed) {
+    if (userData?.globalSteps.verifyBusiness.completed) {
       throw new HttpError(400, 'Business already verified')
     }
 
-    if (userData.manualKybReference && !userData.globalSteps.verifyBusiness.completed) {
+    if (userData?.manualKybReference && !userData.globalSteps.verifyBusiness.completed) {
       throw new HttpError(400, 'Business already in review')
     }
 
@@ -80,11 +80,11 @@ export const verifyBusinessController = async (
         enable_extra_proofs: 1,
         labels: [
           'articles_of_association',
-          'certificate_of_incorporation',
-          'proof_of_address',
-          'register_of_directors',
-          'register_of_shareholders',
-          'signed_and_dated_ownership_structure',
+          // 'certificate_of_incorporation',
+          // 'proof_of_address',
+          // 'register_of_directors',
+          // 'register_of_shareholders',
+          // 'signed_and_dated_ownership_structure',
         ],
         verification_mode: 'any',
         reference: kybReference,
