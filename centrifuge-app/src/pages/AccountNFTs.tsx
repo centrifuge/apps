@@ -2,6 +2,7 @@ import { useCentrifuge, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { NFTCard } from '../components/NFTCard'
+import { OnboardingStatus } from '../components/OnboardingStatus'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -42,7 +43,7 @@ const AccountNFTs: React.FC = () => {
   if (!address) {
     return (
       <Shelf justifyContent="center">
-        <WalletMenu />
+        <WalletMenu menuItems={[<OnboardingStatus />]} />
       </Shelf>
     )
   }
