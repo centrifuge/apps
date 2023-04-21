@@ -1,5 +1,7 @@
 import {
   Box,
+  IconAnchor,
+  IconButton,
   IconCopy,
   IconExternalLink,
   IconPower,
@@ -24,16 +26,19 @@ import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils
 import { Logo } from '../WalletProvider/SelectButton'
 import { useNeworkIcon } from '../WalletProvider/UserSelection'
 import { getWalletIcon, getWalletLabel } from '../WalletProvider/WalletDialog'
-import { ActionAnchor, ActionButton } from './Actions'
 import { ConnectButton } from './ConnectButton'
 
-export function WalletMenu() {
+type WalletMenuProps = {
+  menuItems?: React.ReactNode[]
+}
+
+export function WalletMenu({ menuItems }: WalletMenuProps) {
   const ctx = useWallet()
   const { connectedType, pendingConnect } = ctx
   const accounts = connectedType && ctx[connectedType].accounts
   const address = useAddress()
   return address ? (
-    <ConnectedMenu />
+    <ConnectedMenu menuItems={menuItems} />
   ) : accounts && !accounts.length ? (
     <WalletButton connectLabel="No accounts available" disabled />
   ) : (
@@ -41,7 +46,7 @@ export function WalletMenu() {
   )
 }
 
-function ConnectedMenu() {
+function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
   const ctx = useWallet()
   const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
@@ -105,18 +110,18 @@ function ConnectedMenu() {
                 </Shelf>
 
                 <Shelf alignItems="center" gap="2px">
-                  <ActionButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
+                  <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
                     <IconCopy />
-                  </ActionButton>
+                  </IconButton>
                   {subScanUrl && (
-                    <ActionAnchor
+                    <IconAnchor
                       href={subScanUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       title={`View account on ${subScanUrl}`}
                     >
                       <IconExternalLink />
-                    </ActionAnchor>
+                    </IconAnchor>
                   )}
                 </Shelf>
               </Shelf>
@@ -130,6 +135,8 @@ function ConnectedMenu() {
                 </Text>
               </Stack>
             </MenuItemGroup>
+
+            {!!menuItems?.length && menuItems.map((item, index) => <MenuItemGroup key={index}>{item}</MenuItemGroup>)}
 
             <MenuItemGroup>
               <Box px={2} py={1}>

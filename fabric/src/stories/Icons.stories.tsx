@@ -6,7 +6,6 @@ import * as icons from '../icon'
 
 export default {
   title: 'Icons',
-  // component: () => null,
 } as ComponentMeta<React.FC>
 
 export const Icons: React.FC = () => (

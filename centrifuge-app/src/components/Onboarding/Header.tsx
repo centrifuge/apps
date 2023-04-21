@@ -3,6 +3,7 @@ import { Box, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { config } from '../../config'
+import { OnboardingStatus } from '../OnboardingStatus'
 
 type HeaderProps = {
   children?: React.ReactNode
@@ -25,7 +26,7 @@ export function Header({ children, walletMenu = true }: HeaderProps) {
 
       {walletMenu && (
         <Box width="300px">
-          <WalletMenu />
+          <WalletMenu menuItems={[<OnboardingStatus />]} />
         </Box>
       )}
     </Shelf>

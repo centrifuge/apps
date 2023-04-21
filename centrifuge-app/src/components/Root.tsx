@@ -121,21 +121,23 @@ export function Root() {
               showAdvancedAccounts={showAdvancedAccounts}
             >
               <OnboardingAuthProvider>
-                <DebugFlags
-                  onChange={(state) => {
-                    setIsThemeToggled(!!state.alternativeTheme)
-                    setShowAdvancedAccounts(!!state.showAdvancedAccounts)
-                  }}
-                >
-                  <TransactionProvider>
-                    <TransactionToasts />
-                    <Router>
-                      <LoadBoundary>
-                        <Routes />
-                      </LoadBoundary>
-                    </Router>
-                  </TransactionProvider>
-                </DebugFlags>
+                <OnboardingProvider>
+                  <DebugFlags
+                    onChange={(state) => {
+                      setIsThemeToggled(!!state.alternativeTheme)
+                      setShowAdvancedAccounts(!!state.showAdvancedAccounts)
+                    }}
+                  >
+                    <TransactionProvider>
+                      <TransactionToasts />
+                      <Router>
+                        <LoadBoundary>
+                          <Routes />
+                        </LoadBoundary>
+                      </Router>
+                    </TransactionProvider>
+                  </DebugFlags>
+                </OnboardingProvider>
               </OnboardingAuthProvider>
             </WalletProvider>
           </CentrifugeProvider>
@@ -191,9 +193,7 @@ function Routes() {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingProvider>
-          <OnboardingPage />
-        </OnboardingProvider>
+        <OnboardingPage />
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
