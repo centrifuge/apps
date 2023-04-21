@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { sendVerifiedBusinessMessage } from '../../emails/sendVerifiedBusinessMessage'
-import { reportHttpError } from '../../utils/httpError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
 const crypto = require('crypto')
@@ -83,8 +83,7 @@ export const KYBCallbackController = async (req: Request<any, any, RequestBody, 
       const signedAgreement = await fetchSignedAgreement(wallet, query.poolId, query.trancheId)
 
       if (!signedAgreement) {
-        // send message to slack or mail to dev
-        return
+        throw new HttpError(400, 'Agreement not found')
       }
 
       sendDocumentsMessage(wallet, query.poolId, query.trancheId, signedAgreement)
