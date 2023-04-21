@@ -1,4 +1,10 @@
 import { Request, Response } from 'express'
+import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
+import { sendVerifiedBusinessMessage } from '../../emails/sendVerifiedBusinessMessage'
+import { reportHttpError } from '../../utils/httpError'
+import { shuftiProRequest } from '../../utils/shuftiProRequest'
+import { Subset } from '../../utils/types'
 const crypto = require('crypto')
 
 type VerificationState = 1 | 0 | null
@@ -31,14 +37,64 @@ type RequestBody = {
 }
 
 export const KYBCallbackController = async (req: Request<any, any, RequestBody, any>, res: Response) => {
-  const { headers, body } = req
+  try {
+    const { headers, body, query } = req
 
-  if (headers.signature) {
-    const isValidRequest = isValidShuftiRequest(body, headers.signature)
-    console.log('isValidRequest', isValidRequest)
+    const isValidRequest = headers.signature && isValidShuftiRequest(body, headers.signature)
+
+    if (!isValidRequest || body.event !== 'verification.status.changed' || !query.address || !query.network) {
+      return res.status(200).end()
+    }
+
+    const status: RequestBody = await shuftiProRequest(
+      req,
+      { reference: body.reference },
+      { path: 'status', dryRun: false }
+    )
+
+    if (status.event === 'verification.declined') {
+      // send mail to user, inform them on rejection
+
+      return res.status(200).end()
+    }
+
+    if (status.event !== 'verification.accepted') {
+      return res.status(200).end()
+    }
+
+    const updatedUser: Subset<OnboardingUser> = {
+      globalSteps: {
+        verifyBusiness: {
+          completed: true,
+          timeStamp: new Date().toISOString(),
+        },
+      },
+    }
+
+    const wallet: Request['wallet'] = {
+      address: query.address,
+      network: query.network,
+    }
+
+    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyBusiness'])
+    await sendVerifiedBusinessMessage(body.email, query.poolId, query.trancheId)
+
+    if (query.poolId && query.trancheId) {
+      const signedAgreement = await fetchSignedAgreement(wallet, query.poolId, query.trancheId)
+
+      if (!signedAgreement) {
+        // send message to slack or mail to dev
+        return
+      }
+
+      sendDocumentsMessage(wallet, query.poolId, query.trancheId, signedAgreement)
+    }
+
+    return res.status(200).end()
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
-
-  return res.status(200).end()
 }
 
 function isValidShuftiRequest(body: RequestBody, signature: string | string[]) {
@@ -57,4 +113,22 @@ function isValidShuftiRequest(body: RequestBody, signature: string | string[]) {
   const hash = crypto.createHash('sha256').update(`${requestBody}${process.env.SHUFTI_PRO_SECRET_KEY}`).digest('hex')
 
   return hash === signature
+}
+
+async function fetchSignedAgreement(wallet: Request['wallet'], poolId: string, trancheId: string) {
+  const signedAgreement = await onboardingBucket.file(
+    `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
+  )
+
+  const [signedAgreementExists] = await signedAgreement.exists()
+
+  if (!signedAgreementExists) {
+    return null
+  }
+
+  const pdf = await signedAgreement.download()
+  const test = Uint8Array.from(pdf[0])
+  console.log('test', test)
+  return null
+  // return Uint8Array.from(pdf[0])
 }

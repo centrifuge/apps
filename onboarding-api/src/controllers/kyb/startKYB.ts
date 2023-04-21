@@ -1,23 +1,41 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { reportHttpError } from '../../utils/httpError'
+import { fetchUser } from '../../utils/fetchUser'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
 
 const kybInput = object({
   email: string().email(),
   jurisdictionCode: string().required(),
+  poolId: string(),
+  trancheId: string(),
 })
 
 export const startKYBController = async (req: Request<any, any, InferType<typeof kybInput>>, res: Response) => {
   try {
-    const { body } = req
+    const { body, wallet } = req
     await validateInput(body, kybInput)
 
-    // todo: add checks for required params and throw http errors accordingly
+    const userData = await fetchUser(wallet, { suppressError: true })
+
+    if (userData?.globalSteps.verifyIdentity.completed) {
+      throw new HttpError(400, 'Identity already verified')
+    }
+
+    if (!body.email || !body.jurisdictionCode) {
+      throw new HttpError(400, 'email and jurisdictionCode required for manual kyb')
+    }
 
     const kybReference = `KYB_${Math.random()}`
     console.log('------ kybReference -------', kybReference)
+
+    // optional incl poolId and tranchIds
+    const searchParams = new URLSearchParams({
+      ...wallet,
+      ...(body.poolId && { poolId: body.poolId }),
+      ...(body.trancheId && { trancheId: body.trancheId }),
+    })
 
     const payloadKYB = {
       manual_review: 1,
@@ -37,7 +55,7 @@ export const startKYBController = async (req: Request<any, any, InferType<typeof
 
       // https://ra.shuftipro.com/questionnaire-docs/request
       // callback_url: 'https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-pr1297/kyb-callback',
-      callback_url: 'https://public-keys-stay-85-149-106-77.loca.lt/kyb-callback',
+      callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
       redirect_url: 'http://localhost:3000/onboarding/redirect-url',
     }
 

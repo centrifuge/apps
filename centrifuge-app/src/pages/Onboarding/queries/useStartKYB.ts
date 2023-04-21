@@ -1,4 +1,5 @@
 import { useMutation } from 'react-query'
+import { useLocation } from 'react-router'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { Indentity, KYBResponse } from '../KnowYourBusiness/declarations'
@@ -6,6 +7,11 @@ import { Indentity, KYBResponse } from '../KnowYourBusiness/declarations'
 export const useStartKYB = () => {
   const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser } = useOnboarding()
+
+  let { search } = useLocation()
+  const params = new URLSearchParams(search)
+  let poolId = params.get('poolId')
+  let trancheId = params.get('trancheId')
 
   const mutation = useMutation(
     async (values: Indentity) => {
@@ -19,6 +25,8 @@ export const useStartKYB = () => {
         body: JSON.stringify({
           email: values.email,
           jurisdictionCode: values.jurisdictionCode,
+          ...(poolId && { poolId }),
+          ...(trancheId && { trancheId }),
         }),
       })
 
