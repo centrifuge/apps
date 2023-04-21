@@ -28,9 +28,7 @@ export const startKYBController = async (req: Request<any, any, InferType<typeof
     }
 
     const kybReference = `KYB_${Math.random()}`
-    console.log('------ kybReference -------', kybReference)
 
-    // optional incl poolId and tranchIds
     const searchParams = new URLSearchParams({
       ...wallet,
       ...(body.poolId && { poolId: body.poolId }),
@@ -42,20 +40,19 @@ export const startKYBController = async (req: Request<any, any, InferType<typeof
       enable_extra_proofs: 1,
       labels: [
         'articles_of_association',
-        // 'certificate_of_incorporation',
-        // 'proof_of_address',
-        // 'register_of_directors',
-        // 'register_of_shareholders',
-        // 'signed_and_dated_ownership_structure',
+        'certificate_of_incorporation',
+        'proof_of_address',
+        'register_of_directors',
+        'register_of_shareholders',
+        'signed_and_dated_ownership_structure',
       ],
       verification_mode: 'any',
       reference: kybReference,
       email: body.email,
       country: body.jurisdictionCode,
 
-      // https://ra.shuftipro.com/questionnaire-docs/request
-      // callback_url: 'https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-pr1297/kyb-callback',
-      callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
+      callback_url: `https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-pr1297/kyb-callback?${searchParams}`,
+      // callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
       redirect_url: 'http://localhost:3000/onboarding/redirect-url',
     }
 

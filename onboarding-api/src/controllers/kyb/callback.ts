@@ -17,7 +17,7 @@ type RequestBody = {
     | `verification.${'accepted' | 'declined' | 'cancelled' | 'status.changed'}`
   verification_url: `https://app.shuftipro.com/verification/process/${string}`
   email: string
-  country: string // todo import => RESIDENCY_COUNTRY_CODES
+  country: string
 
   /**
    * This object will be returned in case of verification.accepted or verification.declined.
