@@ -17,7 +17,7 @@ export const centrifuge = new Centrifuge({
   printExtrinsics: true,
 })
 
-export const getPoolById = async (poolId: string) => {
+export const getCentPoolById = async (poolId: string) => {
   const pools = await firstValueFrom(centrifuge.pools.getPools())
   const pool = pools.find((p) => p.id === poolId)
   const metadata = await firstValueFrom(centrifuge.metadata.getMetadata(pool?.metadata!))

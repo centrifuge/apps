@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { IndividualUser, validateAndWriteToFirestore } from '../../database'
+import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
@@ -81,6 +82,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         poolSteps: {},
         email: body.email as string,
       }
+      await sendVerifyEmailMessage(newUser, wallet)
       await validateAndWriteToFirestore(wallet, newUser, 'individual')
     }
 
