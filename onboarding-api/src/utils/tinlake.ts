@@ -192,29 +192,16 @@ export const addTinlakeInvestorToMemberList = async (
   poolId: string,
   trancheId: string
 ) => {
-  const pool = await getTinlakePoolById(poolId)
-  const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
-  const signer = new Wallet(ethConfig.signerPrivateKey).connect(provider)
-  const memberAdminContract = new Contract(ethConfig.memberListAddress, MemberListAdminAbi, signer)
-  const memberlistAddress = trancheId.endsWith('1')
-    ? pool.addresses.SENIOR_MEMBERLIST
-    : pool.addresses.JUNIOR_MEMBERLIST
-  if (poolId === 'rwa-market') {
-    // TODO: do something else
-    // const rwaMarketPermissionManager = new Contract(
-    //   ethConfig.rwaMarket.permissionManagerContractAddress,
-    //   contractAbiRwaMarketPermissionManager,
-    //   this.signer
-    // )
-    // const RWA_MARKET_DEPOSITOR_ROLE = 0
-    // await rwaMarketPermissionManager.addPermissions(
-    //   Array(ethAddresses.length).fill(RWA_MARKET_DEPOSITOR_ROLE),
-    //   ethAddresses,
-    //   { gasLimit: 1000000 }
-    // )
-  }
-  const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
   try {
+    const pool = await getTinlakePoolById(poolId)
+    const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
+    const signer = new Wallet(ethConfig.signerPrivateKey).connect(provider)
+    const memberAdminContract = new Contract(ethConfig.memberListAddress, MemberListAdminAbi, signer)
+    const memberlistAddress = trancheId.endsWith('1')
+      ? pool.addresses.SENIOR_MEMBERLIST
+      : pool.addresses.JUNIOR_MEMBERLIST
+
+    const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
     const tx = await memberAdminContract.functions.updateMember(
       memberlistAddress,
       walletAddress,
