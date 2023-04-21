@@ -31,7 +31,7 @@ export const confirmOwnersController = async (
       throw new HttpError(404, 'Business not found')
     }
 
-    if (!user.globalSteps.verifyBusiness.completed) {
+    if (!user.manualKybReference && !user.globalSteps.verifyBusiness.completed) {
       throw new HttpError(400, 'Business must be verified before confirming ownership')
     }
 

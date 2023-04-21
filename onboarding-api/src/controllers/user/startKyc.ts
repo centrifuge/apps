@@ -28,6 +28,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     // entity user will already be created when starting KYC
     if (
       userData?.investorType === 'entity' &&
+      !userData.manualKybReference &&
       !userData.globalSteps.verifyEmail.completed &&
       !userData.globalSteps.verifyBusiness.completed &&
       !userData.globalSteps.confirmOwners.completed
@@ -117,7 +118,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         show_ocr_form: '1',
       },
     }
-    const kyc = await shuftiProRequest(req, payloadKYC)
+    const kyc = await shuftiProRequest(payloadKYC)
     return res.send({ ...kyc })
   } catch (e) {
     const error = reportHttpError(e)

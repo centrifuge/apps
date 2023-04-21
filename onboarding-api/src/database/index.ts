@@ -62,7 +62,6 @@ const poolStepsSchema = lazy((value) => {
 const globalStepsSchema = object({
   verifyBusiness: object({
     completed: bool(),
-    manualReview: bool(),
     timeStamp: string().nullable(),
   }),
   verifyEmail: object({
@@ -102,6 +101,7 @@ export const entityUserSchema = object({
   countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
   globalSteps: globalStepsSchema,
   poolSteps: poolStepsSchema,
+  manualKybReference: string().default(undefined),
 })
 
 export const individualUserSchema = object({

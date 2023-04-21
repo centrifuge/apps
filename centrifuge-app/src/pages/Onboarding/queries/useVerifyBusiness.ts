@@ -13,7 +13,7 @@ type BusinessInformation = {
 
 export const useVerifyBusiness = () => {
   const { authToken } = useOnboardingAuth()
-  const { refetchOnboardingUser, nextStep } = useOnboarding()
+  const { refetchOnboardingUser } = useOnboarding()
 
   const mutation = useMutation(
     async (values: BusinessInformation) => {
@@ -46,11 +46,12 @@ export const useVerifyBusiness = () => {
       if (!json.globalSteps?.verifyBusiness?.completed) {
         throw new Error()
       }
+
+      return json
     },
     {
       onSuccess: () => {
         refetchOnboardingUser()
-        // nextStep()
       },
     }
   )

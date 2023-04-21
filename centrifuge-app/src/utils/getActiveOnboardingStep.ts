@@ -57,8 +57,10 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId?:
   )
 
   if (investorType === 'entity') {
-    const { jurisdictionCode } = onboardingUser
+    const { jurisdictionCode, manualKybReference } = onboardingUser
     const { confirmOwners, verifyBusiness } = onboardingUser.globalSteps
+
+    const isPendingManualKybReview = manualKybReference && !verifyBusiness.completed
 
     if (jurisdictionCode.startsWith('us')) {
       if (hasSignedAgreement) return ENTITY_US_STEPS.COMPLETE
@@ -71,7 +73,7 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId?:
 
     if (verifyIdentity.completed) return BASE_ENTITY_STEPS.VERIFY_TAX_INFO
     if (confirmOwners.completed) return BASE_ENTITY_STEPS.VERIFY_IDENTITY
-    if (verifyBusiness.completed || verifyBusiness.manualReview) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
+    if (verifyBusiness.completed || isPendingManualKybReview) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
   }
 
   if (investorType === 'individual' && countryOfCitizenship) {

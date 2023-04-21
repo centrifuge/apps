@@ -78,6 +78,27 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   }
 
   if (onboardingStatus === 'pending') {
+    if (
+      onboardingUser.investorType === 'entity' &&
+      !onboardingUser.globalSteps.verifyBusiness.completed &&
+      onboardingUser.manualKybReference
+    ) {
+      return (
+        <Content>
+          <ContentHeader
+            title="Onboarding almost complete!"
+            body="Your documents are under review. We will notify you once your profile is approved."
+          />
+
+          <Box>
+            <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
+              View subscription agreement
+            </AnchorButton>
+          </Box>
+        </Content>
+      )
+    }
+
     return (
       <Content>
         <ContentHeader
