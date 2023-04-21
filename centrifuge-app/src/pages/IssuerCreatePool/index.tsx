@@ -152,12 +152,10 @@ function CreatePoolForm() {
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
   const [isPreimageDialogOpen, setIsPreimageDialogOpen] = React.useState(false)
-  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = React.useState(true)
+  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = React.useState(false)
   const [preimageHash, setPreimageHash] = React.useState('')
   const [createdPoolId, setCreatedPoolId] = React.useState('')
-  const [multisigData, setMultisigData] = React.useState<{ hash: string; callData: string }>({
-    hash: '0x71d79c8ee51aed8ffa1f0832c404dfba3fd8e01c504b13f93510ead11fb6722e',
-  } as any)
+  const [multisigData, setMultisigData] = React.useState<{ hash: string; callData: string }>()
 
   React.useEffect(() => {
     // If the hash can't be found on Pinata the request can take a long time to time out

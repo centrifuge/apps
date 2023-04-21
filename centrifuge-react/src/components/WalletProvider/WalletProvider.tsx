@@ -241,18 +241,12 @@ export function WalletProvider({
     }
   }, [])
 
-  const connect = React.useCallback(
-    async (wallet: Wallet | EvmConnectorMeta, chainId?: number, disconnectFirst = true) => {
-      if (disconnectFirst) {
-        disconnect()
-      }
-      if ('connector' in wallet) {
-        return connectEvm(wallet, chainId)
-      }
-      return connectSubstrate(wallet)
-    },
-    []
-  )
+  const connect = React.useCallback(async (wallet: Wallet | EvmConnectorMeta, chainId?: number) => {
+    if ('connector' in wallet) {
+      return connectEvm(wallet, chainId)
+    }
+    return connectSubstrate(wallet)
+  }, [])
 
   const disconnect = React.useCallback(async () => {
     evmConnectors.forEach((connectorMeta) => {
@@ -272,11 +266,7 @@ export function WalletProvider({
     dispatch({ type: 'reset' })
   }, [])
 
-  const isTryingToConnectEagerly = useConnectEagerly(
-    (wallet) => connect(wallet, undefined, false),
-    dispatch,
-    evmConnectors
-  )
+  const isTryingToConnectEagerly = useConnectEagerly((wallet) => connect(wallet), dispatch, evmConnectors)
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
   const getNetworkName = useGetNetworkName(evmChains)
 
