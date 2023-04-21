@@ -28,11 +28,7 @@ export const verifyBusinessController = async (
     await validateInput(body, verifyBusinessInput)
     const { jurisdictionCode, registrationNumber, businessName, email, manualReview, dryRun } = body
 
-    const userData = await fetchUser(wallet, { suppressError: true })
-
-    if (userData?.investorType !== 'entity') {
-      throw new HttpError(400, 'Verify business is only available for investorType "entity"')
-    }
+    const userData = (await fetchUser(wallet, { suppressError: true })) as EntityUser
 
     if (userData.globalSteps.verifyBusiness.completed) {
       throw new HttpError(400, 'Business already verified')
