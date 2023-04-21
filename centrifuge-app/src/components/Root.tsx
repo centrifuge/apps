@@ -23,6 +23,7 @@ import { IssuerPoolPage } from '../pages/IssuerPool'
 import { IssuerCreateLoanPage } from '../pages/IssuerPool/Assets/CreateLoan'
 import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
+import { MultisigApprovalPage } from '../pages/MultisigApproval'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { OnboardingPage } from '../pages/Onboarding'
@@ -199,6 +200,9 @@ function Routes() {
       </Route>
       <Route exact path="/onboarding/updateInvestorStatus">
         <UpdateInvestorStatus />
+      </Route>
+      <Route exact path="/multisig-approval">
+        <MultisigApprovalPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/pools" />

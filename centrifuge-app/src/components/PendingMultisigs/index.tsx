@@ -1,7 +1,8 @@
-import { ComputedMultisig, computeMultisig, PendingMultisigData } from '@centrifuge/centrifuge-js'
-import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { ComputedMultisig, computeMultisig, Multisig, PendingMultisigData } from '@centrifuge/centrifuge-js'
+import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Dialog, Divider, Stack, Text, TextAreaInput } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useAddress } from '../../utils/useAddress'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
@@ -11,14 +12,8 @@ export function PendingMultisigs({ poolId }: { poolId: string }) {
   const { data: metadata } = usePoolMetadata(pool)
 
   const multisig = metadata?.adminMultisig && computeMultisig(metadata.adminMultisig)
-  // const multisig = computeMultisig({
-  //   signers: ['kAMN6eYXWjYWzvsRYkVw8aJuW5ADjA3Hd2zgL6vbmM72U1Jcu', 'kAKbmHS8q5ceJHQgfAGwYtuhTTNxEAra5WRtsPnai1jSeNoUD'],
-  //   threshold: 2,
-  // })
   const multiAddress = multisig?.address
   const [account] = useSuitableAccounts({ actingAddress: [multiAddress || ''] })
-
-  console.log('multiAddress', multiAddress)
 
   const [pendingMultisigs] = useCentrifugeQuery(
     ['pendingMultisig', multiAddress],
@@ -75,60 +70,50 @@ function MultisigDialog({
   )
 }
 
-function PendingMultisig({ data, multisig }: { data: PendingMultisigData; multisig: ComputedMultisig }) {
-  const { substrate } = useWallet()
-  const { execute: doTransaction, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    'Approve or cancel',
-    (cent) => cent.multisig.approveOrCancel
-  )
-  const api = useCentrifugeApi()
-  const callDataNeeded = !data.callData
-  const [callHex, setCallHex] = React.useState('')
-
-  const [callFromInput, inputValid] = React.useMemo(() => {
-    if (!callHex) return [null, false]
-    try {
-      const call = api.createType('Call', callHex)
-
-      return [call, call.hash.eq(data.hash)]
-    } catch {
-      return [null, false]
-    }
-  }, [api, callHex, data.hash])
-
-  const call = data.call || (inputValid && callFromInput)
-
-  const callString = React.useMemo(() => {
-    if (!call) return ''
-    try {
-      return JSON.stringify(call.toHuman(), null, 2)
-    } catch {
-      return ''
-    }
-  }, [call])
-
-  console.log('data', data, call)
+export function PendingMultisig({
+  data,
+  multisig,
+  possibleCallData,
+}: {
+  data: PendingMultisigData
+  multisig: Multisig
+  possibleCallData?: string
+}) {
+  const {
+    approveOrReject,
+    isReject,
+    callFormInput,
+    callString,
+    transactionIsPending,
+    setCallFormInput,
+    callInputError,
+    isCallDataNeeded,
+  } = usePendingMultisigActions({
+    data,
+    multisig,
+    possibleCallData,
+  })
 
   return (
     <Stack gap={2} alignItems="flex-start">
       <Text style={{ overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         Call hash: {data.hash}
       </Text>
-      {data.info.approvals.includes(substrate.selectedAccount!.address) ? (
-        <Button disabled={transactionIsPending} onClick={() => doTransaction([data.hash, multisig, undefined, true])}>
+      {isReject ? (
+        <Button disabled={transactionIsPending} onClick={approveOrReject}>
           Reject
         </Button>
       ) : (
         <>
-          {callDataNeeded && (
+          {isCallDataNeeded && (
             <>
               <TextAreaInput
                 label="Call data"
                 placeholder="0x..."
-                value={callHex}
-                onChange={(e) => setCallHex(e.target.value)}
+                value={callFormInput}
+                onChange={(e) => setCallFormInput(e.target.value)}
               />
-              {callHex && !inputValid && (
+              {callInputError && (
                 <Text variant="label2" color="statusCritical">
                   Calldata doesn't match hash
                 </Text>
@@ -143,14 +128,72 @@ function PendingMultisig({ data, multisig }: { data: PendingMultisigData; multis
               </Box>
             </details>
           )}
-          <Button
-            disabled={transactionIsPending}
-            onClick={() => doTransaction([data.hash, multisig, callDataNeeded ? callHex : undefined])}
-          >
+          <Button disabled={transactionIsPending} onClick={approveOrReject}>
             Approve
           </Button>
         </>
       )}
     </Stack>
   )
+}
+
+export function usePendingMultisigActions({
+  data,
+  multisig,
+  possibleCallData,
+}: {
+  data: PendingMultisigData
+  multisig: Multisig
+  possibleCallData?: string
+}) {
+  const address = useAddress('substrate')
+  const { execute: doTransaction, isLoading: transactionIsPending } = useCentrifugeTransaction(
+    'Approve or cancel',
+    (cent) => cent.multisig.approveOrCancel
+  )
+  const api = useCentrifugeApi()
+  const [callFormInput, setCallFormInput] = React.useState('')
+
+  const callDataInput = callFormInput || possibleCallData
+
+  const [callFromInput, inputValid] = React.useMemo(() => {
+    if (!callDataInput) return [null, false]
+    try {
+      const call = api.createType('Call', callDataInput)
+
+      return [call, call.hash.eq(data.hash)]
+    } catch {
+      return [null, false]
+    }
+  }, [api, callDataInput, data.hash])
+
+  const call = data.call || (inputValid && callFromInput)
+
+  const callString = React.useMemo(() => {
+    if (!call) return ''
+    try {
+      return JSON.stringify(call.toHuman(), null, 2)
+    } catch {
+      return ''
+    }
+  }, [call])
+
+  console.log('data', data, call)
+
+  const isReject = data.info.approvals.includes(address!)
+  const isCallDataNeeded = !isReject && !data.callData && !possibleCallData
+
+  return {
+    approveOrReject: () =>
+      isReject
+        ? doTransaction([data.hash, multisig, undefined, true])
+        : doTransaction([data.hash, multisig, isCallDataNeeded ? callFormInput : undefined]),
+    isReject,
+    callString,
+    transactionIsPending,
+    callFormInput,
+    setCallFormInput,
+    callInputError: !!callFormInput && !inputValid,
+    isCallDataNeeded,
+  }
 }

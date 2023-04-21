@@ -26,6 +26,7 @@ import * as React from 'react'
 import { useHistory } from 'react-router'
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
+import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
@@ -76,8 +77,8 @@ export interface WriteOffGroupInput {
 }
 
 export const createEmptyTranche = (junior?: boolean): Tranche => ({
-  tokenName: 'Junior',
-  symbolName: 'TPP1JUN',
+  tokenName: '',
+  symbolName: '',
   interestRate: junior ? '' : 0,
   minRiskBuffer: junior ? '' : 0,
   minInvestment: 0,
@@ -150,9 +151,13 @@ function CreatePoolForm() {
   const balances = useBalances(address)
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+  const [isPreimageDialogOpen, setIsPreimageDialogOpen] = React.useState(false)
+  const [isMultisigDialogOpen, setIsMultisigDialogOpen] = React.useState(true)
   const [preimageHash, setPreimageHash] = React.useState('')
   const [createdPoolId, setCreatedPoolId] = React.useState('')
+  const [multisigData, setMultisigData] = React.useState<{ hash: string; callData: string }>({
+    hash: '0x71d79c8ee51aed8ffa1f0832c404dfba3fd8e01c504b13f93510ead11fb6722e',
+  } as any)
 
   React.useEffect(() => {
     // If the hash can't be found on Pinata the request can take a long time to time out
@@ -241,12 +246,14 @@ function CreatePoolForm() {
               ].filter(Boolean)
             )
             console.log('proxiedPoolCreate', proxiedPoolCreate)
+            setMultisigData({ callData: proxiedPoolCreate.method.toHex(), hash: proxiedPoolCreate.method.hash.toHex() })
             return cent.wrapSignAndSend(api, submittable, { ...options, multisig: undefined, proxy: [] })
           })
         )
       },
     {
       onSuccess: (args) => {
+        if (form.values.adminMultisigEnabled) setIsMultisigDialogOpen(true)
         const [, , , poolId] = args
         if (config.poolCreationType === 'immediate') {
           setCreatedPoolId(poolId)
@@ -427,7 +434,7 @@ function CreatePoolForm() {
             if (!parsedEvent) return false
             console.info('Preimage hash: ', parsedEvent.event.data[0])
             setPreimageHash(parsedEvent.event.data[0])
-            setIsDialogOpen(true)
+            setIsPreimageDialogOpen(true)
           })
         )
         .subscribe()
@@ -446,7 +453,20 @@ function CreatePoolForm() {
 
   return (
     <>
-      <PreimageHashDialog preimageHash={preimageHash} open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
+      <PreimageHashDialog
+        preimageHash={preimageHash}
+        open={isPreimageDialogOpen}
+        onClose={() => setIsPreimageDialogOpen(false)}
+      />
+      {multisigData && (
+        <ShareMultisigDialog
+          hash={multisigData.hash}
+          callData={multisigData.callData}
+          multisig={form.values.adminMultisig}
+          open={isMultisigDialogOpen}
+          onClose={() => setIsMultisigDialogOpen(false)}
+        />
+      )}
       <FormikProvider value={form}>
         <Form ref={formRef} noValidate>
           <PageHeader
