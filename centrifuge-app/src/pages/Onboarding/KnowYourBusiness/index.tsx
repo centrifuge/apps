@@ -1,13 +1,12 @@
 import { useFormik } from 'formik'
 import * as React from 'react'
-import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { KYB_COUNTRY_CODES } from '../geographyCodes'
-import { useStartKYB } from '../queries/useStartKYB'
+import { useSetManualKybReference } from '../queries/useSetManualKybReference'
 import { useVerifyBusiness } from '../queries/useVerifyBusiness'
 import { BusinessInformation } from './BusinessInformation'
-import { IdentityVerification } from './IdentityVerification'
+import { ManualBusinessVerification } from './ManualBusinessVerification'
 import { validationSchema } from './validationSchema'
 
 export function KnowYourBusiness() {
@@ -17,8 +16,8 @@ export function KnowYourBusiness() {
   const isUSOrCA =
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
 
-  const { mutate: verifyBusinessInformation, isLoading, isError } = useVerifyBusiness()
-  const { mutate: startKYB, data: startKYBData, isLoading: isStartKYBLoading } = useStartKYB()
+  const { mutate: verifyBusiness, data: verifyBusinessData, isLoading, isError } = useVerifyBusiness()
+  const { mutate: setManualKybReference } = useSetManualKybReference()
 
   const formik = useFormik({
     initialValues: {
@@ -31,48 +30,44 @@ export function KnowYourBusiness() {
     },
     onSubmit: async (values) => {
       const manualReview = !(values.jurisdictionCode in KYB_COUNTRY_CODES)
-      // await verifyBusinessInformation({ ...values, manualReview })
+      await verifyBusiness({ ...values, manualReview })
 
       if (manualReview) {
-        startKYB(values)
+        nextKnowYourBusinessStep()
       } else {
-        // nextStep()
+        nextStep()
       }
     },
     validationSchema,
   })
 
-  const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.data === 'manual.onboarding.completed') {
-      // nextStep()
-      // set 'manualReview' to 'true'
-      // verifyBusinessInformation(values)
+  const handleManualBusinessReview = (event: MessageEvent) => {
+    if (event.origin === 'https://app.shuftipro.com' && event.data === 'manual.onboarding.completed') {
+      setManualKybReference('123')
     }
   }
 
-  const { authToken } = useOnboardingAuth()
-
   React.useEffect(() => {
-    window.addEventListener('message', handleVerifiedIdentity)
+    window.addEventListener('message', handleManualBusinessReview)
 
     return () => {
-      window.removeEventListener('message', handleVerifiedIdentity)
+      window.removeEventListener('message', handleManualBusinessReview)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   React.useEffect(() => {
-    if (startKYBData?.verification_url) {
+    if (verifyBusinessData?.verification_url) {
       nextKnowYourBusinessStep()
     }
-  }, [startKYBData, refetchOnboardingUser])
+  }, [verifyBusinessData, refetchOnboardingUser])
 
   if (activeKnowYourBusinessStep === 0) {
     return <BusinessInformation formik={formik} isLoading={isLoading} isError={isError} />
   }
 
   if (activeKnowYourBusinessStep === 1) {
-    return <IdentityVerification verificationURL={startKYBData!.verification_url} />
+    return <ManualBusinessVerification verificationURL={verifyBusinessData?.verification_url} />
   }
 
   return null

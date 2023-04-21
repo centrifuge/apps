@@ -61,7 +61,7 @@ export const signAndSendDocumentsController = async (
       `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
     )
 
-    if (user.investorType === 'entity' && !user.globalSteps.verifyBusiness.manualReview) {
+    if (user.investorType === 'entity' && user.globalSteps.verifyBusiness.completed) {
       await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
     }
 

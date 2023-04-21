@@ -26,7 +26,7 @@ export const setVerifiedIdentityController = async (
       throw new HttpError(400, 'Unable to process request')
     }
 
-    const status = await shuftiProRequest(req, { reference: user.kycReference }, { path: 'status', dryRun })
+    const status = await shuftiProRequest({ reference: user.kycReference }, { path: 'status', dryRun })
     if (status.event !== 'verification.accepted') {
       throw new HttpError(400, `Failed because ${status.reference} is in "${status.event}" state`)
     }

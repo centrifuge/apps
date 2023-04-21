@@ -46,11 +46,7 @@ export const KYBCallbackController = async (req: Request<any, any, RequestBody, 
       return res.status(200).end()
     }
 
-    const status: RequestBody = await shuftiProRequest(
-      req,
-      { reference: body.reference },
-      { path: 'status', dryRun: false }
-    )
+    const status: RequestBody = await shuftiProRequest({ reference: body.reference }, { path: 'status', dryRun: false })
 
     if (status.event === 'verification.declined') {
       // send mail to user, inform them on rejection

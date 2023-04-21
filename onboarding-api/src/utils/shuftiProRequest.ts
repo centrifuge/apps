@@ -1,10 +1,9 @@
-import { Request } from 'express'
 import fetch from 'node-fetch'
 import { businessAmlMockResponse } from '../mocks/businessAmlResponse'
 import { kybMockResponse } from '../mocks/kybResponse'
 import { HttpError } from './HttpError'
 
-export const shuftiProRequest = async (_req: Request, payload: any, options?: { dryRun?: boolean; path?: string }) => {
+export const shuftiProRequest = async (payload: any, options?: { dryRun?: boolean; path?: string }) => {
   if (
     options?.dryRun &&
     (process.env.COLLATOR_WSS_URL.includes('demo') || process.env.COLLATOR_WSS_URL.includes('development'))

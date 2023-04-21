@@ -108,7 +108,6 @@ type IndividualUserSteps = {
 export interface EntityOnboardingSteps extends IndividualUserSteps {
   verifyBusiness: {
     completed: boolean
-    manualReview: boolean
     timeStamp: string
   }
   confirmOwners: {
@@ -131,6 +130,8 @@ export type EntityUser = {
   countryOfResidency: string | null
   globalSteps: EntityOnboardingSteps
   poolSteps: PoolOnboardingSteps
+  kycReference: string
+  manualKybReference?: string
 }
 
 type IndividualUser = {
@@ -143,6 +144,7 @@ type IndividualUser = {
   countryOfResidency: string
   globalSteps: IndividualUserSteps
   poolSteps: PoolOnboardingSteps
+  kycReference: string
 }
 
 export type OnboardingUser = IndividualUser | EntityUser

@@ -5,7 +5,7 @@ type Props = {
   verificationURL: string
 }
 
-export const IdentityVerification = ({ verificationURL }: Props) => {
+export const ManualBusinessVerification = ({ verificationURL }: Props) => {
   return (
     <Box height="100%">
       <iframe
