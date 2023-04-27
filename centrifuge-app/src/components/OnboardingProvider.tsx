@@ -36,7 +36,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     substrate: { selectedAccount },
   } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useOnboardingAuth()
-  const verificationStatus = useVerificationStatus('kyb')
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const [pool, setPool] = React.useState<OnboardingPool>()
 
@@ -80,6 +79,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       retry: 1,
     }
   )
+
+  const verificationStatus = useVerificationStatus('kyb', refetchOnboardingUser)
 
   React.useEffect(() => {
     // tried to connect but no wallet is connected

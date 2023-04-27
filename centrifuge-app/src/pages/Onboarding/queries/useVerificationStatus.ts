@@ -1,10 +1,8 @@
 import { useQuery } from 'react-query'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
-import { useOnboarding } from '../../../components/OnboardingProvider'
 
-export const useVerificationStatus = (verificationType: 'kyb' | 'kyc') => {
+export const useVerificationStatus = (verificationType: 'kyb' | 'kyc', refetchOnboardingUser: () => void) => {
   const { authToken } = useOnboardingAuth()
-  const { refetchOnboardingUser } = useOnboarding()
 
   const mutation = useQuery(
     ['verificationStatus', authToken],
