@@ -1,6 +1,7 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { useQuery } from 'react-query'
+import { useVerificationStatus } from '../pages/Onboarding/queries/useVerificationStatus'
 import { OnboardingUser } from '../types'
 import { getActiveOnboardingStep } from '../utils/getActiveOnboardingStep'
 import { useOnboardingAuth } from './OnboardingAuthProvider'
@@ -35,6 +36,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     substrate: { selectedAccount },
   } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useOnboardingAuth()
+  const verificationStatus = useVerificationStatus('kyb')
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const [pool, setPool] = React.useState<OnboardingPool>()
 
@@ -91,11 +93,25 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
     // wallet finished connection attempt, user was fetched
     if (!isConnecting && isOnboardingUserFetched) {
-      const activeOnboardingStep = getActiveOnboardingStep(onboardingUser, pool?.id, pool?.trancheId)
+      const activeOnboardingStep = getActiveOnboardingStep(
+        onboardingUser,
+        verificationStatus,
+        pool?.id,
+        pool?.trancheId
+      )
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount, pool])
+  }, [
+    onboardingUser,
+    isConnecting,
+    isOnboardingUserFetched,
+    isAuth,
+    isAuthFetched,
+    selectedAccount,
+    pool,
+    verificationStatus,
+  ])
 
   return (
     <OnboardingContext.Provider

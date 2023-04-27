@@ -38,10 +38,12 @@ export const verifyBusinessController = async (
       throw new HttpError(400, 'Business already in review')
     }
 
+    const kybReference = `KYB_${Math.random()}`
+
     const user: EntityUser = {
       investorType: 'entity',
       kycReference: '',
-      manualKybReference: undefined,
+      manualKybReference: manualReview ? kybReference : undefined,
       wallet: [wallet],
       name: null,
       dateOfBirth: null,
@@ -72,8 +74,6 @@ export const verifyBusinessController = async (
         ...(body.poolId && { poolId: body.poolId }),
         ...(body.trancheId && { trancheId: body.trancheId }),
       })
-
-      const kybReference = `KYB_${Math.random()}`
 
       const payloadKYB = {
         manual_review: 1,

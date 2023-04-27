@@ -3,7 +3,6 @@ import * as React from 'react'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { KYB_COUNTRY_CODES } from '../geographyCodes'
-import { useSetManualKybReference } from '../queries/useSetManualKybReference'
 import { useVerifyBusiness } from '../queries/useVerifyBusiness'
 import { BusinessInformation } from './BusinessInformation'
 import { ManualBusinessVerification } from './ManualBusinessVerification'
@@ -12,12 +11,11 @@ import { validationSchema } from './validationSchema'
 export function KnowYourBusiness() {
   const [activeKnowYourBusinessStep, setActiveKnowYourBusinessStep] = React.useState<number>(0)
   const nextKnowYourBusinessStep = () => setActiveKnowYourBusinessStep((current) => current + 1)
-  const { onboardingUser, refetchOnboardingUser, nextStep } = useOnboarding<EntityUser>()
+  const { onboardingUser, nextStep } = useOnboarding<EntityUser>()
   const isUSOrCA =
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
 
   const { mutate: verifyBusiness, data: verifyBusinessData, isLoading, isError } = useVerifyBusiness()
-  const { mutate: setManualKybReference } = useSetManualKybReference()
 
   const formik = useFormik({
     initialValues: {
@@ -43,7 +41,7 @@ export function KnowYourBusiness() {
 
   const handleManualBusinessReview = (event: MessageEvent) => {
     if (event.data === 'manual.onboarding.completed') {
-      setManualKybReference('123')
+      nextStep()
     }
   }
 

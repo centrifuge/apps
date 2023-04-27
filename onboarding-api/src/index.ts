@@ -10,10 +10,10 @@ import { signAndSendDocumentsController } from './controllers/emails/signAndSend
 import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { KYBCallbackController } from './controllers/kyb/callback'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
-import { setManualKybReference } from './controllers/kyb/setManualKybReference'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
+import { getVerificationStatusController } from './controllers/user/getVerificationStatus'
 import { setVerifiedIdentityController } from './controllers/user/setVerifiedIdentity'
 import { startKycController } from './controllers/user/startKyc'
 import { updateInvestorStatusController } from './controllers/user/updateInvestorStatus'
@@ -47,7 +47,6 @@ onboarding.get('/getUser', verifyAuth, getUserController)
 onboarding.post('/startKyc', verifyAuth, startKycController)
 onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
 
-onboarding.post('/setManualKybReference', verifyAuth, setManualKybReference)
 onboarding.post('/kyb-callback', KYBCallbackController)
 onboarding.get('/kyb-callback', KYBCallbackController)
 
@@ -56,6 +55,8 @@ onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationControlle
 onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 
 onboarding.post('/verifyBusiness', verifyAuth, verifyBusinessController)
+onboarding.post('/verificationStatus', verifyAuth, getVerificationStatusController)
+
 onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
 
 onboarding.get('/getUnsignedAgreement', verifyAuth, getUnsignedAgreementController)
