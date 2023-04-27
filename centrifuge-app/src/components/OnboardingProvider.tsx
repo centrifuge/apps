@@ -80,7 +80,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
   )
 
-  const verificationStatus = useVerificationStatus('kyb', refetchOnboardingUser)
+  const verificationStatus = useVerificationStatus('kyb')
 
   React.useEffect(() => {
     // tried to connect but no wallet is connected

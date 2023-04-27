@@ -1,11 +1,11 @@
 import { useQuery } from 'react-query'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 
-export const useVerificationStatus = (verificationType: 'kyb' | 'kyc', refetchOnboardingUser: () => void) => {
+export const useVerificationStatus = (verificationType: 'kyb' | 'kyc') => {
   const { authToken } = useOnboardingAuth()
 
   const mutation = useQuery(
-    ['verificationStatus', authToken],
+    ['verificationStatus'],
     async (): Promise<'request.pending' | 'verification.accepted'> => {
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verificationStatus`, {
         method: 'POST',
@@ -30,9 +30,7 @@ export const useVerificationStatus = (verificationType: 'kyb' | 'kyc', refetchOn
       return json
     },
     {
-      onSuccess: () => {
-        refetchOnboardingUser()
-      },
+      enabled: !!authToken,
     }
   )
 
