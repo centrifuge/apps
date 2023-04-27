@@ -53,11 +53,6 @@ export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
   const filtered = pools?.filter((p) => poolIds.has(p.id))
 
   return filtered
-
-  // const hasSomeAdminRole = useSuitableAccounts({
-  //   poolId: pid,
-  //   poolRole: ['PoolAdmin', 'LoanAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'Borrower'],
-  // }).length > 0
 }
 
 // Returns whether the connected address can borrow from a pool in principle

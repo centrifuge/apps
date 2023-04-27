@@ -12,15 +12,7 @@ export type ShareMultisigDialogProps = {
 }
 
 export function ShareMultisigDialog({ multisig, hash, callData, open, onClose }: ShareMultisigDialogProps) {
-  const params = new URLSearchParams({
-    hash,
-    signers: multisig.signers.join(','),
-    threshold: multisig.threshold.toString(),
-    data: callData || '',
-  })
-  const url = new URL(`/multisig-approval`, window.location.origin)
-  url.search = params as any
-  const shareUrl = url.toString()
+  const shareUrl = useMultisigShareUrl({ multisig, hash, callData })
 
   const shareData: ShareData = {
     title: 'Approve Transaction',
@@ -54,4 +46,21 @@ export function ShareMultisigDialog({ multisig, hash, callData, open, onClose }:
       </Stack>
     </Dialog>
   )
+}
+
+export function useMultisigShareUrl({
+  multisig,
+  hash,
+  callData,
+}: Pick<ShareMultisigDialogProps, 'multisig' | 'hash' | 'callData'>) {
+  const params = new URLSearchParams({
+    hash,
+    signers: multisig.signers.join(','),
+    threshold: multisig.threshold.toString(),
+    data: callData || '',
+  })
+  const url = new URL(`/multisig-approval`, window.location.origin)
+  url.search = params as any
+  const shareUrl = url.toString()
+  return shareUrl
 }
