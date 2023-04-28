@@ -1,4 +1,4 @@
-import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
+import Centrifuge, { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
   Transaction,
   useCentrifuge,
@@ -11,6 +11,7 @@ import {
   Button,
   CurrencyInput,
   DateInput,
+  FileUpload,
   Grid,
   ImageUpload,
   NumberInput,
@@ -137,6 +138,23 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
           max={input.max}
         />
       )
+    case 'encrypted-file':
+      return (
+        <Field name={name} validate={required()} key={label}>
+          {({ field, meta, form }: any) => (
+            <FileUpload
+              file={field.value ?? ''}
+              onFileChange={(file: any) => {
+                form.setFieldValue(name, file)
+              }}
+              accept={field.accepted}
+              label={`${label}*`}
+              placeholder="Choose file"
+              errorMessage={meta.touched && meta.error ? meta.error : undefined}
+            />
+          )}
+        </Field>
+      )
     default: {
       const { type, ...rest } = input.type as any
       return (
@@ -236,7 +254,7 @@ function IssuerCreateLoan() {
       }
       addTransaction(tx)
 
-      const attributes = valuesToPodAttributes(values.attributes, templateMetadata as any) as any
+      const attributes = (await valuesToPodAttributes(centrifuge, values.attributes, templateMetadata as any)) as any
       attributes._template = { type: 'string', value: templateId }
 
       let imageMetadataHash
@@ -338,7 +356,7 @@ function IssuerCreateLoan() {
           />
           {isLoggedIn ? (
             <>
-              <PageSection titleAddition="Select a template to enter the asset details.">
+              <PageSection>
                 <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
@@ -421,58 +439,113 @@ function IssuerCreateLoan() {
   )
 }
 
-function valuesToPodAttributes(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
+async function valuesToPodAttributes(
+  centrifuge: Centrifuge,
+  values: CreateLoanFormValues['attributes'],
+  template: LoanTemplate
+) {
   return Object.fromEntries(
-    template.sections.flatMap((section) =>
-      section.attributes.map((key) => {
-        const attr = template.attributes[key]
-        const value = values[key]
-        switch (attr.input.type) {
-          case 'date':
-            return [
-              key,
-              {
-                type: 'timestamp',
-                value: new Date(value).toISOString(),
-              },
-            ]
-          case 'currency': {
-            const formatted = attr.input.decimals
-              ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
-              : String(value)
-            return [
-              key,
-              {
-                type: 'monetary',
-                value: formatted,
-                monetary_value: {
-                  ID: attr.input.symbol,
-                  Value: formatted,
-                  ChainID: 1,
-                },
-              },
-            ]
-          }
-          case 'number':
-            return [
-              key,
-              {
-                type: attr.input.decimals ? 'integer' : 'decimal',
-                value: attr.input.decimals
-                  ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
-                  : String(value),
-              },
-            ]
-          default:
-            return [
-              key,
-              {
-                type: 'string',
-                value: String(value),
-              },
-            ]
-        }
-      })
-    )
+    (
+      await Promise.all(
+        template.sections.map(
+          async (section) =>
+            await Promise.all(
+              section.attributes.map(async (key) => {
+                const attr = template.attributes[key]
+                const value = values[key]
+                switch (attr.input.type) {
+                  case 'date':
+                    return [
+                      key,
+                      {
+                        type: 'timestamp',
+                        value: new Date(value).toISOString(),
+                      },
+                    ]
+                  case 'currency': {
+                    const formatted = attr.input.decimals
+                      ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+                      : String(value)
+                    return [
+                      key,
+                      {
+                        type: 'monetary',
+                        value: formatted,
+                        monetary_value: {
+                          ID: attr.input.symbol,
+                          Value: formatted,
+                          ChainID: 1,
+                        },
+                      },
+                    ]
+                  }
+                  case 'number':
+                    return [
+                      key,
+                      {
+                        type: attr.input.decimals ? 'integer' : 'decimal',
+                        value: attr.input.decimals
+                          ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+                          : String(value),
+                      },
+                    ]
+                  case 'encrypted-file':
+                    const unencryptedFile = value as unknown as File
+                    const contents = await unencryptedFile.text()
+                    const password = crypto.getRandomValues(new Uint8Array(32))
+                    const passwordString = Array.from(password, (dec) => dec.toString(16).padStart(2, '0')).join('')
+                    const encryptedContents = await aesGcmEncrypt(contents, passwordString)
+                    const encryptedDataUri = `data:text/plain;base64,${btoa(encryptedContents)}`
+                    const fileHash = (await lastValueFrom(centrifuge.metadata.pinFile(encryptedDataUri))).uri
+
+                    return [
+                      key,
+                      {
+                        type: 'string',
+                        value: JSON.stringify({
+                          uri: fileHash,
+                          mime: unencryptedFile.type,
+                          encryptionMethod: 'AES-GCM',
+                          encryptionKey: passwordString,
+                        }),
+                      },
+                    ]
+                  default:
+                    return [
+                      key,
+                      {
+                        type: 'string',
+                        value: String(value),
+                      },
+                    ]
+                }
+              })
+            )
+        )
+      )
+    ).flat()
   )
+}
+
+// Source: https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a
+async function aesGcmEncrypt(plaintext: string, password: string) {
+  const pwUtf8 = new TextEncoder().encode(password) // encode password as UTF-8
+  const pwHash = await crypto.subtle.digest('SHA-256', pwUtf8) // hash the password
+
+  const iv = crypto.getRandomValues(new Uint8Array(12)) // get 96-bit random iv
+  const ivStr = Array.from(iv)
+    .map((b) => String.fromCharCode(b))
+    .join('') // iv as utf-8 string
+
+  const alg = { name: 'AES-GCM', iv: iv } // specify algorithm to use
+
+  const key = await crypto.subtle.importKey('raw', pwHash, alg, false, ['encrypt']) // generate key from pw
+
+  const ptUint8 = new TextEncoder().encode(plaintext) // encode plaintext as UTF-8
+  const ctBuffer = await crypto.subtle.encrypt(alg, key, ptUint8) // encrypt plaintext using key
+
+  const ctArray = Array.from(new Uint8Array(ctBuffer)) // ciphertext as byte array
+  const ctStr = ctArray.map((byte) => String.fromCharCode(byte)).join('') // ciphertext as string
+
+  return btoa(ivStr + ctStr) // iv+ciphertext base64-encoded
 }
