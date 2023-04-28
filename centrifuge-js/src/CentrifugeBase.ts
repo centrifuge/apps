@@ -4,7 +4,7 @@ import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
 import { DefinitionRpc, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
-import { addressToEvm, sortAddresses } from '@polkadot/util-crypto'
+import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
 import {
   bufferCount,
@@ -29,13 +29,14 @@ import {
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { TransactionOptions } from './types'
-import { computeMultisig, isSameAddress } from './utils'
+import { computeMultisig, evmToSubstrateAddress, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
 
 type ProxyType = string
 
 const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
+const EVM_DISPATCH_OVERHEAD_GAS = 50_000
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -199,7 +200,10 @@ export class CentrifugeBase {
       const otherSigners = sortAddresses(
         options.multisig.signers.filter(
           (signer) =>
-            !isSameAddress(signer, isEvmTx ? addressToEvm(this.config.evmSigningAddress!) : this.getSignerAddress())
+            !isSameAddress(
+              signer,
+              isEvmTx ? evmToSubstrateAddress(this.config.evmSigningAddress!) : this.getSignerAddress()
+            )
         )
       )
       console.log('multisig callData', actualSubmittable.method.toHex())
@@ -312,56 +316,49 @@ export class CentrifugeBase {
     submittable: SubmittableExtrinsic<'rxjs'>,
     options?: T
   ) {
-    const tx: TransactionRequest = {
-      // type: 2,
-      to: EVM_DISPATCH_PRECOMPILE,
-      data: submittable.method.toHex(),
-      gasLimit: 2_000_000,
-      // gas: 0 // TODO: How to estimate gas here?,
-      // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
-    }
+    const address = evmToSubstrateAddress(this.config.evmSigningAddress!)
 
-    // to?: string,
-    // from?: string,
-    // nonce?: BigNumberish,
-
-    // gasLimit?: BigNumberish,
-    // gasPrice?: BigNumberish,
-
-    // data?: BytesLike,
-    // value?: BigNumberish,
-    // chainId?: number
-
-    // type?: number;
-    // accessList?: AccessListish;
-
-    // maxPriorityFeePerGas?: BigNumberish;
-    // maxFeePerGas?: BigNumberish;
-
-    // customData?: Record<string, any>;
-    // ccipReadEnabled?: boolean;
-
-    const txPromise = this.config.evmSigner!.sendTransaction(tx)
-    return from(txPromise).pipe(
-      switchMap((response) => {
-        return from(response.wait()).pipe(
-          map(() => response),
-          startWith(response),
-          catchError(() => of({ ...response, error: new Error('failed') })),
-          tap((result) => {
-            if ('error' in result) {
-              options?.onStatusChange?.({
-                events: [],
-                status: {
-                  dispatchError: {},
-                  hash: { toHex: () => result.hash as any },
-                },
-              } as any)
-            }
-            options?.onStatusChange?.({
-              events: [],
-              status: { isFinalized: result.confirmations >= 1, hash: { toHex: () => result.hash as any } },
-            } as any)
+    return submittable.paymentInfo(address).pipe(
+      switchMap((paymentInfo) => {
+        const weight = paymentInfo.weight.refTime.toPrimitive() as number
+        const gas = Math.ceil(weight / 20_000) + EVM_DISPATCH_OVERHEAD_GAS
+        const tx: TransactionRequest = {
+          // type: 2,
+          to: EVM_DISPATCH_PRECOMPILE,
+          data: submittable.method.toHex(),
+          gasLimit: gas,
+          // gas: 0 // TODO: How to estimate gas here?,
+          // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
+        }
+        const txPromise = this.config.evmSigner!.sendTransaction(tx)
+        return from(txPromise).pipe(
+          switchMap((response) => {
+            return from(response.wait()).pipe(
+              map((receipt) => [response, receipt] as const),
+              startWith([response, null] as const),
+              catchError(() => of([{ ...response, error: new Error('failed') }] as const)),
+              tap(([result, receipt]) => {
+                console.log('response update', result, receipt)
+                if ('error' in result || receipt?.status === 0) {
+                  options?.onStatusChange?.({
+                    events: [],
+                    dispatchError: {},
+                    status: {
+                      hash: { toHex: () => result.hash as any },
+                    },
+                  } as any)
+                } else {
+                  options?.onStatusChange?.({
+                    events: [],
+                    status: {
+                      isInBlock: receipt?.status === 1,
+                      isFinalized: receipt?.status === 1,
+                      hash: { toHex: () => result.hash as any },
+                    },
+                  } as any)
+                }
+              })
+            )
           })
         )
       })

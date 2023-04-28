@@ -6,7 +6,7 @@ export function useEns(address?: string) {
   const { evm, connectedType } = useWallet()
   const { selectedWallet, chainId, selectedAddress } = evm
   const provider = useProviderForConnector(selectedWallet?.connector, chainId)
-  const addr = address ?? selectedAddress
+  const addr = address || (connectedType === 'evm' ? selectedAddress : undefined)
   const { data: name } = useQuery(['ensName', addr, !!provider, chainId], () => provider!.lookupAddress(addr!), {
     enabled: !!provider && !!addr,
     retry: false,
