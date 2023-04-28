@@ -141,3 +141,8 @@ export function computeMultisig(multisig: Multisig): ComputedMultisig {
     threshold: multisig.threshold,
   }
 }
+
+export function evmToSubstrateAddress(address: string) {
+  // Bytes ETH\0 prefixed
+  return `0x45544800${address.substring(2).toLowerCase()}`.padEnd(66, '0')
+}

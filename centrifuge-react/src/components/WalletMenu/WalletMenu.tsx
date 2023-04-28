@@ -35,7 +35,7 @@ type WalletMenuProps = {
 export function WalletMenu({ menuItems }: WalletMenuProps) {
   const ctx = useWallet()
   const { connectedType, pendingConnect } = ctx
-  const accounts = connectedType && ctx[connectedType].accounts
+  const accounts = connectedType && ctx[connectedType === 'substrateEvm' ? 'substrate' : connectedType].accounts
   const address = useAddress()
   return address ? (
     <ConnectedMenu menuItems={menuItems} />
@@ -53,7 +53,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
     ctx
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
-  const balances = useBalances(connectedType === 'substrate' ? address : undefined)
+  const balances = useBalances(connectedType !== 'evm' ? address : undefined)
   const { data: evmBalance } = useNativeBalance()
   const evmCurrency = useNativeCurrency()
   const [balance, symbol] =

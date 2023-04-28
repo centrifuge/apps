@@ -126,7 +126,7 @@ function reducer(state: State, action: Action): State {
 }
 
 type PersistState = {
-  type: 'substrate' | 'evm'
+  type: 'substrate' | 'evm' | 'substrateEvm'
   wallet: string
   address: string
   chainId?: number
@@ -180,10 +180,10 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
   )
 
   React.useEffect(() => {
-    if (state.connectedType === 'evm') {
+    if (state.connectedType === 'evm' || state.connectedType === 'substrateEvm') {
       if (evmState.accounts?.length) {
         persist({
-          type: 'evm',
+          type: state.connectedType,
           wallet: evmConnectors.find((c) => c.connector === state.evm.selectedWallet!.connector)!.id,
           address: evmState.accounts[0],
           chainId: evmState.chainId,

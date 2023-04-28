@@ -50,6 +50,7 @@ export function useCentrifugeConsts() {
 
   return {
     chainDecimals,
+    chainToken: api.registry.chainTokens[0],
     ss58Prefix: consts.system.ss58Prefix.toNumber(),
     proxy: {
       proxyDepositBase: new CurrencyBalance(consts.proxy.proxyDepositBase, chainDecimals),

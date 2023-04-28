@@ -35,7 +35,7 @@ export function useConnectEagerly(
         const wallets = evmConnectors.filter((c) => c.id === source || c.connector instanceof GnosisSafe)
         const connected = await Promise.allSettled(
           wallets.map(async (wallet) => {
-            if (wallet.connector.connectEagerly) {
+            if (wallet.connector.connectEagerly && !(wallet.connector instanceof GnosisSafe)) {
               await wallet.connector.connectEagerly()
             } else {
               await wallet.connector.activate()
@@ -48,7 +48,7 @@ export function useConnectEagerly(
           | undefined
         if (first) {
           dispatch({ type: 'evmSetState', payload: { selectedWallet: first.value } })
-          dispatch({ type: 'setConnectedType', payload: 'evm' })
+          dispatch({ type: 'setConnectedType', payload: type })
         }
       }
     } finally {

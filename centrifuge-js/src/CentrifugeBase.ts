@@ -1,10 +1,10 @@
-import type { JsonRpcSigner } from '@ethersproject/providers'
+import type { JsonRpcSigner, TransactionRequest } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
 import { DefinitionRpc, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
-import { sortAddresses } from '@polkadot/util-crypto'
+import { addressToEvm, sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
 import {
   bufferCount,
@@ -35,6 +35,8 @@ import { getPolkadotApi } from './utils/web3'
 
 type ProxyType = string
 
+const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
+
 export type Config = {
   network: 'altair' | 'centrifuge'
   centrifugeWsUrl: string
@@ -50,6 +52,7 @@ export type Config = {
   signer?: Signer
   signingAddress?: AddressOrPair
   evmSigner?: JsonRpcSigner
+  evmSigningAddress?: string
   printExtrinsics?: boolean
   proxies?: ([delegator: string, forceProxyType?: ProxyType] | string)[]
   debug?: boolean
@@ -170,6 +173,7 @@ export class CentrifugeBase {
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
+    const isEvmTx = this.config.evmSigner && !this.config.signer
     let actualSubmittable = submittable
 
     if (options?.batch) return of(actualSubmittable)
@@ -193,7 +197,10 @@ export class CentrifugeBase {
 
     if (options?.multisig) {
       const otherSigners = sortAddresses(
-        options.multisig.signers.filter((signer) => !isSameAddress(signer, this.getSignerAddress()))
+        options.multisig.signers.filter(
+          (signer) =>
+            !isSameAddress(signer, isEvmTx ? addressToEvm(this.config.evmSigningAddress!) : this.getSignerAddress())
+        )
       )
       console.log('multisig callData', actualSubmittable.method.toHex())
       actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
@@ -220,6 +227,11 @@ export class CentrifugeBase {
             .join(', ')})`
         )
       }
+    }
+
+    if (isEvmTx) {
+      // TODO: signOnly and sendOnly
+      return this.wrapSubstrateEvmSignAndSend(api, submittable, options)
     }
 
     const { signer, signingAddress } = this.getSigner()
@@ -293,6 +305,67 @@ export class CentrifugeBase {
     } catch (e) {
       return throwError(() => e)
     }
+  }
+
+  wrapSubstrateEvmSignAndSend<T extends TransactionOptions>(
+    api: ApiRx,
+    submittable: SubmittableExtrinsic<'rxjs'>,
+    options?: T
+  ) {
+    const tx: TransactionRequest = {
+      // type: 2,
+      to: EVM_DISPATCH_PRECOMPILE,
+      data: submittable.method.toHex(),
+      gasLimit: 2_000_000,
+      // gas: 0 // TODO: How to estimate gas here?,
+      // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
+    }
+
+    // to?: string,
+    // from?: string,
+    // nonce?: BigNumberish,
+
+    // gasLimit?: BigNumberish,
+    // gasPrice?: BigNumberish,
+
+    // data?: BytesLike,
+    // value?: BigNumberish,
+    // chainId?: number
+
+    // type?: number;
+    // accessList?: AccessListish;
+
+    // maxPriorityFeePerGas?: BigNumberish;
+    // maxFeePerGas?: BigNumberish;
+
+    // customData?: Record<string, any>;
+    // ccipReadEnabled?: boolean;
+
+    const txPromise = this.config.evmSigner!.sendTransaction(tx)
+    return from(txPromise).pipe(
+      switchMap((response) => {
+        return from(response.wait()).pipe(
+          map(() => response),
+          startWith(response),
+          catchError(() => of({ ...response, error: new Error('failed') })),
+          tap((result) => {
+            if ('error' in result) {
+              options?.onStatusChange?.({
+                events: [],
+                status: {
+                  dispatchError: {},
+                  hash: { toHex: () => result.hash as any },
+                },
+              } as any)
+            }
+            options?.onStatusChange?.({
+              events: [],
+              status: { isFinalized: result.confirmations >= 1, hash: { toHex: () => result.hash as any } },
+            } as any)
+          })
+        )
+      })
+    )
   }
 
   async querySubquery<T = any>(query: string, variables?: any) {
