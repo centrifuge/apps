@@ -1,5 +1,4 @@
 import { Box } from '@centrifuge/fabric'
-import * as React from 'react'
 
 type Props = {
   verificationURL: string

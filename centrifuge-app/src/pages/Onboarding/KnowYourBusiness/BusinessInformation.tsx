@@ -14,14 +14,15 @@ import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
 import { CA_PROVINCE_CODES, RESIDENCY_COUNTRY_CODES, US_STATE_CODES } from '../geographyCodes'
+import { useVerificationStatus } from '../queries/useVerificationStatus'
 
 type Props = {
   formik: FormikProps<{
     businessName: string
     email: string
     registrationNumber: string
-    jurisdictionCode: string //keyof typeof RESIDENCY_COUNTRY_CODES
-    regionCode: string // keyof typeof US_STATE_CODES | keyof typeof CA_PROVINCE_CODES
+    jurisdictionCode: string
+    regionCode: string
   }>
   isLoading: boolean
   isError: boolean
@@ -30,10 +31,12 @@ type Props = {
 export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
   const { onboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
   const [errorClosed, setErrorClosed] = React.useState(false)
-  const isCompleted = !!onboardingUser?.globalSteps?.verifyBusiness.completed
-  const isManualReview = !!onboardingUser.manualKybReference
+  const { data: verificationStatusData } = useVerificationStatus('kyb', onboardingUser)
 
-  const fieldIsDisabled = isLoading || isCompleted || !!onboardingUser.manualKybReference
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyBusiness.completed
+  const isPendingManualKybReview =
+    verificationStatusData === 'request.pending' || verificationStatusData === 'review.pending'
+  const fieldIsDisabled = isLoading || isCompleted || isPendingManualKybReview
 
   const renderRegionCodeSelect = () => {
     if (formik.values.jurisdictionCode === 'us') {
@@ -132,7 +135,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
         </Button>
         <Button
           onClick={() => {
-            isCompleted || isManualReview ? nextStep() : formik.handleSubmit()
+            isCompleted || isPendingManualKybReview ? nextStep() : formik.handleSubmit()
           }}
           loading={isLoading}
           disabled={isLoading}

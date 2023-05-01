@@ -41,9 +41,17 @@ export const useVerifyBusiness = () => {
         throw new Error()
       }
 
-      const json = await response.json()
+      const user = await response.json()
 
-      return json
+      if (values.manualReview && !user.manualKybReference) {
+        throw new Error()
+      }
+
+      if (values.manualReview && !user.globalSteps?.verifyBusiness?.completed) {
+        throw new Error()
+      }
+
+      return user
     },
     {
       onSuccess: () => {

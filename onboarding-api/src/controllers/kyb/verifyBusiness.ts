@@ -99,7 +99,9 @@ export const verifyBusinessController = async (
       }
 
       const kyb = await shuftiProRequest(payloadKYB)
-      return res.send({ ...kyb })
+      const freshUserData = await fetchUser(wallet)
+
+      return res.send({ ...kyb, ...freshUserData })
     }
 
     const payloadAML = {
