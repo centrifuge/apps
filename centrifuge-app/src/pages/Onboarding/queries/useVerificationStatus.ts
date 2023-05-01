@@ -5,6 +5,14 @@ import { OnboardingUser } from '../../../types'
 export const useVerificationStatus = (verificationType: 'kyb' | 'kyc', onboardingUser: OnboardingUser) => {
   const { authToken } = useOnboardingAuth()
 
+  const getEnabled = () => {
+    if (verificationType === 'kyb') {
+      return onboardingUser.investorType === 'entity' && !!onboardingUser.manualKybReference
+    }
+
+    return onboardingUser.investorType === 'individual' && !!onboardingUser.kycReference
+  }
+
   const query = useQuery(
     ['verificationStatus'],
     async () => {
@@ -29,7 +37,7 @@ export const useVerificationStatus = (verificationType: 'kyb' | 'kyc', onboardin
       return json.verificationStatus
     },
     {
-      enabled: !!onboardingUser,
+      enabled: getEnabled(),
       retry: 1,
     }
   )
