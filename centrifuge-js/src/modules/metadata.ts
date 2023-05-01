@@ -15,7 +15,7 @@ export function getMetadataModule(inst: Centrifuge) {
     if (!url) {
       return from([])
     }
-    return inst.getMetadataObservable<T>(url)
+    return inst.getJsonObservable<T>(url)
   }
 
   function pinFile(b64URI?: string): Observable<{ uri: string; ipfsHash: string }> {

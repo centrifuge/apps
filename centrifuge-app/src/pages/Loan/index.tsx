@@ -144,7 +144,7 @@ const Loan: React.FC = () => {
                       const attribute = templateData.attributes?.[key]
                       if (!attribute) return null
                       const value = publicData[key] ?? privateData[key]
-                      const formatted = value ? formatValue(cent, value, attribute) : '-'
+                      const formatted = value ? formatValue(cent, value, attribute, name) : '-'
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
@@ -230,7 +230,7 @@ const Loan: React.FC = () => {
   )
 }
 
-function formatValue(centrifuge: Centrifuge, value: any, attr: LoanTemplateAttribute) {
+function formatValue(centrifuge: Centrifuge, value: any, attr: LoanTemplateAttribute, loanName: string) {
   switch (attr.input.type) {
     case 'number':
       return (
@@ -244,28 +244,46 @@ function formatValue(centrifuge: Centrifuge, value: any, attr: LoanTemplateAttri
     case 'date':
       return formatDate(value)
     case 'encrypted-file':
+      const viewFile = async () => {
+        const fileObject = JSON.parse(value)
+        const contents = ((await lastValueFrom(centrifuge.metadata.getMetadata<string>(fileObject.uri))) as any)
+          .contents
+        const decryptedContents = await aesGcmDecrypt(contents as string, fileObject.encryptionKey)
+
+        const newWindow = window.open('')
+        newWindow!.document.write("<iframe width='100%' height='100%' src='" + decryptedContents + "'></iframe>")
+      }
+
       const downloadFile = async () => {
         const fileObject = JSON.parse(value)
-        console.log(fileObject)
-        const contents = await lastValueFrom(centrifuge.metadata.getFile<string>(fileObject.uri))
+        const contents = ((await lastValueFrom(centrifuge.metadata.getMetadata<string>(fileObject.uri))) as any)
+          .contents
         const decryptedContents = await aesGcmDecrypt(contents as string, fileObject.encryptionKey)
-        // let pdfWindow = window.open('')
-        // pdfWindow!.document.write(
-        //   "<iframe width='100%' height='100%' src='data:application/pdf;base64, " +
-        //     encodeURI(decryptedContents) +
-        //     "'></iframe>"
-        // )
-        window.open('data:application/pdf,' + escape(decryptedContents))
+
+        const downloadLink = document.createElement('a')
+        const fileName = `${convertToSlug(loanName)}_${convertToSlug(attr.label)}.pdf`
+        downloadLink.href = decryptedContents
+        downloadLink.download = fileName
+        downloadLink.click()
       }
 
       return (
-        <AnchorPillButton
-          onClick={() => downloadFile()}
-          target="_blank"
-          style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
-        >
-          Download
-        </AnchorPillButton>
+        <>
+          <AnchorPillButton
+            onClick={() => viewFile()}
+            target="_blank"
+            style={{ wordBreak: 'break-all', whiteSpace: 'initial', marginRight: '4px' }}
+          >
+            View
+          </AnchorPillButton>
+          <AnchorPillButton
+            onClick={() => downloadFile()}
+            target="_blank"
+            style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+          >
+            Download
+          </AnchorPillButton>
+        </>
       )
     default:
       return value
@@ -295,4 +313,11 @@ async function aesGcmDecrypt(ciphertext: string, password: string) {
   } catch (e) {
     throw new Error('Decrypt failed')
   }
+}
+
+const convertToSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '')
 }

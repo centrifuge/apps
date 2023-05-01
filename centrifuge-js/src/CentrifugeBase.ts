@@ -292,7 +292,7 @@ export class CentrifugeBase {
     )
   }
 
-  getMetadataObservable<T = any>(url: string, optional = true) {
+  getJsonObservable<T = any>(url: string, optional = true) {
     if (new URL(url)?.hostname !== new URL(this.config.metadataHost).hostname) {
       console.warn('Invalid url')
       return from([])
