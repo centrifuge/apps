@@ -1,12 +1,23 @@
 import { useFormik } from 'formik'
 import * as React from 'react'
+import { object, string } from 'yup'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { KYB_COUNTRY_CODES } from '../geographyCodes'
 import { useVerifyBusiness } from '../queries/useVerifyBusiness'
 import { BusinessInformation } from './BusinessInformation'
 import { ManualBusinessVerification } from './ManualBusinessVerification'
-import { validationSchema } from './validationSchema'
+
+export const validationSchema = object({
+  email: string().email('Please enter a valid email address').required('Please enter an email address'),
+  businessName: string().required('Please enter the business name'),
+  registrationNumber: string().required('Please enter the business registration number'),
+  jurisdictionCode: string().required('Please select the business country of incorporation'),
+  regionCode: string().when('jurisdictionCode', {
+    is: (jurisdictionCode: string) => jurisdictionCode === 'us' || jurisdictionCode === 'ca',
+    then: string().required('Please select your region code'),
+  }),
+})
 
 export function KnowYourBusiness() {
   const [activeKnowYourBusinessStep, setActiveKnowYourBusinessStep] = React.useState<number>(0)
@@ -19,11 +30,11 @@ export function KnowYourBusiness() {
 
   const formik = useFormik({
     initialValues: {
-      businessName: onboardingUser?.businessName || 'foo bar',
-      email: onboardingUser?.email || 'ben@k-f.co',
-      registrationNumber: onboardingUser?.registrationNumber || '22',
+      businessName: onboardingUser?.businessName,
+      email: onboardingUser?.email,
+      registrationNumber: onboardingUser?.registrationNumber,
       jurisdictionCode:
-        (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode || 'ky') ?? '',
+        (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode) ?? '',
       regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
     onSubmit: async (values) => {
@@ -40,7 +51,6 @@ export function KnowYourBusiness() {
   })
 
   const handleManualBusinessReview = (event: MessageEvent) => {
-    console.log('yo')
     if (event.data === 'manual.onboarding.completed') {
       nextStep()
     }

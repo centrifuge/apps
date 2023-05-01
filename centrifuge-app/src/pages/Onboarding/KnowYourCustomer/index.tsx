@@ -24,18 +24,16 @@ const getValidationSchema = (investorType: 'individual' | 'entity') =>
 
 export const KnowYourCustomer = () => {
   const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
+
   const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
+
   const { onboardingUser, refetchOnboardingUser } = useOnboarding()
+
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
+
   const isCompleted = !!onboardingUser?.globalSteps?.verifyIdentity.completed
+
   const validationSchema = getValidationSchema(investorType)
-  const { mutate: startKYC, data: startKYCData, isLoading: isStartKYCLoading } = useStartKYC()
-  const { mutate: setVerifiedIdentity } = useVerifyIdentity()
-  const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com') {
-      setVerifiedIdentity()
-    }
-  }
 
   const formik = useFormik({
     initialValues: {
@@ -52,6 +50,16 @@ export const KnowYourCustomer = () => {
     validationSchema,
     validateOnMount: true,
   })
+
+  const { mutate: startKYC, data: startKYCData, isLoading: isStartKYCLoading } = useStartKYC()
+
+  const { mutate: setVerifiedIdentity } = useVerifyIdentity()
+
+  const handleVerifiedIdentity = (event: MessageEvent) => {
+    if (event.origin === 'https://app.shuftipro.com') {
+      setVerifiedIdentity()
+    }
+  }
 
   React.useEffect(() => {
     window.addEventListener('message', handleVerifiedIdentity)
