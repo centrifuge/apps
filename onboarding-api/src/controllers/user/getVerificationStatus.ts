@@ -19,7 +19,7 @@ export const getVerificationStatusController = async (req: Request, res: Respons
 
     const status = await shuftiProRequest({ reference }, { path: 'status', dryRun: false })
 
-    return res.send(status.event)
+    return res.send({ verificationStatus: status.event })
   } catch (e) {
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })

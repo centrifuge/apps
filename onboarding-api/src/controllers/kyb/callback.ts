@@ -49,8 +49,7 @@ export const KYBCallbackController = async (req: Request<any, any, RequestBody, 
     const status: RequestBody = await shuftiProRequest({ reference: body.reference }, { path: 'status', dryRun: false })
 
     if (status.event === 'verification.declined') {
-      // send mail to user, inform them on rejection
-
+      await sendVerifiedBusinessMessage(body.email, false, query.poolId, query.trancheId)
       return res.status(200).end()
     }
 
@@ -73,7 +72,7 @@ export const KYBCallbackController = async (req: Request<any, any, RequestBody, 
     }
 
     await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyBusiness'])
-    await sendVerifiedBusinessMessage(body.email, query.poolId, query.trancheId)
+    await sendVerifiedBusinessMessage(body.email, true, query.poolId, query.trancheId)
 
     if (query.poolId && query.trancheId) {
       const signedAgreement = await fetchSignedAgreement(wallet, query.poolId, query.trancheId)

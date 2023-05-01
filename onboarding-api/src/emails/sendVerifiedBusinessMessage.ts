@@ -1,8 +1,33 @@
 import { sendEmail, templateIds } from '.'
 import { getPoolById } from '../utils/centrifuge'
 
-export const sendVerifiedBusinessMessage = async (to: string, poolId: string, trancheId: string) => {
-  const { metadata } = await getPoolById(poolId)
+const getTemplateId = (isGloballyOnboarding: boolean, isApproved: boolean) => {
+  if (isGloballyOnboarding) {
+    if (isApproved) {
+      return templateIds.manualOnboardedApproved
+    }
+
+    return templateIds.manualOnboardedDeclined
+  }
+
+  if (isApproved) {
+    return templateIds.manualOnboardedPoolApproved
+  }
+
+  return templateIds.manualOnboardedPoolDeclined
+}
+
+export const sendVerifiedBusinessMessage = async (
+  to: string,
+  isApproved: boolean,
+  poolId: string,
+  trancheId: string
+) => {
+  const isGloballyOnboarding = !poolId && !trancheId
+
+  const { pool, metadata } = await getPoolById(poolId)
+  const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name
+
   const message = {
     personalizations: [
       {
@@ -11,16 +36,19 @@ export const sendVerifiedBusinessMessage = async (to: string, poolId: string, tr
             email: to,
           },
         ],
-        dynamic_template_data: {
-          poolName: metadata?.pool.name,
-          trancheId,
-        },
+        ...(!isGloballyOnboarding && {
+          dynamic_template_data: {
+            trancheName,
+          },
+        }),
       },
     ],
-    template_id: poolId && trancheId ? templateIds.manualOnboardedPoolApproved : templateIds.manualOnboardedApproved,
+    template_id: getTemplateId(isGloballyOnboarding, isApproved),
     from: {
       name: 'Centrifuge',
-      email: `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,
+      email: isGloballyOnboarding
+        ? 'hello@centrifuge.io'
+        : `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,
     },
   }
   await sendEmail(message)

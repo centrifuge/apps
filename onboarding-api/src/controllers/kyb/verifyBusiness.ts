@@ -68,6 +68,8 @@ export const verifyBusinessController = async (
       poolSteps: {},
     }
 
+    await validateAndWriteToFirestore(wallet, user, 'entity')
+
     if (manualReview) {
       const searchParams = new URLSearchParams({
         ...wallet,

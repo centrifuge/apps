@@ -7,7 +7,9 @@ export const templateIds = {
   investorApproved: 'd-36a4418ce4144d71bfc327e907cf6c49',
   investorRejected: 'd-279cfc9465054ec580f27c043f2744c6',
   manualOnboardedApproved: 'd-696b01394a834ba7b88b791ef97c25f3',
-  manualOnboardedPoolApproved: 'd-c2331289ebd64af5a0d66404288d2547',
+  manualOnboardedPoolApproved: 'd-522e48402bab4976b41f7c7552918444',
+  manualOnboardedDeclined: 'd-9439062e51f64c8d93d95f788547299d',
+  manualOnboardedPoolDeclined: 'd-9881938c5d3247d6bb32ee2d79f6bebe',
 }
 
 export const sendEmail = async (message: any) => {
