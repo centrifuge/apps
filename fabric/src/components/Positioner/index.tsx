@@ -1,4 +1,4 @@
-import { AriaPositionProps, OverlayContainer, useOverlayPosition } from '@react-aria/overlays'
+import { AriaPositionProps, OverlayContainer, PlacementAxis, useOverlayPosition } from '@react-aria/overlays'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { TextContext } from '../Text'
@@ -9,7 +9,7 @@ type PositionerProps = {
   overlayRef: React.RefObject<HTMLElement>
   placement?: AriaPositionProps['placement']
   offset?: number
-  render: (props: React.HTMLAttributes<Element> & { placement: AriaPositionProps['placement'] }) => React.ReactElement
+  render: (props: React.HTMLAttributes<Element> & { pointer: PlacementAxis }) => React.ReactElement
 }
 
 const PositionerInner: React.FC<PositionerProps> = ({
@@ -21,7 +21,7 @@ const PositionerInner: React.FC<PositionerProps> = ({
   render,
 }) => {
   const theme = useTheme()
-  const { overlayProps } = useOverlayPosition({
+  const { overlayProps, ...restProps } = useOverlayPosition({
     targetRef,
     overlayRef,
     placement,
@@ -29,7 +29,7 @@ const PositionerInner: React.FC<PositionerProps> = ({
     isOpen: isShown,
   })
 
-  return render({ ...overlayProps, placement })
+  return render({ ...overlayProps, pointer: restProps.placement })
 }
 
 export const Positioner: React.FC<PositionerProps> = (props) => {
