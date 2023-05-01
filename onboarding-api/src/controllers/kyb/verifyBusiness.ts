@@ -80,8 +80,7 @@ export const verifyBusinessController = async (
     if (manualReview) {
       const searchParams = new URLSearchParams({
         ...wallet,
-        ...(body.poolId && { poolId: body.poolId }),
-        ...(body.trancheId && { trancheId: body.trancheId }),
+        ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
       })
 
       const payloadKYB = {
