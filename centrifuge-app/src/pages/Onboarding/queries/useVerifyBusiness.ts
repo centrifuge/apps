@@ -47,7 +47,7 @@ export const useVerifyBusiness = () => {
         throw new Error()
       }
 
-      if (values.manualReview && !user.globalSteps?.verifyBusiness?.completed) {
+      if (!values.manualReview && !user.globalSteps?.verifyBusiness?.completed) {
         throw new Error()
       }
 

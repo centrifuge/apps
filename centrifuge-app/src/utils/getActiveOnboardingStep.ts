@@ -77,6 +77,8 @@ export const getActiveOnboardingStep = (
     if (verifyIdentity.completed) return BASE_ENTITY_STEPS.VERIFY_TAX_INFO
     if (confirmOwners.completed) return BASE_ENTITY_STEPS.VERIFY_IDENTITY
     if (verifyBusiness.completed || isPendingManualKybReview) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
+
+    return BASE_ENTITY_STEPS.VERIFY_BUSINESS
   }
 
   if (investorType === 'individual' && countryOfCitizenship) {

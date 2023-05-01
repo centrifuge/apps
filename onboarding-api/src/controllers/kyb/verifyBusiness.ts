@@ -34,13 +34,13 @@ export const verifyBusinessController = async (
       throw new HttpError(400, 'Business already verified')
     }
 
-    if (userData.manualKybReference) {
+    if (userData?.manualKybReference) {
       const status = await shuftiProRequest(
         { reference: userData.manualKybReference },
         { path: 'status', dryRun: false }
       )
 
-      if (status.event === 'request.pending' || status.event === 'review.pending') {
+      if (status.event === 'review.pending') {
         throw new HttpError(400, 'Business already in review')
       }
     }
@@ -83,6 +83,10 @@ export const verifyBusinessController = async (
         ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
       })
 
+      const { origin } = req.headers
+
+      if (!origin) throw new HttpError(400, 'Missing origin header')
+
       const payloadKYB = {
         manual_review: 1,
         enable_extra_proofs: 1,
@@ -100,7 +104,7 @@ export const verifyBusinessController = async (
         country: body.jurisdictionCode,
         redirect_url: '',
 
-        callback_url: `${process.env.ONBOARDING_API_URL}/kyb-callback?${searchParams}`,
+        callback_url: `${origin}/kyb-callback?${searchParams}`,
         // callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
       }
 

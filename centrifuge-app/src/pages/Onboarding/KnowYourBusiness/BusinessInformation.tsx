@@ -34,8 +34,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
   const { data: verificationStatusData } = useVerificationStatus('kyb', onboardingUser)
 
   const isCompleted = !!onboardingUser?.globalSteps?.verifyBusiness.completed
-  const isPendingManualKybReview =
-    verificationStatusData === 'request.pending' || verificationStatusData === 'review.pending'
+  const isPendingManualKybReview = verificationStatusData === 'review.pending'
   const fieldIsDisabled = isLoading || isCompleted || isPendingManualKybReview
 
   const renderRegionCodeSelect = () => {
