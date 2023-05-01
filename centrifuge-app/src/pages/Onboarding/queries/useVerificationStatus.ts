@@ -7,10 +7,10 @@ export const useVerificationStatus = (verificationType: 'kyb' | 'kyc', onboardin
 
   const getEnabled = () => {
     if (verificationType === 'kyb') {
-      return onboardingUser.investorType === 'entity' && !!onboardingUser.manualKybReference
+      return onboardingUser?.investorType === 'entity' && !!onboardingUser?.manualKybReference
     }
 
-    return onboardingUser.investorType === 'individual' && !!onboardingUser.kycReference
+    return onboardingUser?.investorType === 'individual' && !!onboardingUser?.kycReference
   }
 
   const query = useQuery(
