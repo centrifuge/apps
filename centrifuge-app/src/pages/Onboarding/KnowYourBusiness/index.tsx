@@ -40,6 +40,7 @@ export function KnowYourBusiness() {
   })
 
   const handleManualBusinessReview = (event: MessageEvent) => {
+    console.log('yo')
     if (event.data === 'manual.onboarding.completed') {
       nextStep()
     }

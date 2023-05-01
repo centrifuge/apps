@@ -95,7 +95,7 @@ export const verifyBusinessController = async (
 
         callback_url: `https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-pr1297/kyb-callback?${searchParams}`,
         // callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
-        redirect_url: 'http://localhost:3000/onboarding/redirect-url',
+        redirect_url: '',
       }
 
       const kyb = await shuftiProRequest(payloadKYB)
