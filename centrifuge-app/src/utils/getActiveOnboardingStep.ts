@@ -1,4 +1,4 @@
-import { OnboardingUser } from '../types'
+import { OnboardingUser, ShuftiProManualReviewEvents } from '../types'
 
 const BASE_ENTITY_STEPS = {
   LINK_WALLET: 1,
@@ -45,12 +45,14 @@ const INDIVIDUAL_NON_US_STEPS = {
 
 export const getActiveOnboardingStep = (
   onboardingUser: OnboardingUser,
-  kybStatus?: 'verification.pending' | 'verification.accepted' | 'verification.rejected',
+  kybStatus?: ShuftiProManualReviewEvents,
   poolId?: string,
   trancheId?: string
 ) => {
   // user does not exist
   if (!onboardingUser) return 2
+
+  const isManualReviewPending = kybStatus === 'request.pending' || kybStatus === 'review.pending'
 
   const { investorType, countryOfCitizenship } = onboardingUser
   const { verifyIdentity, verifyTaxInfo, verifyAccreditation } = onboardingUser.globalSteps
@@ -76,7 +78,7 @@ export const getActiveOnboardingStep = (
 
     if (verifyIdentity.completed) return BASE_ENTITY_STEPS.VERIFY_TAX_INFO
     if (confirmOwners.completed) return BASE_ENTITY_STEPS.VERIFY_IDENTITY
-    if (verifyBusiness.completed || kybStatus === 'verification.pending') return BASE_ENTITY_STEPS.CONFIRM_OWNERS
+    if (verifyBusiness.completed || isManualReviewPending) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
   }
 
   if (investorType === 'individual' && countryOfCitizenship) {

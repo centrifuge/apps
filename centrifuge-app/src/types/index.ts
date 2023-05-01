@@ -148,3 +148,9 @@ type IndividualUser = {
 }
 
 export type OnboardingUser = IndividualUser | EntityUser
+
+export type ShuftiProManualReviewEvents =
+  | 'request.pending'
+  | 'review.pending'
+  | 'verification.declined'
+  | 'verification.approved'

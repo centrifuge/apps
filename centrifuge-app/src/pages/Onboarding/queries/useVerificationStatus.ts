@@ -1,12 +1,13 @@
 import { useQuery } from 'react-query'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
+import { OnboardingUser } from '../../../types'
 
-export const useVerificationStatus = (verificationType: 'kyb' | 'kyc') => {
+export const useVerificationStatus = (verificationType: 'kyb' | 'kyc', onboardingUser: OnboardingUser) => {
   const { authToken } = useOnboardingAuth()
 
-  const mutation = useQuery(
+  const query = useQuery(
     ['verificationStatus'],
-    async (): Promise<'request.pending' | 'verification.accepted'> => {
+    async () => {
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verificationStatus`, {
         method: 'POST',
         body: JSON.stringify({
@@ -25,14 +26,13 @@ export const useVerificationStatus = (verificationType: 'kyb' | 'kyc') => {
 
       const json = await response.json()
 
-      console.log({ json })
-
-      return json
+      return json.verificationStatus
     },
     {
-      enabled: !!authToken,
+      enabled: !!onboardingUser,
+      retry: 1,
     }
   )
 
-  return mutation
+  return query
 }

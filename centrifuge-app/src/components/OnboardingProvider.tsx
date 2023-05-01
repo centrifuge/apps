@@ -80,7 +80,10 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
   )
 
-  const verificationStatus = useVerificationStatus('kyb')
+  const { data: verificationStatusData, isLoading: isVerificationStatusLoading } = useVerificationStatus(
+    'kyb',
+    onboardingUser
+  )
 
   React.useEffect(() => {
     // tried to connect but no wallet is connected
@@ -96,7 +99,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     if (!isConnecting && isOnboardingUserFetched) {
       const activeOnboardingStep = getActiveOnboardingStep(
         onboardingUser,
-        verificationStatus,
+        verificationStatusData,
         pool?.id,
         pool?.trancheId
       )
@@ -111,7 +114,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     isAuthFetched,
     selectedAccount,
     pool,
-    verificationStatus,
+    verificationStatusData,
   ])
 
   return (
@@ -125,7 +128,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         nextStep,
         previousStep,
         setActiveStep,
-        isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading,
+        isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading || isVerificationStatusLoading,
       }}
     >
       {children}

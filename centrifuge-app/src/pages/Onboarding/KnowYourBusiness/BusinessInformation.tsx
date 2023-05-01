@@ -31,6 +31,9 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
   const { onboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
   const [errorClosed, setErrorClosed] = React.useState(false)
   const isCompleted = !!onboardingUser?.globalSteps?.verifyBusiness.completed
+  const isManualReview = !!onboardingUser.manualKybReference
+
+  const fieldIsDisabled = isLoading || isCompleted || !!onboardingUser.manualKybReference
 
   const renderRegionCodeSelect = () => {
     if (formik.values.jurisdictionCode === 'us') {
@@ -40,7 +43,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
           label="State of incorporation"
           placeholder="Select a state"
           options={formatGeographyCodes(US_STATE_CODES)}
-          disabled={isLoading || isCompleted}
+          disabled={fieldIsDisabled}
           errorMessage={formik.touched.regionCode ? formik.errors.regionCode : undefined}
         />
       )
@@ -53,7 +56,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
           label="Province of incorporation"
           placeholder="Select a province"
           options={formatGeographyCodes(CA_PROVINCE_CODES)}
-          disabled={isLoading || isCompleted}
+          disabled={fieldIsDisabled}
           errorMessage={formik.touched.regionCode ? formik.errors.regionCode : undefined}
         />
       )
@@ -82,17 +85,17 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
               {...formik.getFieldProps('email')}
               label="Email address"
               placeholder="Enter email address"
-              disabled={isLoading || isCompleted}
+              disabled={fieldIsDisabled}
               errorMessage={formik.touched.email ? formik.errors.email : undefined}
             />
-            <ValidEmailTooltip />
+            {!isCompleted && !onboardingUser.manualKybReference && <ValidEmailTooltip />}
           </Box>
 
           <TextInput
             {...formik.getFieldProps('businessName')}
             label="Legal entity name"
             placeholder="Enter entity name"
-            disabled={isLoading || isCompleted}
+            disabled={fieldIsDisabled}
             errorMessage={formik.touched.businessName ? formik.errors.businessName : undefined}
           />
 
@@ -101,7 +104,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
             label="Country of incorporation"
             placeholder="Select a country"
             options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES)}
-            disabled={isLoading || isCompleted}
+            disabled={fieldIsDisabled}
             onChange={(event) => {
               formik.setValues({
                 ...formik.values,
@@ -117,7 +120,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
             {...formik.getFieldProps('registrationNumber')}
             label="Registration number"
             placeholder="0000"
-            disabled={isLoading || isCompleted}
+            disabled={fieldIsDisabled}
             errorMessage={formik.touched.registrationNumber ? formik.errors.registrationNumber : undefined}
           />
         </Fieldset>
@@ -129,7 +132,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
         </Button>
         <Button
           onClick={() => {
-            isCompleted ? nextStep() : formik.handleSubmit()
+            isCompleted || isManualReview ? nextStep() : formik.handleSubmit()
           }}
           loading={isLoading}
           disabled={isLoading}
