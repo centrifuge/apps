@@ -91,7 +91,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
               disabled={fieldIsDisabled}
               errorMessage={formik.touched.email ? formik.errors.email : undefined}
             />
-            {!isCompleted && !onboardingUser.manualKybReference && <ValidEmailTooltip />}
+            {!isCompleted && !isPendingManualKybReview && <ValidEmailTooltip />}
           </Box>
 
           <TextInput

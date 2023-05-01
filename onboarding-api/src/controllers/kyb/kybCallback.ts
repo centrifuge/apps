@@ -1,11 +1,12 @@
+import * as crypto from 'crypto'
 import { Request, Response } from 'express'
 import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { sendVerifiedBusinessMessage } from '../../emails/sendVerifiedBusinessMessage'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
-const crypto = require('crypto')
 
 type VerificationState = 1 | 0 | null
 
@@ -36,13 +37,32 @@ type RequestBody = {
   }
 }
 
-export const KYBCallbackController = async (req: Request<any, any, RequestBody, any>, res: Response) => {
+export const kybCallbackController = async (req: Request<any, any, RequestBody, any>, res: Response) => {
   try {
     const { headers, body, query } = req
 
+    const wallet: Request['wallet'] = {
+      address: query.address,
+      network: query.network,
+    }
+
+    const user = await fetchUser(wallet)
+
+    if (user.investorType !== 'entity') {
+      throw new HttpError(400, 'User is not an entity')
+    }
+
+    if (user.globalSteps.verifyBusiness.completed) {
+      throw new HttpError(400, 'Business already verified')
+    }
+
     const isValidRequest = headers.signature && isValidShuftiRequest(body, headers.signature)
 
-    if (!isValidRequest || body.event !== 'verification.status.changed' || !query.address || !query.network) {
+    if (!isValidRequest) {
+      throw new HttpError(401, 'Unauthorized')
+    }
+
+    if (body.event !== 'verification.status.changed' || !query.address || !query.network) {
       return res.status(200).end()
     }
 
@@ -64,11 +84,6 @@ export const KYBCallbackController = async (req: Request<any, any, RequestBody, 
           timeStamp: new Date().toISOString(),
         },
       },
-    }
-
-    const wallet: Request['wallet'] = {
-      address: query.address,
-      network: query.network,
     }
 
     await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyBusiness'])

@@ -28,9 +28,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     // entity user will already be created when starting KYC
     if (
       userData?.investorType === 'entity' &&
-      !userData.manualKybReference &&
       !userData.globalSteps.verifyEmail.completed &&
-      !userData.globalSteps.verifyBusiness.completed &&
+      (!userData.globalSteps.verifyBusiness.completed || !userData.manualKybReference) &&
       !userData.globalSteps.confirmOwners.completed
     ) {
       throw new HttpError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')

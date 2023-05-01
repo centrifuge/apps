@@ -34,8 +34,15 @@ export const verifyBusinessController = async (
       throw new HttpError(400, 'Business already verified')
     }
 
-    if (userData?.manualKybReference && !userData.globalSteps.verifyBusiness.completed) {
-      throw new HttpError(400, 'Business already in review')
+    if (userData.manualKybReference) {
+      const status = await shuftiProRequest(
+        { reference: userData.manualKybReference },
+        { path: 'status', dryRun: false }
+      )
+
+      if (status.event === 'request.pending' || status.event === 'review.pending') {
+        throw new HttpError(400, 'Business already in review')
+      }
     }
 
     const kybReference = `KYB_${Math.random()}`
@@ -92,10 +99,10 @@ export const verifyBusinessController = async (
         reference: kybReference,
         email: body.email,
         country: body.jurisdictionCode,
-
-        callback_url: `https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-pr1297/kyb-callback?${searchParams}`,
-        // callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
         redirect_url: '',
+
+        callback_url: `${process.env.ONBOARDING_API_URL}/kyb-callback?${searchParams}`,
+        // callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
       }
 
       const kyb = await shuftiProRequest(payloadKYB)

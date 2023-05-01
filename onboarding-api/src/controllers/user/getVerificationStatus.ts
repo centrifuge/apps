@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { fetchUser } from '../../utils/fetchUser'
-import { reportHttpError } from '../../utils/httpError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 
 export const getVerificationStatusController = async (req: Request, res: Response) => {
@@ -15,6 +15,10 @@ export const getVerificationStatusController = async (req: Request, res: Respons
 
     if (req.body.verificationType === 'kyc') {
       reference = user.kycReference
+    }
+
+    if (!reference) {
+      throw new HttpError(400, 'No reference found')
     }
 
     const status = await shuftiProRequest({ reference }, { path: 'status', dryRun: false })
