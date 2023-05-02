@@ -661,10 +661,10 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [poolId, add, remove] = args
-    const signer = inst.getSignerAddress()
-    // Make sure a removal of the PoolAdmin role of the signer is the last tx in the batch, otherwise the later txs will fail
+    const self = inst.getActingAddress()
+    // Make sure a removal of the PoolAdmin role of the acting address is the last tx in the batch, otherwise the later txs will fail
     const sortedRemove = [...remove].sort(([addr, role]) =>
-      role === 'PoolAdmin' && isSameAddress(addr, signer) ? 1 : -1
+      role === 'PoolAdmin' && isSameAddress(addr, self) ? 1 : -1
     )
     const $api = inst.getApi()
 
@@ -721,7 +721,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function updateInvestOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
 
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     return inst.getApi().pipe(
       switchMap(
@@ -750,7 +750,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function updateRedeemOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     return inst.getApi().pipe(
       switchMap(
@@ -871,7 +871,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function collect(args: [poolId: string, trancheId?: string], options?: TransactionOptions) {
     const [poolId, trancheId] = args
     const $api = inst.getApi()
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     if (trancheId !== undefined) {
       return $api.pipe(

@@ -445,6 +445,19 @@ export class CentrifugeBase {
     return signingAddress as string
   }
 
+  getActingAddress(txOptions?: TransactionOptions) {
+    if (txOptions?.proxies) {
+      const proxy = txOptions.proxies.at(-1)!
+      return typeof proxy === 'string' ? proxy : proxy[0]
+    }
+
+    if (txOptions?.multisig) {
+      return computeMultisig(txOptions.multisig).address
+    }
+
+    return this.getSignerAddress()
+  }
+
   setProxies(proxies: Config['proxies']) {
     this.config.proxies = proxies
   }
