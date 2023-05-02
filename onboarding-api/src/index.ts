@@ -13,7 +13,6 @@ import { kybCallbackController } from './controllers/kyb/kybCallback'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
-import { getVerificationStatusController } from './controllers/user/getVerificationStatus'
 import { setVerifiedIdentityController } from './controllers/user/setVerifiedIdentity'
 import { startKycController } from './controllers/user/startKyc'
 import { updateInvestorStatusController } from './controllers/user/updateInvestorStatus'
@@ -54,7 +53,6 @@ onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationControlle
 onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 
 onboarding.post('/verifyBusiness', verifyAuth, verifyBusinessController)
-onboarding.post('/verificationStatus', verifyAuth, getVerificationStatusController)
 
 onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
 

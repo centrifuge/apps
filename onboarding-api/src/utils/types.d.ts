@@ -29,7 +29,6 @@ declare global {
       MEMBERLIST_ADMIN_PURE_PROXY: string
       COLLATOR_WSS_URL: string
       RELAY_WSS_URL: string
-      ONBOARDING_API_URL: string
       INFURA_KEY: string
       EVM_NETWORK: string
     }
