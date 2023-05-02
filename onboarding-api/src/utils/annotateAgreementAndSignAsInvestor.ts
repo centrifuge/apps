@@ -62,7 +62,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
   firstPage.drawText(
     `Signed by ${walletAddress} on Centrifuge
 Block: ${transactionInfo.blockNumber}
-Extrinsic Hash: ${transactionInfo.txHash}`,
+Transaction Hash: ${transactionInfo.txHash}`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,
