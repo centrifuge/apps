@@ -47,6 +47,7 @@ interface PoolMetadataDetails {
   maker?: { ilk: string }
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
+  repName: string
 }
 
 interface BasePool {
@@ -96,7 +97,7 @@ const INFURA_KEY = process.env.INFURA_KEY
 
 const goerliConfig = {
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
-  poolsHash: 'QmRJpVeHkGwZakaQaW6UF2rgRYtL8a3qwZ2c57eB9bZ2iX', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmZoFPrVjcrZCDFrFqCuzmYz9fVudbmyoYBu2tKER5N6Fa', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xaEcFA11fE9601c1B960661d7083A08A5df7c1947',
 }
 const mainnetConfig = {
@@ -137,7 +138,7 @@ export const getTinlakePoolById = async (poolId: string) => {
       issuer: {
         name: poolData.metadata.attributes?.Issuer ?? '',
         email: poolData.metadata?.issuerEmail ?? 'info@centrifuge.io',
-        repName: poolData.metadata.description ?? '',
+        repName: poolData.metadata.repName ?? '',
       },
     },
   }
