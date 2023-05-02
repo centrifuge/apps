@@ -1,5 +1,5 @@
 import { sendEmail, templateIds } from '.'
-import { getPoolById } from '../utils/centrifuge'
+import { getPoolById } from '../utils/getPoolById'
 
 const getTemplateId = (isGloballyOnboarding: boolean, isApproved: boolean) => {
   if (isGloballyOnboarding) {
