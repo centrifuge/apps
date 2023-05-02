@@ -4,7 +4,7 @@ import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { formatBalance, formatPercentage } from '../utils/formatting'
+import { formatBalance } from '../utils/formatting'
 import { useLiquidity } from '../utils/useLiquidity'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
@@ -34,24 +34,24 @@ const columns: Column[] = [
     cell: (row: LiquidityTableRow) => <LockedRow row={row} />,
     flex: '3',
   },
-  {
-    header: 'Executing',
-    cell: (row: LiquidityTableRow) => <ExecutingRow row={row} />,
-    flex: '3',
-  },
-  {
-    header: '%',
-    cell: (row: LiquidityTableRow) => <ExecutingPercentageRow row={row} />,
-    flex: '1',
-  },
+  // {
+  //   header: 'Executing',
+  //   cell: (row: LiquidityTableRow) => <ExecutingRow row={row} />,
+  //   flex: '3',
+  // },
+  // {
+  //   header: '%',
+  //   cell: (row: LiquidityTableRow) => <ExecutingPercentageRow row={row} />,
+  //   flex: '1',
+  // },
 ]
 
 export const EpochList: React.FC<Props> = ({ pool }) => {
   const theme = useTheme()
   const {
-    sumOfExecutableInvestments,
+    // sumOfExecutableInvestments,
     sumOfLockedInvestments,
-    sumOfExecutableRedemptions,
+    // sumOfExecutableRedemptions,
     sumOfLockedRedemptions,
     investments,
     redemptions,
@@ -67,36 +67,36 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
         {formatBalance(sumOfLockedInvestments, pool.currency.symbol)}
       </Text>
     ),
-    executing: (
-      <Text
-        variant="body2"
-        fontWeight={600}
-        color={
-          !sumOfLockedInvestments.equals(sumOfExecutableInvestments)
-            ? theme.colors.statusWarning
-            : theme.colors.textPrimary
-        }
-      >
-        {formatBalance(sumOfExecutableInvestments, pool.currency.symbol)}
-      </Text>
-    ),
-    executingPercentage: (
-      <Text
-        variant="body2"
-        fontWeight={600}
-        color={
-          !sumOfLockedInvestments.equals(sumOfExecutableInvestments)
-            ? theme.colors.statusWarning
-            : theme.colors.textPrimary
-        }
-      >
-        {formatPercentage(
-          Perquintill.fromFloat(
-            sumOfExecutableInvestments.div(sumOfLockedInvestments.gt(0) ? sumOfLockedInvestments : 1)
-          )
-        )}
-      </Text>
-    ),
+    // executing: (
+    //   <Text
+    //     variant="body2"
+    //     fontWeight={600}
+    //     color={
+    //       !sumOfLockedInvestments.equals(sumOfExecutableInvestments)
+    //         ? theme.colors.statusWarning
+    //         : theme.colors.textPrimary
+    //     }
+    //   >
+    //     {formatBalance(sumOfExecutableInvestments, pool.currency.symbol)}
+    //   </Text>
+    // ),
+    // executingPercentage: (
+    //   <Text
+    //     variant="body2"
+    //     fontWeight={600}
+    //     color={
+    //       !sumOfLockedInvestments.equals(sumOfExecutableInvestments)
+    //         ? theme.colors.statusWarning
+    //         : theme.colors.textPrimary
+    //     }
+    //   >
+    //     {formatPercentage(
+    //       Perquintill.fromFloat(
+    //         sumOfExecutableInvestments.div(sumOfLockedInvestments.gt(0) ? sumOfLockedInvestments : 1)
+    //       )
+    //     )}
+    //   </Text>
+    // ),
   }
 
   const summaryRedemptions: LiquidityTableRow = {
@@ -110,36 +110,36 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
         {formatBalance(sumOfLockedRedemptions, pool.currency.symbol)}
       </Text>
     ),
-    executing: (
-      <Text
-        variant="body2"
-        fontWeight={600}
-        color={
-          !sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
-            ? theme.colors.statusWarning
-            : theme.colors.textPrimary
-        }
-      >
-        {formatBalance(sumOfExecutableRedemptions, pool.currency.symbol)}
-      </Text>
-    ),
-    executingPercentage: (
-      <Text
-        variant="body2"
-        fontWeight={600}
-        color={
-          !sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
-            ? theme.colors.statusWarning
-            : theme.colors.textPrimary
-        }
-      >
-        {formatPercentage(
-          Perquintill.fromFloat(
-            sumOfExecutableRedemptions.div(sumOfLockedRedemptions.gt(0) ? sumOfLockedRedemptions : 1)
-          )
-        )}
-      </Text>
-    ),
+    // executing: (
+    //   <Text
+    //     variant="body2"
+    //     fontWeight={600}
+    //     color={
+    //       !sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+    //         ? theme.colors.statusWarning
+    //         : theme.colors.textPrimary
+    //     }
+    //   >
+    //     {formatBalance(sumOfExecutableRedemptions, pool.currency.symbol)}
+    //   </Text>
+    // ),
+    // executingPercentage: (
+    //   <Text
+    //     variant="body2"
+    //     fontWeight={600}
+    //     color={
+    //       !sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+    //         ? theme.colors.statusWarning
+    //         : theme.colors.textPrimary
+    //     }
+    //   >
+    //     {formatPercentage(
+    //       Perquintill.fromFloat(
+    //         sumOfExecutableRedemptions.div(sumOfLockedRedemptions.gt(0) ? sumOfLockedRedemptions : 1)
+    //       )
+    //     )}
+    //   </Text>
+    // ),
   }
 
   return (
@@ -161,23 +161,25 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
 const LockedRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  return <>{React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked, pool.currency.symbol)}</>
-}
-
-const ExecutingRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
   return (
-    <>{React.isValidElement(row.executing) ? row.executing : formatBalance(row.executing || 0, pool.currency.symbol)}</>
+    <>{React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked as Decimal, pool.currency.symbol)}</>
   )
 }
 
-const ExecutingPercentageRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
-  return (
-    <>
-      {React.isValidElement(row.executingPercentage)
-        ? row.executingPercentage
-        : formatPercentage((row?.executingPercentage as Perquintill) || 0)}
-    </>
-  )
-}
+// const ExecutingRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
+//   const { pid: poolId } = useParams<{ pid: string }>()
+//   const pool = usePool(poolId)
+//   return (
+//     <>{React.isValidElement(row.executing) ? row.executing : formatBalance(row.executing || 0, pool.currency.symbol)}</>
+//   )
+// }
+
+// const ExecutingPercentageRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
+//   return (
+//     <>
+//       {React.isValidElement(row.executingPercentage)
+//         ? row.executingPercentage
+//         : formatPercentage((row?.executingPercentage as Perquintill) || 0)}
+//     </>
+//   )
+// }

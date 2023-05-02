@@ -17,7 +17,6 @@ import { config } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { CreateLoanFromNFTPage } from '../pages/CreateLoanFromNFT'
 import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
@@ -119,16 +118,18 @@ export const Root: React.VFC = () => {
             <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
                 <OnboardingAuthProvider>
-                  <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <Router>
-                        <LoadBoundary>
-                          <Routes />
-                        </LoadBoundary>
-                      </Router>
-                    </TransactionProvider>
-                  </DebugFlags>
+                  <OnboardingProvider>
+                    <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                      <TransactionProvider>
+                        <TransactionToasts />
+                        <Router>
+                          <LoadBoundary>
+                            <Routes />
+                          </LoadBoundary>
+                        </Router>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </OnboardingProvider>
                 </OnboardingAuthProvider>
               </PodAuthProvider>
             </WalletProvider>
@@ -144,9 +145,6 @@ const Routes: React.VFC = () => {
     <Switch>
       <Route path="/nfts/collection/:cid/object/mint">
         <MintNFTPage />
-      </Route>
-      <Route path="/nfts/collection/:cid/object/:nftid/new-asset">
-        <CreateLoanFromNFTPage />
       </Route>
       <Route path="/nfts/collection/:cid/object/:nftid">
         <NFTPage />
@@ -188,9 +186,7 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingProvider>
-          <OnboardingPage />
-        </OnboardingProvider>
+        <OnboardingPage />
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />

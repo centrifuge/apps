@@ -27,12 +27,16 @@ interface OnboardingContextType<User, Pool> {
   setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
 }
 
+export type VerificationStatus = 'unverified' | 'pending' | 'verified'
+
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser, OnboardingPool> | null>(null)
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const {
     pendingConnect: { isConnecting },
-    substrate: { selectedAccount },
+    substrate: { selectedAccount: substrateAccount },
+    evm: { selectedAddress: evmAddress },
+    connectedType,
   } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useOnboardingAuth()
   const [activeStep, setActiveStep] = React.useState<number>(0)
@@ -74,14 +78,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     },
     {
       refetchOnWindowFocus: false,
-      enabled: !!selectedAccount,
+      enabled: connectedType === 'evm' ? !!evmAddress : !!substrateAccount,
       retry: 1,
     }
   )
 
   React.useEffect(() => {
     // tried to connect but no wallet is connected
-    if (!isConnecting && !selectedAccount) {
+    if (!isConnecting && !(substrateAccount || evmAddress)) {
       return setActiveStep(1)
     }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
@@ -102,7 +106,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount, pool])
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, substrateAccount, evmAddress, pool])
 
   return (
     <OnboardingContext.Provider
@@ -130,4 +134,25 @@ export const useOnboarding = <
   const ctx = React.useContext(OnboardingContext) as OnboardingContextType<User, Pool>
   if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
+}
+
+export const useVerificationStatus = (): VerificationStatus => {
+  const { onboardingUser } = useOnboarding()
+
+  if (!onboardingUser) {
+    return 'unverified'
+  }
+
+  const requiredGlobalSteps = Object.keys(onboardingUser.globalSteps).filter((globalStep) => {
+    if (
+      (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship === 'us') ||
+      (onboardingUser.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us'))
+    ) {
+      return true
+    } else {
+      return globalStep !== 'verifyAccreditation'
+    }
+  }) as Array<keyof typeof onboardingUser.globalSteps>
+
+  return requiredGlobalSteps.every((step) => onboardingUser.globalSteps[step].completed) ? 'verified' : 'pending'
 }

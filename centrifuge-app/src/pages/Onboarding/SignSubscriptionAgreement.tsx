@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Shelf, Spinner, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Button, Checkbox, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, object } from 'yup'
@@ -24,7 +24,6 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     NonNullable<OnboardingUser>,
     NonNullable<OnboardingPool>
   >()
-
   const poolId = pool.id
   const trancheId = pool.trancheId
 
@@ -36,7 +35,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     },
     validationSchema,
     onSubmit: () => {
-      signRemark([])
+      signRemark([`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`])
     },
   })
 
@@ -61,32 +60,46 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
       <Content>
         <ContentHeader title="Sign subscription agreement" body="Complete subscription agreement" />
 
-        <Box
-          position="relative"
-          overflowY="auto"
-          minHeight="30vh"
-          maxHeight="500px"
-          borderWidth={isAgreementFetched ? 1 : 0}
-          borderColor="borderPrimary"
-          borderStyle="solid"
-          borderRadius="tooltip"
-        >
-          {isAgreementFetched ? (
-            <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
-          ) : (
-            <Shelf
-              position="absolute"
-              top={0}
-              left={0}
-              width="100%"
-              height="100%"
-              alignItems="center"
-              justifyContent="center"
+        <Stack gap={1} alignItems="start">
+          <Box
+            position="relative"
+            overflowY="auto"
+            minHeight="30vh"
+            maxHeight="500px"
+            borderWidth={isAgreementFetched ? 1 : 0}
+            borderColor="borderPrimary"
+            borderStyle="solid"
+            borderRadius="tooltip"
+          >
+            {isAgreementFetched ? (
+              <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
+            ) : (
+              <Shelf
+                position="absolute"
+                top={0}
+                left={0}
+                width="100%"
+                height="100%"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Spinner size="iconLarge" />
+              </Shelf>
+            )}
+          </Box>
+
+          {!!isAgreementFetched && (
+            <AnchorButton
+              href={signedAgreementUrl ?? unsignedAgreementData}
+              download={`subscription-agreement-pool-${pool.id}.pdf`}
+              variant="tertiary"
+              icon={IconDownload}
+              small
             >
-              <Spinner size="iconLarge" />
-            </Shelf>
+              Download document
+            </AnchorButton>
           )}
-        </Box>
+        </Stack>
 
         <Checkbox
           {...formik.getFieldProps('isAgreed')}

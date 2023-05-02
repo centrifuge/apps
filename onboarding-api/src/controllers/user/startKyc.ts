@@ -59,6 +59,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     } else {
       const newUser: IndividualUser = {
         investorType: 'individual',
+        address: null,
         wallet: [req.wallet],
         kycReference,
         name: body.name,

@@ -31,7 +31,10 @@ export const setVerifiedIdentityController = async (
       throw new HttpError(400, `Failed because ${status.reference} is in "${status.event}" state`)
     }
 
+    const address = status.verification_data?.address?.full_address || null
+
     const updatedUser: Subset<OnboardingUser> = {
+      address,
       globalSteps: {
         verifyIdentity: {
           completed: true,
@@ -39,7 +42,7 @@ export const setVerifiedIdentityController = async (
         },
       },
     }
-    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['globalSteps.verifyIdentity'])
+    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['address', 'globalSteps.verifyIdentity'])
     if (user.investorType === 'individual') {
       await sendVerifyEmailMessage(user, wallet)
     }

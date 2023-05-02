@@ -10,6 +10,7 @@ export const templateIds = {
   manualOnboardedPoolApproved: 'd-522e48402bab4976b41f7c7552918444',
   manualOnboardedDeclined: 'd-9439062e51f64c8d93d95f788547299d',
   manualOnboardedPoolDeclined: 'd-9881938c5d3247d6bb32ee2d79f6bebe',
+  investorApprovedIssuer: 'd-4450c4ea803a4c24b0960310667d98d6',
 }
 
 export const sendEmail = async (message: any) => {

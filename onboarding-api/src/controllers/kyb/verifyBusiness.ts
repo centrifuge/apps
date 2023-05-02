@@ -49,6 +49,7 @@ export const verifyBusinessController = async (
 
     const user: EntityUser = {
       investorType: 'entity',
+      address: null,
       kycReference: '',
       manualKybReference: manualReview ? kybReference : null,
       wallet: [wallet],
