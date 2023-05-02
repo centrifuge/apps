@@ -14,7 +14,6 @@ import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
 import { CA_PROVINCE_CODES, RESIDENCY_COUNTRY_CODES, US_STATE_CODES } from '../geographyCodes'
-import { useVerificationStatus } from '../queries/useVerificationStatus'
 
 type Props = {
   formik: FormikProps<{
@@ -31,10 +30,9 @@ type Props = {
 export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
   const { onboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
   const [errorClosed, setErrorClosed] = React.useState(false)
-  const { data: verificationStatusData } = useVerificationStatus('kyb', onboardingUser)
 
   const isCompleted = !!onboardingUser?.globalSteps?.verifyBusiness.completed
-  const isPendingManualKybReview = verificationStatusData === 'review.pending'
+  const isPendingManualKybReview = onboardingUser?.manualKybStatus === 'review.pending'
   const fieldIsDisabled = isLoading || isCompleted || isPendingManualKybReview
 
   const renderRegionCodeSelect = () => {

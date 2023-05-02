@@ -101,7 +101,7 @@ export const entityUserSchema = object({
   countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
   globalSteps: globalStepsSchema,
   poolSteps: poolStepsSchema,
-  manualKybReference: string().default(undefined),
+  manualKybReference: string().nullable().default(null),
 })
 
 export const individualUserSchema = object({

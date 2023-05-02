@@ -24,7 +24,7 @@ export const verifyBusinessController = async (
   res: Response
 ) => {
   try {
-    const { body, wallet } = req
+    const { body, wallet, protocol, headers } = req
     await validateInput(body, verifyBusinessInput)
     const { jurisdictionCode, registrationNumber, businessName, email, manualReview, dryRun } = body
 
@@ -50,7 +50,7 @@ export const verifyBusinessController = async (
     const user: EntityUser = {
       investorType: 'entity',
       kycReference: '',
-      manualKybReference: manualReview ? kybReference : undefined,
+      manualKybReference: manualReview ? kybReference : null,
       wallet: [wallet],
       name: null,
       dateOfBirth: null,
@@ -83,7 +83,7 @@ export const verifyBusinessController = async (
         ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
       })
 
-      const { origin } = req.headers
+      const { origin, host } = headers
 
       if (!origin) throw new HttpError(400, 'Missing origin header')
 
@@ -92,20 +92,18 @@ export const verifyBusinessController = async (
         enable_extra_proofs: 1,
         labels: [
           'articles_of_association',
-          // 'certificate_of_incorporation',
-          // 'proof_of_address',
-          // 'register_of_directors',
-          // 'register_of_shareholders',
-          // 'signed_and_dated_ownership_structure',
+          'certificate_of_incorporation',
+          'proof_of_address',
+          'register_of_directors',
+          'register_of_shareholders',
+          'signed_and_dated_ownership_structure',
         ],
         verification_mode: 'any',
         reference: kybReference,
         email: body.email,
         country: body.jurisdictionCode,
-        redirect_url: '',
-
-        callback_url: `${origin}/kyb-callback?${searchParams}`,
-        // callback_url: `https://young-pants-invite-85-149-106-77.loca.lt/kyb-callback?${searchParams}`,
+        redirect_url: `${origin}/onboarding/redirect-url`,
+        callback_url: `${protocol}://${host}/kybCallback?${searchParams}`,
       }
 
       const kyb = await shuftiProRequest(payloadKYB)

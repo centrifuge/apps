@@ -1,7 +1,6 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { useQuery } from 'react-query'
-import { useVerificationStatus } from '../pages/Onboarding/queries/useVerificationStatus'
 import { OnboardingUser } from '../types'
 import { getActiveOnboardingStep } from '../utils/getActiveOnboardingStep'
 import { useOnboardingAuth } from './OnboardingAuthProvider'
@@ -80,11 +79,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
   )
 
-  const { data: verificationStatusData, isLoading: isVerificationStatusLoading } = useVerificationStatus(
-    'kyb',
-    onboardingUser
-  )
-
   React.useEffect(() => {
     // tried to connect but no wallet is connected
     if (!isConnecting && !selectedAccount) {
@@ -97,7 +91,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
     // wallet finished connection attempt, user was fetched
     if (!isConnecting && isOnboardingUserFetched) {
-      const isPendingManualKybReview = verificationStatusData === 'review.pending'
+      const isPendingManualKybReview = onboardingUser?.manualKybStatus === 'review.pending'
 
       const activeOnboardingStep = getActiveOnboardingStep(
         onboardingUser,
@@ -108,16 +102,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [
-    onboardingUser,
-    isConnecting,
-    isOnboardingUserFetched,
-    isAuth,
-    isAuthFetched,
-    selectedAccount,
-    pool,
-    verificationStatusData,
-  ])
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount, pool])
 
   return (
     <OnboardingContext.Provider
@@ -130,7 +115,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         nextStep,
         previousStep,
         setActiveStep,
-        isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading || isVerificationStatusLoading,
+        isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading,
       }}
     >
       {children}

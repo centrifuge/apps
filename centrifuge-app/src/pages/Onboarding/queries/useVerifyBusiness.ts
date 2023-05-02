@@ -1,4 +1,5 @@
 import { useMutation } from 'react-query'
+import { useLocation } from 'react-router-dom'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
@@ -13,7 +14,11 @@ type BusinessInformation = {
 
 export const useVerifyBusiness = () => {
   const { authToken } = useOnboardingAuth()
-  const { refetchOnboardingUser } = useOnboarding()
+  const { refetchOnboardingUser, nextStep } = useOnboarding()
+  const { search } = useLocation()
+
+  const poolId = new URLSearchParams(search).get('poolId')
+  const trancheId = new URLSearchParams(search).get('trancheId')
 
   const mutation = useMutation(
     async (values: BusinessInformation) => {
@@ -29,6 +34,7 @@ export const useVerifyBusiness = () => {
               : values.jurisdictionCode,
           dryRun: true, // TODO: set this as debug flag option
           manualReview: values?.manualReview ?? false,
+          ...(values?.manualReview && poolId && trancheId && { poolId, trancheId }),
         }),
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -54,8 +60,11 @@ export const useVerifyBusiness = () => {
       return user
     },
     {
-      onSuccess: () => {
+      onSuccess: (_, values) => {
         refetchOnboardingUser()
+        if (!values.manualReview) {
+          nextStep()
+        }
       },
     }
   )

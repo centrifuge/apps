@@ -131,7 +131,8 @@ export type EntityUser = {
   globalSteps: EntityOnboardingSteps
   poolSteps: PoolOnboardingSteps
   kycReference: string
-  manualKybReference?: string
+  manualKybReference: string | null
+  manualKybStatus?: 'review.pending' | 'verification.accepted' | 'verification.declined' | 'request.pending'
 }
 
 type IndividualUser = {

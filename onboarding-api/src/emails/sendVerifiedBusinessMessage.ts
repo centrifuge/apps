@@ -25,8 +25,17 @@ export const sendVerifiedBusinessMessage = async (
 ) => {
   const isGloballyOnboarding = !poolId && !trancheId
 
-  const { pool, metadata } = await getPoolById(poolId)
-  const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name
+  let pool
+  let metadata
+  let trancheName
+
+  if (!isGloballyOnboarding) {
+    const poolData = await getPoolById(poolId)
+    pool = poolData.pool
+    metadata = poolData.metadata
+
+    trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name
+  }
 
   const message = {
     personalizations: [

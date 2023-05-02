@@ -4,6 +4,7 @@ import { object, string } from 'yup'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { KYB_COUNTRY_CODES } from '../geographyCodes'
+import { useSendVerifyEmail } from '../queries/useSendVerifyEmail'
 import { useVerifyBusiness } from '../queries/useVerifyBusiness'
 import { BusinessInformation } from './BusinessInformation'
 import { ManualBusinessVerification } from './ManualBusinessVerification'
@@ -21,37 +22,44 @@ export const validationSchema = object({
 
 export function KnowYourBusiness() {
   const [activeKnowYourBusinessStep, setActiveKnowYourBusinessStep] = React.useState<number>(0)
+
   const nextKnowYourBusinessStep = () => setActiveKnowYourBusinessStep((current) => current + 1)
+
   const { onboardingUser, nextStep } = useOnboarding<EntityUser>()
+
   const isUSOrCA =
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
 
-  const { mutate: verifyBusiness, data: verifyBusinessData, isLoading, isError } = useVerifyBusiness()
-
   const formik = useFormik({
     initialValues: {
-      businessName: onboardingUser?.businessName,
-      email: onboardingUser?.email,
-      registrationNumber: onboardingUser?.registrationNumber,
+      businessName: onboardingUser?.businessName || '',
+      email: onboardingUser?.email || '',
+      registrationNumber: onboardingUser?.registrationNumber || '',
       jurisdictionCode:
         (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode) ?? '',
       regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
-    onSubmit: async (values) => {
+    onSubmit: (values) => {
       const manualReview = !(values.jurisdictionCode in KYB_COUNTRY_CODES)
-      await verifyBusiness({ ...values, manualReview })
-
-      if (manualReview) {
-        nextKnowYourBusinessStep()
-      } else {
-        nextStep()
-      }
+      verifyBusiness({ ...values, manualReview })
     },
     validationSchema,
+    validateOnMount: true,
+    enableReinitialize: true,
   })
+
+  const {
+    mutate: verifyBusiness,
+    data: verifyBusinessData,
+    isLoading: isVerifyBusinessLoading,
+    isError,
+  } = useVerifyBusiness()
+
+  const { mutate: sendVerifyEmail } = useSendVerifyEmail()
 
   const handleManualBusinessReview = (event: MessageEvent) => {
     if (event.data === 'manual.onboarding.completed') {
+      sendVerifyEmail()
       nextStep()
     }
   }
@@ -65,8 +73,14 @@ export function KnowYourBusiness() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  React.useEffect(() => {
+    if (verifyBusinessData?.verification_url) {
+      nextKnowYourBusinessStep()
+    }
+  }, [verifyBusinessData])
+
   if (activeKnowYourBusinessStep === 0) {
-    return <BusinessInformation formik={formik} isLoading={isLoading} isError={isError} />
+    return <BusinessInformation formik={formik} isLoading={isVerifyBusinessLoading} isError={isError} />
   }
 
   if (activeKnowYourBusinessStep === 1) {

@@ -47,7 +47,7 @@ onboarding.get('/getUser', verifyAuth, getUserController)
 onboarding.post('/startKyc', verifyAuth, startKycController)
 onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
 
-onboarding.post('/kyb-callback', kybCallbackController)
+onboarding.post('/kybCallback', kybCallbackController)
 
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUploadMiddleware, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
