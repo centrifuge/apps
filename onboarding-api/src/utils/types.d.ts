@@ -31,6 +31,8 @@ declare global {
       RELAY_WSS_URL: string
       INFURA_KEY: string
       EVM_NETWORK: string
+      EVM_MEMBERLIST_ADMIN_PRIVATE_KEY: string
+      PURE_PROXY_CONTROLLER_SEED: string
     }
   }
 }

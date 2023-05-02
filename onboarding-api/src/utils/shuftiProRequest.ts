@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import { businessAmlMockResponse } from '../mocks/businessAmlResponse'
 import { kybMockResponse } from '../mocks/kybResponse'
-import { HttpError } from './HttpError'
+import { HttpError } from './httpError'
 
 export const shuftiProRequest = async (payload: any, options?: { dryRun?: boolean; path?: string }) => {
   if (

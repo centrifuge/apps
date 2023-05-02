@@ -2,7 +2,7 @@ import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { onboardingBucket } from '../database'
-import { getPoolById } from './centrifuge'
+import { getPoolById } from './getPoolById'
 import { HttpError } from './httpError'
 
 interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
@@ -62,7 +62,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
   firstPage.drawText(
     `Signed by ${walletAddress} on Centrifuge
 Block: ${transactionInfo.blockNumber}
-Extrinsic Hash: ${transactionInfo.extrinsicHash}`,
+Transaction Hash: ${transactionInfo.txHash}`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,
