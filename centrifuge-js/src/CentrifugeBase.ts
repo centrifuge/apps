@@ -233,9 +233,11 @@ export class CentrifugeBase {
       }
     }
 
+    console.log('actualSubmittable', actualSubmittable)
+
     if (isEvmTx) {
       // TODO: signOnly and sendOnly
-      return this.wrapSubstrateEvmSignAndSend(api, submittable, options)
+      return this.wrapSubstrateEvmSignAndSend(api, actualSubmittable, options)
     }
 
     const { signer, signingAddress } = this.getSigner()
@@ -506,7 +508,12 @@ export class CentrifugeBase {
   }
 
   getSignerAddress() {
-    const { signingAddress } = this.getSigner()
+    const { signingAddress, evmSigningAddress } = this.config
+
+    if (!signingAddress) {
+      if (evmSigningAddress) return evmSigningAddress
+      throw new Error('no signer set')
+    }
 
     if (typeof signingAddress !== 'string' && 'address' in signingAddress) {
       return signingAddress.address

@@ -73,7 +73,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         walletDialog: {
           view: 'accounts',
-          wallet: state[state.connectedType!].selectedWallet,
+          wallet: state[state.connectedType === 'substrateEvm' ? 'evm' : state.connectedType!].selectedWallet,
           network:
             state.connectedType === 'substrate'
               ? 'centrifuge'
