@@ -1870,12 +1870,14 @@ __metadata:
   resolution: "@centrifuge/onboarding-api@workspace:onboarding-api"
   dependencies:
     "@centrifuge/centrifuge-js": "workspace:centrifuge-js"
+    "@ethersproject/address": ^5.7.0
     "@ethersproject/contracts": ^5.7.0
     "@ethersproject/providers": ^5.7.2
     "@ethersproject/wallet": ^5.7.0
     "@google-cloud/firestore": ^6.5.0
     "@google-cloud/functions-framework": ^3.1.3
     "@google-cloud/storage": ^6.9.1
+    "@polkadot/util": ^12.1.2
     "@types/cookie": ^0
     "@types/cookie-parser": ^1
     "@types/cors": ^2
@@ -4990,6 +4992,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/util@npm:^12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/util@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-bigint": 12.1.2
+    "@polkadot/x-global": 12.1.2
+    "@polkadot/x-textdecoder": 12.1.2
+    "@polkadot/x-textencoder": 12.1.2
+    "@types/bn.js": ^5.1.1
+    bn.js: ^5.2.1
+    tslib: ^2.5.0
+  checksum: 6e25977923f3745b260483de454814f816d635c1268413d7fd1e8649af8c153ff8c2ce1efd2d0886f41214535959dcba23270a50c940d28ddede98c39ea2e77b
+  languageName: node
+  linkType: hard
+
 "@polkadot/wasm-bridge@npm:6.4.1":
   version: 6.4.1
   resolution: "@polkadot/wasm-bridge@npm:6.4.1"
@@ -5166,6 +5183,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/x-bigint@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-bigint@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-global": 12.1.2
+    tslib: ^2.5.0
+  checksum: 91da086a80d97dae6cc4305b6796c9741e98970c39f77df0a60c9c1ab2673f01a544feab2afdfd0f6ecf32f04308ec69df5f7a6be7428b6fdc352c96082fa60b
+  languageName: node
+  linkType: hard
+
 "@polkadot/x-bigint@npm:9.7.2":
   version: 9.7.2
   resolution: "@polkadot/x-bigint@npm:9.7.2"
@@ -5214,6 +5241,15 @@ __metadata:
   dependencies:
     tslib: ^2.5.0
   checksum: 951d65c0e0d5001daeead6f2383ed2e3ac9baa3b67155e3735aff868c94d97fb6c7f6e65eaa6bbfa8d5fc04b74215cc555a211e69307c9678a7b74029d8ed16d
+  languageName: node
+  linkType: hard
+
+"@polkadot/x-global@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-global@npm:12.1.2"
+  dependencies:
+    tslib: ^2.5.0
+  checksum: f1221ef5a26f8d5baa8dc4117bfdc9e3dfbd64e6f142e438b5ea1e054ee14676219042bdb83adfe7d0325bb80787865cdd06d732dd7f572a9e5f6d6933e79277
   languageName: node
   linkType: hard
 
@@ -5276,6 +5312,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/x-textdecoder@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-textdecoder@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-global": 12.1.2
+    tslib: ^2.5.0
+  checksum: 186bf51df6388401ead3c5884fb6c4782f3f191128841045304fc7205cb3d0bb3f5ea904781c6afec1f6d82a940ef16e557b0401213d8fcec60f5173affca325
+  languageName: node
+  linkType: hard
+
 "@polkadot/x-textdecoder@npm:9.7.2":
   version: 9.7.2
   resolution: "@polkadot/x-textdecoder@npm:9.7.2"
@@ -5303,6 +5349,16 @@ __metadata:
     "@polkadot/x-global": 11.1.3
     tslib: ^2.5.0
   checksum: 3dc09b4c590c7090bee975057407910f36274acb20f0b819eb5a24c64dc7588f6768c78f8b4c16aeb1552c9dfa43cc615bba8c4aa602f8dd6307699121ab9e1d
+  languageName: node
+  linkType: hard
+
+"@polkadot/x-textencoder@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-textencoder@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-global": 12.1.2
+    tslib: ^2.5.0
+  checksum: 5ae010aeb387855478cd8f62fff911a0a0970675d386e77adc1fdfe5bc790ebdb6fb4a1453c08cbef2176f4f831e0f7ef9b2b68e47c9f1d9e160ffd61b5eea00
   languageName: node
   linkType: hard
 

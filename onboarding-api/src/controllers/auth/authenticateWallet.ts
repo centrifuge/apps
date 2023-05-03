@@ -1,8 +1,9 @@
+import { isAddress } from '@polkadot/util-crypto'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
 import { InferType, object, string } from 'yup'
-import { centrifuge } from '../../utils/centrifuge'
+import { centrifuge, isValidSubstrateAddress } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -20,7 +21,7 @@ export const authenticateWalletController = async (
 ) => {
   try {
     await validateInput(req.body, verifyWalletInput)
-    const payload = req.body.jw3t ? await verifySubstrateWallet(req) : await verifyEthWallet(req, res)
+    const payload = req.body.jw3t ? await verifySubstrateWallet(req, res) : await verifyEthWallet(req, res)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '5d',
       audience: req.get('origin'),
@@ -33,17 +34,23 @@ export const authenticateWalletController = async (
 }
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
-async function verifySubstrateWallet(req: Request) {
+async function verifySubstrateWallet(req: Request, res: Response) {
   const { jw3t: token, nonce } = req.body
   const { verified, payload } = await centrifuge.auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
   const address = payload.address
 
+  if (!isValidSubstrateAddress(address)) {
+    throw new Error('Invalid address')
+  }
+
   const cookieNonce = req.signedCookies[`onboarding-auth-${payload.address.toLowerCase()}`]
   if (!cookieNonce || cookieNonce !== nonce) {
     throw new Error('Invalid nonce')
   }
+
+  res.clearCookie(`onboarding-auth-${address}`)
 
   if (verified && onBehalfOf) {
     const isVerifiedProxy = await centrifuge.auth.verifyProxy(address, onBehalfOf, AUTHORIZED_ONBOARDING_PROXY_TYPES)
@@ -64,6 +71,10 @@ async function verifySubstrateWallet(req: Request) {
 async function verifyEthWallet(req: Request, res: Response) {
   try {
     const { message, signature, address, nonce } = req.body
+
+    if (!isAddress(address)) {
+      throw new Error('Invalid address')
+    }
 
     const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
 
