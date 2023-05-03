@@ -1,5 +1,5 @@
 import { sendEmail, templateIds } from '.'
-import { getPoolById } from '../utils/centrifuge'
+import { getPoolById } from '../utils/getPoolById'
 
 export const sendApproveIssuerMessage = async (
   walletAddress: string,
