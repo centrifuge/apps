@@ -12,8 +12,11 @@ export const verifyAuth = async (req: Request, _res: Response, next: NextFunctio
   const payload = (await jwt.verify(token, process.env.JWT_SECRET)) as {
     address: string
     network: SupportedNetworks
-  }
+  } & jwt.JwtPayload
   if (!payload?.address) {
+    throw new HttpError(401, 'Unauthorized')
+  }
+  if (payload.aud !== req.get('origin')) {
     throw new HttpError(401, 'Unauthorized')
   }
   req.wallet = { address: payload.address, network: payload.network }
