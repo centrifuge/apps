@@ -13,6 +13,14 @@ export function usePoolLiquidityTransactions(pool: Pool, fromEpoch: number, toEp
   return result
 }
 
+export function usePoolLiquidityTransactionsByDay(pool: Pool, from: Date, to: Date) {
+  const [result] = useCentrifugeQuery(['usePoolLiquidityTransactionsByDay', pool.id, from, to], (cent) =>
+    cent.pools.usePoolLiquidityTransactionsByDay([pool, from, to])
+  )
+
+  return result
+}
+
 export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
     suspense,

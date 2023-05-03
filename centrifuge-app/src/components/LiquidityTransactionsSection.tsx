@@ -4,7 +4,7 @@ import * as React from 'react'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { getCSVDownloadUrl } from '../utils/getCSVDownloadUrl'
-import { usePoolLiquidityTransactions } from '../utils/usePools'
+import { usePoolLiquidityTransactions, usePoolLiquidityTransactionsByDay } from '../utils/usePools'
 import { Legend, LegendProps } from './Charts/Legend'
 import { StackedBarChart, StackedBarChartProps } from './Charts/StackedBarChart'
 import { PageSection } from './PageSection'
@@ -34,16 +34,22 @@ export function LiquidityTransactionsSection({
   const fromEpoch = toEpoch >= maxEpochs ? toEpoch - maxEpochs : 0
   const data = usePoolLiquidityTransactions(pool, fromEpoch, toEpoch)
 
+  const to = new Date(pool.epoch.lastClosed)
+  const from = pool.createdAt ? new Date(pool.createdAt) : new Date(to.getDate() - 10)
+  const dataByDay = usePoolLiquidityTransactionsByDay(pool, from, to)
+
   const dataUrl: any = React.useMemo(() => {
-    if (!data || !data?.length) {
+    if (!dataByDay || !dataByDay?.length) {
       return undefined
     }
 
-    const formatted = data.map((entry) => ({
-      Epoche: entry.index,
-      'Opened at': `"${formatDate(entry.openedAt)}"`,
-      'Executed at': `"${formatDate(entry.executedAt)}"`,
-      'Closed at': `"${formatDate(entry.closedAt)}"`,
+    const formatted = dataByDay.map((entry) => ({
+      // Epoche: entry.index,
+      // 'Opened at': `"${formatDate(entry.openedAt)}"`,
+      // 'Executed at': `"${formatDate(entry.executedAt)}"`,
+      // 'Closed at': `"${formatDate(entry.closedAt)}"`,
+      Block: entry.blockNumber,
+      Date: `"${formatDate(entry.timestamp)}"`,
       [dataNames[0]]: `"${formatBalance(
         entry[dataKeys[0]] ? entry[dataKeys[0]]!.toDecimal().toNumber() : 0,
         pool.currency.symbol
@@ -57,16 +63,27 @@ export function LiquidityTransactionsSection({
     return getCSVDownloadUrl(formatted)
   }, [data, dataKeys, dataNames, pool.currency.symbol])
 
+  // const chartData: StackedBarChartProps['data'] = React.useMemo(() => {
+  //   return (
+  //     data?.map((entry) => ({
+  //       xAxis: new Date(entry.closedAt).getTime(),
+  //       top: entry[dataKeys[0]]?.toDecimal().toNumber() || 0,
+  //       bottom: entry[dataKeys[1]]?.toDecimal().toNumber() || 0,
+  //       date: entry.closedAt,
+  //     })) || []
+  //   )
+  // }, [data, dataKeys])
+
   const chartData: StackedBarChartProps['data'] = React.useMemo(() => {
     return (
-      data?.map((entry) => ({
-        xAxis: new Date(entry.closedAt).getTime(),
+      dataByDay?.map((entry) => ({
+        xAxis: new Date(entry.timestamp).getTime(),
         top: entry[dataKeys[0]]?.toDecimal().toNumber() || 0,
         bottom: entry[dataKeys[1]]?.toDecimal().toNumber() || 0,
-        date: entry.closedAt,
+        date: entry.timestamp,
       })) || []
     )
-  }, [data, dataKeys])
+  }, [dataByDay, dataKeys])
 
   const legend: LegendProps['data'] = React.useMemo(() => {
     const topTotal = chartData.map(({ top }) => top).reduce((a, b) => a + b, 0)
@@ -92,9 +109,9 @@ export function LiquidityTransactionsSection({
     <PageSection
       title={title}
       titleAddition={
-        !!data &&
-        !!data.length &&
-        `${formatDate(data[0].closedAt, { year: undefined })} - ${formatDate(data[data.length - 1].closedAt)}`
+        !!dataByDay &&
+        !!dataByDay.length &&
+        `${formatDate(dataByDay[0].timestamp)} - ${formatDate(dataByDay[dataByDay.length - 1].timestamp)}`
       }
       headerRight={
         !!dataUrl && (

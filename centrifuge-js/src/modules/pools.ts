@@ -1630,6 +1630,61 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function usePoolLiquidityTransactionsByDay(args: [pool: Pool, from: Date, to: Date]) {
+    const [pool, from, to] = args
+    const $query = inst.getSubqueryObservable<{ poolSnapshots: { nodes: SubqueryPoolSnapshot[] } }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        poolSnapshots(
+          orderBy: BLOCK_NUMBER_ASC,
+          filter: {
+            id: { startsWith: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }
+        ) {
+          nodes {
+            id
+            timestamp
+            blockNumber
+            sumBorrowedAmountByPeriod
+            sumRepaidAmountByPeriod
+            sumInvestedAmountByPeriod
+            sumRedeemedAmountByPeriod
+          }
+        }
+      }`,
+      { poolId: pool.id, from, to },
+      false
+    )
+
+    return $query.pipe(
+      map((data) => {
+        return data!.poolSnapshots.nodes.map(
+          ({
+            sumBorrowedAmountByPeriod,
+            sumRepaidAmountByPeriod,
+            sumInvestedAmountByPeriod,
+            sumRedeemedAmountByPeriod,
+            ...rest
+          }) => ({
+            ...rest,
+            sumBorrowedAmount: sumBorrowedAmountByPeriod
+              ? new CurrencyBalance(sumBorrowedAmountByPeriod, pool.currency.decimals)
+              : undefined,
+            sumRepaidAmount: sumRepaidAmountByPeriod
+              ? new CurrencyBalance(sumRepaidAmountByPeriod, pool.currency.decimals)
+              : undefined,
+            sumInvestedAmount: sumInvestedAmountByPeriod
+              ? new CurrencyBalance(sumInvestedAmountByPeriod, pool.currency.decimals)
+              : undefined,
+            sumRedeemedAmount: sumRedeemedAmountByPeriod
+              ? new CurrencyBalance(sumRedeemedAmountByPeriod, pool.currency.decimals)
+              : undefined,
+          })
+        )
+      })
+    )
+  }
+
   function getDailyTrancheStates(args: [trancheId: string]) {
     const [trancheId] = args
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
@@ -2325,6 +2380,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getCurrencies,
     getDailyTrancheStates,
     getPoolLiquidityTransactions,
+    usePoolLiquidityTransactionsByDay,
   }
 }
 
