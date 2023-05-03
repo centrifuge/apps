@@ -11,7 +11,6 @@ export type SubqueryPoolSnapshot = {
   totalRepaid?: number | null
   totalInvested?: number | null
   totalRedeemed?: number | null
-
   sumBorrowedAmount?: number | null
   sumBorrowedAmountByPeriod?: number | null
   sumRepaidAmountByPeriod?: number | null

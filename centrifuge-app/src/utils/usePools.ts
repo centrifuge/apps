@@ -5,22 +5,6 @@ import { combineLatest, map, Observable } from 'rxjs'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
 import { useMetadata } from './useMetadata'
 
-export function usePoolLiquidityTransactions(pool: Pool, fromEpoch: number, toEpoch: number) {
-  const [result] = useCentrifugeQuery(['poolsLiquidityTransactions', pool.id, fromEpoch, toEpoch], (cent) =>
-    cent.pools.getPoolLiquidityTransactions([pool, fromEpoch, toEpoch])
-  )
-
-  return result
-}
-
-export function usePoolLiquidityTransactionsByDay(pool: Pool, from: Date, to: Date) {
-  const [result] = useCentrifugeQuery(['usePoolLiquidityTransactionsByDay', pool.id, from, to], (cent) =>
-    cent.pools.usePoolLiquidityTransactionsByDay([pool, from, to])
-  )
-
-  return result
-}
-
 export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
     suspense,

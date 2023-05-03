@@ -9,7 +9,6 @@ import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
   InvestorTransactionType,
-  SubqueryEpoch,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
@@ -367,6 +366,12 @@ export type DailyPoolState = {
   currency: string
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
+
+  sumBorrowedAmountByPeriod: number | null
+  sumRepaidAmountByPeriod: number | null
+  sumInvestedAmountByPeriod: number | null
+  sumRedeemedAmountByPeriod: number | null
+  blockNumber: number
 }
 
 interface TrancheFormValues {
@@ -1506,6 +1511,12 @@ export function getPoolsModule(inst: Centrifuge) {
             timestamp
             totalReserve
             portfolioValuation
+
+            blockNumber
+            sumBorrowedAmountByPeriod
+            sumRepaidAmountByPeriod
+            sumInvestedAmountByPeriod
+            sumRedeemedAmountByPeriod
           }
         }
         trancheSnapshots(
@@ -1576,111 +1587,6 @@ export function getPoolsModule(inst: Centrifuge) {
             return { ...state, poolState, poolValue, tranches }
           }) as unknown as DailyPoolState[],
         ]
-      })
-    )
-  }
-
-  function getPoolLiquidityTransactions(args: [pool: Pool, fromEpoch: number, toEpoch: number]) {
-    const [pool, fromEpoch, toEpoch] = args
-    const $query = inst.getSubqueryObservable<{ epoches: { nodes: SubqueryEpoch[] } }>(
-      `query($poolId: String!, $fromEpoch: Int!, $toEpoch: Int!) {
-        epoches(
-          filter: {
-            poolId: { equalTo: $poolId },
-            index: { greaterThanOrEqualTo: $fromEpoch },
-            and: { index: { lessThanOrEqualTo: $toEpoch }}
-          },
-          orderBy: INDEX_ASC
-        ) {
-          nodes {
-            id
-            index
-            openedAt
-            closedAt
-            executedAt
-            sumBorrowedAmount
-            sumRepaidAmount
-            sumInvestedAmount
-            sumRedeemedAmount
-          }
-        }
-      }`,
-      { poolId: pool.id, fromEpoch, toEpoch },
-      false
-    )
-
-    return $query.pipe(
-      map((data) => {
-        return data!.epoches.nodes.map((node) => ({
-          ...node,
-          sumBorrowedAmount: node.sumBorrowedAmount
-            ? new CurrencyBalance(node.sumBorrowedAmount, pool.currency.decimals)
-            : undefined,
-          sumRepaidAmount: node.sumRepaidAmount
-            ? new CurrencyBalance(node.sumRepaidAmount, pool.currency.decimals)
-            : undefined,
-          sumInvestedAmount: node.sumInvestedAmount
-            ? new CurrencyBalance(node.sumInvestedAmount, pool.currency.decimals)
-            : undefined,
-          sumRedeemedAmount: node.sumRedeemedAmount
-            ? new CurrencyBalance(node.sumRedeemedAmount, pool.currency.decimals)
-            : undefined,
-        }))
-      })
-    )
-  }
-
-  function usePoolLiquidityTransactionsByDay(args: [pool: Pool, from: Date, to: Date]) {
-    const [pool, from, to] = args
-    const $query = inst.getSubqueryObservable<{ poolSnapshots: { nodes: SubqueryPoolSnapshot[] } }>(
-      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
-        poolSnapshots(
-          orderBy: BLOCK_NUMBER_ASC,
-          filter: {
-            id: { startsWith: $poolId },
-            timestamp: { greaterThan: $from, lessThan: $to }
-          }
-        ) {
-          nodes {
-            id
-            timestamp
-            blockNumber
-            sumBorrowedAmountByPeriod
-            sumRepaidAmountByPeriod
-            sumInvestedAmountByPeriod
-            sumRedeemedAmountByPeriod
-          }
-        }
-      }`,
-      { poolId: pool.id, from, to },
-      false
-    )
-
-    return $query.pipe(
-      map((data) => {
-        return data!.poolSnapshots.nodes.map(
-          ({
-            sumBorrowedAmountByPeriod,
-            sumRepaidAmountByPeriod,
-            sumInvestedAmountByPeriod,
-            sumRedeemedAmountByPeriod,
-            ...rest
-          }) => ({
-            ...rest,
-            sumBorrowedAmount: sumBorrowedAmountByPeriod
-              ? new CurrencyBalance(sumBorrowedAmountByPeriod, pool.currency.decimals)
-              : undefined,
-            sumRepaidAmount: sumRepaidAmountByPeriod
-              ? new CurrencyBalance(sumRepaidAmountByPeriod, pool.currency.decimals)
-              : undefined,
-            sumInvestedAmount: sumInvestedAmountByPeriod
-              ? new CurrencyBalance(sumInvestedAmountByPeriod, pool.currency.decimals)
-              : undefined,
-            sumRedeemedAmount: sumRedeemedAmountByPeriod
-              ? new CurrencyBalance(sumRedeemedAmountByPeriod, pool.currency.decimals)
-              : undefined,
-          })
-        )
       })
     )
   }
@@ -2379,8 +2285,6 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
-    getPoolLiquidityTransactions,
-    usePoolLiquidityTransactionsByDay,
   }
 }
 
