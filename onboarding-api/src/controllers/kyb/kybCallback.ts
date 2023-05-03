@@ -1,12 +1,14 @@
 import * as crypto from 'crypto'
 import { Request, Response } from 'express'
+import { InferType, mixed, object, string } from 'yup'
 import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { sendVerifiedBusinessMessage } from '../../emails/sendVerifiedBusinessMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
-import { Subset } from '../../utils/types'
+import { Subset, SupportedNetworks } from '../../utils/types'
+import { validateInput } from '../../utils/validateInput'
 
 type VerificationState = 1 | 0 | null
 
@@ -37,9 +39,21 @@ type RequestBody = {
   }
 }
 
-export const kybCallbackController = async (req: Request<any, any, RequestBody, any>, res: Response) => {
+const kybCallbackInput = object({
+  address: string().required(),
+  network: mixed<SupportedNetworks>().required().oneOf(['evm', 'substrate']),
+  poolId: string().optional(),
+  trancheId: string().optional(),
+})
+
+export const kybCallbackController = async (
+  req: Request<any, any, RequestBody, InferType<typeof kybCallbackInput>>,
+  res: Response
+) => {
   try {
     const { headers, body, query } = req
+
+    await validateInput(query, kybCallbackInput)
 
     const wallet: Request['wallet'] = {
       address: query.address,
@@ -62,7 +76,7 @@ export const kybCallbackController = async (req: Request<any, any, RequestBody, 
       throw new HttpError(401, 'Unauthorized')
     }
 
-    if (body.event !== 'verification.status.changed' || !query.address || !query.network) {
+    if (body.event !== 'verification.status.changed') {
       return res.status(200).end()
     }
 
@@ -89,7 +103,11 @@ export const kybCallbackController = async (req: Request<any, any, RequestBody, 
     await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyBusiness'])
     await sendVerifiedBusinessMessage(user.email, true, query.poolId, query.trancheId)
 
-    if (query.poolId && query.trancheId) {
+    if (
+      query.poolId &&
+      query.trancheId &&
+      user.poolSteps[query.poolId]?.[query.trancheId]?.status.status === 'pending'
+    ) {
       const signedAgreement = await fetchSignedAgreement(wallet, query.poolId, query.trancheId)
 
       if (!signedAgreement) {

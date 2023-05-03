@@ -20,10 +20,10 @@ const getTemplateId = (isGloballyOnboarding: boolean, isApproved: boolean) => {
 export const sendVerifiedBusinessMessage = async (
   to: string,
   isApproved: boolean,
-  poolId: string,
-  trancheId: string
+  poolId?: string,
+  trancheId?: string
 ) => {
-  const isGloballyOnboarding = !poolId && !trancheId
+  const isGloballyOnboarding = !poolId || !trancheId
 
   let pool
   let metadata
