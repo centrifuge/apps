@@ -30,6 +30,8 @@ const onboarding = express()
 onboarding.use(rateLimiter)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))
+onboarding.disable('x-powered-by')
+onboarding.disable('server')
 
 onboarding.options('*', corsMiddleware)
 onboarding.post('/authenticateWallet', authenticateWalletController)
