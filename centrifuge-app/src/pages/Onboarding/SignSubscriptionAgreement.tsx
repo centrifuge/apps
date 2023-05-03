@@ -58,7 +58,10 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   return (
     <>
       <Content>
-        <ContentHeader title="Sign subscription agreement" body="Complete subscription agreement" />
+        <ContentHeader
+          title="Sign subscription agreement"
+          body="Read the subscription agreement and click the box below to automatically e-sign the subscription agreement. You don't need to download and sign manually."
+        />
 
         <Stack gap={1} alignItems="start">
           <Box
@@ -106,7 +109,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
           checked={formik.values.isAgreed}
           label={
             <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
-              I hereby agree to the terms of the subscription agreement
+              I hereby sign and agree to the terms of the subscription agreement
             </Text>
           }
           disabled={isSigningTransaction || isSending || hasSignedAgreement}
