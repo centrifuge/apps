@@ -22,7 +22,7 @@ export const authenticateWalletController = async (
     await validateInput(req.body, verifyWalletInput)
     const payload = req.body.jw3t ? await verifySubstrateWallet(req) : await verifyEthWallet(req, res)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '10d',
+      expiresIn: '5d',
     })
     return res.json({ token })
   } catch (e) {
@@ -33,7 +33,12 @@ export const authenticateWalletController = async (
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 async function verifySubstrateWallet(req: Request) {
-  const token = req.body.jw3t
+  const { jw3t: token, nonce } = req.body
+  const cookieNonce = req.signedCookies[`onboarding-auth-${req.wallet.address.toLowerCase()}`]
+
+  if (!cookieNonce || cookieNonce !== nonce) {
+    throw new Error('Invalid nonce')
+  }
   const { verified, payload } = await centrifuge.auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
