@@ -377,7 +377,7 @@ interface TrancheFormValues {
   minInvestment: number | ''
 }
 
-export type IssuerDetails = {
+export type IssuerDetail = {
   title: string
   body: string
 }
@@ -404,7 +404,7 @@ export interface PoolMetadataInput {
   website: string
   forum: string
   email: string
-  details?: IssuerDetails[]
+  details?: IssuerDetail[]
 
   // tranche
   tranches: TrancheFormValues[]
@@ -433,7 +433,7 @@ export type PoolMetadata = {
       forum?: string
       website?: string
     }
-    details?: IssuerDetails[]
+    details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
   }
