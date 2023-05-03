@@ -130,13 +130,7 @@ export default function LiquidityTransactionsSection({
     >
       {!!legend && !!legend.length && <Legend data={legend} />}
       {!!chartData && !!chartData.length && (
-        <StackedBarChart
-          data={chartData}
-          names={dataNames}
-          colors={dataColors}
-          xAxisLabel="Latest day"
-          currency={pool.currency.symbol}
-        />
+        <StackedBarChart data={chartData} names={dataNames} colors={dataColors} currency={pool.currency.symbol} />
       )}
     </PageSection>
   )
