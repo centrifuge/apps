@@ -99,11 +99,7 @@ export const verifyBusinessController = async (
         manual_review: 1,
         enable_extra_proofs: 1,
         labels: [
-          'articles_of_association',
-          'certificate_of_incorporation',
           'proof_of_address',
-          'register_of_directors',
-          'register_of_shareholders',
           'signed_and_dated_ownership_structure',
         ],
         verification_mode: 'any',
