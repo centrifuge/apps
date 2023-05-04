@@ -81,7 +81,11 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   }
 
   if (onboardingStatus === 'pending') {
-    if (onboardingUser.investorType === 'entity' && onboardingUser?.manualKybStatus === 'review.pending') {
+    if (
+      onboardingUser.investorType === 'entity' &&
+      onboardingUser.manualKybStatus === 'review.pending' &&
+      !onboardingUser.globalSteps.verifyBusiness.completed
+    ) {
       return (
         <Content>
           <ContentHeader
