@@ -35,7 +35,7 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'], actingAddress: [access.admin || ''] })
 
   const { execute: createAO, isLoading: createAOIsPending } = useCentrifugeTransaction(
-    'Create Asset Originator',
+    'Create asset originator',
     (cent) => (_args: [], options?: TransactionOptions) => {
       return combineLatest([
         cent.getApi(),
@@ -56,7 +56,7 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
 
   return (
     <PageSection
-      title="Asset Originators"
+      title="Asset originators"
       headerRight={
         <Button
           variant="secondary"
@@ -120,7 +120,7 @@ function AOForm({
   }
 
   const { execute, isLoading } = useCentrifugeTransaction(
-    'Update Asset Originator',
+    'Update asset originator',
     (cent) =>
       (
         args: [
@@ -224,7 +224,7 @@ function AOForm({
 
             return cent.wrapSignAndSend(api, tx, {
               ...options,
-              proxy: [],
+              proxies: [],
               multisig: undefined,
             })
           })
@@ -406,18 +406,6 @@ function AOForm({
                 )}
               </FieldArray>
             </Stack>
-
-            {isEditing && (
-              <Stack gap={2}>
-                <Text as="h3" variant="heading4">
-                  Identity
-                </Text>
-                <Text as="p" variant="body2" color="textSecondary">
-                  Set the name of the AO account to recognize it on-chain
-                </Text>
-                <FieldWithErrorMessage name="name" as={TextInput} label="Name" placeholder="" maxLength={32} />
-              </Stack>
-            )}
           </Stack>
         </PageSection>
       </Form>

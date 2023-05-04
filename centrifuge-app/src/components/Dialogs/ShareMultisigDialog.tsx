@@ -12,7 +12,7 @@ export type ShareMultisigDialogProps = {
 }
 
 export function ShareMultisigDialog({ multisig, hash, callData, open, onClose }: ShareMultisigDialogProps) {
-  const shareUrl = useMultisigShareUrl({ multisig, hash, callData })
+  const shareUrl = getMultisigShareUrl({ multisig, hash, callData })
 
   const shareData: ShareData = {
     title: 'Approve Transaction',
@@ -48,7 +48,7 @@ export function ShareMultisigDialog({ multisig, hash, callData, open, onClose }:
   )
 }
 
-export function useMultisigShareUrl({
+export function getMultisigShareUrl({
   multisig,
   hash,
   callData,

@@ -178,8 +178,6 @@ export function usePendingMultisigActions({
     }
   }, [call])
 
-  console.log('data', data, call)
-
   const isReject = data.info.approvals.includes(address!)
   const isCallDataNeeded = !isReject && !data.callData && !possibleCallData
 

@@ -118,18 +118,7 @@ export function computeTrancheId(trancheIndex: number, poolId: string) {
   const b = new BN(poolId).toArray('le', 8)
   const data = Uint8Array.from(a.concat(b))
 
-  return toHex(hash(data, 16))
-}
-
-function toHex(data: Uint8Array) {
-  const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
-  const out = []
-
-  for (let i = 0; i < data.length; i++) {
-    out.push(hex[(data[i] >> 4) & 0xf])
-    out.push(hex[data[i] & 0xf])
-  }
-  return `0x${out.join('')}`
+  return u8aToHex(hash(data, 16))
 }
 
 // Computes multisig address and sorts signers

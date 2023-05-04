@@ -43,7 +43,6 @@ function computeMultisigInfo(
           }
         }
       } else {
-        console.log('c', c)
         const foundHash = (c.args?.call_hash as Uint8Array).toString()
         if (foundHash === hash) {
           result = {
@@ -120,14 +119,6 @@ export function getMultisigModule(inst: CentrifugeBase) {
 
         if (!event) return false
         const { multisig: eventAddress } = (event.toHuman() as any).event.data
-        console.log(
-          'multisig event',
-          (event.toHuman() as any).event.data,
-          eventAddress,
-          multiAddress,
-          'isSame',
-          isSameAddress(eventAddress, multiAddress)
-        )
         return isSameAddress(eventAddress, multiAddress)
       })
     )
@@ -139,23 +130,18 @@ export function getMultisigModule(inst: CentrifugeBase) {
           hash: (key.toHuman() as Array<string>)[1],
           info: data.toJSON() as unknown as PendingMultisigInfo,
         }))
-        console.log('pending', pending)
         return combineLatest([of(null), ...pending.map((p) => inst.getBlockByBlockNumber(p.info.when.height))]).pipe(
           map(([, ...signedBlocks]) => {
-            console.log('signedBlocks', signedBlocks)
             return signedBlocks
               .map((signedBlock, i) => {
                 const { info, hash } = pending[i]
                 const ext = signedBlock.block.extrinsics[info.when.index]
                 const decoded = parseGenericCall(ext.method as GenericCall, ext.registry)
-                console.log('decoded', decoded)
-                const inf = computeMultisigInfo(decoded, hash, ext.registry, {
+                return computeMultisigInfo(decoded, hash, ext.registry, {
                   ...info,
                   approvals: info.approvals.map((addr) => addressToHex(addr)),
                   depositor: addressToHex(info.depositor),
                 })
-                console.log('inf', inf)
-                return inf
               })
               .filter(Boolean) as PendingMultisigData[]
           })
@@ -185,7 +171,6 @@ export function getMultisigModule(inst: CentrifugeBase) {
       combineLatestWith(getPendingTransaction([address, hash]).pipe(take(1))),
       switchMap(([api, pendingMultisig]) => {
         if (!pendingMultisig) throw new Error('No pending multisig transaction found')
-        console.log('pendingMultisig', pendingMultisig)
         const canSubmit = pendingMultisig.info.approvals.length === threshold - 1
 
         let $paymentInfo = of({})
