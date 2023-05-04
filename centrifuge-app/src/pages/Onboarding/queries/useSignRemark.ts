@@ -1,8 +1,17 @@
-import { useCentrifugeTransaction, useEvmProvider, useTransactions, useWallet } from '@centrifuge/centrifuge-react'
+import {
+  useBalances,
+  useCentrifuge,
+  useCentrifugeTransaction,
+  useEvmProvider,
+  useTransactions,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import { Contract } from '@ethersproject/contracts'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { UseMutateFunction } from 'react-query'
+import { lastValueFrom } from 'rxjs'
 import { ethConfig } from '../../../config'
+import { Dec } from '../../../utils/Decimal'
 import RemarkerAbi from './abi/Remarker.abi.json'
 
 export const useSignRemark = (
@@ -18,8 +27,14 @@ export const useSignRemark = (
 ) => {
   const evmProvider = useEvmProvider()
   const [isEvmTxLoading, setIsEvmTxLoading] = React.useState(false)
+  const centrifuge = useCentrifuge()
   const { updateTransaction, addOrUpdateTransaction } = useTransactions()
-  const { connectedType } = useWallet()
+  const {
+    connectedType,
+    substrate: { selectedAddress, selectedAccount },
+  } = useWallet()
+  const [expectedTxFee, setExpectedTxFee] = React.useState(Dec(0))
+  const balances = useBalances(selectedAddress || '')
 
   const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
     onSuccess: async (_, result) => {
@@ -29,6 +44,29 @@ export const useSignRemark = (
       await sendDocumentsToIssuer({ txHash, blockNumber })
     },
   })
+
+  const signSubstrateRemark = async (args: [message: string]) => {
+    if (balances?.native.balance?.toDecimal().lt(expectedTxFee)) {
+      // fetch to api to add just enough to wallet to be able to sign tx
+    }
+  }
+
+  useEffect(() => {
+    const executePaymentInfo = async () => {
+      if (selectedAccount && selectedAccount.signer) {
+        const api = await centrifuge.connect(selectedAccount.address, selectedAccount.signer)
+        const paymentInfo = await lastValueFrom(
+          api.remark.signRemark([`Signed subscription agreement for pool: 12324565 tranche: 0xacbdefghijklmn`], {
+            paymentInfo: selectedAccount.address,
+          })
+        )
+        // @ts-expect-error
+        const txFee = paymentInfo.partialFee.toDecimal()
+        setExpectedTxFee(txFee)
+      }
+    }
+    executePaymentInfo()
+  }, [])
 
   const signEvmRemark = async (args: [message: string]) => {
     const txId = Math.random().toString(36).substr(2)
@@ -71,5 +109,7 @@ export const useSignRemark = (
     }
   }
 
-  return connectedType === 'evm' ? { execute: signEvmRemark, isLoading: isEvmTxLoading } : substrateMutation
+  return connectedType === 'evm'
+    ? { execute: signEvmRemark, isLoading: isEvmTxLoading }
+    : { execute: signSubstrateRemark, isLoading: substrateMutation.isLoading }
 }
