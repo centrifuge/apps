@@ -88,6 +88,10 @@ export const verifyBusinessController = async (
 
       if (!origin) throw new HttpError(400, 'Missing origin header')
 
+      const callbackBaseUrl = process.env.K_SERVICE
+        ? `https://${host}/${process.env.K_SERVICE}`
+        : `${protocol}://${host}`
+
       const payloadKYB = {
         manual_review: 1,
         enable_extra_proofs: 1,
@@ -104,7 +108,7 @@ export const verifyBusinessController = async (
         email: body.email,
         country: body.jurisdictionCode,
         redirect_url: `${origin}/onboarding/redirect-url`,
-        callback_url: `${protocol}://${host}/kybCallback?${searchParams}`,
+        callback_url: `${callbackBaseUrl}/kybCallback?${searchParams}`,
       }
 
       const kyb = await shuftiProRequest(payloadKYB)
