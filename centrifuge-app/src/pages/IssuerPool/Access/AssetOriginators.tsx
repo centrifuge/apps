@@ -138,16 +138,8 @@ function AOForm({
         ],
         options
       ) => {
-        const [
-          name,
-          ,
-          addedPermissions = [],
-          addedAddresses = [],
-          removedAddresses = [],
-          keys,
-          podOperator,
-          collectionId,
-        ] = args
+        const [, , addedPermissions = [], addedAddresses = [], removedAddresses = [], keys, podOperator, collectionId] =
+          args
 
         return combineLatest([
           cent.getApi(),
@@ -162,7 +154,7 @@ function AOForm({
               .add(podOperator ? proxyDepositFactor : new BN(0))
               .add(collectionId ? collectionDeposit : new BN(0))
               .add(keys ? keyDeposit.mul(new BN(2)) : new BN(0))
-              .add(name && !initialValues.name ? nameDeposit : new BN(0))
+            // .add(name && !initialValues.name ? nameDeposit : new BN(0))
 
             // doing the proxy and multisig transactions manually, because both the Pool Admin and the AO need to call extrinsics
             let tx = api.tx.proxy.proxy(
@@ -175,7 +167,6 @@ function AOForm({
                   undefined,
                   api.tx.utility.batchAll(
                     [
-                      name && api.tx.identity.setIdentity({ display: { raw: name } }),
                       removedAddresses.length &&
                         api.tx.utility.batch(
                           removedAddresses
