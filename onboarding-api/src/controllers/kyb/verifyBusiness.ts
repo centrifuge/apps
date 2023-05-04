@@ -88,9 +88,12 @@ export const verifyBusinessController = async (
 
       if (!origin) throw new HttpError(400, 'Missing origin header')
 
-      const callbackBaseUrl = process.env.K_SERVICE
-        ? `https://${host}/${process.env.K_SERVICE}`
-        : `${protocol}://${host}`
+      /*
+       * K_SERVICE is a GCP injected env variable that denotes the name of the google cloud function.
+       * This is needed in order to construct the callback url in production. More info: https://rb.gy/tqvig
+       */
+      const callbackBaseUrl =
+        process.env.NODE_ENV === 'development' ? `${protocol}://${host}` : `https://${host}/${process.env.K_SERVICE}`
 
       const payloadKYB = {
         manual_review: 1,
