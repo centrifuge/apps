@@ -53,6 +53,12 @@ export const kybCallbackController = async (
   try {
     const { headers, body, query } = req
 
+    const isValidRequest = headers.signature && isValidShuftiRequest(body, headers.signature)
+
+    if (!isValidRequest) {
+      throw new HttpError(401, 'Unauthorized')
+    }
+
     await validateInput(query, kybCallbackInput)
 
     const wallet: Request['wallet'] = {
@@ -70,12 +76,7 @@ export const kybCallbackController = async (
       throw new HttpError(400, 'Business already verified')
     }
 
-    const isValidRequest = headers.signature && isValidShuftiRequest(body, headers.signature)
-
-    if (!isValidRequest) {
-      throw new HttpError(401, 'Unauthorized')
-    }
-
+    // if the documents have merely changed status, we don't need to do anything
     if (body.event !== 'verification.status.changed') {
       return res.status(200).end()
     }

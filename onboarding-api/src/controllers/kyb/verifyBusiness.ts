@@ -98,15 +98,12 @@ export const verifyBusinessController = async (
       const payloadKYB = {
         manual_review: 1,
         enable_extra_proofs: 1,
-        labels: [
-          'proof_of_address',
-          'signed_and_dated_ownership_structure',
-        ],
+        labels: ['proof_of_address', 'signed_and_dated_ownership_structure'],
         verification_mode: 'any',
         reference: kybReference,
         email: body.email,
         country: body.jurisdictionCode,
-        redirect_url: `${origin}/onboarding/redirect-url`,
+        redirect_url: `${origin}/manual-kyb-redirect.html`,
         callback_url: `${callbackBaseUrl}/kybCallback?${searchParams}`,
       }
 
