@@ -38,20 +38,49 @@ export const useSignRemark = (
   const [expectedTxFee, setExpectedTxFee] = React.useState(Dec(0))
   const balances = useBalances(selectedAddress || '')
   const { authToken } = useOnboardingAuth()
+  const txIdSendDocs = Math.random().toString(36).substr(2)
+  const txIdSignRemark = Math.random().toString(36).substr(2)
 
   const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
     onSuccess: async (_, result) => {
       const txHash = result.txHash.toHex()
+      addOrUpdateTransaction({
+        id: txIdSendDocs,
+        title: `Send documents to issuers`,
+        status: 'pending',
+        args: [],
+      })
       // @ts-expect-error
       const blockNumber = result.blockNumber.toString()
-      await sendDocumentsToIssuer({ txHash, blockNumber })
-      setIsSubstrateTxLoading(false)
+      try {
+        await sendDocumentsToIssuer({ txHash, blockNumber })
+        setIsSubstrateTxLoading(false)
+        addOrUpdateTransaction({
+          id: txIdSendDocs,
+          title: `Send documents to issuers`,
+          status: 'succeeded',
+          args: [],
+        })
+      } catch (e) {
+        addOrUpdateTransaction({
+          id: txIdSendDocs,
+          title: `Send documents to issuers`,
+          status: 'pending',
+          args: (e as any)?.message,
+        })
+      }
     },
   })
 
   const signSubstrateRemark = async (args: [message: string]) => {
     setIsSubstrateTxLoading(true)
-    if (balances?.native.balance?.toDecimal().lt(expectedTxFee)) {
+    if (balances?.native.balance?.toDecimal().lt(expectedTxFee.mul(1.1))) {
+      addOrUpdateTransaction({
+        id: txIdSignRemark,
+        title: `Get ${balances?.native.currency.symbol}`,
+        status: 'pending',
+        args,
+      })
       // add just enough native currency to be able to sign remark
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getBalanceForSigning`, {
         method: 'POST',
@@ -61,9 +90,22 @@ export const useSignRemark = (
         },
       })
 
-      if (response.status === 201) {
-        substrateMutation.execute(args)
+      if (response.status !== 201) {
+        addOrUpdateTransaction({
+          id: txIdSignRemark,
+          title: `Get ${balances?.native.currency.symbol}`,
+          status: 'failed',
+          args,
+        })
       }
+      addOrUpdateTransaction({
+        id: txIdSignRemark,
+        title: `Get ${balances?.native.currency.symbol}`,
+        status: 'succeeded',
+        args,
+      })
+      substrateMutation.execute(args)
+      setIsSubstrateTxLoading(false)
     }
   }
 
