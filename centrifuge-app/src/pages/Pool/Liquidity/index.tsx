@@ -65,9 +65,9 @@ export const PoolDetailLiquidity: React.FC = () => {
           <React.Suspense fallback={<Spinner />}>
             <LiquidityTransactionsSection
               pool={pool}
-              title="Repayments & originations"
-              dataKeys={['sumBorrowedAmountByPeriod', 'sumRepaidAmountByPeriod']}
-              dataNames={['Origination', 'Repayment']}
+              title="Originations & repayments"
+              dataKeys={['sumRepaidAmountByPeriod', 'sumBorrowedAmountByPeriod']}
+              dataNames={['Repayment', 'Origination']}
               dataColors={[colors.blueScale[200], colors.blueScale[400]]}
               tooltips={['repayment', 'origination']}
             />
