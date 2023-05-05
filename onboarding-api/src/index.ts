@@ -1,5 +1,6 @@
 const cookieParser = require('cookie-parser')
 import * as dotenv from 'dotenv'
+import { getBalanceForSigningController } from './controllers/agreement/getBalanceForSigning'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
 import { authenticateWalletController } from './controllers/auth/authenticateWallet'
@@ -53,6 +54,7 @@ onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
 
 onboarding.get('/getUnsignedAgreement', verifyAuth, getUnsignedAgreementController)
 onboarding.get('/getSignedAgreement', verifyAuth, getSignedAgreementController)
+onboarding.post('/getBalanceForSigning', verifyAuth, getBalanceForSigningController)
 onboarding.post('/signAndSendDocuments', verifyAuth, signAndSendDocumentsController)
 
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)

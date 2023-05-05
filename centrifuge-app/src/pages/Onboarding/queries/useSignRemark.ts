@@ -10,6 +10,7 @@ import { Contract } from '@ethersproject/contracts'
 import React, { useEffect } from 'react'
 import { UseMutateFunction } from 'react-query'
 import { lastValueFrom } from 'rxjs'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { ethConfig } from '../../../config'
 import { Dec } from '../../../utils/Decimal'
 import RemarkerAbi from './abi/Remarker.abi.json'
@@ -27,6 +28,7 @@ export const useSignRemark = (
 ) => {
   const evmProvider = useEvmProvider()
   const [isEvmTxLoading, setIsEvmTxLoading] = React.useState(false)
+  const [isSubstrateTxLoading, setIsSubstrateTxLoading] = React.useState(false)
   const centrifuge = useCentrifuge()
   const { updateTransaction, addOrUpdateTransaction } = useTransactions()
   const {
@@ -35,6 +37,7 @@ export const useSignRemark = (
   } = useWallet()
   const [expectedTxFee, setExpectedTxFee] = React.useState(Dec(0))
   const balances = useBalances(selectedAddress || '')
+  const { authToken } = useOnboardingAuth()
 
   const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
     onSuccess: async (_, result) => {
@@ -42,12 +45,25 @@ export const useSignRemark = (
       // @ts-expect-error
       const blockNumber = result.blockNumber.toString()
       await sendDocumentsToIssuer({ txHash, blockNumber })
+      setIsSubstrateTxLoading(false)
     },
   })
 
   const signSubstrateRemark = async (args: [message: string]) => {
+    setIsSubstrateTxLoading(true)
     if (balances?.native.balance?.toDecimal().lt(expectedTxFee)) {
-      // fetch to api to add just enough to wallet to be able to sign tx
+      // add just enough native currency to be able to sign remark
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getBalanceForSigning`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.status === 201) {
+        substrateMutation.execute(args)
+      }
     }
   }
 
@@ -111,5 +127,5 @@ export const useSignRemark = (
 
   return connectedType === 'evm'
     ? { execute: signEvmRemark, isLoading: isEvmTxLoading }
-    : { execute: signSubstrateRemark, isLoading: substrateMutation.isLoading }
+    : { execute: signSubstrateRemark, isLoading: isSubstrateTxLoading }
 }
