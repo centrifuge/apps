@@ -25,6 +25,7 @@ type Values = Pick<
   | 'website'
   | 'forum'
   | 'email'
+  | 'details'
 >
 
 export const Issuer: React.FC = () => {
@@ -46,6 +47,7 @@ export const Issuer: React.FC = () => {
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
       email: metadata?.pool?.issuer?.email ?? '',
+      details: metadata?.pool?.details,
     }),
     [metadata, logoFile]
   )
@@ -99,6 +101,7 @@ export const Issuer: React.FC = () => {
             forum: values.forum,
             website: values.website,
           },
+          details: values.details,
         },
       }
 
