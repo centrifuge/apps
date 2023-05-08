@@ -39,8 +39,8 @@ declare global {
 
 type VerificationState = 1 | 0 | null
 
-export type KybCallbackRequestBody = {
-  reference: `KYB_${string}`
+export type ManualKybCallbackRequestBody = {
+  reference: `MANUAL_KYB_REFERENCE_${string}`
   event:
     | `request.${'pending' | 'timeout' | 'deleted' | 'received'}`
     | 'review.pending'

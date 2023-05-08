@@ -6,24 +6,24 @@ import { sendVerifiedBusinessMessage } from '../../emails/sendVerifiedBusinessMe
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
-import { KybCallbackRequestBody, Subset, SupportedNetworks } from '../../utils/types'
+import { ManualKybCallbackRequestBody, Subset, SupportedNetworks } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
-const kybCallbackInput = object({
+const manualKybCallbackInput = object({
   address: string().required(),
   network: mixed<SupportedNetworks>().required().oneOf(['evm', 'substrate']),
   poolId: string().optional(),
   trancheId: string().optional(),
 })
 
-export const kybCallbackController = async (
-  req: Request<any, any, KybCallbackRequestBody, InferType<typeof kybCallbackInput>>,
+export const manualKybCallbackController = async (
+  req: Request<any, any, ManualKybCallbackRequestBody, InferType<typeof manualKybCallbackInput>>,
   res: Response
 ) => {
   try {
     const { body, query } = req
 
-    await validateInput(query, kybCallbackInput)
+    await validateInput(query, manualKybCallbackInput)
 
     const wallet: Request['wallet'] = {
       address: query.address,
@@ -45,7 +45,7 @@ export const kybCallbackController = async (
       return res.status(200).end()
     }
 
-    const status = await shuftiProRequest({ reference: body.reference }, { path: 'status', dryRun: false })
+    const status = await shuftiProRequest({ reference: body.reference }, { path: 'status' })
 
     if (status.event === 'verification.declined') {
       await sendVerifiedBusinessMessage(user.email, false, query.poolId, query.trancheId)

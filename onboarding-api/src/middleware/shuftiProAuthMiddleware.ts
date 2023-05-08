@@ -1,9 +1,9 @@
 import * as crypto from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { HttpError } from '../utils/httpError'
-import { KybCallbackRequestBody } from '../utils/types'
+import { ManualKybCallbackRequestBody } from '../utils/types'
 
-const isValidShuftiProRequest = (body: KybCallbackRequestBody, signature: string | string[]) => {
+const isValidShuftiProRequest = (body: ManualKybCallbackRequestBody, signature: string | string[]) => {
   const requestBody = JSON.stringify(body)
     //  escape all `/`
     .replace(/\//g, '\\/')

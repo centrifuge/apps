@@ -102,7 +102,7 @@ export const verifyBusinessController = async (
         email: body.email,
         country: body.jurisdictionCode,
         redirect_url: `${origin}/manual-kyb-redirect.html`,
-        callback_url: `${callbackBaseUrl}/kybCallback?${searchParams}`,
+        callback_url: `${callbackBaseUrl}/manualKybCallback?${searchParams}`,
       }
 
       const kyb = await shuftiProRequest(payloadKYB)

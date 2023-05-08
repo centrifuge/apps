@@ -9,7 +9,7 @@ import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { signAndSendDocumentsController } from './controllers/emails/signAndSendDocuments'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
-import { kybCallbackController } from './controllers/kyb/kybCallback'
+import { manualKybCallbackController } from './controllers/kyb/manualKybCallback'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
@@ -48,7 +48,7 @@ onboarding.get('/getUser', verifyAuth, getUserController)
 onboarding.post('/startKyc', verifyAuth, startKycController)
 onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
 
-onboarding.post('/kybCallback', kybCallbackController)
+onboarding.post('/manualKybCallback', manualKybCallbackController)
 
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUploadMiddleware, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
