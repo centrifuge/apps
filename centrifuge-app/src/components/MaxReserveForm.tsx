@@ -11,7 +11,7 @@ type Props = {
   poolId: string
 }
 
-export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
+export const MaxReserveForm: React.FC<Props> = ({ poolId }) => {
   const address = useAddress('substrate')
   const isLiquidityAdmin = useLiquidityAdmin(poolId)
   const pool = usePool(poolId)
@@ -24,8 +24,9 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
 
   const form = useFormik<{ maxReserve: number | '' }>({
     initialValues: {
-      maxReserve: '',
+      maxReserve: pool?.reserve.max.toDecimal().toNumber() || '',
     },
+    enableReinitialize: true,
     onSubmit: (values, actions) => {
       if (values.maxReserve) {
         setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool.currency.decimals)])
@@ -50,7 +51,7 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
               {({ field, meta, form }: FieldProps) => (
                 <CurrencyInput
                   {...field}
-                  initialValue={pool?.reserve.max.toDecimal().toNumber()}
+                  initialValue={form.values.maxReserve || undefined}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={pool?.currency.symbol}
