@@ -24,8 +24,16 @@ export const verifyEmailController = async (
     const payload = verifyJwt<VerifyEmailPayload>(token)
     const user = await fetchUser(payload.wallet)
 
+    if (!user.email || !payload.email) {
+      throw new HttpError(400, 'No email found')
+    }
+
     if (user.globalSteps.verifyEmail.completed) {
       throw new HttpError(400, 'Email already verified')
+    }
+
+    if (user.email !== payload.email) {
+      throw new HttpError(400, 'Email does not match')
     }
 
     const globalSteps: Subset<EntityUser> = {
