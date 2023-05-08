@@ -8,13 +8,13 @@ export const getUserController = async (req: Request, res: Response) => {
     const user = await fetchUser(req.wallet, { suppressError: true })
 
     if (!user) {
-      return res.send(user)
+      return res.send(null)
     }
 
     let status
 
     if (user.investorType === 'entity' && user.manualKybReference) {
-      status = await shuftiProRequest({ reference: user.manualKybReference }, { path: 'status', dryRun: false })
+      status = await shuftiProRequest({ reference: user.manualKybReference }, { path: 'status' })
     }
 
     return res.send({

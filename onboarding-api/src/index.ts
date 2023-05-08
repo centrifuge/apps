@@ -21,6 +21,7 @@ import { verifyAccreditationController } from './controllers/user/verifyAccredit
 import { corsMiddleware } from './middleware/cors'
 import { fileUploadMiddleware } from './middleware/fileUpload'
 import { rateLimiter } from './middleware/rateLimiter'
+import { shuftiProAuthMiddleware } from './middleware/shuftiProAuthMiddleware'
 import { verifyAuth } from './middleware/verifyAuth'
 
 const express = require('express')
@@ -30,6 +31,7 @@ dotenv.config()
 const onboarding = express()
 
 onboarding.use(rateLimiter)
+onboarding.use(shuftiProAuthMiddleware)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))
 

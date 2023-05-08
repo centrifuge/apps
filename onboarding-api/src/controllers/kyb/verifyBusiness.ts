@@ -45,13 +45,11 @@ export const verifyBusinessController = async (
       }
     }
 
-    const kybReference = `KYB_${Math.random()}`
-
     const user: EntityUser = {
       investorType: 'entity',
       address: null,
       kycReference: '',
-      manualKybReference: manualReview ? kybReference : null,
+      manualKybReference: manualReview ? `MANUAL_KYB_REQUEST_${Math.random()}` : null,
       wallet: [wallet],
       name: null,
       dateOfBirth: null,
@@ -100,7 +98,7 @@ export const verifyBusinessController = async (
         enable_extra_proofs: 1,
         labels: ['proof_of_address', 'signed_and_dated_ownership_structure'],
         verification_mode: 'any',
-        reference: kybReference,
+        reference: `KYB_${Math.random()}`,
         email: body.email,
         country: body.jurisdictionCode,
         redirect_url: `${origin}/manual-kyb-redirect.html`,
