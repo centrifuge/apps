@@ -8,10 +8,14 @@ on:
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
+      - '.github/actions/deploy-gfunction'
+      - '.github/actions/build-function'
   pull_request:
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
+      - '.github/actions/deploy-gfunction'
+      - '.github/actions/build-function'
   workflow_call:
     inputs:
       deploy_env:
