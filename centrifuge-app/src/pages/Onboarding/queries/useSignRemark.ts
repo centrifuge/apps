@@ -38,41 +38,23 @@ export const useSignRemark = (
   const [expectedTxFee, setExpectedTxFee] = React.useState(Dec(0))
   const balances = useBalances(selectedAddress || '')
   const { authToken } = useOnboardingAuth()
-  const txIdSendDocs = Math.random().toString(36).substr(2)
-  const txIdSignRemark = Math.random().toString(36).substr(2)
 
   const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
     onSuccess: async (_, result) => {
       const txHash = result.txHash.toHex()
-      addOrUpdateTransaction({
-        id: txIdSendDocs,
-        title: `Send documents to issuers`,
-        status: 'pending',
-        args: [],
-      })
       // @ts-expect-error
       const blockNumber = result.blockNumber.toString()
       try {
         await sendDocumentsToIssuer({ txHash, blockNumber })
         setIsSubstrateTxLoading(false)
-        addOrUpdateTransaction({
-          id: txIdSendDocs,
-          title: `Send documents to issuers`,
-          status: 'succeeded',
-          args: [],
-        })
       } catch (e) {
-        addOrUpdateTransaction({
-          id: txIdSendDocs,
-          title: `Send documents to issuers`,
-          status: 'pending',
-          args: (e as any)?.message,
-        })
+        setIsSubstrateTxLoading(false)
       }
     },
   })
 
   const signSubstrateRemark = async (args: [message: string]) => {
+    const txIdSignRemark = Math.random().toString(36).substr(2)
     setIsSubstrateTxLoading(true)
     if (balances?.native.balance?.toDecimal().lt(expectedTxFee.mul(1.1))) {
       addOrUpdateTransaction({
@@ -97,16 +79,18 @@ export const useSignRemark = (
           status: 'failed',
           args,
         })
+        setIsSubstrateTxLoading(false)
+        throw new Error('Insufficient funds')
+      } else {
+        addOrUpdateTransaction({
+          id: txIdSignRemark,
+          title: `Get ${balances?.native.currency.symbol}`,
+          status: 'succeeded',
+          args,
+        })
       }
-      addOrUpdateTransaction({
-        id: txIdSignRemark,
-        title: `Get ${balances?.native.currency.symbol}`,
-        status: 'succeeded',
-        args,
-      })
-      substrateMutation.execute(args)
-      setIsSubstrateTxLoading(false)
     }
+    substrateMutation.execute(args)
   }
 
   useEffect(() => {
