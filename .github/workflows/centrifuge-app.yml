@@ -10,12 +10,14 @@ on:
       - 'centrifuge-js/**'
       - 'centrifuge-react/**'
       - '.github/workflows/centrifuge-app.yml'
+      - '.github/actions/deploy-gcs'
   pull_request:
     paths:
       - 'centrifuge-app/**'
       - 'centrifuge-js/**'
       - 'centrifuge-react/**'
       - '.github/workflows/centrifuge-app.yml'
+      - '.github/actions/deploy-gcs'
   workflow_call:
     inputs:
       deploy_env:
