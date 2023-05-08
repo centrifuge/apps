@@ -90,7 +90,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
         <Content>
           <ContentHeader
             title="Onboarding almost complete!"
-            body="Your documents are under review. We will notify you once your profile is approved."
+            body="Your documents are under review. You will be notified you once your profile is approved."
           />
 
           <Box>
