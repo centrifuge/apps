@@ -74,7 +74,7 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
           </Stack>
           <Stack gap={2}>
             <Text as="h3" variant="heading3">
-              Threshold
+              Configuration change threshold
             </Text>
             <Text as="p" variant="body2" color="textSecondary">
               For additional security, changing the pool configuration (e.g. the tranche structure of write-off policy)
