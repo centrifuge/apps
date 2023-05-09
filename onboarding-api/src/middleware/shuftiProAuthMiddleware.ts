@@ -29,9 +29,9 @@ export const shuftiProAuthMiddleware = (req: Request, res: Response, next: NextF
 
     if (isValid) {
       headers.origin = 'https://shuftipro.com'
+    } else {
+      throw new HttpError(401, 'Unauthorized')
     }
-
-    throw new HttpError(401, 'Unauthorized')
   }
 
   next()
