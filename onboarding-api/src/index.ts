@@ -1,5 +1,4 @@
 const cookieParser = require('cookie-parser')
-import fileUpload = require('express-fileupload')
 import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
