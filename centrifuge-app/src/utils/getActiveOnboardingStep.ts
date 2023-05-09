@@ -43,7 +43,12 @@ const INDIVIDUAL_NON_US_STEPS = {
   COMPLETE: 6,
 }
 
-export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId?: string, trancheId?: string) => {
+export const getActiveOnboardingStep = (
+  onboardingUser: OnboardingUser,
+  isPendingManualKybReview: boolean,
+  poolId?: string,
+  trancheId?: string
+) => {
   // user does not exist
   if (!onboardingUser) return 2
 
@@ -71,7 +76,9 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId?:
 
     if (verifyIdentity.completed) return BASE_ENTITY_STEPS.VERIFY_TAX_INFO
     if (confirmOwners.completed) return BASE_ENTITY_STEPS.VERIFY_IDENTITY
-    if (verifyBusiness.completed) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
+    if (verifyBusiness.completed || isPendingManualKybReview) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
+
+    return BASE_ENTITY_STEPS.VERIFY_BUSINESS
   }
 
   if (investorType === 'individual' && countryOfCitizenship) {

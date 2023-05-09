@@ -9,6 +9,7 @@ import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { signAndSendDocumentsController } from './controllers/emails/signAndSendDocuments'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
+import { manualKybCallbackController } from './controllers/kyb/manualKybCallback'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
@@ -20,7 +21,9 @@ import { verifyAccreditationController } from './controllers/user/verifyAccredit
 import { corsMiddleware } from './middleware/cors'
 import { fileUploadMiddleware } from './middleware/fileUpload'
 import { rateLimiter } from './middleware/rateLimiter'
+import { shuftiProAuthMiddleware } from './middleware/shuftiProAuthMiddleware'
 import { verifyAuth } from './middleware/verifyAuth'
+
 const express = require('express')
 
 dotenv.config()
@@ -28,6 +31,7 @@ dotenv.config()
 const onboarding = express()
 
 onboarding.use(rateLimiter)
+onboarding.use(shuftiProAuthMiddleware)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))
 onboarding.disable('x-powered-by')
@@ -46,11 +50,14 @@ onboarding.get('/getUser', verifyAuth, getUserController)
 onboarding.post('/startKyc', verifyAuth, startKycController)
 onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
 
+onboarding.post('/manualKybCallback', manualKybCallbackController)
+
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUploadMiddleware, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
 onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 
 onboarding.post('/verifyBusiness', verifyAuth, verifyBusinessController)
+
 onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
 
 onboarding.get('/getUnsignedAgreement', verifyAuth, getUnsignedAgreementController)

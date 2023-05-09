@@ -116,18 +116,18 @@ function Amount({ loan }: { loan: Row }) {
   function getAmount(l: Row) {
     switch (l.status) {
       case 'Closed':
-        return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
+        return formatBalance(l.totalRepaid, pool?.currency.symbol)
 
       case 'Active':
         if (l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) {
-          return `${formatBalance(current, pool?.currency.symbol)} available`
+          return formatBalance(current, pool?.currency.symbol)
         }
 
         if (l.outstandingDebt.isZero()) {
-          return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
+          return formatBalance(l.totalRepaid, pool?.currency.symbol)
         }
 
-        return `${formatBalance(l.outstandingDebt, pool?.currency.symbol)} outstanding`
+        return formatBalance(l.outstandingDebt, pool?.currency.symbol)
 
       default:
         return ''

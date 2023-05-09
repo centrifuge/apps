@@ -62,7 +62,9 @@ export const signAndSendDocumentsController = async (
       `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
     )
 
-    await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
+    if (user.investorType === 'entity' && user.globalSteps.verifyBusiness.completed) {
+      await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
+    }
 
     const updatedUser: Subset<OnboardingUser> = {
       poolSteps: {
