@@ -27,7 +27,10 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   }
 
   React.useEffect(() => {
-    if (onboardingUser.poolSteps?.[poolId]?.[trancheId].status.status === 'pending') {
+    if (
+      onboardingUser.poolSteps?.[poolId]?.[trancheId].status.status === 'pending' ||
+      (onboardingUser.investorType === 'entity' && onboardingUser?.manualKybStatus)
+    ) {
       window.addEventListener('focus', onFocus)
     } else {
       window.removeEventListener('focus', onFocus)
@@ -78,6 +81,27 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   }
 
   if (onboardingStatus === 'pending') {
+    if (
+      onboardingUser.investorType === 'entity' &&
+      onboardingUser.manualKybStatus === 'review.pending' &&
+      !onboardingUser.globalSteps.verifyBusiness.completed
+    ) {
+      return (
+        <Content>
+          <ContentHeader
+            title="Onboarding almost complete!"
+            body="Your documents are under review. You will be notified you once your profile is approved."
+          />
+
+          <Box>
+            <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
+              View subscription agreement
+            </AnchorButton>
+          </Box>
+        </Content>
+      )
+    }
+
     return (
       <Content>
         <ContentHeader

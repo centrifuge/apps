@@ -1,7 +1,5 @@
 import { Box, Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { useMutation } from 'react-query'
-import { useOnboardingAuth } from '../OnboardingAuthProvider'
-import { useOnboarding } from '../OnboardingProvider'
+import { useSendVerifyEmail } from '../../pages/Onboarding/queries/useSendVerifyEmail'
 
 type Props = {
   isDialogOpen: boolean
@@ -9,31 +7,7 @@ type Props = {
 }
 
 export const ConfirmResendEmailVerificationDialog = ({ isDialogOpen, setIsDialogOpen }: Props) => {
-  const { authToken } = useOnboardingAuth()
-  const { refetchOnboardingUser } = useOnboarding()
-
-  const { mutate: sendVerifyEmail, isLoading } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/sendVerifyEmail`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-
-      if (response.status !== 200) {
-        throw new Error()
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        setIsDialogOpen(false)
-      },
-    }
-  )
+  const { mutate: sendVerifyEmail, isLoading } = useSendVerifyEmail()
 
   return (
     <Dialog
@@ -49,7 +23,18 @@ export const ConfirmResendEmailVerificationDialog = ({ isDialogOpen, setIsDialog
             <Button onClick={() => setIsDialogOpen(false)} variant="secondary" disabled={isLoading}>
               Cancel
             </Button>
-            <Button onClick={() => sendVerifyEmail()} loading={isLoading} disabled={isLoading} loadingMessage="Sending">
+            <Button
+              onClick={() =>
+                sendVerifyEmail(undefined, {
+                  onSuccess: () => {
+                    setIsDialogOpen(false)
+                  },
+                })
+              }
+              loading={isLoading}
+              disabled={isLoading}
+              loadingMessage="Sending"
+            >
               Send
             </Button>
           </Shelf>

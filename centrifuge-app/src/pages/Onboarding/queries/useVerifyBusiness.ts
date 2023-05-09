@@ -1,4 +1,5 @@
 import { useMutation } from 'react-query'
+import { useLocation } from 'react-router-dom'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
@@ -8,11 +9,16 @@ type BusinessInformation = {
   registrationNumber: string
   jurisdictionCode: string
   regionCode: string
+  manualReview?: boolean
 }
 
 export const useVerifyBusiness = () => {
   const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser, nextStep } = useOnboarding()
+  const { search } = useLocation()
+
+  const poolId = new URLSearchParams(search).get('poolId')
+  const trancheId = new URLSearchParams(search).get('trancheId')
 
   const mutation = useMutation(
     async (values: BusinessInformation) => {
@@ -27,6 +33,8 @@ export const useVerifyBusiness = () => {
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
           dryRun: true, // TODO: set this as debug flag option
+          manualReview: values?.manualReview ?? false,
+          ...(values?.manualReview && poolId && trancheId && { poolId, trancheId }),
         }),
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -39,16 +47,24 @@ export const useVerifyBusiness = () => {
         throw new Error()
       }
 
-      const json = await response.json()
+      const user = await response.json()
 
-      if (!json.globalSteps?.verifyBusiness?.completed) {
+      if (values.manualReview && !user.manualKybReference) {
         throw new Error()
       }
+
+      if (!values.manualReview && !user.globalSteps?.verifyBusiness?.completed) {
+        throw new Error()
+      }
+
+      return user
     },
     {
-      onSuccess: () => {
+      onSuccess: (_, values) => {
         refetchOnboardingUser()
-        nextStep()
+        if (!values.manualReview) {
+          nextStep()
+        }
       },
     }
   )
