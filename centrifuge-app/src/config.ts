@@ -109,6 +109,7 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Commercial Real Estate',
     'Residential Real Estate',
     'Project Finance',
+    'Trade Finance',
   ],
   defaultAssetClass: 'Consumer Credit',
   poolCreationType,
@@ -122,7 +123,7 @@ const goerliConfig = {
   rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
-  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmZoFPrVjcrZCDFrFqCuzmYz9fVudbmyoYBu2tKER5N6Fa', // TODO: add registry to config and fetch poolHash
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
 }
 const mainnetConfig = {

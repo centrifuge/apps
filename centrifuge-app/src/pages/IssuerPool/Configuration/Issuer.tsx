@@ -26,6 +26,7 @@ type Values = Pick<
   | 'website'
   | 'forum'
   | 'email'
+  | 'details'
 >
 
 export function Issuer() {
@@ -48,6 +49,7 @@ export function Issuer() {
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
       email: metadata?.pool?.issuer?.email ?? '',
+      details: metadata?.pool?.details,
     }),
     [metadata, logoFile]
   )
@@ -101,6 +103,7 @@ export function Issuer() {
             forum: values.forum,
             website: values.website,
           },
+          details: values.details,
         },
       }
 

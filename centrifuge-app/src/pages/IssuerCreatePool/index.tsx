@@ -43,7 +43,6 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
 import { truncate } from '../../utils/web3'
 import { AdminMultisigSection } from './AdminMultisig'
-import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
@@ -91,7 +90,6 @@ export type CreatePoolValues = Omit<
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
-  details: IssuerDetail[]
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
 }

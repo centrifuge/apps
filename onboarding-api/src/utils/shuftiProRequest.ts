@@ -1,10 +1,9 @@
-import { Request } from 'express'
 import fetch from 'node-fetch'
 import { businessAmlMockResponse } from '../mocks/businessAmlResponse'
 import { kybMockResponse } from '../mocks/kybResponse'
-import { HttpError } from './HttpError'
+import { HttpError } from './httpError'
 
-export const shuftiProRequest = async (_req: Request, payload: any, options?: { dryRun?: boolean; path?: string }) => {
+export const shuftiProRequest = async (payload: any, options?: { dryRun?: boolean; path?: string }) => {
   if (
     options?.dryRun &&
     (process.env.COLLATOR_WSS_URL.includes('demo') || process.env.COLLATOR_WSS_URL.includes('development'))
@@ -22,6 +21,7 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
   try {
     // TODO: check if possible to use Buf.from()
     const token = btoa(`${process.env.SHUFTI_PRO_CLIENT_ID}:${process.env.SHUFTI_PRO_SECRET_KEY}`)
+
     const shuftiRes = await fetch(`https://api.shuftipro.com/${options?.path ?? ''}`, {
       method: 'post',
       headers: {

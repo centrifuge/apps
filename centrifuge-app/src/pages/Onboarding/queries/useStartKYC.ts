@@ -2,7 +2,7 @@ import { useMutation } from 'react-query'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
-type Indentity = {
+type Identity = {
   name: string
   email?: string
   dateOfBirth: string
@@ -17,7 +17,7 @@ export const useStartKYC = () => {
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
   const mutation = useMutation(
-    async (values: Indentity) => {
+    async (values: Identity) => {
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/startKYC`, {
         method: 'POST',
         headers: {

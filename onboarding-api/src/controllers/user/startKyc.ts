@@ -29,7 +29,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
     if (
       userData?.investorType === 'entity' &&
       !userData.globalSteps.verifyEmail.completed &&
-      !userData.globalSteps.verifyBusiness.completed &&
+      (!userData.globalSteps.verifyBusiness.completed || !userData.manualKybReference) &&
       !userData.globalSteps.confirmOwners.completed
     ) {
       throw new HttpError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
@@ -118,7 +118,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         show_ocr_form: '1',
       },
     }
-    const kyc = await shuftiProRequest(req, payloadKYC)
+    const kyc = await shuftiProRequest(payloadKYC)
     return res.send({ ...kyc })
   } catch (e) {
     const error = reportHttpError(e)

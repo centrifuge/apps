@@ -12,7 +12,6 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { formatBalance } from '../../../utils/formatting'
-import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { PoolDetailSideBar } from '../Overview'
@@ -21,12 +20,11 @@ const ReserveCashDragChart = React.lazy(() => import('../../../components/Charts
 
 export const PoolDetailLiquidityTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isLiquidityAdmin = useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] }).length > 0
   return (
     <PageWithSideBar
       sidebar={
         <Stack gap={2}>
-          {isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}
+          <MaxReserveForm poolId={poolId} />
           <PoolDetailSideBar />
         </Stack>
       }
