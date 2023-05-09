@@ -23,7 +23,7 @@ export const authenticateWalletController = async (
     await validateInput(req.body, verifyWalletInput)
     const payload = req.body.jw3t ? await verifySubstrateWallet(req, res) : await verifyEthWallet(req, res)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '5d',
+      expiresIn: '8h',
       audience: req.get('origin'),
     })
     return res.json({ token })

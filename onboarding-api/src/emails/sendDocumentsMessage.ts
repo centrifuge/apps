@@ -19,7 +19,7 @@ export const sendDocumentsMessage = async (
   const { metadata, pool } = await getPoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '5d',
+    expiresIn: '14d',
   })
 
   const taxInfoFile = await onboardingBucket.file(`tax-information/${wallet.address}.pdf`)
