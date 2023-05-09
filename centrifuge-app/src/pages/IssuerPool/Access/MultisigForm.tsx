@@ -77,7 +77,7 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
               Configuration change threshold
             </Text>
             <Text as="p" variant="body2" color="textSecondary">
-              For additional security, changing the pool configuration (e.g. the tranche structure of write-off policy)
+              For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
               requires multiple signers. Any such change will require the confirmation of:
             </Text>
 
