@@ -1,4 +1,5 @@
 const cookieParser = require('cookie-parser')
+import fileUpload = require('express-fileupload')
 import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
@@ -19,7 +20,6 @@ import { updateInvestorStatusController } from './controllers/user/updateInvesto
 import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
-import { fileUploadMiddleware } from './middleware/fileUpload'
 import { rateLimiter } from './middleware/rateLimiter'
 import { shuftiProAuthMiddleware } from './middleware/shuftiProAuthMiddleware'
 import { verifyAuth } from './middleware/verifyAuth'
@@ -52,7 +52,7 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 
 onboarding.post('/manualKybCallback', manualKybCallbackController)
 
-onboarding.post('/uploadTaxInfo', verifyAuth, fileUploadMiddleware, uploadTaxInfoController)
+onboarding.post('/uploadTaxInfo', verifyAuth, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
 onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 

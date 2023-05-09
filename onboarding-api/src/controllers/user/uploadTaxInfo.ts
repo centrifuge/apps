@@ -6,8 +6,11 @@ import { HttpError, reportHttpError } from '../../utils/httpError'
 import { Subset } from '../../utils/types'
 
 const validateTaxInfoFile = async (file: Buffer) => {
-  const fileString = file.toString('utf8')
+  if (file.byteLength > 1024 * 1024) {
+    throw new HttpError(400, 'File size must be less than 1MB')
+  }
 
+  const fileString = file.toString('utf8')
   const body = fileString.slice(fileString.indexOf('\r\n\r\n') + 4)
   const type = await fileTypeFromBuffer(Buffer.from(body))
 
