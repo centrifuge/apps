@@ -12,6 +12,7 @@ import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useListedPools } from '../utils/useListedPools'
 import { usePools } from '../utils/usePools'
+import { useTVLtoUSD } from '../utils/useTVLtoUSD'
 
 export const TokenOverviewPage: React.FC = () => {
   return (
@@ -54,23 +55,12 @@ const TokenOverview: React.FC = () => {
     [listedTokens]
   )
 
-  const totalValueLocked = React.useMemo(() => {
-    return (
-      listedTokens
-        ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance
-            .toDecimal()
-            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
-            .toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
-    )
-  }, [listedTokens])
+  const { tvlUSD } = useTVLtoUSD()
 
   const pageSummaryData = [
     {
       label: <Tooltips type="tvl" />,
-      value: formatBalance(Dec(totalValueLocked || 0), config.baseCurrency),
+      value: formatBalance(Dec(tvlUSD || 0), config.baseCurrency),
     },
     { label: 'Pools', value: listedPools?.length || 0 },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
