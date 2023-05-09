@@ -27,9 +27,10 @@ export const getSigner = async () => {
 }
 
 export const getCentPoolById = async (poolId: string) => {
-  const pools = await firstValueFrom(getCentrifuge().pools.getPools())
+  const cent = getCentrifuge()
+  const pools = await firstValueFrom(cent.pools.getPools())
   const pool = pools.find((p) => p.id === poolId)
-  const metadata = await firstValueFrom(getCentrifuge().metadata.getMetadata(pool?.metadata!))
+  const metadata = await firstValueFrom(cent.metadata.getMetadata(pool?.metadata!))
   if (!metadata) {
     throw new Error(`Pool metadata not found for pool ${poolId}`)
   }
@@ -99,20 +100,9 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
   const signer = await getSigner()
   const $api = getCentrifuge().getApi()
   const $paymentInfo = $api
-    .pipe(
-      switchMap((api) => {
-        const submittble = api.tx.system.remarkWithEvent('Signing for pool')
-        return submittble.paymentInfo(wallet.address)
-      })
-    )
+    .pipe(switchMap((api) => api.tx.system.remarkWithEvent('Signing for pool').paymentInfo(wallet.address)))
     .pipe(take(1))
-  const $nativeBalance = $api
-    .pipe(
-      switchMap((api) => {
-        return api.query.system.account(wallet.address)
-      })
-    )
-    .pipe(take(1))
+  const $nativeBalance = $api.pipe(switchMap((api) => api.query.system.account(wallet.address))).pipe(take(1))
   const tx = await lastValueFrom(
     combineLatest([$api, $paymentInfo, $nativeBalance]).pipe(
       switchMap(([api, paymentInfo, nativeBalance]) => {
@@ -122,18 +112,16 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
         )
         const txFee = new CurrencyBalance(paymentInfo.partialFee.toString(), api.registry.chainDecimals[0])
 
-        // 10% buffer on txFee check
-        // if (currentNativeBalance.gt(txFee.muln(1.1))) {
-        //   throw new HttpError(400, 'Bad request: balance exceeded')
-        // }
+        if (currentNativeBalance.gte(txFee.muln(1.1))) {
+          throw new HttpError(400, 'Bad request: balance exceeded')
+        }
 
         // add 10% buffer to the transaction fee
         const submittable = api.tx.tokens.transfer({ Id: wallet.address }, 'Native', txFee.add(txFee.muln(1.1)))
-        const proxiedSubmittable = api.tx.proxy.proxy(PROXY_ADDRESS, undefined, submittable)
+        // const proxiedSubmittable = api.tx.proxy.proxy(PROXY_ADDRESS, undefined, submittable)
         return submittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
-        console.log('🚀 ~ isFinalized:', isFinalized)
         if (events.length > 0) {
           events.forEach(({ event }) => {
             const proxyResult = event.data[0]?.toHuman()
@@ -161,6 +149,5 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
       })
     )
   )
-  console.log('TXXX', tx.toHuman())
   return tx.txHash.toString()
 }
