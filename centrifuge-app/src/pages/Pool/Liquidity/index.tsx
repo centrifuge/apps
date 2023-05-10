@@ -11,7 +11,6 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { formatBalance } from '../../../utils/formatting'
-import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { PoolDetailSideBar } from '../Overview'
@@ -21,12 +20,12 @@ const LiquidityTransactionsSection = React.lazy(() => import('../../../component
 
 export const PoolDetailLiquidityTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isLiquidityAdmin = useLiquidityAdmin(poolId)
+
   return (
     <PageWithSideBar
       sidebar={
         <Stack gap={2}>
-          {isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}
+          <MaxReserveForm poolId={poolId} />
           <PoolDetailSideBar />
         </Stack>
       }

@@ -109,23 +109,23 @@ export const TaxInfo = () => {
     if (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship !== 'us') {
       return {
         type: 'W-8BEN',
-        url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
-        label: 'www.irs.gov/pub/irs-pdf/fw8ben.pdf',
+        url: 'https://www.irs.gov',
+        label: 'www.irs.gov',
       }
     }
 
     if (onboardingUser.investorType === 'entity' && !onboardingUser.jurisdictionCode.startsWith('us')) {
       return {
         type: 'W-8BEN-E',
-        url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',
-        label: 'www.irs.gov/pub/irs-pdf/fw8bene.pdf',
+        url: 'https://www.irs.gov',
+        label: 'www.irs.gov',
       }
     }
 
     return {
       type: 'W9',
-      url: 'https://www.irs.gov/pub/irs-pdf/fw9.pdf',
-      label: 'www.irs.gov/pub/irs-pdf/fw9.pdf',
+      url: 'https://www.irs.gov',
+      label: 'www.irs.gov',
     }
   }, [onboardingUser])
 
