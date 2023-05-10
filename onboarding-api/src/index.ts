@@ -1,5 +1,6 @@
 const cookieParser = require('cookie-parser')
 import * as dotenv from 'dotenv'
+import express, { Express } from 'express'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
 import { authenticateWalletController } from './controllers/auth/authenticateWallet'
@@ -19,15 +20,14 @@ import { updateInvestorStatusController } from './controllers/user/updateInvesto
 import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
+import { fileUpload } from './middleware/fileUpload'
 import { rateLimiter } from './middleware/rateLimiter'
 import { shuftiProAuthMiddleware } from './middleware/shuftiProAuthMiddleware'
 import { verifyAuth } from './middleware/verifyAuth'
 
-const express = require('express')
-
 dotenv.config()
 
-const onboarding = express()
+const onboarding = express() as Express
 
 onboarding.use(rateLimiter)
 onboarding.use(shuftiProAuthMiddleware)
@@ -51,7 +51,7 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 
 onboarding.post('/manualKybCallback', manualKybCallbackController)
 
-onboarding.post('/uploadTaxInfo', verifyAuth, uploadTaxInfoController)
+onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
 onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 
