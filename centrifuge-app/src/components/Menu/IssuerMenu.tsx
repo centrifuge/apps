@@ -1,8 +1,8 @@
-import { Box, IconChevronDown, IconChevronRight, IconUser, Text } from '@centrifuge/fabric'
+import { Box, IconChevronDown, IconChevronRight, IconUser } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
-import styled, { useTheme } from 'styled-components'
-import { baseButton, primaryButton } from './styles'
+import { useTheme } from 'styled-components'
+import { Toggle } from './Toggle'
 
 type IssuerMenuProps = {
   defaultOpen?: boolean
@@ -10,14 +10,6 @@ type IssuerMenuProps = {
   stacked?: boolean
   children?: React.ReactNode
 }
-
-const Toggle = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
-  ${baseButton}
-  ${primaryButton}
-  width: 100%;
-  grid-template-columns: ${({ stacked, theme }) =>
-    stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr ${theme.sizes.iconSmall}px`};
-`
 
 export function IssuerMenu({ defaultOpen = false, poolIds = [], stacked, children }: IssuerMenuProps) {
   const match = useRouteMatch<{ pid: string }>('/issuer/:pid')
