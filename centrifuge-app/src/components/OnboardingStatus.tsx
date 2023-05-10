@@ -1,15 +1,17 @@
 import {
+  Box,
   iconActionStyles,
   IconClockForward,
   IconExternalLink,
   IconShieldCheck,
   Shelf,
+  Spinner,
   Stack,
   Text,
 } from '@centrifuge/fabric'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { useVerificationStatus } from './OnboardingProvider'
+import { useGlobalOnboardingStatus } from '../pages/Onboarding/queries/useGlobalOnboardingStatus'
 import { RouterLinkButton } from './RouterLinkButton'
 
 const ActionLink = styled(Link)`
@@ -17,26 +19,34 @@ const ActionLink = styled(Link)`
 `
 
 export function OnboardingStatus() {
-  const status = useVerificationStatus()
+  const { data: globalOnboardingStatus, isFetching: isFetchingGlobalOnboardingStatus } = useGlobalOnboardingStatus()
 
-  return status ? (
+  return (
     <Stack px={2} py={1} gap="4px">
       <Text as="span" variant="label2" color="textPrimary">
         Verification status:
       </Text>
 
-      {status === 'unverified' ? (
+      {isFetchingGlobalOnboardingStatus ? (
+        <Box display="flex" justifyContent="center" alignItems="center">
+          <Spinner />
+        </Box>
+      ) : globalOnboardingStatus === 'unverified' ? (
         <RouterLinkButton to="/onboarding" small>
           Verify identity
         </RouterLinkButton>
       ) : (
         <Shelf as="span" gap={1}>
-          {status === 'pending' ? <IconClockForward size="iconSmall" /> : <IconShieldCheck size="iconSmall" />}
+          {globalOnboardingStatus === 'pending' ? (
+            <IconClockForward size="iconSmall" />
+          ) : (
+            <IconShieldCheck size="iconSmall" />
+          )}
           <Text as="span" variant="interactive1" style={{ flexGrow: 1 }}>
-            {status === 'pending' ? 'In progress…' : 'Complete'}
+            {globalOnboardingStatus === 'pending' ? 'In progress…' : 'Complete'}
           </Text>
 
-          {!!(status === 'pending') && (
+          {!!(globalOnboardingStatus === 'pending') && (
             <ActionLink to="/onboarding" aria-label="Go to onboarding">
               <IconExternalLink size="iconSmall" />
             </ActionLink>
@@ -44,5 +54,5 @@ export function OnboardingStatus() {
         </Shelf>
       )}
     </Stack>
-  ) : null
+  )
 }
