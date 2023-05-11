@@ -20,7 +20,7 @@ export const getGlobalOnboardingStatusController = async (
     const user = await fetchUser(req.query, { suppressError: true })
 
     if (!user) {
-      return res.send('unverified')
+      return res.send({ onboardingGlobalStatus: 'unverified' })
     }
 
     const requiredGlobalSteps = Object.keys(user.globalSteps).filter((globalStep) => {
@@ -38,7 +38,7 @@ export const getGlobalOnboardingStatusController = async (
       ? 'verified'
       : 'pending'
 
-    return res.send(onboardingGlobalStatus)
+    return res.send({ onboardingGlobalStatus })
   } catch (e) {
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })

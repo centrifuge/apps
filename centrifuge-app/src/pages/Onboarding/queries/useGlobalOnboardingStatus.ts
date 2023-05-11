@@ -23,9 +23,9 @@ export const useGlobalOnboardingStatus = () => {
           }
         )
 
-        const text = await response.text()
+        const json = await response.json()
 
-        return text
+        return json.onboardingGlobalStatus
       }
     },
     {
