@@ -154,7 +154,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: |
-            app-staging.centrifuge.io has been promoted to apps.centrifuge.io and is not LIVE!
+            app.staging.centrifuge.io has been promoted to apps.centrifuge.io and is not LIVE!
             Check out the new release -> https://github.com/centrifuge/apps/releases/
           SLACK_USERNAME: "Centrifuge GHA Bot"
           SLACK_ICON: "https://centrifuge.io/favicon.ico"
