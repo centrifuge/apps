@@ -131,7 +131,6 @@ type PoolDetailsData = {
   metadata?: string
   parameters: {
     minEpochTime: number
-    challengeTime: number
     maxNavAge: number
   }
   epoch: {
@@ -204,7 +203,6 @@ export type Pool = {
     lastExecuted: number
     challengePeriodEnd: number
     status: 'submissionPeriod' | 'challengePeriod' | 'executionPeriod' | 'ongoing'
-    challengeTime: number
   }
   nav: {
     latest: CurrencyBalance
@@ -1414,10 +1412,10 @@ export function getPoolsModule(inst: Centrifuge) {
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
                   status: getEpochStatus(epochExecution, blockNumber),
                   challengePeriodEnd: epochExecution?.challengePeriodEnd,
-                  challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 parameters: {
                   ...pool.parameters,
+                  challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 nav: {
                   latest: navData?.latest
