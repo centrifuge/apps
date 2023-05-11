@@ -8,11 +8,27 @@ import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
 const verifyWalletInput = object({
-  message: string(),
-  address: string(),
-  nonce: string(),
   signature: string(),
-  jw3t: string(),
+  message: string().when('signature', {
+    is: (value) => value !== undefined,
+    then: (verifyWalletInput) => verifyWalletInput.required(),
+  }),
+  address: string().when('signature', {
+    is: (value) => value !== undefined,
+    then: (verifyWalletInput) =>
+      verifyWalletInput.required().test({
+        name: 'is-address',
+        test(value, ctx) {
+          if (isAddress(value)) return true
+          return ctx.createError({ message: 'Invalid address', path: ctx.path })
+        },
+      }),
+  }),
+  jw3t: string().when('signature', {
+    is: undefined,
+    then: (verifyWalletInput) => verifyWalletInput.required(),
+  }),
+  nonce: string().required(),
 })
 
 export const authenticateWalletController = async (
@@ -21,7 +37,7 @@ export const authenticateWalletController = async (
 ) => {
   try {
     await validateInput(req.body, verifyWalletInput)
-    const payload = req.body.jw3t ? await verifySubstrateWallet(req, res) : await verifyEthWallet(req, res)
+    const payload = req.body?.jw3t ? await verifySubstrateWallet(req, res) : await verifyEthWallet(req, res)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '8h',
       audience: req.get('origin'),
