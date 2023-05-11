@@ -1,16 +1,11 @@
 import { Request, Response } from 'express'
 import pinFile from './controllers/pinFile'
 import pinJson from './controllers/pinJson'
-import unpinFile from './controllers/unpinFile'
 
 const routes = [
   {
     name: 'pinFile',
     controller: pinFile,
-  },
-  {
-    name: 'unpinFile',
-    controller: unpinFile,
   },
   {
     name: 'pinJson',

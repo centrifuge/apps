@@ -33,6 +33,7 @@ declare global {
       EVM_NETWORK: string
       EVM_MEMBERLIST_ADMIN_PRIVATE_KEY: string
       PURE_PROXY_CONTROLLER_SEED: string
+      ONBOARDING_STORAGE_BUCKET: string
     }
   }
 }

@@ -12,6 +12,7 @@ import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { manualKybCallbackController } from './controllers/kyb/manualKybCallback'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
+import { getGlobalOnboardingStatusController } from './controllers/user/getGlobalOnboardingStatus'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
 import { setVerifiedIdentityController } from './controllers/user/setVerifiedIdentity'
@@ -37,32 +38,26 @@ onboarding.disable('x-powered-by')
 onboarding.disable('server')
 
 onboarding.options('*', corsMiddleware)
-onboarding.post('/authenticateWallet', authenticateWalletController)
-onboarding.post('/verify', verifyTokenController)
-onboarding.post('/nonce', generateNonceController)
 
-onboarding.post('/sendVerifyEmail', verifyAuth, sendVerifyEmailController)
+onboarding.get('/getGlobalOnboardingStatus', getGlobalOnboardingStatusController)
+onboarding.get('/getSignedAgreement', verifyAuth, getSignedAgreementController)
+onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
+onboarding.get('/getUnsignedAgreement', verifyAuth, getUnsignedAgreementController)
+onboarding.get('/getUser', verifyAuth, getUserController)
 onboarding.get('/verifyEmail', verifyEmailController)
 
-onboarding.get('/getUser', verifyAuth, getUserController)
-
-onboarding.post('/startKyc', verifyAuth, startKycController)
-onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
-
-onboarding.post('/manualKybCallback', manualKybCallbackController)
-
-onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
-onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
-onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
-
-onboarding.post('/verifyBusiness', verifyAuth, verifyBusinessController)
-
+onboarding.post('/authenticateWallet', authenticateWalletController)
 onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
-
-onboarding.get('/getUnsignedAgreement', verifyAuth, getUnsignedAgreementController)
-onboarding.get('/getSignedAgreement', verifyAuth, getSignedAgreementController)
+onboarding.post('/manualKybCallback', manualKybCallbackController)
+onboarding.post('/nonce', generateNonceController)
+onboarding.post('/sendVerifyEmail', verifyAuth, sendVerifyEmailController)
+onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
 onboarding.post('/signAndSendDocuments', verifyAuth, signAndSendDocumentsController)
-
+onboarding.post('/startKyc', verifyAuth, startKycController)
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
+onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
+onboarding.post('/verify', verifyTokenController)
+onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
+onboarding.post('/verifyBusiness', verifyAuth, verifyBusinessController)
 
 exports.onboarding = onboarding

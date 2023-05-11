@@ -39,7 +39,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1 
 
       - name: Sync webpack from staging
-        run: gsutil -m rsync -d -r gs://app-staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
+        run: gsutil -m rsync -d -r gs://app.staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
   
   retrieve-prod-assets:
     runs-on: ubuntu-latest
@@ -154,7 +154,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: |
-            app-staging.centrifuge.io has been promoted to apps.centrifuge.io and is not LIVE!
+            app.staging.centrifuge.io has been promoted to apps.centrifuge.io and is not LIVE!
             Check out the new release -> https://github.com/centrifuge/apps/releases/
           SLACK_USERNAME: "Centrifuge GHA Bot"
           SLACK_ICON: "https://centrifuge.io/favicon.ico"
