@@ -68,7 +68,7 @@ export const UpdateInvestorStatus: React.FC = () => {
             </>
           ) : (
             <>
-              <ContentHeader title="An error occured" body="Please contract info@centrifuge.io for more information." />
+              <ContentHeader title="An error occured" body="Please contact info@centrifuge.io for more information." />
             </>
           )}
         </Content>
