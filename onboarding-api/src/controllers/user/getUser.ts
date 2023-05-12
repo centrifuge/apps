@@ -8,19 +8,17 @@ export const getUserController = async (req: Request, res: Response) => {
     const user = await fetchUser(req.wallet, { suppressError: true })
 
     if (!user) {
-      return res.send(null)
+      return res.status(200).send(null)
     }
-
-    let status
 
     if (user.investorType === 'entity' && user.manualKybReference) {
-      status = await shuftiProRequest({ reference: user.manualKybReference }, { path: 'status' })
+      const status = await shuftiProRequest({ reference: user.manualKybReference }, { path: 'status' })
+      return res.send({
+        ...user,
+        ...{ manualKybStatus: status.event },
+      })
     }
-
-    return res.send({
-      ...user,
-      ...(status && { manualKybStatus: status.event }),
-    })
+    return res.status(200).send({ ...user })
   } catch (e) {
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })
