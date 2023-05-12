@@ -15,10 +15,10 @@ export const getUserController = async (req: Request, res: Response) => {
       const status = await shuftiProRequest({ reference: user.manualKybReference }, { path: 'status' })
       return res.send({
         ...user,
-        ...{ manualKybStatus: status.event },
+        manualKybStatus: status.event,
       })
     }
-    return res.status(200).send({ ...user })
+    return res.status(200).json(user)
   } catch (e) {
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })

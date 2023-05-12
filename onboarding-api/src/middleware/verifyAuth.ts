@@ -1,4 +1,4 @@
-import { isAddress } from '@polkadot/util-crypto'
+import { isAddress } from '@ethersproject/address'
 import { NextFunction, Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { isValidSubstrateAddress } from '../utils/centrifuge'
