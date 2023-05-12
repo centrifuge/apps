@@ -43,6 +43,7 @@ import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { InvestRedeemProvider, useInvestRedeem } from './InvestRedeemProvider'
+import { InvestRedeemActions } from './types'
 
 export type ActionsRef = React.MutableRefObject<
   | {
@@ -499,9 +500,13 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   const maxRedeem = state.trancheBalanceWithPending.mul(state.tokenPrice)
   const tokenSymbol = state.trancheCurrency?.symbol
 
-  hooks.useActionSucceeded(() => {
-    form.resetForm()
-    setChangeOrderFormShown(false)
+  hooks.useActionSucceeded((action) => {
+    if (action === 'approveTrancheToken') {
+      form.submitForm()
+    } else {
+      form.resetForm()
+      setChangeOrderFormShown(false)
+    }
   })
 
   // const availableReserve = Dec(pool.reserve.available ?? '0').div('1e18')
@@ -551,7 +556,10 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'
 
-  function renderInput(cancelCb?: () => void) {
+  function renderInput(
+    cancelCb?: () => void,
+    preSubmitAction?: { onClick: InvestRedeemActions['approveTrancheToken']; loading?: boolean }
+  ) {
     return (
       <Stack gap={2}>
         <EpochBusy busy={calculatingOrders} />
@@ -585,9 +593,14 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
-            Redeem
-          </Button>
+          {preSubmitAction ? (
+            <Button {...preSubmitAction}>Redeem</Button>
+          ) : (
+            <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
+              Redeem
+            </Button>
+          )}
+
           {cancelCb && (
             <Button variant="secondary" onClick={cancelCb} disabled={calculatingOrders}>
               Cancel
@@ -631,16 +644,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             }}
           />
         ) : state.needsTrancheTokenApproval ? (
-          <Stack px={1} gap={1}>
-            <Button onClick={actions.approveTrancheToken} loading={isApproving}>
-              Approve {state.trancheCurrency?.symbol}
-            </Button>
-            {onCancel && (
-              <Button variant="secondary" onClick={onCancel}>
-                Cancel
-              </Button>
-            )}
-          </Stack>
+          renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
         ) : (
           renderInput(onCancel)
         )}
