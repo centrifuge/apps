@@ -228,6 +228,7 @@ function getTinlakeLoanStatus(loan: TinlakeLoanData) {
   return 'Active'
 }
 
+// TODO: refactor to use multicall instead of subgraph
 async function getTinlakeLoans(poolId: string) {
   const query = `
     {
