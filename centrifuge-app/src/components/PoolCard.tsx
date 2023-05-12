@@ -1,10 +1,12 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Card, Grid, IconChevronRight, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { usePoolMetadata } from '../utils/usePools'
@@ -98,11 +100,7 @@ export function PoolCard({ pool }: PoolCardProps) {
             pool ? <Tooltips type="valueLocked" variant="secondary" props={{ poolId: pool.id }} /> : 'Value locked'
           }
           value={
-            pool ? (
-              formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)
-            ) : (
-              <TextWithPlaceholder isLoading />
-            )
+            pool ? formatBalance(getPoolValueLocked(pool), pool.currency.symbol) : <TextWithPlaceholder isLoading />
           }
           renderAs={{ label: 'dt', value: 'dd' }}
         />
@@ -113,16 +111,22 @@ export function PoolCard({ pool }: PoolCardProps) {
         />
         <LabelValueStack
           label="Capacity"
-          value={
-            pool ? (
-              formatBalance(pool.tranches.at(-1)!.capacity, pool.currency.symbol)
-            ) : (
-              <TextWithPlaceholder isLoading />
-            )
-          }
+          value={pool ? formatBalance(getPoolCapacity(pool), pool.currency.symbol) : <TextWithPlaceholder isLoading />}
           renderAs={{ label: 'dt', value: 'dd' }}
         />
       </Shelf>
     </Card>
   )
+}
+
+function getPoolValueLocked(pool: Pool | TinlakePool) {
+  return pool.tranches
+    .map((tranche) =>
+      tranche.tokenPrice ? tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()) : Dec(0)
+    )
+    .reduce((a, b) => a.add(b))
+}
+
+function getPoolCapacity(pool: Pool | TinlakePool) {
+  return pool.tranches.map(({ capacity }) => capacity).reduce((a, b) => a.add(b.toDecimal()), new Decimal(0))
 }
