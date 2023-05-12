@@ -1,4 +1,4 @@
-import { Loan } from '@centrifuge/centrifuge-js'
+import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
@@ -11,14 +11,14 @@ import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 
-type Row = Loan & {
+type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
   statusLabel: string
   originationDateSortKey: string
 }
 
 type Props = {
-  loans: Loan[]
+  loans: Loan[] | TinlakeLoan[]
 }
 
 const columns: Column[] = [

@@ -1,11 +1,11 @@
 import {
   CurrencyBalance,
-  Loan,
   Perquintill,
   Pool,
   PoolMetadata,
   Price,
   Rate,
+  TinlakeLoan,
   TokenBalance,
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
@@ -80,7 +80,7 @@ export interface PoolsData {
   pools: PoolData[]
 }
 
-export interface TinlakeLoan {
+export interface TinlakeLoanData {
   id: string
   borrowsAggregatedAmount: string
   debt: string
@@ -169,7 +169,7 @@ export function useTinlakeLoans(poolId: string) {
         dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
         riskGroup: loan.riskGroup,
         owner: loan.owner,
-      })) as Loan[]
+      })) as TinlakeLoan[]
     },
     {
       enabled: !!poolId && !!poolId.startsWith('0x'),
@@ -218,7 +218,7 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
   version: 2 | 3
 }
 
-function getTinlakeLoanStatus(loan: TinlakeLoan) {
+function getTinlakeLoanStatus(loan: TinlakeLoanData) {
   if (loan.financingDate && loan.debt === '0') {
     return 'Closed'
   }
@@ -251,7 +251,7 @@ async function getTinlakeLoans(poolId: string) {
       }
     }`
 
-  const { loans } = await request<{ loans: TinlakeLoan[] }>('https://graph.centrifuge.io/tinlake', query)
+  const { loans } = await request<{ loans: TinlakeLoanData[] }>('https://graph.centrifuge.io/tinlake', query)
   return loans
 }
 

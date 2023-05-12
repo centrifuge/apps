@@ -45,9 +45,8 @@ export const PoolDetailAssets: React.FC = () => {
     )
   }
 
-  const ongoingAssets = loans.filter(
-    (loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()
-  ) as ActiveLoan[]
+  const ongoingAssets = (loans &&
+    [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero())) as ActiveLoan[]
 
   const avgInterestRatePerSec = ongoingAssets
     .reduce<any>((curr, prev) => curr.add(prev.pricing.interestRate.toPercent() || Dec(0)), Dec(0))

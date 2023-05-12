@@ -1,4 +1,4 @@
-import { Loan } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { StatusChip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { daysBetween } from '../utils/date'
@@ -6,13 +6,13 @@ import { daysBetween } from '../utils/date'
 type LabelStatus = 'default' | 'info' | 'ok' | 'warning' | 'critical'
 
 interface Props {
-  loan: Loan
+  loan: Loan | TinlakeLoan
 }
 
-export function getLoanLabelStatus(l: Loan): [LabelStatus, string] {
+export function getLoanLabelStatus(l: Loan | TinlakeLoan): [LabelStatus, string] {
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
-  if (l.status === 'Active' && l.writeOffStatus) return ['critical', 'Write-off']
+  if (l.status === 'Active' && (l as ActiveLoan).writeOffStatus) return ['critical', 'Write-off']
   if (l.status === 'Closed') return ['ok', 'Repaid']
   if (l.status === 'Active' && l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) return ['default', 'Ready']
   if (l.status === 'Created') return ['default', 'Created']

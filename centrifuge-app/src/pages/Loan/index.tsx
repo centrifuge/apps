@@ -1,4 +1,4 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -103,8 +103,8 @@ const Loan: React.FC = () => {
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
             {poolMetadata?.pool?.asset.class} asset by{' '}
-            {isTinlakePool && loan?.owner
-              ? truncate(loan.owner)
+            {isTinlakePool && (loan as TinlakeLoan)?.owner
+              ? truncate((loan as TinlakeLoan).owner)
               : nft?.owner && <Identity clickToCopy address={nft?.owner} />}
           </TextWithPlaceholder>
         }
@@ -116,9 +116,9 @@ const Loan: React.FC = () => {
               {
                 label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
                 value: isTinlakePool
-                  ? loan.riskGroup
-                  : loan.pricing.value
-                  ? formatBalance(loan.pricing.value, pool?.currency.symbol)
+                  ? (loan as TinlakeLoan).riskGroup
+                  : (loan as LoanType).pricing.value
+                  ? formatBalance((loan as LoanType).pricing.value, pool?.currency.symbol)
                   : 'n/a',
               },
               {
@@ -132,11 +132,11 @@ const Loan: React.FC = () => {
             ]}
           />
 
-          {!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && loan.dateClosed) ? (
+          {!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && (loan as TinlakeLoan).dateClosed) ? (
             <PageSection title="Financing & repayment cash flow">
               <Shelf gap={3} flexWrap="wrap">
-                {isTinlakePool && loan.status === 'Closed' && loan.dateClosed ? (
-                  <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
+                {isTinlakePool && loan.status === 'Closed' && (loan as TinlakeLoan).dateClosed ? (
+                  <LabelValueStack label="Date closed" value={formatDate((loan as TinlakeLoan).dateClosed)} />
                 ) : (
                   <FinancingRepayment
                     drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
@@ -180,7 +180,7 @@ const Loan: React.FC = () => {
           })}
 
           <PageSection title="NFT">
-            {isTinlakePool && loan.owner ? (
+            {isTinlakePool && (loan as TinlakeLoan).owner ? (
               <Shelf gap={6}>
                 <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
                 <LabelValueStack
@@ -192,9 +192,9 @@ const Loan: React.FC = () => {
                         wordBreak: 'break-word',
                         whiteSpace: 'normal',
                       }}
-                      onClick={() => copyToClipboard(loan.owner || '')}
+                      onClick={() => copyToClipboard((loan as TinlakeLoan).owner || '')}
                     >
-                      {truncate(loan.owner)}
+                      {truncate((loan as TinlakeLoan).owner)}
                     </Text>
                   }
                 />
