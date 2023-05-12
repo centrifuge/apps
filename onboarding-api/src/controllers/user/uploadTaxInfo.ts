@@ -1,24 +1,22 @@
 import { Request, Response } from 'express'
-import { fileTypeFromBuffer } from 'file-type'
 import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { Subset } from '../../utils/types'
 
-const validateTaxInfoFile = async (file: Buffer) => {
-  const fileString = file.toString('utf8')
+const validateFileSize = async (file?: Buffer) => {
+  if (!file) {
+    throw new HttpError(400, 'File not found')
+  }
 
-  const body = fileString.slice(fileString.indexOf('\r\n\r\n') + 4)
-  const type = await fileTypeFromBuffer(Buffer.from(body))
-
-  if (type?.mime !== 'application/pdf') {
-    throw new HttpError(400, 'Only PDF files are allowed')
+  if (file.byteLength > 1024 * 1024) {
+    throw new HttpError(400, 'File size must be less than 1MB')
   }
 }
 
 export const uploadTaxInfoController = async (req: Request, res: Response) => {
   try {
-    await validateTaxInfoFile(req.body)
+    await validateFileSize(req.body)
     const { wallet } = req
     const user = await fetchUser(wallet)
 

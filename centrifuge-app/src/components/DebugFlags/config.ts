@@ -30,7 +30,6 @@ export type Key =
   | 'editPoolConfig'
   | 'poolReporting'
   | 'editPoolVisibility'
-  | 'dryRunVerifyBusiness'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -70,11 +69,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editPoolVisibility: {
-    type: 'checkbox',
-    default: false,
-    alwaysShow: true,
-  },
-  dryRunVerifyBusiness: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

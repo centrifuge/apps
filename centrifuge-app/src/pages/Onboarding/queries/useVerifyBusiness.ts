@@ -1,6 +1,5 @@
 import { useMutation } from 'react-query'
 import { useLocation } from 'react-router-dom'
-import { useDebugFlags } from '../../../components/DebugFlags'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
@@ -17,7 +16,6 @@ export const useVerifyBusiness = () => {
   const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser, nextStep } = useOnboarding()
   const { search } = useLocation()
-  const { dryRunVerifyBusiness } = useDebugFlags()
 
   const poolId = new URLSearchParams(search).get('poolId')
   const trancheId = new URLSearchParams(search).get('trancheId')
@@ -34,7 +32,7 @@ export const useVerifyBusiness = () => {
             values.jurisdictionCode === 'us' || values.jurisdictionCode === 'ca'
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
-          dryRun: dryRunVerifyBusiness,
+          dryRun: import.meta.env.REACT_APP_ONBOARDING_API_URL.includes('production') ? false : true,
           manualReview: values?.manualReview ?? false,
           ...(values?.manualReview && poolId && trancheId && { poolId, trancheId }),
         }),
