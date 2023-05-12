@@ -1691,6 +1691,8 @@ __metadata:
     eslint-plugin-react: 7.30.1
     form-data: ^4.0.0
     formik: ^2.2.9
+    graphql: ^16.6.0
+    graphql-request: ^6.0.0
     jw3t: ^1.0.10
     nodemon: ^2.0.20
     npm-run-all: ^4.1.5
@@ -2971,6 +2973,15 @@ __metadata:
     teeny-request: ^8.0.0
     uuid: ^8.0.0
   checksum: 158f59a002cedb25365485d1be42fa09f40e58508169bf1861daab28fea1ce561dd61ba356086f5a792637e6038cb7be7faa1feb0e5312e1b49932dc1e0034f1
+  languageName: node
+  linkType: hard
+
+"@graphql-typed-document-node/core@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@graphql-typed-document-node/core@npm:3.2.0"
+  peerDependencies:
+    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: b08775cae1c65d89c54df4be0356786169ed3420a1f872c4319eb581b07282d6efec1ac548205ac73d576d5604f0a02c243b27d0ab6b1634ce7c4fddf90a5474
   languageName: node
   linkType: hard
 
@@ -16924,6 +16935,25 @@ fsevents@^1.2.7:
   version: 1.0.4
   resolution: "grapheme-splitter@npm:1.0.4"
   checksum: 6875e94add80360364a609e1fd0fe325e3b82326db2278dd36c1011a6bfc0e098811e791dedf9a88d4ae3f9d17a5c6a8d684948dd7b097f1f8d5ff905676e2b2
+  languageName: node
+  linkType: hard
+
+"graphql-request@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "graphql-request@npm:6.0.0"
+  dependencies:
+    "@graphql-typed-document-node/core": ^3.2.0
+    cross-fetch: ^3.1.5
+  peerDependencies:
+    graphql: 14 - 16
+  checksum: 472cacd717abea3cb997d12e5cba1e126a6982ca465858e3908c8bb891b8a7b253b07bdc9f2e94d3aab8f918cd96866b1de8df28a21c5e1706169f10484f61c5
+  languageName: node
+  linkType: hard
+
+"graphql@npm:^16.6.0":
+  version: 16.6.0
+  resolution: "graphql@npm:16.6.0"
+  checksum: ec652ccf6e8b6b0c42c984c2ff979e6d01ed18576aec2ba29eeb359c5189965d6cc0915db3ffb3ac755014e994ff876b7e0894a7489b9987a25d31652d06dcb9
   languageName: node
   linkType: hard
 

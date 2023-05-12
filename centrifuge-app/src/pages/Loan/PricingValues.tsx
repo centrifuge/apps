@@ -6,11 +6,13 @@ import { formatPercentage } from '../../utils/formatting'
 export function PricingValues({ loan: { pricing } }: { loan: Loan }) {
   return (
     <>
-      <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />
-      <LabelValueStack
-        label="Advance rate"
-        value={pricing.advanceRate && formatPercentage(pricing.advanceRate.toPercent())}
-      />
+      {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
+      {pricing.advanceRate && (
+        <LabelValueStack
+          label="Advance rate"
+          value={pricing.advanceRate && formatPercentage(pricing.advanceRate.toPercent())}
+        />
+      )}
       <LabelValueStack
         label="Financing fee"
         value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}

@@ -2,15 +2,18 @@ import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { combineLatest } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Dec } from './Decimal'
+import { useTinlakeLoans } from './tinlake/useTinlakePools'
 
 export function useLoans(poolId: string) {
   const isTinlakePool = poolId.startsWith('0x')
-  const [result] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
+  const [centLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     suspense: true,
     enabled: !isTinlakePool,
   })
 
-  return result
+  const { data: tinlakeLoans } = useTinlakeLoans(poolId)
+
+  return isTinlakePool ? tinlakeLoans : centLoans
 }
 
 export function useLoansAcrossPools(poolIds?: string[]) {
@@ -47,7 +50,11 @@ export function useNftDocumentId(collectionId?: string, nftId?: string) {
 export function useAvailableFinancing(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
-  const initialCeiling = loan.pricing.value.toDecimal().mul(loan.pricing.advanceRate.toDecimal())
+  const isTinlakePool = poolId.startsWith('0x')
+  const initialCeiling = isTinlakePool
+    ? loan.pricing.ceiling?.toDecimal() || Dec(0)
+    : loan.pricing.value?.toDecimal().mul(loan.pricing.advanceRate?.toDecimal() || 0) || Dec(0)
+
   if (loan.status !== 'Active') return { current: initialCeiling, initial: initialCeiling }
 
   const debtWithMargin = loan.outstandingDebt

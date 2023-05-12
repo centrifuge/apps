@@ -6,7 +6,7 @@ import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
-import { useNFT } from '../utils/useNFTs'
+import { useCentNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
@@ -91,7 +91,8 @@ export function LoanList({ loans }: Props) {
 }
 
 function AssetName({ loan }: { loan: Row }) {
-  const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
+  const isTinlakePool = loan.poolId.startsWith('0x')
+  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, true, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
     <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
@@ -103,7 +104,11 @@ function AssetName({ loan }: { loan: Row }) {
         fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {metadata?.name}
+        {isTinlakePool
+          ? loan.asset.nftId.length >= 9
+            ? `${loan.asset.nftId.slice(0, 4)}...${loan.asset.nftId.slice(-4)}`
+            : loan.asset.nftId
+          : metadata?.name}
       </TextWithPlaceholder>
     </Shelf>
   )

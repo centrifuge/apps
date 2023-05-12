@@ -17,13 +17,13 @@ export function getLoanLabelStatus(l: Loan): [LabelStatus, string] {
   if (l.status === 'Active' && l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) return ['default', 'Ready']
   if (l.status === 'Created') return ['default', 'Created']
 
-  if (l.status === 'Active' && 'maturityDate' in l.pricing) {
+  if (l.status === 'Active' && 'maturityDate' in l.pricing && l.pricing.maturityDate) {
     const days = daysBetween(today, l.pricing.maturityDate)
-    if (days === 0) return ['warning', 'due today']
-    if (days === 1) return ['warning', 'due tomorrow']
-    if (days > 1 && days <= 5) return ['warning', `due in ${days} days`]
-    if (days === -1) return ['critical', `due ${Math.abs(days)} day ago`]
-    if (days < -1) return ['critical', `due ${Math.abs(days)} days ago`]
+    if (days === 0) return ['warning', 'Due today']
+    if (days === 1) return ['warning', 'Due tomorrow']
+    if (days > 1 && days <= 5) return ['warning', `Due in ${days} days`]
+    if (days === -1) return ['critical', `Due ${Math.abs(days)} day ago`]
+    if (days < -1) return ['critical', `Due ${Math.abs(days)} days ago`]
   }
   return ['info', 'Ongoing']
 }

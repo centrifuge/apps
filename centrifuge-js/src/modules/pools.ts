@@ -265,15 +265,16 @@ type ClosedLoanData = {
 }
 
 type PricingInfo = {
-  valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
-  maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
-  value: CurrencyBalance
+  valuationMethod?: 'discountedCashFlow' | 'outstandingDebt'
+  maxBorrowAmount?: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+  value?: CurrencyBalance
   maturityDate: string
-  advanceRate: Rate
+  advanceRate?: Rate
   interestRate: Rate
   probabilityOfDefault?: Rate
   lossGivenDefault?: Rate
   discountRate?: Rate
+  ceiling?: CurrencyBalance
 }
 
 // transformed type for UI
@@ -291,6 +292,8 @@ export type CreatedLoan = {
   totalRepaid: CurrencyBalance
   normalizedDebt: CurrencyBalance
   outstandingDebt: CurrencyBalance
+  riskGroup?: string
+  owner?: string
 }
 
 // transformed type for UI
@@ -313,6 +316,8 @@ export type ActiveLoan = {
   originationDate: string
   normalizedDebt: CurrencyBalance
   outstandingDebt: CurrencyBalance
+  riskGroup?: string
+  owner?: string
 }
 
 // transformed type for UI
@@ -327,6 +332,9 @@ export type ClosedLoan = {
   }
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
+  dateClosed?: number
+  riskGroup?: string
+  owner?: string
 }
 
 export type Loan = CreatedLoan | ClosedLoan | ActiveLoan
