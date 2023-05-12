@@ -125,6 +125,7 @@ const goerliConfig = {
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
   poolsHash: 'QmZoFPrVjcrZCDFrFqCuzmYz9fVudbmyoYBu2tKER5N6Fa', // TODO: add registry to config and fetch poolHash
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
+  blockExplorerUrl: 'https://goerli.etherscan.io',
 }
 const mainnetConfig = {
   rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
@@ -132,6 +133,7 @@ const mainnetConfig = {
   tinlakeUrl: 'https://tinlake.centrifuge.io',
   poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
   remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
+  blockExplorerUrl: 'https://etherscan.io',
 }
 
 export const ethConfig = {

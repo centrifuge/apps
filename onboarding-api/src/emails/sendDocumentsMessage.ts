@@ -44,7 +44,7 @@ export const sendDocumentsMessage = async (
           )}&status=rejected&metadata=${pool?.metadata}`,
           approveLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
             token
-          )}&status=approved&metadata=${pool?.metadata}`,
+          )}&status=approved&metadata=${pool?.metadata}&network=${wallet.network}`,
           disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
         },
       },

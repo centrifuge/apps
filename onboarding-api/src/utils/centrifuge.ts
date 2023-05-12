@@ -84,7 +84,7 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
   //     .connect(signer.address, signer)
   //     .pools.updatePoolRoles([poolId, [[walletAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]], []])
   // )
-  return tx.txHash.toString()
+  return { txHash: tx.txHash.toString() }
 }
 
 export const validateRemark = async (
