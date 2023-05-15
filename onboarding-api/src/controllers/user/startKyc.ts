@@ -99,7 +99,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       face: {
         proof: '',
         allow_offline: IS_DEV_ENV ? '1' : '0',
-        check_duplicate_request: IS_DEV_ENV ? '1' : '0',
+        check_duplicate_request: IS_DEV_ENV ? '0' : '1',
       },
       document: {
         proof: '',
