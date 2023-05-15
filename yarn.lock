@@ -1663,7 +1663,6 @@ __metadata:
     "@makerdao/multicall": ^0.12.0
     "@polkadot/extension-dapp": ^0.44.1
     "@polkadot/react-identicon": ^2.8.2
-    "@safe-global/safe-apps-sdk": ^7.11.0
     "@stablelib/blake2b": ^1.0.1
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
@@ -6057,16 +6056,6 @@ __metadata:
     "@safe-global/safe-gateway-typescript-sdk": ^3.5.3
     ethers: ^5.7.2
   checksum: d3f231622f42c6056794a16e14bad0ba63cb33d4f69b96fae33d4dd116770abd5bd90c8089676392b1fb714def63661ea3874c37765ea6f78cb87de5fdcd916a
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-apps-sdk@npm:^7.11.0":
-  version: 7.11.0
-  resolution: "@safe-global/safe-apps-sdk@npm:7.11.0"
-  dependencies:
-    "@safe-global/safe-gateway-typescript-sdk": ^3.5.3
-    ethers: ^5.7.2
-  checksum: a7be67f7eea01263dc566456afaa6504658e23f9c3505c361659463d61a5b134b4814b21b274a7cbb37ac8d11ea947febf5eae2685b10032c13118d6c1061a32
   languageName: node
   linkType: hard
 
