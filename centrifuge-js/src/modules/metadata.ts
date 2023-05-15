@@ -35,14 +35,6 @@ export function getMetadataModule(inst: Centrifuge) {
       .pipe(map(({ uri }) => parseIPFSHash(uri)))
   }
 
-  function unpinFile(uri: string) {
-    if (!inst.config.unpinFile) {
-      return from([])
-    }
-    const hash = parseIPFSHash(uri).ipfsHash
-    return inst.config.unpinFile(hash)
-  }
-
   function parseMetadataUrl(url: string) {
     try {
       let newUrl
@@ -80,5 +72,5 @@ export function getMetadataModule(inst: Centrifuge) {
     return { uri, ipfsHash: '' }
   }
 
-  return { getMetadata, parseMetadataUrl, pinFile, pinJson, unpinFile }
+  return { getMetadata, parseMetadataUrl, pinFile, pinJson }
 }

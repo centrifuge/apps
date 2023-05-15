@@ -27,11 +27,12 @@ export const confirmOwnersController = async (
     await validateInput(req.body, confirmOwnersInput)
     const { wallet } = req
     const user = await fetchUser(wallet)
+
     if (user.investorType !== 'entity') {
-      throw new HttpError(404, 'Business not found')
+      throw new HttpError(400, 'User is not an entity')
     }
 
-    if (!user.globalSteps.verifyBusiness.completed) {
+    if (!user.manualKybReference && !user.globalSteps.verifyBusiness.completed) {
       throw new HttpError(400, 'Business must be verified before confirming ownership')
     }
 
@@ -40,7 +41,7 @@ export const confirmOwnersController = async (
     }
 
     if (!user.globalSteps.verifyEmail.completed) {
-      throw new HttpError(400, 'Email must be verified before completing business verification')
+      throw new HttpError(400, 'Email must be verified before confirming ownership')
     }
 
     const verifyEntity: Subset<EntityUser> = {

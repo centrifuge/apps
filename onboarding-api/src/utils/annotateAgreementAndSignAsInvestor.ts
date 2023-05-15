@@ -3,7 +3,8 @@ import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { onboardingBucket } from '../database'
-import { centrifuge, getPoolById } from './centrifuge'
+import { centrifuge } from './centrifuge'
+import { getPoolById } from './getPoolById'
 import { HttpError } from './httpError'
 
 interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {

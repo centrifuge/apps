@@ -27,7 +27,7 @@ export const KnowYourCustomer = () => {
 
   const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
 
-  const { onboardingUser, refetchOnboardingUser } = useOnboarding()
+  const { onboardingUser } = useOnboarding()
 
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
@@ -49,6 +49,7 @@ export const KnowYourCustomer = () => {
     },
     validationSchema,
     validateOnMount: true,
+    enableReinitialize: true,
   })
 
   const { mutate: startKYC, data: startKYCData, isLoading: isStartKYCLoading } = useStartKYC()
@@ -56,7 +57,7 @@ export const KnowYourCustomer = () => {
   const { mutate: setVerifiedIdentity } = useVerifyIdentity()
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com') {
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.accepted') {
       setVerifiedIdentity()
     }
   }
@@ -74,7 +75,7 @@ export const KnowYourCustomer = () => {
     if (startKYCData?.verification_url) {
       nextKnowYourCustomerStep()
     }
-  }, [startKYCData, refetchOnboardingUser])
+  }, [startKYCData])
 
   if (activeKnowYourCustomerStep === 0) {
     return <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />

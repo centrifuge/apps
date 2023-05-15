@@ -93,7 +93,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
     // wallet finished connection attempt, user was fetched
     if (!isConnecting && isOnboardingUserFetched) {
-      const activeOnboardingStep = getActiveOnboardingStep(onboardingUser, pool?.id, pool?.trancheId)
+      const isPendingManualKybReview = onboardingUser?.manualKybStatus === 'review.pending'
+
+      const activeOnboardingStep = getActiveOnboardingStep(
+        onboardingUser,
+        isPendingManualKybReview,
+        pool?.id,
+        pool?.trancheId
+      )
 
       return setActiveStep(activeOnboardingStep)
     }

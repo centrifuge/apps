@@ -1,9 +1,8 @@
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
 import { onboardingBucket, Wallet } from '../database'
-import { getPoolById } from '../utils/centrifuge'
+import { getPoolById } from '../utils/getPoolById'
 import { HttpError } from '../utils/httpError'
-import { getTinlakePoolById } from '../utils/tinlake'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string
@@ -17,11 +16,10 @@ export const sendDocumentsMessage = async (
   trancheId: string,
   signedAgreement: Uint8Array
 ) => {
-  const { metadata, pool } =
-    wallet.network === 'substrate' ? await getPoolById(poolId) : await getTinlakePoolById(poolId)
+  const { metadata, pool } = await getPoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '7d',
+    expiresIn: '14d',
   })
 
   const taxInfoFile = await onboardingBucket.file(`tax-information/${wallet.address}.pdf`)
@@ -46,7 +44,7 @@ export const sendDocumentsMessage = async (
           )}&status=rejected&metadata=${pool?.metadata}`,
           approveLink: `${process.env.REDIRECT_URL}/onboarding/updateInvestorStatus?token=${encodeURIComponent(
             token
-          )}&status=approved&metadata=${pool?.metadata}`,
+          )}&status=approved&metadata=${pool?.metadata}&network=${wallet.network}`,
           disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
         },
       },
@@ -54,7 +52,7 @@ export const sendDocumentsMessage = async (
     template_id: templateIds.updateInvestorStatus,
     from: {
       name: 'Centrifuge',
-      email: `noreply@centrifuge.io`,
+      email: 'hello@centrifuge.io',
     },
     attachments: [
       {
