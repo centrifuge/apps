@@ -64,11 +64,11 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
     .add(loan.outstandingDebt.toDecimal().mul(loan.pricing.interestRate.toDecimal().div(365 * 8))) // Additional 3 hour interest as margin
 
   let ceiling = initialCeiling
-  // if (loan.pricing.maxBorrowAmount === 'upToTotalBorrowed') {
-  //   ceiling = ceiling.minus(loan.totalBorrowed?.toDecimal() || 0)
-  // } else {
-  //   ceiling = ceiling.minus(debtWithMargin)
-  //   ceiling = ceiling.isNegative() ? Dec(0) : ceiling
-  // }
+  if ((loan as Loan).pricing.maxBorrowAmount === 'upToTotalBorrowed') {
+    ceiling = ceiling.minus(loan.totalBorrowed?.toDecimal() || 0)
+  } else {
+    ceiling = ceiling.minus(debtWithMargin)
+    ceiling = ceiling.isNegative() ? Dec(0) : ceiling
+  }
   return { current: ceiling, initial: initialCeiling, debtWithMargin }
 }
