@@ -20,9 +20,9 @@ export const UpdateInvestorStatus: React.FC = () => {
     data && poolMetadata ? poolMetadata?.[data.poolId]?.metadata.name : poolMetadata ? poolMetadata.pool?.name : ''
   const blockExplorerUrl =
     network === 'evm' && data?.txHash
-      ? `${ethConfig.blockExplorerUrl}/extrinsic/${data.txHash}`
+      ? `${ethConfig.blockExplorerUrl}/tx/${data.txHash}`
       : network === 'substrate' && data?.txHash
-      ? `${import.meta.env.REACT_APP_SUBSCAN_URL}/tx/${data.txHash}`
+      ? `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${data.txHash}`
       : null
   return (
     <Layout>

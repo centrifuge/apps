@@ -22,6 +22,7 @@ import { verifyAccreditationController } from './controllers/user/verifyAccredit
 import { corsMiddleware } from './middleware/cors'
 import { fileUpload } from './middleware/fileUpload'
 import { rateLimiterMiddleware } from './middleware/rateLimiter'
+import { restrictedPool } from './middleware/restrictedPool'
 import { shuftiProAuthMiddleware } from './middleware/shuftiProAuthMiddleware'
 import { verifyAuth } from './middleware/verifyAuth'
 
@@ -34,6 +35,7 @@ onboarding.options('*', corsMiddleware)
 
 // middleware
 onboarding.use(rateLimiterMiddleware)
+onboarding.use(restrictedPool)
 onboarding.use(shuftiProAuthMiddleware)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))

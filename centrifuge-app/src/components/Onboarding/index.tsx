@@ -9,6 +9,7 @@ import { Header } from './Header'
 import { Layout } from './Layout'
 import { Notification } from './Notification'
 import { NotificationBar } from './NotificationBar'
+import { PoolBranding } from './PoolBranding'
 import { ValidEmailTooltip } from './ValidEmailTooltip'
 
 export {
@@ -25,4 +26,5 @@ export {
   Notification,
   NotificationBar,
   ValidEmailTooltip,
+  PoolBranding,
 }
