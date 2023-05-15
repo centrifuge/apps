@@ -272,7 +272,7 @@ export function getTinlakeModule(inst: Centrifuge) {
   ) {
     const submissionTx = (async () => {
       const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
-      if ((await coordinator.submissionPeriod()) !== false) throw new Error('Not in submission period')
+      if ((await coordinator.submissionPeriod()) !== true) throw new Error('Not in submission period')
       const state = await getEpochState(contractAddresses, contractVersions, [])
       const orders = await getOrders(contractAddresses, contractVersions, [])
       const solution = await runSolver(contractAddresses, contractVersions, [state, orders])

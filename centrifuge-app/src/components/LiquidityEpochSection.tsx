@@ -1,7 +1,9 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { formatBalance, useCentrifuge, useCentrifugeTransaction, useEvmProvider } from '@centrifuge/centrifuge-react'
 import { Button, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useTinlakeBalances } from '../utils/tinlake/useTinlakeBalances'
+import { useTinlakeInvestments } from '../utils/tinlake/useTinlakeInvestments'
 import { TinlakePool, useTinlakePools } from '../utils/tinlake/useTinlakePools'
 import { useTinlakeTransaction } from '../utils/tinlake/useTinlakeTransaction'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
@@ -246,18 +248,26 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
 function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   const { refetch } = useTinlakePools()
   const cent = useCentrifuge()
+  const provider = useEvmProvider()
+  const { refetch: refetchBalances } = useTinlakeBalances()
+  const { refetch: refetchInvestments } = useTinlakeInvestments(pool.id)
+
   const { execute: closeEpochTx, isLoading: loadingClose } = useTinlakeTransaction(
     pool.id,
     'Close epoch',
     (cent) => cent.tinlake.closeEpoch,
     {
       onSuccess: async () => {
-        const coordinator = cent.tinlake.contract(pool.addresses, undefined, 'COORDINATOR')
+        const signer = provider!.getSigner()
+        const connectedCent = cent.connectEvm(signer)
+        const coordinator = connectedCent.tinlake.contract(pool.addresses, undefined, 'COORDINATOR')
         if ((await coordinator.submissionPeriod()) === true) {
           // didn't execute right away, run solver
           solveEpochTx([])
         } else {
           refetch()
+          refetchBalances()
+          refetchInvestments()
         }
       },
     }
@@ -275,7 +285,14 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   const { execute: executeEpochTx, isLoading: loadingExecution } = useTinlakeTransaction(
     pool.id,
     'Execute epoch',
-    (cent) => cent.tinlake.executeEpoch
+    (cent) => cent.tinlake.executeEpoch,
+    {
+      onSuccess: () => {
+        refetch()
+        refetchBalances()
+        refetchInvestments()
+      },
+    }
   )
 
   const juniorInvest = pool.tranches[0].pendingInvestments.toDecimal()
@@ -343,7 +360,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
       } else {
         epochButtonElement = (
           <Button variant="secondary" small disabled>
-            Close epoch
+            Start order execution
           </Button>
         )
       }
@@ -358,25 +375,21 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
     case 'challengePeriod':
       epochButtonElement = (
         <Button variant="secondary" small disabled>
-          Start order execution
+          Execute orders
         </Button>
       )
       break
     case 'executionPeriod':
       epochButtonElement = (
-        <Button variant="secondary" small onClick={() => executeEpochTx([])}>
-          Start order execution
+        <Button variant="secondary" small onClick={() => executeEpochTx([])} loading={loadingExecution}>
+          Execute orders
         </Button>
       )
       break
   }
 
   return (
-    <PageSection
-      title="Order overview"
-      titleAddition={<Text variant="body2">{loadingExecution && 'Order executing'}</Text>}
-      headerRight={epochButtonElement}
-    >
+    <PageSection title="Order overview" headerRight={epochButtonElement}>
       <Stack gap="2">
         <Stack gap="3">
           <DataTableGroup>
