@@ -3,11 +3,10 @@ import { businessAmlMockResponse } from '../mocks/businessAmlResponse'
 import { kybMockResponse } from '../mocks/kybResponse'
 import { HttpError } from './httpError'
 
+const acceptableDryRunEnvs = ['demo', 'development', 'catalyst']
+
 export const shuftiProRequest = async (payload: any, options?: { dryRun?: boolean; path?: string }) => {
-  if (
-    options?.dryRun &&
-    (process.env.COLLATOR_WSS_URL.includes('demo') || process.env.COLLATOR_WSS_URL.includes('development'))
-  ) {
+  if (options?.dryRun && acceptableDryRunEnvs.some((env) => process.env.COLLATOR_WSS_URL.includes(env))) {
     if (payload.reference.startsWith('BUSINESS_AML_REQUEST')) {
       return businessAmlMockResponse
     } else if (payload.reference.startsWith('KYB_REQUEST')) {
