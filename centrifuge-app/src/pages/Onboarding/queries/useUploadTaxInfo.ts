@@ -17,7 +17,6 @@ export const useUploadTaxInfo = () => {
           body: formData,
           headers: {
             Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'multipart/form-data',
           },
           credentials: 'include',
         })

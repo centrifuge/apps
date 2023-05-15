@@ -51,7 +51,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: |
-            app-altair.centrifuge.io and app-staging.centrifuge.io updated by GH actions job
+            app.altair.centrifuge.io and app.staging.centrifuge.io updated by GH actions job
             Check out the new pre-release -> https://github.com/centrifuge/apps/releases/
           SLACK_USERNAME: "Centrifuge GHA Bot"
           SLACK_ICON: "https://centrifuge.io/favicon.ico"

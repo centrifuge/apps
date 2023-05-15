@@ -88,19 +88,19 @@ export const updateInvestorStatusController = async (
         `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
       )
 
-      await addInvestorToMemberList(wallet, poolId, trancheId)
+      const { txHash } = await addInvestorToMemberList(wallet, poolId, trancheId)
       await Promise.all([
         sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF),
         sendApproveIssuerMessage(wallet.address, poolId, trancheId, countersignedAgreementPDF),
         validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
       ])
-      return res.status(200).send({ poolId, trancheId })
+      return res.status(200).send({ status: 'approved', poolId, trancheId, txHash })
     } else if (user?.email && status === 'rejected') {
       await Promise.all([
         sendRejectInvestorMessage(user.email, poolId),
         validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
       ])
-      throw new HttpError(400, 'Investor has been rejected')
+      return res.status(200).send({ status: 'rejected', poolId, trancheId })
     }
     throw new HttpError(400, 'Investor status may have already been updated')
   } catch (e) {

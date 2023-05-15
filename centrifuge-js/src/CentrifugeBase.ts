@@ -43,7 +43,6 @@ export type Config = {
   metadataHost: string
   pinFile?: (b64URI: string) => Promise<{ uri: string }>
   pinJson?: (json: string) => Promise<{ uri: string }>
-  unpinFile?: (hash: string) => Promise<void>
   signer?: Signer
   signingAddress?: AddressOrPair
   evmSigner?: JsonRpcSigner
