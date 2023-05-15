@@ -1,3 +1,4 @@
+import { GnosisSafe } from '@web3-react/gnosis-safe'
 import * as React from 'react'
 import { EvmConnectorMeta } from './evm/connectors'
 import { useConnectorState } from './evm/utils'
@@ -144,7 +145,7 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
 
   React.useEffect(() => {
     if (state.connectedType === 'evm') {
-      if (evmState.accounts?.length) {
+      if (evmState.accounts?.length && !(state.evm.selectedWallet!.connector instanceof GnosisSafe)) {
         persist({
           type: 'evm',
           wallet: evmConnectors.find((c) => c.connector === state.evm.selectedWallet!.connector)!.id,
