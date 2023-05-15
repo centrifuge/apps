@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { IndividualUser, validateAndWriteToFirestore } from '../../database'
+import { IS_DEV_ENV } from '../../utils/envCheck'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
-import { IS_DEV_ENV } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
 const kycInput = object({
