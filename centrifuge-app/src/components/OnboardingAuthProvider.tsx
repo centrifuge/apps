@@ -113,6 +113,7 @@ export function useOnboardingAuth() {
     login: ctx.login,
     refetchAuth,
     isAuthFetched: isFetched,
+    isLoading: ctx.isLoggingIn,
   }
 }
 
