@@ -36,14 +36,6 @@ const Pools: React.FC = () => {
     )
   }, [listedTokens])
 
-  React.useEffect(() => {
-    if (listedPools && listedPools?.length) {
-      listedPools.forEach((pool) => {
-        console.log('max reserve', pool.reserve.max.toFloat())
-      })
-    }
-  }, [listedPools, filtered])
-
   const pageSummaryData = [
     {
       label: <Tooltips type="tvl" />,
