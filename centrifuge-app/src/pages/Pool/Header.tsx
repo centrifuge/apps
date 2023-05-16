@@ -69,7 +69,8 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
           <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
           {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>}
-          {poolReporting && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>}
+          {/* {poolReporting && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>} */}
+          <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>
         </NavigationTabs>
       </Shelf>
     </PageHeader>
