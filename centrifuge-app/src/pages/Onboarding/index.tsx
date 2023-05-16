@@ -1,7 +1,7 @@
-import { Box, Step, Stepper, Thumbnail } from '@centrifuge/fabric'
+import { Step, Stepper } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-import { Container, Header, Layout } from '../../components/Onboarding'
+import { Container, Header, Layout, PoolBranding } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
 import { usePool } from '../../utils/usePools'
@@ -59,13 +59,7 @@ export const OnboardingPage: React.FC = () => {
 
   return (
     <Layout>
-      <Header>
-        {pool?.symbol && (
-          <Box pt={1}>
-            <Thumbnail type="token" size="large" label={pool.symbol} />
-          </Box>
-        )}
-      </Header>
+      <Header>{!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}</Header>
 
       <Container
         isLoading={isLoadingStep}

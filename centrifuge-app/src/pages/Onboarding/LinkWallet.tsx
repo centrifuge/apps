@@ -16,7 +16,7 @@ const validationSchema = object({
 export const LinkWallet = () => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = React.useState(false)
   const { nextStep } = useOnboarding()
-  const { login, isAuth } = useOnboardingAuth()
+  const { login, isAuth, isLoading } = useOnboardingAuth()
   const {
     evm: { selectedAddress },
     substrate: { selectedAccount },
@@ -89,6 +89,7 @@ export const LinkWallet = () => {
           <Button onClick={nextStep}>Next</Button>
         ) : (
           <Button
+            loading={isLoading}
             onClick={() => {
               isAuth ? nextStep() : formik.handleSubmit()
             }}
