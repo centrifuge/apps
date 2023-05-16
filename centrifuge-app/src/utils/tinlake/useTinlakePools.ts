@@ -1,7 +1,17 @@
-import { CurrencyBalance, Perquintill, Pool, PoolMetadata, Price, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
+import {
+  CurrencyBalance,
+  Perquintill,
+  Pool,
+  PoolMetadata,
+  Price,
+  Rate,
+  TinlakeLoan,
+  TokenBalance,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
 import BN from 'bn.js'
+import { request } from 'graphql-request'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
@@ -70,6 +80,23 @@ export interface PoolsData {
   pools: PoolData[]
 }
 
+export interface TinlakeLoanData {
+  id: string
+  borrowsAggregatedAmount: string
+  debt: string
+  financingDate: string | null
+  index: number
+  interestRatePerSecond: string
+  maturityDate: string | null
+  nftId: string
+  pool: { id: string }
+  repaysAggregatedAmount: string
+  ceiling: string
+  closed: number
+  riskGroup: string
+  owner: string
+}
+
 function parsePoolsMetadata(poolsMetadata: TinlakeMetadataPool[]): IpfsPools {
   const launching = poolsMetadata.filter((p): p is LaunchingPool => !!p.metadata.isLaunching)
   const active = poolsMetadata.filter(
@@ -114,6 +141,44 @@ export function useTinlakePools(suspense = false) {
   })
 }
 
+export function useTinlakeLoans(poolId: string) {
+  return useQuery(
+    ['tinlakePoolLoans', poolId],
+    async () => {
+      const loans = await getTinlakeLoans(poolId)
+
+      return loans.map((loan) => ({
+        asset: {
+          nftId: loan.nftId,
+          collectionId: loan.pool.id,
+        },
+        id: loan.index.toString(),
+        originationDate: loan.financingDate ? new Date(Number(loan.financingDate) * 1000).toISOString() : null,
+        outstandingDebt: new CurrencyBalance(loan.debt, 18),
+        poolId: loan.pool.id,
+        pricing: {
+          maturityDate: Number(loan.maturityDate) ? new Date(Number(loan.maturityDate) * 1000).toISOString() : null,
+          interestRate: new Rate(
+            new BN(loan.interestRatePerSecond).sub(new BN(10).pow(new BN(27))).mul(new BN(31536000))
+          ),
+          ceiling: new CurrencyBalance(loan.ceiling, 18),
+        },
+        status: getTinlakeLoanStatus(loan),
+        totalBorrowed: new CurrencyBalance(loan.borrowsAggregatedAmount, 18),
+        totalRepaid: new CurrencyBalance(loan.repaysAggregatedAmount, 18),
+        dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
+        riskGroup: loan.riskGroup,
+        owner: loan.owner,
+      })) as TinlakeLoan[]
+    },
+    {
+      enabled: !!poolId && !!poolId.startsWith('0x'),
+      staleTime: Infinity,
+      suspense: true,
+    }
+  )
+}
+
 export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches'> & {
   metadata: PoolMetadata
   tinlakeMetadata: PoolMetadataDetails
@@ -151,6 +216,44 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
     | undefined
   network: 'mainnet' | 'kovan' | 'goerli'
   version: 2 | 3
+}
+
+function getTinlakeLoanStatus(loan: TinlakeLoanData) {
+  if (loan.financingDate && loan.debt === '0') {
+    return 'Closed'
+  }
+  if (!loan.financingDate) {
+    return 'Created'
+  }
+  return 'Active'
+}
+
+// TODO: refactor to use multicall instead of subgraph
+async function getTinlakeLoans(poolId: string) {
+  const query = `
+    {
+      loans (first: 1000, where: { pool_in: ["${poolId.toLowerCase()}"]}) {
+        nftId
+        id
+        index
+        financingDate
+        debt
+        pool {
+          id
+        }
+        maturityDate
+        interestRatePerSecond
+        borrowsAggregatedAmount
+        repaysAggregatedAmount
+        ceiling
+        closed
+        riskGroup
+        owner
+      }
+    }`
+
+  const { loans } = await request<{ loans: TinlakeLoanData[] }>('https://graph.centrifuge.io/tinlake', query)
+  return loans
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {

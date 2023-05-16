@@ -1,4 +1,4 @@
-import { Loan } from '@centrifuge/centrifuge-js'
+import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
@@ -6,19 +6,19 @@ import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
-import { useNFT } from '../utils/useNFTs'
+import { useCentNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 
-type Row = Loan & {
+type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
   statusLabel: string
   originationDateSortKey: string
 }
 
 type Props = {
-  loans: Loan[]
+  loans: Loan[] | TinlakeLoan[]
 }
 
 const columns: Column[] = [
@@ -91,7 +91,8 @@ export function LoanList({ loans }: Props) {
 }
 
 function AssetName({ loan }: { loan: Row }) {
-  const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
+  const isTinlakePool = loan.poolId.startsWith('0x')
+  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, true, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
     <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
@@ -103,7 +104,11 @@ function AssetName({ loan }: { loan: Row }) {
         fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {metadata?.name}
+        {isTinlakePool
+          ? loan.asset.nftId.length >= 9
+            ? `${loan.asset.nftId.slice(0, 4)}...${loan.asset.nftId.slice(-4)}`
+            : loan.asset.nftId
+          : metadata?.name}
       </TextWithPlaceholder>
     </Shelf>
   )

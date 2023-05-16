@@ -264,7 +264,7 @@ type ClosedLoanData = {
   totalRepaid: string
 }
 
-type PricingInfo = {
+export type PricingInfo = {
   valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
   maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
   value: CurrencyBalance
@@ -274,6 +274,30 @@ type PricingInfo = {
   probabilityOfDefault?: Rate
   lossGivenDefault?: Rate
   discountRate?: Rate
+}
+
+type TinlakePricingInfo = {
+  maturityDate: string
+  interestRate: Rate
+  ceiling: CurrencyBalance
+}
+
+export type TinlakeLoan = {
+  asset: {
+    collectionId: string
+    nftId: string
+  }
+  dateClosed: number
+  id: string
+  outstandingDebt: CurrencyBalance
+  owner: string
+  poolId: string
+  pricing: TinlakePricingInfo
+  riskGroup: string
+  status: 'Created' | 'Active' | 'Closed'
+  totalBorrowed: CurrencyBalance
+  totalRepaid: CurrencyBalance
+  originationDate: string
 }
 
 // transformed type for UI
