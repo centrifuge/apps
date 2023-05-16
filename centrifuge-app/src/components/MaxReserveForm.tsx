@@ -28,7 +28,7 @@ export const MaxReserveForm: React.FC<Props> = ({ poolId }) => {
     },
     enableReinitialize: true,
     onSubmit: (values, actions) => {
-      if (values.maxReserve) {
+      if (typeof values.maxReserve === 'number' && values.maxReserve >= 0) {
         setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool.currency.decimals)])
       } else {
         actions.setErrors({ maxReserve: 'Invalid number' })
