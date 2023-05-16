@@ -1,4 +1,4 @@
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, Checkbox, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
@@ -32,6 +32,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const poolData = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(poolData)
   const centrifuge = useCentrifuge()
+  const { connectedType } = useWallet()
 
   const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
 
@@ -50,7 +51,12 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
 
   const unsignedAgreementUrl = poolMetadata?.onboarding?.agreements[trancheId]
     ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[trancheId].ipfsHash)
-    : centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    : connectedType === 'substrate'
+    ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    : null
+
+  // tinlake pools without subdocs cannot accept investors
+  const isPoolClosedToOnboarding = connectedType === 'evm' && !poolMetadata?.onboarding?.agreements[trancheId]?.ipfsHash
 
   React.useEffect(() => {
     if (hasSignedAgreement) {
@@ -59,67 +65,65 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasSignedAgreement])
 
-  return (
-    <>
-      <Content>
-        <ContentHeader
-          title="Sign subscription agreement"
-          body="Read the subscription agreement and click the box below to automatically e-sign the subscription agreement. You don't need to download and sign manually."
-        />
+  return !isPoolClosedToOnboarding ? (
+    <Content>
+      <ContentHeader
+        title="Sign subscription agreement"
+        body="Read the subscription agreement and click the box below to automatically e-sign the subscription agreement. You don't need to download and sign manually."
+      />
 
-        <Stack gap={1} alignItems="start">
-          <Box
-            position="relative"
-            overflowY="auto"
-            minHeight="30vh"
-            maxHeight="500px"
-            borderWidth={unsignedAgreementUrl ? 1 : 0}
-            borderColor="borderPrimary"
-            borderStyle="solid"
-            borderRadius="tooltip"
-          >
-            {unsignedAgreementUrl ? (
-              <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementUrl) as string} />
-            ) : (
-              <Shelf
-                position="absolute"
-                top={0}
-                left={0}
-                width="100%"
-                height="100%"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Spinner size="iconLarge" />
-              </Shelf>
-            )}
-          </Box>
-
-          {!!unsignedAgreementUrl && (
-            <AnchorButton
-              href={signedAgreementUrl ?? unsignedAgreementUrl}
-              download={`subscription-agreement-pool-${pool.id}.pdf`}
-              variant="tertiary"
-              icon={IconDownload}
-              small
+      <Stack gap={1} alignItems="start">
+        <Box
+          position="relative"
+          overflowY="auto"
+          minHeight="30vh"
+          maxHeight="500px"
+          borderWidth={unsignedAgreementUrl ? 1 : 0}
+          borderColor="borderPrimary"
+          borderStyle="solid"
+          borderRadius="tooltip"
+        >
+          {unsignedAgreementUrl ? (
+            <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementUrl) as string} />
+          ) : (
+            <Shelf
+              position="absolute"
+              top={0}
+              left={0}
+              width="100%"
+              height="100%"
+              alignItems="center"
+              justifyContent="center"
             >
-              Download document
-            </AnchorButton>
+              <Spinner size="iconLarge" />
+            </Shelf>
           )}
-        </Stack>
+        </Box>
 
-        <Checkbox
-          {...formik.getFieldProps('isAgreed')}
-          checked={formik.values.isAgreed}
-          label={
-            <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
-              I hereby sign and agree to the terms of the subscription agreement
-            </Text>
-          }
-          disabled={isSigningTransaction || isSending || hasSignedAgreement}
-          errorMessage={formik.errors.isAgreed}
-        />
-      </Content>
+        {!!unsignedAgreementUrl && (
+          <AnchorButton
+            href={signedAgreementUrl ?? unsignedAgreementUrl}
+            download={`subscription-agreement-pool-${pool.id}.pdf`}
+            variant="tertiary"
+            icon={IconDownload}
+            small
+          >
+            Download document
+          </AnchorButton>
+        )}
+      </Stack>
+
+      <Checkbox
+        {...formik.getFieldProps('isAgreed')}
+        checked={formik.values.isAgreed}
+        label={
+          <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
+            I hereby sign and agree to the terms of the subscription agreement
+          </Text>
+        }
+        disabled={isSigningTransaction || isSending || hasSignedAgreement}
+        errorMessage={formik.errors.isAgreed}
+      />
 
       <ActionBar>
         <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
@@ -134,6 +138,23 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
           {hasSignedAgreement ? 'Next' : 'Sign'}
         </Button>
       </ActionBar>
-    </>
+    </Content>
+  ) : (
+    <Content>
+      <ContentHeader
+        title="This pool is closed for onboarding"
+        body={
+          <span>
+            This pool is currently not accepting new investors. Please contact the issuer (
+            <a href={`mailto:${poolMetadata?.pool?.issuer.email}?subject=Onboarding&body=I’m reaching out about…`}>
+              {poolMetadata?.pool?.issuer.email}
+            </a>{' '}
+            ) for any questions.
+          </span>
+        }
+      />
+
+      <Stack gap={1} alignItems="start"></Stack>
+    </Content>
   )
 }
