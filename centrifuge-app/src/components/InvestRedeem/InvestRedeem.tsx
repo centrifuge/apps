@@ -43,7 +43,6 @@ import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { InvestRedeemProvider, useInvestRedeem } from './InvestRedeemProvider'
-import { InvestRedeemActions } from './types'
 
 export type ActionsRef = React.MutableRefObject<
   | {
@@ -312,9 +311,13 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
   const { allowInvestBelowMin } = useDebugFlags()
   const pool = usePool(state.poolId)
 
-  hooks.useActionSucceeded(() => {
-    form.resetForm()
-    setChangeOrderFormShown(false)
+  hooks.useActionSucceeded((action) => {
+    if (action === 'approvePoolCurrency') {
+      form.submitForm()
+    } else {
+      form.resetForm()
+      setChangeOrderFormShown(false)
+    }
   })
 
   const pendingInvest = state.order?.remainingInvestCurrency ?? Dec(0)
@@ -359,7 +362,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
   const isCollecting = state.pendingAction === 'collect' && isPending
 
-  function renderInput(cancelCb?: () => void) {
+  function renderInput(cancelCb?: () => void, preSubmitAction?: { onClick: () => void; loading?: boolean }) {
     return (
       <Stack gap={2}>
         <EpochBusy busy={state.isPoolBusy} />
@@ -416,14 +419,18 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button
-            type="submit"
-            loading={isInvesting}
-            loadingMessage={loadingMessage}
-            disabled={state.isPoolBusy || nativeBalanceTooLow}
-          >
-            {changeOrderFormShown ? 'Change order' : investLabel}
-          </Button>
+          {preSubmitAction ? (
+            <Button {...preSubmitAction}>{investLabel}</Button>
+          ) : (
+            <Button
+              type="submit"
+              loading={isInvesting}
+              loadingMessage={loadingMessage}
+              disabled={state.isPoolBusy || nativeBalanceTooLow}
+            >
+              {changeOrderFormShown ? 'Change order' : investLabel}
+            </Button>
+          )}
           {cancelCb && (
             <Button variant="secondary" onClick={cancelCb} disabled={state.isPoolBusy || nativeBalanceTooLow}>
               Cancel
@@ -467,16 +474,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             }}
           />
         ) : state.needsPoolCurrencyApproval ? (
-          <Stack px={1} gap={1}>
-            <Button onClick={actions.approvePoolCurrency} loading={isApproving}>
-              Approve {state.poolCurrency?.symbol}
-            </Button>
-            {onCancel && (
-              <Button variant="secondary" onClick={onCancel}>
-                Cancel
-              </Button>
-            )}
-          </Stack>
+          renderInput(onCancel, { onClick: actions.approvePoolCurrency, loading: isApproving })
         ) : (
           renderInput(onCancel)
         )}
@@ -549,17 +547,14 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
 
   const isPending =
     !!state.pendingTransaction && ['creating', 'unconfirmed', 'pending'].includes(state.pendingTransaction?.status)
-  const isRedeeming = state.pendingAction === 'invest' && isPending
-  const isCancelling = state.pendingAction === 'cancelInvest' && isPending
+  const isRedeeming = state.pendingAction === 'redeem' && isPending
+  const isCancelling = state.pendingAction === 'cancelRedeem' && isPending
   const isApproving = state.pendingAction === 'approveTrancheToken' && isPending
   const isCollecting = state.pendingAction === 'collect' && isPending
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'
 
-  function renderInput(
-    cancelCb?: () => void,
-    preSubmitAction?: { onClick: InvestRedeemActions['approveTrancheToken']; loading?: boolean }
-  ) {
+  function renderInput(cancelCb?: () => void, preSubmitAction?: { onClick: () => void; loading?: boolean }) {
     return (
       <Stack gap={2}>
         <EpochBusy busy={calculatingOrders} />
