@@ -1,6 +1,5 @@
 import { Loan } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
@@ -14,7 +13,6 @@ import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 
 type Row = Loan & {
   idSortKey: number
-  maturityDate: string | null
   statusLabel: string
   originationDateSortKey: string
 }
@@ -33,14 +31,13 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Financing date" />,
-    cell: (l: Row) =>
-      l.originationDateSortKey && l.status === 'Active' && l?.originationDate ? formatDate(l.originationDate) : '',
+    cell: (l: Row) => (l.originationDateSortKey && l.status === 'Active' ? formatDate(l.originationDate) : ''),
     flex: '2',
     sortKey: 'originationDateSortKey',
   },
   {
     header: <SortableTableHeader label="Maturity date" />,
-    cell: (l: Row) => (l.maturityDate ? formatDate(l.maturityDate) : ''),
+    cell: (l: Row) => (l.pricing.maturityDate ? formatDate(l.pricing.maturityDate) : ''),
     flex: '2',
     sortKey: 'maturityDate',
   },
@@ -64,19 +61,18 @@ const columns: Column[] = [
   },
 ]
 
-export const LoanList: React.FC<Props> = ({ loans }) => {
+export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const rows: Row[] = loans.map((loan) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
-      maturityDate: loan.status !== 'Created' && loan.loanInfo?.type !== 'CreditLine' ? loan.loanInfo.maturityDate : '',
       idSortKey: parseInt(loan.id, 10),
-      outstandingDebtSortKey: loan.status !== 'Created' && loan?.outstandingDebt?.toDecimal().toNumber(),
+      outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
       originationDateSortKey:
-        loan.status !== 'Created' &&
+        loan.status === 'Active' &&
         loan?.originationDate &&
-        !loan?.interestRatePerSec?.isZero() &&
+        !loan?.pricing.interestRate?.isZero() &&
         !loan?.totalBorrowed?.isZero()
           ? loan.originationDate
           : '',
@@ -94,7 +90,7 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
   )
 }
 
-const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
+function AssetName({ loan }: { loan: Row }) {
   const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
@@ -113,25 +109,25 @@ const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
   )
 }
 
-const Amount: React.VFC<{ loan: Row }> = ({ loan }) => {
+function Amount({ loan }: { loan: Row }) {
   const pool = usePool(loan.poolId)
   const { current } = useAvailableFinancing(loan.poolId, loan.id)
 
   function getAmount(l: Row) {
     switch (l.status) {
       case 'Closed':
-        return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
+        return formatBalance(l.totalRepaid, pool?.currency.symbol)
 
       case 'Active':
-        if (l.interestRatePerSec?.gtn(0) && l.totalBorrowed?.isZero()) {
-          return `${formatBalance(current, pool?.currency.symbol)} available`
+        if (l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) {
+          return formatBalance(current, pool?.currency.symbol)
         }
 
         if (l.outstandingDebt.isZero()) {
-          return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
+          return formatBalance(l.totalRepaid, pool?.currency.symbol)
         }
 
-        return `${formatBalance(l.outstandingDebt, pool?.currency.symbol)} outstanding`
+        return formatBalance(l.outstandingDebt, pool?.currency.symbol)
 
       default:
         return ''

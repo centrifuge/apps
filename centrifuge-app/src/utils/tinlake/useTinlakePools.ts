@@ -5,7 +5,6 @@ import BN from 'bn.js'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
-import { useDebugFlags } from '../../components/DebugFlags'
 import { ethConfig } from '../../config'
 import { Dec } from '../Decimal'
 import { currencies } from './currencies'
@@ -107,10 +106,9 @@ function useIpfsPools(suspense = false) {
 }
 
 export function useTinlakePools(suspense = false) {
-  const { showTinlakePools } = useDebugFlags()
   const ipfsPools = useIpfsPools(suspense)
   return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), {
-    enabled: !!ipfsPools && !!showTinlakePools,
+    enabled: !!ipfsPools,
     staleTime: Infinity,
     suspense,
   })
@@ -417,6 +415,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         },
         issuer: {
           name: p.metadata.attributes?.Issuer ?? '',
+          repName: p.metadata.description ?? '',
           description: p.metadata.description ?? '',
           email: p.metadata?.issuerEmail ?? '',
           logo: p.metadata.media?.logo

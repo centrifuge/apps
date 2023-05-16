@@ -1,13 +1,17 @@
 import { useMutation } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
-import { useOnboarding } from '../../../components/OnboardingProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
+import { OnboardingPool, useOnboarding } from '../../../components/OnboardingProvider'
+import { OnboardingUser } from '../../../types'
 
 export const useSignAndSendDocuments = () => {
-  const { refetchOnboardingUser, pool, nextStep } = useOnboarding()
-  const { authToken } = useAuth()
+  const { refetchOnboardingUser, pool, nextStep } = useOnboarding<OnboardingUser, NonNullable<OnboardingPool>>()
+  const { authToken } = useOnboardingAuth()
+
+  const poolId = pool.id
+  const trancheId = pool.trancheId
 
   const mutation = useMutation(
-    async (transactionInfo: { extrinsicHash: string; blockNumber: string }) => {
+    async (transactionInfo: { txHash: string; blockNumber: string }) => {
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAndSendDocuments`, {
         method: 'POST',
         headers: {
@@ -16,8 +20,8 @@ export const useSignAndSendDocuments = () => {
         },
         body: JSON.stringify({
           transactionInfo,
-          trancheId: pool.trancheId,
-          poolId: pool.id,
+          trancheId,
+          poolId,
         }),
         credentials: 'include',
       })

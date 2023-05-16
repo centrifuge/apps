@@ -7,22 +7,33 @@ import { useVerifyIdentity } from '../queries/useVerifyIdentity'
 import { IdentityVerification } from './IdentityVerification'
 import { SignerVerification } from './SignerVerification'
 
-const signerInput = object({
-  name: string().required(),
-  dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
-  countryOfCitizenship: string().required(),
-  countryOfResidency: string().required(),
-  isAccurate: boolean().oneOf([true]),
-})
+const getValidationSchema = (investorType: 'individual' | 'entity') =>
+  object({
+    name: string().required('Please enter a name'),
+    dateOfBirth: date()
+      .required('Please enter a date of birth')
+      .min(new Date(1900, 0, 1), 'Date of birth must be after 1900')
+      .max(new Date(), 'Date of birth must be in the past'),
+    countryOfCitizenship: string().required('Please select a country of citizenship'),
+    countryOfResidency: string().required('Please select a country of residency'),
+    isAccurate: boolean().oneOf([true], 'You must confirm that the information is accurate'),
+    ...(investorType === 'individual' && {
+      email: string().email('Please enter a valid email address').required('Please enter an email address'),
+    }),
+  })
 
 export const KnowYourCustomer = () => {
   const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
 
   const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
 
-  const { onboardingUser, refetchOnboardingUser } = useOnboarding()
+  const { onboardingUser } = useOnboarding()
+
+  const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
   const isCompleted = !!onboardingUser?.globalSteps?.verifyIdentity.completed
+
+  const validationSchema = getValidationSchema(investorType)
 
   const formik = useFormik({
     initialValues: {
@@ -31,12 +42,14 @@ export const KnowYourCustomer = () => {
       countryOfCitizenship: onboardingUser?.countryOfCitizenship || '',
       countryOfResidency: onboardingUser?.countryOfResidency || '',
       isAccurate: !!isCompleted,
+      email: investorType === 'individual' ? onboardingUser?.email || '' : undefined,
     },
     onSubmit: (values) => {
       startKYC(values)
     },
-    validationSchema: signerInput,
+    validationSchema,
     validateOnMount: true,
+    enableReinitialize: true,
   })
 
   const { mutate: startKYC, data: startKYCData, isLoading: isStartKYCLoading } = useStartKYC()
@@ -44,7 +57,7 @@ export const KnowYourCustomer = () => {
   const { mutate: setVerifiedIdentity } = useVerifyIdentity()
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com') {
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.accepted') {
       setVerifiedIdentity()
     }
   }
@@ -62,7 +75,7 @@ export const KnowYourCustomer = () => {
     if (startKYCData?.verification_url) {
       nextKnowYourCustomerStep()
     }
-  }, [startKYCData, refetchOnboardingUser])
+  }, [startKYCData])
 
   if (activeKnowYourCustomerStep === 0) {
     return <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />

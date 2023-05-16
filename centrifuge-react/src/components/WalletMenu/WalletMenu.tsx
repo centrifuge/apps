@@ -1,7 +1,9 @@
 import {
   Box,
-  Button,
+  IconAnchor,
+  IconButton,
   IconCopy,
+  IconExternalLink,
   IconPower,
   IconSwitch,
   Menu,
@@ -18,21 +20,25 @@ import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
-import { formatBalance, formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
-import { useAddress, useWallet } from '../WalletProvider'
+import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
+import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
-import { NetworkIcon } from '../WalletProvider/UserSelection'
+import { useNeworkIcon } from '../WalletProvider/UserSelection'
 import { getWalletIcon, getWalletLabel } from '../WalletProvider/WalletDialog'
 import { ConnectButton } from './ConnectButton'
 
-export function WalletMenu() {
+type WalletMenuProps = {
+  menuItems?: React.ReactNode[]
+}
+
+export function WalletMenu({ menuItems }: WalletMenuProps) {
   const ctx = useWallet()
   const { connectedType, pendingConnect } = ctx
   const accounts = connectedType && ctx[connectedType].accounts
   const address = useAddress()
   return address ? (
-    <ConnectedMenu />
+    <ConnectedMenu menuItems={menuItems} />
   ) : accounts && !accounts.length ? (
     <WalletButton connectLabel="No accounts available" disabled />
   ) : (
@@ -40,7 +46,7 @@ export function WalletMenu() {
   )
 }
 
-function ConnectedMenu() {
+function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
   const ctx = useWallet()
   const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
@@ -58,6 +64,8 @@ function ConnectedMenu() {
       : balances
       ? [balances.native.balance, balances.native.currency.symbol]
       : []
+  const explorer = useGetExplorerUrl(connectedNetwork ?? undefined)
+  const subScanUrl = explorer.address(address, connectedNetwork ?? undefined)
 
   return (
     <Popover
@@ -92,29 +100,51 @@ function ConnectedMenu() {
           <Menu>
             <MenuItemGroup>
               <Shelf px={2} pt={1} gap={1} alignItems="center" justifyContent="space-between">
-                <Box style={{ pointerEvents: 'none' }}>
-                  <Identicon value={address} size={17} theme="polkadot" />
-                </Box>
-                <Text variant="interactive1" fontWeight={400}>
-                  {truncateAddress(address)}
-                </Text>
-                <Button icon={IconCopy} variant="tertiary" small onClick={() => copyToClipboard(address)}></Button>
+                <Shelf alignItems="center" gap={1}>
+                  <Box style={{ pointerEvents: 'none' }}>
+                    <Identicon value={address} size={17} theme="polkadot" />
+                  </Box>
+                  <Text variant="interactive1" fontWeight={400}>
+                    {truncateAddress(address)}
+                  </Text>
+                </Shelf>
+
+                <Shelf alignItems="center" gap="2px">
+                  <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
+                    <IconCopy />
+                  </IconButton>
+                  {subScanUrl && (
+                    <IconAnchor
+                      href={subScanUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`View account on ${subScanUrl}`}
+                    >
+                      <IconExternalLink />
+                    </IconAnchor>
+                  )}
+                </Shelf>
               </Shelf>
-              <Stack gap={0} px={2} pb={1}>
-                <Text variant="label2" textAlign="center">
+
+              <Stack gap={0} mt={1} px={2} pb={1}>
+                <Text variant="label2" textAlign="center" color="textPrimary">
                   Balance
                 </Text>
-                <Text variant="body1" fontWeight={500} textAlign="center">
-                  {balance && formatBalance(balance, symbol, 2)}
+                <Text fontSize={22} fontWeight={500} textAlign="center">
+                  {balance && formatBalanceAbbreviated(balance, symbol)}
                 </Text>
               </Stack>
             </MenuItemGroup>
 
+            {!!menuItems?.length && menuItems.map((item, index) => <MenuItemGroup key={index}>{item}</MenuItemGroup>)}
+
             <MenuItemGroup>
               <Box px={2} py={1}>
-                <Text variant="label2">Network</Text>
+                <Text variant="label2" color="textPrimary">
+                  Network
+                </Text>
                 <Shelf gap={1}>
-                  <NetworkIcon network={connectedNetwork!} size="iconSmall" />
+                  <Logo icon={useNeworkIcon(connectedNetwork!)} size="iconSmall" />
                   <Text variant="interactive1">{connectedNetworkName}</Text>
                 </Shelf>
               </Box>
@@ -123,7 +153,9 @@ function ConnectedMenu() {
             <MenuItemGroup>
               {wallet && (
                 <Box px={2} py={1}>
-                  <Text variant="label2">Wallet</Text>
+                  <Text variant="label2" color="textPrimary">
+                    Wallet
+                  </Text>
                   <Shelf gap={1}>
                     <Logo icon={getWalletIcon(wallet)} size="iconSmall" />
                     <Text variant="interactive1">{getWalletLabel(wallet)}</Text>
@@ -134,6 +166,7 @@ function ConnectedMenu() {
                 <MenuItem
                   label="Switch account"
                   icon={<IconSwitch size="iconSmall" />}
+                  minHeight={0}
                   onClick={() => {
                     state.close()
                     showAccounts()
@@ -143,6 +176,7 @@ function ConnectedMenu() {
                 <MenuItem
                   label="Switch wallet"
                   icon={<IconSwitch size="iconSmall" />}
+                  minHeight={0}
                   onClick={() => {
                     state.close()
                     showWallets(connectedNetwork, wallet)
@@ -155,6 +189,7 @@ function ConnectedMenu() {
               <MenuItem
                 label="Disconnect"
                 icon={<IconPower size="iconSmall" />}
+                minHeight={0}
                 onClick={() => {
                   state.close()
                   disconnect()

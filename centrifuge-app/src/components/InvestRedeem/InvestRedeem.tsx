@@ -26,6 +26,7 @@ import css from '@styled-system/css'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
@@ -35,7 +36,7 @@ import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePermissions } from '../../utils/usePermissions'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
 import { LoadBoundary } from '../LoadBoundary'
@@ -71,7 +72,7 @@ export function InvestRedeem({ networks = ['centrifuge'], ...rest }: Props) {
           networks.length > 1 ? 'networks' : 'network'
         }. To be able to invest and redeem you need to switch the network.`}
       >
-        <InvestRedeemState {...rest} />
+        <InvestRedeemState networks={networks} {...rest} />
       </ConnectionGuard>
     </LoadBoundary>
   )
@@ -164,7 +165,7 @@ function InvestRedeemState(props: Props) {
   )
 }
 
-type InnerProps = {
+type InnerProps = Props & {
   poolId: string
   trancheId: string
   view: 'invest' | 'redeem' | 'start'
@@ -172,9 +173,12 @@ type InnerProps = {
   setTrancheId: React.Dispatch<string>
 }
 
-function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
+function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
+  const history = useHistory()
+  const { data: metadata } = usePoolMetadata(pool)
+  const { showWallets, connectedType } = useWallet()
 
   let actualView = view
   if (state.order) {
@@ -192,12 +196,16 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
         <Box pb={1}>
           <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
         </Box>
-        <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-          {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
-        </TextWithPlaceholder>
-        <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-          {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
-        </TextWithPlaceholder>
+        {connectedType && (
+          <>
+            <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
+              {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
+              {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
+            </TextWithPlaceholder>
+          </>
+        )}
         <Box bleedX={2} mt={1} alignSelf="stretch">
           <Divider borderColor="borderSecondary" />
         </Box>
@@ -216,7 +224,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
           onChange={(event) => setTrancheId(event.target.value as any)}
         />
       )}
-      {state.isDataLoading ? (
+      {connectedType && state.isDataLoading ? (
         <Spinner />
       ) : state.isAllowedToInvest ? (
         <>
@@ -258,15 +266,27 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
           )}
         </>
       ) : (
-        // TODO: Link to onboarding and show whether onboarding is in progress
+        // TODO: Show whether onboarding is in progress
         <Stack gap={2}>
           <Text variant="body3">
-            New Silver tokens are available to U.S. and Non-U.S. persons. U.S. persons must be verified “accredited
-            investors”.{' '}
-            <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#requirements">Learn more</AnchorTextLink>
+            {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
+            verified “accredited investors”.{' '}
+            <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
+              Learn more
+            </AnchorTextLink>
           </Text>
           <Stack px={1}>
-            <Button>Onboard to {state.trancheCurrency?.symbol ?? 'token'}</Button>
+            <Button
+              onClick={() => {
+                if (!connectedType) {
+                  showWallets(networks?.length === 1 ? networks[0] : undefined)
+                } else {
+                  history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
+                }
+              }}
+            >
+              {connectedType ? `Onboard to ${state.trancheCurrency?.symbol ?? 'token'}` : 'Connect to invest'}
+            </Button>
           </Stack>
         </Stack>
       )}

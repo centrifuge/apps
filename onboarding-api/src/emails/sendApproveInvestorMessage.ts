@@ -1,9 +1,15 @@
 import { sendEmail, templateIds } from '.'
-import { getPoolById } from '../utils/centrifuge'
+import { getPoolById } from '../utils/getPoolById'
 
-export const sendApproveInvestorMessage = async (to: string, poolId: string, trancheId: string) => {
+export const sendApproveInvestorMessage = async (
+  to: string,
+  poolId: string,
+  trancheId: string,
+  countersignedAgreementPDF: Uint8Array
+) => {
   const { pool, metadata } = await getPoolById(poolId)
   const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name
+
   const message = {
     personalizations: [
       {
@@ -15,7 +21,7 @@ export const sendApproveInvestorMessage = async (to: string, poolId: string, tra
         dynamic_template_data: {
           poolName: metadata?.pool.name,
           trancheName,
-          poolUrl: `${process.env.REDIRECT_URL}/investments/${poolId}`,
+          poolUrl: `${process.env.REDIRECT_URL}/pools/${poolId}`,
         },
       },
     ],
@@ -24,6 +30,14 @@ export const sendApproveInvestorMessage = async (to: string, poolId: string, tra
       name: 'Centrifuge',
       email: `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,
     },
+    attachments: [
+      {
+        content: Buffer.from(countersignedAgreementPDF).toString('base64'),
+        filename: `${trancheName?.replaceAll(' ', '-')}-subscription-agreement.pdf`,
+        type: 'application/pdf',
+        disposition: 'attachment',
+      },
+    ],
   }
   await sendEmail(message)
 }

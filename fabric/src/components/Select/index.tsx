@@ -23,7 +23,7 @@ const StyledSelect = styled.select`
   appearance: none;
   background-color: transparent;
   border: none;
-  padding: 0 1em 0 0;
+  padding: ${({ theme }) => `0 ${theme.sizes.iconMedium}px 0 0`};
   margin: 0;
   width: 100%;
   font-family: inherit;
@@ -41,35 +41,34 @@ const StyledSelect = styled.select`
   }
 `
 
-export const Select: React.FC<SelectProps> = ({
-  options,
-  label,
-  placeholder,
-  errorMessage,
-  disabled,
-  outlined = false,
-  ...rest
-}) => {
+const Chevron = styled(IconChevronDown)`
+  position: absolute;
+  top: 0;
+  right: 0;
+  pointer-events: none;
+`
+
+export const Select: React.FC<SelectProps> = ({ options, label, placeholder, errorMessage, disabled, ...rest }) => {
   return (
     <Stack gap={1} width="100%">
       <InputBox
-        width="100%"
-        label={label}
         as="div"
-        outlined={outlined}
+        label={label}
         inputElement={
-          <StyledSelect disabled={disabled} {...rest}>
-            <option value="" disabled>
-              {placeholder}
-            </option>
-            {options.map((option, index) => (
-              <option key={`${index}${option.value}`} value={option.value}>
-                {option.label}
+          <>
+            <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
+            <StyledSelect disabled={disabled} {...rest}>
+              <option value="" disabled>
+                {placeholder}
               </option>
-            ))}
-          </StyledSelect>
+              {options.map((option, index) => (
+                <option key={`${index}${option.value}`} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </StyledSelect>
+          </>
         }
-        rightElement={<IconChevronDown color={disabled ? 'textSecondary' : 'textPrimary'} />}
       />
       {errorMessage && (
         <Box px={2}>

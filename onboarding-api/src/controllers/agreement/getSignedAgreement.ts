@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { onboardingBucket } from '../../database'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
 const getSignedAgreementInput = object({
@@ -16,26 +16,22 @@ export const getSignedAgreementController = async (
   try {
     await validateInput(req.query, getSignedAgreementInput)
     const { poolId, trancheId } = req.query
-    const { walletAddress } = req
+    const { wallet } = req
 
     const signedAgreement = await onboardingBucket.file(
-      `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+      `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
     )
 
     const [signedAgreementExists] = await signedAgreement.exists()
 
-    if (signedAgreementExists) {
-      const pdf = await signedAgreement.download()
-      return res.send({ signedAgreement: pdf[0] })
+    if (!signedAgreementExists) {
+      throw new HttpError(400, 'Agreement not found')
     }
 
-    throw new HttpsError(400, 'Agreement not found')
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+    const pdf = await signedAgreement.download()
+    return res.send({ signedAgreement: pdf[0] })
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

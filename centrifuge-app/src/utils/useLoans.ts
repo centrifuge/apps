@@ -3,8 +3,6 @@ import { combineLatest } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Dec } from './Decimal'
 
-const SEC_PER_DAY = 24 * 60 * 60
-
 export function useLoans(poolId: string) {
   const isTinlakePool = poolId.startsWith('0x')
   const [result] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
@@ -49,22 +47,19 @@ export function useNftDocumentId(collectionId?: string, nftId?: string) {
 export function useAvailableFinancing(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
-  if (loan.status !== 'Active') return { current: Dec(0), initial: Dec(0) }
+  const initialCeiling = loan.pricing.value.toDecimal().mul(loan.pricing.advanceRate.toDecimal())
+  if (loan.status !== 'Active') return { current: initialCeiling, initial: initialCeiling }
 
   const debtWithMargin = loan.outstandingDebt
     .toDecimal()
-    .add(loan.outstandingDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
-  if (!loan?.loanInfo) {
-    return { current: Dec(0), initial: Dec(0) }
-  }
+    .add(loan.outstandingDebt.toDecimal().mul(loan.pricing.interestRate.toDecimal().div(365 * 8))) // Additional 3 hour interest as margin
 
-  const initialCeiling = loan.loanInfo.value.toDecimal().mul(loan.loanInfo.advanceRate.toDecimal())
   let ceiling = initialCeiling
-  if (loan.loanInfo.type === 'BulletLoan') {
+  if (loan.pricing.maxBorrowAmount === 'upToTotalBorrowed') {
     ceiling = ceiling.minus(loan.totalBorrowed?.toDecimal() || 0)
   } else {
     ceiling = ceiling.minus(debtWithMargin)
     ceiling = ceiling.isNegative() ? Dec(0) : ceiling
   }
-  return { current: ceiling, initial: initialCeiling }
+  return { current: ceiling, initial: initialCeiling, debtWithMargin }
 }

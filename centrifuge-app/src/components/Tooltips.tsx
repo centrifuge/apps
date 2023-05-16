@@ -30,9 +30,9 @@ const tooltipText = {
     label: 'APY',
     body: 'The Annual Percentage Yield ("APY") of a token is calculated as the effective annualized return of the pool\'s token price.',
   },
-  protection: {
-    label: 'Protection',
-    body: 'The risk protection is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
+  subordination: {
+    label: 'Subordination',
+    body: 'The subordination is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
   },
   currency: {
     label: 'override',
@@ -190,12 +190,28 @@ const tooltipText = {
     label: 'Pool',
     body: 'Allows to manage pool configuration and manage other admins.',
   },
+  origination: {
+    label: 'Origination',
+    body: 'Origination is the process by which the issuer finances a new asset.',
+  },
+  repayment: {
+    label: 'Repayment',
+    body: 'Repayment is a structured repaying of funds that have been given to the issuer over a period of time, typically alongside a payment of interest.',
+  },
+  investment: {
+    label: 'Investment',
+    body: 'An investment is an asset or item acquired with the goal of generating income or appreciation.',
+  },
+  redemption: {
+    label: 'Redemption',
+    body: 'Redemption in a pool means withdrawal of investment by the lender.',
+  },
   noTranchProtection: {
-    label: 'Min. protection',
+    label: 'Min. subordination',
     body: 'The first, most junior tranche is not protected by subordinated tranches.',
   },
   tranchProtection: {
-    label: 'Min. protection',
+    label: 'Min. subordination',
     body: 'Minimum protection required for this tranche by all subordinated tranches.',
   },
   variableTranchInterest: {
@@ -206,9 +222,13 @@ const tooltipText = {
     label: 'Fixed interest rate',
     body: 'Fixed interest rate (APR) this tranche accrues on deployed capital.',
   },
+  issuerRepName: {
+    label: 'Issuer representive name',
+    body: 'This is the full legal name of the authorized representive of the pool.',
+  },
 }
 
-type TooltipsProps = {
+export type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string

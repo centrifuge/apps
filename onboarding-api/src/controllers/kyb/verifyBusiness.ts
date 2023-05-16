@@ -1,21 +1,22 @@
 import { Request, Response } from 'express'
-import { bool, date, InferType, object, string } from 'yup'
-import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { bool, InferType, object, string } from 'yup'
+import { EntityUser, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
+import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
 const verifyBusinessInput = object({
   dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
-  poolId: string().required(),
-  trancheId: string().required(),
   businessName: string().required(), // used for AML
-  incorporationDate: date().required(), // used for AML
   registrationNumber: string().required(),
   jurisdictionCode: string().required(), // country of incorporation
+  manualReview: bool().required(),
+  poolId: string().optional(),
+  trancheId: string().optional(),
 })
 
 export const verifyBusinessController = async (
@@ -23,30 +24,102 @@ export const verifyBusinessController = async (
   res: Response
 ) => {
   try {
-    await validateInput(req.body, verifyBusinessInput)
-    const {
-      walletAddress,
-      body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
-    } = { ...req }
+    const { body, wallet, protocol, headers } = req
+    await validateInput(body, verifyBusinessInput)
+    const { jurisdictionCode, registrationNumber, businessName, email, manualReview, dryRun } = body
 
-    const entityDoc = await userCollection.doc(req.walletAddress).get()
-    const entityData = entityDoc.data() as OnboardingUser
-    if (entityDoc.exists && entityData.investorType !== 'entity') {
-      throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
+    const userData = (await fetchUser(wallet, { suppressError: true })) as EntityUser
+
+    if (userData?.globalSteps.verifyBusiness.completed) {
+      throw new HttpError(400, 'Business already verified')
     }
 
-    if (entityDoc.exists && entityData.investorType === 'entity' && entityData.globalSteps?.verifyBusiness.completed) {
-      throw new HttpsError(400, 'Business already verified')
+    if (userData?.manualKybReference) {
+      const status = await shuftiProRequest(
+        { reference: userData.manualKybReference },
+        { path: 'status', dryRun: false }
+      )
+
+      if (status.event === 'review.pending') {
+        throw new HttpError(400, 'Business already in review')
+      }
+    }
+
+    const MANUAL_KYB_REFERENCE = `MANUAL_KYB_REQUEST_${Math.random()}`
+
+    const user: EntityUser = {
+      investorType: 'entity',
+      address: null,
+      kycReference: '',
+      manualKybReference: manualReview ? MANUAL_KYB_REFERENCE : null,
+      wallet: [wallet],
+      name: null,
+      dateOfBirth: null,
+      countryOfCitizenship: null,
+      countryOfResidency: null,
+      email,
+      businessName,
+      ultimateBeneficialOwners: [],
+      registrationNumber,
+      jurisdictionCode,
+      globalSteps: {
+        verifyBusiness: {
+          completed: false,
+          timeStamp: null,
+        },
+        verifyEmail: { completed: false, timeStamp: null },
+        confirmOwners: { completed: false, timeStamp: null },
+        verifyIdentity: { completed: false, timeStamp: null },
+        verifyAccreditation: { completed: false, timeStamp: null },
+        verifyTaxInfo: { completed: false, timeStamp: null },
+      },
+      poolSteps: {},
+    }
+
+    await validateAndWriteToFirestore(wallet, user, 'entity')
+
+    if (manualReview) {
+      const searchParams = new URLSearchParams({
+        ...wallet,
+        ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
+      })
+
+      const { origin, host } = headers
+
+      if (!origin) throw new HttpError(400, 'Missing origin header')
+
+      /*
+       * K_SERVICE is a GCP injected env variable that denotes the name of the google cloud function.
+       * This is needed in order to construct the callback url in production. More info: https://rb.gy/tqvig
+       */
+      const callbackBaseUrl =
+        process.env.NODE_ENV === 'development' ? `${protocol}://${host}` : `https://${host}/${process.env.K_SERVICE}`
+
+      const payloadKYB = {
+        manual_review: 1,
+        enable_extra_proofs: 1,
+        labels: ['proof_of_address', 'signed_and_dated_ownership_structure'],
+        verification_mode: 'any',
+        reference: MANUAL_KYB_REFERENCE,
+        email: body.email,
+        country: body.jurisdictionCode,
+        redirect_url: `${origin}/manual-kyb-redirect.html`,
+        callback_url: `${callbackBaseUrl}/manualKybCallback?${searchParams}`,
+      }
+
+      const kyb = await shuftiProRequest(payloadKYB)
+      const freshUserData = await fetchUser(wallet)
+
+      return res.status(200).send({ ...kyb, ...freshUserData })
     }
 
     const payloadAML = {
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
       aml_for_businesses: {
         business_name: businessName,
-        business_incorporation_date: incorporationDate,
       },
     }
-    const businessAML = await shuftiProRequest(req, payloadAML, { dryRun })
+    const businessAML = await shuftiProRequest(payloadAML, { dryRun })
     const businessAmlVerified = businessAML.event === 'verification.accepted'
 
     const kybPayload = {
@@ -56,64 +129,30 @@ export const verifyBusinessController = async (
         company_registration_number: registrationNumber,
       },
     }
-    const kyb = await shuftiProRequest(req, kybPayload, { dryRun })
+    const kyb = await shuftiProRequest(kybPayload, { dryRun })
     const kybVerified = kyb.event === 'verification.accepted'
 
-    const user: EntityUser = {
-      investorType: 'entity',
-      kycReference: '',
-      wallet: {
-        address: walletAddress,
-        network: 'polkadot',
-      },
-      name: null,
-      dateOfBirth: null,
-      countryOfCitizenship: null,
-      countryOfResidency: null,
-      email,
-      businessName,
+    const updatedUser: Subset<OnboardingUser> = {
       ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
-      registrationNumber,
-      incorporationDate,
-      jurisdictionCode,
       globalSteps: {
-        verifyBusiness: { completed: !!(kybVerified && businessAmlVerified), timeStamp: new Date().toISOString() },
-        verifyEmail: { completed: false, timeStamp: null },
-        confirmOwners: { completed: false, timeStamp: null },
-        verifyIdentity: { completed: false, timeStamp: null },
-        verifyAccreditation: { completed: false, timeStamp: null },
-        verifyTaxInfo: { completed: false, timeStamp: null },
-      },
-      poolSteps: {
-        [poolId]: {
-          [trancheId]: {
-            signAgreement: {
-              completed: false,
-              timeStamp: null,
-              transactionInfo: {
-                extrinsicHash: null,
-                blockNumber: null,
-              },
-            },
-            status: {
-              status: null,
-              timeStamp: null,
-            },
-          },
+        verifyBusiness: {
+          completed: kybVerified && businessAmlVerified,
+          timeStamp: new Date().toISOString(),
         },
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, user, 'entity')
-    await sendVerifyEmailMessage(user)
-    const freshUserData = await fetchUser(walletAddress)
+    await validateAndWriteToFirestore(wallet, updatedUser, 'entity', [
+      'ultimateBeneficialOwners',
+      'globalSteps.verifyBusiness',
+    ])
+
+    await sendVerifyEmailMessage(user, wallet)
+    const freshUserData = await fetchUser(wallet)
+
     return res.status(200).json({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

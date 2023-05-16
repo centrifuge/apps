@@ -1,7 +1,8 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, WalletMenu } from '@centrifuge/centrifuge-react'
+import { useBalances, useWallet, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
@@ -11,6 +12,7 @@ import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
 import { LogoLink } from './LogoLink'
 import { Menu } from './Menu'
+import { OnboardingStatus } from './OnboardingStatus'
 
 type Props = {
   sidebar?: React.ReactNode
@@ -28,6 +30,9 @@ export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
 export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
   const isMedium = useIsAboveBreakpoint('M')
+  const { connectedType } = useWallet()
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const isTinlakePool = poolId?.startsWith('0x')
 
   const theme = useTheme()
   const balances = useBalances(useAddress('substrate'))
@@ -37,6 +42,13 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
   const hasLowAusdBalance =
     (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currency.decimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
 
+  const shouldRenderFaucet =
+    connectedType === 'substrate' &&
+    !isTinlakePool &&
+    import.meta.env.REACT_APP_FAUCET_URL &&
+    hasLowDevelBalance &&
+    hasLowAusdBalance
+
   return (
     <Grid
       gridTemplateAreas={[
@@ -45,7 +57,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
         `"menu main" "menu sidebar"`,
         `"menu main sidebar"`,
       ]}
-      gridTemplateColumns={['1fr', '1fr', `${MENU_WIDTH}px 1fr`, `${MENU_WIDTH}px 1fr`, '235px 1fr 440px']}
+      gridTemplateColumns={['1fr', '1fr', `${MENU_WIDTH}px 1fr`, `${MENU_WIDTH}px 1fr 350px`, '235px 1fr 440px']}
       gridTemplateRows={[
         `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,
         `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,
@@ -75,7 +87,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           <Shelf justifyContent="space-between">
             <LogoLink />
             <Stack gap={4}>
-              <WalletMenu />
+              <WalletMenu menuItems={[<OnboardingStatus />]} />
             </Stack>
           </Shelf>
         ) : (
@@ -131,10 +143,10 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           ) : (
             <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
               <Stack mb={9} px={8} gap={4}>
-                <WalletMenu />
+                <WalletMenu menuItems={[<OnboardingStatus />]} />
               </Stack>
 
-              {import.meta.env.REACT_APP_FAUCET_URL && hasLowDevelBalance && hasLowAusdBalance && <Faucet />}
+              {shouldRenderFaucet && <Faucet />}
 
               <LoadBoundary>{sidebar}</LoadBoundary>
             </Stack>

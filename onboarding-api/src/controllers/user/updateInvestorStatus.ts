@@ -1,12 +1,14 @@
 import { Request, Response } from 'express'
 import { InferType, object, string, StringSchema } from 'yup'
-import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMessage'
-import { UpdateInvestorStatusPayload } from '../../emails/sendDocuments'
+import { sendApproveIssuerMessage } from '../../emails/sendApproveIssuerMessage'
+import { UpdateInvestorStatusPayload } from '../../emails/sendDocumentsMessage'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
-import { addInvestorToMemberList } from '../../utils/centrifuge'
+import { addInvestorToMemberList } from '../../utils/addInvestorToMemberList'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
+import { signAcceptanceAsIssuer } from '../../utils/signAcceptanceAsIssuer'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { verifyJwt } from '../../utils/verifyJwt'
@@ -26,8 +28,8 @@ export const updateInvestorStatusController = async (
       query: { token, status },
     } = req
     const payload = verifyJwt<UpdateInvestorStatusPayload>(token)
-    const { poolId, trancheId, walletAddress } = payload
-    const user = await fetchUser(walletAddress)
+    const { poolId, trancheId, wallet } = payload
+    const user = await fetchUser(wallet)
 
     const incompleteSteps = Object.entries(user.globalSteps).filter(([name, step]) => {
       if (name === 'verifyAccreditation') {
@@ -38,24 +40,24 @@ export const updateInvestorStatusController = async (
         if (user.investorType === 'entity' && user.jurisdictionCode?.startsWith('us')) {
           return !step?.completed
         }
-        return true
+        return false
       }
       return !step?.completed
     })
 
     if (incompleteSteps.length > 0) {
-      throw new HttpsError(
+      throw new HttpError(
         400,
         `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
       )
     }
 
     if (user.poolSteps[poolId][trancheId].status.status !== 'pending') {
-      throw new HttpsError(400, 'Investor status may have already been updated')
+      throw new HttpError(400, 'Investor status may have already been updated')
     }
 
     if (!user.poolSteps?.[poolId][trancheId].signAgreement.completed) {
-      throw new HttpsError(400, 'Argeements must be signed before investor status can invest')
+      throw new HttpError(400, 'Argeements must be signed before investor status can invest')
     }
 
     const updatedUser: Subset<OnboardingUser> = {
@@ -63,7 +65,7 @@ export const updateInvestorStatusController = async (
         ...user.poolSteps,
         [poolId]: {
           [trancheId]: {
-            ...user.poolSteps[poolId][trancheId].signAgreement,
+            ...user.poolSteps[poolId][trancheId],
             status: {
               status,
               timeStamp: new Date().toISOString(),
@@ -73,23 +75,36 @@ export const updateInvestorStatusController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
-
     if (user?.email && status === 'approved') {
-      await addInvestorToMemberList(walletAddress, poolId, trancheId)
-      await sendApproveInvestorMessage(user.email, poolId, trancheId)
-      return res.status(204).send()
+      const countersignedAgreementPDF = await signAcceptanceAsIssuer({
+        poolId,
+        trancheId,
+        walletAddress: wallet.address,
+        investorName: user.name as string,
+      })
+
+      await writeToOnboardingBucket(
+        countersignedAgreementPDF,
+        `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
+      )
+
+      const { txHash } = await addInvestorToMemberList(wallet, poolId, trancheId)
+      await Promise.all([
+        sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF),
+        sendApproveIssuerMessage(wallet.address, poolId, trancheId, countersignedAgreementPDF),
+        validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
+      ])
+      return res.status(200).send({ status: 'approved', poolId, trancheId, txHash })
     } else if (user?.email && status === 'rejected') {
-      await sendRejectInvestorMessage(user.email, poolId)
-      throw new HttpsError(400, 'Investor has been rejected')
+      await Promise.all([
+        sendRejectInvestorMessage(user.email, poolId),
+        validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
+      ])
+      return res.status(200).send({ status: 'rejected', poolId, trancheId })
     }
-    throw new HttpsError(400, 'Investor status may have already been updated')
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+    throw new HttpError(400, 'Investor status may have already been updated')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

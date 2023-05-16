@@ -1,13 +1,13 @@
 import { useMutation } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
-export const useUploadTaxInfo = (taxInfo: File | null) => {
-  const { authToken } = useAuth()
+export const useUploadTaxInfo = () => {
+  const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser, nextStep } = useOnboarding()
 
   const mutation = useMutation(
-    async () => {
+    async (taxInfo?: File) => {
       if (taxInfo) {
         const formData = new FormData()
         formData.append('taxInfo', taxInfo)
@@ -17,7 +17,6 @@ export const useUploadTaxInfo = (taxInfo: File | null) => {
           body: formData,
           headers: {
             Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'multipart/form-data',
           },
           credentials: 'include',
         })

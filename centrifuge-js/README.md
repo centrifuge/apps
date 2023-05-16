@@ -152,7 +152,7 @@ connectedCent.pools.closeEpoch(["<your-pool-id>"]).subscribe({
 await firstValueFrom(connectedCent.pools.closeEpoch(["<your-pool-id>"]))
 ```
 
-## `cent.pools.createPool()`
+## `cent.pools.createPool([...args], options): Observable<ISubmittableResult>`
 
 Creating a pool requires a series of extrinsics to be executed sequentially. Using the `cent.pools.createPool()` abstraction provides three ways of creating pools:
 
@@ -199,7 +199,7 @@ The pools initial maximum reserve (can be changed later).
 
 #### `metadataValues: PoolMetadataInput`
 
-An object containing all of the required keys from the `PoolMetadataInput` type. Note that any images associated with the pool metadata must be uploaded prior to called the `createPoolMethod`
+An object containing all of the required keys from the `PoolMetadataInput` type. Note that any images associated with the pool metadata must be uploaded prior to calling the `createPoolMethod`
 
 ### `createPool()` options
 
@@ -210,6 +210,74 @@ Along with the regular tx options the `createPool()` supports an additional opti
 | `immediate`    | Sign the tx, no further actions required                                                                                             |
 | `notePreimage` | Signing the tx will create a fast tracked democracy proposal. Voting will be required. Pool must be initiliazed after voting period. |
 | `propose`      | Signing the tx will create a regular democracy proposal. Voting will be required. Pool must be initiliazed after voting period.      |
+
+## Minting assets on Centrifuge Chain
+
+Like creating pools, minting assets also requires a series of transactions to be executed sequentially.
+
+> This guide does not cover authentication (yet), but it is required to make any request to the POD.
+
+The following steps must be executed in order to mint an asset on-chain:
+
+1. `cent.pod.createDocument`: Create a document containing private and public data on the POD. The POD will handle pinning the public metadata to IPFS internally
+2. `cent.pod.commitDocumentAndMintNft`: Commit the document to the POD. This will automatically make a request on chain to mint the collateral NFT and will add it to the supplied collection.
+3. `cent.pools.createLoan` Create the loan (asset) from the collateral NFT on-chain. This is a transaction/extrinsic on chain and will therefore require a signature.
+
+## `centrifuge.pod.createDocument([...args], options): { documentId: string }`
+
+First, create a document on the POD. This should include public and private asset data. The private data will be stored and encrypted in the POD. Public data will be pinned to IPFS. This tx does not require a signature, the POD will sign for it. Upon completion the request will return the newly created document ID which will be needed in the following steps.
+
+### `createDocument` args
+
+#### `podUrl: string`
+
+The endpoint to reach the POD at.
+
+#### `signedToken: string`
+
+TBD
+
+#### `document: CommitDocumentInput`
+
+TBD
+
+## `centrifuge.pod.commitDocumentAndMintNft([...args], options): { nftId: string; jobId: string}`
+
+After the document is created (and `documentId` is known) it needs to be commited to the chain to prevent changes in the future. The POD will take care of creating the NFT on-chain using the attributes from the provided `documentId`. `commitDocumentAndMintNft()` is doing a lot behind the scenes. So instead of completing immediately, a `jobId` will be returned which can be used to track the progress of function call.
+
+CentrifugeJS provides an async method to wait for the job to finish, which can be found under: `cent.pod.awaitJob()`.
+
+### `commitDocumentAndMintNft` args
+
+#### `podUrl: string`
+
+The endpoint to reach the POD at.
+
+#### `signedToken: string`
+
+TBD
+
+#### `document: CommitDocumentInput`\
+
+TBD
+
+## `cent.pools.createLoan([...args], options): Observable<ISubmittableResult>`
+
+To assign the newly created asset to a pool the job must be completed first. Make sure to use a connected instance of CentrifugeJS to that the transaction can be signed.
+
+### `createLoan` args
+
+#### `poolId: string`
+
+The poolId to which the assets belongs.
+
+#### `collectionId: string`
+
+The id used for the collateral collection.
+
+#### `nftId: string`
+
+The value returned from the `commitDocumentAndMintNft`
 
 ## Local development
 

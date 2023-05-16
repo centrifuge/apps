@@ -11,16 +11,18 @@ import { useCentrifuge } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
 import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
 import { getStore } from './evm/utils'
-import { Account, Proxy, State } from './types'
+import { Account, Network, Proxy, State } from './types'
 import { useConnectEagerly } from './useConnectEagerly'
 import { Action, getPersisted, persist, useWalletStateInternal } from './useWalletState'
 import { useGetNetworkName } from './utils'
 import { WalletDialog } from './WalletDialog'
 
-type WalletContextType = {
+export type WalletContextType = {
   connectedType: 'evm' | 'substrate' | null
   connectedNetwork: State['walletDialog']['network']
   connectedNetworkName: string | null
+  scopedNetworks: Network[] | null
+  setScopedNetworks: (scopedNetwork: Network[] | null) => void
   dispatch: (action: Action) => void
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
@@ -110,20 +112,17 @@ export function WalletProvider({
 
   const cent = useCentrifuge()
   const { data: proxies } = useQuery(
-    ['proxies', state.substrate.accounts?.map((acc) => acc.address)],
+    ['allProxies'],
     () =>
-      firstValueFrom(cent.proxies.getMultiUserProxies([state.substrate.accounts!.map((acc) => acc.address)])).then(
-        (proxies) => {
-          return Object.fromEntries(
-            Object.entries(proxies).map(([delegatee, ps]) => [
-              cent.utils.formatAddress(delegatee),
-              ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
-            ])
-          )
-        }
-      ),
+      firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
+        return Object.fromEntries(
+          Object.entries(proxies).map(([delegatee, ps]) => [
+            cent.utils.formatAddress(delegatee),
+            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+          ])
+        )
+      }),
     {
-      enabled: !!state.substrate.accounts?.length,
       staleTime: Infinity,
     }
   )
@@ -212,6 +211,7 @@ export function WalletProvider({
   }, [])
 
   const connect = React.useCallback(async (wallet: Wallet | EvmConnectorMeta, chainId?: number) => {
+    disconnect()
     if ('connector' in wallet) {
       return connectEvm(wallet, chainId)
     }
@@ -240,6 +240,8 @@ export function WalletProvider({
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
   const getNetworkName = useGetNetworkName(evmChains)
 
+  const [scopedNetworks, setScopedNetworks] = React.useState<WalletContextType['scopedNetworks']>(null)
+
   const ctx: WalletContextType = React.useMemo(() => {
     const selectedSubstrateAccount =
       state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null
@@ -249,6 +251,8 @@ export function WalletProvider({
       connectedType: state.connectedType,
       connectedNetwork,
       connectedNetworkName: connectedNetwork ? getNetworkName(connectedNetwork) : null,
+      scopedNetworks,
+      setScopedNetworks,
       dispatch,
       showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
         dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),

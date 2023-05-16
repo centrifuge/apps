@@ -16,7 +16,7 @@ import {
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { filter, lastValueFrom } from 'rxjs'
+import { lastValueFrom, tap } from 'rxjs'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
@@ -32,9 +32,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
-import { IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
-import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -60,14 +58,6 @@ export interface Tranche {
   minRiskBuffer: number | ''
   minInvestment: number | ''
 }
-export interface RiskGroupInput {
-  groupName: string
-  advanceRate: number | ''
-  fee: number | ''
-  probabilityOfDefault: number | ''
-  lossGivenDefault: number | ''
-  discountRate: number | ''
-}
 export interface WriteOffGroupInput {
   days: number | ''
   writeOff: number | ''
@@ -82,20 +72,10 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
   minInvestment: 0,
 })
 
-export const createEmptyRiskGroup = (): RiskGroupInput => ({
-  groupName: '',
-  advanceRate: '',
-  fee: '',
-  probabilityOfDefault: '',
-  lossGivenDefault: '',
-  discountRate: '',
-})
-
 export type CreatePoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo' | 'executiveSummary'> & {
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
-  details: IssuerDetail[]
 }
 
 const initialValues: CreatePoolValues = {
@@ -110,6 +90,7 @@ const initialValues: CreatePoolValues = {
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_NEW_POOLS,
 
   issuerName: '',
+  issuerRepName: '',
   issuerLogo: null,
   issuerDescription: '',
 
@@ -120,7 +101,6 @@ const initialValues: CreatePoolValues = {
   details: [],
 
   tranches: [createEmptyTranche(true)],
-  riskGroups: [createEmptyRiskGroup()],
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
@@ -293,6 +273,9 @@ const CreatePoolForm: React.VFC = () => {
       if (storedIssuer.name) {
         form.setFieldValue('issuerName', storedIssuer.name, false)
       }
+      if (storedIssuer.repName) {
+        form.setFieldValue('issuerRepName', storedIssuer.repName, false)
+      }
       if (storedIssuer.description) {
         form.setFieldValue('issuerDescription', storedIssuer.description, false)
       }
@@ -305,17 +288,13 @@ const CreatePoolForm: React.VFC = () => {
       const $events = centrifuge
         .getEvents()
         .pipe(
-          filter(({ api, events }) => {
-            const event = events.find(({ event }) => api.events.preimage.PreimageNoted.is(event))
+          tap(({ api, events }) => {
+            const event = events.find(({ event }) => api.events.preimage.Noted.is(event))
             const parsedEvent = event?.toJSON() as any
-            // the events api returns a few events for the event PreimageNoted where the data looks different everytime
-            // when data is a tuple and the length is 3, it may be safe to extract the first value as the preimage hash
-            if (parsedEvent?.event?.data?.length === 3) {
-              console.info('Preimage hash: ', parsedEvent.event.data[0])
-              setPreimageHash(parsedEvent.event.data[0])
-              setIsDialogOpen(true)
-            }
-            return !!event
+            if (!parsedEvent) return false
+            console.info('Preimage hash: ', parsedEvent.event.data[0])
+            setPreimageHash(parsedEvent.event.data[0])
+            setIsDialogOpen(true)
           })
         )
         .subscribe()
@@ -450,8 +429,6 @@ const CreatePoolForm: React.VFC = () => {
           </PageSection>
 
           <TrancheSection />
-
-          <RiskGroupsSection />
         </Form>
       </FormikProvider>
     </>

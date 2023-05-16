@@ -1,20 +1,21 @@
 import { useQuery } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 
 export const useUnsignedAgreement = () => {
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { pool, onboardingUser } = useOnboarding()
 
-  const isCompleted = onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreement.completed
+  const poolId = pool?.id as string
+  const trancheId = pool?.trancheId as string
+
+  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
 
   const query = useQuery(
-    ['unsigned-subscription-agreement', pool.id, pool.trancheId],
+    ['unsigned-subscription-agreement', poolId, trancheId],
     async () => {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${pool.id}&trancheId=${
-          pool.trancheId
-        }`,
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${poolId}&trancheId=${trancheId}`,
         {
           method: 'GET',
           headers: {
@@ -34,7 +35,7 @@ export const useUnsignedAgreement = () => {
       return URL.createObjectURL(documentBlob)
     },
     {
-      enabled: !isCompleted,
+      enabled: !hasSignedAgreement,
       refetchOnWindowFocus: false,
     }
   )

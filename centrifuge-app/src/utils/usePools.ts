@@ -1,8 +1,8 @@
-import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
-import { useTinlakePools } from './tinlake/useTinlakePools'
+import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
 import { useMetadata } from './useMetadata'
 
 export function usePools(suspense = true) {
@@ -13,15 +13,22 @@ export function usePools(suspense = true) {
   return result
 }
 
-export function usePool(id: string) {
+export function usePool<T extends boolean = true>(
+  id: string,
+  required?: T
+): T extends true ? Pool | TinlakePool : Pool | TinlakePool | undefined {
   const isTinlakePool = id.startsWith('0x')
   const tinlakePools = useTinlakePools(isTinlakePool)
   const pools = usePools()
   const pool = isTinlakePool
     ? tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === id.toLowerCase())
     : pools?.find((p) => p.id === id)
-  if (!pool) throw new Error(`Pool not found`)
-  return pool
+
+  if (!pool && required !== false) {
+    throw new Error('Pool not found')
+  }
+
+  return pool as T extends true ? Pool | TinlakePool : Pool | TinlakePool | undefined
 }
 
 export function useTokens() {
@@ -177,7 +184,7 @@ export function useConstants() {
         minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toHuman()),
         maxTranches: Number(api.consts.poolSystem.maxTranches.toHuman()),
         challengeTime: Number(api.consts.poolSystem.challengeTime.toHuman()),
-        maxWriteOffGroups: Number(api.consts.loans.maxWriteOffGroups.toHuman()),
+        maxWriteOffPolicySize: Number(api.consts.loans.maxWriteOffPolicySize.toHuman()),
       }
     },
     {

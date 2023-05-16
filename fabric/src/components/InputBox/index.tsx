@@ -72,7 +72,7 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = React.forwardRef(
           )}
           <Stack>
             <Shelf>
-              <Box flex="1 1 auto" minWidth={0}>
+              <Box flex="1 1 auto" minWidth={0} position="relative">
                 <Text
                   variant="body1"
                   color={disabled ? 'textDisabled' : 'textPrimary'}

@@ -3,7 +3,7 @@ import { InferType, object, string } from 'yup'
 import { EntityUser, validateAndWriteToFirestore } from '../../database'
 import { VerifyEmailPayload } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { verifyJwt } from '../../utils/verifyJwt'
@@ -22,29 +22,28 @@ export const verifyEmailController = async (
       query: { token },
     } = req
     const payload = verifyJwt<VerifyEmailPayload>(token)
-    const user = await fetchUser(payload.walletAddress)
+    const user = await fetchUser(payload.wallet)
 
-    // individual users don't have email addresses yet
-    if (user.investorType !== 'entity') {
-      throw new HttpsError(400, 'Bad request')
+    if (!user.email || !payload.email) {
+      throw new HttpError(400, 'No email found')
     }
 
     if (user.globalSteps.verifyEmail.completed) {
-      throw new HttpsError(400, 'Email already verified')
+      throw new HttpError(400, 'Email already verified')
+    }
+
+    if (user.email !== payload.email) {
+      throw new HttpError(400, 'Email does not match')
     }
 
     const globalSteps: Subset<EntityUser> = {
-      globalSteps: { ...user.globalSteps, verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
+      globalSteps: { verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(payload.walletAddress, globalSteps, 'entity', ['globalSteps'])
+    await validateAndWriteToFirestore(payload.wallet, globalSteps, user.investorType, ['globalSteps.verifyEmail'])
     return res.status(204).send()
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

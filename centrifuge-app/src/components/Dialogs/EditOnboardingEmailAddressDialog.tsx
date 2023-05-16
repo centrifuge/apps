@@ -2,7 +2,7 @@ import { Box, Button, Dialog, Shelf, Stack, Text, TextInput } from '@centrifuge/
 import * as React from 'react'
 import { useMutation } from 'react-query'
 import { string } from 'yup'
-import { useAuth } from '../AuthProvider'
+import { useOnboardingAuth } from '../OnboardingAuthProvider'
 import { useOnboarding } from '../OnboardingProvider'
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 
 export const EditOnboardingEmailAddressDialog = ({ isDialogOpen, setIsDialogOpen, currentEmail }: Props) => {
   const [newEmail, setNewEmail] = React.useState('')
-  const { authToken } = useAuth()
+  const { authToken } = useOnboardingAuth()
   const { refetchOnboardingUser } = useOnboarding()
 
   const isValid = React.useMemo(() => string().email().required().isValidSync(newEmail), [newEmail])

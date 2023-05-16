@@ -1,52 +1,67 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { IndividualUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
-import { HttpsError } from '../../utils/httpsError'
+import { IndividualUser, validateAndWriteToFirestore } from '../../database'
+import { IS_DEV_ENV } from '../../utils/envCheck'
+import { fetchUser } from '../../utils/fetchUser'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
 
 const kycInput = object({
   name: string().required(),
+  email: string().email(),
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(),
   countryOfResidency: string().required(),
-  poolId: string(),
-  trancheId: string(),
 })
 
 export const startKycController = async (req: Request<any, any, InferType<typeof kycInput>>, res: Response) => {
   try {
-    const { walletAddress, body } = req
+    const { wallet, body } = req
     await validateInput(req.body, kycInput)
 
-    const userDoc = await userCollection.doc(walletAddress).get()
-    const userData = userDoc.data() as OnboardingUser
+    const userData = await fetchUser(wallet, { suppressError: true })
 
-    if (!userDoc.exists && (!body.poolId || !body.trancheId)) {
-      throw new HttpsError(400, 'trancheId and poolId required for individual kyc')
+    if (!userData && !body.email) {
+      throw new HttpError(400, 'email required for individual kyc')
     }
 
+    // entity user will already be created when starting KYC
     if (
-      userData.investorType === 'entity' &&
+      userData?.investorType === 'entity' &&
       !userData.globalSteps.verifyEmail.completed &&
-      !userData.globalSteps.verifyBusiness.completed &&
+      (!userData.globalSteps.verifyBusiness.completed || !userData.manualKybReference) &&
       !userData.globalSteps.confirmOwners.completed
     ) {
-      throw new HttpsError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
+      throw new HttpError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
     }
 
-    if (userData.globalSteps.verifyIdentity.completed) {
-      throw new HttpsError(400, 'Identity already verified')
+    if (userData?.globalSteps.verifyIdentity.completed) {
+      throw new HttpError(400, 'Identity already verified')
     }
 
     const kycReference = `KYC_${Math.random()}`
-    if (body.poolId && body.trancheId) {
-      const updatedUserData: IndividualUser = {
+
+    if (userData) {
+      const updatedUser = {
+        name: body.name,
+        countryOfCitizenship: body.countryOfCitizenship,
+        countryOfResidency: body.countryOfResidency,
+        dateOfBirth: body.dateOfBirth,
+        kycReference,
+      }
+      await validateAndWriteToFirestore(wallet, updatedUser, 'entity', [
+        'name',
+        'countryOfCitizenship',
+        'countryOfResidency',
+        'dateOfBirth',
+        'kycReference',
+      ])
+    } else {
+      const newUser: IndividualUser = {
         investorType: 'individual',
-        wallet: {
-          address: walletAddress,
-          network: 'polkadot',
-        },
+        address: null,
+        wallet: [req.wallet],
         kycReference,
         name: body.name,
         dateOfBirth: body.dateOfBirth,
@@ -64,48 +79,16 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
           verifyAccreditation: { completed: false, timeStamp: null },
           verifyTaxInfo: { completed: false, timeStamp: null },
         },
-        poolSteps: {
-          [body.poolId]: {
-            [body.trancheId]: {
-              signAgreement: {
-                completed: false,
-                timeStamp: null,
-                transactionInfo: {
-                  extrinsicHash: null,
-                  blockNumber: null,
-                },
-              },
-              status: {
-                status: null,
-                timeStamp: null,
-              },
-            },
-          },
-        },
-        email: null,
+        poolSteps: {},
+        email: body.email as string,
       }
-      await validateAndWriteToFirestore(walletAddress, updatedUserData, 'individual')
-    } else {
-      const updatedUser = {
-        name: body.name,
-        countryOfCitizenship: body.countryOfCitizenship,
-        countryOfResidency: body.countryOfResidency,
-        dateOfBirth: body.dateOfBirth,
-        kycReference,
-      }
-      await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', [
-        'name',
-        'countryOfCitizenship',
-        'countryOfResidency',
-        'dateOfBirth',
-        'kycReference',
-      ])
+      await validateAndWriteToFirestore(wallet, newUser, 'individual')
     }
 
     const payloadKYC = {
       reference: kycReference,
       callback_url: '',
-      email: userData.email ?? '',
+      email: userData?.email ?? '',
       country: body.countryOfCitizenship,
       language: 'EN',
       redirect_url: '',
@@ -115,8 +98,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       ttl: 1800, // 30 minutes: time in seconds for the verification url to stay active
       face: {
         proof: '',
-        allow_offline: '1', // TODO: disable once we go live
-        check_duplicate_request: '0', // TODO: enable once we go live
+        allow_offline: IS_DEV_ENV ? '1' : '0',
+        check_duplicate_request: IS_DEV_ENV ? '0' : '1',
       },
       document: {
         proof: '',
@@ -136,14 +119,10 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         show_ocr_form: '1',
       },
     }
-    const kyc = await shuftiProRequest(req, payloadKYC)
+    const kyc = await shuftiProRequest(payloadKYC)
     return res.send({ ...kyc })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

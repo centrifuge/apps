@@ -1,15 +1,18 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
-import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
+import { getSelectedWallet } from '../../../utils/getSelectedWallet'
 
 export const useTaxInfo = () => {
-  const { authToken } = useAuth()
-  const { selectedAccount } = useWallet().substrate
+  const { authToken } = useOnboardingAuth()
+  const wallet = useWallet()
   const { onboardingUser } = useOnboarding()
 
+  const selectedWallet = getSelectedWallet(wallet)
+
   const query = useQuery(
-    ['tax-info', selectedAccount?.address],
+    ['tax-info', selectedWallet?.address],
     async () => {
       const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo`, {
         method: 'GET',

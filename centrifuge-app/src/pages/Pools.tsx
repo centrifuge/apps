@@ -10,7 +10,6 @@ import { config } from '../config'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useListedPools } from '../utils/useListedPools'
-import { usePools } from '../utils/usePools'
 
 export const PoolsPage: React.FC = () => {
   return (
@@ -21,7 +20,6 @@ export const PoolsPage: React.FC = () => {
 }
 
 const Pools: React.FC = () => {
-  const pools = usePools()
   const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
   const totalValueLocked = React.useMemo(() => {
     return (
@@ -48,12 +46,12 @@ const Pools: React.FC = () => {
   return (
     <Stack gap={0} flex={1}>
       <PageHeader
-        title="Investments"
+        title="Pools"
         subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
         actions={<MenuSwitch />}
       />
 
-      {pools?.length ? (
+      {listedPools?.length ? (
         <>
           <PageSummary data={pageSummaryData} />
           <PoolList pools={listedPools} isLoading={metadataIsLoading} />

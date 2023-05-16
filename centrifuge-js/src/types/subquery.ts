@@ -11,6 +11,12 @@ export type SubqueryPoolSnapshot = {
   totalRepaid?: number | null
   totalInvested?: number | null
   totalRedeemed?: number | null
+  sumBorrowedAmount?: number | null
+  sumBorrowedAmountByPeriod?: number | null
+  sumRepaidAmountByPeriod?: number | null
+  sumInvestedAmountByPeriod?: number | null
+  sumRedeemedAmountByPeriod?: number | null
+  blockNumber: number
 }
 
 export type SubqueryTrancheSnapshot = {
@@ -68,4 +74,17 @@ export type SubqueryBorrowerTransaction = {
   loanId: string
   type: BorrowerTransactionType
   amount?: number | null
+}
+
+export type SubqueryEpoch = {
+  id: string
+  poolId: string
+  index: number
+  openedAt: string
+  closedAt: string
+  executedAt: string
+  sumBorrowedAmount: number | null
+  sumRepaidAmount: number | null
+  sumInvestedAmount: number | null
+  sumRedeemedAmount: number | null
 }

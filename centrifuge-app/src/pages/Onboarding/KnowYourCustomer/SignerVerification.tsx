@@ -1,5 +1,6 @@
-import { Box, Button, Checkbox, DateInput, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, DateInput, Select, Text, TextInput } from '@centrifuge/fabric'
 import { FormikProps } from 'formik'
+import { ActionBar, Content, ContentHeader, Fieldset, ValidEmailTooltip } from '../../../components/Onboarding'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
 import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES } from '../geographyCodes'
@@ -7,6 +8,7 @@ import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES } from '../geographyCodes'
 type Props = {
   formik: FormikProps<{
     name: string
+    email: string | undefined
     dateOfBirth: string
     countryOfCitizenship: string
     countryOfResidency: string
@@ -36,72 +38,78 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>{copy[investorType].title}</Text>
-        <Text fontSize={2}>{copy[investorType].description}</Text>
-        <Stack gap={2} py={6} width="493px">
+    <>
+      <Content>
+        <ContentHeader title={copy[investorType].title} body={copy[investorType].description} />
+
+        <Fieldset>
           <TextInput
-            id="name"
-            value={formik.values.name}
+            {...formik.getFieldProps('name')}
             label="Full Name"
-            onChange={formik.handleChange}
             disabled={isLoading || isCompleted}
+            errorMessage={formik.touched.name ? formik.errors.name : undefined}
           />
+          {investorType === 'individual' && (
+            <Box position="relative">
+              <TextInput
+                {...formik.getFieldProps('email')}
+                label="Email address"
+                placeholder="Enter email address"
+                disabled={isLoading || isCompleted}
+                errorMessage={formik.touched.email ? formik.errors.email : undefined}
+              />
+              <ValidEmailTooltip />
+            </Box>
+          )}
           <DateInput
-            id="dateOfBirth"
-            value={formik.values.dateOfBirth}
+            {...formik.getFieldProps('dateOfBirth')}
             label="Date of Birth"
-            onChange={formik.handleChange}
             disabled={isLoading || isCompleted}
+            errorMessage={formik.touched.dateOfBirth ? formik.errors.dateOfBirth : undefined}
           />
           <Select
-            name="countryOfCitizenship"
+            {...formik.getFieldProps('countryOfCitizenship')}
             label="Country of Citizenship"
             placeholder="Select a country"
             options={formatGeographyCodes(KYC_COUNTRY_CODES)}
-            onChange={(event) => formik.setFieldValue('countryOfCitizenship', event.target.value)}
-            value={formik.values.countryOfCitizenship}
             disabled={isLoading || isCompleted}
+            errorMessage={formik.touched.countryOfCitizenship ? formik.errors.countryOfCitizenship : undefined}
           />
           <Select
-            name="countryOfResidency"
+            {...formik.getFieldProps('countryOfResidency')}
             label="Country of Residence"
             placeholder="Select a country"
             options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES)}
-            onChange={(event) => formik.setFieldValue('countryOfResidency', event.target.value)}
-            value={formik.values.countryOfResidency}
             disabled={isLoading || isCompleted}
+            errorMessage={formik.touched.countryOfResidency ? formik.errors.countryOfResidency : undefined}
           />
-        </Stack>
+        </Fieldset>
         <Box>
           <Checkbox
-            id="isAccurate"
-            style={{
-              cursor: 'pointer',
-            }}
+            {...formik.getFieldProps('isAccurate')}
             checked={formik.values.isAccurate}
-            onChange={formik.handleChange}
             label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>{copy[investorType].checkboxLabel}</Text>}
             disabled={isLoading || isCompleted}
+            errorMessage={formik.touched.isAccurate ? formik.errors.isAccurate : undefined}
           />
         </Box>
-      </Box>
-      <Shelf gap="2">
+      </Content>
+
+      <ActionBar>
         <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
           Back
         </Button>
         <Button
           onClick={() => {
-            isCompleted ? nextStep() : formik.submitForm()
+            isCompleted ? nextStep() : formik.handleSubmit()
           }}
           loading={isLoading}
-          disabled={isLoading || !formik.isValid}
+          disabled={isLoading}
           loadingMessage="Verifying"
         >
           Next
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

@@ -17,7 +17,15 @@ import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
 
 type Values = Pick<
   CreatePoolValues,
-  'issuerName' | 'issuerLogo' | 'issuerDescription' | 'executiveSummary' | 'website' | 'forum' | 'email'
+  | 'issuerName'
+  | 'issuerRepName'
+  | 'issuerLogo'
+  | 'issuerDescription'
+  | 'executiveSummary'
+  | 'website'
+  | 'forum'
+  | 'email'
+  | 'details'
 >
 
 export const Issuer: React.FC = () => {
@@ -32,12 +40,14 @@ export const Issuer: React.FC = () => {
   const initialValues: Values = React.useMemo(
     () => ({
       issuerName: metadata?.pool?.issuer?.name ?? '',
+      issuerRepName: metadata?.pool?.issuer?.repName ?? '',
       issuerLogo: logoFile ?? null,
       issuerDescription: metadata?.pool?.issuer?.description ?? '',
       executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : ('' as any),
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
       email: metadata?.pool?.issuer?.email ?? '',
+      details: metadata?.pool?.details,
     }),
     [metadata, logoFile]
   )
@@ -78,6 +88,7 @@ export const Issuer: React.FC = () => {
           ...oldMetadata.pool,
           issuer: {
             name: values.issuerName,
+            repName: values.issuerRepName,
             description: values.issuerDescription,
             email: values.email,
             logo:
@@ -90,6 +101,7 @@ export const Issuer: React.FC = () => {
             forum: values.forum,
             website: values.website,
           },
+          details: values.details,
         },
       }
 

@@ -4,7 +4,7 @@ import {
   EvmChains,
   TransactionProvider,
   TransactionToasts,
-  WalletProvider
+  WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
@@ -13,11 +13,10 @@ import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
-import { config } from '../config'
+import { config, ethConfig } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { CreateLoanFromNFTPage } from '../pages/CreateLoanFromNFT'
 import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
@@ -33,12 +32,12 @@ import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
-import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
+import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
 import { PodAuthProvider } from './PodAuthProvider'
 
@@ -66,12 +65,6 @@ const centConfig: UserProvidedConfig = {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ uri: b64URI }),
     }),
-  unpinFile: (hash) =>
-    pinToApi('unpinFile', {
-      method: 'DELETE',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ hash }),
-    }),
   pinJson: (json) =>
     pinToApi('pinJson', {
       method: 'POST',
@@ -82,16 +75,24 @@ const centConfig: UserProvidedConfig = {
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
-const evmChains: EvmChains = {
-  1: {
-    urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
-    iconUrl: ethereumLogo,
-  },
-  5: {
-    urls: [`https://goerli.infura.io/v3/${infuraKey}`],
-    iconUrl: goerliLogo,
-  },
-}
+const evmChains: EvmChains =
+  ethConfig.network === 'mainnet'
+    ? {
+        1: {
+          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+          iconUrl: ethereumLogo,
+        },
+      }
+    : {
+        1: {
+          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+          iconUrl: ethereumLogo,
+        },
+        5: {
+          urls: [`https://goerli.infura.io/v3/${infuraKey}`],
+          iconUrl: goerliLogo,
+        },
+      }
 
 export const Root: React.VFC = () => {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
@@ -117,18 +118,20 @@ export const Root: React.VFC = () => {
             <DemoBanner />
             <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
-                <AuthProvider>
-                  <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <Router>
-                        <LoadBoundary>
-                          <Routes />
-                        </LoadBoundary>
-                      </Router>
-                    </TransactionProvider>
-                  </DebugFlags>
-                </AuthProvider>
+                <OnboardingAuthProvider>
+                  <OnboardingProvider>
+                    <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                      <TransactionProvider>
+                        <TransactionToasts />
+                        <Router>
+                          <LoadBoundary>
+                            <Routes />
+                          </LoadBoundary>
+                        </Router>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </OnboardingProvider>
+                </OnboardingAuthProvider>
               </PodAuthProvider>
             </WalletProvider>
           </CentrifugeProvider>
@@ -143,9 +146,6 @@ const Routes: React.VFC = () => {
     <Switch>
       <Route path="/nfts/collection/:cid/object/mint">
         <MintNFTPage />
-      </Route>
-      <Route path="/nfts/collection/:cid/object/:nftid/new-asset">
-        <CreateLoanFromNFTPage />
       </Route>
       <Route path="/nfts/collection/:cid/object/:nftid">
         <NFTPage />
@@ -171,25 +171,23 @@ const Routes: React.VFC = () => {
       <Route path="/issuer/:pid">
         <IssuerPoolPage />
       </Route>
-      <Route path="/investments/:pid/assets/:aid">
+      <Route path="/pools/:pid/assets/:aid">
         <LoanPage />
       </Route>
-      <Route path="/investments/tokens">
+      <Route path="/pools/tokens">
         <TokenOverviewPage />
       </Route>
-      <Route path="/investments/:pid">
+      <Route path="/pools/:pid">
         <PoolDetailPage />
       </Route>
-      <Route path="/investments">
+      <Route path="/pools">
         <PoolsPage />
       </Route>
       <Route path="/disclaimer">
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingProvider>
-          <OnboardingPage />
-        </OnboardingProvider>
+        <OnboardingPage />
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
@@ -198,7 +196,7 @@ const Routes: React.VFC = () => {
         <UpdateInvestorStatus />
       </Route>
       <Route exact path="/">
-        <Redirect to="/investments" />
+        <Redirect to="/pools" />
       </Route>
       <Route>
         <NotFoundPage />

@@ -1,8 +1,10 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { InteractiveCard, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import { Box, Card, Grid, IconChevronRight, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useRouteMatch } from 'react-router'
+import { useRouteMatch } from 'react-router'
+import { Link } from 'react-router-dom'
+import styled from 'styled-components'
 import { formatBalance } from '../utils/formatting'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { usePoolMetadata } from '../utils/usePools'
@@ -15,15 +17,44 @@ type PoolCardProps = {
   pool?: Pool | TinlakePool
 }
 
-export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
+const Anchor = styled(Grid)`
+  place-items: center;
+  color: ${({ theme }) => theme.colors.textInteractive};
+
+  &:active {
+    color: ${({ theme }) => theme.colors.textInteractive};
+  }
+
+  &:focus-visible {
+    outline: ${({ theme }) => `2px solid ${theme.colors.textInteractive}`};
+  }
+
+  svg {
+    transition: transform 0.15s;
+  }
+
+  &:hover svg {
+    transform: translateX(5px);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+`
+
+export function PoolCard({ pool }: PoolCardProps) {
   const cent = useCentrifuge()
-  const history = useHistory()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const { data: metadata } = usePoolMetadata(pool)
 
   return (
-    <InteractiveCard
-      icon={
+    <Card role="article" variant="interactive">
+      <Grid as="header" gridTemplateColumns="40px 1fr" alignItems="start" gap={1} p={2}>
         <Eththumbnail show={pool?.id.startsWith('0x')}>
           {metadata?.pool?.icon?.uri ? (
             <img src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)} alt="" height="40" width="40" />
@@ -31,41 +62,67 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
             <Thumbnail type="pool" label="LP" size="large" />
           )}
         </Eththumbnail>
-      }
-      variant="button"
-      title={<TextWithPlaceholder isLoading={!metadata}>{metadata?.pool?.name}</TextWithPlaceholder>}
-      subtitle={<TextWithPlaceholder isLoading={!metadata}>{metadata?.pool?.issuer.name}</TextWithPlaceholder>}
-      onClick={pool ? () => history.push(`${basePath}/${pool.id}`) : undefined}
-      secondaryHeader={
-        <Shelf gap="6" justifyContent="flex-start">
-          <LabelValueStack
-            label={
-              pool ? <Tooltips type="valueLocked" variant="secondary" props={{ poolId: pool.id }} /> : 'Value locked'
-            }
-            value={
-              pool ? (
-                formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)
-              ) : (
-                <TextWithPlaceholder isLoading />
-              )
-            }
-          />
-          <LabelValueStack
-            label="Tokens"
-            value={pool ? pool.tranches.length : <TextWithPlaceholder isLoading width={2} variance={0} />}
-          />
-          <LabelValueStack
-            label="Capacity"
-            value={
-              pool ? (
-                formatBalance(pool.tranches.at(-1)!.capacity, pool.currency.symbol)
-              ) : (
-                <TextWithPlaceholder isLoading />
-              )
-            }
-          />
-        </Shelf>
-      }
-    />
+
+        <Grid position="relative" gridTemplateColumns="1fr 30px" alignItems="center" gap={1}>
+          <Box>
+            <TextWithPlaceholder as="h2" variant="heading3" color="textInteractive" isLoading={!metadata}>
+              {metadata?.pool?.name}
+            </TextWithPlaceholder>
+
+            <TextWithPlaceholder as="span" variant="body2" isLoading={!metadata}>
+              {metadata?.pool?.issuer.name}
+            </TextWithPlaceholder>
+          </Box>
+
+          {pool && (
+            <Anchor
+              forwardedAs={Link}
+              gridTemplateColumns="1fr"
+              width={30}
+              height={30}
+              borderRadius="tooltip"
+              to={`${basePath}/${pool.id}`}
+              aria-label="Go to pool details"
+            >
+              <IconChevronRight />
+            </Anchor>
+          )}
+        </Grid>
+      </Grid>
+
+      <Box as="hr" height="1px" backgroundColor="borderSecondary" border="none" />
+
+      <Shelf as="dl" gap="6" p={2} justifyContent="flex-start">
+        <LabelValueStack
+          label={
+            pool ? <Tooltips type="valueLocked" variant="secondary" props={{ poolId: pool.id }} /> : 'Value locked'
+          }
+          value={
+            pool ? (
+              formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)
+            ) : (
+              <TextWithPlaceholder isLoading />
+            )
+          }
+          renderAs={{ label: 'dt', value: 'dd' }}
+        />
+        <LabelValueStack
+          label="Tokens"
+          value={pool ? pool.tranches.length : <TextWithPlaceholder isLoading width={2} variance={0} />}
+          renderAs={{ label: 'dt', value: 'dd' }}
+        />
+        <LabelValueStack
+          label="Capacity"
+          value={
+            pool ? (
+              formatBalance(pool.tranches.at(-1)!.capacity, pool.currency.symbol)
+            ) : (
+              <TextWithPlaceholder isLoading />
+            )
+          }
+          renderAs={{ label: 'dt', value: 'dd' }}
+        />
+      </Shelf>
+    </Card>
   )
 }

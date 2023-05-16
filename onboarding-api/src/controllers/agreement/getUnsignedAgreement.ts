@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { onboardingBucket } from '../../database'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
 const getUnsignedAgreementInput = object({
@@ -15,23 +15,20 @@ export const getUnsignedAgreementController = async (
 ) => {
   try {
     await validateInput(req.query, getUnsignedAgreementInput)
-    const { poolId, trancheId } = req.query
-    const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
+    // const { poolId, trancheId } = req.query
+    // TODO: make subscription agreements pool and tranche specific
+    const unsignedAgreement = await onboardingBucket.file('subscription-agreements/generic_subscription_agreement.pdf')
 
     const [unsignedAgreementExists] = await unsignedAgreement.exists()
 
-    if (unsignedAgreementExists) {
-      const pdf = await unsignedAgreement.download()
-      return res.send({ unsignedAgreement: pdf[0] })
+    if (!unsignedAgreementExists) {
+      throw new HttpError(400, 'Agreement not found')
     }
 
-    throw new HttpsError(400, 'Agreement not found')
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+    const pdf = await unsignedAgreement.download()
+    return res.send({ unsignedAgreement: pdf[0] })
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

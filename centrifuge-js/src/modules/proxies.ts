@@ -2,8 +2,45 @@ import { encodeAddress } from '@polkadot/util-crypto'
 import { map, switchMap } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account } from '../types'
+import { addressToHex } from '../utils'
 
 export function getProxiesModule(inst: CentrifugeBase) {
+  // TODO: Probably remove this as getting all proxies from the chain could potentially be quite a lot of data
+  // Used as a fallback for when the SubQuery is down
+  function getAllProxies() {
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => api.query.proxy.proxies.entries()),
+      map((data) => {
+        const proxiesByDelegate: Record<string, { delegator: string; delegatee: string; types: string[] }[]> = {}
+        data
+          .flatMap(([keyValue, dataValue]) => {
+            const delegator = addressToHex((keyValue as any).toHuman()[0])
+            const proxies = (dataValue as any).toHuman()[0] as { delegate: string; proxyType: string }[]
+            return proxies.map((proxy) => ({
+              delegator,
+              delegatee: addressToHex(proxy.delegate),
+              proxyType: proxy.proxyType,
+            }))
+          })
+          .forEach((proxy) => {
+            const index = proxiesByDelegate[proxy.delegatee]?.findIndex((p) => p.delegator === proxy.delegator)
+            if (index > -1) {
+              proxiesByDelegate[proxy.delegatee][index].types.push(proxy.proxyType)
+            } else {
+              ;(proxiesByDelegate[proxy.delegatee] || (proxiesByDelegate[proxy.delegatee] = [])).push({
+                delegator: proxy.delegator,
+                delegatee: proxy.delegatee,
+                types: [proxy.proxyType],
+              })
+            }
+          })
+        return proxiesByDelegate
+      })
+    )
+  }
+
   function getUserProxies(args: [address: Account]) {
     const [address] = args
 
@@ -88,5 +125,6 @@ export function getProxiesModule(inst: CentrifugeBase) {
   return {
     getUserProxies,
     getMultiUserProxies,
+    getAllProxies,
   }
 }
