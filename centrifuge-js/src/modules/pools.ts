@@ -8,13 +8,14 @@ import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
+  BorrowerTransactionType,
   InvestorTransactionType,
   SubqueryBorrowerTransaction,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
-import { addressToHex, getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
+import { addressToHex, getDateMonthsFromNow, getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
 
@@ -508,6 +509,30 @@ export type WriteOffGroup = {
   overdueDays: number
   penaltyInterestRate: Rate
   percentage: Rate
+}
+
+type InvestorTransaction = {
+  id: string
+  timestamp: string
+  accountId: string
+  trancheId: string
+  epochNumber: number
+  type: InvestorTransactionType
+  currencyAmount: CurrencyBalance | undefined
+  tokenAmount: CurrencyBalance | undefined
+  tokenPrice: Price | undefined
+  transactionFee: CurrencyBalance | null
+}
+
+type BorrowerTransaction = {
+  id: string
+  timestamp: string
+  poolId: string
+  accountId: string
+  epochId: string
+  loanId: string
+  type: BorrowerTransactionType
+  amount: CurrencyBalance | undefined
 }
 
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
@@ -1693,8 +1718,8 @@ export function getPoolsModule(inst: Centrifuge) {
       {
         poolId,
         trancheId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
       }
     )
 
@@ -1722,7 +1747,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
                   transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
                 }
-              }) as unknown as any[], // TODO: add typing
+              }) as unknown as InvestorTransaction[],
             ]
           })
         )
@@ -1746,8 +1771,8 @@ export function getPoolsModule(inst: Centrifuge) {
           nodes {
             loanId
             epochId
-            timestamp
             type
+            timestamp
             amount
           }
         }
@@ -1755,18 +1780,20 @@ export function getPoolsModule(inst: Centrifuge) {
       `,
       {
         poolId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
       },
       false
     )
 
     return $query.pipe(
-      map((data) => {
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
         return data!.borrowerTransactions.nodes.map((tx) => ({
           ...tx,
+          amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
           timestamp: new Date(tx.timestamp),
-        }))
+        })) as unknown as BorrowerTransaction[]
       })
     )
   }

@@ -107,6 +107,11 @@ export function getDateYearsFromNow(years: number) {
   return new Date(new Date().setFullYear(new Date().getFullYear() + years))
 }
 
+export function getDateMonthsFromNow(month: number) {
+  const date = new Date()
+  return new Date(date.setMonth(date.getMonth() + month))
+}
+
 export function addressToHex(addr: string) {
   return u8aToHex(decodeAddress(addr))
 }

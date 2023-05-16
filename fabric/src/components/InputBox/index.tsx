@@ -16,20 +16,13 @@ export type InputBoxProps = {
   outlined?: boolean
 }
 
-const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean; $outlined?: boolean }>`
+const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean }>`
   border: 1px solid;
   text-align: left;
   border-radius: ${({ theme }) => theme.radii.input}px;
-  background: ${({ theme, $disabled, $outlined }) =>
-    $disabled ? theme.colors.backgroundPage : $outlined ? 'transparent' : theme.colors.backgroundInput};
-  border-color: ${({ theme, $disabled, $active, $outlined }) =>
-    $disabled
-      ? theme.colors.backgroundSecondary
-      : $active
-      ? theme.colors.textSelected
-      : $outlined
-      ? theme.colors.borderButtonSecondary
-      : 'transparent'};
+  background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
+  border-color: ${({ theme, $disabled, $active }) =>
+    $disabled ? theme.colors.backgroundSecondary : $active ? theme.colors.textSelected : 'transparent'};
   &:focus,
   &:focus-within {
     border-color: var(--fabric-color-focus);
@@ -37,34 +30,11 @@ const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean; $ou
 `
 
 export const InputBox: React.FC<StackProps & InputBoxProps> = React.forwardRef(
-  (
-    {
-      label,
-      secondaryLabel,
-      errorMessage,
-      inputElement,
-      rightElement,
-      disabled,
-      active,
-      outlined = false,
-      ...boxProps
-    },
-    ref
-  ) => {
+  ({ label, secondaryLabel, errorMessage, inputElement, rightElement, disabled, active, ...boxProps }, ref) => {
     const theme = useTheme()
     return (
       <Stack gap={1} width="100%">
-        <InputWrapper
-          gap="4px"
-          px={2}
-          py={1}
-          as="label"
-          $active={active}
-          $disabled={disabled}
-          $outlined={outlined}
-          {...boxProps}
-          ref={ref}
-        >
+        <InputWrapper gap="4px" px={2} py={1} as="label" $active={active} $disabled={disabled} {...boxProps} ref={ref}>
           {label && (
             <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
               {label}

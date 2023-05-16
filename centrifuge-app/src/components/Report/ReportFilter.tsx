@@ -29,21 +29,24 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Borrower transactions', value: 'borrower-tx' },
   ]
 
-  React.useEffect(() => {
-    // const now = new Date()
-    // setStartDate(new Date(now.setDate(now.getDate() - rangeOptions[1].days)))
-    // setStartDate(pool?.createdAt ? new Date(pool?.createdAt) : new Date())
-  }, [])
-
   return (
-    <Shelf alignItems="center" flexWrap="wrap" gap={2} p={2} backgroundColor="backgroundSecondary">
+    <Shelf
+      alignItems="center"
+      flexWrap="wrap"
+      gap={2}
+      p={2}
+      borderWidth={0}
+      borderBottomWidth={1}
+      borderStyle="solid"
+      borderColor="borderSecondary"
+    >
       <Box minWidth={200} maxWidth={200}>
         <Select
           name="report"
+          label="Report"
           placeholder="Select a report"
           options={reportOptions}
           value={report}
-          outlined={true}
           onChange={(event) => {
             if (event.target.value) {
               setReport(event.target.value as Report)
@@ -79,8 +82,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         <Box minWidth={150} maxWidth={150}>
           <Select
             name="groupBy"
+            label="Group by"
             placeholder="Select a time period to group by"
-            outlined={true}
             options={[
               {
                 label: 'Day',
@@ -105,8 +108,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         <Box minWidth={150} maxWidth={150}>
           <Select
             name="activeTranche"
+            label="Token"
             placeholder="Select a token"
-            outlined={true}
             options={[
               {
                 label: 'All tokens',

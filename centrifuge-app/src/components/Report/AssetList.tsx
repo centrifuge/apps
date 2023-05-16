@@ -1,8 +1,6 @@
-// import { ActiveLoan, Loan, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Loan, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
-// import { LOAN_TYPE_LABELS } from '../../pages/Loan/utils'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -26,29 +24,7 @@ export function AssetList({ pool }: { pool: Pool }) {
         name: '',
         value: [
           loan.id,
-          // 'loanInfo' in loan ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '-',
           loan.status === 'Created' ? 'New' : loan.status,
-          // 'loanInfo' in loan ? formatBalance(loan.loanInfo.value.toDecimal()) : '-',
-          // formatBalance((loan as ActiveLoan).outstandingDebt.toDecimal()),
-          // formatBalance((loan as ActiveLoan).totalBorrowed.toDecimal()),
-          // formatBalance((loan as ActiveLoan).totalRepaid.toDecimal()),
-          // loan.status !== 'Created' && loan.originationDate && Number(loan.originationDate) > 0
-          //   ? formatDate(loan.originationDate.toString())
-          //   : '-',
-          // loan.status !== 'Created' && 'maturityDate' in loan.loanInfo
-          //   ? formatDate(loan.loanInfo.maturityDate.toString())
-          //   : '-',
-          // 'interestRatePerSec' in loan ? formatPercentage(loan.interestRatePerSec.toAprPercent()) : '-',
-          // 'loanInfo' in loan ? formatPercentage(loan.loanInfo.advanceRate.toPercent()) : '-',
-          // loan.status !== 'Created' && 'probabilityOfDefault' in loan.loanInfo
-          //   ? formatPercentage(loan.loanInfo.probabilityOfDefault.toPercent())
-          //   : '-',
-          // loan.status !== 'Created' && 'lossGivenDefault' in loan.loanInfo
-          //   ? formatPercentage(loan.loanInfo.lossGivenDefault.toPercent())
-          //   : '-',
-          // loan.status !== 'Created' && 'discountRate' in loan.loanInfo
-          //   ? formatPercentage(loan.loanInfo.discountRate.toPercent())
-          //   : '-',
           formatBalance(loan.pricing.value.toDecimal()),
           'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt.toDecimal()) : '-',
           'totalBorrowed' in loan ? formatBalance(loan.totalBorrowed.toDecimal()) : '-',
@@ -60,7 +36,6 @@ export function AssetList({ pool }: { pool: Pool }) {
           loan.pricing.probabilityOfDefault ? formatPercentage(loan.pricing.probabilityOfDefault.toPercent()) : '-',
           loan.pricing.lossGivenDefault ? formatPercentage(loan.pricing.lossGivenDefault.toPercent()) : '-',
           loan.pricing.discountRate ? formatPercentage(loan.pricing.discountRate.toPercent()) : '-',
-          // formatDate(loan.maturityDate.toString()),
         ],
         heading: false,
       }))
@@ -68,7 +43,6 @@ export function AssetList({ pool }: { pool: Pool }) {
 
   const headers = [
     'ID',
-    'Asset type',
     'Status',
     'Collateral value',
     'Outstanding',
