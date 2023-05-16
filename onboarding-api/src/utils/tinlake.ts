@@ -141,6 +141,16 @@ export const getTinlakePoolById = async (poolId: string) => {
         repName: poolData.metadata.repName ?? '',
       },
     },
+    onboarding: {
+      agreements: {
+        [`${id}-0`]: {
+          ipfsHash: poolData.metadata.attributes?.Links['Agreements']?.[`${id}-0`],
+        },
+        [`${id}-1`]: {
+          ipfsHash: poolData.metadata.attributes?.Links['Agreements']?.[`${id}-1`],
+        },
+      },
+    },
   }
   const pool = {
     metadata: uri,

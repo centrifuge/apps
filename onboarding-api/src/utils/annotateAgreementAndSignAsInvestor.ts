@@ -1,3 +1,4 @@
+import { Request } from 'express'
 import fetch from 'node-fetch'
 import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
@@ -9,7 +10,7 @@ import { HttpError } from './httpError'
 
 interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
   name: string
-  walletAddress: string
+  wallet: Request['wallet']
   email: string
 }
 
@@ -19,13 +20,12 @@ export const annotateAgreementAndSignAsInvestor = async ({
   poolId,
   trancheId,
   transactionInfo,
-  walletAddress,
+  wallet,
   name,
   email,
 }: SignatureInfo) => {
-  const { pool } = await getPoolById(poolId)
+  const { pool, metadata } = await getPoolById(poolId)
   const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name as string
-  const { metadata } = await getPoolById(poolId)
 
   const signaturePage = await onboardingBucket.file('signature-page.pdf')
   const [signaturePageExists] = await signaturePage.exists()
@@ -36,7 +36,15 @@ export const annotateAgreementAndSignAsInvestor = async ({
 
   const unsignedAgreementUrl = metadata?.onboarding?.agreements[trancheId]
     ? centrifuge.metadata.parseMetadataUrl(metadata?.onboarding?.agreements[trancheId].ipfsHash)
-    : centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    : wallet.network === 'substrate'
+    ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    : null
+
+  // tinlake pools that are closed for onboarding don't have agreements in their metadata
+  if (!unsignedAgreementUrl) {
+    throw new HttpError(400, 'Agreement not found')
+  }
+
   const unsignedAgreementRes = await fetch(unsignedAgreementUrl)
   const unsignedAgreement = Buffer.from(await unsignedAgreementRes.arrayBuffer())
   const unsignedAgreementPdfDoc = await PDFDocument.load(unsignedAgreement)
@@ -60,7 +68,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
   const lastPage = pages[pages.length - 1]
 
   firstPage.drawText(
-    `Signed by ${walletAddress} on Centrifuge
+    `Signed by ${wallet.address} on Centrifuge
 Block: ${transactionInfo.blockNumber}
 Transaction Hash: ${transactionInfo.txHash}`,
     {
@@ -73,7 +81,7 @@ Transaction Hash: ${transactionInfo.txHash}`,
     }
   )
 
-  lastPage.drawText(walletAddress, {
+  lastPage.drawText(wallet.address, {
     x: 72,
     y: 582,
     size: 12,
