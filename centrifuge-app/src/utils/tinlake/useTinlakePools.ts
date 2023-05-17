@@ -293,11 +293,11 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         call: ['totalRedeem()(uint256)'],
         returns: [[`${poolId}.pendingJuniorRedemptions`, toCurrencyBalance]],
       },
-      // {
-      //   target: pool.addresses.FEED,
-      //   call: ['currentNAV()(uint256)'],
-      //   returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
-      // },
+      {
+        target: pool.addresses.FEED,
+        call: ['currentNAV()(uint256)'],
+        returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
+      },
       {
         target: pool.addresses.ASSESSOR,
         call: ['maxSeniorRatio()(uint256)'],
