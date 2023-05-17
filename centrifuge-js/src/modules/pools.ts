@@ -262,7 +262,7 @@ type ClosedLoanData = {
   totalRepaid: string
 }
 
-type PricingInfo = {
+export type PricingInfo = {
   valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
   maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
   value: CurrencyBalance
@@ -272,6 +272,30 @@ type PricingInfo = {
   probabilityOfDefault?: Rate
   lossGivenDefault?: Rate
   discountRate?: Rate
+}
+
+type TinlakePricingInfo = {
+  maturityDate: string
+  interestRate: Rate
+  ceiling: CurrencyBalance
+}
+
+export type TinlakeLoan = {
+  asset: {
+    collectionId: string
+    nftId: string
+  }
+  dateClosed: number
+  id: string
+  outstandingDebt: CurrencyBalance
+  owner: string
+  poolId: string
+  pricing: TinlakePricingInfo
+  riskGroup: string
+  status: 'Created' | 'Active' | 'Closed'
+  totalBorrowed: CurrencyBalance
+  totalRepaid: CurrencyBalance
+  originationDate: string
 }
 
 // transformed type for UI
@@ -462,27 +486,13 @@ export type PoolMetadata = {
     lossGivenDefault: string
     discountRate: string
   }[]
-  // Not yet implemented
-  // onboarding: {
-  //   live: boolean
-  //   agreements: {
-  //     name: string
-  //     provider: 'docusign'
-  //     providerTemplateId: string
-  //     tranche: string
-  //     country: 'us | non-us'
-  //   }[]
-  //   issuer: {
-  //     name: string
-  //     email: string
-  //     restrictedCountryCodes: string[]
-  //     minInvestmentCurrency: number
-  //     nonSolicitationNotice: 'all' | 'non-us' | 'none'
-  //   }
-  // }
-  // bot: {
-  //   channelId: string
-  // }
+  onboarding?: {
+    agreements: {
+      [trancheId: string]: {
+        ipfsHash: string
+      }
+    }
+  }
 }
 
 type AssetCurrencyData = {

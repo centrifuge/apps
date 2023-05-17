@@ -76,7 +76,7 @@ const tooltipText = {
   },
   averageFinancingFee: {
     label: 'Average financing fee',
-    body: 'The average financing fee of the assets in the pool.',
+    body: 'The average financing fee of the active assets in the pool.',
   },
   averageAmount: {
     label: 'Average amount',

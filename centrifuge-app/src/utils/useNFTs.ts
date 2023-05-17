@@ -9,13 +9,13 @@ export function useNFTs(collectionId?: string) {
   return result
 }
 
-export function useNFT(collectionId?: string | null, nftId?: string, suspense = true) {
+export function useCentNFT(collectionId?: string | null, nftId?: string, suspense = true, isTinlakePool = false) {
   const [result] = useCentrifugeQuery(
     ['nft', collectionId, nftId],
     (cent) => cent.nfts.getNft([collectionId!, nftId!]),
     {
       suspense,
-      enabled: !!collectionId && !!nftId,
+      enabled: !!collectionId && !!nftId && !isTinlakePool,
     }
   )
 

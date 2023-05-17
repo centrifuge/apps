@@ -31,7 +31,7 @@ export const signAndSendDocumentsController = async (
     const { poolId, trancheId, transactionInfo } = req.body
     const { wallet } = req
 
-    const user = await fetchUser(wallet)
+    const { poolSteps, globalSteps, investorType, name, email } = await fetchUser(wallet)
 
     const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
 
@@ -42,8 +42,8 @@ export const signAndSendDocumentsController = async (
     }
 
     if (
-      user.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
-      user.poolSteps?.[poolId]?.[trancheId]?.status.status !== null
+      poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
+      poolSteps?.[poolId]?.[trancheId]?.status.status !== null
     ) {
       throw new HttpError(400, 'User has already signed the agreement')
     }
@@ -51,10 +51,10 @@ export const signAndSendDocumentsController = async (
     const signedAgreementPDF = await annotateAgreementAndSignAsInvestor({
       poolId,
       trancheId,
-      walletAddress: wallet.address,
+      wallet,
       transactionInfo,
-      name: user.name as string,
-      email: user.email as string,
+      name: name as string,
+      email: email as string,
     })
 
     await writeToOnboardingBucket(
@@ -62,13 +62,13 @@ export const signAndSendDocumentsController = async (
       `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
     )
 
-    if (user.investorType === 'entity' && user.globalSteps.verifyBusiness.completed) {
+    if ((investorType === 'entity' && globalSteps.verifyBusiness.completed) || investorType === 'individual') {
       await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
     }
 
     const updatedUser: Subset<OnboardingUser> = {
       poolSteps: {
-        ...user?.poolSteps,
+        ...poolSteps,
         [poolId]: {
           [trancheId]: {
             signAgreement: {
@@ -85,7 +85,7 @@ export const signAndSendDocumentsController = async (
       },
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
+    await validateAndWriteToFirestore(wallet, updatedUser, investorType, ['poolSteps'])
     const freshUserData = await fetchUser(wallet)
     return res.status(201).send({ ...freshUserData })
   } catch (e) {
