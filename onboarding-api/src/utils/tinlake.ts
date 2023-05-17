@@ -194,8 +194,6 @@ export const validateEvmRemark = async (
   )
 
   const [sender, actualRemark] = filteredEvents.flatMap((ev) => ev.args?.map((arg) => arg.toString()))
-  console.log('🚀 ~ actualRemark:', actualRemark)
-  console.log('🚀 ~ sender:', sender)
   if (actualRemark !== expectedRemark || sender !== wallet.address) {
     throw new HttpError(400, 'Invalid remark')
   }

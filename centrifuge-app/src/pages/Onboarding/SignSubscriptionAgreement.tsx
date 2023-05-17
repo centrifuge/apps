@@ -163,8 +163,6 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
           </span>
         }
       />
-
-      <Stack gap={1} alignItems="start"></Stack>
     </Content>
   )
 }

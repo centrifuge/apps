@@ -21,7 +21,7 @@ const initialValues: AgreementsUpload = {
 export const OnboardingConfig: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool) as PoolMetadata
+  const { data: poolMetadata } = usePoolMetadata(pool) as { data: PoolMetadata }
   const [isEditing, setIsEditing] = React.useState(false)
   const centrifuge = useCentrifuge()
 
