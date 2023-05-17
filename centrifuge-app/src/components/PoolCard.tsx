@@ -5,7 +5,7 @@ import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { formatBalance } from '../utils/formatting'
+import { formatBalance, formatPercentage } from '../utils/formatting'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { usePoolMetadata } from '../utils/usePools'
 import { Eththumbnail } from './EthThumbnail'
@@ -51,6 +51,7 @@ export function PoolCard({ pool }: PoolCardProps) {
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const { data: metadata } = usePoolMetadata(pool)
+  const mostSeniorTranche = pool?.tranches?.slice(1).at(-1)
 
   return (
     <Card role="article" variant="interactive">
@@ -70,7 +71,7 @@ export function PoolCard({ pool }: PoolCardProps) {
             </TextWithPlaceholder>
 
             <TextWithPlaceholder as="span" variant="body2" isLoading={!metadata}>
-              {metadata?.pool?.issuer.name}
+              {metadata?.pool?.asset.class}
             </TextWithPlaceholder>
           </Box>
 
@@ -107,11 +108,6 @@ export function PoolCard({ pool }: PoolCardProps) {
           renderAs={{ label: 'dt', value: 'dd' }}
         />
         <LabelValueStack
-          label="Tokens"
-          value={pool ? pool.tranches.length : <TextWithPlaceholder isLoading width={2} variance={0} />}
-          renderAs={{ label: 'dt', value: 'dd' }}
-        />
-        <LabelValueStack
           label="Capacity"
           value={
             pool ? (
@@ -122,6 +118,13 @@ export function PoolCard({ pool }: PoolCardProps) {
           }
           renderAs={{ label: 'dt', value: 'dd' }}
         />
+        {mostSeniorTranche && mostSeniorTranche.interestRatePerSec && (
+          <LabelValueStack
+            label="Senior APY"
+            value={formatPercentage(mostSeniorTranche.interestRatePerSec.toAprPercent())}
+            renderAs={{ label: 'dt', value: 'dd' }}
+          />
+        )}
       </Shelf>
     </Card>
   )
