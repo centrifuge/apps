@@ -18,8 +18,27 @@ export function useConnectEagerly(
     try {
       setIsTrying(true)
       const { wallet: source, type } = getPersisted()
-      if (!source || !type) return
-      if (type === 'substrate') {
+      const isProbablyGnosis = window !== window.parent
+
+      if ((type === 'evm' && source) || isProbablyGnosis) {
+        let wallet
+        if (isProbablyGnosis) {
+          wallet = evmConnectors.find((c) => c.connector instanceof GnosisSafe)
+        } else {
+          wallet = evmConnectors.find((c) => c.id === source)
+        }
+
+        if (!wallet) return
+
+        if (wallet.connector.connectEagerly) {
+          await wallet.connector.connectEagerly()
+        } else {
+          await wallet.connector.activate()
+        }
+
+        dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
+        dispatch({ type: 'setConnectedType', payload: 'evm' })
+      } else if (type === 'substrate' && source) {
         // This script might have loaded quicker than the wallet extension,
         // so we'll wait up to 2 seconds for it to load
         let i = 8
@@ -32,24 +51,6 @@ export function useConnectEagerly(
           await new Promise((res) => setTimeout(res, 250))
         }
       } else {
-        const wallets = evmConnectors.filter((c) => c.id === source || c.connector instanceof GnosisSafe)
-        const connected = await Promise.allSettled(
-          wallets.map(async (wallet) => {
-            if (wallet.connector.connectEagerly) {
-              await wallet.connector.connectEagerly()
-            } else {
-              await wallet.connector.activate()
-            }
-            return wallet
-          })
-        )
-        const first = connected.find((result) => result.status === 'fulfilled') as
-          | PromiseFulfilledResult<EvmConnectorMeta>
-          | undefined
-        if (first) {
-          dispatch({ type: 'evmSetState', payload: { selectedWallet: first.value } })
-          dispatch({ type: 'setConnectedType', payload: 'evm' })
-        }
       }
     } finally {
       setIsTrying(false)
