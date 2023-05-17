@@ -299,11 +299,11 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         call: ['totalRedeem()(uint256)'],
         returns: [[`${poolId}.pendingJuniorRedemptions`, toCurrencyBalance]],
       },
-      // {
-      //   target: pool.addresses.FEED,
-      //   call: ['currentNAV()(uint256)'],
-      //   returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
-      // },
+      {
+        target: pool.addresses.FEED,
+        call: ['currentNAV()(uint256)'],
+        returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
+      },
       {
         target: pool.addresses.ASSESSOR,
         call: ['maxSeniorRatio()(uint256)'],
@@ -388,25 +388,23 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         returns: [[`${poolId}.submissionPeriod`]],
       }
     )
-
-    if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk !== '') {
+    if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk) {
       calls.push(
-        // TODO: Find out why these break
-        // {
-        //   target: pool.addresses.CLERK,
-        //   call: ['debt()(uint256)'],
-        //   returns: [[`${poolId}.usedCreditline`, toCurrencyBalance]],
-        // },
-        // {
-        //   target: pool.addresses.CLERK,
-        //   call: ['remainingCredit()(uint256)'],
-        //   returns: [[`${poolId}.unusedCreditline`, toCurrencyBalance]],
-        // },
-        // {
-        //   target: pool.addresses.CLERK,
-        //   call: ['creditline()(uint256)'],
-        //   returns: [[`${poolId}.availableCreditline`, toCurrencyBalance]],
-        // },
+        {
+          target: pool.addresses.CLERK,
+          call: ['debt()(uint)'],
+          returns: [[`${poolId}.usedCreditline`, toCurrencyBalance]],
+        },
+        {
+          target: pool.addresses.CLERK,
+          call: ['remainingCredit()(uint256)'],
+          returns: [[`${poolId}.unusedCreditline`, toCurrencyBalance]],
+        },
+        {
+          target: pool.addresses.CLERK,
+          call: ['creditline()(uint256)'],
+          returns: [[`${poolId}.availableCreditline`, toCurrencyBalance]],
+        },
         {
           target: pool.addresses.ASSESSOR,
           call: ['totalBalance()(uint256)'],
@@ -496,7 +494,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       .add(state.pendingSeniorInvestments)
       .sub(state.pendingSeniorRedemptions)
 
-    const newJuniorAsset = (state.netAssetValue ?? new BN(0)).add(newReserve).sub(newSeniorAsset)
+    const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
     const maxPoolSize = newJuniorAsset
       .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state.maxSeniorRatio)))
       .div(new BN(10).pow(new BN(6)))
@@ -597,14 +595,14 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       capacity,
       capacityGivenMaxReserve,
       capacityGivenMaxDropRatio: new CurrencyBalance(capacityGivenMaxDropRatioPerPool[id], 18),
-      value: new CurrencyBalance(data.reserve.add(data.netAssetValue ?? new BN(0)), 18),
+      value: new CurrencyBalance(data.reserve.add(data.netAssetValue), 18),
       reserve: {
         max: data.maxReserve,
         available: data.reserve,
         total: data.reserve,
       },
       nav: {
-        latest: data.netAssetValue ?? new CurrencyBalance(0, 18),
+        latest: data.netAssetValue,
         lastUpdated: new Date().toISOString(),
       },
       createdAt: null,
