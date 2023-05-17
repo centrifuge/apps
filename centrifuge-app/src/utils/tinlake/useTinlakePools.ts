@@ -561,6 +561,12 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         },
       },
       riskGroups: [],
+      onboarding: {
+        agreements: {
+          [`${id}-0`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '' },
+          [`${id}-1`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '' },
+        },
+      },
     }
 
     function getEpochStatus(): 'challengePeriod' | 'submissionPeriod' | 'ongoing' | 'executionPeriod' {
