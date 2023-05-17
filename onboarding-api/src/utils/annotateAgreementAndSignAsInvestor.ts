@@ -70,7 +70,8 @@ export const annotateAgreementAndSignAsInvestor = async ({
   firstPage.drawText(
     `Signed by ${wallet.address} on Centrifuge
 Block: ${transactionInfo.blockNumber}
-Transaction Hash: ${transactionInfo.txHash}`,
+Transaction hash: ${transactionInfo.txHash}
+Agreement hash: ${metadata.onboarding.agreements[trancheId].ipfsHash}`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,
@@ -111,7 +112,15 @@ Transaction Hash: ${transactionInfo.txHash}`,
     size: 12,
   })
 
-  const signedAgreementPDF = await signedAgreement.save()
+  // all tinlake agreements require the executive summary to be appended
+  if (wallet.network === 'evm') {
+    const execSummaryRes = await fetch(metadata.pool.links.executiveSummary.uri)
+    const execSummary = Buffer.from(await execSummaryRes.arrayBuffer())
+    const execSummaryPdf = await PDFDocument.load(execSummary)
+    const execSummaryCopiedPages = await signedAgreement.copyPages(execSummaryPdf, execSummaryPdf.getPageIndices())
+    execSummaryCopiedPages.forEach((page) => signedAgreement.addPage(page))
+  }
 
+  const signedAgreementPDF = await signedAgreement.save()
   return signedAgreementPDF
 }

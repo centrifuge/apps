@@ -1,4 +1,4 @@
-import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, Checkbox, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
@@ -32,7 +32,6 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const poolData = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(poolData)
   const centrifuge = useCentrifuge()
-  const { connectedType } = useWallet()
 
   const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
 
@@ -51,12 +50,12 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
 
   const unsignedAgreementUrl = poolMetadata?.onboarding?.agreements[trancheId]
     ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[trancheId].ipfsHash)
-    : connectedType === 'substrate'
+    : !poolId.startsWith('0x')
     ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
 
   // tinlake pools without subdocs cannot accept investors
-  const isPoolClosedToOnboarding = connectedType === 'evm' && !poolMetadata?.onboarding?.agreements[trancheId]?.ipfsHash
+  const isPoolClosedToOnboarding = poolId.startsWith('0x') && !unsignedAgreementUrl
 
   React.useEffect(() => {
     if (hasSignedAgreement) {
@@ -108,11 +107,22 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             icon={IconDownload}
             small
           >
-            Download document
+            Download agreement
+          </AnchorButton>
+        )}
+
+        {!!(poolId.startsWith('0x') && poolMetadata?.pool?.links.executiveSummary?.uri) && (
+          <AnchorButton
+            href={poolMetadata?.pool?.links.executiveSummary?.uri}
+            download={`executive-summary-pool-${pool.id}.pdf`}
+            variant="tertiary"
+            icon={IconDownload}
+            small
+          >
+            Executive summary attachment
           </AnchorButton>
         )}
       </Stack>
-
       <Checkbox
         {...formik.getFieldProps('isAgreed')}
         checked={formik.values.isAgreed}

@@ -140,14 +140,17 @@ export const getTinlakePoolById = async (poolId: string) => {
         email: poolData.metadata?.issuerEmail ?? 'info@centrifuge.io',
         repName: poolData.metadata.repName ?? '',
       },
+      links: {
+        executiveSummary: { uri: poolData.metadata.attributes?.Links?.['Executive Summary'] },
+      },
     },
     onboarding: {
       agreements: {
         [`${id}-0`]: {
-          ipfsHash: poolData.metadata.attributes?.Links['Agreements']?.[`${id}-0`],
+          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-0`],
         },
         [`${id}-1`]: {
-          ipfsHash: poolData.metadata.attributes?.Links['Agreements']?.[`${id}-1`],
+          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
         },
       },
     },
@@ -191,6 +194,8 @@ export const validateEvmRemark = async (
   )
 
   const [sender, actualRemark] = filteredEvents.flatMap((ev) => ev.args?.map((arg) => arg.toString()))
+  console.log('🚀 ~ actualRemark:', actualRemark)
+  console.log('🚀 ~ sender:', sender)
   if (actualRemark !== expectedRemark || sender !== wallet.address) {
     throw new HttpError(400, 'Invalid remark')
   }
