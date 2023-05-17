@@ -34,7 +34,9 @@ const PriceYieldChart: React.FC<{
     )
   }, [trancheStates])
 
-  onDataLoaded(data.length > 0)
+  React.useEffect(() => {
+    onDataLoaded(data.length > 0)
+  }, [])
 
   if (!trancheStates || trancheStates?.length === 1) return <Spinner />
 
