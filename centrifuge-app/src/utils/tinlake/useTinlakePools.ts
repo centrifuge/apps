@@ -182,7 +182,11 @@ export function useTinlakeLoans(poolId: string) {
 export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches'> & {
   metadata: PoolMetadata
   tinlakeMetadata: PoolMetadataDetails
-  tranches: (Omit<Pool['tranches'][0], 'poolMetadata'> & { poolMetadata: PoolMetadata })[]
+  tranches: (Omit<Pool['tranches'][0], 'poolMetadata'> & {
+    poolMetadata: PoolMetadata
+    pendingInvestments: CurrencyBalance
+    pendingRedemptions: TokenBalance
+  })[]
 
   creditline: { available: CurrencyBalance; used: CurrencyBalance; unused: CurrencyBalance } | null
   addresses: {
@@ -195,25 +199,27 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
     JUNIOR_TOKEN: string
     JUNIOR_OPERATOR: string
     SENIOR_OPERATOR: string
-    CLERK?: string | undefined
+    CLERK?: string
     ASSESSOR: string
     RESERVE: string
     SENIOR_TRANCHE: string
     JUNIOR_TRANCHE: string
     FEED: string
-    POOL_ADMIN?: string | undefined
+    POOL_ADMIN?: string
     SENIOR_MEMBERLIST: string
     JUNIOR_MEMBERLIST: string
     COORDINATOR: string
     PILE: string
-    MCD_VAT?: string | undefined
-    MCD_JUG?: string | undefined
-    MAKER_MGR?: string | undefined
+    MCD_VAT?: string
+    MCD_JUG?: string
+    MAKER_MGR?: string
   }
-  versions?: { FEED?: number | undefined; POOL_ADMIN?: number | undefined } | undefined
-  contractConfig?:
-    | { JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'; SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR' }
-    | undefined
+  versions?: { FEED?: number; POOL_ADMIN?: number }
+  contractConfig?: {
+    JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
+    SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
+  }
+
   network: 'mainnet' | 'kovan' | 'goerli'
   version: 2 | 3
 }
@@ -368,13 +374,13 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       },
       {
         target: pool.addresses.COORDINATOR,
-        call: ['challengeTime()(uint256)'],
-        returns: [[`${poolId}.epoch.challengeTime`, toNumber]],
+        call: ['minimumEpochTime()(uint256)'],
+        returns: [[`${poolId}.parameters.minEpochTime`, toNumber]],
       },
       {
         target: pool.addresses.COORDINATOR,
         call: ['challengeTime()(uint256)'],
-        returns: [[`${poolId}.epoch.challengeTime`, toNumber]],
+        returns: [[`${poolId}.parameters.challengeTime`, toNumber]],
       },
       {
         target: pool.addresses.COORDINATOR,
@@ -561,10 +567,18 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         },
       },
       riskGroups: [],
+      onboarding: {
+        agreements: {
+          [`${id}-0`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '' },
+          [`${id}-1`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '' },
+        },
+      },
     }
 
     function getEpochStatus(): 'challengePeriod' | 'submissionPeriod' | 'ongoing' | 'executionPeriod' {
-      if (new Date(data.epoch.challengePeriodEnd).getTime() !== 0) {
+      const challengePeriodEnd = new Date(data.epoch.challengePeriodEnd).getTime()
+      if (challengePeriodEnd !== 0) {
+        if (challengePeriodEnd < Date.now()) return 'executionPeriod'
         return 'challengePeriod'
       }
       if (data.submissionPeriod) {
@@ -621,6 +635,8 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           },
           poolMetadata: metadata,
           poolCurrency: currencies.DAI,
+          pendingInvestments: data.pendingJuniorInvestments,
+          pendingRedemptions: data.pendingJuniorRedemptions,
         },
         {
           index: 1,
@@ -646,6 +662,8 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           },
           poolMetadata: metadata,
           poolCurrency: currencies.DAI,
+          pendingInvestments: data.pendingSeniorInvestments,
+          pendingRedemptions: data.pendingSeniorRedemptions,
         },
       ],
       epoch: {
@@ -653,8 +671,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         status: getEpochStatus(),
       },
       parameters: {
-        minEpochTime: 24 * 60 * 60,
-        challengeTime: 5 * 60,
+        ...data.parameters,
         maxNavAge: 5 * 60,
       },
       creditline: data.availableCreditline
@@ -697,7 +714,10 @@ interface State {
     lastClosed: string
     lastExecuted: number
     challengePeriodEnd: number
+  }
+  parameters: {
     challengeTime: number
+    minEpochTime: number
   }
   submissionPeriod: boolean
 }

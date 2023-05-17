@@ -43,16 +43,14 @@ export const PoolDetailLiquidity: React.FC = () => {
   const pool = usePool(poolId)
   const { colors } = useTheme()
 
-  if (!pool) return null
-
   const pageSummaryData = [
     {
       label: <Tooltips type="poolReserve" />,
-      value: formatBalance(pool?.reserve.total.toDecimal() || 0, pool?.currency.symbol || ''),
+      value: formatBalance(pool.reserve.total.toDecimal() || 0, pool.currency.symbol || ''),
     },
     {
       label: <Tooltips type="maxReserve" />,
-      value: formatBalance(pool?.reserve.max.toDecimal() || 0, pool?.currency.symbol || ''),
+      value: formatBalance(pool.reserve.max.toDecimal() || 0, pool.currency.symbol || ''),
     },
   ]
 
@@ -90,10 +88,9 @@ export const PoolDetailLiquidity: React.FC = () => {
               </React.Suspense>
             </Stack>
           </PageSection>
-
-          <LiquidityEpochSection pool={pool} />
         </>
       )}
+      <LiquidityEpochSection pool={pool} />
     </>
   )
 }

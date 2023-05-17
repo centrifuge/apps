@@ -51,7 +51,7 @@ export const signAndSendDocumentsController = async (
     const signedAgreementPDF = await annotateAgreementAndSignAsInvestor({
       poolId,
       trancheId,
-      walletAddress: wallet.address,
+      wallet,
       transactionInfo,
       name: name as string,
       email: email as string,
