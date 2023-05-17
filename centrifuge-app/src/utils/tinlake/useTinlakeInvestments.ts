@@ -2,14 +2,16 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { BigNumber } from '@ethersproject/bignumber'
 import Decimal from 'decimal.js-light'
 import { useQuery } from 'react-query'
+import { useAddress } from '../useAddress'
 import { usePool } from '../usePools'
 import { Call, multicall } from './multicall'
 import { TinlakePool } from './useTinlakePools'
 
 export function useTinlakeInvestments(poolId: string, address?: string) {
+  const addr = useAddress('evm') || address
   const pool = usePool(poolId) as TinlakePool
-  return useQuery(['tinlakeInvestment', poolId, address], () => getInvestment(pool, address!), {
-    enabled: !!address,
+  return useQuery(['tinlakeInvestment', poolId, addr], () => getInvestment(pool, addr!), {
+    enabled: !!addr,
     suspense: true,
   })
 }

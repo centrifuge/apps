@@ -3,6 +3,7 @@ import { TransactionRequest, TransactionResponse } from '@ethersproject/provider
 import BN from 'bn.js'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
+import { calculateOptimalSolution, Orders, State } from '../utils/solver/tinlakeSolver'
 import { abis } from './tinlake/abi'
 
 const contracts: Record<string, Contract> = {}
@@ -32,15 +33,28 @@ export type TinlakeContractAddresses = {
   MCD_JUG?: string
   MAKER_MGR?: string
 }
+export type TinlakeContractVersions = {
+  FEED?: number
+  POOL_ADMIN?: number
+}
 export type TinlakeContractNames = keyof TinlakeContractAddresses
-type AbisNames = keyof typeof abis
+type Abis = typeof abis
+type AbisNames = keyof Abis
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+const e27 = new BN(10).pow(new BN(27))
 
 export function getTinlakeModule(inst: Centrifuge) {
-  function contract(contractAddresses: TinlakeContractAddresses, name: AbisNames) {
-    const contractAddress = contractAddresses[name]
-    const abi = abis[name]
+  function contract(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    name: AbisNames
+  ) {
+    const abiName = (
+      contractVersions && name in contractVersions ? `${name}_V${(contractVersions as any)[name]}` : name
+    ) as AbisNames
+    const contractAddress = (contractAddresses as any)[name]
+    const abi = abis[abiName]
     if (!inst.config.evmSigner) throw new Error('Needs signer')
     if (!abi) throw new Error('ABI not found')
     if (!contracts[contractAddress]) {
@@ -63,12 +77,13 @@ export function getTinlakeModule(inst: Centrifuge) {
 
   function approveTrancheForCurrency(
     contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
     args: [tranche: 'senior' | 'junior'],
     options: TransactionRequest = {}
   ) {
     const [tranche] = args
     return pending(
-      contract(contractAddresses, 'TINLAKE_CURRENCY').approve(
+      contract(contractAddresses, contractVersions, 'TINLAKE_CURRENCY').approve(
         contractAddresses[tranche === 'junior' ? 'JUNIOR_TRANCHE' : 'SENIOR_TRANCHE'],
         maxUint256,
         options
@@ -78,12 +93,13 @@ export function getTinlakeModule(inst: Centrifuge) {
 
   function approveTrancheToken(
     contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
     args: [tranche: 'senior' | 'junior'],
     options: TransactionRequest = {}
   ) {
     const [tranche] = args
     return pending(
-      contract(contractAddresses, tranche === 'junior' ? 'JUNIOR_TOKEN' : 'SENIOR_TOKEN').approve(
+      contract(contractAddresses, contractVersions, tranche === 'junior' ? 'JUNIOR_TOKEN' : 'SENIOR_TOKEN').approve(
         contractAddresses[tranche === 'junior' ? 'JUNIOR_TRANCHE' : 'SENIOR_TRANCHE'],
         maxUint256,
         options
@@ -93,41 +109,256 @@ export function getTinlakeModule(inst: Centrifuge) {
 
   function updateInvestOrder(
     contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
     args: [tranche: 'senior' | 'junior', order: BN],
     options: TransactionRequest = {}
   ) {
     const [tranche, order] = args
     return pending(
-      contract(contractAddresses, tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR').supplyOrder(
-        order.toString(),
-        options
-      )
+      contract(
+        contractAddresses,
+        contractVersions,
+        tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR'
+      ).supplyOrder(order.toString(), options)
     )
   }
 
   function updateRedeemOrder(
     contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
     args: [tranche: 'senior' | 'junior', order: BN],
     options: TransactionRequest = {}
   ) {
     const [tranche, order] = args
     return pending(
-      contract(contractAddresses, tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR').redeemOrder(
-        order.toString(),
-        options
-      )
+      contract(
+        contractAddresses,
+        contractVersions,
+        tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR'
+      ).redeemOrder(order.toString(), options)
     )
   }
 
   function collect(
     contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
     args: [tranche: 'senior' | 'junior'],
     options: TransactionRequest = {}
   ) {
     const [tranche] = args
     return pending(
-      contract(contractAddresses, tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR')['disburse()'](options)
+      contract(contractAddresses, contractVersions, tranche === 'junior' ? 'JUNIOR_OPERATOR' : 'SENIOR_OPERATOR')[
+        'disburse()'
+      ](options)
     )
+  }
+
+  /**
+   * @param beforeClosing if true, calculate the values as if the epoch would be closed now
+   */
+  async function getEpochState(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    args: [beforeClosing?: boolean]
+  ) {
+    const [beforeClosing] = args
+    const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+    const assessor = contract(contractAddresses, contractVersions, 'ASSESSOR')
+    const feed = contract(contractAddresses, contractVersions, 'FEED')
+    const isMakerIntegrated = contractAddresses.CLERK !== undefined
+
+    const reserve = toBN(
+      await (beforeClosing
+        ? isMakerIntegrated
+          ? contract(contractAddresses, contractVersions, 'ASSESSOR').totalBalance()
+          : contract(contractAddresses, contractVersions, 'RESERVE').totalBalance()
+        : coordinator.epochReserve())
+    )
+    const netAssetValue = toBN(
+      await (beforeClosing
+        ? contractVersions?.FEED === 2
+          ? feed.latestNAV()
+          : feed.approximatedNAV()
+        : coordinator.epochNAV())
+    )
+    const seniorAsset = beforeClosing
+      ? isMakerIntegrated
+        ? toBN(await assessor.seniorDebt()).add(toBN(await assessor.seniorBalance()))
+        : toBN(await assessor.seniorDebt_()).add(toBN(await assessor.seniorBalance_()))
+      : toBN(await coordinator.epochSeniorAsset())
+
+    const minDropRatio = toBN(await assessor.minSeniorRatio())
+    const maxDropRatio = toBN(await assessor.maxSeniorRatio())
+    const maxReserve = toBN(await assessor.maxReserve())
+
+    return { reserve, netAssetValue, seniorAsset, minDropRatio, maxDropRatio, maxReserve }
+  }
+
+  /**
+   * @param beforeClosing if true, calculate the values as if the epoch would be closed now
+   */
+  async function getOrders(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    args: [beforeClosing?: boolean]
+  ) {
+    const [beforeClosing] = args
+    if (beforeClosing) {
+      const seniorTranche = contract(contractAddresses, contractVersions, 'SENIOR_TRANCHE')
+      const juniorTranche = contract(contractAddresses, contractVersions, 'JUNIOR_TRANCHE')
+      const assessor = contract(contractAddresses, contractVersions, 'ASSESSOR')
+      const feed = contract(contractAddresses, contractVersions, 'FEED')
+
+      const epochNAV = toBN(await feed.currentNAV())
+      const epochReserve = toBN(await contract(contractAddresses, contractVersions, 'RESERVE').totalBalance())
+      const epochSeniorTokenPrice = toBN(
+        await assessor['calcSeniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
+      )
+      const epochJuniorTokenPrice = toBN(
+        await assessor['calcJuniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
+      )
+
+      return {
+        dropInvest: toBN(await seniorTranche.totalSupply()),
+        dropRedeem: toBN(await seniorTranche.totalRedeem())
+          .mul(epochSeniorTokenPrice)
+          .div(e27),
+        tinInvest: toBN(await juniorTranche.totalSupply()),
+        tinRedeem: toBN(await juniorTranche.totalRedeem())
+          .mul(epochJuniorTokenPrice)
+          .div(e27),
+      }
+    }
+    const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+    const orderState = await coordinator.order()
+
+    return {
+      dropInvest: toBN(await orderState.seniorSupply),
+      dropRedeem: toBN(await orderState.seniorRedeem),
+      tinInvest: toBN(await orderState.juniorSupply),
+      tinRedeem: toBN(await orderState.juniorRedeem),
+    }
+  }
+
+  async function getSolverWeights(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined
+  ) {
+    const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+
+    return {
+      dropInvest: toBN(await coordinator.weightSeniorSupply()),
+      dropRedeem: toBN(await coordinator.weightSeniorRedeem()),
+      tinInvest: toBN(await coordinator.weightJuniorSupply()),
+      tinRedeem: toBN(await coordinator.weightJuniorRedeem()),
+    }
+  }
+
+  function closeEpoch(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    _: [],
+    options: TransactionRequest = {}
+  ) {
+    const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+    return pending(coordinator.closeEpoch({ ...options, gasLimit: 5000000 }))
+  }
+
+  function solveEpoch(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    _: [],
+    options: TransactionRequest = {}
+  ) {
+    const submissionTx = (async () => {
+      const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+      if ((await coordinator.submissionPeriod()) !== true) throw new Error('Not in submission period')
+      const state = await getEpochState(contractAddresses, contractVersions, [])
+      const orders = await getOrders(contractAddresses, contractVersions, [])
+      const solution = await runSolver(contractAddresses, contractVersions, [state, orders])
+
+      if (!solution.isFeasible) {
+        throw new Error('Failed to find a solution')
+      }
+
+      return coordinator.submitSolution(
+        solution.dropRedeem.toString(),
+        solution.tinRedeem.toString(),
+        solution.tinInvest.toString(),
+        solution.dropInvest.toString(),
+        options
+      )
+    })()
+
+    return pending(submissionTx)
+  }
+
+  async function runSolver(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    args: [state: State, orders: Orders, calcInvestmentCapacity?: boolean]
+  ) {
+    const [state, orders, calcInvestmentCapacity] = args
+    const weights = await getSolverWeights(contractAddresses, contractVersions)
+    const solution = await calculateOptimalSolution(state, orders, weights, calcInvestmentCapacity)
+
+    if (!solution.isFeasible) {
+      throw new Error('Failed to find a solution')
+    }
+
+    return solution
+  }
+
+  function executeEpoch(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    _: [],
+    options: TransactionRequest = {}
+  ) {
+    const tx = (async () => {
+      const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+      if ((await getCurrentEpochState(contractAddresses, contractVersions)) !== 'challenge-period-ended') {
+        throw new Error('Current epoch is still in the challenge period')
+      }
+
+      return coordinator.executeEpoch({ ...options, gasLimit: 2000000 })
+    })()
+    return pending(tx)
+  }
+
+  async function getLatestBlockTimestamp() {
+    const { provider } = inst.config.evmSigner!
+    const latestBlock = await provider.getBlock(await provider.getBlockNumber())
+    if (!latestBlock) return new Date().getTime()
+    return latestBlock.timestamp
+  }
+
+  async function getCurrentEpochState(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined
+  ) {
+    const coordinator = contract(contractAddresses, contractVersions, 'COORDINATOR')
+
+    const minChallengePeriodEnd = toBN(await coordinator.minChallengePeriodEnd()).toNumber()
+    const latestBlockTimestamp = await getLatestBlockTimestamp()
+    if (minChallengePeriodEnd !== 0) {
+      if (minChallengePeriodEnd < latestBlockTimestamp) return 'challenge-period-ended'
+      return 'in-challenge-period'
+    }
+
+    const submissionPeriod = await coordinator.submissionPeriod()
+    if (submissionPeriod === true) {
+      return 'in-submission-period'
+    }
+
+    const lastEpochClosed = toBN(await coordinator.lastEpochClosed()).toNumber()
+    const minimumEpochTime = toBN(await coordinator.minimumEpochTime()).toNumber()
+    if (submissionPeriod === false) {
+      if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) return 'can-be-closed'
+      return 'open'
+    }
+
+    throw new Error('Arrived at impossible current epoch state')
   }
 
   return {
@@ -136,5 +367,13 @@ export function getTinlakeModule(inst: Centrifuge) {
     approveTrancheForCurrency,
     approveTrancheToken,
     collect,
+    closeEpoch,
+    solveEpoch,
+    executeEpoch,
+    contract,
   }
+}
+
+function toBN(val: { toString(): string }) {
+  return new BN(val.toString())
 }

@@ -123,7 +123,7 @@ const goerliConfig = {
   rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
-  poolsHash: 'QmZoFPrVjcrZCDFrFqCuzmYz9fVudbmyoYBu2tKER5N6Fa', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmbhSKTw6MgigA8UhooM2aq5utHvSeyBT3jWjokKL8DNTx', // TODO: add registry to config and fetch poolHash
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
   blockExplorerUrl: 'https://goerli.etherscan.io',
 }
@@ -131,7 +131,7 @@ const mainnetConfig = {
   rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmfShrE7bvcjiyiBjyyzfJz6dFtZ8RLdoHHA9bG1GFZzby', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmdHDG1z6LmfX8Z7vmC2RwaaVkDuVwQssDcs7NyuFaBgQz', // TODO: add registry to config and fetch poolHash
   remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
   blockExplorerUrl: 'https://etherscan.io',
 }
