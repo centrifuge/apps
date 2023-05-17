@@ -211,7 +211,7 @@ export const addTinlakeInvestorToMemberList = async (
     )
     const finalizedTx = await tx.wait()
     console.log(`tx finalized: ${finalizedTx.transactionHash}, nonce=${tx.nonce}`)
-    return pool
+    return { txHash: finalizedTx.transactionHash }
   } catch (e) {
     reportHttpError(e)
     throw new HttpError(400, `Could not add ${walletAddress} to MemberList for pool ${poolId}`)

@@ -11,12 +11,18 @@ const allowedOrigins = [
 
 export const corsMiddleware = cors({
   origin: (origin, callback) => {
-    const isAllowedOrigin = allowedOrigins.some((regex) => regex.test(origin))
+    const origins = origin?.split(', ')
 
-    if (isAllowedOrigin) {
-      callback(null, true)
-    } else {
+    if (origins?.length > 1) {
       callback(new Error(`Not allowed by CORS, ${origin}`))
+    } else {
+      const isAllowedOrigin = allowedOrigins.some((regex) => regex.test(origin))
+
+      if (isAllowedOrigin) {
+        callback(null, true)
+      } else {
+        callback(new Error(`Not allowed by CORS, ${origin}`))
+      }
     }
   },
   credentials: true,

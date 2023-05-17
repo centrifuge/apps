@@ -57,7 +57,7 @@ export const KnowYourCustomer = () => {
   const { mutate: setVerifiedIdentity } = useVerifyIdentity()
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com') {
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.accepted') {
       setVerifiedIdentity()
     }
   }
