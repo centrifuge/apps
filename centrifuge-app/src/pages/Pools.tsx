@@ -1,10 +1,11 @@
-import { Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { MenuSwitch } from '../components/MenuSwitch'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolList } from '../components/PoolList'
+import { PoolsSwitch } from '../components/PoolsSwitch'
 import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
@@ -20,6 +21,7 @@ export const PoolsPage: React.FC = () => {
 }
 
 const Pools: React.FC = () => {
+  const [filtered, setFiltered] = React.useState(true)
   const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
   const totalValueLocked = React.useMemo(() => {
     return (
@@ -54,7 +56,13 @@ const Pools: React.FC = () => {
       {listedPools?.length ? (
         <>
           <PageSummary data={pageSummaryData} />
-          <PoolList pools={listedPools} isLoading={metadataIsLoading} />
+          <PoolList
+            pools={filtered ? listedPools.filter(({ reserve }) => reserve.max.toFloat() > 0) : listedPools}
+            isLoading={metadataIsLoading}
+          />
+          <Box mx={2} mt={3} p={2} borderWidth={0} borderTopWidth={1} borderStyle="solid" borderColor="borderSecondary">
+            <PoolsSwitch filtered={filtered} setFiltered={setFiltered} />
+          </Box>
         </>
       ) : (
         <Shelf p={4} justifyContent="center" textAlign="center">
