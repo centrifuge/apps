@@ -120,7 +120,7 @@ export function PoolCard({ pool }: PoolCardProps) {
         />
         {mostSeniorTranche && mostSeniorTranche.interestRatePerSec && (
           <LabelValueStack
-            label="Senior APY"
+            label="Senior APR"
             value={formatPercentage(mostSeniorTranche.interestRatePerSec.toAprPercent())}
             renderAs={{ label: 'dt', value: 'dd' }}
           />
