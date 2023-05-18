@@ -663,7 +663,7 @@ export const RESTRICTED_COUNTRY_CODES = {
   kp: 'North Korea',
   ly: 'Libya',
   ni: 'Nicaragua',
-  ru: 'Russian',
+  ru: 'Russia',
   sd: 'Sudan',
   so: 'Somalia',
   sy: 'Syria',
