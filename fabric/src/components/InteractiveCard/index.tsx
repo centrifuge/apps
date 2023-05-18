@@ -45,9 +45,9 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({
     if (onClick) onClick(e)
   }
 
-  React.useEffect(() => {
-    setOpen(rest.isOpen ?? open)
-  }, [rest.isOpen])
+  // React.useEffect(() => {
+  //   setOpen(rest.isOpen ?? open)
+  // }, [rest.isOpen])
 
   return (
     <Card variant={variant === 'default' ? 'default' : 'interactive'} {...rest}>
