@@ -55,13 +55,13 @@ async function verifySubstrateWallet(req: Request, res: Response) {
   const { verified, payload } = await centrifuge.auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
-  const address = payload.address
+  const address = payload.address.toLowerCase()
 
   if (!isValidSubstrateAddress(address)) {
     throw new Error('Invalid address')
   }
 
-  const cookieNonce = req.signedCookies[`onboarding-auth-${payload.address.toLowerCase()}`]
+  const cookieNonce = req.signedCookies[`onboarding-auth-${address}`]
   if (!cookieNonce || cookieNonce !== nonce) {
     throw new Error('Invalid nonce')
   }
@@ -86,13 +86,14 @@ async function verifySubstrateWallet(req: Request, res: Response) {
 
 async function verifyEthWallet(req: Request, res: Response) {
   try {
-    const { message, signature, address, nonce } = req.body
+    const { message, signature, address: ethAddress, nonce } = req.body
+    const address = ethAddress.toLowerCase()
 
     if (!isAddress(address)) {
       throw new Error('Invalid address')
     }
 
-    const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
+    const cookieNonce = req.signedCookies[`onboarding-auth-${address}`]
 
     if (!cookieNonce || cookieNonce !== nonce) {
       throw new Error('Invalid nonce')

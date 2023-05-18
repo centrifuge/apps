@@ -5,7 +5,8 @@ import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { formatBalance } from '../utils/formatting'
+import { Dec } from '../utils/Decimal'
+import { formatBalance, formatPercentage } from '../utils/formatting'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { usePoolMetadata } from '../utils/usePools'
 import { Eththumbnail } from './EthThumbnail'
@@ -51,6 +52,7 @@ export function PoolCard({ pool }: PoolCardProps) {
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const { data: metadata } = usePoolMetadata(pool)
+  const mostSeniorTranche = pool?.tranches?.slice(1).at(-1)
 
   return (
     <Card role="article" variant="interactive">
@@ -70,7 +72,7 @@ export function PoolCard({ pool }: PoolCardProps) {
             </TextWithPlaceholder>
 
             <TextWithPlaceholder as="span" variant="body2" isLoading={!metadata}>
-              {metadata?.pool?.issuer.name}
+              {metadata?.pool?.asset.class}
             </TextWithPlaceholder>
           </Box>
 
@@ -98,17 +100,8 @@ export function PoolCard({ pool }: PoolCardProps) {
             pool ? <Tooltips type="valueLocked" variant="secondary" props={{ poolId: pool.id }} /> : 'Value locked'
           }
           value={
-            pool ? (
-              formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)
-            ) : (
-              <TextWithPlaceholder isLoading />
-            )
+            pool ? formatBalance(getPoolValueLocked(pool), pool.currency.symbol) : <TextWithPlaceholder isLoading />
           }
-          renderAs={{ label: 'dt', value: 'dd' }}
-        />
-        <LabelValueStack
-          label="Tokens"
-          value={pool ? pool.tranches.length : <TextWithPlaceholder isLoading width={2} variance={0} />}
           renderAs={{ label: 'dt', value: 'dd' }}
         />
         <LabelValueStack
@@ -122,7 +115,22 @@ export function PoolCard({ pool }: PoolCardProps) {
           }
           renderAs={{ label: 'dt', value: 'dd' }}
         />
+        {mostSeniorTranche && mostSeniorTranche.interestRatePerSec && (
+          <LabelValueStack
+            label="Senior APR"
+            value={formatPercentage(mostSeniorTranche.interestRatePerSec.toAprPercent())}
+            renderAs={{ label: 'dt', value: 'dd' }}
+          />
+        )}
       </Shelf>
     </Card>
   )
+}
+
+function getPoolValueLocked(pool: Pool | TinlakePool) {
+  return pool.tranches
+    .map((tranche) =>
+      tranche.tokenPrice ? tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()) : Dec(0)
+    )
+    .reduce((a, b) => a.add(b))
 }

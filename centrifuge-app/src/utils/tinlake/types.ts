@@ -24,7 +24,7 @@ export interface PoolMetadataDetails {
   website?: string
   asset: string
   securitize?: SecuritizeData
-  attributes?: { Issuer: string; Links: { [key: string]: string } }
+  attributes?: { Issuer: string; Links: { [key: string]: string | any } }
   assetMaturity?: string
   currencySymbol?: string
   isUpcoming?: boolean
