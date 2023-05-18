@@ -349,7 +349,7 @@ function IssuerCreateLoan() {
                     borderColor="borderPrimary"
                     borderStyle="solid"
                   >
-                    <Text>Asset template is missing. Please add an asset template or create a new one.</Text>
+                    <Text>Asset template is missing. Please create one first.</Text>
                   </Box>
                 )}
                 <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
