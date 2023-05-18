@@ -32,10 +32,11 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({
   subtitle,
   children,
   onClick,
+  isOpen,
   ...rest
 }) => {
   const [hovered, setHovered] = React.useState(false)
-  const [open, setOpen] = React.useState(rest.isOpen ?? false)
+  const [open, setOpen] = React.useState(isOpen ?? false)
   const theme = useTheme()
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
@@ -45,9 +46,9 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({
     if (onClick) onClick(e)
   }
 
-  // React.useEffect(() => {
-  //   setOpen(rest.isOpen ?? open)
-  // }, [rest.isOpen])
+  React.useEffect(() => {
+    setOpen(isOpen ?? open)
+  }, [isOpen])
 
   return (
     <Card variant={variant === 'default' ? 'default' : 'interactive'} {...rest}>

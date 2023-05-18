@@ -18,7 +18,7 @@ export function PoolToken({ token, defaultOpen, children }: PoolTokenProps) {
       isOpen={showChart && defaultOpen}
       variant={showChart ? 'collapsible' : 'default'}
       icon={<Thumbnail label={token.symbol ?? ''} type="token" />}
-      title={<Text>{token.name}????</Text>}
+      title={<Text>{token.name}</Text>}
       secondaryHeader={children}
     >
       <Stack maxHeight="300px">
