@@ -30,7 +30,14 @@ export const OnboardingPage: React.FC = () => {
   const poolDetails = usePool(poolId || '', false)
 
   React.useEffect(() => {
-    if (!poolId || !trancheId) {
+    const isTinlakePool = poolId?.startsWith('0x')
+    const trancheName = trancheId?.split('-')[1] === '0' ? 'junior' : 'senior'
+    const canOnboard = isTinlakePool
+      ? typeof poolDetails?.metadata === 'object' &&
+        poolDetails?.metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+      : true
+
+    if (!poolId || !trancheId || !canOnboard) {
       setPool(null)
       return history.push('/onboarding')
     }
