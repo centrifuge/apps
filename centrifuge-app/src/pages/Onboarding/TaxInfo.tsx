@@ -180,7 +180,7 @@ export const TaxInfo = () => {
           onClick={() => {
             isCompleted ? nextStep() : formik.handleSubmit()
           }}
-          disabled={isLoading || !formik.values.taxInfo || !formik.values.isEmailVerified}
+          disabled={isLoading || (!formik.values.taxInfo && !taxInfoData) || !formik.values.isEmailVerified}
           loading={isLoading}
           loadingMessage="Uploading"
         >
