@@ -35,7 +35,6 @@ onboarding.options('*', corsMiddleware)
 
 // middleware
 onboarding.use(rateLimiterMiddleware)
-onboarding.use(canOnboardToTinlakeTranche)
 onboarding.use(shuftiProAuthMiddleware)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))
@@ -59,7 +58,7 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
 
 // pool steps
-onboarding.post('/signAndSendDocuments', verifyAuth, signAndSendDocumentsController)
+onboarding.post('/signAndSendDocuments', canOnboardToTinlakeTranche, verifyAuth, signAndSendDocumentsController)
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
 
 // getters
