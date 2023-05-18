@@ -24,14 +24,8 @@ import { PoolDetailHeader } from '../Header'
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export function PoolDetailOverviewTab() {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const isTinlakePool = poolId.startsWith('0x')
-  const { metadata } = usePool(poolId)
   const { state } = useLocation<{ token: string }>()
   const [selectedToken, setSelectedToken] = React.useState(state?.token)
-  const wallet = useWallet()
-  const { data: tinlakePermissions } = useTinlakePermissions(poolId, wallet.evm.selectedAddress || '')
-  const isAllowedToInvest = tinlakePermissions?.junior.inMemberlist || tinlakePermissions?.senior.inMemberlist
 
   const investRef = React.useRef<{ setView(view: 'invest' | 'redeem'): void }>()
 
@@ -40,17 +34,10 @@ export function PoolDetailOverviewTab() {
     investRef.current?.setView('invest')
   }
 
-  const trancheName = selectedToken?.split('-')[1] === '0' ? 'junior' : 'senior'
-
-  const isTrancheOpen =
-    selectedToken && typeof metadata === 'object' ? metadata.pool.newInvestmentsStatus[trancheName] !== 'closed' : null
-
   return (
     <PageWithSideBar
       sidebar={
-        !isTinlakePool || isAllowedToInvest || isTrancheOpen ? (
-          <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
-        ) : null
+        <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
       }
     >
       <PoolDetailHeader />
@@ -146,12 +133,12 @@ export function PoolDetailOverview({
   }
 
   const getTrancheAvailability = (token: string) => {
-    if (isTinlakePool && typeof pool.metadata === 'object') {
+    if (isTinlakePool && metadata?.pool?.newInvestmentsStatus) {
       const trancheName = token.split('-')[1] === '0' ? 'junior' : 'senior'
 
       const isMember = tinlakePermissions?.[trancheName].inMemberlist
 
-      return isMember || pool.metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+      return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
     }
 
     return true

@@ -4,7 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import { Container, Header, Layout, PoolBranding } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
 import { GlobalStatus } from './GlobalStatus'
@@ -28,14 +28,12 @@ export const OnboardingPage: React.FC = () => {
 
   const history = useHistory()
   const poolDetails = usePool(poolId || '', false)
+  const { data: metadata } = usePoolMetadata(poolDetails)
 
   React.useEffect(() => {
     const isTinlakePool = poolId?.startsWith('0x')
     const trancheName = trancheId?.split('-')[1] === '0' ? 'junior' : 'senior'
-    const canOnboard = isTinlakePool
-      ? typeof poolDetails?.metadata === 'object' &&
-        poolDetails?.metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
-      : true
+    const canOnboard = (isTinlakePool && metadata?.pool?.newInvestmentsStatus[trancheName] !== 'closed') || true
 
     if (!poolId || !trancheId || !canOnboard) {
       setPool(null)
@@ -56,7 +54,7 @@ export const OnboardingPage: React.FC = () => {
 
     setPool(null)
     return history.push('/onboarding')
-  }, [poolId, setPool, trancheId, history, poolDetails])
+  }, [poolId, setPool, trancheId, history, poolDetails, metadata])
 
   const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
 
