@@ -12,10 +12,12 @@ type PoolTokenProps = {
 
 export function PoolToken({ token, defaultOpen, children }: PoolTokenProps) {
   const [showChart, setShowChart] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(defaultOpen)
 
   return (
     <InteractiveCard
-      isOpen={showChart && defaultOpen}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
       variant={showChart ? 'collapsible' : 'default'}
       icon={<Thumbnail label={token.symbol ?? ''} type="token" />}
       title={<Text>{token.name}</Text>}

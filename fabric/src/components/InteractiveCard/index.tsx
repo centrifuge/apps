@@ -1,6 +1,7 @@
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { IconChevronRight } from '../../icon'
+import useControlledState from '../../utils/useControlledState'
 import { Box } from '../Box'
 import { VisualButton } from '../Button'
 import { Card, CardProps } from '../Card'
@@ -19,36 +20,36 @@ type OwnProps = {
   onClick?: React.MouseEventHandler<HTMLButtonElement>
   isOpen?: boolean
   children?: React.ReactNode
+  setIsOpen?: (b: boolean) => void
 }
 
 export type InteractiveCardProps = OwnProps & Omit<CardProps, 'variant'>
 
-export const InteractiveCard: React.FC<InteractiveCardProps> = ({
-  variant = 'default',
-  icon,
-  title,
-  titleAddition,
-  secondaryHeader,
-  subtitle,
-  children,
-  onClick,
-  isOpen,
-  ...rest
-}) => {
+export const InteractiveCard: React.FC<InteractiveCardProps> = (props) => {
+  const {
+    variant = 'default',
+    icon,
+    title,
+    titleAddition,
+    secondaryHeader,
+    subtitle,
+    children,
+    onClick,
+    isOpen = false,
+    setIsOpen = (b: boolean) => b,
+    ...rest
+  } = props
+
+  const [open, setOpen] = useControlledState(false, isOpen, setIsOpen)
   const [hovered, setHovered] = React.useState(false)
-  const [open, setOpen] = React.useState(isOpen ?? false)
   const theme = useTheme()
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (variant === 'collapsible') {
-      setOpen((prev) => !prev)
+      setOpen(!open)
     }
     if (onClick) onClick(e)
   }
-
-  React.useEffect(() => {
-    setOpen(isOpen ?? open)
-  }, [isOpen])
 
   return (
     <Card variant={variant === 'default' ? 'default' : 'interactive'} {...rest}>
