@@ -149,7 +149,7 @@ function InvestRedeemState(props: Props) {
       setTrancheId(allowedTranches.at(-1)!.id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allowedTranches])
+  }, [allowedTranches[0]])
 
   React.useImperativeHandle(actionsRef, () => ({
     setView: (view) => {
