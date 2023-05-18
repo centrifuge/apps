@@ -119,9 +119,10 @@ function useAllowedTrancheIds(poolId: string) {
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
   const pool = usePool(poolId)
   const allowedTrancheIds = isTinlakePool
-    ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
-        Boolean
-      )
+    ? ([
+        tinlakePermissions?.junior?.inMemberlist && pool.tranches[0].id,
+        tinlakePermissions?.senior?.inMemberlist && pool.tranches[1].id,
+      ].filter(Boolean) as string[])
     : Object.keys(permissions?.pools[poolId]?.tranches ?? {})
 
   return allowedTrancheIds
@@ -136,7 +137,7 @@ function InvestRedeemState(props: Props) {
 
   React.useEffect(() => {
     if (allowedTrancheIds[0]) {
-      setTrancheId(allowedTrancheIds[0])
+      setTrancheId(allowedTrancheIds.at(-1)!)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowedTrancheIds[0]])
