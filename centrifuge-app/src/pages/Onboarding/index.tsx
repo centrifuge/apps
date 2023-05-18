@@ -12,6 +12,7 @@ import { InvestorType } from './InvestorType'
 import { KnowYourBusiness } from './KnowYourBusiness'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
+import { useGlobalOnboardingStatus } from './queries/useGlobalOnboardingStatus'
 import { useSignedAgreement } from './queries/useSignedAgreement'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 import { TaxInfo } from './TaxInfo'
@@ -23,6 +24,7 @@ export const OnboardingPage: React.FC = () => {
   const poolId = new URLSearchParams(search).get('poolId')
   const trancheId = new URLSearchParams(search).get('trancheId')
   const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool } = useOnboarding()
+  const { data: globalOnboardingStatus, isFetching: isFetchingGlobalOnboardingStatus } = useGlobalOnboardingStatus()
 
   const history = useHistory()
   const poolDetails = usePool(poolId || '', false)
@@ -62,7 +64,7 @@ export const OnboardingPage: React.FC = () => {
       <Header>{!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}</Header>
 
       <Container
-        isLoading={isLoadingStep}
+        isLoading={isLoadingStep || isFetchingGlobalOnboardingStatus}
         aside={
           <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
             <Step label="Link wallet" />
@@ -105,7 +107,7 @@ export const OnboardingPage: React.FC = () => {
           </Stepper>
         }
       >
-        {activeStep === 1 && <LinkWallet />}
+        {activeStep === 1 && <LinkWallet globalOnboardingStatus={globalOnboardingStatus} />}
         {activeStep === 2 && <InvestorType investorType={investorType} setInvestorType={setInvestorType} />}
         {investorType === 'entity' && (
           <>
