@@ -129,6 +129,8 @@ export function PoolDetailOverview({
     hasScrolledToToken.current = true
   }
 
+  console.log('tokens', tokens)
+
   return (
     <>
       <PageSummary data={pageSummaryData} />
@@ -155,10 +157,17 @@ export function PoolDetailOverview({
                     label={<Tooltips variant="secondary" type="valueLocked" />}
                     value={formatBalance(token.valueLocked, pool?.currency.symbol)}
                   />
-                  <LabelValueStack
-                    label={<Tooltips variant="secondary" type="apy" />}
-                    value={formatPercentage(token.apy)}
-                  />
+                  {token.seniority === 0 ? (
+                    <LabelValueStack
+                      label={<Tooltips variant="secondary" type="juniorTrancheYields" />}
+                      value="Variable"
+                    />
+                  ) : (
+                    <LabelValueStack
+                      label={<Tooltips variant="secondary" type="apy" />}
+                      value={formatPercentage(token.apy)}
+                    />
+                  )}
                   <LabelValueStack
                     label="Capacity"
                     value={
