@@ -36,14 +36,6 @@ export function IssuerSection({ metadata }: IssuerSectionProps) {
           <Text variant="body2">{metadata?.pool?.issuer.description}</Text>
         </Stack>
         <Stack gap="2">
-          {!isTinlakePool && (
-            <Box>
-              <AnchorPillButton variant="small" href={explorer.address('')}>
-                View pool account
-              </AnchorPillButton>
-            </Box>
-          )}
-
           {metadata?.pool?.links.executiveSummary && (
             <LabelValueStack
               label="Download"
