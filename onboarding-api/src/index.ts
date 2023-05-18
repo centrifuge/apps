@@ -19,10 +19,10 @@ import { startKycController } from './controllers/user/startKyc'
 import { updateInvestorStatusController } from './controllers/user/updateInvestorStatus'
 import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
+import { canOnboardToTinlakeTranche } from './middleware/canOnboardToTinlakeTranche'
 import { corsMiddleware } from './middleware/cors'
 import { fileUpload } from './middleware/fileUpload'
 import { rateLimiterMiddleware } from './middleware/rateLimiter'
-import { restrictedPool } from './middleware/restrictedPool'
 import { shuftiProAuthMiddleware } from './middleware/shuftiProAuthMiddleware'
 import { verifyAuth } from './middleware/verifyAuth'
 
@@ -35,7 +35,7 @@ onboarding.options('*', corsMiddleware)
 
 // middleware
 onboarding.use(rateLimiterMiddleware)
-onboarding.use(restrictedPool)
+onboarding.use(canOnboardToTinlakeTranche)
 onboarding.use(shuftiProAuthMiddleware)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))

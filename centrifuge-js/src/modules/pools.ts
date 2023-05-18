@@ -448,6 +448,10 @@ export type PoolMetadata = {
     asset: {
       class: string
     }
+    newInvestmentsStatus: {
+      junior: 'closed' | 'request' | 'open'
+      senior: 'closed' | 'request' | 'open'
+    }
     issuer: {
       repName: string
       name: string

@@ -111,7 +111,7 @@ function EpochBusy({ busy }: { busy?: boolean }) {
   ) : null
 }
 
-function useAllowedTrancheIds(poolId: string) {
+function useAllowedTranches(poolId: string) {
   const address = useAddress()
   const { connectedType } = useWallet()
   const isTinlakePool = poolId.startsWith('0x')
@@ -119,28 +119,37 @@ function useAllowedTrancheIds(poolId: string) {
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
   const pool = usePool(poolId)
   const allowedTrancheIds = isTinlakePool
-    ? ([
-        tinlakePermissions?.junior?.inMemberlist && pool.tranches[0].id,
-        tinlakePermissions?.senior?.inMemberlist && pool.tranches[1].id,
-      ].filter(Boolean) as string[])
+    ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
+        (tranche) => {
+          if (tranche && typeof pool.metadata === 'object') {
+            const trancheName = tranche.split('-')[1] === '0' ? 'junior' : 'senior'
+
+            const isMember = tinlakePermissions?.[trancheName].inMemberlist
+
+            return isMember || pool.metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+          }
+
+          return false
+        }
+      )
     : Object.keys(permissions?.pools[poolId]?.tranches ?? {})
 
-  return allowedTrancheIds
+  return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
 }
 
 function InvestRedeemState(props: Props) {
   const { poolId, trancheId: trancheIdProp, onSetTrancheId, actionsRef } = props
-  const allowedTrancheIds = useAllowedTrancheIds(poolId)
+  const allowedTranches = useAllowedTranches(poolId)
   const pool = usePool(poolId)
   const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
   const [trancheId, setTrancheId] = useControlledState<string>(pool.tranches.at(-1)!.id, trancheIdProp, onSetTrancheId)
 
   React.useEffect(() => {
-    if (allowedTrancheIds[0]) {
-      setTrancheId(allowedTrancheIds.at(-1)!)
+    if (allowedTranches.at(-1)?.id) {
+      setTrancheId(allowedTranches.at(-1)!.id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allowedTrancheIds[0]])
+  }, [allowedTranches])
 
   React.useImperativeHandle(actionsRef, () => ({
     setView: (view) => {
@@ -177,9 +186,13 @@ type InnerProps = Props & {
 function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
-  const history = useHistory()
+  const allowedTranches = useAllowedTranches(state.poolId)
+  const isTinlakePool = state.poolId.startsWith('0x')
+
+  const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
+
   const { data: metadata } = usePoolMetadata(pool)
-  const { showWallets, connectedType } = useWallet()
+  const { connectedType } = useWallet()
 
   let actualView = view
   if (state.order) {
@@ -211,14 +224,14 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
           <Divider borderColor="borderSecondary" />
         </Box>
       </Stack>
-      {pool.tranches.length > 1 && (
+      {availableTranches.length > 1 && (
         <Select
           name="token"
           placeholder="Select a token"
-          options={pool.tranches
-            .map((t) => ({
-              label: t.currency.symbol ?? '',
-              value: t.id,
+          options={availableTranches
+            .map((tranche) => ({
+              label: tranche.currency.symbol ?? '',
+              value: tranche.id,
             }))
             .reverse()}
           value={state.trancheId}
@@ -277,22 +290,52 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
             </AnchorTextLink>
           </Text>
           <Stack px={1}>
-            <Button
-              onClick={() => {
-                if (!connectedType) {
-                  showWallets(networks?.length === 1 ? networks[0] : undefined)
-                } else {
-                  history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
-                }
-              }}
-            >
-              {connectedType ? `Onboard to ${state.trancheCurrency?.symbol ?? 'token'}` : 'Connect to invest'}
-            </Button>
+            <OnboardingButton networks={networks} />
           </Stack>
         </Stack>
       )}
     </Stack>
   )
+}
+
+const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
+  const { showWallets, connectedType } = useWallet()
+  const { state } = useInvestRedeem()
+  const pool = usePool(state.poolId)
+  const isTinlakePool = pool.id.startsWith('0x')
+
+  const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
+
+  const investStatus = typeof pool.metadata === 'object' ? pool.metadata.pool.newInvestmentsStatus[trancheName] : null
+
+  const history = useHistory()
+
+  const getOnboardingButtonText = () => {
+    if (connectedType) {
+      if (investStatus === 'request') {
+        return 'Contact issuer'
+      }
+
+      if (investStatus === 'open' || !isTinlakePool) {
+        return `Onboard to ${state.trancheCurrency?.symbol ?? 'token'}`
+      }
+    } else {
+      return 'Connect to invest'
+    }
+  }
+
+  const handleClick = () => {
+    if (!connectedType) {
+      showWallets(networks?.length === 1 ? networks[0] : undefined)
+    } else if (investStatus === 'request') {
+      typeof pool.metadata === 'object' &&
+        window.open(`mailto:${pool.metadata.pool.issuer.email}?subject=New%20Investment%20Inquiry`)
+    } else {
+      history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
+    }
+  }
+
+  return <Button onClick={handleClick}>{getOnboardingButtonText()}</Button>
 }
 
 type InvestValues = {

@@ -16,6 +16,7 @@ import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -23,8 +24,15 @@ import { PoolDetailHeader } from '../Header'
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export function PoolDetailOverviewTab() {
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const isTinlakePool = poolId.startsWith('0x')
+  const { metadata } = usePool(poolId)
   const { state } = useLocation<{ token: string }>()
   const [selectedToken, setSelectedToken] = React.useState(state?.token)
+  const wallet = useWallet()
+  const { data: tinlakePermissions } = useTinlakePermissions(poolId, wallet.evm.selectedAddress || '')
+  const isAllowedToInvest = tinlakePermissions?.junior.inMemberlist || tinlakePermissions?.senior.inMemberlist
+
   const investRef = React.useRef<{ setView(view: 'invest' | 'redeem'): void }>()
 
   function setToken(token: string) {
@@ -32,10 +40,17 @@ export function PoolDetailOverviewTab() {
     investRef.current?.setView('invest')
   }
 
+  const trancheName = selectedToken?.split('-')[1] === '0' ? 'junior' : 'senior'
+
+  const isTrancheOpen =
+    selectedToken && typeof metadata === 'object' ? metadata.pool.newInvestmentsStatus[trancheName] !== 'closed' : null
+
   return (
     <PageWithSideBar
       sidebar={
-        <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        !isTinlakePool || isAllowedToInvest || isTrancheOpen ? (
+          <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        ) : null
       }
     >
       <PoolDetailHeader />
@@ -83,7 +98,8 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { showWallets, connectedType } = useWallet()
+  const { showWallets, connectedType, evm } = useWallet()
+  const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
     {
@@ -129,6 +145,18 @@ export function PoolDetailOverview({
     hasScrolledToToken.current = true
   }
 
+  const getTrancheAvailability = (token: string) => {
+    if (isTinlakePool && typeof pool.metadata === 'object') {
+      const trancheName = token.split('-')[1] === '0' ? 'junior' : 'senior'
+
+      const isMember = tinlakePermissions?.[trancheName].inMemberlist
+
+      return isMember || pool.metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+    }
+
+    return true
+  }
+
   return (
     <>
       <PageSummary data={pageSummaryData} />
@@ -171,7 +199,7 @@ export function PoolDetailOverview({
                       </Text>
                     }
                   />
-                  {setSelectedToken && (
+                  {setSelectedToken && getTrancheAvailability(token.id) && (
                     <Button
                       variant="secondary"
                       onClick={() => {
