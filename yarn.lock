@@ -1704,7 +1704,7 @@ __metadata:
     react-query: ^3.39.1
     react-router: ^5.2.1
     react-router-dom: ^5.3.0
-    recharts: ^2.1.12
+    recharts: 2.6.2
     styled-components: ^5.3.5
     styled-system: ^5.1.5
     typescript: ^4.7.4
@@ -23334,9 +23334,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"recharts@npm:^2.1.12":
-  version: 2.5.0
-  resolution: "recharts@npm:2.5.0"
+"recharts@npm:2.6.2":
+  version: 2.6.2
+  resolution: "recharts@npm:2.6.2"
   dependencies:
     classnames: ^2.2.5
     eventemitter3: ^4.0.1
@@ -23351,7 +23351,7 @@ fsevents@^1.2.7:
     prop-types: ^15.6.0
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 71280ce2b6592128fbf1a2d7e7f0b2839139983c471c677747c8b9474331d6f4fc4162d5de6721d188786d75e962dbe54fc8ac4ab568d7f9df502e8d58f77d9c
+  checksum: 9cb369027db82a171cdbc49b155f6847228bd4b781cfb39cb388bd8818c17b5fd86fde8fb729d00af46fe3f363ff913fceaeda751d18c350312bae4247cdebcd
   languageName: node
   linkType: hard
 
