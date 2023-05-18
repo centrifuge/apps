@@ -19,8 +19,8 @@ type OwnProps = {
   secondaryHeader?: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLButtonElement>
   isOpen?: boolean
-  children?: React.ReactNode
   setIsOpen?: (b: boolean) => void
+  children?: React.ReactNode
 }
 
 export type InteractiveCardProps = OwnProps & Omit<CardProps, 'variant'>
@@ -35,8 +35,8 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = (props) => {
     subtitle,
     children,
     onClick,
-    isOpen = false,
-    setIsOpen = (b: boolean) => b,
+    isOpen,
+    setIsOpen,
     ...rest
   } = props
 
