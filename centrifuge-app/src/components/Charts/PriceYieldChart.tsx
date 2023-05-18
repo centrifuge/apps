@@ -13,7 +13,11 @@ type ChartData = {
   tokenPrice: number
 }
 
-const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
+const PriceYieldChart: React.FC<{
+  trancheId: string
+  onDataLoaded?: (b: boolean) => void
+  renderFallback?: boolean
+}> = ({ trancheId, onDataLoaded = () => {}, renderFallback = true }) => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const trancheStates = useDailyTrancheStates(trancheId)
@@ -29,6 +33,10 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
       }) || []
     )
   }, [trancheStates])
+
+  React.useLayoutEffect(() => {
+    onDataLoaded(data.length > 0)
+  }, [data, onDataLoaded])
 
   if (!trancheStates || trancheStates?.length === 1) return <Spinner />
 
@@ -59,9 +67,9 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
         </ResponsiveContainer>
       </Shelf>
     </Stack>
-  ) : (
+  ) : renderFallback ? (
     <Text variant="label1">Data unavailable</Text>
-  )
+  ) : null
 }
 
 const CustomLegend: React.VFC<{
