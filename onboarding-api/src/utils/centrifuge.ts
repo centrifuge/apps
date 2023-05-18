@@ -104,7 +104,7 @@ export const validateRemark = async (
 // https://polkadot.js.org/docs/util-crypto/examples/validate-address/
 export const isValidSubstrateAddress = (address: string) => {
   try {
-    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address, false))
+    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
     return true
   } catch (error) {
     return false
