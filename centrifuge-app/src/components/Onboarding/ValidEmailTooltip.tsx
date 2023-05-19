@@ -44,7 +44,7 @@ export function ValidEmailTooltip() {
       backgroundColor="backgroundPrimary"
       borderRadius="tooltip"
     >
-      <Title forwardedAs="span" variant="heading6" color="statusCritical">
+      <Title forwardedAs="span" variant="heading6" color="statusInfo">
         Please enter a valid email
       </Title>
       <Text as="span" variant="body3">
