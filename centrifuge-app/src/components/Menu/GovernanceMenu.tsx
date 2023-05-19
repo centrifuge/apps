@@ -82,7 +82,7 @@ export function GovernanceMenu() {
         {isXLarge ? (
           <Stack as="ul" gap={1}>
             {links.map(({ href, label }) => (
-              <Box as="li" pl={4} key={href}>
+              <Box as="li" pl={4} pr={1} key={href}>
                 <Link href={href} stacked={!isXLarge}>
                   {label}
                 </Link>

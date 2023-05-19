@@ -55,18 +55,17 @@ async function verifySubstrateWallet(req: Request, res: Response) {
   const { verified, payload } = await centrifuge.auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
-  const address = payload.address.toLowerCase()
-
+  const address = payload.address
   if (!isValidSubstrateAddress(address)) {
     throw new Error('Invalid address')
   }
 
-  const cookieNonce = req.signedCookies[`onboarding-auth-${address}`]
+  const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
   if (!cookieNonce || cookieNonce !== nonce) {
     throw new Error('Invalid nonce')
   }
 
-  res.clearCookie(`onboarding-auth-${address}`)
+  res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
 
   if (verified && onBehalfOf) {
     const isVerifiedProxy = await centrifuge.auth.verifyProxy(address, onBehalfOf, AUTHORIZED_ONBOARDING_PROXY_TYPES)
@@ -86,21 +85,20 @@ async function verifySubstrateWallet(req: Request, res: Response) {
 
 async function verifyEthWallet(req: Request, res: Response) {
   try {
-    const { message, signature, address: ethAddress, nonce } = req.body
-    const address = ethAddress.toLowerCase()
+    const { message, signature, address, nonce } = req.body
 
     if (!isAddress(address)) {
       throw new Error('Invalid address')
     }
 
-    const cookieNonce = req.signedCookies[`onboarding-auth-${address}`]
+    const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
 
     if (!cookieNonce || cookieNonce !== nonce) {
       throw new Error('Invalid nonce')
     }
 
     const decodedMessage = await new SiweMessage(message).verify({ signature })
-    res.clearCookie(`onboarding-auth-${address}`)
+    res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
     return {
       address: decodedMessage.data.address,
       network: 'evm',

@@ -13,7 +13,7 @@ import {
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
 import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
-import { CA_PROVINCE_CODES, RESIDENCY_COUNTRY_CODES, US_STATE_CODES } from '../geographyCodes'
+import { CA_PROVINCE_CODES, RESIDENCY_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES, US_STATE_CODES } from '../geographyCodes'
 
 type Props = {
   formik: FormikProps<{
@@ -103,7 +103,9 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
             {...formik.getFieldProps('jurisdictionCode')}
             label="Country of incorporation"
             placeholder="Select a country"
-            options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES)}
+            options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES).filter(
+              (countryCode) => !Object.keys(RESTRICTED_COUNTRY_CODES).includes(countryCode.value)
+            )}
             disabled={fieldIsDisabled}
             onChange={(event) => {
               formik.setValues({
