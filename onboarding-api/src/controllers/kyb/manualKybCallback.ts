@@ -74,13 +74,13 @@ export const manualKybCallbackController = async (
       query?.trancheId &&
       user.poolSteps[query?.poolId]?.[query?.trancheId]?.status.status === 'pending'
     ) {
-      const signedAgreement = await fetchSignedAgreement(wallet, query?.poolId, query?.trancheId)
+      const signedAgreement = await fetchSignedAgreement(wallet, query.poolId, query.trancheId)
 
       if (!signedAgreement) {
         throw new HttpError(400, 'Agreement not found')
       }
 
-      sendDocumentsMessage(wallet, query?.poolId, query?.trancheId, signedAgreement)
+      sendDocumentsMessage(wallet, query.poolId, query.trancheId, signedAgreement)
     }
 
     return res.status(200).end()
