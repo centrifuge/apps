@@ -54,9 +54,9 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
           tx.epochNumber.toString(),
           formatDate(tx.timestamp.toString()),
           tx.type,
-          tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal()) : '-',
-          tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal()) : '-',
-          tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 4) : '',
+          tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal(), pool.currency) : '-',
+          tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.currency) : '-',
+          tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 4) : '-',
         ],
         heading: false,
       }

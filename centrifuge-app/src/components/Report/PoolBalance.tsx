@@ -48,17 +48,17 @@ export function PoolBalance({ pool }: { pool: Pool }) {
     return [
       {
         name: 'Pool value',
-        value: poolStates?.map((state) => formatBalance(state.poolValue)) || [],
+        value: poolStates?.map((state) => formatBalance(state.poolValue, pool.currency)) || [],
         heading: false,
       },
       {
         name: 'Asset value',
-        value: poolStates?.map((state) => formatBalance(state.poolState.portfolioValuation)) || [],
+        value: poolStates?.map((state) => formatBalance(state.poolState.portfolioValuation, pool.currency)) || [],
         heading: false,
       },
       {
         name: 'Reserve',
-        value: poolStates?.map((state) => formatBalance(state.poolState.totalReserve)) || [],
+        value: poolStates?.map((state) => formatBalance(state.poolState.totalReserve, pool.currency)) || [],
         heading: false,
       },
     ]
@@ -79,7 +79,9 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) =>
-              state.tranches[token.id].price ? formatBalance(state.tranches[token.id].price?.toFloat()!) : '1.000'
+              state.tranches[token.id].price
+                ? formatBalance(state.tranches[token.id].price?.toFloat()!, pool.currency)
+                : '1.000'
             ) || [],
           heading: false,
         })) || []
@@ -100,7 +102,9 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         .map((token) => ({
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
-            poolStates?.map((state) => formatBalance(state.tranches[token.id].fulfilledInvestOrders.toDecimal())) || [],
+            poolStates?.map((state) =>
+              formatBalance(state.tranches[token.id].fulfilledInvestOrders.toDecimal(), pool.currency)
+            ) || [],
           heading: false,
         })) || [],
       [
@@ -116,8 +120,9 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           .map((token) => ({
             name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
             value:
-              poolStates?.map((state) => formatBalance(state.tranches[token.id].fulfilledRedeemOrders.toDecimal())) ||
-              [],
+              poolStates?.map((state) =>
+                formatBalance(state.tranches[token.id].fulfilledRedeemOrders.toDecimal(), pool.currency)
+              ) || [],
             heading: false,
           })) || []
       )
