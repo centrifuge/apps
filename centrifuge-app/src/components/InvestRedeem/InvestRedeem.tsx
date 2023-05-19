@@ -312,7 +312,7 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
 
-  const investStatus = metadata?.pool?.newInvestmentsStatus[trancheName] || null
+  const investStatus = metadata?.pool?.newInvestmentsStatus?.[trancheName] || null
 
   const history = useHistory()
 

@@ -10,7 +10,7 @@ export const canOnboardToTinlakeTranche = async (req, res, next) => {
 
     const trancheName = trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
 
-    if (metadata?.pool?.newInvestmentsStatus[trancheName] !== 'open') {
+    if (metadata?.pool?.newInvestmentsStatus?.[trancheName] !== 'open') {
       throw new HttpError(403, 'Forbidden')
     }
   }
