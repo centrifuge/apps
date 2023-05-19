@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric' // DateInput
+import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 
@@ -14,6 +14,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     setStartDate,
     endDate,
     setEndDate,
+    range,
+    setRange,
     report,
     setReport,
     groupBy,
@@ -58,25 +60,12 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       <DateRange
         start={startDate}
         end={endDate}
-        onSelection={(start, end) => {
+        onSelection={(start, end, range) => {
+          setRange(range)
           setStartDate(start)
           setEndDate(end)
         }}
       />
-
-      {/* <Box minWidth={150} maxWidth={150}>
-        <DateInput
-          value={startDate.toISOString().slice(0, 10)}
-          onChange={(event) => setStartDate(new Date(event.target.value))}
-        />
-      </Box>
-
-      <Box minWidth={150} maxWidth={150}>
-        <DateInput
-          value={endDate.toISOString().slice(0, 10)}
-          onChange={(event) => setEndDate(new Date(event.target.value))}
-        />
-      </Box> */}
 
       {report === 'pool-balance' && (
         <Box minWidth={150} maxWidth={150}>
@@ -89,10 +78,14 @@ export function ReportFilter({ pool }: ReportFilterProps) {
                 label: 'Day',
                 value: 'day',
               },
-              {
-                label: 'Month',
-                value: 'month',
-              },
+              ...(range !== 'last-week'
+                ? [
+                    {
+                      label: 'Month',
+                      value: 'month',
+                    },
+                  ]
+                : []),
             ]}
             value={groupBy}
             onChange={(event) => {

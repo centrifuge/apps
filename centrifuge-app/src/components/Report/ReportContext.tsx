@@ -1,3 +1,4 @@
+import { RangeOptionValue } from '@centrifuge/fabric'
 import * as React from 'react'
 
 export type GroupBy = 'day' | 'month'
@@ -13,6 +14,9 @@ export type ReportContext = {
 
   endDate: Date
   setEndDate: (date: Date) => void
+
+  range: RangeOptionValue
+  setRange: (range: RangeOptionValue) => void
 
   report: Report
   setReport: (report: Report) => void
@@ -39,6 +43,9 @@ const defaultContext = {
   endDate: new Date(),
   setEndDate() {},
 
+  range: 'last-month' as RangeOptionValue,
+  setRange() {},
+
   report: 'pool-balance' as Report,
   setReport() {},
 
@@ -58,6 +65,7 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   const [startDate, setStartDate] = React.useState(defaultContext.startDate)
   const [endDate, setEndDate] = React.useState(defaultContext.endDate)
   const [report, setReport] = React.useState(defaultContext.report)
+  const [range, setRange] = React.useState(defaultContext.range)
 
   // Custom filters for specific reports
   const [groupBy, setGroupBy] = React.useState(defaultContext.groupBy)
@@ -72,6 +80,8 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
         setStartDate,
         endDate,
         setEndDate,
+        range,
+        setRange,
         report,
         setReport,
         groupBy,

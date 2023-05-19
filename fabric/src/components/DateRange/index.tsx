@@ -1,26 +1,32 @@
 import * as React from 'react'
 import { Box } from '../Box'
-import { Select } from '../Select'
+import { Select, SelectOptionItem } from '../Select'
 
 export type DateRangeProps = {
-  onSelection: (start: Date, end: Date) => void
-  defaultOption?: (typeof rangeOptions)[number]
+  onSelection: (start: Date, end: Date, range: RangeOptionValue) => void
+  defaultOption?: RangeOption
   start: Date
   end: Date
 }
 
-export const rangeOptions = [
+type RangeOption = SelectOptionItem & {
+  label: 'Last week' | 'Last month' | 'Last year'
+  value: 'last-week' | 'last-month' | 'last-year'
+}
+export type RangeOptionValue = RangeOption['value']
+
+export const rangeOptions: RangeOption[] = [
   {
-    value: 'last-week',
     label: 'Last week',
+    value: 'last-week',
   },
   {
-    value: 'last-month',
     label: 'Last month',
+    value: 'last-month',
   },
   {
-    value: 'last-year',
     label: 'Last year',
+    value: 'last-year',
   },
 ]
 
@@ -48,7 +54,7 @@ export function DateRange({ onSelection, defaultOption = rangeOptions[1], start,
   }, [])
 
   React.useEffect(() => {
-    onSelection(startDate, end)
+    onSelection(startDate, end, value)
   }, [startDate, end, value])
 
   return (
@@ -60,7 +66,7 @@ export function DateRange({ onSelection, defaultOption = rangeOptions[1], start,
           options={rangeOptions}
           value={value}
           onChange={({ target }) => {
-            setValue(target.value)
+            setValue(target.value as RangeOptionValue)
             setStartDate(getDate[target.value](end))
           }}
         />
