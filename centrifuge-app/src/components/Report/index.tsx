@@ -25,7 +25,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         </Text>
         {(report === 'pool-balance' || report === 'asset-list') && pool && (
           <Text variant="body3" color="textSecondary">
-            All amounts are in {pool.currency.symbol}.
+            All amounts are in {pool.currency.symbol}
           </Text>
         )}
       </Shelf>
