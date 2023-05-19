@@ -38,10 +38,7 @@ export const verifyBusinessController = async (
     }
 
     if (userData?.manualKybReference) {
-      const status = await shuftiProRequest(
-        { reference: userData.manualKybReference },
-        { path: 'status', dryRun: false }
-      )
+      const status = await shuftiProRequest({ reference: userData.manualKybReference }, { path: 'status' })
 
       if (status.event === 'review.pending') {
         throw new HttpError(400, 'Business already in review')
@@ -83,7 +80,6 @@ export const verifyBusinessController = async (
 
     if (manualReview) {
       const searchParams = new URLSearchParams({
-        ...wallet,
         ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
       })
 

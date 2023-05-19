@@ -33,7 +33,7 @@ onboarding.disable('x-powered-by')
 onboarding.disable('server')
 onboarding.options('*', corsMiddleware)
 
-// middleware
+// global middleware
 onboarding.use(rateLimiterMiddleware)
 onboarding.use(shuftiProAuthMiddleware)
 onboarding.use(corsMiddleware)

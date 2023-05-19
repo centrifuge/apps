@@ -1,17 +1,14 @@
 import { Request, Response } from 'express'
-import { InferType, mixed, object, string } from 'yup'
-import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { InferType, object, string } from 'yup'
+import { onboardingBucket, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { sendVerifiedBusinessMessage } from '../../emails/sendVerifiedBusinessMessage'
-import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
-import { ManualKybCallbackRequestBody, Subset, SupportedNetworks } from '../../utils/types'
+import { ManualKybCallbackRequestBody, Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
 const manualKybCallbackInput = object({
-  address: string().required(),
-  network: mixed<SupportedNetworks>().required().oneOf(['evm', 'substrate']),
   poolId: string().optional(),
   trancheId: string().optional(),
 })
@@ -25,12 +22,16 @@ export const manualKybCallbackController = async (
 
     await validateInput(query, manualKybCallbackInput)
 
-    const wallet: Request['wallet'] = {
-      address: query.address,
-      network: query.network,
+    const userSnapshot = await userCollection.where(`manualKybReference`, '==', body.reference).get()
+    if (userSnapshot.empty) {
+      throw new Error("User doesn't exist")
     }
+    const user = userSnapshot.docs.map((doc) => doc.data())[0] as OnboardingUser
 
-    const user = await fetchUser(wallet)
+    const wallet: Request['wallet'] = {
+      address: user.wallet[0].address,
+      network: user.wallet[0].network,
+    }
 
     if (user.investorType !== 'entity') {
       throw new HttpError(400, 'User is not an entity')
@@ -48,7 +49,7 @@ export const manualKybCallbackController = async (
     const status = await shuftiProRequest({ reference: body.reference }, { path: 'status' })
 
     if (status.event === 'verification.declined') {
-      await sendVerifiedBusinessMessage(user.email, false, query.poolId, query.trancheId)
+      await sendVerifiedBusinessMessage(user.email, false, query?.poolId, query?.trancheId)
       return res.status(200).end()
     }
 
@@ -66,12 +67,12 @@ export const manualKybCallbackController = async (
     }
 
     await validateAndWriteToFirestore(wallet, updatedUser, 'entity', ['globalSteps.verifyBusiness'])
-    await sendVerifiedBusinessMessage(user.email, true, query.poolId, query.trancheId)
+    await sendVerifiedBusinessMessage(user.email, true, query?.poolId, query?.trancheId)
 
     if (
-      query.poolId &&
-      query.trancheId &&
-      user.poolSteps[query.poolId]?.[query.trancheId]?.status.status === 'pending'
+      query?.poolId &&
+      query?.trancheId &&
+      user.poolSteps[query?.poolId]?.[query?.trancheId]?.status.status === 'pending'
     ) {
       const signedAgreement = await fetchSignedAgreement(wallet, query.poolId, query.trancheId)
 
