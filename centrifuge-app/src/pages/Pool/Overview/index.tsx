@@ -16,6 +16,7 @@ import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -25,6 +26,7 @@ const PoolAssetReserveChart = React.lazy(() => import('../../../components/Chart
 export function PoolDetailOverviewTab() {
   const { state } = useLocation<{ token: string }>()
   const [selectedToken, setSelectedToken] = React.useState(state?.token)
+
   const investRef = React.useRef<{ setView(view: 'invest' | 'redeem'): void }>()
 
   function setToken(token: string) {
@@ -83,7 +85,8 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { showWallets, connectedType } = useWallet()
+  const { showWallets, connectedType, evm } = useWallet()
+  const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
     {
@@ -129,6 +132,18 @@ export function PoolDetailOverview({
     hasScrolledToToken.current = true
   }
 
+  const getTrancheAvailability = (token: string) => {
+    if (isTinlakePool && metadata?.pool?.newInvestmentsStatus) {
+      const trancheName = token.split('-')[1] === '0' ? 'junior' : 'senior'
+
+      const isMember = tinlakePermissions?.[trancheName].inMemberlist
+
+      return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+    }
+
+    return true
+  }
+
   return (
     <>
       <PageSummary data={pageSummaryData} />
@@ -155,10 +170,17 @@ export function PoolDetailOverview({
                     label={<Tooltips variant="secondary" type="valueLocked" />}
                     value={formatBalance(token.valueLocked, pool?.currency.symbol)}
                   />
-                  <LabelValueStack
-                    label={<Tooltips variant="secondary" type="apy" />}
-                    value={formatPercentage(token.apy)}
-                  />
+                  {token.seniority === 0 ? (
+                    <LabelValueStack
+                      label={<Tooltips variant="secondary" type="juniorTrancheYields" />}
+                      value="Variable"
+                    />
+                  ) : (
+                    <LabelValueStack
+                      label={<Tooltips variant="secondary" type="apy" />}
+                      value={formatPercentage(token.apy)}
+                    />
+                  )}
                   <LabelValueStack
                     label="Capacity"
                     value={
@@ -171,7 +193,7 @@ export function PoolDetailOverview({
                       </Text>
                     }
                   />
-                  {setSelectedToken && (
+                  {setSelectedToken && getTrancheAvailability(token.id) && (
                     <Button
                       variant="secondary"
                       onClick={() => {

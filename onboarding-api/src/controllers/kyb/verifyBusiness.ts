@@ -3,6 +3,7 @@ import { bool, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
+import { RESTRICTED_COUNTRY_CODES } from '../../utils/geographyCodes'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
@@ -13,7 +14,9 @@ const verifyBusinessInput = object({
   email: string().email().required(),
   businessName: string().required(), // used for AML
   registrationNumber: string().required(),
-  jurisdictionCode: string().required(), // country of incorporation
+  jurisdictionCode: string()
+    .required()
+    .test((value) => !Object.keys(RESTRICTED_COUNTRY_CODES).includes(value!)), // country of incorporation
   manualReview: bool().required(),
   poolId: string().optional(),
   trancheId: string().optional(),

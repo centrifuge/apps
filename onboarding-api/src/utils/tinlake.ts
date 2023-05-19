@@ -48,6 +48,10 @@ interface PoolMetadataDetails {
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
   repName: string
+  newInvestmentsStatus: {
+    junior: 'closed' | 'request' | 'open'
+    senior: 'closed' | 'request' | 'open'
+  }
 }
 
 interface BasePool {
@@ -97,12 +101,12 @@ const INFURA_KEY = process.env.INFURA_KEY
 
 const goerliConfig = {
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
-  poolsHash: 'QmbhSKTw6MgigA8UhooM2aq5utHvSeyBT3jWjokKL8DNTx', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xaEcFA11fE9601c1B960661d7083A08A5df7c1947',
 }
 const mainnetConfig = {
   remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
-  poolsHash: 'QmdHDG1z6LmfX8Z7vmC2RwaaVkDuVwQssDcs7NyuFaBgQz', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmanPH4Sv9qBz28xfdXkE7npsQ2ZgnjsoQ2EjzDrXfkJVL', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b',
 }
 
@@ -134,6 +138,7 @@ export const getTinlakePoolById = async (poolId: string) => {
   const id = poolData.addresses.ROOT_CONTRACT
   const metadata = {
     pool: {
+      newInvestmentsStatus: poolData.metadata.newInvestmentsStatus,
       name: poolData.metadata.name,
       issuer: {
         name: poolData.metadata.attributes?.Issuer ?? '',
