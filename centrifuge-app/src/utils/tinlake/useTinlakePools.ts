@@ -520,6 +520,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         asset: {
           class: p.metadata.asset,
         },
+        newInvestmentsStatus: p.metadata.newInvestmentsStatus,
         issuer: {
           name: p.metadata.attributes?.Issuer ?? '',
           repName: p.metadata.description ?? '',
