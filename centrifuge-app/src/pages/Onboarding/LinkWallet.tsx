@@ -66,25 +66,21 @@ export const LinkWallet = ({ globalOnboardingStatus }: Props) => {
             checked={isAuth || formik.values.isAgreedToDataSharingAgreement}
             disabled={isAuth}
             errorMessage={formik.errors.isAgreedToDataSharingAgreement}
-            label={
-              <Shelf gap="4px">
-                <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the</Text>
-                <button
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontFamily: 'Inter,sans-serif',
-                  }}
-                  onClick={() => setIsDataSharingAgreementDialogOpen(true)}
-                >
-                  <Text variant="body1" color="textInteractive">
-                    data sharing agreement.
-                  </Text>
-                </button>
-              </Shelf>
-            }
+            label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the</Text>}
           />
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'Inter,sans-serif',
+            }}
+            onClick={() => setIsDataSharingAgreementDialogOpen(true)}
+          >
+            <Text variant="body1" color="textInteractive">
+              data sharing agreement.
+            </Text>
+          </button>
           <DataSharingAgreementDialog
             isDialogOpen={isDataSharingAgreementDialogOpen}
             setIsDialogOpen={setIsDataSharingAgreementDialogOpen}
