@@ -74,7 +74,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         walletDialog: {
           view: 'accounts',
-          wallet: state[state.connectedType === 'substrateEvm' ? 'evm' : state.connectedType!].selectedWallet,
+          wallet: state[state.connectedType!].selectedWallet,
           network:
             state.connectedType === 'substrate'
               ? 'centrifuge'
@@ -127,7 +127,7 @@ function reducer(state: State, action: Action): State {
 }
 
 type PersistState = {
-  type: 'substrate' | 'evm' | 'substrateEvm'
+  type: 'substrate' | 'evm'
   wallet: string
   address: string
   chainId?: number
@@ -181,10 +181,10 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
   )
 
   React.useEffect(() => {
-    if (state.connectedType === 'evm' || state.connectedType === 'substrateEvm') {
+    if (state.connectedType === 'evm') {
       if (evmState.accounts?.length && !(state.evm.selectedWallet!.connector instanceof GnosisSafe)) {
         persist({
-          type: state.connectedType,
+          type: 'evm',
           wallet: evmConnectors.find((c) => c.connector === state.evm.selectedWallet!.connector)!.id,
           address: evmState.accounts[0],
           chainId: evmState.chainId,

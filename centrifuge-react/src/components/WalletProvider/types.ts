@@ -18,7 +18,7 @@ export type EvmChainId = number
 export type Network = 'centrifuge' | EvmChainId
 
 export type State = {
-  connectedType: 'evm' | 'substrate' | 'substrateEvm' | null
+  connectedType: 'evm' | 'substrate' | null
   walletDialog: {
     view: 'accounts' | 'wallets' | null
     network: Network | null

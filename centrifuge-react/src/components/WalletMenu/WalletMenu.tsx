@@ -34,8 +34,8 @@ type WalletMenuProps = {
 
 export function WalletMenu({ menuItems }: WalletMenuProps) {
   const ctx = useWallet()
-  const { connectedType, pendingConnect } = ctx
-  const accounts = connectedType && ctx[connectedType === 'substrateEvm' ? 'substrate' : connectedType].accounts
+  const { connectedType, pendingConnect, isEvmOnSubstrate } = ctx
+  const accounts = connectedType && ctx[isEvmOnSubstrate ? 'substrate' : 'evm'].accounts
   const address = useAddress()
   return address ? (
     <ConnectedMenu menuItems={menuItems} />
