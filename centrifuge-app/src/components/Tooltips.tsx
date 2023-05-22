@@ -31,7 +31,7 @@ const tooltipText = {
     body: 'The Annual Percentage Yield ("APY") of a token is calculated as the effective annualized return of the pool\'s token price.',
   },
   juniorTrancheYields: {
-    label: 'APY',
+    label: 'APR',
     body: 'The junior tranche yields variable returns depending on the pools excess returns after fixed senior returns have been served.',
   },
   subordination: {
