@@ -177,7 +177,7 @@ export function PoolDetailOverview({
                     />
                   ) : (
                     <LabelValueStack
-                      label={<Tooltips variant="secondary" type="fixedTranchInterest" label="APR" />}
+                      label={<Tooltips variant="secondary" type="seniorTokenAPR" />}
                       value={formatPercentage(token.apr)}
                     />
                   )}
