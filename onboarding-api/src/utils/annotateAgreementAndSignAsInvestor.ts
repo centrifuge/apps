@@ -71,7 +71,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
     `Signed by ${wallet.address} on Centrifuge
 Block: ${transactionInfo.blockNumber}
 Transaction hash: ${transactionInfo.txHash}
-Agreement hash: ${metadata.onboarding.agreements[trancheId].ipfsHash}`,
+Agreement hash: ${unsignedAgreementUrl}`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,
