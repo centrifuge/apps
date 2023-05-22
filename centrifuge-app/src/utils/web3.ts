@@ -15,6 +15,7 @@ const whitelistedAccounts = whitelistConfig
 export function isWhitelistedAccount(address: string) {
   if (!whitelistedAccounts.length) return true
   const addr = encodeAddress(address)
+
   return whitelistedAccounts.includes(addr)
 }
 

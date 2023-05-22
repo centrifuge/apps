@@ -55,6 +55,7 @@ onboarding.post('/confirmOwners', verifyAuth, confirmOwnersController)
 onboarding.post('/verifyAccreditation', verifyAuth, verifyAccreditationController)
 onboarding.post('/startKyc', verifyAuth, startKycController)
 onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityController)
+
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
 
 // pool steps
