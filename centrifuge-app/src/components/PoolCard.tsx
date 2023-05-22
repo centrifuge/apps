@@ -5,8 +5,8 @@ import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { Dec } from '../utils/Decimal'
 import { formatBalance, formatPercentage } from '../utils/formatting'
+import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { usePoolMetadata } from '../utils/usePools'
 import { Eththumbnail } from './EthThumbnail'
@@ -125,12 +125,4 @@ export function PoolCard({ pool }: PoolCardProps) {
       </Shelf>
     </Card>
   )
-}
-
-function getPoolValueLocked(pool: Pool | TinlakePool) {
-  return pool.tranches
-    .map((tranche) =>
-      tranche.tokenPrice ? tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()) : Dec(0)
-    )
-    .reduce((a, b) => a.add(b))
 }
