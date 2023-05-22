@@ -27,6 +27,10 @@ export const primaryButton = css<{ isActive?: boolean; stacked?: boolean }>`
 
   background-color: ${({ isActive, theme }) => (isActive ? theme.colors.secondarySelectedBackground : 'transparent')};
 
+  @media (max-width: ${({ theme }) => theme.breakpoints['XL']}) {
+    font-size: 10px;
+  }
+
   @media (min-width: ${({ theme }) => theme.breakpoints['XL']}) {
     border-radius: 16px;
   }

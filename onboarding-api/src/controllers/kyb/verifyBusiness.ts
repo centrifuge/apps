@@ -3,6 +3,7 @@ import { bool, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
+import { RESTRICTED_COUNTRY_CODES } from '../../utils/geographyCodes'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
@@ -13,7 +14,9 @@ const verifyBusinessInput = object({
   email: string().email().required(),
   businessName: string().required(), // used for AML
   registrationNumber: string().required(),
-  jurisdictionCode: string().required(), // country of incorporation
+  jurisdictionCode: string()
+    .required()
+    .test((value) => !Object.keys(RESTRICTED_COUNTRY_CODES).includes(value!)), // country of incorporation
   manualReview: bool().required(),
   poolId: string().optional(),
   trancheId: string().optional(),
@@ -35,21 +38,20 @@ export const verifyBusinessController = async (
     }
 
     if (userData?.manualKybReference) {
-      const status = await shuftiProRequest(
-        { reference: userData.manualKybReference },
-        { path: 'status', dryRun: false }
-      )
+      const status = await shuftiProRequest({ reference: userData.manualKybReference }, { path: 'status' })
 
       if (status.event === 'review.pending') {
         throw new HttpError(400, 'Business already in review')
       }
     }
 
+    const MANUAL_KYB_REFERENCE = `MANUAL_KYB_REQUEST_${Math.random()}`
+
     const user: EntityUser = {
       investorType: 'entity',
       address: null,
       kycReference: '',
-      manualKybReference: manualReview ? `MANUAL_KYB_REQUEST_${Math.random()}` : null,
+      manualKybReference: manualReview ? MANUAL_KYB_REFERENCE : null,
       wallet: [wallet],
       name: null,
       dateOfBirth: null,
@@ -78,7 +80,6 @@ export const verifyBusinessController = async (
 
     if (manualReview) {
       const searchParams = new URLSearchParams({
-        ...wallet,
         ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
       })
 
@@ -98,7 +99,7 @@ export const verifyBusinessController = async (
         enable_extra_proofs: 1,
         labels: ['proof_of_address', 'signed_and_dated_ownership_structure'],
         verification_mode: 'any',
-        reference: `KYB_${Math.random()}`,
+        reference: MANUAL_KYB_REFERENCE,
         email: body.email,
         country: body.jurisdictionCode,
         redirect_url: `${origin}/manual-kyb-redirect.html`,
@@ -108,7 +109,7 @@ export const verifyBusinessController = async (
       const kyb = await shuftiProRequest(payloadKYB)
       const freshUserData = await fetchUser(wallet)
 
-      return res.send({ ...kyb, ...freshUserData })
+      return res.status(200).send({ ...kyb, ...freshUserData })
     }
 
     const payloadAML = {

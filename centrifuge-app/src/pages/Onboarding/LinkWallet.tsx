@@ -8,15 +8,19 @@ import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboardingAuth } from '../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../components/OnboardingProvider'
 
+type Props = {
+  globalOnboardingStatus: 'unverified' | 'pending' | 'verified'
+}
+
 const validationSchema = object({
   isAgreedToDataSharingAgreement: boolean().oneOf([true], 'You must agree to the data sharing agreement'),
   hasSelectedWallet: boolean().oneOf([true], 'Please connect your wallet'),
 })
 
-export const LinkWallet = () => {
+export const LinkWallet = ({ globalOnboardingStatus }: Props) => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = React.useState(false)
   const { nextStep } = useOnboarding()
-  const { login, isAuth } = useOnboardingAuth()
+  const { login, isAuth, isLoading } = useOnboardingAuth()
   const {
     evm: { selectedAddress },
     substrate: { selectedAccount },
@@ -49,7 +53,11 @@ export const LinkWallet = () => {
       <Content>
         <ContentHeader
           title="Connect and link your wallet"
-          body="To start, you need to connect your wallet in the top right corner and sign a message to verify the wallet. You also need to agree to the data sharing agreement to continue with the identity verification process."
+          body={`${
+            globalOnboardingStatus === 'unverified'
+              ? 'To start, you need to connect '
+              : 'To continue with the onboarding, you need to re-connect '
+          }your wallet in the top right corner and sign a message to verify the wallet. You also need to agree to the data sharing agreement to continue with the identity verification process."`}
         />
 
         <Shelf gap={1}>
@@ -89,6 +97,7 @@ export const LinkWallet = () => {
           <Button onClick={nextStep}>Next</Button>
         ) : (
           <Button
+            loading={isLoading}
             onClick={() => {
               isAuth ? nextStep() : formik.handleSubmit()
             }}

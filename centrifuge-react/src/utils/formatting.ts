@@ -34,10 +34,12 @@ export function formatBalanceAbbreviated(
   let formattedAmount = ''
   if (amountNumber >= 1e6) {
     formattedAmount = `${(amountNumber / 1e6).toFixed(decimals)}M`
-  } else if (amountNumber > 999) {
+  } else if (amountNumber >= 1000) {
     formattedAmount = `${(amountNumber / 1e3).toFixed(decimals)}K`
-  } else {
+  } else if (amountNumber >= 10) {
     formattedAmount = `${amountNumber.toFixed(decimals)}`
+  } else {
+    formattedAmount = `${amountNumber.toFixed(Math.max(decimals, 2))}`
   }
   return currency ? `${formattedAmount} ${currency}` : formattedAmount
 }

@@ -27,8 +27,6 @@ interface OnboardingContextType<User, Pool> {
   setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
 }
 
-export type VerificationStatus = 'unverified' | 'pending' | 'verified'
-
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser, OnboardingPool> | null>(null)
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
@@ -134,25 +132,4 @@ export const useOnboarding = <
   const ctx = React.useContext(OnboardingContext) as OnboardingContextType<User, Pool>
   if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
-}
-
-export const useVerificationStatus = (): VerificationStatus => {
-  const { onboardingUser } = useOnboarding()
-
-  if (!onboardingUser) {
-    return 'unverified'
-  }
-
-  const requiredGlobalSteps = Object.keys(onboardingUser.globalSteps).filter((globalStep) => {
-    if (
-      (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship === 'us') ||
-      (onboardingUser.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us'))
-    ) {
-      return true
-    } else {
-      return globalStep !== 'verifyAccreditation'
-    }
-  }) as Array<keyof typeof onboardingUser.globalSteps>
-
-  return requiredGlobalSteps.every((step) => onboardingUser.globalSteps[step].completed) ? 'verified' : 'pending'
 }

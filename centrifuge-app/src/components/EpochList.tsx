@@ -21,7 +21,7 @@ export type LiquidityTableRow = {
   executingPercentage?: Perquintill | React.ReactElement
 }
 
-const columns: Column[] = [
+export const columns: Column[] = [
   {
     align: 'left',
     header: 'Order',

@@ -1,7 +1,17 @@
-import { CurrencyBalance, Perquintill, Pool, PoolMetadata, Price, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
+import {
+  CurrencyBalance,
+  Perquintill,
+  Pool,
+  PoolMetadata,
+  Price,
+  Rate,
+  TinlakeLoan,
+  TokenBalance,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
 import BN from 'bn.js'
+import { request } from 'graphql-request'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
@@ -70,6 +80,23 @@ export interface PoolsData {
   pools: PoolData[]
 }
 
+export interface TinlakeLoanData {
+  id: string
+  borrowsAggregatedAmount: string
+  debt: string
+  financingDate: string | null
+  index: number
+  interestRatePerSecond: string
+  maturityDate: string | null
+  nftId: string
+  pool: { id: string }
+  repaysAggregatedAmount: string
+  ceiling: string
+  closed: number
+  riskGroup: string
+  owner: string
+}
+
 function parsePoolsMetadata(poolsMetadata: TinlakeMetadataPool[]): IpfsPools {
   const launching = poolsMetadata.filter((p): p is LaunchingPool => !!p.metadata.isLaunching)
   const active = poolsMetadata.filter(
@@ -114,10 +141,52 @@ export function useTinlakePools(suspense = false) {
   })
 }
 
+export function useTinlakeLoans(poolId: string) {
+  return useQuery(
+    ['tinlakePoolLoans', poolId],
+    async () => {
+      const loans = await getTinlakeLoans(poolId)
+
+      return loans.map((loan) => ({
+        asset: {
+          nftId: loan.nftId,
+          collectionId: loan.pool.id,
+        },
+        id: loan.index.toString(),
+        originationDate: loan.financingDate ? new Date(Number(loan.financingDate) * 1000).toISOString() : null,
+        outstandingDebt: new CurrencyBalance(loan.debt, 18),
+        poolId: loan.pool.id,
+        pricing: {
+          maturityDate: Number(loan.maturityDate) ? new Date(Number(loan.maturityDate) * 1000).toISOString() : null,
+          interestRate: new Rate(
+            new BN(loan.interestRatePerSecond).sub(new BN(10).pow(new BN(27))).mul(new BN(31536000))
+          ),
+          ceiling: new CurrencyBalance(loan.ceiling, 18),
+        },
+        status: getTinlakeLoanStatus(loan),
+        totalBorrowed: new CurrencyBalance(loan.borrowsAggregatedAmount, 18),
+        totalRepaid: new CurrencyBalance(loan.repaysAggregatedAmount, 18),
+        dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
+        riskGroup: loan.riskGroup,
+        owner: loan.owner,
+      })) as TinlakeLoan[]
+    },
+    {
+      enabled: !!poolId && !!poolId.startsWith('0x'),
+      staleTime: Infinity,
+      suspense: true,
+    }
+  )
+}
+
 export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches'> & {
   metadata: PoolMetadata
   tinlakeMetadata: PoolMetadataDetails
-  tranches: (Omit<Pool['tranches'][0], 'poolMetadata'> & { poolMetadata: PoolMetadata })[]
+  tranches: (Omit<Pool['tranches'][0], 'poolMetadata'> & {
+    poolMetadata: PoolMetadata
+    pendingInvestments: CurrencyBalance
+    pendingRedemptions: TokenBalance
+  })[]
 
   creditline: { available: CurrencyBalance; used: CurrencyBalance; unused: CurrencyBalance } | null
   addresses: {
@@ -130,27 +199,67 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
     JUNIOR_TOKEN: string
     JUNIOR_OPERATOR: string
     SENIOR_OPERATOR: string
-    CLERK?: string | undefined
+    CLERK?: string
     ASSESSOR: string
     RESERVE: string
     SENIOR_TRANCHE: string
     JUNIOR_TRANCHE: string
     FEED: string
-    POOL_ADMIN?: string | undefined
+    POOL_ADMIN?: string
     SENIOR_MEMBERLIST: string
     JUNIOR_MEMBERLIST: string
     COORDINATOR: string
     PILE: string
-    MCD_VAT?: string | undefined
-    MCD_JUG?: string | undefined
-    MAKER_MGR?: string | undefined
+    MCD_VAT?: string
+    MCD_JUG?: string
+    MAKER_MGR?: string
   }
-  versions?: { FEED?: number | undefined; POOL_ADMIN?: number | undefined } | undefined
-  contractConfig?:
-    | { JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'; SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR' }
-    | undefined
+  versions?: { FEED?: number; POOL_ADMIN?: number }
+  contractConfig?: {
+    JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
+    SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
+  }
+
   network: 'mainnet' | 'kovan' | 'goerli'
   version: 2 | 3
+}
+
+function getTinlakeLoanStatus(loan: TinlakeLoanData) {
+  if (loan.financingDate && loan.debt === '0') {
+    return 'Closed'
+  }
+  if (!loan.financingDate) {
+    return 'Created'
+  }
+  return 'Active'
+}
+
+// TODO: refactor to use multicall instead of subgraph
+async function getTinlakeLoans(poolId: string) {
+  const query = `
+    {
+      loans (first: 1000, where: { pool_in: ["${poolId.toLowerCase()}"]}) {
+        nftId
+        id
+        index
+        financingDate
+        debt
+        pool {
+          id
+        }
+        maturityDate
+        interestRatePerSecond
+        borrowsAggregatedAmount
+        repaysAggregatedAmount
+        ceiling
+        closed
+        riskGroup
+        owner
+      }
+    }`
+
+  const { loans } = await request<{ loans: TinlakeLoanData[] }>('https://graph.centrifuge.io/tinlake', query)
+  return loans
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
@@ -190,11 +299,11 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         call: ['totalRedeem()(uint256)'],
         returns: [[`${poolId}.pendingJuniorRedemptions`, toCurrencyBalance]],
       },
-      // {
-      //   target: pool.addresses.FEED,
-      //   call: ['currentNAV()(uint256)'],
-      //   returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
-      // },
+      {
+        target: pool.addresses.FEED,
+        call: ['currentNAV()(uint256)'],
+        returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
+      },
       {
         target: pool.addresses.ASSESSOR,
         call: ['maxSeniorRatio()(uint256)'],
@@ -265,13 +374,13 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       },
       {
         target: pool.addresses.COORDINATOR,
-        call: ['challengeTime()(uint256)'],
-        returns: [[`${poolId}.epoch.challengeTime`, toNumber]],
+        call: ['minimumEpochTime()(uint256)'],
+        returns: [[`${poolId}.parameters.minEpochTime`, toNumber]],
       },
       {
         target: pool.addresses.COORDINATOR,
         call: ['challengeTime()(uint256)'],
-        returns: [[`${poolId}.epoch.challengeTime`, toNumber]],
+        returns: [[`${poolId}.parameters.challengeTime`, toNumber]],
       },
       {
         target: pool.addresses.COORDINATOR,
@@ -279,25 +388,23 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         returns: [[`${poolId}.submissionPeriod`]],
       }
     )
-
-    if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk !== '') {
+    if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk) {
       calls.push(
-        // TODO: Find out why these break
-        // {
-        //   target: pool.addresses.CLERK,
-        //   call: ['debt()(uint256)'],
-        //   returns: [[`${poolId}.usedCreditline`, toCurrencyBalance]],
-        // },
-        // {
-        //   target: pool.addresses.CLERK,
-        //   call: ['remainingCredit()(uint256)'],
-        //   returns: [[`${poolId}.unusedCreditline`, toCurrencyBalance]],
-        // },
-        // {
-        //   target: pool.addresses.CLERK,
-        //   call: ['creditline()(uint256)'],
-        //   returns: [[`${poolId}.availableCreditline`, toCurrencyBalance]],
-        // },
+        {
+          target: pool.addresses.CLERK,
+          call: ['debt()(uint)'],
+          returns: [[`${poolId}.usedCreditline`, toCurrencyBalance]],
+        },
+        {
+          target: pool.addresses.CLERK,
+          call: ['remainingCredit()(uint256)'],
+          returns: [[`${poolId}.unusedCreditline`, toCurrencyBalance]],
+        },
+        {
+          target: pool.addresses.CLERK,
+          call: ['creditline()(uint256)'],
+          returns: [[`${poolId}.availableCreditline`, toCurrencyBalance]],
+        },
         {
           target: pool.addresses.ASSESSOR,
           call: ['totalBalance()(uint256)'],
@@ -387,7 +494,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       .add(state.pendingSeniorInvestments)
       .sub(state.pendingSeniorRedemptions)
 
-    const newJuniorAsset = (state.netAssetValue ?? new BN(0)).add(newReserve).sub(newSeniorAsset)
+    const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
     const maxPoolSize = newJuniorAsset
       .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state.maxSeniorRatio)))
       .div(new BN(10).pow(new BN(6)))
@@ -413,6 +520,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         asset: {
           class: p.metadata.asset,
         },
+        newInvestmentsStatus: p.metadata.newInvestmentsStatus,
         issuer: {
           name: p.metadata.attributes?.Issuer ?? '',
           repName: p.metadata.description ?? '',
@@ -457,10 +565,18 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           minInitialInvestment: '5000000000000000000000',
         },
       },
+      onboarding: {
+        agreements: {
+          [`${id}-0`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '' },
+          [`${id}-1`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '' },
+        },
+      },
     }
 
     function getEpochStatus(): 'challengePeriod' | 'submissionPeriod' | 'ongoing' | 'executionPeriod' {
-      if (new Date(data.epoch.challengePeriodEnd).getTime() !== 0) {
+      const challengePeriodEnd = new Date(data.epoch.challengePeriodEnd).getTime()
+      if (challengePeriodEnd !== 0) {
+        if (challengePeriodEnd < Date.now()) return 'executionPeriod'
         return 'challengePeriod'
       }
       if (data.submissionPeriod) {
@@ -479,14 +595,14 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       capacity,
       capacityGivenMaxReserve,
       capacityGivenMaxDropRatio: new CurrencyBalance(capacityGivenMaxDropRatioPerPool[id], 18),
-      value: new CurrencyBalance(data.reserve.add(data.netAssetValue ?? new BN(0)), 18),
+      value: new CurrencyBalance(data.reserve.add(data.netAssetValue), 18),
       reserve: {
         max: data.maxReserve,
         available: data.reserve,
         total: data.reserve,
       },
       nav: {
-        latest: data.netAssetValue ?? new CurrencyBalance(0, 18),
+        latest: data.netAssetValue,
         lastUpdated: new Date().toISOString(),
       },
       createdAt: null,
@@ -517,6 +633,8 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           },
           poolMetadata: metadata,
           poolCurrency: currencies.DAI,
+          pendingInvestments: data.pendingJuniorInvestments,
+          pendingRedemptions: data.pendingJuniorRedemptions,
         },
         {
           index: 1,
@@ -542,6 +660,8 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           },
           poolMetadata: metadata,
           poolCurrency: currencies.DAI,
+          pendingInvestments: data.pendingSeniorInvestments,
+          pendingRedemptions: data.pendingSeniorRedemptions,
         },
       ],
       epoch: {
@@ -549,8 +669,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         status: getEpochStatus(),
       },
       parameters: {
-        minEpochTime: 24 * 60 * 60,
-        challengeTime: 5 * 60,
+        ...data.parameters,
         maxNavAge: 5 * 60,
       },
       creditline: data.availableCreditline
@@ -593,7 +712,10 @@ interface State {
     lastClosed: string
     lastExecuted: number
     challengePeriodEnd: number
+  }
+  parameters: {
     challengeTime: number
+    minEpochTime: number
   }
   submissionPeriod: boolean
 }

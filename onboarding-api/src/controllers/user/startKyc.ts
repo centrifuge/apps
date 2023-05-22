@@ -1,7 +1,9 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { IndividualUser, validateAndWriteToFirestore } from '../../database'
+import { IS_DEV_ENV } from '../../utils/envCheck'
 import { fetchUser } from '../../utils/fetchUser'
+import { RESTRICTED_COUNTRY_CODES } from '../../utils/geographyCodes'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
@@ -10,7 +12,9 @@ const kycInput = object({
   name: string().required(),
   email: string().email(),
   dateOfBirth: string().required(),
-  countryOfCitizenship: string().required(),
+  countryOfCitizenship: string()
+    .required()
+    .test((value) => !Object.keys(RESTRICTED_COUNTRY_CODES).includes(value!)),
   countryOfResidency: string().required(),
 })
 
@@ -97,8 +101,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       ttl: 1800, // 30 minutes: time in seconds for the verification url to stay active
       face: {
         proof: '',
-        allow_offline: '1', // TODO: disable once we go live
-        check_duplicate_request: '0', // TODO: enable once we go live
+        allow_offline: IS_DEV_ENV ? '1' : '0',
+        check_duplicate_request: IS_DEV_ENV ? '0' : '1',
       },
       document: {
         proof: '',

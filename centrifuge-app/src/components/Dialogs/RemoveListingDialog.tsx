@@ -3,7 +3,7 @@ import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useAddress } from '../../utils/useAddress'
-import { useNFT } from '../../utils/useNFTs'
+import { useCentNFT } from '../../utils/useNFTs'
 import { ButtonGroup } from '../ButtonGroup'
 
 type Props = {
@@ -20,7 +20,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
   const address = useAddress('substrate')
   const balances = useBalances(address)
   const centrifuge = useCentrifuge()
-  const nft = useNFT(collectionId, nftId)
+  const nft = useCentNFT(collectionId, nftId)
 
   const isConnected = !!substrate.selectedAccount?.address
 

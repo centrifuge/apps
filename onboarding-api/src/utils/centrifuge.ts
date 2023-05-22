@@ -1,7 +1,8 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { ApiRx, WsProvider } from '@polkadot/api'
 import { Keyring } from '@polkadot/keyring'
-import { cryptoWaitReady } from '@polkadot/util-crypto'
+import { hexToU8a, isHex } from '@polkadot/util'
+import { cryptoWaitReady, decodeAddress, encodeAddress } from '@polkadot/util-crypto'
 import { firstValueFrom, lastValueFrom, switchMap, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
@@ -83,7 +84,7 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
   //     .connect(signer.address, signer)
   //     .pools.updatePoolRoles([poolId, [[walletAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]], []])
   // )
-  return tx.txHash.toString()
+  return { txHash: tx.txHash.toString() }
 }
 
 export const validateRemark = async (
@@ -97,5 +98,15 @@ export const validateRemark = async (
   } catch (error) {
     reportHttpError(error)
     throw new HttpError(400, 'Invalid remark')
+  }
+}
+
+// https://polkadot.js.org/docs/util-crypto/examples/validate-address/
+export const isValidSubstrateAddress = (address: string) => {
+  try {
+    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
+    return true
+  } catch (error) {
+    return false
   }
 }

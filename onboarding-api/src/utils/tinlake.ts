@@ -48,6 +48,10 @@ interface PoolMetadataDetails {
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
   repName: string
+  newInvestmentsStatus: {
+    junior: 'closed' | 'request' | 'open'
+    senior: 'closed' | 'request' | 'open'
+  }
 }
 
 interface BasePool {
@@ -97,12 +101,12 @@ const INFURA_KEY = process.env.INFURA_KEY
 
 const goerliConfig = {
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
-  poolsHash: 'QmZoFPrVjcrZCDFrFqCuzmYz9fVudbmyoYBu2tKER5N6Fa', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xaEcFA11fE9601c1B960661d7083A08A5df7c1947',
 }
 const mainnetConfig = {
   remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
-  poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmNvauf8E6TkUiyF1ZgtYtntHz335tCswKp2uhBH1fiui1', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b',
 }
 
@@ -134,11 +138,25 @@ export const getTinlakePoolById = async (poolId: string) => {
   const id = poolData.addresses.ROOT_CONTRACT
   const metadata = {
     pool: {
+      newInvestmentsStatus: poolData.metadata.newInvestmentsStatus,
       name: poolData.metadata.name,
       issuer: {
         name: poolData.metadata.attributes?.Issuer ?? '',
         email: poolData.metadata?.issuerEmail ?? 'info@centrifuge.io',
         repName: poolData.metadata.repName ?? '',
+      },
+      links: {
+        executiveSummary: { uri: poolData.metadata.attributes?.Links?.['Executive Summary'] },
+      },
+    },
+    onboarding: {
+      agreements: {
+        [`${id}-0`]: {
+          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-0`],
+        },
+        [`${id}-1`]: {
+          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
+        },
       },
     },
   }
@@ -207,11 +225,12 @@ export const addTinlakeInvestorToMemberList = async (
       OneHundredYearsFromNow,
       {
         gasLimit: 1000000,
+        maxPriorityFeePerGas: 4000000000, // 4 gwei
       }
     )
     const finalizedTx = await tx.wait()
     console.log(`tx finalized: ${finalizedTx.transactionHash}, nonce=${tx.nonce}`)
-    return pool
+    return { txHash: finalizedTx.transactionHash }
   } catch (e) {
     reportHttpError(e)
     throw new HttpError(400, `Could not add ${walletAddress} to MemberList for pool ${poolId}`)

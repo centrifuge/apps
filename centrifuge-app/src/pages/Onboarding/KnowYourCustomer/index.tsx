@@ -1,3 +1,4 @@
+import { Button, Stack } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, date, object, string } from 'yup'
@@ -24,8 +25,7 @@ const getValidationSchema = (investorType: 'individual' | 'entity') =>
 
 export const KnowYourCustomer = () => {
   const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
-
-  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
+  const [verificationDeclined, setVerificationDeclined] = React.useState(false)
 
   const { onboardingUser } = useOnboarding()
 
@@ -57,8 +57,11 @@ export const KnowYourCustomer = () => {
   const { mutate: setVerifiedIdentity } = useVerifyIdentity()
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com') {
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.accepted') {
       setVerifiedIdentity()
+    }
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.declined') {
+      setVerificationDeclined(true)
     }
   }
 
@@ -73,7 +76,7 @@ export const KnowYourCustomer = () => {
 
   React.useEffect(() => {
     if (startKYCData?.verification_url) {
-      nextKnowYourCustomerStep()
+      setActiveKnowYourCustomerStep(1)
     }
   }, [startKYCData])
 
@@ -82,7 +85,24 @@ export const KnowYourCustomer = () => {
   }
 
   if (activeKnowYourCustomerStep === 1) {
-    return <IdentityVerification verificationURL={startKYCData.verification_url} />
+    return (
+      <>
+        <IdentityVerification verificationURL={startKYCData.verification_url} />
+        {verificationDeclined && (
+          <Stack>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setVerificationDeclined(false)
+                setActiveKnowYourCustomerStep(0)
+              }}
+            >
+              Restart verification
+            </Button>
+          </Stack>
+        )}
+      </>
+    )
   }
 
   return null

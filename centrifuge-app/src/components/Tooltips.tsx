@@ -30,6 +30,10 @@ const tooltipText = {
     label: 'APY',
     body: 'The Annual Percentage Yield ("APY") of a token is calculated as the effective annualized return of the pool\'s token price.',
   },
+  juniorTrancheYields: {
+    label: 'APY',
+    body: 'The junior tranche yields variable returns depending on the pools excess returns after fixed senior returns have been served.',
+  },
   subordination: {
     label: 'Subordination',
     body: 'The subordination is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
@@ -76,7 +80,7 @@ const tooltipText = {
   },
   averageFinancingFee: {
     label: 'Average financing fee',
-    body: 'The average financing fee of the assets in the pool.',
+    body: 'The average financing fee of the active assets in the pool.',
   },
   averageAmount: {
     label: 'Average amount',

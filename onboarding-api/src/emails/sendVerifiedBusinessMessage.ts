@@ -48,6 +48,7 @@ export const sendVerifiedBusinessMessage = async (
         ...(!isGloballyOnboarding && {
           dynamic_template_data: {
             trancheName,
+            poolName: metadata?.pool.name,
           },
         }),
       },

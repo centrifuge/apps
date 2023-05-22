@@ -18,7 +18,7 @@ import { Action, getPersisted, persist, useWalletStateInternal } from './useWall
 import { useGetNetworkName } from './utils'
 import { WalletDialog } from './WalletDialog'
 
-type WalletContextType = {
+export type WalletContextType = {
   connectedType: 'evm' | 'substrate' | null
   connectedNetwork: State['walletDialog']['network']
   connectedNetworkName: string | null

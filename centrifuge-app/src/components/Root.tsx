@@ -13,7 +13,7 @@ import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
-import { config } from '../config'
+import { config, ethConfig } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
@@ -65,12 +65,6 @@ const centConfig: UserProvidedConfig = {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ uri: b64URI }),
     }),
-  unpinFile: (hash) =>
-    pinToApi('unpinFile', {
-      method: 'DELETE',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ hash }),
-    }),
   pinJson: (json) =>
     pinToApi('pinJson', {
       method: 'POST',
@@ -81,16 +75,24 @@ const centConfig: UserProvidedConfig = {
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
-const evmChains: EvmChains = {
-  1: {
-    urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
-    iconUrl: ethereumLogo,
-  },
-  5: {
-    urls: [`https://goerli.infura.io/v3/${infuraKey}`],
-    iconUrl: goerliLogo,
-  },
-}
+const evmChains: EvmChains =
+  ethConfig.network === 'mainnet'
+    ? {
+        1: {
+          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+          iconUrl: ethereumLogo,
+        },
+      }
+    : {
+        1: {
+          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+          iconUrl: ethereumLogo,
+        },
+        5: {
+          urls: [`https://goerli.infura.io/v3/${infuraKey}`],
+          iconUrl: goerliLogo,
+        },
+      }
 
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)

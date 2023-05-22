@@ -3,7 +3,7 @@ import { FormikProps } from 'formik'
 import { ActionBar, Content, ContentHeader, Fieldset, ValidEmailTooltip } from '../../../components/Onboarding'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
-import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES } from '../geographyCodes'
+import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES } from '../geographyCodes'
 
 type Props = {
   formik: FormikProps<{
@@ -71,7 +71,9 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
             {...formik.getFieldProps('countryOfCitizenship')}
             label="Country of Citizenship"
             placeholder="Select a country"
-            options={formatGeographyCodes(KYC_COUNTRY_CODES)}
+            options={formatGeographyCodes(KYC_COUNTRY_CODES).filter(
+              (countryCode) => !Object.keys(RESTRICTED_COUNTRY_CODES).includes(countryCode.value)
+            )}
             disabled={isLoading || isCompleted}
             errorMessage={formik.touched.countryOfCitizenship ? formik.errors.countryOfCitizenship : undefined}
           />

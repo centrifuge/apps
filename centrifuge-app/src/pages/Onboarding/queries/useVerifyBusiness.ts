@@ -32,7 +32,7 @@ export const useVerifyBusiness = () => {
             values.jurisdictionCode === 'us' || values.jurisdictionCode === 'ca'
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
-          dryRun: true, // TODO: set this as debug flag option
+          dryRun: import.meta.env.REACT_APP_ONBOARDING_API_URL.includes('production') ? false : true,
           manualReview: values?.manualReview ?? false,
           ...(values?.manualReview && poolId && trancheId && { poolId, trancheId }),
         }),
