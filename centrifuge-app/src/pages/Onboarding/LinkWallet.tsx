@@ -57,7 +57,7 @@ export const LinkWallet = ({ globalOnboardingStatus }: Props) => {
             globalOnboardingStatus === 'unverified'
               ? 'To start, you need to connect '
               : 'To continue with the onboarding, you need to re-connect '
-          }your wallet in the top right corner and sign a message to verify the wallet. You also need to agree to the data sharing agreement to continue with the identity verification process."`}
+          }your wallet in the top right corner and sign a message to verify the wallet. You also need to agree to the data sharing agreement to continue with the identity verification process.`}
         />
 
         <Shelf gap={1}>
