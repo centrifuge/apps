@@ -127,7 +127,7 @@ export type IndividualUser = InferType<typeof individualUserSchema>
 export type OnboardingUser = IndividualUser | EntityUser
 
 export const firestore = new Firestore()
-export const userCollection = firestore.collection(`onboarding-users`)
+export const userCollection = firestore.collection(`onboarding-users-dev-temp`)
 
 export const storage = new Storage()
 export const onboardingBucket = storage.bucket(process.env.ONBOARDING_STORAGE_BUCKET)
