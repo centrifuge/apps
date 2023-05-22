@@ -16,6 +16,7 @@ import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -93,7 +94,7 @@ export function PoolDetailOverview({
       label: <Tooltips type="assetClass" />,
       value: <TextWithPlaceholder isLoading={metadataIsLoading}>{metadata?.pool?.asset.class}</TextWithPlaceholder>,
     },
-    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency.symbol) },
+    { label: <Tooltips type="valueLocked" />, value: formatBalance(getPoolValueLocked(pool), pool.currency.symbol) },
   ]
 
   if (!isTinlakePool) {
