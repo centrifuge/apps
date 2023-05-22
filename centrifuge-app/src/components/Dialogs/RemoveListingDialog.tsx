@@ -2,7 +2,7 @@ import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/
 import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useBalance } from '../../utils/useBalance'
-import { useNFT } from '../../utils/useNFTs'
+import { useCentNFT } from '../../utils/useNFTs'
 import { ButtonGroup } from '../ButtonGroup'
 
 type Props = {
@@ -18,7 +18,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
   const { substrate } = useWallet()
   const balance = useBalance()
   const centrifuge = useCentrifuge()
-  const nft = useNFT(collectionId, nftId)
+  const nft = useCentNFT(collectionId, nftId)
 
   const isConnected = !!substrate.selectedAccount?.address
 

@@ -36,15 +36,6 @@ export function IssuerSection({ metadata }: IssuerSectionProps) {
           <Text variant="body2">{metadata?.pool?.issuer.description}</Text>
         </Stack>
         <Stack gap="2">
-          <Box>
-            <AnchorPillButton
-              variant="small"
-              href={explorer.address('')} // TODO: Add issuer address
-            >
-              View pool account
-            </AnchorPillButton>
-          </Box>
-
           {metadata?.pool?.links.executiveSummary && (
             <LabelValueStack
               label="Download"
@@ -54,6 +45,7 @@ export function IssuerSection({ metadata }: IssuerSectionProps) {
                     Executive summary
                   </PillButton>
                   <ExecutiveSummaryDialog
+                    issuerName={metadata?.pool?.issuer.name}
                     href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
                     open={isDialogOpen}
                     onClose={() => setIsDialogOpen(false)}

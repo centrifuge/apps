@@ -1,4 +1,4 @@
-import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, findBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -20,7 +20,7 @@ type RepayValues = {
   amount: number | '' | Decimal
 }
 
-export function FinanceForm({ loan }: { loan: LoanType }) {
+export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
   const pool = usePool(loan.poolId)
   const address = useAddress('substrate')
   const balances = useBalances(address)

@@ -1,6 +1,7 @@
 import Centrifuge, { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Keyring } from '@polkadot/keyring'
-import { cryptoWaitReady } from '@polkadot/util-crypto'
+import { hexToU8a, isHex } from '@polkadot/util'
+import { cryptoWaitReady, decodeAddress, encodeAddress } from '@polkadot/util-crypto'
 import { Request } from 'express'
 import { combineLatest, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
@@ -79,7 +80,17 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
       })
     )
   )
-  return tx.txHash.toString()
+
+  // this doens't work b/c .connect() exepcts a Signer, not a KeyringPair
+  // how it is: cent-js.signAndSend(signingAddress, { signer, era })
+  // how it should be: cent-js.signAndSend(signer)
+  // centrifuge.config.proxy = proxyAddress
+  // const result = await firstValueFrom(
+  //   centrifuge
+  //     .connect(signer.address, signer)
+  //     .pools.updatePoolRoles([poolId, [[walletAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]], []])
+  // )
+  return { txHash: tx.txHash.toString() }
 }
 
 export const validateRemark = async (
@@ -150,4 +161,14 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
     )
   )
   return tx.txHash.toString()
+}
+
+// https://polkadot.js.org/docs/util-crypto/examples/validate-address/
+export const isValidSubstrateAddress = (address: string) => {
+  try {
+    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
+    return true
+  } catch (error) {
+    return false
+  }
 }

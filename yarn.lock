@@ -1691,6 +1691,8 @@ __metadata:
     eslint-plugin-react: 7.30.1
     form-data: ^4.0.0
     formik: ^2.2.9
+    graphql: ^16.6.0
+    graphql-request: ^6.0.0
     jw3t: ^1.0.10
     nodemon: ^2.0.20
     npm-run-all: ^4.1.5
@@ -1702,7 +1704,7 @@ __metadata:
     react-query: ^3.39.1
     react-router: ^5.2.1
     react-router-dom: ^5.3.0
-    recharts: ^2.1.12
+    recharts: 2.6.2
     styled-components: ^5.3.5
     styled-system: ^5.1.5
     typescript: ^4.7.4
@@ -1870,21 +1872,24 @@ __metadata:
   resolution: "@centrifuge/onboarding-api@workspace:onboarding-api"
   dependencies:
     "@centrifuge/centrifuge-js": "workspace:centrifuge-js"
+    "@ethersproject/address": ^5.7.0
     "@ethersproject/contracts": ^5.7.0
     "@ethersproject/providers": ^5.7.2
     "@ethersproject/wallet": ^5.7.0
     "@google-cloud/firestore": ^6.5.0
     "@google-cloud/functions-framework": ^3.1.3
     "@google-cloud/storage": ^6.9.1
+    "@polkadot/util": ^12.1.2
+    "@types/busboy": ^1
     "@types/cookie": ^0
     "@types/cookie-parser": ^1
     "@types/cors": ^2
     "@types/express": ^4.17.14
-    "@types/express-fileupload": ^1
     "@types/jsonwebtoken": ^8
     "@types/yup": ^0
     "@typescript-eslint/eslint-plugin": ^5.12.0
     "@typescript-eslint/parser": ^5.12.0
+    busboy: ^1.6.0
     cookie: ^0.5.0
     cookie-parser: ^1.4.6
     cors: ^2.8.5
@@ -1893,7 +1898,6 @@ __metadata:
     eslint-config-google: ^0.14.0
     eslint-plugin-import: ^2.25.4
     express: ^4.18.2
-    express-fileupload: ^1.4.0
     express-rate-limit: ^6.7.0
     file-type: ^18.2.0
     jsonwebtoken: ^9.0.0
@@ -2969,6 +2973,15 @@ __metadata:
     teeny-request: ^8.0.0
     uuid: ^8.0.0
   checksum: 158f59a002cedb25365485d1be42fa09f40e58508169bf1861daab28fea1ce561dd61ba356086f5a792637e6038cb7be7faa1feb0e5312e1b49932dc1e0034f1
+  languageName: node
+  linkType: hard
+
+"@graphql-typed-document-node/core@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@graphql-typed-document-node/core@npm:3.2.0"
+  peerDependencies:
+    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: b08775cae1c65d89c54df4be0356786169ed3420a1f872c4319eb581b07282d6efec1ac548205ac73d576d5604f0a02c243b27d0ab6b1634ce7c4fddf90a5474
   languageName: node
   linkType: hard
 
@@ -4990,6 +5003,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/util@npm:^12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/util@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-bigint": 12.1.2
+    "@polkadot/x-global": 12.1.2
+    "@polkadot/x-textdecoder": 12.1.2
+    "@polkadot/x-textencoder": 12.1.2
+    "@types/bn.js": ^5.1.1
+    bn.js: ^5.2.1
+    tslib: ^2.5.0
+  checksum: 6e25977923f3745b260483de454814f816d635c1268413d7fd1e8649af8c153ff8c2ce1efd2d0886f41214535959dcba23270a50c940d28ddede98c39ea2e77b
+  languageName: node
+  linkType: hard
+
 "@polkadot/wasm-bridge@npm:6.4.1":
   version: 6.4.1
   resolution: "@polkadot/wasm-bridge@npm:6.4.1"
@@ -5166,6 +5194,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/x-bigint@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-bigint@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-global": 12.1.2
+    tslib: ^2.5.0
+  checksum: 91da086a80d97dae6cc4305b6796c9741e98970c39f77df0a60c9c1ab2673f01a544feab2afdfd0f6ecf32f04308ec69df5f7a6be7428b6fdc352c96082fa60b
+  languageName: node
+  linkType: hard
+
 "@polkadot/x-bigint@npm:9.7.2":
   version: 9.7.2
   resolution: "@polkadot/x-bigint@npm:9.7.2"
@@ -5214,6 +5252,15 @@ __metadata:
   dependencies:
     tslib: ^2.5.0
   checksum: 951d65c0e0d5001daeead6f2383ed2e3ac9baa3b67155e3735aff868c94d97fb6c7f6e65eaa6bbfa8d5fc04b74215cc555a211e69307c9678a7b74029d8ed16d
+  languageName: node
+  linkType: hard
+
+"@polkadot/x-global@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-global@npm:12.1.2"
+  dependencies:
+    tslib: ^2.5.0
+  checksum: f1221ef5a26f8d5baa8dc4117bfdc9e3dfbd64e6f142e438b5ea1e054ee14676219042bdb83adfe7d0325bb80787865cdd06d732dd7f572a9e5f6d6933e79277
   languageName: node
   linkType: hard
 
@@ -5276,6 +5323,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/x-textdecoder@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-textdecoder@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-global": 12.1.2
+    tslib: ^2.5.0
+  checksum: 186bf51df6388401ead3c5884fb6c4782f3f191128841045304fc7205cb3d0bb3f5ea904781c6afec1f6d82a940ef16e557b0401213d8fcec60f5173affca325
+  languageName: node
+  linkType: hard
+
 "@polkadot/x-textdecoder@npm:9.7.2":
   version: 9.7.2
   resolution: "@polkadot/x-textdecoder@npm:9.7.2"
@@ -5303,6 +5360,16 @@ __metadata:
     "@polkadot/x-global": 11.1.3
     tslib: ^2.5.0
   checksum: 3dc09b4c590c7090bee975057407910f36274acb20f0b819eb5a24c64dc7588f6768c78f8b4c16aeb1552c9dfa43cc615bba8c4aa602f8dd6307699121ab9e1d
+  languageName: node
+  linkType: hard
+
+"@polkadot/x-textencoder@npm:12.1.2":
+  version: 12.1.2
+  resolution: "@polkadot/x-textencoder@npm:12.1.2"
+  dependencies:
+    "@polkadot/x-global": 12.1.2
+    tslib: ^2.5.0
+  checksum: 5ae010aeb387855478cd8f62fff911a0a0970675d386e77adc1fdfe5bc790ebdb6fb4a1453c08cbef2176f4f831e0f7ef9b2b68e47c9f1d9e160ffd61b5eea00
   languageName: node
   linkType: hard
 
@@ -7830,7 +7897,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/busboy@npm:*":
+"@types/busboy@npm:^1":
   version: 1.5.0
   resolution: "@types/busboy@npm:1.5.0"
   dependencies:
@@ -8015,16 +8082,6 @@ __metadata:
   version: 0.0.51
   resolution: "@types/estree@npm:0.0.51"
   checksum: b67a490e5b0b5e7f532912eb4ba3231df6c3eb73b71d8fea2d445f71da6058c204bf0c4ba05c1d7877e4c77428f929bc51cf683ae19eeaf33dc12b79168208ab
-  languageName: node
-  linkType: hard
-
-"@types/express-fileupload@npm:^1":
-  version: 1.4.1
-  resolution: "@types/express-fileupload@npm:1.4.1"
-  dependencies:
-    "@types/busboy": "*"
-    "@types/express": "*"
-  checksum: e239cf2a434d2311d974fb5f2f354f3b2d44d422edcaeac1bba242f15c96dd12e7c7a242131b485884036f3334b1a8b6a4de54133deb6f0991b5e0d644c3287e
   languageName: node
   linkType: hard
 
@@ -15644,15 +15701,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-fileupload@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "express-fileupload@npm:1.4.0"
-  dependencies:
-    busboy: ^1.6.0
-  checksum: 79d7dc1b5a3f82add689b586c90e9058341e40efdcbee7ac4c8bc0f3fda75197a2d605fa87da2fc946e9a081b3dc5ce5c254070b9a72c1f819434f48fc6c0f23
-  languageName: node
-  linkType: hard
-
 "express-rate-limit@npm:^6.7.0":
   version: 6.7.0
   resolution: "express-rate-limit@npm:6.7.0"
@@ -16887,6 +16935,25 @@ fsevents@^1.2.7:
   version: 1.0.4
   resolution: "grapheme-splitter@npm:1.0.4"
   checksum: 6875e94add80360364a609e1fd0fe325e3b82326db2278dd36c1011a6bfc0e098811e791dedf9a88d4ae3f9d17a5c6a8d684948dd7b097f1f8d5ff905676e2b2
+  languageName: node
+  linkType: hard
+
+"graphql-request@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "graphql-request@npm:6.0.0"
+  dependencies:
+    "@graphql-typed-document-node/core": ^3.2.0
+    cross-fetch: ^3.1.5
+  peerDependencies:
+    graphql: 14 - 16
+  checksum: 472cacd717abea3cb997d12e5cba1e126a6982ca465858e3908c8bb891b8a7b253b07bdc9f2e94d3aab8f918cd96866b1de8df28a21c5e1706169f10484f61c5
+  languageName: node
+  linkType: hard
+
+"graphql@npm:^16.6.0":
+  version: 16.6.0
+  resolution: "graphql@npm:16.6.0"
+  checksum: ec652ccf6e8b6b0c42c984c2ff979e6d01ed18576aec2ba29eeb359c5189965d6cc0915db3ffb3ac755014e994ff876b7e0894a7489b9987a25d31652d06dcb9
   languageName: node
   linkType: hard
 
@@ -23267,9 +23334,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"recharts@npm:^2.1.12":
-  version: 2.5.0
-  resolution: "recharts@npm:2.5.0"
+"recharts@npm:2.6.2":
+  version: 2.6.2
+  resolution: "recharts@npm:2.6.2"
   dependencies:
     classnames: ^2.2.5
     eventemitter3: ^4.0.1
@@ -23284,7 +23351,7 @@ fsevents@^1.2.7:
     prop-types: ^15.6.0
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 71280ce2b6592128fbf1a2d7e7f0b2839139983c471c677747c8b9474331d6f4fc4162d5de6721d188786d75e962dbe54fc8ac4ab568d7f9df502e8d58f77d9c
+  checksum: 9cb369027db82a171cdbc49b155f6847228bd4b781cfb39cb388bd8818c17b5fd86fde8fb729d00af46fe3f363ff913fceaeda751d18c350312bae4247cdebcd
   languageName: node
   linkType: hard
 
