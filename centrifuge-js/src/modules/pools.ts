@@ -2259,7 +2259,18 @@ export function getPoolsModule(inst: Centrifuge) {
     }
   }
 
+  function claimLiquidityRewards() {
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        return 'hello world'
+      })
+    )
+  }
+
   return {
+    claimLiquidityRewards,
     createPool,
     initialisePool,
     updatePool,
