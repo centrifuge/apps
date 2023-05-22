@@ -3,10 +3,11 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 export const ExecutiveSummaryDialog: React.FC<{
+  issuerName: string
   href: string
   open: boolean
   onClose: () => void
-}> = ({ href, open, onClose }) => {
+}> = ({ issuerName, href, open, onClose }) => {
   return (
     <Dialog
       isOpen={open}
@@ -19,7 +20,7 @@ export const ExecutiveSummaryDialog: React.FC<{
         <Stack>
           <Text variant="body1">
             By clicking the button below, you confirm that you are requesting the executive summary without having been
-            solicited or approached, directly or indirectly by the issuer of New Silver 2 or any affiliate.
+            solicited or approached, directly or indirectly by the issuer of {issuerName} or any affiliate.
           </Text>
         </Stack>
         <Box alignSelf="flex-end">
