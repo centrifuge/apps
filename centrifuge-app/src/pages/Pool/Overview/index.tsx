@@ -111,7 +111,7 @@ export function PoolDetailOverview({
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
-        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
+        apr: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
         name: tranche.currency.name,
@@ -178,8 +178,8 @@ export function PoolDetailOverview({
                     />
                   ) : (
                     <LabelValueStack
-                      label={<Tooltips variant="secondary" type="apy" />}
-                      value={formatPercentage(token.apy)}
+                      label={<Tooltips variant="secondary" type="seniorTokenAPR" />}
+                      value={formatPercentage(token.apr)}
                     />
                   )}
                   <LabelValueStack
