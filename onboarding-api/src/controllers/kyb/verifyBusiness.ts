@@ -3,7 +3,7 @@ import { bool, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
-import { RESTRICTED_COUNTRY_CODES } from '../../utils/geographyCodes'
+import { KYB_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES } from '../../utils/geographyCodes'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
@@ -17,7 +17,6 @@ const verifyBusinessInput = object({
   jurisdictionCode: string()
     .required()
     .test((value) => !Object.keys(RESTRICTED_COUNTRY_CODES).includes(value!)), // country of incorporation
-  manualReview: bool().required(),
   poolId: string().optional(),
   trancheId: string().optional(),
 })
@@ -27,9 +26,9 @@ export const verifyBusinessController = async (
   res: Response
 ) => {
   try {
-    const { body, wallet, protocol, headers } = req
+    const { body, wallet } = req
     await validateInput(body, verifyBusinessInput)
-    const { jurisdictionCode, registrationNumber, businessName, email, manualReview, dryRun } = body
+    const { jurisdictionCode, registrationNumber, businessName, email, dryRun } = body
 
     const userData = (await fetchUser(wallet, { suppressError: true })) as EntityUser
 
@@ -45,13 +44,11 @@ export const verifyBusinessController = async (
       }
     }
 
-    const MANUAL_KYB_REFERENCE = `MANUAL_KYB_REQUEST_${Math.random()}`
-
     const user: EntityUser = {
       investorType: 'entity',
       address: null,
       kycReference: '',
-      manualKybReference: manualReview ? MANUAL_KYB_REFERENCE : null,
+      manualKybReference: null,
       wallet: [wallet],
       name: null,
       dateOfBirth: null,
@@ -76,41 +73,11 @@ export const verifyBusinessController = async (
       poolSteps: {},
     }
 
-    await validateAndWriteToFirestore(wallet, user, 'entity')
-
-    if (manualReview) {
-      const searchParams = new URLSearchParams({
-        ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
-      })
-
-      const { origin, host } = headers
-
-      if (!origin) throw new HttpError(400, 'Missing origin header')
-
-      /*
-       * K_SERVICE is a GCP injected env variable that denotes the name of the google cloud function.
-       * This is needed in order to construct the callback url in production. More info: https://rb.gy/tqvig
-       */
-      const callbackBaseUrl =
-        process.env.NODE_ENV === 'development' ? `${protocol}://${host}` : `https://${host}/${process.env.K_SERVICE}`
-
-      const payloadKYB = {
-        manual_review: 1,
-        enable_extra_proofs: 1,
-        labels: ['proof_of_address', 'signed_and_dated_ownership_structure'],
-        verification_mode: 'any',
-        reference: MANUAL_KYB_REFERENCE,
-        email: body.email,
-        country: body.jurisdictionCode,
-        redirect_url: `${origin}/manual-kyb-redirect.html`,
-        callback_url: `${callbackBaseUrl}/manualKybCallback?${searchParams}`,
-      }
-
-      const kyb = await shuftiProRequest(payloadKYB)
-      const freshUserData = await fetchUser(wallet)
-
-      return res.status(200).send({ ...kyb, ...freshUserData })
+    if (!(jurisdictionCode in KYB_COUNTRY_CODES)) {
+      return startManualKyb(req, res, user)
     }
+
+    await validateAndWriteToFirestore(wallet, user, 'entity')
 
     const payloadAML = {
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
@@ -154,4 +121,48 @@ export const verifyBusinessController = async (
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })
   }
+}
+
+// submits documents to shutfipro for manual review
+// status changes made in shufti backoffice will trigger /manualKybCallback
+const startManualKyb = async (req: Request, res: Response, user: EntityUser) => {
+  const { body, wallet, protocol, headers } = req
+
+  await validateAndWriteToFirestore(wallet, user, 'entity')
+  await sendVerifyEmailMessage(user, wallet)
+
+  const MANUAL_KYB_REFERENCE = `MANUAL_KYB_REQUEST_${Math.random()}`
+  user.manualKybReference = MANUAL_KYB_REFERENCE
+
+  const searchParams = new URLSearchParams({
+    ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
+  })
+
+  const { origin, host } = headers
+
+  if (!origin) throw new HttpError(400, 'Missing origin header')
+
+  /*
+   * K_SERVICE is a GCP injected env variable that denotes the name of the google cloud function.
+   * This is needed in order to construct the callback url in production. More info: https://rb.gy/tqvig
+   */
+  const callbackBaseUrl =
+    process.env.NODE_ENV === 'development' ? `${protocol}://${host}` : `https://${host}/${process.env.K_SERVICE}`
+
+  const payloadmanualKYB = {
+    manual_review: 1,
+    enable_extra_proofs: 1,
+    labels: ['proof_of_address', 'signed_and_dated_ownership_structure'],
+    verification_mode: 'any',
+    reference: MANUAL_KYB_REFERENCE,
+    email: body.email,
+    country: body.jurisdictionCode,
+    redirect_url: `${origin}/manual-kyb-redirect.html`,
+    callback_url: `${callbackBaseUrl}/manualKybCallback?${searchParams}`,
+  }
+
+  const manualKyb = await shuftiProRequest(payloadmanualKYB)
+  const freshUserData = await fetchUser(wallet)
+
+  return res.status(200).send({ ...manualKyb, ...freshUserData })
 }
