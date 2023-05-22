@@ -21,10 +21,11 @@ export function MaxReserveForm({ poolId }: Props) {
 
   const form = useFormik<{ maxReserve: number | '' }>({
     initialValues: {
-      maxReserve: '',
+      maxReserve: pool?.reserve.max.toDecimal().toNumber() || '',
     },
+    enableReinitialize: true,
     onSubmit: (values, actions) => {
-      if (values.maxReserve) {
+      if (typeof values.maxReserve === 'number' && values.maxReserve >= 0) {
         setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool.currency.decimals)], { account })
       } else {
         actions.setErrors({ maxReserve: 'Invalid number' })
@@ -47,7 +48,7 @@ export function MaxReserveForm({ poolId }: Props) {
               {({ field, meta, form }: FieldProps) => (
                 <CurrencyInput
                   {...field}
-                  initialValue={pool?.reserve.max.toDecimal().toNumber()}
+                  initialValue={form.values.maxReserve || undefined}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={pool?.currency.symbol}

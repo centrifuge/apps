@@ -1,5 +1,5 @@
 import { PoolRoles } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Checkbox, IconMinusCircle, Stack, Text } from '@centrifuge/fabric'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, Form, FormikProvider, useFormik } from 'formik'
@@ -26,8 +26,6 @@ type Row = Admin & { index: number }
 export function Admins({ poolId }: { poolId: string }) {
   const poolPermissions = usePoolPermissions(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
-  const { selectedAccount } = useWallet().substrate
-  const me = selectedAccount?.address && encodeAddress(selectedAccount?.address)
 
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
@@ -123,8 +121,7 @@ export function Admins({ poolId }: { poolId: string }) {
                       header: 'Address',
                       cell: (row: Admin) => (
                         <Text variant="body2">
-                          <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />{' '}
-                          {row.address === me && `(${selectedAccount?.name || 'you'})`}
+                          <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />
                         </Text>
                       ),
                       flex: '3',

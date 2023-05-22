@@ -23,12 +23,9 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
       {(fldArr) => (
         <Stack gap={4}>
           <Stack gap={2}>
-            <Text as="h3" variant="heading3">
-              Addresses
-            </Text>
             <Text as="p" variant="body2" color="textSecondary">
-              Add or remove addresses to manage the pool (add investors, change the write-off schedule, manage the
-              reserve, update metadata and tranche structure as well as pool parameters).
+              Add or remove addresses to manage the pool. Each manager can individually add investors and manage the
+              reserve of the pool.
             </Text>
             <DataTable
               data={rows}
@@ -77,10 +74,11 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
           </Stack>
           <Stack gap={2}>
             <Text as="h3" variant="heading3">
-              Threshold
+              Configuration change threshold
             </Text>
             <Text as="p" variant="body2" color="textSecondary">
-              Any pool configuration change will require the confirmation of:
+              For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
+              requires multiple signers. Any such change will require the confirmation of:
             </Text>
 
             <Shelf gap={2}>
@@ -105,7 +103,7 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
                 </Box>
               )}
               <Text>
-                {!isEditing && adminMultisig.threshold} out of {adminMultisig.signers.length} owners
+                {!isEditing && adminMultisig.threshold} out of {adminMultisig.signers.length} managers
               </Text>
             </Shelf>
             <Text variant="label2" color="statusCritical">

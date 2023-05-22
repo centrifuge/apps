@@ -79,8 +79,6 @@ export function parseGenericCall(genericCall: GenericCall, registry: Registry): 
       if (Array.isArray(argument)) {
         newArgs[paramName] = parseArrayGenericCalls(argument, registry)
       } else if (argument instanceof GenericCall) {
-        // console.log("callData", argument.toHex())
-        // console.log('argument.toHuman', argument.toHuman())
         newArgs['callData'] = argument.toHex()
         newArgs[paramName] = parseGenericCall(argument as GenericCall, registry)
       } else if (

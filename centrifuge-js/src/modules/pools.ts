@@ -8,7 +8,6 @@ import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
   InvestorTransactionType,
-  SubqueryEpoch,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
@@ -131,7 +130,6 @@ type PoolDetailsData = {
   metadata?: string
   parameters: {
     minEpochTime: number
-    challengeTime: number
     maxNavAge: number
   }
   epoch: {
@@ -203,7 +201,6 @@ export type Pool = {
     lastExecuted: number
     challengePeriodEnd: number
     status: 'submissionPeriod' | 'challengePeriod' | 'executionPeriod' | 'ongoing'
-    challengeTime: number
   }
   nav: {
     latest: CurrencyBalance
@@ -263,7 +260,7 @@ type ClosedLoanData = {
   totalRepaid: string
 }
 
-type PricingInfo = {
+export type PricingInfo = {
   valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
   maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
   value: CurrencyBalance
@@ -273,6 +270,30 @@ type PricingInfo = {
   probabilityOfDefault?: Rate
   lossGivenDefault?: Rate
   discountRate?: Rate
+}
+
+type TinlakePricingInfo = {
+  maturityDate: string
+  interestRate: Rate
+  ceiling: CurrencyBalance
+}
+
+export type TinlakeLoan = {
+  asset: {
+    collectionId: string
+    nftId: string
+  }
+  dateClosed: number
+  id: string
+  outstandingDebt: CurrencyBalance
+  owner: string
+  poolId: string
+  pricing: TinlakePricingInfo
+  riskGroup: string
+  status: 'Created' | 'Active' | 'Closed'
+  totalBorrowed: CurrencyBalance
+  totalRepaid: CurrencyBalance
+  originationDate: string
 }
 
 // transformed type for UI
@@ -365,6 +386,12 @@ export type DailyPoolState = {
   currency: string
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
+
+  sumBorrowedAmountByPeriod: number | null
+  sumRepaidAmountByPeriod: number | null
+  sumInvestedAmountByPeriod: number | null
+  sumRedeemedAmountByPeriod: number | null
+  blockNumber: number
 }
 
 interface TrancheFormValues {
@@ -375,7 +402,7 @@ interface TrancheFormValues {
   minInvestment: number | ''
 }
 
-export type IssuerDetails = {
+export type IssuerDetail = {
   title: string
   body: string
 }
@@ -402,7 +429,7 @@ export interface PoolMetadataInput {
   website: string
   forum: string
   email: string
-  details?: IssuerDetails[]
+  details?: IssuerDetail[]
 
   // tranche
   tranches: TrancheFormValues[]
@@ -424,6 +451,10 @@ export type PoolMetadata = {
     asset: {
       class: string
     }
+    newInvestmentsStatus: {
+      junior: 'closed' | 'request' | 'open'
+      senior: 'closed' | 'request' | 'open'
+    }
     issuer: {
       repName: string
       name: string
@@ -436,7 +467,7 @@ export type PoolMetadata = {
       forum?: string
       website?: string
     }
-    details?: IssuerDetails[]
+    details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
   }
@@ -458,27 +489,13 @@ export type PoolMetadata = {
     signers: string[]
     threshold: number
   }
-  // Not yet implemented
-  // onboarding: {
-  //   live: boolean
-  //   agreements: {
-  //     name: string
-  //     provider: 'docusign'
-  //     providerTemplateId: string
-  //     tranche: string
-  //     country: 'us | non-us'
-  //   }[]
-  //   issuer: {
-  //     name: string
-  //     email: string
-  //     restrictedCountryCodes: string[]
-  //     minInvestmentCurrency: number
-  //     nonSolicitationNotice: 'all' | 'non-us' | 'none'
-  //   }
-  // }
-  // bot: {
-  //   channelId: string
-  // }
+  onboarding?: {
+    agreements: {
+      [trancheId: string]: {
+        ipfsHash: string
+      }
+    }
+  }
 }
 
 type AssetCurrencyData = {
@@ -661,10 +678,10 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [poolId, add, remove] = args
-    const signer = inst.getSignerAddress()
-    // Make sure a removal of the PoolAdmin role of the signer is the last tx in the batch, otherwise the later txs will fail
+    const self = inst.getActingAddress()
+    // Make sure a removal of the PoolAdmin role of the acting address is the last tx in the batch, otherwise the later txs will fail
     const sortedRemove = [...remove].sort(([addr, role]) =>
-      role === 'PoolAdmin' && isSameAddress(addr, signer) ? 1 : -1
+      role === 'PoolAdmin' && isSameAddress(addr, self) ? 1 : -1
     )
     const $api = inst.getApi()
 
@@ -721,7 +738,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function updateInvestOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
 
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     return inst.getApi().pipe(
       switchMap(
@@ -750,7 +767,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function updateRedeemOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     return inst.getApi().pipe(
       switchMap(
@@ -871,7 +888,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function collect(args: [poolId: string, trancheId?: string], options?: TransactionOptions) {
     const [poolId, trancheId] = args
     const $api = inst.getApi()
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     if (trancheId !== undefined) {
       return $api.pipe(
@@ -1359,10 +1376,10 @@ export function getPoolsModule(inst: Centrifuge) {
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
                   status: getEpochStatus(epochExecution, blockNumber),
                   challengePeriodEnd: epochExecution?.challengePeriodEnd,
-                  challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 parameters: {
                   ...pool.parameters,
+                  challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 nav: {
                   latest: navData?.latest
@@ -1456,6 +1473,12 @@ export function getPoolsModule(inst: Centrifuge) {
             timestamp
             totalReserve
             portfolioValuation
+
+            blockNumber
+            sumBorrowedAmountByPeriod
+            sumRepaidAmountByPeriod
+            sumInvestedAmountByPeriod
+            sumRedeemedAmountByPeriod
           }
         }
         trancheSnapshots(
@@ -1526,56 +1549,6 @@ export function getPoolsModule(inst: Centrifuge) {
             return { ...state, poolState, poolValue, tranches }
           }) as unknown as DailyPoolState[],
         ]
-      })
-    )
-  }
-
-  function getPoolLiquidityTransactions(args: [pool: Pool, fromEpoch: number, toEpoch: number]) {
-    const [pool, fromEpoch, toEpoch] = args
-    const $query = inst.getSubqueryObservable<{ epoches: { nodes: SubqueryEpoch[] } }>(
-      `query($poolId: String!, $fromEpoch: Int!, $toEpoch: Int!) {
-        epoches(
-          filter: {
-            poolId: { equalTo: $poolId },
-            index: { greaterThanOrEqualTo: $fromEpoch },
-            and: { index: { lessThanOrEqualTo: $toEpoch }}
-          },
-          orderBy: INDEX_ASC
-        ) {
-          nodes {
-            id
-            index
-            openedAt
-            closedAt
-            executedAt
-            sumBorrowedAmount
-            sumRepaidAmount
-            sumInvestedAmount
-            sumRedeemedAmount
-          }
-        }
-      }`,
-      { poolId: pool.id, fromEpoch, toEpoch },
-      false
-    )
-
-    return $query.pipe(
-      map((data) => {
-        return data!.epoches.nodes.map((node) => ({
-          ...node,
-          sumBorrowedAmount: node.sumBorrowedAmount
-            ? new CurrencyBalance(node.sumBorrowedAmount, pool.currency.decimals)
-            : undefined,
-          sumRepaidAmount: node.sumRepaidAmount
-            ? new CurrencyBalance(node.sumRepaidAmount, pool.currency.decimals)
-            : undefined,
-          sumInvestedAmount: node.sumInvestedAmount
-            ? new CurrencyBalance(node.sumInvestedAmount, pool.currency.decimals)
-            : undefined,
-          sumRedeemedAmount: node.sumRedeemedAmount
-            ? new CurrencyBalance(node.sumRedeemedAmount, pool.currency.decimals)
-            : undefined,
-        }))
       })
     )
   }
@@ -2273,7 +2246,6 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
-    getPoolLiquidityTransactions,
   }
 }
 

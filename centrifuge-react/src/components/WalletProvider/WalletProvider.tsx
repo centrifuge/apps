@@ -18,8 +18,9 @@ import { Action, getPersisted, persist, useWalletStateInternal } from './useWall
 import { useGetNetworkName } from './utils'
 import { WalletDialog } from './WalletDialog'
 
-type WalletContextType = {
-  connectedType: 'evm' | 'substrate' | 'substrateEvm' | null
+export type WalletContextType = {
+  isEvmOnSubstrate: boolean
+  connectedType: 'evm' | 'substrate' | null
   connectedNetwork: State['walletDialog']['network']
   connectedNetworkName: string | null
   scopedNetworks: Network[] | null
@@ -71,18 +72,36 @@ export function useWallet() {
 }
 
 export function useAddress(typeOverride?: 'substrate' | 'evm') {
-  const { connectedType, evm, substrate } = useWallet()
+  const { connectedType, evm, substrate, isEvmOnSubstrate } = useWallet()
   const type = typeOverride ?? connectedType
   if (type === 'evm') {
     return evm.accounts?.[0]
   }
-  if (connectedType === 'substrateEvm') {
+  if (isEvmOnSubstrate) {
     return (
       substrate.selectedCombinedAccount?.actingAddress ||
       (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts[0]) : undefined)
     )
   }
   return substrate.selectedCombinedAccount?.actingAddress || substrate.selectedAccount?.address
+}
+
+export function useCentEvmChainId() {
+  const cent = useCentrifuge()
+  const { data: centEvmChainId } = useQuery(
+    ['evmChainId'],
+    () =>
+      firstValueFrom(
+        cent.getApi().pipe(
+          switchMap((api) => api.query.evmChainId.chainId()),
+          map((chainIdData) => chainIdData.toPrimitive() as number)
+        )
+      ),
+    {
+      staleTime: Infinity,
+    }
+  )
+  return centEvmChainId
 }
 
 type WalletProviderProps = {
@@ -110,20 +129,7 @@ export function WalletProvider({
 
   const cent = useCentrifuge()
   const consts = useCentrifugeConsts()
-
-  const { data: centEvmChainId } = useQuery(
-    ['evmChainId'],
-    () =>
-      firstValueFrom(
-        cent.getApi().pipe(
-          switchMap((api) => api.query.evmChainId.chainId()),
-          map((chainIdData) => chainIdData.toPrimitive() as number)
-        )
-      ),
-    {
-      staleTime: Infinity,
-    }
-  )
+  const centEvmChainId = useCentEvmChainId()
 
   const evmChains = React.useMemo(() => {
     const chains = {
@@ -149,6 +155,7 @@ export function WalletProvider({
     cachedEvmConnectors || (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), evmAdditionalConnectors))
 
   const [state, dispatch] = useWalletStateInternal(evmConnectors)
+  const isEvmOnSubstrate = state.evm.chainId === centEvmChainId
 
   const unsubscribeRef = React.useRef<(() => void) | null>()
 
@@ -174,15 +181,13 @@ export function WalletProvider({
         )
       }),
       */
-
-  const evmSubstrateAccounts =
-    state.connectedType === 'substrateEvm'
-      ? state.evm.accounts?.map((addr) => ({
-          address: evmToSubstrateAddress(addr),
-          source: state.evm.selectedWallet!.id,
-          wallet: state.evm.selectedWallet as any,
-        }))
-      : null
+  const evmSubstrateAccounts = isEvmOnSubstrate
+    ? state.evm.accounts?.map((addr) => ({
+        address: evmToSubstrateAddress(addr),
+        source: state.evm.selectedWallet!.id,
+        wallet: state.evm.selectedWallet as any,
+      }))
+    : null
   const { data: proxies } = useQuery(
     [
       'proxies',
@@ -281,7 +286,7 @@ export function WalletProvider({
 
   const connectEvm = React.useCallback(
     async (wallet: EvmConnectorMeta, network?: Network) => {
-      const chainId = network === 'centrifuge' ? 999999 : network
+      const chainId = network === 'centrifuge' ? centEvmChainId : network
       // console.log('getAddChainParameters(evmChains, chainId)', getAddChainParameters(evmChains, chainId))
       const { connector } = wallet
       try {
@@ -293,7 +298,7 @@ export function WalletProvider({
         })
 
         dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
-        dispatch({ type: 'setConnectedType', payload: network === 'centrifuge' ? 'substrateEvm' : 'evm' })
+        dispatch({ type: 'setConnectedType', payload: 'evm' })
 
         return accounts
       } catch (error) {

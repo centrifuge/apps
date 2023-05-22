@@ -1,3 +1,4 @@
+import { Button, Stack } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, date, object, string } from 'yup'
@@ -24,10 +25,9 @@ const getValidationSchema = (investorType: 'individual' | 'entity') =>
 
 export const KnowYourCustomer = () => {
   const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
+  const [verificationDeclined, setVerificationDeclined] = React.useState(false)
 
-  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
-
-  const { onboardingUser, refetchOnboardingUser } = useOnboarding()
+  const { onboardingUser } = useOnboarding()
 
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
@@ -49,6 +49,7 @@ export const KnowYourCustomer = () => {
     },
     validationSchema,
     validateOnMount: true,
+    enableReinitialize: true,
   })
 
   const { mutate: startKYC, data: startKYCData, isLoading: isStartKYCLoading } = useStartKYC()
@@ -56,8 +57,11 @@ export const KnowYourCustomer = () => {
   const { mutate: setVerifiedIdentity } = useVerifyIdentity()
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com') {
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.accepted') {
       setVerifiedIdentity()
+    }
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.declined') {
+      setVerificationDeclined(true)
     }
   }
 
@@ -72,16 +76,33 @@ export const KnowYourCustomer = () => {
 
   React.useEffect(() => {
     if (startKYCData?.verification_url) {
-      nextKnowYourCustomerStep()
+      setActiveKnowYourCustomerStep(1)
     }
-  }, [startKYCData, refetchOnboardingUser])
+  }, [startKYCData])
 
   if (activeKnowYourCustomerStep === 0) {
     return <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
   }
 
   if (activeKnowYourCustomerStep === 1) {
-    return <IdentityVerification verificationURL={startKYCData.verification_url} />
+    return (
+      <>
+        <IdentityVerification verificationURL={startKYCData.verification_url} />
+        {verificationDeclined && (
+          <Stack>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setVerificationDeclined(false)
+                setActiveKnowYourCustomerStep(0)
+              }}
+            >
+              Restart verification
+            </Button>
+          </Stack>
+        )}
+      </>
+    )
   }
 
   return null

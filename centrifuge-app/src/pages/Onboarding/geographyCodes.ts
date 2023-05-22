@@ -1,3 +1,4 @@
+// KYB countries supported by ShuftiPro
 export const KYB_COUNTRY_CODES = {
   ae_az: 'Abu Dhabi (UAE)',
   al: 'Albania',
@@ -86,6 +87,7 @@ export const KYB_COUNTRY_CODES = {
   vn: 'Viet Nam',
 }
 
+// KYC countries supported by ShuftiPro
 export const KYC_COUNTRY_CODES = {
   af: 'Afghanistan',
   ax: 'Aland Islands',
@@ -336,6 +338,7 @@ export const KYC_COUNTRY_CODES = {
   zw: 'Zimbabwe',
 }
 
+// All country codes
 export const RESIDENCY_COUNTRY_CODES = {
   af: 'Afghanistan',
   ax: 'Aland Islands',
@@ -649,4 +652,22 @@ export const US_STATE_CODES = {
   wv: 'West Virginia',
   wi: 'Wisconsin',
   wy: 'Wyoming',
+}
+
+export const RESTRICTED_COUNTRY_CODES = {
+  by: 'Belarus',
+  cd: 'Congo, Dem. Republic',
+  cu: 'Cuba',
+  iq: 'Iraq',
+  ir: 'Iran',
+  kp: 'North Korea',
+  ly: 'Libya',
+  ni: 'Nicaragua',
+  ru: 'Russia',
+  sd: 'Sudan',
+  so: 'Somalia',
+  sy: 'Syria',
+  ua: 'Ukraine',
+  ve: 'Venezuela',
+  zw: 'Zimbabwe',
 }

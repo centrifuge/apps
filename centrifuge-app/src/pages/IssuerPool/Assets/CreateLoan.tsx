@@ -30,6 +30,7 @@ import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PodAuthSection } from '../../../components/PodAuthSection'
+import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
@@ -352,8 +353,20 @@ function IssuerCreateLoan() {
           />
           {isAuthed ? (
             <>
-              <PageSection titleAddition="Select a template to enter the asset details.">
-                <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+              <PageSection titleAddition={templateId && 'Select a template to enter the asset details.'}>
+                {!templateId && (
+                  <Box
+                    mb={3}
+                    py={2}
+                    borderWidth={0}
+                    borderBottomWidth={1}
+                    borderColor="borderPrimary"
+                    borderStyle="solid"
+                  >
+                    <Text>Asset template is missing. Please create one first.</Text>
+                  </Box>
+                )}
+                <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
                     name="assetName"
@@ -361,7 +374,13 @@ function IssuerCreateLoan() {
                     label="Asset name*"
                     placeholder=""
                     maxLength={100}
+                    disabled={!templateId}
                   />
+                  <Box alignSelf="center" justifySelf="end">
+                    <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
+                      Create template
+                    </RouterLinkButton>
+                  </Box>
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">

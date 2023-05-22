@@ -114,10 +114,20 @@ export function useOnboardingAuth() {
     login: ctx.login,
     refetchAuth,
     isAuthFetched: isFetched,
+    isLoading: ctx.isLoggingIn,
   }
 }
 
 const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cent: Centrifuge, proxy?: any) => {
+  const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ address }),
+  })
+  const { nonce } = await nonceRes.json()
   if (proxy) {
     // @ts-expect-error Signer type version mismatch
     const { token, payload } = await cent.auth.generateJw3t(address, signer, {
@@ -134,7 +144,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({ jw3t: token }),
+          body: JSON.stringify({ jw3t: token, nonce }),
         })
         if (authTokenRes.status !== 200) {
           throw new Error('Failed to authenticate wallet')
@@ -157,7 +167,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ jw3t: token }),
+        body: JSON.stringify({ jw3t: token, nonce }),
       })
       if (authTokenRes.status !== 200) {
         throw new Error('Failed to authenticate wallet')

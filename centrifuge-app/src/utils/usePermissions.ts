@@ -135,6 +135,7 @@ export function usePoolAccess(poolId: string) {
   const poolPermissions = usePoolPermissions(poolId)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
+  const multisig = metadata?.adminMultisig && computeMultisig(metadata?.adminMultisig)
   const [admin, adminPermissions] =
     (poolPermissions &&
       Object.entries(poolPermissions).find(([, poolRoles]) => poolRoles.roles.includes('PoolAdmin'))) ||
@@ -212,20 +213,20 @@ export function usePoolAccess(poolId: string) {
     address: admin || '',
     roles: Object.fromEntries(adminPermissions?.roles.map((role) => [role, true]) || []),
   }
+
   const storedManagerPermissions = poolPermissions
-    ? metadata?.adminMultisig?.signers
-      ? Object.entries(poolPermissions)
-          .filter(
-            ([addr, p]) =>
-              p.roles.length &&
-              (metadata.adminMultisig!.signers.includes(addr) ||
-                adminDelegates?.find((p) => p.types.includes('Any') && p.delegatee === addr))
-          )
-          .map(([address, permissions]) => ({
-            address,
-            roles: Object.fromEntries(permissions.roles.map((role) => [role, true])),
-          }))
-      : []
+    ? Object.entries(poolPermissions)
+        .filter(
+          ([addr, p]) =>
+            p.roles.length &&
+            (multisig?.signers
+              ? multisig.signers.includes(addr)
+              : adminDelegates?.find((p) => p.types.includes('Any') && p.delegatee === addr))
+        )
+        .map(([address, permissions]) => ({
+          address,
+          roles: Object.fromEntries(permissions.roles.map((role) => [role, true])),
+        }))
     : []
   const missingAdminPermissions = diffPermissions(
     [storedAdminRoles],
@@ -233,7 +234,7 @@ export function usePoolAccess(poolId: string) {
   ).add
   const missingManagerPermissions = diffPermissions(
     storedManagerPermissions,
-    (metadata?.adminMultisig?.signers || adminDelegates?.map((p) => p.delegatee))?.map((address) => ({
+    (multisig?.signers || adminDelegates?.map((p) => p.delegatee))?.map((address) => ({
       address,
       roles: { MemberListAdmin: true, LiquidityAdmin: true },
     })) || []

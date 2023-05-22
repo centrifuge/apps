@@ -4,6 +4,7 @@ import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
 import { RouterLinkButton } from '../RouterLinkButton'
+import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
 import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
@@ -32,6 +33,8 @@ export function Menu() {
           NFTs
         </PageLink>
       )}
+
+      <GovernanceMenu />
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isXLarge} stacked={!isXLarge} poolIds={pools.map(({ id }) => id)}>

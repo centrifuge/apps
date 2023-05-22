@@ -61,7 +61,6 @@ export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' 
           }),
         ]).pipe(
           map(([api, submittable, paymentInfo]) => {
-            console.log('paymentInfo', paymentInfo)
             const { minimumDeposit } = api.consts.democracy
             if (config.poolCreationType === 'notePreimage') {
               // hard coded base and byte deposit supplied by protocol
