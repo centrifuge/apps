@@ -127,12 +127,10 @@ export const verifyBusinessController = async (
 // status changes made in shufti backoffice will trigger /manualKybCallback
 const startManualKyb = async (req: Request, res: Response, user: EntityUser) => {
   const { body, wallet, protocol, headers } = req
-
-  await validateAndWriteToFirestore(wallet, user, 'entity')
-  await sendVerifyEmailMessage(user, wallet)
-
   const MANUAL_KYB_REFERENCE = `MANUAL_KYB_REQUEST_${Math.random()}`
   user.manualKybReference = MANUAL_KYB_REFERENCE
+  await validateAndWriteToFirestore(wallet, user, 'entity')
+  await sendVerifyEmailMessage(user, wallet)
 
   const searchParams = new URLSearchParams({
     ...(body.poolId && body.trancheId && { poolId: body.poolId, trancheId: body.trancheId }),
@@ -163,6 +161,5 @@ const startManualKyb = async (req: Request, res: Response, user: EntityUser) => 
 
   const manualKyb = await shuftiProRequest(payloadmanualKYB)
   const freshUserData = await fetchUser(wallet)
-
   return res.status(200).send({ ...manualKyb, ...freshUserData })
 }

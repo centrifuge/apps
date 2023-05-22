@@ -3,6 +3,7 @@ import * as React from 'react'
 import { object, string } from 'yup'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { EntityUser } from '../../../types'
+import { KYB_COUNTRY_CODES } from '../geographyCodes'
 import { useSendVerifyEmail } from '../queries/useSendVerifyEmail'
 import { useVerifyBusiness } from '../queries/useVerifyBusiness'
 import { BusinessInformation } from './BusinessInformation'
@@ -39,7 +40,8 @@ export function KnowYourBusiness() {
       regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
     onSubmit: (values) => {
-      verifyBusiness(values)
+      const manualReview = !(values.jurisdictionCode in KYB_COUNTRY_CODES)
+      verifyBusiness({ ...values, manualReview })
     },
     validationSchema,
     validateOnMount: true,
