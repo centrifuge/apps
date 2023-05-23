@@ -108,7 +108,7 @@ export const useSignRemark = (
       }
     }
     executePaymentInfo()
-  }, [])
+  }, [centrifuge, selectedAccount])
 
   const signEvmRemark = async (args: [message: string]) => {
     const txId = Math.random().toString(36).substr(2)

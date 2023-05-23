@@ -9,7 +9,6 @@ import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocu
 import { HttpError, reportHttpError } from './httpError'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
-const PROXY_ADDRESS = process.env.MEMBERLIST_ADMIN_PURE_PROXY
 
 export const getCentrifuge = () =>
   new Centrifuge({
@@ -50,7 +49,7 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
           { Pool: poolId },
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
         )
-        const proxiedSubmittable = api.tx.proxy.proxy(PROXY_ADDRESS, undefined, submittable)
+        const proxiedSubmittable = api.tx.proxy.proxy(process.env.MEMBERLIST_ADMIN_PURE_PROXY, undefined, submittable)
         return proxiedSubmittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
@@ -129,8 +128,8 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
 
         // add 10% buffer to the transaction fee
         const submittable = api.tx.tokens.transfer({ Id: wallet.address }, 'Native', txFee.add(txFee.muln(1.1)))
-        // const proxiedSubmittable = api.tx.proxy.proxy(PROXY_ADDRESS, undefined, submittable)
-        return submittable.signAndSend(signer)
+        const proxiedSubmittable = api.tx.proxy.proxy(process.env.MEMBERLIST_ADMIN_PURE_PROXY, undefined, submittable)
+        return proxiedSubmittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
         if (events.length > 0) {
