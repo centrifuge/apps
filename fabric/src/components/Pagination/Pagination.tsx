@@ -8,11 +8,9 @@ import { Text } from '../Text'
 import { usePaginationContext } from './PaginationContainer'
 import { PaginationState } from './usePagination'
 
-type StyledProps = {
+const StyledButton = styled.button<{
   $active?: boolean
-}
-
-export const StyledButton = styled.button<StyledProps>(
+}>(
   {
     display: 'flex',
     alignItems: 'center',
