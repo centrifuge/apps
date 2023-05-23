@@ -23,7 +23,7 @@ const StyledButton = styled.button<{
     borderStyle: 'solid',
     userSelect: 'none',
   },
-  ({ disabled, $active, theme }) => {
+  ({ disabled, $active }) => {
     const bg = 'backgroundButtonTertiary'
     const bgFocus = 'backgroundButtonTertiaryFocus'
     const bgHover = 'backgroundButtonTertiaryHover'
@@ -39,7 +39,6 @@ const StyledButton = styled.button<{
     const borderHover = 'borderButtonTertiaryHover'
     const borderPressed = 'borderButtonTertiaryPressed'
     const borderDisabled = 'borderButtonTertiaryDisabled'
-    const shadow = 'shadowButtonTertiaryPressed'
 
     return css({
       paddingX: '2px',
@@ -50,7 +49,6 @@ const StyledButton = styled.button<{
       pointerEvents: disabled ? 'none' : 'initial',
       minHeight: 24,
       minWidth: 24,
-      '--fabric-color-focus': theme.colors[shadow],
 
       '&:hover': {
         color: fgHover,
