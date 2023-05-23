@@ -392,6 +392,7 @@ export function WalletProvider({
       state.connectedType === 'evm' ? state.evm.chainId! : state.connectedType === 'substrate' ? 'centrifuge' : null
     return {
       connectedType: state.connectedType,
+      isEvmOnSubstrate,
       connectedNetwork,
       connectedNetworkName: connectedNetwork ? getNetworkName(connectedNetwork) : null,
       scopedNetworks,

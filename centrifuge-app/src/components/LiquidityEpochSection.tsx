@@ -1,5 +1,11 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useCentrifuge, useCentrifugeTransaction, useEvmProvider } from '@centrifuge/centrifuge-react'
+import {
+  formatBalance,
+  useCentrifuge,
+  useCentrifugeTransaction,
+  useEvmProvider,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import { Button, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTinlakeBalances } from '../utils/tinlake/useTinlakeBalances'
@@ -260,6 +266,9 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   const { refetch } = useTinlakePools()
   const cent = useCentrifuge()
   const provider = useEvmProvider()
+  const {
+    evm: { selectedAddress },
+  } = useWallet()
   const { refetch: refetchBalances } = useTinlakeBalances()
   const { refetch: refetchInvestments } = useTinlakeInvestments(pool.id)
 
@@ -270,7 +279,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
     {
       onSuccess: async () => {
         const signer = provider!.getSigner()
-        const connectedCent = cent.connectEvm(signer)
+        const connectedCent = cent.connectEvm(selectedAddress!, signer)
         const coordinator = connectedCent.tinlake.contract(pool.addresses, undefined, 'COORDINATOR')
         if ((await coordinator.submissionPeriod()) === true) {
           // didn't execute right away, run solver
