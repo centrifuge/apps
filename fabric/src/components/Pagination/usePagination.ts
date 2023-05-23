@@ -23,7 +23,7 @@ export function usePagination({
   totalSize = data.length,
   page: pageProp,
   pageSize: pageSizeProp,
-  onPageChange = () => {},
+  onPageChange,
   initialPage = 1,
   onPageSizeChange,
 }: PaginationProps) {
