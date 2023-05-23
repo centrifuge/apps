@@ -1,5 +1,16 @@
 import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  IconChevronRight,
+  Pagination,
+  PaginationContainer,
+  Shelf,
+  Stack,
+  Text,
+  TextWithPlaceholder,
+  Thumbnail,
+  usePagination,
+} from '@centrifuge/fabric'
 import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
@@ -9,6 +20,7 @@ import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { LoadBoundary } from './LoadBoundary'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 
 type Row = (Loan | TinlakeLoan) & {
@@ -79,20 +91,34 @@ export function LoanList({ loans }: Props) {
       ...loan,
     }
   })
+
+  const pagination = usePagination({ data: rows, pageSize: 20 })
+
   return (
-    <DataTable
-      data={rows}
-      columns={columns}
-      defaultSortKey="idSortKey"
-      defaultSortOrder="asc"
-      onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
-    />
+    <PaginationContainer pagination={pagination}>
+      <Stack gap={2}>
+        <LoadBoundary>
+          <DataTable
+            data={pagination.pageData}
+            columns={columns}
+            defaultSortKey="idSortKey"
+            defaultSortOrder="asc"
+            onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+          />
+        </LoadBoundary>
+        {pagination.pageCount > 1 && (
+          <Box alignSelf="center">
+            <Pagination />
+          </Box>
+        )}
+      </Stack>
+    </PaginationContainer>
   )
 }
 
 function AssetName({ loan }: { loan: Row }) {
   const isTinlakePool = loan.poolId.startsWith('0x')
-  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, true, isTinlakePool)
+  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
     <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
