@@ -12,7 +12,7 @@ const sign = (n: BN) => (n.isZero() ? 0 : n.isNeg() ? -1 : 1)
 
 export function useListedPools() {
   const pools = usePools()
-  const tinlakePools = useTinlakePools()
+  const tinlakePools = useTinlakePools(true)
 
   const address = useAddress('substrate')
   const permissions = usePermissions(address)
