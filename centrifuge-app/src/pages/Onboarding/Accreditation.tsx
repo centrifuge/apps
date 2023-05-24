@@ -1,4 +1,4 @@
-import { Button, Checkbox, Stack, Text } from '@centrifuge/fabric'
+import { Button, Checkbox, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, object } from 'yup'
@@ -11,7 +11,33 @@ const validationSchema = object({
   isAccredited: boolean().oneOf([true], 'You must confirm that you are an accredited investor'),
 })
 
+export const ConfirmAccreditationDialog = ({
+  open,
+  onClose,
+  confirm,
+}: {
+  open: boolean
+  onClose: () => void
+  confirm: () => void
+}) => {
+  return (
+    <Dialog isOpen={open} onClose={onClose} width="684px">
+      <Stack gap={3}>
+        <Text variant="heading2">Accredited investor</Text>
+        <Text>I confirm that I am an accredited investor</Text>
+        <Shelf gap={2}>
+          <Button onClick={confirm}>Confirm</Button>
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+        </Shelf>
+      </Stack>
+    </Dialog>
+  )
+}
+
 export const Accreditation = () => {
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const { onboardingUser, previousStep, nextStep } = useOnboarding<NonNullable<OnboardingUser>>()
 
   const isCompleted = !!onboardingUser.globalSteps.verifyAccreditation?.completed
@@ -30,6 +56,11 @@ export const Accreditation = () => {
 
   return (
     <>
+      <ConfirmAccreditationDialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        confirm={formik.handleSubmit}
+      />
       <Content>
         <ContentHeader
           title="Accredited investor assessment"
@@ -69,7 +100,7 @@ export const Accreditation = () => {
         </Button>
         <Button
           onClick={() => {
-            isCompleted ? nextStep() : formik.handleSubmit()
+            isCompleted ? nextStep() : setIsDialogOpen(true)
           }}
           disabled={isLoading}
           loading={isLoading}
