@@ -13,10 +13,30 @@ export function LiquidityRewards() {
     }
   )
 
+  const claimLiquidityRewards = async () => {
+    execute([''])
+  }
+
+  // const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
+  //   'Start order execution',
+  //   (cent) => cent.pools.closeEpoch,
+  //   {
+  //     onSuccess: () => {
+  //       console.log('Started order execution successfully')
+  //     },
+  //   }
+  // )
+
+  // const closeEpoch = async () => {
+  //   if (!pool) return
+  //   // const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
+  //   closeEpochTx([pool.id, false])
+  // }
+
   return (
     <Box>
       <Text>Liquidity rewards</Text>
-      <Button onClick={() => execute(['foo'])}>execute</Button>
+      <Button onClick={() => claimLiquidityRewards()}>execute</Button>
     </Box>
   )
 }

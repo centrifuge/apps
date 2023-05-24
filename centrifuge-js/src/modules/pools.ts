@@ -2259,7 +2259,44 @@ export function getPoolsModule(inst: Centrifuge) {
     }
   }
 
-  function claimLiquidityRewards() {
+  function claimLiquidityRewards(args: [currencyId: string]) {
+    const [currencyId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        return 'hello world'
+      })
+    )
+
+    // return $api.pipe(
+    //   switchMap((api) => {
+    //     const submittable = api.tx.loans.close(poolId, loanId)
+    //     return inst.wrapSignAndSend(api, submittable, options)
+    //   })
+    // )
+
+    // return $api.pipe(
+    //   switchMap((api) => {
+    //     const submittable = api.tx.loans.create(poolId, info)
+    //     return inst.wrapSignAndSend(api, submittable, options)
+    //   })
+    // )
+  }
+
+  function stake(args: [currencyId: string, amount: number]) {
+    const [currencyId, amount] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        return 'hello world'
+      })
+    )
+  }
+
+  function unStake(args: [currencyId: string, amount: number]) {
+    const [currencyId, amount] = args
     const $api = inst.getApi()
 
     return $api.pipe(
@@ -2271,6 +2308,8 @@ export function getPoolsModule(inst: Centrifuge) {
 
   return {
     claimLiquidityRewards,
+    stake,
+    unStake,
     createPool,
     initialisePool,
     updatePool,
