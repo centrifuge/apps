@@ -36,7 +36,7 @@ export const OnboardingSettings: React.FC = () => {
       agreements: (pool.tranches as Token[]).reduce<AgreementsUpload['agreements']>(
         (prevT, currT) => ({
           ...prevT,
-          [currT.id]: poolMetadata?.onboarding?.agreements[currT.id].ipfsHash
+          [currT.id]: poolMetadata?.onboarding?.agreements[currT.id]?.ipfsHash
             ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[currT.id].ipfsHash)
             : undefined,
         }),
@@ -70,6 +70,7 @@ export const OnboardingSettings: React.FC = () => {
         const pinnedAgreement = await lastValueFrom(centrifuge.metadata.pinFile(uri))
         onboardingAgreements = {
           agreements: {
+            ...poolMetadata?.onboarding?.agreements,
             ...onboardingAgreements.agreements,
             [tId]: { ipfsHash: pinnedAgreement.ipfsHash },
           },
@@ -123,8 +124,7 @@ export const OnboardingSettings: React.FC = () => {
                     label={`Subscription document for ${
                       (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.name
                     }`}
-                    onFileChange={async (file) => {
-                      console.log('onFileChange', file)
+                    onFileChange={(file) => {
                       formik.setFieldValue('agreements', {
                         ...formik.values.agreements,
                         [tId]: file,
