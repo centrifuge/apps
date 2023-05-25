@@ -16,15 +16,21 @@ export const ConfirmAccreditationDialog = ({
   open,
   onClose,
   confirm,
+  isEntity,
 }: {
   open: boolean
   onClose: () => void
   confirm: () => void
+  isEntity: boolean
 }) => {
   return (
     <Dialog isOpen={open} onClose={onClose} width="30%" title="Accredited investor">
       <Stack gap={3}>
-        <Text>I confirm that I am an accredited investor</Text>
+        {isEntity ? (
+          <Text> I confirm that the entity is an accredited investor</Text>
+        ) : (
+          <Text>I confirm that I am an accredited investor</Text>
+        )}
         <Shelf gap={2}>
           <Button onClick={confirm}>Confirm</Button>
           <Button variant="secondary" onClick={onClose}>
@@ -62,6 +68,7 @@ export const Accreditation = () => {
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         confirm={formik.handleSubmit}
+        isEntity={isEntity}
       />
       <Content>
         <ContentHeader
@@ -128,7 +135,13 @@ export const Accreditation = () => {
         <Checkbox
           {...formik.getFieldProps('isAccredited')}
           label={
-            <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>I confirm that I am an accredited investor</Text>
+            isEntity ? (
+              <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>
+                I confirm that the entity is an accredited investor
+              </Text>
+            ) : (
+              <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>I confirm that I am an accredited investor</Text>
+            )
           }
           disabled={isCompleted || isLoading}
           errorMessage={formik.errors.isAccredited}
