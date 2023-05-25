@@ -1,6 +1,7 @@
 import { Button, Checkbox, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
+import { useTheme } from 'styled-components'
 import { boolean, object } from 'yup'
 import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
@@ -21,9 +22,8 @@ export const ConfirmAccreditationDialog = ({
   confirm: () => void
 }) => {
   return (
-    <Dialog isOpen={open} onClose={onClose} width="684px">
+    <Dialog isOpen={open} onClose={onClose} width="30%" title="Accredited investor">
       <Stack gap={3}>
-        <Text variant="heading2">Accredited investor</Text>
         <Text>I confirm that I am an accredited investor</Text>
         <Shelf gap={2}>
           <Button onClick={confirm}>Confirm</Button>
@@ -39,8 +39,10 @@ export const ConfirmAccreditationDialog = ({
 export const Accreditation = () => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const { onboardingUser, previousStep, nextStep } = useOnboarding<NonNullable<OnboardingUser>>()
+  const theme = useTheme()
 
   const isCompleted = !!onboardingUser.globalSteps.verifyAccreditation?.completed
+  const isEntity = onboardingUser.investorType === 'entity'
 
   const { mutate: verifyAccreditation, isLoading } = useVerifyAccreditation()
 
@@ -64,23 +66,63 @@ export const Accreditation = () => {
       <Content>
         <ContentHeader
           title="Accredited investor assessment"
-          body="Following is the criteria for being an accredited investor, as per the SEC publications:"
+          body={
+            isEntity ? (
+              <Text>
+                Following is a partial list of the criteria for your entity to be an Accredited Investor. The full list
+                can be found{' '}
+                <a
+                  style={{
+                    color: theme.colors.textInteractive,
+                  }}
+                  href="https://www.sec.gov/education/capitalraising/building-blocks/accredited-investor"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  here
+                </a>
+                .
+              </Text>
+            ) : (
+              'Following is the criteria for being an accredited investor, as per the SEC publications:'
+            )
+          }
         />
 
         <Stack as="ul" gap={2} style={{ listStyle: 'disc' }}>
-          <Text as="li" variant="body1">
-            An annual income of $200,000 or greater ($300,000 in case of joint partners with a spouse) and proof of
-            maintaining the same yearly
-          </Text>
-          <Text as="li" variant="body1">
-            Net worth greater than $1 million either as a sole owner or with a joint partner, excluding residence
-          </Text>
-          <Text as="li" variant="body1">
-            In the case of a trust, a total of $5 million in assets is required
-          </Text>
-          <Text as="li" variant="body1">
-            An organization with all shareholders being accredited investors
-          </Text>
+          {isEntity ? (
+            <>
+              <Text as="li" variant="body1">
+                Your entity owns in excess of $5 million in investments
+              </Text>
+              <Text as="li" variant="body1">
+                Your entity is a corporation and has assets in excess of $5 million
+              </Text>
+              <Text as="li" variant="body1">
+                All the owners of your entity are Accredited Investors
+              </Text>
+              <Text as="li" variant="body1">
+                Your entity is a regulated financial entity such as a bank, insurance company or SEC-regulated
+                investment advisor or broker-dealer
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text as="li" variant="body1">
+                An annual income of $200,000 or greater ($300,000 in case of joint partners with a spouse) and proof of
+                maintaining the same yearly
+              </Text>
+              <Text as="li" variant="body1">
+                Net worth greater than $1 million either as a sole owner or with a joint partner, excluding residence
+              </Text>
+              <Text as="li" variant="body1">
+                In the case of a trust, a total of $5 million in assets is required
+              </Text>
+              <Text as="li" variant="body1">
+                An organization with all shareholders being accredited investors
+              </Text>
+            </>
+          )}
         </Stack>
 
         <Checkbox
