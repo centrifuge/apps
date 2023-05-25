@@ -11,7 +11,6 @@ import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
 import { LoanTemplates } from './LoanTemplates'
-import { OnboardingConfig } from './OnboardingConfig'
 import { PoolConfig } from './PoolConfig'
 import { WriteOffGroups } from './WriteOffGroups'
 
@@ -41,7 +40,6 @@ const IssuerPoolConfiguration: React.FC = () => {
           <WriteOffGroups />
           <Admins />
           <LoanTemplates />
-          <OnboardingConfig />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}
