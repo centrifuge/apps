@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import {
+  EntityUser,
   OnboardingUser,
   transactionInfoSchema,
   validateAndWriteToFirestore,
@@ -10,6 +11,7 @@ import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
 import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
+import { getPoolById } from '../../utils/getPoolById'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { validateEvmRemark } from '../../utils/tinlake'
 import { Subset } from '../../utils/types'
@@ -31,7 +33,21 @@ export const signAndSendDocumentsController = async (
     const { poolId, trancheId, transactionInfo } = req.body
     const { wallet } = req
 
-    const { poolSteps, globalSteps, investorType, name, email } = await fetchUser(wallet)
+    const { poolSteps, globalSteps, investorType, name, email, ...user } = await fetchUser(wallet)
+    const { metadata } = await getPoolById(poolId)
+    if (
+      investorType === 'individual' &&
+      metadata?.onboarding.kycRestrictedCountries.includes(user.countryOfCitizenship)
+    ) {
+      throw new HttpError(400, 'Country not supported by issuer')
+    }
+
+    if (
+      investorType === 'entity' &&
+      metadata?.onboarding.kybRestrictedCountries.includes((user as EntityUser).jurisdictionCode!)
+    ) {
+      throw new HttpError(400, 'Country not supported by issuer')
+    }
 
     const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
 
