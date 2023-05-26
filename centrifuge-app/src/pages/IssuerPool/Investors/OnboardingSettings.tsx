@@ -167,7 +167,7 @@ export const OnboardingSettings = () => {
             </Stack>
             <Stack gap={2}>
               <Text variant="heading4">Restricted onboarding countries (KYB)</Text>
-              <DefaultRestrictedKYBCountries />
+              <DefaultRestrictedCountries />
               <SearchInput
                 label="Add restricted KYB onboarding countries"
                 placeholder="Search country to add"
@@ -226,7 +226,7 @@ export const OnboardingSettings = () => {
                 ))}
               </Stack>
               <Text variant="heading4">Restricted onboarding countries (KYC)</Text>
-              <DefaultRestrictedKYBCountries />
+              <DefaultRestrictedCountries />
               <SearchInput
                 label="Add restricted KYC onboarding countries"
                 placeholder="Search country to add"
@@ -292,7 +292,7 @@ export const OnboardingSettings = () => {
   )
 }
 
-const DefaultRestrictedKYBCountries = () => {
+const DefaultRestrictedCountries = () => {
   return (
     <details>
       <summary>
