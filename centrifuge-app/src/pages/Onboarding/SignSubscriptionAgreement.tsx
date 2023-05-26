@@ -106,6 +106,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             variant="tertiary"
             icon={IconDownload}
             small
+            target="_blank"
           >
             Download agreement
           </AnchorButton>
@@ -118,6 +119,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             variant="tertiary"
             icon={IconDownload}
             small
+            target="_blank"
           >
             Executive summary attachment
           </AnchorButton>
