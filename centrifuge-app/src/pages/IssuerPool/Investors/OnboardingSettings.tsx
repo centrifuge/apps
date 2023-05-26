@@ -1,6 +1,17 @@
 import { PoolMetadata, Token } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, FileUpload, IconMinusCircle, SearchInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  FileUpload,
+  IconMinusCircle,
+  InputGroup,
+  RadioButton,
+  SearchInput,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -15,6 +26,7 @@ type OnboardingSettingsInput = {
   agreements: { [trancheId: string]: File | string | undefined }
   kybRestrictedCountries: string[]
   kycRestrictedCountries: string[]
+  allowUSInvestors: boolean
 }
 
 export const OnboardingSettings = () => {
@@ -53,6 +65,7 @@ export const OnboardingSettings = () => {
         poolMetadata?.onboarding?.kycRestrictedCountries?.map(
           (c) => KYC_COUNTRY_CODES[c as keyof typeof KYC_COUNTRY_CODES]
         ) ?? [],
+      allowUSInvestors: poolMetadata?.onboarding?.allowUSInvestors ?? true,
     }
   }, [pool, poolMetadata])
 
@@ -104,7 +117,12 @@ export const OnboardingSettings = () => {
 
       const amendedMetadata: PoolMetadata = {
         ...poolMetadata,
-        onboarding: { agreements: onboardingAgreements, kycRestrictedCountries, kybRestrictedCountries },
+        onboarding: {
+          agreements: onboardingAgreements,
+          kycRestrictedCountries,
+          kybRestrictedCountries,
+          allowUSInvestors: values.allowUSInvestors,
+        },
       }
       updateConfigTx([poolId, amendedMetadata])
       actions.setSubmitting(true)
@@ -164,6 +182,25 @@ export const OnboardingSettings = () => {
                   </Box>
                 )
               })}
+            </Stack>
+            <Stack gap={2}>
+              <Text variant="heading4">Allow US based investors?</Text>
+              <InputGroup>
+                <RadioButton
+                  name="accreditedInvestor"
+                  textStyle="body2"
+                  checked={formik.values.allowUSInvestors}
+                  label="Yes"
+                  onClick={() => formik.setFieldValue('allowUSInvestors', true)}
+                />
+                <RadioButton
+                  name="accreditedInvestor"
+                  textStyle="body2"
+                  checked={!formik.values.allowUSInvestors}
+                  label="No"
+                  onClick={() => formik.setFieldValue('allowUSInvestors', false)}
+                />
+              </InputGroup>
             </Stack>
             <Stack gap={2}>
               <Text variant="heading4">Restricted onboarding countries (KYB)</Text>

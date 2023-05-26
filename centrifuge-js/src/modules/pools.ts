@@ -498,6 +498,7 @@ export type PoolMetadata = {
     }
     kybRestrictedCountries?: string[]
     kycRestrictedCountries?: string[]
+    allowUSInvestors?: boolean
   }
 }
 
