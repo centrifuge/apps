@@ -11,13 +11,13 @@ import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { KYB_COUNTRY_CODES, KYC_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES } from '../../Onboarding/geographyCodes'
 
-type OnboardingSettings = {
+type OnboardingSettingsInput = {
   agreements: { [trancheId: string]: File | string | undefined }
   kybRestrictedCountries: string[]
   kycRestrictedCountries: string[]
 }
 
-export const OnboardingSettings: React.FC = () => {
+export const OnboardingSettings = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool) as { data: PoolMetadata }
@@ -34,9 +34,9 @@ export const OnboardingSettings: React.FC = () => {
     }
   )
 
-  const initialValues: OnboardingSettings = React.useMemo(() => {
+  const initialValues: OnboardingSettingsInput = React.useMemo(() => {
     return {
-      agreements: (pool.tranches as Token[]).reduce<OnboardingSettings['agreements']>(
+      agreements: (pool.tranches as Token[]).reduce<OnboardingSettingsInput['agreements']>(
         (prevT, currT) => ({
           ...prevT,
           [currT.id]: poolMetadata?.onboarding?.agreements?.[currT.id]?.ipfsHash
