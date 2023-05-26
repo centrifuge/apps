@@ -37,14 +37,14 @@ export const signAndSendDocumentsController = async (
     const { metadata } = await getPoolById(poolId)
     if (
       investorType === 'individual' &&
-      metadata?.onboarding.kycRestrictedCountries.includes(user.countryOfCitizenship)
+      metadata?.onboarding?.kycRestrictedCountries.includes(user.countryOfCitizenship)
     ) {
       throw new HttpError(400, 'Country not supported by issuer')
     }
 
     if (
       investorType === 'entity' &&
-      metadata?.onboarding.kybRestrictedCountries.includes((user as EntityUser).jurisdictionCode!)
+      metadata?.onboarding?.kybRestrictedCountries.includes((user as EntityUser).jurisdictionCode!)
     ) {
       throw new HttpError(400, 'Country not supported by issuer')
     }
