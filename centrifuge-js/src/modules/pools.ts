@@ -491,11 +491,13 @@ export type PoolMetadata = {
     discountRate: string
   }[]
   onboarding?: {
-    agreements: {
+    agreements?: {
       [trancheId: string]: {
         ipfsHash: string
       }
     }
+    kybRestrictedCountries?: string[]
+    kycRestrictedCountries?: string[]
   }
 }
 

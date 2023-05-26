@@ -9,11 +9,12 @@ import { ButtonGroup } from '../../../components/ButtonGroup'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { KYB_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES } from '../../Onboarding/geographyCodes'
+import { KYB_COUNTRY_CODES, KYC_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES } from '../../Onboarding/geographyCodes'
 
 type OnboardingSettings = {
   agreements: { [trancheId: string]: File | string | undefined }
-  restrictedCountries: string[]
+  kybRestrictedCountries: string[]
+  kycRestrictedCountries: string[]
 }
 
 export const OnboardingSettings: React.FC = () => {
@@ -38,15 +39,19 @@ export const OnboardingSettings: React.FC = () => {
       agreements: (pool.tranches as Token[]).reduce<OnboardingSettings['agreements']>(
         (prevT, currT) => ({
           ...prevT,
-          [currT.id]: poolMetadata?.onboarding?.agreements[currT.id]?.ipfsHash
+          [currT.id]: poolMetadata?.onboarding?.agreements?.[currT.id]?.ipfsHash
             ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[currT.id].ipfsHash)
             : undefined,
         }),
         {}
       ),
-      restrictedCountries:
-        poolMetadata?.onboarding?.restrictedCountries?.map(
+      kybRestrictedCountries:
+        poolMetadata?.onboarding?.kybRestrictedCountries?.map(
           (c) => KYB_COUNTRY_CODES[c as keyof typeof KYB_COUNTRY_CODES]
+        ) ?? [],
+      kycRestrictedCountries:
+        poolMetadata?.onboarding?.kycRestrictedCountries?.map(
+          (c) => KYC_COUNTRY_CODES[c as keyof typeof KYC_COUNTRY_CODES]
         ) ?? [],
     }
   }, [pool, poolMetadata])
@@ -85,15 +90,21 @@ export const OnboardingSettings: React.FC = () => {
         }
       }
 
-      const restrictedCountries = values.restrictedCountries
+      const kybRestrictedCountries = values.kybRestrictedCountries
         .map(
           (country) => Object.entries(KYB_COUNTRY_CODES).find(([_code, _country]) => _country === country)?.[0] ?? ''
         )
         .filter(Boolean)
 
+      const kycRestrictedCountries = values.kycRestrictedCountries
+        .map(
+          (country) => Object.entries(KYC_COUNTRY_CODES).find(([_code, _country]) => _country === country)?.[0] ?? ''
+        )
+        .filter(Boolean)
+
       const amendedMetadata: PoolMetadata = {
         ...poolMetadata,
-        onboarding: { agreements: onboardingAgreements, restrictedCountries },
+        onboarding: { agreements: onboardingAgreements, kycRestrictedCountries, kybRestrictedCountries },
       }
       updateConfigTx([poolId, amendedMetadata])
       actions.setSubmitting(true)
@@ -155,17 +166,21 @@ export const OnboardingSettings: React.FC = () => {
               })}
             </Stack>
             <Stack gap={2}>
+              <Text variant="heading4">Restricted onboarding countries (KYB)</Text>
               <DefaultRestrictedKYBCountries />
               <SearchInput
-                label="Add restricted onboarding countries"
+                label="Add restricted KYB onboarding countries"
                 placeholder="Search country to add"
                 disabled={!isEditing || formik.isSubmitting || isLoading}
                 onChange={(e) => {
                   if (
                     Object.values(KYB_COUNTRY_CODES).includes(e.target.value as keyof typeof KYB_COUNTRY_CODES) &&
-                    !formik.values.restrictedCountries.includes(e.target.value)
+                    !formik.values.kybRestrictedCountries.includes(e.target.value)
                   ) {
-                    formik.setFieldValue('restrictedCountries', [...formik.values.restrictedCountries, e.target.value])
+                    formik.setFieldValue('kybRestrictedCountries', [
+                      ...formik.values.kybRestrictedCountries,
+                      e.target.value,
+                    ])
                   }
                 }}
                 list="kybSupportedCountries"
@@ -176,12 +191,12 @@ export const OnboardingSettings: React.FC = () => {
                 ))}
               </datalist>
               <Stack gap={0}>
-                {formik.values.restrictedCountries.length > 0 && (
+                {formik.values.kybRestrictedCountries.length > 0 && (
                   <Text color="textSecondary" variant="body2">
-                    Countries
+                    KYB restricted countries
                   </Text>
                 )}
-                {formik.values.restrictedCountries.map((country) => (
+                {formik.values.kybRestrictedCountries.map((country) => (
                   <Shelf
                     p="4px"
                     width="100%"
@@ -202,8 +217,67 @@ export const OnboardingSettings: React.FC = () => {
                       icon={IconMinusCircle}
                       onClick={() => {
                         formik.setFieldValue(
-                          'restrictedCountries',
-                          formik.values.restrictedCountries.filter((c) => c !== country)
+                          'kybRestrictedCountries',
+                          formik.values.kybRestrictedCountries.filter((c) => c !== country)
+                        )
+                      }}
+                    />
+                  </Shelf>
+                ))}
+              </Stack>
+              <Text variant="heading4">Restricted onboarding countries (KYC)</Text>
+              <DefaultRestrictedKYBCountries />
+              <SearchInput
+                label="Add restricted KYC onboarding countries"
+                placeholder="Search country to add"
+                disabled={!isEditing || formik.isSubmitting || isLoading}
+                onChange={(e) => {
+                  if (
+                    Object.values(KYC_COUNTRY_CODES).includes(e.target.value as keyof typeof KYC_COUNTRY_CODES) &&
+                    !formik.values.kycRestrictedCountries.includes(e.target.value)
+                  ) {
+                    formik.setFieldValue('kycRestrictedCountries', [
+                      ...formik.values.kycRestrictedCountries,
+                      e.target.value,
+                    ])
+                  }
+                }}
+                list="kycSupportedCountries"
+              />
+              <datalist id="kycSupportedCountries">
+                {Object.entries(KYC_COUNTRY_CODES).map(([code, country]) => (
+                  <option key={code} value={country} id={code} />
+                ))}
+              </datalist>
+              <Stack gap={0}>
+                {formik.values.kycRestrictedCountries.length > 0 && (
+                  <Text color="textSecondary" variant="body2">
+                    KYC restricted countries
+                  </Text>
+                )}
+                {formik.values.kycRestrictedCountries.map((country) => (
+                  <Shelf
+                    p="4px"
+                    width="100%"
+                    justifyContent="space-between"
+                    borderBottom="1px solid"
+                    borderBottomColor="borderSecondary"
+                  >
+                    <Text
+                      key={country}
+                      variant="body2"
+                      color={isEditing && !isLoading && !formik.isSubmitting ? 'textPrimary' : 'textDisabled'}
+                    >
+                      {country}
+                    </Text>
+                    <Button
+                      disabled={!isEditing || formik.isSubmitting || isLoading}
+                      variant="tertiary"
+                      icon={IconMinusCircle}
+                      onClick={() => {
+                        formik.setFieldValue(
+                          'kycRestrictedCountries',
+                          formik.values.kycRestrictedCountries.filter((c) => c !== country)
                         )
                       }}
                     />
@@ -220,22 +294,19 @@ export const OnboardingSettings: React.FC = () => {
 
 const DefaultRestrictedKYBCountries = () => {
   return (
-    <>
-      <Text variant="heading4">Restricted onboarding countries</Text>
-      <details>
-        <summary>
-          <Text style={{ display: 'inline' }} variant="body2">
-            Unsupported countries
+    <details>
+      <summary>
+        <Text style={{ display: 'inline' }} variant="body2">
+          Unsupported countries
+        </Text>
+      </summary>
+      <Stack as="ul" gap={0} style={{ listStyle: 'disc', listStylePosition: 'inside' }}>
+        {Object.values(RESTRICTED_COUNTRY_CODES).map((country) => (
+          <Text key={country} as="li" variant="body2">
+            {country}
           </Text>
-        </summary>
-        <Stack as="ul" gap={0} style={{ listStyle: 'disc', listStylePosition: 'inside' }}>
-          {Object.values(RESTRICTED_COUNTRY_CODES).map((country) => (
-            <Text key={country} as="li" variant="body2">
-              {country}
-            </Text>
-          ))}
-        </Stack>
-      </details>
-    </>
+        ))}
+      </Stack>
+    </details>
   )
 }
