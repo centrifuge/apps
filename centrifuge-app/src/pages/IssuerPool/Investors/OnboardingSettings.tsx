@@ -1,6 +1,6 @@
 import { PoolMetadata, Token } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, FileUpload, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, FileUpload, IconMinusCircle, SearchInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -9,9 +9,11 @@ import { ButtonGroup } from '../../../components/ButtonGroup'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { KYB_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES } from '../../Onboarding/geographyCodes'
 
-type AgreementsUpload = {
+type OnboardingSettings = {
   agreements: { [trancheId: string]: File | string | undefined }
+  restrictedCountries: string[]
 }
 
 export const OnboardingSettings: React.FC = () => {
@@ -31,9 +33,9 @@ export const OnboardingSettings: React.FC = () => {
     }
   )
 
-  const initialValues: AgreementsUpload = React.useMemo(() => {
+  const initialValues: OnboardingSettings = React.useMemo(() => {
     return {
-      agreements: (pool.tranches as Token[]).reduce<AgreementsUpload['agreements']>(
+      agreements: (pool.tranches as Token[]).reduce<OnboardingSettings['agreements']>(
         (prevT, currT) => ({
           ...prevT,
           [currT.id]: poolMetadata?.onboarding?.agreements[currT.id]?.ipfsHash
@@ -42,6 +44,10 @@ export const OnboardingSettings: React.FC = () => {
         }),
         {}
       ),
+      restrictedCountries:
+        poolMetadata?.onboarding?.restrictedCountries?.map(
+          (c) => KYB_COUNTRY_CODES[c as keyof typeof KYB_COUNTRY_CODES]
+        ) ?? [],
     }
   }, [pool, poolMetadata])
 
@@ -58,28 +64,36 @@ export const OnboardingSettings: React.FC = () => {
       if (!values.agreements || !poolMetadata) {
         return
       }
-      let onboardingAgreements: PoolMetadata['onboarding'] = {
-        agreements: {},
-      }
+      let onboardingAgreements = poolMetadata?.onboarding?.agreements ?? {}
       for (const [tId, file] of Object.entries(values.agreements)) {
-        if (!file || typeof file === 'string') {
-          // file hasn't changed
+        if (!file) {
           continue
         }
-        const uri = await getFileDataURI(file)
-        const pinnedAgreement = await lastValueFrom(centrifuge.metadata.pinFile(uri))
-        onboardingAgreements = {
-          agreements: {
-            ...poolMetadata?.onboarding?.agreements,
-            ...onboardingAgreements.agreements,
-            [tId]: { ipfsHash: pinnedAgreement.ipfsHash },
-          },
+        // file is already IPFS hash so it hasn't changed
+        if (typeof file === 'string') {
+          onboardingAgreements = {
+            ...onboardingAgreements,
+            [tId]: { ipfsHash: file },
+          }
+        } else {
+          const uri = await getFileDataURI(file)
+          const pinnedAgreement = await lastValueFrom(centrifuge.metadata.pinFile(uri))
+          onboardingAgreements = {
+            ...onboardingAgreements,
+            [tId]: { ipfsHash: centrifuge.metadata.parseMetadataUrl(pinnedAgreement.ipfsHash) },
+          }
         }
       }
 
+      const restrictedCountries = values.restrictedCountries
+        .map(
+          (country) => Object.entries(KYB_COUNTRY_CODES).find(([_code, _country]) => _country === country)?.[0] ?? ''
+        )
+        .filter(Boolean)
+
       const amendedMetadata: PoolMetadata = {
         ...poolMetadata,
-        onboarding: onboardingAgreements,
+        onboarding: { agreements: onboardingAgreements, restrictedCountries },
       }
       updateConfigTx([poolId, amendedMetadata])
       actions.setSubmitting(true)
@@ -100,10 +114,10 @@ export const OnboardingSettings: React.FC = () => {
                 <Button
                   type="submit"
                   small
-                  loading={formik.isSubmitting}
+                  loading={formik.isSubmitting || isLoading}
                   loadingMessage={formik.isSubmitting || isLoading ? 'Pending...' : undefined}
                   key="done"
-                  disabled={formik.isSubmitting}
+                  disabled={formik.isSubmitting || isLoading}
                 >
                   Done
                 </Button>
@@ -115,32 +129,113 @@ export const OnboardingSettings: React.FC = () => {
             )
           }
         >
-          <Stack gap={2}>
-            <Text variant="heading4">Subscription documents</Text>
-            {Object.entries(formik.values.agreements).map(([tId, agreement]) => {
-              return (
-                <Box>
-                  <FileUpload
-                    label={`Subscription document for ${
-                      (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.name
-                    }`}
-                    onFileChange={(file) => {
-                      formik.setFieldValue('agreements', {
-                        ...formik.values.agreements,
-                        [tId]: file,
-                      })
-                    }}
-                    placeholder="Choose a file..."
-                    disabled={!isEditing || formik.isSubmitting || isLoading}
-                    file={agreement}
-                    accept="application/pdf"
-                  />
-                </Box>
-              )
-            })}
+          <Stack gap={3} mb={5}>
+            <Stack gap={2}>
+              <Text variant="heading4">Subscription documents</Text>
+              {Object.entries(formik.values.agreements).map(([tId, agreement]) => {
+                return (
+                  <Box key={tId}>
+                    <FileUpload
+                      label={`Subscription document for ${
+                        (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.name
+                      }`}
+                      onFileChange={(file) => {
+                        formik.setFieldValue('agreements', {
+                          ...formik.values.agreements,
+                          [tId]: file,
+                        })
+                      }}
+                      placeholder="Choose a file..."
+                      disabled={!isEditing || formik.isSubmitting || isLoading}
+                      file={agreement}
+                      accept="application/pdf"
+                    />
+                  </Box>
+                )
+              })}
+            </Stack>
+            <Stack gap={2}>
+              <DefaultRestrictedKYBCountries />
+              <SearchInput
+                label="Add restricted onboarding countries"
+                placeholder="Search country to add"
+                disabled={!isEditing || formik.isSubmitting || isLoading}
+                onChange={(e) => {
+                  if (
+                    Object.values(KYB_COUNTRY_CODES).includes(e.target.value as keyof typeof KYB_COUNTRY_CODES) &&
+                    !formik.values.restrictedCountries.includes(e.target.value)
+                  ) {
+                    formik.setFieldValue('restrictedCountries', [...formik.values.restrictedCountries, e.target.value])
+                  }
+                }}
+                list="kybSupportedCountries"
+              />
+              <datalist id="kybSupportedCountries">
+                {Object.entries(KYB_COUNTRY_CODES).map(([code, country]) => (
+                  <option key={code} value={country} id={code} />
+                ))}
+              </datalist>
+              <Stack gap={0}>
+                {formik.values.restrictedCountries.length > 0 && (
+                  <Text color="textSecondary" variant="body2">
+                    Countries
+                  </Text>
+                )}
+                {formik.values.restrictedCountries.map((country) => (
+                  <Shelf
+                    p="4px"
+                    width="100%"
+                    justifyContent="space-between"
+                    borderBottom="1px solid"
+                    borderBottomColor="borderSecondary"
+                  >
+                    <Text
+                      key={country}
+                      variant="body2"
+                      color={isEditing && !isLoading && !formik.isSubmitting ? 'textPrimary' : 'textDisabled'}
+                    >
+                      {country}
+                    </Text>
+                    <Button
+                      disabled={!isEditing || formik.isSubmitting || isLoading}
+                      variant="tertiary"
+                      icon={IconMinusCircle}
+                      onClick={() => {
+                        formik.setFieldValue(
+                          'restrictedCountries',
+                          formik.values.restrictedCountries.filter((c) => c !== country)
+                        )
+                      }}
+                    />
+                  </Shelf>
+                ))}
+              </Stack>
+            </Stack>
           </Stack>
         </PageSection>
       </Form>
     </FormikProvider>
+  )
+}
+
+const DefaultRestrictedKYBCountries = () => {
+  return (
+    <>
+      <Text variant="heading4">Restricted onboarding countries</Text>
+      <details>
+        <summary>
+          <Text style={{ display: 'inline' }} variant="body2">
+            Unsupported countries
+          </Text>
+        </summary>
+        <Stack as="ul" gap={0} style={{ listStyle: 'disc', listStylePosition: 'inside' }}>
+          {Object.values(RESTRICTED_COUNTRY_CODES).map((country) => (
+            <Text key={country} as="li" variant="body2">
+              {country}
+            </Text>
+          ))}
+        </Stack>
+      </details>
+    </>
   )
 }
