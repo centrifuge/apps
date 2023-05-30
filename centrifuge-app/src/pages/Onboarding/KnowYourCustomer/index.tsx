@@ -1,4 +1,4 @@
-import { Button, Stack } from '@centrifuge/fabric'
+import { Box, Button, Dialog, Flex, Stack } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, date, object, string } from 'yup'
@@ -86,22 +86,26 @@ export const KnowYourCustomer = () => {
 
   if (activeKnowYourCustomerStep === 1) {
     return (
-      <>
-        <IdentityVerification verificationURL={startKYCData.verification_url} />
-        {verificationDeclined && (
-          <Stack>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setVerificationDeclined(false)
-                setActiveKnowYourCustomerStep(0)
-              }}
-            >
-              Restart verification
-            </Button>
-          </Stack>
-        )}
-      </>
+      <Dialog isOpen={true} onClose={() => setActiveKnowYourCustomerStep(0)} width="850px">
+        <Stack justifyContent="space-between">
+          <Box height="500px">
+            <IdentityVerification verificationURL={startKYCData.verification_url} />
+          </Box>
+          {verificationDeclined && (
+            <Flex justifyContent="flex-end">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setVerificationDeclined(false)
+                  setActiveKnowYourCustomerStep(0)
+                }}
+              >
+                Restart verification
+              </Button>
+            </Flex>
+          )}
+        </Stack>
+      </Dialog>
     )
   }
 

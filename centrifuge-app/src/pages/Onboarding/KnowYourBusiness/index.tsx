@@ -1,3 +1,4 @@
+import { Box, Dialog } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { object, string } from 'yup'
@@ -84,7 +85,13 @@ export function KnowYourBusiness() {
   }
 
   if (activeKnowYourBusinessStep === 1) {
-    return <ManualBusinessVerification verificationURL={verifyBusinessData?.verification_url} />
+    return (
+      <Dialog isOpen={true} onClose={() => setActiveKnowYourBusinessStep(0)} width="850px">
+        <Box height="500px">
+          <ManualBusinessVerification verificationURL={verifyBusinessData?.verification_url} />
+        </Box>
+      </Dialog>
+    )
   }
 
   return null
