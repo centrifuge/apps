@@ -24,7 +24,8 @@ const getValidationSchema = (investorType: 'individual' | 'entity') =>
   })
 
 export const KnowYourCustomer = () => {
-  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
+  const [isKnowYourCustomerDialogOpen, setIsKnowYourCustomerDialogOpen] = React.useState(false)
+
   const [verificationDeclined, setVerificationDeclined] = React.useState(false)
 
   const { onboardingUser } = useOnboarding()
@@ -76,38 +77,39 @@ export const KnowYourCustomer = () => {
 
   React.useEffect(() => {
     if (startKYCData?.verification_url) {
-      setActiveKnowYourCustomerStep(1)
+      setIsKnowYourCustomerDialogOpen(true)
     }
   }, [startKYCData])
 
-  if (activeKnowYourCustomerStep === 0) {
-    return <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
-  }
-
-  if (activeKnowYourCustomerStep === 1) {
-    return (
-      <Dialog isOpen={true} onClose={() => setActiveKnowYourCustomerStep(0)} width="850px">
-        <Stack justifyContent="space-between">
-          <Box height="500px">
-            <IdentityVerification verificationURL={startKYCData.verification_url} />
-          </Box>
-          {verificationDeclined && (
-            <Flex justifyContent="flex-end">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setVerificationDeclined(false)
-                  setActiveKnowYourCustomerStep(0)
-                }}
-              >
-                Restart verification
-              </Button>
-            </Flex>
-          )}
-        </Stack>
-      </Dialog>
-    )
-  }
-
-  return null
+  return (
+    <>
+      <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
+      {startKYCData?.verification_url && (
+        <Dialog
+          isOpen={isKnowYourCustomerDialogOpen}
+          onClose={() => setIsKnowYourCustomerDialogOpen(false)}
+          width="850px"
+        >
+          <Stack justifyContent="space-between">
+            <Box height="500px">
+              <IdentityVerification verificationURL={startKYCData.verification_url} />
+            </Box>
+            {verificationDeclined && (
+              <Flex justifyContent="flex-end">
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setVerificationDeclined(false)
+                    setIsKnowYourCustomerDialogOpen(false)
+                  }}
+                >
+                  Restart verification
+                </Button>
+              </Flex>
+            )}
+          </Stack>
+        </Dialog>
+      )}
+    </>
+  )
 }

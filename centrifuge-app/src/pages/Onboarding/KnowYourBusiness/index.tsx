@@ -22,9 +22,7 @@ export const validationSchema = object({
 })
 
 export function KnowYourBusiness() {
-  const [activeKnowYourBusinessStep, setActiveKnowYourBusinessStep] = React.useState<number>(0)
-
-  const nextKnowYourBusinessStep = () => setActiveKnowYourBusinessStep((current) => current + 1)
+  const [isKnowYourBusinessDialogOpen, setIsKnowYourBusinessDialogOpen] = React.useState(false)
 
   const { onboardingUser, nextStep } = useOnboarding<EntityUser>()
 
@@ -76,23 +74,24 @@ export function KnowYourBusiness() {
 
   React.useEffect(() => {
     if (verifyBusinessData?.verification_url) {
-      nextKnowYourBusinessStep()
+      setIsKnowYourBusinessDialogOpen(true)
     }
   }, [verifyBusinessData])
 
-  if (activeKnowYourBusinessStep === 0) {
-    return <BusinessInformation formik={formik} isLoading={isVerifyBusinessLoading} isError={isError} />
-  }
-
-  if (activeKnowYourBusinessStep === 1) {
-    return (
-      <Dialog isOpen={true} onClose={() => setActiveKnowYourBusinessStep(0)} width="850px">
-        <Box height="500px">
-          <ManualBusinessVerification verificationURL={verifyBusinessData?.verification_url} />
-        </Box>
-      </Dialog>
-    )
-  }
-
-  return null
+  return (
+    <>
+      <BusinessInformation formik={formik} isLoading={isVerifyBusinessLoading} isError={isError} />
+      {verifyBusinessData?.verification_url && (
+        <Dialog
+          isOpen={isKnowYourBusinessDialogOpen}
+          onClose={() => setIsKnowYourBusinessDialogOpen(false)}
+          width="850px"
+        >
+          <Box height="500px">
+            <ManualBusinessVerification verificationURL={verifyBusinessData.verification_url} />
+          </Box>
+        </Dialog>
+      )}
+    </>
+  )
 }
