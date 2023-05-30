@@ -35,7 +35,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
   }
 
   const unsignedAgreementUrl = metadata?.onboarding?.agreements[trancheId]
-    ? getCentrifuge().metadata.parseMetadataUrl(metadata?.onboarding?.agreements[trancheId].ipfsHash)
+    ? getCentrifuge().metadata.parseMetadataUrl(metadata?.onboarding?.agreements?.[trancheId].ipfsHash)
     : wallet.network === 'substrate'
     ? getCentrifuge().metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
