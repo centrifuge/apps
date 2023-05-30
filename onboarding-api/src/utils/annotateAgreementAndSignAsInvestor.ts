@@ -34,11 +34,11 @@ export const annotateAgreementAndSignAsInvestor = async ({
     throw new HttpError(400, 'Signature page not found')
   }
 
-  const unsignedAgreementUrl = metadata?.onboarding?.agreements[trancheId]
-    ? centrifuge.metadata.parseMetadataUrl(metadata?.onboarding?.agreements[trancheId].ipfsHash)
+  const unsignedAgreementUrl = metadata?.onboarding?.agreements?.[trancheId]
+    ? centrifuge.metadata.parseMetadataUrl(metadata?.onboarding?.agreements?.[trancheId].ipfsHash)
     : wallet.network === 'substrate'
     ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
-    : null
+    : ''
 
   // tinlake pools that are closed for onboarding don't have agreements in their metadata
   if (!unsignedAgreementUrl) {
@@ -71,7 +71,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
     `Signed by ${wallet.address} on Centrifuge
 Block: ${transactionInfo.blockNumber}
 Transaction hash: ${transactionInfo.txHash}
-Agreement hash: ${metadata.onboarding.agreements[trancheId].ipfsHash}`,
+Agreement hash: ${unsignedAgreementUrl}`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,

@@ -48,14 +48,18 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
 
-  const unsignedAgreementUrl = poolMetadata?.onboarding?.agreements[trancheId]
-    ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[trancheId].ipfsHash)
+  const unsignedAgreementUrl = poolMetadata?.onboarding?.agreements?.[trancheId]
+    ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[trancheId].uri)
     : !poolId.startsWith('0x')
     ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
 
   // tinlake pools without subdocs cannot accept investors
   const isPoolClosedToOnboarding = poolId.startsWith('0x') && !unsignedAgreementUrl
+  const isCountrySupported =
+    onboardingUser.investorType === 'entity'
+      ? !poolMetadata?.onboarding?.kybRestrictedCountries?.includes(onboardingUser.jurisdictionCode)
+      : !poolMetadata?.onboarding?.kycRestrictedCountries?.includes(onboardingUser.countryOfCitizenship)
 
   React.useEffect(() => {
     if (hasSignedAgreement) {
@@ -64,7 +68,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasSignedAgreement])
 
-  return !isPoolClosedToOnboarding ? (
+  return !isPoolClosedToOnboarding && isCountrySupported ? (
     <Content>
       <ContentHeader
         title="Sign subscription agreement"
@@ -150,6 +154,21 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
           {hasSignedAgreement ? 'Next' : 'Sign'}
         </Button>
       </ActionBar>
+    </Content>
+  ) : !isCountrySupported ? (
+    <Content>
+      <ContentHeader
+        title="Country not supported"
+        body={
+          <span>
+            This pool is currently not accepting new investors from your country. Please contact the issuer (
+            <a href={`mailto:${poolMetadata?.pool?.issuer.email}?subject=Onboarding&body=I’m reaching out about…`}>
+              {poolMetadata?.pool?.issuer.email}
+            </a>
+            ) for any questions.
+          </span>
+        }
+      />
     </Content>
   ) : (
     <Content>

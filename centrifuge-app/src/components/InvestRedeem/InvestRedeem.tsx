@@ -335,6 +335,8 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
       showWallets(networks?.length === 1 ? networks[0] : undefined)
     } else if (investStatus === 'request') {
       window.open(`mailto:${metadata?.pool?.issuer.email}?subject=New%20Investment%20Inquiry`)
+    } else if (metadata?.onboarding?.externalOnboardingUrl) {
+      window.open(metadata.onboarding.externalOnboardingUrl)
     } else {
       history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
     }

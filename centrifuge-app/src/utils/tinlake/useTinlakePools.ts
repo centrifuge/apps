@@ -568,8 +568,14 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       riskGroups: [],
       onboarding: {
         agreements: {
-          [`${id}-0`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '' },
-          [`${id}-1`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '' },
+          [`${id}-0`]: {
+            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '',
+            mime: 'application/pdf',
+          },
+          [`${id}-1`]: {
+            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '',
+            mime: 'application/pdf',
+          },
         },
       },
     }
