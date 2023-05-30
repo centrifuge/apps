@@ -51,8 +51,8 @@ export const OnboardingSettings = () => {
       agreements: (pool.tranches as Token[]).reduce<OnboardingSettingsInput['agreements']>(
         (prevT, currT) => ({
           ...prevT,
-          [currT.id]: poolMetadata?.onboarding?.agreements?.[currT.id]?.ipfsHash
-            ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[currT.id].ipfsHash)
+          [currT.id]: poolMetadata?.onboarding?.agreements?.[currT.id]?.uri
+            ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[currT.id].uri)
             : undefined,
         }),
         {}
@@ -91,14 +91,14 @@ export const OnboardingSettings = () => {
         if (typeof file === 'string') {
           onboardingAgreements = {
             ...onboardingAgreements,
-            [tId]: { ipfsHash: file },
+            [tId]: { uri: file, mime: 'application/pdf' },
           }
         } else {
           const uri = await getFileDataURI(file)
           const pinnedAgreement = await lastValueFrom(centrifuge.metadata.pinFile(uri))
           onboardingAgreements = {
             ...onboardingAgreements,
-            [tId]: { ipfsHash: centrifuge.metadata.parseMetadataUrl(pinnedAgreement.ipfsHash) },
+            [tId]: { uri: centrifuge.metadata.parseMetadataUrl(pinnedAgreement.ipfsHash), mime: file.type },
           }
         }
       }

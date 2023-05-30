@@ -493,7 +493,8 @@ export type PoolMetadata = {
   onboarding?: {
     agreements?: {
       [trancheId: string]: {
-        ipfsHash: string
+        uri: string
+        mime: string
       }
     }
     kybRestrictedCountries?: string[]
