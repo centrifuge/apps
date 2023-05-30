@@ -132,7 +132,7 @@ export const OnboardingSettings = () => {
           agreements: onboardingAgreements,
           kycRestrictedCountries,
           kybRestrictedCountries,
-          externalOnboardingUrl: values.externalOnboardingUrl,
+          externalOnboardingUrl: useExternalUrl ? values.externalOnboardingUrl : undefined,
         },
       }
       updateConfigTx([poolId, amendedMetadata])
@@ -255,9 +255,11 @@ export const OnboardingSettings = () => {
                 list="kybSupportedCountries"
               />
               <datalist id="kybSupportedCountries">
-                {Object.entries(KYB_COUNTRY_CODES).map(([code, country]) => (
-                  <option key={code} value={country} id={code} />
-                ))}
+                {Object.entries(KYB_COUNTRY_CODES)
+                  .filter(([_, country]) => !formik.values.kybRestrictedCountries.includes(country))
+                  .map(([code, country]) => (
+                    <option key={code} value={country} id={code} />
+                  ))}
               </datalist>
               <Stack gap={0}>
                 {formik.values.kybRestrictedCountries.length > 0 && (
@@ -314,9 +316,11 @@ export const OnboardingSettings = () => {
                 list="kycSupportedCountries"
               />
               <datalist id="kycSupportedCountries">
-                {Object.entries(KYC_COUNTRY_CODES).map(([code, country]) => (
-                  <option key={code} value={country} id={code} />
-                ))}
+                {Object.entries(KYC_COUNTRY_CODES)
+                  .filter(([_, country]) => !formik.values.kycRestrictedCountries.includes(country))
+                  .map(([code, country]) => (
+                    <option key={code} value={country} id={code} />
+                  ))}
               </datalist>
               <Stack gap={0}>
                 {formik.values.kycRestrictedCountries.length > 0 && (
