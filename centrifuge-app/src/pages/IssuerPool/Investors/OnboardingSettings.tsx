@@ -5,17 +5,17 @@ import {
   Button,
   FileUpload,
   IconMinusCircle,
-  InputGroup,
-  RadioButton,
   SearchInput,
   Shelf,
   Stack,
   Text,
+  TextInput,
 } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
+import styled from 'styled-components'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
@@ -26,7 +26,7 @@ type OnboardingSettingsInput = {
   agreements: { [trancheId: string]: File | string | undefined }
   kybRestrictedCountries: string[]
   kycRestrictedCountries: string[]
-  allowUSInvestors: boolean
+  externalOnboardingUrl?: string
 }
 
 export const OnboardingSettings = () => {
@@ -34,6 +34,7 @@ export const OnboardingSettings = () => {
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool) as { data: PoolMetadata }
   const [isEditing, setIsEditing] = React.useState(false)
+  const [useExternalUrl, setUseExternalUrl] = React.useState(!!poolMetadata?.onboarding?.externalOnboardingUrl)
   const centrifuge = useCentrifuge()
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
@@ -65,7 +66,7 @@ export const OnboardingSettings = () => {
         poolMetadata?.onboarding?.kycRestrictedCountries?.map(
           (c) => KYC_COUNTRY_CODES[c as keyof typeof KYC_COUNTRY_CODES]
         ) ?? [],
-      allowUSInvestors: poolMetadata?.onboarding?.allowUSInvestors ?? true,
+      externalOnboardingUrl: poolMetadata?.onboarding?.externalOnboardingUrl ?? '',
     }
   }, [pool, poolMetadata])
 
@@ -78,6 +79,20 @@ export const OnboardingSettings = () => {
 
   const formik = useFormik({
     initialValues,
+    validateOnBlur: true,
+    validateOnChange: false,
+    validate(values) {
+      const errors: Partial<OnboardingSettingsInput> = {}
+      if (useExternalUrl && !values.externalOnboardingUrl) {
+        errors.externalOnboardingUrl = 'Link required for external onboarding'
+      }
+      if (useExternalUrl && values.externalOnboardingUrl) {
+        if (!values.externalOnboardingUrl.includes('http') || !new URL(values.externalOnboardingUrl)) {
+          errors.externalOnboardingUrl = 'Invalid URL'
+        }
+      }
+      return errors
+    },
     onSubmit: async (values, actions) => {
       if (!values.agreements || !poolMetadata) {
         return
@@ -104,15 +119,11 @@ export const OnboardingSettings = () => {
       }
 
       const kybRestrictedCountries = values.kybRestrictedCountries
-        .map(
-          (country) => Object.entries(KYB_COUNTRY_CODES).find(([_code, _country]) => _country === country)?.[0] ?? ''
-        )
+        .map((country) => Object.entries(KYB_COUNTRY_CODES).find(([_c, _country]) => _country === country)?.[0] ?? '')
         .filter(Boolean)
 
       const kycRestrictedCountries = values.kycRestrictedCountries
-        .map(
-          (country) => Object.entries(KYC_COUNTRY_CODES).find(([_code, _country]) => _country === country)?.[0] ?? ''
-        )
+        .map((country) => Object.entries(KYC_COUNTRY_CODES).find(([_c, _country]) => _country === country)?.[0] ?? '')
         .filter(Boolean)
 
       const amendedMetadata: PoolMetadata = {
@@ -121,7 +132,7 @@ export const OnboardingSettings = () => {
           agreements: onboardingAgreements,
           kycRestrictedCountries,
           kybRestrictedCountries,
-          allowUSInvestors: values.allowUSInvestors,
+          externalOnboardingUrl: values.externalOnboardingUrl,
         },
       }
       updateConfigTx([poolId, amendedMetadata])
@@ -160,6 +171,46 @@ export const OnboardingSettings = () => {
         >
           <Stack gap={3} mb={5}>
             <Stack gap={2}>
+              <Text variant="heading4">Onboarding provider</Text>
+              <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px" width="fit-content">
+                <ToggleButton
+                  forwardedAs="button"
+                  variant="interactive2"
+                  isActive={!useExternalUrl}
+                  disabled={!isEditing || formik.isSubmitting || isLoading}
+                  type="button"
+                  onClick={() => setUseExternalUrl(false)}
+                >
+                  Centrifuge
+                </ToggleButton>
+                <ToggleButton
+                  forwardedAs="button"
+                  variant="interactive2"
+                  type="button"
+                  isActive={useExternalUrl}
+                  disabled={!isEditing || formik.isSubmitting || isLoading}
+                  onClick={() => setUseExternalUrl(true)}
+                >
+                  External
+                </ToggleButton>
+              </Shelf>
+              {useExternalUrl && (
+                <TextInput
+                  value={formik.values.externalOnboardingUrl}
+                  onChange={(e) => formik.setFieldValue('externalOnboardingUrl', e.target.value)}
+                  placeholder="https://"
+                  label="External onboarding url"
+                  onBlur={formik.handleBlur}
+                  disabled={!isEditing || formik.isSubmitting || isLoading}
+                  errorMessage={
+                    formik.errors.externalOnboardingUrl && useExternalUrl
+                      ? formik.errors.externalOnboardingUrl
+                      : undefined
+                  }
+                />
+              )}
+            </Stack>
+            <Stack gap={2}>
               <Text variant="heading4">Subscription documents</Text>
               {Object.entries(formik.values.agreements).map(([tId, agreement]) => {
                 return (
@@ -182,25 +233,6 @@ export const OnboardingSettings = () => {
                   </Box>
                 )
               })}
-            </Stack>
-            <Stack gap={2}>
-              <Text variant="heading4">Allow US based investors?</Text>
-              <InputGroup>
-                <RadioButton
-                  name="accreditedInvestor"
-                  textStyle="body2"
-                  checked={formik.values.allowUSInvestors}
-                  label="Yes"
-                  onClick={() => formik.setFieldValue('allowUSInvestors', true)}
-                />
-                <RadioButton
-                  name="accreditedInvestor"
-                  textStyle="body2"
-                  checked={!formik.values.allowUSInvestors}
-                  label="No"
-                  onClick={() => formik.setFieldValue('allowUSInvestors', false)}
-                />
-              </InputGroup>
             </Stack>
             <Stack gap={2}>
               <Text variant="heading4">Restricted onboarding countries (KYB)</Text>
@@ -347,3 +379,23 @@ const DefaultRestrictedCountries = () => {
     </details>
   )
 }
+
+const ToggleButton = styled(Text)<{ isActive: boolean }>`
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  display: block;
+  padding: 8px 16px;
+  border-radius: 20px;
+
+  color: ${({ theme, isActive }) => (isActive ? theme.colors.textInteractive : theme.colors.textPrimary)};
+  box-shadow: ${({ theme, isActive }) => (isActive ? theme.shadows.cardInteractive : 'none')};
+  background: ${({ theme, isActive }) => (isActive ? theme.colors.backgroundPage : 'transparent')};
+
+  ${({ disabled, theme }) =>
+    disabled &&
+    `
+    cursor: not-allowed;
+    color: ${theme.colors.textDisabled};
+  `}
+`
