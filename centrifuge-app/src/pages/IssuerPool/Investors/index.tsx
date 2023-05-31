@@ -2,15 +2,16 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useAddress } from '../../../utils/useAddress'
-import { usePermissions } from '../../../utils/usePermissions'
+import { PendingMultisigs } from '../../../components/PendingMultisigs'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { InvestorStatus } from './InvestorStatus'
 import { OnboardingSettings } from './OnboardingSettings'
 
-export const IssuerPoolInvestorsPage: React.FC = () => {
+export function IssuerPoolInvestorsPage() {
+  const { pid: poolId } = useParams<{ pid: string }>()
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<PendingMultisigs poolId={poolId} />}>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolInvestors />
@@ -19,12 +20,10 @@ export const IssuerPoolInvestorsPage: React.FC = () => {
   )
 }
 
-const IssuerPoolInvestors: React.FC = () => {
+function IssuerPoolInvestors() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
-  const canEditInvestors = address && permissions?.pools[poolId]?.roles.includes('MemberListAdmin')
-  const isPoolAdmin = address && permissions?.pools[poolId]?.roles.includes('PoolAdmin')
+  const canEditInvestors = useSuitableAccounts({ poolId, poolRole: ['MemberListAdmin'] }).length > 0
+  const isPoolAdmin = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] }).length > 0
 
   return (
     <>

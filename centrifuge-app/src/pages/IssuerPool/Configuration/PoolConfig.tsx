@@ -4,6 +4,7 @@ import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageSection } from '../../../components/PageSection'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
 
@@ -11,10 +12,11 @@ type Props = {
   poolId: string
 }
 
-export const PoolConfig: React.VFC<Props> = (props: { poolId: string }) => {
+export function PoolConfig({ poolId }: Props) {
   const [isEditing, setIsEditing] = React.useState(false)
-  const pool = usePool(props.poolId)
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
     'Update pool config',
@@ -44,7 +46,7 @@ export const PoolConfig: React.VFC<Props> = (props: { poolId: string }) => {
       return errors
     },
     onSubmit: async (values, { setSubmitting }) => {
-      updateConfigTx([props.poolId, JSON.parse(values.metadata)])
+      updateConfigTx([poolId, JSON.parse(values.metadata)], { account })
       setSubmitting(false)
     },
   })

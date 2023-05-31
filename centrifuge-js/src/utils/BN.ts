@@ -1,3 +1,4 @@
+import { Codec } from '@polkadot/types-codec/types'
 import BN from 'bn.js'
 import { Numeric } from 'decimal.js-light'
 import { Dec } from './Decimal'
@@ -24,8 +25,14 @@ class BNSubType extends BN {
 
 export class CurrencyBalance extends BN {
   decimals: number
-  constructor(number: number | string | number[] | Uint8Array | Buffer | BN, decimals: number) {
-    super(BN.isBN(number) ? number.toString() : number)
+  constructor(number: number | string | number[] | Uint8Array | Buffer | BN | Codec, decimals: number) {
+    super(
+      typeof number === 'object' && 'toPrimitive' in number
+        ? number.toString()
+        : BN.isBN(number)
+        ? number.toString()
+        : number
+    )
     this.decimals = decimals
   }
   static fromFloat(number: Numeric, decimals: number) {

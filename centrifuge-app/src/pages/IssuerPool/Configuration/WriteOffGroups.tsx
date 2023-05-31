@@ -8,6 +8,7 @@ import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Column, DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { formatPercentage } from '../../../utils/formatting'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { useConstants, useWriteOffGroups } from '../../../utils/usePools'
 import { WriteOffInput } from './WriteOffInput'
 
@@ -52,6 +53,7 @@ export function WriteOffGroups() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
   const consts = useConstants()
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['LoanAdmin'] })
 
   const savedGroups = useWriteOffGroups(poolId)
   const sortedSavedGroups = [...(savedGroups ?? [])].sort((a, b) => a.overdueDays - b.overdueDays)
@@ -135,7 +137,7 @@ export function WriteOffGroups() {
         percentage: Rate.fromPercent(g.writeOff),
         penaltyInterestRate: Rate.fromPercent(g.penaltyInterest),
       }))
-      execute([poolId, writeOffGroups])
+      execute([poolId, writeOffGroups], { account })
       actions.setSubmitting(false)
     },
   })
@@ -157,7 +159,7 @@ export function WriteOffGroups() {
           }}
           small
           key="edit"
-          disabled={form.values.writeOffGroups.length >= (consts?.maxWriteOffPolicySize ?? 5)}
+          disabled={form.values.writeOffGroups.length >= (consts?.maxWriteOffPolicySize ?? 5) || !account}
         >
           Add another
         </Button>

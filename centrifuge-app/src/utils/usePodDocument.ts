@@ -1,16 +1,18 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
-import { useAuth } from '../components/PodAuthProvider'
+import { usePodAuth } from './usePodAuth'
+import { usePodUrl } from './usePools'
 
-export function usePodDocument(podUrl: string | null | undefined, documentId: string | undefined) {
+export function usePodDocument(poolId: string, documentId: string | undefined) {
   const cent = useCentrifuge()
-  const { authToken } = useAuth()
+  const podUrl = usePodUrl(poolId)
+  const { token } = usePodAuth(poolId)
 
   const query = useQuery(
-    ['podDocument', podUrl, documentId, authToken],
-    () => cent.pod.getCommittedDocument([podUrl!, authToken, documentId!]),
+    ['podDocument', podUrl, documentId, token],
+    () => cent.pod.getCommittedDocument([podUrl!, token, documentId!]),
     {
-      enabled: !!podUrl && !!documentId && !!authToken,
+      enabled: !!podUrl && !!documentId && !!token,
     }
   )
   return query

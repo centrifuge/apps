@@ -1,6 +1,5 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
-import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
@@ -13,7 +12,7 @@ import {
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
-import { addressToHex, getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
+import { addressToHex, computeTrancheId, getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
 
@@ -191,7 +190,6 @@ export type Pool = {
   value: CurrencyBalance
   createdAt: string | null
   tranches: Token[]
-  isInitialised: boolean
   reserve: {
     max: CurrencyBalance
     available: CurrencyBalance
@@ -435,6 +433,11 @@ export interface PoolMetadataInput {
 
   // tranche
   tranches: TrancheFormValues[]
+
+  adminMultisig?: {
+    signers: string[]
+    threshold: number
+  }
 }
 
 export type PoolStatus = 'open' | 'upcoming' | 'hidden'
@@ -447,10 +450,6 @@ export type PoolMetadata = {
     icon: { uri: string; mime: string } | null
     asset: {
       class: string
-    }
-    newInvestmentsStatus: {
-      junior: 'closed' | 'request' | 'open'
-      senior: 'closed' | 'request' | 'open'
     }
     issuer: {
       repName: string
@@ -482,14 +481,10 @@ export type PoolMetadata = {
     id: string
     createdAt: string
   }[]
-  riskGroups: {
-    name: string | undefined
-    advanceRate: string
-    interestRatePerSec: string
-    probabilityOfDefault: string
-    lossGivenDefault: string
-    discountRate: string
-  }[]
+  adminMultisig?: {
+    signers: string[]
+    threshold: number
+  }
   onboarding?: {
     agreements?: {
       [trancheId: string]: {
@@ -544,7 +539,6 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
-
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
@@ -569,77 +563,29 @@ export function getPoolsModule(inst: Centrifuge) {
             return pinPoolMetadata(metadata, poolId, currencyMeta.decimals, options)
           }),
           switchMap((pinnedMetadata) => {
-            let submittable
-            if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-              submittable = api.tx.poolRegistry.register(
-                admin,
-                poolId,
-                trancheInput,
-                currency,
-                maxReserve.toString(),
-                pinnedMetadata.ipfsHash
-              )
-            } else {
-              submittable = api.tx.utility.batchAll([
-                api.tx.poolRegistry.register(
-                  inst.getSignerAddress(),
-                  poolId,
-                  trancheInput,
-                  currency,
-                  maxReserve.toString(),
-                  pinnedMetadata.ipfsHash
-                ),
-                api.tx.permissions.add(
-                  { PoolRole: 'PoolAdmin' },
-                  admin,
-                  { Pool: poolId },
-                  {
-                    PoolRole: 'LoanAdmin',
-                  }
-                ),
-              ])
-            }
+            const tx = api.tx.poolRegistry.register(
+              admin,
+              poolId,
+              trancheInput,
+              currency,
+              maxReserve.toString(),
+              pinnedMetadata.ipfsHash
+            )
             if (options?.createType === 'propose') {
-              const proposalSubmittable = api.tx.utility.batchAll([
-                api.tx.preimage.notePreimage(submittable.method.toHex()),
-                api.tx.democracy.propose({ Inline: submittable.method.hash }, api.consts.democracy.minimumDeposit),
+              const proposalTx = api.tx.utility.batchAll([
+                api.tx.preimage.notePreimage(tx.method.toHex()),
+                api.tx.democracy.propose({ Inline: tx.method.hash }, api.consts.democracy.minimumDeposit),
               ])
-              return inst.wrapSignAndSend(api, proposalSubmittable, options)
+              return inst.wrapSignAndSend(api, proposalTx, options)
             }
             if (options?.createType === 'notePreimage') {
-              const preimageSubmittable = api.tx.preimage.notePreimage(submittable.method.toHex())
-              return inst.wrapSignAndSend(api, preimageSubmittable, options)
+              const preimageTx = api.tx.preimage.notePreimage(tx.method.toHex())
+              return inst.wrapSignAndSend(api, preimageTx, options)
             }
-            return inst.wrapSignAndSend(api, submittable, options)
+            return inst.wrapSignAndSend(api, tx, options)
           })
         )
       )
-    )
-  }
-
-  function initialisePool(
-    args: [admin: string, poolId: string, collateralCollectionId?: string],
-    options?: TransactionOptions
-  ) {
-    const [admin, poolId, collateralCollectionId] = args
-
-    return inst.getApi().pipe(
-      switchMap((api) => {
-        const submittable = api.tx.utility.batchAll(
-          [
-            collateralCollectionId && api.tx.uniques.create(collateralCollectionId, admin),
-            api.tx.permissions.add(
-              { PoolRole: 'PoolAdmin' },
-              admin,
-              { Pool: poolId },
-              {
-                PoolRole: 'LoanAdmin',
-              }
-            ),
-          ].filter(Boolean)
-        )
-        return inst.wrapSignAndSend(api, submittable, options)
-      })
     )
   }
 
@@ -661,7 +607,7 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     })
 
-    const formattedMetadata = {
+    const formattedMetadata: PoolMetadata = {
       version: 1,
       pool: {
         name: metadata.poolName,
@@ -687,6 +633,7 @@ export function getPoolsModule(inst: Centrifuge) {
         url: metadata.podEndpoint ?? null,
       },
       tranches: tranchesById,
+      adminMultisig: metadata.adminMultisig,
     }
 
     return inst.metadata.pinJson(formattedMetadata)
@@ -731,10 +678,10 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [poolId, add, remove] = args
-    const signer = inst.getSignerAddress()
-    // Make sure a removal of the PoolAdmin role of the signer is the last tx in the batch, otherwise the later txs will fail
+    const self = inst.getActingAddress()
+    // Make sure a removal of the PoolAdmin role of the acting address is the last tx in the batch, otherwise the later txs will fail
     const sortedRemove = [...remove].sort(([addr, role]) =>
-      role === 'PoolAdmin' && isSameAddress(addr, signer) ? 1 : -1
+      role === 'PoolAdmin' && isSameAddress(addr, self) ? 1 : -1
     )
     const $api = inst.getApi()
 
@@ -791,7 +738,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function updateInvestOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
 
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     return inst.getApi().pipe(
       switchMap(
@@ -820,7 +767,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function updateRedeemOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     return inst.getApi().pipe(
       switchMap(
@@ -941,7 +888,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function collect(args: [poolId: string, trancheId?: string], options?: TransactionOptions) {
     const [poolId, trancheId] = args
     const $api = inst.getApi()
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     if (trancheId !== undefined) {
       return $api.pipe(
@@ -1078,7 +1025,7 @@ export function getPoolsModule(inst: Centrifuge) {
           map((permissionsData) => {
             const roles: { [account: string]: PoolRoles } = {}
             permissionsData.forEach((value, i) => {
-              const account = poolKeys[i][0]
+              const account = addressToHex(poolKeys[i][0])
               const permissions = value.toJSON() as any
               roles[account] = {
                 roles: (
@@ -1364,7 +1311,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 createdAt: null,
                 metadata,
                 currency,
-                isInitialised: true,
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
                   const trancheKeyIndex = trancheIdToIndex[trancheId]
@@ -2265,7 +2211,6 @@ export function getPoolsModule(inst: Centrifuge) {
 
   return {
     createPool,
-    initialisePool,
     updatePool,
     setMaxReserve,
     setMetadata,
@@ -2326,25 +2271,6 @@ function getOutstandingDebt(
   const debt = debtFromAccRate.add(debtSinceUpdated)
 
   return CurrencyBalance.fromFloat(debt, currencyDecimals)
-}
-
-function computeTrancheId(trancheIndex: number, poolId: string) {
-  const a = new BN(trancheIndex).toArray('le', 8)
-  const b = new BN(poolId).toArray('le', 8)
-  const data = Uint8Array.from(a.concat(b))
-
-  return toHex(hash(data, 16))
-}
-
-function toHex(data: Uint8Array) {
-  const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
-  const out = []
-
-  for (let i = 0; i < data.length; i++) {
-    out.push(hex[(data[i] >> 4) & 0xf])
-    out.push(hex[data[i] & 0xf])
-  }
-  return `0x${out.join('')}`
 }
 
 function getEpochStatus(epochExecution: Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>, blockNumber: number) {

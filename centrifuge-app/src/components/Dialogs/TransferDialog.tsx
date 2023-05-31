@@ -1,9 +1,9 @@
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Dialog, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
+import { Dec } from '../../utils/Decimal'
 import { useAddress } from '../../utils/useAddress'
-import { useBalance } from '../../utils/useBalance'
 import { isSameAddress } from '../../utils/web3'
 import { ButtonGroup } from '../ButtonGroup'
 
@@ -20,7 +20,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
   const [address, setAddress] = React.useState('')
   const [touched, setTouched] = React.useState(false)
   const connectedAddress = useAddress('substrate')
-  const balance = useBalance()
+  const balances = useBalances(connectedAddress)
 
   const isConnected = !!connectedAddress
 
@@ -65,7 +65,8 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
 
   const error = getError()
 
-  const balanceLow = !balance || balance < TRANSFER_FEE_ESTIMATE
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
+  const balanceLow = balanceDec.lt(TRANSFER_FEE_ESTIMATE)
 
   const disabled = !!error || balanceLow
 
@@ -89,7 +90,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
           <Shelf justifyContent="space-between">
             {balanceLow && (
               <Text variant="label1" color="criticalForeground">
-                Your balance is too low ({(balance || 0).toFixed(2)} AIR)
+                Your balance is too low ({(balanceDec || 0).toFixed(2)} AIR)
               </Text>
             )}
             <ButtonGroup ml="auto">

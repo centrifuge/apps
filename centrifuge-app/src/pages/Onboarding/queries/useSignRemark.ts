@@ -96,13 +96,12 @@ export const useSignRemark = (
   useEffect(() => {
     const executePaymentInfo = async () => {
       if (selectedAccount && selectedAccount.signer) {
-        const api = await centrifuge.connect(selectedAccount.address, selectedAccount.signer)
+        const api = await centrifuge.connect(selectedAccount.address, selectedAccount.signer as any)
         const paymentInfo = await lastValueFrom(
           api.remark.signRemark([`Signed subscription agreement for pool: 12324565 tranche: 0xacbdefghijklmn`], {
             paymentInfo: selectedAccount.address,
           })
         )
-        // @ts-expect-error
         const txFee = paymentInfo.partialFee.toDecimal()
         setExpectedTxFee(txFee)
       }

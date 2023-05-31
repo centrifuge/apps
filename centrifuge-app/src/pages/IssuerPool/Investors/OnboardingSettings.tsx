@@ -19,6 +19,7 @@ import styled from 'styled-components'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { KYB_COUNTRY_CODES, KYC_COUNTRY_CODES, RESTRICTED_COUNTRY_CODES } from '../../Onboarding/geographyCodes'
 
@@ -36,6 +37,7 @@ export const OnboardingSettings = () => {
   const [isEditing, setIsEditing] = React.useState(false)
   const [useExternalUrl, setUseExternalUrl] = React.useState(!!poolMetadata?.onboarding?.externalOnboardingUrl)
   const centrifuge = useCentrifuge()
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
     'Update pool config',
@@ -135,7 +137,7 @@ export const OnboardingSettings = () => {
           externalOnboardingUrl: useExternalUrl ? values.externalOnboardingUrl : undefined,
         },
       }
-      updateConfigTx([poolId, amendedMetadata])
+      updateConfigTx([poolId, amendedMetadata], { account })
       actions.setSubmitting(true)
     },
   })

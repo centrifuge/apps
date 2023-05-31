@@ -19,7 +19,7 @@ import React from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
-import { usePermissions } from '../../../utils/usePermissions'
+import { usePermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useOrder, usePool } from '../../../utils/usePools'
 
 const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
@@ -31,10 +31,11 @@ export const InvestorStatus: React.FC = () => {
   const permissions = usePermissions(validAddress)
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
 
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['MemberListAdmin'] })
+
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Update investor',
-    (cent) => cent.pools.updatePoolRoles,
-    {}
+    (cent) => cent.pools.updatePoolRoles
   )
 
   const allowedTranches = Object.entries(permissions?.pools[poolId]?.tranches ?? {})
@@ -50,9 +51,9 @@ export const InvestorStatus: React.FC = () => {
     const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
 
     if (isAllowed) {
-      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]])
+      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]], { account })
     } else {
-      execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []])
+      execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []], { account })
     }
     setPendingTrancheId(trancheId)
   }

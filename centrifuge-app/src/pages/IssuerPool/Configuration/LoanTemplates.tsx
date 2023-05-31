@@ -1,5 +1,4 @@
 import { IconChevronRight, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
@@ -15,7 +14,7 @@ type Row = {
   id: string
 }
 
-export const LoanTemplates: React.FC = () => {
+export function LoanTemplates() {
   const { pid: poolId } = useParams<{ pid: string }>()
 
   const pool = usePool(poolId)

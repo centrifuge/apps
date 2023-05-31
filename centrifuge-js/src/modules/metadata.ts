@@ -10,13 +10,9 @@ export function getMetadataModule(inst: Centrifuge) {
     return inst.getMetadataObservable<T>(url)
   }
 
-  function pinFile(b64URI?: string): Observable<{ uri: string; ipfsHash: string }> {
+  function pinFile(b64URI: string): Observable<{ uri: string; ipfsHash: string }> {
     if (!inst.config?.pinFile) {
-      console.error('pinFile must be set in config to use this feature')
-      return from([])
-    }
-    if (!b64URI) {
-      return from([])
+      throw new Error('pinFile must be set in config to use this feature')
     }
 
     return from(inst.config.pinFile(b64URI))

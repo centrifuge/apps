@@ -77,7 +77,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
             alias={
               connectedType === 'evm'
                 ? ensName ?? undefined
-                : !substrate.proxy
+                : !substrate.selectedProxies
                 ? substrate.selectedAccount?.name
                 : undefined
             }

@@ -565,7 +565,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           minInitialInvestment: '5000000000000000000000',
         },
       },
-      riskGroups: [],
       onboarding: {
         agreements: {
           [`${id}-0`]: {

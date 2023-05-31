@@ -10,6 +10,7 @@ import { useTinlakeTransaction } from '../utils/tinlake/useTinlakeTransaction'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'
+import { useSuitableAccounts } from '../utils/usePermissions'
 import { DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
 import { columns, EpochList, LiquidityTableRow } from './EpochList'
@@ -52,9 +53,14 @@ export function LiquidityEpochSection({ pool }: LiquidityEpochSectionProps) {
 }
 
 function EpochStatusOngoing({ pool }: { pool: Pool }) {
-  const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
-    useLiquidity(pool.id)
+  const {
+    sumOfLockedInvestments,
+    sumOfLockedRedemptions,
+    // sumOfExecutableInvestments,
+    // sumOfExecutableRedemptions
+  } = useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
+  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Start order execution',
     (cent) => cent.pools.closeEpoch,
@@ -68,18 +74,21 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const closeEpoch = async () => {
     if (!pool) return
     // const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
-    closeEpochTx([pool.id, false])
+    closeEpochTx([pool.id, false], {
+      account,
+      forceProxyType: ['Borrow', 'Invest'],
+    })
   }
 
   const ordersLocked = !epochTimeRemaining && sumOfLockedInvestments.add(sumOfLockedRedemptions).gt(0)
-  const ordersPartiallyExecutable =
-    (sumOfExecutableInvestments.gt(0) && sumOfExecutableInvestments.lt(sumOfLockedInvestments)) ||
-    (sumOfExecutableRedemptions.gt(0) && sumOfExecutableRedemptions.lt(sumOfLockedRedemptions))
-  const ordersFullyExecutable =
-    sumOfLockedInvestments.equals(sumOfExecutableInvestments) &&
-    sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
-  const noOrdersExecutable =
-    !ordersFullyExecutable && sumOfExecutableInvestments.eq(0) && sumOfExecutableRedemptions.eq(0)
+  // const ordersPartiallyExecutable =
+  //   (sumOfExecutableInvestments.gt(0) && sumOfExecutableInvestments.lt(sumOfLockedInvestments)) ||
+  //   (sumOfExecutableRedemptions.gt(0) && sumOfExecutableRedemptions.lt(sumOfLockedRedemptions))
+  // const ordersFullyExecutable =
+  //   sumOfLockedInvestments.equals(sumOfExecutableInvestments) &&
+  //   sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+  // const noOrdersExecutable =
+  //   !ordersFullyExecutable && sumOfExecutableInvestments.eq(0) && sumOfExecutableRedemptions.eq(0)
 
   return (
     <PageSection
@@ -149,6 +158,7 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
 
 function EpochStatusSubmission({ pool }: { pool: Pool }) {
   // const [isFeasible, setIsFeasible] = React.useState(true)
+  // const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   // const { execute: submitSolutionTx, isLoading: loadingSolution } = useCentrifugeTransaction(
   //   'Submit solution',
   //   (cent) => cent.pools.submitSolution,
@@ -164,7 +174,7 @@ function EpochStatusSubmission({ pool }: { pool: Pool }) {
 
   // const submitSolution = async () => {
   //   if (!pool) return
-  //   submitSolutionTx([pool.id])
+  //   submitSolutionTx([pool.id], { account, forceProxyType: ['Borrow', 'Invest'] })
   // }
 
   return (
@@ -200,6 +210,7 @@ function EpochStatusSubmission({ pool }: { pool: Pool }) {
 
 function EpochStatusExecution({ pool }: { pool: Pool }) {
   const { minutesRemaining, minutesTotal } = useChallengeTimeCountdown(pool.id)
+  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute order',
     (cent) => cent.pools.executeEpoch
@@ -207,7 +218,7 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
 
   const executeEpoch = () => {
     if (!pool) return
-    executeEpochTx([pool.id])
+    executeEpochTx([pool.id], { account, forceProxyType: ['Borrow', 'Invest'] })
   }
 
   return (
