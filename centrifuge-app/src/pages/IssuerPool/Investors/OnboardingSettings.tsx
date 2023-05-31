@@ -5,6 +5,7 @@ import {
   Button,
   FileUpload,
   IconMinusCircle,
+  RadioButton,
   SearchInput,
   Shelf,
   Stack,
@@ -28,6 +29,7 @@ type OnboardingSettingsInput = {
   kybRestrictedCountries: string[]
   kycRestrictedCountries: string[]
   externalOnboardingUrl?: string
+  openForOnboarding: { [trancheId: string]: boolean }
 }
 
 export const OnboardingSettings = () => {
@@ -54,8 +56,8 @@ export const OnboardingSettings = () => {
       agreements: (pool.tranches as Token[]).reduce<OnboardingSettingsInput['agreements']>(
         (prevT, currT) => ({
           ...prevT,
-          [currT.id]: poolMetadata?.onboarding?.agreements?.[currT.id]?.uri
-            ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[currT.id].uri)
+          [currT.id]: poolMetadata?.onboarding?.tranches?.[currT.id]?.agreement?.uri
+            ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[currT.id].agreement!.uri)
             : undefined,
         }),
         {}
@@ -69,6 +71,13 @@ export const OnboardingSettings = () => {
           (c) => KYC_COUNTRY_CODES[c as keyof typeof KYC_COUNTRY_CODES]
         ) ?? [],
       externalOnboardingUrl: poolMetadata?.onboarding?.externalOnboardingUrl ?? '',
+      openForOnboarding: (pool.tranches as Token[]).reduce<OnboardingSettingsInput['openForOnboarding']>(
+        (prevT, currT) => ({
+          ...prevT,
+          [currT.id]: !!poolMetadata?.onboarding?.tranches?.[currT.id]?.openForOnboarding,
+        }),
+        {}
+      ),
     }
   }, [pool, poolMetadata])
 
@@ -99,23 +108,35 @@ export const OnboardingSettings = () => {
       if (!values.agreements || !poolMetadata) {
         return
       }
-      let onboardingAgreements = poolMetadata?.onboarding?.agreements ?? {}
+      let onboardingTranches = {}
       for (const [tId, file] of Object.entries(values.agreements)) {
         if (!file) {
-          continue
+          onboardingTranches = {
+            ...onboardingTranches,
+            [tId]: {
+              agreement: undefined,
+              openForOnboarding: !!values.openForOnboarding[tId],
+            },
+          }
         }
         // file is already IPFS hash so it hasn't changed
-        if (typeof file === 'string') {
-          onboardingAgreements = {
-            ...onboardingAgreements,
-            [tId]: { uri: file, mime: 'application/pdf' },
+        else if (typeof file === 'string') {
+          onboardingTranches = {
+            ...onboardingTranches,
+            [tId]: {
+              agreement: { uri: file, mime: 'application/pdf' },
+              openForOnboarding: !!values.openForOnboarding[tId],
+            },
           }
         } else {
           const uri = await getFileDataURI(file)
           const pinnedAgreement = await lastValueFrom(centrifuge.metadata.pinFile(uri))
-          onboardingAgreements = {
-            ...onboardingAgreements,
-            [tId]: { uri: centrifuge.metadata.parseMetadataUrl(pinnedAgreement.ipfsHash), mime: file.type },
+          onboardingTranches = {
+            ...onboardingTranches,
+            [tId]: {
+              agreement: { uri: centrifuge.metadata.parseMetadataUrl(pinnedAgreement.ipfsHash), mime: file.type },
+              openForOnboarding: !!values.openForOnboarding[tId],
+            },
           }
         }
       }
@@ -131,7 +152,7 @@ export const OnboardingSettings = () => {
       const amendedMetadata: PoolMetadata = {
         ...poolMetadata,
         onboarding: {
-          agreements: onboardingAgreements,
+          tranches: onboardingTranches,
           kycRestrictedCountries,
           kybRestrictedCountries,
           externalOnboardingUrl: useExternalUrl ? values.externalOnboardingUrl : undefined,
@@ -172,29 +193,66 @@ export const OnboardingSettings = () => {
           }
         >
           <Stack gap={3} mb={5}>
+            <Text variant="heading4">Onboarding status</Text>
+            <Stack gap={1}>
+              {Object.entries(formik.values.openForOnboarding).map(([tId, open]) => (
+                <Shelf width="100%" justifyContent="space-between" gap={2}>
+                  <Text variant="body1">{(pool.tranches as Token[]).find((t) => t.id === tId)?.currency.name}</Text>
+                  <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px" width="fit-content">
+                    <ToggleButton
+                      forwardedAs="button"
+                      variant="interactive2"
+                      isActive={open}
+                      disabled={!isEditing || formik.isSubmitting || isLoading}
+                      type="button"
+                      label={(pool.tranches as Token[]).find((t) => t.id === tId)?.currency.name}
+                      onClick={() => {
+                        formik.setFieldValue('openForOnboarding', {
+                          ...formik.values.openForOnboarding,
+                          [tId]: true,
+                        })
+                      }}
+                    >
+                      Open
+                    </ToggleButton>
+                    <ToggleButton
+                      forwardedAs="button"
+                      variant="interactive2"
+                      type="button"
+                      isActive={!open}
+                      disabled={!isEditing || formik.isSubmitting || isLoading}
+                      onClick={() => {
+                        formik.setFieldValue('openForOnboarding', {
+                          ...formik.values.openForOnboarding,
+                          [tId]: false,
+                        })
+                      }}
+                    >
+                      Closed
+                    </ToggleButton>
+                  </Shelf>
+                </Shelf>
+              ))}
+            </Stack>
             <Stack gap={2}>
               <Text variant="heading4">Onboarding provider</Text>
-              <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px" width="fit-content">
-                <ToggleButton
-                  forwardedAs="button"
-                  variant="interactive2"
-                  isActive={!useExternalUrl}
+              <Shelf gap={1}>
+                <RadioButton
                   disabled={!isEditing || formik.isSubmitting || isLoading}
-                  type="button"
-                  onClick={() => setUseExternalUrl(false)}
-                >
-                  Centrifuge
-                </ToggleButton>
-                <ToggleButton
-                  forwardedAs="button"
-                  variant="interactive2"
-                  type="button"
-                  isActive={useExternalUrl}
+                  checked={!useExternalUrl}
+                  label="Centrifuge"
+                  onChange={() => {
+                    setUseExternalUrl(false)
+                  }}
+                />
+                <RadioButton
                   disabled={!isEditing || formik.isSubmitting || isLoading}
-                  onClick={() => setUseExternalUrl(true)}
-                >
-                  External
-                </ToggleButton>
+                  checked={useExternalUrl}
+                  label="Other"
+                  onChange={() => {
+                    setUseExternalUrl(true)
+                  }}
+                />
               </Shelf>
               {useExternalUrl && (
                 <TextInput
@@ -216,7 +274,7 @@ export const OnboardingSettings = () => {
               <Text variant="heading4">Subscription documents</Text>
               {Object.entries(formik.values.agreements).map(([tId, agreement]) => {
                 return (
-                  <Box key={tId}>
+                  <Box key={`${tId}-sub-docs`}>
                     <FileUpload
                       label={`Subscription document for ${
                         (pool.tranches as Token[])?.find((t) => t.id === tId)?.currency.name
@@ -260,7 +318,7 @@ export const OnboardingSettings = () => {
                 {Object.entries(KYB_COUNTRY_CODES)
                   .filter(([_, country]) => !formik.values.kybRestrictedCountries.includes(country))
                   .map(([code, country]) => (
-                    <option key={code} value={country} id={code} />
+                    <option key={`${code}-kyb`} value={country} id={code} />
                   ))}
               </datalist>
               <Stack gap={0}>
@@ -271,6 +329,7 @@ export const OnboardingSettings = () => {
                 )}
                 {formik.values.kybRestrictedCountries.map((country) => (
                   <Shelf
+                    key={`${country}-kyb-restricted`}
                     p="4px"
                     width="100%"
                     justifyContent="space-between"
@@ -321,7 +380,7 @@ export const OnboardingSettings = () => {
                 {Object.entries(KYC_COUNTRY_CODES)
                   .filter(([_, country]) => !formik.values.kycRestrictedCountries.includes(country))
                   .map(([code, country]) => (
-                    <option key={code} value={country} id={code} />
+                    <option key={`${code}-kyc`} value={country} id={code} />
                   ))}
               </datalist>
               <Stack gap={0}>
@@ -332,6 +391,7 @@ export const OnboardingSettings = () => {
                 )}
                 {formik.values.kycRestrictedCountries.map((country) => (
                   <Shelf
+                    key={`${country}-kyc-restricted`}
                     p="4px"
                     width="100%"
                     justifyContent="space-between"
