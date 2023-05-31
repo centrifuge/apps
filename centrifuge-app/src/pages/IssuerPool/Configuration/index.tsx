@@ -10,7 +10,6 @@ import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
 import { LoanTemplates } from './LoanTemplates'
-import { OnboardingConfig } from './OnboardingConfig'
 import { PoolConfig } from './PoolConfig'
 import { WriteOffGroups } from './WriteOffGroups'
 
@@ -39,7 +38,6 @@ function IssuerPoolConfiguration() {
           <EpochAndTranches />
           <WriteOffGroups />
           <LoanTemplates />
-          <OnboardingConfig />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}

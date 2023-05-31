@@ -14,6 +14,7 @@ export const DataSharingAgreementDialog = ({ isDialogOpen, setIsDialogOpen }: Pr
   >
     <Stack height="452px" gap={3} overflowY="scroll">
       <Text variant="heading2">Consent to data transfer</Text>
+      <Text>KYC and KYB verifications for this pool are performed by Shufti Pro, a third-party service provider.</Text>
       <Text>
         Shufti Pro Limited enables Investors to disclose their personal data to issuers of such Investors' choosing.
         Investors located in the European Economic Area ("EEA") or the United Kingdom should be aware that these

@@ -7,7 +7,7 @@ import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import MemberListAdminAbi from './abi/MemberListAdmin.abi.json'
 import RemarkerAbi from './abi/Remarker.abi.json'
-import { centrifuge } from './centrifuge'
+import { getCentrifuge } from './centrifuge'
 import { HttpError, reportHttpError } from './httpError'
 
 export interface LaunchingPool extends BasePool {}
@@ -127,7 +127,7 @@ function parsePoolsMetadata(poolsMetadata): { active: ActivePool[] } {
 
 export const getTinlakePoolById = async (poolId: string) => {
   const uri = ethConfig.poolsHash
-  const data = (await lastValueFrom(centrifuge.metadata.getMetadata(uri))) as PoolMetadataDetails
+  const data = (await lastValueFrom(getCentrifuge().metadata.getMetadata(uri))) as PoolMetadataDetails
   const pools = parsePoolsMetadata(Object.values(data))
   const poolData = pools.active.find((p) => p.addresses.ROOT_CONTRACT === poolId)
 
@@ -152,10 +152,12 @@ export const getTinlakePoolById = async (poolId: string) => {
     onboarding: {
       agreements: {
         [`${id}-0`]: {
-          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-0`],
+          uri: poolData.metadata.attributes?.Links.Agreements?.[`${id}-0`],
+          mime: 'application/pdf',
         },
         [`${id}-1`]: {
-          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
+          uri: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
+          mime: 'application/pdf',
         },
       },
     },

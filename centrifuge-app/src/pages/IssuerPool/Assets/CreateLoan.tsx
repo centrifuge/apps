@@ -376,11 +376,13 @@ function IssuerCreateLoan() {
                     maxLength={100}
                     disabled={!templateId}
                   />
-                  <Box alignSelf="center" justifySelf="end">
-                    <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
-                      Create template
-                    </RouterLinkButton>
-                  </Box>
+                  {!templateId && (
+                    <Box alignSelf="center" justifySelf="end">
+                      <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
+                        Create template
+                      </RouterLinkButton>
+                    </Box>
+                  )}
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">

@@ -33,7 +33,6 @@ export const useVerifyBusiness = () => {
               ? `${values.jurisdictionCode}_${values.regionCode}`
               : values.jurisdictionCode,
           dryRun: import.meta.env.REACT_APP_ONBOARDING_API_URL.includes('production') ? false : true,
-          manualReview: values?.manualReview ?? false,
           ...(values?.manualReview && poolId && trancheId && { poolId, trancheId }),
         }),
         headers: {

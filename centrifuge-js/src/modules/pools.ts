@@ -490,11 +490,15 @@ export type PoolMetadata = {
     threshold: number
   }
   onboarding?: {
-    agreements: {
+    agreements?: {
       [trancheId: string]: {
-        ipfsHash: string
+        uri: string
+        mime: string
       }
     }
+    kybRestrictedCountries?: string[]
+    kycRestrictedCountries?: string[]
+    externalOnboardingUrl?: string
   }
 }
 

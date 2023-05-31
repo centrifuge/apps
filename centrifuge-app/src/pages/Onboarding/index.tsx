@@ -35,7 +35,7 @@ export const OnboardingPage: React.FC = () => {
     const trancheName = trancheId?.split('-')[1] === '0' ? 'junior' : 'senior'
     const canOnboard = isTinlakePool && metadata?.pool?.newInvestmentsStatus?.[trancheName] !== 'closed'
 
-    if (!poolId || !trancheId || !canOnboard) {
+    if (!poolId || !trancheId || (isTinlakePool && !canOnboard)) {
       setPool(null)
       return history.push('/onboarding')
     }
