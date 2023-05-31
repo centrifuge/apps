@@ -407,9 +407,11 @@ export type IssuerDetail = {
   body: string
 }
 
+type FileType = { uri: string; mime: string }
+
 export interface PoolMetadataInput {
   // details
-  poolIcon: { uri: string; mime: string } | null
+  poolIcon: FileType | null
   poolName: string
   assetClass: string
   currency: string
@@ -422,10 +424,10 @@ export interface PoolMetadataInput {
   // issuer
   issuerName: string
   issuerRepName: string
-  issuerLogo?: { uri: string; mime: string } | null
+  issuerLogo?: FileType | null
   issuerDescription: string
 
-  executiveSummary: { uri: string; mime: string } | null
+  executiveSummary: FileType | null
   website: string
   forum: string
   email: string
@@ -447,7 +449,7 @@ export type PoolMetadata = {
   version?: number
   pool: {
     name: string
-    icon: { uri: string; mime: string } | null
+    icon: FileType | null
     asset: {
       class: string
     }
@@ -456,10 +458,10 @@ export type PoolMetadata = {
       name: string
       description: string
       email: string
-      logo?: { uri: string; mime: string } | null
+      logo?: FileType | null
     }
     links: {
-      executiveSummary: { uri: string; mime: string } | null
+      executiveSummary: FileType | null
       forum?: string
       website?: string
     }
@@ -473,7 +475,7 @@ export type PoolMetadata = {
   tranches: Record<
     string,
     {
-      icon?: { uri: string; mime: string } | null
+      icon?: FileType | null
       minInitialInvestment?: string
     }
   >
@@ -486,15 +488,10 @@ export type PoolMetadata = {
     threshold: number
   }
   onboarding?: {
-    agreements?: {
-      [trancheId: string]: {
-        uri: string
-        mime: string
-      }
-    }
     kybRestrictedCountries?: string[]
     kycRestrictedCountries?: string[]
     externalOnboardingUrl?: string
+    tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
   }
 }
 
