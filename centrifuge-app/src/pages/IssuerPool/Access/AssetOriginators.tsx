@@ -32,8 +32,6 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
     proxy: { proxyDepositBase, proxyDepositFactor },
   } = useCentrifugeConsts()
 
-  console.log('access', access)
-
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'], actingAddress: [access.admin || ''] })
 
   const { execute: createAO, isLoading: createAOIsPending } = useCentrifugeTransaction(
@@ -95,7 +93,6 @@ function AOForm({
 }) {
   const [isEditing, setIsEditing] = React.useState(false)
   const [account] = useSuitableAccounts({ poolId, actingAddress: [ao.address] }).filter((a) => a.proxies?.length === 2)
-  console.log('suitaccount', account)
   const identity = useIdentity(ao.address)
   const cent = useCentrifuge()
   const {
@@ -215,8 +212,6 @@ function AOForm({
                 tx,
               ])
             }
-
-            console.log('tx', tx, options)
 
             return cent.wrapSignAndSend(api, tx, {
               ...options,

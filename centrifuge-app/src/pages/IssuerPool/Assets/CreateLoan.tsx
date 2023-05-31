@@ -178,6 +178,8 @@ function IssuerCreateLoan() {
     .add(attributeDepositBase.mul(new BN(2)))
     .add(depositPerByte.mul(new BN(NFT_DATA_BYTES)))
 
+  console.log('deposit', deposit)
+
   const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
@@ -376,11 +378,13 @@ function IssuerCreateLoan() {
                     maxLength={100}
                     disabled={!templateId}
                   />
-                  <Box alignSelf="center" justifySelf="end">
-                    <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
-                      Create template
-                    </RouterLinkButton>
-                  </Box>
+                  {!templateId && (
+                    <Box alignSelf="center" justifySelf="end">
+                      <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
+                        Create template
+                      </RouterLinkButton>
+                    </Box>
+                  )}
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">

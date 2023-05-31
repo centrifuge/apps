@@ -8,6 +8,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { Button, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Dec } from '../utils/Decimal'
 import { useTinlakeBalances } from '../utils/tinlake/useTinlakeBalances'
 import { useTinlakeInvestments } from '../utils/tinlake/useTinlakeInvestments'
 import { TinlakePool, useTinlakePools } from '../utils/tinlake/useTinlakePools'
@@ -315,10 +316,12 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
     }
   )
 
-  const juniorInvest = pool.tranches[0].pendingInvestments.toDecimal()
-  const seniorInvest = pool.tranches[1].pendingInvestments.toDecimal()
-  const juniorRedeem = pool.tranches[0].pendingRedemptions.toDecimal()
-  const seniorRedeem = pool.tranches[1].pendingRedemptions.toDecimal()
+  const juniorTokenPrice = pool.tranches[0].tokenPrice?.toDecimal() || Dec(1)
+  const seniorTokenPrice = pool.tranches[1].tokenPrice?.toDecimal() || Dec(1)
+  const juniorInvest = pool.tranches[0].pendingInvestments.toDecimal().mul(juniorTokenPrice)
+  const seniorInvest = pool.tranches[1].pendingInvestments.toDecimal().mul(seniorTokenPrice)
+  const juniorRedeem = pool.tranches[0].pendingRedemptions.toDecimal().mul(juniorTokenPrice)
+  const seniorRedeem = pool.tranches[1].pendingRedemptions.toDecimal().mul(seniorTokenPrice)
   const sumOfLockedInvestments = juniorInvest.add(seniorInvest)
   const sumOfLockedRedemptions = juniorRedeem.add(seniorRedeem)
   const investments: LiquidityTableRow[] = [

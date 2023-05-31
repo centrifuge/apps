@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
 import { InferType, object, string } from 'yup'
-import { centrifuge, isValidSubstrateAddress } from '../../utils/centrifuge'
+import { getCentrifuge, isValidSubstrateAddress } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -52,7 +52,7 @@ export const authenticateWalletController = async (
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 async function verifySubstrateWallet(req: Request, res: Response) {
   const { jw3t: token, nonce } = req.body
-  const { verified, payload } = await centrifuge.auth.verify(token!)
+  const { verified, payload } = await await getCentrifuge().auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
   const address = payload.address
@@ -68,7 +68,11 @@ async function verifySubstrateWallet(req: Request, res: Response) {
   res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
 
   if (verified && onBehalfOf) {
-    const isVerifiedProxy = await centrifuge.auth.verifyProxy(address, onBehalfOf, AUTHORIZED_ONBOARDING_PROXY_TYPES)
+    const isVerifiedProxy = await getCentrifuge().auth.verifyProxy(
+      address,
+      onBehalfOf,
+      AUTHORIZED_ONBOARDING_PROXY_TYPES
+    )
     if (isVerifiedProxy.verified) {
       req.wallet.address = address
     } else if (verified && !onBehalfOf) {

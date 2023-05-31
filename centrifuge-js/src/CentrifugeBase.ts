@@ -313,7 +313,7 @@ export class CentrifugeBase {
   }
 
   wrapSubstrateEvmSignAndSend<T extends TransactionOptions>(
-    api: ApiRx,
+    _: ApiRx,
     submittable: SubmittableExtrinsic<'rxjs'>,
     options?: T
   ) {

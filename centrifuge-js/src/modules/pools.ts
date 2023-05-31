@@ -451,10 +451,6 @@ export type PoolMetadata = {
     asset: {
       class: string
     }
-    newInvestmentsStatus: {
-      junior: 'closed' | 'request' | 'open'
-      senior: 'closed' | 'request' | 'open'
-    }
     issuer: {
       repName: string
       name: string
@@ -490,11 +486,15 @@ export type PoolMetadata = {
     threshold: number
   }
   onboarding?: {
-    agreements: {
+    agreements?: {
       [trancheId: string]: {
-        ipfsHash: string
+        uri: string
+        mime: string
       }
     }
+    kybRestrictedCountries?: string[]
+    kycRestrictedCountries?: string[]
+    externalOnboardingUrl?: string
   }
 }
 

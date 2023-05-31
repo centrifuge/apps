@@ -4,7 +4,7 @@ import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { onboardingBucket } from '../database'
-import { centrifuge } from './centrifuge'
+import { getCentrifuge } from './centrifuge'
 import { getPoolById } from './getPoolById'
 import { HttpError } from './httpError'
 
@@ -35,9 +35,9 @@ export const annotateAgreementAndSignAsInvestor = async ({
   }
 
   const unsignedAgreementUrl = metadata?.onboarding?.agreements[trancheId]
-    ? centrifuge.metadata.parseMetadataUrl(metadata?.onboarding?.agreements[trancheId].ipfsHash)
+    ? getCentrifuge().metadata.parseMetadataUrl(metadata?.onboarding?.agreements?.[trancheId].uri)
     : wallet.network === 'substrate'
-    ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    ? getCentrifuge().metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
 
   // tinlake pools that are closed for onboarding don't have agreements in their metadata
@@ -71,7 +71,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
     `Signed by ${wallet.address} on Centrifuge
 Block: ${transactionInfo.blockNumber}
 Transaction hash: ${transactionInfo.txHash}
-Agreement hash: ${metadata.onboarding.agreements[trancheId].ipfsHash}`,
+Agreement hash: ${unsignedAgreementUrl}`,
     {
       x: 30,
       y: firstPage.getSize().height - 30,

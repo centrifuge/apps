@@ -44,8 +44,9 @@ export function getAuthModule(inst: Centrifuge) {
     }
 
     const polkaJsSigner = new jw3t.PolkaJsSigner({
-      // @ts-expect-error KeyPair type mismatch
+      // @ts-ignore KeyPair type mismatch
       account,
+      // @ts-ignore Signer type mismatch
       signer,
     })
     const jw3tSigner = new jw3t.JW3TSigner(polkaJsSigner, content)

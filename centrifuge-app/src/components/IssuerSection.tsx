@@ -45,6 +45,7 @@ export function IssuerSection({ metadata }: IssuerSectionProps) {
                     Executive summary
                   </PillButton>
                   <ExecutiveSummaryDialog
+                    issuerName={metadata?.pool?.issuer.name}
                     href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
                     open={isDialogOpen}
                     onClose={() => setIsDialogOpen(false)}
