@@ -48,8 +48,8 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
 
-  const unsignedAgreementUrl = poolMetadata?.onboarding?.agreements?.[trancheId]
-    ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[trancheId].uri)
+  const unsignedAgreementUrl = poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
+    ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[trancheId].agreement?.uri!)
     : !poolId.startsWith('0x')
     ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
