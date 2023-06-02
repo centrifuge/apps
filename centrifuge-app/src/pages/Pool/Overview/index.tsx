@@ -11,6 +11,7 @@ import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PoolToken } from '../../../components/PoolToken'
+import PortfolioSection from '../../../components/PortfolioSection'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { ethConfig } from '../../../config'
@@ -220,6 +221,9 @@ export function PoolDetailOverview({
       </PageSection>
       <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />
+      </PageSection>
+      <PageSection title="Portfolio">
+        <PortfolioSection />
       </PageSection>
     </>
   )

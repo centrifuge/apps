@@ -40,6 +40,7 @@
     "@web3modal/standalone": "^2.4.2",
     "axios": "^0.24.0",
     "bn.js": "^5.2.1",
+    "chart.js": "^4.3.0",
     "form-data": "^4.0.0",
     "formik": "^2.2.9",
     "jw3t": "^1.0.10",
