@@ -1,8 +1,8 @@
-import { Stack } from '@centrifuge/fabric'
+import { Shelf, Text } from '@centrifuge/fabric'
 import Chart from 'chart.js/auto'
 import * as React from 'react'
 
-const POOL_CONFIG_REPORTS = {
+const POOL_CONFIG_REPORTS: { reports: { [name: string]: { sections: ReportSection[] } } } = {
   reports: {
     poolOverview: {
       sections: [
@@ -12,12 +12,18 @@ const POOL_CONFIG_REPORTS = {
           view: 'chart',
           viewData: { type: 'bar' },
         },
+        {
+          name: 'Average FICO score (weighted by outstanding debt) over time',
+          aggregate: 'ficoScoreWeightedByNormalizedDebtOverTime',
+          view: 'chart',
+          viewData: { type: 'line' },
+        },
       ],
     },
   },
 }
 
-const POD_INDEXER_DATA = {
+const POD_INDEXER_DATA: { data: { [id: string]: ChartData } } = {
   data: {
     sumOfNormalizedDebtPerState: [
       {
@@ -33,7 +39,68 @@ const POD_INDEXER_DATA = {
         value1: 581202,
       },
     ],
+    ficoScoreWeightedByNormalizedDebtOverTime: [
+      {
+        key1: '2023-05-20',
+        value1: 580,
+      },
+      {
+        key1: '2023-05-21',
+        value1: 605,
+      },
+      {
+        key1: '2023-05-22',
+        value1: 610,
+      },
+      {
+        key1: '2023-05-23',
+        value1: 610,
+      },
+      {
+        key1: '2023-05-24',
+        value1: 610,
+      },
+      {
+        key1: '2023-05-25',
+        value1: 605,
+      },
+      {
+        key1: '2023-05-26',
+        value1: 601,
+      },
+    ],
   },
+}
+
+interface ReportSection {
+  name: string
+  aggregate: string
+  view: 'chart'
+  viewData: any // TODO
+}
+
+type ChartData = { key1: any; value1: any }[]
+
+const displayChart = async (reportSection: ReportSection, data: ChartData) => {
+  new Chart(document.getElementById(`chart_${reportSection.aggregate}`), {
+    ...reportSection.viewData,
+    data: {
+      labels: data.map((row) => row.key1),
+      datasets: [
+        {
+          data: data.map((row) => row.value1),
+          backgroundColor: '#2762ff',
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  })
 }
 
 const PortfolioSection: React.VFC = () => {
@@ -41,37 +108,23 @@ const PortfolioSection: React.VFC = () => {
     Chart.defaults.borderColor = '#eee'
     Chart.defaults.color = '#000'
     ;(async function () {
-      const report = POOL_CONFIG_REPORTS['reports']['poolOverview']['sections'][0]
-      const data = POD_INDEXER_DATA['data']['sumOfNormalizedDebtPerState']
-
-      new Chart(document.getElementById('chart'), {
-        ...report.viewData,
-        data: {
-          labels: data.map((row) => row.key1),
-          datasets: [
-            {
-              data: data.map((row) => row.value1),
-              backgroundColor: '#2762ff',
-            },
-          ],
-        },
-        options: {
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-        },
+      POOL_CONFIG_REPORTS['reports']['poolOverview']['sections'].forEach((reportSection) => {
+        displayChart(reportSection, POD_INDEXER_DATA['data'][reportSection.aggregate])
       })
     })()
   }, [])
 
   return (
-    <Stack>
-      <div>
-        <canvas id="chart"></canvas>
-      </div>
-    </Stack>
+    <Shelf gap="50px">
+      {POOL_CONFIG_REPORTS['reports']['poolOverview']['sections'].map((reportSection) => (
+        <div style={{ width: '50%' }}>
+          <Text variant="heading5" style={{ marginBottom: '24px' }}>
+            {reportSection.name}
+          </Text>
+          <canvas id={`chart_${reportSection.aggregate}`}></canvas>
+        </div>
+      ))}
+    </Shelf>
   )
 }
 
