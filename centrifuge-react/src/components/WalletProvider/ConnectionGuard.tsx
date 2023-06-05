@@ -12,9 +12,11 @@ type Props = {
 
 export function ConnectionGuard({ networks, children, body = 'Unsupported network.' }: Props) {
   const {
+    isEvmOnSubstrate,
     connectedType,
     connectedNetwork,
     evm: { chains, selectedWallet },
+    substrate: { evmChainId },
     showWallets,
     connect,
   } = useWallet()
@@ -23,11 +25,15 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
     return <>{children}</>
   }
 
-  if (connectedNetwork && networks.includes(connectedNetwork)) return <>{children}</>
+  if (
+    connectedNetwork &&
+    (networks.includes(connectedNetwork) || (networks.includes('centrifuge') && isEvmOnSubstrate))
+  )
+    return <>{children}</>
 
   function switchNetwork(target: Network) {
-    if (connectedType === 'evm' && selectedWallet && typeof target === 'number') {
-      connect(selectedWallet, target)
+    if (connectedType === 'evm' && selectedWallet) {
+      connect(selectedWallet, target === 'centrifuge' ? evmChainId : target)
     } else {
       showWallets(target)
     }

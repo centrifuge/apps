@@ -40,7 +40,7 @@ export function WalletMenu({ menuItems }: WalletMenuProps) {
   return address ? (
     <ConnectedMenu menuItems={menuItems} />
   ) : accounts && !accounts.length ? (
-    <WalletButton connectLabel="No accounts available" disabled />
+    <ConnectButton label="No accounts available" />
   ) : (
     <ConnectButton loading={pendingConnect.isConnecting} />
   )

@@ -18,7 +18,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
-  const { showWallets, substrate, walletDialog, evm, connectedType, isEvmOnSubstrate } = useWallet()
+  const { showWallets, substrate, walletDialog, evm, isEvmOnSubstrate } = useWallet()
   const provider = useEvmProvider()
   const { selectedCombinedAccount, selectedAccount } = substrate
   const cent = useCentrifuge()

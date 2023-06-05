@@ -50,13 +50,14 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
 
   const getNetworkName = useGetNetworkName()
 
+  const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
+
   const sortedEvmWallets = sortEvmWallets(evm.connectors.filter((c) => c.shown))
-  const shownWallets =
-    selectedNetwork === 'centrifuge'
-      ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
-      : selectedNetwork
-      ? sortedEvmWallets
-      : []
+  const shownWallets = isCentChainSelected
+    ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
+    : selectedNetwork
+    ? sortedEvmWallets
+    : []
 
   function close() {
     dispatch({ type: 'closeWalletDialog' })
@@ -78,8 +79,8 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
   function walletButtonMuted() {
     return Boolean(
       scopedNetworks &&
-        ((selectedNetwork === 'centrifuge' && !scopedNetworks.includes('centrifuge')) ||
-          (typeof selectedNetwork === 'number' && scopedNetworks.includes('centrifuge')))
+        ((isCentChainSelected && !scopedNetworks.includes('centrifuge')) ||
+          (typeof selectedNetwork === 'number' && !scopedNetworks.includes(selectedNetwork)))
     )
   }
 
@@ -98,7 +99,7 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
               <SelectButton
                 logo={<Logo icon={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
-                active={selectedNetwork === 'centrifuge'}
+                active={isCentChainSelected}
                 muted={Boolean(scopedNetworks && !scopedNetworks.includes('centrifuge'))}
               >
                 {getNetworkName('centrifuge')}

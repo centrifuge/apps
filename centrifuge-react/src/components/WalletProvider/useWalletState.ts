@@ -130,7 +130,7 @@ type PersistState = {
   type: 'substrate' | 'evm'
   wallet: string
   address: string
-  chainId?: number
+  // chainId?: number
 }
 
 export function getPersistedMultisigs(): Multisig[] {
@@ -168,6 +168,8 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
 
   const evmState = useConnectorState(reducerState.evm.selectedWallet?.connector)
 
+  console.log('reducerState', reducerState, evmState)
+
   const state = React.useMemo(
     () => ({
       ...reducerState,
@@ -187,8 +189,12 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
           type: 'evm',
           wallet: evmConnectors.find((c) => c.connector === state.evm.selectedWallet!.connector)!.id,
           address: evmState.accounts[0],
-          chainId: evmState.chainId,
+          // chainId: evmState.chainId,
         })
+      }
+      if (!evmState.accounts) {
+        dispatch({ type: 'reset' })
+        // state.evm.selectedWallet?.connector.deactivate?.()
       }
     } else if (state.connectedType === 'substrate') {
       if (state.substrate.selectedAccountAddress) {

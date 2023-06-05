@@ -27,7 +27,6 @@ module.exports = {
     'new-parens': 'off',
     'newline-per-chained-call': 'off',
     'no-array-constructor': 'error',
-    'no-duplicate-imports': 'error',
     'no-eval': 'error',
     'no-extra-semi': 'off',
     'no-irregular-whitespace': 'off',

@@ -1,11 +1,12 @@
 import coinbasewalletLogo from '@centrifuge/fabric/assets/logos/coinbasewallet.svg'
 import metamaskLogo from '@centrifuge/fabric/assets/logos/metamask.svg'
 import walletconnectLogo from '@centrifuge/fabric/assets/logos/walletconnect.svg'
+// import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
+import { WalletConnect as WalletConnectV2 } from '@centrifuge/web3-react-walletconnect-v2-universal'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
-import { WalletConnect } from '@web3-react/walletconnect'
 import { isMobile } from '../../../utils/device'
 import { createConnector, isCoinbaseWallet, isInjected } from './utils'
 
@@ -24,18 +25,48 @@ export type EvmConnectorMeta = {
 
 export function getEvmConnectors(
   urls: { [chainId: number]: string[] },
-  additionalConnectors?: EvmConnectorMeta[]
+  {
+    walletConnectId,
+    additionalConnectors,
+  }: {
+    walletConnectId?: string
+    additionalConnectors?: EvmConnectorMeta[]
+    substrateEvmChainId?: number
+  } = {}
 ): EvmConnectorMeta[] {
   const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
-  const [walletConnect] = createConnector(
-    (actions) =>
-      new WalletConnect({
-        actions,
-        options: {
-          rpc: urls,
-        },
-      })
-  )
+  const { ['1']: _, ...optional } = urls
+  const chains = [1, ...Object.keys(optional).map(Number)]
+  // const walletConnect =
+  //   walletConnectId &&
+  //   createConnector(
+  //     (actions) =>
+  //       new WalletConnectV2({
+  //         actions,
+  //         options: {
+  //           projectId: walletConnectId,
+  //           chains: chains,
+  //           optionalChains: chains.slice(1),
+  //           showQrModal: true,
+  //           rpcMap: urls,
+  //         },
+  //       })
+  //   )[0]
+  const walletConnect =
+    walletConnectId &&
+    createConnector(
+      (actions) =>
+        new WalletConnectV2({
+          actions,
+          options: {
+            projectId: walletConnectId,
+            // chains: chains,
+            // optionalChains: chains.slice(1),
+            // showQrModal: true,
+            // rpcMap: urls,
+          },
+        })
+    )[0]
   const [coinbase] = createConnector(
     (actions) =>
       new CoinbaseWallet({
@@ -81,7 +112,7 @@ export function getEvmConnectors(
         return !isMobile() || this.installed
       },
     },
-    {
+    walletConnect && {
       id: 'walletconnect',
       title: 'WalletConnect',
       installUrl: '',
@@ -114,5 +145,5 @@ export function getEvmConnectors(
       },
     },
     ...(additionalConnectors ?? []),
-  ]
+  ].filter(Boolean) as EvmConnectorMeta[]
 }

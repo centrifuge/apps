@@ -8,7 +8,8 @@
     "simulation-tests",
     "onboarding-api",
     "faucet-api",
-    "pinning-api"
+    "pinning-api",
+    "web3-react-walletconnect-v2-universal"
   ],
   "devDependencies": {
     "@types/bn.js": "^5.1.1",

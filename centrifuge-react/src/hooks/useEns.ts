@@ -7,13 +7,33 @@ export function useEns(address?: string) {
   const { selectedWallet, chainId, selectedAddress } = evm
   const provider = useProviderForConnector(selectedWallet?.connector, chainId)
   const addr = address || (connectedType === 'evm' ? selectedAddress : undefined)
-  const { data: name } = useQuery(['ensName', addr, !!provider, chainId], () => provider!.lookupAddress(addr!), {
-    enabled: !!provider && !!addr,
-    retry: false,
-  })
-  const { data: avatar } = useQuery(['ensAvatar', addr, !!provider, chainId], () => provider!.getAvatar(addr!), {
-    enabled: !!provider && !!addr,
-    retry: false,
-  })
+  const { data: name } = useQuery(
+    ['ensName', addr, !!provider, chainId],
+    () => {
+      try {
+        return provider!.lookupAddress(addr!)
+      } catch {
+        return null
+      }
+    },
+    {
+      enabled: !!provider && !!addr,
+      staleTime: Infinity,
+    }
+  )
+  const { data: avatar } = useQuery(
+    ['ensAvatar', addr, !!provider, chainId],
+    () => {
+      try {
+        return provider!.getAvatar(addr!)
+      } catch {
+        return null
+      }
+    },
+    {
+      enabled: !!provider && !!addr,
+      staleTime: Infinity,
+    }
+  )
   return connectedType === 'evm' || address ? { name, avatar } : {}
 }

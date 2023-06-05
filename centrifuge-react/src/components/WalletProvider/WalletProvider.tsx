@@ -1,9 +1,10 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
+// import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
+import { WalletConnect as WalletConnectV2 } from '@centrifuge/web3-react-walletconnect-v2-universal'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { Web3ReactState } from '@web3-react/types'
-import { WalletConnect } from '@web3-react/walletconnect'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, map, switchMap } from 'rxjs'
@@ -61,6 +62,9 @@ export type WalletContextType = {
   }
 }
 
+const GENESIS_HASH = '0x104a9115f2cf8fd13a32bb27cd0ee5c3e0bc20414d850b838fee19d02bd7d4a2'
+const CAIP_ID = GENESIS_HASH.slice(2, 34)
+
 const WalletContext = React.createContext<WalletContextType>(null as any)
 
 export const wallets = getWallets()
@@ -90,15 +94,21 @@ export function useCentEvmChainId() {
   const cent = useCentrifuge()
   const { data: centEvmChainId } = useQuery(
     ['evmChainId'],
-    () =>
-      firstValueFrom(
-        cent.getApi().pipe(
-          switchMap((api) => api.query.evmChainId.chainId()),
-          map((chainIdData) => chainIdData.toPrimitive() as number)
+    () => {
+      try {
+        return firstValueFrom(
+          cent.getApi().pipe(
+            switchMap((api) => api.query.evmChainId.chainId()),
+            map((chainIdData) => chainIdData.toPrimitive() as number)
+          )
         )
-      ),
+      } catch {
+        return undefined
+      }
+    },
     {
       staleTime: Infinity,
+      suspense: true,
     }
   )
   return centEvmChainId
@@ -108,6 +118,7 @@ type WalletProviderProps = {
   children: React.ReactNode
   evmChains?: EvmChains
   evmAdditionalConnectors?: EvmConnectorMeta[]
+  walletConnectId?: string
   subscanUrl?: string
   showAdvancedAccounts?: boolean
 }
@@ -122,6 +133,7 @@ export function WalletProvider({
     },
   },
   evmAdditionalConnectors,
+  walletConnectId,
   subscanUrl,
   showAdvancedAccounts,
 }: WalletProviderProps) {
@@ -152,7 +164,14 @@ export function WalletProvider({
   }, [centEvmChainId])
 
   const evmConnectors =
-    cachedEvmConnectors || (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), evmAdditionalConnectors))
+    cachedEvmConnectors ||
+    (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), {
+      additionalConnectors: evmAdditionalConnectors,
+      walletConnectId,
+      substrateEvmChainId: centEvmChainId,
+    }))
+
+  console.log('evmConnectors', evmConnectors)
 
   const [state, dispatch] = useWalletStateInternal(evmConnectors)
   const isEvmOnSubstrate = state.evm.chainId === centEvmChainId
@@ -291,7 +310,7 @@ export function WalletProvider({
       const { connector } = wallet
       try {
         const accounts = await setPendingConnect(wallet, async () => {
-          await (connector instanceof WalletConnect
+          await (connector instanceof WalletConnectV2
             ? connector.activate(chainId)
             : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))
           return getStore(wallet.connector).getState().accounts
@@ -340,7 +359,7 @@ export function WalletProvider({
 
   const isTryingToConnectEagerly = useConnectEagerly((wallet) => connect(wallet), dispatch, evmConnectors)
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
-  const getNetworkName = useGetNetworkName(evmChains)
+  const getNetworkName = useGetNetworkName(evmChains, centEvmChainId ?? null)
 
   const [scopedNetworks, setScopedNetworks] = React.useState<WalletContextType['scopedNetworks']>(null)
 
