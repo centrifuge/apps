@@ -19,6 +19,8 @@ export type DataTableProps<T = any> = {
   rounded?: boolean
   hoverable?: boolean
   summary?: T
+  pageSize?: number
+  page?: number
 } & GroupedProps
 
 export type OrderBy = 'asc' | 'desc'
@@ -51,6 +53,8 @@ export const DataTable = <T extends Record<string, any>>({
   groupIndex,
   lastGroupIndex,
   defaultSortOrder = 'desc',
+  pageSize = Infinity,
+  page = 1,
 }: DataTableProps<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
@@ -65,10 +69,10 @@ export const DataTable = <T extends Record<string, any>>({
     setCurrentSortKey(sortKey)
   }
 
-  const sortedData = React.useMemo(
-    () => sorter([...data], orderBy[currentSortKey], currentSortKey),
-    [orderBy, data, currentSortKey]
-  )
+  const sortedAndPaginatedData = React.useMemo(() => {
+    const sortedData = sorter([...data], orderBy[currentSortKey], currentSortKey)
+    return sortedData.slice((page - 1) * pageSize, page * pageSize)
+  }, [orderBy, data, currentSortKey, page, pageSize])
 
   const showHeader = groupIndex === 0 || !groupIndex
   return (
@@ -96,7 +100,7 @@ export const DataTable = <T extends Record<string, any>>({
           ))}
       </Shelf>
       <Stack>
-        {sortedData?.map((row, i) => (
+        {sortedAndPaginatedData?.map((row, i) => (
           <Row
             rounded={rounded}
             hoverable={hoverable}

@@ -38,32 +38,43 @@ const columns: Column[] = [
     align: 'left',
     header: <SortableTableHeader label="Asset" />,
     cell: (l: Row) => <AssetName loan={l} />,
-    flex: '3',
+    flex: '2',
     sortKey: 'idSortKey',
   },
   {
+    align: 'left',
+    header: <SortableTableHeader label="NFT ID" />,
+    cell: (l: Row) =>
+      l.asset.nftId.length >= 9 ? `${l.asset.nftId.slice(0, 4)}...${l.asset.nftId.slice(-4)}` : l.asset.nftId,
+    flex: '2',
+    sortKey: 'nftIdSortKey',
+  },
+  {
+    align: 'left',
     header: <SortableTableHeader label="Financing date" />,
     cell: (l: Row) => (l.originationDateSortKey && l.status === 'Active' ? formatDate(l.originationDate) : ''),
     flex: '2',
     sortKey: 'originationDateSortKey',
   },
   {
+    align: 'left',
     header: <SortableTableHeader label="Maturity date" />,
     cell: (l: Row) => (l.pricing.maturityDate ? formatDate(l.pricing.maturityDate) : ''),
     flex: '2',
     sortKey: 'maturityDate',
   },
   {
+    align: 'left',
     header: <SortableTableHeader label="Amount" />,
     cell: (l: Row) => <Amount loan={l} />,
-    flex: '3',
+    flex: '2',
     sortKey: 'outstandingDebtSortKey',
   },
   {
+    align: 'left',
     header: <SortableTableHeader label="Status" />,
     cell: (l: Row) => <LoanLabel loan={l} />,
     flex: '2',
-    align: 'center',
     sortKey: 'statusLabel',
   },
   {
@@ -79,6 +90,7 @@ export function LoanList({ loans }: Props) {
   const rows: Row[] = loans.map((loan) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
+      nftIdSortKey: loan.asset.nftId,
       idSortKey: parseInt(loan.id, 10),
       outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
       originationDateSortKey:
@@ -88,6 +100,7 @@ export function LoanList({ loans }: Props) {
         !loan?.totalBorrowed?.isZero()
           ? loan.originationDate
           : '',
+      maturityDate: loan.pricing.maturityDate,
       ...loan,
     }
   })
@@ -99,11 +112,13 @@ export function LoanList({ loans }: Props) {
       <Stack gap={2}>
         <LoadBoundary>
           <DataTable
-            data={pagination.pageData}
+            data={rows}
             columns={columns}
             defaultSortKey="idSortKey"
             defaultSortOrder="asc"
             onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+            pageSize={20}
+            page={pagination.page}
           />
         </LoadBoundary>
         {pagination.pageCount > 1 && (
@@ -130,11 +145,7 @@ function AssetName({ loan }: { loan: Row }) {
         fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {isTinlakePool
-          ? loan.asset.nftId.length >= 9
-            ? `${loan.asset.nftId.slice(0, 4)}...${loan.asset.nftId.slice(-4)}`
-            : loan.asset.nftId
-          : metadata?.name}
+        {metadata?.name}
       </TextWithPlaceholder>
     </Shelf>
   )
