@@ -492,6 +492,7 @@ export type PoolMetadata = {
     kycRestrictedCountries?: string[]
     externalOnboardingUrl?: string
     tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
+    podReadAccess?: boolean
   }
 }
 
@@ -1203,11 +1204,11 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(
         (api) =>
           combineLatest([
-            api.query.poolSystem.pool.entries(),
-            api.query.poolRegistry.poolMetadata.entries(),
-            api.query.loans.portfolioValuation.entries(),
-            api.query.poolSystem.epochExecution.entries(),
-            getCurrencies(),
+            api.query.poolSystem.pool.entries().pipe(take(1)),
+            api.query.poolRegistry.poolMetadata.entries().pipe(take(1)),
+            api.query.loans.portfolioValuation.entries().pipe(take(1)),
+            api.query.poolSystem.epochExecution.entries().pipe(take(1)),
+            getCurrencies().pipe(take(1)),
           ]),
         (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies]) => ({
           api,

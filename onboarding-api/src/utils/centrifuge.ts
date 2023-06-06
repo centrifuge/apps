@@ -6,6 +6,7 @@ import { Request } from 'express'
 import { combineLatest, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
+import { getPoolById } from './getPoolById'
 import { HttpError, reportHttpError } from './httpError'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
@@ -38,8 +39,11 @@ export const getCentPoolById = async (poolId: string) => {
 }
 
 export const addCentInvestorToMemberList = async (walletAddress: string, poolId: string, trancheId: string) => {
+  const pureProxyAddress = process.env.MEMBERLIST_ADMIN_PURE_PROXY
   const signer = await getSigner()
-  const api = getCentrifuge().getApi()
+  const cent = getCentrifuge()
+  const api = cent.getApi()
+  const { metadata } = await getPoolById(poolId)
   const tx = await lastValueFrom(
     api.pipe(
       switchMap((api) => {
@@ -49,27 +53,41 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
           { Pool: poolId },
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
         )
-        const proxiedSubmittable = api.tx.proxy.proxy(process.env.MEMBERLIST_ADMIN_PURE_PROXY, undefined, submittable)
-        return proxiedSubmittable.signAndSend(signer)
+        if (metadata?.onboarding?.podReadAccess) {
+          const address = cent.utils.formatAddress(walletAddress)
+          const podSubmittable = api.tx.permissions.add(
+            { PoolRole: 'MemberListAdmin' },
+            address,
+            { Pool: poolId },
+            { PoolRole: 'PODReadAccess' }
+          )
+          const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
+          const proxiedPodSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, podSubmittable)
+          const batchSubmittable = api.tx.utility.batchAll([proxiedPodSubmittable, proxiedSubmittable])
+          return batchSubmittable.signAndSend(signer)
+        } else {
+          const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
+          return proxiedSubmittable.signAndSend(signer)
+        }
       }),
       takeWhile(({ events, isFinalized }) => {
         if (events.length > 0) {
           events.forEach(({ event }) => {
-            const proxyResult = event.data[0]?.toHuman()
-            if (event.method === 'ProxyExecuted' && proxyResult === 'Ok') {
-              console.log(`Executed proxy to add to MemberList`, { walletAddress, poolId, trancheId, proxyResult })
+            const result = event.data[0]?.toHuman()
+            // @ts-expect-error
+            if (result?.Module?.error) {
+              console.log(`Transaction error`, { walletAddress, poolId, trancheId, result })
+              throw new HttpError(400, 'Bad request')
             }
-            if (
-              event.method === 'ProxyExecuted' &&
-              proxyResult &&
-              typeof proxyResult === 'object' &&
-              'Err' in proxyResult
-            ) {
+            if (event.method === 'ProxyExecuted' && result === 'Ok') {
+              console.log(`Executed proxy to add to MemberList`, { walletAddress, poolId, trancheId, result })
+            }
+            if (event.method === 'ProxyExecuted' && result && typeof result === 'object' && 'Err' in result) {
               console.log(`An error occured executing proxy to add to MemberList`, {
                 walletAddress,
                 poolId,
                 trancheId,
-                proxyResult: proxyResult.Err,
+                proxyResult: result.Err,
               })
               throw new HttpError(400, 'Bad request')
             }
@@ -80,15 +98,6 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
     )
   )
 
-  // this doens't work b/c .connect() exepcts a Signer, not a KeyringPair
-  // how it is: cent-js.signAndSend(signingAddress, { signer, era })
-  // how it should be: cent-js.signAndSend(signer)
-  // centrifuge.config.proxy = proxyAddress
-  // const result = await firstValueFrom(
-  //   centrifuge
-  //     .connect(signer.address, signer)
-  //     .pools.updatePoolRoles([poolId, [[walletAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]], []])
-  // )
   return { txHash: tx.txHash.toString() }
 }
 
