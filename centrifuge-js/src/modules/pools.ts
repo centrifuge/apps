@@ -451,6 +451,7 @@ export type PoolMetadata = {
     asset: {
       class: string
     }
+    newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
       repName: string
       name: string
