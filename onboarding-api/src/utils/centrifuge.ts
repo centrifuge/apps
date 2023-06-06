@@ -65,10 +65,9 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
           const proxiedPodSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, podSubmittable)
           const batchSubmittable = api.tx.utility.batchAll([proxiedPodSubmittable, proxiedSubmittable])
           return batchSubmittable.signAndSend(signer)
-        } else {
-          const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
-          return proxiedSubmittable.signAndSend(signer)
         }
+        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
+        return proxiedSubmittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
         if (events.length > 0) {
