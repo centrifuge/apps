@@ -123,14 +123,14 @@ export const OnboardingSettings = () => {
       ),
       podReadAccess: !!poolMetadata?.onboarding?.podReadAccess || false,
     }
-  }, [pool, poolMetadata])
+  }, [pool, poolMetadata, centrifuge.metadata])
 
   React.useEffect(() => {
     if (isEditing) return
     formik.resetForm()
     formik.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues, isEditing, centrifuge.metadata])
+  }, [initialValues, isEditing])
 
   const formik = useFormik({
     initialValues,
