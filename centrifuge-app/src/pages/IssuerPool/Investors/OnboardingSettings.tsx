@@ -130,7 +130,7 @@ export const OnboardingSettings = () => {
     formik.resetForm()
     formik.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues, isEditing])
+  }, [initialValues, isEditing, centrifuge.metadata])
 
   const formik = useFormik({
     initialValues,
