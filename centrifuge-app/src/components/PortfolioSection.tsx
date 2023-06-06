@@ -16,7 +16,29 @@ const POOL_CONFIG_REPORTS: { reports: { [name: string]: { sections: ReportSectio
           name: 'Average FICO score (weighted by outstanding debt) over time',
           aggregate: 'ficoScoreWeightedByNormalizedDebtOverTime',
           view: 'chart',
-          viewData: { type: 'line' },
+          viewData: {
+            type: 'line',
+            options: {
+              plugins: {
+                legend: {
+                  labels: {
+                    font: {
+                      family: 'Inter',
+                      size: 20,
+                    },
+                  },
+                },
+              },
+              scales: {
+                y: [
+                  {
+                    min: 500,
+                    max: 700,
+                  },
+                ],
+              },
+            },
+          },
         },
       ],
     },
@@ -42,7 +64,7 @@ const POD_INDEXER_DATA: { data: { [id: string]: ChartData } } = {
     ficoScoreWeightedByNormalizedDebtOverTime: [
       {
         key1: '2023-05-20',
-        value1: 580,
+        value1: 608,
       },
       {
         key1: '2023-05-21',
@@ -75,7 +97,7 @@ const POD_INDEXER_DATA: { data: { [id: string]: ChartData } } = {
 interface ReportSection {
   name: string
   aggregate: string
-  view: 'chart'
+  view: 'chart' | 'counter'
   viewData: any // TODO
 }
 
@@ -106,7 +128,7 @@ const displayChart = async (reportSection: ReportSection, data: ChartData) => {
 const PortfolioSection: React.VFC = () => {
   React.useEffect(() => {
     Chart.defaults.borderColor = '#eee'
-    Chart.defaults.color = '#000'
+    Chart.defaults.color = 'rgb(97, 97, 97)'
     ;(async function () {
       POOL_CONFIG_REPORTS['reports']['poolOverview']['sections'].forEach((reportSection) => {
         displayChart(reportSection, POD_INDEXER_DATA['data'][reportSection.aggregate])
