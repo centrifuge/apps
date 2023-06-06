@@ -1204,11 +1204,11 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(
         (api) =>
           combineLatest([
-            api.query.poolSystem.pool.entries().pipe(take(1)),
-            api.query.poolRegistry.poolMetadata.entries().pipe(take(1)),
-            api.query.loans.portfolioValuation.entries().pipe(take(1)),
-            api.query.poolSystem.epochExecution.entries().pipe(take(1)),
-            getCurrencies().pipe(take(1)),
+            api.query.poolSystem.pool.entries(),
+            api.query.poolRegistry.poolMetadata.entries(),
+            api.query.loans.portfolioValuation.entries(),
+            api.query.poolSystem.epochExecution.entries(),
+            getCurrencies(),
           ]),
         (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies]) => ({
           api,
