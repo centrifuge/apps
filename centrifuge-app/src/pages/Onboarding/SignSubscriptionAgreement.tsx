@@ -33,7 +33,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { data: poolMetadata } = usePoolMetadata(poolData)
   const centrifuge = useCentrifuge()
 
-  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
+  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed
 
   const formik = useFormik({
     initialValues: {

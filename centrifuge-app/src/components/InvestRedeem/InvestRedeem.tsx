@@ -35,7 +35,6 @@ import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
@@ -115,7 +114,6 @@ function useAllowedTranches(poolId: string) {
   const address = useAddress()
   const { connectedType } = useWallet()
   const isTinlakePool = poolId.startsWith('0x')
-  const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
@@ -135,7 +133,6 @@ function useAllowedTranches(poolId: string) {
         }
       )
     : [
-        ...Object.keys(permissions?.pools[poolId]?.tranches ?? {}),
         ...Object.entries(metadata?.onboarding?.tranches ?? {})
           .filter(([_, { openForOnboarding }]) => openForOnboarding)
           .map(([tId]) => tId),
@@ -194,7 +191,6 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const allowedTranches = useAllowedTranches(state.poolId)
-  const isTinlakePool = state.poolId.startsWith('0x')
 
   const { data: metadata } = usePoolMetadata(pool)
   const { connectedType } = useWallet()
