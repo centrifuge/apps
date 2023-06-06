@@ -13,7 +13,7 @@ import {
   Text,
   TextInput,
 } from '@centrifuge/fabric'
-import { FieldArray, Form, FormikProvider, useFormik } from 'formik'
+import { FieldArray, Form, FormikProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { combineLatest, lastValueFrom, switchMap, takeWhile } from 'rxjs'
@@ -365,133 +365,9 @@ export const OnboardingSettings = () => {
                 disabled={true}
               />
             </Stack>
-            <FieldArray name="kybRestrictedCountries">
-              {(fldArr) => (
-                <Stack gap={2}>
-                  <Text variant="heading4">Restricted onboarding countries (KYB)</Text>
-                  <DefaultRestrictedCountries />
-                  {isEditing && !isLoading && (
-                    <>
-                      <SearchInput
-                        label="Add restricted KYB onboarding countries"
-                        placeholder="Search country to add"
-                        disabled={!isEditing || formik.isSubmitting || isLoading}
-                        onChange={(e) => {
-                          if (
-                            Object.values(KYB_COUNTRY_CODES).includes(
-                              e.target.value as keyof typeof KYB_COUNTRY_CODES
-                            ) &&
-                            !formik.values.kybRestrictedCountries.includes(e.target.value)
-                          ) {
-                            fldArr.push(e.target.value)
-                          }
-                        }}
-                        list="kybSupportedCountries"
-                      />
-                      <datalist id="kybSupportedCountries">
-                        {Object.entries(KYB_COUNTRY_CODES)
-                          .filter(([_, country]) => !formik.values.kybRestrictedCountries.includes(country))
-                          .map(([code, country]) => (
-                            <option key={`${code}-kyb`} value={country} id={code} />
-                          ))}
-                      </datalist>
-                    </>
-                  )}
-                  <Stack gap={3}>
-                    <DataTable
-                      data={formik.values.kybRestrictedCountries.map((country, index) => ({
-                        country,
-                        index,
-                      }))}
-                      columns={[
-                        {
-                          align: 'left',
-                          header: 'Countries',
-                          cell: (row: Row) => <Text variant="body2">{row.country}</Text>,
-                          flex: '3',
-                        },
-                        {
-                          header: '',
-                          cell: (row: Row) =>
-                            isEditing && (
-                              <Button
-                                variant="tertiary"
-                                icon={IconMinusCircle}
-                                onClick={() => fldArr.remove(row.index)}
-                                disabled={isLoading}
-                              />
-                            ),
-                          flex: '0 0 72px',
-                        },
-                      ]}
-                    />
-                  </Stack>
-                </Stack>
-              )}
-            </FieldArray>
+            <RestrictedCountriesTable isEditing={isEditing} isLoading={isLoading} formik={formik} type="KYB" />
+            <RestrictedCountriesTable isEditing={isEditing} isLoading={isLoading} formik={formik} type="KYC" />
           </Stack>
-          <FieldArray name="kycRestrictedCountries">
-            {(fldArr) => (
-              <Stack gap={2}>
-                <Text variant="heading4">Restricted onboarding countries (KYC)</Text>
-                <DefaultRestrictedCountries />
-                {isEditing && !isLoading && (
-                  <>
-                    <SearchInput
-                      label="Add restricted KYC onboarding countries"
-                      placeholder="Search country to add"
-                      disabled={!isEditing || formik.isSubmitting || isLoading}
-                      onChange={(e) => {
-                        if (
-                          Object.values(KYC_COUNTRY_CODES).includes(e.target.value as keyof typeof KYC_COUNTRY_CODES) &&
-                          !formik.values.kycRestrictedCountries.includes(e.target.value)
-                        ) {
-                          fldArr.push(e.target.value)
-                        }
-                      }}
-                      list="kycSupportedCountries"
-                    />
-                    <datalist id="kycSupportedCountries">
-                      {Object.entries(KYC_COUNTRY_CODES)
-                        .filter(([_, country]) => !formik.values.kycRestrictedCountries.includes(country))
-                        .map(([code, country]) => (
-                          <option key={`${code}-kyc`} value={country} id={code} />
-                        ))}
-                    </datalist>
-                  </>
-                )}
-                <Stack gap={3}>
-                  <DataTable
-                    data={formik.values.kycRestrictedCountries.map((country, index) => ({
-                      country,
-                      index,
-                    }))}
-                    columns={[
-                      {
-                        align: 'left',
-                        header: 'Countries',
-                        cell: (row: Row) => <Text variant="body2">{row.country}</Text>,
-                        flex: '3',
-                      },
-                      {
-                        header: '',
-                        cell: (row: Row) =>
-                          isEditing && (
-                            <Button
-                              variant="tertiary"
-                              icon={IconMinusCircle}
-                              onClick={() => fldArr.remove(row.index)}
-                              disabled={isLoading}
-                            />
-                          ),
-                        flex: '0 0 72px',
-                      },
-                    ]}
-                  />
-                </Stack>
-              </Stack>
-            )}
-          </FieldArray>
         </PageSection>
       </Form>
     </FormikProvider>
@@ -514,6 +390,81 @@ const DefaultRestrictedCountries = () => {
         ))}
       </Stack>
     </details>
+  )
+}
+
+const RestrictedCountriesTable = ({
+  formik,
+  isLoading,
+  isEditing,
+  type,
+}: {
+  formik: FormikProps<OnboardingSettingsInput>
+  isLoading: boolean
+  isEditing: boolean
+  type: 'KYC' | 'KYB'
+}) => {
+  const fieldArrayName = type === 'KYC' ? 'kycRestrictedCountries' : 'kybRestrictedCountries'
+  const countryCodesEntries = type === 'KYC' ? Object.entries(KYC_COUNTRY_CODES) : Object.entries(KYB_COUNTRY_CODES)
+  const countryCodesValues = type === 'KYC' ? Object.values(KYC_COUNTRY_CODES) : Object.values(KYB_COUNTRY_CODES)
+  const countryValues = type === 'KYC' ? formik.values.kycRestrictedCountries : formik.values.kybRestrictedCountries
+  return (
+    <FieldArray name={fieldArrayName}>
+      {(fldArr) => (
+        <Stack gap={2}>
+          <Text variant="heading4">Restricted onboarding countries ({type})</Text>
+          <DefaultRestrictedCountries />
+          {isEditing && !isLoading && (
+            <>
+              <SearchInput
+                label={`Add restricted ${type} onboarding countries`}
+                placeholder="Search country to add"
+                disabled={!isEditing || formik.isSubmitting || isLoading}
+                onChange={(e) => {
+                  if (countryCodesValues.includes(e.target.value) && !countryValues.includes(e.target.value)) {
+                    fldArr.push(e.target.value)
+                  }
+                }}
+                list={fieldArrayName}
+              />
+              <datalist id={fieldArrayName}>
+                {countryCodesEntries
+                  .filter(([_, country]) => !countryValues.includes(country))
+                  .map(([code, country]) => (
+                    <option key={`${code}-kyc`} value={country} id={code} />
+                  ))}
+              </datalist>
+            </>
+          )}
+          <Stack gap={3}>
+            <DataTable
+              data={countryValues.map((country, index) => ({ country, index }))}
+              columns={[
+                {
+                  align: 'left',
+                  header: 'Countries',
+                  cell: (row: Row) => <Text variant="body2">{row.country}</Text>,
+                  flex: '3',
+                },
+                {
+                  header: '',
+                  cell: (row: Row) =>
+                    isEditing && (
+                      <Button
+                        variant="tertiary"
+                        icon={IconMinusCircle}
+                        onClick={() => fldArr.remove(row.index)}
+                        disabled={isLoading}
+                      />
+                    ),
+                  flex: '0 0 72px',
+                },
+              ]}
+            />
+          </Stack>
+        </Stack>
+      )}
+    </FieldArray>
   )
 }
 
