@@ -1,6 +1,8 @@
 import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
+  formatBalance,
   Transaction,
+  useBalances,
   useCentrifuge,
   useCentrifugeConsts,
   useCentrifugeTransaction,
@@ -20,7 +22,6 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
@@ -69,8 +70,6 @@ export type CreateLoanFormValues = {
 }
 
 type TemplateFieldProps = LoanTemplateAttribute & { name: string }
-
-const NFT_DATA_BYTES = 43 + 48 + 65 // document_id attribute + document_version attribute + metadata
 
 function TemplateField({ label, name, input }: TemplateFieldProps) {
   switch (input.type) {
@@ -166,17 +165,14 @@ function IssuerCreateLoan() {
 
   const { addTransaction, updateTransaction } = useTransactions()
   const {
-    uniques: { itemDeposit, metadataDepositBase, attributeDepositBase, depositPerByte },
+    loans: { loanDeposit },
+    chainSymbol,
   } = useCentrifugeConsts()
   const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
   const { assetOriginators } = usePoolAccess(pid)
   const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
     ?.collateralCollections[0]?.id
-
-  const deposit = itemDeposit
-    .add(metadataDepositBase)
-    .add(attributeDepositBase.mul(new BN(2)))
-    .add(depositPerByte.mul(new BN(NFT_DATA_BYTES)))
+  const balances = useBalances(account.actingAddress)
 
   const { isAuthed, token } = usePodAuth(pid)
 
@@ -327,6 +323,11 @@ function IssuerCreateLoan() {
 
   const isPending = isTxLoading || form.isSubmitting
 
+  const balanceDec = balances?.native.balance.toDecimal()
+  const balanceLow = balanceDec?.lt(loanDeposit.toDecimal())
+
+  const errorMessage = balanceLow ? `The AO account needs at least ${formatBalance(loanDeposit, chainSymbol, 1)}` : null
+
   return (
     <FormikProvider value={form}>
       <Form ref={formRef} noValidate>
@@ -337,13 +338,14 @@ function IssuerCreateLoan() {
             actions={
               isAuthed && (
                 <>
+                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     loading={isPending}
-                    disabled={!templateMetadata || !account || !collateralCollectionId}
+                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
                   >
                     Create
                   </Button>
