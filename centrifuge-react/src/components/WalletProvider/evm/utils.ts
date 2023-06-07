@@ -12,9 +12,11 @@ import { getChainInfo } from './chains'
 const stores = new WeakMap<Connector, Web3ReactStore>()
 const [emptyConnector, emptyStore] = createConnector(() => EMPTY)
 
-export function createConnector<T extends Connector>(f: (actions: Actions) => T): [T, Web3ReactStore] {
+export function createConnector<T extends Connector>(
+  f: (actions: Actions, store: Web3ReactStore) => T
+): [T, Web3ReactStore] {
   const [store, actions] = createWeb3ReactStoreAndActions()
-  const connector = f(actions)
+  const connector = f(actions, store)
   stores.set(connector, store)
   return [connector, store]
 }

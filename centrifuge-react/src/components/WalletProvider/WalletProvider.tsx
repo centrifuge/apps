@@ -311,7 +311,11 @@ export function WalletProvider({
       try {
         const accounts = await setPendingConnect(wallet, async () => {
           await (connector instanceof WalletConnectV2
-            ? connector.activate(chainId)
+            ? connector.activate(
+                network === 'centrifuge'
+                  ? [`polkadot:91b171bb158e2d3848fa23a9f1c25182`, `eip155:${centEvmChainId}`]
+                  : `eip155:${chainId}`
+              )
             : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))
           return getStore(wallet.connector).getState().accounts
         })

@@ -170,17 +170,22 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
 
   console.log('reducerState', reducerState, evmState)
 
-  const state = React.useMemo(
-    () => ({
+  const state = React.useMemo(() => {
+    const [namespace, chainId] = (evmState.chainId as any)?.includes(':')
+      ? (evmState.chainId as any).split(':')
+      : evmState.chainId
+      ? ['eip155', evmState.chainId]
+      : [undefined, undefined]
+    return {
       ...reducerState,
       evm: {
         ...reducerState.evm,
         accounts: evmState.accounts,
-        chainId: evmState.chainId,
+        chainId: isNaN(Number(chainId)) ? chainId : Number(chainId),
+        namespace,
       },
-    }),
-    [reducerState, evmState]
-  )
+    }
+  }, [reducerState, evmState])
 
   React.useEffect(() => {
     if (state.connectedType === 'evm') {
@@ -207,21 +212,6 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
     }
     persistMultisigs(state.substrate.multisigs)
   }, [state])
-
-  // React.useEffect(() => {
-  //   Promise.resolve().then(() =>
-  //     dispatch({
-  //       type: 'substrateAddMultisig',
-  //       payload: {
-  //         signers: [
-  //           'kAKbmHS8q5ceJHQgfAGwYtuhTTNxEAra5WRtsPnai1jSeNoUD',
-  //           'kAJy3k3GUNt14LfK8Uht37kN1LUehTnoQHGMt98i6Erf4xzSD',
-  //         ],
-  //         threshold: 2,
-  //       },
-  //     })
-  //   )
-  // }, [])
 
   return [state, dispatch] as const
 }

@@ -1,6 +1,7 @@
 import type UniversalProvider from '@walletconnect/universal-provider'
 import type { NamespaceConfig } from '@walletconnect/universal-provider'
-import type { Actions, ProviderRpcError } from '@web3-react/types'
+import { getAccountsFromNamespaces, getChainsFromNamespaces } from '@walletconnect/utils'
+import type { Actions, ProviderRpcError, Web3ReactStore } from '@web3-react/types'
 import { Connector } from '@web3-react/types'
 import type { Web3Modal } from '@web3modal/standalone'
 import EventEmitter3 from 'eventemitter3'
@@ -22,6 +23,7 @@ export type WalletConnectOptions = Parameters<typeof UniversalProvider.init>[0] 
  */
 export interface WalletConnectConstructorArgs {
   actions: Actions
+  store: Web3ReactStore
   /** Options to pass to `@walletconnect/ethereum-provider`. */
   options: WalletConnectOptions
   /** The chainId to connect to in activate if one is not provided. */
@@ -43,6 +45,7 @@ export class WalletConnect extends Connector {
   public provider?: UniversalProvider
   public readonly events = new EventEmitter3()
   private modal?: Web3Modal
+  private store: Web3ReactStore
 
   private readonly options: Omit<WalletConnectOptions, keyof Parameters<UniversalProvider['connect']>[0]>
 
@@ -53,16 +56,23 @@ export class WalletConnect extends Connector {
 
   private eagerConnection?: Promise<UniversalProvider>
 
-  constructor({ actions, options, defaultChainId, timeout = DEFAULT_TIMEOUT, onError }: WalletConnectConstructorArgs) {
+  constructor({
+    actions,
+    store,
+    options,
+    defaultChainId,
+    timeout = DEFAULT_TIMEOUT,
+    onError,
+  }: WalletConnectConstructorArgs) {
     super(actions, onError)
 
     const { namespaces, optionalNamespaces, ...rest } = options
 
     this.options = rest
     this.connectOptions = { namespaces, optionalNamespaces }
-    // this.chains = chains
     this.defaultChainId = defaultChainId
     this.timeout = timeout
+    this.store = store
   }
 
   private disconnectListener = (error: ProviderRpcError) => {
@@ -72,12 +82,12 @@ export class WalletConnect extends Connector {
 
   private chainChangedListener = (chainId: string): void => {
     console.log('chainId', chainId)
-    this.actions.update({ chainId: Number.parseInt(chainId, 16) })
+    // this.actions.update({ chainId: Number.parseInt(chainId, 16) })
   }
 
   private accountsChangedListener = (accounts: string[]): void => {
     console.log('accounts', accounts)
-    this.actions.update({ accounts })
+    // this.actions.update({ accounts })
   }
 
   // eslint-disable-next-line
@@ -88,7 +98,7 @@ export class WalletConnect extends Connector {
     this.events.emit(URI_AVAILABLE, uri)
   }
 
-  private isomorphicInitialize(desiredChainId: number | undefined = this.defaultChainId): Promise<UniversalProvider> {
+  private isomorphicInitialize(): Promise<UniversalProvider> {
     if (this.eagerConnection) return this.eagerConnection
 
     // const rpcMap = this.rpcMap ? getBestUrlMap(this.rpcMap, this.timeout) : undefined
@@ -150,7 +160,19 @@ export class WalletConnect extends Connector {
       if (!provider.session) {
         throw new Error('No active session found. Connect your wallet first.')
       }
-      this.actions.update({ accounts: provider.accounts, chainId: provider.chainId })
+
+      const chainId = getIdealChainId(provider.session)
+      const accounts = getAccountsFromNamespaces(provider.session.namespaces)
+        .filter((addr) => addr.startsWith(chainId))
+        .map((addr) => addr.slice(chainId.length + 1))
+
+      if (!chainId || !accounts?.length) throw new Error('No accounts found')
+
+      this.store.setState({
+        chainId,
+        accounts,
+        activating: false,
+      })
     } catch (error) {
       await this.deactivate()
       cancelActivation()
@@ -159,31 +181,28 @@ export class WalletConnect extends Connector {
   }
 
   /**
-   * @param desiredChainId - The desired chainId to connect to.
+   * @param desiredChainId - The desired CAIP-2-compatible chainId to connect to.
    */
-  public async activate(desiredChainId?: number): Promise<void> {
-    const provider = await this.isomorphicInitialize(desiredChainId)
+  public async activate(desiredChainId?: string | string[]): Promise<void> {
+    const provider = await this.isomorphicInitialize()
+    const desiredChainIds = Array.isArray(desiredChainId) ? desiredChainId : desiredChainId ? [desiredChainId] : []
 
     if (provider.session) {
-      if (!desiredChainId || desiredChainId === provider.chainId) return
-      // WalletConnect exposes connected accounts, not chains: `eip155:${chainId}:${address}`
-      const isConnectedToDesiredChain = provider.session.namespaces.eip155.accounts.some((account) =>
-        account.startsWith(`eip155:${desiredChainId}:`)
-      )
+      const connectedTo = this.store.getState().chainId as any as string
+      if (!desiredChainId || desiredChainIds.includes(connectedTo)) return
+      const bestMatchChainId = getIdealChainId(provider.session, desiredChainIds)
+      const isConnectedToDesiredChain = desiredChainIds.includes(bestMatchChainId)
       if (!isConnectedToDesiredChain) {
-        if (this.options.optionalChains?.includes(desiredChainId)) {
-          throw new Error(
-            `Cannot activate an optional chain (${desiredChainId}), as the wallet is not connected to it.\n\tYou should handle this error in application code, as there is no guarantee that a wallet is connected to a chain configured in "optionalChains".`
-          )
-        }
-        throw new Error(
-          `Unknown chain (${desiredChainId}). Make sure to include any chains you might connect to in the "chains" or "optionalChains" parameters when initializing WalletConnect.`
-        )
+        throw new Error(`Cannot activate a chain (${desiredChainId}), as the wallet is not connected to it.`)
       }
-      return provider.request<void>({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${desiredChainId.toString(16)}` }],
-      })
+      this.store.setState({ chainId: bestMatchChainId })
+      return provider.request<void>(
+        {
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: `0x${bestMatchChainId.toString(16)}` }],
+        },
+        bestMatchChainId
+      )
     }
 
     const cancelActivation = this.actions.startActivation()
@@ -191,6 +210,13 @@ export class WalletConnect extends Connector {
     try {
       const params = {
         namespaces: {
+          eip155: {
+            methods: ['eth_sendTransaction', 'eth_signTransaction', 'get_balance', 'personal_sign'],
+            chains: ['eip155:1'],
+            events: ['chainChanged', 'accountsChanged'],
+          },
+        },
+        optionalNamespaces: {
           polkadot: {
             methods: ['polkadot_signTransaction', 'polkadot_signMessage'],
             chains: [
@@ -199,39 +225,14 @@ export class WalletConnect extends Connector {
             events: ['chainChanged", "accountsChanged'],
           },
           eip155: {
-            methods: [
-              'eth_sendTransaction',
-              'eth_signTransaction',
-              'eth_sign',
-              // "personal_sign",
-              // "eth_signTypedData",
-            ],
-            chains: ['eip155:1', 'eip155:5'],
+            methods: ['eth_sendTransaction', 'eth_signTransaction', 'get_balance', 'personal_sign'],
+            chains: ['eip155:5', 'eip155:999999'],
             events: ['chainChanged', 'accountsChanged'],
             rpcMap: {
               5: 'https://goerli.infura.io/v3/bf808e7d3d924fbeb74672d9341d0550',
+              999999: 'https://fullnode.development.cntrfg.com/',
             },
           },
-        },
-        optionalNamespaces: {
-          eip155: {
-            methods: [
-              // 'eth_sendTransaction',
-              // 'eth_signTransaction',
-              // 'eth_sign',
-              // // "personal_sign",
-              // // "eth_signTypedData",
-            ],
-            chains: ['eip155:5'],
-            events: [],
-          },
-          // polkadot: {
-          //   methods: ['polkadot_signTransaction', 'polkadot_signMessage'],
-          //   chains: [
-          //     'polkadot:91b171bb158e2d3848fa23a9f1c25182', // polkadot
-          //   ],
-          //   events: ['chainChanged", "accountsChanged'],
-          // },
         },
       }
       const session = await new Promise<any>(async (resolve, reject) => {
@@ -259,10 +260,17 @@ export class WalletConnect extends Connector {
 
       if (!session) throw new Error('Failed to establish session. Please try again')
 
-      const accounts = await provider.enable()
+      await provider.enable()
       console.log('provider2', provider)
+      const chainId = getIdealChainId(session, desiredChainIds)
+      const accounts = getAccountsFromNamespaces(session.namespaces)
+        .filter((addr) => addr.startsWith(chainId))
+        .map((addr) => addr.slice(chainId.length + 1))
+      console.log('chainId, accounts', chainId, accounts)
 
-      this.actions.update({ chainId: provider.session?.chainId!, accounts })
+      if (!chainId || !accounts?.length) throw new Error('No accounts found')
+
+      this.store.setState({ chainId, accounts, activating: false })
     } catch (error) {
       await this.deactivate()
       cancelActivation()
@@ -283,4 +291,10 @@ export class WalletConnect extends Connector {
     this.eagerConnection = undefined
     this.actions.resetState()
   }
+}
+
+function getIdealChainId(session: Exclude<UniversalProvider['session'], undefined>, desiredChainIds?: string[]) {
+  const chainIds = getChainsFromNamespaces(session.namespaces)
+  const chainId = chainIds.find((cid) => desiredChainIds?.includes(cid)) || chainIds[0]
+  return chainId
 }

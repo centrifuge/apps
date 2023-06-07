@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@walletconnect/universal-provider": "^2.7.4",
+    "@walletconnect/utils": "^2.7.4",
     "@web3-react/types": "^8.2.0",
     "@web3modal/standalone": "^2.2.1",
     "eventemitter3": "^4.0.7"

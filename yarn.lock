@@ -1935,6 +1935,7 @@ __metadata:
   resolution: "@centrifuge/web3-react-walletconnect-v2-universal@workspace:web3-react-walletconnect-v2-universal"
   dependencies:
     "@walletconnect/universal-provider": ^2.7.4
+    "@walletconnect/utils": ^2.7.4
     "@web3-react/store": ^8.2.0
     "@web3-react/types": ^8.2.0
     "@web3modal/standalone": ^2.2.1
@@ -9369,6 +9370,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@walletconnect/types@npm:2.7.8":
+  version: 2.7.8
+  resolution: "@walletconnect/types@npm:2.7.8"
+  dependencies:
+    "@walletconnect/events": ^1.0.1
+    "@walletconnect/heartbeat": 1.2.1
+    "@walletconnect/jsonrpc-types": 1.0.3
+    "@walletconnect/keyvaluestorage": ^1.0.2
+    "@walletconnect/logger": ^2.0.1
+    events: ^3.3.0
+  checksum: 096283a604104d00d14c4bbd3542d9ff6b4f2a5085d4663ec493e0deaae4cf113f9d8e6101c5caa625700b2523595394dd07475036335b4a75d0f290fae33703
+  languageName: node
+  linkType: hard
+
 "@walletconnect/universal-provider@npm:2.7.7, @walletconnect/universal-provider@npm:^2.7.4":
   version: 2.7.7
   resolution: "@walletconnect/universal-provider@npm:2.7.7"
@@ -9406,6 +9421,28 @@ __metadata:
     query-string: 7.1.3
     uint8arrays: ^3.1.0
   checksum: 01b1ec2ca77f89ba812a03f58cdcf929c76c068d2e33c022b4797a0d180cc482e6f4069f80400fce535768c63dcaba3f2e036a937b320b6d5ac0fe8a65d69a41
+  languageName: node
+  linkType: hard
+
+"@walletconnect/utils@npm:^2.7.4":
+  version: 2.7.8
+  resolution: "@walletconnect/utils@npm:2.7.8"
+  dependencies:
+    "@stablelib/chacha20poly1305": 1.0.1
+    "@stablelib/hkdf": 1.0.1
+    "@stablelib/random": ^1.0.2
+    "@stablelib/sha256": 1.0.1
+    "@stablelib/x25519": ^1.0.3
+    "@walletconnect/relay-api": ^1.0.9
+    "@walletconnect/safe-json": ^1.0.2
+    "@walletconnect/time": ^1.0.2
+    "@walletconnect/types": 2.7.8
+    "@walletconnect/window-getters": ^1.0.1
+    "@walletconnect/window-metadata": ^1.0.1
+    detect-browser: 5.3.0
+    query-string: 7.1.3
+    uint8arrays: ^3.1.0
+  checksum: ed5f714a675cd222ca198703bb12338e0cfea9da7c937b74fa3cc9bfa1f0ff84b551ee6f348cf25f1d4cd02f0d4e0fd19339b733cee1198dd05a956b0b1e2a22
   languageName: node
   linkType: hard
 

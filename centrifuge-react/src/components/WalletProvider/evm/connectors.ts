@@ -55,9 +55,10 @@ export function getEvmConnectors(
   const walletConnect =
     walletConnectId &&
     createConnector(
-      (actions) =>
+      (actions, store) =>
         new WalletConnectV2({
           actions,
+          store,
           options: {
             projectId: walletConnectId,
             // chains: chains,
