@@ -115,7 +115,7 @@ export function LoanList({ loans }: Props) {
             data={rows}
             columns={columns}
             defaultSortKey="idSortKey"
-            defaultSortOrder="asc"
+            defaultSortOrder="desc"
             onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
             pageSize={20}
             page={pagination.page}
