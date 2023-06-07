@@ -1,7 +1,7 @@
 import { Button, Card, IconChevronDown, Menu, MenuItem, MenuItemGroup, Popover, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Network } from './types'
-import { useNetworkName } from './utils'
+import { useGetNetworkName } from './utils'
 import { useWallet } from './WalletProvider'
 
 type Props = {
@@ -21,6 +21,8 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
     connect,
   } = useWallet()
 
+  const getName = useGetNetworkName()
+
   if (!connectedNetwork) {
     return <>{children}</>
   }
@@ -39,7 +41,7 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
     }
   }
 
-  const name = useNetworkName(networks[0])
+  const name = getName(networks[0])
 
   if (connectedNetwork) {
     return (
