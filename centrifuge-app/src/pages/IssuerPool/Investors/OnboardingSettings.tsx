@@ -360,9 +360,7 @@ export const OnboardingSettings = () => {
                 label="Automatically give new investors access to private asset-level data"
                 checked={formik.values.podReadAccess}
                 onChange={(e) => formik.setFieldValue('podReadAccess', !!e.target.checked)}
-                // disabled={!isEditing || formik.isSubmitting || isLoading}
-                // TODO: enable button when https://github.com/centrifuge/centrifuge-chain/issues/1328 is merged
-                disabled={true}
+                disabled={!isEditing || formik.isSubmitting || isLoading}
               />
             </Stack>
             <RestrictedCountriesTable isEditing={isEditing} isLoading={isLoading} formik={formik} type="KYB" />
