@@ -22,7 +22,6 @@
     "@babel/core": "^7.15.5",
     "@centrifuge/centrifuge-js": "workspace:*",
     "@centrifuge/fabric": "workspace:*",
-    "@centrifuge/web3-react-walletconnect-v2-universal": "workspace:*",
     "@mdx-js/preact": "^2.1.1",
     "@mdx-js/react": "^1.6.22",
     "@storybook/addon-actions": "^6.5.16",

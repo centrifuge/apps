@@ -1,10 +1,9 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
-// import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
-import { WalletConnect as WalletConnectV2 } from '@centrifuge/web3-react-walletconnect-v2-universal'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { Web3ReactState } from '@web3-react/types'
+import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, map, switchMap } from 'rxjs'
@@ -61,9 +60,6 @@ export type WalletContextType = {
     selectedAddress: string | null
   }
 }
-
-const GENESIS_HASH = '0x104a9115f2cf8fd13a32bb27cd0ee5c3e0bc20414d850b838fee19d02bd7d4a2'
-const CAIP_ID = GENESIS_HASH.slice(2, 34)
 
 const WalletContext = React.createContext<WalletContextType>(null as any)
 

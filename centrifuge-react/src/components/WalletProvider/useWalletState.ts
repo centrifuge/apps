@@ -208,20 +208,5 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
     persistMultisigs(state.substrate.multisigs)
   }, [state])
 
-  // React.useEffect(() => {
-  //   Promise.resolve().then(() =>
-  //     dispatch({
-  //       type: 'substrateAddMultisig',
-  //       payload: {
-  //         signers: [
-  //           'kAKbmHS8q5ceJHQgfAGwYtuhTTNxEAra5WRtsPnai1jSeNoUD',
-  //           'kAJy3k3GUNt14LfK8Uht37kN1LUehTnoQHGMt98i6Erf4xzSD',
-  //         ],
-  //         threshold: 2,
-  //       },
-  //     })
-  //   )
-  // }, [])
-
   return [state, dispatch] as const
 }
