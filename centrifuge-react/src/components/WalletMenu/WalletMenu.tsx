@@ -1,3 +1,4 @@
+import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import {
   Box,
   IconAnchor,
@@ -21,6 +22,7 @@ import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
+import { useCentrifuge } from '../CentrifugeProvider'
 import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
@@ -48,9 +50,21 @@ export function WalletMenu({ menuItems }: WalletMenuProps) {
 
 function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
+  const centrifuge = useCentrifuge()
   const ctx = useWallet()
-  const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
-    ctx
+  const {
+    isEvmOnSubstrate,
+    connectedType,
+    substrate,
+    disconnect,
+    showWallets,
+    showAccounts,
+    connectedNetwork,
+    connectedNetworkName,
+  } = ctx
+  const convertedAddress = isEvmOnSubstrate ? evmToSubstrateAddress(address) : address
+  console.log('convertedAddress', convertedAddress)
+  const formattedAddress = connectedType === 'evm' ? address : centrifuge.utils.formatAddress(address)
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
   const balances = useBalances(connectedType !== 'evm' ? address : undefined)
@@ -73,7 +87,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
         <Stack ref={ref} width="100%" alignItems="stretch">
           <WalletButton
             active={state.isOpen}
-            address={address}
+            address={formattedAddress}
             alias={
               connectedType === 'evm'
                 ? ensName ?? undefined
@@ -102,15 +116,15 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
               <Shelf px={2} pt={1} gap={1} alignItems="center" justifyContent="space-between">
                 <Shelf alignItems="center" gap={1}>
                   <Box style={{ pointerEvents: 'none' }}>
-                    <Identicon value={address} size={17} theme="polkadot" />
+                    <Identicon value={formattedAddress} size={17} theme="polkadot" />
                   </Box>
                   <Text variant="interactive1" fontWeight={400}>
-                    {truncateAddress(address)}
+                    {truncateAddress(formattedAddress)}
                   </Text>
                 </Shelf>
 
                 <Shelf alignItems="center" gap="2px">
-                  <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
+                  <IconButton onClick={() => copyToClipboard(formattedAddress)} title="Copy address to clipboard">
                     <IconCopy />
                   </IconButton>
                   {subScanUrl && (

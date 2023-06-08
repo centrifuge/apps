@@ -56,6 +56,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   showEvmOnSubstrate: {
     type: 'checkbox',
     default: false,
+    alwaysShow: true,
   },
   editPoolConfig: {
     type: 'checkbox',

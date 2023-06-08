@@ -172,7 +172,7 @@ export function WalletProvider({
     }))
 
   const [state, dispatch] = useWalletStateInternal(evmConnectors)
-  const isEvmOnSubstrate = state.evm.chainId === centEvmChainId
+  const isEvmOnSubstrate = state.connectedType === 'evm' && state.evm.chainId === centEvmChainId
 
   const unsubscribeRef = React.useRef<(() => void) | null>()
 
