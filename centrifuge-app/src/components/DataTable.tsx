@@ -1,5 +1,6 @@
 import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
+import BN from 'bn.js'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
@@ -36,9 +37,15 @@ export type Column = {
 const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
   if (order === 'asc') {
-    return data.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1))
+    return data.sort((a, b) => {
+      if (sortKey === 'nftIdSortKey') return new BN(a[sortKey]).gt(new BN(b[sortKey])) ? 1 : -1
+      return a[sortKey] > b[sortKey] ? 1 : -1
+    })
   }
-  return data.sort((a, b) => (b[sortKey] > a[sortKey] ? 1 : -1))
+  return data.sort((a, b) => {
+    if (sortKey === 'nftIdSortKey') return new BN(b[sortKey]).gt(new BN(a[sortKey])) ? 1 : -1
+    return b[sortKey] > a[sortKey] ? 1 : -1
+  })
 }
 
 export const DataTable = <T extends Record<string, any>>({
