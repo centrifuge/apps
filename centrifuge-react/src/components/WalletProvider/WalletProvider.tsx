@@ -153,8 +153,8 @@ export function WalletProvider({
         iconUrl: '',
         name: 'Centrifuge',
         nativeCurrency: {
-          name: consts.chainToken,
-          symbol: consts.chainToken,
+          name: consts.chainSymbol,
+          symbol: consts.chainSymbol,
           decimals: consts.chainDecimals,
         },
         blockExplorerUrl: 'https://etherscan.io/',

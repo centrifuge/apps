@@ -260,7 +260,7 @@ async function getTinlakeLoans(poolId: string) {
       }
     }`
 
-  const data = await request<{ data: any[] }>('https://graph.centrifuge.io/tinlake', query)
+  const data = await request<{ pools: any[] }>('https://graph.centrifuge.io/tinlake', query)
 
   const loans = data.pools.reduce((assets: any[], pool: any) => {
     if (pool.loans) {
@@ -576,6 +576,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         },
       },
       onboarding: {
+        // @ts-ignore
         agreements: {
           [`${id}-0`]: {
             uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '',

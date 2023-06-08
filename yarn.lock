@@ -1681,7 +1681,6 @@ __metadata:
     "@typescript-eslint/parser": 5.30.5
     "@vitejs/plugin-react": ^2
     "@web3modal/standalone": ^2.4.2
-    add: ^2.0.6
     axios: ^0.24.0
     babel-plugin-styled-components: ^2.0.7
     bn.js: ^5.2.1
@@ -1713,7 +1712,6 @@ __metadata:
     vite: ^3
     vite-plugin-node-polyfills: ^0.7.0
     vitest: ^0.28.3
-    yarn: ^1.22.19
   languageName: unknown
   linkType: soft
 
@@ -9983,13 +9981,6 @@ __metadata:
   version: 1.0.0
   resolution: "add-stream@npm:1.0.0"
   checksum: 3b452cd36229ae6199cea9938ef5de26037164f7918eece0fab6db64401cdaddecad754771cfa026322dc81a1fe96f7cac03dfb932fbed572bc5e337ddc6c28a
-  languageName: node
-  linkType: hard
-
-"add@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "add@npm:2.0.6"
-  checksum: 8599798e63565ee9acb4c0d79485501a60450491c47830fa7bee6ad4f311a880e8f8417deeb69804dbb54765246fd704d3e34fa4ab1b57ed70ae00344ee9d00f
   languageName: node
   linkType: hard
 
@@ -28043,16 +28034,6 @@ fsevents@^1.2.7:
     y18n: ^5.0.5
     yargs-parser: ^21.1.1
   checksum: 30104234c49f3d5180714aa520b6abc9765ae83179b3938feaf60f712e8f6affb7b3348990f465cbdc80fcf28e52a899dfa579b9886f0203261caf84148da484
-  languageName: node
-  linkType: hard
-
-"yarn@npm:^1.22.19":
-  version: 1.22.19
-  resolution: "yarn@npm:1.22.19"
-  bin:
-    yarn: bin/yarn.js
-    yarnpkg: bin/yarn.js
-  checksum: 58540815069942a668389087447c3abf7467b03cdf6119c285488041246b0ecb29e86f540d834c23244919f7e4069c206c3798fcdc3bb8208d83f0e9567cd2f7
   languageName: node
   linkType: hard
 
