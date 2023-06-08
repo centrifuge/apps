@@ -503,11 +503,11 @@ export class CentrifugeBase {
     }
   }
 
-  getSignerAddress() {
+  getSignerAddress(type?: 'substrate') {
     const { signingAddress, evmSigningAddress } = this.config
 
     if (!signingAddress) {
-      if (evmSigningAddress) return evmSigningAddress
+      if (evmSigningAddress) return type === 'substrate' ? evmToSubstrateAddress(evmSigningAddress) : evmSigningAddress
       throw new Error('no signer set')
     }
 
@@ -528,7 +528,7 @@ export class CentrifugeBase {
       return computeMultisig(txOptions.multisig).address
     }
 
-    return this.getSignerAddress()
+    return this.getSignerAddress('substrate')
   }
 
   setProxies(proxies: Config['proxies']) {
