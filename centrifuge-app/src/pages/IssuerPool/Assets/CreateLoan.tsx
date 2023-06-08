@@ -178,8 +178,6 @@ function IssuerCreateLoan() {
     .add(attributeDepositBase.mul(new BN(2)))
     .add(depositPerByte.mul(new BN(NFT_DATA_BYTES)))
 
-  console.log('deposit', deposit)
-
   const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)

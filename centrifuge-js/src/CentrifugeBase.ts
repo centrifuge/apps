@@ -232,8 +232,6 @@ export class CentrifugeBase {
       }
     }
 
-    console.log('actualSubmittable', actualSubmittable)
-
     if (isEvmTx) {
       // TODO: signOnly and sendOnly
       return this.wrapSubstrateEvmSignAndSend(api, actualSubmittable, options)
@@ -339,7 +337,6 @@ export class CentrifugeBase {
               startWith([response, null] as const),
               catchError(() => of([{ ...response, error: new Error('failed') }] as const)),
               tap(([result, receipt]) => {
-                console.log('response update', result, receipt)
                 if ('error' in result || receipt?.status === 0) {
                   options?.onStatusChange?.({
                     events: [],

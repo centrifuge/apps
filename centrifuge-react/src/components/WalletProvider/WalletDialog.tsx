@@ -23,7 +23,7 @@ import { Logo, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
 import { UserSelection } from './UserSelection'
 import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
-import { useWallet, wallets } from './WalletProvider'
+import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 
 type Props = {
   evmChains: EvmChains
@@ -37,6 +37,7 @@ const title = {
 
 export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
   const ctx = useWallet()
+  const centEvmChainId = useCentEvmChainId()
   const {
     pendingConnect: { isConnecting, wallet: pendingWallet, isError: isConnectError },
     walletDialog: { view, network: selectedNetwork, wallet: selectedWallet },
@@ -53,11 +54,10 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
   const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
 
   const sortedEvmWallets = sortEvmWallets(evm.connectors.filter((c) => c.shown))
-  const shownWallets = isCentChainSelected
+  const centWallets = centEvmChainId
     ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
-    : selectedNetwork
-    ? sortedEvmWallets
-    : []
+    : sortCentrifugeWallets(wallets)
+  const shownWallets = isCentChainSelected ? centWallets : selectedNetwork ? sortedEvmWallets : []
 
   function close() {
     dispatch({ type: 'closeWalletDialog' })

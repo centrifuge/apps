@@ -105,7 +105,6 @@ const MintNFT: React.FC = () => {
       return
     }
     const nftId = await cent.nfts.getAvailableNftId(collectionId)
-    console.log('nftId', nftId)
     const imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     const metadataValues: NFTMetadataInput = {
       name: nameValue,

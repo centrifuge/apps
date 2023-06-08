@@ -8,7 +8,7 @@ import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, map, switchMap } from 'rxjs'
 import { ReplacedError, useAsyncCallback } from '../../hooks/useAsyncCallback'
-import { useCentrifuge, useCentrifugeConsts } from '../CentrifugeProvider'
+import { useCentrifuge, useCentrifugeApi, useCentrifugeConsts } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
 import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
 import { getStore } from './evm/utils'
@@ -88,6 +88,7 @@ export function useAddress(typeOverride?: 'substrate' | 'evm') {
 
 export function useCentEvmChainId() {
   const cent = useCentrifuge()
+  const api = useCentrifugeApi()
   const { data: centEvmChainId } = useQuery(
     ['evmChainId'],
     () => {
@@ -105,6 +106,7 @@ export function useCentEvmChainId() {
     {
       staleTime: Infinity,
       suspense: true,
+      enabled: !!api.query.evmChainId,
     }
   )
   return centEvmChainId
@@ -166,8 +168,6 @@ export function WalletProvider({
       walletConnectId,
       substrateEvmChainId: centEvmChainId,
     }))
-
-  console.log('evmConnectors', evmConnectors)
 
   const [state, dispatch] = useWalletStateInternal(evmConnectors)
   const isEvmOnSubstrate = state.evm.chainId === centEvmChainId

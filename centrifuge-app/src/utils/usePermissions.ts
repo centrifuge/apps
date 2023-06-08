@@ -96,7 +96,6 @@ export function useSuitableAccounts(config: SuitableConfig) {
   } = useWallet()
   const signingAddress = isEvmOnSubstrate ? evmToSubstrateAddress(selectedAddress!) : selectedAccount?.address
   const permissions = usePoolPermissions(poolId)
-  console.log('combinedAccounts', combinedAccounts)
   const accounts = (combinedAccounts ?? [])?.filter((acc) => {
     if (acc.signingAccount.address !== signingAddress) return false
     if (actingAddress && !actingAddress.includes(acc.actingAddress)) return false
