@@ -52,7 +52,13 @@ const columns: Column[] = [
   {
     align: 'left',
     header: <SortableTableHeader label="Financing date" />,
-    cell: (l: Row) => (l.originationDateSortKey && l.status === 'Active' ? formatDate(l.originationDate) : ''),
+    cell: (l: Row) => {
+      // @ts-expect-error value only exists on Tinlake loans and on active Centrifuge loans
+      return l.originationDate && (l.poolId.startsWith('0x') || l.status === 'Active')
+        ? // @ts-expect-error
+          formatDate(l.originationDate)
+        : ''
+    },
     flex: '2',
     sortKey: 'originationDateSortKey',
   },
