@@ -34,8 +34,8 @@ export const annotateAgreementAndSignAsInvestor = async ({
     throw new HttpError(400, 'Signature page not found')
   }
 
-  const unsignedAgreementUrl = metadata?.onboarding?.agreements[trancheId]
-    ? getCentrifuge().metadata.parseMetadataUrl(metadata?.onboarding?.agreements?.[trancheId].uri)
+  const unsignedAgreementUrl = metadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
+    ? getCentrifuge().metadata.parseMetadataUrl(metadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri)
     : wallet.network === 'substrate'
     ? getCentrifuge().metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null

@@ -8,6 +8,7 @@ import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
@@ -16,6 +17,7 @@ import { usePoolAccess, useSuitableAccounts } from '../../../utils/usePermission
 import { required } from '../../../utils/validation'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { diffPermissions } from '../Configuration/Admins'
+import { CreatePodAccount } from './CreatePodAccount'
 
 type AOFormValues = {
   withdrawAddress: string
@@ -94,11 +96,12 @@ function AOForm({
   const [isEditing, setIsEditing] = React.useState(false)
   const [account] = useSuitableAccounts({ poolId, actingAddress: [ao.address] }).filter((a) => a.proxies?.length === 2)
   const identity = useIdentity(ao.address)
+  const { showPodAccountCreation } = useDebugFlags()
   const cent = useCentrifuge()
   const {
     proxy: { proxyDepositFactor },
     uniques: { collectionDeposit },
-    identity: { basicDeposit: nameDeposit },
+    loans: { loanDeposit },
     keystore: { keyDeposit },
   } = useCentrifugeConsts()
 
@@ -153,8 +156,8 @@ function AOForm({
               .mul(new BN((addedAddresses.length - removedAddresses.length) * numProxyTypesPerHotWallet))
               .add(podOperator ? proxyDepositFactor : new BN(0))
               .add(collectionId ? collectionDeposit : new BN(0))
-              .add(keys ? keyDeposit.mul(new BN(2)) : new BN(0))
-            // .add(name && !initialValues.name ? nameDeposit : new BN(0))
+              // When setting up the AO, also add enough funds to create 100 loans
+              .add(keys ? keyDeposit.mul(new BN(2)).add(loanDeposit.mul(new BN(100))) : new BN(0))
 
             // doing the proxy and multisig transactions manually, because both the Pool Admin and the AO need to call extrinsics
             let tx = api.tx.proxy.proxy(
@@ -317,6 +320,17 @@ function AOForm({
                 <Text as="h3" variant="heading4">
                   POD Setup
                 </Text>
+                {showPodAccountCreation && (
+                  <CreatePodAccount
+                    poolId={poolId}
+                    address={ao.address}
+                    onSuccess={(res) => {
+                      form.setFieldValue('p2pKey', res.p2pDiscoveryKey, false)
+                      form.setFieldValue('documentKey', res.documentSigningKey, false)
+                      form.setFieldValue('podOperator', res.operatorAccountId, false)
+                    }}
+                  />
+                )}
                 <Text as="p" variant="body2" color="textSecondary">
                   Values that need to be set in order to be able to authenticate with the POD and create assets
                 </Text>

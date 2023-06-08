@@ -33,6 +33,7 @@ export type Key =
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
+  | 'showPodAccountCreation'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -78,6 +79,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editPoolVisibility: {
+    type: 'checkbox',
+    default: false,
+  },
+  showPodAccountCreation: {
     type: 'checkbox',
     default: false,
   },
