@@ -58,7 +58,7 @@ export const getActiveOnboardingStep = (
   const hasSignedAgreement = !!(
     poolId &&
     trancheId &&
-    onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
+    onboardingUser.poolSteps?.[poolId]?.[trancheId]?.signAgreement?.completed
   )
 
   if (investorType === 'entity') {
