@@ -302,7 +302,6 @@ export function WalletProvider({
   const connectEvm = React.useCallback(
     async (wallet: EvmConnectorMeta, network?: Network) => {
       const chainId = network === 'centrifuge' ? centEvmChainId : network
-      // console.log('getAddChainParameters(evmChains, chainId)', getAddChainParameters(evmChains, chainId))
       const { connector } = wallet
       try {
         const accounts = await setPendingConnect(wallet, async () => {

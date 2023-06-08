@@ -66,7 +66,6 @@ export function useCentrifugeTransaction<T extends Array<any>>(
           ]),
           ...txOptions,
           onStatusChange: (result) => {
-            console.log('onStatusChange', result)
             const errors = result.events.filter(({ event }) => {
               const possibleProxyErr = event.data[0]?.toHuman()
               return (
@@ -81,7 +80,6 @@ export function useCentrifugeTransaction<T extends Array<any>>(
 
             if (result.dispatchError || errors.length) {
               let errorMessage = 'Transaction failed'
-              console.log('status failed')
               txError = result.dispatchError || errors[0]
               if (errors.length) {
                 const error = errors[0].event.data[0] as any
@@ -117,7 +115,6 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         })
       )
 
-      console.log('txError', txError)
       if (txError) {
         options.onError?.(txError)
       } else {
