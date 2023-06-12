@@ -106,9 +106,9 @@ export function PoolManagers({ poolId }: { poolId: string }) {
             storedManagerPermissions,
             values.adminMultisig.signers.map((address) => ({
               address,
-              roles: { MemberListAdmin: true, LiquidityAdmin: true },
+              roles: { InvestorAdmin: true, LiquidityAdmin: true },
             })),
-            ['LiquidityAdmin', 'MemberListAdmin']
+            ['LiquidityAdmin', 'InvestorAdmin']
           ),
           newPoolMetadata,
         ],

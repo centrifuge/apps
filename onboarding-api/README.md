@@ -351,7 +351,7 @@ Sets the ultimate beneficial owners for the entity.
 
 Once onboarding is complete a final tx will be signed by the server which will whtielist investors. For this, a pure proxy must be created and sufficiently funded for each chain environment. The pure proxy only has to be created once and can be used for all pools.
 
-After creating the pure proxy, it must then be given `MemberListAdmin` permissions for each pool by the address with `PoolAdmin` permissions.
+After creating the pure proxy, it must then be given `InvestorAdmin` permissions for each pool by the address with `PoolAdmin` permissions.
 
 ## Endpoints
 

@@ -12,7 +12,7 @@ import { Tooltips } from '../../../components/Tooltips'
 import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { AddAddressInput } from './AddAddressInput'
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
+type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin'
 
 type Admin = {
   address: string
@@ -157,7 +157,7 @@ export function Admins({ poolId }: { poolId: string }) {
                       header: <Tooltips type="whitelist" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
-                          name={`admins.${row.index}.roles.MemberListAdmin`}
+                          name={`admins.${row.index}.roles.InvestorAdmin`}
                           as={Checkbox}
                           type="checkbox"
                           disabled={!isEditing || isLoading}
@@ -223,7 +223,7 @@ export function Admins({ poolId }: { poolId: string }) {
   )
 }
 
-const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'LoanAdmin']
+const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin']
 
 export function diffPermissions(storedValues: Admin[], formValues: Admin[], rolesToCheck = roles) {
   const storedObj = Object.fromEntries(storedValues.map((admin) => [admin.address, admin.roles]))
