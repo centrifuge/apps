@@ -29,6 +29,7 @@ export type TinlakeContractAddresses = {
   JUNIOR_MEMBERLIST: string
   COORDINATOR: string
   PILE: string
+  CLAIM_CFG: string
   MCD_VAT?: string
   MCD_JUG?: string
   MAKER_MGR?: string
@@ -361,6 +362,36 @@ export function getTinlakeModule(inst: Centrifuge) {
     throw new Error('Arrived at impossible current epoch state')
   }
 
+  // src: tinlake-apps > tinlake.js > src > actions > claimCFG.ts
+  // 1. getClaimCFGAccountID
+  // 2. updateClaimCFGAccountID
+  // these were used to link accounts -> not sure if this feature should be part of centrifuge-app or if it should be retired
+  async function getClaimCFGAccountID(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    args: [address: string],
+    options: TransactionRequest = {}
+  ) {
+    const [address] = args
+    const coordinator = contract(contractAddresses, contractVersions, 'CLAIM_CFG')
+
+    const tx = coordinator.accounts(address, options)
+    return pending(tx)
+  }
+
+  async function updateClaimCFGAccountID(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    args: [centAddress: string],
+    options: TransactionRequest = {}
+  ) {
+    const [centAddress] = args
+    const coordinator = contract(contractAddresses, contractVersions, 'CLAIM_CFG')
+
+    const tx = coordinator.update(centAddress, options)
+    return pending(tx)
+  }
+
   return {
     updateInvestOrder,
     updateRedeemOrder,
@@ -371,6 +402,8 @@ export function getTinlakeModule(inst: Centrifuge) {
     solveEpoch,
     executeEpoch,
     contract,
+    getClaimCFGAccountID,
+    updateClaimCFGAccountID,
   }
 }
 

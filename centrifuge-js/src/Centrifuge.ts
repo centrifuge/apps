@@ -9,6 +9,7 @@ import { getPodModule } from './modules/pod'
 import { getPoolsModule } from './modules/pools'
 import { getProxiesModule } from './modules/proxies'
 import { getRemarkModule } from './modules/remark'
+import { getRewardsModule } from './modules/rewards'
 import { getTinlakeModule } from './modules/tinlake'
 import { getTokensModule } from './modules/tokens'
 import { getUtilsModule } from './modules/utils'
@@ -24,6 +25,7 @@ export class Centrifuge extends CentrifugeBase {
   auth = getAuthModule(this)
   tinlake = getTinlakeModule(this)
   remark = getRemarkModule(this)
+  rewards = getRewardsModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)

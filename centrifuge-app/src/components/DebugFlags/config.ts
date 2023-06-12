@@ -22,6 +22,7 @@ export type DebugFlagConfig =
 
 export type Key =
   | 'address'
+  | 'evmAddress'
   | 'batchMintNFTs'
   | 'persistDebugFlags'
   | 'showUnusedFlags'
@@ -33,6 +34,10 @@ export type Key =
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
+    type: 'text',
+    default: '',
+  },
+  evmAddress: {
     type: 'text',
     default: '',
   },

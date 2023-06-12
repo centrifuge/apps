@@ -2259,13 +2259,20 @@ export function getPoolsModule(inst: Centrifuge) {
     }
   }
 
-  function claimLiquidityRewards(args: [currencyId: string]) {
-    const [currencyId] = args
+  function claimLiquidityRewards(args: [trancheId: string], options?: TransactionOptions) {
+    const [trancheId] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        return 'hello world'
+        // console.log('$api', api)
+
+        // todo: check if already collected
+        // check if can call 'collect()'
+        // const collect = api.tx.investments.collectInvestments([poolId, trancheId])
+
+        const submittable = api.tx.liquidityRewards.claimReward(trancheId)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
 
@@ -2284,31 +2291,45 @@ export function getPoolsModule(inst: Centrifuge) {
     // )
   }
 
-  function stake(args: [currencyId: string, amount: number]) {
-    const [currencyId, amount] = args
+  function collectAndStake(
+    args: [poolId: string, trancheId: string, currencyId: Exclude<CurrencyKey, string>, amount: number],
+    options?: TransactionOptions
+  ) {
+    const [poolId, trancheId, currencyId, amount] = args
     const $api = inst.getApi()
 
+    // return $api.pipe(
+    //   switchMap((api) => {
+    //     const submittable = api.tx.liquidityRewards.stake(currencyId, amount)
+    //     return inst.wrapSignAndSend(api, submittable, options)
+    //   })
+    // )
     return $api.pipe(
       switchMap((api) => {
-        return 'hello world'
+        const submittable = api.tx.utility.batchAll([
+          api.tx.investments.collectInvestments([poolId, trancheId]),
+          api.tx.liquidityRewards.stake(currencyId, amount),
+        ])
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
 
-  function unStake(args: [currencyId: string, amount: number]) {
+  function unStake(args: [currencyId: Exclude<CurrencyKey, string>, amount: number], options?: TransactionOptions) {
     const [currencyId, amount] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        return 'hello world'
+        const submittable = api.tx.liquidityRewards.unStake(currencyId, amount)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
 
   return {
     claimLiquidityRewards,
-    stake,
+    collectAndStake,
     unStake,
     createPool,
     initialisePool,

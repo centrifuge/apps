@@ -13,6 +13,7 @@ import { LoadBoundary } from './LoadBoundary'
 import { LogoLink } from './LogoLink'
 import { Menu } from './Menu'
 import { OnboardingStatus } from './OnboardingStatus'
+import { TinlakeRewards } from './TinlakeRewards'
 
 type Props = {
   sidebar?: React.ReactNode
@@ -149,6 +150,8 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
               {shouldRenderFaucet && <Faucet />}
 
               <LoadBoundary>{sidebar}</LoadBoundary>
+
+              <TinlakeRewards />
             </Stack>
           )}
         </Box>
