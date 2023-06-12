@@ -2298,11 +2298,12 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
 }
 
 function parseCurrencyKey(key: CurrencyKey): CurrencyKey {
-  console.log('key', key)
-  if (typeof key === 'string' || 'ForeignAsset' in key) return key
-  return {
-    Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+  if (typeof key !== 'string' && 'Tranche' in key) {
+    return {
+      Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+    }
   }
+  return key
 }
 
 function looksLike(a: any, b: any): boolean {
