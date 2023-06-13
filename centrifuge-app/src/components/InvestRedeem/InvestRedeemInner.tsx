@@ -40,9 +40,6 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const allowedTranches = useAllowedTranches(state.poolId)
-  const isTinlakePool = state.poolId.startsWith('0x')
-
-  const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
 
   const { data: metadata } = usePoolMetadata(pool)
   const { connectedType } = useWallet()
@@ -57,7 +54,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const canOnlyInvest =
     state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
-  if (!isTinlakePool || availableTranches.length) {
+  if (allowedTranches.length) {
     return (
       <Stack as={Card} gap={2} p={2}>
         <Stack alignItems="center">
@@ -79,11 +76,11 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
           </Box>
         </Stack>
 
-        {availableTranches.length > 1 && (
+        {allowedTranches.length > 1 && (
           <Select
             name="token"
             placeholder="Select a token"
-            options={availableTranches
+            options={allowedTranches
               .map((tranche) => ({
                 label: tranche.currency.symbol ?? '',
                 value: tranche.id,
@@ -96,7 +93,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
 
         {connectedType && state.isDataLoading ? (
           <Spinner />
-        ) : state.isAllowedToInvest ? (
+        ) : state.isAllowedToInvest && metadata?.onboarding?.tranches?.[state.trancheId]?.openForOnboarding ? (
           <>
             {canOnlyInvest ? (
               <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />

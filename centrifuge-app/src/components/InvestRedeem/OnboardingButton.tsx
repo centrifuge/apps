@@ -10,7 +10,6 @@ export const OnboardingButton = ({ networks }: { networks: Network[] | undefined
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const isTinlakePool = pool.id.startsWith('0x')
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
 
@@ -24,7 +23,7 @@ export const OnboardingButton = ({ networks }: { networks: Network[] | undefined
         return 'Contact issuer'
       }
 
-      if (investStatus === 'open' || !isTinlakePool) {
+      if (investStatus === 'open' || metadata?.onboarding?.tranches?.[state.trancheId]?.openForOnboarding) {
         return `Onboard to ${state.trancheCurrency?.symbol ?? 'token'}`
       }
     } else {
