@@ -2283,11 +2283,17 @@ function getEpochStatus(epochExecution: Pick<EpochExecutionData, 'challengePerio
   return 'ongoing'
 }
 
-export function findCurrency<T extends Pick<CurrencyMetadata, 'key'>>(
+export function findCurrency<T extends Pick<CurrencyMetadata, 'key' | 'symbol'>>(
   currencies: T[],
   key: CurrencyKey
 ): T | undefined {
-  return currencies.find((currency) => looksLike(currency.key, key))
+  const curr = currencies.find((currency) => {
+    if (typeof key === 'string') {
+      return looksLike(currency.symbol, key)
+    }
+    return looksLike(currency.key, key)
+  })
+  return curr
 }
 
 export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
