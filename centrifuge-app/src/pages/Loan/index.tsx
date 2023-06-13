@@ -28,12 +28,10 @@ import { LoanTemplate, LoanTemplateAttribute } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
-import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
-import { useCanBorrowAsset, usePermissions } from '../../utils/usePermissions'
-import { usePod } from '../../utils/usePod'
+import { useCanBorrowAsset } from '../../utils/usePermissions'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
@@ -51,11 +49,9 @@ export const LoanPage: React.FC = () => {
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
-  const address = useAddress('substrate')
-  const permissions = usePermissions(address)
   const canBorrow = useCanBorrowAsset(pid, aid)
 
-  if (!loan || loan.status === 'Closed' || !permissions || !canBorrow) return null
+  if (!loan || loan.status === 'Closed' || !canBorrow) return null
 
   return <FinanceForm loan={loan} />
 }
@@ -78,13 +74,11 @@ const Loan: React.FC = () => {
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const { data: templateData } = useMetadata<LoanTemplate>(
-    nftMetadata?.properties?._template && `ipfs://ipfs/${nftMetadata?.properties?._template}`
+    nftMetadata?.properties?._template && `ipfs://${nftMetadata?.properties?._template}`
   )
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
-  const podUrl = poolMetadata?.pod?.url
-  const { isLoggedIn } = usePod(podUrl)
-  const { data: document } = usePodDocument(podUrl, documentId)
+  const { data: document } = usePodDocument(poolId, documentId)
 
   const publicData = nftMetadata?.properties
     ? Object.fromEntries(Object.entries(nftMetadata.properties).map(([key, obj]: any) => [key, obj]))
@@ -172,8 +166,8 @@ const Loan: React.FC = () => {
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
-                ) : !isPublic && !isLoggedIn && podUrl ? (
-                  <PodAuthSection podUrl={podUrl} buttonLabel="Authenticate to view" />
+                ) : !isPublic ? (
+                  <PodAuthSection poolId={poolId} buttonLabel="Authenticate to view" />
                 ) : null}
               </PageSection>
             )
@@ -279,9 +273,10 @@ const Loan: React.FC = () => {
 function formatValue(value: any, attr: LoanTemplateAttribute) {
   switch (attr.input.type) {
     case 'number':
-      return (
-        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals).toFloat() : Number(value)
-      ).toLocaleString('en')
+      return `${(attr.input.decimals
+        ? new CurrencyBalance(value, attr.input.decimals).toFloat()
+        : Number(value)
+      ).toLocaleString('en')} ${attr.input.unit || ''}`
     case 'currency':
       return formatBalance(
         attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals) : Number(value),

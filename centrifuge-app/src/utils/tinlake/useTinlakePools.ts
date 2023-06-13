@@ -239,27 +239,37 @@ function getTinlakeLoanStatus(loan: TinlakeLoanData) {
 async function getTinlakeLoans(poolId: string) {
   const query = `
     {
-      loans (first: 1000, where: { pool_in: ["${poolId.toLowerCase()}"]}) {
-        nftId
-        id
-        index
-        financingDate
-        debt
-        pool {
+      pools (where: { id_in: ["${poolId.toLowerCase()}"]}) {
+        loans (first: 1000) {
+          nftId
           id
+          index
+          financingDate
+          debt
+          pool {
+            id
+          }
+          maturityDate
+          interestRatePerSecond
+          borrowsAggregatedAmount
+          repaysAggregatedAmount
+          ceiling
+          closed
+          riskGroup
+          owner
         }
-        maturityDate
-        interestRatePerSecond
-        borrowsAggregatedAmount
-        repaysAggregatedAmount
-        ceiling
-        closed
-        riskGroup
-        owner
       }
     }`
 
-  const { loans } = await request<{ loans: TinlakeLoanData[] }>('https://graph.centrifuge.io/tinlake', query)
+  const data = await request<{ data: any[] }>('https://graph.centrifuge.io/tinlake', query)
+
+  const loans = data.pools.reduce((assets: any[], pool: any) => {
+    if (pool.loans) {
+      assets.push(...pool.loans)
+    }
+    return assets
+  }, [])
+
   return loans
 }
 
@@ -566,11 +576,16 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           minInitialInvestment: '5000000000000000000000',
         },
       },
-      riskGroups: [],
       onboarding: {
         agreements: {
-          [`${id}-0`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '' },
-          [`${id}-1`]: { ipfsHash: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '' },
+          [`${id}-0`]: {
+            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '',
+            mime: 'application/pdf',
+          },
+          [`${id}-1`]: {
+            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '',
+            mime: 'application/pdf',
+          },
         },
       },
     }

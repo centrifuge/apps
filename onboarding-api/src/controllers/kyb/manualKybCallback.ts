@@ -80,7 +80,7 @@ export const manualKybCallbackController = async (
         throw new HttpError(400, 'Agreement not found')
       }
 
-      sendDocumentsMessage(wallet, query.poolId, query.trancheId, signedAgreement)
+      await sendDocumentsMessage(wallet, query.poolId, query.trancheId, signedAgreement)
     }
 
     return res.status(200).end()

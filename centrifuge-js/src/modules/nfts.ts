@@ -4,7 +4,7 @@ import { combineLatest, EMPTY, firstValueFrom } from 'rxjs'
 import { expand, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
-import { getRandomUint, isSameAddress } from '../utils'
+import { addressToHex, getRandomUint, isSameAddress } from '../utils'
 
 type Item = {
   owner: string
@@ -74,9 +74,9 @@ export function getNftsModule(inst: Centrifuge) {
           const collectionValue = value.toJSON() as Class
           const collection: Collection = {
             id,
-            admin: collectionValue.admin,
-            owner: collectionValue.owner,
-            issuer: collectionValue.issuer,
+            admin: addressToHex(collectionValue.admin),
+            owner: addressToHex(collectionValue.owner),
+            issuer: addressToHex(collectionValue.issuer),
             items: collectionValue.items,
             metadataUri: metasObj[id]?.data,
           }
@@ -102,9 +102,9 @@ export function getNftsModule(inst: Centrifuge) {
         if (!collectionValue) throw new Error('Collection not found')
         const collection: Collection = {
           id: collectionId,
-          admin: collectionValue.admin,
-          owner: collectionValue.owner,
-          issuer: collectionValue.issuer,
+          admin: addressToHex(collectionValue.admin),
+          owner: addressToHex(collectionValue.owner),
+          issuer: addressToHex(collectionValue.issuer),
           items: collectionValue.items,
           metadataUri: (meta.toHuman() as any)?.data,
         }
@@ -187,7 +187,7 @@ export function getNftsModule(inst: Centrifuge) {
         const nft: NFT = {
           id: nftId,
           collectionId,
-          owner: saleValue?.seller || nftValue.owner,
+          owner: addressToHex(saleValue?.seller || nftValue.owner),
           metadataUri: (meta.toHuman() as any)?.data,
           sellPrice: saleValue ? parseHex(saleValue.price.amount) : null,
         }
@@ -246,7 +246,7 @@ export function getNftsModule(inst: Centrifuge) {
               const nft: NFT = {
                 id,
                 collectionId,
-                owner: sale?.seller || instance.owner,
+                owner: addressToHex(sale?.seller || instance.owner),
                 metadataUri: (metas[i]?.toHuman() as any)?.data,
                 sellPrice: sale ? parseHex(sale.price.amount) : null,
               }

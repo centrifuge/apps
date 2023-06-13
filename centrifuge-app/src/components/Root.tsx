@@ -23,6 +23,7 @@ import { IssuerPoolPage } from '../pages/IssuerPool'
 import { IssuerCreateLoanPage } from '../pages/IssuerPool/Assets/CreateLoan'
 import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
+import { MultisigApprovalPage } from '../pages/MultisigApproval'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { OnboardingPage } from '../pages/Onboarding'
@@ -39,7 +40,6 @@ import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
-import { PodAuthProvider } from './PodAuthProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,8 +94,9 @@ const evmChains: EvmChains =
         },
       }
 
-export const Root: React.VFC = () => {
+export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
+  const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
 
   return (
     <>
@@ -116,23 +117,30 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
-              <PodAuthProvider>
-                <OnboardingAuthProvider>
-                  <OnboardingProvider>
-                    <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                      <TransactionProvider>
-                        <TransactionToasts />
-                        <Router>
-                          <LoadBoundary>
-                            <Routes />
-                          </LoadBoundary>
-                        </Router>
-                      </TransactionProvider>
-                    </DebugFlags>
-                  </OnboardingProvider>
-                </OnboardingAuthProvider>
-              </PodAuthProvider>
+            <WalletProvider
+              evmChains={evmChains}
+              subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+              showAdvancedAccounts={showAdvancedAccounts}
+            >
+              <OnboardingAuthProvider>
+                <OnboardingProvider>
+                  <DebugFlags
+                    onChange={(state) => {
+                      setIsThemeToggled(!!state.alternativeTheme)
+                      setShowAdvancedAccounts(!!state.showAdvancedAccounts)
+                    }}
+                  >
+                    <TransactionProvider>
+                      <TransactionToasts />
+                      <Router>
+                        <LoadBoundary>
+                          <Routes />
+                        </LoadBoundary>
+                      </Router>
+                    </TransactionProvider>
+                  </DebugFlags>
+                </OnboardingProvider>
+              </OnboardingAuthProvider>
             </WalletProvider>
           </CentrifugeProvider>
         </FabricProvider>
@@ -141,7 +149,7 @@ export const Root: React.VFC = () => {
   )
 }
 
-const Routes: React.VFC = () => {
+function Routes() {
   return (
     <Switch>
       <Route path="/nfts/collection/:cid/object/mint">
@@ -194,6 +202,9 @@ const Routes: React.VFC = () => {
       </Route>
       <Route exact path="/onboarding/updateInvestorStatus">
         <UpdateInvestorStatus />
+      </Route>
+      <Route exact path="/multisig-approval">
+        <MultisigApprovalPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/pools" />

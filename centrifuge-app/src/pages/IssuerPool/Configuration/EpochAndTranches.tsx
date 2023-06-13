@@ -11,6 +11,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { useConstants, usePool, usePoolMetadata } from '../../../utils/usePools'
 import { TrancheInput } from '../../IssuerCreatePool/TrancheInput'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -19,11 +20,12 @@ type Values = Pick<PoolMetadataInput, 'epochHours' | 'epochMinutes' | 'tranches'
 
 type Row = Values['tranches'][0]
 
-export const EpochAndTranches: React.FC = () => {
+export function EpochAndTranches() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const columns: Column[] = [
     {
@@ -158,7 +160,7 @@ export const EpochAndTranches: React.FC = () => {
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),
       ]
-      execute([poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches }])
+      execute([poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches }], { account })
       actions.setSubmitting(false)
     },
   })

@@ -1,23 +1,22 @@
 import { Stack } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useIsPoolAdmin } from '../../../utils/usePermissions'
+import { PendingMultisigs } from '../../../components/PendingMultisigs'
+import { usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
-import { Admins } from './Admins'
 import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
 import { LoanTemplates } from './LoanTemplates'
-import { OnboardingConfig } from './OnboardingConfig'
 import { PoolConfig } from './PoolConfig'
 import { WriteOffGroups } from './WriteOffGroups'
 
-export const IssuerPoolConfigurationPage: React.FC = () => {
+export function IssuerPoolConfigurationPage() {
+  const { pid: poolId } = useParams<{ pid: string }>()
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<PendingMultisigs poolId={poolId} />}>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolConfiguration />
@@ -26,22 +25,19 @@ export const IssuerPoolConfigurationPage: React.FC = () => {
   )
 }
 
-const IssuerPoolConfiguration: React.FC = () => {
+function IssuerPoolConfiguration() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isPoolAdmin = useIsPoolAdmin(poolId)
   const { editPoolConfig } = useDebugFlags()
 
   return (
     <Stack>
-      {isPoolAdmin && (
+      {!!usePoolAdmin(poolId) && (
         <>
           <Details />
           <Issuer />
           <EpochAndTranches />
           <WriteOffGroups />
-          <Admins />
           <LoanTemplates />
-          <OnboardingConfig />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}

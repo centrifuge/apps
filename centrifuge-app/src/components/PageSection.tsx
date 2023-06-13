@@ -3,7 +3,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 type Props = {
-  title?: string
+  title?: React.ReactNode
   titleAddition?: React.ReactNode
   subtitle?: string
   headerRight?: React.ReactNode
@@ -79,9 +79,11 @@ export const PageSection: React.FC<Props> = ({
             </Shelf>
 
             {subtitle && (
-              <Text variant="body2" color="textSecondary">
-                {subtitle}
-              </Text>
+              <Box pl={collapsible ? 5 : 0}>
+                <Text variant="body2" as="small" color="textSecondary">
+                  {subtitle}
+                </Text>
+              </Box>
             )}
           </Stack>
           {headerRight}

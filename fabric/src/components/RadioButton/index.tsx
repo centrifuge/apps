@@ -8,9 +8,10 @@ import { Text } from '../Text'
 export type RadioButtonProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string
   errorMessage?: string
+  textStyle?: string
 }
 
-export const RadioButton: React.VFC<RadioButtonProps> = ({ label, errorMessage, ...radioProps }) => {
+export const RadioButton: React.VFC<RadioButtonProps> = ({ label, errorMessage, textStyle, ...radioProps }) => {
   return (
     <label>
       <Shelf as={Text} gap={1} alignItems="baseline">
@@ -19,7 +20,7 @@ export const RadioButton: React.VFC<RadioButtonProps> = ({ label, errorMessage, 
           <StyledOutline />
         </StyledWrapper>
         <Stack gap={1} flex={1}>
-          <Text variant="body1" color={radioProps.disabled ? 'textDisabled' : 'textPrimary'}>
+          <Text variant={textStyle ?? 'body2'} color={radioProps.disabled ? 'textDisabled' : 'textPrimary'}>
             {label}
           </Text>
           {errorMessage && (
