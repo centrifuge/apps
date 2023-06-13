@@ -24,12 +24,14 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 ### Onboarding API
 
-Setup pure proxy to sign transactions.
+Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 
-1. Wallet A calls proxy.create_pure(..) . This creates a pure proxy, which doesn’t have a private key or seed. You can then copy the address (pure_proxy_address) from the event submitted.
-2. Wallet A calls proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=PermissionManagement)
-3. Wallet A calls proxy.proxy(pure_proxy_address, proxy.add_proxy(multisig_C, type=Any). Multisig C is some multisig that can swap out wallet B if it ever gets compromised / lost. This should be at least a multisig with 2 signer threshold.
+1. Use Wallet A to call proxy.create_pure(..) . This creates a pure proxy, which doesn’t have a private key or seed. You can then copy the address (pure_proxy_address) from the event submitted.
+2. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=PermissionManagement)
+3. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(multisig_C, type=Any). Multisig C is some multisig that can swap out wallet B if it ever gets compromised / lost. This should be at least a multisig with 2 signer threshold.
 4. Add the pure_proxy_address to the env variable `MEMBERLIST_ADMIN_PURE_PROXY` in the onboarding api and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` in the centrifuge-app env variables.
+5. Make sure secure_wallet_B is funded with both aUSD and the Native currency.
+6. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=Any) for
 
 Note: onboarding must be manually enabled for each tranche in the issuer settings.
 
