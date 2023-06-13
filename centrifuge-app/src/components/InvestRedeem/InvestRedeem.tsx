@@ -310,7 +310,7 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
   const isTinlakePool = pool.id.startsWith('0x')
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
-  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'request'
+  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'closed'
   const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
 
   const history = useHistory()
@@ -319,6 +319,9 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
     if (connectedType) {
       if (investStatus === 'request') {
         return 'Contact issuer'
+      }
+      if (investStatus === 'closed') {
+        return `${state.trancheCurrency?.symbol ?? 'token'} onboarding closed`
       }
 
       if (investStatus === 'open' || !isTinlakePool) {
@@ -341,7 +344,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
     }
   }
 
-  return <Button onClick={handleClick}>{getOnboardingButtonText()}</Button>
+  return (
+    <Button disabled={investStatus === 'closed'} onClick={handleClick}>
+      {getOnboardingButtonText()}
+    </Button>
+  )
 }
 
 type InvestValues = {
