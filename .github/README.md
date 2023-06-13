@@ -31,7 +31,7 @@ Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 3. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(multisig_C, type=Any). Multisig C is some multisig that can swap out wallet B if it ever gets compromised / lost. This should be at least a multisig with 2 signer threshold.
 4. Add the pure_proxy_address to the env variable `MEMBERLIST_ADMIN_PURE_PROXY` in the onboarding api and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` in the centrifuge-app env variables.
 5. Make sure secure_wallet_B is funded with both aUSD and the Native currency.
-6. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=Any) for
+6. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=Any) to be able to transfer tokens.
 
 Note: onboarding must be manually enabled for each tranche in the issuer settings.
 
