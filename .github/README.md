@@ -24,18 +24,14 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 ### Onboarding API
 
-<!-- TODO: make subdocs pool and tranche specific
-1. Add subdocs for new pools and tranches in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/subscription-agreements/<poolId>/<trancheId>.pdf` -->
+Setup pure proxy to sign transactions.
 
-1. Add a subdoc in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/subscription-agreements/generic_subscription_agreement.pdf`
-2. Add the acceptance page in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/acceptance-page.pdf`
-3. Add the signature page in cloud storage bucket. Format: `centrifuge-onboarding-api-dev/signature-page.pdf`
-4. Onboarding API whitelisting:
-   a. Create an account to control the pure proxy and add it’s seed phrase to the secret env variables
-   b. Create the pure proxy using the account created in step one
-   c. Go to explorer and find the tx that creates the pure proxy, copy the randomly generated address and paste into env variables
-   d. Fund both the proxy and the controlling account
-   e. In each pool give the pure proxy whitelisting permission - this can only be done by the pool admin
+1. Wallet A calls proxy.create_pure(..) . This creates a pure proxy, which doesn’t have a private key or seed. You can then copy the address (pure_proxy_address) from the event submitted.
+2. Wallet A calls proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=PermissionManagement)
+3. Wallet A calls proxy.proxy(pure_proxy_address, proxy.add_proxy(multisig_C, type=Any). Multisig C is some multisig that can swap out wallet B if it ever gets compromised / lost. This should be at least a multisig with 2 signer threshold.
+4. Add the pure_proxy_address to the env variable `MEMBERLIST_ADMIN_PURE_PROXY` in the onboarding api and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` in the centrifuge-app env variables.
+
+Note: onboarding must be manually enabled for each tranche in the issuer settings.
 
 ### Asset Originator POD Access
 
