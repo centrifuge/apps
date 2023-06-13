@@ -210,10 +210,10 @@ export const OnboardingSettings = () => {
       const isAnyTrancheOpen = Object.values(values.openForOnboarding).includes(true)
       if (!useExternalUrl && isAnyTrancheOpen && !hasMemberlistPermissions) {
         // pool is open for onboarding and onboarding-api proxy is not in pool permissions
-        updatePermissionAndConfigTx([[[investorAdmin, 'InvestorAdmin']], [], amendedMetadata])
+        updatePermissionAndConfigTx([[[investorAdmin, 'InvestorAdmin']], [], amendedMetadata], { account })
       } else if (hasMemberlistPermissions && (useExternalUrl || !isAnyTrancheOpen)) {
         // remove onboarding-api proxy from pool permissions
-        updatePermissionAndConfigTx([[], [[investorAdmin, 'InvestorAdmin']], amendedMetadata])
+        updatePermissionAndConfigTx([[], [[investorAdmin, 'InvestorAdmin']], amendedMetadata], { account })
       } else {
         updateConfigTx([poolId, amendedMetadata], { account })
       }
