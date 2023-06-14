@@ -1,4 +1,3 @@
-import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import {
   Box,
   IconAnchor,
@@ -52,18 +51,8 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
   const centrifuge = useCentrifuge()
   const ctx = useWallet()
-  const {
-    isEvmOnSubstrate,
-    connectedType,
-    substrate,
-    disconnect,
-    showWallets,
-    showAccounts,
-    connectedNetwork,
-    connectedNetworkName,
-  } = ctx
-  const convertedAddress = isEvmOnSubstrate ? evmToSubstrateAddress(address) : address
-  console.log('convertedAddress', convertedAddress)
+  const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
+    ctx
   const formattedAddress = connectedType === 'evm' ? address : centrifuge.utils.formatAddress(address)
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
