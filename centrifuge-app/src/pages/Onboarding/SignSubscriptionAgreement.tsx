@@ -13,7 +13,6 @@ import { useSignRemark } from './queries/useSignRemark'
 
 type Props = {
   signedAgreementUrl: string | undefined
-  isSignedAgreementFetched: boolean
 }
 
 const validationSchema = object({
@@ -22,7 +21,7 @@ const validationSchema = object({
 
 const GENERIC_SUBSCRIPTION_AGREEMENT = 'QmYuPPQuuc9ezYQtgTAupLDcLCBn9ZJgsPjG7mUx7qbN8G'
 
-export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
+export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
   const { onboardingUser, pool, previousStep, nextStep } = useOnboarding<
     NonNullable<OnboardingUser>,
     NonNullable<OnboardingPool>
