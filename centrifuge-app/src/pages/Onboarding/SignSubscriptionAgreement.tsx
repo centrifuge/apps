@@ -178,7 +178,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
             This pool is currently not accepting new investors. Please contact the issuer (
             <a href={`mailto:${poolMetadata?.pool?.issuer.email}?subject=Onboarding&body=I’m reaching out about…`}>
               {poolMetadata?.pool?.issuer.email}
-            </a>{' '}
+            </a>
             ) for any questions.
           </span>
         }
