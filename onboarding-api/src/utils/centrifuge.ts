@@ -23,7 +23,7 @@ export const getSigner = async () => {
   await cryptoWaitReady()
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 })
   // the pure proxy controller (PURE_PROXY_CONTROLLER_SEED) is the wallet that controls the pure proxy being used to sign the transaction
-  // the pure proxy address (MEMBERLIST_ADMIN_PURE_PROXY) has to be given MemberListAdmin permissions on each pool before being able to whitelist investors
+  // the pure proxy address (MEMBERLIST_ADMIN_PURE_PROXY) has to be given InvestorAdmin permissions on each pool before being able to whitelist investors
   return keyring.addFromMnemonic(process.env.PURE_PROXY_CONTROLLER_SEED)
 }
 
@@ -48,7 +48,7 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
     api.pipe(
       switchMap((api) => {
         const submittable = api.tx.permissions.add(
-          { PoolRole: 'MemberListAdmin' },
+          { PoolRole: 'InvestorAdmin' },
           walletAddress,
           { Pool: poolId },
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
@@ -56,7 +56,7 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
         if (metadata?.onboarding?.podReadAccess) {
           const address = cent.utils.formatAddress(walletAddress)
           const podSubmittable = api.tx.permissions.add(
-            { PoolRole: 'MemberListAdmin' },
+            { PoolRole: 'InvestorAdmin' },
             address,
             { Pool: poolId },
             { PoolRole: 'PODReadAccess' }

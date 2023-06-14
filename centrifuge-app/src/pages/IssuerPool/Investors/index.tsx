@@ -22,7 +22,7 @@ export function IssuerPoolInvestorsPage() {
 
 function IssuerPoolInvestors() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const canEditInvestors = useSuitableAccounts({ poolId, poolRole: ['MemberListAdmin'] }).length > 0
+  const canEditInvestors = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'] }).length > 0
   const isPoolAdmin = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] }).length > 0
 
   return (

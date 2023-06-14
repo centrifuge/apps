@@ -225,13 +225,13 @@ export function usePoolAccess(poolId: string) {
     : []
   const missingAdminPermissions = diffPermissions(
     [storedAdminRoles],
-    [{ address: storedAdminRoles.address, roles: { MemberListAdmin: true } }]
+    [{ address: storedAdminRoles.address, roles: { InvestorAdmin: true } }]
   ).add
   const missingManagerPermissions = diffPermissions(
     storedManagerPermissions,
     (multisig?.signers || adminDelegates?.map((p) => p.delegatee))?.map((address) => ({
       address,
-      roles: { MemberListAdmin: true, LiquidityAdmin: true },
+      roles: { InvestorAdmin: true, LiquidityAdmin: true },
     })) || []
   ).add
 
