@@ -2,7 +2,7 @@ import { Box, IconInvestments, IconNft, Menu as Panel, MenuItemGroup, Shelf, Sta
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
-import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
+import { usePools } from '../../utils/usePools'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
@@ -10,7 +10,8 @@ import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
 export function Menu() {
-  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
+  // const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
+  const pools = usePools() || []
   const isXLarge = useIsAboveBreakpoint('XL')
   const address = useAddress('substrate')
 
