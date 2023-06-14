@@ -4,6 +4,7 @@ import * as React from 'react'
 export const DemoBanner = () => {
   const storageKey = 'demo-banner-seen'
   const isDemo = import.meta.env.REACT_APP_IS_DEMO
+  const isStaging = window?.location.origin === 'https://app.staging.centrifuge.io'
   const [isOpen, setIsOpen] = React.useState(false)
 
   React.useEffect(() => {
@@ -15,9 +16,13 @@ export const DemoBanner = () => {
     setIsOpen(false)
   }
 
+  if (!isDemo && !isStaging) {
+    return null
+  }
+
   return (
     <Banner
-      isOpen={isOpen && isDemo}
+      isOpen={isOpen}
       onClose={() => onClose()}
       title={
         <Text as="h3" color="textInverted" variant="heading5">
