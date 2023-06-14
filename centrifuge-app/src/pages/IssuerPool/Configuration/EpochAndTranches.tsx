@@ -175,7 +175,10 @@ export function EpochAndTranches() {
           tokenSymbol: tranche.symbolName,
         })),
       ]
-      execute([poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches }], { account })
+      execute(
+        [poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches: hasTrancheChanges ? tranches : undefined }],
+        { account }
+      )
       actions.setSubmitting(false)
     },
   })
