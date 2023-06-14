@@ -104,6 +104,7 @@ export const entityUserSchema = object({
   countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
   globalSteps: globalStepsSchema,
   poolSteps: poolStepsSchema,
+  manualKybReference: string().nullable().default(null),
   address: string().nullable().default(null),
 })
 
@@ -129,7 +130,7 @@ export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
 
 export const storage = new Storage()
-export const onboardingBucket = storage.bucket('centrifuge-onboarding-api-dev') // TODO: make an env variable
+export const onboardingBucket = storage.bucket(process.env.ONBOARDING_STORAGE_BUCKET)
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {

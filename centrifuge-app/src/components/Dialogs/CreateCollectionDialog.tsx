@@ -2,6 +2,7 @@ import { CollectionMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/
 import {
   ConnectionGuard,
   useAsyncCallback,
+  useBalances,
   useCentrifuge,
   useCentrifugeTransaction,
   useWallet,
@@ -22,8 +23,9 @@ import * as React from 'react'
 import { Redirect } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
+import { Dec } from '../../utils/Decimal'
 import { getFileDataURI } from '../../utils/getFileDataURI'
-import { useBalance } from '../../utils/useBalance'
+import { useAddress } from '../../utils/useAddress'
 import { ButtonGroup } from '../ButtonGroup'
 
 // TODO: replace with better fee estimate
@@ -38,7 +40,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const [description, setDescription] = React.useState<string>('')
   const [logo, setLogo] = React.useState<File | null>(null)
   const cent = useCentrifuge()
-  const balance = useBalance()
+  const address = useAddress('substrate')
+  const balances = useBalances(address)
   const [redirect, setRedirect] = React.useState<string>('')
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [termsAccepted, setTermsAccepted] = React.useState(false)
@@ -70,15 +73,16 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     const collectionId = await cent.nfts.getAvailableCollectionId()
 
     let fileDataUri
+    let imageMetadataHash
     if (logo) {
       fileDataUri = await getFileDataURI(logo)
+      imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     }
 
-    const imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     const metadataValues: CollectionMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      image: imageMetadataHash.ipfsHash,
+      image: imageMetadataHash?.ipfsHash,
     }
 
     doTransaction([collectionId, substrate.selectedAccount!.address, metadataValues])
@@ -106,7 +110,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     onClose()
   }
 
-  const balanceLow = !balance || balance < CREATE_FEE_ESTIMATE
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
+  const balanceLow = balanceDec.lt(CREATE_FEE_ESTIMATE)
   const isTxPending = metadataIsUploading || transactionIsPending
 
   const fieldDisabled = !isConnected || balanceLow || isTxPending
@@ -156,7 +161,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
               <Shelf justifyContent="space-between">
                 {balanceLow && (
                   <Text variant="label1" color="criticalForeground">
-                    Your balance is too low ({(balance || 0).toFixed(2)} AIR)
+                    Your balance is too low ({(balanceDec || 0).toFixed(2)} AIR)
                   </Text>
                 )}
                 <ButtonGroup ml="auto">

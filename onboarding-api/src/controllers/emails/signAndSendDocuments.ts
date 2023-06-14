@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import {
+  EntityUser,
   OnboardingUser,
   transactionInfoSchema,
   validateAndWriteToFirestore,
@@ -10,6 +11,7 @@ import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
 import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
+import { getPoolById } from '../../utils/getPoolById'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { validateEvmRemark } from '../../utils/tinlake'
 import { Subset } from '../../utils/types'
@@ -31,7 +33,21 @@ export const signAndSendDocumentsController = async (
     const { poolId, trancheId, transactionInfo } = req.body
     const { wallet } = req
 
-    const user = await fetchUser(wallet)
+    const { poolSteps, globalSteps, investorType, name, email, ...user } = await fetchUser(wallet)
+    const { metadata } = await getPoolById(poolId)
+    if (
+      investorType === 'individual' &&
+      metadata?.onboarding?.kycRestrictedCountries.includes(user.countryOfCitizenship)
+    ) {
+      throw new HttpError(400, 'Country not supported by issuer')
+    }
+
+    if (
+      investorType === 'entity' &&
+      metadata?.onboarding?.kybRestrictedCountries.includes((user as EntityUser).jurisdictionCode!)
+    ) {
+      throw new HttpError(400, 'Country not supported by issuer')
+    }
 
     const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
 
@@ -42,8 +58,8 @@ export const signAndSendDocumentsController = async (
     }
 
     if (
-      user.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
-      user.poolSteps?.[poolId]?.[trancheId]?.status.status !== null
+      poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
+      poolSteps?.[poolId]?.[trancheId]?.status.status !== null
     ) {
       throw new HttpError(400, 'User has already signed the agreement')
     }
@@ -51,10 +67,10 @@ export const signAndSendDocumentsController = async (
     const signedAgreementPDF = await annotateAgreementAndSignAsInvestor({
       poolId,
       trancheId,
-      walletAddress: wallet.address,
+      wallet,
       transactionInfo,
-      name: user.name as string,
-      email: user.email as string,
+      name: name as string,
+      email: email as string,
     })
 
     await writeToOnboardingBucket(
@@ -62,11 +78,13 @@ export const signAndSendDocumentsController = async (
       `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
     )
 
-    await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
+    if ((investorType === 'entity' && globalSteps.verifyBusiness.completed) || investorType === 'individual') {
+      await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
+    }
 
     const updatedUser: Subset<OnboardingUser> = {
       poolSteps: {
-        ...user?.poolSteps,
+        ...poolSteps,
         [poolId]: {
           [trancheId]: {
             signAgreement: {
@@ -83,7 +101,7 @@ export const signAndSendDocumentsController = async (
       },
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
+    await validateAndWriteToFirestore(wallet, updatedUser, investorType, ['poolSteps'])
     const freshUserData = await fetchUser(wallet)
     return res.status(201).send({ ...freshUserData })
   } catch (e) {

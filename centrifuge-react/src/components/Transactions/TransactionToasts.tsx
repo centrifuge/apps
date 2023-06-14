@@ -20,6 +20,7 @@ const toastSublabel = {
 }
 
 const TOAST_DURATION = 10000
+const ERROR_TOAST_DURATION = 60000
 
 export type TransactionToastsProps = {
   positionProps?: {
@@ -44,7 +45,7 @@ export function TransactionToasts({
   const explorer = useGetExplorerUrl()
 
   return (
-    <Stack gap={2} position="fixed" width={330} zIndex="overlay" {...positionProps}>
+    <Stack gap={2} position="fixed" width={330} zIndex="onTopOfTheWorld" {...positionProps}>
       {transactions
         .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
         .map((tx) => {
@@ -56,8 +57,8 @@ export function TransactionToasts({
               status={toastStatus[tx.status]}
               onDismiss={dismiss(tx.id)}
               onStatusChange={(newStatus) => {
-                if (['ok'].includes(newStatus)) {
-                  setTimeout(dismiss(tx.id), TOAST_DURATION)
+                if (['ok', 'critical'].includes(newStatus)) {
+                  setTimeout(dismiss(tx.id), newStatus === 'ok' ? TOAST_DURATION : ERROR_TOAST_DURATION)
                 }
               }}
               action={

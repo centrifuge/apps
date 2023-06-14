@@ -38,6 +38,11 @@ const StyledSpinner = styled(IconSpinner)`
   animation: ${rotate} 0.8s linear infinite;
 `
 
+const StyledSublabel = styled(Text)`
+  word-break: normal;
+  overflow-wrap: anywhere;
+`
+
 const statusIcons = {
   info: IconInfo,
   pending: StyledSpinner,
@@ -74,7 +79,7 @@ export const Toast: React.FC<ToastProps> = ({
         </Box>
         <Stack alignItems="flex-start">
           <Text variant="heading4">{label}</Text>
-          <Text variant="label2">{sublabel}</Text>
+          <StyledSublabel variant="label2">{sublabel}</StyledSublabel>
         </Stack>
         <Shelf ml="auto">
           {action}

@@ -1,4 +1,4 @@
-import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, findBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -6,9 +6,9 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
-import { useAddress } from '../../utils/useAddress'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
+import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 
@@ -20,11 +20,11 @@ type RepayValues = {
   amount: number | '' | Decimal
 }
 
-export function FinanceForm({ loan }: { loan: LoanType }) {
+export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
   const pool = usePool(loan.poolId)
-  const address = useAddress('substrate')
-  const balances = useBalances(address)
-  const balance = balances ? findBalance(balances.currencies, pool.currency.key)!.balance.toDecimal() : Dec(0)
+  const account = useBorrower(loan.poolId, loan.id)
+  const balances = useBalances(account.actingAddress)
+  const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const { current: availableFinancing, debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
@@ -57,7 +57,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
   )
 
   function repayAll() {
-    doRepayAllTransaction([loan.poolId, loan.id])
+    doRepayAllTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })
   }
 
   const financeForm = useFormik<FinanceValues>({
@@ -66,7 +66,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doFinanceTransaction([loan.poolId, loan.id, amount])
+      doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -78,7 +78,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doRepayTransaction([loan.poolId, loan.id, amount])
+      doRepayTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -229,7 +229,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
             <Button
               variant="secondary"
               loading={isCloseLoading}
-              onClick={() => doCloseTransaction([loan.poolId, loan.id])}
+              onClick={() => doCloseTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })}
             >
               Close
             </Button>

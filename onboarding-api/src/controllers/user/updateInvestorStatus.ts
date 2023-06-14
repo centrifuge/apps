@@ -5,7 +5,7 @@ import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMess
 import { sendApproveIssuerMessage } from '../../emails/sendApproveIssuerMessage'
 import { UpdateInvestorStatusPayload } from '../../emails/sendDocumentsMessage'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
-import { addInvestorToMemberList } from '../../utils/centrifuge'
+import { addInvestorToMemberList } from '../../utils/addInvestorToMemberList'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { signAcceptanceAsIssuer } from '../../utils/signAcceptanceAsIssuer'
@@ -88,15 +88,19 @@ export const updateInvestorStatusController = async (
         `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
       )
 
-      await addInvestorToMemberList(wallet.address, poolId, trancheId)
-      await sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF)
-      await sendApproveIssuerMessage(wallet.address, poolId, trancheId, countersignedAgreementPDF)
-      await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
-      return res.status(200).send({ poolId, trancheId })
+      const { txHash } = await addInvestorToMemberList(wallet, poolId, trancheId)
+      await Promise.all([
+        sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF),
+        sendApproveIssuerMessage(wallet.address, poolId, trancheId, countersignedAgreementPDF),
+        validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
+      ])
+      return res.status(200).send({ status: 'approved', poolId, trancheId, txHash })
     } else if (user?.email && status === 'rejected') {
-      await sendRejectInvestorMessage(user.email, poolId)
-      await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps'])
-      throw new HttpError(400, 'Investor has been rejected')
+      await Promise.all([
+        sendRejectInvestorMessage(user.email, poolId),
+        validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
+      ])
+      return res.status(200).send({ status: 'rejected', poolId, trancheId })
     }
     throw new HttpError(400, 'Investor status may have already been updated')
   } catch (e) {

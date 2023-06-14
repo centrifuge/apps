@@ -1,10 +1,12 @@
 import Centrifuge, { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
+  formatBalance,
   Transaction,
+  useBalances,
   useCentrifuge,
+  useCentrifugeConsts,
   useCentrifugeTransaction,
   useTransactions,
-  useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -29,14 +31,14 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
+import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
-import { useAddress } from '../../../utils/useAddress'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadata } from '../../../utils/useMetadata'
-import { usePod } from '../../../utils/usePod'
+import { usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
+import { usePodAuth } from '../../../utils/usePodAuth'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, min, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -177,18 +179,23 @@ function IssuerCreateLoan() {
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
   const history = useHistory()
-  const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
-  const collateralCollectionId = pid
-  const { selectedAccount, proxy } = useWallet().substrate
-  const { addTransaction, updateTransaction } = useTransactions()
 
-  const { isAuth, authToken } = useAuth()
+  const { addTransaction, updateTransaction } = useTransactions()
+  const {
+    loans: { loanDeposit },
+    chainSymbol,
+  } = useCentrifugeConsts()
+  const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
+  const { assetOriginators } = usePoolAccess(pid)
+  const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
+    ?.collateralCollections[0]?.id
+  const balances = useBalances(account.actingAddress)
+
+  const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const podUrl = poolMetadata?.pod?.url
-
-  const { isLoggedIn } = usePod(podUrl)
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
@@ -230,7 +237,7 @@ function IssuerCreateLoan() {
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken || !templateMetadata) return
+      if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
       const { decimals } = pool.currency
       const pricingInfo = {
         valuationMethod: values.pricing.valuationMethod,
@@ -266,10 +273,10 @@ function IssuerCreateLoan() {
       try {
         const { documentId } = await centrifuge.pod.createDocument([
           podUrl,
-          authToken,
+          token,
           {
             attributes,
-            writeAccess: [address],
+            writeAccess: [account.actingAddress],
           },
         ])
 
@@ -280,11 +287,11 @@ function IssuerCreateLoan() {
 
         const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
           podUrl,
-          authToken,
+          token,
           {
             documentId,
             collectionId: collateralCollectionId,
-            owner: address,
+            owner: account.actingAddress,
             publicAttributes,
             name: values.assetName,
             description: values.description,
@@ -294,26 +301,26 @@ function IssuerCreateLoan() {
 
         updateTransaction(txId, { status: 'unconfirmed' })
 
-        const connectedCent = centrifuge.connect(selectedAccount!.address, selectedAccount!.signer as any)
-        if (proxy) {
-          connectedCent.setProxy(proxy.delegator)
-        }
+        const connectedCent = centrifuge.connect(account.signingAccount.address, account.signingAccount.signer as any)
 
         // Sign createLoan transaction
         const submittable = await lastValueFrom(
           connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
             signOnly: true,
             era: 100,
+            proxies: account.proxies?.map((p) => [p.delegator, p.types.includes('Borrow') ? 'Borrow' : undefined]),
+            multisig: account.multisig,
           })
         )
 
         updateTransaction(txId, { status: 'pending' })
 
-        await centrifuge.pod.awaitJob([podUrl, authToken, jobId])
+        await centrifuge.pod.awaitJob([podUrl, token, jobId])
 
         // Send the signed createLoan transaction
         doTransaction([submittable], undefined, txId)
       } catch (e) {
+        console.error(e)
         updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create document NFT' })
       }
 
@@ -334,6 +341,11 @@ function IssuerCreateLoan() {
 
   const isPending = isTxLoading || form.isSubmitting
 
+  const balanceDec = balances?.native.balance.toDecimal()
+  const balanceLow = balanceDec?.lt(loanDeposit.toDecimal())
+
+  const errorMessage = balanceLow ? `The AO account needs at least ${formatBalance(loanDeposit, chainSymbol, 1)}` : null
+
   return (
     <FormikProvider value={form}>
       <Form ref={formRef} noValidate>
@@ -342,22 +354,39 @@ function IssuerCreateLoan() {
             title="Create asset"
             subtitle={poolMetadata?.pool?.name}
             actions={
-              isLoggedIn && (
+              isAuthed && (
                 <>
+                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isPending} disabled={!templateMetadata}>
+                  <Button
+                    type="submit"
+                    loading={isPending}
+                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
+                  >
                     Create
                   </Button>
                 </>
               )
             }
           />
-          {isLoggedIn ? (
+          {isAuthed ? (
             <>
-              <PageSection>
-                <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+              <PageSection titleAddition={templateId && 'Select a template to enter the asset details.'}>
+                {!templateId && (
+                  <Box
+                    mb={3}
+                    py={2}
+                    borderWidth={0}
+                    borderBottomWidth={1}
+                    borderColor="borderPrimary"
+                    borderStyle="solid"
+                  >
+                    <Text>Asset template is missing. Please create one first.</Text>
+                  </Box>
+                )}
+                <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
                     name="assetName"
@@ -365,7 +394,15 @@ function IssuerCreateLoan() {
                     label="Asset name*"
                     placeholder=""
                     maxLength={100}
+                    disabled={!templateId}
                   />
+                  {!templateId && (
+                    <Box alignSelf="center" justifySelf="end">
+                      <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
+                        Create template
+                      </RouterLinkButton>
+                    </Box>
+                  )}
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">
@@ -424,7 +461,7 @@ function IssuerCreateLoan() {
             </>
           ) : podUrl ? (
             <Box py={8}>
-              <PodAuthSection podUrl={podUrl} message="You need to be logged in to create assets" />
+              <PodAuthSection poolId={pid} message="You need to be logged in to create assets" />
             </Box>
           ) : (
             !poolMetadataIsLoading && (

@@ -11,6 +11,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { useConstants, usePool, usePoolMetadata } from '../../../utils/usePools'
 import { TrancheInput } from '../../IssuerCreatePool/TrancheInput'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -19,11 +20,12 @@ type Values = Pick<PoolMetadataInput, 'epochHours' | 'epochMinutes' | 'tranches'
 
 type Row = Values['tranches'][0]
 
-export const EpochAndTranches: React.FC = () => {
+export function EpochAndTranches() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const columns: Column[] = [
     {
@@ -149,16 +151,34 @@ export const EpochAndTranches: React.FC = () => {
 
       const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
+      const hasTrancheChanges = initialValues.tranches.some((t1, i) => {
+        const t2 = values.tranches[i]
+        return (
+          t1.tokenName !== t2.tokenName ||
+          t1.symbolName !== t2.symbolName ||
+          t1.interestRate !== t2.interestRate ||
+          t1.minRiskBuffer !== t2.minRiskBuffer
+        )
+      })
+
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const nonJuniorTranches = values.tranches.slice(1)
       const tranches = [
-        {}, // most junior tranche
+        {
+          tokenName: values.tranches[0].tokenName,
+          tokenSymbol: values.tranches[0].symbolName,
+        }, // most junior tranche
         ...nonJuniorTranches.map((tranche) => ({
           interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
+          tokenName: tranche.tokenName,
+          tokenSymbol: tranche.symbolName,
         })),
       ]
-      execute([poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches }])
+      execute(
+        [poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches: hasTrancheChanges ? tranches : undefined }],
+        { account }
+      )
       actions.setSubmitting(false)
     },
   })
@@ -189,7 +209,7 @@ export const EpochAndTranches: React.FC = () => {
           title="Epoch and tranches"
           subtitle={
             delay
-              ? `A change Takes ${
+              ? `Changes take ${
                   delay < 0.5 ? `${Math.ceil(delay / 24)} hours` : `${Math.round(delay)} days`
                 } to take effect`
               : undefined

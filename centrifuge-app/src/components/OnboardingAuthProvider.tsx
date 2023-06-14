@@ -13,11 +13,12 @@ export const OnboardingAuthContext = React.createContext<{
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export function OnboardingAuthProvider({ children }: { children: React.ReactNode }) {
-  const { selectedWallet, proxy, selectedAccount } = useWallet().substrate
+  const { selectedWallet, selectedProxies, selectedAccount } = useWallet().substrate
   const { selectedAddress } = useWallet().evm
   const cent = useCentrifuge()
   const provider = useEvmProvider()
   const walletAddress = selectedAccount?.address ?? selectedAddress
+  const proxy = selectedProxies?.[0]
 
   const { data: session, refetch: refetchSession } = useQuery(
     ['session', selectedAccount?.address, proxy?.delegator, selectedAddress],
@@ -113,10 +114,20 @@ export function useOnboardingAuth() {
     login: ctx.login,
     refetchAuth,
     isAuthFetched: isFetched,
+    isLoading: ctx.isLoggingIn,
   }
 }
 
 const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cent: Centrifuge, proxy?: any) => {
+  const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ address }),
+  })
+  const { nonce } = await nonceRes.json()
   if (proxy) {
     // @ts-expect-error Signer type version mismatch
     const { token, payload } = await cent.auth.generateJw3t(address, signer, {
@@ -133,7 +144,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({ jw3t: token }),
+          body: JSON.stringify({ jw3t: token, nonce }),
         })
         if (authTokenRes.status !== 200) {
           throw new Error('Failed to authenticate wallet')
@@ -156,7 +167,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ jw3t: token }),
+        body: JSON.stringify({ jw3t: token, nonce }),
       })
       if (authTokenRes.status !== 200) {
         throw new Error('Failed to authenticate wallet')

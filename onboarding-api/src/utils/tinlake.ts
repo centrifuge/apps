@@ -1,12 +1,14 @@
 import { Contract } from '@ethersproject/contracts'
 import { InfuraProvider } from '@ethersproject/providers'
+import { Wallet } from '@ethersproject/wallet'
 import { Request } from 'express'
 import { lastValueFrom } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
+import MemberListAdminAbi from './abi/MemberListAdmin.abi.json'
 import RemarkerAbi from './abi/Remarker.abi.json'
-import { centrifuge } from './centrifuge'
-import { HttpError } from './httpError'
+import { getCentrifuge } from './centrifuge'
+import { HttpError, reportHttpError } from './httpError'
 
 export interface LaunchingPool extends BasePool {}
 
@@ -45,6 +47,11 @@ interface PoolMetadataDetails {
   maker?: { ilk: string }
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
+  repName: string
+  newInvestmentsStatus: {
+    junior: 'closed' | 'request' | 'open'
+    senior: 'closed' | 'request' | 'open'
+  }
 }
 
 interface BasePool {
@@ -89,27 +96,25 @@ interface ActivePool extends BasePool {
   }
 }
 
-const ETH_NETWORK = process.env.EVM_NETWORK || 'mainnet'
+const EVM_NETWORK = process.env.EVM_NETWORK || 'mainnet'
+const INFURA_KEY = process.env.INFURA_KEY
 
 const goerliConfig = {
-  rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
-  tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
-  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
+  memberListAddress: '0xaEcFA11fE9601c1B960661d7083A08A5df7c1947',
 }
 const mainnetConfig = {
-  rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
-  tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmNvauf8E6TkUiyF1ZgtYtntHz335tCswKp2uhBH1fiui1', // TODO: add registry to config and fetch poolHash
+  memberListAddress: '0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b',
 }
 
 export const ethConfig = {
-  network: ETH_NETWORK,
+  network: EVM_NETWORK,
   multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
-  ...(ETH_NETWORK === 'goerli' ? goerliConfig : mainnetConfig),
+  signerPrivateKey: process.env.EVM_MEMBERLIST_ADMIN_PRIVATE_KEY,
+  ...(EVM_NETWORK === 'goerli' ? goerliConfig : mainnetConfig),
 }
 
 function parsePoolsMetadata(poolsMetadata): { active: ActivePool[] } {
@@ -122,7 +127,7 @@ function parsePoolsMetadata(poolsMetadata): { active: ActivePool[] } {
 
 export const getTinlakePoolById = async (poolId: string) => {
   const uri = ethConfig.poolsHash
-  const data = (await lastValueFrom(centrifuge.metadata.getMetadata(uri))) as PoolMetadataDetails
+  const data = (await lastValueFrom(getCentrifuge().metadata.getMetadata(uri))) as PoolMetadataDetails
   const pools = parsePoolsMetadata(Object.values(data))
   const poolData = pools.active.find((p) => p.addresses.ROOT_CONTRACT === poolId)
 
@@ -133,10 +138,27 @@ export const getTinlakePoolById = async (poolId: string) => {
   const id = poolData.addresses.ROOT_CONTRACT
   const metadata = {
     pool: {
+      newInvestmentsStatus: poolData.metadata.newInvestmentsStatus,
       name: poolData.metadata.name,
       issuer: {
         name: poolData.metadata.attributes?.Issuer ?? '',
         email: poolData.metadata?.issuerEmail ?? 'info@centrifuge.io',
+        repName: poolData.metadata.repName ?? '',
+      },
+      links: {
+        executiveSummary: { uri: poolData.metadata.attributes?.Links?.['Executive Summary'] },
+      },
+    },
+    onboarding: {
+      agreements: {
+        [`${id}-0`]: {
+          uri: poolData.metadata.attributes?.Links.Agreements?.[`${id}-0`],
+          mime: 'application/pdf',
+        },
+        [`${id}-1`]: {
+          uri: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
+          mime: 'application/pdf',
+        },
       },
     },
   }
@@ -161,6 +183,7 @@ export const getTinlakePoolById = async (poolId: string) => {
   return {
     pool,
     metadata,
+    addresses: poolData.addresses,
   }
 }
 
@@ -169,9 +192,6 @@ export const validateEvmRemark = async (
   transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
   expectedRemark: string
 ) => {
-  const EVM_NETWORK = process.env.EVM_NETWORK
-  const INFURA_KEY = process.env.INFURA_KEY
-
   const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
   const contract = new Contract(ethConfig.remarkerAddress, RemarkerAbi).connect(provider)
   const filteredEvents = await contract.queryFilter(
@@ -183,5 +203,38 @@ export const validateEvmRemark = async (
   const [sender, actualRemark] = filteredEvents.flatMap((ev) => ev.args?.map((arg) => arg.toString()))
   if (actualRemark !== expectedRemark || sender !== wallet.address) {
     throw new HttpError(400, 'Invalid remark')
+  }
+}
+
+export const addTinlakeInvestorToMemberList = async (
+  walletAddress: Request['wallet']['address'],
+  poolId: string,
+  trancheId: string
+) => {
+  try {
+    const pool = await getTinlakePoolById(poolId)
+    const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
+    const signer = new Wallet(ethConfig.signerPrivateKey).connect(provider)
+    const memberAdminContract = new Contract(ethConfig.memberListAddress, MemberListAdminAbi, signer)
+    const memberlistAddress = trancheId.endsWith('1')
+      ? pool.addresses.SENIOR_MEMBERLIST
+      : pool.addresses.JUNIOR_MEMBERLIST
+
+    const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
+    const tx = await memberAdminContract.functions.updateMember(
+      memberlistAddress,
+      walletAddress,
+      OneHundredYearsFromNow,
+      {
+        gasLimit: 1000000,
+        maxPriorityFeePerGas: 4000000000, // 4 gwei
+      }
+    )
+    const finalizedTx = await tx.wait()
+    console.log(`tx finalized: ${finalizedTx.transactionHash}, nonce=${tx.nonce}`)
+    return { txHash: finalizedTx.transactionHash }
+  } catch (e) {
+    reportHttpError(e)
+    throw new HttpError(400, `Could not add ${walletAddress} to MemberList for pool ${poolId}`)
   }
 }

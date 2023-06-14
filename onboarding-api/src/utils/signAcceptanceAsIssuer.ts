@@ -1,6 +1,6 @@
 import { PDFDocument, StandardFonts } from 'pdf-lib'
 import { onboardingBucket } from '../database'
-import { getPoolById } from './centrifuge'
+import { getPoolById } from './getPoolById'
 import { HttpError } from './httpError'
 
 type SignatureInfo = {

@@ -1,12 +1,14 @@
-import * as React from 'react'
+import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { PendingMultisigs } from '../../../components/PendingMultisigs'
 import { PoolDetailOverview } from '../../Pool/Overview'
 import { IssuerPoolHeader } from '../Header'
 
-export const IssuerPoolOverviewPage: React.FC = () => {
+export function IssuerPoolOverviewPage() {
+  const { pid: poolId } = useParams<{ pid: string }>()
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<PendingMultisigs poolId={poolId} />}>
       <IssuerPoolHeader />
       <LoadBoundary>
         <PoolDetailOverview />

@@ -18,13 +18,9 @@ export function getMetadataModule(inst: Centrifuge) {
     return inst.getJsonObservable<T>(url)
   }
 
-  function pinFile(b64URI?: string): Observable<{ uri: string; ipfsHash: string }> {
+  function pinFile(b64URI: string): Observable<{ uri: string; ipfsHash: string }> {
     if (!inst.config?.pinFile) {
-      console.error('pinFile must be set in config to use this feature')
-      return from([])
-    }
-    if (!b64URI) {
-      return from([])
+      throw new Error('pinFile must be set in config to use this feature')
     }
 
     return from(inst.config.pinFile(b64URI))
@@ -43,14 +39,6 @@ export function getMetadataModule(inst: Centrifuge) {
       .pipe(map(({ uri }) => parseIPFSHash(uri)))
   }
 
-  function unpinFile(uri: string) {
-    if (!inst.config.unpinFile) {
-      return from([])
-    }
-    const hash = parseIPFSHash(uri).ipfsHash
-    return inst.config.unpinFile(hash)
-  }
-
   function parseMetadataUrl(url: string) {
     try {
       let newUrl
@@ -58,8 +46,10 @@ export function getMetadataModule(inst: Centrifuge) {
       if (!url.includes(':')) {
         // string without protocol is assumed to be an IPFS hash
         newUrl = new URL(`ipfs/${url.replace(/\/?(ipfs\/)/, '')}`, inst.config.metadataHost)
+      } else if (url.startsWith('ipfs://ipfs/')) {
+        newUrl = new URL(`ipfs/${url.slice(12)}`, inst.config.metadataHost)
       } else if (url.startsWith('ipfs://')) {
-        newUrl = new URL(url.substr(7), inst.config.metadataHost)
+        newUrl = new URL(`ipfs/${url.slice(7)}`, inst.config.metadataHost)
       } else {
         newUrl = new URL(url)
       }
@@ -76,17 +66,14 @@ export function getMetadataModule(inst: Centrifuge) {
 
   const IPFS_HASH_LENGTH = 46
   function parseIPFSHash(uri: string) {
-    if (uri.includes('ipfs://')) {
-      const hash = uri
-        .split(/ipfs:\/\/ipfs\//)
-        .filter(Boolean)
-        .join()
+    if (uri.startsWith('ipfs://')) {
+      const hash = uri.slice(7)
       return { uri, ipfsHash: hash }
     } else if (!uri.includes('/') && uri.length === IPFS_HASH_LENGTH) {
-      return { uri: `ipfs://ipfs/${uri}`, ipfsHash: uri }
+      return { uri: `ipfs://${uri}`, ipfsHash: uri }
     }
     return { uri, ipfsHash: '' }
   }
 
-  return { getFile, getMetadata, parseMetadataUrl, pinFile, pinJson, unpinFile }
+  return { getMetadata, parseMetadataUrl, pinFile, pinJson }
 }

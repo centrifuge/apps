@@ -15,7 +15,7 @@ import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
-import { useNFT } from '../utils/useNFTs'
+import { useCentNFT } from '../utils/useNFTs'
 import { isSameAddress } from '../utils/web3'
 
 export const NFTPage: React.FC = () => {
@@ -29,7 +29,7 @@ export const NFTPage: React.FC = () => {
 const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
   const address = useAddress('substrate')
-  const nft = useNFT(collectionId, nftId)
+  const nft = useCentNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)

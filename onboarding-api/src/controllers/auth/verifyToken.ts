@@ -13,8 +13,11 @@ export const verifyTokenController = async (req: Request, res: Response) => {
     const payload = (await jwt.verify(token, process.env.JWT_SECRET)) as {
       address: string
       network: SupportedNetworks
-    }
+    } & jwt.JwtPayload
     if (!payload?.address) {
+      throw new HttpError(401, 'Unauthorized')
+    }
+    if (payload.aud !== req.get('origin')) {
       throw new HttpError(401, 'Unauthorized')
     }
     return res.send({ verified: true })

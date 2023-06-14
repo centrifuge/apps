@@ -1,17 +1,10 @@
 import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import { useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
 import { useMetadata } from './useMetadata'
-
-export function usePoolLiquidityTransactions(pool: Pool, fromEpoch: number, toEpoch: number) {
-  const [result] = useCentrifugeQuery(['poolsLiquidityTransactions', pool.id, fromEpoch, toEpoch], (cent) =>
-    cent.pools.getPoolLiquidityTransactions([pool, fromEpoch, toEpoch])
-  )
-
-  return result
-}
 
 export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
@@ -151,22 +144,24 @@ export function usePendingCollectMulti(poolId: string, trancheIds?: string[], ad
   return result
 }
 
-export function usePoolPermissions(poolId?: string) {
-  const [result] = useCentrifugeQuery(['poolPermissions', poolId], (cent) => cent.pools.getPoolPermissions([poolId!]), {
-    enabled: !!poolId,
-  })
-
-  return result
-}
+const addedMultisigs = new WeakSet()
 
 export function usePoolMetadata(
   pool?: { metadata?: string } | { id: string; metadata?: string | Partial<PoolMetadata> }
 ) {
+  const { substrate } = useWallet()
   const data = useMetadata<PoolMetadata>(typeof pool?.metadata === 'string' ? pool.metadata : undefined)
   const tinlakeData = useQuery(
     ['tinlakeMetadata', pool && 'id' in pool && pool.id],
     () => pool?.metadata as PoolMetadata
   )
+  useEffect(() => {
+    if (data.data?.adminMultisig && !addedMultisigs.has(data.data?.adminMultisig)) {
+      substrate.addMultisig(data.data.adminMultisig)
+      addedMultisigs.add(data.data.adminMultisig)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.data])
   return typeof pool?.metadata === 'string' ? data : tinlakeData
 }
 
@@ -195,4 +190,11 @@ export function useWriteOffGroups(poolId: string) {
   const [result] = useCentrifugeQuery(['writeOffGroups', poolId], (cent) => cent.pools.getWriteOffGroups([poolId]))
 
   return result
+}
+
+export function usePodUrl(poolId: string) {
+  const pool = usePool(poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
+  const podUrl = poolMetadata?.pod?.url
+  return podUrl
 }

@@ -15,6 +15,7 @@ import { config } from '../../../config'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -26,7 +27,7 @@ const ASSET_CLASSES = config.assetClasses.map((label) => ({
   value: label,
 }))
 
-export const Details: React.FC = () => {
+export function Details() {
   const isDemo = import.meta.env.REACT_APP_IS_DEMO
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
@@ -36,6 +37,7 @@ export const Details: React.FC = () => {
   const prefetchMetadata = usePrefetchMetadata()
   const { data: iconFile } = useFile(metadata?.pool?.icon?.uri, 'icon')
   const { editPoolVisibility } = useDebugFlags()
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const initialValues: Values = React.useMemo(
     () => ({
@@ -86,7 +88,7 @@ export const Details: React.FC = () => {
         },
       }
 
-      execute([poolId, newPoolMetadata])
+      execute([poolId, newPoolMetadata], { account })
       actions.setSubmitting(false)
     },
   })

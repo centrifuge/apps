@@ -26,11 +26,10 @@ export type StackedBarChartProps = {
   }[]
   names: [string, string]
   colors: [string, string]
-  xAxisLabel?: string
   currency: string
 }
 
-export function StackedBarChart({ data, names, colors, xAxisLabel, currency }: StackedBarChartProps) {
+export function StackedBarChart({ data, names, colors, currency }: StackedBarChartProps) {
   const theme = useTheme()
   const maxBarSize = 16
   const axisStyle = { fontSize: '10px', fill: theme.colors.textSecondary }
@@ -40,7 +39,7 @@ export function StackedBarChart({ data, names, colors, xAxisLabel, currency }: S
       <ResponsiveContainer width="100%" height={180}>
         <BarChart
           data={data.map(({ bottom, ...rest }) => ({ bottom: bottom * -1, ...rest }))}
-          margin={{ left: -16 }}
+          margin={{ bottom: 5, left: -16 }}
           stackOffset="sign"
         >
           <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
@@ -50,9 +49,10 @@ export function StackedBarChart({ data, names, colors, xAxisLabel, currency }: S
             style={axisStyle}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(tick: number, index: number) =>
-              xAxisLabel && index === data.length - 1 ? xAxisLabel : formatDate(tick, { year: '2-digit' })
-            }
+            interval={0}
+            tickMargin={10}
+            angle={45}
+            tickFormatter={(tick: number) => formatDate(tick, { year: undefined })}
           />
 
           <YAxis

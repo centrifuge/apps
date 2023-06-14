@@ -24,10 +24,11 @@ export function useGetExplorerUrl(network?: Network) {
   const {
     evm: { chains },
     substrate: { subscanUrl },
+    connectedNetwork,
   } = useWallet()
 
   function getEvmUrl(networkOverride?: Network) {
-    const netw = networkOverride ?? network
+    const netw = networkOverride || network || connectedNetwork
     return typeof netw === 'number' ? getChainInfo(chains, netw)?.blockExplorerUrl : ''
   }
 
