@@ -366,6 +366,8 @@ export type AccountTokenBalance = {
 export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
+  tokenName?: string
+  tokenSymbol?: string
 }
 
 export type DailyTrancheState = {
@@ -655,18 +657,40 @@ export function getPoolsModule(inst: Centrifuge) {
     const minEpochTime = minEpochTimeInput ? { newValue: minEpochTimeInput } : undefined
     const tranches = tranchesInput
       ? {
-          newValue: tranchesInput.map((t) => [
+          newValue: tranchesInput.map((t) =>
             t.interestRatePerSec
-              ? { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] }
-              : 'Residual',
-          ]),
+              ? { trancheType: { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] } }
+              : { trancheType: 'Residual', seniority: null }
+          ),
+        }
+      : undefined
+    const trancheMetadata = tranchesInput
+      ? {
+          newValue: tranchesInput,
         }
       : undefined
     const maxNavAge = maxNavAgeInput ? { newValue: maxNavAgeInput } : undefined
 
+    console.log(
+      `
+          minEpochTime,
+          tranches,
+          maxNavAge,
+          trancheMetadata,`,
+      minEpochTime,
+      tranches,
+      maxNavAge,
+      trancheMetadata
+    )
+
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.poolRegistry.update(poolId, { minEpochTime, tranches, maxNavAge })
+        const submittable = api.tx.poolRegistry.update(poolId, {
+          minEpochTime,
+          tranches,
+          maxNavAge,
+          trancheMetadata,
+        })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )

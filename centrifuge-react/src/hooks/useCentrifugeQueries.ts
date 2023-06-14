@@ -11,6 +11,7 @@ type MultiQueryOptions<T> = ({
   queryCallback: (cent: Centrifuge) => Observable<T>
 } & CentrifugeQueryOptions)[]
 
+// TODO: Fix infinite loop when receiving new data sometimes
 export function useCentrifugeQueries<T>(
   queries: readonly [...MultiQueryOptions<T>]
 ): readonly [(T | null | undefined)[], (Observable<T | null> | undefined)[]] {
