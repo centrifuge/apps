@@ -136,8 +136,7 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
 
         // add 10% buffer to the transaction fee
         const submittable = api.tx.tokens.transfer({ Id: wallet.address }, 'Native', txFee.add(txFee.muln(1.1)))
-        const proxiedSubmittable = api.tx.proxy.proxy(process.env.MEMBERLIST_ADMIN_PURE_PROXY, undefined, submittable)
-        return proxiedSubmittable.signAndSend(signer)
+        return submittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
         if (events.length > 0) {
