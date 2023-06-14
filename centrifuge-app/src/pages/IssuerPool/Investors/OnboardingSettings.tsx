@@ -205,15 +205,15 @@ export const OnboardingSettings = () => {
         },
       }
 
-      const memberlistAdmin = import.meta.env.REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY
-      const hasMemberlistPermissions = permissions?.[addressToHex(memberlistAdmin)]?.roles.includes('MemberListAdmin')
+      const investorAdmin = import.meta.env.REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY
+      const hasMemberlistPermissions = permissions?.[addressToHex(investorAdmin)]?.roles.includes('InvestorAdmin')
       const isAnyTrancheOpen = Object.values(values.openForOnboarding).includes(true)
       if (!useExternalUrl && isAnyTrancheOpen && !hasMemberlistPermissions) {
         // pool is open for onboarding and onboarding-api proxy is not in pool permissions
-        updatePermissionAndConfigTx([[[memberlistAdmin, 'MemberListAdmin']], [], amendedMetadata])
+        updatePermissionAndConfigTx([[[investorAdmin, 'InvestorAdmin']], [], amendedMetadata], { account })
       } else if (hasMemberlistPermissions && (useExternalUrl || !isAnyTrancheOpen)) {
         // remove onboarding-api proxy from pool permissions
-        updatePermissionAndConfigTx([[], [[memberlistAdmin, 'MemberListAdmin']], amendedMetadata])
+        updatePermissionAndConfigTx([[], [[investorAdmin, 'InvestorAdmin']], amendedMetadata], { account })
       } else {
         updateConfigTx([poolId, amendedMetadata], { account })
       }

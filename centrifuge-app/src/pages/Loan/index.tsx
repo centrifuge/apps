@@ -74,7 +74,7 @@ const Loan: React.FC = () => {
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const { data: templateData } = useMetadata<LoanTemplate>(
-    nftMetadata?.properties?._template && `ipfs://ipfs/${nftMetadata?.properties?._template}`
+    nftMetadata?.properties?._template && `ipfs://${nftMetadata?.properties?._template}`
   )
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)

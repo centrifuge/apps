@@ -8,7 +8,7 @@ import { Request, Response } from 'express'
 
 dotenv.config()
 
-const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
+const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.algol.cntrfg.com/public-ws'
 
 const ONE_AUSD = new BN(10).pow(new BN(12))
 const ONE_DEVEL = new BN(10).pow(new BN(18))
