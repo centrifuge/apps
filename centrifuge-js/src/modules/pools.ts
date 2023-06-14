@@ -671,18 +671,6 @@ export function getPoolsModule(inst: Centrifuge) {
       : undefined
     const maxNavAge = maxNavAgeInput ? { newValue: maxNavAgeInput } : undefined
 
-    console.log(
-      `
-          minEpochTime,
-          tranches,
-          maxNavAge,
-          trancheMetadata,`,
-      minEpochTime,
-      tranches,
-      maxNavAge,
-      trancheMetadata
-    )
-
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.poolRegistry.update(poolId, {
