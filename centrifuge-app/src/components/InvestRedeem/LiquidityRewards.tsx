@@ -25,7 +25,7 @@ export function LiquidityRewards() {
   const { state } = useInvestRedeem()
 
   const { execute: claimLiquidityRewards, isLoading: claimLiquidityRewardsLoading } = useCentrifugeTransaction(
-    'Claim cfg liquidity rewards',
+    'Claim CFG liquidity rewards',
     (cent) => cent.pools.claimLiquidityRewards,
     {
       onSuccess: (args) => {
@@ -35,7 +35,7 @@ export function LiquidityRewards() {
   )
 
   const { execute: executeStake, isLoading: stakeLoading } = useCentrifugeTransaction(
-    'Stake',
+    'Stake tokens',
     (cent) => cent.pools.collectAndStake,
     {
       onSuccess: (args) => {
