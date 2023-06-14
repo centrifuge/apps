@@ -54,13 +54,12 @@ export const PoolDetailAssets: React.FC = () => {
     .dividedBy(ongoingAssets.length)
     .toDecimalPlaces(2)
 
-  const assetValue =
-    ongoingAssets && ongoingAssets.map(({ outstandingDebt }) => outstandingDebt.toDecimal()).reduce((a, b) => a.add(b))
+  const assetValue = formatBalance(pool.nav.latest.toDecimal().toNumber(), pool.currency.symbol)
 
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
     {
       label: <Tooltips type="assetValue" />,
-      value: assetValue ? formatBalance(assetValue.toNumber(), pool.currency.symbol) : 0,
+      value: assetValue,
     },
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
     { label: <Tooltips type="averageFinancingFee" />, value: formatPercentage(avgInterestRatePerSec) },
