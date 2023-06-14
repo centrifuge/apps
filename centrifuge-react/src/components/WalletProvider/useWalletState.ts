@@ -190,6 +190,9 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
           chainId: evmState.chainId,
         })
       }
+      if (!evmState.accounts) {
+        dispatch({ type: 'reset' })
+      }
     } else if (state.connectedType === 'substrate') {
       if (state.substrate.selectedAccountAddress) {
         persist({
