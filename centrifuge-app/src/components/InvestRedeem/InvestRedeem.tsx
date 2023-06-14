@@ -35,6 +35,7 @@ import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
+import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
@@ -113,6 +114,7 @@ function EpochBusy({ busy }: { busy?: boolean }) {
 function useAllowedTranches(poolId: string) {
   const address = useAddress()
   const { connectedType } = useWallet()
+  const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
   const isTinlakePool = poolId.startsWith('0x')
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
   const pool = usePool(poolId)
@@ -132,11 +134,7 @@ function useAllowedTranches(poolId: string) {
           return false
         }
       )
-    : [
-        ...Object.entries(metadata?.onboarding?.tranches ?? {})
-          .filter(([_, { openForOnboarding }]) => openForOnboarding)
-          .map(([tId]) => tId),
-      ].flat()
+    : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
 
   return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
 }
@@ -191,6 +189,8 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const allowedTranches = useAllowedTranches(state.poolId)
+  const isTinlakePool = state.poolId.startsWith('0x')
+  const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
 
   const { data: metadata } = usePoolMetadata(pool)
   const { connectedType } = useWallet()
@@ -205,7 +205,7 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   const canOnlyInvest =
     state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
-  if (allowedTranches.length) {
+  if (!isTinlakePool || availableTranches.length) {
     return (
       <Stack as={Card} gap={2} p={2}>
         <Stack alignItems="center">
@@ -226,11 +226,11 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
             <Divider borderColor="borderSecondary" />
           </Box>
         </Stack>
-        {allowedTranches.length > 1 && (
+        {availableTranches.length > 1 && (
           <Select
             name="token"
             placeholder="Select a token"
-            options={allowedTranches
+            options={availableTranches
               .map((tranche) => ({
                 label: tranche.currency.symbol ?? '',
                 value: tranche.id,
@@ -242,7 +242,7 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
         )}
         {connectedType && state.isDataLoading ? (
           <Spinner />
-        ) : state.isAllowedToInvest && metadata?.onboarding?.tranches?.[state.trancheId]?.openForOnboarding ? (
+        ) : state.isAllowedToInvest ? (
           <>
             {canOnlyInvest ? (
               <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
@@ -310,8 +310,8 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
   const isTinlakePool = pool.id.startsWith('0x')
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
-
-  const investStatus = metadata?.pool?.newInvestmentsStatus?.[trancheName] || null
+  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'closed'
+  const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
 
   const history = useHistory()
 
@@ -320,8 +320,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
       if (investStatus === 'request') {
         return 'Contact issuer'
       }
+      if (investStatus === 'closed') {
+        return `${state.trancheCurrency?.symbol ?? 'token'} onboarding closed`
+      }
 
-      if (investStatus === 'open' || metadata?.onboarding?.tranches?.[state.trancheId]?.openForOnboarding) {
+      if (investStatus === 'open' || !isTinlakePool) {
         return `Onboard to ${state.trancheCurrency?.symbol ?? 'token'}`
       }
     } else {
@@ -341,7 +344,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
     }
   }
 
-  return <Button onClick={handleClick}>{getOnboardingButtonText()}</Button>
+  return (
+    <Button disabled={investStatus === 'closed'} onClick={handleClick}>
+      {getOnboardingButtonText()}
+    </Button>
+  )
 }
 
 type InvestValues = {
