@@ -473,7 +473,8 @@ export type PoolMetadata = {
     listed: boolean
   }
   pod?: {
-    url: string | null
+    node: string | null
+    indexer?: string | null
   }
   tranches: Record<
     string,
@@ -631,7 +632,7 @@ export function getPoolsModule(inst: Centrifuge) {
         listed: metadata.listed ?? true,
       },
       pod: {
-        url: metadata.podEndpoint ?? null,
+        node: metadata.podEndpoint ?? null,
       },
       tranches: tranchesById,
       adminMultisig: metadata.adminMultisig,
