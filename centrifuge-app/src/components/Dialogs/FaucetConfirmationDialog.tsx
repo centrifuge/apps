@@ -1,4 +1,4 @@
-import { Box, Dialog, IconInfo, Stack, Text } from '@centrifuge/fabric'
+import { Box, Dialog, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 
@@ -9,17 +9,19 @@ export const FaucetConfirmationDialog: React.FC<{
   onClose: () => void
 }> = ({ hash, open, onClose, error }) => {
   return (
-    <Dialog isOpen={open} onClose={onClose} width="684px" icon={<IconInfo />} title="Faucet claim">
+    <Dialog isOpen={open} onClose={onClose} width="684px" title="Claim submitted">
       <Box display="flex">
         <Stack gap={3}>
           <Stack gap={2}>
             <Text variant="body1" as="h2">
-              {hash ? 'Success. Please allow a couple of minutes for the tokens to reach your wallet' : error}
+              {hash
+                ? 'The transfer has been submitted. Please allow a couple of minutes for the transaction to complete.'
+                : error}
             </Text>
             {hash && !error && (
               <Box>
                 <Text as="p" variant="body1">
-                  Transaction hash:
+                  Hash:
                 </Text>
                 <Text
                   as="p"
