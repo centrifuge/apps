@@ -9,7 +9,7 @@ import { usePool } from '../utils/usePools'
 import { FaucetConfirmationDialog } from './Dialogs/FaucetConfirmationDialog'
 
 const MIN_DEVEL_BALANCE = 10
-const MIN_AUSD_BALANCE = 100
+const MIN_POOL_CURRENCY_BALANCE = 100
 
 export const Faucet = () => {
   const { selectedAccount } = useWallet().substrate
@@ -29,9 +29,9 @@ export const Faucet = () => {
   const poolCurrency = findCurrency(currencies ?? [], pool?.currency?.key)
   const poolCurrencyBalance =
     balances?.currencies.find((curr) => curr.currency.symbol === poolCurrency?.symbol)?.balance ?? new BN(0)
-  const hasLowAusdBalance =
+  const hasLowPoolCurrencyBalance =
     (poolCurrency &&
-      new CurrencyBalance(poolCurrencyBalance, poolCurrency.decimals).toDecimal().lte(MIN_AUSD_BALANCE)) ||
+      new CurrencyBalance(poolCurrencyBalance, poolCurrency.decimals).toDecimal().lte(MIN_POOL_CURRENCY_BALANCE)) ||
     !poolCurrency
 
   const shouldRenderFaucet =
@@ -40,7 +40,7 @@ export const Faucet = () => {
     !isTinlakePool &&
     import.meta.env.REACT_APP_FAUCET_URL &&
     hasLowNativeBalance &&
-    hasLowAusdBalance
+    hasLowPoolCurrencyBalance
 
   const handleClaim = async () => {
     setIsLoading(true)
