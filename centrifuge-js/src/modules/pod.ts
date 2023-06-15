@@ -1,5 +1,6 @@
 import { u8aToHex } from '@polkadot/util'
 import { decodeAddress } from '@polkadot/util-crypto'
+import { PoolMetadata } from './pools'
 
 type JobResponse = {
   JobID: string
@@ -104,6 +105,53 @@ export function getPodModule() {
       })
       .then((res) => res.json())
     return res as T
+  }
+
+  async function callIndexer<T = any>(indexerUrl: string, query: string, variables?: any) {
+    const res = await fetch(indexerUrl, {
+      method: 'POST',
+      body: JSON.stringify({ query, variables }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(async (res) => {
+      const { data, errors } = await res.json()
+      if (errors?.length) {
+        throw errors
+      }
+      return data as T
+    })
+    return res as T
+  }
+
+  async function getReports(
+    args: [
+      indexerUrl: string,
+      poolMetadata: Required<Pick<PoolMetadata, 'aggregates' | 'reports'>>,
+      page?: keyof Exclude<PoolMetadata['reports'], undefined>
+    ]
+  ) {
+    const [indexerUrl, poolMetadata, page] = args
+    const aggregateNames = Array.from(
+      new Set(
+        (page ? [poolMetadata.reports[page]] : Object.values(poolMetadata.reports)).flatMap((page) =>
+          page.sections.map((s) => s.aggregate)
+        )
+      )
+    )
+    const res = await callIndexer(
+      indexerUrl,
+      `query {
+          aggregations {
+            ${aggregateNames.map(
+              (n) => `${n}
+            `
+            )}
+          }
+        }`,
+      {}
+    )
+    return res.query.aggregations
   }
 
   async function getJob(args: [podUrl: string, token: string, jobId: string]) {
@@ -220,5 +268,6 @@ export function getPodModule() {
     getCommittedDocument,
     awaitJob,
     getSelf,
+    getReports,
   }
 }

@@ -487,6 +487,17 @@ export type PoolMetadata = {
     id: string
     createdAt: string
   }[]
+  aggregates?: Record<string, Record<string, object>[]>
+  reports?: {
+    poolOverview: {
+      sections: {
+        name: string
+        aggregate: string
+        view: 'chart' | 'table' | 'counter'
+        viewData: any
+      }[]
+    }
+  }
   adminMultisig?: {
     signers: string[]
     threshold: number
