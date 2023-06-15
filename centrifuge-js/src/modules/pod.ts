@@ -151,7 +151,7 @@ export function getPodModule() {
         }`,
       {}
     )
-    return res.query.aggregations
+    return res.aggregations
   }
 
   async function getJob(args: [podUrl: string, token: string, jobId: string]) {

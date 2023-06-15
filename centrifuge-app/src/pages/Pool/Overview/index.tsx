@@ -10,8 +10,8 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { PodIndexerReports } from '../../../components/PodIndexerReports'
 import { PoolToken } from '../../../components/PoolToken'
-import PortfolioSection from '../../../components/PortfolioSection'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { ethConfig } from '../../../config'
@@ -223,7 +223,7 @@ export function PoolDetailOverview({
         <IssuerSection metadata={metadata} />
       </PageSection>
       <PageSection title="Portfolio">
-        <PortfolioSection />
+        <PodIndexerReports poolId={poolId} page="poolOverview" />
       </PageSection>
     </>
   )
