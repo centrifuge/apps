@@ -77,7 +77,7 @@ export const Faucet = () => {
             Faucet
           </Text>
           <Text as="p" variant="heading3">
-            1k Native and 10k {pool.currency.symbol}
+            1k {balances.native.currency.symbol} and 10k {pool.currency.symbol}
           </Text>
         </Stack>
         <Button loading={isLoading} disabled={isLoading} onClick={handleClaim} variant="primary">
