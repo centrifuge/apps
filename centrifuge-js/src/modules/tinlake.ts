@@ -361,6 +361,21 @@ export function getTinlakeModule(inst: Centrifuge) {
     throw new Error('Arrived at impossible current epoch state')
   }
 
+  async function getRiskGroup(
+    addresses: TinlakeContractAddresses,
+    versions: TinlakeContractVersions = {},
+    loanId: number
+  ) {
+    // retrieve nftId = hash from tokenID & registry
+
+    const feed = contract(addresses, versions, 'FEED')
+
+    const nftId = await feed['nftID(uint256)'](loanId)
+
+    // retrieve riskgroup from nft
+    return feed.risk(nftId)
+  }
+
   return {
     updateInvestOrder,
     updateRedeemOrder,
@@ -371,6 +386,7 @@ export function getTinlakeModule(inst: Centrifuge) {
     solveEpoch,
     executeEpoch,
     contract,
+    getRiskGroup,
   }
 }
 

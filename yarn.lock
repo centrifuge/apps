@@ -5,6 +5,13 @@ __metadata:
   version: 4
   cacheKey: 7
 
+"@adraffy/ens-normalize@npm:1.9.2":
+  version: 1.9.2
+  resolution: "@adraffy/ens-normalize@npm:1.9.2"
+  checksum: 99f5f3bf3e52dd09c1b2b0d1c2409f6116a03e8dacc6eb07ed99bffd73f20534b9ec1aec0d98d4977143744e6cc585f3c51ae4973784bec22276f227855b7834
+  languageName: node
+  linkType: hard
+
 "@ampproject/remapping@npm:^2.2.0":
   version: 2.2.1
   resolution: "@ampproject/remapping@npm:2.2.1"
@@ -1689,6 +1696,7 @@ __metadata:
     eslint-config-prettier: 8.5.0
     eslint-config-react-app: ^7.0.1
     eslint-plugin-react: 7.30.1
+    ethers: ^6.6.0
     form-data: ^4.0.0
     formik: ^2.2.9
     graphql: ^16.6.0
@@ -8062,6 +8070,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:18.15.13":
+  version: 18.15.13
+  resolution: "@types/node@npm:18.15.13"
+  checksum: 4495d8a9f845c51a70bcc46b827c1475846c5923ace1345208230df8bf338bbe80acf28f889cbc2e5d4b24d891cf0e47dc86ee141acea80c6239960b8f7626e8
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^12.12.54":
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
@@ -9672,6 +9687,13 @@ __metadata:
   version: 3.0.0
   resolution: "aes-js@npm:3.0.0"
   checksum: 14e3109ab25b54ed400af84a633dc95af5e0724395d051f1f5a07a6a60b2c26b318afae6729dd7535ccbb694c96db68031ccd1cef4811c6cecbf07c354fb689d
+  languageName: node
+  linkType: hard
+
+"aes-js@npm:4.0.0-beta.5":
+  version: 4.0.0-beta.5
+  resolution: "aes-js@npm:4.0.0-beta.5"
+  checksum: f8933957bef56f76ef103b754175f4e40237fddccb128f21a550d9d266d850164c677c453a6c76d9dae63ea77dcc565a20a3b045f5b2fd6f335281ff188b431a
   languageName: node
   linkType: hard
 
@@ -15214,6 +15236,21 @@ __metadata:
     "@ethersproject/web": 5.7.1
     "@ethersproject/wordlists": 5.7.0
   checksum: 1ba7f7bb7a1b589fa7e5d4c94d75705cb1feb6bdb33caa55633e38150fd7ab0636a7380c92f067243a1d512d06b79196a07720ec048d3b4ccca06fad4f23245a
+  languageName: node
+  linkType: hard
+
+"ethers@npm:^6.6.0":
+  version: 6.6.0
+  resolution: "ethers@npm:6.6.0"
+  dependencies:
+    "@adraffy/ens-normalize": 1.9.2
+    "@noble/hashes": 1.1.2
+    "@noble/secp256k1": 1.7.1
+    "@types/node": 18.15.13
+    aes-js: 4.0.0-beta.5
+    tslib: 2.4.0
+    ws: 8.5.0
+  checksum: 0f08cf3f48b5979b4e6e3574cd794b235c73aa8371e1b23623c3ac015893524ea41cae9f0c64f6386e8c50a796b11afc5e1b578feaa7233f609a8659c0b5a1d7
   languageName: node
   linkType: hard
 
@@ -25715,6 +25752,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"tslib@npm:2.4.0":
+  version: 2.4.0
+  resolution: "tslib@npm:2.4.0"
+  checksum: 6964ab2376e335b1613968293070a4d5e7b09a36f6b853fbb19ffceda1f3dde547fe264b0e181f737274ef6a24307ee8ace843c0c7e235dba61c5af61f342795
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.4.1, tslib@npm:^2.5.0":
   version: 2.5.0
   resolution: "tslib@npm:2.5.0"
@@ -27267,6 +27311,21 @@ fsevents@^1.2.7:
     utf-8-validate:
       optional: true
   checksum: 77ce9a21297a3a2a7a312f17bd7b98c14df11c151db12f1df814393c0e9c11e94592fc4b5b26e6d3da9de5006cbdb4bdfed0a7a2fb165fc5010d43af07b50d1c
+  languageName: node
+  linkType: hard
+
+"ws@npm:8.5.0":
+  version: 8.5.0
+  resolution: "ws@npm:8.5.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ^5.0.2
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: d6a23b354e058a4adc4c36adbf54e2f4dd0acdab2f15615a9bb22b1d7e1fe452cf70e2d038da1fea0a8ade87fc1a9e074750c6dd41d16c7e0e4e80948b415c68
   languageName: node
   linkType: hard
 

@@ -14,6 +14,8 @@ export function useLoans(poolId: string) {
 
   const { data: tinlakeLoans } = useTinlakeLoans(poolId)
 
+  console.log({ tinlakeLoans })
+
   return isTinlakePool ? tinlakeLoans : centLoans
 }
 

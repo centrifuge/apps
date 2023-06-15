@@ -1,17 +1,15 @@
-import {
+import Centrifuge, {
   CurrencyBalance,
   Perquintill,
   Pool,
   PoolMetadata,
   Price,
   Rate,
-  TinlakeLoan,
   TokenBalance,
 } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useEvmProvider } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
 import BN from 'bn.js'
-import { request } from 'graphql-request'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
@@ -26,50 +24,73 @@ import {
   IpfsPools,
   LaunchingPool,
   PoolMetadataDetails,
-  PoolStatus,
   TinlakeMetadataPool,
   UpcomingPool,
 } from './types'
 
+type Tranche = {
+  availableFunds: BN
+  tokenPrice: BN
+  type: string
+  token: string
+  totalSupply: BN
+  interestRate?: BN
+}
+
+export interface PoolTranche extends Tranche {
+  pendingInvestments?: BN
+  pendingRedemptions?: BN
+  decimals?: number
+  address?: string
+  inMemberlist?: boolean
+  effectiveBalance?: BN
+  debt?: BN
+  balance?: BN
+  interestRate?: BN
+  token: 'DROP' | 'TIN'
+}
+
+export interface RiskGroup {
+  ceilingRatio: BN
+  thresholdRatio: BN
+  rate: {
+    pie: BN
+    chi: BN
+    ratePerSecond: BN
+    lastUpdated: BN
+    fixedRate: BN
+  }
+  recoveryRatePD: BN
+}
+
+export interface WriteOffGroup {
+  percentage: BN
+  overdueDays: BN
+}
+
 export interface PoolData {
-  id: string
-  name: string
-  slug: string
+  junior: PoolTranche
+  senior: PoolTranche
+  maker?: any
+  availableFunds: BN
+  minJuniorRatio: BN
+  currentJuniorRatio: BN
+  netAssetValue: BN
+  reserve: BN
+  reserveAtLastEpochClose: BN
+  maxJuniorRatio: BN
+  maxReserve: BN
+  totalPendingInvestments: BN
+  totalRedemptionsCurrency: BN
+  isPoolAdmin?: boolean
+  adminLevel?: number
+  reserveAndRemainingCredit?: BN
+  discountRate: BN
+  risk?: RiskGroup[]
+  juniorInvestors?: { [key: string]: { collected: BN; uncollected: BN } }
+  writeOffGroups?: WriteOffGroup[]
   isUpcoming: boolean
-  isArchived: boolean
   isLaunching: boolean
-  isOversubscribed: boolean
-  asset: string
-  ongoingLoans: number
-  totalDebt: BN
-  totalDebtNum: number
-  totalRepaysAggregatedAmount: BN
-  totalRepaysAggregatedAmountNum: number
-  weightedInterestRate: BN
-  weightedInterestRateNum: number
-  seniorInterestRate?: BN
-  seniorInterestRateNum: number
-  order?: number
-  version: number
-  totalFinancedCurrency: BN
-  financingsCount?: number
-  status?: PoolStatus
-  reserve?: BN
-  assetValue?: BN
-  juniorYield14Days: BN | null
-  seniorYield14Days: BN | null
-  juniorYield30Days: BN | null
-  seniorYield30Days: BN | null
-  juniorYield90Days: BN | null
-  seniorYield90Days: BN | null
-  icon: string | null
-  juniorTokenPrice?: BN | null
-  seniorTokenPrice?: BN | null
-  currency: string
-  capacity?: BN
-  capacityGivenMaxReserve?: BN
-  capacityGivenMaxDropRatio?: BN
-  shortName: string
   poolClosing?: boolean
 }
 
@@ -142,41 +163,19 @@ export function useTinlakePools(suspense = false) {
 }
 
 export function useTinlakeLoans(poolId: string) {
-  return useQuery(
-    ['tinlakePoolLoans', poolId],
-    async () => {
-      const loans = await getTinlakeLoans(poolId)
+  const tinlakePools = useTinlakePools()
+  const provider = useEvmProvider()
 
-      return loans.map((loan) => ({
-        asset: {
-          nftId: loan.nftId,
-          collectionId: loan.pool.id,
-        },
-        id: loan.index.toString(),
-        originationDate: loan.financingDate ? new Date(Number(loan.financingDate) * 1000).toISOString() : null,
-        outstandingDebt: new CurrencyBalance(loan.debt, 18),
-        poolId: loan.pool.id,
-        pricing: {
-          maturityDate: Number(loan.maturityDate) ? new Date(Number(loan.maturityDate) * 1000).toISOString() : null,
-          interestRate: new Rate(
-            new BN(loan.interestRatePerSecond).sub(new BN(10).pow(new BN(27))).mul(new BN(31536000))
-          ),
-          ceiling: new CurrencyBalance(loan.ceiling, 18),
-        },
-        status: getTinlakeLoanStatus(loan),
-        totalBorrowed: new CurrencyBalance(loan.borrowsAggregatedAmount, 18),
-        totalRepaid: new CurrencyBalance(loan.repaysAggregatedAmount, 18),
-        dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
-        riskGroup: loan.riskGroup,
-        owner: loan.owner,
-      })) as TinlakeLoan[]
-    },
-    {
-      enabled: !!poolId && !!poolId.startsWith('0x'),
-      staleTime: Infinity,
-      suspense: true,
-    }
-  )
+  const pool = tinlakePools.data?.pools.find((p) => p.id === poolId)
+
+  if (!pool) throw new Error(`Pool not found: ${poolId}`)
+
+  const cent = useCentrifuge()
+
+  return useQuery(['tinlakePools', pool], () => getTinlakeLoans(pool, cent, provider), {
+    staleTime: Infinity,
+    suspense: true,
+  })
 }
 
 export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches'> & {
@@ -213,6 +212,7 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
     MCD_VAT?: string
     MCD_JUG?: string
     MAKER_MGR?: string
+    SHELF?: string
   }
   versions?: { FEED?: number; POOL_ADMIN?: number }
   contractConfig?: {
@@ -222,6 +222,22 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
 
   network: 'mainnet' | 'kovan' | 'goerli'
   version: 2 | 3
+}
+
+interface MulticallData {
+  registry: string
+  tokenId: BN
+  principal: BN
+  interestRate: BN
+  debt: BN
+  threshold: BN
+  price: BN
+  scoreCard: {
+    thresholdRatio: BN
+    ceilingRatio: BN
+    interestRate: BN
+    recoveryRatePD: BN
+  }
 }
 
 function getTinlakeLoanStatus(loan: TinlakeLoanData) {
@@ -234,42 +250,100 @@ function getTinlakeLoanStatus(loan: TinlakeLoanData) {
   return 'Active'
 }
 
-// TODO: refactor to use multicall instead of subgraph
-async function getTinlakeLoans(poolId: string) {
-  const query = `
-    {
-      pools (where: { id_in: ["${poolId.toLowerCase()}"]}) {
-        loans (first: 1000) {
-          nftId
-          id
-          index
-          financingDate
-          debt
-          pool {
-            id
-          }
-          maturityDate
-          interestRatePerSecond
-          borrowsAggregatedAmount
-          repaysAggregatedAmount
-          ceiling
-          closed
-          riskGroup
-          owner
-        }
+async function getTinlakeLoans(pool: TinlakePool, cent: Centrifuge, provider: any) {
+  const toBN = (val: BigNumber) => new BN(val.toString())
+
+  const signer = provider!.getSigner()
+  const connectedCent = cent.connectEvm(signer)
+
+  const loans = 10
+
+  const calls: Call[] = []
+
+  for (let i = 0; i < loans; i += 1) {
+    const riskGroupBefore = await connectedCent.tinlake.getRiskGroup(pool.addresses, pool.versions, i)
+
+    const riskGroup = riskGroupBefore.toNumber()
+
+    calls.push(
+      {
+        target: pool.addresses.SHELF!,
+        call: ['shelf(uint256)(address,uint256)', i],
+        returns: [[`registry${i}`], [`tokenId`, toBN]],
+      },
+      {
+        target: pool.addresses.FEED,
+        call: ['ceiling(uint256)(uint256)', i],
+        returns: [[`principal${i}`, toBN]],
+      },
+      {
+        target: pool.addresses.PILE,
+        call: ['rates(uint256)(uint256,uint256,uint256,uint48,uint256)', riskGroup],
+        returns: [
+          [`rates${i}.pie`],
+          [`rates${i}.chi`],
+          [`interestRate${i}`, toBN],
+          [`rates${i}.lastUpdated`],
+          [`rates${i}.fixedRate`],
+        ],
+      },
+      {
+        target: pool.addresses.PILE,
+        call: ['debt(uint256)(uint256)', i],
+        returns: [[`debt${i}`, toBN]],
+      },
+      {
+        target: pool.addresses.PILE,
+        call: ['loanRates(uint256)(uint256)', i],
+        returns: [[`rateGroup${i}`, (val: string) => Number(val.toString())]],
+      },
+      {
+        target: pool.addresses.FEED,
+        call: ['thresholdRatio(uint256)(uint256)', riskGroup],
+        returns: [[`scoreCard${i}.thresholdRatio`, toBN]],
+      },
+      {
+        target: pool.addresses.FEED!,
+        call: ['ceilingRatio(uint256)(uint256)', riskGroup],
+        returns: [[`scoreCard${i}.ceilingRatio`, toBN]],
       }
-    }`
+    )
+  }
 
-  const data = await request<{ data: any[] }>('https://graph.centrifuge.io/tinlake', query)
+  console.log({ calls })
 
-  const loans = data.pools.reduce((assets: any[], pool: any) => {
-    if (pool.loans) {
-      assets.push(...pool.loans)
-    }
-    return assets
-  }, [])
+  const multicallData = await multicall<{ [key: string]: State }>(calls)
 
-  return loans
+  console.log({ multicallData })
+
+  // TODO: load data using multicall
+  // const [nftData] = await Promise.all([getNFT(multicallData.registry, pool, multicallData.tokenId.toString())])
+
+  // const nft = 'nft' in nftData ? nftData.nft : undefined
+
+  // asset: {
+  //   nftId: loan.nftId,
+  //   collectionId: loan.pool.id,
+  // },
+  // id: loan.index.toString(),
+  // originationDate: loan.financingDate ? new Date(Number(loan.financingDate) * 1000).toISOString() : null,
+  // outstandingDebt: new CurrencyBalance(loan.debt, 18),
+  // poolId: loan.pool.id,
+  // pricing: {
+  //   maturityDate: Number(loan.maturityDate) ? new Date(Number(loan.maturityDate) * 1000).toISOString() : null,
+  //   interestRate: new Rate(
+  //     new BN(loan.interestRatePerSecond).sub(new BN(10).pow(new BN(27))).mul(new BN(31536000))
+  //   ),
+  //   ceiling: new CurrencyBalance(loan.ceiling, 18),
+  // },
+  // status: getTinlakeLoanStatus(loan),
+  // totalBorrowed: new CurrencyBalance(loan.borrowsAggregatedAmount, 18),
+  // totalRepaid: new CurrencyBalance(loan.repaysAggregatedAmount, 18),
+  // dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
+  // riskGroup: loan.riskGroup,
+  // owner: loan.owner,
+
+  return multicallData
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
