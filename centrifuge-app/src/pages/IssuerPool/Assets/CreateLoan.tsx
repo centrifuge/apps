@@ -177,7 +177,7 @@ function IssuerCreateLoan() {
   const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
-  const podUrl = poolMetadata?.pod?.url
+  const podUrl = poolMetadata?.pod?.node
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',

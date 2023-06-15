@@ -150,6 +150,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
           throw new Error('Failed to authenticate wallet')
         }
         const authToken = await authTokenRes.json()
+        sessionStorage.clear()
         sessionStorage.setItem(
           `centrifuge-onboarding-auth-${address}-${proxy.delegator}`,
           JSON.stringify({ signed: authToken.token, payload })
@@ -173,6 +174,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
         throw new Error('Failed to authenticate wallet')
       }
       const authToken = await authTokenRes.json()
+      sessionStorage.clear()
       sessionStorage.setItem(
         `centrifuge-onboarding-auth-${address}`,
         JSON.stringify({ signed: authToken.token, payload })
@@ -219,6 +221,7 @@ Issued At: ${new Date().toISOString()}`
   }
   const token = await tokenRes.json()
   if (token) {
+    sessionStorage.clear()
     sessionStorage.setItem(
       `centrifuge-onboarding-auth-${address}`,
       JSON.stringify({ signed: token.token, payload: message })

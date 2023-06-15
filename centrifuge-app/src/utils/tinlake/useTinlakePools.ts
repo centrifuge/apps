@@ -147,6 +147,7 @@ export function useTinlakeLoans(poolId: string) {
     async () => {
       const loans = await getTinlakeLoans(poolId)
 
+      // @ts-expect-error
       return loans.map((loan) => ({
         asset: {
           nftId: loan.nftId,
@@ -262,6 +263,7 @@ async function getTinlakeLoans(poolId: string) {
 
   const data = await request<{ data: any[] }>('https://graph.centrifuge.io/tinlake', query)
 
+  // @ts-expect-error
   const loans = data.pools.reduce((assets: any[], pool: any) => {
     if (pool.loans) {
       assets.push(...pool.loans)
@@ -576,14 +578,20 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         },
       },
       onboarding: {
-        agreements: {
+        tranches: {
           [`${id}-0`]: {
-            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '',
-            mime: 'application/pdf',
+            agreement: {
+              uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '',
+              mime: 'application/pdf',
+            },
+            openForOnboarding: p.metadata.newInvestmentsStatus.junior === 'open',
           },
           [`${id}-1`]: {
-            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '',
-            mime: 'application/pdf',
+            agreement: {
+              uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '',
+              mime: 'application/pdf',
+            },
+            openForOnboarding: p.metadata.newInvestmentsStatus.senior === 'open',
           },
         },
       },
