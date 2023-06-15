@@ -473,7 +473,8 @@ export type PoolMetadata = {
     listed: boolean
   }
   pod?: {
-    url: string | null
+    node: string | null
+    indexer?: string | null
   }
   tranches: Record<
     string,
@@ -631,7 +632,7 @@ export function getPoolsModule(inst: Centrifuge) {
         listed: metadata.listed ?? true,
       },
       pod: {
-        url: metadata.podEndpoint ?? null,
+        node: metadata.podEndpoint ?? null,
       },
       tranches: tranchesById,
       adminMultisig: metadata.adminMultisig,
@@ -2295,17 +2296,11 @@ function getEpochStatus(epochExecution: Pick<EpochExecutionData, 'challengePerio
   return 'ongoing'
 }
 
-export function findCurrency<T extends Pick<CurrencyMetadata, 'key' | 'symbol'>>(
+export function findCurrency<T extends Pick<CurrencyMetadata, 'key'>>(
   currencies: T[],
   key: CurrencyKey
 ): T | undefined {
-  const curr = currencies.find((currency) => {
-    if (typeof key === 'string') {
-      return looksLike(currency.symbol, key)
-    }
-    return looksLike(currency.key, key)
-  })
-  return curr
+  return currencies.find((currency) => looksLike(currency.key, key))
 }
 
 export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
