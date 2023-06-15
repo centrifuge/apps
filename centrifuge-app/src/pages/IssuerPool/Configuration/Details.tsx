@@ -44,7 +44,7 @@ export function Details() {
       poolName: metadata?.pool?.name ?? '',
       poolIcon: iconFile ?? null,
       assetClass: metadata?.pool?.asset?.class ?? '',
-      podEndpoint: metadata?.pod?.url ?? '',
+      podEndpoint: metadata?.pod?.node ?? '',
       listed: metadata?.pool?.listed ?? false,
     }),
     [metadata, iconFile]
@@ -84,7 +84,8 @@ export function Details() {
           listed: values.listed,
         },
         pod: {
-          url: values.podEndpoint,
+          ...oldMetadata.pod,
+          node: values.podEndpoint,
         },
       }
 
@@ -217,7 +218,7 @@ export function Details() {
               <LabelValueStack label="Asset class" value={metadata?.pool?.asset.class} />
 
               <LabelValueStack label="Currency" value={currency} />
-              <LabelValueStack label="POD endpoint" value={metadata?.pod?.url ?? '-'} />
+              <LabelValueStack label="POD endpoint" value={metadata?.pod?.node ?? '-'} />
               <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
             </Shelf>
           )}
