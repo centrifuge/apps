@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "lint": "eslint src/**/*.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --minify",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --minify && yarn build:centjs",
+    "build:centjs": "cd ../centrifuge-js && yarn build && cd ../faucet-api",
     "start:types": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --watch",
     "start:functions": "nodemon --watch ./dist/ --exec npx functions-framework --target=faucet --signature-type=http --port=8081",
     "develop": "run-p -l start:functions start:types",
