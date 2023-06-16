@@ -4,101 +4,12 @@ import { Shelf, Text } from '@centrifuge/fabric'
 import Chart from 'chart.js/auto'
 import * as React from 'react'
 import { useQuery } from 'react-query'
+import styled from 'styled-components'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
   page: keyof Exclude<PoolMetadata['reports'], undefined>
   poolId: string
-}
-
-// const POOL_CONFIG_REPORTS: { reports: { [name: string]: { sections: ReportSection[] } } } = {
-//   reports: {
-//     poolOverview: {
-//       sections: [
-//         {
-//           name: 'Exposure by US state',
-//           aggregate: 'sumOfNormalizedDebtPerState',
-//           view: 'chart',
-//           viewData: { type: 'bar' },
-//         },
-//         {
-//           name: 'Average FICO score (weighted by outstanding debt) over time',
-//           aggregate: 'ficoScoreWeightedByNormalizedDebtOverTime',
-//           view: 'chart',
-//           viewData: {
-//             type: 'line',
-//             options: {
-//               plugins: {
-//                 legend: {
-//                   labels: {
-//                     font: {
-//                       family: 'Inter',
-//                       size: 20,
-//                     },
-//                   },
-//                 },
-//               },
-//               scales: {
-//                 y: [
-//                   {
-//                     min: 500,
-//                     max: 700,
-//                   },
-//                 ],
-//               },
-//             },
-//           },
-//         },
-//       ],
-//     },
-//   },
-// }
-
-const MOCK_DATA = {
-  sumOfNormalizedDebtPerState: [
-    {
-      key1: 'CA',
-      value1: 200314,
-    },
-    {
-      key1: 'TX',
-      value1: 120123,
-    },
-    {
-      key1: 'NY',
-      value1: 581202,
-    },
-  ],
-  ficoWeightedByNormalizedDebt: [
-    {
-      key1: '2023-05-20',
-      value1: 608,
-    },
-    {
-      key1: '2023-05-21',
-      value1: 605,
-    },
-    {
-      key1: '2023-05-22',
-      value1: 610,
-    },
-    {
-      key1: '2023-05-23',
-      value1: 610,
-    },
-    {
-      key1: '2023-05-24',
-      value1: 610,
-    },
-    {
-      key1: '2023-05-25',
-      value1: 605,
-    },
-    {
-      key1: '2023-05-26',
-      value1: 601,
-    },
-  ],
 }
 
 export function PodIndexerReports({ page, poolId }: Props) {
@@ -107,10 +18,9 @@ export function PodIndexerReports({ page, poolId }: Props) {
   const centrifuge = useCentrifuge()
   const { data } = useQuery(
     ['podIndexerReports', page],
-    () => {
-      const realData = centrifuge.pod.getReports([metadata!.pod!.indexer!, metadata as any, page])
-      console.log('realData', realData)
-      return MOCK_DATA
+    async () => {
+      const realData = await centrifuge.pod.getReports([metadata!.pod!.indexer!, metadata as any, page])
+      return realData
     },
     {
       enabled: !!metadata?.reports,
@@ -125,16 +35,16 @@ export function PodIndexerReports({ page, poolId }: Props) {
 
 type ReportSectionWithData = Required<PoolMetadata>['reports']['poolOverview']['sections'][0] & { data: any }
 
-type ChartData = { key1: any; value1: any }[]
+type ChartData = { value1: any; value2: any }[]
 
 function displayChart(reportSection: ReportSectionWithData, data: ChartData, node: HTMLCanvasElement) {
   return new Chart(node, {
     ...reportSection.viewData,
     data: {
-      labels: data.map((row) => row.key1),
+      labels: data.map((row) => row.value1),
       datasets: [
         {
-          data: data.map((row) => row.value1),
+          data: data.map((row) => row.value2),
           backgroundColor: '#2762ff',
         },
       ],
@@ -149,20 +59,28 @@ function displayChart(reportSection: ReportSectionWithData, data: ChartData, nod
   })
 }
 
+const Section = styled(Shelf)`
+  height: 300px;
+`
+
+const SectionContent = styled.div`
+  text-align: center;
+`
+
 function ReportSections({ sections }: { sections: ReportSectionWithData[] }) {
   return (
-    <Shelf gap="50px">
-      {sections.map((section) => (
-        <ReportSection section={section} />
-      ))}
-    </Shelf>
+    <Section gap="50px" alignItems="flex-start">
+      {sections.map((section) =>
+        section.view === 'chart' ? <ChartSection section={section} /> : <CounterSection section={section} />
+      )}
+    </Section>
   )
 }
 
 Chart.defaults.borderColor = '#eee'
 Chart.defaults.color = 'rgb(97, 97, 97)'
 
-function ReportSection({ section }: { section: ReportSectionWithData }) {
+function ChartSection({ section }: { section: ReportSectionWithData }) {
   const ref = React.useRef<HTMLCanvasElement>(null)
 
   React.useEffect(() => {
@@ -178,7 +96,27 @@ function ReportSection({ section }: { section: ReportSectionWithData }) {
       <Text variant="heading5" style={{ marginBottom: '24px' }}>
         {section.name}
       </Text>
-      <canvas ref={ref} />
+      <SectionContent>
+        <canvas ref={ref} />
+      </SectionContent>
+    </div>
+  )
+}
+
+function CounterSection({ section }: { section: ReportSectionWithData }) {
+  return (
+    <div style={{ width: '50%' }}>
+      <Text variant="heading5" style={{ marginBottom: '24px' }}>
+        {section.name}
+      </Text>
+      <SectionContent>
+        <Text variant="heading1" style={{ marginBottom: '24px', fontSize: '60px' }}>
+          {parseFloat(section.data[0].value1).toFixed(section.viewData.decimals || 0)}
+        </Text>
+        <Text variant="heading6" style={{ marginBottom: '24px' }}>
+          {section.viewData.label}
+        </Text>
+      </SectionContent>
     </div>
   )
 }

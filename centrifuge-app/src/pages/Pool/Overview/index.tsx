@@ -222,9 +222,11 @@ export function PoolDetailOverview({
       <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />
       </PageSection>
-      <PageSection title="Portfolio">
-        <PodIndexerReports poolId={poolId} page="poolOverview" />
-      </PageSection>
+      {metadata?.reports && 'poolOverview' in metadata?.reports && (
+        <PageSection title="Portfolio">
+          <PodIndexerReports poolId={poolId} page="poolOverview" />
+        </PageSection>
+      )}
     </>
   )
 }
