@@ -13,14 +13,10 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 ## Preparing Envs (e.g when the dev chain data is reset)
 
-### Frontend
-
-1. Create pools for initial data
-
-### Faucet
+### Faucet (only available in demo and dev)
 
 1. Add a valid seed hex to `faucet-api/env-vars/demo.secrets`
-2. Fund the account wallet with aUSD and DEVEL/DEMO
+2. Fund the account wallet with all availabe pool currencies and the native currency
 
 ### Onboarding API
 
@@ -32,7 +28,7 @@ Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 4. Add the pure_proxy_address to the env variable `MEMBERLIST_ADMIN_PURE_PROXY` in the onboarding api and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` in the centrifuge-app env variables.
 5. Make sure secure_wallet_B is funded with both aUSD and the Native currency.
 
-Note: onboarding must be manually enabled for each tranche in the issuer settings.
+> onboarding must be manually enabled for each tranche in the issuer settings.
 
 ### Asset Originator POD Access
 
@@ -107,14 +103,46 @@ To set a pool into maintenance mode, add the pool id to the environment variable
 
 To make sure repository admins can control the full workflow of our apps to production safely this repository provides the following flow:
 
-- When you open a PR a new cent-app will be deployed with your PR number on the URL such as: app-prXXX.k-f.dev
+- Opening a new PR will deploy cent-app will the PR number to app-prXXX.k-f.dev
 
-- After code is merged to main you can see the changes in: app-dev.k-f.dev
+- Merging code into `main` will deploy cent-app to: app-dev.k-f.dev
 
-- When a repository admin creates a `centrifuge-app/v*` tag it will will trigger a deployment to [altair.centrifuge.io](https://altair.centrifuge.io). The release needs to FIRST be marked as `prerelease`.
+- Demo deployments must be [manually triggered](https://github.com/centrifuge/apps/actions/workflows/demo-deploys.yml). They are not required for the release process
 
-  > Draft releases or tags other than the one above will not trigger any deployments.
+- Repository admins create tags prefixed with `rc-centrifuge-app-v` which will trigger a deployment to [app.altair.centrifuge.io](https://app.altair.centrifuge.io) and [app.staging.centrifuge.io](https://app.staging.centrifuge.io) (pre-release).
 
-- Once ready, you can edit your pre-release and untick the "pre-release" setting to fully publish a release, this will trigger a refresh of our code in app.centrifuge.io and app.ipfs.centrifuge.io (coming soon)
+- Once ready, you can edit the pre-release and untick the "pre-release" setting to fully publish a release, this will trigger a refresh of our code in app.centrifuge.io and app.ipfs.centrifuge.io (coming soon)
+
+- Using the github release manager the pre-release can be promoted to production ([app.centrifuge.io](https://app.centrifuge.io)) using the artifacts generated in the pre-release. The production release must be approved by a reviewer.
+
+## How to release
+
+### Step 1: Pre-Release to [staging](app.staging.centrifuge.io) and [altair](app.altair.centrifuge.io)
+
+Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releases/new).
+
+1. Create new tag `rc-centrifuge-app-vX.X` (e.g. `rc-centrifuge-app-v1.13`). Pre-releases that don't use the naming guidelines will not trigger any deployments.
+   - Major version: release includes new features/improvments
+   - Minor version: release only includes bug fixes
+2. Name the release `CentrifugeApp vX.X`
+3. Generate the release notes
+4. Tick the `Set as a pre-release` checkbox
+5. Click `Publish release` to trigger the build
+6. Once the build is complete, a reviewer must approve the release to trigger a deployment
+
+When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
+
+### More info
 
 More info on our release process rationale can be found in [our HackMD](https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view) (Private link, only k-f contributors)
+
+### Step 2: Release to [production](app.centrifuge.io)
+
+> Step 1 must be completed before starting with this step. The production deployment uses the artifacts generated in the pre-release.
+
+Navigate to the [release summary](https://github.com/centrifuge/apps/releases) and select the pre-release you want to publish.
+
+1. Untick the `Set as a pre-release` checkbox and then tick the `Set as the latest release` checkbox
+2. Click `Update release` to trigger the prod deployment. As with the pre-release, the production release must be approved by a reviewer.
+
+When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
