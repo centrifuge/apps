@@ -2334,17 +2334,27 @@ export function getPoolsModule(inst: Centrifuge) {
   function computeLiquidityRewards(args: [address: Account, poolId: string, trancheId: string]) {
     const [address, poolId, trancheId] = args
 
-    const RewardDomain = {
-      Block: 'Block',
-      Liquidity: 'Liquidity',
-    }
-
     return inst.getApi().pipe(
-      switchMap((api) =>
-        api.rpc.rewards.computeReward([RewardDomain.Liquidity, { Tranche: [poolId, trancheId] }], address)
-      ),
+      // switchMap((api) => api.rpc.rewards.computeReward(['Liquidity', { Tranche: [poolId, trancheId] }], address)),
+      // switchMap((api) => api.rpc.rewards.computeReward('Liquidity', { Tranche: [poolId, trancheId] }, address)),
+      switchMap((api) => api.rpc.rewards.computeReward('Liquidity', [poolId, trancheId], address)),
       map((data) => {
         console.log('data', data)
+      })
+    )
+  }
+
+  function listCurrencies(args: [address: Account]) {
+    const [address] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => api.rpc.rewards.listCurrencies('Liquidity', address)),
+      map((data) => {
+        const results = data.toPrimitive() as {
+          tranche: [number, string]
+        }[]
+
+        return results
       })
     )
   }
@@ -2353,6 +2363,7 @@ export function getPoolsModule(inst: Centrifuge) {
     claimLiquidityRewards,
     collectAndStake,
     unStake,
+    listCurrencies,
     getAccountStakes,
     getRewardCurrencyGroup,
     getLiquidityRewardsActiveEpochData,

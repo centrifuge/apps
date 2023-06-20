@@ -60,8 +60,8 @@ function useRewardCurrencyGroup(poolId?: string, trancheId?: string) {
 
 function useComputeLiquidityRewards(address?: string, poolId?: string, trancheId?: string) {
   const [result] = useCentrifugeQuery(
-    ['compute liquidity rewards', address, poolId, trancheId],
-    (cent) => cent.pools.computeLiquidityRewards([address, poolId!, trancheId!]),
+    ['compute liquidity rewards', address, poolId, trancheId, '7789'],
+    (cent) => cent.pools.computeLiquidityRewards([address!, poolId!, trancheId!]),
     {
       suspense: true,
       enabled: !!address && !!poolId && !!trancheId,
@@ -71,13 +71,25 @@ function useComputeLiquidityRewards(address?: string, poolId?: string, trancheId
   return result
 }
 
+function useListCurrencies(address?: string) {
+  const [result] = useCentrifugeQuery(['list currencies', address], (cent) => cent.pools.listCurrencies([address!]), {
+    suspense: true,
+    enabled: !!address,
+  })
+
+  return result
+}
+
 export function LiquidityRewards() {
   const { state } = useInvestRedeem()
   const add = useAddress()
   console.log('state', state)
+  console.log('add', add)
 
   const rewards = useComputeLiquidityRewards(add, state.poolId, state.trancheId)
+  // const listCurrencies = useListCurrencies(add)
   console.log('rewards', rewards)
+  // console.log('listCurrencies', listCurrencies)
 
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
   // pendingRedeem.mul(state.tokenPrice)

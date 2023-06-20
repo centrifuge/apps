@@ -122,25 +122,33 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
       description: 'List reward currencies',
       params: [
         {
+          name: 'domain',
+          type: 'RewardDomain',
+        },
+        {
           name: 'account_id',
           type: 'AccountId',
         },
       ],
-      type: 'u128',
+      type: 'Vec<CurrencyId>',
     },
     computeReward: {
       description: 'Compute reward',
       params: [
         {
+          name: 'domain',
+          type: 'RewardDomain',
+        },
+        {
           name: 'currency_id',
-          type: '(RewardDomain,CurrencyId)',
+          type: 'CurrencyId',
         },
         {
           name: 'account_id',
           type: 'AccountId',
         },
       ],
-      type: 'u128',
+      type: 'Option<u128>',
     },
   },
 }
