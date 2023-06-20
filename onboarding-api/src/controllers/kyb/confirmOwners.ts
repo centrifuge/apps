@@ -10,7 +10,10 @@ const confirmOwnersInput = object({
   ultimateBeneficialOwners: array(
     object({
       name: string().required(),
-      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+      dateOfBirth: date()
+        .required()
+        .min(new Date(1900, 0, 1))
+        .max(new Date(new Date().getFullYear() - 18, new Date().getMonth()), 'UBO must be 18 or older'),
       countryOfResidency: string().required(),
       countryOfCitizenship: string().required(),
     }).required()
