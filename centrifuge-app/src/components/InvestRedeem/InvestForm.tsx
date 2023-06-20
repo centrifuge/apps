@@ -53,8 +53,8 @@ export function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = '
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-      if (validateNumberInput(values.amount, 0, state.poolCUrrencyBalanceWithPending)) {
-        errors.amount = validateNumberInput(values.amount, 0, state.poolCUrrencyBalanceWithPending)
+      if (validateNumberInput(values.amount, 0, state.poolCurrencyBalanceWithPending)) {
+        errors.amount = validateNumberInput(values.amount, 0, state.poolCurrencyBalanceWithPending)
       } else if (hasPendingOrder && Dec(values.amount).eq(pendingInvest)) {
         errors.amount = 'Equals current order'
       } else if (!allowInvestBelowMin && state.isFirstInvestment && Dec(values.amount).lt(state.minInitialInvestment)) {
@@ -105,9 +105,9 @@ export function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = '
                 secondaryLabel={
                   state.poolCurrencyBalance &&
                   state.poolCurrency &&
-                  `${formatBalance(state.poolCUrrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
+                  `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
                 }
-                onSetMax={() => form.setFieldValue('amount', state.poolCUrrencyBalanceWithPending)}
+                onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
                 autoFocus={autoFocus}
               />
             )

@@ -101,7 +101,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     ).toDecimal(),
     nativeBalance: nativeBalance?.toDecimal() || Dec(0),
     poolCurrencyBalance: poolCurrencyBalance,
-    poolCUrrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
+    poolCurrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
     trancheBalance,
     trancheBalanceWithPending: combinedBalance,
     investmentValue,

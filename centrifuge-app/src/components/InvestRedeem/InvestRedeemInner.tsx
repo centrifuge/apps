@@ -54,6 +54,12 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const canOnlyInvest =
     state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
+  // console.log('pendingRedeem', pendingRedeem.toString())
+  // console.log('canOnlyInvest', canOnlyInvest)
+  // console.log('payoutTokenAmount', state?.order?.payoutTokenAmount.toString())
+  // console.log('trancheBalanceWithPending', state?.trancheBalanceWithPending.toString())
+  // console.log('-----------')
+
   if (allowedTranches.length) {
     return (
       <Stack as={Card} gap={2} p={2}>
@@ -91,6 +97,8 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
           />
         )}
 
+        <LiquidityRewards />
+
         {connectedType && state.isDataLoading ? (
           <Spinner />
         ) : state.isAllowedToInvest && metadata?.onboarding?.tranches?.[state.trancheId]?.openForOnboarding ? (
@@ -112,7 +120,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
                     <SuccessBanner title="Redemption successful" />
                   ) : null)}
 
-                <LiquidityRewards />
+                {/* <LiquidityRewards /> */}
 
                 <EpochBusy busy={state.isPoolBusy} />
 

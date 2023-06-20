@@ -2208,70 +2208,143 @@ export function getPoolsModule(inst: Centrifuge) {
     }
   }
 
-  function claimLiquidityRewards(args: [trancheId: string], options?: TransactionOptions) {
-    const [trancheId] = args
+  function claimLiquidityRewards(args: [poolId: string, trancheId: string], options?: TransactionOptions) {
+    const [poolId, trancheId] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        // console.log('$api', api)
-
-        // todo: check if already collected
-        // check if can call 'collect()'
-        // const collect = api.tx.investments.collectInvestments([poolId, trancheId])
-
-        const submittable = api.tx.liquidityRewards.claimReward(trancheId)
+        const submittable = api.tx.liquidityRewards.claimReward({ Tranche: [poolId, trancheId] })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
-
-    // return $api.pipe(
-    //   switchMap((api) => {
-    //     const submittable = api.tx.loans.close(poolId, loanId)
-    //     return inst.wrapSignAndSend(api, submittable, options)
-    //   })
-    // )
-
-    // return $api.pipe(
-    //   switchMap((api) => {
-    //     const submittable = api.tx.loans.create(poolId, info)
-    //     return inst.wrapSignAndSend(api, submittable, options)
-    //   })
-    // )
   }
 
-  function collectAndStake(
-    args: [poolId: string, trancheId: string, currencyId: Exclude<CurrencyKey, string>, amount: number],
-    options?: TransactionOptions
-  ) {
-    const [poolId, trancheId, currencyId, amount] = args
+  function collectAndStake(args: [poolId: string, trancheId: string, amount: BN], options?: TransactionOptions) {
+    const [poolId, trancheId, amount] = args
     const $api = inst.getApi()
 
-    // return $api.pipe(
-    //   switchMap((api) => {
-    //     const submittable = api.tx.liquidityRewards.stake(currencyId, amount)
-    //     return inst.wrapSignAndSend(api, submittable, options)
-    //   })
-    // )
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll([
           api.tx.investments.collectInvestments([poolId, trancheId]),
-          api.tx.liquidityRewards.stake(currencyId, amount),
+          api.tx.liquidityRewards.stake({ Tranche: [poolId, trancheId] }, amount.toString()),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
 
-  function unStake(args: [currencyId: Exclude<CurrencyKey, string>, amount: number], options?: TransactionOptions) {
-    const [currencyId, amount] = args
+  function unStake(args: [poolId: string, trancheId: string, amount: BN], options?: TransactionOptions) {
+    const [poolId, trancheId, amount] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.liquidityRewards.unStake(currencyId, amount)
+        const submittable = api.tx.liquidityRewards.unstake({ Tranche: [poolId, trancheId] }, amount)
         return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function getAccountStakes(args: [address: Account, poolId: string, trancheId: string]) {
+    const [address, poolId, trancheId] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })),
+      combineLatestWith(getPoolCurrency([poolId])),
+      map(([data, currency]) => {
+        const { stake, rewardTally, lastCurrencyMovement } = data.toPrimitive() as {
+          stake: number
+          rewardTally: number
+          lastCurrencyMovement: number
+        }
+
+        return {
+          stake: new TokenBalance(stake, currency.decimals).toDecimal(),
+          rewardTally,
+          lastCurrencyMovement,
+        }
+      })
+    )
+  }
+
+  function getRewardCurrencyGroup(args: [poolId: string, trancheId: string]) {
+    const [poolId, trancheId] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.liquidityRewardsBase.currency({ Tranche: [poolId, trancheId] })),
+      map((data) => {
+        const [groupId, { totalStake }] = data.toPrimitive() as [
+          string,
+          {
+            rptChanges: unknown[]
+            totalStake: number
+          }
+        ]
+
+        return {
+          groupId,
+          totalStake,
+        }
+      })
+    )
+  }
+
+  function getLiquidityRewardsActiveEpochData() {
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.liquidityRewards.activeEpochData()),
+      map((data) => {
+        const { duration, reward, weights } = data.toPrimitive() as {
+          duration: number
+          reward: string
+          weights: { [key: number]: number }
+        }
+
+        return {
+          duration,
+          reward: new TokenBalance(reward, 18).toDecimal(),
+          weights,
+        }
+      })
+    )
+  }
+
+  function getORMLTokens(args: [address: Account, poolId: string, trancheId: string]) {
+    const [address, poolId, trancheId] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.ormlTokens.accounts(address, { Tranche: [poolId, trancheId] })),
+      map((data) => {
+        const { free, reserved, frozen } = data.toPrimitive() as {
+          free: number
+          reserved: number
+          frozen: number
+        }
+
+        return {
+          free: new TokenBalance(free, 18).toDecimal(), // collected tranche tokens
+          reserved: new TokenBalance(reserved, 18).toDecimal(), // staked tranche tokens
+          frozen: new TokenBalance(frozen, 18).toDecimal(),
+        }
+      })
+    )
+  }
+
+  function computeLiquidityRewards(args: [address: Account, poolId: string, trancheId: string]) {
+    const [address, poolId, trancheId] = args
+
+    const RewardDomain = {
+      Block: 'Block',
+      Liquidity: 'Liquidity',
+    }
+
+    return inst.getApi().pipe(
+      switchMap((api) =>
+        api.rpc.rewards.computeReward([RewardDomain.Liquidity, { Tranche: [poolId, trancheId] }], address)
+      ),
+      map((data) => {
+        console.log('data', data)
       })
     )
   }
@@ -2280,6 +2353,11 @@ export function getPoolsModule(inst: Centrifuge) {
     claimLiquidityRewards,
     collectAndStake,
     unStake,
+    getAccountStakes,
+    getRewardCurrencyGroup,
+    getLiquidityRewardsActiveEpochData,
+    getORMLTokens,
+    computeLiquidityRewards,
     createPool,
     updatePool,
     setMaxReserve,

@@ -50,7 +50,7 @@ export type InvestRedeemState = {
   minInitialInvestment: Decimal
   nativeBalance: Decimal
   poolCurrencyBalance: Decimal
-  poolCUrrencyBalanceWithPending: Decimal
+  poolCurrencyBalanceWithPending: Decimal
   trancheBalance: Decimal
   trancheBalanceWithPending: Decimal
   investmentValue: Decimal
