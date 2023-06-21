@@ -14,7 +14,7 @@ const getValidationSchema = (investorType: 'individual' | 'entity') =>
     dateOfBirth: date()
       .required('Please enter a date of birth')
       .min(new Date(1900, 0, 1), 'Date of birth must be after 1900')
-      .max(new Date(), 'Date of birth must be in the past'),
+      .max(new Date(new Date().getFullYear() - 18, new Date().getMonth()), 'You must be 18 or older'),
     countryOfCitizenship: string().required('Please select a country of citizenship'),
     countryOfResidency: string().required('Please select a country of residency'),
     isAccurate: boolean().oneOf([true], 'You must confirm that the information is accurate'),
