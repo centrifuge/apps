@@ -103,46 +103,57 @@ To set a pool into maintenance mode, add the pool id to the environment variable
 
 To make sure repository admins can control the full workflow of our apps to production safely this repository provides the following flow:
 
-- Opening a new PR will deploy cent-app will the PR number to app-prXXX.k-f.dev
+- Opening a new PR will deploy cent-app using the PR number to app-prXXX.k-f.dev - There should be a comment with these links in your PR after deployment. Forks do not trigger a PR deployment
 
-- Merging code into `main` will deploy cent-app to: app-dev.k-f.dev
+- Merging code into `main` will deploy buckets and functions pointing to: app-dev.k-f.dev
 
-- Demo deployments must be [manually triggered](https://github.com/centrifuge/apps/actions/workflows/demo-deploys.yml). They are not required for the release process
+- Demo deployments must be [manually triggered](https://github.com/centrifuge/apps/actions/workflows/demo-deploys.yml). They are not required for the release process.
 
-- Repository admins create tags prefixed with `rc-centrifuge-app-v` which will trigger a deployment to [app.altair.centrifuge.io](https://app.altair.centrifuge.io) and [app.staging.centrifuge.io](https://app.staging.centrifuge.io) (pre-release).
+- Catalyst deployments are triggered by pushing a tag containing `rc` in the tag name.
 
-- Once ready, you can edit the pre-release and untick the "pre-release" setting to fully publish a release, this will trigger a refresh of our code in app.centrifuge.io and app.ipfs.centrifuge.io (coming soon)
+- Altair and staging are triggered by creating a `pre-release` [on the Github repository](https://github.com/centrifuge/apps/releases/new) 
+
+- Centrifuge is deployed by editing [an existing release](https://github.com/centrifuge/apps/releases) and unmarking `pre-release` to fully release it, it will promote the staging artifacts to app.centrifuge.io 
 
 - Using the github release manager the pre-release can be promoted to production ([app.centrifuge.io](https://app.centrifuge.io)) using the artifacts generated in the pre-release. The production release must be approved by a reviewer.
 
-## How to release
+(Coming soon: release web-bundle to IPFS)
 
-### Step 1: Pre-Release to [staging](app.staging.centrifuge.io) and [altair](app.altair.centrifuge.io)
+You can follow your deployments by going to [the Actions section](https://github.com/centrifuge/apps/actions/workflows/centrifuge-app.yml) of the github repo
 
-Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releases/new).
+HackMD docs: https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view
 
-1. Create new tag `rc-centrifuge-app-vX.X` (e.g. `rc-centrifuge-app-v1.13`). Pre-releases that don't use the naming guidelines will not trigger any deployments.
+## More info
+
+More info on our release process rationale can be found in [our HackMD](https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view) (Private link, only k-f contributors)
+
+## Releasing to staging, Altair, and Prod/Centrifuge
+
+### 1. Create a release and mark it as a pre-Release 
+-> Deploys to pp.staging.centrifuge.io) and app.altair.centrifuge.io
+
+Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releases/new). Make sure to tick the `pre-release` option.
+
+1. Use an existing tag `rc` created to release Catalyst or create a new `centrifuge-app-vX.YY` tag on the release screen. Only tags starting with `rc*` or `centrifuge-app-v*` will meet the requirements for deployments
    - Major version: release includes new features/improvments
    - Minor version: release only includes bug fixes
 2. Name the release `CentrifugeApp vX.X`
 3. Generate the release notes
 4. Tick the `Set as a pre-release` checkbox
-5. Click `Publish release` to trigger the build
+5. Click `Publish release` to trigger the build. You can follow progress on the [Actions dashboard](https://github.com/centrifuge/apps/actions/workflows/staging-deploy.yml)
 6. Once the build is complete, a reviewer must approve the release to trigger a deployment
 
 When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
 
-### More info
+### 2. Create a production Release 
+-> Deploys to app.centrifuge.io
 
-More info on our release process rationale can be found in [our HackMD](https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view) (Private link, only k-f contributors)
-
-### Step 2: Release to [production](app.centrifuge.io)
-
-> Step 1 must be completed before starting with this step. The production deployment uses the artifacts generated in the pre-release.
+> The deployment to staging from point 1. needs to have been finished first. The production deployment uses the artifacts generated in the pre-release.
 
 Navigate to the [release summary](https://github.com/centrifuge/apps/releases) and select the pre-release you want to publish.
 
 1. Untick the `Set as a pre-release` checkbox and then tick the `Set as the latest release` checkbox
 2. Click `Update release` to trigger the prod deployment. As with the pre-release, the production release must be approved by a reviewer.
+3. Follow your prod deployment in the  [Actions dashboard](https://github.com/centrifuge/apps/actions/workflows/prod-deploy.yml)
 
 When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
