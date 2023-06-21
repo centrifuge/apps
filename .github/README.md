@@ -109,7 +109,7 @@ To make sure repository admins can control the full workflow of our apps to prod
 
 - Demo deployments must be [manually triggered](https://github.com/centrifuge/apps/actions/workflows/demo-deploys.yml). They are not required for the release process.
 
-- Catalyst deployments are triggered by pushing a tag containing `rc` in the tag name.
+- Catalyst deployments are triggered by pushing a tag containing `centrifuge-app-v*` in the tag name.
 
 - Altair and staging are triggered by creating a `pre-release` [on the Github repository](https://github.com/centrifuge/apps/releases/new) 
 
@@ -130,11 +130,11 @@ More info on our release process rationale can be found in [our HackMD](https://
 ## Releasing to staging, Altair, and Prod/Centrifuge
 
 ### 1. Create a release and mark it as a pre-Release 
--> Deploys to pp.staging.centrifuge.io) and app.altair.centrifuge.io
+-> Deploys to app.staging.centrifuge.io and app.altair.centrifuge.io
 
 Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releases/new). Make sure to tick the `pre-release` option.
 
-1. Use an existing tag `rc` created to release Catalyst or create a new `centrifuge-app-vX.YY` tag on the release screen. Only tags starting with `rc*` or `centrifuge-app-v*` will meet the requirements for deployments
+1. Create a new `centrifuge-app-vX.YY` tag on the release screen. Only tags starting with `centrifuge-app-v*` will meet the requirements for deployments:
    - Major version: release includes new features/improvments
    - Minor version: release only includes bug fixes
 2. Name the release `CentrifugeApp vX.X`
