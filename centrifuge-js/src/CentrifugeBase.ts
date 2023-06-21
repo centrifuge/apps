@@ -161,13 +161,18 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
 const parachainRuntimeApi: DefinitionsCall = {
   PoolsApi: [
     {
-      methods: parachainRpcMethods.pools,
+      methods: {
+        tranche_token_prices: parachainRpcMethods.pools.trancheTokenPrices,
+      },
       version: 1,
     },
   ],
   RewardsApi: [
     {
-      methods: parachainRpcMethods.rewards,
+      methods: {
+        compute_reward: parachainRpcMethods.rewards.computeReward,
+        list_currencies: parachainRpcMethods.rewards.listCurrencies,
+      },
       version: 1,
     },
   ],
