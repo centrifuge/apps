@@ -161,6 +161,8 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
 const parachainRuntimeApi: DefinitionsCall = {
   PoolsApi: [
     {
+      // Runtime API calls must be in snake case (as defined in rust)
+      // However, RPCs are usually in camel case
       methods: {
         tranche_token_prices: parachainRpcMethods.pools.trancheTokenPrices,
       },
@@ -169,6 +171,8 @@ const parachainRuntimeApi: DefinitionsCall = {
   ],
   RewardsApi: [
     {
+      // Runtime API calls must be in snake case (as defined in rust)
+      // However, RPCs are usually in camel case
       methods: {
         compute_reward: parachainRpcMethods.rewards.computeReward,
         list_currencies: parachainRpcMethods.rewards.listCurrencies,
