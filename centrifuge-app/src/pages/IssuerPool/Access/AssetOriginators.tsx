@@ -153,7 +153,7 @@ function AOForm({
           switchMap(([api, permissionTx]) => {
             const numProxyTypesPerHotWallet = 3
             const deposit = proxyDepositFactor
-              .mul(new BN((addedAddresses.length - removedAddresses.length) * numProxyTypesPerHotWallet))
+              .mul(new BN(Math.max(addedAddresses.length - removedAddresses.length, 0) * numProxyTypesPerHotWallet))
               .add(podOperator ? proxyDepositFactor : new BN(0))
               .add(collectionId ? collectionDeposit : new BN(0))
               // When setting up the AO, also add enough funds to create 100 loans

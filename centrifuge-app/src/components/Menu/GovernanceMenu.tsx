@@ -116,6 +116,10 @@ const links = [
     href: 'https://voting.opensquare.io/space/centrifuge',
     label: 'Off-chain voting',
   },
+  {
+    href: 'https://gov.centrifuge.io/',
+    label: 'Governance forum',
+  },
 ]
 
 function Link({ href, stacked, children }: { href: string; stacked: boolean; children: React.ReactNode }) {

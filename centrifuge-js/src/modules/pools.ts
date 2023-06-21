@@ -19,7 +19,7 @@ import { Dec } from '../utils/Decimal'
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
+type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin'
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
@@ -41,7 +41,7 @@ const AdminRoleBits = {
   Borrower: 0b00000010,
   PricingAdmin: 0b00000100,
   LiquidityAdmin: 0b00001000,
-  MemberListAdmin: 0b00010000,
+  InvestorAdmin: 0b00010000,
   LoanAdmin: 0b00100000,
 }
 
@@ -366,6 +366,8 @@ export type AccountTokenBalance = {
 export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
+  tokenName?: string
+  tokenSymbol?: string
 }
 
 export type DailyTrancheState = {
@@ -471,7 +473,8 @@ export type PoolMetadata = {
     listed: boolean
   }
   pod?: {
-    url: string | null
+    node: string | null
+    indexer?: string | null
   }
   tranches: Record<
     string,
@@ -596,7 +599,7 @@ export function getPoolsModule(inst: Centrifuge) {
   ) {
     if (options?.paymentInfo) {
       const hash = '0'.repeat(46)
-      return of({ uri: `ipfs://ipfs/${hash}`, ipfsHash: hash })
+      return of({ uri: `ipfs://${hash}`, ipfsHash: hash })
     }
 
     const tranchesById: PoolMetadata['tranches'] = {}
@@ -629,7 +632,7 @@ export function getPoolsModule(inst: Centrifuge) {
         listed: metadata.listed ?? true,
       },
       pod: {
-        url: metadata.podEndpoint ?? null,
+        node: metadata.podEndpoint ?? null,
       },
       tranches: tranchesById,
       adminMultisig: metadata.adminMultisig,
@@ -655,18 +658,28 @@ export function getPoolsModule(inst: Centrifuge) {
     const minEpochTime = minEpochTimeInput ? { newValue: minEpochTimeInput } : undefined
     const tranches = tranchesInput
       ? {
-          newValue: tranchesInput.map((t) => [
+          newValue: tranchesInput.map((t) =>
             t.interestRatePerSec
-              ? { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] }
-              : 'Residual',
-          ]),
+              ? { trancheType: { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] } }
+              : { trancheType: 'Residual', seniority: null }
+          ),
+        }
+      : undefined
+    const trancheMetadata = tranchesInput
+      ? {
+          newValue: tranchesInput,
         }
       : undefined
     const maxNavAge = maxNavAgeInput ? { newValue: maxNavAgeInput } : undefined
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.poolRegistry.update(poolId, { minEpochTime, tranches, maxNavAge })
+        const submittable = api.tx.poolRegistry.update(poolId, {
+          minEpochTime,
+          tranches,
+          maxNavAge,
+          trancheMetadata,
+        })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -689,7 +702,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const submittable = api.tx.utility.batchAll([
           ...add.map(([addr, role]) =>
             api.tx.permissions.add(
-              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
+              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
               addr,
               { Pool: poolId },
               { PoolRole: role }
@@ -697,7 +710,7 @@ export function getPoolsModule(inst: Centrifuge) {
           ),
           ...sortedRemove.map(([addr, role]) =>
             api.tx.permissions.remove(
-              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
+              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
               addr,
               { Pool: poolId },
               { PoolRole: role }
@@ -973,7 +986,7 @@ export function getPoolsModule(inst: Centrifuge) {
             const permissions = value.toJSON() as any
             roles.pools[poolId] = {
               roles: (
-                ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'LoanAdmin'] as const
+                ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin'] as const
               ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
               tranches: {},
             }
@@ -1028,7 +1041,7 @@ export function getPoolsModule(inst: Centrifuge) {
               const permissions = value.toJSON() as any
               roles[account] = {
                 roles: (
-                  ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'LoanAdmin'] as const
+                  ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin'] as const
                 ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
                 tranches: {},
               }
@@ -2298,10 +2311,12 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
 }
 
 function parseCurrencyKey(key: CurrencyKey): CurrencyKey {
-  if (typeof key === 'string' || 'ForeignAsset' in key) return key
-  return {
-    Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+  if (typeof key !== 'string' && 'Tranche' in key) {
+    return {
+      Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+    }
   }
+  return key
 }
 
 function looksLike(a: any, b: any): boolean {

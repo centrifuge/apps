@@ -130,8 +130,9 @@ export function getMultisigModule(inst: CentrifugeBase) {
           hash: (key.toHuman() as Array<string>)[1],
           info: data.toJSON() as unknown as PendingMultisigInfo,
         }))
-        return combineLatest(pending.map((p) => inst.getBlockByBlockNumber(p.info.when.height))).pipe(
-          map((signedBlocks) => {
+        // add in an empty observable so `combineLatest` always emits, even when `pending` is an empty array
+        return combineLatest([of(null), ...pending.map((p) => inst.getBlockByBlockNumber(p.info.when.height))]).pipe(
+          map(([, ...signedBlocks]) => {
             return signedBlocks
               .map((signedBlock, i) => {
                 const { info, hash } = pending[i]

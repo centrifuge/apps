@@ -464,11 +464,17 @@ export function WalletProvider({
   )
 }
 
-function findProxySequences(proxies: Record<string, Proxy[]>, acc: Proxy[][], curSeq: Proxy[], delegatee: string) {
-  if (!proxies[delegatee]) return
+function findProxySequences(
+  proxies: Record<string, Proxy[]>,
+  acc: Proxy[][],
+  curSeq: Proxy[],
+  delegatee: string,
+  depth = 0
+) {
+  if (!proxies[delegatee] || depth >= 3) return
   proxies[delegatee].forEach((nextProxy) => {
     const seq = [...curSeq, nextProxy]
     acc.push(seq)
-    findProxySequences(proxies, acc, seq, nextProxy.delegator)
+    findProxySequences(proxies, acc, seq, nextProxy.delegator, depth + 1)
   })
 }

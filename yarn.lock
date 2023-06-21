@@ -15903,6 +15903,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "faucet-api@workspace:faucet-api"
   dependencies:
+    "@centrifuge/centrifuge-js": "workspace:*"
     "@google-cloud/firestore": ^6.5.0
     "@google-cloud/functions-framework": ^3.1.2
     "@types/bn.js": ^5
@@ -15911,6 +15912,7 @@ __metadata:
     bn.js: ^5.2.1
     esbuild: ^0.15.8
     eslint: ^8.23.1
+    nodemon: ^2.0.22
     npm-run-all: ^4.1.5
     typescript: ^4.8.3
   languageName: unknown
@@ -21126,7 +21128,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^2.0.15, nodemon@npm:^2.0.20":
+"nodemon@npm:^2.0.15, nodemon@npm:^2.0.20, nodemon@npm:^2.0.22":
   version: 2.0.22
   resolution: "nodemon@npm:2.0.22"
   dependencies:

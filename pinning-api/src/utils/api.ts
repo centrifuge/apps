@@ -37,4 +37,4 @@ export const pinFile = async (fileReadStream: any) => {
   }) as Promise<{ data: { IpfsHash: string } }>
 }
 
-export const ipfsHashToURI = (hash: string) => `ipfs://ipfs/${hash}`
+export const ipfsHashToURI = (hash: string) => `ipfs://${hash}`

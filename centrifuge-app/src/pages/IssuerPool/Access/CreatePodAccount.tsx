@@ -37,7 +37,7 @@ export function CreatePodAccount({ poolId, address, onSuccess }: Props) {
     async () => {
       try {
         const { token } = await getAdminToken(cent)
-        return cent.pod.getAccount([podUrl!, token, addressToHex(address)])
+        return await cent.pod.getAccount([podUrl!, token, addressToHex(address)])
       } catch {
         return null
       }
