@@ -33,8 +33,8 @@ export function InvestRedeemState(props: InvestRedeemProps) {
   }
 
   return (
-    <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
-      <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
+    <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
+      <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
         <InvestRedeemInner
           {...props}
           trancheId={trancheId}
@@ -42,7 +42,7 @@ export function InvestRedeemState(props: InvestRedeemProps) {
           setView={setView}
           setTrancheId={handleSetTrancheId}
         />
-      </LiquidityRewardsProvider>
-    </InvestRedeemProvider>
+      </InvestRedeemProvider>
+    </LiquidityRewardsProvider>
   )
 }

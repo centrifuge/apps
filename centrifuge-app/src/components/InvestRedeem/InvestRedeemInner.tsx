@@ -40,6 +40,8 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const allowedTranches = useAllowedTranches(state.poolId)
+  const isTinlakePool = state.poolId.startsWith('0x')
+  const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
 
   const { data: metadata } = usePoolMetadata(pool)
   const { connectedType } = useWallet()
@@ -59,7 +61,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const canOnlyInvest =
     state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
-  if (allowedTranches.length) {
+  if (!isTinlakePool || availableTranches.length) {
     return (
       <Stack as={Card} gap={2} p={2}>
         <Stack alignItems="center">
@@ -80,12 +82,11 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
             <Divider borderColor="borderSecondary" />
           </Box>
         </Stack>
-
-        {allowedTranches.length > 1 && (
+        {availableTranches.length > 1 && (
           <Select
             name="token"
             placeholder="Select a token"
-            options={allowedTranches
+            options={availableTranches
               .map((tranche) => ({
                 label: tranche.currency.symbol ?? '',
                 value: tranche.id,
@@ -123,7 +124,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
 
         {connectedType && state.isDataLoading ? (
           <Spinner />
-        ) : state.isAllowedToInvest && metadata?.onboarding?.tranches?.[state.trancheId]?.openForOnboarding ? (
+        ) : state.isAllowedToInvest ? (
           <>
             {canOnlyInvest ? (
               <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
@@ -141,9 +142,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
                   ) : !state.order.payoutCurrencyAmount.isZero() ? (
                     <SuccessBanner title="Redemption successful" />
                   ) : null)}
-
                 <EpochBusy busy={state.isPoolBusy} />
-
                 <Stack p={1} gap={1}>
                   <Grid gap={1} columns={2} equalColumns>
                     <Button variant="secondary" small onClick={() => setView('redeem')} disabled={state.isPoolBusy}>

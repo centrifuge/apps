@@ -1,7 +1,9 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
 import { Dec } from '../../utils/Decimal'
 import { useTinlakePermissions } from '../../utils/tinlake/useTinlakePermissions'
 import { useAddress } from '../../utils/useAddress'
+import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 export function inputToNumber(num: number | Decimal | '') {
@@ -26,6 +28,8 @@ export function validateNumberInput(value: number | string | Decimal, min: numbe
 
 export function useAllowedTranches(poolId: string) {
   const address = useAddress()
+  const { connectedType } = useWallet()
+  const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
   const isTinlakePool = poolId.startsWith('0x')
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
   const pool = usePool(poolId)
@@ -45,11 +49,7 @@ export function useAllowedTranches(poolId: string) {
           return false
         }
       )
-    : [
-        ...Object.entries(metadata?.onboarding?.tranches ?? {})
-          .filter(([_, { openForOnboarding }]) => openForOnboarding)
-          .map(([tId]) => tId),
-      ].flat()
+    : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
 
   return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
 }
