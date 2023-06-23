@@ -2,6 +2,7 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
+import { Faucet } from '../../../components/Faucet'
 import { InvestRedeem } from '../../../components/InvestRedeem/InvestRedeem'
 import { ActionsRef } from '../../../components/InvestRedeem/types'
 import { IssuerSection } from '../../../components/IssuerSection'
@@ -39,7 +40,10 @@ export function PoolDetailOverviewTab() {
   return (
     <PageWithSideBar
       sidebar={
-        <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        <>
+          <Faucet />
+          <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        </>
       }
     >
       <PoolDetailHeader />

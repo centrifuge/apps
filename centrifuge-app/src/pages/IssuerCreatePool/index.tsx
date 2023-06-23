@@ -188,7 +188,7 @@ function CreatePoolForm() {
         args: [
           transferToMultisig: BN,
           aoProxy: string,
-          admin: string,
+          adminProxy: string,
           poolId: string,
           collectionId: string,
           tranches: TrancheInput[],
@@ -198,19 +198,20 @@ function CreatePoolForm() {
         ],
         options
       ) => {
-        const [transferToMultisig, aoProxy, admin, , , , , , { adminMultisig }] = args
+        const [transferToMultisig, aoProxy, adminProxy, , , , , , { adminMultisig }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
+        console.log('adminMultisig', multisigAddr)
         const poolArgs = args.slice(2) as any
         return combineLatest([cent.getApi(), cent.pools.createPool(poolArgs, { batch: true })]).pipe(
           switchMap(([api, poolSubmittable]) => {
-            const manager = multisigAddr ?? address
+            const adminProxyDelegate = multisigAddr ?? address
             const otherMultisigSigners =
               multisigAddr && sortAddresses(adminMultisig.signers.filter((addr) => !isSameAddress(addr, address!)))
-            const proxiedPoolCreate = api.tx.proxy.proxy(admin, undefined, poolSubmittable)
+            const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
             const submittable = api.tx.utility.batchAll(
               [
                 api.tx.balances.transfer(
-                  admin,
+                  adminProxy,
                   new CurrencyBalance(api.consts.proxy.proxyDepositFactor, chainDecimals).add(transferToMultisig)
                 ),
                 api.tx.balances.transfer(
@@ -219,12 +220,12 @@ function CreatePoolForm() {
                     new CurrencyBalance(api.consts.uniques.collectionDeposit, chainDecimals)
                   )
                 ),
-                manager !== address &&
+                adminProxyDelegate !== address &&
                   api.tx.proxy.proxy(
-                    admin,
+                    adminProxy,
                     undefined,
                     api.tx.utility.batchAll([
-                      api.tx.proxy.addProxy(manager, 'Any', 0),
+                      api.tx.proxy.addProxy(adminProxyDelegate, 'Any', 0),
                       api.tx.proxy.removeProxy(address, 'Any', 0),
                     ])
                   ),
@@ -232,7 +233,7 @@ function CreatePoolForm() {
                   aoProxy,
                   undefined,
                   api.tx.utility.batchAll([
-                    api.tx.proxy.addProxy(admin, 'Any', 0),
+                    api.tx.proxy.addProxy(adminProxy, 'Any', 0),
                     api.tx.proxy.removeProxy(address, 'Any', 0),
                   ])
                 ),

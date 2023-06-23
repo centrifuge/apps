@@ -136,30 +136,18 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
 
         // add 10% buffer to the transaction fee
         const submittable = api.tx.tokens.transfer({ Id: wallet.address }, 'Native', txFee.add(txFee.muln(1.1)))
-        const proxiedSubmittable = api.tx.proxy.proxy(process.env.MEMBERLIST_ADMIN_PURE_PROXY, undefined, submittable)
-        return proxiedSubmittable.signAndSend(signer)
+        return submittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
         if (events.length > 0) {
           events.forEach(({ event }) => {
-            const proxyResult = event.data[0]?.toHuman()
-            if (event.method === 'ProxyExecuted' && proxyResult === 'Ok') {
-              console.log(`Executed proxy for transfer`, { walletAddress: wallet.address, proxyResult })
+            const result = event.data[0]?.toHuman()
+            if (event.method === 'ProxyExecuted' && result === 'Ok') {
+              console.log(`Executed proxy for transfer`, { walletAddress: wallet.address, result })
             }
             if (event.method === 'ExtrinsicFailed') {
-              console.log(`Extrinsic for transfer failed`, { walletAddress: wallet.address, proxyResult })
+              console.log(`Extrinsic for transfer failed`, { walletAddress: wallet.address, result })
               throw new HttpError(400, 'Bad request: extrinsic failed')
-            }
-            if (
-              event.method === 'ProxyExecuted' &&
-              proxyResult &&
-              typeof proxyResult === 'object' &&
-              'Err' in proxyResult
-            ) {
-              console.log(`An error occured executing proxy to transfer native currency`, {
-                proxyResult: proxyResult.Err,
-              })
-              throw new HttpError(400, 'Bad request: proxy failed')
             }
           })
         }

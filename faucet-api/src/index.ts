@@ -1,3 +1,4 @@
+import Centrifuge, { CurrencyBalance, findCurrency } from '@centrifuge/centrifuge-js'
 import { Firestore } from '@google-cloud/firestore'
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import Keyring from '@polkadot/keyring'
@@ -5,17 +6,13 @@ import { cryptoWaitReady } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
+import { firstValueFrom } from 'rxjs'
 
 dotenv.config()
 
-const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
+const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.algol.cntrfg.com/public-ws'
 
-const ONE_AUSD = new BN(10).pow(new BN(12))
-const ONE_DEVEL = new BN(10).pow(new BN(18))
-const ONE_THOUSAND_DEVEL = ONE_DEVEL.muln(1000)
-const TEN_DEVEL = ONE_DEVEL.muln(10)
-const TEN_THOUSAND_AUSD = ONE_AUSD.muln(10000)
-const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
+const AUSD_KEY = { foreignAsset: 2 }
 
 const MAX_API_REQUESTS_PER_WALLET = 100
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
@@ -31,6 +28,10 @@ const centrifugeDomains = [
   /^(https:\/\/.*altair\.network)/,
   /^(https:\/\/.*k-f\.dev)/,
 ]
+
+const centrifuge = new Centrifuge({
+  centrifugeWsUrl: URL,
+})
 
 function hexToBN(value: string | number) {
   if (typeof value === 'number') return new BN(value)
@@ -57,22 +58,37 @@ async function faucet(req: Request, res: Response) {
       res.set('Access-Control-Max-Age', '3600')
       return res.status(204).send('')
     }
-    const { address } = req.query
+    const { address, poolId } = req.query
 
-    if (!address) {
+    if (!address || !poolId) {
       return res.status(400).send('Invalid address param')
     }
 
     const api = await ApiPromise.create({ provider: wsProvider })
 
+    const currencies = await firstValueFrom(centrifuge.pools.getCurrencies())
+    const pools = await firstValueFrom(centrifuge.pools.getPools())
+    const pool = pools.find((p) => p.id === poolId)
+    if (!pool) {
+      throw new Error('Pool not found')
+    }
+    const currency = findCurrency(currencies, pool.currency.key)
+    if (!currency) {
+      throw new Error('Currency not found')
+    }
+
     // check DEVEL and aUSD balances
-    const [nativeBalanceResponse, ausdBalanceResponse] = await Promise.all([
+    const [nativeBalanceResponse, currencyBalanceResponse] = await Promise.all([
       api.query.system.account(address),
-      api.query.ormlTokens.accounts(address, 'AUSD'),
+      api.query.ormlTokens.accounts(address, currency?.key ?? AUSD_KEY),
     ])
     const nativeBalance = hexToBN((nativeBalanceResponse?.toJSON() as any)?.data?.free || 0)
-    const ausdBalance = hexToBN((ausdBalanceResponse?.toJSON() as any)?.free || 0)
-    if (ausdBalance.gte(ONE_HUNDRED_AUSD) || nativeBalance.gte(TEN_DEVEL)) {
+    const currencyBalance = hexToBN((currencyBalanceResponse?.toJSON() as any)?.free || 0)
+
+    if (
+      currencyBalance.gte(CurrencyBalance.fromFloat(100, currency.decimals)) ||
+      nativeBalance.gte(CurrencyBalance.fromFloat(10, 18))
+    ) {
       api.disconnect()
       return res.status(400).send('Wallet already has sufficient aUSD/DEVEL balances')
     }
@@ -101,20 +117,26 @@ async function faucet(req: Request, res: Response) {
       .set({
         address,
         timestamp: Date.now(),
+        currency: currency?.key ?? AUSD_KEY,
         count: (doc.data()?.count ?? 0) + 1,
       })
 
     const txBatch = api.tx.utility.batchAll([
-      api.tx.tokens.transfer(address, { Native: true }, ONE_THOUSAND_DEVEL.toString()),
-      api.tx.tokens.transfer(address, { AUSD: true }, TEN_THOUSAND_AUSD.toString()),
+      api.tx.tokens.transfer(address, { Native: true }, CurrencyBalance.fromFloat(1000, 18).toString()),
+      api.tx.tokens.transfer(
+        address,
+        currency?.key ?? AUSD_KEY,
+        CurrencyBalance.fromFloat(10000, currency.decimals).toString()
+      ),
     ])
     await cryptoWaitReady()
     const keyring = new Keyring({ type: 'sr25519' })
     console.log('signing and sending tx')
-    const hash = URL.includes('demo')
-      ? await txBatch.signAndSend(keyring.addFromUri(process.env.SEED_HEX as string))
-      : await txBatch.signAndSend(keyring.addFromUri('//Alice'))
-    console.log('signed and sent tx')
+    const hash = URL.includes('development')
+      ? await txBatch.signAndSend(keyring.addFromUri('//Alice'))
+      : await txBatch.signAndSend(keyring.addFromUri(process.env.SEED_HEX as string))
+
+    console.log('signed and sent tx with hash', hash)
     api.disconnect()
     return res.status(200).json({ hash })
   } catch (e) {
