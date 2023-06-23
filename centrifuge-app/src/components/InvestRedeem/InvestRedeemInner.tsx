@@ -98,7 +98,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
         )}
 
         <Box>
-          {!stakes?.stake.isZero() && (
+          {!!stakes && !stakes?.stake.isZero() && (
             <Text>Staked amount: {formatBalance(stakes!.stake, state.trancheCurrency?.symbol)}</Text>
           )}
           {rewards && <Text>Rewards: {formatBalance(rewards, 'CFG', 2)}</Text>}

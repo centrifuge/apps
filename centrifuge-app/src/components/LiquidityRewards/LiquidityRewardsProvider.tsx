@@ -25,7 +25,7 @@ export function LiquidityRewardsProvider({ poolId, trancheId, children }: Liquid
   const stakeableAmount = trancheBalance.add(pendingRedeem).add(payoutTokenAmount).minus(stakedAmount)
 
   const canStake = !stakeableAmount.isZero()
-  const canUnstake = !stakes?.stake.isZero()
+  const canUnstake = !!stakes && !stakes?.stake.isZero()
   const canClaim = !!rewards && !rewards?.isZero()
 
   const claim = useCentrifugeTransaction('Claim CFG liquidity rewards', (cent) => cent.rewards.claimLiquidityRewards)
