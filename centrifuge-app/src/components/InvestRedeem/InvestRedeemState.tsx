@@ -1,6 +1,7 @@
 import { useControlledState } from '@centrifuge/fabric'
 import * as React from 'react'
 import { usePool } from '../../utils/usePools'
+import { LiquidityRewardsProvider } from '../LiquidityRewards/LiquidityRewardsProvider'
 import { InvestRedeemInner } from './InvestRedeemInner'
 import { InvestRedeemProvider } from './InvestRedeemProvider'
 import { InvestRedeemProps } from './types'
@@ -33,13 +34,15 @@ export function InvestRedeemState(props: InvestRedeemProps) {
 
   return (
     <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
-      <InvestRedeemInner
-        {...props}
-        trancheId={trancheId}
-        view={view}
-        setView={setView}
-        setTrancheId={handleSetTrancheId}
-      />
+      <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
+        <InvestRedeemInner
+          {...props}
+          trancheId={trancheId}
+          view={view}
+          setView={setView}
+          setTrancheId={handleSetTrancheId}
+        />
+      </LiquidityRewardsProvider>
     </InvestRedeemProvider>
   )
 }

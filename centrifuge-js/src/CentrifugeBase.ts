@@ -2,7 +2,7 @@ import type { JsonRpcSigner } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
-import { DefinitionRpc, ISubmittableResult, Signer } from '@polkadot/types/types'
+import { DefinitionRpc, DefinitionsCall, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
@@ -62,6 +62,8 @@ export type PaymentInfo = {
   weight: number
 }
 
+export type RewardDomain = 'Block' | 'Liquidity'
+
 const defaultConfig: Config = {
   network: 'centrifuge',
   centrifugeWsUrl: 'wss://fullnode.parachain.centrifuge.io',
@@ -93,6 +95,9 @@ const parachainTypes = {
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
   },
+  StakingCurrency: {
+    _enum: ['BlockRewards'],
+  },
   CurrencyId: {
     _enum: {
       Native: 'Native',
@@ -100,6 +105,7 @@ const parachainTypes = {
       KSM: 'KSM',
       AUSD: 'AUSD',
       ForeignAsset: 'u32',
+      Staking: 'StakingCurrency',
     },
   },
 }
@@ -119,7 +125,8 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
   },
   rewards: {
     listCurrencies: {
-      description: 'List reward currencies',
+      description:
+        'List all reward currencies for the given domain and account. These currencies could be used as keys for the computeReward call',
       params: [
         {
           name: 'domain',
@@ -133,7 +140,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
       type: 'Vec<CurrencyId>',
     },
     computeReward: {
-      description: 'Compute reward',
+      description: 'Compute the claimable reward for the given triplet of domain, currency and account',
       params: [
         {
           name: 'domain',
@@ -148,9 +155,27 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
           type: 'AccountId',
         },
       ],
-      type: 'Option<u128>',
+      type: 'Option<Balance>',
     },
   },
+}
+
+const parachainRuntimeApi: DefinitionsCall = {
+  PoolsApi: [
+    {
+      methods: parachainRpcMethods.pools,
+      version: 1,
+    },
+  ],
+  RewardsApi: [
+    {
+      methods: {
+        compute_reward: parachainRpcMethods.rewards.computeReward,
+        list_currencies: parachainRpcMethods.rewards.listCurrencies,
+      },
+      version: 1,
+    },
+  ],
 }
 
 type Events = ISubmittableResult['events']
@@ -395,11 +420,11 @@ export class CentrifugeBase {
   }
 
   getApi() {
-    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods)
+    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi)
   }
 
   getApiPromise() {
-    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods))
+    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi))
   }
 
   getRelayChainApi() {

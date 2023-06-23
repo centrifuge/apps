@@ -15,12 +15,12 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { useLiquidityRewards } from '../LiquidityRewards/LiquidityRewardsContext'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { EpochBusy } from './EpochBusy'
 import { InvestForm } from './InvestForm'
 import { useInvestRedeem } from './InvestRedeemProvider'
-import { LiquidityRewards } from './LiquidityRewards'
 import { OnboardingButton } from './OnboardingButton'
 import { RedeemForm } from './RedeemForm'
 import { SuccessBanner } from './SuccessBanner'
@@ -44,6 +44,11 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const { data: metadata } = usePoolMetadata(pool)
   const { connectedType } = useWallet()
 
+  const {
+    state: { rewards, stakes, canStake, canUnstake, canClaim, isLoading },
+    actions: { stake, unStake, claim },
+  } = useLiquidityRewards()
+
   let actualView = view
   if (state.order) {
     if (!state.order.remainingInvestCurrency.isZero()) actualView = 'invest'
@@ -53,12 +58,6 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
   const canOnlyInvest =
     state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
-
-  // console.log('pendingRedeem', pendingRedeem.toString())
-  // console.log('canOnlyInvest', canOnlyInvest)
-  // console.log('payoutTokenAmount', state?.order?.payoutTokenAmount.toString())
-  // console.log('trancheBalanceWithPending', state?.trancheBalanceWithPending.toString())
-  // console.log('-----------')
 
   if (allowedTranches.length) {
     return (
@@ -97,7 +96,30 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
           />
         )}
 
-        <LiquidityRewards />
+        <Box>
+          {!stakes?.stake.isZero() && (
+            <Text>Staked amount: {formatBalance(stakes!.stake, state.trancheCurrency?.symbol)}</Text>
+          )}
+          {rewards && <Text>Rewards: {formatBalance(rewards, 'CFG', 2)}</Text>}
+
+          {canStake && (
+            <Button onClick={stake} loading={isLoading}>
+              stake
+            </Button>
+          )}
+
+          {canUnstake && (
+            <Button onClick={() => unStake()} loading={isLoading}>
+              unstake
+            </Button>
+          )}
+
+          {canClaim && (
+            <Button onClick={claim} loading={isLoading}>
+              Claim
+            </Button>
+          )}
+        </Box>
 
         {connectedType && state.isDataLoading ? (
           <Spinner />
@@ -119,8 +141,6 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
                   ) : !state.order.payoutCurrencyAmount.isZero() ? (
                     <SuccessBanner title="Redemption successful" />
                   ) : null)}
-
-                {/* <LiquidityRewards /> */}
 
                 <EpochBusy busy={state.isPoolBusy} />
 
