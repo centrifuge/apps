@@ -54,23 +54,32 @@ export type PoolRoles = {
   roles: AdminRole[]
   tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
-type LoanInfoInputValuation =
+type LoanInfoInput =
   | {
       valuationMethod: 'outstandingDebt'
+      maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+      value: BN
+      maturityDate: Date
+      advanceRate: BN
+      interestRate: BN
+    }
+  | {
+      valuationMethod: 'oracle'
+      maxBorrowQuantity: string
+      Isin: string
+      maturityDate: Date
     }
   | {
       valuationMethod: 'discountedCashFlow'
       probabilityOfDefault: BN
       lossGivenDefault: BN
       discountRate: BN
+      maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+      value: BN
+      maturityDate: Date
+      advanceRate: BN
+      interestRate: BN
     }
-export type LoanInfoInput = LoanInfoInputValuation & {
-  maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
-  value: BN
-  maturityDate: Date
-  advanceRate: BN
-  interestRate: BN
-}
 export type LoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
@@ -82,29 +91,42 @@ export type LoanInfoData = {
   /// Collateral used for this loan
   collateral: [string, string]
 
-  /// Value of the collateral used for this loan
-  collateralValue: string
-
-  /// Valuation method of this loan
-  valuationMethod:
-    | { outstandingDebt: null }
+  pricing:
     | {
-        discountedCashFlow: {
-          probabilityOfDefault: string
-          lossGivenDefault: string
-          discountRate: string
+        external: {
+          priceId: {
+            Isin: string
+          }
+          maxBorrowQuantity: string
+        }
+      }
+    | {
+        internal: {
+          /// Valuation method of this loan
+          valuationMethod:
+            | { outstandingDebt: null }
+            | {
+                discountedCashFlow: {
+                  probabilityOfDefault: string
+                  lossGivenDefault: string
+                  discountRate: string
+                }
+              }
+          /// Value of the collateral used for this loan
+          collateralValue: string
+          /// Interest rate per second with any penalty applied
+          interestRate: string
+          maxBorrowAmount:
+            | { upToTotalBorrowed: { advanceRate: string } }
+            | { upToOutstandingDebt: { advanceRate: string } }
         }
       }
 
   /// Restrictions of this loan
   restrictions: {
-    maxBorrowAmount: { upToTotalBorrowed: { advanceRate: string } } | { upToOutstandingDebt: { advanceRate: string } }
-    borrows: 'WrittenOff'
+    borrows: 'NotWrittenOff'
     repayments: 'None'
   }
-
-  /// Interest rate per second with any penalty applied
-  interestRate: string
 }
 
 type TrancheDetailsData = {
@@ -261,15 +283,17 @@ type ClosedLoanData = {
 }
 
 export type PricingInfo = {
-  valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
-  maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
-  value: CurrencyBalance
+  valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle'
+  maxBorrowAmount?: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+  value?: CurrencyBalance
   maturityDate: string
-  advanceRate: Rate
-  interestRate: Rate
+  advanceRate?: Rate
+  interestRate?: Rate
   probabilityOfDefault?: Rate
   lossGivenDefault?: Rate
   discountRate?: Rate
+  maxBorrowQuantity?: string
+  Isin?: string
 }
 
 type TinlakePricingInfo = {
@@ -1078,7 +1102,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const info: LoanInfoData = {
       /// Specify the repayments schedule of the loan
       schedule: {
-        maturity: { fixed: infoInput.maturityDate.getTime() / 1000 },
+        maturity: { fixed: Math.round(infoInput.maturityDate.getTime() / 1000) },
         interestPayments: 'None',
         payDownSchedule: 'None',
       },
@@ -1086,30 +1110,41 @@ export function getPoolsModule(inst: Centrifuge) {
       /// Collateral used for this loan
       collateral: [collectionId, nftId],
 
-      /// Value of the collateral used for this loan
-      collateralValue: infoInput.value.toString(),
-
-      /// Valuation method of this loan
-      valuationMethod:
-        infoInput.valuationMethod === 'outstandingDebt'
-          ? { outstandingDebt: null }
+      pricing:
+        infoInput.valuationMethod === 'oracle'
+          ? {
+              external: {
+                priceId: {
+                  Isin: infoInput.Isin,
+                },
+                maxBorrowQuantity: infoInput.maxBorrowQuantity,
+              },
+            }
           : {
-              discountedCashFlow: {
-                probabilityOfDefault: infoInput.probabilityOfDefault.toString(),
-                lossGivenDefault: infoInput.lossGivenDefault.toString(),
-                discountRate: infoInput.discountRate.toString(),
+              internal: {
+                valuationMethod:
+                  infoInput.valuationMethod === 'outstandingDebt'
+                    ? { outstandingDebt: null }
+                    : {
+                        discountedCashFlow: {
+                          probabilityOfDefault: infoInput.probabilityOfDefault.toString(),
+                          lossGivenDefault: infoInput.lossGivenDefault.toString(),
+                          discountRate: infoInput.discountRate.toString(),
+                        },
+                      },
+                /// Value of the collateral used for this loan
+                collateralValue: infoInput.value.toString(),
+                /// Interest rate per second with any penalty applied
+                interestRate: infoInput.interestRate.toString(),
+                maxBorrowAmount: {
+                  [infoInput.maxBorrowAmount]: { advanceRate: infoInput.advanceRate.toString() },
+                } as any,
               },
             },
-
-      /// Restrictions of this loan
       restrictions: {
-        maxBorrowAmount: { [infoInput.maxBorrowAmount]: { advanceRate: infoInput.advanceRate.toString() } } as any,
-        borrows: 'WrittenOff',
+        borrows: 'NotWrittenOff',
         repayments: 'None',
       },
-
-      /// Interest rate per second with any penalty applied
-      interestRate: infoInput.interestRate.toString(),
     }
 
     return $api.pipe(
@@ -1943,27 +1978,39 @@ export function getPoolsModule(inst: Centrifuge) {
           const { info } = loan
           const [collectionId, nftId] = info.collateral
           const discount =
-            'discountedCashFlow' in info.valuationMethod ? info.valuationMethod.discountedCashFlow : undefined
+            info.pricing.internal && 'discountedCashFlow' in info.pricing.internal.valuationMethod
+              ? info.pricing.internal.valuationMethod.discountedCashFlow
+              : undefined
           return {
             asset: {
               collectionId: collectionId.toString(),
               nftId: hexToBN(nftId).toString(),
             },
-            pricing: {
-              valuationMethod:
-                'outstandingDebt' in info.valuationMethod ? 'outstandingDebt' : ('discountedCashFlow' as any),
-              maxBorrowAmount: Object.keys(info.restrictions.maxBorrowAmount)[0] as any,
-              value: new CurrencyBalance(hexToBN(info.collateralValue), currency.decimals),
-              maturityDate: new Date(loan.info.schedule.maturity.fixed * 1000).toISOString(),
-              advanceRate: new Rate(hexToBN(Object.values(info.restrictions.maxBorrowAmount)[0].advanceRate)),
-              probabilityOfDefault: discount?.probabilityOfDefault
-                ? new Rate(hexToBN(discount.probabilityOfDefault))
-                : undefined,
-              lossGivenDefault: discount?.lossGivenDefault ? new Rate(hexToBN(discount.lossGivenDefault)) : undefined,
-              discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
-
-              interestRate: new Rate(hexToBN(loan.info.interestRate)),
-            },
+            pricing: info.pricing.external
+              ? {
+                  valuationMethod: 'oracle',
+                  maxBorrowQuantity: info.pricing.external.maxBorrowQuantity,
+                  Isin: info.pricing.external.Isin,
+                  maturityDate: new Date(loan.info.schedule.maturity.fixed * 1000).toISOString(),
+                }
+              : {
+                  valuationMethod:
+                    'outstandingDebt' in info.pricing.internal.valuationMethod
+                      ? 'outstandingDebt'
+                      : ('discountedCashFlow' as any),
+                  maxBorrowAmount: Object.keys(info.pricing.internal.maxBorrowAmount)[0] as any,
+                  value: new CurrencyBalance(hexToBN(info.pricing.internal.collateralValue), currency.decimals),
+                  advanceRate: new Rate(hexToBN(Object.values(info.pricing.internal.maxBorrowAmount)[0].advanceRate)),
+                  probabilityOfDefault: discount?.probabilityOfDefault
+                    ? new Rate(hexToBN(discount.probabilityOfDefault))
+                    : undefined,
+                  lossGivenDefault: discount?.lossGivenDefault
+                    ? new Rate(hexToBN(discount.lossGivenDefault))
+                    : undefined,
+                  discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
+                  interestRate: new Rate(hexToBN(loan.info.pricing.internal.interestRate)),
+                  maturityDate: new Date(loan.info.schedule.maturity.fixed * 1000).toISOString(),
+                },
           }
         }
 

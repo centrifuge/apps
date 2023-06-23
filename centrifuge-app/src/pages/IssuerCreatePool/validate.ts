@@ -56,6 +56,8 @@ export const validate = {
   probabilityOfDefault: combine(required(), nonNegativeNumber(), max(100)),
   discountRate: combine(required(), nonNegativeNumber(), max(100)),
   lossGivenDefault: combine(required(), nonNegativeNumber(), max(100)),
+  maxBorrowQuantity: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
+  Isin: combine(required(), minLength(12), maxLength(12)),
 
   // write-off groups
   days: combine(required(), integer(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),

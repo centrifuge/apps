@@ -4,6 +4,10 @@ import { formatDate } from '../../utils/date'
 import { formatPercentage } from '../../utils/formatting'
 
 export function PricingValues({ loan: { pricing } }: { loan: Loan | TinlakeLoan }) {
+  if (pricing.valuationMethod === 'oracle') {
+    return <>Oracle</>
+  }
+
   return (
     <>
       {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
