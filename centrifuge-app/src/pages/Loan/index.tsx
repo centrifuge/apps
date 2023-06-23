@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -107,14 +107,14 @@ const Loan: React.FC = () => {
         <>
           <PageSummary
             data={[
-              {
-                label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
-                value: isTinlakePool
-                  ? (loan as TinlakeLoan).riskGroup
-                  : (loan as LoanType).pricing.value
-                  ? formatBalance((loan as LoanType).pricing.value, pool?.currency.symbol)
-                  : 'n/a',
-              },
+              // {
+              //   label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
+              //   value: isTinlakePool
+              //     ? (loan as TinlakeLoan).riskGroup
+              //     : (loan as LoanType).pricing.value
+              //     ? formatBalance((loan as LoanType).pricing.value, pool?.currency.symbol)
+              //     : 'n/a',
+              // },
               {
                 label: <Tooltips type="availableFinancing" />,
                 value: formatBalance(availableFinancing, pool?.currency.symbol),

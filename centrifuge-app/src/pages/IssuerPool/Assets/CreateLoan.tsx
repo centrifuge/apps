@@ -57,7 +57,7 @@ export type CreateLoanFormValues = {
   assetName: string
   attributes: Record<string, string | number>
   pricing: {
-    valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
+    valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle'
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
     value: number | ''
     maturityDate: string
@@ -66,6 +66,8 @@ export type CreateLoanFormValues = {
     probabilityOfDefault: number | ''
     lossGivenDefault: number | ''
     discountRate: number | ''
+    maxBorrowQuantity: string
+    Isin: string
   }
 }
 
@@ -172,7 +174,7 @@ function IssuerCreateLoan() {
   const { assetOriginators } = usePoolAccess(pid)
   const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
     ?.collateralCollections[0]?.id
-  const balances = useBalances(account.actingAddress)
+  const balances = useBalances(account?.actingAddress)
 
   const { isAuthed, token } = usePodAuth(pid)
 
@@ -216,22 +218,32 @@ function IssuerCreateLoan() {
         probabilityOfDefault: '',
         lossGivenDefault: '',
         discountRate: '',
+        maxBorrowQuantity: '',
+        Isin: '',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
       const { decimals } = pool.currency
-      const pricingInfo = {
-        valuationMethod: values.pricing.valuationMethod,
-        maxBorrowAmount: values.pricing.maxBorrowAmount,
-        value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
-        maturityDate: new Date(values.pricing.maturityDate),
-        advanceRate: Rate.fromPercent(values.pricing.advanceRate),
-        interestRate: Rate.fromPercent(values.pricing.interestRate),
-        probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
-        lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
-        discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
-      } as const
+      const pricingInfo =
+        values.pricing.valuationMethod === 'oracle'
+          ? {
+              valuationMethod: values.pricing.valuationMethod,
+              maxBorrowQuantity: values.pricing.maxBorrowQuantity,
+              Isin: values.pricing.Isin || '',
+              maturityDate: new Date(values.pricing.maturityDate),
+            }
+          : {
+              valuationMethod: values.pricing.valuationMethod,
+              maxBorrowAmount: values.pricing.maxBorrowAmount,
+              value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+              maturityDate: new Date(values.pricing.maturityDate),
+              advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+              interestRate: Rate.fromPercent(values.pricing.interestRate),
+              probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
+              lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
+              discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
+            }
 
       const txId = Math.random().toString(36).substring(2)
 
