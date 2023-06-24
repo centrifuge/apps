@@ -4,12 +4,18 @@ import { formatDate } from '../../utils/date'
 import { formatPercentage } from '../../utils/formatting'
 
 export function PricingValues({ loan: { pricing } }: { loan: Loan | TinlakeLoan }) {
-  if (pricing.valuationMethod === 'oracle') {
-    return <>Oracle</>
-  }
-
   return (
     <>
+      <LabelValueStack
+        label="Valuation method"
+        value={
+          pricing.valuationMethod === 'oracle'
+            ? 'Oracle'
+            : pricing.valuationMethod === 'discountedCashflow'
+            ? 'Discounted cashflow'
+            : 'Outstanding debt'
+        }
+      />
       {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
       {(pricing as PricingInfo).advanceRate && (
         <LabelValueStack
@@ -19,10 +25,12 @@ export function PricingValues({ loan: { pricing } }: { loan: Loan | TinlakeLoan 
           }
         />
       )}
-      <LabelValueStack
-        label="Financing fee"
-        value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
-      />
+      {(pricing as PricingInfo).interestRate && (
+        <LabelValueStack
+          label="Financing fee"
+          value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
+        />
+      )}
       {(pricing as PricingInfo).valuationMethod === 'discountedCashFlow' && (
         <>
           <LabelValueStack
@@ -58,6 +66,13 @@ export function PricingValues({ loan: { pricing } }: { loan: Loan | TinlakeLoan 
               formatPercentage(((pricing as PricingInfo).discountRate as Rate).toPercent())
             }
           />
+        </>
+      )}
+
+      {(pricing as PricingInfo).valuationMethod === 'oracle' && (
+        <>
+          <LabelValueStack label="Max quantity" value={(pricing as PricingInfo).maxBorrowQuantity} />
+          <LabelValueStack label="ISIN" value={(pricing as PricingInfo).Isin} />
         </>
       )}
     </>

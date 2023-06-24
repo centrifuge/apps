@@ -32,7 +32,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
         <>
           <FieldWithErrorMessage
             as={NumberInput}
-            label={<Tooltips type="financingFee" variant="secondary" label="Max borrow quantity*" />}
+            label={<Tooltips type="financingFee" variant="secondary" label="Max quantity*" />}
             placeholder="0"
             name="pricing.maxBorrowQuantity"
             validate={validate.maxBorrowQuantity}
