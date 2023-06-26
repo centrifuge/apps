@@ -1,65 +1,62 @@
-import { Loan, PricingInfo, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatDate } from '../../utils/date'
 import { formatPercentage } from '../../utils/formatting'
 
 export function PricingValues({ loan: { pricing } }: { loan: Loan | TinlakeLoan }) {
-  if (pricing.valuationMethod === 'oracle') {
-    return <>Oracle</>
+  if ('valuationMethod' in pricing && pricing.valuationMethod === 'oracle') {
+    return (
+      <>
+        <LabelValueStack label="Valuation Method" value="Oracle" />
+        <LabelValueStack label="Max quantity" value={pricing.maxBorrowQuantity} />
+        <LabelValueStack label="ISIN" value={pricing.Isin} />
+      </>
+    )
   }
 
-  return (
-    <>
-      {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
-      {(pricing as PricingInfo).advanceRate && (
-        <LabelValueStack
-          label="Advance rate"
-          value={
-            (pricing as PricingInfo).advanceRate && formatPercentage((pricing as PricingInfo).advanceRate.toPercent())
-          }
-        />
-      )}
-      <LabelValueStack
-        label="Financing fee"
-        value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
-      />
-      {(pricing as PricingInfo).valuationMethod === 'discountedCashFlow' && (
-        <>
-          <LabelValueStack
-            label="Probability of default"
-            value={
-              (pricing as PricingInfo).probabilityOfDefault &&
-              formatPercentage(((pricing as PricingInfo).probabilityOfDefault as Rate).toPercent())
-            }
-          />
-          <LabelValueStack
-            label="Loss given default"
-            value={
-              (pricing as PricingInfo).lossGivenDefault &&
-              formatPercentage(((pricing as PricingInfo).lossGivenDefault as Rate).toPercent())
-            }
-          />
-          <LabelValueStack
-            label="Expected loss"
-            value={
-              (pricing as PricingInfo).lossGivenDefault &&
-              (pricing as PricingInfo).probabilityOfDefault &&
-              formatPercentage(
-                ((pricing as PricingInfo).lossGivenDefault as Rate).toFloat() *
-                  ((pricing as PricingInfo).probabilityOfDefault as Rate).toFloat() *
-                  100
-              )
-            }
-          />
-          <LabelValueStack
-            label="Discount rate"
-            value={
-              (pricing as PricingInfo).discountRate &&
-              formatPercentage(((pricing as PricingInfo).discountRate as Rate).toPercent())
-            }
-          />
-        </>
-      )}
-    </>
+  if (
+    'valuationMethod' in pricing &&
+    (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
   )
+    return (
+      <>
+        {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
+        {pricing.advanceRate && (
+          <LabelValueStack
+            label="Advance rate"
+            value={pricing.advanceRate && formatPercentage(pricing.advanceRate.toPercent())}
+          />
+        )}
+        <LabelValueStack
+          label="Financing fee"
+          value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
+        />
+        {pricing.valuationMethod === 'discountedCashFlow' && (
+          <>
+            <LabelValueStack
+              label="Probability of default"
+              value={pricing.probabilityOfDefault && formatPercentage(pricing.probabilityOfDefault.toPercent())}
+            />
+            <LabelValueStack
+              label="Loss given default"
+              value={pricing.lossGivenDefault && formatPercentage(pricing.lossGivenDefault.toPercent())}
+            />
+            <LabelValueStack
+              label="Expected loss"
+              value={
+                pricing.lossGivenDefault &&
+                pricing.probabilityOfDefault &&
+                formatPercentage(pricing.lossGivenDefault.toFloat() * pricing.probabilityOfDefault.toFloat() * 100)
+              }
+            />
+            <LabelValueStack
+              label="Discount rate"
+              value={pricing.discountRate && formatPercentage(pricing.discountRate.toPercent())}
+            />
+          </>
+        )}
+      </>
+    )
+
+  return null
 }

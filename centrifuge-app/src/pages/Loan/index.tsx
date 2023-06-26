@@ -1,4 +1,4 @@
-import { CurrencyBalance, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -97,8 +97,8 @@ const Loan: React.FC = () => {
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
             {poolMetadata?.pool?.asset.class} asset by{' '}
-            {isTinlakePool && (loan as TinlakeLoan)?.owner
-              ? truncate((loan as TinlakeLoan).owner)
+            {isTinlakePool && loan && 'owner' in loan
+              ? truncate(loan.owner)
               : nft?.owner && <Identity clickToCopy address={nft?.owner} />}
           </TextWithPlaceholder>
         }
@@ -107,14 +107,24 @@ const Loan: React.FC = () => {
         <>
           <PageSummary
             data={[
-              // {
-              //   label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
-              //   value: isTinlakePool
-              //     ? (loan as TinlakeLoan).riskGroup
-              //     : (loan as LoanType).pricing.value
-              //     ? formatBalance((loan as LoanType).pricing.value, pool?.currency.symbol)
-              //     : 'n/a',
-              // },
+              {
+                label: (
+                  <Tooltips
+                    type={
+                      isTinlakePool
+                        ? 'riskGroup'
+                        : 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                        ? 'assetType'
+                        : 'collateralValue'
+                    }
+                  />
+                ),
+                value: isTinlakePool
+                  ? 'riskGroup' in loan
+                  : 'value' in loan.pricing
+                  ? formatBalance(loan.pricing.value, pool?.currency.symbol)
+                  : 'TBD',
+              },
               {
                 label: <Tooltips type="availableFinancing" />,
                 value: formatBalance(availableFinancing, pool?.currency.symbol),
@@ -126,11 +136,13 @@ const Loan: React.FC = () => {
             ]}
           />
 
-          {!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && (loan as TinlakeLoan).dateClosed) ? (
+          {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&
+          'valuationMethod' in loan.pricing &&
+          loan.pricing.valuationMethod !== 'oracle' ? (
             <PageSection title="Financing & repayment cash flow">
               <Shelf gap={3} flexWrap="wrap">
-                {isTinlakePool && loan.status === 'Closed' && (loan as TinlakeLoan).dateClosed ? (
-                  <LabelValueStack label="Date closed" value={formatDate((loan as TinlakeLoan).dateClosed)} />
+                {isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan ? (
+                  <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
                 ) : (
                   <FinancingRepayment
                     drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
@@ -174,7 +186,7 @@ const Loan: React.FC = () => {
           })}
 
           <PageSection title="NFT">
-            {isTinlakePool && (loan as TinlakeLoan).owner ? (
+            {isTinlakePool && 'owner' in loan ? (
               <Shelf gap={6}>
                 <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
                 <LabelValueStack
@@ -186,9 +198,9 @@ const Loan: React.FC = () => {
                         wordBreak: 'break-word',
                         whiteSpace: 'normal',
                       }}
-                      onClick={() => copyToClipboard((loan as TinlakeLoan).owner || '')}
+                      onClick={() => copyToClipboard(loan.owner || '')}
                     >
-                      {truncate((loan as TinlakeLoan).owner)}
+                      {truncate(loan.owner)}
                     </Text>
                   }
                 />
