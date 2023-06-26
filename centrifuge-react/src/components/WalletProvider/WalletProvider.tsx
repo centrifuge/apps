@@ -3,7 +3,7 @@ import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { Web3ReactState } from '@web3-react/types'
-import { WalletConnect } from '@web3-react/walletconnect'
+import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
@@ -84,6 +84,7 @@ type WalletProviderProps = {
   evmAdditionalConnectors?: EvmConnectorMeta[]
   subscanUrl?: string
   showAdvancedAccounts?: boolean
+  walletConnectId?: string
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
@@ -96,12 +97,17 @@ export function WalletProvider({
     },
   },
   evmAdditionalConnectors,
+  walletConnectId,
   subscanUrl,
   showAdvancedAccounts,
 }: WalletProviderProps) {
   if (!evmChains[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
   const evmConnectors =
-    cachedEvmConnectors || (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), evmAdditionalConnectors))
+    cachedEvmConnectors ||
+    (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), {
+      additionalConnectors: evmAdditionalConnectors,
+      walletConnectId,
+    }))
 
   const [state, dispatch] = useWalletStateInternal(evmConnectors)
 
@@ -224,7 +230,7 @@ export function WalletProvider({
     const { connector } = wallet
     try {
       const accounts = await setPendingConnect(wallet, async () => {
-        await (connector instanceof WalletConnect
+        await (connector instanceof WalletConnectV2
           ? connector.activate(chainId)
           : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))
         return getStore(wallet.connector).getState().accounts

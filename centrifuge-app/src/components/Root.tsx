@@ -121,6 +121,7 @@ export function Root() {
               evmChains={evmChains}
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
               showAdvancedAccounts={showAdvancedAccounts}
+              walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
             >
               <OnboardingAuthProvider>
                 <OnboardingProvider>
