@@ -15,12 +15,14 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { ClaimLiquidityRewards } from '../LiquidityRewards/ClaimLiquidityRewards'
 import { useLiquidityRewards } from '../LiquidityRewards/LiquidityRewardsContext'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { EpochBusy } from './EpochBusy'
 import { InvestForm } from './InvestForm'
 import { useInvestRedeem } from './InvestRedeemProvider'
+import { LightButton } from './LightButton'
 import { OnboardingButton } from './OnboardingButton'
 import { RedeemForm } from './RedeemForm'
 import { SuccessBanner } from './SuccessBanner'
@@ -47,8 +49,8 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
   const { connectedType } = useWallet()
 
   const {
-    state: { rewards, stakes, canStake, canUnstake, canClaim, isLoading },
-    actions: { stake, unStake, claim },
+    state: { stakes, canStake, canUnstake, isLoading },
+    actions: { stake, unStake },
   } = useLiquidityRewards()
 
   let actualView = view
@@ -101,23 +103,10 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
           {!!stakes && !stakes?.stake.isZero() && (
             <Text>Staked amount: {formatBalance(stakes!.stake, state.trancheCurrency?.symbol)}</Text>
           )}
-          {rewards && <Text>Rewards: {formatBalance(rewards, 'CFG', 2)}</Text>}
-
-          {canStake && (
-            <Button onClick={stake} loading={isLoading}>
-              stake
-            </Button>
-          )}
 
           {canUnstake && (
             <Button onClick={() => unStake()} loading={isLoading}>
               unstake
-            </Button>
-          )}
-
-          {canClaim && (
-            <Button onClick={claim} loading={isLoading}>
-              Claim
             </Button>
           )}
         </Box>
@@ -137,8 +126,18 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
                       body={`${formatBalance(
                         state.order.investCurrency,
                         state.poolCurrency?.symbol
-                      )} was successfully invested`}
-                    />
+                      )} was successfully invested. Stake pool tokens to earn CFG rewards.`}
+                    >
+                      {canStake && (
+                        <Grid mt="1px" columns={1}>
+                          <LightButton onClick={stake} disabled={isLoading}>
+                            <Text variant="body2" color="inherit">
+                              Stake
+                            </Text>
+                          </LightButton>
+                        </Grid>
+                      )}
+                    </SuccessBanner>
                   ) : !state.order.payoutCurrencyAmount.isZero() ? (
                     <SuccessBanner title="Redemption successful" />
                   ) : null)}
@@ -162,6 +161,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
             ) : (
               <RedeemForm onCancel={() => setView('start')} autoFocus />
             )}
+            <ClaimLiquidityRewards />
           </>
         ) : (
           // TODO: Show whether onboarding is in progress

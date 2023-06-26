@@ -195,6 +195,26 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
+  function getEndOfEpoch() {
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.liquidityRewards.endOfEpoch()),
+      map((data) => {
+        const aapje = data?.toPrimitive() as number
+
+        return aapje
+      })
+    )
+  }
+
+  function getCurrentBlock() {
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.system.number()),
+      map((data) => {
+        return data?.toPrimitive() as number
+      })
+    )
+  }
+
   return {
     getORMLTokens,
     getAccountStakes,
@@ -207,5 +227,7 @@ export function getRewardsModule(inst: Centrifuge) {
     unStake,
     stake,
     claimLiquidityRewards,
+    getEndOfEpoch,
+    getCurrentBlock,
   }
 }
