@@ -50,8 +50,16 @@ export function useNftDocumentId(collectionId?: string, nftId?: string) {
 export function useAvailableFinancing(poolId: string, assetId: string) {
   const isTinlakePool = poolId.startsWith('0x')
   const loan = useLoan(poolId, assetId)
-  if (!loan || (!isTinlakePool && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle'))
-    return { current: Dec(0), initial: Dec(0) }
+  if (!loan) return { current: Dec(0), initial: Dec(0) }
+
+  if (
+    !isTinlakePool &&
+    'valuationMethod' in loan.pricing &&
+    loan.pricing.valuationMethod === 'oracle' &&
+    loan.status === 'Created'
+  ) {
+    return { current: Dec(loan.pricing.maxBorrowQuantity), initial: Dec(loan.pricing.maxBorrowQuantity) }
+  }
 
   const initialCeiling = isTinlakePool
     ? 'ceiling' in loan.pricing
@@ -60,6 +68,7 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
     : 'value' in loan.pricing && 'advanceRate' in loan.pricing
     ? loan.pricing.value.toDecimal().mul(loan.pricing.advanceRate.toDecimal())
     : Dec(0)
+
   if (loan.status !== 'Active') return { current: initialCeiling, initial: initialCeiling }
 
   const debtWithMargin =
