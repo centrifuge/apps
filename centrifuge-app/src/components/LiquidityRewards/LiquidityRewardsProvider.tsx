@@ -24,24 +24,27 @@ export function LiquidityRewardsProvider({ poolId, trancheId, children }: Liquid
   const balances = useBalances(address)
   const endOfEpoch = useEndOfEpoch()
   const currentBlockNumber = useCurrentBlock()
-  const claimCountdown = useClaimCountdown(endOfEpoch! - currentBlockNumber!)
+  const countdown = useClaimCountdown(endOfEpoch! - currentBlockNumber!)
 
   const trancheBalance =
     balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
-  const stakedAmount = stakes?.stake.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
   const payoutTokenAmount = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
-  const stakeableAmount = trancheBalance.add(pendingRedeem).add(payoutTokenAmount).minus(stakedAmount)
+  const remainingRedeemToken = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
+
+  const redeemToken = order?.redeemToken.toDecimal() ?? Dec(0)
+
+  const stakeableAmount = trancheBalance
+    .add(pendingRedeem)
+    .add(payoutTokenAmount)
+    .minus(redeemToken)
+    .minus(remainingRedeemToken)
   const tranche = pool.tranches.find(({ id }) => id === trancheId)
 
-  const canStake = !stakeableAmount.isZero()
+  const canStake = !stakeableAmount.isZero() && stakeableAmount.isPositive()
   const canUnstake = !!stakes && !stakes?.stake.isZero()
   const canClaim = !!rewards && !rewards?.isZero()
-  const countdown = canUnstake && !canClaim ? claimCountdown : null
 
-  console.log('rewards', rewards?.toString())
-  console.log('claimCountdown', claimCountdown)
-  console.log('countdown', countdown)
   const claim = useCentrifugeTransaction('Claim CFG liquidity rewards', (cent) => cent.rewards.claimLiquidityRewards)
   const stake = useCentrifugeTransaction('Stake tokens', (cent) => cent.rewards.stake)
   const unStake = useCentrifugeTransaction('Unstake tokens', (cent) => cent.rewards.unStake)
@@ -50,11 +53,16 @@ export function LiquidityRewardsProvider({ poolId, trancheId, children }: Liquid
     tranche,
     countdown,
     rewards,
+    stakeableAmount,
     stakes,
     canStake,
     canUnstake,
     canClaim,
-    isLoading: claim.isLoading || stake.isLoading || unStake.isLoading,
+    isLoading: {
+      claim: claim.isLoading,
+      stake: stake.isLoading,
+      unStake: unStake.isLoading,
+    },
   }
 
   const actions: LiquidityRewardsActions = {

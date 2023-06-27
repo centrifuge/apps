@@ -54,7 +54,7 @@ export const PendingOrder: React.FC<{
               </Text>
             )}
           </LightButton>
-          <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling || calculatingOrders}>
+          <LightButton type="button" $right onClick={onChangeOrder} disabled={isCancelling || calculatingOrders}>
             <Text variant="body2" color="inherit">
               Change order
             </Text>

@@ -84,7 +84,7 @@ export function useListCurrencies(address?: string) {
 }
 
 export function useClaimCountdown(remainingBlocks: number): ClaimCountDown {
-  const defaultReturn = { days: null, hours: null, minutes: null, seconds: null, message: null }
+  const defaultReturn = null
 
   if (typeof remainingBlocks !== 'number' || isNaN(remainingBlocks)) {
     return defaultReturn
@@ -93,9 +93,9 @@ export function useClaimCountdown(remainingBlocks: number): ClaimCountDown {
   const executionTimePerBlockInSeconds = 12
   const secondsInADay = 24 * 60 * 60
   const totalSeconds = remainingBlocks * executionTimePerBlockInSeconds
+  const remainingSeconds = totalSeconds % secondsInADay
 
   const days = Math.floor(totalSeconds / secondsInADay)
-  const remainingSeconds = totalSeconds % secondsInADay
   const hours = Math.floor(remainingSeconds / 3600)
   const minutes = Math.floor((remainingSeconds % 3600) / 60)
   const seconds = remainingSeconds % 60
@@ -104,15 +104,10 @@ export function useClaimCountdown(remainingBlocks: number): ClaimCountDown {
     return defaultReturn
   }
 
-  const hoursMessage = hours > 0 ? `${hours} hrs` : ''
-  const minutesMessage = minutes > 0 ? `${minutes} min` : ''
-  const secondsMessage = minutes < 5 && seconds > 0 ? `${seconds} seconds` : ''
+  const daysMessage = days >= 1 ? `${days} day${days === 1 ? '' : 's'}` : ''
+  const hoursMessage = hours > 0 ? `${hours} hr${hours <= 1 ? '' : 's'}` : ''
+  const minutesMessage = minutes > 0 ? `${minutes} min${minutes <= 1 ? '' : 's'}` : ''
+  const secondsMessage = seconds > 0 ? `${seconds} second${seconds <= 1 ? '' : 's'}` : ''
 
-  return {
-    days,
-    hours,
-    minutes,
-    seconds,
-    message: `${hoursMessage} ${minutesMessage} ${secondsMessage} remaining`,
-  }
+  return days >= 1 ? daysMessage : [hoursMessage, minutesMessage, secondsMessage].filter(Boolean).join(' ')
 }

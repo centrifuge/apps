@@ -10,21 +10,38 @@ export function ClaimLiquidityRewards() {
     actions: { claim },
   } = useLiquidityRewards()
 
+  const rewardsAmount =
+    rewards && !rewards?.isZero()
+      ? rewards.gte(Dec(10000))
+        ? formatBalanceAbbreviated(rewards, 'CFG', 2)
+        : formatBalance(rewards, 'CFG', 2)
+      : '0 CFG'
+
   return !!rewards && !rewards?.isZero() ? (
     <Box as={Card} p={2} pb={3}>
-      <Shelf justifyContent="space-between" flexWrap="wrap" gap={1}>
-        <Stack>
-          <Text as="span" variant="body3">
-            {countdown && countdown.message ? `Claimable rewards in ${countdown.message} days` : 'Claimable rewards'}
-          </Text>
+      <Stack gap={2}>
+        <Shelf justifyContent="space-between" flexWrap="wrap" gap={1}>
           <Text as="strong" variant="heading3">
-            {rewards.gte(Dec(10000)) ? formatBalanceAbbreviated(rewards, 'CFG', 2) : formatBalance(rewards, 'CFG', 2)}
+            {rewardsAmount}
           </Text>
-        </Stack>
-        <Button loading={isLoading} disabled={!canClaim} onClick={claim} small>
-          Claim
-        </Button>
-      </Shelf>
+          <Button
+            loading={isLoading.claim}
+            loadingMessage="Claiming…"
+            disabled={!canClaim}
+            onClick={claim}
+            variant="secondary"
+            small
+          >
+            Claim
+          </Button>
+        </Shelf>
+
+        {!!countdown && (
+          <Text as="span" variant="body3">
+            New rounds of rewards will be available in {countdown}
+          </Text>
+        )}
+      </Stack>
     </Box>
   ) : null
 }
