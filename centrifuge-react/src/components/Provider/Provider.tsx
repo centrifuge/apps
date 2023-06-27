@@ -19,6 +19,7 @@ export type ProviderProps = {
   evmAdditionalConnectors?: EvmConnectorMeta[]
   subscanUrl?: string
   transactionToastPositionProps?: TransactionToastsProps['positionProps']
+  walletConnectId?: string
 }
 
 export function Provider({
@@ -27,12 +28,18 @@ export function Provider({
   evmChains,
   evmAdditionalConnectors,
   subscanUrl,
+  walletConnectId,
   transactionToastPositionProps,
 }: ProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <CentrifugeProvider config={centrifugeConfig}>
-        <WalletProvider evmChains={evmChains} evmAdditionalConnectors={evmAdditionalConnectors} subscanUrl={subscanUrl}>
+        <WalletProvider
+          walletConnectId={walletConnectId}
+          evmChains={evmChains}
+          evmAdditionalConnectors={evmAdditionalConnectors}
+          subscanUrl={subscanUrl}
+        >
           <TransactionProvider>
             <TransactionToasts positionProps={transactionToastPositionProps} />
             {children}
