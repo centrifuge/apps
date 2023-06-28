@@ -152,10 +152,12 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
           )}
         </Stack>
 
-        <Stack as={Card} gap={2} p={2}>
-          <ClaimLiquidityRewards />
-          <Staker />
-        </Stack>
+        {!isTinlakePool && (
+          <Stack as={Card} gap={2} p={2}>
+            <ClaimLiquidityRewards />
+            <Staker />
+          </Stack>
+        )}
       </>
     )
   }

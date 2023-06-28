@@ -15,7 +15,12 @@ import {
 import { LiquidityRewardsContext } from './LiquidityRewardsContext'
 import { LiquidityRewardsActions, LiquidityRewardsProviderProps, LiquidityRewardsState } from './types'
 
-export function LiquidityRewardsProvider({ poolId, trancheId, children }: LiquidityRewardsProviderProps) {
+export function LiquidityRewardsProvider(props: LiquidityRewardsProviderProps) {
+  const isTinlakePool = props.poolId.startsWith('0x')
+  return !isTinlakePool ? <Provider {...props} /> : <>{props.children}</>
+}
+
+function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps) {
   const pool = usePool(poolId) as Pool
   const address = useAddress()
   const order = usePendingCollect(poolId, trancheId, address)
