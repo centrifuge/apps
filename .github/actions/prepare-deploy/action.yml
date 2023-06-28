@@ -60,7 +60,7 @@ runs:
           echo "front_url=app.staging.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT
           # env_name is production because it needs to use the prod variable files inside each app
-        elif  ${{ contains(github.ref, 'refs/tags/rc') }}; then
+        elif  ${{ inputs.deploy_to == 'catalyst' }}; then
           # CATALYST
           echo "function_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-catalyst.k-f.dev" >> $GITHUB_OUTPUT
