@@ -49,7 +49,7 @@ export function Staker() {
                 {formatBalance(stakeableAmount!, tranche?.currency?.symbol)}
               </Text>
               <Text as="span" variant="body3">
-                available to stake
+                Stake pool tokens to earn CFG rewards.
               </Text>
             </Stack>
           )}
