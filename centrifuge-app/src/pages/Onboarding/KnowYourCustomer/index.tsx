@@ -1,3 +1,4 @@
+import { Box, Button, Dialog, Flex, Stack } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, date, object, string } from 'yup'
@@ -13,7 +14,7 @@ const getValidationSchema = (investorType: 'individual' | 'entity') =>
     dateOfBirth: date()
       .required('Please enter a date of birth')
       .min(new Date(1900, 0, 1), 'Date of birth must be after 1900')
-      .max(new Date(), 'Date of birth must be in the past'),
+      .max(new Date(new Date().getFullYear() - 18, new Date().getMonth()), 'You must be 18 or older'),
     countryOfCitizenship: string().required('Please select a country of citizenship'),
     countryOfResidency: string().required('Please select a country of residency'),
     isAccurate: boolean().oneOf([true], 'You must confirm that the information is accurate'),
@@ -23,9 +24,9 @@ const getValidationSchema = (investorType: 'individual' | 'entity') =>
   })
 
 export const KnowYourCustomer = () => {
-  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
+  const [isKnowYourCustomerDialogOpen, setIsKnowYourCustomerDialogOpen] = React.useState(false)
 
-  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
+  const [verificationDeclined, setVerificationDeclined] = React.useState(false)
 
   const { onboardingUser } = useOnboarding()
 
@@ -60,6 +61,9 @@ export const KnowYourCustomer = () => {
     if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.accepted') {
       setVerifiedIdentity()
     }
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.declined') {
+      setVerificationDeclined(true)
+    }
   }
 
   React.useEffect(() => {
@@ -73,17 +77,39 @@ export const KnowYourCustomer = () => {
 
   React.useEffect(() => {
     if (startKYCData?.verification_url) {
-      nextKnowYourCustomerStep()
+      setIsKnowYourCustomerDialogOpen(true)
     }
   }, [startKYCData])
 
-  if (activeKnowYourCustomerStep === 0) {
-    return <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
-  }
-
-  if (activeKnowYourCustomerStep === 1) {
-    return <IdentityVerification verificationURL={startKYCData.verification_url} />
-  }
-
-  return null
+  return (
+    <>
+      <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
+      {startKYCData?.verification_url && (
+        <Dialog
+          isOpen={isKnowYourCustomerDialogOpen}
+          onClose={() => setIsKnowYourCustomerDialogOpen(false)}
+          width="850px"
+        >
+          <Stack justifyContent="space-between">
+            <Box height="500px">
+              <IdentityVerification verificationURL={startKYCData.verification_url} />
+            </Box>
+            {verificationDeclined && (
+              <Flex justifyContent="flex-end">
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setVerificationDeclined(false)
+                    setIsKnowYourCustomerDialogOpen(false)
+                  }}
+                >
+                  Restart verification
+                </Button>
+              </Flex>
+            )}
+          </Stack>
+        </Dialog>
+      )}
+    </>
+  )
 }

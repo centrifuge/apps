@@ -2,18 +2,15 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import * as React from 'react'
-import { useAddress } from '../utils/useAddress'
-import { useLiquidityAdmin } from '../utils/usePermissions'
+import { useSuitableAccounts } from '../utils/usePermissions'
 import { usePool } from '../utils/usePools'
 
 type Props = {
   poolId: string
 }
 
-export const MaxReserveForm: React.FC<Props> = ({ poolId }) => {
-  const address = useAddress('substrate')
-  const isLiquidityAdmin = useLiquidityAdmin(poolId)
+export function MaxReserveForm({ poolId }: Props) {
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })
   const pool = usePool(poolId)
 
   const { execute: setMaxReserveTx, isLoading } = useCentrifugeTransaction(
@@ -29,7 +26,7 @@ export const MaxReserveForm: React.FC<Props> = ({ poolId }) => {
     enableReinitialize: true,
     onSubmit: (values, actions) => {
       if (typeof values.maxReserve === 'number' && values.maxReserve >= 0) {
-        setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool.currency.decimals)])
+        setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool.currency.decimals)], { account })
       } else {
         actions.setErrors({ maxReserve: 'Invalid number' })
       }
@@ -37,7 +34,7 @@ export const MaxReserveForm: React.FC<Props> = ({ poolId }) => {
     },
   })
 
-  if (!address || !isLiquidityAdmin) return null
+  if (!account) return null
 
   return (
     <Stack as={Card} gap={2} p={2}>

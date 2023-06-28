@@ -5,7 +5,7 @@ import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
-import { WalletConnect } from '@web3-react/walletconnect'
+import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import { isMobile } from '../../../utils/device'
 import { createConnector, isCoinbaseWallet, isInjected } from './utils'
 
@@ -24,15 +24,31 @@ export type EvmConnectorMeta = {
 
 export function getEvmConnectors(
   urls: { [chainId: number]: string[] },
-  additionalConnectors?: EvmConnectorMeta[]
+  {
+    walletConnectId,
+    additionalConnectors,
+  }: {
+    walletConnectId?: string
+    additionalConnectors?: EvmConnectorMeta[]
+    substrateEvmChainId?: number
+  } = {}
 ): EvmConnectorMeta[] {
   const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
+  const { ['1']: _, ...optional } = urls
+  const chains = [1, ...Object.keys(optional).map(Number)]
+  if (!walletConnectId) {
+    throw new Error('WalletConnect ID is required')
+  }
   const [walletConnect] = createConnector(
     (actions) =>
-      new WalletConnect({
+      new WalletConnectV2({
         actions,
         options: {
-          rpc: urls,
+          projectId: walletConnectId,
+          chains: chains,
+          optionalChains: chains.slice(1),
+          showQrModal: true,
+          rpcMap: urls,
         },
       })
   )

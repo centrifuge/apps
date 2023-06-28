@@ -20,7 +20,6 @@ const LiquidityTransactionsSection = React.lazy(() => import('../../../component
 
 export const PoolDetailLiquidityTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-
   return (
     <PageWithSideBar
       sidebar={

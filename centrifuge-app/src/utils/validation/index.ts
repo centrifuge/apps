@@ -1,3 +1,4 @@
+import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { getImageDimensions } from '../getImageDimensions'
 
@@ -91,6 +92,9 @@ export const maxLength = (maxValue: number, err?: CustomError) => (val?: string)
   typeof val === 'string' && val.length <= maxValue
     ? ''
     : getError(`Needs to be less than ${maxValue} characters`, err, val || '')
+
+export const address = (err?: CustomError) => (val?: string) =>
+  val && !isAddress(val) ? getError('Invalid address', err, val || '') : ''
 
 export const oneOf = (valuesArray: unknown[], err?: CustomError) => (val?: string) =>
   valuesArray.indexOf(val) !== -1 ? '' : getError(`Value must be one of: ${valuesArray.join(', ')}`, err, val || '')

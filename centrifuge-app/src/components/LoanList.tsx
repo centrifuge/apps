@@ -1,5 +1,16 @@
 import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  IconChevronRight,
+  Pagination,
+  PaginationContainer,
+  Shelf,
+  Stack,
+  Text,
+  TextWithPlaceholder,
+  Thumbnail,
+  usePagination,
+} from '@centrifuge/fabric'
 import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
@@ -9,6 +20,7 @@ import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { LoadBoundary } from './LoadBoundary'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 
 type Row = (Loan | TinlakeLoan) & {
@@ -26,32 +38,49 @@ const columns: Column[] = [
     align: 'left',
     header: <SortableTableHeader label="Asset" />,
     cell: (l: Row) => <AssetName loan={l} />,
-    flex: '3',
+    flex: '2',
     sortKey: 'idSortKey',
   },
   {
+    align: 'left',
+    header: <SortableTableHeader label="NFT ID" />,
+    cell: (l: Row) =>
+      l.asset.nftId.length >= 9 ? `${l.asset.nftId.slice(0, 4)}...${l.asset.nftId.slice(-4)}` : l.asset.nftId,
+    flex: '2',
+    sortKey: 'nftIdSortKey',
+  },
+  {
+    align: 'left',
     header: <SortableTableHeader label="Financing date" />,
-    cell: (l: Row) => (l.originationDateSortKey && l.status === 'Active' ? formatDate(l.originationDate) : ''),
+    cell: (l: Row) => {
+      // @ts-expect-error value only exists on Tinlake loans and on active Centrifuge loans
+      return l.originationDate && (l.poolId.startsWith('0x') || l.status === 'Active')
+        ? // @ts-expect-error
+          formatDate(l.originationDate)
+        : ''
+    },
     flex: '2',
     sortKey: 'originationDateSortKey',
   },
   {
+    align: 'left',
     header: <SortableTableHeader label="Maturity date" />,
     cell: (l: Row) => (l.pricing.maturityDate ? formatDate(l.pricing.maturityDate) : ''),
     flex: '2',
     sortKey: 'maturityDate',
   },
   {
+    align: 'left',
     header: <SortableTableHeader label="Amount" />,
     cell: (l: Row) => <Amount loan={l} />,
-    flex: '3',
+    flex: '2',
     sortKey: 'outstandingDebtSortKey',
   },
   {
+    align: 'left',
     header: <SortableTableHeader label="Status" />,
     cell: (l: Row) => <LoanLabel loan={l} />,
     flex: '2',
-    align: 'center',
     sortKey: 'statusLabel',
   },
   {
@@ -67,6 +96,7 @@ export function LoanList({ loans }: Props) {
   const rows: Row[] = loans.map((loan) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
+      nftIdSortKey: loan.asset.nftId,
       idSortKey: parseInt(loan.id, 10),
       outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
       originationDateSortKey:
@@ -76,23 +106,40 @@ export function LoanList({ loans }: Props) {
         !loan?.totalBorrowed?.isZero()
           ? loan.originationDate
           : '',
+      maturityDate: loan.pricing.maturityDate,
       ...loan,
     }
   })
+
+  const pagination = usePagination({ data: rows, pageSize: 20 })
+
   return (
-    <DataTable
-      data={rows}
-      columns={columns}
-      defaultSortKey="idSortKey"
-      defaultSortOrder="asc"
-      onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
-    />
+    <PaginationContainer pagination={pagination}>
+      <Stack gap={2}>
+        <LoadBoundary>
+          <DataTable
+            data={rows}
+            columns={columns}
+            defaultSortKey="idSortKey"
+            defaultSortOrder="desc"
+            onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+            pageSize={20}
+            page={pagination.page}
+          />
+        </LoadBoundary>
+        {pagination.pageCount > 1 && (
+          <Box alignSelf="center">
+            <Pagination />
+          </Box>
+        )}
+      </Stack>
+    </PaginationContainer>
   )
 }
 
 function AssetName({ loan }: { loan: Row }) {
   const isTinlakePool = loan.poolId.startsWith('0x')
-  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, true, isTinlakePool)
+  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
     <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
@@ -104,11 +151,7 @@ function AssetName({ loan }: { loan: Row }) {
         fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {isTinlakePool
-          ? loan.asset.nftId.length >= 9
-            ? `${loan.asset.nftId.slice(0, 4)}...${loan.asset.nftId.slice(-4)}`
-            : loan.asset.nftId
-          : metadata?.name}
+        {metadata?.name}
       </TextWithPlaceholder>
     </Shelf>
   )

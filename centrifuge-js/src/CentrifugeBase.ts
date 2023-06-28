@@ -2,8 +2,9 @@ import type { JsonRpcSigner } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
-import { ISubmittableResult, Signer } from '@polkadot/types/types'
+import { DefinitionRpc, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
+import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
 import {
   bufferCount,
@@ -13,7 +14,6 @@ import {
   filter,
   firstValueFrom,
   from,
-  lastValueFrom,
   map,
   mergeWith,
   Observable,
@@ -29,8 +29,11 @@ import {
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { TransactionOptions } from './types'
+import { computeMultisig, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
+
+type ProxyType = string
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -47,7 +50,7 @@ export type Config = {
   signingAddress?: AddressOrPair
   evmSigner?: JsonRpcSigner
   printExtrinsics?: boolean
-  proxy?: string
+  proxies?: ([delegator: string, forceProxyType?: ProxyType] | string)[]
   debug?: boolean
 }
 
@@ -85,9 +88,23 @@ const parachainTypes = {
     leafHash: 'Hash',
     sortedHashes: 'Vec<Hash>',
   },
+  PoolId: 'u64',
+  TrancheId: '[u8; 16]',
+  RewardDomain: {
+    _enum: ['Block', 'Liquidity'],
+  },
+  CurrencyId: {
+    _enum: {
+      Native: 'Native',
+      Tranche: '(PoolId, TrancheId)',
+      KSM: 'KSM',
+      AUSD: 'AUSD',
+      ForeignAsset: 'u32',
+    },
+  },
 }
 
-const parachainRpcMethods = {
+const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
   pools: {
     trancheTokenPrices: {
       description: 'Retrieve prices for all tranches',
@@ -98,6 +115,32 @@ const parachainRpcMethods = {
         },
       ],
       type: 'Vec<u128>',
+    },
+  },
+  rewards: {
+    listCurrencies: {
+      description: 'List reward currencies',
+      params: [
+        {
+          name: 'account_id',
+          type: 'AccountId',
+        },
+      ],
+      type: 'u128',
+    },
+    computeReward: {
+      description: 'Compute reward',
+      params: [
+        {
+          name: 'currency_id',
+          type: '(RewardDomain,CurrencyId)',
+        },
+        {
+          name: 'account_id',
+          type: 'AccountId',
+        },
+      ],
+      type: 'u128',
     },
   },
 }
@@ -126,7 +169,38 @@ export class CentrifugeBase {
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
-    if (options?.batch) return of(submittable)
+    let actualSubmittable = submittable
+
+    if (options?.batch) return of(actualSubmittable)
+
+    const proxies = (options?.proxies || this.config.proxies)?.map((p) =>
+      Array.isArray(p) ? p : ([p, undefined] as const)
+    )
+
+    let transferTx
+    if (options?.transferToActingAccount && (options?.multisig || proxies)) {
+      const multi = options?.multisig && computeMultisig(options.multisig)
+      transferTx = api.tx.balances.transfer(proxies?.at(-1)?.[0] || multi?.address, options.transferToActingAccount)
+    }
+
+    if (proxies && !options?.sendOnly) {
+      actualSubmittable = proxies.reduceRight(
+        (acc, [delegator, forceProxyType]) => api.tx.proxy.proxy(delegator, forceProxyType, acc),
+        actualSubmittable
+      )
+    }
+
+    if (options?.multisig) {
+      const otherSigners = sortAddresses(
+        options.multisig.signers.filter((signer) => !isSameAddress(signer, this.getSignerAddress()))
+      )
+      console.log('multisig callData', actualSubmittable.method.toHex())
+      actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
+    }
+
+    if (transferTx) {
+      actualSubmittable = api.tx.utility.batchAll([transferTx, actualSubmittable])
+    }
 
     if (this.config.printExtrinsics) {
       if (submittable.method.method === 'batchAll' || submittable.method.method === 'batch') {
@@ -150,25 +224,18 @@ export class CentrifugeBase {
     const { signer, signingAddress } = this.getSigner()
 
     try {
-      let actualSubmittable = submittable
-      if (this.config.proxy && !options?.sendOnly) {
-        actualSubmittable = api.tx.proxy.proxy(this.config.proxy, undefined, submittable)
-      }
-
       const $paymentInfo = submittable.paymentInfo(signingAddress)
       const $balances = api.query.system.account(signingAddress)
 
       if (options?.paymentInfo) {
-        return lastValueFrom(
-          $paymentInfo.pipe(
-            map((paymentInfoRaw) => {
-              const paymentInfo = paymentInfoRaw.toJSON() as PaymentInfo
-              return {
-                ...paymentInfo,
-                partialFee: new CurrencyBalance(paymentInfo.partialFee, api.registry.chainDecimals[0]),
-              }
-            })
-          )
+        return $paymentInfo.pipe(
+          map((paymentInfoRaw) => {
+            const paymentInfo = paymentInfoRaw.toJSON() as any
+            return {
+              ...paymentInfo,
+              partialFee: new CurrencyBalance(hexToBn(paymentInfo.partialFee), api.registry.chainDecimals[0]),
+            }
+          })
         )
       }
 
@@ -377,11 +444,24 @@ export class CentrifugeBase {
     return signingAddress as string
   }
 
-  setProxy(proxyAccount: string) {
-    this.config.proxy = proxyAccount
+  getActingAddress(txOptions?: TransactionOptions) {
+    if (txOptions?.proxies) {
+      const proxy = txOptions.proxies.at(-1)!
+      return typeof proxy === 'string' ? proxy : proxy[0]
+    }
+
+    if (txOptions?.multisig) {
+      return computeMultisig(txOptions.multisig).address
+    }
+
+    return this.getSignerAddress()
   }
 
-  clearProxy() {
-    this.config.proxy = undefined
+  setProxies(proxies: Config['proxies']) {
+    this.config.proxies = proxies
+  }
+
+  clearProxies() {
+    this.config.proxies = undefined
   }
 }

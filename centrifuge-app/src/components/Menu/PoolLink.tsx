@@ -1,6 +1,5 @@
 import type { Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'

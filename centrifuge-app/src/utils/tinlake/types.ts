@@ -33,6 +33,10 @@ export interface PoolMetadataDetails {
   maker?: { ilk: string }
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
+  newInvestmentsStatus: {
+    junior: 'closed' | 'request' | 'open'
+    senior: 'closed' | 'request' | 'open'
+  }
 }
 
 interface BasePool {

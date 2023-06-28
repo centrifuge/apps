@@ -1,6 +1,5 @@
-import Centrifuge, { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
+import Centrifuge, { CurrencyBalance, Perquintill, PoolMetadataInput, Rate } from '@centrifuge/centrifuge-js'
+import { useCentrifuge, useCentrifugeConsts, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import * as React from 'react'
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
@@ -11,7 +10,6 @@ const mockMetadata = {
   poolIcon: '0x',
   poolName: 'More Pool Poolios',
   assetClass: 'Corporate Credit',
-  currency: 'ausd',
   maxReserve: 1,
   epochHours: 23,
   epochMinutes: 50,
@@ -25,23 +23,19 @@ const mockMetadata = {
   forum: '',
   email: 'user@k-f.co',
   details: [],
-  riskGroups: [
-    {
-      groupName: 'A',
-      advanceRate: 100,
-      fee: 12,
-      probabilityOfDefault: 12,
-      lossGivenDefault: 12,
-      discountRate: 12,
-    },
-  ],
 }
 
 type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
 
-export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) {
+export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' | 'maxReserve'>) {
   const [proposeFee, setProposeFee] = React.useState<CurrencyBalance | null>(null)
-  const [chainDecimals, setChainDecimals] = React.useState(18)
+  const [paymentInfo, setPaymentInfo] = React.useState<{ weight: number; partialFee: CurrencyBalance } | null>(null)
+  const {
+    chainDecimals,
+    poolSystem: { poolDeposit },
+    proxy: { proxyDepositBase, proxyDepositFactor },
+    uniques: { collectionDeposit },
+  } = useCentrifugeConsts()
   const { selectedAccount } = useWallet().substrate
   const centrifuge = useCentrifuge()
   const currencies = useCurrencies()
@@ -61,10 +55,13 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
             paymentInfo: selectedAccount.address,
             createType: config.poolCreationType,
           }),
+          connectedCent.pools.createPool(args, {
+            paymentInfo: selectedAccount.address,
+            createType: config.poolCreationType,
+          }),
         ]).pipe(
-          map(([api, submittable]) => {
+          map(([api, submittable, paymentInfo]) => {
             const { minimumDeposit } = api.consts.democracy
-            setChainDecimals(api.registry.chainDecimals[0])
             if (config.poolCreationType === 'notePreimage') {
               // hard coded base and byte deposit supplied by protocol
               const preimageBaseDeposit = new CurrencyBalance('4140000000000000000', chainDecimals)
@@ -73,11 +70,11 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
                 // the first argument passed to the `notePreimage` extrinsic is the actual encoded proposal in bytes
                 .mul(new BN((submittable as any).method.args[0].length))
                 .add(preimageBaseDeposit)
-              return new CurrencyBalance(preimageFee, chainDecimals)
+              return [new CurrencyBalance(preimageFee, chainDecimals), paymentInfo]
             } else if (config.poolCreationType === 'propose') {
-              return new CurrencyBalance(hexToBN(minimumDeposit.toHex()), chainDecimals)
+              return [new CurrencyBalance(hexToBN(minimumDeposit.toHex()), chainDecimals), paymentInfo]
             }
-            return new CurrencyBalance(0, chainDecimals)
+            return [new CurrencyBalance(0, chainDecimals), paymentInfo]
           })
         )
       })
@@ -88,7 +85,11 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
   React.useEffect(() => {
     const sub = $proposeFee.subscribe({
       next: (val) => {
-        setProposeFee(val)
+        setProposeFee(val?.[0] as any)
+        setPaymentInfo(val?.[1] as any)
+      },
+      error: (error) => {
+        console.error('getProposeFee error', error)
       },
     })
     return () => {
@@ -98,7 +99,7 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getProposeFee = React.useCallback(
-    debounce((values: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) => {
+    debounce((values: Pick<PoolMetadataInput, 'tranches' | 'maxReserve'>) => {
       if (!selectedAccount || !currencies) return
 
       const noJuniorTranches = values.tranches.slice(1)
@@ -125,13 +126,18 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
   )
 
   React.useEffect(() => {
-    if (config.poolCreationType !== 'immediate') {
-      getProposeFee(formValues)
-    }
+    getProposeFee(formValues)
   }, [formValues, getProposeFee])
 
   return {
     proposeFee,
+    paymentInfo,
+    poolDeposit,
+    collectionDeposit,
+    proxyDeposit: new CurrencyBalance(
+      proxyDepositBase.add(proxyDepositFactor.mul(new BN(2))).mul(new BN(2)),
+      proxyDepositBase.decimals
+    ),
   }
 }
 

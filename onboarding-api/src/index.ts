@@ -1,6 +1,7 @@
 const cookieParser = require('cookie-parser')
 import * as dotenv from 'dotenv'
 import express, { Express } from 'express'
+import { getBalanceForSigningController } from './controllers/agreement/getBalanceForSigning'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { authenticateWalletController } from './controllers/auth/authenticateWallet'
 import { generateNonceController } from './controllers/auth/generateNonce'
@@ -19,10 +20,10 @@ import { startKycController } from './controllers/user/startKyc'
 import { updateInvestorStatusController } from './controllers/user/updateInvestorStatus'
 import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
+import { canOnboardToTinlakeTranche } from './middleware/canOnboardToTinlakeTranche'
 import { corsMiddleware } from './middleware/cors'
 import { fileUpload } from './middleware/fileUpload'
 import { rateLimiterMiddleware } from './middleware/rateLimiter'
-import { restrictedPool } from './middleware/restrictedPool'
 import { shuftiProAuthMiddleware } from './middleware/shuftiProAuthMiddleware'
 import { verifyAuth } from './middleware/verifyAuth'
 
@@ -33,9 +34,8 @@ onboarding.disable('x-powered-by')
 onboarding.disable('server')
 onboarding.options('*', corsMiddleware)
 
-// middleware
+// global middleware
 onboarding.use(rateLimiterMiddleware)
-onboarding.use(restrictedPool)
 onboarding.use(shuftiProAuthMiddleware)
 onboarding.use(corsMiddleware)
 onboarding.use(cookieParser(process.env.COOKIE_SECRET))
@@ -59,12 +59,13 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
 
 // pool steps
-onboarding.post('/signAndSendDocuments', verifyAuth, signAndSendDocumentsController)
+onboarding.post('/signAndSendDocuments', canOnboardToTinlakeTranche, verifyAuth, signAndSendDocumentsController)
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
 
 // getters
 onboarding.get('/getUser', verifyAuth, getUserController)
 onboarding.get('/getGlobalOnboardingStatus', getGlobalOnboardingStatusController)
+onboarding.post('/getBalanceForSigning', verifyAuth, getBalanceForSigningController)
 onboarding.get('/getSignedAgreement', verifyAuth, getSignedAgreementController)
 onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 

@@ -15,6 +15,7 @@ import { config } from '../../../config'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -26,7 +27,7 @@ const ASSET_CLASSES = config.assetClasses.map((label) => ({
   value: label,
 }))
 
-export const Details: React.FC = () => {
+export function Details() {
   const isDemo = import.meta.env.REACT_APP_IS_DEMO
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
@@ -36,13 +37,14 @@ export const Details: React.FC = () => {
   const prefetchMetadata = usePrefetchMetadata()
   const { data: iconFile } = useFile(metadata?.pool?.icon?.uri, 'icon')
   const { editPoolVisibility } = useDebugFlags()
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const initialValues: Values = React.useMemo(
     () => ({
       poolName: metadata?.pool?.name ?? '',
       poolIcon: iconFile ?? null,
       assetClass: metadata?.pool?.asset?.class ?? '',
-      podEndpoint: metadata?.pod?.url ?? '',
+      podEndpoint: metadata?.pod?.node ?? '',
       listed: metadata?.pool?.listed ?? false,
     }),
     [metadata, iconFile]
@@ -82,11 +84,12 @@ export const Details: React.FC = () => {
           listed: values.listed,
         },
         pod: {
-          url: values.podEndpoint,
+          ...oldMetadata.pod,
+          node: values.podEndpoint,
         },
       }
 
-      execute([poolId, newPoolMetadata])
+      execute([poolId, newPoolMetadata], { account })
       actions.setSubmitting(false)
     },
   })
@@ -215,7 +218,7 @@ export const Details: React.FC = () => {
               <LabelValueStack label="Asset class" value={metadata?.pool?.asset.class} />
 
               <LabelValueStack label="Currency" value={currency} />
-              <LabelValueStack label="POD endpoint" value={metadata?.pod?.url ?? '-'} />
+              <LabelValueStack label="POD endpoint" value={metadata?.pod?.node ?? '-'} />
               <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
             </Shelf>
           )}
