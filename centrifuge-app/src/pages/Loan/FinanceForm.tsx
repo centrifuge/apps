@@ -1,6 +1,17 @@
 import { CurrencyBalance, findBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Button,
+  Card,
+  CurrencyInput,
+  IconInfo,
+  InlineFeedback,
+  NumberInput,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
+import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -65,7 +76,10 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
+      const amount =
+        'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+          ? new BN(values.amount.toString())
+          : CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
       doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
@@ -109,12 +123,24 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
             {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}</Text>
+            <Text variant="heading3">
+              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                ? `${new BN(loan.pricing.maxBorrowQuantity).sub(loan.totalBorrowed)} x ${loan.pricing.oracle.value} ${
+                    pool?.currency.symbol
+                  }: ${new BN(loan.pricing.maxBorrowQuantity)
+                    .sub(loan.totalBorrowed)
+                    .mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
+                : formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}
+            </Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
             <Text variant="label1">
-              {formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}
+              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                ? `${loan.totalBorrowed.toString()} x ${loan.pricing.oracle.value} ${
+                    pool?.currency.symbol
+                  }: ${loan.totalBorrowed.mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
+                : formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}
             </Text>
           </Shelf>
         </Stack>
@@ -132,18 +158,56 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                   )
                 )}
               >
-                {({ field, meta, form }: FieldProps) => (
-                  <CurrencyInput
-                    {...field}
-                    label="Amount"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
-                    disabled={isFinanceLoading}
-                    currency={pool?.currency.symbol}
-                    onChange={(value: number) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', maxBorrow)}
-                  />
-                )}
+                {({ field, meta, form }: FieldProps) => {
+                  if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
+                    return (
+                      <NumberInput
+                        {...field}
+                        label="Amount"
+                        disabled={isFinanceLoading}
+                        errorMessage={meta.touched ? meta.error : undefined}
+                        secondaryLabel={
+                          <Shelf justifyContent="space-between">
+                            <>
+                              {new BN(loan.pricing.maxBorrowQuantity).sub(loan.totalBorrowed).toString()} x{' '}
+                              {loan.pricing.Isin} (
+                              {new BN(loan.pricing.maxBorrowQuantity)
+                                .sub(loan.totalBorrowed)
+                                .mul(new BN(loan.pricing.oracle.value))
+                                .toString()}{' '}
+                              {pool?.currency.symbol})
+                            </>
+                            <Button
+                              small
+                              variant="secondary"
+                              onClick={() => {
+                                form.setFieldValue(
+                                  'amount',
+                                  // @ts-expect-error
+                                  new BN(loan.pricing.maxBorrowQuantity).sub(loan.totalBorrowed).toNumber()
+                                )
+                              }}
+                            >
+                              MAX
+                            </Button>
+                          </Shelf>
+                        }
+                      />
+                    )
+                  }
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Amount"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
+                      disabled={isFinanceLoading}
+                      currency={pool?.currency.symbol}
+                      onChange={(value: number) => form.setFieldValue('amount', value)}
+                      onSetMax={() => form.setFieldValue('amount', maxBorrow)}
+                    />
+                  )
+                }}
               </Field>
               {poolReserve.lessThan(availableFinancing) && (
                 <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
@@ -169,11 +233,23 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Outstanding</Text>
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(debt), pool?.currency.symbol, 2)}</Text>
+            <Text variant="heading3">
+              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                ? `${loan.totalBorrowed.toString()} x ${loan.pricing.oracle.value} ${pool?.currency.symbol}: ${new BN(
+                    loan.totalBorrowed
+                  ).mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
+                : formatBalance(roundDown(debt), pool?.currency.symbol, 2)}
+            </Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total repaid</Text>
-            <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency.symbol, 2)}</Text>
+            <Text variant="label1">
+              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                ? `${loan.totalRepaid.toString()} x ${loan.pricing.oracle.value} ${
+                    pool?.currency.symbol
+                  }: ${loan.totalRepaid.mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
+                : formatBalance(loan?.totalRepaid || 0, pool?.currency.symbol, 2)}
+            </Text>
           </Shelf>
         </Stack>
 

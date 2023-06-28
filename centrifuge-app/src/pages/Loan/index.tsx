@@ -127,11 +127,19 @@ const Loan: React.FC = () => {
               },
               {
                 label: <Tooltips type="availableFinancing" />,
-                value: formatBalance(availableFinancing, pool?.currency.symbol),
+                value:
+                  'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                    ? `${availableFinancing.toString()} @ ${loan.pricing.oracle.value} ${pool?.currency.symbol}`
+                    : formatBalance(availableFinancing, pool?.currency.symbol),
               },
               {
                 label: <Tooltips type="outstanding" />,
-                value: 'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt, pool?.currency.symbol) : 'n/a',
+                value:
+                  'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                    ? `${loan.totalBorrowed.toString()} @ ${loan.pricing.oracle.value} ${pool?.currency.symbol}`
+                    : 'outstandingDebt' in loan
+                    ? formatBalance(loan.outstandingDebt, pool?.currency.symbol)
+                    : 'n/a',
               },
             ]}
           />
@@ -157,7 +165,7 @@ const Loan: React.FC = () => {
 
           <PageSection title="Pricing">
             <Shelf gap={3} flexWrap="wrap">
-              <PricingValues loan={loan} />
+              <PricingValues loan={loan} pool={pool} />
             </Shelf>
           </PageSection>
         </>

@@ -1,15 +1,28 @@
-import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { LabelValueStack } from '../../components/LabelValueStack'
-import { formatDate } from '../../utils/date'
+import { formatDate, getAge } from '../../utils/date'
 import { formatPercentage } from '../../utils/formatting'
+import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 
-export function PricingValues({ loan: { pricing } }: { loan: Loan | TinlakeLoan }) {
+type Props = {
+  loan: Loan | TinlakeLoan
+  pool: Pool | TinlakePool
+}
+
+export function PricingValues({ loan: { pricing }, pool }: Props) {
   if ('valuationMethod' in pricing && pricing.valuationMethod === 'oracle') {
+    const today = new Date()
+    today.setUTCHours(0, 0, 0, 0)
+
+    const days = getAge(new Date(pricing.oracle.timestamp).toISOString())
+
     return (
       <>
         <LabelValueStack label="Valuation Method" value="Oracle" />
         <LabelValueStack label="Max quantity" value={pricing.maxBorrowQuantity} />
         <LabelValueStack label="ISIN" value={pricing.Isin} />
+        <LabelValueStack label="Current price" value={`${pricing.oracle.value} ${pool?.currency.symbol}`} />
+        <LabelValueStack label="Price last updated" value={`${days} ago`} />
       </>
     )
   }

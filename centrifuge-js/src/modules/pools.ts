@@ -302,6 +302,10 @@ export type ExternalPricingInfo = {
   maxBorrowQuantity: string
   Isin: string
   maturityDate: string
+  oracle: {
+    value: number | string
+    timestamp: number
+  }
 }
 
 type TinlakePricingInfo = {
@@ -1973,122 +1977,156 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.loans.createdLoan.entries(poolId),
           api.query.loans.activeLoans(poolId),
           api.query.loans.closedLoan.entries(poolId),
+          api.query.priceOracle.values.entries(),
           $rates,
           $interestLastUpdated,
           $currencyMeta,
         ]).pipe(take(1))
       }),
-      map(([createdLoanValues, activeLoanValues, closedLoanValues, rateValues, interestLastUpdated, rawCurrency]) => {
-        const currency = rawCurrency.toHuman() as AssetCurrencyData
-        const rates = rateValues.toJSON() as InterestAccrual[]
+      map(
+        ([
+          createdLoanValues,
+          activeLoanValues,
+          closedLoanValues,
+          oracles,
+          rateValues,
+          interestLastUpdated,
+          rawCurrency,
+        ]) => {
+          const oraclePrices = oracles.reduce(
+            (oracleValues, oracle) => {
+              // @ts-expect-error
+              const { timestamp, value } = oracle[1].toJSON()
 
-        function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
-          const { info } = loan
-          const [collectionId, nftId] = info.collateral
+              oracleValues[`0x${oracle[0].toString().slice(-24)}`] = {
+                timestamp,
+                value: hexToBN(value).toString(),
+              }
 
-          const discount =
-            'internal' in info.pricing && 'discountedCashFlow' in info.pricing.internal.valuationMethod
-              ? info.pricing.internal.valuationMethod.discountedCashFlow
-              : undefined
-
-          return {
-            asset: {
-              collectionId: collectionId.toString(),
-              nftId: hexToBN(nftId).toString(),
+              return oracleValues
             },
-            pricing:
-              'external' in info.pricing
-                ? {
-                    valuationMethod: 'oracle' as any,
-                    maxBorrowQuantity: info.pricing.external.maxBorrowQuantity,
-                    Isin: Buffer.from(info.pricing.external.priceId.isin.substring(2), 'hex').toString(),
-                    maturityDate: new Date(loan.info.schedule.maturity.fixed * 1000).toISOString(),
-                  }
-                : {
-                    valuationMethod: ('outstandingDebt' in info.pricing.internal.valuationMethod
-                      ? 'outstandingDebt'
-                      : 'discountedCashFlow') as any,
-                    maxBorrowAmount: Object.keys(info.pricing.internal.maxBorrowAmount)[0] as any,
-                    value: new CurrencyBalance(hexToBN(info.pricing.internal.collateralValue), currency.decimals),
-                    advanceRate: new Rate(hexToBN(Object.values(info.pricing.internal.maxBorrowAmount)[0].advanceRate)),
-                    probabilityOfDefault: discount?.probabilityOfDefault
-                      ? new Rate(hexToBN(discount.probabilityOfDefault))
-                      : undefined,
-                    lossGivenDefault: discount?.lossGivenDefault
-                      ? new Rate(hexToBN(discount.lossGivenDefault))
-                      : undefined,
-                    discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
-                    interestRate: new Rate(hexToBN(info.pricing.internal.interestRate)),
-                    maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
-                  },
-          }
-        }
-
-        const createdLoans: CreatedLoan[] = (createdLoanValues as any[]).map(([key, value]) => {
-          const loan = value.toJSON() as unknown as CreatedLoanData
-          const nil = new CurrencyBalance(0, currency.decimals)
-          return {
-            ...getSharedLoanInfo(loan),
-            id: formatLoanKey(key as StorageKey<[u32, u32]>),
-            poolId,
-            status: 'Created',
-            borrower: addressToHex(loan.borrower),
-            totalBorrowed: nil,
-            totalRepaid: nil,
-            outstandingDebt: nil,
-            normalizedDebt: nil,
-          }
-        })
-
-        const activeLoans: ActiveLoan[] = (activeLoanValues.toJSON() as any[]).map(
-          ([loan]: [ActiveLoanData, number]) => {
-            const loanRate =
-              'internal' in loan.info.pricing
-                ? new Rate(hexToBN(loan.info.pricing.internal.interestRate)).toDecimal().toString()
-                : '0'
-            const interestData = rates.find(
-              (rate) => new Rate(hexToBN(rate.interestRatePerSec)).toApr().toDecimalPlaces(4).toString() === loanRate
-            )
-            const writeOffStatus = {
-              penaltyInterestRate: new Rate(hexToBN(loan.writeOffStatus.penalty)),
-              percentage: new Rate(hexToBN(loan.writeOffStatus.percentage)),
+            {} as {
+              [isin: string]: {
+                timestamp: number
+                value: string
+              }
             }
+          )
+
+          const currency = rawCurrency.toHuman() as AssetCurrencyData
+          const rates = rateValues.toJSON() as InterestAccrual[]
+
+          function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
+            const { info } = loan
+            const [collectionId, nftId] = info.collateral
+
+            const discount =
+              'internal' in info.pricing && 'discountedCashFlow' in info.pricing.internal.valuationMethod
+                ? info.pricing.internal.valuationMethod.discountedCashFlow
+                : undefined
 
             return {
-              ...getSharedLoanInfo(loan),
-              id: hexToBN(loan.loanId).toString(),
-              poolId,
-              status: 'Active',
-              borrower: addressToHex(loan.borrower),
-              writeOffStatus: writeOffStatus.percentage.isZero() ? undefined : writeOffStatus,
-              totalBorrowed: new CurrencyBalance(hexToBN(loan.totalBorrowed), currency.decimals),
-              totalRepaid: new CurrencyBalance(hexToBN(loan.totalRepaid), currency.decimals),
-              originationDate: new Date(loan.originationDate * 1000).toISOString(),
-              outstandingDebt: getOutstandingDebt(
-                loan,
-                currency.decimals,
-                interestLastUpdated.toJSON() as number,
-                interestData
-              ),
-              normalizedDebt: new CurrencyBalance(hexToBN(loan.normalizedDebt), currency.decimals),
+              asset: {
+                collectionId: collectionId.toString(),
+                nftId: hexToBN(nftId).toString(),
+              },
+              pricing:
+                'external' in info.pricing
+                  ? {
+                      valuationMethod: 'oracle' as any,
+                      maxBorrowQuantity: info.pricing.external.maxBorrowQuantity,
+                      Isin: Buffer.from(info.pricing.external.priceId.isin.substring(2), 'hex').toString(),
+                      maturityDate: new Date(loan.info.schedule.maturity.fixed * 1000).toISOString(),
+                      oracle: oraclePrices[info.pricing.external.priceId.isin] as any,
+                    }
+                  : {
+                      valuationMethod: ('outstandingDebt' in info.pricing.internal.valuationMethod
+                        ? 'outstandingDebt'
+                        : 'discountedCashFlow') as any,
+                      maxBorrowAmount: Object.keys(info.pricing.internal.maxBorrowAmount)[0] as any,
+                      value: new CurrencyBalance(hexToBN(info.pricing.internal.collateralValue), currency.decimals),
+                      advanceRate: new Rate(
+                        hexToBN(Object.values(info.pricing.internal.maxBorrowAmount)[0].advanceRate)
+                      ),
+                      probabilityOfDefault: discount?.probabilityOfDefault
+                        ? new Rate(hexToBN(discount.probabilityOfDefault))
+                        : undefined,
+                      lossGivenDefault: discount?.lossGivenDefault
+                        ? new Rate(hexToBN(discount.lossGivenDefault))
+                        : undefined,
+                      discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
+                      interestRate: new Rate(hexToBN(info.pricing.internal.interestRate)),
+                      maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
+                    },
             }
           }
-        )
 
-        const closedLoans: ClosedLoan[] = (closedLoanValues as any[]).map(([key, value]) => {
-          const loan = value.toJSON() as unknown as ClosedLoanData
-          return {
-            ...getSharedLoanInfo(loan),
-            id: formatLoanKey(key as StorageKey<[u32, u32]>),
-            poolId,
-            status: 'Closed',
-            totalBorrowed: new CurrencyBalance(hexToBN(loan.totalBorrowed), currency.decimals),
-            totalRepaid: new CurrencyBalance(hexToBN(loan.totalRepaid), currency.decimals),
-          }
-        })
+          const createdLoans: CreatedLoan[] = (createdLoanValues as any[]).map(([key, value]) => {
+            const loan = value.toJSON() as unknown as CreatedLoanData
+            const nil = new CurrencyBalance(0, currency.decimals)
+            return {
+              ...getSharedLoanInfo(loan),
+              id: formatLoanKey(key as StorageKey<[u32, u32]>),
+              poolId,
+              status: 'Created',
+              borrower: addressToHex(loan.borrower),
+              totalBorrowed: nil,
+              totalRepaid: nil,
+              outstandingDebt: nil,
+              normalizedDebt: nil,
+            }
+          })
 
-        return [...createdLoans, ...activeLoans, ...closedLoans] as Loan[]
-      }),
+          const activeLoans: ActiveLoan[] = (activeLoanValues.toJSON() as any[]).map(
+            ([loan]: [ActiveLoanData, number]) => {
+              const loanRate =
+                'internal' in loan.info.pricing
+                  ? new Rate(hexToBN(loan.info.pricing.internal.interestRate)).toDecimal().toString()
+                  : '0'
+              const interestData = rates.find(
+                (rate) => new Rate(hexToBN(rate.interestRatePerSec)).toApr().toDecimalPlaces(4).toString() === loanRate
+              )
+              const writeOffStatus = {
+                penaltyInterestRate: new Rate(hexToBN(loan.writeOffStatus.penalty)),
+                percentage: new Rate(hexToBN(loan.writeOffStatus.percentage)),
+              }
+
+              return {
+                ...getSharedLoanInfo(loan),
+                id: hexToBN(loan.loanId).toString(),
+                poolId,
+                status: 'Active',
+                borrower: addressToHex(loan.borrower),
+                writeOffStatus: writeOffStatus.percentage.isZero() ? undefined : writeOffStatus,
+                totalBorrowed: new CurrencyBalance(hexToBN(loan.totalBorrowed), currency.decimals),
+                totalRepaid: new CurrencyBalance(hexToBN(loan.totalRepaid), currency.decimals),
+                originationDate: new Date(loan.originationDate * 1000).toISOString(),
+                outstandingDebt: getOutstandingDebt(
+                  loan,
+                  currency.decimals,
+                  interestLastUpdated.toJSON() as number,
+                  interestData
+                ),
+                normalizedDebt: new CurrencyBalance(hexToBN(loan.normalizedDebt), currency.decimals),
+              }
+            }
+          )
+
+          const closedLoans: ClosedLoan[] = (closedLoanValues as any[]).map(([key, value]) => {
+            const loan = value.toJSON() as unknown as ClosedLoanData
+            return {
+              ...getSharedLoanInfo(loan),
+              id: formatLoanKey(key as StorageKey<[u32, u32]>),
+              poolId,
+              status: 'Closed',
+              totalBorrowed: new CurrencyBalance(hexToBN(loan.totalBorrowed), currency.decimals),
+              totalRepaid: new CurrencyBalance(hexToBN(loan.totalRepaid), currency.decimals),
+            }
+          })
+
+          return [...createdLoans, ...activeLoans, ...closedLoans] as Loan[]
+        }
+      ),
       repeatWhen(() => $events)
     )
   }
