@@ -147,7 +147,6 @@ export function useTinlakeLoans(poolId: string) {
     async () => {
       const loans = await getTinlakeLoans(poolId)
 
-      // @ts-expect-error
       return loans.map((loan) => ({
         asset: {
           nftId: loan.nftId,
@@ -263,7 +262,6 @@ async function getTinlakeLoans(poolId: string) {
 
   const data = await request<{ pools: any[] }>('https://graph.centrifuge.io/tinlake', query)
 
-  // @ts-expect-error
   const loans = data.pools.reduce((assets: any[], pool: any) => {
     if (pool.loans) {
       assets.push(...pool.loans)

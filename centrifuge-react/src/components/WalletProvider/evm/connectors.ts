@@ -36,21 +36,22 @@ export function getEvmConnectors(
   const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
   const { ['1']: _, ...optional } = urls
   const chains = [1, ...Object.keys(optional).map(Number)]
-  const walletConnect =
-    walletConnectId &&
-    createConnector(
-      (actions) =>
-        new WalletConnectV2({
-          actions,
-          options: {
-            projectId: walletConnectId,
-            chains: chains,
-            optionalChains: chains.slice(1),
-            showQrModal: true,
-            rpcMap: urls,
-          },
-        })
-    )[0]
+  if (!walletConnectId) {
+    throw new Error('WalletConnect ID is required')
+  }
+  const [walletConnect] = createConnector(
+    (actions) =>
+      new WalletConnectV2({
+        actions,
+        options: {
+          projectId: walletConnectId,
+          chains: chains,
+          optionalChains: chains.slice(1),
+          showQrModal: true,
+          rpcMap: urls,
+        },
+      })
+  )
   const [coinbase] = createConnector(
     (actions) =>
       new CoinbaseWallet({
