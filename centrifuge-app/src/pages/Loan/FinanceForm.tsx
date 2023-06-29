@@ -175,13 +175,23 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                         secondaryLabel={
                           <Shelf justifyContent="space-between">
                             <>
-                              {loan.pricing.maxBorrowQuantity.sub(loan.totalBorrowed).toString()} x {loan.pricing.Isin}{' '}
-                              (
                               {loan.pricing.maxBorrowQuantity
-                                .sub(loan.totalBorrowed)
-                                .mul(new BN(loan.pricing.oracle.value))
+                                .sub(loan.pricing.outstandingQuantity)
+                                .div(new BN(10).pow(new BN(pool?.currency.decimals)))
                                 .toString()}{' '}
-                              {pool?.currency.symbol})
+                              x {loan.pricing.Isin} (
+                              {formatBalance(
+                                new CurrencyBalance(
+                                  loan.pricing.maxBorrowQuantity
+                                    .sub(loan.pricing.outstandingQuantity)
+                                    .mul(new BN(loan.pricing.oracle.value))
+                                    .div(new BN(10).pow(new BN(27))),
+                                  pool?.currency.decimals
+                                ),
+                                pool?.currency.symbol,
+                                2
+                              )}
+                              )
                             </>
                             <Button
                               small
@@ -189,8 +199,12 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                               onClick={() => {
                                 form.setFieldValue(
                                   'amount',
-                                  // @ts-expect-error
-                                  loan.pricing.maxBorrowQuantity.sub(loan.totalBorrowed).toNumber()
+                                  'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                                    ? loan.pricing.maxBorrowQuantity
+                                        .sub(loan.pricing.outstandingQuantity || '0')
+                                        .div(new BN(10).pow(new BN(pool?.currency.decimals)))
+                                        .toNumber()
+                                    : '0'
                                 )
                               }}
                             >
