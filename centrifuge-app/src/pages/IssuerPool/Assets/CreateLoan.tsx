@@ -66,7 +66,7 @@ export type CreateLoanFormValues = {
     probabilityOfDefault: number | ''
     lossGivenDefault: number | ''
     discountRate: number | ''
-    maxBorrowQuantity: string
+    maxBorrowQuantity: number | ''
     Isin: string
   }
 }
@@ -229,7 +229,7 @@ function IssuerCreateLoan() {
         values.pricing.valuationMethod === 'oracle'
           ? {
               valuationMethod: values.pricing.valuationMethod,
-              maxBorrowQuantity: values.pricing.maxBorrowQuantity,
+              maxBorrowQuantity: CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals),
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
             }

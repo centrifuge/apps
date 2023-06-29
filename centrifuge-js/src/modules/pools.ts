@@ -1181,7 +1181,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 priceId: {
                   isin: infoInput.Isin,
                 },
-                maxBorrowQuantity: infoInput.maxBorrowQuantity,
+                maxBorrowQuantity: infoInput.maxBorrowQuantity.toString(),
               },
             }
           : {
