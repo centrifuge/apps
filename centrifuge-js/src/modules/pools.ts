@@ -350,11 +350,12 @@ export type InternalPricingInfo = {
 
 export type ExternalPricingInfo = {
   valuationMethod: 'oracle'
-  maxBorrowQuantity: string
+  maxBorrowQuantity: CurrencyBalance
+  outstandingQuantity: CurrencyBalance
   Isin: string
   maturityDate: string
   oracle: {
-    value: number | string
+    value: Rate
     timestamp: number
   }
 }
@@ -2051,7 +2052,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
               oracleValues[`0x${oracle[0].toString().slice(-24)}`] = {
                 timestamp,
-                value: hexToBN(value).toString(),
+                value: new Rate(hexToBN(value)),
               }
 
               return oracleValues
@@ -2059,7 +2060,7 @@ export function getPoolsModule(inst: Centrifuge) {
             {} as {
               [isin: string]: {
                 timestamp: number
-                value: string
+                value: Rate
               }
             }
           )
@@ -2095,14 +2096,14 @@ export function getPoolsModule(inst: Centrifuge) {
                 'priceId' in pricingInfo
                   ? {
                       valuationMethod: 'oracle' as any,
-                      maxBorrowQuantity: pricingInfo.maxBorrowQuantity,
+                      maxBorrowQuantity: new CurrencyBalance(pricingInfo.maxBorrowQuantity, currency.decimals),
                       Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
                       maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
                       oracle: oraclePrices[pricingInfo.priceId.isin] as any,
                       outstandingQuantity:
                         'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
-                          ? info.pricing.external.outstandingQuantity
-                          : 0,
+                          ? new CurrencyBalance(info.pricing.external.outstandingQuantity, currency.decimals)
+                          : new CurrencyBalance('0', currency.decimals),
                     }
                   : {
                       valuationMethod: ('outstandingDebt' in pricingInfo.valuationMethod

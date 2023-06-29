@@ -129,14 +129,18 @@ const Loan: React.FC = () => {
                 label: <Tooltips type="availableFinancing" />,
                 value:
                   'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                    ? `${availableFinancing.toString()} @ ${loan.pricing.oracle.value} ${pool?.currency.symbol}`
+                    ? `${availableFinancing.toString()} x ${loan.pricing.oracle.value.toDecimal()} ${
+                        pool?.currency.symbol
+                      }`
                     : formatBalance(availableFinancing, pool?.currency.symbol),
               },
               {
                 label: <Tooltips type="outstanding" />,
                 value:
                   'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                    ? `${loan.totalBorrowed.toString()} @ ${loan.pricing.oracle.value} ${pool?.currency.symbol}`
+                    ? `${loan.totalBorrowed.toString()} x ${loan.pricing.oracle.value.toDecimal()} ${
+                        pool?.currency.symbol
+                      }`
                     : 'outstandingDebt' in loan
                     ? formatBalance(loan.outstandingDebt, pool?.currency.symbol)
                     : 'n/a',

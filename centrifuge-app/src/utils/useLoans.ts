@@ -58,7 +58,7 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
     loan.pricing.valuationMethod === 'oracle' &&
     loan.status === 'Created'
   ) {
-    return { current: Dec(loan.pricing.maxBorrowQuantity), initial: Dec(loan.pricing.maxBorrowQuantity) }
+    return { current: loan.pricing.maxBorrowQuantity.toDecimal(), initial: loan.pricing.maxBorrowQuantity.toDecimal() }
   }
 
   const initialCeiling = isTinlakePool

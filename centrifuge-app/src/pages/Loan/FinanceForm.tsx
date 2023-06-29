@@ -125,22 +125,28 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
             {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="heading3">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${new BN(loan.pricing.maxBorrowQuantity).sub(loan.totalBorrowed)} x ${loan.pricing.oracle.value} ${
+                ? `${loan.pricing.maxBorrowQuantity
+                    .sub(loan.pricing.outstandingQuantity)
+                    .div(new BN(10).pow(new BN(pool?.currency.decimals)))} x ${loan.pricing.oracle.value.toDecimal()} ${
                     pool?.currency.symbol
-                  }: ${new BN(loan.pricing.maxBorrowQuantity)
-                    .sub(loan.totalBorrowed)
-                    .mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
+                  }: ${formatBalance(
+                    new CurrencyBalance(
+                      loan.pricing.maxBorrowQuantity
+                        .sub(loan.pricing.outstandingQuantity)
+                        .mul(new BN(loan.pricing.oracle.value))
+                        .div(new BN(10).pow(new BN(27))),
+                      pool?.currency.decimals
+                    ),
+                    pool?.currency.symbol,
+                    2
+                  )}`
                 : formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}
             </Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
             <Text variant="label1">
-              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${loan.totalBorrowed.toString()} x ${loan.pricing.oracle.value} ${
-                    pool?.currency.symbol
-                  }: ${loan.totalBorrowed.mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
-                : formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}
+              {formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}
             </Text>
           </Shelf>
         </Stack>
@@ -169,9 +175,9 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                         secondaryLabel={
                           <Shelf justifyContent="space-between">
                             <>
-                              {new BN(loan.pricing.maxBorrowQuantity).sub(loan.totalBorrowed).toString()} x{' '}
-                              {loan.pricing.Isin} (
-                              {new BN(loan.pricing.maxBorrowQuantity)
+                              {loan.pricing.maxBorrowQuantity.sub(loan.totalBorrowed).toString()} x {loan.pricing.Isin}{' '}
+                              (
+                              {loan.pricing.maxBorrowQuantity
                                 .sub(loan.totalBorrowed)
                                 .mul(new BN(loan.pricing.oracle.value))
                                 .toString()}{' '}
@@ -184,7 +190,7 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                                 form.setFieldValue(
                                   'amount',
                                   // @ts-expect-error
-                                  new BN(loan.pricing.maxBorrowQuantity).sub(loan.totalBorrowed).toNumber()
+                                  loan.pricing.maxBorrowQuantity.sub(loan.totalBorrowed).toNumber()
                                 )
                               }}
                             >
@@ -235,21 +241,26 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="heading3">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${loan.totalBorrowed.toString()} x ${loan.pricing.oracle.value} ${pool?.currency.symbol}: ${new BN(
-                    loan.totalBorrowed
-                  ).mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
+                ? `${
+                    loan.pricing.outstandingQuantity
+                      .div(new BN(10).pow(new BN(pool?.currency.decimals - 2)))
+                      .toNumber() / 100
+                  } x ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}:  ${formatBalance(
+                    new CurrencyBalance(
+                      loan.pricing.outstandingQuantity
+                        .mul(new BN(loan.pricing.oracle.value))
+                        .div(new BN(10).pow(new BN(27))),
+                      pool?.currency.decimals
+                    ),
+                    pool?.currency.symbol,
+                    2
+                  )}`
                 : formatBalance(roundDown(debt), pool?.currency.symbol, 2)}
             </Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total repaid</Text>
-            <Text variant="label1">
-              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${loan.totalRepaid.toString()} x ${loan.pricing.oracle.value} ${
-                    pool?.currency.symbol
-                  }: ${loan.totalRepaid.mul(new BN(loan.pricing.oracle.value))} ${pool?.currency.symbol}`
-                : formatBalance(loan?.totalRepaid || 0, pool?.currency.symbol, 2)}
-            </Text>
+            <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency.symbol, 2)}</Text>
           </Shelf>
         </Stack>
 
