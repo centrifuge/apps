@@ -1939,7 +1939,7 @@ __metadata:
     "@web3-react/metamask": 8.2.1
     "@web3-react/store": 8.2.0
     "@web3-react/types": 8.2.0
-    "@web3-react/walletconnect-v2": /Users/sophial/Code/Work/Centrifuge/web3-react/packages/walletconnect-v2
+    "@web3-react/walletconnect-v2": 8.3.6
     babel-loader: 8.1.0
     bn.js: ^5.2.1
     buffer: ^6.0.3
@@ -9615,7 +9615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@walletconnect/ethereum-provider@npm:^2.8.3":
+"@walletconnect/ethereum-provider@npm:^2.8.3, @walletconnect/ethereum-provider@npm:^2.8.4":
   version: 2.8.6
   resolution: "@walletconnect/ethereum-provider@npm:2.8.6"
   dependencies:
@@ -9765,7 +9765,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@walletconnect/modal@npm:^2.5.4":
+"@walletconnect/modal@npm:^2.4.5, @walletconnect/modal@npm:^2.5.4":
   version: 2.5.9
   resolution: "@walletconnect/modal@npm:2.5.9"
   dependencies:
@@ -9984,15 +9984,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/walletconnect-v2@file:/Users/sophial/Code/Work/Centrifuge/web3-react/packages/walletconnect-v2::locator=%40centrifuge%2Fcentrifuge-react%40workspace%3Acentrifuge-react":
-  version: 8.3.5
-  resolution: "@web3-react/walletconnect-v2@file:/Users/sophial/Code/Work/Centrifuge/web3-react/packages/walletconnect-v2#/Users/sophial/Code/Work/Centrifuge/web3-react/packages/walletconnect-v2::hash=a4292d&locator=%40centrifuge%2Fcentrifuge-react%40workspace%3Acentrifuge-react"
+"@web3-react/walletconnect-v2@npm:8.3.6":
+  version: 8.3.6
+  resolution: "@web3-react/walletconnect-v2@npm:8.3.6"
   dependencies:
-    "@walletconnect/ethereum-provider": ^2.8.3
-    "@walletconnect/modal": ^2.5.4
+    "@walletconnect/ethereum-provider": ^2.8.4
+    "@walletconnect/modal": ^2.4.5
     "@web3-react/types": ^8.2.0
     eventemitter3: ^4.0.7
-  checksum: 19b5d0e46c910ff65d545230a2236568eee686e71b6667860302716813d5c4a8c9b1bd6fa42bb95b51120cc934f2d896cfaa5af98cf1df9d8e613172699e29fb
+  checksum: 7d7b0e68ad27ad99f1894c6361cf952e80bb1a6c5230015b95716d8c19c4eb3a497ae42311a3837647e73c38832847f015c123078e2f0ec198f702216e331b73
   languageName: node
   linkType: hard
 

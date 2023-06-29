@@ -77,7 +77,7 @@
     "@web3-react/metamask": "8.2.1",
     "@web3-react/store": "8.2.0",
     "@web3-react/types": "8.2.0",
-    "@web3-react/walletconnect-v2": "8.3.4",
+    "@web3-react/walletconnect-v2": "8.3.6",
     "bn.js": "^5.2.1",
     "buffer": "^6.0.3",
     "decimal.js-light": "^2.5.1",
