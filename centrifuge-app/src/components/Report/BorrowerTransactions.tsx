@@ -8,6 +8,7 @@ import { useBorrowerTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
+import { formatBorrowerTransactionsType } from './utils'
 
 export function BorrowerTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData } = React.useContext(ReportContext)
@@ -21,17 +22,17 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
     return transactions?.map((tx) => ({
       name: '',
       value: [
-        tx.loanId,
-        tx.epochId,
+        tx.loanId.split('-').at(-1)!,
+        tx.epochId.split('-').at(-1)!,
         formatDate(tx.timestamp.toString()),
-        tx.type,
+        formatBorrowerTransactionsType(tx.type),
         tx.amount ? formatBalance(tx.amount, pool.currency) : '-',
       ],
       heading: false,
     }))
   }, [transactions])
 
-  const headers = ['Loan', 'Epoch', 'Date', 'Type', 'Token amount']
+  const headers = ['Asset ID', 'Epoch', 'Date', 'Type', 'Token amount']
 
   const columns = headers.map((col, index) => ({
     align: 'left',
