@@ -6,8 +6,8 @@ export type LoanTemplateAttribute = {
   label: string
   type: {
     primitive: 'string' | 'number'
-    statistics: 'categorical' | 'continuous' | 'ordinal' | 'descrete'
-    constructor: 'String' | 'Date' | 'Number'
+    statistics?: 'categorical' | 'continuous' | 'ordinal' | 'discrete'
+    constructor: 'String' | 'Date' | 'Number' | 'File'
   }
   input: (
     | {
@@ -36,6 +36,10 @@ export type LoanTemplateAttribute = {
         max?: number
         unit?: string
         decimals?: number // when defined, number will be stored as an integer with its value multiplied by 10 ^ decimals
+      }
+    | {
+        type: 'encrypted-file'
+        accepted: string
       }
   ) & { placeholder?: string }
   output: {} | null

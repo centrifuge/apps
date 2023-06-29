@@ -1,4 +1,4 @@
-import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
+import Centrifuge, { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
   formatBalance,
   Transaction,
@@ -13,6 +13,7 @@ import {
   Button,
   CurrencyInput,
   DateInput,
+  FileUpload,
   Grid,
   ImageUpload,
   NumberInput,
@@ -139,6 +140,23 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
           max={input.max}
         />
       )
+    case 'encrypted-file':
+      return (
+        <Field name={name} validate={required()} key={label}>
+          {({ field, meta, form }: any) => (
+            <FileUpload
+              file={field.value ?? ''}
+              onFileChange={(file: any) => {
+                form.setFieldValue(name, file)
+              }}
+              accept={field.accepted}
+              label={`${label}*`}
+              placeholder="Choose file"
+              errorMessage={meta.touched && meta.error ? meta.error : undefined}
+            />
+          )}
+        </Field>
+      )
     default: {
       const { type, ...rest } = input.type as any
       return (
@@ -243,7 +261,7 @@ function IssuerCreateLoan() {
       }
       addTransaction(tx)
 
-      const attributes = valuesToPodAttributes(values.attributes, templateMetadata as any) as any
+      const attributes = (await valuesToPodAttributes(centrifuge, values.attributes, templateMetadata as any)) as any
       attributes._template = { type: 'string', value: templateId }
 
       let imageMetadataHash
@@ -458,58 +476,149 @@ function IssuerCreateLoan() {
   )
 }
 
-function valuesToPodAttributes(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
+async function valuesToPodAttributes(
+  centrifuge: Centrifuge,
+  values: CreateLoanFormValues['attributes'],
+  template: LoanTemplate
+) {
   return Object.fromEntries(
-    template.sections.flatMap((section) =>
-      section.attributes.map((key) => {
-        const attr = template.attributes[key]
-        const value = values[key]
-        switch (attr.input.type) {
-          case 'date':
-            return [
-              key,
-              {
-                type: 'timestamp',
-                value: new Date(value).toISOString(),
-              },
-            ]
-          case 'currency': {
-            const formatted = attr.input.decimals
-              ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
-              : String(value)
-            return [
-              key,
-              {
-                type: 'monetary',
-                value: formatted,
-                monetary_value: {
-                  ID: attr.input.symbol,
-                  Value: formatted,
-                  ChainID: 1,
-                },
-              },
-            ]
-          }
-          case 'number':
-            return [
-              key,
-              {
-                type: attr.input.decimals ? 'integer' : 'decimal',
-                value: attr.input.decimals
-                  ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
-                  : String(value),
-              },
-            ]
-          default:
-            return [
-              key,
-              {
-                type: 'string',
-                value: String(value),
-              },
-            ]
-        }
-      })
-    )
+    (
+      await Promise.all(
+        template.sections.map(
+          async (section) =>
+            await Promise.all(
+              section.attributes.map(async (key) => {
+                const attr = template.attributes[key]
+                const value = values[key]
+                switch (attr.input.type) {
+                  case 'date':
+                    return [
+                      key,
+                      {
+                        type: 'timestamp',
+                        value: new Date(value).toISOString(),
+                      },
+                    ]
+                  case 'currency': {
+                    const formatted = attr.input.decimals
+                      ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+                      : String(value)
+                    return [
+                      key,
+                      {
+                        type: 'monetary',
+                        value: formatted,
+                        monetary_value: {
+                          ID: attr.input.symbol,
+                          Value: formatted,
+                          ChainID: 1,
+                        },
+                      },
+                    ]
+                  }
+                  case 'number':
+                    return [
+                      key,
+                      {
+                        type: attr.input.decimals ? 'integer' : 'decimal',
+                        value: attr.input.decimals
+                          ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+                          : String(value),
+                      },
+                    ]
+                  case 'encrypted-file':
+                    const unencryptedFile = value as unknown as File
+
+                    const fileReader = new FileReader()
+                    let base64: any
+                    fileReader.onload = (fileLoadedEvent) => {
+                      base64 = fileLoadedEvent.target!.result
+                    }
+                    fileReader.readAsDataURL(unencryptedFile)
+
+                    // For some reason, this is required :O
+                    await unencryptedFile.text()
+
+                    const randomString = crypto.getRandomValues(new Uint8Array(32))
+                    const encryptionKey = Array.from(randomString, (dec) => dec.toString(16).padStart(2, '0')).join('')
+                    const encryptedContents = await aesGcmEncrypt(base64!, encryptionKey)
+                    const uri = (
+                      (await lastValueFrom(centrifuge.metadata.pinJson({ contents: encryptedContents }))) as any
+                    ).uri
+
+                    return [
+                      key,
+                      {
+                        type: 'string',
+                        value: JSON.stringify({
+                          encryptionKey,
+                          uri,
+                          mime: unencryptedFile.type,
+                          encryptionMethod: 'AES-GCM',
+                        }),
+                      },
+                    ]
+                  default:
+                    return [
+                      key,
+                      {
+                        type: 'string',
+                        value: String(value),
+                      },
+                    ]
+                }
+              })
+            )
+        )
+      )
+    ).flat()
   )
+}
+
+// Source: https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a
+async function aesGcmEncrypt(plaintext: string, password: string) {
+  const pwUtf8 = new TextEncoder().encode(password) // encode password as UTF-8
+  const pwHash = await crypto.subtle.digest('SHA-256', pwUtf8) // hash the password
+
+  const iv = crypto.getRandomValues(new Uint8Array(12)) // get 96-bit random iv
+  const ivStr = Array.from(iv)
+    .map((b) => String.fromCharCode(b))
+    .join('') // iv as utf-8 string
+
+  const alg = { name: 'AES-GCM', iv: iv } // specify algorithm to use
+
+  const key = await crypto.subtle.importKey('raw', pwHash, alg, false, ['encrypt']) // generate key from pw
+
+  const ptUint8 = new TextEncoder().encode(plaintext) // encode plaintext as UTF-8
+  const ctBuffer = await crypto.subtle.encrypt(alg, key, ptUint8) // encrypt plaintext using key
+
+  const ctArray = Array.from(new Uint8Array(ctBuffer)) // ciphertext as byte array
+  const ctStr = ctArray.map((byte) => String.fromCharCode(byte)).join('') // ciphertext as string
+
+  return btoa(ivStr + ctStr) // iv+ciphertext base64-encoded
+}
+
+// Source: https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a
+async function aesGcmDecrypt(ciphertext: string, password: string) {
+  const pwUtf8 = new TextEncoder().encode(password) // encode password as UTF-8
+  const pwHash = await crypto.subtle.digest('SHA-256', pwUtf8) // hash the password
+
+  const ivStr = atob(ciphertext).slice(0, 12) // decode base64 iv
+  const iv = new Uint8Array(Array.from(ivStr).map((ch) => ch.charCodeAt(0))) // iv as Uint8Array
+
+  const alg = { name: 'AES-GCM', iv: iv } // specify algorithm to use
+
+  const key = await crypto.subtle.importKey('raw', pwHash, alg, false, ['decrypt']) // generate key from pw
+
+  const ctStr = atob(ciphertext).slice(12) // decode base64 ciphertext
+  const ctUint8 = new Uint8Array(Array.from(ctStr).map((ch) => ch.charCodeAt(0))) // ciphertext as Uint8Array
+  // note: why doesn't ctUint8 = new TextEncoder().encode(ctStr) work?
+
+  try {
+    const plainBuffer = await crypto.subtle.decrypt(alg, key, ctUint8) // decrypt ciphertext using key
+    const plaintext = new TextDecoder().decode(plainBuffer) // plaintext from ArrayBuffer
+    return plaintext // return the plaintext
+  } catch (e) {
+    throw new Error('Decrypt failed')
+  }
 }

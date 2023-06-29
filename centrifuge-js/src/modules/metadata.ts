@@ -2,12 +2,20 @@ import { first, from, map, Observable } from 'rxjs'
 import Centrifuge from '..'
 
 export function getMetadataModule(inst: Centrifuge) {
+  function getFile<T = any>(uri: string): Observable<T | T[] | null> {
+    const url = parseMetadataUrl(uri)
+    if (!url) {
+      return from([])
+    }
+    return inst.getFileObservable<T>(url)
+  }
+
   function getMetadata<T = any>(uri: string): Observable<T | T[] | null> {
     const url = parseMetadataUrl(uri)
     if (!url) {
       return from([])
     }
-    return inst.getMetadataObservable<T>(url)
+    return inst.getJsonObservable<T>(url)
   }
 
   function pinFile(b64URI: string): Observable<{ uri: string; ipfsHash: string }> {

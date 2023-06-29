@@ -335,7 +335,30 @@ export class CentrifugeBase {
     return $
   }
 
-  getMetadataObservable<T = any>(url: string, optional = true) {
+  getFileObservable<T = any>(url: string, optional = true) {
+    if (new URL(url)?.hostname !== new URL(this.config.metadataHost).hostname) {
+      console.warn('Invalid url')
+      return from([])
+    }
+    const $ = fromFetch(url)
+    if (optional) {
+      return $.pipe(
+        startWith(null),
+        catchError(() => of(null)),
+        switchMap((res) => {
+          return from(res?.text() || []) as Observable<unknown> as Observable<T>
+        })
+      )
+    }
+
+    return $.pipe(
+      switchMap((res) => {
+        return from(res.text()) as Observable<unknown> as Observable<T>
+      })
+    )
+  }
+
+  getJsonObservable<T = any>(url: string, optional = true) {
     if (new URL(url)?.hostname !== new URL(this.config.metadataHost).hostname) {
       console.warn('Invalid url')
       return from([])

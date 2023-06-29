@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import Centrifuge, { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -13,6 +13,7 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { lastValueFrom } from 'rxjs'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
@@ -162,7 +163,7 @@ const Loan: React.FC = () => {
                       const attribute = templateData.attributes?.[key]
                       if (!attribute) return null
                       const value = publicData[key] ?? privateData[key]
-                      const formatted = value ? formatValue(value, attribute) : '-'
+                      const formatted = value ? formatValue(cent, value, attribute, name) : '-'
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
@@ -270,7 +271,7 @@ const Loan: React.FC = () => {
   )
 }
 
-function formatValue(value: any, attr: LoanTemplateAttribute) {
+function formatValue(centrifuge: Centrifuge, value: any, attr: LoanTemplateAttribute, loanName: string) {
   switch (attr.input.type) {
     case 'number':
       return `${(attr.input.decimals
@@ -284,7 +285,81 @@ function formatValue(value: any, attr: LoanTemplateAttribute) {
       )
     case 'date':
       return formatDate(value)
+    case 'encrypted-file':
+      const viewFile = async () => {
+        const fileObject = JSON.parse(value)
+        const contents = ((await lastValueFrom(centrifuge.metadata.getMetadata<string>(fileObject.uri))) as any)
+          .contents
+        const decryptedContents = await aesGcmDecrypt(contents as string, fileObject.encryptionKey)
+
+        const newWindow = window.open('')
+        newWindow!.document.write("<iframe width='100%' height='100%' src='" + decryptedContents + "'></iframe>")
+      }
+
+      const downloadFile = async () => {
+        const fileObject = JSON.parse(value)
+        const contents = ((await lastValueFrom(centrifuge.metadata.getMetadata<string>(fileObject.uri))) as any)
+          .contents
+        const decryptedContents = await aesGcmDecrypt(contents as string, fileObject.encryptionKey)
+
+        const downloadLink = document.createElement('a')
+        const fileName = `${convertToSlug(loanName)}_${convertToSlug(attr.label)}.pdf`
+        downloadLink.href = decryptedContents
+        downloadLink.download = fileName
+        downloadLink.click()
+      }
+
+      return (
+        <>
+          <AnchorPillButton
+            onClick={() => viewFile()}
+            target="_blank"
+            style={{ wordBreak: 'break-all', whiteSpace: 'initial', marginRight: '4px' }}
+          >
+            View
+          </AnchorPillButton>
+          <AnchorPillButton
+            onClick={() => downloadFile()}
+            target="_blank"
+            style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+          >
+            Download
+          </AnchorPillButton>
+        </>
+      )
     default:
       return value
   }
+}
+
+// Source: https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a
+async function aesGcmDecrypt(ciphertext: string, password: string) {
+  const pwUtf8 = new TextEncoder().encode(password) // encode password as UTF-8
+  const pwHash = await crypto.subtle.digest('SHA-256', pwUtf8) // hash the password
+
+  const ivStr = atob(ciphertext).slice(0, 12) // decode base64 iv
+  const iv = new Uint8Array(Array.from(ivStr).map((ch) => ch.charCodeAt(0))) // iv as Uint8Array
+
+  const alg = { name: 'AES-GCM', iv: iv } // specify algorithm to use
+
+  const key = await crypto.subtle.importKey('raw', pwHash, alg, false, ['decrypt']) // generate key from pw
+
+  const ctStr = atob(ciphertext).slice(12) // decode base64 ciphertext
+  const ctUint8 = new Uint8Array(Array.from(ctStr).map((ch) => ch.charCodeAt(0))) // ciphertext as Uint8Array
+  // note: why doesn't ctUint8 = new TextEncoder().encode(ctStr) work?
+
+  try {
+    const plainBuffer = await crypto.subtle.decrypt(alg, key, ctUint8) // decrypt ciphertext using key
+    const plaintext = new TextDecoder().decode(plainBuffer) // plaintext from ArrayBuffer
+    return plaintext // return the plaintext
+  } catch (e) {
+    throw new Error('Decrypt failed')
+  }
+}
+
+const convertToSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '')
 }
