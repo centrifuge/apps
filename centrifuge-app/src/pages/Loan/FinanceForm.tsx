@@ -79,6 +79,8 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
       const amount =
         'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
           ? new BN(values.amount.toString())
+              .mul(loan.pricing.oracle.value)
+              .div(new BN(10).pow(new BN(27 - pool.currency.decimals)))
           : CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
       doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
