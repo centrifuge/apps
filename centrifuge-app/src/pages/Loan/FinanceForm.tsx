@@ -93,8 +93,13 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doRepayTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
+      const amount =
+        'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+          ? new BN(values.amount.toString())
+              .mul(loan.pricing.oracle.value)
+              .div(new BN(10).pow(new BN(27 - pool.currency.decimals)))
+          : CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
+      doRepayTransaction([loan.poolId, loan.id, amount, new BN(0)], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -171,7 +176,7 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                     return (
                       <NumberInput
                         {...field}
-                        label="Amount"
+                        label="Quantity"
                         disabled={isFinanceLoading}
                         errorMessage={meta.touched ? meta.error : undefined}
                         secondaryLabel={
@@ -293,6 +298,53 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                   name="amount"
                 >
                   {({ field, meta, form }: FieldProps) => {
+                    if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
+                      return (
+                        <NumberInput
+                          {...field}
+                          label="Quantity"
+                          disabled={isRepayLoading || isRepayAllLoading}
+                          errorMessage={meta.touched ? meta.error : undefined}
+                          secondaryLabel={
+                            <Shelf justifyContent="space-between">
+                              <>
+                                {loan.pricing.outstandingQuantity
+                                  .div(new BN(10).pow(new BN(pool?.currency.decimals)))
+                                  .toString()}{' '}
+                                x {loan.pricing.Isin} (
+                                {formatBalance(
+                                  new CurrencyBalance(
+                                    loan.pricing.outstandingQuantity
+                                      .mul(new BN(loan.pricing.oracle.value))
+                                      .div(new BN(10).pow(new BN(27))),
+                                    pool?.currency.decimals
+                                  ),
+                                  pool?.currency.symbol,
+                                  2
+                                )}
+                                )
+                              </>
+                              <Button
+                                small
+                                variant="secondary"
+                                onClick={() => {
+                                  form.setFieldValue(
+                                    'amount',
+                                    'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                                      ? loan.pricing.outstandingQuantity
+                                          .div(new BN(10).pow(new BN(pool?.currency.decimals)))
+                                          .toNumber()
+                                      : '0'
+                                  )
+                                }}
+                              >
+                                MAX
+                              </Button>
+                            </Shelf>
+                          }
+                        />
+                      )
+                    }
                     return (
                       <CurrencyInput
                         {...field}

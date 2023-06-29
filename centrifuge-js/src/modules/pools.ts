@@ -1230,13 +1230,13 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
-    const [poolId, loanId, amount] = args
+  function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN, uncheckedAmount: BN], options?: TransactionOptions) {
+    const [poolId, loanId, amount, uncheckedAmount] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.repay(poolId, loanId, amount.toString())
+        const submittable = api.tx.loans.repay(poolId, loanId, amount.toString(), uncheckedAmount.toString())
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -1260,7 +1260,7 @@ export function getPoolsModule(inst: Centrifuge) {
             : Dec(0)
         const amount = CurrencyBalance.fromFloat(debtWithMargin || 0, pool.currency.decimals).toString()
         const submittable = api.tx.utility.batchAll([
-          api.tx.loans.repay(poolId, loanId, amount),
+          api.tx.loans.repay(poolId, loanId, amount, '0'),
           api.tx.loans.close(poolId, loanId),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
@@ -2155,16 +2155,23 @@ export function getPoolsModule(inst: Centrifuge) {
                 percentage: new Rate(hexToBN(loan.writeOffPercentage)),
               }
 
+              const sharedInfo = getSharedLoanInfo(loan)
+
               // TODO: for external assets, debt = outstandingDebt * price
               const outstandingDebt =
                 'internal' in loan.pricing
                   ? getOutstandingDebt(loan, currency.decimals, interestLastUpdated.toJSON() as number, interestData)
-                  : new CurrencyBalance(0, currency.decimals)
+                  : new CurrencyBalance(
+                      new BN(loan.pricing.external.outstandingQuantity)
+                        .mul(sharedInfo.pricing.oracle.value)
+                        .div(new BN(10).pow(new BN(27))),
+                      currency.decimals
+                    )
 
               const nil = new CurrencyBalance(0, currency.decimals)
 
               return {
-                ...getSharedLoanInfo(loan),
+                ...sharedInfo,
                 id: loanId.toString(),
                 poolId,
                 status: 'Active',

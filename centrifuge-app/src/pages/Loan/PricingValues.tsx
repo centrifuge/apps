@@ -18,7 +18,7 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
 
     return (
       <>
-        <LabelValueStack label="Valuation Method" value="Oracle" />
+        <LabelValueStack label="Valuation method" value="Oracle" />
         <LabelValueStack label="Max quantity" value={pricing.maxBorrowQuantity.toDecimal().toString()} />
         <LabelValueStack label="ISIN" value={pricing.Isin} />
         <LabelValueStack label="Current price" value={`${pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`} />
