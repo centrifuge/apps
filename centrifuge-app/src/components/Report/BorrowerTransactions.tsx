@@ -26,7 +26,7 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
         tx.epochId.split('-').at(-1)!,
         formatDate(tx.timestamp.toString()),
         formatBorrowerTransactionsType(tx.type),
-        tx.amount ? formatBalance(tx.amount, pool.currency) : '-',
+        tx.amount ? `${pool.currency} ${formatBalance(tx.amount)}` : '-',
       ],
       heading: false,
     }))
