@@ -130,6 +130,61 @@ export type LoanInfoData = {
   }
 }
 
+export type ActiveLoanInfoData = {
+  /// Specify the repayments schedule of the loan
+  schedule: {
+    maturity: { fixed: number }
+    interestPayments: 'None'
+    payDownSchedule: 'None'
+  }
+
+  /// Collateral used for this loan
+  collateral: [string, string]
+
+  pricing:
+    | {
+        external: {
+          info: {
+            priceId: {
+              isin: string
+            }
+            maxBorrowQuantity: string
+          }
+          outstandingQuantity: string
+        }
+      }
+    | {
+        internal: {
+          info: {
+            /// Valuation method of this loan
+            valuationMethod:
+              | { outstandingDebt: null }
+              | {
+                  discountedCashFlow: {
+                    probabilityOfDefault: string
+                    lossGivenDefault: string
+                    discountRate: string
+                  }
+                }
+            /// Value of the collateral used for this loan
+            collateralValue: string
+            /// Interest rate per second with any penalty applied
+            interestRate: string
+            maxBorrowAmount:
+              | { upToTotalBorrowed: { advanceRate: string } }
+              | { upToOutstandingDebt: { advanceRate: string } }
+          }
+          writeOffPenalty: string
+        }
+      }
+
+  /// Restrictions of this loan
+  restrictions: {
+    borrows: 'NotWrittenOff'
+    repayments: 'None'
+  }
+}
+
 type TrancheDetailsData = {
   trancheType:
     | { residual: null }
@@ -261,14 +316,10 @@ type CreatedLoanData = {
 }
 
 // type from chain
-type ActiveLoanData = {
+type ActiveLoanData = ActiveLoanInfoData & {
   loanId: string
   borrower: string
-  info: LoanInfoData
-  writeOffStatus: {
-    percentage: string
-    penalty: string
-  }
+  writeOffPercentage: string
   originationDate: number
   normalizedDebt: string
   totalBorrowed: string
@@ -2017,12 +2068,22 @@ export function getPoolsModule(inst: Centrifuge) {
           const rates = rateValues.toJSON() as InterestAccrual[]
 
           function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
-            const { info } = loan
+            const info = 'info' in loan ? loan.info : loan
             const [collectionId, nftId] = info.collateral
 
+            // Active loans have additinal info layer
+            const pricingInfo =
+              'info' in loan
+                ? 'external' in loan.info.pricing
+                  ? loan.info.pricing.external
+                  : loan.info.pricing.internal
+                : 'external' in loan.pricing
+                ? loan.pricing.external.info
+                : loan.pricing.internal.info
+
             const discount =
-              'internal' in info.pricing && 'discountedCashFlow' in info.pricing.internal.valuationMethod
-                ? info.pricing.internal.valuationMethod.discountedCashFlow
+              'maxBorrowAmount' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
+                ? pricingInfo.valuationMethod.discountedCashFlow
                 : undefined
 
             return {
@@ -2031,23 +2092,25 @@ export function getPoolsModule(inst: Centrifuge) {
                 nftId: hexToBN(nftId).toString(),
               },
               pricing:
-                'external' in info.pricing
+                'priceId' in pricingInfo
                   ? {
                       valuationMethod: 'oracle' as any,
-                      maxBorrowQuantity: info.pricing.external.maxBorrowQuantity,
-                      Isin: Buffer.from(info.pricing.external.priceId.isin.substring(2), 'hex').toString(),
-                      maturityDate: new Date(loan.info.schedule.maturity.fixed * 1000).toISOString(),
-                      oracle: oraclePrices[info.pricing.external.priceId.isin] as any,
+                      maxBorrowQuantity: pricingInfo.maxBorrowQuantity,
+                      Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
+                      maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
+                      oracle: oraclePrices[pricingInfo.priceId.isin] as any,
+                      outstandingQuantity:
+                        'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
+                          ? info.pricing.external.outstandingQuantity
+                          : 0,
                     }
                   : {
-                      valuationMethod: ('outstandingDebt' in info.pricing.internal.valuationMethod
+                      valuationMethod: ('outstandingDebt' in pricingInfo.valuationMethod
                         ? 'outstandingDebt'
                         : 'discountedCashFlow') as any,
-                      maxBorrowAmount: Object.keys(info.pricing.internal.maxBorrowAmount)[0] as any,
-                      value: new CurrencyBalance(hexToBN(info.pricing.internal.collateralValue), currency.decimals),
-                      advanceRate: new Rate(
-                        hexToBN(Object.values(info.pricing.internal.maxBorrowAmount)[0].advanceRate)
-                      ),
+                      maxBorrowAmount: Object.keys(pricingInfo.maxBorrowAmount)[0] as any,
+                      value: new CurrencyBalance(hexToBN(pricingInfo.collateralValue), currency.decimals),
+                      advanceRate: new Rate(hexToBN(Object.values(pricingInfo.maxBorrowAmount)[0].advanceRate)),
                       probabilityOfDefault: discount?.probabilityOfDefault
                         ? new Rate(hexToBN(discount.probabilityOfDefault))
                         : undefined,
@@ -2055,7 +2118,7 @@ export function getPoolsModule(inst: Centrifuge) {
                         ? new Rate(hexToBN(discount.lossGivenDefault))
                         : undefined,
                       discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
-                      interestRate: new Rate(hexToBN(info.pricing.internal.interestRate)),
+                      interestRate: new Rate(hexToBN(pricingInfo.interestRate)),
                       maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
                     },
             }
@@ -2078,22 +2141,30 @@ export function getPoolsModule(inst: Centrifuge) {
           })
 
           const activeLoans: ActiveLoan[] = (activeLoanValues.toJSON() as any[]).map(
-            ([loan]: [ActiveLoanData, number]) => {
+            ([loanId, loan]: [number, ActiveLoanData]) => {
               const loanRate =
-                'internal' in loan.info.pricing
-                  ? new Rate(hexToBN(loan.info.pricing.internal.interestRate)).toDecimal().toString()
+                'internal' in loan.pricing
+                  ? new Rate(hexToBN(loan.pricing.internal.info.interestRate)).toDecimal().toString()
                   : '0'
               const interestData = rates.find(
                 (rate) => new Rate(hexToBN(rate.interestRatePerSec)).toApr().toDecimalPlaces(4).toString() === loanRate
               )
               const writeOffStatus = {
-                penaltyInterestRate: new Rate(hexToBN(loan.writeOffStatus.penalty)),
-                percentage: new Rate(hexToBN(loan.writeOffStatus.percentage)),
+                penaltyInterestRate: new Rate(0), // TODO: fix
+                percentage: new Rate(hexToBN(loan.writeOffPercentage)),
               }
+
+              // TODO: for external assets, debt = outstandingDebt * price
+              const outstandingDebt =
+                'internal' in loan.pricing
+                  ? getOutstandingDebt(loan, currency.decimals, interestLastUpdated.toJSON() as number, interestData)
+                  : new CurrencyBalance(0, currency.decimals)
+
+              const nil = new CurrencyBalance(0, currency.decimals)
 
               return {
                 ...getSharedLoanInfo(loan),
-                id: hexToBN(loan.loanId).toString(),
+                id: loanId.toString(),
                 poolId,
                 status: 'Active',
                 borrower: addressToHex(loan.borrower),
@@ -2101,13 +2172,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 totalBorrowed: new CurrencyBalance(hexToBN(loan.totalBorrowed), currency.decimals),
                 totalRepaid: new CurrencyBalance(hexToBN(loan.totalRepaid), currency.decimals),
                 originationDate: new Date(loan.originationDate * 1000).toISOString(),
-                outstandingDebt: getOutstandingDebt(
-                  loan,
-                  currency.decimals,
-                  interestLastUpdated.toJSON() as number,
-                  interestData
-                ),
-                normalizedDebt: new CurrencyBalance(hexToBN(loan.normalizedDebt), currency.decimals),
+                outstandingDebt,
+                normalizedDebt:
+                  'normalizedDebt' in loan ? new CurrencyBalance(hexToBN(loan.normalizedDebt), currency.decimals) : nil,
               }
             }
           )
