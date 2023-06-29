@@ -138,9 +138,10 @@ const Loan: React.FC = () => {
                 label: <Tooltips type="outstanding" />,
                 value:
                   'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                    ? `${loan.totalBorrowed.toString()} x ${loan.pricing.oracle.value.toDecimal()} ${
-                        pool?.currency.symbol
-                      }`
+                    ? `${new CurrencyBalance(
+                        loan.pricing.outstandingQuantity,
+                        pool?.currency.decimals
+                      ).toDecimal()} x ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`
                     : 'outstandingDebt' in loan
                     ? formatBalance(loan.outstandingDebt, pool?.currency.symbol)
                     : 'n/a',
