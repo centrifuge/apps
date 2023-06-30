@@ -18,13 +18,13 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
 
     return (
       <>
+        <LabelValueStack label="ISIN" value={pricing.Isin} />
+        <LabelValueStack label="Current price" value={`${pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`} />
+        <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
         <LabelValueStack label="Valuation method" value="Oracle" />
         {pricing.maxBorrowQuantity && (
           <LabelValueStack label="Max quantity" value={pricing.maxBorrowQuantity.toDecimal().toString()} />
         )}
-        <LabelValueStack label="ISIN" value={pricing.Isin} />
-        <LabelValueStack label="Current price" value={`${pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`} />
-        <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
       </>
     )
   }
