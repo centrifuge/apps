@@ -106,47 +106,54 @@ const Loan: React.FC = () => {
       {loan && pool && (
         <>
           <PageSummary
-            data={[
-              {
-                label: (
-                  <Tooltips
-                    type={
-                      isTinlakePool
-                        ? 'riskGroup'
-                        : 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                        ? 'assetType'
-                        : 'collateralValue'
-                    }
-                  />
-                ),
-                value: isTinlakePool
-                  ? 'riskGroup' in loan
-                  : 'value' in loan.pricing
-                  ? formatBalance(loan.pricing.value, pool?.currency.symbol)
-                  : 'TBD',
-              },
-              {
-                label: <Tooltips type="availableFinancing" />,
-                value:
-                  'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                    ? `${availableFinancing.toString()} x ${loan.pricing.oracle.value.toDecimal()} ${
-                        pool?.currency.symbol
-                      }`
-                    : formatBalance(availableFinancing, pool?.currency.symbol),
-              },
-              {
-                label: <Tooltips type="outstanding" />,
-                value:
-                  'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                    ? `${new CurrencyBalance(
-                        loan.pricing.outstandingQuantity,
-                        pool?.currency.decimals
-                      ).toDecimal()} x ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`
-                    : 'outstandingDebt' in loan
-                    ? formatBalance(loan.outstandingDebt, pool?.currency.symbol)
-                    : 'n/a',
-              },
-            ]}
+            data={
+              'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                ? [
+                    {
+                      label: 'Value',
+                      value: formatBalance(loan.outstandingDebt, pool?.currency.symbol),
+                    },
+                    {
+                      label: 'Quantity',
+                      value: formatBalance(
+                        new CurrencyBalance(loan.pricing.outstandingQuantity, pool?.currency.decimals)
+                      ),
+                    },
+                    {
+                      label: 'Price',
+                      value: `${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`,
+                    },
+                  ]
+                : [
+                    {
+                      label: (
+                        <Tooltips
+                          type={
+                            isTinlakePool
+                              ? 'riskGroup'
+                              : 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                              ? 'assetType'
+                              : 'collateralValue'
+                          }
+                        />
+                      ),
+                      value: isTinlakePool
+                        ? 'riskGroup' in loan
+                        : 'value' in loan.pricing
+                        ? formatBalance(loan.pricing.value, pool?.currency.symbol)
+                        : 'TBD',
+                    },
+                    {
+                      label: <Tooltips type="availableFinancing" />,
+                      value: formatBalance(availableFinancing, pool?.currency.symbol),
+                    },
+                    {
+                      label: <Tooltips type="outstanding" />,
+                      value:
+                        'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt, pool?.currency.symbol) : 'n/a',
+                    },
+                  ]
+            }
           />
 
           {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&

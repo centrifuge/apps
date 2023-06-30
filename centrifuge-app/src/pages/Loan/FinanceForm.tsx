@@ -133,7 +133,9 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                 <Text variant="heading3">Available financing</Text>
                 {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
                 <Text variant="heading3">
-                  {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                  {'valuationMethod' in loan.pricing &&
+                  loan.pricing.valuationMethod === 'oracle' &&
+                  !!loan.pricing.maxBorrowQuantity
                     ? `${loan.pricing.maxBorrowQuantity
                         .sub(loan.pricing.outstandingQuantity)
                         .div(
@@ -183,44 +185,50 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                         disabled={isFinanceLoading}
                         errorMessage={meta.touched ? meta.error : undefined}
                         secondaryLabel={
-                          <Shelf justifyContent="space-between">
-                            <>
-                              {loan.pricing.maxBorrowQuantity
-                                .sub(loan.pricing.outstandingQuantity)
-                                .div(new BN(10).pow(new BN(pool?.currency.decimals)))
-                                .toString()}{' '}
-                              x {loan.pricing.Isin} (
-                              {formatBalance(
-                                new CurrencyBalance(
+                          'valuationMethod' in loan.pricing &&
+                          loan.pricing.valuationMethod === 'oracle' &&
+                          loan.pricing.maxBorrowQuantity && (
+                            <Shelf justifyContent="space-between">
+                              <>
+                                {loan.pricing.maxBorrowQuantity &&
                                   loan.pricing.maxBorrowQuantity
                                     .sub(loan.pricing.outstandingQuantity)
-                                    .mul(new BN(loan.pricing.oracle.value))
-                                    .div(new BN(10).pow(new BN(27))),
-                                  pool?.currency.decimals
-                                ),
-                                pool?.currency.symbol,
-                                2
-                              )}
-                              )
-                            </>
-                            <Button
-                              small
-                              variant="secondary"
-                              onClick={() => {
-                                form.setFieldValue(
-                                  'amount',
-                                  'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                                    ? loan.pricing.maxBorrowQuantity
-                                        .sub(loan.pricing.outstandingQuantity || '0')
-                                        .div(new BN(10).pow(new BN(pool?.currency.decimals)))
-                                        .toNumber()
-                                    : '0'
+                                    .div(new BN(10).pow(new BN(pool?.currency.decimals)))
+                                    .toString()}{' '}
+                                x {loan.pricing.Isin} (
+                                {loan.pricing.maxBorrowQuantity &&
+                                  formatBalance(
+                                    new CurrencyBalance(
+                                      loan.pricing.maxBorrowQuantity
+                                        .sub(loan.pricing.outstandingQuantity)
+                                        .mul(new BN(loan.pricing.oracle.value))
+                                        .div(new BN(10).pow(new BN(27))),
+                                      pool?.currency.decimals
+                                    ),
+                                    pool?.currency.symbol,
+                                    2
+                                  )}
                                 )
-                              }}
-                            >
-                              MAX
-                            </Button>
-                          </Shelf>
+                              </>
+                              <Button
+                                small
+                                variant="secondary"
+                                onClick={() => {
+                                  form.setFieldValue(
+                                    'amount',
+                                    'maxBorrowQuantity' in loan.pricing && !!loan.pricing.maxBorrowQuantity
+                                      ? loan.pricing.maxBorrowQuantity
+                                          .sub(loan.pricing.outstandingQuantity || '0')
+                                          .div(new BN(10).pow(new BN(pool?.currency.decimals)))
+                                          .toNumber()
+                                      : 0
+                                  )
+                                }}
+                              >
+                                MAX
+                              </Button>
+                            </Shelf>
+                          )
                         }
                       />
                     )
