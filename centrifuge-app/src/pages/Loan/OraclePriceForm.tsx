@@ -1,12 +1,13 @@
 import { Loan as LoanType, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useAddress, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Stack } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { switchMap } from 'rxjs'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { useSuitableAccounts } from '../../utils/usePermissions'
+import { usePoolPermissions } from '../../utils/usePermissions'
+import { usePool } from '../../utils/usePools'
 import { combine, positiveNumber } from '../../utils/validation'
 
 type PriceValues = {
@@ -14,7 +15,9 @@ type PriceValues = {
 }
 
 export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
-  const [account] = useSuitableAccounts({ poolId: loan.poolId, poolRole: ['PricingAdmin'] })
+  const address = useAddress()
+  const isLiquidityAdmin = usePoolPermissions(loan.poolId)?.[address || ''].roles.includes('LiquidityAdmin')
+  const pool = usePool(loan.poolId)
 
   const { execute: doOraclePriceTransaction, isLoading: isOraclePriceLoading } = useCentrifugeTransaction(
     'Set oracle price',
@@ -44,7 +47,7 @@ export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
     },
     onSubmit: (values, actions) => {
       const price = Rate.fromFloat(values.price)
-      doOraclePriceTransaction([price], { account })
+      doOraclePriceTransaction([price])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -53,7 +56,11 @@ export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
   const priceFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(oraclePriceForm, priceFormRef)
 
-  if (loan.status === 'Closed' || !('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle')) {
+  if (
+    !isLiquidityAdmin ||
+    loan.status === 'Closed' ||
+    !('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle')
+  ) {
     return null
   }
 
@@ -70,7 +77,7 @@ export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                     label="Price"
                     errorMessage={meta.touched ? meta.error : undefined}
                     disabled={isOraclePriceLoading}
-                    currency="USD"
+                    currency={pool.currency.symbol}
                     onChange={(value) => form.setFieldValue('price', value)}
                   />
                 )
