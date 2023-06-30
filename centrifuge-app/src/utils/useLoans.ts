@@ -60,7 +60,7 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
           ),
           initial: loan.pricing.maxBorrowQuantity.toDecimal(),
         }
-      : { current: Dec(1), initial: Dec(1) }
+      : { current: Dec(100000000), initial: Dec(100000000) }
   }
 
   const initialCeiling = isTinlakePool

@@ -247,15 +247,17 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                   )
                 }}
               </Field>
-              {poolReserve.lessThan(availableFinancing) && (
-                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
-                  <IconInfo size="iconMedium" />
-                  <Text variant="body3">
-                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
-                    than the available financing
-                  </Text>
-                </Shelf>
-              )}
+              {poolReserve.lessThan(availableFinancing) ||
+                ('valuationMethod' in loan.pricing &&
+                  !(loan.pricing.valuationMethod === 'oracle' && !loan.pricing.maxBorrowQuantity) && (
+                    <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
+                      <IconInfo size="iconMedium" />
+                      <Text variant="body3">
+                        The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is
+                        smaller than the available financing
+                      </Text>
+                    </Shelf>
+                  ))}
               <Stack px={1}>
                 <Button type="submit" loading={isFinanceLoading}>
                   Finance asset
