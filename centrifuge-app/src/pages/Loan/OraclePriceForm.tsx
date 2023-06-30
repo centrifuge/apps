@@ -59,7 +59,8 @@ export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
   if (
     !isLiquidityAdmin ||
     loan.status === 'Closed' ||
-    !('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle')
+    !('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') ||
+    import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('parachain.centrifuge.io')
   ) {
     return null
   }
