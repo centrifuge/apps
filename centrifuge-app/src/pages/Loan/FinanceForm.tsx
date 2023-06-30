@@ -127,29 +127,32 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
         <Stack>
-          <Shelf justifyContent="space-between">
-            <Text variant="heading3">Available financing</Text>
-            {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">
-              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${loan.pricing.maxBorrowQuantity
-                    .sub(loan.pricing.outstandingQuantity)
-                    .div(new BN(10).pow(new BN(pool?.currency.decimals)))} x ${loan.pricing.oracle.value.toDecimal()} ${
-                    pool?.currency.symbol
-                  }: ${formatBalance(
-                    new CurrencyBalance(
-                      loan.pricing.maxBorrowQuantity
+          {'valuationMethod' in loan.pricing &&
+            !(loan.pricing.valuationMethod === 'oracle' && !loan.pricing.maxBorrowQuantity) && (
+              <Shelf justifyContent="space-between">
+                <Text variant="heading3">Available financing</Text>
+                {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
+                <Text variant="heading3">
+                  {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                    ? `${loan.pricing.maxBorrowQuantity
                         .sub(loan.pricing.outstandingQuantity)
-                        .mul(new BN(loan.pricing.oracle.value))
-                        .div(new BN(10).pow(new BN(27))),
-                      pool?.currency.decimals
-                    ),
-                    pool?.currency.symbol,
-                    2
-                  )}`
-                : formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}
-            </Text>
-          </Shelf>
+                        .div(
+                          new BN(10).pow(new BN(pool?.currency.decimals))
+                        )} x ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}: ${formatBalance(
+                        new CurrencyBalance(
+                          loan.pricing.maxBorrowQuantity
+                            .sub(loan.pricing.outstandingQuantity)
+                            .mul(new BN(loan.pricing.oracle.value))
+                            .div(new BN(10).pow(new BN(27))),
+                          pool?.currency.decimals
+                        ),
+                        pool?.currency.symbol,
+                        2
+                      )}`
+                    : formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}
+                </Text>
+              </Shelf>
+            )}
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
             <Text variant="label1">

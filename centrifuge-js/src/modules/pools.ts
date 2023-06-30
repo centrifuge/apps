@@ -1230,7 +1230,10 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN, uncheckedAmount: BN], options?: TransactionOptions) {
+  function repayLoanPartially(
+    args: [poolId: string, loanId: string, amount: BN, uncheckedAmount: BN],
+    options?: TransactionOptions
+  ) {
     const [poolId, loanId, amount, uncheckedAmount] = args
     const $api = inst.getApi()
 
@@ -2087,6 +2090,15 @@ export function getPoolsModule(inst: Centrifuge) {
                 ? pricingInfo.valuationMethod.discountedCashFlow
                 : undefined
 
+            if ('maxBorrowQuantity' in pricingInfo) {
+              console.log(hexToBN(pricingInfo.maxBorrowQuantity).toString())
+              console.log(new BN(1000).pow(new BN(currency.decimals)).toString())
+              console.log(
+                hexToBN(pricingInfo.maxBorrowQuantity).gt(new BN(10000).mul(new BN(10).pow(new BN(currency.decimals))))
+                  ? 'true'
+                  : 'false'
+              )
+            }
             return {
               asset: {
                 collectionId: collectionId.toString(),
@@ -2096,7 +2108,13 @@ export function getPoolsModule(inst: Centrifuge) {
                 'priceId' in pricingInfo
                   ? {
                       valuationMethod: 'oracle' as any,
-                      maxBorrowQuantity: new CurrencyBalance(pricingInfo.maxBorrowQuantity, currency.decimals),
+                      // If the max borrow quantity is larger than 10k, this is assumed to be "limitless"
+                      // TODO: replace by Option once data structure on chain changes
+                      maxBorrowQuantity: hexToBN(pricingInfo.maxBorrowQuantity).gt(
+                        new BN(10000).mul(new BN(10).pow(new BN(currency.decimals)))
+                      )
+                        ? null
+                        : new CurrencyBalance(hexToBN(pricingInfo.maxBorrowQuantity), currency.decimals),
                       Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
                       maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
                       oracle: oraclePrices[pricingInfo.priceId.isin] as any,
