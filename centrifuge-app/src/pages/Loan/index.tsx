@@ -111,7 +111,12 @@ const Loan: React.FC = () => {
                 ? [
                     {
                       label: 'Value',
-                      value: formatBalance(loan.outstandingDebt, pool?.currency.symbol),
+                      value: formatBalance(
+                        'outstandingDebt' in loan
+                          ? loan.outstandingDebt
+                          : new CurrencyBalance(0, pool.currency.decimals),
+                        pool?.currency.symbol
+                      ),
                     },
                     {
                       label: 'Quantity',
@@ -126,17 +131,7 @@ const Loan: React.FC = () => {
                   ]
                 : [
                     {
-                      label: (
-                        <Tooltips
-                          type={
-                            isTinlakePool
-                              ? 'riskGroup'
-                              : 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                              ? 'assetType'
-                              : 'collateralValue'
-                          }
-                        />
-                      ),
+                      label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
                       value: isTinlakePool
                         ? 'riskGroup' in loan
                         : 'value' in loan.pricing
