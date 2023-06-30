@@ -350,7 +350,7 @@ export type InternalPricingInfo = {
 
 export type ExternalPricingInfo = {
   valuationMethod: 'oracle'
-  maxBorrowQuantity: CurrencyBalance
+  maxBorrowQuantity: CurrencyBalance | null
   outstandingQuantity: CurrencyBalance
   Isin: string
   maturityDate: string
@@ -2090,15 +2090,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 ? pricingInfo.valuationMethod.discountedCashFlow
                 : undefined
 
-            if ('maxBorrowQuantity' in pricingInfo) {
-              console.log(hexToBN(pricingInfo.maxBorrowQuantity).toString())
-              console.log(new BN(1000).pow(new BN(currency.decimals)).toString())
-              console.log(
-                hexToBN(pricingInfo.maxBorrowQuantity).gt(new BN(10000).mul(new BN(10).pow(new BN(currency.decimals))))
-                  ? 'true'
-                  : 'false'
-              )
-            }
             return {
               asset: {
                 collectionId: collectionId.toString(),
@@ -2175,7 +2166,6 @@ export function getPoolsModule(inst: Centrifuge) {
 
               const sharedInfo = getSharedLoanInfo(loan)
 
-              // TODO: for external assets, debt = outstandingDebt * price
               const outstandingDebt =
                 'internal' in loan.pricing
                   ? getOutstandingDebt(loan, currency.decimals, interestLastUpdated.toJSON() as number, interestData)
