@@ -3,6 +3,7 @@ import {
   combineAsync,
   imageFile,
   integer,
+  isin,
   max,
   maxDecimals,
   maxFileSize,
@@ -57,7 +58,7 @@ export const validate = {
   discountRate: combine(required(), nonNegativeNumber(), max(100)),
   lossGivenDefault: combine(required(), nonNegativeNumber(), max(100)),
   maxBorrowQuantity: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
-  Isin: combine(required(), minLength(12), maxLength(12)),
+  Isin: combine(required(), minLength(12), maxLength(12), isin()),
 
   // write-off groups
   days: combine(required(), integer(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
