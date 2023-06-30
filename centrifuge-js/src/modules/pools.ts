@@ -174,6 +174,7 @@ export type ActiveLoanInfoData = {
               | { upToTotalBorrowed: { advanceRate: string } }
               | { upToOutstandingDebt: { advanceRate: string } }
           }
+          normalizedDebt: string
           writeOffPenalty: string
         }
       }
@@ -317,11 +318,9 @@ type CreatedLoanData = {
 
 // type from chain
 type ActiveLoanData = ActiveLoanInfoData & {
-  loanId: string
   borrower: string
   writeOffPercentage: string
   originationDate: number
-  normalizedDebt: string
   totalBorrowed: string
   totalRepaid: string
 }
@@ -2004,6 +2003,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
+            api.events.priceOracle.NewFeedData.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
@@ -2190,7 +2190,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 originationDate: new Date(loan.originationDate * 1000).toISOString(),
                 outstandingDebt,
                 normalizedDebt:
-                  'normalizedDebt' in loan ? new CurrencyBalance(hexToBN(loan.normalizedDebt), currency.decimals) : nil,
+                  'internal' in loan.pricing
+                    ? new CurrencyBalance(hexToBN(loan.pricing.internal.normalizedDebt), currency.decimals)
+                    : nil,
               }
             }
           )
@@ -2454,9 +2456,14 @@ function getOutstandingDebt(
   accrual?: InterestAccrual
 ) {
   if (!accrual) return new CurrencyBalance(0, currencyDecimals)
+  if (!('internal' in loan.pricing)) return new CurrencyBalance(0, currencyDecimals)
   const accRate = new Rate(hexToBN(accrual.accumulatedRate)).toDecimal()
   const rate = new Rate(hexToBN(accrual.interestRatePerSec)).toDecimal()
-  const normalizedDebt = new CurrencyBalance(hexToBN(loan.normalizedDebt), currencyDecimals).toDecimal()
+  const normalizedDebt = new CurrencyBalance(
+    hexToBN(loan.pricing.internal.normalizedDebt),
+    currencyDecimals
+  ).toDecimal()
+
   const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
 
   const debtFromAccRate = normalizedDebt.mul(accRate)
