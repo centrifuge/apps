@@ -36,6 +36,7 @@ import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
+import { OraclePriceForm } from './OraclePriceForm'
 import { PricingValues } from './PricingValues'
 
 export const LoanPage: React.FC = () => {
@@ -53,7 +54,12 @@ const LoanSidebar: React.FC = () => {
 
   if (!loan || loan.status === 'Closed' || !canBorrow) return null
 
-  return <FinanceForm loan={loan} />
+  return (
+    <Stack gap={2}>
+      <OraclePriceForm loan={loan} />
+      <FinanceForm loan={loan} />
+    </Stack>
+  )
 }
 
 const Loan: React.FC = () => {
