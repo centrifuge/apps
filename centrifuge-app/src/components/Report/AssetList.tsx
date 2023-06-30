@@ -2,15 +2,17 @@ import { Loan, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoans } from '../../utils/useLoans'
 import { DataTable } from '../DataTable'
+import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
+import { UserFeedback } from './UserFeedback'
 
 export function AssetList({ pool }: { pool: Pool }) {
-  const loans = useLoans(pool.id)
+  const loans = useLoans(pool.id) as Loan[]
   const { setCsvData, startDate, endDate } = React.useContext(ReportContext)
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -25,10 +27,14 @@ export function AssetList({ pool }: { pool: Pool }) {
         value: [
           loan.id,
           loan.status === 'Created' ? 'New' : loan.status,
-          formatBalance(loan.pricing.value.toDecimal(), pool.currency),
-          'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt.toDecimal(), pool.currency) : '-',
-          'totalBorrowed' in loan ? formatBalance(loan.totalBorrowed.toDecimal(), pool.currency) : '-',
-          'totalRepaid' in loan ? formatBalance(loan.totalRepaid.toDecimal(), pool.currency) : '-',
+          formatBalanceAbbreviated(loan.pricing.value.toDecimal(), pool.currency.symbol),
+          'outstandingDebt' in loan
+            ? formatBalanceAbbreviated(loan.outstandingDebt.toDecimal(), pool.currency.symbol)
+            : '-',
+          'totalBorrowed' in loan
+            ? formatBalanceAbbreviated(loan.totalBorrowed.toDecimal(), pool.currency.symbol)
+            : '-',
+          'totalRepaid' in loan ? formatBalanceAbbreviated(loan.totalRepaid.toDecimal(), pool.currency.symbol) : '-',
           'originationDate' in loan ? formatDate(loan.originationDate) : '-',
           formatDate(loan.pricing.maturityDate),
           formatPercentage(loan.pricing.interestRate.toPercent()),
@@ -61,7 +67,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     align: 'left',
     header: col,
     cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-    flex: index === 0 ? '0 0 50px' : '0 0 100px',
+    flex: index === 0 ? '0 0 50px' : '0 0 120px',
   }))
 
   const dataUrl = React.useMemo(() => {
@@ -89,5 +95,13 @@ export function AssetList({ pool }: { pool: Pool }) {
     return () => setCsvData(undefined)
   }, [dataUrl])
 
-  return <DataTable data={data} columns={columns} hoverable rounded={false} />
+  if (!loans) {
+    return <Spinner />
+  }
+
+  return data.length > 0 ? (
+    <DataTable data={data} columns={columns} hoverable rounded={false} />
+  ) : (
+    <UserFeedback reportType="Assets" />
+  )
 }

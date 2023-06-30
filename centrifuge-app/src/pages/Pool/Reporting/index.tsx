@@ -42,11 +42,11 @@ export function PoolDetailReportingTab() {
 
 export function PoolDetailReporting({ pool }: { pool: Pool }) {
   if (!pool) {
-    return <Spinner />
+    return <Spinner mt={2} />
   }
 
   return (
-    <React.Suspense fallback={<Spinner />}>
+    <React.Suspense fallback={<Spinner mt={2} />}>
       <ReportComponent pool={pool} />
     </React.Suspense>
   )

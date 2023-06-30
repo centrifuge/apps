@@ -20,11 +20,13 @@ export function ReportComponent({ pool }: { pool: Pool }) {
   return (
     <Box pb={6}>
       <Shelf p={2} justifyContent="space-between">
-        <Text variant="body3" color="textSecondary">
-          {formatDate(startDate)} - {formatDate(endDate)}
+        <Text as="span" variant="body3" color="textSecondary">
+          <time dateTime={startDate.toISOString()}>{formatDate(startDate)}</time>
+          {' - '}
+          <time dateTime={endDate.toISOString()}>{formatDate(endDate)}</time>
         </Text>
         {(report === 'pool-balance' || report === 'asset-list') && pool && (
-          <Text variant="body3" color="textSecondary">
+          <Text as="span" variant="body3" color="textSecondary">
             All amounts are in {pool.currency.symbol}
           </Text>
         )}

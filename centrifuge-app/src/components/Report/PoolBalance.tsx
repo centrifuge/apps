@@ -1,13 +1,15 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
+import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
+import { UserFeedback } from './UserFeedback'
 
 export function PoolBalance({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
@@ -26,7 +28,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         align: 'left',
         header: '',
         cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body2'}>{row.name}</Text>,
-        flex: '1 0 200px',
+        flex: '0 0 200px',
       },
     ].concat(
       poolStates.map((state, index) => ({
@@ -39,7 +41,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
             : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
         }`,
         cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-        flex: '0 0 100px',
+        flex: '0 0 120px',
       }))
     )
   }, [poolStates])
@@ -48,17 +50,22 @@ export function PoolBalance({ pool }: { pool: Pool }) {
     return [
       {
         name: 'Pool value',
-        value: poolStates?.map((state) => formatBalance(state.poolValue, pool.currency)) || [],
+        value: poolStates?.map((state) => formatBalanceAbbreviated(state.poolValue, pool.currency.symbol)) || [],
         heading: false,
       },
       {
         name: 'Asset value',
-        value: poolStates?.map((state) => formatBalance(state.poolState.portfolioValuation, pool.currency)) || [],
+        value:
+          poolStates?.map((state) =>
+            formatBalanceAbbreviated(state.poolState.portfolioValuation, pool.currency.symbol)
+          ) || [],
         heading: false,
       },
       {
         name: 'Reserve',
-        value: poolStates?.map((state) => formatBalance(state.poolState.totalReserve, pool.currency)) || [],
+        value:
+          poolStates?.map((state) => formatBalanceAbbreviated(state.poolState.totalReserve, pool.currency.symbol)) ||
+          [],
         heading: false,
       },
     ]
@@ -80,7 +87,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           value:
             poolStates?.map((state) =>
               state.tranches[token.id].price
-                ? formatBalance(state.tranches[token.id].price?.toFloat()!, pool.currency)
+                ? formatBalanceAbbreviated(state.tranches[token.id].price?.toFloat()!, pool.currency.symbol)
                 : '1.000'
             ) || [],
           heading: false,
@@ -103,7 +110,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) =>
-              formatBalance(state.tranches[token.id].fulfilledInvestOrders.toDecimal(), pool.currency)
+              formatBalanceAbbreviated(state.tranches[token.id].fulfilledInvestOrders.toDecimal(), pool.currency.symbol)
             ) || [],
           heading: false,
         })) || [],
@@ -121,7 +128,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
             name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
             value:
               poolStates?.map((state) =>
-                formatBalance(state.tranches[token.id].fulfilledRedeemOrders.toDecimal(), pool.currency)
+                formatBalanceAbbreviated(
+                  state.tranches[token.id].fulfilledRedeemOrders.toDecimal(),
+                  pool.currency.symbol
+                )
               ) || [],
             heading: false,
           })) || []
@@ -148,13 +158,17 @@ export function PoolBalance({ pool }: { pool: Pool }) {
     return () => setCsvData(undefined)
   }, [dataUrl])
 
-  return poolStates?.length ? (
+  if (!poolStates) {
+    return <Spinner mt={2} />
+  }
+
+  return poolStates?.length > 0 ? (
     <DataTableGroup rounded={false}>
       <DataTable data={overviewRecords} columns={columns} hoverable rounded={false} />
       <DataTable data={priceRecords} columns={columns} hoverable rounded={false} />
       <DataTable data={inOutFlowRecords} columns={columns} hoverable rounded={false} />
     </DataTableGroup>
   ) : (
-    <Text>No data</Text>
+    <UserFeedback reportType="Pool balance" />
   )
 }

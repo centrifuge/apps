@@ -6,9 +6,18 @@ import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useInvestorTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
+import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
+import { UserFeedback } from './UserFeedback'
 import { formatInvestorTransactionsType } from './utils'
+
+function truncate(string: string) {
+  const first = string.slice(0, 5)
+  const last = string.slice(-5)
+
+  return `${first}...${last}`
+}
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, startDate, endDate } = React.useContext(ReportContext)
@@ -30,12 +39,13 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     'Token amount',
     'Price',
   ]
+  const columnWidths = ['220px', '150px', '100px', '120px', '300px', '180px', '180px', '180px']
 
   const columns = headers.map((col, index) => ({
     align: 'left',
     header: col,
     cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-    flex: index === 0 ? '0 0 150px' : index === 4 ? '0 0 200px' : '1',
+    flex: `0 0 ${columnWidths[index]}`,
   }))
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -51,7 +61,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
         name: '',
         value: [
           token.currency.name,
-          tx.accountId,
+          truncate(tx.accountId),
           tx.epochNumber.toString(),
           formatDate(tx.timestamp.toString()),
           formatInvestorTransactionsType({
@@ -94,5 +104,13 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     return () => setCsvData(undefined)
   }, [dataUrl])
 
-  return <DataTable data={data} columns={columns} hoverable rounded={false} />
+  if (!transactions) {
+    return <Spinner mt={2} />
+  }
+
+  return data.length > 0 ? (
+    <DataTable data={data} columns={columns} hoverable rounded={false} />
+  ) : (
+    <UserFeedback reportType="Investor transactions" />
+  )
 }
