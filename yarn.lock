@@ -1843,7 +1843,7 @@ __metadata:
     eslint-plugin-react: 7.30.1
     form-data: ^4.0.0
     formik: ^2.2.9
-    graphql: ^16.6.0
+    graphql: ~16.6.0
     graphql-request: ^6.0.0
     jw3t: ^1.0.10
     nodemon: ^2.0.20
@@ -17431,10 +17431,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"graphql@npm:^16.6.0":
-  version: 16.7.1
-  resolution: "graphql@npm:16.7.1"
-  checksum: 0a43da06571f168e4c1950b9817bbe0494eaa56f14151e671547e4735e501f5dad3e826a92e2df3ae9b143f353c8a86ad5906309f95230c7fbb7d5cac707a06f
+"graphql@npm:~16.6.0":
+  version: 16.6.0
+  resolution: "graphql@npm:16.6.0"
+  checksum: ec652ccf6e8b6b0c42c984c2ff979e6d01ed18576aec2ba29eeb359c5189965d6cc0915db3ffb3ac755014e994ff876b7e0894a7489b9987a25d31652d06dcb9
   languageName: node
   linkType: hard
 
