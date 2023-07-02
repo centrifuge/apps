@@ -1,4 +1,4 @@
-import { Loan, Pool, Rate } from '@centrifuge/centrifuge-js'
+import { Pool, Rate } from '@centrifuge/centrifuge-js'
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -254,25 +254,21 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
             value: [
               loan.id,
               loan.status === 'Created' ? 'New' : loan.status,
-              (loan as Loan).pricing.value ? formatBalance((loan as Loan).pricing.value.toDecimal()) : '-',
+              'value' in loan.pricing ? formatBalance(loan.pricing.value.toDecimal()) : '-',
               'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt.toDecimal()) : '-',
               'totalBorrowed' in loan ? formatBalance(loan.totalBorrowed.toDecimal()) : '-',
               'totalRepaid' in loan ? formatBalance(loan.totalRepaid.toDecimal()) : '-',
               'originationDate' in loan ? formatDate(loan.originationDate) : '-',
               formatDate(loan.pricing.maturityDate),
-              formatPercentage(loan.pricing.interestRate.toPercent()),
-              (loan as Loan).pricing.advanceRate
-                ? formatPercentage((loan as Loan).pricing.advanceRate.toPercent())
+              'interestRate' in loan.pricing ? formatPercentage(loan.pricing.interestRate.toPercent()) : '-',
+              'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
+              'probabilityOfDefault' in loan.pricing
+                ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
                 : '-',
-              (loan as Loan).pricing.probabilityOfDefault
-                ? formatPercentage(((loan as Loan).pricing.probabilityOfDefault as Rate).toPercent())
+              'lossGivenDefault' in loan.pricing
+                ? formatPercentage((loan.pricing.lossGivenDefault as Rate).toPercent())
                 : '-',
-              (loan as Loan).pricing.lossGivenDefault
-                ? formatPercentage(((loan as Loan).pricing.lossGivenDefault as Rate).toPercent())
-                : '-',
-              (loan as Loan).pricing.discountRate
-                ? formatPercentage(((loan as Loan).pricing.discountRate as Rate).toPercent())
-                : '-',
+              'discountRate' in loan.pricing ? formatPercentage((loan.pricing.discountRate as Rate).toPercent()) : '-',
               // formatDate(loan.maturityDate.toString()),
             ],
             heading: false,

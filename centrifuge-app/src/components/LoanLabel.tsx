@@ -14,7 +14,13 @@ export function getLoanLabelStatus(l: Loan | TinlakeLoan): [LabelStatus, string]
   today.setUTCHours(0, 0, 0, 0)
   if (l.status === 'Active' && (l as ActiveLoan).writeOffStatus) return ['critical', 'Write-off']
   if (l.status === 'Closed') return ['ok', 'Repaid']
-  if (l.status === 'Active' && l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) return ['default', 'Ready']
+  if (
+    l.status === 'Active' &&
+    'interestRate' in l.pricing &&
+    l.pricing.interestRate?.gtn(0) &&
+    l.totalBorrowed?.isZero()
+  )
+    return ['default', 'Ready']
   if (l.status === 'Created') return ['default', 'Created']
 
   if (l.status === 'Active' && 'maturityDate' in l.pricing && l.pricing.maturityDate) {
