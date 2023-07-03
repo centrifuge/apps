@@ -1,4 +1,4 @@
-import { CurrencyInput, DateInput, Grid, NumberInput, Select } from '@centrifuge/fabric'
+import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
@@ -22,40 +22,65 @@ export function PricingInput({ poolId }: { poolId: string }) {
             options={[
               { value: 'discountedCashFlow', label: 'Discounted cashflow' },
               { value: 'outstandingDebt', label: 'Outstanding debt' },
+              { value: 'oracle', label: 'Oracle' },
             ]}
             placeholder="Choose valuation method"
           />
         )}
       </Field>
-      <Field name="pricing.maxBorrowAmount">
-        {({ field, meta, form }: FieldProps) => (
-          <Select
-            {...field}
-            label="Borrow restriction"
-            onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
-            errorMessage={meta.touched && meta.error ? meta.error : undefined}
-            options={[
-              { value: 'upToTotalBorrowed', label: 'Up to total borrowed' },
-              { value: 'upToOutstandingDebt', label: 'Up to outstanding debt' },
-            ]}
-            placeholder="Choose borrow restriction"
+      {values.pricing.valuationMethod === 'oracle' && (
+        <>
+          <FieldWithErrorMessage
+            as={NumberInput}
+            label={<Tooltips type="financingFee" variant="secondary" label="Max quantity*" />}
+            placeholder="0"
+            name="pricing.maxBorrowQuantity"
+            validate={validate.maxBorrowQuantity}
           />
-        )}
-      </Field>
+          <FieldWithErrorMessage
+            as={TextInput}
+            label={<Tooltips type="financingFee" variant="secondary" label="ISIN*" />}
+            placeholder="010101010000"
+            name="pricing.Isin"
+            validate={validate.Isin}
+          />
+        </>
+      )}
 
-      <Field name="pricing.value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
-        {({ field, meta, form }: FieldProps) => (
-          <CurrencyInput
-            {...field}
-            label="Collateral value*"
-            placeholder="0.00"
-            errorMessage={meta.touched ? meta.error : undefined}
-            currency={pool?.currency.symbol}
-            onChange={(value) => form.setFieldValue('pricing.value', value)}
-            variant="small"
-          />
-        )}
-      </Field>
+      {(values.pricing.valuationMethod === 'discountedCashFlow' ||
+        values.pricing.valuationMethod === 'outstandingDebt') && (
+        <>
+          <Field name="pricing.maxBorrowAmount">
+            {({ field, meta, form }: FieldProps) => (
+              <Select
+                {...field}
+                label="Borrow restriction"
+                onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
+                errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                options={[
+                  { value: 'upToTotalBorrowed', label: 'Up to total borrowed' },
+                  { value: 'upToOutstandingDebt', label: 'Up to outstanding debt' },
+                ]}
+                placeholder="Choose borrow restriction"
+              />
+            )}
+          </Field>
+
+          <Field name="pricing.value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
+            {({ field, meta, form }: FieldProps) => (
+              <CurrencyInput
+                {...field}
+                label="Collateral value*"
+                placeholder="0.00"
+                errorMessage={meta.touched ? meta.error : undefined}
+                currency={pool?.currency.symbol}
+                onChange={(value) => form.setFieldValue('pricing.value', value)}
+                variant="small"
+              />
+            )}
+          </Field>
+        </>
+      )}
       <FieldWithErrorMessage
         as={DateInput}
         validate={required()}
@@ -67,23 +92,29 @@ export function PricingInput({ poolId }: { poolId: string }) {
         // Max 5 years from now
         max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
       />
-      <FieldWithErrorMessage
-        as={NumberInput}
-        label={<Tooltips type="financingFee" variant="secondary" label="Financing fee*" />}
-        placeholder="0.00"
-        rightElement="%"
-        name="pricing.interestRate"
-        validate={validate.fee}
-      />
 
-      <FieldWithErrorMessage
-        as={NumberInput}
-        label={<Tooltips type="advanceRate" variant="secondary" label="Advance rate*" />}
-        placeholder="0.00"
-        rightElement="%"
-        name="pricing.advanceRate"
-        validate={validate.advanceRate}
-      />
+      {(values.pricing.valuationMethod === 'discountedCashFlow' ||
+        values.pricing.valuationMethod === 'outstandingDebt') && (
+        <>
+          <FieldWithErrorMessage
+            as={NumberInput}
+            label={<Tooltips type="financingFee" variant="secondary" label="Financing fee*" />}
+            placeholder="0.00"
+            rightElement="%"
+            name="pricing.interestRate"
+            validate={validate.fee}
+          />
+
+          <FieldWithErrorMessage
+            as={NumberInput}
+            label={<Tooltips type="advanceRate" variant="secondary" label="Advance rate*" />}
+            placeholder="0.00"
+            rightElement="%"
+            name="pricing.advanceRate"
+            validate={validate.advanceRate}
+          />
+        </>
+      )}
       {values.pricing.valuationMethod === 'discountedCashFlow' && (
         <>
           <FieldWithErrorMessage

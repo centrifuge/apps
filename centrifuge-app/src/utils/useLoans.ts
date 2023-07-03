@@ -1,4 +1,3 @@
-import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { combineLatest } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -53,18 +52,36 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
 
+  if (!isTinlakePool && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
+    return loan.pricing.maxBorrowQuantity
+      ? {
+          current: Dec(loan.pricing.maxBorrowQuantity.sub(loan.pricing.outstandingQuantity).toString()).div(
+            Dec(10).pow(loan.pricing.maxBorrowQuantity.decimals)
+          ),
+          initial: loan.pricing.maxBorrowQuantity.toDecimal(),
+        }
+      : { current: Dec(100000000), initial: Dec(100000000) }
+  }
+
   const initialCeiling = isTinlakePool
-    ? (loan as TinlakeLoan).pricing.ceiling?.toDecimal() || Dec(0)
-    : (loan as Loan).pricing.value?.toDecimal().mul((loan as Loan).pricing.advanceRate?.toDecimal() || 0) || Dec(0)
+    ? 'ceiling' in loan.pricing
+      ? loan.pricing.ceiling.toDecimal()
+      : Dec(0)
+    : 'value' in loan.pricing && 'advanceRate' in loan.pricing
+    ? loan.pricing.value.toDecimal().mul(loan.pricing.advanceRate.toDecimal())
+    : Dec(0)
 
   if (loan.status !== 'Active') return { current: initialCeiling, initial: initialCeiling }
 
-  const debtWithMargin = loan.outstandingDebt
-    .toDecimal()
-    .add(loan.outstandingDebt.toDecimal().mul(loan.pricing.interestRate.toDecimal().div(365 * 8))) // Additional 3 hour interest as margin
+  const debtWithMargin =
+    'interestRate' in loan.pricing
+      ? loan.outstandingDebt
+          .toDecimal()
+          .add(loan.outstandingDebt.toDecimal().mul(loan.pricing.interestRate.toDecimal().div(365 * 8))) // Additional 3 hour interest as margin
+      : Dec(0)
 
   let ceiling = initialCeiling
-  if ((loan as Loan).pricing.maxBorrowAmount === 'upToTotalBorrowed') {
+  if ('maxBorrowAmount' in loan.pricing && loan.pricing.maxBorrowAmount === 'upToTotalBorrowed') {
     ceiling = ceiling.minus(loan.totalBorrowed?.toDecimal() || 0)
   } else {
     ceiling = ceiling.minus(debtWithMargin)
