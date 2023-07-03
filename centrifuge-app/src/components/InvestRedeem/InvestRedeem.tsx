@@ -506,7 +506,12 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>
@@ -671,7 +676,12 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>
