@@ -174,6 +174,7 @@ export type ActiveLoanInfoData = {
               | { upToTotalBorrowed: { advanceRate: string } }
               | { upToOutstandingDebt: { advanceRate: string } }
           }
+          normalizedDebt: string
           writeOffPenalty: string
         }
       }
@@ -2456,7 +2457,10 @@ function getOutstandingDebt(
   if (!accrual) return new CurrencyBalance(0, currencyDecimals)
   const accRate = new Rate(hexToBN(accrual.accumulatedRate)).toDecimal()
   const rate = new Rate(hexToBN(accrual.interestRatePerSec)).toDecimal()
-  const normalizedDebt = new CurrencyBalance(hexToBN(loan.normalizedDebt), currencyDecimals).toDecimal()
+  const balance =
+    'internal' in loan.pricing && !loan.normalizedDebt ? loan.pricing.internal.normalizedDebt : loan.normalizedDebt
+
+  const normalizedDebt = new CurrencyBalance(hexToBN(balance), currencyDecimals).toDecimal()
   const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
 
   const debtFromAccRate = normalizedDebt.mul(accRate)
