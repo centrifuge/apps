@@ -1,32 +1,44 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
-import { request } from 'graphql-request'
 import { useQuery } from 'react-query'
 import { combineLatest, map } from 'rxjs'
 import { useAddress } from '../../utils/useAddress'
 import { RewardBalance, RewardClaim, RewardDayTotals, RewardsData, UserRewardsData } from './types'
 
 async function getTinlakeUserRewards(ethAddr: string) {
-  let result
-  try {
-    const query = `
-      {
-        rewardBalances(where: {id: "${ethAddr.toLowerCase()}"}) {
-          links {
-            centAddress
-            rewardsAccumulated
+  let rewardBalances: RewardBalance[] = []
+
+  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+        query GetRewardBalances($address: String!) {
+          rewardBalances(where: {id: $address}) {
+            links {
+              centAddress
+              rewardsAccumulated
+            }
+            linkableRewards
+            totalRewards
+            nonZeroBalanceSince
           }
-          linkableRewards
-          totalRewards
-          nonZeroBalanceSince
         }
-      }
-    `
-    result = await request<{ rewardBalances: RewardBalance[] }>('https://graph.centrifuge.io/tinlake', query)
-  } catch (err) {
-    console.error(`error occurred while fetching user rewards for user ${ethAddr} | ${err}`)
-    throw err
+        `,
+      variables: {
+        address: ethAddr.toLowerCase(),
+      },
+    }),
+  })
+
+  if (response?.ok) {
+    const { data } = await response.json()
+    rewardBalances = data
+  } else {
+    throw new Error(`Error occurred while fetching user rewards for user ${ethAddr}`)
   }
 
   const transformed: UserRewardsData = {
@@ -36,7 +48,7 @@ async function getTinlakeUserRewards(ethAddr: string) {
     links: [],
   }
 
-  const rewardBalance = result?.rewardBalances[0]
+  const rewardBalance = rewardBalances[0]
   if (rewardBalance) {
     transformed.nonZeroInvestmentSince = rewardBalance.nonZeroBalanceSince
       ? new CurrencyBalance(rewardBalance.nonZeroBalanceSince, 18)
@@ -59,26 +71,37 @@ export function useTinlakeUserRewards(ethAddr?: string | null) {
 }
 
 async function getTinlakeRewards(): Promise<RewardsData | null> {
-  let result
-  try {
-    const query = `
-    {
-      rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
-        dropRewardRate
-        tinRewardRate
-        toDateRewardAggregateValue
-        toDateAORewardAggregateValue
-        todayReward
-      }
-    }
-    `
-    result = await request<{ rewardDayTotals: RewardDayTotals[] }>('https://graph.centrifuge.io/tinlake', query)
-  } catch (err) {
-    console.error(`error occured while fetching total rewards ${err}`)
-    return null
+  let rewardDayTotals: RewardDayTotals[] = []
+
+  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+        query GetRewardDayTotals {
+          rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
+            dropRewardRate
+            tinRewardRate
+            toDateRewardAggregateValue
+            toDateAORewardAggregateValue
+            todayReward
+          }
+        }
+        `,
+    }),
+  })
+
+  if (response?.ok) {
+    const { data } = await response.json()
+    rewardDayTotals = data.rewardDayTotals
+  } else {
+    throw new Error('Error occured while fetching total rewards')
   }
 
-  const data = result?.rewardDayTotals[0]
+  const data = rewardDayTotals[0]
+
   if (!data) {
     return null
   }
