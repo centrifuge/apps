@@ -16,7 +16,8 @@ type PriceValues = {
 
 export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
   const address = useAddress()
-  const isLiquidityAdmin = address ? usePoolPermissions(loan.poolId)?.[address]?.roles?.includes('Borrower') : false
+  const permissions = usePoolPermissions(loan.poolId)
+  const isBorrower = address ? permissions?.[address].roles?.includes('Borrower') : false
   const pool = usePool(loan.poolId)
 
   const { execute: doOraclePriceTransaction, isLoading: isOraclePriceLoading } = useCentrifugeTransaction(
@@ -57,7 +58,7 @@ export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
   useFocusInvalidInput(oraclePriceForm, priceFormRef)
 
   if (
-    !isLiquidityAdmin ||
+    !isBorrower ||
     loan.status === 'Closed' ||
     !('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') ||
     import.meta.env.REACT_APP_COLLATOR_WSS_URL === 'wss://fullnode.parachain.centrifuge.io'
