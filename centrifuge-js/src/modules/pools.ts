@@ -2131,7 +2131,6 @@ export function getPoolsModule(inst: Centrifuge) {
               'maxBorrowAmount' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
                 ? pricingInfo.valuationMethod.discountedCashFlow
                 : undefined
-
             return {
               asset: {
                 collectionId: collectionId.toString(),
@@ -2146,7 +2145,10 @@ export function getPoolsModule(inst: Centrifuge) {
                       maxBorrowQuantity: hexToBN(pricingInfo.maxBorrowQuantity).gt(
                         new BN(10000).mul(new BN(10).pow(new BN(currency.decimals)))
                       )
-                        ? null
+                        ? new CurrencyBalance(
+                            new BN(100000000000000).mul(new BN(10).pow(new BN(currency.decimals))),
+                            currency.decimals
+                          )
                         : new CurrencyBalance(hexToBN(pricingInfo.maxBorrowQuantity), currency.decimals),
                       Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
                       maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),

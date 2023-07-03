@@ -83,7 +83,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
     validateOnMount: true,
   })
 
-  //TODO:
   const repayForm = useFormik<RepayValues>({
     initialValues: {
       price: '',
@@ -119,7 +118,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
 
-  console.log('price', repayForm.values)
   return (
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
@@ -141,9 +139,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                   max(
                     // @ts-expect-error
                     loan.pricing.maxBorrowQuantity
-                      .toDecimal()
+                      ?.toDecimal()
                       // @ts-expect-error
-                      .sub(loan.pricing.outstandingQuantity.toDecimal())
+                      .sub(loan.pricing.outstandingQuantity?.toDecimal() || Dec(0))
                       .toNumber(),
                     'Quantity exeeds max borrow quantity'
                   )
@@ -193,12 +191,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                   <Text variant="body3">
                     {financeForm.values.price && !Number.isNaN(financeForm.values.price as number)
                       ? formatBalance(
-                          CurrencyBalance.fromFloat(
-                            new BN(financeForm.values.price?.toString() || 0)
-                              .muln(financeForm.values.quantity || 0)
-                              .toNumber(),
-                            pool?.currency.decimals
-                          ),
+                          Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0)),
                           pool?.currency.symbol,
                           2
                         )
@@ -299,12 +292,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                     <Text variant="body3">
                       {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                         ? formatBalance(
-                            CurrencyBalance.fromFloat(
-                              new BN(repayForm.values.price?.toString() || 0)
-                                .muln(repayForm.values.quantity || 0)
-                                .toNumber(),
-                              pool?.currency.decimals
-                            ),
+                            Dec(repayForm.values.price || 0).mul(Dec(repayForm.values.quantity || 0)),
                             pool?.currency.symbol,
                             2
                           )
