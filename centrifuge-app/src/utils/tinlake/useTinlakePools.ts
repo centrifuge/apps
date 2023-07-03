@@ -146,7 +146,6 @@ export function useTinlakeLoans(poolId: string) {
     async () => {
       const loans = await getTinlakeLoans(poolId)
 
-      // @ts-expect-error
       return loans.map((loan) => ({
         asset: {
           nftId: loan.nftId,

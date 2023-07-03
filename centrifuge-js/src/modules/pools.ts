@@ -323,6 +323,7 @@ type ActiveLoanData = ActiveLoanInfoData & {
   originationDate: number
   totalBorrowed: string
   totalRepaid: string
+  normalizedDebt: string
 }
 
 // type from chain
