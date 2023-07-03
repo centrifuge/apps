@@ -281,7 +281,7 @@ async function getTinlakeLoans(poolId: string) {
       const { data } = await response.json()
       pools = data.pools
     } else {
-      console.warn(`Issue fetching loans for Tinlake pool ${poolId}. Status:`, response?.status)
+      throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Status: ${response?.status}`)
     }
   } catch (error) {
     console.warn(`Error fetching loans for Tinlake pool ${poolId}:`, error)
