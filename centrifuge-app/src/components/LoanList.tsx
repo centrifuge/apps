@@ -102,6 +102,7 @@ export function LoanList({ loans }: Props) {
       originationDateSortKey:
         loan.status === 'Active' &&
         loan?.originationDate &&
+        'interestRate' in loan.pricing &&
         !loan?.pricing.interestRate?.isZero() &&
         !loan?.totalBorrowed?.isZero()
           ? loan.originationDate
@@ -167,7 +168,7 @@ function Amount({ loan }: { loan: Row }) {
         return formatBalance(l.totalRepaid, pool?.currency.symbol)
 
       case 'Active':
-        if (l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) {
+        if ('interestRate' in l.pricing && l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) {
           return formatBalance(current, pool?.currency.symbol)
         }
 
