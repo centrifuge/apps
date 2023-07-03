@@ -1219,16 +1219,20 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function financeExternalLoan(
-    args: [poolId: string, loanId: string, amount: CurrencyBalance, price: Rate, isin: string],
+    args: [poolId: string, loanId: string, amount: CurrencyBalance, price: Rate, isin: string, aoProxy: string],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, amount, price, isin] = args
+    const [poolId, loanId, amount, price, isin, aoProxy] = args
     const $api = inst.getApi()
     return $api.pipe(
       switchMap((api) => {
-        const borrowSubmittable = api.tx.loans.borrow(poolId, loanId, amount.toString())
+        const borrowSubmittable = api.tx.proxy.proxy(
+          aoProxy,
+          undefined,
+          api.tx.loans.borrow(poolId, loanId, amount.toString())
+        )
         const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
-        const batchSubmittable = api.tx.utility.batchAll([borrowSubmittable, oracleFeedSubmittable])
+        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, borrowSubmittable])
         return inst.wrapSignAndSend(api, batchSubmittable, options)
       })
     )

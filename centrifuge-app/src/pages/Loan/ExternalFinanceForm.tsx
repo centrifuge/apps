@@ -76,7 +76,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
       price: '',
-      quantity: 0,
+      quantity: '',
     },
     onSubmit: (values, actions) => {
       const price = Rate.fromFloat(values.price)
@@ -86,16 +86,14 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
       )
 
       // @ts-expect-error
-      doFinanceTransaction([loan.poolId, loan.id, amount, price, loan.pricing.Isin], {
-        account,
-        forceProxyType: 'Borrow',
-      })
+      doFinanceTransaction([loan.poolId, loan.id, amount, price, loan.pricing.Isin, account.actingAddress])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
   })
 
-  // TODO: const repayForm = useFormik<RepayValues>({
+  //TODO:
+  const repayForm = useFormik<RepayValues>({
     initialValues: {
       price: '',
       quantity: '',
@@ -162,6 +160,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                       label="Quantity"
                       disabled={isFinanceLoading}
                       errorMessage={meta.touched ? meta.error : undefined}
+                      placeholder="0"
                     />
                   )
                 }}
@@ -182,9 +181,12 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                     <CurrencyInput
                       {...field}
                       label="Price"
+                      variant="small"
+                      disabled={isFinanceLoading}
                       errorMessage={meta.touched ? meta.error : undefined}
                       currency={pool.currency.symbol}
                       onChange={(value) => form.setFieldValue('price', value)}
+                      placeholder="0.0"
                     />
                   )
                 }}
@@ -242,16 +244,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                     loan.pricing.outstandingQuantity
                       .div(new BN(10).pow(new BN(pool?.currency.decimals - 2)))
                       .toNumber() / 100
-                  } x ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}:  ${formatBalance(
-                    new CurrencyBalance(
-                      loan.pricing.outstandingQuantity
-                        .mul(new BN(loan.pricing.oracle.value))
-                        .div(new BN(10).pow(new BN(27))),
-                      pool?.currency.decimals
-                    ),
-                    pool?.currency.symbol,
-                    2
-                  )}`
+                  } @ ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`
                 : ''}
             </Text>
           </Shelf>
@@ -273,13 +266,14 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                   )}
                   name="quantity"
                 >
-                  {({ field, meta, form }: FieldProps) => {
+                  {({ field, meta }: FieldProps) => {
                     return (
                       <NumberInput
                         {...field}
                         label="Quantity"
                         disabled={isRepayLoading || isRepayAllLoading}
                         errorMessage={meta.touched ? meta.error : undefined}
+                        placeholder="0"
                       />
                     )
                   }}
@@ -292,10 +286,11 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                   )}
                   name="price"
                 >
-                  {({ field, meta, form }: FieldProps) => {
+                  {({ field, meta }: FieldProps) => {
                     return (
-                      <NumberInput
+                      <CurrencyInput
                         {...field}
+                        variant="small"
                         label="Price"
                         disabled={isRepayLoading || isRepayAllLoading}
                         errorMessage={meta.touched ? meta.error : undefined}

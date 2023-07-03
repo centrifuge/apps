@@ -75,6 +75,7 @@ export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                 return (
                   <CurrencyInput
                     {...field}
+                    variant="small"
                     label="Price"
                     errorMessage={meta.touched ? meta.error : undefined}
                     disabled={isOraclePriceLoading}
