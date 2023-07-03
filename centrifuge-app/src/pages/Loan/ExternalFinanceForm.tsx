@@ -38,7 +38,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
-  const { current: availableFinancing, debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
+  const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => cent.pools.financeExternalLoan,
@@ -51,7 +51,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
-    (cent) => cent.pools.repayLoanPartially,
+    (cent) => cent.pools.repayExternalLoanPartially,
     {
       onSuccess: () => {
         repayForm.resetForm()
@@ -59,19 +59,10 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
     }
   )
 
-  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
-    'Repay asset',
-    (cent) => cent.pools.repayAndCloseLoan
-  )
-
   const { execute: doCloseTransaction, isLoading: isCloseLoading } = useCentrifugeTransaction(
     'Close asset',
     (cent) => cent.pools.closeLoan
   )
-
-  function repayAll() {
-    doRepayAllTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })
-  }
 
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
@@ -99,10 +90,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
       quantity: '',
     },
     onSubmit: (values, actions) => {
-      const amount = new BN(values.amount.toString())
-        .mul(loan.pricing.oracle.value)
-        .div(new BN(10).pow(new BN(27 - pool.currency.decimals)))
-      doRepayTransaction([loan.poolId, loan.id, amount, new BN(0)], { account, forceProxyType: 'Borrow' })
+      const price = Rate.fromFloat(values.price)
+      const amount = new CurrencyBalance(
+        price.muln(values.quantity || 0).div(new BN(10).pow(new BN(27 - pool.currency.decimals))),
+        pool.currency.decimals
+      )
+      // @ts-expect-error
+      doRepayTransaction([loan.poolId, loan.id, amount, new BN(0), price, loan.pricing.Isin, account.actingAddress])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -121,13 +115,11 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-  const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
-  const canRepayAll = debtWithMargin?.lte(balance)
 
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
 
-  console.log('price', financeForm.values)
+  console.log('price', repayForm.values)
   return (
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
@@ -146,10 +138,14 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                 name="quantity"
                 validate={combine(
                   positiveNumber(),
-                  max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
                   max(
-                    maxBorrow.toNumber(),
-                    `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
+                    // @ts-expect-error
+                    loan.pricing.maxBorrowQuantity
+                      .toDecimal()
+                      // @ts-expect-error
+                      .sub(loan.pricing.outstandingQuantity.toDecimal())
+                      .toNumber(),
+                    'Quantity exeeds max borrow quantity'
                   )
                 )}
               >
@@ -236,21 +232,17 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
       <Stack as={Card} gap={2} p={2}>
         <Stack>
           <Shelf justifyContent="space-between">
-            <Text variant="heading3">Outstanding</Text>
+            <Text variant="label1">Outstanding</Text>
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">
+            <Text variant="label1">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
                 ? `${
                     loan.pricing.outstandingQuantity
                       .div(new BN(10).pow(new BN(pool?.currency.decimals - 2)))
                       .toNumber() / 100
-                  } @ ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`
+                  } @ ${formatBalance(loan.pricing.oracle.value.toDecimal(), pool?.currency.symbol, 2)}`
                 : ''}
             </Text>
-          </Shelf>
-          <Shelf justifyContent="space-between">
-            <Text variant="label1">Total repaid</Text>
-            <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency.symbol, 2)}</Text>
           </Shelf>
         </Stack>
 
@@ -261,7 +253,8 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                 <Field
                   validate={combine(
                     positiveNumber(),
-                    max(balance.toNumber(), 'Amount exceeds balance'),
+                    //  @ts-expect-error
+                    max(loan.pricing.outstandingQuantity.toDecimal().toNumber(), 'Quantity exceeds outstanding'),
                     max(debt.toNumber(), 'Amount exceeds outstanding')
                   )}
                   name="quantity"
@@ -271,7 +264,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                       <NumberInput
                         {...field}
                         label="Quantity"
-                        disabled={isRepayLoading || isRepayAllLoading}
+                        disabled={isRepayLoading}
                         errorMessage={meta.touched ? meta.error : undefined}
                         placeholder="0"
                       />
@@ -286,18 +279,42 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                   )}
                   name="price"
                 >
-                  {({ field, meta }: FieldProps) => {
+                  {({ field, meta, form }: FieldProps) => {
                     return (
                       <CurrencyInput
                         {...field}
                         variant="small"
                         label="Price"
-                        disabled={isRepayLoading || isRepayAllLoading}
+                        disabled={isRepayLoading}
                         errorMessage={meta.touched ? meta.error : undefined}
+                        currency={pool.currency.symbol}
+                        onChange={(value) => form.setFieldValue('price', value)}
                       />
                     )
                   }}
                 </Field>
+                <Stack gap={1}>
+                  <Shelf justifyContent="space-between">
+                    <Text variant="body3">Total amount</Text>
+                    <Text variant="body3">
+                      {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
+                        ? formatBalance(
+                            CurrencyBalance.fromFloat(
+                              new BN(repayForm.values.price?.toString() || 0)
+                                .muln(repayForm.values.quantity || 0)
+                                .toNumber(),
+                              pool?.currency.decimals
+                            ),
+                            pool?.currency.symbol,
+                            2
+                          )
+                        : `0.00 ${pool.currency.symbol}`}
+                    </Text>
+                  </Shelf>
+                  <Text variant="body3" color="textSecondary">
+                    This is calculated through the amount multiplied by the current price of the asset
+                  </Text>
+                </Stack>
                 {balance.lessThan(debt) && (
                   <InlineFeedback>
                     Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than
@@ -305,16 +322,8 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                   </InlineFeedback>
                 )}
                 <Stack gap={1} px={1}>
-                  <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
+                  <Button type="submit" disabled={isRepayLoading} loading={isRepayLoading}>
                     Repay asset
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    loading={isRepayAllLoading}
-                    disabled={!canRepayAll || isRepayLoading}
-                    onClick={() => repayAll()}
-                  >
-                    Repay all and close
                   </Button>
                 </Stack>
               </Stack>

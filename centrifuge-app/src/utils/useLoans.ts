@@ -55,10 +55,12 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   if (!isTinlakePool && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
     return loan.pricing.maxBorrowQuantity
       ? {
-          current: Dec(loan.pricing.maxBorrowQuantity.sub(loan.pricing.outstandingQuantity).toString()).div(
-            Dec(10).pow(loan.pricing.maxBorrowQuantity.decimals)
-          ),
+          current: loan.pricing.maxBorrowQuantity.toDecimal().sub(loan.pricing.outstandingQuantity.toDecimal()),
           initial: loan.pricing.maxBorrowQuantity.toDecimal(),
+          debtWithMargin: loan.pricing.maxBorrowQuantity
+            .toDecimal()
+            .sub(loan.pricing.outstandingQuantity.toDecimal())
+            .mul(loan.pricing.oracle.value.toDecimal()),
         }
       : { current: Dec(100000000), initial: Dec(100000000) }
   }

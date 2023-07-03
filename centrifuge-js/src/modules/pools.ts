@@ -1264,6 +1264,27 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function repayExternalLoanPartially(
+    args: [poolId: string, loanId: string, amount: BN, uncheckedAmount: BN, price: Rate, isin: string, aoProxy: string],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, amount, uncheckedAmount, price, isin, aoProxy] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const repaySubmittable = api.tx.proxy.proxy(
+          aoProxy,
+          undefined,
+          api.tx.loans.repay(poolId, loanId, amount.toString(), uncheckedAmount.toString())
+        )
+        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
+        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, repaySubmittable])
+        return inst.wrapSignAndSend(api, batchSubmittable, options)
+      })
+    )
+  }
+
   function repayAndCloseLoan(args: [poolId: string, loanId: string], options?: TransactionOptions) {
     const [poolId, loanId] = args
     const $api = inst.getApi()
@@ -2443,6 +2464,7 @@ export function getPoolsModule(inst: Centrifuge) {
     financeLoan,
     financeExternalLoan,
     repayLoanPartially,
+    repayExternalLoanPartially,
     repayAndCloseLoan,
     closeLoan,
     getPool,
