@@ -240,14 +240,13 @@ async function getTinlakeLoans(poolId: string) {
     loans: unknown[]
   }[] = []
 
-  try {
-    const response = await fetch('https://graph.centrifuge.io/tinlake', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: `
+  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
         query GetLoansByPoolId($poolId: String!) {
           pools (where: { id_in: [$poolId]}) {
             loans (first: 1000) {
@@ -271,20 +270,17 @@ async function getTinlakeLoans(poolId: string) {
           }
         }
       `,
-        variables: {
-          poolId: poolId.toLowerCase(),
-        },
-      }),
-    })
+      variables: {
+        poolId: poolId.toLowerCase(),
+      },
+    }),
+  })
 
-    if (response?.ok) {
-      const { data } = await response.json()
-      pools = data.pools
-    } else {
-      throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Status: ${response?.status}`)
-    }
-  } catch (error) {
-    console.warn(`Error fetching loans for Tinlake pool ${poolId}:`, error)
+  if (response?.ok) {
+    const { data } = await response.json()
+    pools = data.pools
+  } else {
+    throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Status: ${response?.status}`)
   }
 
   const loans = pools.reduce((assets: any[], pool: any) => {
