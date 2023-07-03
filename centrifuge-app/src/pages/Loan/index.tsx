@@ -116,6 +116,10 @@ const Loan: React.FC = () => {
               'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
                 ? [
                     {
+                      label: 'Maturity date',
+                      value: formatDate(loan.pricing.maturityDate),
+                    },
+                    {
                       label: 'Value',
                       value: formatBalance(
                         'outstandingDebt' in loan
