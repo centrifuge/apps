@@ -137,7 +137,6 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
   const hooks = {
     useActionSucceeded,
   }
-  console.log('state', state)
 
   return <InvestRedeemContext.Provider value={{ state, actions, hooks }}>{children}</InvestRedeemContext.Provider>
 }
