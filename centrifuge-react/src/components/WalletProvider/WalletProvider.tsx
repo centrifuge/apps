@@ -144,12 +144,14 @@ export function WalletProvider({
   const centEvmChainId = useCentEvmChainId()
 
   const evmChains = React.useMemo(() => {
+    const centUrl = new URL(cent.parachainUrl)
+    centUrl.protocol = 'https:'
     const chains = {
       ...evmChainsProp,
     }
     if (centEvmChainId) {
       chains[centEvmChainId] = {
-        urls: ['https://fullnode.development.cntrfg.com/'],
+        urls: [centUrl.toString()],
         iconUrl: '',
         name: 'Centrifuge',
         nativeCurrency: {
