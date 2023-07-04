@@ -91,10 +91,12 @@ export function useSuitableAccounts(config: SuitableConfig) {
   const { actingAddress, poolId, poolRole, proxyType } = config
   const {
     isEvmOnSubstrate,
-    substrate: { selectedAccount, combinedAccounts },
+    substrate: { selectedAccount, combinedAccounts, evmChainId },
     evm: { selectedAddress },
   } = useWallet()
-  const signingAddress = isEvmOnSubstrate ? evmToSubstrateAddress(selectedAddress!) : selectedAccount?.address
+  const signingAddress = isEvmOnSubstrate
+    ? evmToSubstrateAddress(selectedAddress!, evmChainId!)
+    : selectedAccount?.address
   const permissions = usePoolPermissions(poolId)
   const accounts = (combinedAccounts ?? [])?.filter((acc) => {
     if (acc.signingAccount.address !== signingAddress) return false

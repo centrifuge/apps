@@ -80,7 +80,7 @@ export function useAddress(typeOverride?: 'substrate' | 'evm') {
   if (isEvmOnSubstrate) {
     return (
       substrate.selectedCombinedAccount?.actingAddress ||
-      (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts[0]) : undefined)
+      (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts[0], substrate.evmChainId!) : undefined)
     )
   }
   return substrate.selectedCombinedAccount?.actingAddress || substrate.selectedAccount?.address
@@ -202,7 +202,7 @@ export function WalletProvider({
       */
   const evmSubstrateAccounts = isEvmOnSubstrate
     ? state.evm.accounts?.map((addr) => ({
-        address: evmToSubstrateAddress(addr),
+        address: evmToSubstrateAddress(addr, centEvmChainId!),
         source: state.evm.selectedWallet!.id,
         wallet: state.evm.selectedWallet as any,
       }))
