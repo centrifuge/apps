@@ -53,7 +53,6 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
-  // TODO: type domain
   function listCurrencies(args: [address: Account, rewardDomain: RewardDomain]) {
     const [address, rewardDomain] = args
 
@@ -159,14 +158,16 @@ export function getRewardsModule(inst: Centrifuge) {
       switchMap((api) => api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })),
       combineLatestWith(getPoolCurrency([poolId])),
       map(([data, currency]) => {
-        const { stake, rewardTally, lastCurrencyMovement } = data.toPrimitive() as {
+        const { stake, pendingStake, rewardTally, lastCurrencyMovement } = data.toPrimitive() as {
           stake: number
+          pendingStake: number
           rewardTally: number
           lastCurrencyMovement: number
         }
 
         return {
           stake: new TokenBalance(stake, currency.decimals),
+          pendingStake: new TokenBalance(pendingStake, currency.decimals),
           rewardTally,
           lastCurrencyMovement,
         }
@@ -199,9 +200,9 @@ export function getRewardsModule(inst: Centrifuge) {
     return inst.getApi().pipe(
       switchMap((api) => api.query.liquidityRewards.endOfEpoch()),
       map((data) => {
-        const aapje = data?.toPrimitive() as number
+        const duration = data?.toPrimitive() as number
 
-        return aapje
+        return duration
       })
     )
   }

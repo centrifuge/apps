@@ -33,7 +33,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const price = tranche.tokenPrice?.toDecimal() ?? Dec(1)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
-  const stakedAmount = stakes?.stake.toDecimal() ?? Dec(0)
+  const stakedAmount = stakes?.stake.toDecimal().add(stakes.pendingStake.toDecimal()) ?? Dec(0)
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem).add(stakedAmount)
   const investmentValue = combinedBalance.mul(price)
   const poolCurBalance =

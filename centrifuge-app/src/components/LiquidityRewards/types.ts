@@ -15,11 +15,13 @@ export type LiquidityRewardsState = {
   stakes:
     | {
         stake: TokenBalance
+        pendingStake: TokenBalance
         rewardTally: number
         lastCurrencyMovement: number
       }
     | undefined
     | null
+  enabled: boolean
   canStake: boolean
   canUnstake: boolean
   canClaim: boolean

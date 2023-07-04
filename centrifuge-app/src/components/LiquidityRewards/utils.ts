@@ -1,5 +1,4 @@
-export function getRewardsDurationInDays(blocks: number) {
-  const executionTimePerBlockInSeconds = 12
-  const blocksPerDay = (24 * 60 * 60) / executionTimePerBlockInSeconds
-  return Math.round(blocks / blocksPerDay)
+export function getRewardsDurationInDays(milliseconds: number): number {
+  const days = milliseconds / (1000 * 60 * 60 * 24)
+  return Math.round(days)
 }

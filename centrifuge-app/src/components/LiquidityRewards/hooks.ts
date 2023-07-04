@@ -83,25 +83,29 @@ export function useListCurrencies(address?: string) {
   return result
 }
 
-export function useClaimCountdown(remainingBlocks: number): ClaimCountDown {
-  const defaultReturn = null
-
-  if (typeof remainingBlocks !== 'number' || isNaN(remainingBlocks)) {
-    return defaultReturn
+export function useClaimCountdown(unixTimestamp?: number | null): ClaimCountDown {
+  if (!unixTimestamp) {
+    return null
   }
 
-  const executionTimePerBlockInSeconds = 12
-  const secondsInADay = 24 * 60 * 60
-  const totalSeconds = remainingBlocks * executionTimePerBlockInSeconds
-  const remainingSeconds = totalSeconds % secondsInADay
+  const timeRemaining = unixTimestamp - new Date().getTime()
 
-  const days = Math.floor(totalSeconds / secondsInADay)
-  const hours = Math.floor(remainingSeconds / 3600)
-  const minutes = Math.floor((remainingSeconds % 3600) / 60)
-  const seconds = remainingSeconds % 60
+  if (timeRemaining <= 0) {
+    return null
+  }
+
+  const millisecondsInDay = 24 * 60 * 60 * 1000
+  const millisecondsInHour = 60 * 60 * 1000
+  const millisecondsInMinute = 60 * 1000
+  const millisecondsInSecond = 1000
+
+  const days = Math.floor(timeRemaining / millisecondsInDay)
+  const hours = Math.floor((timeRemaining % millisecondsInDay) / millisecondsInHour)
+  const minutes = Math.floor((timeRemaining % millisecondsInHour) / millisecondsInMinute)
+  const seconds = Math.floor((timeRemaining % millisecondsInMinute) / millisecondsInSecond)
 
   if (hours + minutes + seconds <= 0) {
-    return defaultReturn
+    return null
   }
 
   const daysMessage = days >= 1 ? `${days} day${days === 1 ? '' : 's'}` : ''

@@ -9,8 +9,8 @@ import {
   useAccountStakes,
   useClaimCountdown,
   useComputeLiquidityRewards,
-  useCurrentBlock,
   useEndOfEpoch,
+  useRewardCurrencyGroup,
 } from './hooks'
 import { LiquidityRewardsContext } from './LiquidityRewardsContext'
 import { LiquidityRewardsActions, LiquidityRewardsProviderProps, LiquidityRewardsState } from './types'
@@ -28,8 +28,8 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
   const rewards = useComputeLiquidityRewards(address, poolId, trancheId)
   const balances = useBalances(address)
   const endOfEpoch = useEndOfEpoch()
-  const currentBlockNumber = useCurrentBlock()
-  const countdown = useClaimCountdown(endOfEpoch! - currentBlockNumber!)
+  const countdown = useClaimCountdown(endOfEpoch)
+  const rewardCurrencyGroup = useRewardCurrencyGroup(poolId, trancheId)
 
   const trancheBalance =
     balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
@@ -46,6 +46,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
     .minus(remainingRedeemToken)
   const tranche = pool.tranches.find(({ id }) => id === trancheId)
 
+  const enabled = !!rewardCurrencyGroup?.groupId
   const canStake = !stakeableAmount.isZero() && stakeableAmount.isPositive()
   const canUnstake = !!stakes && !stakes?.stake.isZero()
   const canClaim = !!rewards && !rewards?.isZero()
@@ -60,6 +61,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
     rewards,
     stakeableAmount,
     stakes,
+    enabled,
     canStake,
     canUnstake,
     canClaim,

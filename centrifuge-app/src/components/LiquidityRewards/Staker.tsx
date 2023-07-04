@@ -14,13 +14,14 @@ export function Staker() {
   )
 
   const {
-    state: { tranche, stakes, canStake, canUnstake, isLoading, stakeableAmount },
+    state: { tranche, stakes, enabled, canStake, canUnstake, isLoading, stakeableAmount },
     actions: { stake, unStake },
   } = useLiquidityRewards()
 
-  const hasStakes = !!stakes && !stakes?.stake.isZero()
+  const combinedStakes = !!stakes && tranche ? stakes.stake.toDecimal().add(stakes.pendingStake.toDecimal()) : null
+  const hasStakes = !!stakes && !combinedStakes?.isZero()
 
-  return hasStakes || canStake || canUnstake ? (
+  return enabled && (hasStakes || canStake || canUnstake) ? (
     <Box>
       <Box p={2} borderTopLeftRadius="card" borderTopRightRadius="card" backgroundColor="secondarySelectedBackground">
         <Stack gap={2}>
@@ -29,13 +30,15 @@ export function Staker() {
               <Shelf gap={1}>
                 <IconCheckInCircle size="iconSmall" />
                 <Text as="strong" variant="body2" fontWeight={600}>
-                  {formatBalance(stakes!.stake, tranche?.currency?.symbol)} staked
+                  {formatBalance(combinedStakes!, tranche?.currency?.symbol)} staked
                 </Text>
               </Shelf>
 
               <Text as="span" variant="body3">
-                {rewardsDurationInDays
-                  ? `CFG rewards are distributed approximately each ${rewardsDurationInDays} days`
+                {rewardsDurationInDays !== undefined
+                  ? `CFG rewards are distributed approximately each ${rewardsDurationInDays} day${
+                      rewardsDurationInDays > 1 ? 's' : ''
+                    }`
                   : 'CFG rewards are distributed regulary after a fixed amount of executed blocks'}
               </Text>
             </Stack>
