@@ -24,7 +24,7 @@ import { AnchorPillButton } from '../../components/PillButton'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
-import { LoanTemplate, LoanTemplateAttribute } from '../../types'
+import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
@@ -37,6 +37,7 @@ import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
 import { PricingValues } from './PricingValues'
+import { formatNftAttribute } from './utils'
 
 export const LoanPage: React.FC = () => {
   return (
@@ -189,7 +190,7 @@ const Loan: React.FC = () => {
                       const attribute = templateData.attributes?.[key]
                       if (!attribute) return null
                       const value = publicData[key] ?? privateData[key]
-                      const formatted = value ? formatValue(value, attribute) : '-'
+                      const formatted = value ? formatNftAttribute(value, attribute) : '-'
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
@@ -295,23 +296,4 @@ const Loan: React.FC = () => {
       ) : null}
     </Stack>
   )
-}
-
-function formatValue(value: any, attr: LoanTemplateAttribute) {
-  switch (attr.input.type) {
-    case 'number':
-      return `${(attr.input.decimals
-        ? new CurrencyBalance(value, attr.input.decimals).toFloat()
-        : Number(value)
-      ).toLocaleString('en')} ${attr.input.unit || ''}`
-    case 'currency':
-      return formatBalance(
-        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals) : Number(value),
-        attr.input.symbol
-      )
-    case 'date':
-      return formatDate(value)
-    default:
-      return value
-  }
 }

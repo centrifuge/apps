@@ -56,6 +56,7 @@ export type LoanTemplate = {
   }
   attributes: Record<string, LoanTemplateAttribute>
   sections: LoanTemplateSection[]
+  keyAttributes?: string[]
 }
 
 export type InvestorTypes = 'individual' | 'entity'
