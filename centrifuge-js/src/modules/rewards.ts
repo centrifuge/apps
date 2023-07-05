@@ -1,5 +1,5 @@
 import BN from 'bn.js'
-import { combineLatestWith, map, switchMap } from 'rxjs/operators'
+import { combineLatestWith, filter, map, repeat, switchMap } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { RewardDomain } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
@@ -43,13 +43,21 @@ export function getRewardsModule(inst: Centrifuge) {
     const [address, poolId, trancheId, rewardDomain] = args
     const currencyId = { Tranche: [poolId, trancheId] }
 
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.liquidityRewards.NewEpoch.is(event))
+        return !!event
+      })
+    )
+
     return inst.getApi().pipe(
       switchMap((api) => api.call.rewardsApi.computeReward(rewardDomain, currencyId, address)),
       map((data) => {
         const reward = data?.toPrimitive() as string
 
         return reward ? new TokenBalance(reward, 18).toDecimal() : null
-      })
+      }),
+      repeat({ delay: () => $events })
     )
   }
 
