@@ -229,7 +229,9 @@ function IssuerCreateLoan() {
         values.pricing.valuationMethod === 'oracle'
           ? {
               valuationMethod: values.pricing.valuationMethod,
-              maxBorrowQuantity: CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals).toString(),
+              maxBorrowAmount: values.pricing.maxBorrowQuantity
+                ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals).toString()
+                : null,
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
             }

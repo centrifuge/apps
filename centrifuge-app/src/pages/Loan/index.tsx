@@ -1,4 +1,4 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -48,12 +48,16 @@ export const LoanPage: React.FC = () => {
   )
 }
 
+function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
+  return loan.poolId.startsWith('0x')
+}
+
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
   const canBorrow = useCanBorrowAsset(pid, aid)
 
-  if (!loan || loan.status === 'Closed' || !canBorrow) return null
+  if (!loan || loan.status === 'Closed' || !canBorrow || isTinlakeLoan(loan)) return null
 
   return (
     <Stack gap={2}>

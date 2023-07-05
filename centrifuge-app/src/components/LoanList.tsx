@@ -174,7 +174,6 @@ function AssetMetadataField({ loan, name, attribute }: { loan: Row; name: string
         isLoading={isLoading}
         width={12}
         variant="body2"
-        fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
         {formatNftAttribute(metadata?.properties[name], attribute)}

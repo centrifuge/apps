@@ -1,4 +1,4 @@
-import { CurrencyBalance, findBalance, Loan as LoanType, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, findBalance, Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Button,
@@ -33,7 +33,7 @@ type RepayValues = {
   quantity: number | ''
 }
 
-export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
+export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account.actingAddress)
@@ -137,12 +137,10 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                 validate={combine(
                   positiveNumber(),
                   max(
-                    // @ts-expect-error
-                    loan.pricing.maxBorrowQuantity
+                    loan.pricing.maxBorrowAmount
                       ?.toDecimal()
-                      // @ts-expect-error
                       .sub(loan.pricing.outstandingQuantity?.toDecimal() || Dec(0))
-                      .toNumber(),
+                      .toNumber() ?? Infinity,
                     'Quantity exeeds max borrow quantity'
                   )
                 )}
@@ -203,7 +201,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                 </Text>
               </Stack>
               {poolReserve.lessThan(availableFinancing) ||
-                ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowQuantity && (
+                ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowAmount && (
                   <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
                     <IconInfo size="iconMedium" />
                     <Text variant="body3">
@@ -246,7 +244,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) 
                 <Field
                   validate={combine(
                     positiveNumber(),
-                    //  @ts-expect-error
                     max(loan.pricing.outstandingQuantity.toDecimal().toNumber(), 'Quantity exceeds outstanding'),
                     max(debt.toNumber(), 'Amount exceeds outstanding')
                   )}

@@ -1,4 +1,4 @@
-import { Loan as LoanType, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Stack } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -14,7 +14,7 @@ type PriceValues = {
   price: number | '' | Decimal
 }
 
-export function OraclePriceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
+export function OraclePriceForm({ loan }: { loan: LoanType }) {
   const address = useAddress()
   const permissions = usePoolPermissions(loan.poolId)
   const isBorrower = address ? permissions?.[address].roles?.includes('Borrower') : false
