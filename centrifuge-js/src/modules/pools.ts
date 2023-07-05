@@ -66,7 +66,7 @@ type LoanInfoInput =
     }
   | {
       valuationMethod: 'oracle'
-      maxBorrowQuantity: string
+      maxBorrowAmount: string | null
       Isin: string
       maturityDate: Date
     }
@@ -98,7 +98,7 @@ export type LoanInfoData = {
           priceId: {
             isin: string
           }
-          maxBorrowQuantity: string
+          maxBorrowAmount: { noLimit: null } | { quantity: string }
         }
       }
     | {
@@ -148,7 +148,7 @@ export type ActiveLoanInfoData = {
             priceId: {
               isin: string
             }
-            maxBorrowQuantity: string
+            maxBorrowAmount: { noLimit: null } | { quantity: string }
           }
           outstandingQuantity: string
         }
@@ -351,7 +351,7 @@ export type InternalPricingInfo = {
 
 export type ExternalPricingInfo = {
   valuationMethod: 'oracle'
-  maxBorrowQuantity: CurrencyBalance | null
+  maxBorrowAmount: CurrencyBalance | null
   outstandingQuantity: CurrencyBalance
   Isin: string
   maturityDate: string
@@ -1182,7 +1182,8 @@ export function getPoolsModule(inst: Centrifuge) {
                 priceId: {
                   isin: infoInput.Isin,
                 },
-                maxBorrowQuantity: infoInput.maxBorrowQuantity.toString(),
+                maxBorrowAmount:
+                  infoInput.maxBorrowAmount === null ? { noLimit: null } : { quantity: infoInput.maxBorrowAmount },
               },
             }
           : {
@@ -2069,10 +2070,13 @@ export function getPoolsModule(inst: Centrifuge) {
             }
           )
 
+          console.log('oraclePrices', oraclePrices, oracles)
+
           const currency = rawCurrency.toHuman() as AssetCurrencyData
           const rates = rateValues.toJSON() as InterestAccrual[]
 
           function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
+            console.log('loan', loan)
             const info = 'info' in loan ? loan.info : loan
             const [collectionId, nftId] = info.collateral
 
@@ -2087,7 +2091,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 : loan.pricing.internal.info
 
             const discount =
-              'maxBorrowAmount' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
+              'valuationMethod' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
                 ? pricingInfo.valuationMethod.discountedCashFlow
                 : undefined
 
@@ -2102,11 +2106,10 @@ export function getPoolsModule(inst: Centrifuge) {
                       valuationMethod: 'oracle' as any,
                       // If the max borrow quantity is larger than 10k, this is assumed to be "limitless"
                       // TODO: replace by Option once data structure on chain changes
-                      maxBorrowAmount: hexToBN(pricingInfo.maxBorrowQuantity).gt(
-                        new BN(10000).mul(new BN(10).pow(new BN(currency.decimals)))
-                      )
-                        ? 'NoLimit'
-                        : { Quantity: new CurrencyBalance(hexToBN(pricingInfo.maxBorrowQuantity), currency.decimals) },
+                      maxBorrowAmount:
+                        'noLimit' in pricingInfo.maxBorrowAmount
+                          ? null
+                          : new CurrencyBalance(hexToBN(pricingInfo.maxBorrowAmount.quantity), currency.decimals),
                       Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
                       maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
                       oracle: oraclePrices[pricingInfo.priceId.isin] as any,

@@ -128,21 +128,21 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
       <Stack as={Card} gap={2} p={2}>
         <Stack>
           {'valuationMethod' in loan.pricing &&
-            !(loan.pricing.valuationMethod === 'oracle' && !loan.pricing.maxBorrowQuantity) && (
+            !(loan.pricing.valuationMethod === 'oracle' && !loan.pricing.maxBorrowAmount) && (
               <Shelf justifyContent="space-between">
                 <Text variant="heading3">Available financing</Text>
                 {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
                 <Text variant="heading3">
                   {'valuationMethod' in loan.pricing &&
                   loan.pricing.valuationMethod === 'oracle' &&
-                  !!loan.pricing.maxBorrowQuantity
-                    ? `${loan.pricing.maxBorrowQuantity
+                  !!loan.pricing.maxBorrowAmount
+                    ? `${loan.pricing.maxBorrowAmount
                         .sub(loan.pricing.outstandingQuantity)
                         .div(
                           new BN(10).pow(new BN(pool?.currency.decimals))
                         )} x ${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}: ${formatBalance(
                         new CurrencyBalance(
-                          loan.pricing.maxBorrowQuantity
+                          loan.pricing.maxBorrowAmount
                             .sub(loan.pricing.outstandingQuantity)
                             .mul(new BN(loan.pricing.oracle.value))
                             .div(new BN(10).pow(new BN(27))),
@@ -187,19 +187,19 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                         secondaryLabel={
                           'valuationMethod' in loan.pricing &&
                           loan.pricing.valuationMethod === 'oracle' &&
-                          loan.pricing.maxBorrowQuantity && (
+                          loan.pricing.maxBorrowAmount && (
                             <Shelf justifyContent="space-between">
                               <>
-                                {loan.pricing.maxBorrowQuantity &&
-                                  loan.pricing.maxBorrowQuantity
+                                {loan.pricing.maxBorrowAmount &&
+                                  loan.pricing.maxBorrowAmount
                                     .sub(loan.pricing.outstandingQuantity)
                                     .div(new BN(10).pow(new BN(pool?.currency.decimals)))
                                     .toString()}{' '}
                                 x {loan.pricing.Isin} (
-                                {loan.pricing.maxBorrowQuantity &&
+                                {loan.pricing.maxBorrowAmount &&
                                   formatBalance(
                                     new CurrencyBalance(
-                                      loan.pricing.maxBorrowQuantity
+                                      loan.pricing.maxBorrowAmount
                                         .sub(loan.pricing.outstandingQuantity)
                                         .mul(new BN(loan.pricing.oracle.value))
                                         .div(new BN(10).pow(new BN(27))),
@@ -216,8 +216,8 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                                 onClick={() => {
                                   form.setFieldValue(
                                     'amount',
-                                    'maxBorrowQuantity' in loan.pricing && !!loan.pricing.maxBorrowQuantity
-                                      ? loan.pricing.maxBorrowQuantity
+                                    'oracle' in loan.pricing && !!loan.pricing.maxBorrowAmount
+                                      ? loan.pricing.maxBorrowAmount
                                           .sub(loan.pricing.outstandingQuantity || '0')
                                           .div(new BN(10).pow(new BN(pool?.currency.decimals)))
                                           .toNumber()
@@ -249,7 +249,7 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
               </Field>
               {poolReserve.lessThan(availableFinancing) ||
                 ('valuationMethod' in loan.pricing &&
-                  !(loan.pricing.valuationMethod === 'oracle' && !loan.pricing.maxBorrowQuantity) && (
+                  !(loan.pricing.valuationMethod === 'oracle' && !loan.pricing.maxBorrowAmount) && (
                     <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
                       <IconInfo size="iconMedium" />
                       <Text variant="body3">
