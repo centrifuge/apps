@@ -17,7 +17,7 @@ type PriceValues = {
 export function OraclePriceForm({ loan }: { loan: LoanType }) {
   const address = useAddress()
   const permissions = usePoolPermissions(loan.poolId)
-  const isBorrower = address ? permissions?.[address].roles?.includes('Borrower') : false
+  const isBorrower = address ? permissions?.[address]?.roles?.includes('Borrower') : false
   const pool = usePool(loan.poolId)
 
   const { execute: doOraclePriceTransaction, isLoading: isOraclePriceLoading } = useCentrifugeTransaction(
