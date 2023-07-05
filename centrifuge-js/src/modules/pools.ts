@@ -2111,13 +2111,10 @@ export function getPoolsModule(inst: Centrifuge) {
             }
           )
 
-          console.log('oraclePrices', oraclePrices, oracles)
-
           const currency = rawCurrency.toHuman() as AssetCurrencyData
           const rates = rateValues.toJSON() as InterestAccrual[]
 
           function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
-            console.log('loan', loan)
             const info = 'info' in loan ? loan.info : loan
             const [collectionId, nftId] = info.collateral
 
