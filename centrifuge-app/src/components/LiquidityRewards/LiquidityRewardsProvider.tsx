@@ -39,6 +39,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
 
   const redeemToken = order?.redeemToken.toDecimal() ?? Dec(0)
 
+  const combinedStakes = !!stakes ? stakes.stake.toDecimal().add(stakes.pendingStake.toDecimal()) : null
   const stakeableAmount = trancheBalance
     .add(pendingRedeem)
     .add(payoutTokenAmount)
@@ -48,7 +49,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
 
   const enabled = !!rewardCurrencyGroup?.groupId
   const canStake = !stakeableAmount.isZero() && stakeableAmount.isPositive()
-  const canUnstake = !!stakes && !stakes?.stake.isZero()
+  const canUnstake = !!combinedStakes && !combinedStakes.isZero()
   const canClaim = !!rewards && !rewards?.isZero()
 
   const claim = useCentrifugeTransaction('Claim CFG liquidity rewards', (cent) => cent.rewards.claimLiquidityRewards)
@@ -60,7 +61,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
     countdown,
     rewards,
     stakeableAmount,
-    stakes,
+    combinedStakes,
     enabled,
     canStake,
     canUnstake,

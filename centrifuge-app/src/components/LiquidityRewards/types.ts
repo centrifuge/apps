@@ -1,4 +1,4 @@
-import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { Token } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 
 export type LiquidityRewardsProviderProps = {
@@ -12,15 +12,7 @@ export type LiquidityRewardsState = {
   countdown: ClaimCountDown | null
   rewards: Decimal | null | undefined
   stakeableAmount: Decimal | null
-  stakes:
-    | {
-        stake: TokenBalance
-        pendingStake: TokenBalance
-        rewardTally: number
-        lastCurrencyMovement: number
-      }
-    | undefined
-    | null
+  combinedStakes: Decimal | null
   enabled: boolean
   canStake: boolean
   canUnstake: boolean

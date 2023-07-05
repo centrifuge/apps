@@ -14,12 +14,11 @@ export function Staker() {
   )
 
   const {
-    state: { tranche, stakes, enabled, canStake, canUnstake, isLoading, stakeableAmount },
+    state: { tranche, combinedStakes, enabled, canStake, canUnstake, isLoading, stakeableAmount },
     actions: { stake, unStake },
   } = useLiquidityRewards()
 
-  const combinedStakes = !!stakes && tranche ? stakes.stake.toDecimal().add(stakes.pendingStake.toDecimal()) : null
-  const hasStakes = !!stakes && !combinedStakes?.isZero()
+  const hasStakes = !!combinedStakes && !combinedStakes?.isZero()
 
   return enabled && (hasStakes || canStake || canUnstake) ? (
     <Box>
@@ -35,11 +34,20 @@ export function Staker() {
               </Shelf>
 
               <Text as="span" variant="body3">
-                {rewardsDurationInDays !== undefined
-                  ? `CFG rewards are distributed approximately each ${rewardsDurationInDays} day${
-                      rewardsDurationInDays > 1 ? 's' : ''
-                    }`
-                  : 'CFG rewards are distributed regulary after a fixed amount of executed blocks'}
+                The stake will be rewarded after being in the system for a whole reward epoch
+                {rewardsDurationInDays !== undefined ? (
+                  <>
+                    {' '}
+                    of{' '}
+                    <Text as="strong" variant="body3" fontWeight={600}>
+                      {rewardsDurationInDays} day{rewardsDurationInDays > 1 ? 's' : ''}
+                    </Text>
+                  </>
+                ) : (
+                  ''
+                )}
+                {'. '}
+                CFG rewards are distributed regulary after each reward epoch.
               </Text>
             </Stack>
           )}
