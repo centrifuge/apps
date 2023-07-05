@@ -71,9 +71,8 @@ export function useWallet() {
   return ctx
 }
 
-export function useAddress(typeOverride?: 'substrate' | 'evm') {
+export function useAddress(type?: 'substrate' | 'evm') {
   const { connectedType, evm, substrate, isEvmOnSubstrate } = useWallet()
-  const type = typeOverride ?? connectedType
   if (type === 'evm') {
     return evm.accounts?.[0]
   }
@@ -82,6 +81,9 @@ export function useAddress(typeOverride?: 'substrate' | 'evm') {
       substrate.selectedCombinedAccount?.actingAddress ||
       (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts[0], substrate.evmChainId!) : undefined)
     )
+  }
+  if (connectedType === 'evm') {
+    return evm.accounts?.[0]
   }
   return substrate.selectedCombinedAccount?.actingAddress || substrate.selectedAccount?.address
 }

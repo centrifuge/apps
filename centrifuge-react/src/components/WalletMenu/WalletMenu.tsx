@@ -15,6 +15,7 @@ import {
   Text,
   WalletButton,
 } from '@centrifuge/fabric'
+import { getAddress } from '@ethersproject/address'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
@@ -51,16 +52,26 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
   const centrifuge = useCentrifuge()
   const ctx = useWallet()
-  const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
-    ctx
-  const formattedAddress = connectedType === 'evm' ? address : centrifuge.utils.formatAddress(address)
+  const {
+    evm,
+    connectedType,
+    substrate,
+    disconnect,
+    showWallets,
+    showAccounts,
+    connectedNetwork,
+    connectedNetworkName,
+    isEvmOnSubstrate,
+  } = ctx
+  const formattedAddress =
+    connectedType === 'evm' ? getAddress(evm.selectedAddress!) : centrifuge.utils.formatAddress(address)
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
-  const balances = useBalances(connectedType !== 'evm' ? address : undefined)
+  const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
   const { data: evmBalance } = useNativeBalance()
   const evmCurrency = useNativeCurrency()
   const [balance, symbol] =
-    connectedType === 'evm'
+    connectedType === 'evm' && !isEvmOnSubstrate
       ? evmBalance && evmCurrency
         ? [evmBalance, evmCurrency.symbol]
         : []
@@ -76,7 +87,8 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
         <Stack ref={ref} width="100%" alignItems="stretch">
           <WalletButton
             active={state.isOpen}
-            address={formattedAddress}
+            address={address}
+            displayAddress={formattedAddress}
             alias={
               connectedType === 'evm'
                 ? ensName ?? undefined
@@ -88,7 +100,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
             icon={
               avatar ? (
                 <Box as="img" src={avatar} alt={ensName ?? ''} width="iconMedium" />
-              ) : connectedType === 'evm' ? (
+              ) : connectedType === 'evm' && !isEvmOnSubstrate ? (
                 'ethereum'
               ) : (
                 'polkadot'
