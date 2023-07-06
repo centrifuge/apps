@@ -1,4 +1,4 @@
-import type { JsonRpcSigner } from '@ethersproject/providers'
+import type { JsonRpcSigner, TransactionRequest } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
@@ -29,11 +29,14 @@ import {
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { TransactionOptions } from './types'
-import { computeMultisig, isSameAddress } from './utils'
+import { computeMultisig, evmToSubstrateAddress, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
 
 type ProxyType = string
+
+const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
+const EVM_DISPATCH_OVERHEAD_GAS = 50_000
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -49,9 +52,11 @@ export type Config = {
   signer?: Signer
   signingAddress?: AddressOrPair
   evmSigner?: JsonRpcSigner
+  evmSigningAddress?: string
   printExtrinsics?: boolean
   proxies?: ([delegator: string, forceProxyType?: ProxyType] | string)[]
   debug?: boolean
+  substrateEvmChainId?: number
 }
 
 export type UserProvidedConfig = Partial<Config>
@@ -169,6 +174,7 @@ export class CentrifugeBase {
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
+    const isEvmTx = this.config.evmSigner && !this.config.signer
     let actualSubmittable = submittable
 
     if (options?.batch) return of(actualSubmittable)
@@ -192,7 +198,15 @@ export class CentrifugeBase {
 
     if (options?.multisig) {
       const otherSigners = sortAddresses(
-        options.multisig.signers.filter((signer) => !isSameAddress(signer, this.getSignerAddress()))
+        options.multisig.signers.filter(
+          (signer) =>
+            !isSameAddress(
+              signer,
+              isEvmTx
+                ? evmToSubstrateAddress(this.config.evmSigningAddress!, this.config.substrateEvmChainId!)
+                : this.getSignerAddress()
+            )
+        )
       )
       console.log('multisig callData', actualSubmittable.method.toHex())
       actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
@@ -219,6 +233,11 @@ export class CentrifugeBase {
             .join(', ')})`
         )
       }
+    }
+
+    if (isEvmTx) {
+      // TODO: signOnly and sendOnly
+      return this.wrapSubstrateEvmSignAndSend(api, actualSubmittable, options)
     }
 
     const { signer, signingAddress } = this.getSigner()
@@ -292,6 +311,59 @@ export class CentrifugeBase {
     } catch (e) {
       return throwError(() => e)
     }
+  }
+
+  wrapSubstrateEvmSignAndSend<T extends TransactionOptions>(
+    _: ApiRx,
+    submittable: SubmittableExtrinsic<'rxjs'>,
+    options?: T
+  ) {
+    const address = evmToSubstrateAddress(this.config.evmSigningAddress!, this.config.substrateEvmChainId!)
+
+    return submittable.paymentInfo(address).pipe(
+      switchMap((paymentInfo) => {
+        const weight = paymentInfo.weight.refTime.toPrimitive() as number
+        const gas = Math.ceil(weight / 20_000) + EVM_DISPATCH_OVERHEAD_GAS
+        const tx: TransactionRequest = {
+          // type: 2,
+          to: EVM_DISPATCH_PRECOMPILE,
+          data: submittable.method.toHex(),
+          gasLimit: gas,
+          // gas: 0 // TODO: How to estimate gas here?,
+          // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
+        }
+        const txPromise = this.config.evmSigner!.sendTransaction(tx)
+        return from(txPromise).pipe(
+          switchMap((response) => {
+            return from(response.wait()).pipe(
+              map((receipt) => [response, receipt] as const),
+              startWith([response, null] as const),
+              catchError(() => of([{ ...response, error: new Error('failed') }] as const)),
+              tap(([result, receipt]) => {
+                if ('error' in result || receipt?.status === 0) {
+                  options?.onStatusChange?.({
+                    events: [],
+                    dispatchError: {},
+                    status: {
+                      hash: { toHex: () => result.hash as any },
+                    },
+                  } as any)
+                } else {
+                  options?.onStatusChange?.({
+                    events: [],
+                    status: {
+                      isInBlock: receipt?.status === 1,
+                      isFinalized: receipt?.status === 1,
+                      hash: { toHex: () => result.hash as any },
+                    },
+                  } as any)
+                }
+              })
+            )
+          })
+        )
+      })
+    )
   }
 
   async querySubquery<T = any>(query: string, variables?: any) {
@@ -434,8 +506,17 @@ export class CentrifugeBase {
     }
   }
 
-  getSignerAddress() {
-    const { signingAddress } = this.getSigner()
+  getSignerAddress(type?: 'substrate') {
+    const { signingAddress, evmSigningAddress } = this.config
+
+    if (!signingAddress) {
+      if (evmSigningAddress && this.config.substrateEvmChainId) {
+        return type === 'substrate'
+          ? evmToSubstrateAddress(evmSigningAddress, this.config.substrateEvmChainId)
+          : evmSigningAddress
+      }
+      throw new Error('no signer set')
+    }
 
     if (typeof signingAddress !== 'string' && 'address' in signingAddress) {
       return signingAddress.address
@@ -454,7 +535,7 @@ export class CentrifugeBase {
       return computeMultisig(txOptions.multisig).address
     }
 
-    return this.getSignerAddress()
+    return this.getSignerAddress('substrate')
   }
 
   setProxies(proxies: Config['proxies']) {

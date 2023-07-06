@@ -23,11 +23,12 @@ import { Logo, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
 import { UserSelection } from './UserSelection'
 import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
-import { useWallet, wallets } from './WalletProvider'
+import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 
 type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
+  evmOnSubstrate?: boolean
 }
 
 const title = {
@@ -35,8 +36,9 @@ const title = {
   wallets: 'Connect wallet',
 }
 
-export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
+export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }: Props) {
   const ctx = useWallet()
+  const centEvmChainId = useCentEvmChainId()
   const {
     pendingConnect: { isConnecting, wallet: pendingWallet, isError: isConnectError },
     walletDialog: { view, network: selectedNetwork, wallet: selectedWallet },
@@ -45,16 +47,19 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
     connect: doConnect,
     evm,
     scopedNetworks,
+    substrate: { evmChainId },
   } = ctx
 
   const getNetworkName = useGetNetworkName()
 
-  const shownWallets =
-    selectedNetwork === 'centrifuge'
-      ? sortCentrifugeWallets(wallets)
-      : selectedNetwork
-      ? sortEvmWallets(evm.connectors.filter((c) => c.shown))
-      : []
+  const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
+
+  const sortedEvmWallets = sortEvmWallets(evm.connectors.filter((c) => c.shown))
+  const centWallets =
+    centEvmChainId && evmOnSubstrate
+      ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
+      : sortCentrifugeWallets(wallets)
+  const shownWallets = isCentChainSelected ? centWallets : selectedNetwork ? sortedEvmWallets : []
 
   function close() {
     dispatch({ type: 'closeWalletDialog' })
@@ -62,9 +67,8 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
 
   async function connect(wallet: Wallet | EvmConnectorMeta) {
     try {
-      const accounts = await doConnect(wallet, typeof selectedNetwork === 'number' ? selectedNetwork : undefined)
-      if (accounts?.length && 'extensionName' in wallet) {
-        // Showing the account picker even when there's only one account, as the user might have proxies
+      const accounts = await doConnect(wallet, selectedNetwork!)
+      if (accounts?.length! > 1 && 'extensionName' in wallet) {
         dispatch({ type: 'showWalletDialogAccounts' })
       } else {
         close()
@@ -77,8 +81,8 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
   function walletButtonMuted() {
     return Boolean(
       scopedNetworks &&
-        ((selectedNetwork === 'centrifuge' && !scopedNetworks.includes('centrifuge')) ||
-          (typeof selectedNetwork === 'number' && scopedNetworks.includes('centrifuge')))
+        ((isCentChainSelected && !scopedNetworks.includes('centrifuge')) ||
+          (typeof selectedNetwork === 'number' && !scopedNetworks.includes(selectedNetwork)))
     )
   }
 
@@ -97,7 +101,7 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
               <SelectButton
                 logo={<Logo icon={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
-                active={selectedNetwork === 'centrifuge'}
+                active={isCentChainSelected}
                 muted={Boolean(scopedNetworks && !scopedNetworks.includes('centrifuge'))}
               >
                 {getNetworkName('centrifuge')}
@@ -105,6 +109,8 @@ export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
 
               {Object.entries(evmChains).map(([chainId, chain]) => {
                 const info = getChainInfo(evmChains, Number(chainId))
+
+                if (Number(chainId) === evmChainId) return null
 
                 return (
                   <SelectButton

@@ -5,7 +5,6 @@ import {
   useBalances,
   useCentrifuge,
   useCentrifugeTransaction,
-  useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -35,7 +34,6 @@ const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const { substrate } = useWallet()
   const [name, setName] = React.useState<string>('')
   const [description, setDescription] = React.useState<string>('')
   const [logo, setLogo] = React.useState<File | null>(null)
@@ -46,7 +44,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [termsAccepted, setTermsAccepted] = React.useState(false)
 
-  const isConnected = !!substrate.selectedAccount?.address
+  const isConnected = !!address
 
   const {
     execute: doTransaction,
@@ -85,7 +83,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
       image: imageMetadataHash?.ipfsHash,
     }
 
-    doTransaction([collectionId, substrate.selectedAccount!.address, metadataValues])
+    doTransaction([collectionId, address, metadataValues])
   })
 
   // Only close if the modal is still showing the last created collection
@@ -127,7 +125,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     <>
       <Dialog isOpen={open && !confirmOpen} onClose={close} title="Create new collection">
         <ConnectionGuard networks={['centrifuge']}>
-          <form onSubmit={() => setConfirmOpen(true)}>
+          <form onSubmit={execute}>
             <Stack gap={3}>
               <TextInput
                 label="Name"

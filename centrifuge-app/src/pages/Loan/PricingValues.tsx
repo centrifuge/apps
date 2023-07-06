@@ -1,7 +1,7 @@
 import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatDate, getAge } from '../../utils/date'
-import { formatPercentage } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 
 type Props = {
@@ -19,11 +19,14 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
     return (
       <>
         <LabelValueStack label="ISIN" value={pricing.Isin} />
-        <LabelValueStack label="Current price" value={`${pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`} />
+        <LabelValueStack
+          label="Current price"
+          value={`${formatBalance(pricing.oracle.value.toDecimal(), pool.currency.symbol, 6, 2)}`}
+        />
         <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
         <LabelValueStack label="Valuation method" value="Oracle" />
-        {pricing.maxBorrowQuantity && (
-          <LabelValueStack label="Max quantity" value={pricing.maxBorrowQuantity.toDecimal().toString()} />
+        {pricing.maxBorrowAmount && (
+          <LabelValueStack label="Max quantity" value={pricing.maxBorrowAmount.toDecimal().toString()} />
         )}
       </>
     )
