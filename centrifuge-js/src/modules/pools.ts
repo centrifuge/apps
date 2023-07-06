@@ -2149,7 +2149,7 @@ export function getPoolsModule(inst: Centrifuge) {
                           : new CurrencyBalance(hexToBN(pricingInfo.maxBorrowAmount.quantity), currency.decimals),
                       Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
                       maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
-                      oracle: oraclePrices[pricingInfo.priceId.isin] as any,
+                      oracle: oraclePrices[pricingInfo.priceId.isin] || { value: new Rate(0), timestamp: 0 },
                       outstandingQuantity:
                         'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
                           ? new CurrencyBalance(info.pricing.external.outstandingQuantity, currency.decimals)
@@ -2212,7 +2212,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   ? getOutstandingDebt(loan, currency.decimals, interestLastUpdated.toJSON() as number, interestData)
                   : new CurrencyBalance(
                       new BN(loan.pricing.external.outstandingQuantity)
-                        .mul(sharedInfo.pricing.oracle.value)
+                        .mul(sharedInfo.pricing.oracle?.value ?? new BN(0))
                         .div(new BN(10).pow(new BN(27))),
                       currency.decimals
                     )
