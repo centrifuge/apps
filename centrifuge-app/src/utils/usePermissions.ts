@@ -1,4 +1,4 @@
-import { addressToHex, Collection, computeMultisig, PoolRoles } from '@centrifuge/centrifuge-js'
+import { addressToHex, Collection, computeMultisig, evmToSubstrateAddress, PoolRoles } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
@@ -90,11 +90,16 @@ type SuitableConfig = {
 export function useSuitableAccounts(config: SuitableConfig) {
   const { actingAddress, poolId, poolRole, proxyType } = config
   const {
-    substrate: { selectedAccount, combinedAccounts },
+    isEvmOnSubstrate,
+    substrate: { selectedAccount, combinedAccounts, evmChainId },
+    evm: { selectedAddress },
   } = useWallet()
+  const signingAddress = isEvmOnSubstrate
+    ? evmToSubstrateAddress(selectedAddress!, evmChainId!)
+    : selectedAccount?.address
   const permissions = usePoolPermissions(poolId)
   const accounts = (combinedAccounts ?? [])?.filter((acc) => {
-    if (acc.signingAccount.address !== selectedAccount?.address) return false
+    if (acc.signingAccount.address !== signingAddress) return false
     if (actingAddress && !actingAddress.includes(acc.actingAddress)) return false
     if (
       acc.proxies &&
