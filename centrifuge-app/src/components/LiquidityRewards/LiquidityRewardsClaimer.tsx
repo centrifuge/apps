@@ -4,7 +4,7 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
 
-export function ClaimLiquidityRewards() {
+export function LiquidityRewardsClaimer() {
   const {
     state: { countdown, rewards, canClaim, isLoading },
     actions: { claim },

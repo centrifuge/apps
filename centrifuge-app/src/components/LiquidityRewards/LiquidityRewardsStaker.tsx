@@ -6,7 +6,7 @@ import { useActiveEpochData } from './hooks'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
 import { getRewardsDurationInDays } from './utils'
 
-export function Staker() {
+export function LiquidityRewardsStaker() {
   const activeEpochData = useActiveEpochData()
   const rewardsDurationInDays = React.useMemo(
     () => (activeEpochData?.duration ? getRewardsDurationInDays(activeEpochData?.duration) : undefined),

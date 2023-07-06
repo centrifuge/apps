@@ -15,8 +15,7 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
-import { ClaimLiquidityRewards } from '../LiquidityRewards/ClaimLiquidityRewards'
-import { Staker } from '../LiquidityRewards/Staker'
+import { LiquidityRewardsContainer } from '../LiquidityRewards/LiquidityRewardsContainer'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { EpochBusy } from './EpochBusy'
@@ -152,12 +151,7 @@ export function InvestRedeemInner({ view, setView, setTrancheId, networks }: Inn
           )}
         </Stack>
 
-        {!isTinlakePool && (
-          <Stack as={Card} gap={2} p={2}>
-            <ClaimLiquidityRewards />
-            <Staker />
-          </Stack>
-        )}
+        {!isTinlakePool && <LiquidityRewardsContainer />}
       </>
     )
   }
