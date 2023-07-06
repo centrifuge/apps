@@ -1,4 +1,4 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -24,7 +24,7 @@ import { AnchorPillButton } from '../../components/PillButton'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
-import { LoanTemplate, LoanTemplateAttribute } from '../../types'
+import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
@@ -36,7 +36,9 @@ import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
+import { OraclePriceForm } from './OraclePriceForm'
 import { PricingValues } from './PricingValues'
+import { formatNftAttribute } from './utils'
 
 export const LoanPage: React.FC = () => {
   return (
@@ -46,14 +48,23 @@ export const LoanPage: React.FC = () => {
   )
 }
 
+function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
+  return loan.poolId.startsWith('0x')
+}
+
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
   const canBorrow = useCanBorrowAsset(pid, aid)
 
-  if (!loan || loan.status === 'Closed' || !canBorrow) return null
+  if (!loan || loan.status === 'Closed' || !canBorrow || isTinlakeLoan(loan)) return null
 
-  return <FinanceForm loan={loan} />
+  return (
+    <Stack gap={2}>
+      <OraclePriceForm loan={loan} />
+      <FinanceForm loan={loan} />
+    </Stack>
+  )
 }
 
 const Loan: React.FC = () => {
@@ -109,6 +120,10 @@ const Loan: React.FC = () => {
             data={
               'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
                 ? [
+                    {
+                      label: 'Maturity date',
+                      value: formatDate(loan.pricing.maturityDate),
+                    },
                     {
                       label: 'Value',
                       value: formatBalance(
@@ -189,7 +204,7 @@ const Loan: React.FC = () => {
                       const attribute = templateData.attributes?.[key]
                       if (!attribute) return null
                       const value = publicData[key] ?? privateData[key]
-                      const formatted = value ? formatValue(value, attribute) : '-'
+                      const formatted = value ? formatNftAttribute(value, attribute) : '-'
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
@@ -295,23 +310,4 @@ const Loan: React.FC = () => {
       ) : null}
     </Stack>
   )
-}
-
-function formatValue(value: any, attr: LoanTemplateAttribute) {
-  switch (attr.input.type) {
-    case 'number':
-      return `${(attr.input.decimals
-        ? new CurrencyBalance(value, attr.input.decimals).toFloat()
-        : Number(value)
-      ).toLocaleString('en')} ${attr.input.unit || ''}`
-    case 'currency':
-      return formatBalance(
-        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals) : Number(value),
-        attr.input.symbol
-      )
-    case 'date':
-      return formatDate(value)
-    default:
-      return value
-  }
 }
