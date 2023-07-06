@@ -1,10 +1,31 @@
 import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
 import { Transaction } from '@centrifuge/centrifuge-react'
+import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 
-type CurrencyMeta = Pick<CurrencyMetadata, 'decimals' | 'symbol'>
+// type CurrencyId = Exclude<CurrencyMetadata['key'], string>
+type CurrencyMeta = Pick<CurrencyMetadata, 'decimals' | 'symbol'> //& { key?: CurrencyId }
+
+export type ActionsRef = React.MutableRefObject<
+  | {
+      setView(view: 'invest' | 'redeem'): void
+    }
+  | undefined
+>
+
+export type InvestRedeemProps = {
+  poolId: string
+  trancheId?: string
+  onSetTrancheId?: React.Dispatch<string>
+  actionsRef?: ActionsRef
+  networks?: Network[]
+}
+
+export type InvestValues = {
+  amount: number | ''
+}
 
 export type InvestRedeemAction =
   | 'invest'
@@ -29,7 +50,7 @@ export type InvestRedeemState = {
   minInitialInvestment: Decimal
   nativeBalance: Decimal
   poolCurrencyBalance: Decimal
-  poolCUrrencyBalanceWithPending: Decimal
+  poolCurrencyBalanceWithPending: Decimal
   trancheBalance: Decimal
   trancheBalanceWithPending: Decimal
   investmentValue: Decimal
@@ -42,8 +63,6 @@ export type InvestRedeemState = {
     remainingInvestCurrency: Decimal
     remainingRedeemToken: Decimal
   } | null
-  collectAmount: Decimal
-  collectType: 'invest' | 'redeem' | null
   needsToCollectBeforeOrder: boolean
   needsPoolCurrencyApproval: boolean
   needsTrancheTokenApproval: boolean
