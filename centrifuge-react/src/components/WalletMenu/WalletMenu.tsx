@@ -15,12 +15,14 @@ import {
   Text,
   WalletButton,
 } from '@centrifuge/fabric'
+import { getAddress } from '@ethersproject/address'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
+import { useCentrifuge } from '../CentrifugeProvider'
 import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
@@ -34,13 +36,13 @@ type WalletMenuProps = {
 
 export function WalletMenu({ menuItems }: WalletMenuProps) {
   const ctx = useWallet()
-  const { connectedType, pendingConnect } = ctx
-  const accounts = connectedType && ctx[connectedType].accounts
+  const { connectedType, pendingConnect, isEvmOnSubstrate } = ctx
+  const accounts = connectedType && ctx[isEvmOnSubstrate ? 'substrate' : 'evm'].accounts
   const address = useAddress()
   return address ? (
     <ConnectedMenu menuItems={menuItems} />
   ) : accounts && !accounts.length ? (
-    <WalletButton connectLabel="No accounts available" disabled />
+    <ConnectButton label="No accounts available" />
   ) : (
     <ConnectButton loading={pendingConnect.isConnecting} />
   )
@@ -48,16 +50,28 @@ export function WalletMenu({ menuItems }: WalletMenuProps) {
 
 function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
+  const centrifuge = useCentrifuge()
   const ctx = useWallet()
-  const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
-    ctx
+  const {
+    evm,
+    connectedType,
+    substrate,
+    disconnect,
+    showWallets,
+    showAccounts,
+    connectedNetwork,
+    connectedNetworkName,
+    isEvmOnSubstrate,
+  } = ctx
+  const formattedAddress =
+    connectedType === 'evm' ? getAddress(evm.selectedAddress!) : centrifuge.utils.formatAddress(address)
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
-  const balances = useBalances(connectedType === 'substrate' ? address : undefined)
+  const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
   const { data: evmBalance } = useNativeBalance()
   const evmCurrency = useNativeCurrency()
   const [balance, symbol] =
-    connectedType === 'evm'
+    connectedType === 'evm' && !isEvmOnSubstrate
       ? evmBalance && evmCurrency
         ? [evmBalance, evmCurrency.symbol]
         : []
@@ -74,6 +88,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
           <WalletButton
             active={state.isOpen}
             address={address}
+            displayAddress={formattedAddress}
             alias={
               connectedType === 'evm'
                 ? ensName ?? undefined
@@ -85,7 +100,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
             icon={
               avatar ? (
                 <Box as="img" src={avatar} alt={ensName ?? ''} width="iconMedium" />
-              ) : connectedType === 'evm' ? (
+              ) : connectedType === 'evm' && !isEvmOnSubstrate ? (
                 'ethereum'
               ) : (
                 'polkadot'
@@ -102,15 +117,15 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
               <Shelf px={2} pt={1} gap={1} alignItems="center" justifyContent="space-between">
                 <Shelf alignItems="center" gap={1}>
                   <Box style={{ pointerEvents: 'none' }}>
-                    <Identicon value={address} size={17} theme="polkadot" />
+                    <Identicon value={formattedAddress} size={17} theme="polkadot" />
                   </Box>
                   <Text variant="interactive1" fontWeight={400}>
-                    {truncateAddress(address)}
+                    {truncateAddress(formattedAddress)}
                   </Text>
                 </Shelf>
 
                 <Shelf alignItems="center" gap="2px">
-                  <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
+                  <IconButton onClick={() => copyToClipboard(formattedAddress)} title="Copy address to clipboard">
                     <IconCopy />
                   </IconButton>
                   {subScanUrl && (
