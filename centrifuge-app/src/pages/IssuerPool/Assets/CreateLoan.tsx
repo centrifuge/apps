@@ -369,7 +369,7 @@ function IssuerCreateLoan() {
           />
           {isAuthed ? (
             <>
-              <PageSection titleAddition={templateId && 'Select a template to enter the asset details.'}>
+              <PageSection>
                 {!templateId && (
                   <Box
                     mb={3}
