@@ -6,7 +6,7 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { switchMap } from 'rxjs'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { usePoolPermissions } from '../../utils/usePermissions'
+import { useCanSetOraclePrice } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, positiveNumber } from '../../utils/validation'
 
@@ -16,8 +16,7 @@ type PriceValues = {
 
 export function OraclePriceForm({ loan }: { loan: LoanType }) {
   const address = useAddress()
-  const permissions = usePoolPermissions(loan.poolId)
-  const isBorrower = address ? permissions?.[address]?.roles?.includes('Borrower') : false
+  const canPrice = useCanSetOraclePrice(address)
   const pool = usePool(loan.poolId)
 
   const { execute: doOraclePriceTransaction, isLoading: isOraclePriceLoading } = useCentrifugeTransaction(
@@ -58,7 +57,7 @@ export function OraclePriceForm({ loan }: { loan: LoanType }) {
   useFocusInvalidInput(oraclePriceForm, priceFormRef)
 
   if (
-    !isBorrower ||
+    !canPrice ||
     loan.status === 'Closed' ||
     !('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') ||
     import.meta.env.REACT_APP_COLLATOR_WSS_URL === 'wss://fullnode.parachain.centrifuge.io'
@@ -82,6 +81,7 @@ export function OraclePriceForm({ loan }: { loan: LoanType }) {
                     disabled={isOraclePriceLoading}
                     currency={pool.currency.symbol}
                     onChange={(value) => form.setFieldValue('price', value)}
+                    precision={6}
                   />
                 )
               }}
