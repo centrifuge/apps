@@ -108,14 +108,16 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     }
   }
 
-  React.useEffect(() => {
-    if (inputProps.value) {
-      const inputFormatted = formatThousandSeparator(
-        Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
-      )
-      setValue(inputFormatted)
-    }
-  }, [inputProps.value])
+  // Disabled for now, because it's janky as hell
+  // TODO: fix it
+  // React.useEffect(() => {
+  //   if (inputProps.value) {
+  //     const inputFormatted = formatThousandSeparator(
+  //       Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
+  //     )
+  //     setValue(inputFormatted)
+  //   }
+  // }, [inputProps.value])
 
   return (
     <InputBox
