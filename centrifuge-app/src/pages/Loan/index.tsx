@@ -190,18 +190,22 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
             </PageSection>
           ) : null}
 
-          <PageSection title="Pricing">
+          <PageSection
+            title="Pricing"
+            headerRight={
+              canOraclePrice &&
+              setShowOraclePricing &&
+              loan.status !== 'Closed' &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod === 'oracle' && (
+                <Button variant="secondary" onClick={() => setShowOraclePricing()} small>
+                  Update price
+                </Button>
+              )
+            }
+          >
             <Shelf gap={3} flexWrap="wrap">
               <PricingValues loan={loan} pool={pool} />
-              {canOraclePrice &&
-                setShowOraclePricing &&
-                loan.status !== 'Closed' &&
-                'valuationMethod' in loan.pricing &&
-                loan.pricing.valuationMethod === 'oracle' && (
-                  <Button variant="secondary" onClick={() => setShowOraclePricing()} small>
-                    Update price
-                  </Button>
-                )}
             </Shelf>
           </PageSection>
         </>
