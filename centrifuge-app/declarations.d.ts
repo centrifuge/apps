@@ -15,4 +15,5 @@ interface ImportMetaEnv {
   REACT_APP_ONBOARDING_API_URL: string
   REACT_APP_TINLAKE_NETWORK: 'goerli' | 'mainnet'
   REACT_APP_INFURA_KEY: string
+  REACT_APP_WALLETCONNECT_ID: string
 }

@@ -97,7 +97,7 @@ export function getEvmConnectors(
         return !isMobile() || this.installed
       },
     },
-    {
+    walletConnect && {
       id: 'walletconnect',
       title: 'WalletConnect',
       installUrl: '',
@@ -130,5 +130,5 @@ export function getEvmConnectors(
       },
     },
     ...(additionalConnectors ?? []),
-  ]
+  ].filter(Boolean) as EvmConnectorMeta[]
 }

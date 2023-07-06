@@ -166,7 +166,9 @@ export function getMultisigModule(inst: CentrifugeBase) {
 
     const address = u8aToHex(createKeyMulti(signers, threshold))
 
-    const otherSigners = sortAddresses(signers.filter((signer) => !isSameAddress(signer, inst.getSignerAddress())))
+    const otherSigners = sortAddresses(
+      signers.filter((signer) => !isSameAddress(signer, inst.getSignerAddress('substrate')))
+    )
 
     return $api.pipe(
       combineLatestWith(getPendingTransaction([address, hash]).pipe(take(1))),
@@ -186,7 +188,7 @@ export function getMultisigModule(inst: CentrifugeBase) {
               }`
             )
           }
-          $paymentInfo = api.tx(call).paymentInfo(inst.getSignerAddress())
+          $paymentInfo = api.tx(call).paymentInfo(inst.getSignerAddress('substrate'))
         }
 
         return $paymentInfo.pipe(
