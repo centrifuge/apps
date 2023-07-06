@@ -1,8 +1,8 @@
 import { Box, Divider, Grid, IconCheckInCircle, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../../utils/formatting'
-import { LightButton } from '../InvestRedeem/LightButton'
 import { useActiveEpochData } from './hooks'
+import { LightButton } from './LightButton'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
 import { getRewardsDurationInDays } from './utils'
 
