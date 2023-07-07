@@ -179,6 +179,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       currency={pool.currency.symbol}
                       onChange={(value) => form.setFieldValue('price', value)}
                       placeholder="0.0"
+                      precision={6}
                     />
                   )
                 }}
