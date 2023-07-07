@@ -1,15 +1,15 @@
 import { Box, Divider, Grid, IconCheckInCircle, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { millisecondsToDays } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { useActiveEpochData } from './hooks'
 import { LightButton } from './LightButton'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
-import { getRewardsDurationInDays } from './utils'
 
 export function LiquidityRewardsStaker() {
   const activeEpochData = useActiveEpochData()
   const rewardsDurationInDays = React.useMemo(
-    () => (activeEpochData?.duration ? getRewardsDurationInDays(activeEpochData?.duration) : undefined),
+    () => (activeEpochData?.duration ? millisecondsToDays(activeEpochData?.duration) : undefined),
     [activeEpochData?.duration]
   )
 
