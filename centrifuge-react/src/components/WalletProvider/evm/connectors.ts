@@ -49,7 +49,7 @@ export function getEvmConnectors(
           optionalChains: chains.slice(1),
           showQrModal: true,
           rpcMap: Object.entries(urls).reduce((prev, curr) => {
-            return { ...prev, [`eip155:${curr[0]}`]: [curr[1][0]] }
+            return { ...prev, [`eip155:${curr[0]}`]: curr[1] }
           }, {}),
         },
       })
