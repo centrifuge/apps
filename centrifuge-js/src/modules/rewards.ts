@@ -182,15 +182,6 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
-  function getCurrentBlock() {
-    return inst.getApi().pipe(
-      switchMap((api) => api.query.system.number()),
-      map((data) => {
-        return data?.toPrimitive() as number
-      })
-    )
-  }
-
   return {
     getORMLTokens,
     getAccountStakes,
@@ -202,6 +193,5 @@ export function getRewardsModule(inst: Centrifuge) {
     stake,
     claimLiquidityRewards,
     getEndOfEpoch,
-    getCurrentBlock,
   }
 }

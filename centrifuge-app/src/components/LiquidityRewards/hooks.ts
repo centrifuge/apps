@@ -41,7 +41,7 @@ export function useEndOfEpoch() {
 }
 
 export function useCurrentBlock() {
-  const [result] = useCentrifugeQuery(['System current block'], (cent) => cent.rewards.getCurrentBlock())
+  const [result] = useCentrifugeQuery(['System current block'], (cent) => cent.utils.getCurrentBlock())
 
   return result
 }
