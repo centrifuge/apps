@@ -1,10 +1,6 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import { fetchFromTinlakeSubgraph } from './fetchFromTinlakeSubgraph'
-
-type PoolsDailyData = {
-  day: number
-  poolValue: number
-}
 
 export async function getTinlakeSubgraphTVL() {
   const query = `
@@ -17,20 +13,22 @@ export async function getTinlakeSubgraphTVL() {
     }
   `
 
-  const data = await fetchFromTinlakeSubgraph(query)
-  const UintBase = new BN(10).pow(new BN(18))
+  const data: {
+    days: {
+      id: string
+      assetValue: string
+      reserve: string
+    }[]
+  } = await fetchFromTinlakeSubgraph(query)
 
   const poolsDailyData =
     data && data?.days
-      ? data.days
-          .map((item: any) => {
-            return {
-              day: Number(item.id),
-              poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
-            }
-          })
-          .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)
-      : []
+      ? data.days.map(({ id, assetValue, reserve }) => ({
+          dateInMilliseconds: new Date(Number(id) * 1000).setHours(0, 0, 0, 0),
+          poolTVL: new CurrencyBalance(new BN(assetValue || '0').add(new BN(reserve || '0')), 18).toDecimal(),
+        }))
+      : // .sort((a: PoolsDailyData, b: PoolsDailyData) => a.dateInMilliseconds - b.dateInMilliseconds)
+        []
 
   return poolsDailyData
 }
