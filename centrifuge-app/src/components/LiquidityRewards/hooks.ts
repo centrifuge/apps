@@ -71,7 +71,7 @@ export function useComputeLiquidityRewards(address?: string, poolId?: string, tr
 }
 
 // list of all staked currencyIds
-export function useListCurrencies(address?: string) {
+export function useStakedCurrencyIds(address?: string) {
   const [result] = useCentrifugeQuery(
     ['list currencies', address],
     (cent) => cent.rewards.listCurrencies([address!, 'Liquidity']),
