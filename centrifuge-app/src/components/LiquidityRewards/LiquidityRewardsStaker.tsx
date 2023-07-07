@@ -15,7 +15,7 @@ export function LiquidityRewardsStaker() {
 
   const {
     state: { tranche, combinedStakes, enabled, canStake, canUnstake, isLoading, stakeableAmount },
-    actions: { stake, unStake },
+    actions: { stake, unstake },
   } = useLiquidityRewards()
 
   const hasStakes = !!combinedStakes && !combinedStakes?.isZero()
@@ -69,7 +69,7 @@ export function LiquidityRewardsStaker() {
 
       <Grid mt="1px" gap="1px" columns={canStake && canUnstake ? 2 : 1}>
         {canStake && (
-          <LightButton onClick={stake} $left $right={!canUnstake} disabled={isLoading.unStake || isLoading.stake}>
+          <LightButton onClick={stake} $left $right={!canUnstake} disabled={isLoading.unstake || isLoading.stake}>
             <Text variant="body2" color="inherit">
               Stake
             </Text>
@@ -77,10 +77,10 @@ export function LiquidityRewardsStaker() {
         )}
         {canUnstake && (
           <LightButton
-            onClick={() => unStake()}
+            onClick={() => unstake()}
             $left={!canStake}
             $right
-            disabled={isLoading.unStake || isLoading.stake}
+            disabled={isLoading.unstake || isLoading.stake}
           >
             <Text variant="body2" color="inherit">
               Unstake

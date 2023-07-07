@@ -20,14 +20,14 @@ export type LiquidityRewardsState = {
   isLoading: {
     claim: boolean
     stake: boolean
-    unStake: boolean
+    unstake: boolean
   }
 }
 
 export type LiquidityRewardsActions = {
   claim(): void
   stake(): void
-  unStake(amount?: Decimal): void
+  unstake(amount?: Decimal): void
 }
 
 export type LiquidityRewardsContextType = {

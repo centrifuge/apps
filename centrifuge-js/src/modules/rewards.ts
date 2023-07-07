@@ -119,7 +119,7 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
-  function unStake(args: [poolId: string, trancheId: string, amount: BN], options?: TransactionOptions) {
+  function unstake(args: [poolId: string, trancheId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, trancheId, amount] = args
     const $api = inst.getApi()
 
@@ -233,7 +233,7 @@ export function getRewardsModule(inst: Centrifuge) {
     claimedCFGRewards,
     getActiveEpochData,
     getRewardCurrencyGroup,
-    unStake,
+    unstake,
     stake,
     claimLiquidityRewards,
     getEndOfEpoch,

@@ -54,7 +54,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
 
   const claim = useCentrifugeTransaction('Claim CFG liquidity rewards', (cent) => cent.rewards.claimLiquidityRewards)
   const stake = useCentrifugeTransaction('Stake tokens', (cent) => cent.rewards.stake)
-  const unStake = useCentrifugeTransaction('Unstake tokens', (cent) => cent.rewards.unStake)
+  const unstake = useCentrifugeTransaction('Unstake tokens', (cent) => cent.rewards.unstake)
 
   const state: LiquidityRewardsState = {
     tranche,
@@ -69,7 +69,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
     isLoading: {
       claim: claim.isLoading,
       stake: stake.isLoading,
-      unStake: unStake.isLoading,
+      unstake: unstake.isLoading,
     },
   }
 
@@ -89,7 +89,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
       const tokenbalance = TokenBalance.fromFloat(stakeableAmount, pool.currency.decimals)
       stake.execute([poolId, trancheId, tokenbalance])
     },
-    unStake: (customAmount?: Decimal) => {
+    unstake: (customAmount?: Decimal) => {
       const amount = customAmount ?? stakes?.stake.toDecimal()
 
       if (!pool.currency || !poolId || !trancheId || !amount) {
@@ -97,7 +97,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
       }
 
       const tokenbalance = TokenBalance.fromFloat(amount, pool.currency.decimals)
-      unStake.execute([poolId, trancheId, tokenbalance])
+      unstake.execute([poolId, trancheId, tokenbalance])
     },
   }
 
