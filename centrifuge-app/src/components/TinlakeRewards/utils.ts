@@ -1,3 +1,4 @@
+import { addThousandsSeparators, toPrecision } from '@centrifuge/centrifuge-js'
 import { blake2AsU8a } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
@@ -32,23 +33,6 @@ function baseToDisplay(base: string | BN, decimals: number) {
   const res = `${a}.${b}`
 
   return neg ? `-${res}` : res
-}
-
-function addThousandsSeparators(x: string | BN | number) {
-  const parts = x.toString().split('.')
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return parts.join('.')
-}
-
-function toPrecision(value: string, precision: number) {
-  const zero = new Decimal('0').toFixed(precision)
-  const result = new Decimal(value.toString()).toFixed(precision)
-
-  // If value >= 0.0 but will be rounded to 0.0, round up.
-  // Otherwise, 183542 base units as precision 18 will be rounded to 0.00.
-  if (zero === result) return new Decimal(value.toString()).toFixed(precision, Decimal.ROUND_UP)
-
-  return result
 }
 
 function dynamicPrecision(num: string) {
