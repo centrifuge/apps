@@ -1684,7 +1684,7 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     }>(
       `query {
-        poolSnapshots(first: 1000, orderBy: PERIOD_START_DESC) {
+        poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
           nodes {
             portfolioValuation
             totalReserve
@@ -1704,13 +1704,27 @@ export function getPoolsModule(inst: Centrifuge) {
         if (!data) {
           return []
         }
-        return data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
+
+        const mergedMap = new Map()
+        const formatted = data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
           dateInMilliseconds: new Date(periodStart).getTime(),
-          poolTVL: new CurrencyBalance(
+          tvl: new CurrencyBalance(
             new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
             pool.currency.decimals
           ).toDecimal(),
         }))
+
+        formatted.forEach((entry) => {
+          const { dateInMilliseconds, tvl } = entry
+
+          if (mergedMap.has(dateInMilliseconds)) {
+            mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
+          } else {
+            mergedMap.set(dateInMilliseconds, tvl)
+          }
+        })
+
+        return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
       })
     )
   }

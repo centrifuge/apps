@@ -5,7 +5,7 @@ import { fetchFromTinlakeSubgraph } from './fetchFromTinlakeSubgraph'
 export async function getTinlakeSubgraphTVL() {
   const query = `
     query PoolsDailyData {
-      days(orderBy: id, orderDirection: desc, first: 1000) {
+      days(orderBy: id, orderDirection: asc, first: 1000) {
         id
         assetValue
         reserve
@@ -25,10 +25,9 @@ export async function getTinlakeSubgraphTVL() {
     data && data?.days
       ? data.days.map(({ id, assetValue, reserve }) => ({
           dateInMilliseconds: new Date(Number(id) * 1000).setHours(0, 0, 0, 0),
-          poolTVL: new CurrencyBalance(new BN(assetValue || '0').add(new BN(reserve || '0')), 18).toDecimal(),
+          tvl: new CurrencyBalance(new BN(assetValue || '0').add(new BN(reserve || '0')), 18).toDecimal(),
         }))
-      : // .sort((a: PoolsDailyData, b: PoolsDailyData) => a.dateInMilliseconds - b.dateInMilliseconds)
-        []
+      : []
 
   return poolsDailyData
 }

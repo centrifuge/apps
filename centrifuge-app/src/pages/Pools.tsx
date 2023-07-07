@@ -1,6 +1,6 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { TotalValueLocked } from '../components/Charts/TotalValueLocked'
+import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
 import { MenuSwitch } from '../components/MenuSwitch'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
@@ -12,10 +12,13 @@ import { config } from '../config'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useListedPools } from '../utils/useListedPools'
+
 export const PoolsPage: React.FC = () => {
   return (
     <PageWithSideBar sidebar>
-      <TotalValueLocked />
+      <Box p={2}>
+        <CardTotalValueLocked />
+      </Box>
       <Pools />
     </PageWithSideBar>
   )
