@@ -131,7 +131,7 @@ export function useUserRewards() {
   const [centChainData] = useCentrifugeQuery(
     ['cent chain data', ethAddr, centAddresses],
     (centrifuge) =>
-      combineLatest(centAddresses!.map((centAccountID) => centrifuge.rewards.claimedCFGRewards([centAccountID]))).pipe(
+      combineLatest(centAddresses!.map((centAccountID) => centrifuge.tinlake.claimedCFGRewards([centAccountID]))).pipe(
         map((result) => {
           const links = subgraphQuery.data!.links.map((link, index) => ({
             ...link,

@@ -3,6 +3,8 @@ import { TransactionRequest, TransactionResponse } from '@ethersproject/provider
 import BN from 'bn.js'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
+import { TransactionOptions } from '../types'
+import { CurrencyBalance } from '../utils/BN'
 import { calculateOptimalSolution, Orders, State } from '../utils/solver/tinlakeSolver'
 import { abis } from './tinlake/abi'
 
@@ -34,16 +36,24 @@ export type TinlakeContractAddresses = {
   MCD_JUG?: string
   MAKER_MGR?: string
 }
+
 export type TinlakeContractVersions = {
   FEED?: number
   POOL_ADMIN?: number
 }
+
 export type TinlakeContractNames = keyof TinlakeContractAddresses
 type Abis = typeof abis
 type AbisNames = keyof Abis
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 const e27 = new BN(10).pow(new BN(27))
+
+type ClaimCFGRewardsInput = [
+  claimerAccountID: string, // ID of Centrifuge Chain account that should receive the rewards
+  amount: string, // amount that should be received
+  proof: Uint8Array[] // proof for the given claimer and amount
+]
 
 export function getTinlakeModule(inst: Centrifuge) {
   function contract(
@@ -392,6 +402,31 @@ export function getTinlakeModule(inst: Centrifuge) {
     return pending(tx)
   }
 
+  function claimCFGRewards(args: ClaimCFGRewardsInput, options?: TransactionOptions) {
+    const [claimerAccountID, amount, proof] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => {
+        const submittable = api.tx.claims.claim(claimerAccountID, amount, proof)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function claimedCFGRewards(args: [centAddr: string]) {
+    const [centAddr] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) =>
+        api.query.claims.claimedAmounts(centAddr).pipe(
+          map((claimed) => {
+            return new CurrencyBalance(claimed.toString(), api.registry.chainDecimals[0])
+          })
+        )
+      )
+    )
+  }
+
   return {
     updateInvestOrder,
     updateRedeemOrder,
@@ -404,6 +439,8 @@ export function getTinlakeModule(inst: Centrifuge) {
     contract,
     getClaimCFGAccountID,
     updateClaimCFGAccountID,
+    claimCFGRewards,
+    claimedCFGRewards,
   }
 }
 

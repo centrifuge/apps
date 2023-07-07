@@ -24,7 +24,7 @@ export function ClaimTinlakeRewards() {
   const [status, setStatus] = React.useState<null | TransactionStatus>(null)
   const [error, setError] = React.useState<null | string>(null)
 
-  const { execute } = useCentrifugeTransaction('Claim CFG rewards', (cent) => cent.rewards.claimCFGRewards)
+  const { execute } = useCentrifugeTransaction('Claim CFG rewards', (cent) => cent.tinlake.claimCFGRewards)
 
   const claim = async () => {
     setStatus('pending')

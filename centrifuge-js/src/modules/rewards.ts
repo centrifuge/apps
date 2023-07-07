@@ -3,42 +3,9 @@ import { combineLatestWith, filter, map, repeat, switchMap } from 'rxjs/operator
 import { Centrifuge } from '../Centrifuge'
 import { RewardDomain } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
-import { CurrencyBalance, TokenBalance } from '../utils/BN'
-
-type ClaimCFGRewardsInput = [
-  claimerAccountID: string, // ID of Centrifuge Chain account that should receive the rewards
-  amount: string, // amount that should be received
-  proof: Uint8Array[] // proof for the given claimer and amount
-]
+import { TokenBalance } from '../utils/BN'
 
 export function getRewardsModule(inst: Centrifuge) {
-  // Tinlake specific
-  function claimCFGRewards(args: ClaimCFGRewardsInput, options?: TransactionOptions) {
-    const [claimerAccountID, amount, proof] = args
-
-    return inst.getApi().pipe(
-      switchMap((api) => {
-        const submittable = api.tx.claims.claim(claimerAccountID, amount, proof)
-        return inst.wrapSignAndSend(api, submittable, options)
-      })
-    )
-  }
-
-  // Tinlake specific
-  function claimedCFGRewards(args: [centAddr: string]) {
-    const [centAddr] = args
-
-    return inst.getApi().pipe(
-      switchMap((api) =>
-        api.query.claims.claimedAmounts(centAddr).pipe(
-          map((claimed) => {
-            return new CurrencyBalance(claimed.toString(), api.registry.chainDecimals[0])
-          })
-        )
-      )
-    )
-  }
-
   function computeReward(args: [address: Account, poolId: string, trancheId: string, rewardDomain: RewardDomain]) {
     const [address, poolId, trancheId, rewardDomain] = args
     const currencyId = { Tranche: [poolId, trancheId] }
@@ -229,8 +196,6 @@ export function getRewardsModule(inst: Centrifuge) {
     getAccountStakes,
     computeReward,
     listCurrencies,
-    claimCFGRewards,
-    claimedCFGRewards,
     getActiveEpochData,
     getRewardCurrencyGroup,
     unstake,
