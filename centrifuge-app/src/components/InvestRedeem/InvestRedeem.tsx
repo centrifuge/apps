@@ -215,10 +215,10 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
           {connectedType && (
             <>
               <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-                {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
+                {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
               </TextWithPlaceholder>
               <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
+                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)}
               </TextWithPlaceholder>
             </>
           )}
@@ -506,7 +506,13 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>
@@ -671,7 +677,13 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>

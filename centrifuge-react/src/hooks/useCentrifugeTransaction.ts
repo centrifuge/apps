@@ -4,7 +4,7 @@ import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/Transactions'
-import { CombinedSubstrateAccount, SubstrateAccount, useWallet } from '../components/WalletProvider'
+import { CombinedSubstrateAccount, SubstrateAccount, useEvmProvider, useWallet } from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
 export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
@@ -18,7 +18,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
-  const { showWallets, substrate, walletDialog } = useWallet()
+  const { showWallets, substrate, walletDialog, evm, isEvmOnSubstrate } = useWallet()
+  const provider = useEvmProvider()
   const { selectedCombinedAccount, selectedAccount } = substrate
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
@@ -39,7 +40,12 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         proxies: undefined,
       }
     try {
-      const connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
+      let connectedCent
+      if (isEvmOnSubstrate) {
+        connectedCent = cent.connectEvm(evm.selectedAddress!, provider!.getSigner(), substrate.evmChainId!)
+      } else {
+        connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
+      }
       const api = await cent.getApiPromise()
 
       const transaction = transactionCallback(connectedCent)
@@ -134,11 +140,11 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     addOrUpdateTransaction(tx)
     setLastId(id)
 
-    if (!selectedAccount) {
+    if (!selectedAccount && !isEvmOnSubstrate) {
       pendingTransaction.current = { id, args, options }
       showWallets('centrifuge')
     } else {
-      doTransaction(selectedCombinedAccount, selectedAccount, id, args, options)
+      doTransaction(selectedCombinedAccount, selectedAccount!, id, args, options)
     }
     return id
   }
@@ -150,8 +156,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       if (walletDialog.view !== null) return
       pendingTransaction.current = undefined
 
-      if (selectedAccount) {
-        doTransaction(selectedCombinedAccount, selectedAccount, id, args, options)
+      if (selectedAccount || isEvmOnSubstrate) {
+        doTransaction(selectedCombinedAccount, selectedAccount!, id, args, options)
       } else {
         updateTransaction(id, { status: 'failed', failedReason: 'No account connected' })
       }
