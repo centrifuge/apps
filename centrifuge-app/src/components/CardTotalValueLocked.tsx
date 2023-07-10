@@ -10,7 +10,7 @@ import { tooltipText } from './Tooltips'
 
 export function CardTotalValueLocked() {
   const [hovered, setHovered] = React.useState<DataPoint | undefined>(undefined)
-  const [_, listedTokens] = useListedPools()
+  const [, listedTokens] = useListedPools()
 
   const chartHeight = 100
   const balanceProps = {
