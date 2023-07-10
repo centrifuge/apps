@@ -14,18 +14,6 @@ export function useAccountStakes(address?: string, poolId?: string, trancheId?: 
   return result
 }
 
-export function useOrmlTokens(address?: string, poolId?: string, trancheId?: string) {
-  const [result] = useCentrifugeQuery(
-    ['orml tokens', address, poolId, trancheId],
-    (cent) => cent.rewards.getORMLTokens([address!, poolId!, trancheId!]),
-    {
-      enabled: !!address && !!poolId && !!trancheId,
-    }
-  )
-
-  return result
-}
-
 export function useActiveEpochData() {
   const [result] = useCentrifugeQuery(['Liquidity Rewards Active Epoch Data'], (cent) =>
     cent.rewards.getActiveEpochData()

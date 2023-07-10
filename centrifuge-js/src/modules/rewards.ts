@@ -150,27 +150,6 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
-  function getORMLTokens(args: [address: Account, poolId: string, trancheId: string]) {
-    const [address, poolId, trancheId] = args
-
-    return inst.getApi().pipe(
-      switchMap((api) => api.query.ormlTokens.accounts(address, { Tranche: [poolId, trancheId] })),
-      map((data) => {
-        const { free, reserved, frozen } = data.toPrimitive() as {
-          free: number
-          reserved: number
-          frozen: number
-        }
-
-        return {
-          free: new TokenBalance(free, 18).toDecimal(), // collected tranche tokens
-          reserved: new TokenBalance(reserved, 18).toDecimal(), // staked tranche tokens
-          frozen: new TokenBalance(frozen, 18).toDecimal(),
-        }
-      })
-    )
-  }
-
   function getEndOfEpoch() {
     return inst.getApi().pipe(
       switchMap((api) => api.query.liquidityRewards.endOfEpoch()),
@@ -183,7 +162,6 @@ export function getRewardsModule(inst: Centrifuge) {
   }
 
   return {
-    getORMLTokens,
     getAccountStakes,
     computeReward,
     listCurrencies,
