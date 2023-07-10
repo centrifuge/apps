@@ -5,6 +5,9 @@ export function useAddress(typeOverride?: 'substrate' | 'evm') {
   const { address: debugSubstrateAddress, evmAddress: debugEvmAddress } = useDebugFlags()
   const { connectedType } = useWallet()
   const address = useWalletAddress(typeOverride)
-  const debugAddress = (typeOverride || connectedType) === 'evm' ? debugEvmAddress : debugSubstrateAddress
+  const { isEvmOnSubstrate } = useWallet()
+  const debugAddress =
+    typeOverride === 'evm' || (connectedType === 'evm' && !isEvmOnSubstrate) ? debugEvmAddress : debugSubstrateAddress
+
   return (debugAddress as string) || address
 }
