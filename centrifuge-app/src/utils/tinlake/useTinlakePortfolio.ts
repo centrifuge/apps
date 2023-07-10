@@ -1,6 +1,6 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
-import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
 import { Call, multicall } from './multicall'
 import { IpfsPools, TokenResult } from './types'
@@ -24,7 +24,7 @@ export enum TinlakeTranche {
 }
 
 async function getTinlakePortfolio(ipfsPools: IpfsPools, address: string) {
-  const toBN = (val: BigNumber) => new BN(val.toString())
+  const toBN = (val: BN) => new CurrencyBalance(val, 18)
 
   const calls: Call[] = ipfsPools.active.flatMap((pool) => [
     {
