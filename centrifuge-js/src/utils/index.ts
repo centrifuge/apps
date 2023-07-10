@@ -135,3 +135,11 @@ export function computeMultisig(multisig: Multisig): ComputedMultisig {
     threshold: multisig.threshold,
   }
 }
+
+export function evmToSubstrateAddress(address: string, chainId: number) {
+  // Bytes EVM\0 as suffix
+  const suffix = '45564d00'
+  const chainHex = chainId.toString(16).padStart(4, '0')
+
+  return `0x${address.substring(2).toLowerCase()}000000000000${chainHex}${suffix}`
+}

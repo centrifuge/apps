@@ -22,10 +22,10 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 
-1. Use Wallet A to call proxy.create_pure(..) . This creates a pure proxy, which doesn’t have a private key or seed. You can then copy the address (pure_proxy_address) from the event submitted.
-2. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=PermissionManagement)
+1. Use Wallet A to call proxy.create_pure(..) . This creates a pure proxy, which doesn’t have a private key or seed. You can then copy the address (pure_proxy_address) from the event submitted. The pure proxy will need a small amount of native currency to submit the following transaction.
+2. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=PermissionManagement). secure_wallet_b should any account that is secured by a private key. The seed phrase won't change when the chain is reset. Make sure the seed phrase for the secure wallet is stored in your local env (`/onboarding-api/.env`) file under the name `PURE_PROXY_CONTROLLER_SEED` in the onboarding-api.
 3. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(multisig_C, type=Any). Multisig C is some multisig that can swap out wallet B if it ever gets compromised / lost. This should be at least a multisig with 2 signer threshold.
-4. Add the pure_proxy_address to the env variable `MEMBERLIST_ADMIN_PURE_PROXY` in the onboarding api and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` in the centrifuge-app env variables.
+4. Add the pure_proxy_address to the env variable `MEMBERLIST_ADMIN_PURE_PROXY` in the onboarding api and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` in the centrifuge-app (`/centrifuge-app/.env-config/.env.development.local`) env variables.
 5. Make sure secure_wallet_B is funded with both aUSD and the Native currency.
 
 > onboarding must be manually enabled for each tranche in the issuer settings.
@@ -111,9 +111,9 @@ To make sure repository admins can control the full workflow of our apps to prod
 
 - Catalyst deployments are triggered by pushing a tag containing `centrifuge-app-v*` in the tag name.
 
-- Altair and staging are triggered by creating a `pre-release` [on the Github repository](https://github.com/centrifuge/apps/releases/new) 
+- Altair and staging are triggered by creating a `pre-release` [on the Github repository](https://github.com/centrifuge/apps/releases/new)
 
-- Centrifuge is deployed by editing [an existing release](https://github.com/centrifuge/apps/releases) and unmarking `pre-release` to fully release it, it will promote the staging artifacts to app.centrifuge.io 
+- Centrifuge is deployed by editing [an existing release](https://github.com/centrifuge/apps/releases) and unmarking `pre-release` to fully release it, it will promote the staging artifacts to app.centrifuge.io
 
 - Using the github release manager the pre-release can be promoted to production ([app.centrifuge.io](https://app.centrifuge.io)) using the artifacts generated in the pre-release. The production release must be approved by a reviewer.
 
@@ -127,9 +127,10 @@ HackMD docs: https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view
 
 More info on our release process rationale can be found in [our HackMD](https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view) (Private link, only k-f contributors)
 
-## Releasing to staging, Altair, and Prod/Centrifuge
+## How to release to staging, Altair, and Prod/Centrifuge
 
-### 1. Create a release and mark it as a pre-Release 
+### 1. Create a release and mark it as a pre-release
+
 -> Deploys to app.staging.centrifuge.io and app.altair.centrifuge.io
 
 Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releases/new). Make sure to tick the `pre-release` option.
@@ -145,7 +146,8 @@ Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releas
 
 When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
 
-### 2. Create a production Release 
+### 2. Create a production release
+
 -> Deploys to app.centrifuge.io
 
 > The deployment to staging from point 1. needs to have been finished first. The production deployment uses the artifacts generated in the pre-release.
@@ -154,6 +156,6 @@ Navigate to the [release summary](https://github.com/centrifuge/apps/releases) a
 
 1. Untick the `Set as a pre-release` checkbox and then tick the `Set as the latest release` checkbox
 2. Click `Update release` to trigger the prod deployment. As with the pre-release, the production release must be approved by a reviewer.
-3. Follow your prod deployment in the  [Actions dashboard](https://github.com/centrifuge/apps/actions/workflows/prod-deploy.yml)
+3. Follow your prod deployment in the [Actions dashboard](https://github.com/centrifuge/apps/actions/workflows/prod-deploy.yml)
 
 When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.

@@ -43,6 +43,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
   const pendingRedeem = trancheInvestment?.disburse.remainingRedeemToken || Dec(0)
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
   const investmentValue = combinedBalance.mul(price)
+  const collectAmount = (disburse?.payoutCurrencyAmount || Dec(0)).add(disburse?.payoutTokenAmount || 0)
 
   const isCalculatingOrders = pool.epoch.status !== 'ongoing'
 
@@ -114,9 +115,9 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       remainingInvestCurrency: disburse?.remainingInvestCurrency || Dec(0),
       remainingRedeemToken: disburse?.remainingRedeemToken || Dec(0),
     },
-    needsToCollectBeforeOrder: !(disburse?.payoutCurrencyAmount || Dec(0))
-      .add(disburse?.payoutTokenAmount || 0)
-      .isZero(),
+    collectAmount,
+    collectType: disburse?.payoutCurrencyAmount.isZero() ? 'invest' : 'redeem',
+    needsToCollectBeforeOrder: !collectAmount.isZero(),
     needsPoolCurrencyApproval: !!trancheInvestment?.poolCurrencyAllowance.isZero(),
     needsTrancheTokenApproval: !!trancheInvestment?.tokenAllowance.isZero(),
     pendingAction,

@@ -48,7 +48,9 @@ export function getEvmConnectors(
           chains: chains,
           optionalChains: chains.slice(1),
           showQrModal: true,
-          rpcMap: urls,
+          rpcMap: Object.entries(urls).reduce((prev, curr) => {
+            return { ...prev, [`eip155:${curr[0]}`]: curr[1] }
+          }, {}),
         },
       })
   )
@@ -97,7 +99,7 @@ export function getEvmConnectors(
         return !isMobile() || this.installed
       },
     },
-    {
+    walletConnect && {
       id: 'walletconnect',
       title: 'WalletConnect',
       installUrl: '',
@@ -130,5 +132,5 @@ export function getEvmConnectors(
       },
     },
     ...(additionalConnectors ?? []),
-  ]
+  ].filter(Boolean) as EvmConnectorMeta[]
 }
