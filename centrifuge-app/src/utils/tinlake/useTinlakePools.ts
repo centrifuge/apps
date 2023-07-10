@@ -240,7 +240,7 @@ async function getTinlakeLoans(poolId: string) {
     loans: unknown[]
   }[] = []
 
-  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+  const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
