@@ -14,6 +14,7 @@ export type WalletButtonProps = Omit<
 > & {
   connectLabel?: string
   address?: string
+  displayAddress?: string
   alias?: string
   balance?: string
   icon?: IconTheme | React.ReactElement
@@ -46,6 +47,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
   active,
   connectLabel = 'Connect wallet',
   address,
+  displayAddress = address,
   alias,
   balance,
   ...buttonProps
@@ -85,7 +87,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
           </Box>
         ) : (
           <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500} style={{ margin: address ? 0 : 'auto' }}>
-            {address ? truncate(address) : connectLabel}
+            {displayAddress ? truncate(displayAddress) : connectLabel}
           </Text>
         )}
         {address && balance && (

@@ -24,6 +24,7 @@ export type Key =
   | 'address'
   | 'batchMintNFTs'
   | 'persistDebugFlags'
+  | 'showEvmOnSubstrate'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
@@ -48,6 +49,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   alternativeTheme: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  showEvmOnSubstrate: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

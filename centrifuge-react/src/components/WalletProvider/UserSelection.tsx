@@ -73,8 +73,11 @@ export type NetworkIconProps = {
 }
 
 export function useNeworkIcon(network: NetworkIconProps['network']) {
-  const { evm } = useWallet()
-  const src = network === 'centrifuge' ? centrifugeLogo : evm.chains[network]?.iconUrl ?? ''
+  const {
+    evm,
+    substrate: { evmChainId },
+  } = useWallet()
+  const src = network === 'centrifuge' || network === evmChainId ? centrifugeLogo : evm.chains[network]?.iconUrl ?? ''
   return src
 }
 
