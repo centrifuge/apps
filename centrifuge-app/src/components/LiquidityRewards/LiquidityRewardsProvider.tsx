@@ -66,6 +66,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
     canStake,
     canUnstake,
     canClaim,
+    nativeCurrency: balances?.native.currency,
     isLoading: {
       claim: claim.isLoading,
       stake: stake.isLoading,

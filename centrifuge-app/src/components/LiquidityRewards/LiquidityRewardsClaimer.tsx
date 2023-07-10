@@ -6,16 +6,16 @@ import { useLiquidityRewards } from './LiquidityRewardsContext'
 
 export function LiquidityRewardsClaimer() {
   const {
-    state: { countdown, rewards, canClaim, isLoading },
+    state: { countdown, rewards, canClaim, isLoading, nativeCurrency },
     actions: { claim },
   } = useLiquidityRewards()
 
   const rewardsAmount =
     rewards && !rewards?.isZero()
       ? rewards.gte(Dec(10000))
-        ? formatBalanceAbbreviated(rewards, 'CFG', 2)
-        : formatBalance(rewards, 'CFG', 2)
-      : '0 CFG'
+        ? formatBalanceAbbreviated(rewards, nativeCurrency?.symbol, 2)
+        : formatBalance(rewards, nativeCurrency?.symbol, 2)
+      : `0 ${nativeCurrency?.symbol || 'CFG'}`
 
   return !!rewards && !rewards?.isZero() ? (
     <Box as={Card} p={2} pb={3}>

@@ -14,7 +14,7 @@ export function LiquidityRewardsStaker() {
   )
 
   const {
-    state: { tranche, combinedStakes, enabled, canStake, canUnstake, isLoading, stakeableAmount },
+    state: { tranche, combinedStakes, enabled, canStake, canUnstake, isLoading, stakeableAmount, nativeCurrency },
     actions: { stake, unstake },
   } = useLiquidityRewards()
 
@@ -47,7 +47,7 @@ export function LiquidityRewardsStaker() {
                   ''
                 )}
                 {'. '}
-                CFG rewards are distributed regulary after each reward epoch.
+                {nativeCurrency?.symbol || 'CFG'} rewards are distributed regulary after each reward epoch.
               </Text>
             </Stack>
           )}
@@ -60,7 +60,7 @@ export function LiquidityRewardsStaker() {
                 {formatBalance(stakeableAmount!, tranche?.currency?.symbol)}
               </Text>
               <Text as="span" variant="body3">
-                Stake pool tokens to earn CFG rewards.
+                Stake pool tokens to earn {nativeCurrency?.symbol || 'CFG'} rewards.
               </Text>
             </Stack>
           )}

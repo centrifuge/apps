@@ -1,4 +1,4 @@
-import { Token } from '@centrifuge/centrifuge-js'
+import { CurrencyMetadata, Token } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 
 export type LiquidityRewardsProviderProps = {
@@ -17,6 +17,7 @@ export type LiquidityRewardsState = {
   canStake: boolean
   canUnstake: boolean
   canClaim: boolean
+  nativeCurrency?: Pick<CurrencyMetadata, 'decimals' | 'symbol'>
   isLoading: {
     claim: boolean
     stake: boolean

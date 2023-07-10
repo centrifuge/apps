@@ -1,9 +1,10 @@
-import { TransactionStatus, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { TransactionStatus, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { TinlakeTranche, useTinlakePortfolio } from '../../utils/tinlake/useTinlakePortfolio'
 import { useRewardClaims, useTinlakeRewards, useUserRewards } from '../../utils/tinlake/useTinlakeRewards'
+import { useAddress } from '../../utils/useAddress'
 import { calculateCFGRewards, calcUnclaimed, createBufferProofFromClaim, createTree, newClaim } from './utils'
 
 export function ClaimTinlakeRewards() {
@@ -11,6 +12,8 @@ export function ClaimTinlakeRewards() {
   const { data: claims } = useRewardClaims()
   const { data: rewards } = useTinlakeRewards()
   const portfolio = useTinlakePortfolio()
+  const address = useAddress()
+  const balances = useBalances(address)
 
   const portfolioValue = portfolio.data?.totalValue
   const portfolioTinValue = portfolio.data?.tokenBalances
@@ -121,7 +124,7 @@ export function ClaimTinlakeRewards() {
 
           {dailyRewards && (
             <Text as="span" variant="body3" color="textSecondary">
-              Stay invested to continue earning {dailyRewards} CFG daily.
+              Stay invested to continue earning {dailyRewards} {balances?.native.currency.symbol || 'CFG'} daily.
             </Text>
           )}
         </>
