@@ -1,5 +1,5 @@
 import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
-import { ClaimCountDown } from './types'
+import * as React from 'react'
 
 export function useAccountStakes(address?: string, poolId?: string, trancheId?: string) {
   const [result] = useCentrifugeQuery(
@@ -83,35 +83,44 @@ export function useStakedCurrencyIds(address?: string) {
   return result
 }
 
-export function useClaimCountdown(unixTimestamp?: number | null): ClaimCountDown {
-  if (!unixTimestamp) {
-    return null
-  }
+export function useClaimCountdown() {
+  const endOfEpoch = useEndOfEpoch()
+  const [countDownDate, setCountDownDate] = React.useState(
+    endOfEpoch ? new Date(endOfEpoch).getTime() : new Date().getTime()
+  )
 
-  const timeRemaining = unixTimestamp - new Date().getTime()
+  React.useEffect(() => {
+    setCountDownDate(endOfEpoch ? new Date(endOfEpoch).getTime() : new Date().getTime())
+  }, [endOfEpoch])
 
-  if (timeRemaining <= 0) {
-    return null
-  }
+  const [countDown, setCountDown] = React.useState(countDownDate - new Date().getTime())
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCountDown(countDownDate - new Date().getTime())
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [countDownDate])
 
   const millisecondsInDay = 24 * 60 * 60 * 1000
   const millisecondsInHour = 60 * 60 * 1000
   const millisecondsInMinute = 60 * 1000
   const millisecondsInSecond = 1000
 
-  const days = Math.floor(timeRemaining / millisecondsInDay)
-  const hours = Math.floor((timeRemaining % millisecondsInDay) / millisecondsInHour)
-  const minutes = Math.floor((timeRemaining % millisecondsInHour) / millisecondsInMinute)
-  const seconds = Math.floor((timeRemaining % millisecondsInMinute) / millisecondsInSecond)
+  function getMessage(timeRemaining: number) {
+    const days = Math.floor(timeRemaining / millisecondsInDay)
+    const hours = Math.floor((timeRemaining % millisecondsInDay) / millisecondsInHour)
+    const minutes = Math.floor((timeRemaining % millisecondsInHour) / millisecondsInMinute)
+    const seconds = Math.floor((timeRemaining % millisecondsInMinute) / millisecondsInSecond)
 
-  if (hours + minutes + seconds <= 0) {
-    return null
+    const daysMessage = days >= 1 ? `${days} day${days === 1 ? '' : 's'}` : ''
+    const hoursMessage = hours > 0 ? `${hours} hr${hours <= 1 ? '' : 's'}` : ''
+    const minutesMessage = minutes > 0 ? `${minutes} min${minutes <= 1 ? '' : 's'}` : ''
+    const secondsMessage = seconds > 0 ? `${seconds} second${seconds <= 1 ? '' : 's'}` : ''
+
+    return days >= 1 ? daysMessage : [hoursMessage, minutesMessage, secondsMessage].filter(Boolean).join(' ')
   }
 
-  const daysMessage = days >= 1 ? `${days} day${days === 1 ? '' : 's'}` : ''
-  const hoursMessage = hours > 0 ? `${hours} hr${hours <= 1 ? '' : 's'}` : ''
-  const minutesMessage = minutes > 0 ? `${minutes} min${minutes <= 1 ? '' : 's'}` : ''
-  const secondsMessage = seconds > 0 ? `${seconds} second${seconds <= 1 ? '' : 's'}` : ''
-
-  return days >= 1 ? daysMessage : [hoursMessage, minutesMessage, secondsMessage].filter(Boolean).join(' ')
+  return getMessage(countDown)
 }
