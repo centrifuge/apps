@@ -125,9 +125,9 @@ HackMD docs: https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view
 
 More info on our release process rationale can be found in [our HackMD](https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view) (Private link, only k-f contributors)
 
-## Releasing to staging, Altair, and Prod/Centrifuge
+## How to release to staging, Altair, and Prod/Centrifuge
 
-### 1. Create a release and mark it as a pre-Release
+### 1. Create a release and mark it as a pre-release
 
 -> Deploys to app.staging.centrifuge.io and app.altair.centrifuge.io
 
@@ -144,7 +144,7 @@ Navigate to create a new [pre-release](https://github.com/centrifuge/apps/releas
 
 When the deployment is finished a notification will be sent to the #eng-apps channel on Slack.
 
-### 2. Create a production Release
+### 2. Create a production release
 
 -> Deploys to app.centrifuge.io
 
