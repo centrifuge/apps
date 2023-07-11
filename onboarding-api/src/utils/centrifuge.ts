@@ -38,8 +38,6 @@ export const getCentPoolById = async (poolId: string) => {
   return { pool, metadata }
 }
 
-// it works when I submit the pod read access tx in the polkadot ui
-// fails here :/
 export const addCentInvestorToMemberList = async (walletAddress: string, poolId: string, trancheId: string) => {
   const pureProxyAddress = process.env.MEMBERLIST_ADMIN_PURE_PROXY
   const signer = await getSigner()

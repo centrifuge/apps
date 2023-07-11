@@ -108,7 +108,6 @@ export const initProxiesController = async (req: Request, res: Response) => {
                 throw new HttpError(400, 'Transaction error')
               }
               if (event.method === 'ProxyExecuted' && result && typeof result === 'object' && 'Err' in result) {
-                console.log('🚀 ~ result:', result)
                 console.log(`An error occured executing proxy`, {
                   proxyResult: result.Err,
                 })

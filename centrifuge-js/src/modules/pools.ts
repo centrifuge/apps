@@ -637,7 +637,6 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
-    console.log('🚀 ~ tranches:', tranches)
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
