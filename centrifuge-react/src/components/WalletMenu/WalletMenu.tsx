@@ -26,8 +26,7 @@ import { useCentrifuge } from '../CentrifugeProvider'
 import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
-import { useNeworkIcon } from '../WalletProvider/UserSelection'
-import { getWalletIcon, getWalletLabel } from '../WalletProvider/WalletDialog'
+import { useNetworkIcon } from '../WalletProvider/utils'
 import { ConnectButton } from './ConnectButton'
 
 type WalletMenuProps = {
@@ -159,7 +158,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                   Network
                 </Text>
                 <Shelf gap={1}>
-                  <Logo icon={useNeworkIcon(connectedNetwork!)} size="iconSmall" />
+                  <Logo icon={useNetworkIcon(connectedNetwork!)} size="iconSmall" />
                   <Text variant="interactive1">{connectedNetworkName}</Text>
                 </Shelf>
               </Box>
@@ -172,8 +171,8 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                     Wallet
                   </Text>
                   <Shelf gap={1}>
-                    <Logo icon={getWalletIcon(wallet)} size="iconSmall" />
-                    <Text variant="interactive1">{getWalletLabel(wallet)}</Text>
+                    <Logo icon={wallet.logo.src} size="iconSmall" />
+                    <Text variant="interactive1">{wallet.title}</Text>
                   </Shelf>
                 </Box>
               )}

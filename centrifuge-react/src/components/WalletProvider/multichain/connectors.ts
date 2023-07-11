@@ -1,16 +1,10 @@
-import { IconArrowRight } from '@centrifuge/fabric'
-import coinbasewalletLogo from '@centrifuge/fabric/assets/logos/coinbasewallet.svg'
 import metamaskLogo from '@centrifuge/fabric/assets/logos/metamask.svg'
 import walletconnectLogo from '@centrifuge/fabric/assets/logos/walletconnect.svg'
-import subWalletLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/SubWalletLogo.svg'
-import talismanLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/TalismanLogo.svg'
-import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
-import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import { isMobile } from '../../../utils/device'
-import { createConnector, isCoinbaseWallet, isInjected, isMetaMaskWallet, isSubWallet, isTalismanWallet } from './utils'
+import { createConnector, isCoinbaseWallet, isInjected } from './utils'
 
 export type EvmConnectorMeta = {
   id: string
@@ -57,18 +51,6 @@ export function getEvmConnectors(
         },
       })
   )
-  const [coinbase] = createConnector(
-    (actions) =>
-      new CoinbaseWallet({
-        actions,
-        options: {
-          url: urls[1][0],
-          appName: 'Centrifuge',
-        },
-      })
-  )
-  const [gnosisSafe] = createConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
-
   return [
     {
       id: 'gnosis-safe',
@@ -88,12 +70,11 @@ export function getEvmConnectors(
     },
     {
       id: 'metamask',
-      get title() {
-        return getBrowserWalletMeta().title
-      },
+      title: 'MetaMask',
       installUrl: 'https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn',
-      get logo() {
-        return getBrowserWalletMeta().logo
+      logo: {
+        src: metamaskLogo,
+        alt: 'MetaMask',
       },
       connector: metaMask,
       get installed() {
@@ -119,59 +100,5 @@ export function getEvmConnectors(
         return !isMobile() || !isInjected()
       },
     },
-    {
-      id: 'coinbase',
-      title: 'Coinbase Wallet',
-      installUrl: '',
-      logo: {
-        src: coinbasewalletLogo,
-        alt: 'Coinbase Wallet',
-      },
-      connector: coinbase,
-      get installed() {
-        return true
-      },
-      get shown() {
-        return true
-      },
-    },
-    ...(additionalConnectors ?? []),
   ].filter(Boolean) as EvmConnectorMeta[]
-}
-
-function getBrowserWalletMeta() {
-  switch (true) {
-    case isSubWallet():
-      return {
-        title: 'Subwallet (EVM)',
-        logo: {
-          src: subWalletLogo,
-          alt: 'Subwallet',
-        },
-      }
-    case isTalismanWallet():
-      return {
-        title: 'Talisman (EVM)',
-        logo: {
-          src: talismanLogo,
-          alt: 'Talisman',
-        },
-      }
-    case !isMetaMaskWallet():
-      return {
-        title: 'Browser Wallet',
-        logo: {
-          src: IconArrowRight,
-          alt: 'Browser Wallet',
-        },
-      }
-    default:
-      return {
-        title: 'MetaMask',
-        logo: {
-          src: metamaskLogo,
-          alt: 'MetaMask',
-        },
-      }
-  }
 }
