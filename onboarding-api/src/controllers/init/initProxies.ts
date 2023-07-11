@@ -3,7 +3,7 @@ import { Keyring } from '@polkadot/api'
 import { u8aToHex } from '@polkadot/util'
 import { createKeyMulti, cryptoWaitReady } from '@polkadot/util-crypto'
 import { Request, Response } from 'express'
-import { lastValueFrom, switchMap, takeWhile } from 'rxjs'
+import { combineLatestWith, lastValueFrom, switchMap, takeWhile } from 'rxjs'
 import { getCentrifuge } from '../../utils/centrifuge'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 
@@ -18,23 +18,23 @@ export const initProxiesController = async (req: Request, res: Response) => {
     const cent = getCentrifuge()
     const api = cent.getApi()
 
-    const pureProxyTx = await lastValueFrom(
+    const [pureProxyTx] = await lastValueFrom(
       api.pipe(
         switchMap((api) => {
           const submittable = api.tx.proxy.createPure('Any', 0, 0)
           return submittable.signAndSend(alice)
         }),
-        takeWhile(({ events, isFinalized }) => {
+        combineLatestWith(api),
+        takeWhile(([{ events, isFinalized }, api]) => {
           if (events.length > 0) {
             events.forEach(({ event }) => {
               const result = event.data[0]?.toHuman()
               // @ts-expect-error
               if (result?.Module?.error) {
-                console.log(`Transaction error [createPure]`, { result })
+                // @ts-expect-error
+                const { name, section } = api.registry.findMetaError(event.data[0].asModule)
+                console.log(`Transaction error [createPure]`, { result, error: { name, section } })
                 throw new HttpError(400, 'Bad request')
-              }
-              if (event.method === 'PureCreated') {
-                console.log(`Pure proxy created`, { result })
               }
             })
           }
@@ -44,7 +44,8 @@ export const initProxiesController = async (req: Request, res: Response) => {
     )
 
     // @ts-expect-error
-    const pureProxyAddress = pureProxyTx.events.find(({ event }) => event.method === 'PureCreated')?.event.data.pure
+    const pureProxyAddress = pureProxyTx.events?.find(({ event }) => event.method === 'PureCreated')?.event.data.pure
+    console.log('Pure proxy created', pureProxyAddress.toString())
 
     // fund the pure proxy
     await lastValueFrom(
@@ -53,7 +54,7 @@ export const initProxiesController = async (req: Request, res: Response) => {
           const fundProxySubmittable = api.tx.tokens.transfer(
             { Id: pureProxyAddress },
             'Native',
-            CurrencyBalance.fromFloat(10, 18)
+            CurrencyBalance.fromFloat(100000, 18)
           )
 
           // aUSD for dev/demo faucet
@@ -62,76 +63,52 @@ export const initProxiesController = async (req: Request, res: Response) => {
               Id: pureProxyController.address,
             },
             { ForeignAsset: 2 },
-            CurrencyBalance.fromFloat(1000, 12)
+            CurrencyBalance.fromFloat(100000, 12)
           )
-          // aUSD for dev/demo faucet
+          // USDT for dev/demo faucet
           const fundUSDTSubmittable = api.tx.tokens.transfer(
             {
               Id: pureProxyController.address,
             },
             { ForeignAsset: 1 },
-            CurrencyBalance.fromFloat(1000, 12)
+            CurrencyBalance.fromFloat(100000, 12)
           )
-          const batchSubmittable = api.tx.utility.batchAll([
-            fundProxySubmittable,
-            fundAUSDSubmittable,
-            fundUSDTSubmittable,
-          ])
-          return batchSubmittable.signAndSend(alice)
-        }),
-        takeWhile(({ events, isFinalized }) => {
-          if (events.length > 0) {
-            events.forEach(({ event }) => {
-              const result = event.data[0]?.toHuman()
-              // @ts-expect-error
-              if (result?.Module?.error) {
-                console.log(`Transaction error [transfer]`, { result })
-                throw new HttpError(400, 'Bad request')
-              }
-              if (event.method === 'PureCreated') {
-                console.log(`Funding complete`, { result })
-                return
-              }
-            })
-          }
-          return !isFinalized
-        })
-      )
-    )
-
-    await lastValueFrom(
-      api.pipe(
-        switchMap((api) => {
-          const multisigAddresses = [alice.address, bob.address]
-          const multiAddress = u8aToHex(createKeyMulti(multisigAddresses, 2))
 
           const proxiedControllerSubmittable = api.tx.proxy.proxy(
             pureProxyAddress,
             undefined,
             api.tx.proxy.addProxy({ Id: pureProxyController.address }, 'PermissionManagement', 0)
           )
+
+          const multiAddress = u8aToHex(createKeyMulti([alice.address, bob.address], 2))
           const proxiedMultiSubmittable = api.tx.proxy.proxy(
             pureProxyAddress,
             undefined,
             api.tx.proxy.addProxy({ Id: multiAddress.toString() }, 'Any', 0)
           )
-          const batchSubmittable = api.tx.utility.batchAll([proxiedControllerSubmittable, proxiedMultiSubmittable])
+          const batchSubmittable = api.tx.utility.batchAll([
+            fundProxySubmittable,
+            fundAUSDSubmittable,
+            fundUSDTSubmittable,
+            proxiedControllerSubmittable,
+            proxiedMultiSubmittable,
+          ])
           return batchSubmittable.signAndSend(alice)
         }),
-        takeWhile(({ events, isFinalized }) => {
+        combineLatestWith(api),
+        takeWhile(([{ events, isFinalized }, api]) => {
           if (events.length > 0) {
             events.forEach(({ event }) => {
               const result = event.data[0]?.toHuman()
-              console.log('in proxy', result)
               // @ts-expect-error
               if (result?.Module?.error) {
-                console.log(`Transaction error`, { result })
-                throw new HttpError(400, 'Transaction error [addProxy]')
-              }
-              if (event.method === 'ProxyExecuted' && result === 'Ok') {
-                console.log(`Executed proxy to add proxies`, { result })
+                // @ts-expect-error
+                const { name, section } = api.registry.findMetaError(event.data[0].asModule)
+                console.log(`Transaction error`, { result, error: { name, section } })
+                throw new HttpError(400, 'Transaction error')
               }
               if (event.method === 'ProxyExecuted' && result && typeof result === 'object' && 'Err' in result) {
+                console.log('🚀 ~ result:', result)
                 console.log(`An error occured executing proxy`, {
                   proxyResult: result.Err,
                 })
@@ -144,7 +121,7 @@ export const initProxiesController = async (req: Request, res: Response) => {
       )
     )
 
-    // return res.status(200).json({ txHash: tx.txHash.toString() })
+    console.log('Transferred funds to pure proxy and initialized proxies')
     return res.status(200).json({ pureProxyAddress })
   } catch (e) {
     const error = reportHttpError(e)
