@@ -153,8 +153,6 @@ export function useUserRewards() {
     }
   )
 
-  // console.log('centChainQuery', centChainQuery)
-
   return {
     ...subgraphQuery,
     data: centChainData || subgraphQuery.data,
