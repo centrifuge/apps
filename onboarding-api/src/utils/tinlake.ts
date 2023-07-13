@@ -154,8 +154,8 @@ export const getTinlakePoolById = async (poolId: string) => {
             mime: 'application/pdf',
           },
         },
-        agreement: {
-          [`${id}-1`]: {
+        [`${id}-1`]: {
+          agreement: {
             uri: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
             mime: 'application/pdf',
           },
