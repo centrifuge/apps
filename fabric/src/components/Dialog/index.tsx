@@ -21,11 +21,20 @@ type Props = React.PropsWithChildren<{
   onClose: () => void
   width?: string | number
   title?: string | React.ReactElement
+  subtitle?: string | React.ReactElement
   icon?: React.ComponentType<IconProps> | React.ReactElement
   children?: React.ReactNode
 }>
 
-const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title }) => {
+const DialogInner: React.FC<Props> = ({
+  children,
+  isOpen,
+  onClose,
+  width = 'dialog',
+  icon: IconComp,
+  title,
+  subtitle,
+}) => {
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const { overlayProps, underlayProps } = useOverlay(
@@ -67,13 +76,15 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
           ref={ref}
         >
           <Stack gap={3}>
-            <Shelf gap={2}>
-              {IconComp && (isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp)}
-              {typeof title === 'string' && <Text variant="heading2">{title}</Text>}
-              {React.isValidElement(title) && title}
+            <Stack>
+              <Shelf gap={2}>
+                {IconComp && (isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp)}
+                {typeof title === 'string' ? <Text variant="heading2">{title}</Text> : title}
 
-              <Button variant="tertiary" icon={IconX} onClick={() => onClose()} style={{ marginLeft: 'auto' }} />
-            </Shelf>
+                <Button variant="tertiary" icon={IconX} onClick={() => onClose()} style={{ marginLeft: 'auto' }} />
+              </Shelf>
+              {subtitle && <Text variant="body2">{subtitle}</Text>}
+            </Stack>
             {children}
           </Stack>
         </Card>

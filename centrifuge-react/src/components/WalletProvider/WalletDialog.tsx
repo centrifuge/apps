@@ -23,7 +23,7 @@ import { EvmConnectorMeta } from './evm/connectors'
 import { isSubWallet, isTalismanWallet } from './evm/utils'
 import { Logo, NetworkIcon, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
-import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkIcon, useGetNetworkName } from './utils'
+import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
 import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 
 type Props = {
@@ -54,7 +54,6 @@ export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }
   } = ctx
 
   const getNetworkName = useGetNetworkName()
-  const getNetworkIcon = useGetNetworkIcon()
 
   const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
 
@@ -91,9 +90,13 @@ export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }
   }
 
   return (
-    <Dialog title={view ? title[view] : undefined} isOpen={!!view} onClose={close}>
+    <Dialog
+      title={view ? title[view] : undefined}
+      isOpen={!!view}
+      onClose={close}
+      subtitle={view === 'networks' ? 'Choose your network and wallet to connect with Centrifuge' : undefined}
+    >
       <Stack gap={3}>
-        {view === 'networks' && <Text>Choose your network and wallet to connect with Centrifuge</Text>}
         <SelectionStep
           step={1}
           title="Choose network"
@@ -227,7 +230,11 @@ export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }
                     variant="tertiary"
                     small
                     icon={IconExternalLink}
-                    onClick={() => connect(evm.connectors.find((c) => c.connector instanceof MetaMask)!)}
+                    onClick={() => {
+                      const wallet = evm.connectors.find((c) => c.connector instanceof MetaMask)!
+                      showWallets(selectedNetwork, wallet)
+                      connect(wallet)
+                    }}
                   >
                     Use EVM Account
                   </Button>

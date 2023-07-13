@@ -162,5 +162,5 @@ export type NetworkIconProps = {
 }
 
 export function NetworkIcon({ network, size = 'iconRegular' }: NetworkIconProps) {
-  return <LogoButton icon={useNetworkIcon(network)} size={size} />
+  return <Logo icon={useNetworkIcon(network)} size={size} />
 }

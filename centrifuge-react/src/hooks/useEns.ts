@@ -9,9 +9,9 @@ export function useEns(address?: string) {
   const addr = address || (connectedType === 'evm' ? selectedAddress : undefined)
   const { data: name } = useQuery(
     ['ensName', addr, !!provider, chainId],
-    () => {
+    async () => {
       try {
-        return provider!.lookupAddress(addr!)
+        return await provider!.lookupAddress(addr!)
       } catch {
         return null
       }
@@ -23,9 +23,9 @@ export function useEns(address?: string) {
   )
   const { data: avatar } = useQuery(
     ['ensAvatar', addr, !!provider, chainId],
-    () => {
+    async () => {
       try {
-        return provider!.getAvatar(addr!)
+        return await provider!.getAvatar(addr!)
       } catch {
         return null
       }
