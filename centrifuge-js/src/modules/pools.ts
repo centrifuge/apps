@@ -20,7 +20,14 @@ import { Dec } from '../utils/Decimal'
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin'
+type AdminRole =
+  | 'PoolAdmin'
+  | 'Borrower'
+  | 'PricingAdmin'
+  | 'LiquidityAdmin'
+  | 'InvestorAdmin'
+  | 'LoanAdmin'
+  | 'PODReadAccess'
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
@@ -44,6 +51,7 @@ const AdminRoleBits = {
   LiquidityAdmin: 0b00001000,
   InvestorAdmin: 0b00010000,
   LoanAdmin: 0b00100000,
+  PODReadAccess: 0b01000000,
 }
 
 // const CurrencyRoleBits = {
@@ -1074,7 +1082,15 @@ export function getPoolsModule(inst: Centrifuge) {
             const permissions = value.toJSON() as any
             roles.pools[poolId] = {
               roles: (
-                ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin'] as const
+                [
+                  'PoolAdmin',
+                  'Borrower',
+                  'PricingAdmin',
+                  'LiquidityAdmin',
+                  'InvestorAdmin',
+                  'LoanAdmin',
+                  'PODReadAccess',
+                ] as const
               ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
               tranches: {},
             }
@@ -1129,7 +1145,15 @@ export function getPoolsModule(inst: Centrifuge) {
               const permissions = value.toJSON() as any
               roles[account] = {
                 roles: (
-                  ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin'] as const
+                  [
+                    'PoolAdmin',
+                    'Borrower',
+                    'PricingAdmin',
+                    'LiquidityAdmin',
+                    'InvestorAdmin',
+                    'LoanAdmin',
+                    'PODReadAccess',
+                  ] as const
                 ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
                 tranches: {},
               }
