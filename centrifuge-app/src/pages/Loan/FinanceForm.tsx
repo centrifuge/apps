@@ -1,6 +1,7 @@
-import { CurrencyBalance, findBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -11,6 +12,7 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
+import { ExternalFinanceForm } from './ExternalFinanceForm'
 
 type FinanceValues = {
   amount: number | '' | Decimal
@@ -20,7 +22,12 @@ type RepayValues = {
   amount: number | '' | Decimal
 }
 
-export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
+export const FinanceForm = ({ loan }: { loan: LoanType }) => {
+  const isExternalAsset = 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+  return isExternalAsset ? <ExternalFinanceForm loan={loan} /> : <InternalFinanceForm loan={loan} />
+}
+
+function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account.actingAddress)
@@ -78,7 +85,7 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doRepayTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
+      doRepayTransaction([loan.poolId, loan.id, amount, new BN(0)], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -106,11 +113,13 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
         <Stack>
-          <Shelf justifyContent="space-between">
-            <Text variant="heading3">Available financing</Text>
-            {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}</Text>
-          </Shelf>
+          {'valuationMethod' in loan.pricing && (
+            <Shelf justifyContent="space-between">
+              <Text variant="heading3">Available financing</Text>
+              {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
+              <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}</Text>
+            </Shelf>
+          )}
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
             <Text variant="label1">
@@ -132,20 +141,22 @@ export function FinanceForm({ loan }: { loan: LoanType | TinlakeLoan }) {
                   )
                 )}
               >
-                {({ field, meta, form }: FieldProps) => (
-                  <CurrencyInput
-                    {...field}
-                    label="Amount"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
-                    disabled={isFinanceLoading}
-                    currency={pool?.currency.symbol}
-                    onChange={(value: number) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', maxBorrow)}
-                  />
-                )}
+                {({ field, meta, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Amount"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
+                      disabled={isFinanceLoading}
+                      currency={pool?.currency.symbol}
+                      onChange={(value: number) => form.setFieldValue('amount', value)}
+                      onSetMax={() => form.setFieldValue('amount', maxBorrow)}
+                    />
+                  )
+                }}
               </Field>
-              {poolReserve.lessThan(availableFinancing) && (
+              {poolReserve.lessThan(availableFinancing) || (
                 <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
                   <IconInfo size="iconMedium" />
                   <Text variant="body3">

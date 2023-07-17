@@ -31,7 +31,7 @@ export const InvestorStatus: React.FC = () => {
   const permissions = usePermissions(validAddress)
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
 
-  const [account] = useSuitableAccounts({ poolId, poolRole: ['MemberListAdmin'] })
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'] })
 
   const { execute, isLoading: isTransactionPending } = useCentrifugeTransaction(
     'Update investor',

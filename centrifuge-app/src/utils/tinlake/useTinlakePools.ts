@@ -11,7 +11,6 @@ import {
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
 import BN from 'bn.js'
-import { request } from 'graphql-request'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
@@ -236,29 +235,63 @@ function getTinlakeLoanStatus(loan: TinlakeLoanData) {
 
 // TODO: refactor to use multicall instead of subgraph
 async function getTinlakeLoans(poolId: string) {
-  const query = `
-    {
-      loans (first: 1000, where: { pool_in: ["${poolId.toLowerCase()}"]}) {
-        nftId
-        id
-        index
-        financingDate
-        debt
-        pool {
-          id
-        }
-        maturityDate
-        interestRatePerSecond
-        borrowsAggregatedAmount
-        repaysAggregatedAmount
-        ceiling
-        closed
-        riskGroup
-        owner
-      }
-    }`
+  let pools: {
+    loans: unknown[]
+  }[] = []
 
-  const { loans } = await request<{ loans: TinlakeLoanData[] }>('https://graph.centrifuge.io/tinlake', query)
+  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+        query GetLoansByPoolId($poolId: String!) {
+          pools (where: { id_in: [$poolId]}) {
+            loans (first: 1000) {
+              nftId
+              id
+              index
+              financingDate
+              debt
+              pool {
+                id
+              }
+              maturityDate
+              interestRatePerSecond
+              borrowsAggregatedAmount
+              repaysAggregatedAmount
+              ceiling
+              closed
+              riskGroup
+              owner
+            }
+          }
+        }
+      `,
+      variables: {
+        poolId: poolId.toLowerCase(),
+      },
+    }),
+  })
+
+  if (response?.ok) {
+    const { data, errors } = await response.json()
+    if (errors?.length) {
+      throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Errors: ${errors}`)
+    }
+    pools = data.pools
+  } else {
+    throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Status: ${response?.status}`)
+  }
+
+  const loans = pools.reduce((assets: any[], pool: any) => {
+    if (pool.loans) {
+      assets.push(...pool.loans)
+    }
+    return assets
+  }, [])
+
   return loans
 }
 
@@ -566,14 +599,20 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         },
       },
       onboarding: {
-        agreements: {
+        tranches: {
           [`${id}-0`]: {
-            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '',
-            mime: 'application/pdf',
+            agreement: {
+              uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-0`] || '',
+              mime: 'application/pdf',
+            },
+            openForOnboarding: p.metadata.newInvestmentsStatus.junior === 'open',
           },
           [`${id}-1`]: {
-            uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '',
-            mime: 'application/pdf',
+            agreement: {
+              uri: p.metadata?.attributes?.Links?.['Agreements']?.[`${id}-1`] || '',
+              mime: 'application/pdf',
+            },
+            openForOnboarding: p.metadata.newInvestmentsStatus.senior === 'open',
           },
         },
       },

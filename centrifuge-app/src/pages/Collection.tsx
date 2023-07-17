@@ -40,7 +40,6 @@ const Collection: React.FC = () => {
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
   const [account] = useSuitableAccounts({ actingAddress: [collection.owner] })
-  console.log('collection.owner', collection.owner, account)
 
   const canMint = !!account
 

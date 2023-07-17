@@ -3,9 +3,10 @@ import { Keyring } from '@polkadot/keyring'
 import { hexToU8a, isHex } from '@polkadot/util'
 import { cryptoWaitReady, decodeAddress, encodeAddress } from '@polkadot/util-crypto'
 import { Request } from 'express'
-import { combineLatest, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
+import { combineLatest, combineLatestWith, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
+import { getPoolById } from './getPoolById'
 import { HttpError, reportHttpError } from './httpError'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
@@ -22,7 +23,7 @@ export const getSigner = async () => {
   await cryptoWaitReady()
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 })
   // the pure proxy controller (PURE_PROXY_CONTROLLER_SEED) is the wallet that controls the pure proxy being used to sign the transaction
-  // the pure proxy address (MEMBERLIST_ADMIN_PURE_PROXY) has to be given MemberListAdmin permissions on each pool before being able to whitelist investors
+  // the pure proxy address (MEMBERLIST_ADMIN_PURE_PROXY) has to be given InvestorAdmin permissions on each pool before being able to whitelist investors
   return keyring.addFromMnemonic(process.env.PURE_PROXY_CONTROLLER_SEED)
 }
 
@@ -38,38 +39,62 @@ export const getCentPoolById = async (poolId: string) => {
 }
 
 export const addCentInvestorToMemberList = async (walletAddress: string, poolId: string, trancheId: string) => {
+  const pureProxyAddress = process.env.MEMBERLIST_ADMIN_PURE_PROXY
   const signer = await getSigner()
-  const api = getCentrifuge().getApi()
-  const tx = await lastValueFrom(
+  const cent = getCentrifuge()
+  const api = cent.getApi()
+  const { metadata } = await getPoolById(poolId)
+
+  const hasPodReadAccess = (await firstValueFrom(cent.pools.getPoolPermissions([poolId])))?.[
+    walletAddress
+  ]?.roles.includes('PODReadAccess')
+
+  const [tx] = await lastValueFrom(
     api.pipe(
       switchMap((api) => {
         const submittable = api.tx.permissions.add(
-          { PoolRole: 'MemberListAdmin' },
+          { PoolRole: 'InvestorAdmin' },
           walletAddress,
           { Pool: poolId },
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
         )
-        const proxiedSubmittable = api.tx.proxy.proxy(process.env.MEMBERLIST_ADMIN_PURE_PROXY, undefined, submittable)
+        if (!hasPodReadAccess && metadata?.onboarding?.podReadAccess) {
+          const address = cent.utils.formatAddress(walletAddress)
+          const podSubmittable = api.tx.permissions.add(
+            { PoolRole: 'InvestorAdmin' },
+            address,
+            { Pool: poolId },
+            { PoolRole: 'PODReadAccess' }
+          )
+          const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
+          const proxiedPodSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, podSubmittable)
+          const batchSubmittable = api.tx.utility.batchAll([proxiedPodSubmittable, proxiedSubmittable])
+          return batchSubmittable.signAndSend(signer)
+        }
+        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
         return proxiedSubmittable.signAndSend(signer)
       }),
-      takeWhile(({ events, isFinalized }) => {
+      combineLatestWith(api),
+      takeWhile(([{ events, isFinalized }, api]) => {
         if (events.length > 0) {
           events.forEach(({ event }) => {
-            const proxyResult = event.data[0]?.toHuman()
-            if (event.method === 'ProxyExecuted' && proxyResult === 'Ok') {
-              console.log(`Executed proxy to add to MemberList`, { walletAddress, poolId, trancheId, proxyResult })
+            const result = event.data[0]?.toHuman()
+            // @ts-expect-error
+            if (result?.Module?.error) {
+              // @ts-expect-error
+              const { name, section } = api.registry.findMetaError(event.data[0].asModule)
+              console.log(`Transaction error`, { walletAddress, poolId, trancheId, error: { section, name } })
+              throw new HttpError(400, 'Bad request')
             }
-            if (
-              event.method === 'ProxyExecuted' &&
-              proxyResult &&
-              typeof proxyResult === 'object' &&
-              'Err' in proxyResult
-            ) {
+            if (event.method === 'ProxyExecuted' && result === 'Ok') {
+              console.log(`Executed proxy to add to MemberList`, { walletAddress, poolId, trancheId })
+            }
+            if (event.method === 'ProxyExecuted' && result && typeof result === 'object' && 'Err' in result) {
               console.log(`An error occured executing proxy to add to MemberList`, {
                 walletAddress,
                 poolId,
                 trancheId,
-                proxyResult: proxyResult.Err,
+                result: result.Err,
               })
               throw new HttpError(400, 'Bad request')
             }
@@ -80,15 +105,6 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
     )
   )
 
-  // this doens't work b/c .connect() exepcts a Signer, not a KeyringPair
-  // how it is: cent-js.signAndSend(signingAddress, { signer, era })
-  // how it should be: cent-js.signAndSend(signer)
-  // centrifuge.config.proxy = proxyAddress
-  // const result = await firstValueFrom(
-  //   centrifuge
-  //     .connect(signer.address, signer)
-  //     .pools.updatePoolRoles([poolId, [[walletAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]], []])
-  // )
   return { txHash: tx.txHash.toString() }
 }
 
@@ -128,30 +144,18 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
 
         // add 10% buffer to the transaction fee
         const submittable = api.tx.tokens.transfer({ Id: wallet.address }, 'Native', txFee.add(txFee.muln(1.1)))
-        const proxiedSubmittable = api.tx.proxy.proxy(process.env.MEMBERLIST_ADMIN_PURE_PROXY, undefined, submittable)
-        return proxiedSubmittable.signAndSend(signer)
+        return submittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
         if (events.length > 0) {
           events.forEach(({ event }) => {
-            const proxyResult = event.data[0]?.toHuman()
-            if (event.method === 'ProxyExecuted' && proxyResult === 'Ok') {
-              console.log(`Executed proxy for transfer`, { walletAddress: wallet.address, proxyResult })
+            const result = event.data[0]?.toHuman()
+            if (event.method === 'ProxyExecuted' && result === 'Ok') {
+              console.log(`Executed proxy for transfer`, { walletAddress: wallet.address, result })
             }
             if (event.method === 'ExtrinsicFailed') {
-              console.log(`Extrinsic for transfer failed`, { walletAddress: wallet.address, proxyResult })
+              console.log(`Extrinsic for transfer failed`, { walletAddress: wallet.address, result })
               throw new HttpError(400, 'Bad request: extrinsic failed')
-            }
-            if (
-              event.method === 'ProxyExecuted' &&
-              proxyResult &&
-              typeof proxyResult === 'object' &&
-              'Err' in proxyResult
-            ) {
-              console.log(`An error occured executing proxy to transfer native currency`, {
-                proxyResult: proxyResult.Err,
-              })
-              throw new HttpError(400, 'Bad request: proxy failed')
             }
           })
         }

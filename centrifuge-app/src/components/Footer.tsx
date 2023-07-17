@@ -16,6 +16,11 @@ export const Footer = () => {
             Need help?
           </Text>
         </UnstyledLink>
+        <UnstyledLink href="https://docs.centrifuge.io/">
+          <Text textOverflow="ellipsis" variant="body4">
+            Documentation
+          </Text>
+        </UnstyledLink>
         <UntyledButton onClick={() => setIsDialogOpen(true)}>
           <Text textOverflow="ellipsis" variant="body4">
             Investment disclaimer

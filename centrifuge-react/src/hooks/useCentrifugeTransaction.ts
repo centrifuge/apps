@@ -42,7 +42,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     try {
       let connectedCent
       if (isEvmOnSubstrate) {
-        connectedCent = cent.connectEvm(evm.selectedAddress!, provider!.getSigner())
+        connectedCent = cent.connectEvm(evm.selectedAddress!, provider!.getSigner(), substrate.evmChainId!)
       } else {
         connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
       }

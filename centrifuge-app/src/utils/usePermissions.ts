@@ -1,11 +1,18 @@
-import { addressToHex, Collection, computeMultisig, evmToSubstrateAddress, PoolRoles } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQueries, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import {
+  addressToHex,
+  Collection,
+  computeMultisig,
+  evmToSubstrateAddress,
+  isSameAddress,
+  PoolRoles,
+} from '@centrifuge/centrifuge-js'
+import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
 import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
-import { usePool, usePoolMetadata, usePools } from './usePools'
+import { usePool, usePoolMetadata } from './usePools'
 
 export function usePermissions(address?: string) {
   const [result] = useCentrifugeQuery(['permissions', address], (cent) => cent.pools.getUserPermissions([address!]), {
@@ -22,43 +29,55 @@ export function usePoolPermissions(poolId?: string) {
   return result
 }
 
-export function useUserPermissionsMulti(addresses: string[]) {
-  const [results] = useCentrifugeQueries(
-    addresses.map((address) => ({
-      queryKey: ['permissions', address],
-      queryCallback: (cent) => cent.pools.getUserPermissions([address!]),
-    }))
-  )
+// export function useUserPermissionsMulti(addresses: string[]) {
+//   const [results] = useCentrifugeQueries(
+//     addresses.map((address) => ({
+//       queryKey: ['permissions', address],
+//       queryCallback: (cent) => cent.pools.getUserPermissions([address!]),
+//     }))
+//   )
 
-  return results
-}
+//   return results
+// }
 
-// Better name welcomed lol
-export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
-  const {
-    substrate: { combinedAccounts },
-  } = useWallet()
-  const actingAddresses = [...new Set(combinedAccounts?.map((acc) => acc.actingAddress))]
-  const permissionResults = useUserPermissionsMulti(actingAddresses)
+// // Better name welcomed lol
+// export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
+//   const {
+//     substrate: { combinedAccounts },
+//   } = useWallet()
+//   const actingAddresses = [...new Set(combinedAccounts?.map((acc) => acc.actingAddress))]
+//   const permissionResults = useUserPermissionsMulti(actingAddresses)
 
-  const poolIds = new Set(
-    permissionResults
-      .map((permissions) =>
-        Object.entries(permissions?.pools || {}).map(([poolId, roles]) => (roles.roles.length ? poolId : []))
-      )
-      .flat(2)
-  )
+//   const poolIds = new Set(
+//     permissionResults
+//       .map((permissions) =>
+//         Object.entries(permissions?.pools || {}).map(([poolId, roles]) => (roles.roles.length ? poolId : []))
+//       )
+//       .flat(2)
+//   )
 
-  const pools = usePools(false)
-  const filtered = pools?.filter((p) => poolIds.has(p.id))
+//   const pools = usePools(false)
+//   const filtered = pools?.filter((p) => poolIds.has(p.id))
 
-  return filtered
-}
+//   return filtered
+// }
 
 // Returns whether the connected address can borrow from a pool in principle
 export function useCanBorrow(poolId: string) {
   const [account] = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] })
   return !!account
+}
+
+export function useCanSetOraclePrice(address?: string) {
+  const [members] = useCentrifugeQuery(['oracleMembers'], (cent) =>
+    cent.getApi().pipe(
+      switchMap((api) => api.query.priceOracleMembership.members()),
+      map((memberData) => {
+        return memberData.toJSON() as string[]
+      })
+    )
+  )
+  return address && !!members?.find((addr) => isSameAddress(addr, address))
 }
 
 // Returns whether the connected address can borrow against a specific asset from a pool
@@ -91,10 +110,12 @@ export function useSuitableAccounts(config: SuitableConfig) {
   const { actingAddress, poolId, poolRole, proxyType } = config
   const {
     isEvmOnSubstrate,
-    substrate: { selectedAccount, combinedAccounts },
+    substrate: { selectedAccount, combinedAccounts, evmChainId },
     evm: { selectedAddress },
   } = useWallet()
-  const signingAddress = isEvmOnSubstrate ? evmToSubstrateAddress(selectedAddress!) : selectedAccount?.address
+  const signingAddress = isEvmOnSubstrate
+    ? evmToSubstrateAddress(selectedAddress!, evmChainId!)
+    : selectedAccount?.address
   const permissions = usePoolPermissions(poolId)
   console.log('combinedAccounts', combinedAccounts)
   const accounts = (combinedAccounts ?? [])?.filter((acc) => {
@@ -229,13 +250,13 @@ export function usePoolAccess(poolId: string) {
     : []
   const missingAdminPermissions = diffPermissions(
     [storedAdminRoles],
-    [{ address: storedAdminRoles.address, roles: { MemberListAdmin: true } }]
+    [{ address: storedAdminRoles.address, roles: { InvestorAdmin: true } }]
   ).add
   const missingManagerPermissions = diffPermissions(
     storedManagerPermissions,
     (multisig?.signers || adminDelegates?.map((p) => p.delegatee))?.map((address) => ({
       address,
-      roles: { MemberListAdmin: true, LiquidityAdmin: true },
+      roles: { InvestorAdmin: true, LiquidityAdmin: true },
     })) || []
   ).add
 

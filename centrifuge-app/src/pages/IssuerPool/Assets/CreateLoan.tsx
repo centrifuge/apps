@@ -1,6 +1,8 @@
 import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
+  formatBalance,
   Transaction,
+  useBalances,
   useCentrifuge,
   useCentrifugeConsts,
   useCentrifugeTransaction,
@@ -20,7 +22,6 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
@@ -56,7 +57,7 @@ export type CreateLoanFormValues = {
   assetName: string
   attributes: Record<string, string | number>
   pricing: {
-    valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
+    valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle'
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
     value: number | ''
     maturityDate: string
@@ -65,12 +66,12 @@ export type CreateLoanFormValues = {
     probabilityOfDefault: number | ''
     lossGivenDefault: number | ''
     discountRate: number | ''
+    maxBorrowQuantity: number | ''
+    Isin: string
   }
 }
 
 type TemplateFieldProps = LoanTemplateAttribute & { name: string }
-
-const NFT_DATA_BYTES = 43 + 48 + 65 // document_id attribute + document_version attribute + metadata
 
 function TemplateField({ label, name, input }: TemplateFieldProps) {
   switch (input.type) {
@@ -166,24 +167,21 @@ function IssuerCreateLoan() {
 
   const { addTransaction, updateTransaction } = useTransactions()
   const {
-    uniques: { itemDeposit, metadataDepositBase, attributeDepositBase, depositPerByte },
+    loans: { loanDeposit },
+    chainSymbol,
   } = useCentrifugeConsts()
   const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
   const { assetOriginators } = usePoolAccess(pid)
   const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
     ?.collateralCollections[0]?.id
-
-  const deposit = itemDeposit
-    .add(metadataDepositBase)
-    .add(attributeDepositBase.mul(new BN(2)))
-    .add(depositPerByte.mul(new BN(NFT_DATA_BYTES)))
+  const balances = useBalances(account?.actingAddress)
 
   console.log('deposit', deposit)
 
   const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
-  const podUrl = poolMetadata?.pod?.url
+  const podUrl = poolMetadata?.pod?.node
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
@@ -222,22 +220,34 @@ function IssuerCreateLoan() {
         probabilityOfDefault: '',
         lossGivenDefault: '',
         discountRate: '',
+        maxBorrowQuantity: '',
+        Isin: '',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
       const { decimals } = pool.currency
-      const pricingInfo = {
-        valuationMethod: values.pricing.valuationMethod,
-        maxBorrowAmount: values.pricing.maxBorrowAmount,
-        value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
-        maturityDate: new Date(values.pricing.maturityDate),
-        advanceRate: Rate.fromPercent(values.pricing.advanceRate),
-        interestRate: Rate.fromPercent(values.pricing.interestRate),
-        probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
-        lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
-        discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
-      } as const
+      const pricingInfo =
+        values.pricing.valuationMethod === 'oracle'
+          ? {
+              valuationMethod: values.pricing.valuationMethod,
+              maxBorrowAmount: values.pricing.maxBorrowQuantity
+                ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals).toString()
+                : null,
+              Isin: values.pricing.Isin || '',
+              maturityDate: new Date(values.pricing.maturityDate),
+            }
+          : {
+              valuationMethod: values.pricing.valuationMethod,
+              maxBorrowAmount: values.pricing.maxBorrowAmount,
+              value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+              maturityDate: new Date(values.pricing.maturityDate),
+              advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+              interestRate: Rate.fromPercent(values.pricing.interestRate),
+              probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
+              lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
+              discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
+            }
 
       const txId = Math.random().toString(36).substring(2)
 
@@ -329,6 +339,11 @@ function IssuerCreateLoan() {
 
   const isPending = isTxLoading || form.isSubmitting
 
+  const balanceDec = balances?.native.balance.toDecimal()
+  const balanceLow = balanceDec?.lt(loanDeposit.toDecimal())
+
+  const errorMessage = balanceLow ? `The AO account needs at least ${formatBalance(loanDeposit, chainSymbol, 1)}` : null
+
   return (
     <FormikProvider value={form}>
       <Form ref={formRef} noValidate>
@@ -339,13 +354,14 @@ function IssuerCreateLoan() {
             actions={
               isAuthed && (
                 <>
+                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     loading={isPending}
-                    disabled={!templateMetadata || !account || !collateralCollectionId}
+                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
                   >
                     Create
                   </Button>
@@ -355,7 +371,7 @@ function IssuerCreateLoan() {
           />
           {isAuthed ? (
             <>
-              <PageSection titleAddition={templateId && 'Select a template to enter the asset details.'}>
+              <PageSection>
                 {!templateId && (
                   <Box
                     mb={3}

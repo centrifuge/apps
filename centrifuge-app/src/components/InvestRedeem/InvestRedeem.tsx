@@ -114,8 +114,8 @@ function EpochBusy({ busy }: { busy?: boolean }) {
 function useAllowedTranches(poolId: string) {
   const address = useAddress()
   const { connectedType } = useWallet()
-  const isTinlakePool = poolId.startsWith('0x')
   const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
+  const isTinlakePool = poolId.startsWith('0x')
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
@@ -134,7 +134,7 @@ function useAllowedTranches(poolId: string) {
           return false
         }
       )
-    : Object.keys(permissions?.pools[poolId]?.tranches ?? {})
+    : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
 
   return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
 }
@@ -190,7 +190,6 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   const pool = usePool(state.poolId)
   const allowedTranches = useAllowedTranches(state.poolId)
   const isTinlakePool = state.poolId.startsWith('0x')
-
   const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
 
   const { data: metadata } = usePoolMetadata(pool)
@@ -216,10 +215,10 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
           {connectedType && (
             <>
               <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-                {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
+                {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
               </TextWithPlaceholder>
               <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
+                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)}
               </TextWithPlaceholder>
             </>
           )}
@@ -304,15 +303,15 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
 }
 
 const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
-  const { showWallets, connectedType } = useWallet()
+  const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
-
-  const investStatus = metadata?.pool?.newInvestmentsStatus?.[trancheName] || null
+  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'closed'
+  const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
 
   const history = useHistory()
 
@@ -320,6 +319,9 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
     if (connectedType) {
       if (investStatus === 'request') {
         return 'Contact issuer'
+      }
+      if (investStatus === 'closed') {
+        return `${state.trancheCurrency?.symbol ?? 'token'} onboarding closed`
       }
 
       if (investStatus === 'open' || !isTinlakePool) {
@@ -332,7 +334,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
 
   const handleClick = () => {
     if (!connectedType) {
-      showWallets(networks?.length === 1 ? networks[0] : undefined)
+      if (networks && networks.length >= 1) {
+        showWallets(networks[0])
+      } else {
+        showNetworks()
+      }
     } else if (investStatus === 'request') {
       window.open(`mailto:${metadata?.pool?.issuer.email}?subject=New%20Investment%20Inquiry`)
     } else if (metadata?.onboarding?.externalOnboardingUrl) {
@@ -342,7 +348,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
     }
   }
 
-  return <Button onClick={handleClick}>{getOnboardingButtonText()}</Button>
+  return (
+    <Button disabled={investStatus === 'closed'} onClick={handleClick}>
+      {getOnboardingButtonText()}
+    </Button>
+  )
 }
 
 type InvestValues = {
@@ -500,7 +510,13 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>
@@ -665,7 +681,13 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>

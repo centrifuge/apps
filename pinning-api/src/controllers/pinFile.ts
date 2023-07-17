@@ -22,7 +22,7 @@ const dataUriToReadStream = (uri: string) => {
   return fs.createReadStream(tempFilePath)
 }
 
-const ipfsHashToURI = (hash: string) => `ipfs://ipfs/${hash}`
+const ipfsHashToURI = (hash: string) => `ipfs://${hash}`
 
 export default async (req: Request, res: Response) => {
   try {

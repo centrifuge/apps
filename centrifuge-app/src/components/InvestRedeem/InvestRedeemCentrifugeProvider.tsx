@@ -107,6 +107,8 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
           remainingRedeemToken: order.remainingRedeemToken.toDecimal(),
         }
       : null,
+    collectAmount: Dec(0),
+    collectType: null,
     needsToCollectBeforeOrder: false,
     needsPoolCurrencyApproval: false,
     needsTrancheTokenApproval: false,

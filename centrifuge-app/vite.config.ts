@@ -33,6 +33,10 @@ export default defineConfig({
       'decimal.js-light',
       'bn.js',
     ],
+    alias: {
+      '@walletconnect/ethereum-provider': '../../../@walletconnect/ethereum-provider/dist/index.es.js',
+      '@walletconnect/utils': '../../../@walletconnect/utils/dist/index.umd.js',
+    },
   },
   plugins: [
     react({

@@ -1,4 +1,4 @@
-import { Grid, IconInfoFilled, Stack, Text, Tooltip } from '@centrifuge/fabric'
+import { Box, Flex, IconCheck, IconInfoFilled, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Network } from './types'
@@ -7,34 +7,52 @@ import { useGetNetworkName } from './utils'
 type SelectionStepProps = {
   step: number
   title: string
-  disabled?: boolean
+  expanded?: boolean
   children?: React.ReactNode
   tooltip?: React.ReactNode
+  titleElement?: React.ReactNode
+  rightElement?: React.ReactNode
 }
 
-const Marker = styled(Text)<{ disabled: boolean }>`
-  display: inline-block;
-  vertical-align: baseline;
-  width: 1.6em;
-  height: 1.6em;
-  margin-right: 0.7em;
+const Marker = styled(Flex)<{ $done: boolean }>`
   border-radius: 50%;
-  background-color: ${({ theme, disabled }) => (disabled ? theme.colors.textDisabled : theme.colors.textPrimary)};
+  background-color: ${({ theme, $done }) => ($done ? theme.colors.accentPrimary : theme.colors.textPrimary)};
 `
 
-export function SelectionStep({ step, title, disabled = false, children, tooltip }: SelectionStepProps) {
+export function SelectionStep({
+  step,
+  title,
+  titleElement,
+  expanded = true,
+  children,
+  tooltip,
+  rightElement,
+}: SelectionStepProps) {
   return (
     <Stack>
-      <Text as="h3" variant="heading4" color={disabled ? 'textDisabled' : 'textPrimary'}>
-        <Marker variant="interactive1" color="textInverted" textAlign="center" lineHeight="1.6em" disabled={disabled}>
-          {step}
-        </Marker>
-        {title}
-        {tooltip}
-      </Text>
-      <Grid minColumnWidth={120} mt={2} pl={4} gap={1}>
-        {children}
-      </Grid>
+      <Shelf justifyContent="space-between">
+        <Shelf gap={2}>
+          <Marker width="iconMedium" height="iconMedium" $done={!expanded} justifyContent="center" alignItems="center">
+            {expanded ? (
+              <Text variant="interactive1" color="textInverted" textAlign="center">
+                {step}
+              </Text>
+            ) : (
+              <IconCheck size="iconSmall" color="textInverted" />
+            )}
+          </Marker>
+          <Stack bleedY={2} gap="4px">
+            <Text as="h3" variant={titleElement && !expanded ? 'label2' : 'heading4'} color="textPrimary">
+              {title}
+              {tooltip}
+            </Text>
+            {!expanded && titleElement}
+          </Stack>
+        </Shelf>
+        <Box bleedY={2}>{rightElement}</Box>
+      </Shelf>
+
+      {expanded && children}
     </Stack>
   )
 }

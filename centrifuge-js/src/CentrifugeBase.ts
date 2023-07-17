@@ -56,6 +56,7 @@ export type Config = {
   printExtrinsics?: boolean
   proxies?: ([delegator: string, forceProxyType?: ProxyType] | string)[]
   debug?: boolean
+  substrateEvmChainId?: number
 }
 
 export type UserProvidedConfig = Partial<Config>
@@ -201,7 +202,9 @@ export class CentrifugeBase {
           (signer) =>
             !isSameAddress(
               signer,
-              isEvmTx ? evmToSubstrateAddress(this.config.evmSigningAddress!) : this.getSignerAddress()
+              isEvmTx
+                ? evmToSubstrateAddress(this.config.evmSigningAddress!, this.config.substrateEvmChainId!)
+                : this.getSignerAddress()
             )
         )
       )
@@ -231,8 +234,6 @@ export class CentrifugeBase {
         )
       }
     }
-
-    console.log('actualSubmittable', actualSubmittable)
 
     if (isEvmTx) {
       // TODO: signOnly and sendOnly
@@ -317,7 +318,7 @@ export class CentrifugeBase {
     submittable: SubmittableExtrinsic<'rxjs'>,
     options?: T
   ) {
-    const address = evmToSubstrateAddress(this.config.evmSigningAddress!)
+    const address = evmToSubstrateAddress(this.config.evmSigningAddress!, this.config.substrateEvmChainId!)
 
     return submittable.paymentInfo(address).pipe(
       switchMap((paymentInfo) => {
@@ -339,7 +340,6 @@ export class CentrifugeBase {
               startWith([response, null] as const),
               catchError(() => of([{ ...response, error: new Error('failed') }] as const)),
               tap(([result, receipt]) => {
-                console.log('response update', result, receipt)
                 if ('error' in result || receipt?.status === 0) {
                   options?.onStatusChange?.({
                     events: [],
@@ -506,11 +506,15 @@ export class CentrifugeBase {
     }
   }
 
-  getSignerAddress() {
+  getSignerAddress(type?: 'substrate') {
     const { signingAddress, evmSigningAddress } = this.config
 
     if (!signingAddress) {
-      if (evmSigningAddress) return evmSigningAddress
+      if (evmSigningAddress && this.config.substrateEvmChainId) {
+        return type === 'substrate'
+          ? evmToSubstrateAddress(evmSigningAddress, this.config.substrateEvmChainId)
+          : evmSigningAddress
+      }
       throw new Error('no signer set')
     }
 
@@ -531,7 +535,7 @@ export class CentrifugeBase {
       return computeMultisig(txOptions.multisig).address
     }
 
-    return this.getSignerAddress()
+    return this.getSignerAddress('substrate')
   }
 
   setProxies(proxies: Config['proxies']) {

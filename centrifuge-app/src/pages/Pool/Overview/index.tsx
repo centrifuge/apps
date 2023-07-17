@@ -2,6 +2,7 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
+import { Faucet } from '../../../components/Faucet'
 import { ActionsRef, InvestRedeem } from '../../../components/InvestRedeem/InvestRedeem'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LabelValueStack } from '../../../components/LabelValueStack'
@@ -38,7 +39,10 @@ export function PoolDetailOverviewTab() {
   return (
     <PageWithSideBar
       sidebar={
-        <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        <>
+          <Faucet />
+          <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        </>
       }
     >
       <PoolDetailHeader />
@@ -86,7 +90,7 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { showWallets, connectedType, evm } = useWallet()
+  const { showNetworks, connectedType, evm } = useWallet()
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
@@ -199,7 +203,7 @@ export function PoolDetailOverview({
                       variant="secondary"
                       onClick={() => {
                         if (!connectedType) {
-                          showWallets()
+                          showNetworks()
                         }
                         setSelectedToken(token.id)
                       }}

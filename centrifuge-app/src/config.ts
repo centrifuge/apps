@@ -110,6 +110,7 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Residential Real Estate',
     'Project Finance',
     'Trade Finance',
+    'US Treasuries',
   ],
   defaultAssetClass: 'Consumer Credit',
   poolCreationType,
