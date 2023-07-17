@@ -20,15 +20,13 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 ### Onboarding API
 
+> Setup is ONLY for dev
+
 Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 
-1. Use Wallet A to call proxy.create_pure(..) . This creates a pure proxy, which doesn’t have a private key or seed. You can then copy the address (pure_proxy_address) from the event submitted. The pure proxy will need a small amount of native currency to submit the following transaction.
-2. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(secure_wallet_B, type=PermissionManagement). secure_wallet_b should any account that is secured by a private key. The seed phrase won't change when the chain is reset. Make sure the seed phrase for the secure wallet is stored in your local env (`/onboarding-api/.env`) file under the name `PURE_PROXY_CONTROLLER_SEED` in the onboarding-api.
-3. Use Wallet A to call proxy.proxy(pure_proxy_address, proxy.add_proxy(multisig_C, type=Any). Multisig C is some multisig that can swap out wallet B if it ever gets compromised / lost. This should be at least a multisig with 2 signer threshold.
-4. Add the pure_proxy_address to the env variable `MEMBERLIST_ADMIN_PURE_PROXY` in the onboarding api and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` in the centrifuge-app (`/centrifuge-app/.env-config/.env.development.local`) env variables.
-5. Make sure secure_wallet_B is funded with both aUSD and the Native currency.
-
-> onboarding must be manually enabled for each tranche in the issuer settings.
+1. Run `/initProxies` to create the pure proxy, fund it, and give it sufficient permissions
+2. Copy the resulting pure proxy address and add it to the env varibles: `MEMBERLIST_ADMIN_PURE_PROXY` (onboarding-api) and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` (centrifuge-app)
+3. Enable onboarding for each new pool under /issuer/<poolId>/investors
 
 ### Asset Originator POD Access
 
