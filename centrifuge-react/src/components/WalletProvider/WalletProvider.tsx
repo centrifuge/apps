@@ -26,6 +26,7 @@ export type WalletContextType = {
   scopedNetworks: Network[] | null
   setScopedNetworks: (scopedNetwork: Network[] | null) => void
   dispatch: (action: Action) => void
+  showNetworks: (network?: State['walletDialog']['network']) => void
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
   walletDialog: State['walletDialog']
@@ -241,10 +242,12 @@ export function WalletProvider({
   )
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {
-    const mappedAccounts = accounts.map((acc) => ({
-      ...acc,
-      address: addressToHex(acc.address),
-    }))
+    const mappedAccounts = accounts
+      .map((acc) => ({
+        ...acc,
+        address: addressToHex(acc.address),
+      }))
+      .filter((acc) => (acc as any).type !== 'ethereum')
 
     const { address: persistedAddress } = getPersisted()
     const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
@@ -418,6 +421,8 @@ export function WalletProvider({
       scopedNetworks,
       setScopedNetworks,
       dispatch,
+      showNetworks: (network?: State['walletDialog']['network']) =>
+        dispatch({ type: 'showWalletDialog', payload: { view: 'networks', network, wallet: null } }),
       showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
         dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),
       showAccounts: () => dispatch({ type: 'showWalletDialogAccounts', payload: { network: state.evm.chainId } }),
