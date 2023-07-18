@@ -1830,8 +1830,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 5.30.5
     "@typescript-eslint/parser": 5.30.5
     "@vitejs/plugin-react": ^2
-    "@walletconnect/ethereum-provider": ^2.8.3
-    "@walletconnect/modal": ^2.5.4
+    "@web3modal/standalone": ^2.4.2
     axios: ^0.24.0
     babel-plugin-styled-components: ^2.0.7
     bn.js: ^5.2.1
@@ -1843,8 +1842,6 @@ __metadata:
     eslint-plugin-react: 7.30.1
     form-data: ^4.0.0
     formik: ^2.2.9
-    graphql: ^16.6.0
-    graphql-request: ^6.0.0
     jw3t: ^1.0.10
     nodemon: ^2.0.20
     npm-run-all: ^4.1.5
@@ -1903,6 +1900,7 @@ __metadata:
     "@centrifuge/centrifuge-js": "workspace:*"
     "@centrifuge/fabric": "workspace:*"
     "@coinbase/wallet-sdk": ^3.6.3
+    "@ethersproject/address": ^5.6.0
     "@ethersproject/bignumber": ^5.6.0
     "@ethersproject/networks": ^5.6.0
     "@ethersproject/providers": ^5.6.0
@@ -1933,7 +1931,6 @@ __metadata:
     "@walletconnect/ethereum-provider": ^2.8.3
     "@walletconnect/modal": ^2.5.4
     "@web3-react/coinbase-wallet": 8.2.0
-    "@web3-react/core": ^8.2.0
     "@web3-react/empty": 8.2.0
     "@web3-react/gnosis-safe": 8.2.0
     "@web3-react/metamask": 8.2.1
@@ -2637,7 +2634,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/address@npm:5.7.0, @ethersproject/address@npm:^5, @ethersproject/address@npm:^5.7.0":
+"@ethersproject/address@npm:5.7.0, @ethersproject/address@npm:^5, @ethersproject/address@npm:^5.6.0, @ethersproject/address@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/address@npm:5.7.0"
   dependencies:
@@ -2819,7 +2816,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/providers@npm:5.7.2, @ethersproject/providers@npm:^5, @ethersproject/providers@npm:^5.6.0, @ethersproject/providers@npm:^5.7.2":
+"@ethersproject/providers@npm:5.7.2, @ethersproject/providers@npm:^5.6.0, @ethersproject/providers@npm:^5.7.2":
   version: 5.7.2
   resolution: "@ethersproject/providers@npm:5.7.2"
   dependencies:
@@ -3127,15 +3124,6 @@ __metadata:
     teeny-request: ^8.0.0
     uuid: ^8.0.0
   checksum: 6024a531aba46b3f7a68fa65026cbd0b0df49c5536026a783c453c89e0e9f4d7d38cc598697d0afac0eca008e12fff8747105b71f73ddb25142ae075879d614d
-  languageName: node
-  linkType: hard
-
-"@graphql-typed-document-node/core@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "@graphql-typed-document-node/core@npm:3.2.0"
-  peerDependencies:
-    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: b08775cae1c65d89c54df4be0356786169ed3420a1f872c4319eb581b07282d6efec1ac548205ac73d576d5604f0a02c243b27d0ab6b1634ce7c4fddf90a5474
   languageName: node
   linkType: hard
 
@@ -3590,12 +3578,9 @@ __metadata:
   linkType: hard
 
 "@jridgewell/source-map@npm:^0.3.3":
-  version: 0.3.3
-  resolution: "@jridgewell/source-map@npm:0.3.3"
-  dependencies:
-    "@jridgewell/gen-mapping": ^0.3.0
-    "@jridgewell/trace-mapping": ^0.3.9
-  checksum: dd7476c3144cb646edc55de65d8ff55d0aeda42291e679bf3a861d5a2fd28724b4bd00a0959cce8d03112ad4f81353c1fb6412cb9ff59d1e70536d6396b640a0
+  version: 0.3.4
+  resolution: "@jridgewell/source-map@npm:0.3.4"
+  checksum: fef5505d02b55cd2b187a060672ae9c50ab6fd6359ce6bd72e400a20997f3f693b1c594ea1095ef207a150ca7d88ed5ed3c13ac73352a7b9a6e269b67cd72663
   languageName: node
   linkType: hard
 
@@ -9917,23 +9902,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/core@npm:^8.2.0":
-  version: 8.2.0
-  resolution: "@web3-react/core@npm:8.2.0"
-  dependencies:
-    "@ethersproject/providers": ^5
-    "@web3-react/store": ^8.2.0
-    "@web3-react/types": ^8.2.0
-    zustand: ^4.3.5
-  peerDependencies:
-    react: ">=16.8"
-  dependenciesMeta:
-    "@ethersproject/providers":
-      optional: true
-  checksum: edabc9004233660379022207a5fcb195adf977883b9e20fbe627c0999abd352e0b66842e10166b68832ed8978cfe6436a572e91b564974aed054fdee4cedf48a
-  languageName: node
-  linkType: hard
-
 "@web3-react/empty@npm:8.2.0":
   version: 8.2.0
   resolution: "@web3-react/empty@npm:8.2.0"
@@ -9964,7 +9932,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-react/store@npm:8.2.0, @web3-react/store@npm:^8.2.0":
+"@web3-react/store@npm:8.2.0":
   version: 8.2.0
   resolution: "@web3-react/store@npm:8.2.0"
   dependencies:
@@ -9993,6 +9961,38 @@ __metadata:
     "@web3-react/types": ^8.2.0
     eventemitter3: ^4.0.7
   checksum: 7d7b0e68ad27ad99f1894c6361cf952e80bb1a6c5230015b95716d8c19c4eb3a497ae42311a3837647e73c38832847f015c123078e2f0ec198f702216e331b73
+  languageName: node
+  linkType: hard
+
+"@web3modal/core@npm:2.4.3":
+  version: 2.4.3
+  resolution: "@web3modal/core@npm:2.4.3"
+  dependencies:
+    buffer: 6.0.3
+    valtio: 1.10.5
+  checksum: 26e436027fc3e321086efcec6d19ae0b7bed776bd6ab54ad6f8ef7e9fbd20598d38f093bf13e59bd65206c657f16e3eed291dc7f546b417aea44952ee018ead8
+  languageName: node
+  linkType: hard
+
+"@web3modal/standalone@npm:^2.4.2":
+  version: 2.4.3
+  resolution: "@web3modal/standalone@npm:2.4.3"
+  dependencies:
+    "@web3modal/core": 2.4.3
+    "@web3modal/ui": 2.4.3
+  checksum: a9fb1b5a86b42ccecddd3490fda845ea09694ac36b4b9bef1c592dce154ea1420d3454d988e58c8145297dccadb9c35ede5bd74044ccc81aacbba1e0fadd8e2d
+  languageName: node
+  linkType: hard
+
+"@web3modal/ui@npm:2.4.3":
+  version: 2.4.3
+  resolution: "@web3modal/ui@npm:2.4.3"
+  dependencies:
+    "@web3modal/core": 2.4.3
+    lit: 2.7.5
+    motion: 10.16.2
+    qrcode: 1.5.3
+  checksum: 68cd01347642a7fc91d9ebf29aac8f6396c2e298d36030f2eeba7e4e368cc1d390b8ce1b6bf903bf97967c4d2fa689fd36905f7008381c1760f5c9c3800a12f9
   languageName: node
   linkType: hard
 
@@ -16958,7 +16958,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"gcp-metadata@npm:^5.2.0":
+"gcp-metadata@npm:^5.3.0":
   version: 5.3.0
   resolution: "gcp-metadata@npm:5.3.0"
   dependencies:
@@ -17336,19 +17336,19 @@ fsevents@^1.2.7:
   linkType: hard
 
 "google-auth-library@npm:^8.0.1, google-auth-library@npm:^8.0.2":
-  version: 8.8.0
-  resolution: "google-auth-library@npm:8.8.0"
+  version: 8.9.0
+  resolution: "google-auth-library@npm:8.9.0"
   dependencies:
     arrify: ^2.0.0
     base64-js: ^1.3.0
     ecdsa-sig-formatter: ^1.0.11
     fast-text-encoding: ^1.0.0
     gaxios: ^5.0.0
-    gcp-metadata: ^5.2.0
+    gcp-metadata: ^5.3.0
     gtoken: ^6.1.0
     jws: ^4.0.0
     lru-cache: ^6.0.0
-  checksum: 1e75a4b18d68e915a97ab005cb715314220a804853c4924593e9bac547e9d4191d2746550e319448df3955a2dfb7fa738be0faad74bd88be2256212512f7e269
+  checksum: 8da6537c45dd6c4a09c6dc6c4a0b2e3099707a034297363906922e2eb3b8d0a6af8c44804ae178da7c2ac7efb5bc83d6bda4fc4bcd7f19cc98edd91f17b2e603
   languageName: node
   linkType: hard
 
@@ -17416,25 +17416,6 @@ fsevents@^1.2.7:
   version: 1.4.0
   resolution: "graphemer@npm:1.4.0"
   checksum: 12f207d1d9f4581994d8668ec238933eab6aaccad8c74cb92aac78bb37555658397e04a5c55dd0492e9a21e939fa6daceb5436424153f0e81bab00fb423a04ce
-  languageName: node
-  linkType: hard
-
-"graphql-request@npm:^6.0.0":
-  version: 6.1.0
-  resolution: "graphql-request@npm:6.1.0"
-  dependencies:
-    "@graphql-typed-document-node/core": ^3.2.0
-    cross-fetch: ^3.1.5
-  peerDependencies:
-    graphql: 14 - 16
-  checksum: f7554a812ed372f7df78311277ad15dd8571bd1796317ee593b53bbed16983f5ca512d5c2a48746c3337b1ab075c2c9baa78c2edd3331d6070b950d00a359e14
-  languageName: node
-  linkType: hard
-
-"graphql@npm:^16.6.0":
-  version: 16.7.1
-  resolution: "graphql@npm:16.7.1"
-  checksum: 0a43da06571f168e4c1950b9817bbe0494eaa56f14151e671547e4735e501f5dad3e826a92e2df3ae9b143f353c8a86ad5906309f95230c7fbb7d5cac707a06f
   languageName: node
   linkType: hard
 
@@ -27548,6 +27529,21 @@ fsevents@^1.2.7:
     spdx-correct: ^3.0.0
     spdx-expression-parse: ^3.0.0
   checksum: 940899bd4eacfa012ceecb10a5814ba0e8103da5243aa74d0d62f1f8a405efcd23e034fb7193e2d05b392870c53aabcb1f66439b062075cdcb28bc5d562a8ff6
+  languageName: node
+  linkType: hard
+
+"valtio@npm:1.10.5":
+  version: 1.10.5
+  resolution: "valtio@npm:1.10.5"
+  dependencies:
+    proxy-compare: 2.5.1
+    use-sync-external-store: 1.2.0
+  peerDependencies:
+    react: ">=16.8"
+  peerDependenciesMeta:
+    react:
+      optional: true
+  checksum: b3fc4ffb992854dff9dbaa8ff55a04aa0395467091df1bcf083a665fd50de1f372c8b77adc93f1b7c5ffdb08dde8d6e695629f83e0a5dce532ff30a75997d5ef
   languageName: node
   linkType: hard
 

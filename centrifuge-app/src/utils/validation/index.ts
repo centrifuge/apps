@@ -91,7 +91,7 @@ export const minLength = (minValue: number, err?: CustomError) => (val?: string)
 export const maxLength = (maxValue: number, err?: CustomError) => (val?: string) =>
   typeof val === 'string' && val.length <= maxValue
     ? ''
-    : getError(`Needs to be less than ${maxValue} characters`, err, val || '')
+    : getError(`Needs to be at most ${maxValue} characters`, err, val || '')
 
 export const address = (err?: CustomError) => (val?: string) =>
   val && !isAddress(val) ? getError('Invalid address', err, val || '') : ''
@@ -129,10 +129,10 @@ export const isin = (err?: CustomError) => (val?: any) => {
 
   const match = regex.exec(val.toString())
   console.log(match)
-  if (match?.length != 4) return getError(`Not a valid ISIN`, err, val)
+  if (match?.length !== 4) return getError(`Not a valid ISIN`, err, val)
 
   // validate the check digit
-  return match[3] == calcISINCheck(match[1] + match[2]).toString() ? '' : getError(`Not a valid ISIN`, err, val)
+  return match[3] === calcISINCheck(match[1] + match[2]).toString() ? '' : getError(`Not a valid ISIN`, err, val)
 }
 
 /**

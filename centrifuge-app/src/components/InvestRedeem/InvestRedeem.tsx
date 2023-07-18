@@ -215,10 +215,10 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
           {connectedType && (
             <>
               <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-                {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
+                {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
               </TextWithPlaceholder>
               <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
+                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)}
               </TextWithPlaceholder>
             </>
           )}
@@ -303,7 +303,7 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
 }
 
 const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
-  const { showWallets, connectedType } = useWallet()
+  const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const { data: metadata } = usePoolMetadata(pool)
@@ -334,7 +334,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
 
   const handleClick = () => {
     if (!connectedType) {
-      showWallets(networks?.length === 1 ? networks[0] : undefined)
+      if (networks && networks.length >= 1) {
+        showWallets(networks[0])
+      } else {
+        showNetworks()
+      }
     } else if (investStatus === 'request') {
       window.open(`mailto:${metadata?.pool?.issuer.email}?subject=New%20Investment%20Inquiry`)
     } else if (metadata?.onboarding?.externalOnboardingUrl) {
@@ -506,7 +510,13 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>
@@ -671,7 +681,13 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>
