@@ -176,8 +176,6 @@ function IssuerCreateLoan() {
     ?.collateralCollections[0]?.id
   const balances = useBalances(account?.actingAddress)
 
-  console.log('deposit', deposit)
-
   const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
