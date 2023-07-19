@@ -311,7 +311,7 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
 }
 
 const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
-  const { showWallets, connectedType } = useWallet()
+  const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const { data: metadata } = usePoolMetadata(pool)
@@ -342,7 +342,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
 
   const handleClick = () => {
     if (!connectedType) {
-      showWallets(networks?.length === 1 ? networks[0] : undefined)
+      if (networks && networks.length >= 1) {
+        showWallets(networks[0])
+      } else {
+        showNetworks()
+      }
     } else if (investStatus === 'request') {
       window.open(`mailto:${metadata?.pool?.issuer.email}?subject=New%20Investment%20Inquiry`)
     } else if (metadata?.onboarding?.externalOnboardingUrl) {

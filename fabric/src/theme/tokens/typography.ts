@@ -28,7 +28,7 @@ const typography: ThemeTypography = {
   heading5: {
     fontSize: 14,
     lineHeight: 1.375,
-    fontWeight: 600,
+    fontWeight: 500,
     color: 'textSecondary',
   },
   heading6: {
