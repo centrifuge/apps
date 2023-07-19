@@ -3,7 +3,7 @@ import { Codec } from '@polkadot/types-codec/types'
 import BN from 'bn.js'
 import { Buffer } from 'buffer'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
-import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { combineLatestWith, filter, map, repeat, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -2403,7 +2403,85 @@ export function getPoolsModule(inst: Centrifuge) {
     }
   }
 
+  function getAccountInvestments(args: [address: Account]) {
+    const [address] = args
+    const $api = inst.getApi()
+
+    const $events = inst.getEvents()
+
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([
+          api.query.ormlTokens.accounts.entries(address),
+          api.query.investments.redeemOrders.entries(address),
+          getCurrencies(),
+        ]).pipe(
+          map(([rawTokens, rawRedeem, currencies]) => {
+            const tokens = []
+
+            rawTokens.forEach(([rawKey, rawValue]) => {
+              const key = parseCurrencyKey((rawKey.toHuman() as any)[1] as CurrencyKey)
+              const { free, reserved } = rawValue.toJSON() as {
+                free: number
+                reserved: number
+                frozen: number
+              }
+              const currency = findCurrency(currencies, key)
+
+              if (!currency) {
+                return
+              }
+
+              const combined = hexToBN(free).add(hexToBN(reserved))
+
+              if (typeof key !== 'string' && 'Tranche' in key) {
+                const [pid, trancheId] = key.Tranche
+                const poolId = pid.replace(/\D/g, '')
+
+                if (!combined.isZero()) {
+                  tokens.push({
+                    currency,
+                    poolId,
+                    trancheId,
+                    balance: new TokenBalance(combined, currency.decimals),
+                  })
+                }
+              } else {
+                if (!combined.isZero()) {
+                  tokens.push({
+                    currency,
+                    balance: new CurrencyBalance(combined, currency.decimals),
+                  })
+                }
+              }
+            })
+
+            rawRedeem.forEach(([rawKey, rawValue]) => {
+              const { poolId, trancheId } = (rawKey.toHuman() as any)[1] as {
+                poolId: string
+                trancheId: string
+              }
+              const key = parseCurrencyKey({ Tranche: [poolId, trancheId] })
+              const { amount } = rawValue.toJSON() as {
+                amount: number
+                submittedAt: number
+              }
+              const currency = findCurrency(currencies, key)
+            })
+
+            return {
+              foo: 'bar',
+            }
+          })
+        )
+      ),
+
+      repeat({ delay: () => $events })
+    )
+  }
+
   return {
+    getAccountInvestments,
     createPool,
     updatePool,
     setMaxReserve,

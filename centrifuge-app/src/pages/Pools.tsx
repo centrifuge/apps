@@ -6,6 +6,7 @@ import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolList } from '../components/PoolList'
 import { PoolsSwitch } from '../components/PoolsSwitch'
+import { PortfolioCta } from '../components/PortfolioCta'
 import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
@@ -47,6 +48,11 @@ const Pools: React.FC = () => {
 
   return (
     <Stack gap={0} flex={1}>
+      <Shelf p={2}>
+        <Box width="50%" ml="auto">
+          <PortfolioCta />
+        </Box>
+      </Shelf>
       <PageHeader
         title="Pools"
         subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
