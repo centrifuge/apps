@@ -2,7 +2,6 @@ import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { useTheme } from 'styled-components'
 import { getTinlakeSubgraphTVL } from '../../utils/tinlake/getTinlakeSubgraphTVL'
 import { useDailyTVL } from '../../utils/usePools'
 
@@ -19,8 +18,7 @@ type TotalValueLockedProps = {
 export function TotalValueLocked({ chainTVL, setHovered }: TotalValueLockedProps) {
   const centrifugeTVL = useDailyTVL()
   const tinlakeTVL = useDailyTinlakeTVL()
-  const { colors } = useTheme()
-  const theme = useTheme()
+  const chartColor = '#ff8c00'
 
   const chartData = React.useMemo(() => {
     if (!tinlakeTVL || !centrifugeTVL) {
@@ -53,8 +51,8 @@ export function TotalValueLocked({ chainTVL, setHovered }: TotalValueLockedProps
       >
         <defs>
           <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={colors.accentSecondary} stopOpacity={1} />
-            <stop offset="95%" stopColor={colors.accentSecondary} stopOpacity={0} />
+            <stop offset="5%" stopColor={chartColor} stopOpacity={0.3} />
+            <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
           </linearGradient>
         </defs>
         <Area
@@ -64,7 +62,7 @@ export function TotalValueLocked({ chainTVL, setHovered }: TotalValueLockedProps
           fillOpacity={1}
           fill="url(#colorPoolValue)"
           name="Current Value Locked"
-          activeDot={{ fill: colors.accentSecondary }}
+          activeDot={{ fill: chartColor }}
         />
         <Tooltip content={<></>} />
       </AreaChart>
