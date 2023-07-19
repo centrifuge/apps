@@ -3628,6 +3628,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.2
+  resolution: "@kurkle/color@npm:0.3.2"
+  checksum: c9241d020b123b1c586b4d88e85cdfecad036512374dfe3db407f4bbf775c62ab8e53f0abdbe4a75843e1cba605c1e611c26c698df30e66ac87cd2a36282b075
+  languageName: node
+  linkType: hard
+
 "@lit-labs/ssr-dom-shim@npm:^1.0.0, @lit-labs/ssr-dom-shim@npm:^1.1.0":
   version: 1.1.1
   resolution: "@lit-labs/ssr-dom-shim@npm:1.1.1"
@@ -3641,13 +3648,6 @@ __metadata:
   dependencies:
     "@lit-labs/ssr-dom-shim": ^1.0.0
   checksum: 2fc3ff0cc58eb612e1353129f7a7b522ab16d9985bbd5c4c3d0ed759068fb095a4fbb3e927c74fa67bda6f3e792ab25d271c027cdd2b37b65242c6f42fe44aea
-  languageName: node
-  linkType: hard
-
-"@kurkle/color@npm:^0.3.0":
-  version: 0.3.2
-  resolution: "@kurkle/color@npm:0.3.2"
-  checksum: c9241d020b123b1c586b4d88e85cdfecad036512374dfe3db407f4bbf775c62ab8e53f0abdbe4a75843e1cba605c1e611c26c698df30e66ac87cd2a36282b075
   languageName: node
   linkType: hard
 

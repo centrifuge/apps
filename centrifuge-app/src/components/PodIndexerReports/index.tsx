@@ -1,5 +1,5 @@
-import { PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { PoolMetadata, TokenBalance } from '@centrifuge/centrifuge-js'
+import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Shelf, Text } from '@centrifuge/fabric'
 import Chart from 'chart.js/auto'
 import * as React from 'react'
@@ -19,7 +19,7 @@ export function PodIndexerReports({ page, poolId }: Props) {
   const { data } = useQuery(
     ['podIndexerReports', page],
     async () => {
-      const realData = await centrifuge.pod.getReports([metadata!.pod!.indexer!, metadata as any, page])
+      const realData = await centrifuge.pod.getReports([metadata!.pod!.indexer![0], metadata as any, page])
       return realData
     },
     {
@@ -35,21 +35,24 @@ export function PodIndexerReports({ page, poolId }: Props) {
 
 type ReportSectionWithData = Required<PoolMetadata>['reports']['poolOverview']['sections'][0] & { data: any }
 
-type ChartData = { value1: any; value2: any }[]
+type ChartData = Record<`key${number}` | `value${number}`, any>[]
 
 function displayChart(reportSection: ReportSectionWithData, data: ChartData, node: HTMLCanvasElement) {
+  const filtered = data.filter((d) => d.value0 != null)
   return new Chart(node, {
     ...reportSection.viewData,
     data: {
-      labels: data.map((row) => row.value1),
+      labels: filtered.map((row) => row.value0),
       datasets: [
         {
-          data: data.map((row) => row.value2),
+          data: filtered.map((row) => new TokenBalance(row.value1, reportSection.viewData.decimals || 0).toFloat()),
           backgroundColor: '#2762ff',
         },
       ],
     },
+
     options: {
+      ...reportSection.viewData.options,
       plugins: {
         legend: {
           display: false,
@@ -111,7 +114,10 @@ function CounterSection({ section }: { section: ReportSectionWithData }) {
       </Text>
       <SectionContent>
         <Text variant="heading1" style={{ marginBottom: '24px', fontSize: '60px' }}>
-          {parseFloat(section.data[0].value1).toFixed(section.viewData.decimals || 0)}
+          {formatBalance(
+            new TokenBalance(section.data[0].value0, section.viewData.decimals || 0),
+            section.viewData.symbol
+          )}
         </Text>
         <Text variant="heading6" style={{ marginBottom: '24px' }}>
           {section.viewData.label}

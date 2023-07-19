@@ -562,7 +562,7 @@ export type PoolMetadata = {
   }
   pod?: {
     node: string | null
-    indexer?: string | null
+    indexer?: string[] | null
   }
   tranches: Record<
     string,
