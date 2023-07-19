@@ -1668,6 +1668,67 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getDailyTVL() {
+    const $query = inst.getSubqueryObservable<{
+      poolSnapshots: {
+        nodes: {
+          portfolioValuation: string
+          totalReserve: string
+          periodStart: string
+          pool: {
+            currency: {
+              decimals: number
+            }
+          }
+        }[]
+      }
+    }>(
+      `query {
+        poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
+          nodes {
+            portfolioValuation
+            totalReserve
+            periodStart
+            pool {
+              currency {
+                decimals
+              }
+            }
+          }
+        }
+      }`
+    )
+
+    return $query.pipe(
+      map((data) => {
+        if (!data) {
+          return []
+        }
+
+        const mergedMap = new Map()
+        const formatted = data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
+          dateInMilliseconds: new Date(periodStart).getTime(),
+          tvl: new CurrencyBalance(
+            new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
+            pool.currency.decimals
+          ).toDecimal(),
+        }))
+
+        formatted.forEach((entry) => {
+          const { dateInMilliseconds, tvl } = entry
+
+          if (mergedMap.has(dateInMilliseconds)) {
+            mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
+          } else {
+            mergedMap.set(dateInMilliseconds, tvl)
+          }
+        })
+
+        return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+      })
+    )
+  }
+
   function getDailyTrancheStates(args: [trancheId: string]) {
     const [trancheId] = args
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
@@ -2440,6 +2501,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
+    getDailyTVL,
   }
 }
 

@@ -86,6 +86,14 @@ export function useDailyTrancheStates(trancheId: string) {
   return result
 }
 
+export function useDailyTVL() {
+  const [result] = useCentrifugeQuery(['daily TVL'], (cent) => cent.pools.getDailyTVL(), {
+    suspense: true,
+  })
+
+  return result
+}
+
 export function usePoolOrders(poolId: string) {
   const [result] = useCentrifugeQuery(['poolOrders', poolId], (cent) => cent.pools.getPoolOrders([poolId]))
 
