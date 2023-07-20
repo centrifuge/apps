@@ -47,7 +47,7 @@ export function ClaimTinlakeRewards() {
     const proof = createBufferProofFromClaim(tree, newClaim(claim))
 
     try {
-      const hash = await execute([claim.accountID, claim.balance, proof])
+      await execute([claim.accountID, claim.balance, proof])
       setStatus('succeeded')
     } catch (e) {
       console.log('error "ClaimTinlakeRewards" execute:', e)
