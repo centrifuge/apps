@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Shelf } from '../Shelf'
 
-export type NavigationProps = {
+export type SideNavigationProps = {
   items: {
     label: string
     href: string
@@ -10,19 +10,19 @@ export type NavigationProps = {
   }[]
 }
 
-export function Navigation({ items }: NavigationProps) {
+export function SideNavigation({ items }: SideNavigationProps) {
   return (
-    <NavigationContainer>
+    <SideNavigationContainer>
       {items.map(({ label, href, isActive }) => (
-        <NavigationItem href={href} isActive={isActive}>
+        <SideNavigationItem href={href} isActive={isActive}>
           {label}
-        </NavigationItem>
+        </SideNavigationItem>
       ))}
-    </NavigationContainer>
+    </SideNavigationContainer>
   )
 }
 
-export function NavigationContainer({ children }: { children: React.ReactNode }) {
+export function SideNavigationContainer({ children }: { children: React.ReactNode }) {
   return (
     <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px">
       {children}
@@ -30,7 +30,7 @@ export function NavigationContainer({ children }: { children: React.ReactNode })
   )
 }
 
-export const NavigationItem = styled.a<{ isActive: boolean }>`
+export const SideNavigationItem = styled.a<{ isActive: boolean }>`
   display: block;
   padding: 8px 16px;
   border-radius: 20px;

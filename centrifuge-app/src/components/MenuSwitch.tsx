@@ -1,4 +1,4 @@
-import { NavigationContainer, NavigationItem } from '@centrifuge/fabric'
+import { SideNavigationContainer, SideNavigationItem } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link, useLocation, useRouteMatch } from 'react-router-dom'
 
@@ -18,12 +18,12 @@ export function MenuSwitch() {
   ]
 
   return (
-    <NavigationContainer>
+    <SideNavigationContainer>
       {links.map(({ to, label }) => (
-        <NavigationItem key={to} as={Link} to={to} isActive={pathname === to}>
+        <SideNavigationItem key={to} as={Link} to={to} isActive={pathname === to}>
           {label}
-        </NavigationItem>
+        </SideNavigationItem>
       ))}
-    </NavigationContainer>
+    </SideNavigationContainer>
   )
 }
