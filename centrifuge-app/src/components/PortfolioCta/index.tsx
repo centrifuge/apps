@@ -1,4 +1,4 @@
-import { useBalances, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import { useBalances } from '@centrifuge/centrifuge-react'
 import { Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useAddress } from '../../utils/useAddress'
@@ -8,8 +8,6 @@ import { Cubes } from './Cubes'
 export function PortfolioCta() {
   const address = useAddress()
   const balances = useBalances(address)
-  const investments = useAccountInvestments(address)
-  // console.log('balances', balances)
 
   return (
     <Card p={3} pb={5} as="article" position="relative" overflow="hidden">
@@ -62,16 +60,4 @@ export function PortfolioCta() {
       </Stack>
     </Card>
   )
-}
-
-function useAccountInvestments(address?: string) {
-  const [result] = useCentrifugeQuery(
-    ['account investments', address],
-    (cent) => cent.pools.getAccountInvestments([address!]),
-    {
-      enabled: !!address,
-    }
-  )
-
-  return result
 }
