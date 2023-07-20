@@ -12,7 +12,7 @@ export function PoolStatus({ pool }: { pool?: Pool | TinlakePool }) {
 
   return tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk ? (
     <StatusChip status="ok">Maker Pool</StatusChip>
-  ) : pool.reserve.max.toFloat() > 0 ? (
+  ) : pool.tranches.at(-1)?.capacity.toFloat() ? (
     <StatusChip status="info">Open for investments</StatusChip>
   ) : (
     <StatusChip status="default">Closed</StatusChip>
