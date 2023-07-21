@@ -114,7 +114,12 @@ export const validateRemark = async (
 ) => {
   try {
     await firstValueFrom(
-      getCentrifuge().remark.validateRemark(transactionInfo.blockNumber, transactionInfo.txHash, expectedRemark)
+      getCentrifuge().remark.validateRemark(
+        transactionInfo.blockNumber,
+        transactionInfo.txHash,
+        expectedRemark,
+        transactionInfo?.isEvmOnSubstrate
+      )
     )
   } catch (error) {
     reportHttpError(error)

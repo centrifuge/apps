@@ -13,8 +13,11 @@ export const OnboardingAuthContext = React.createContext<{
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export function OnboardingAuthProvider({ children }: { children: React.ReactNode }) {
-  const { selectedWallet, selectedProxies, selectedAccount } = useWallet().substrate
-  const { selectedAddress } = useWallet().evm
+  const {
+    substrate: { selectedWallet, selectedProxies, selectedAccount, evmChainId },
+    evm: { selectedAddress },
+    isEvmOnSubstrate,
+  } = useWallet()
   const cent = useCentrifuge()
   const provider = useEvmProvider()
   const walletAddress = selectedAccount?.address ?? selectedAddress
@@ -44,9 +47,12 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
     try {
       if (selectedAccount?.address && selectedWallet?.signer) {
         await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer, cent, proxy)
+      } else if (isEvmOnSubstrate && selectedAddress && provider?.getSigner()) {
+        await loginWithEvm(selectedAddress, provider.getSigner(), evmChainId)
       } else if (selectedAddress && provider?.getSigner()) {
         await loginWithEvm(selectedAddress, provider.getSigner())
       }
+      throw new Error('network not supported')
     } catch {
     } finally {
       refetchSession()
@@ -183,7 +189,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
   }
 }
 
-const loginWithEvm = async (address: string, signer: any) => {
+const loginWithEvm = async (address: string, signer: any, evmChainId?: number) => {
   const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
     method: 'POST',
     headers: {
@@ -203,7 +209,7 @@ Please sign to authenticate your wallet
 
 URI: ${origin}
 Version: 1
-Chain ID: ${import.meta.env.REACT_APP_TINLAKE_NETWORK === 'mainnet' ? 1 : 5 /* goerli */}
+Chain ID: ${evmChainId ? evmChainId : import.meta.env.REACT_APP_TINLAKE_NETWORK === 'mainnet' ? 1 : 5 /* goerli */}
 Nonce: ${nonce}
 Issued At: ${new Date().toISOString()}`
 
@@ -214,7 +220,7 @@ Issued At: ${new Date().toISOString()}`
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({ message, signature: signedMessage, address, nonce }),
+    body: JSON.stringify({ message, signature: signedMessage, address, nonce, substrateEvmChainId: evmChainId }),
   })
   if (tokenRes.status !== 200) {
     throw new Error('Failed to authenticate wallet')

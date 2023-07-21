@@ -51,7 +51,7 @@ export const signAndSendDocumentsController = async (
 
     const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
 
-    if (wallet.network === 'substrate') {
+    if (wallet.network === 'substrate' || (wallet.network === 'evm' && wallet.substrateEvmChainId)) {
       await validateRemark(transactionInfo, remark)
     } else {
       await validateEvmRemark(req.wallet, transactionInfo, remark)

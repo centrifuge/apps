@@ -2,7 +2,7 @@ import { isAddress } from '@polkadot/util-crypto'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
-import { InferType, object, string } from 'yup'
+import { InferType, number, object, string } from 'yup'
 import { getCentrifuge, isValidSubstrateAddress } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
@@ -29,6 +29,7 @@ const verifyWalletInput = object({
     then: (verifyWalletInput) => verifyWalletInput.required(),
   }),
   nonce: string().required(),
+  substrateEvmChainId: number().optional(),
 })
 
 export const authenticateWalletController = async (
@@ -50,7 +51,7 @@ export const authenticateWalletController = async (
 }
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
-async function verifySubstrateWallet(req: Request, res: Response) {
+async function verifySubstrateWallet(req: Request, res: Response): Promise<Request['wallet']> {
   const { jw3t: token, nonce } = req.body
   const { verified, payload } = await await getCentrifuge().auth.verify(token!)
 
@@ -87,9 +88,9 @@ async function verifySubstrateWallet(req: Request, res: Response) {
   }
 }
 
-async function verifyEthWallet(req: Request, res: Response) {
+async function verifyEthWallet(req: Request, res: Response): Promise<Omit<Request['wallet'], 'substrateChainId'>> {
   try {
-    const { message, signature, address, nonce } = req.body
+    const { message, signature, address, nonce, substrateEvmChainId } = req.body
 
     if (!isAddress(address)) {
       throw new Error('Invalid address')
@@ -106,6 +107,7 @@ async function verifyEthWallet(req: Request, res: Response) {
     return {
       address: decodedMessage.data.address,
       network: 'evm',
+      substrateEvmChainId,
     }
   } catch (error) {
     throw new Error('Invalid message or signature')
