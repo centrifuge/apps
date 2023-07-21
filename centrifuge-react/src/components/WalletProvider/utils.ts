@@ -1,3 +1,4 @@
+import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { CentrifugeContext } from '../CentrifugeProvider/CentrifugeProvider'
@@ -28,6 +29,19 @@ export function useGetNetworkName(
 
 export function useNetworkName(network: Network) {
   return useGetNetworkName()(network)
+}
+
+export function useGetNetworkIcon() {
+  const {
+    evm,
+    substrate: { evmChainId },
+  } = useWallet()
+  return (network: Network) =>
+    network === 'centrifuge' || network === evmChainId ? centrifugeLogo : evm.chains[network]?.iconUrl ?? ''
+}
+
+export function useNetworkIcon(network: Network) {
+  return useGetNetworkIcon()(network)
 }
 
 export function useGetExplorerUrl(network?: Network) {

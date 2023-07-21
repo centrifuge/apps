@@ -90,7 +90,7 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { showWallets, connectedType, evm } = useWallet()
+  const { showNetworks, connectedType, evm } = useWallet()
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
@@ -203,7 +203,7 @@ export function PoolDetailOverview({
                       variant="secondary"
                       onClick={() => {
                         if (!connectedType) {
-                          showWallets()
+                          showNetworks()
                         }
                         setSelectedToken(token.id)
                       }}
