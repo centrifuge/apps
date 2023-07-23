@@ -1,11 +1,12 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
-import { LoadBoundary } from '../components/LoadBoundary'
+import { LayoutBase } from '../components/LayoutBase'
+// import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
+// import { LoadBoundary } from '../components/LoadBoundary'
 import { MenuSwitch } from '../components/MenuSwitch'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
-import { PageWithSideBar } from '../components/PageWithSideBar'
+// import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolList } from '../components/PoolList'
 import { PoolsSwitch } from '../components/PoolsSwitch'
 import { Tooltips } from '../components/Tooltips'
@@ -16,14 +17,15 @@ import { useListedPools } from '../utils/useListedPools'
 
 export const PoolsPage: React.FC = () => {
   return (
-    <PageWithSideBar sidebar>
-      <LoadBoundary>
-        <Box p={2}>
-          <CardTotalValueLocked />
-        </Box>
-      </LoadBoundary>
-      <Pools />
-    </PageWithSideBar>
+    <LayoutBase />
+    // <PageWithSideBar sidebar>
+    //   <LoadBoundary>
+    //     <Box p={2}>
+    //       <CardTotalValueLocked />
+    //     </Box>
+    //   </LoadBoundary>
+    //   <Pools />
+    // </PageWithSideBar>
   )
 }
 
