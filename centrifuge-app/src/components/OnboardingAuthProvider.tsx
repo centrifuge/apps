@@ -227,7 +227,13 @@ Issued At: ${new Date().toISOString()}`
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({ message, signature: signedMessage, address, nonce, substrateEvmChainId: evmChainId }),
+    body: JSON.stringify({
+      message,
+      signature: signedMessage,
+      address,
+      nonce,
+      ...(evmChainId ? { substrateEvmChainId: evmChainId } : {}),
+    }),
   })
   if (tokenRes.status !== 200) {
     throw new Error('Failed to authenticate wallet')

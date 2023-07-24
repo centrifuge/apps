@@ -23,6 +23,6 @@ export const verifyAuth = async (req: Request, _res: Response, next: NextFunctio
   if ((network === 'evm' && !isAddress(address)) || (network === 'substrate' && !getValidSubstrateAddress(address))) {
     throw new HttpError(401, 'Invalid address')
   }
-  req.wallet = { address, network, substrateEvmChainId }
+  req.wallet = { address, network, ...(substrateEvmChainId ? { substrateEvmChainId } : {}) }
   next()
 }

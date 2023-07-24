@@ -104,7 +104,7 @@ async function verifyEthWallet(req: Request, res: Response): Promise<Omit<Reques
     return {
       address: decodedMessage.data.address,
       network: 'evm',
-      substrateEvmChainId,
+      ...(substrateEvmChainId ? { substrateEvmChainId } : {}),
     }
   } catch (error) {
     throw new Error('Invalid message or signature')
