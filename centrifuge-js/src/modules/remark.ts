@@ -22,7 +22,7 @@ export function getRemarkModule(inst: CentrifugeBase) {
           const actualRemark = Buffer.from(`${evmInput}`, 'hex').toString()
 
           if (actualRemark !== expectedRemark) {
-            throw new Error('Centjs: Invalid remark')
+            throw new Error('Invalid remark')
           }
           return of(true)
         }

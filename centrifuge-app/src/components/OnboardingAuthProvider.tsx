@@ -1,5 +1,7 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
+import { hexToU8a } from '@polkadot/util'
+import { encodeAddress } from '@polkadot/util-crypto'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
@@ -20,20 +22,23 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
   } = useWallet()
   const cent = useCentrifuge()
   const provider = useEvmProvider()
-  const walletAddress = selectedAccount?.address ?? selectedAddress
+  // onboarding-api expects the wallet address in the native substrate format
+  const address = selectedAccount?.address
+    ? encodeAddress(hexToU8a(selectedAccount?.address), cent.getChainId())
+    : selectedAddress
   const proxy = selectedProxies?.[0]
 
   const { data: session, refetch: refetchSession } = useQuery(
     ['session', selectedAccount?.address, proxy?.delegator, selectedAddress],
     () => {
-      if (selectedAccount?.address || selectedAddress) {
+      if (address) {
         if (proxy) {
-          const rawItem = sessionStorage.getItem(`centrifuge-onboarding-auth-${walletAddress}-${proxy.delegator}`)
+          const rawItem = sessionStorage.getItem(`centrifuge-onboarding-auth-${address}-${proxy.delegator}`)
           if (rawItem) {
             return JSON.parse(rawItem)
           }
         } else {
-          const rawItem = sessionStorage.getItem(`centrifuge-onboarding-auth-${walletAddress}`)
+          const rawItem = sessionStorage.getItem(`centrifuge-onboarding-auth-${address}`)
           if (rawItem) {
             return JSON.parse(rawItem)
           }
@@ -124,7 +129,9 @@ export function useOnboardingAuth() {
   }
 }
 
-const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cent: Centrifuge, proxy?: any) => {
+const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], cent: Centrifuge, proxy?: any) => {
+  // onboarding-api expects the wallet address in the native substrate format
+  const address = encodeAddress(hexToU8a(hexAddress), cent.getChainId())
   const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
     method: 'POST',
     headers: {

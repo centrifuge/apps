@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
 import { InferType, number, object, string } from 'yup'
-import { getCentrifuge, isValidSubstrateAddress } from '../../utils/centrifuge'
+import { getCentrifuge, getValidSubstrateAddress } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -56,10 +56,7 @@ async function verifySubstrateWallet(req: Request, res: Response): Promise<Reque
   const { verified, payload } = await await getCentrifuge().auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
-  const address = payload.address
-  if (!isValidSubstrateAddress(address)) {
-    throw new Error('Invalid address')
-  }
+  const address = getValidSubstrateAddress(payload.address)
 
   const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
   if (!cookieNonce || cookieNonce !== nonce) {

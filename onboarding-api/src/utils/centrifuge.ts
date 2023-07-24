@@ -172,11 +172,14 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
 }
 
 // https://polkadot.js.org/docs/util-crypto/examples/validate-address/
-export const isValidSubstrateAddress = (address: string) => {
+export const getValidSubstrateAddress = (address: string) => {
   try {
-    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
-    return true
+    const validAddress = encodeAddress(
+      isHex(address) ? hexToU8a(address) : decodeAddress(address),
+      getCentrifuge().getChainId()
+    )
+    return validAddress
   } catch (error) {
-    return false
+    throw new Error('Invalid address')
   }
 }
