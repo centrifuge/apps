@@ -129,7 +129,7 @@ export const getTinlakePoolById = async (poolId: string) => {
   const poolData = pools.active.find((p) => p.addresses.ROOT_CONTRACT === poolId)
 
   if (!poolData) {
-    throw new Error(`Pool ${poolId} not found`)
+    throw new Error(`Tinlake pool with ID ${poolId} not found`)
   }
 
   const id = poolData.addresses.ROOT_CONTRACT
@@ -229,7 +229,8 @@ export const addTinlakeInvestorToMemberList = async (
       OneHundredYearsFromNow,
       {
         gasLimit: 1000000,
-        maxPriorityFeePerGas: 4000000000, // 4 gwei
+        // TODO: find a better number, this is causing errors on goerli
+        // maxPriorityFeePerGas: 4000000000, // 4 gwei
       }
     )
     const finalizedTx = await tx.wait()
