@@ -276,32 +276,52 @@ export class WalletConnect extends Connector {
           polkadotOptionalChains.delete(cid)
         }
       })
+      // const params = {
+      //   namespaces,
+      //   optionalNamespaces: {
+      //     eip155: {
+      //       methods: ['eth_sendTransaction', 'eth_signTransaction', 'get_balance', 'personal_sign'],
+      //       chains: [...eip155OptionalChains],
+      //       events: ['chainChanged', 'accountsChanged'],
+      //       rpcMap: this.rpcMap?.eip155,
+      //       // rpcMap:{
+      //       //   5: 'https://goerli.infura.io/v3/bf808e7d3d924fbeb74672d9341d0550',
+      //       //   999999: 'https://fullnode.development.cntrfg.com/',
+      //       // },
+      //     },
+      //     polkadot: {
+      //       methods: ['polkadot_signTransaction', 'polkadot_signMessage'],
+      //       chains: [...polkadotOptionalChains],
+      //       // chains: [
+      //       //   'polkadot:91b171bb158e2d3848fa23a9f1c25182', // polkadot
+      //       // ],
+      //       events: ['chainChanged", "accountsChanged'],
+      //       rpcMap: this.rpcMap?.polkadot,
+      //     },
+      //   },
+      // }
       const params = {
-        namespaces,
-        optionalNamespaces: {
-          eip155: {
-            methods: ['eth_sendTransaction', 'eth_signTransaction', 'get_balance', 'personal_sign'],
-            chains: [...eip155OptionalChains],
-            events: ['chainChanged', 'accountsChanged'],
-            rpcMap: this.rpcMap?.eip155,
-            // rpcMap:{
-            //   5: 'https://goerli.infura.io/v3/bf808e7d3d924fbeb74672d9341d0550',
-            //   999999: 'https://fullnode.development.cntrfg.com/',
-            // },
-          },
+        namespaces: {
           polkadot: {
             methods: ['polkadot_signTransaction', 'polkadot_signMessage'],
-            chains: [...polkadotOptionalChains],
-            // chains: [
-            //   'polkadot:91b171bb158e2d3848fa23a9f1c25182', // polkadot
-            // ],
+            chains: [
+              'polkadot:91b171bb158e2d3848fa23a9f1c25182', // polkadot
+            ],
             events: ['chainChanged", "accountsChanged'],
             rpcMap: this.rpcMap?.polkadot,
           },
         },
+        optionalNamespaces: {
+          eip155: {
+            methods: ['eth_sendTransaction', 'eth_signTransaction', 'get_balance', 'personal_sign'],
+            chains: ['eip155:5', 'eip155:1'],
+            events: ['chainChanged', 'accountsChanged'],
+            rpcMap: this.rpcMap?.eip155,
+          },
+        },
       }
-      // eslint-disable-next-line no-async-promise-executor
-      const session = await new Promise<any>(async (resolve, reject) => {
+      console.log('params', params)
+      const session = await new Promise<any>((resolve, reject) => {
         this.modal?.subscribeModal((state) => {
           // the modal was closed so reject the promise
           if (!state.open && !provider.session) {
@@ -309,7 +329,7 @@ export class WalletConnect extends Connector {
             reject(new Error('Connection request reset. Please try again.'))
           }
         })
-        await provider
+        provider
           .connect({
             ...this.connectOptions,
             ...params,
