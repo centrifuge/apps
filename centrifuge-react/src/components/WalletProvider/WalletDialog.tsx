@@ -19,8 +19,8 @@ import { MetaMask } from '@web3-react/metamask'
 import * as React from 'react'
 import { AccountButton, AccountIcon, AccountName } from './AccountButton'
 import { EvmChains, getChainInfo } from './evm/chains'
-import { EvmConnectorMeta } from './evm/connectors'
 import { isSubWallet, isTalismanWallet } from './evm/utils'
+import { ConnectorMeta } from './multichain/connectors'
 import { Logo, NetworkIcon, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
 import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
@@ -49,6 +49,7 @@ export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }
     showWallets,
     connect: doConnect,
     evm,
+    multichain,
     scopedNetworks,
     substrate: { evmChainId },
   } = ctx
@@ -58,17 +59,22 @@ export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }
   const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
 
   const sortedEvmWallets = sortEvmWallets(evm.connectors.filter((c) => c.shown))
+  const multichainWallets = multichain.connectors.filter((c) => c.shown)
   const centWallets =
     centEvmChainId && evmOnSubstrate
       ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
-      : sortCentrifugeWallets(wallets)
-  const shownWallets = isCentChainSelected ? centWallets : selectedNetwork ? sortedEvmWallets : []
+      : [...sortCentrifugeWallets(wallets)]
+  const shownWallets = isCentChainSelected
+    ? [...centWallets, ...multichainWallets]
+    : selectedNetwork
+    ? [...sortedEvmWallets, ...multichainWallets]
+    : []
 
   function close() {
     dispatch({ type: 'closeWalletDialog' })
   }
 
-  async function connect(wallet: Wallet | EvmConnectorMeta) {
+  async function connect(wallet: Wallet | ConnectorMeta) {
     try {
       const accounts = await doConnect(wallet, selectedNetwork!)
       if (accounts?.length! > 1 && 'extensionName' in wallet) {

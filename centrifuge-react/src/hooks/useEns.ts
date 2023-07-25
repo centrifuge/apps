@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query'
 import { useWallet } from '../components/WalletProvider'
-import { useProviderForConnector } from '../components/WalletProvider/evm/utils'
+import { useProviderForConnector } from '../components/WalletProvider/multichain/utils'
 
 export function useEns(address?: string) {
   const { evm, connectedType } = useWallet()

@@ -1,6 +1,6 @@
 import type { ComputedMultisig } from '@centrifuge/centrifuge-js'
 import type { Wallet, WalletAccount } from '@subwallet/wallet-connect/types'
-import type { EvmConnectorMeta } from './evm/connectors'
+import type { ConnectorMeta } from './multichain/connectors'
 
 export type SubstrateAccount = WalletAccount
 
@@ -18,14 +18,17 @@ export type EvmChainId = number
 export type Network = 'centrifuge' | EvmChainId
 
 export type State = {
-  connectedType: 'evm' | 'substrate' | null
+  connectedType: 'evm' | 'substrate' | 'multichain' | null
   walletDialog: {
     view: 'accounts' | 'wallets' | 'networks' | null
     network: Network | null
-    wallet: Wallet | EvmConnectorMeta | null
+    wallet: Wallet | ConnectorMeta | null
   }
   evm: {
-    selectedWallet: EvmConnectorMeta | null
+    selectedWallet: ConnectorMeta | null
+  }
+  multichain: {
+    selectedWallet: ConnectorMeta | null
   }
   substrate: {
     accounts: SubstrateAccount[] | null

@@ -1,9 +1,10 @@
 import { computeMultisig, Multisig } from '@centrifuge/centrifuge-js'
 import { isAddress } from '@polkadot/util-crypto'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
+import { Web3ReactState } from '@web3-react/types'
 import * as React from 'react'
-import { EvmConnectorMeta } from './evm/connectors'
-import { useConnectorState } from './evm/utils'
+import { ConnectorMeta } from './multichain/connectors'
+import { useConnectorState, Web3ReactMultichainState } from './multichain/utils'
 import { State } from './types'
 
 const PERSIST_KEY = 'centrifugeWalletPersist_v2'
@@ -17,6 +18,9 @@ const initialState: State = {
     wallet: null,
   },
   evm: {
+    selectedWallet: null,
+  },
+  multichain: {
     selectedWallet: null,
   },
   substrate: {
@@ -54,6 +58,10 @@ export type Action =
   | {
       type: 'evmSetState'
       payload: Partial<State['evm']>
+    }
+  | {
+      type: 'multichainSetState'
+      payload: Partial<State['multichain']>
     }
   | {
       type: 'setConnectedType'
@@ -115,6 +123,14 @@ function reducer(state: State, action: Action): State {
           ...action.payload,
         },
       }
+    case 'multichainSetState':
+      return {
+        ...state,
+        evm: {
+          ...state.evm,
+          ...action.payload,
+        },
+      }
     case 'setConnectedType':
       return {
         ...state,
@@ -127,7 +143,7 @@ function reducer(state: State, action: Action): State {
 }
 
 type PersistState = {
-  type: 'substrate' | 'evm'
+  type: 'substrate' | 'evm' | 'multichain'
   wallet: string
   address: string
 }
@@ -162,26 +178,28 @@ export function persist(state: Partial<PersistState> | null) {
   }
 }
 
-export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
+export function useWalletStateInternal(evmConnectors: ConnectorMeta[], multichainConnectors: ConnectorMeta[]) {
   const [reducerState, dispatch] = React.useReducer(reducer, initialState)
 
-  const evmState = useConnectorState(reducerState.evm.selectedWallet?.connector)
+  const evmState = useConnectorState(reducerState.evm.selectedWallet?.connector) as Web3ReactState
+  const multichainState = useConnectorState(
+    reducerState.multichain.selectedWallet?.connector
+  ) as Web3ReactMultichainState
 
   console.log('reducerState', reducerState, evmState)
 
   const state = React.useMemo(() => {
-    const [namespace, chainId] = (evmState.chainId as any)?.includes(':')
-      ? (evmState.chainId as any).split(':')
-      : evmState.chainId
-      ? ['eip155', evmState.chainId]
-      : [undefined, undefined]
     return {
       ...reducerState,
       evm: {
         ...reducerState.evm,
         accounts: evmState.accounts,
-        chainId: isNaN(Number(chainId)) ? chainId : Number(chainId),
-        namespace,
+        chainId: evmState.chainId,
+      },
+      multichain: {
+        ...reducerState.multichain,
+        accounts: multichainState.accounts,
+        chainId: multichainState.chainId,
       },
     }
   }, [reducerState, evmState])
@@ -204,6 +222,14 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
           type: 'substrate',
           wallet: state.substrate.selectedWallet?.extensionName,
           address: state.substrate.selectedAccountAddress,
+        })
+      }
+    } else if (state.connectedType === 'multichain') {
+      if (multichainState.accounts?.length && !(state.multichain.selectedWallet!.connector instanceof GnosisSafe)) {
+        persist({
+          type: 'multichain',
+          wallet: multichainConnectors.find((c) => c.connector === state.multichain.selectedWallet!.connector)!.id,
+          address: multichainState.accounts[0],
         })
       }
     }

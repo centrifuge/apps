@@ -76,7 +76,6 @@
     "@web3-react/empty": "8.2.0",
     "@web3-react/gnosis-safe": "8.2.0",
     "@web3-react/metamask": "8.2.1",
-    "@web3-react/store": "8.2.0",
     "@web3-react/types": "8.2.0",
     "@web3-react/walletconnect-v2": "8.3.6",
     "bn.js": "^5.2.1",
@@ -84,6 +83,7 @@
     "decimal.js-light": "^2.5.1",
     "react-query": "^3.39.1",
     "rxjs": "^7.4.0",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "zustand": "^4.3.9"
   }
 }

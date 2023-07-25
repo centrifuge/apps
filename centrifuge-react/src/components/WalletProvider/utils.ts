@@ -3,7 +3,7 @@ import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { CentrifugeContext } from '../CentrifugeProvider/CentrifugeProvider'
 import { EvmChains, getChainInfo } from './evm/chains'
-import { EvmConnectorMeta } from './evm/connectors'
+import { ConnectorMeta } from './multichain/connectors'
 import { Network } from './types'
 import { useWallet } from './WalletProvider'
 
@@ -89,7 +89,7 @@ export function sortCentrifugeWallets(wallets: Wallet[]) {
     .concat(wallets.filter(({ extensionName }) => !order[extensionName]))
 }
 
-export function sortEvmWallets(wallets: EvmConnectorMeta[]) {
+export function sortEvmWallets(wallets: ConnectorMeta[]) {
   const order = {
     metamask: 1,
     walletconnect: 2,

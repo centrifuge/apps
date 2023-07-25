@@ -2,7 +2,7 @@ import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { CentrifugeProvider, CentrifugeProviderProps } from '../CentrifugeProvider'
 import { TransactionProvider, TransactionToasts, TransactionToastsProps } from '../Transactions'
-import { EvmChains, EvmConnectorMeta, WalletProvider } from '../WalletProvider'
+import { EvmChains, ConnectorMeta, WalletProvider } from '../WalletProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,7 +16,7 @@ export type ProviderProps = {
   children: React.ReactNode
   centrifugeConfig?: CentrifugeProviderProps['config']
   evmChains?: EvmChains
-  evmAdditionalConnectors?: EvmConnectorMeta[]
+  evmAdditionalConnectors?: ConnectorMeta[]
   walletConnectId?: string
   subscanUrl?: string
   transactionToastPositionProps?: TransactionToastsProps['positionProps']

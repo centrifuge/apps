@@ -1,4 +1,5 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
+import { WalletConnect as WalletConnectV2Universal } from '@centrifuge/web3-react-walletconnect-v2-universal'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -10,8 +11,9 @@ import { firstValueFrom, map, switchMap } from 'rxjs'
 import { ReplacedError, useAsyncCallback } from '../../hooks/useAsyncCallback'
 import { useCentrifuge, useCentrifugeApi, useCentrifugeConsts } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
-import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
-import { getStore } from './evm/utils'
+import { getEvmConnectors } from './evm/connectors'
+import { ConnectorMeta, getMultichainConnectors } from './multichain/connectors'
+import { getConnectorType, getStore, Web3ReactMultichainState } from './multichain/utils'
 import { CombinedSubstrateAccount, Network, Proxy, State, SubstrateAccount } from './types'
 import { useConnectEagerly } from './useConnectEagerly'
 import { Action, getPersisted, persist, useWalletStateInternal } from './useWalletState'
@@ -20,7 +22,7 @@ import { WalletDialog } from './WalletDialog'
 
 export type WalletContextType = {
   isEvmOnSubstrate: boolean
-  connectedType: 'evm' | 'substrate' | null
+  connectedType: 'evm' | 'substrate' | 'multichain' | null
   connectedNetwork: State['walletDialog']['network']
   connectedNetworkName: string | null
   scopedNetworks: Network[] | null
@@ -30,12 +32,12 @@ export type WalletContextType = {
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
   walletDialog: State['walletDialog']
-  connect: (wallet: Wallet | EvmConnectorMeta, network?: Network) => Promise<SubstrateAccount[] | string[] | undefined>
+  connect: (wallet: Wallet | ConnectorMeta, network?: Network) => Promise<SubstrateAccount[] | string[] | undefined>
   disconnect: () => void
   pendingConnect: {
     isConnecting: boolean
     isError: boolean
-    wallet: Wallet | EvmConnectorMeta | null
+    wallet: Wallet | ConnectorMeta | null
   }
   substrate: {
     evmChainId?: number
@@ -55,14 +57,20 @@ export type WalletContextType = {
     isWeb3Injected: boolean
   }
   evm: Pick<Web3ReactState, 'chainId' | 'accounts'> & {
-    connectors: EvmConnectorMeta[]
+    connectors: ConnectorMeta[]
     chains: EvmChains
-    selectedWallet: EvmConnectorMeta | null
+    selectedWallet: ConnectorMeta | null
+    selectedAddress: string | null
+  }
+  multichain: Pick<Web3ReactMultichainState, 'chainId' | 'accounts'> & {
+    connectors: ConnectorMeta[]
+    selectedWallet: ConnectorMeta | null
     selectedAddress: string | null
   }
 }
 
-const GENESIS_HASH = '0x104a9115f2cf8fd13a32bb27cd0ee5c3e0bc20414d850b838fee19d02bd7d4a2'
+const GENESIS_HASH = '0x6ec98e96cd2df0064032a94d3805a7e23cd2a3c6944f8a9da2ae4289c441f9b0'
+const POLKADOT_GENESIS_HASH = '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
 const CAIP_ID = GENESIS_HASH.slice(2, 34)
 
 const WalletContext = React.createContext<WalletContextType>(null as any)
@@ -106,12 +114,11 @@ export function useCentEvmChainId() {
           )
         )
       } catch {
-        return undefined
+        return null
       }
     },
     {
       staleTime: Infinity,
-      suspense: true,
       enabled: !!api.query.evmChainId,
     }
   )
@@ -121,14 +128,15 @@ export function useCentEvmChainId() {
 type WalletProviderProps = {
   children: React.ReactNode
   evmChains?: EvmChains
-  evmAdditionalConnectors?: EvmConnectorMeta[]
+  evmAdditionalConnectors?: ConnectorMeta[]
   walletConnectId?: string
   subscanUrl?: string
   showAdvancedAccounts?: boolean
   evmOnSubstrate?: boolean
 }
 
-let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
+let cachedEvmConnectors: ConnectorMeta[] | undefined = undefined
+let cachedMultichainConnectors: ConnectorMeta[] | undefined = undefined
 
 export function WalletProvider({
   children,
@@ -172,14 +180,33 @@ export function WalletProvider({
   }, [centEvmChainId])
 
   const evmConnectors =
-    cachedEvmConnectors ||
-    (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), {
-      additionalConnectors: evmAdditionalConnectors,
-      walletConnectId,
-      substrateEvmChainId: centEvmChainId,
-    }))
+    centEvmChainId !== undefined
+      ? cachedEvmConnectors ||
+        (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), {
+          additionalConnectors: evmAdditionalConnectors,
+          walletConnectId,
+          substrateEvmChainId: centEvmChainId ?? undefined,
+        }))
+      : []
+  const multichainConnectors =
+    centEvmChainId !== undefined
+      ? cachedMultichainConnectors ||
+        (cachedMultichainConnectors = getMultichainConnectors({
+          walletConnectId,
+          chains: Object.keys(evmChains)
+            .map((id) => `eip155:${id}`)
+            .concat(`polkadot:${CAIP_ID}`),
+          rpcMap: {
+            eip155: Object.fromEntries(Object.entries(evmChains).map(([id, obj]) => [`eip155:${id}`, obj.urls[0]])),
+            polkadot: {
+              [`polkadot:${CAIP_ID}`]: 'wss://fullnode.development.cntrfg.com',
+              // [`polkadot:${CAIP_ID}`]: 'wss://polkadot-public-rpc.blockops.network/ws'
+            },
+          },
+        }))
+      : []
 
-  const [state, dispatch] = useWalletStateInternal(evmConnectors)
+  const [state, dispatch] = useWalletStateInternal(evmConnectors, multichainConnectors)
   const isEvmOnSubstrate = state.connectedType === 'evm' && state.evm.chainId === centEvmChainId
 
   const unsubscribeRef = React.useRef<(() => void) | null>()
@@ -279,7 +306,7 @@ export function WalletProvider({
     isLoading: isConnectingByInteraction,
     isError: isConnectError,
   } = useAsyncCallback(
-    (_: EvmConnectorMeta | Wallet, cb: () => Promise<SubstrateAccount[] | string[] | undefined>) => cb(),
+    (_: ConnectorMeta | Wallet, cb: () => Promise<SubstrateAccount[] | string[] | undefined>) => cb(),
     {
       throwOnReplace: true,
     }
@@ -312,8 +339,8 @@ export function WalletProvider({
   }, [])
 
   const connectEvm = React.useCallback(
-    async (wallet: EvmConnectorMeta, network?: Network) => {
-      const chainId = network === 'centrifuge' ? centEvmChainId : network
+    async (wallet: ConnectorMeta, network?: Network) => {
+      const chainId = network === 'centrifuge' ? centEvmChainId! : network
       const { connector } = wallet
       try {
         const accounts = await setPendingConnect(wallet, async () => {
@@ -341,10 +368,47 @@ export function WalletProvider({
     [evmChains]
   )
 
+  const connectMultichain = React.useCallback(
+    async (wallet: ConnectorMeta, network?: Network) => {
+      const chainId = network === 'centrifuge' ? undefined : `eip155:${network}`
+
+      console.log('network', network, chainId)
+      const { connector } = wallet
+      try {
+        const accounts = await setPendingConnect(wallet, async () => {
+          await (connector instanceof WalletConnectV2Universal
+            ? // ? connector.activate(
+              //     network === 'centrifuge'
+              //       ? [`polkadot:91b171bb158e2d3848fa23a9f1c25182`, `eip155:${centEvmChainId}`]
+              //       : `eip155:${chainId}`
+              //   )
+              connector.activate(chainId)
+            : connector.activate())
+          return getStore(wallet.connector).getState().accounts
+        })
+
+        dispatch({ type: 'multichainSetState', payload: { selectedWallet: wallet } })
+        dispatch({ type: 'setConnectedType', payload: 'multichain' })
+
+        return accounts
+      } catch (error) {
+        if (error instanceof ReplacedError) return
+        console.error(error)
+        throw error
+      }
+    },
+    [evmChains]
+  )
+
   const connect = React.useCallback(
-    async (wallet: Wallet | EvmConnectorMeta, network?: Network) => {
+    async (wallet: Wallet | ConnectorMeta, network?: Network) => {
       if ('connector' in wallet) {
-        return connectEvm(wallet, network)
+        console.log('getConnectorType(wallet.connector)', getConnectorType(wallet.connector))
+        if (getConnectorType(wallet.connector) === 'evm') {
+          return connectEvm(wallet, network)
+        } else {
+          return connectMultichain(wallet, network)
+        }
       }
       return connectSubstrate(wallet)
     },
@@ -369,7 +433,12 @@ export function WalletProvider({
     dispatch({ type: 'reset' })
   }, [])
 
-  const isTryingToConnectEagerly = useConnectEagerly((wallet) => connect(wallet), dispatch, evmConnectors)
+  const isTryingToConnectEagerly = useConnectEagerly(
+    (wallet) => connect(wallet),
+    dispatch,
+    evmConnectors,
+    multichainConnectors
+  )
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
   const getNetworkName = useGetNetworkName(evmChains, centEvmChainId ?? null)
 
@@ -444,7 +513,7 @@ export function WalletProvider({
       disconnect,
       substrate: {
         ...state.substrate,
-        evmChainId: centEvmChainId,
+        evmChainId: centEvmChainId ?? undefined,
         accounts: evmSubstrateAccounts || state.substrate.accounts,
         combinedAccounts: combinedSubstrateAccounts,
         selectedAccount: selectedSubstrateAccount,
@@ -469,6 +538,11 @@ export function WalletProvider({
         selectedAddress: state.evm.accounts?.[0] || null,
         connectors: evmConnectors,
         chains: evmChains,
+      },
+      multichain: {
+        ...state.multichain,
+        selectedAddress: state.evm.accounts?.[0] || null,
+        connectors: multichainConnectors,
       },
     }
   }, [connect, disconnect, selectAccount, proxies, nestedProxies, state, isConnectError, isConnecting])

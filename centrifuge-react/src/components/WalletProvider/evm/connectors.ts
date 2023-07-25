@@ -7,23 +7,11 @@ import talismanLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/Tal
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
-import { Connector } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import { isMobile } from '../../../utils/device'
-import { createConnector, isCoinbaseWallet, isInjected, isMetaMaskWallet, isSubWallet, isTalismanWallet } from './utils'
-
-export type EvmConnectorMeta = {
-  id: string
-  title: string
-  installUrl: string
-  logo: {
-    src: string
-    alt: string
-  }
-  connector: Connector
-  get installed(): boolean
-  get shown(): boolean
-}
+import { ConnectorMeta } from '../multichain/connectors'
+import { createConnector } from '../multichain/utils'
+import { isCoinbaseWallet, isInjected, isMetaMaskWallet, isSubWallet, isTalismanWallet } from './utils'
 
 export function getEvmConnectors(
   urls: { [chainId: number]: string[] },
@@ -32,10 +20,10 @@ export function getEvmConnectors(
     additionalConnectors,
   }: {
     walletConnectId?: string
-    additionalConnectors?: EvmConnectorMeta[]
+    additionalConnectors?: ConnectorMeta[]
     substrateEvmChainId?: number
   } = {}
-): EvmConnectorMeta[] {
+): ConnectorMeta[] {
   const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
   const { ['1']: _, ...optional } = urls
   const chains = [1, ...Object.keys(optional).map(Number)]
@@ -136,7 +124,7 @@ export function getEvmConnectors(
       },
     },
     ...(additionalConnectors ?? []),
-  ].filter(Boolean) as EvmConnectorMeta[]
+  ].filter(Boolean) as ConnectorMeta[]
 }
 
 function getBrowserWalletMeta() {

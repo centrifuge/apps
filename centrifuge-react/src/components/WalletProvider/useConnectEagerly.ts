@@ -2,15 +2,16 @@ import { getWalletBySource } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import * as React from 'react'
-import { EvmConnectorMeta } from './evm/connectors'
+import { ConnectorMeta } from './multichain/connectors'
 import { Action, getPersisted } from './useWalletState'
 
 let triedEager = false
 
 export function useConnectEagerly(
-  connect: (wallet: EvmConnectorMeta | Wallet) => void,
+  connect: (wallet: ConnectorMeta | Wallet) => void,
   dispatch: (action: Action) => void,
-  evmConnectors: EvmConnectorMeta[]
+  evmConnectors: ConnectorMeta[],
+  multichainConnectors: ConnectorMeta[]
 ) {
   const [isTryingEagerly, setIsTrying] = React.useState(false)
 
@@ -20,12 +21,13 @@ export function useConnectEagerly(
       const { wallet: source, type } = getPersisted()
       const isProbablyGnosis = window !== window.parent
 
-      if ((type === 'evm' && source) || isProbablyGnosis) {
+      if ((source && (type === 'evm' || type === 'multichain')) || isProbablyGnosis) {
         let wallet
+        const connectors = type === 'multichain' ? multichainConnectors : evmConnectors
         if (isProbablyGnosis) {
-          wallet = evmConnectors.find((c) => c.connector instanceof GnosisSafe)
+          wallet = connectors.find((c) => c.connector instanceof GnosisSafe)
         } else {
-          wallet = evmConnectors.find((c) => c.id === source)
+          wallet = connectors.find((c) => c.id === source)
         }
 
         if (!wallet) return
@@ -36,8 +38,11 @@ export function useConnectEagerly(
           await wallet.connector.activate()
         }
 
-        dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
-        dispatch({ type: 'setConnectedType', payload: 'evm' })
+        dispatch({
+          type: type === 'multichain' ? 'multichainSetState' : 'evmSetState',
+          payload: { selectedWallet: wallet },
+        })
+        dispatch({ type: 'setConnectedType', payload: type === 'evm' || type === 'multichain' ? type : 'evm' })
       } else if (type === 'substrate' && source) {
         // This script might have loaded quicker than the wallet extension,
         // so we'll wait up to 2 seconds for it to load
@@ -57,11 +62,11 @@ export function useConnectEagerly(
   }
 
   React.useEffect(() => {
-    if (!triedEager) {
+    if (!triedEager && evmConnectors.length) {
       tryReconnect()
     }
     triedEager = true
-  }, [])
+  }, [evmConnectors.length])
 
   return isTryingEagerly
 }
