@@ -28,10 +28,16 @@ export const manualKybCallbackController = async (
     }
     const user = userSnapshot.docs.map((doc) => doc.data())[0] as OnboardingUser
 
-    const wallet: Request['wallet'] = {
-      address: user.wallet[0].address,
-      network: user.wallet[0].network,
+    // find first possible address, assumes the user has only one wallet
+    const [network, addresses] =
+      Object.entries(user.wallets).find(([, addresses]) => addresses && addresses.length > 0) || []
+    if (!network || !addresses) {
+      throw new HttpError(404, 'Not found')
     }
+    const wallet = {
+      address: addresses[0],
+      network,
+    } as Request['wallet']
 
     if (user.investorType !== 'entity') {
       throw new HttpError(400, 'User is not an entity')

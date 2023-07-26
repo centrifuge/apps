@@ -207,11 +207,7 @@ export const validateEvmRemark = async (
   }
 }
 
-export const addTinlakeInvestorToMemberList = async (
-  walletAddress: Request['wallet']['address'],
-  poolId: string,
-  trancheId: string
-) => {
+export const addTinlakeInvestorToMemberList = async (wallet: Request['wallet'], poolId: string, trancheId: string) => {
   try {
     const pool = await getTinlakePoolById(poolId)
     const provider = new InfuraProvider(process.env.EVM_NETWORK, process.env.INFURA_KEY)
@@ -225,7 +221,7 @@ export const addTinlakeInvestorToMemberList = async (
     const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
     const tx = await memberAdminContract.functions.updateMember(
       memberlistAddress,
-      walletAddress,
+      wallet.address,
       OneHundredYearsFromNow,
       {
         gasLimit: 1000000,
@@ -238,6 +234,6 @@ export const addTinlakeInvestorToMemberList = async (
     return { txHash: finalizedTx.transactionHash }
   } catch (e) {
     reportHttpError(e)
-    throw new HttpError(400, `Could not add ${walletAddress} to MemberList for pool ${poolId}`)
+    throw new HttpError(400, `Could not add ${wallet.address} to MemberList for pool ${poolId}`)
   }
 }

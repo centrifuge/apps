@@ -36,7 +36,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
 
   const unsignedAgreementUrl = metadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
     ? centrifuge.metadata.parseMetadataUrl(metadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri)
-    : wallet.network === 'substrate' || wallet.substrateEvmChainId
+    : wallet.network === 'substrate' || wallet.network === 'evmOnSubstrate'
     ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
 
@@ -113,7 +113,7 @@ Agreement hash: ${unsignedAgreementUrl}`,
   })
 
   // all tinlake agreements require the executive summary to be appended
-  if (wallet.network === 'evm' && !wallet.substrateEvmChainId) {
+  if (wallet.network === 'evm') {
     const execSummaryRes = await fetch(metadata.pool.links.executiveSummary.uri)
     const execSummary = Buffer.from(await execSummaryRes.arrayBuffer())
     const execSummaryPdf = await PDFDocument.load(execSummary)

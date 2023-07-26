@@ -5,9 +5,9 @@ import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMess
 import { sendApproveIssuerMessage } from '../../emails/sendApproveIssuerMessage'
 import { UpdateInvestorStatusPayload } from '../../emails/sendDocumentsMessage'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
-import { addInvestorToMemberList } from '../../utils/addInvestorToMemberList'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { networkSwitch } from '../../utils/networkSwitch'
 import { signAcceptanceAsIssuer } from '../../utils/signAcceptanceAsIssuer'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
@@ -88,6 +88,7 @@ export const updateInvestorStatusController = async (
         `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
       )
 
+      const addInvestorToMemberList = networkSwitch('addInvestorToMemberList', wallet.network)
       const { txHash } = await addInvestorToMemberList(wallet, poolId, trancheId)
       await Promise.all([
         sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF),

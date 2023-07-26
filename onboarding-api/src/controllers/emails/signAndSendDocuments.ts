@@ -9,11 +9,10 @@ import {
 } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
-import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { getPoolById } from '../../utils/getPoolById'
 import { HttpError, reportHttpError } from '../../utils/httpError'
-import { validateEvmRemark } from '../../utils/tinlake'
+import { networkSwitch } from '../../utils/networkSwitch'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
@@ -51,11 +50,8 @@ export const signAndSendDocumentsController = async (
 
     const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
 
-    if (wallet.network === 'substrate' || (wallet.network === 'evm' && wallet.substrateEvmChainId)) {
-      await validateRemark(transactionInfo, remark)
-    } else {
-      await validateEvmRemark(req.wallet, transactionInfo, remark)
-    }
+    const validateRemark = networkSwitch('validateRemark', wallet.network)
+    await validateRemark(wallet, transactionInfo, remark)
 
     if (
       poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&

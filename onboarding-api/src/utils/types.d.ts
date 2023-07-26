@@ -8,15 +8,12 @@ export type Subset<K> = {
     : K[attr]
 }
 
-export type SupportedNetworks = 'substrate' | 'evm'
-
 declare global {
   export namespace Express {
     export interface Request {
       wallet: {
         address: string
         network: SupportedNetworks
-        substrateEvmChainId?: number
       }
     }
   }
@@ -35,6 +32,7 @@ declare global {
       EVM_MEMBERLIST_ADMIN_PRIVATE_KEY: string
       PURE_PROXY_CONTROLLER_SEED: string
       ONBOARDING_STORAGE_BUCKET: string
+      EVM_ON_SUBSTRATE_CHAIN_ID: string
     }
   }
 }

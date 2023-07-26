@@ -10,19 +10,20 @@ export const verifyAuth = async (req: Request, _res: Response, next: NextFunctio
     throw new HttpError(401, 'Unauthorized')
   }
   const token = authorization.split(' ')[1]
-  const { address, network, aud, substrateEvmChainId } = (await jwt.verify(
-    token,
-    process.env.JWT_SECRET
-  )) as Request['wallet'] & jwt.JwtPayload
+  const { address, network, aud } = (await jwt.verify(token, process.env.JWT_SECRET)) as Request['wallet'] &
+    jwt.JwtPayload
   if (!address) {
     throw new HttpError(401, 'Unauthorized')
   }
   if (aud !== req.get('origin')) {
     throw new HttpError(401, 'Unauthorized')
   }
-  if ((network === 'evm' && !isAddress(address)) || (network === 'substrate' && !getValidSubstrateAddress(address))) {
+  if (
+    (network.includes('evm') && !isAddress(address)) ||
+    (network === 'substrate' && !getValidSubstrateAddress({ address, network }))
+  ) {
     throw new HttpError(401, 'Invalid address')
   }
-  req.wallet = { address, network, ...(substrateEvmChainId ? { substrateEvmChainId } : {}) }
+  req.wallet = { address, network }
   next()
 }

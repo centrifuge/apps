@@ -49,7 +49,12 @@ export const verifyBusinessController = async (
       address: null,
       kycReference: '',
       manualKybReference: null,
-      wallet: [wallet],
+      wallets: {
+        evm: [],
+        substrate: [],
+        evmOnSubstrate: [],
+        ...{ [wallet.network]: [wallet.address] },
+      },
       name: null,
       dateOfBirth: null,
       countryOfCitizenship: null,

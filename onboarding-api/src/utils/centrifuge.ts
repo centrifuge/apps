@@ -1,4 +1,4 @@
-import Centrifuge, { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import Centrifuge, { CurrencyBalance, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { Keyring } from '@polkadot/keyring'
 import { hexToU8a, isHex } from '@polkadot/util'
 import { cryptoWaitReady, decodeAddress, encodeAddress } from '@polkadot/util-crypto'
@@ -22,7 +22,7 @@ export const getCentrifuge = () =>
 export const getSigner = async () => {
   await cryptoWaitReady()
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 })
-  // the pure proxy controller (PURE_PROXY_CONTROLLER_SEED) is the wallet that controls the pure proxy being used to sign the transaction
+  // the pure proxxy controller (PURE_PROXY_CONTROLLER_SEED) is the wallet that controls the pure proxy being used to sign the transaction
   // the pure proxy address (MEMBERLIST_ADMIN_PURE_PROXY) has to be given InvestorAdmin permissions on each pool before being able to whitelist investors
   return keyring.addFromMnemonic(process.env.PURE_PROXY_CONTROLLER_SEED)
 }
@@ -38,12 +38,13 @@ export const getCentPoolById = async (poolId: string) => {
   return { pool, metadata }
 }
 
-export const addCentInvestorToMemberList = async (walletAddress: string, poolId: string, trancheId: string) => {
+export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poolId: string, trancheId: string) => {
   const pureProxyAddress = process.env.MEMBERLIST_ADMIN_PURE_PROXY
   const signer = await getSigner()
   const cent = getCentrifuge()
   const api = cent.getApi()
   const { metadata } = await getPoolById(poolId)
+  const walletAddress = getValidSubstrateAddress(wallet)
 
   const hasPodReadAccess = (await firstValueFrom(cent.pools.getPoolPermissions([poolId])))?.[
     walletAddress
@@ -59,10 +60,9 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
         )
         if (!hasPodReadAccess && metadata?.onboarding?.podReadAccess) {
-          const address = cent.utils.formatAddress(walletAddress)
           const podSubmittable = api.tx.permissions.add(
             { PoolRole: 'InvestorAdmin' },
-            address,
+            walletAddress,
             { Pool: poolId },
             { PoolRole: 'PODReadAccess' }
           )
@@ -108,7 +108,8 @@ export const addCentInvestorToMemberList = async (walletAddress: string, poolId:
   return { txHash: tx.txHash.toString() }
 }
 
-export const validateRemark = async (
+export const validateSubstrateRemark = async (
+  _wallet: Request['wallet'],
   transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
   expectedRemark: string
 ) => {
@@ -172,10 +173,13 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
 }
 
 // https://polkadot.js.org/docs/util-crypto/examples/validate-address/
-export const getValidSubstrateAddress = (address: string) => {
+export const getValidSubstrateAddress = (wallet: Request['wallet']) => {
   try {
+    if (wallet.network === 'evmOnSubstrate') {
+      return evmToSubstrateAddress(wallet.address, Number(process.env.EVM_ON_SUBSTRATE_CHAIN_ID))
+    }
     const validAddress = encodeAddress(
-      isHex(address) ? hexToU8a(address) : decodeAddress(address),
+      isHex(wallet.address) ? hexToU8a(wallet.address) : decodeAddress(wallet.address),
       getCentrifuge().getChainId()
     )
     return validAddress

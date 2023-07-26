@@ -2,9 +2,11 @@ import { isAddress } from '@polkadot/util-crypto'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
-import { InferType, number, object, string } from 'yup'
-import { getCentrifuge, getValidSubstrateAddress } from '../../utils/centrifuge'
+import { InferType, object, string, StringSchema } from 'yup'
+import { SupportedNetworks } from '../../database'
+import { getCentrifuge } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
+import { networkSwitch } from '../../utils/networkSwitch'
 import { validateInput } from '../../utils/validateInput'
 
 const verifyWalletInput = object({
@@ -29,7 +31,7 @@ const verifyWalletInput = object({
     then: (verifyWalletInput) => verifyWalletInput.required(),
   }),
   nonce: string().required(),
-  substrateEvmChainId: number().optional(),
+  network: string().oneOf(['evm', 'substrate', 'evmOnSubstrate']) as StringSchema<SupportedNetworks>,
 })
 
 export const authenticateWalletController = async (
@@ -38,7 +40,9 @@ export const authenticateWalletController = async (
 ) => {
   try {
     await validateInput(req.body, verifyWalletInput)
-    const payload = req.body?.jw3t ? await verifySubstrateWallet(req, res) : await verifyEthWallet(req, res)
+    const verifyWallet = networkSwitch('verifyWallet', req.body.network)
+    const payload = await verifyWallet(req, res)
+
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '8h',
       audience: req.get('origin'),
@@ -51,12 +55,12 @@ export const authenticateWalletController = async (
 }
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
-async function verifySubstrateWallet(req: Request, res: Response): Promise<Request['wallet']> {
+export async function verifySubstrateWallet(req: Request, res: Response): Promise<Request['wallet']> {
   const { jw3t: token, nonce } = req.body
   const { verified, payload } = await await getCentrifuge().auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
-  const address = getValidSubstrateAddress(payload.address)
+  const address = payload.address
 
   const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
   if (!cookieNonce || cookieNonce !== nonce) {
@@ -81,13 +85,13 @@ async function verifySubstrateWallet(req: Request, res: Response): Promise<Reque
   }
   return {
     address,
-    network: 'substrate',
+    network: payload.network || 'substrate',
   }
 }
 
-async function verifyEthWallet(req: Request, res: Response): Promise<Omit<Request['wallet'], 'substrateChainId'>> {
+export async function verifyEthWallet(req: Request, res: Response): Promise<Request['wallet']> {
   try {
-    const { message, signature, address, nonce, substrateEvmChainId } = req.body
+    const { message, signature, address, nonce, network } = req.body
 
     if (!isAddress(address)) {
       throw new Error('Invalid address')
@@ -103,8 +107,7 @@ async function verifyEthWallet(req: Request, res: Response): Promise<Omit<Reques
     res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
     return {
       address: decodedMessage.data.address,
-      network: 'evm',
-      ...(substrateEvmChainId ? { substrateEvmChainId } : {}),
+      network: network,
     }
   } catch (error) {
     throw new Error('Invalid message or signature')

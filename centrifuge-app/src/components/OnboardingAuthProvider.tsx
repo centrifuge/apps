@@ -157,7 +157,7 @@ const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], 
             'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({ jw3t: token, nonce }),
+          body: JSON.stringify({ jw3t: token, nonce, network: 'substrate' }),
         })
         if (authTokenRes.status !== 200) {
           throw new Error('Failed to authenticate wallet')
@@ -181,7 +181,7 @@ const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], 
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ jw3t: token, nonce }),
+        body: JSON.stringify({ jw3t: token, nonce, network: 'substrate' }),
       })
       if (authTokenRes.status !== 200) {
         throw new Error('Failed to authenticate wallet')
@@ -232,7 +232,7 @@ Issued At: ${new Date().toISOString()}`
       signature: signedMessage,
       address,
       nonce,
-      ...(evmChainId ? { substrateEvmChainId: evmChainId } : {}),
+      network: evmChainId ? 'evmOnSubstrate' : 'evm',
     }),
   })
   if (tokenRes.status !== 200) {
