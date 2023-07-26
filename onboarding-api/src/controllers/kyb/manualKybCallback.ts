@@ -5,13 +5,42 @@ import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { sendVerifiedBusinessMessage } from '../../emails/sendVerifiedBusinessMessage'
 import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
-import { ManualKybCallbackRequestBody, Subset } from '../../utils/types'
+import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
 const manualKybCallbackInput = object({
   poolId: string().optional(),
   trancheId: string().optional(),
 })
+
+type VerificationState = 1 | 0 | null
+
+export type ManualKybCallbackRequestBody = {
+  reference: `MANUAL_KYB_REFERENCE_${string}`
+  event:
+    | `request.${'pending' | 'timeout' | 'deleted' | 'received'}`
+    | 'review.pending'
+    | `verification.${'accepted' | 'declined' | 'cancelled' | 'status.changed'}`
+  verification_url: `https://app.shuftipro.com/verification/process/${string}`
+  email: string
+  country: string
+
+  /**
+   * This object will be returned in case of verification.accepted or verification.declined.
+   * This object will include all the gathered data in a request process.
+   */
+  verification_data?: unknown
+  verification_result?: {
+    proof_stores: {
+      articles_of_association: VerificationState
+      certificate_of_incorporation: VerificationState
+      proof_of_address: VerificationState
+      register_of_directors: VerificationState
+      register_of_shareholders: VerificationState
+      signed_and_dated_ownership_structure: VerificationState
+    }
+  }
+}
 
 export const manualKybCallbackController = async (
   req: Request<any, any, ManualKybCallbackRequestBody, InferType<typeof manualKybCallbackInput>>,

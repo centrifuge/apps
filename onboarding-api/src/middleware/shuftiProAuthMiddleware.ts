@@ -1,7 +1,7 @@
 import * as crypto from 'crypto'
 import { NextFunction, Request, Response } from 'express'
+import { ManualKybCallbackRequestBody } from '../controllers/kyb/manualKybCallback'
 import { HttpError } from '../utils/httpError'
-import { ManualKybCallbackRequestBody } from '../utils/types'
 
 const isValidShuftiProRequest = (body: ManualKybCallbackRequestBody, signature: string | string[]) => {
   const requestBody = JSON.stringify(body)

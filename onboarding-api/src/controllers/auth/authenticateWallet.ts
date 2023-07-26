@@ -107,7 +107,7 @@ export async function verifyEthWallet(req: Request, res: Response): Promise<Requ
     res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
     return {
       address: decodedMessage.data.address,
-      network: network,
+      network,
     }
   } catch (error) {
     throw new Error('Invalid message or signature')
