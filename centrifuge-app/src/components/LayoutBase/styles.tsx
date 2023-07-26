@@ -1,11 +1,12 @@
 import { Box, Grid, Stack } from '@centrifuge/fabric'
 import styled from 'styled-components'
 
-const HEADER_HEIGHT = 56
+const HEADER_HEIGHT = 60
 const TOOLBAR_HEIGHT = 50
-
+const LAYOUT_MAX_WIDTH = 1800
 const SIDEBAR_WIDTH = 80
 const SIDEBAR_WIDTH_EXTENDED = 220
+
 // the main breakpoint to switch from stacked to columns layout
 const BREAK_POINT_COLUMNS = 'M'
 // breakpoint from minimal to extended left sidebar width
@@ -14,6 +15,7 @@ const BREAK_POINT_SIDEBAR_EXTENDED = 'L'
 export const Root = styled(Grid)`
   position: relative;
   min-height: 100vh;
+  max-width: ${LAYOUT_MAX_WIDTH}px;
 
   @supports (min-height: 100dvh) {
     min-height: 100dvh;
@@ -123,7 +125,6 @@ export const WalletContainer = styled(Stack)`
 
   min-width: 200px;
   height: ${HEADER_HEIGHT}px;
-  padding-right: ${({ theme }) => theme.space[2]}px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['S']}) {
     min-width: 250px;
@@ -132,6 +133,11 @@ export const WalletContainer = styled(Stack)`
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     justify-content: start;
     padding-top: ${({ theme }) => theme.space[2]}px;
+  }
+
+  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_SIDEBAR_EXTENDED]}) {
+    min-width: 350px;
+    padding-top: ${({ theme }) => theme.space[3]}px;
   }
 `
 

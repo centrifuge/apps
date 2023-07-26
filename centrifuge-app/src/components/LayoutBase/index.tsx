@@ -20,6 +20,8 @@ type LayoutBaseProps = {
   sidePanel?: typeof SidePanel
 }
 
+const PADDING_MAIN = [2, 2, 3, 5, 10]
+
 export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
   return (
     <Root>
@@ -29,7 +31,7 @@ export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
         <LogoLink />
       </LogoContainer>
 
-      <WalletContainer>
+      <WalletContainer pr={PADDING_MAIN}>
         <WalletMenu menuItems={[<OnboardingStatus />]} />
       </WalletContainer>
 
@@ -37,7 +39,7 @@ export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
         <Menu />
       </ToolbarContainer>
 
-      <MainContainer as="main" px={3} py={5}>
+      <MainContainer as="main" px={PADDING_MAIN} pt={[2, 3, 7, 10]} pb={4}>
         {children}
       </MainContainer>
 
