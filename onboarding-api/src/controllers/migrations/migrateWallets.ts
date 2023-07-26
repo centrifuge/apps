@@ -1,4 +1,5 @@
 import { userCollection } from '../../database'
+import { HttpError } from '../../utils/httpError'
 
 /**
  *
