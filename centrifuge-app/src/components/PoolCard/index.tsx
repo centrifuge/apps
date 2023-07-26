@@ -24,7 +24,7 @@ export function PoolCard({ pool }: { pool?: Pool | TinlakePool }) {
 
   return (
     <Root as="article">
-      <Grid gridTemplateColumns="235px 210px 140px 70px 1fr" gap={4} p={2} alignItems="center">
+      <Grid gridTemplateColumns="1fr 1fr 200px 70px 150px" gap={4} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={pool?.id.startsWith('0x')}>
             {metadata?.pool?.icon?.uri ? (
