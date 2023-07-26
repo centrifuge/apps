@@ -14,6 +14,10 @@ import { Anchor, Ellipsis, Root } from './styles'
 
 // Not passing a pool shows a placeholder card
 
+const columns_base = 'minmax(150px, 1fr) 1fr 140px 70px 150px'
+const columns_extended = 'minmax(150px, 1fr) 1fr 140px 100px 150px'
+const COLUMNS = [columns_base, columns_base, columns_base, columns_extended]
+
 export function PoolCard({ pool }: { pool?: Pool | TinlakePool }) {
   const cent = useCentrifuge()
   const { data: metadata } = usePoolMetadata(pool)
@@ -24,7 +28,7 @@ export function PoolCard({ pool }: { pool?: Pool | TinlakePool }) {
 
   return (
     <Root as="article">
-      <Grid gridTemplateColumns="1fr 1fr 200px 70px 150px" gap={4} p={2} alignItems="center">
+      <Grid gridTemplateColumns={COLUMNS} gap={[3, 3, 6, 8]} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={pool?.id.startsWith('0x')}>
             {metadata?.pool?.icon?.uri ? (
