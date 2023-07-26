@@ -1,7 +1,9 @@
 import { u8aToHex } from '@polkadot/util'
-import { addressEq, decodeAddress } from '@polkadot/util-crypto'
+import { addressEq, createKeyMulti, decodeAddress, sortAddresses } from '@polkadot/util-crypto'
+import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
+import { ComputedMultisig, Multisig } from '../types'
 import { Dec } from './Decimal'
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
@@ -109,4 +111,30 @@ export function getDateYearsFromNow(years: number) {
 
 export function addressToHex(addr: string) {
   return u8aToHex(decodeAddress(addr))
+}
+
+export function computeTrancheId(trancheIndex: number, poolId: string) {
+  const a = new BN(trancheIndex).toArray('le', 8)
+  const b = new BN(poolId).toArray('le', 8)
+  const data = Uint8Array.from(a.concat(b))
+
+  return u8aToHex(hash(data, 16))
+}
+
+// Computes multisig address and sorts signers
+export function computeMultisig(multisig: Multisig): ComputedMultisig {
+  const address = u8aToHex(createKeyMulti(multisig.signers, multisig.threshold))
+  return {
+    address,
+    signers: sortAddresses(multisig.signers).map(addressToHex),
+    threshold: multisig.threshold,
+  }
+}
+
+export function evmToSubstrateAddress(address: string, chainId: number) {
+  // Bytes EVM\0 as suffix
+  const suffix = '45564d00'
+  const chainHex = chainId.toString(16).padStart(4, '0')
+
+  return `0x${address.substring(2).toLowerCase()}000000000000${chainHex}${suffix}`
 }

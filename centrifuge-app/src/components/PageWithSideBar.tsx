@@ -1,26 +1,20 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useWallet, WalletMenu } from '@centrifuge/centrifuge-react'
+import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
-import { useAddress } from '../utils/useAddress'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
-import { Faucet } from './Faucet'
 import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
 import { LogoLink } from './LogoLink'
 import { Menu } from './Menu'
 import { OnboardingStatus } from './OnboardingStatus'
+import { TinlakeRewards } from './TinlakeRewards'
 
 type Props = {
   sidebar?: React.ReactNode
   children?: React.ReactNode
 }
-
-const MIN_DEVEL_BALANCE = 10
-const MIN_AUSD_BALANCE = 100
 
 const TOOLBAR_HEIGHT = 75
 const HEADER_HEIGHT = 56
@@ -30,24 +24,7 @@ export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
 export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
   const isMedium = useIsAboveBreakpoint('M')
-  const { connectedType } = useWallet()
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const isTinlakePool = poolId?.startsWith('0x')
-
   const theme = useTheme()
-  const balances = useBalances(useAddress('substrate'))
-  const hasLowDevelBalance =
-    balances && new CurrencyBalance(balances.native.balance, 18).toDecimal().lte(MIN_DEVEL_BALANCE)
-  const aUSD = balances && balances.currencies.find((curr) => curr.currency.key === 'AUSD')
-  const hasLowAusdBalance =
-    (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currency.decimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
-
-  const shouldRenderFaucet =
-    connectedType === 'substrate' &&
-    !isTinlakePool &&
-    import.meta.env.REACT_APP_FAUCET_URL &&
-    hasLowDevelBalance &&
-    hasLowAusdBalance
 
   return (
     <Grid
@@ -146,9 +123,9 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
                 <WalletMenu menuItems={[<OnboardingStatus />]} />
               </Stack>
 
-              {shouldRenderFaucet && <Faucet />}
-
               <LoadBoundary>{sidebar}</LoadBoundary>
+
+              <TinlakeRewards />
             </Stack>
           )}
         </Box>

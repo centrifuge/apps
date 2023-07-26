@@ -1,8 +1,9 @@
-import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, CurrencyInput, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
-import { useBalance } from '../../utils/useBalance'
+import { Dec } from '../../utils/Decimal'
+import { useAddress } from '../../utils/useAddress'
 import { ButtonGroup } from '../ButtonGroup'
 
 const e18 = new BN(10).pow(new BN(18))
@@ -19,10 +20,8 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [price, setPrice] = React.useState<number | ''>()
   const [touched, setTouched] = React.useState(false)
-  const { substrate } = useWallet()
-  const balance = useBalance()
-
-  const isConnected = !!substrate.selectedAccount?.address
+  const address = useAddress('substrate')
+  const balances = useBalances(address)
 
   const {
     execute: doTransaction,
@@ -40,7 +39,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (!isConnected || !!error) return
+    if (!!error) return
     if (!price) return
     const amountBN = new BN(price).mul(e18)
     doTransaction([collectionId, nftId, amountBN])
@@ -66,7 +65,8 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
 
   const error = getError()
 
-  const balanceLow = !balance || balance < TRANSFER_FEE_ESTIMATE
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
+  const balanceLow = balanceDec.lt(TRANSFER_FEE_ESTIMATE)
 
   const disabled = !!error || balanceLow
 
@@ -89,7 +89,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
           <Shelf justifyContent="space-between">
             {balanceLow && (
               <Text variant="label1" color="criticalForeground">
-                Your balance is too low ({(balance || 0).toFixed(2)} AIR)
+                Your balance is too low ({(balanceDec || 0).toFixed(2)} AIR)
               </Text>
             )}
             <ButtonGroup ml="auto">

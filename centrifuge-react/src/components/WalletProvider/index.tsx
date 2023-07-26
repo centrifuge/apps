@@ -10,5 +10,6 @@ export {
   useNativeCurrency as useEvmNativeCurrency,
   useProviderForConnector,
 } from './evm/utils'
+export type { CombinedSubstrateAccount, EvmChainId, Network, Proxy, SubstrateAccount } from './types'
 export { getNetworkName, useGetExplorerUrl, useGetNetworkName, useNetworkName } from './utils'
 export * from './WalletProvider'

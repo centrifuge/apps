@@ -1,25 +1,31 @@
 import { CurrencyBalance, findBalance, Pool } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { CentrifugeTransactionOptions } from '@centrifuge/centrifuge-react/dist/hooks/useCentrifugeTransaction'
 import BN from 'bn.js'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useAddress } from '../../utils/useAddress'
-import { usePermissions } from '../../utils/usePermissions'
+import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
+import { useLiquidityRewards } from '../LiquidityRewards/LiquidityRewardsContext'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
 
 export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: Props) {
-  const address = useAddress('substrate')
+  const [account] = useSuitableAccounts({ poolId, poolRole: [{ trancheInvestor: trancheId }], proxyType: ['Invest'] })
+  const fallbackAddress = useAddress('substrate')
+  const address = account?.actingAddress || fallbackAddress
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
   const pool = usePool(poolId) as Pool
   const [pendingAction, setPendingAction] = React.useState<InvestRedeemAction>()
-  const permissions = usePermissions(address)
-  const isAllowedToInvest = !!permissions?.pools[poolId]?.tranches[trancheId]
+  const isAllowedToInvest = !!account
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
+  const {
+    state: { combinedStakes },
+  } = useLiquidityRewards()
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -29,7 +35,8 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const price = tranche.tokenPrice?.toDecimal() ?? Dec(1)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
-  const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
+  const stakedAmount = combinedStakes ?? Dec(0)
+  const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem).add(stakedAmount)
   const investmentValue = combinedBalance.mul(price)
   const poolCurBalance =
     (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) ?? Dec(0)
@@ -53,9 +60,13 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   }
   const pendingTransaction = pendingAction && txActions[pendingAction]?.lastCreatedTransaction
 
-  function doAction<T = any>(name: InvestRedeemAction, fn: (arg: T) => any[]): (args?: T) => void {
+  function doAction<T = any>(
+    name: InvestRedeemAction,
+    fn: (arg: T) => any[],
+    opt?: CentrifugeTransactionOptions
+  ): (args?: T) => void {
     return (args) => {
-      txActions[name]?.execute(fn(args!) as any)
+      txActions[name]?.execute(fn(args!) as any, opt)
       setPendingAction(name)
     }
   }
@@ -72,7 +83,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const state: InvestRedeemState = {
     poolId,
     trancheId,
-    isDataLoading: balances == null || order == null || permissions == null || isMetadataLoading,
+    isDataLoading: balances == null || order == null || isMetadataLoading,
     isAllowedToInvest,
     isPoolBusy: isCalculatingOrders,
     isFirstInvestment: order?.submittedAt === 0 && order.investCurrency.isZero(),
@@ -101,6 +112,8 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
           remainingRedeemToken: order.remainingRedeemToken.toDecimal(),
         }
       : null,
+    collectAmount: Dec(0),
+    collectType: null,
     needsToCollectBeforeOrder: false,
     needsPoolCurrencyApproval: false,
     needsTrancheTokenApproval: false,
@@ -109,13 +122,13 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   }
 
   const actions: InvestRedeemActions = {
-    invest: doAction('invest', (newOrder: BN) => [poolId, trancheId, newOrder]),
-    redeem: doAction('redeem', (newOrder: BN) => [poolId, trancheId, newOrder]),
+    invest: doAction('invest', (newOrder: BN) => [poolId, trancheId, newOrder], { account, forceProxyType: 'Invest' }),
+    redeem: doAction('redeem', (newOrder: BN) => [poolId, trancheId, newOrder], { account, forceProxyType: 'Invest' }),
     collect: () => {},
     approvePoolCurrency: () => {},
     approveTrancheToken: () => {},
-    cancelInvest: doAction('cancelInvest', () => [poolId, trancheId, new BN(0)]),
-    cancelRedeem: doAction('cancelRedeem', () => [poolId, trancheId, new BN(0)]),
+    cancelInvest: doAction('cancelInvest', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
+    cancelRedeem: doAction('cancelRedeem', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
   }
 
   const hooks = {

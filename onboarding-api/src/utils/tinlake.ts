@@ -7,7 +7,7 @@ import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import MemberListAdminAbi from './abi/MemberListAdmin.abi.json'
 import RemarkerAbi from './abi/Remarker.abi.json'
-import { centrifuge } from './centrifuge'
+import { getCentrifuge } from './centrifuge'
 import { HttpError, reportHttpError } from './httpError'
 
 export interface LaunchingPool extends BasePool {}
@@ -96,9 +96,6 @@ interface ActivePool extends BasePool {
   }
 }
 
-const EVM_NETWORK = process.env.EVM_NETWORK || 'mainnet'
-const INFURA_KEY = process.env.INFURA_KEY
-
 const goerliConfig = {
   remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
   poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
@@ -110,24 +107,24 @@ const mainnetConfig = {
   memberListAddress: '0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b',
 }
 
-export const ethConfig = {
-  network: EVM_NETWORK,
+export const getEthConfig = () => ({
+  network: process.env.EVM_NETWORK,
   multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
   signerPrivateKey: process.env.EVM_MEMBERLIST_ADMIN_PRIVATE_KEY,
-  ...(EVM_NETWORK === 'goerli' ? goerliConfig : mainnetConfig),
-}
+  ...(process.env.EVM_NETWORK === 'goerli' ? goerliConfig : mainnetConfig),
+})
 
 function parsePoolsMetadata(poolsMetadata): { active: ActivePool[] } {
-  const launching = poolsMetadata.filter((p): p is LaunchingPool => !!p.metadata.isLaunching)
+  const launching = poolsMetadata.filter((p): p is LaunchingPool => !!p.metadata?.isLaunching)
   const active = poolsMetadata.filter(
-    (p): p is ActivePool => !!('addresses' in p && p.addresses.ROOT_CONTRACT && !launching.includes(p))
+    (p): p is ActivePool => !!('addresses' in p && p.addresses.ROOT_CONTRACT && !launching?.includes(p))
   )
   return { active }
 }
 
 export const getTinlakePoolById = async (poolId: string) => {
-  const uri = ethConfig.poolsHash
-  const data = (await lastValueFrom(centrifuge.metadata.getMetadata(uri))) as PoolMetadataDetails
+  const uri = getEthConfig().poolsHash
+  const data = (await lastValueFrom(getCentrifuge().metadata.getMetadata(uri))) as PoolMetadataDetails
   const pools = parsePoolsMetadata(Object.values(data))
   const poolData = pools.active.find((p) => p.addresses.ROOT_CONTRACT === poolId)
 
@@ -150,12 +147,18 @@ export const getTinlakePoolById = async (poolId: string) => {
       },
     },
     onboarding: {
-      agreements: {
+      tranches: {
         [`${id}-0`]: {
-          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-0`],
+          agreement: {
+            uri: poolData.metadata.attributes?.Links.Agreements?.[`${id}-0`],
+            mime: 'application/pdf',
+          },
         },
         [`${id}-1`]: {
-          ipfsHash: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
+          agreement: {
+            uri: poolData.metadata.attributes?.Links.Agreements?.[`${id}-1`],
+            mime: 'application/pdf',
+          },
         },
       },
     },
@@ -190,8 +193,8 @@ export const validateEvmRemark = async (
   transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
   expectedRemark: string
 ) => {
-  const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
-  const contract = new Contract(ethConfig.remarkerAddress, RemarkerAbi).connect(provider)
+  const provider = new InfuraProvider(process.env.EVM_NETWORK, process.env.INFURA_KEY)
+  const contract = new Contract(getEthConfig().remarkerAddress, RemarkerAbi).connect(provider)
   const filteredEvents = await contract.queryFilter(
     'Remarked',
     Number(transactionInfo.blockNumber),
@@ -211,7 +214,8 @@ export const addTinlakeInvestorToMemberList = async (
 ) => {
   try {
     const pool = await getTinlakePoolById(poolId)
-    const provider = new InfuraProvider(EVM_NETWORK, INFURA_KEY)
+    const provider = new InfuraProvider(process.env.EVM_NETWORK, process.env.INFURA_KEY)
+    const ethConfig = getEthConfig()
     const signer = new Wallet(ethConfig.signerPrivateKey).connect(provider)
     const memberAdminContract = new Contract(ethConfig.memberListAddress, MemberListAdminAbi, signer)
     const memberlistAddress = trancheId.endsWith('1')

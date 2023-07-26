@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { pinJson } from '../utils/api'
 
-const ipfsHashToURI = (hash: string) => `ipfs://ipfs/${hash}`
+const ipfsHashToURI = (hash: string) => `ipfs://${hash}`
 
 export default async (req: Request, res: Response) => {
   try {

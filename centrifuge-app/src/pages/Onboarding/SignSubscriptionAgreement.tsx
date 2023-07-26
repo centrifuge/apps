@@ -13,7 +13,6 @@ import { useSignRemark } from './queries/useSignRemark'
 
 type Props = {
   signedAgreementUrl: string | undefined
-  isSignedAgreementFetched: boolean
 }
 
 const validationSchema = object({
@@ -22,7 +21,7 @@ const validationSchema = object({
 
 const GENERIC_SUBSCRIPTION_AGREEMENT = 'QmYuPPQuuc9ezYQtgTAupLDcLCBn9ZJgsPjG7mUx7qbN8G'
 
-export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
+export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
   const { onboardingUser, pool, previousStep, nextStep } = useOnboarding<
     NonNullable<OnboardingUser>,
     NonNullable<OnboardingPool>
@@ -33,7 +32,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { data: poolMetadata } = usePoolMetadata(poolData)
   const centrifuge = useCentrifuge()
 
-  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId].signAgreement.completed
+  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed
 
   const formik = useFormik({
     initialValues: {
@@ -48,14 +47,18 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
 
-  const unsignedAgreementUrl = poolMetadata?.onboarding?.agreements[trancheId]
-    ? centrifuge.metadata.parseMetadataUrl(poolMetadata?.onboarding?.agreements[trancheId].ipfsHash)
+  const unsignedAgreementUrl = poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
+    ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[trancheId].agreement?.uri!)
     : !poolId.startsWith('0x')
     ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
 
   // tinlake pools without subdocs cannot accept investors
   const isPoolClosedToOnboarding = poolId.startsWith('0x') && !unsignedAgreementUrl
+  const isCountrySupported =
+    onboardingUser.investorType === 'entity'
+      ? !poolMetadata?.onboarding?.kybRestrictedCountries?.includes(onboardingUser.jurisdictionCode)
+      : !poolMetadata?.onboarding?.kycRestrictedCountries?.includes(onboardingUser.countryOfCitizenship)
 
   React.useEffect(() => {
     if (hasSignedAgreement) {
@@ -64,7 +67,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasSignedAgreement])
 
-  return !isPoolClosedToOnboarding ? (
+  return !isPoolClosedToOnboarding && isCountrySupported ? (
     <Content>
       <ContentHeader
         title="Sign subscription agreement"
@@ -106,6 +109,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             variant="tertiary"
             icon={IconDownload}
             small
+            target="_blank"
           >
             Download agreement
           </AnchorButton>
@@ -118,6 +122,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             variant="tertiary"
             icon={IconDownload}
             small
+            target="_blank"
           >
             Executive summary attachment
           </AnchorButton>
@@ -149,6 +154,21 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
         </Button>
       </ActionBar>
     </Content>
+  ) : !isCountrySupported ? (
+    <Content>
+      <ContentHeader
+        title="Country not supported"
+        body={
+          <span>
+            This pool is currently not accepting new investors from your country. Please contact the issuer (
+            <a href={`mailto:${poolMetadata?.pool?.issuer.email}?subject=Onboarding&body=I’m reaching out about…`}>
+              {poolMetadata?.pool?.issuer.email}
+            </a>
+            ) for any questions.
+          </span>
+        }
+      />
+    </Content>
   ) : (
     <Content>
       <ContentHeader
@@ -158,7 +178,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
             This pool is currently not accepting new investors. Please contact the issuer (
             <a href={`mailto:${poolMetadata?.pool?.issuer.email}?subject=Onboarding&body=I’m reaching out about…`}>
               {poolMetadata?.pool?.issuer.email}
-            </a>{' '}
+            </a>
             ) for any questions.
           </span>
         }

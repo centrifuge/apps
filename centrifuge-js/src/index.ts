@@ -1,5 +1,6 @@
 import { Centrifuge } from './Centrifuge'
 export type { UserProvidedConfig } from './CentrifugeBase'
+export * from './modules/multisig'
 export type { Collection, NFT } from './modules/nfts'
 export * from './modules/pools'
 export type { TinlakeContractAddresses, TinlakeContractNames, TinlakeContractVersions } from './modules/tinlake'

@@ -2,6 +2,7 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
+import { Faucet } from '../../../components/Faucet'
 import { ActionsRef, InvestRedeem } from '../../../components/InvestRedeem/InvestRedeem'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LabelValueStack } from '../../../components/LabelValueStack'
@@ -16,6 +17,7 @@ import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -37,7 +39,10 @@ export function PoolDetailOverviewTab() {
   return (
     <PageWithSideBar
       sidebar={
-        <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        <>
+          <Faucet />
+          <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        </>
       }
     >
       <PoolDetailHeader />
@@ -85,7 +90,7 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { showWallets, connectedType, evm } = useWallet()
+  const { showNetworks, connectedType, evm } = useWallet()
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
@@ -93,7 +98,7 @@ export function PoolDetailOverview({
       label: <Tooltips type="assetClass" />,
       value: <TextWithPlaceholder isLoading={metadataIsLoading}>{metadata?.pool?.asset.class}</TextWithPlaceholder>,
     },
-    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency.symbol) },
+    { label: <Tooltips type="valueLocked" />, value: formatBalance(getPoolValueLocked(pool), pool.currency.symbol) },
   ]
 
   if (!isTinlakePool) {
@@ -110,7 +115,7 @@ export function PoolDetailOverview({
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
-        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
+        apr: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
         name: tranche.currency.name,
@@ -177,8 +182,8 @@ export function PoolDetailOverview({
                     />
                   ) : (
                     <LabelValueStack
-                      label={<Tooltips variant="secondary" type="apy" />}
-                      value={formatPercentage(token.apy)}
+                      label={<Tooltips variant="secondary" type="seniorTokenAPR" />}
+                      value={formatPercentage(token.apr)}
                     />
                   )}
                   <LabelValueStack
@@ -198,7 +203,7 @@ export function PoolDetailOverview({
                       variant="secondary"
                       onClick={() => {
                         if (!connectedType) {
-                          showWallets()
+                          showNetworks()
                         }
                         setSelectedToken(token.id)
                       }}

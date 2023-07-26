@@ -4,7 +4,8 @@ import Decimal from 'decimal.js-light'
 export function formatBalance(
   amount: CurrencyBalance | TokenBalance | Decimal | number,
   currency?: string | CurrencyMetadata,
-  precision = 0
+  precision = 0,
+  minPrecision = precision
 ) {
   const formattedAmount = (
     amount instanceof TokenBalance || amount instanceof CurrencyBalance
@@ -13,7 +14,7 @@ export function formatBalance(
       ? amount.toNumber()
       : amount
   ).toLocaleString('en', {
-    minimumFractionDigits: precision,
+    minimumFractionDigits: minPrecision,
     maximumFractionDigits: precision,
   })
   return currency ? `${formattedAmount} ${typeof currency === 'string' ? currency : currency.symbol}` : formattedAmount

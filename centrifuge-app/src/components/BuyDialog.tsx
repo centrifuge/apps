@@ -1,10 +1,9 @@
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { Dec } from '../utils/Decimal'
 import { useAddress } from '../utils/useAddress'
-import { useBalance } from '../utils/useBalance'
 import { useCentNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
 
@@ -19,7 +18,7 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const address = useAddress('substrate')
-  const balance = useBalance()
+  const balances = useBalances(address)
   const nft = useCentNFT(collectionId, nftId)
 
   const isConnected = !!address
@@ -55,14 +54,14 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
   }
 
   const priceDec = Dec(nft?.sellPrice ?? 0).div('1e18')
-  const balanceDec = Dec(balance ?? 0)
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
 
   const balanceLow = balanceDec.lt(priceDec.add(Dec(TRANSFER_FEE_ESTIMATE)))
 
   const disabled = balanceLow || !nft
 
   function getMessage() {
-    if (balance == null) return
+    if (balances == null) return
     if (balanceDec.lt(priceDec)) return 'Insufficient funds to purchase this NFT'
     if (balanceLow) return 'Insufficient funds to pay for transaction costs'
   }
@@ -82,7 +81,7 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
                 <Text variant="heading1" fontWeight={400}>
                   {nft?.sellPrice && `${formatPrice(priceDec.toNumber())} AIR`}
                 </Text>
-                {balance != null && <Text variant="label2">{formatPrice(balance)} AIR balance</Text>}
+                {balances != null && <Text variant="label2">{formatPrice(balanceDec.toNumber())} AIR balance</Text>}
               </Stack>
             </Shelf>
           </Stack>

@@ -1,5 +1,5 @@
 import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
-import { useAsyncCallback, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useAsyncCallback, useBalances, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -21,12 +21,11 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { nftMetadataSchema } from '../schemas'
+import { Dec } from '../utils/Decimal'
 import { getFileDataURI } from '../utils/getFileDataURI'
-import { useAddress } from '../utils/useAddress'
-import { useBalance } from '../utils/useBalance'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
-import { isSameAddress } from '../utils/web3'
+import { useSuitableAccounts } from '../utils/usePermissions'
 
 const DEFAULT_NFT_NAME = 'Untitled NFT'
 
@@ -57,8 +56,10 @@ const MintNFT: React.FC = () => {
   const { cid: collectionId } = useParams<{ cid: string }>()
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
-  const balance = useBalance()
-  const address = useAddress('substrate')
+
+  if (!collection) throw new Error('Collection not found')
+
+  const balances = useBalances(collection.owner)
   const cent = useCentrifuge()
   const [version, setNextVersion] = React.useReducer((s) => s + 1, 0)
   const history = useHistory()
@@ -70,6 +71,8 @@ const MintNFT: React.FC = () => {
   const [file, setFile] = React.useState<File | null>(null)
 
   const isPageUnchanged = useIsPageUnchanged()
+
+  const [account] = useSuitableAccounts({ actingAddress: [collection.owner] })
 
   const isFormValid = nftName.trim() && nftDescription.trim() && fileDataUri
 
@@ -108,7 +111,7 @@ const MintNFT: React.FC = () => {
       description: descriptionValue,
       image: imageMetadataHash.uri,
     }
-    doTransaction([collectionId, nftId, address!, metadataValues, nftAmount])
+    doTransaction([collectionId, nftId, collection.owner, metadataValues, nftAmount], { account })
   })
 
   function reset() {
@@ -123,8 +126,9 @@ const MintNFT: React.FC = () => {
 
   const isMinting = metadataIsUploading || transactionIsPending
 
-  const balanceLow = !balance || balance < MINT_FEE_ESTIMATE
-  const canMint = isSameAddress(address, collection?.owner)
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
+  const balanceLow = balanceDec.lt(MINT_FEE_ESTIMATE)
+  const canMint = !!account
   const fieldDisabled = balanceLow || !canMint || isMinting
   const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
 
@@ -143,7 +147,7 @@ const MintNFT: React.FC = () => {
                 <Text variant="label1" color="criticalForeground">
                   {!canMint
                     ? `You're not the owner of the collection`
-                    : `Your balance is too low (${(balance || 0).toFixed(2)} AIR)`}
+                    : `Your balance is too low (${(balanceDec || 0).toFixed(2)} AIR)`}
                 </Text>
               )}
               <Button disabled={submitDisabled} type="submit" loading={isMinting}>

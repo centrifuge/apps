@@ -50,7 +50,6 @@ export function useConnectEagerly(
           }
           await new Promise((res) => setTimeout(res, 250))
         }
-      } else {
       }
     } finally {
       setIsTrying(false)

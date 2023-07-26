@@ -35,7 +35,7 @@ export const OnboardingPage: React.FC = () => {
     const trancheName = trancheId?.split('-')[1] === '0' ? 'junior' : 'senior'
     const canOnboard = isTinlakePool && metadata?.pool?.newInvestmentsStatus?.[trancheName] !== 'closed'
 
-    if (!poolId || !trancheId || !canOnboard) {
+    if (!poolId || !trancheId || (isTinlakePool && !canOnboard)) {
       setPool(null)
       return history.push('/onboarding')
     }
@@ -126,10 +126,7 @@ export const OnboardingPage: React.FC = () => {
                 {pool ? (
                   <>
                     {activeStep === 8 && (
-                      <SignSubscriptionAgreement
-                        isSignedAgreementFetched={isSignedAgreementFetched}
-                        signedAgreementUrl={signedAgreementData as string}
-                      />
+                      <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData as string} />
                     )}
 
                     {activeStep === 9 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
@@ -140,12 +137,7 @@ export const OnboardingPage: React.FC = () => {
               </>
             ) : pool ? (
               <>
-                {activeStep === 7 && (
-                  <SignSubscriptionAgreement
-                    isSignedAgreementFetched={isSignedAgreementFetched}
-                    signedAgreementUrl={signedAgreementData}
-                  />
-                )}
+                {activeStep === 7 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
                 {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (
@@ -162,12 +154,7 @@ export const OnboardingPage: React.FC = () => {
                 {activeStep === 5 && <Accreditation />}
                 {pool ? (
                   <>
-                    {activeStep === 6 && (
-                      <SignSubscriptionAgreement
-                        isSignedAgreementFetched={isSignedAgreementFetched}
-                        signedAgreementUrl={signedAgreementData}
-                      />
-                    )}
+                    {activeStep === 6 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
                     {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
@@ -176,12 +163,7 @@ export const OnboardingPage: React.FC = () => {
               </>
             ) : pool ? (
               <>
-                {activeStep === 5 && (
-                  <SignSubscriptionAgreement
-                    isSignedAgreementFetched={isSignedAgreementFetched}
-                    signedAgreementUrl={signedAgreementData}
-                  />
-                )}
+                {activeStep === 5 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
                 {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (

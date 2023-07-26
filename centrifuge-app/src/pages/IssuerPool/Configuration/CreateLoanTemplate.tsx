@@ -10,6 +10,7 @@ import { PageHeader } from '../../../components/PageHeader'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { LoanTemplate } from '../../../types'
 import { useMetadata, usePrefetchMetadata } from '../../../utils/useMetadata'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
 
@@ -109,7 +110,7 @@ const initialSchemaJSON = `{
   ]
 }`
 
-export const IssuerPoolCreateLoanTemplatePage: React.FC = () => {
+export function IssuerPoolCreateLoanTemplatePage() {
   return (
     <PageWithSideBar>
       <CreateLoanTemplate />
@@ -117,7 +118,7 @@ export const IssuerPoolCreateLoanTemplatePage: React.FC = () => {
   )
 }
 
-export const CreateLoanTemplate: React.FC = () => {
+export function CreateLoanTemplate() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
@@ -126,6 +127,7 @@ export const CreateLoanTemplate: React.FC = () => {
   const [redirect, setRedirect] = React.useState('')
   const cent = useCentrifuge()
   const { data: lastTemplateVersion } = useMetadata<LoanTemplate>(poolMetadata?.loanTemplates?.at(-1)?.id)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
     'Create asset template',
@@ -175,7 +177,7 @@ export const CreateLoanTemplate: React.FC = () => {
 
       prefetchMetadata(templateMetadataHash.ipfsHash)
 
-      updateConfigTx([poolId, newPoolMetadata])
+      updateConfigTx([poolId, newPoolMetadata], { account })
       setSubmitting(false)
     },
   })

@@ -18,7 +18,7 @@ export const ViewLoanTemplate: React.FC = () => {
   const { pid: poolId, sid: templateId } = useParams<{ pid: string; sid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const { data: templateData } = useMetadata(`ipfs://ipfs/${templateId}`)
+  const { data: templateData } = useMetadata(`ipfs://${templateId}`)
 
   return (
     <>

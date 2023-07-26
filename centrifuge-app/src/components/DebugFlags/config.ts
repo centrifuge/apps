@@ -22,17 +22,26 @@ export type DebugFlagConfig =
 
 export type Key =
   | 'address'
+  | 'evmAddress'
   | 'batchMintNFTs'
   | 'persistDebugFlags'
+  | 'showEvmOnSubstrate'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
   | 'editPoolConfig'
   | 'poolReporting'
   | 'editPoolVisibility'
+  | 'showAdvancedAccounts'
+  | 'editAdminConfig'
+  | 'showPodAccountCreation'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
+    type: 'text',
+    default: '',
+  },
+  evmAddress: {
     type: 'text',
     default: '',
   },
@@ -49,15 +58,22 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     alwaysShow: true,
   },
-  editPoolConfig: {
+  showEvmOnSubstrate: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
   },
+  editPoolConfig: {
+    type: 'checkbox',
+    default: false,
+  },
+  editAdminConfig: {
+    type: 'checkbox',
+    default: false,
+  },
   poolReporting: {
     type: 'checkbox',
     default: false,
-    alwaysShow: true,
   },
   persistDebugFlags: {
     type: 'checkbox',
@@ -69,6 +85,14 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editPoolVisibility: {
+    type: 'checkbox',
+    default: false,
+  },
+  showPodAccountCreation: {
+    type: 'checkbox',
+    default: false,
+  },
+  showAdvancedAccounts: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

@@ -2,9 +2,9 @@ import { CollectionMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/
 import {
   ConnectionGuard,
   useAsyncCallback,
+  useBalances,
   useCentrifuge,
   useCentrifugeTransaction,
-  useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -22,8 +22,9 @@ import * as React from 'react'
 import { Redirect } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
+import { Dec } from '../../utils/Decimal'
 import { getFileDataURI } from '../../utils/getFileDataURI'
-import { useBalance } from '../../utils/useBalance'
+import { useAddress } from '../../utils/useAddress'
 import { ButtonGroup } from '../ButtonGroup'
 
 // TODO: replace with better fee estimate
@@ -33,17 +34,17 @@ const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const { substrate } = useWallet()
   const [name, setName] = React.useState<string>('')
   const [description, setDescription] = React.useState<string>('')
   const [logo, setLogo] = React.useState<File | null>(null)
   const cent = useCentrifuge()
-  const balance = useBalance()
+  const address = useAddress('substrate')
+  const balances = useBalances(address)
   const [redirect, setRedirect] = React.useState<string>('')
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [termsAccepted, setTermsAccepted] = React.useState(false)
 
-  const isConnected = !!substrate.selectedAccount?.address
+  const isConnected = !!address
 
   const {
     execute: doTransaction,
@@ -70,18 +71,19 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     const collectionId = await cent.nfts.getAvailableCollectionId()
 
     let fileDataUri
+    let imageMetadataHash
     if (logo) {
       fileDataUri = await getFileDataURI(logo)
+      imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     }
 
-    const imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     const metadataValues: CollectionMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      image: imageMetadataHash.ipfsHash,
+      image: imageMetadataHash?.ipfsHash,
     }
 
-    doTransaction([collectionId, substrate.selectedAccount!.address, metadataValues])
+    doTransaction([collectionId, address, metadataValues])
   })
 
   // Only close if the modal is still showing the last created collection
@@ -106,7 +108,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     onClose()
   }
 
-  const balanceLow = !balance || balance < CREATE_FEE_ESTIMATE
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
+  const balanceLow = balanceDec.lt(CREATE_FEE_ESTIMATE)
   const isTxPending = metadataIsUploading || transactionIsPending
 
   const fieldDisabled = !isConnected || balanceLow || isTxPending
@@ -122,7 +125,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     <>
       <Dialog isOpen={open && !confirmOpen} onClose={close} title="Create new collection">
         <ConnectionGuard networks={['centrifuge']}>
-          <form onSubmit={() => setConfirmOpen(true)}>
+          <form onSubmit={execute}>
             <Stack gap={3}>
               <TextInput
                 label="Name"
@@ -156,7 +159,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
               <Shelf justifyContent="space-between">
                 {balanceLow && (
                   <Text variant="label1" color="criticalForeground">
-                    Your balance is too low ({(balance || 0).toFixed(2)} AIR)
+                    Your balance is too low ({(balanceDec || 0).toFixed(2)} AIR)
                   </Text>
                 )}
                 <ButtonGroup ml="auto">

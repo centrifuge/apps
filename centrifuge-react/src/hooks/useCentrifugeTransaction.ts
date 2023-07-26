@@ -1,14 +1,16 @@
 import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { ISubmittableResult } from '@polkadot/types/types'
-import { WalletAccount } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/Transactions'
-import { useWallet } from '../components/WalletProvider'
+import { CombinedSubstrateAccount, SubstrateAccount, useEvmProvider, useWallet } from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
-type TxOptions = Pick<TransactionOptions, 'createType'>
+export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
+  account?: CombinedSubstrateAccount
+  forceProxyType?: string | string[]
+}
 
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
@@ -16,18 +18,33 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
-  const { showWallets, substrate, walletDialog } = useWallet()
-  const { selectedAccount, proxy } = substrate
+  const { showWallets, substrate, walletDialog, evm, isEvmOnSubstrate } = useWallet()
+  const provider = useEvmProvider()
+  const { selectedCombinedAccount, selectedAccount } = substrate
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
-  const pendingTransaction = React.useRef<{ id: string; args: T; options?: TxOptions }>()
+  const pendingTransaction = React.useRef<{ id: string; args: T; options?: CentrifugeTransactionOptions }>()
 
-  async function doTransaction(selectedAccount: WalletAccount, id: string, args: T, txOptions?: TxOptions) {
+  async function doTransaction(
+    selectedCombinedAccount: CombinedSubstrateAccount | null,
+    selectedAccount: SubstrateAccount,
+    id: string,
+    args: T,
+    txOptions?: CentrifugeTransactionOptions
+  ) {
+    const account = selectedCombinedAccount ||
+      txOptions?.account || {
+        signingAccount: selectedAccount,
+        multisig: undefined,
+        proxies: undefined,
+      }
     try {
-      const connectedCent = cent.connect(selectedAccount?.address, selectedAccount?.signer as any)
-      if (proxy) {
-        connectedCent.setProxy(proxy.delegator)
+      let connectedCent
+      if (isEvmOnSubstrate) {
+        connectedCent = cent.connectEvm(evm.selectedAddress!, provider!.getSigner(), substrate.evmChainId!)
+      } else {
+        connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
       }
       const api = await cent.getApiPromise()
 
@@ -38,6 +55,15 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       let txError: any = null
       const lastResult = await lastValueFrom(
         transaction(args, {
+          multisig: account.multisig,
+          proxies: account.proxies?.map((p) => [
+            p.delegator,
+            txOptions?.forceProxyType
+              ? (Array.isArray(txOptions.forceProxyType) ? txOptions.forceProxyType : [txOptions.forceProxyType]).find(
+                  (type) => p.types.includes(type)
+                )
+              : undefined,
+          ]),
           ...txOptions,
           onStatusChange: (result) => {
             const errors = result.events.filter(({ event }) => {
@@ -102,7 +128,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     }
   }
 
-  function execute(args: T, options?: TxOptions, idOverride?: string) {
+  function execute(args: T, options?: CentrifugeTransactionOptions, idOverride?: string) {
     const id = idOverride ?? Math.random().toString(36).substr(2)
     const tx: Transaction = {
       id,
@@ -114,11 +140,11 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     addOrUpdateTransaction(tx)
     setLastId(id)
 
-    if (!selectedAccount) {
+    if (!selectedAccount && !isEvmOnSubstrate) {
       pendingTransaction.current = { id, args, options }
       showWallets('centrifuge')
     } else {
-      doTransaction(selectedAccount, id, args, options)
+      doTransaction(selectedCombinedAccount, selectedAccount!, id, args, options)
     }
     return id
   }
@@ -130,8 +156,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       if (walletDialog.view !== null) return
       pendingTransaction.current = undefined
 
-      if (selectedAccount) {
-        doTransaction(selectedAccount, id, args, options)
+      if (selectedAccount || isEvmOnSubstrate) {
+        doTransaction(selectedCombinedAccount, selectedAccount!, id, args, options)
       } else {
         updateTransaction(id, { status: 'failed', failedReason: 'No account connected' })
       }

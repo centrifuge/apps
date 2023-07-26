@@ -3,7 +3,6 @@ import { Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { useTheme } from 'styled-components'
 import { formatBalance } from '../utils/formatting'
 import { useLiquidity } from '../utils/useLiquidity'
 import { usePool } from '../utils/usePools'
@@ -47,7 +46,7 @@ export const columns: Column[] = [
 ]
 
 export const EpochList: React.FC<Props> = ({ pool }) => {
-  const theme = useTheme()
+  // const theme = useTheme()
   const {
     // sumOfExecutableInvestments,
     sumOfLockedInvestments,

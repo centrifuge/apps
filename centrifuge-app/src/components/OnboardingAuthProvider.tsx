@@ -13,11 +13,12 @@ export const OnboardingAuthContext = React.createContext<{
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export function OnboardingAuthProvider({ children }: { children: React.ReactNode }) {
-  const { selectedWallet, proxy, selectedAccount } = useWallet().substrate
+  const { selectedWallet, selectedProxies, selectedAccount } = useWallet().substrate
   const { selectedAddress } = useWallet().evm
   const cent = useCentrifuge()
   const provider = useEvmProvider()
   const walletAddress = selectedAccount?.address ?? selectedAddress
+  const proxy = selectedProxies?.[0]
 
   const { data: session, refetch: refetchSession } = useQuery(
     ['session', selectedAccount?.address, proxy?.delegator, selectedAddress],
@@ -149,6 +150,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
           throw new Error('Failed to authenticate wallet')
         }
         const authToken = await authTokenRes.json()
+        sessionStorage.clear()
         sessionStorage.setItem(
           `centrifuge-onboarding-auth-${address}-${proxy.delegator}`,
           JSON.stringify({ signed: authToken.token, payload })
@@ -172,6 +174,7 @@ const loginWithSubstrate = async (address: string, signer: Wallet['signer'], cen
         throw new Error('Failed to authenticate wallet')
       }
       const authToken = await authTokenRes.json()
+      sessionStorage.clear()
       sessionStorage.setItem(
         `centrifuge-onboarding-auth-${address}`,
         JSON.stringify({ signed: authToken.token, payload })
@@ -218,6 +221,7 @@ Issued At: ${new Date().toISOString()}`
   }
   const token = await tokenRes.json()
   if (token) {
+    sessionStorage.clear()
     sessionStorage.setItem(
       `centrifuge-onboarding-auth-${address}`,
       JSON.stringify({ signed: token.token, payload: message })

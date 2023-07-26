@@ -1,1 +1,8 @@
-export { CentrifugeProvider, CentrifugeProviderProps, useCentrifuge, useCentrifugeKey } from './CentrifugeProvider'
+export {
+  CentrifugeProvider,
+  CentrifugeProviderProps,
+  useCentrifuge,
+  useCentrifugeApi,
+  useCentrifugeConsts,
+  useCentrifugeKey,
+} from './CentrifugeProvider'
