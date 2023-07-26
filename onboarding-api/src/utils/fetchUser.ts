@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { OnboardingUser, SupportedNetworks, userCollection } from '../database'
+import { OnboardingUser, SupportedNetworks, userCollection, validateAndWriteToFirestore } from '../database'
 import { HttpError, reportHttpError } from './httpError'
 
 type Options = { suppressError?: boolean }
@@ -15,6 +15,32 @@ export async function fetchUser<T>(wallet: Request['wallet'], options?: OptionsO
       throw new HttpError(404, 'Unsupported network')
     }
     const userSnapshot = await userCollection.where(`wallets.${wallet.network}`, 'array-contains', wallet.address).get()
+
+    // For evm chains only: if the user doesn't exist on the current network, check if they exist on another network
+    if (userSnapshot.empty && wallet.network.includes('evm')) {
+      for (const network of supportedNetworks.filter((n) => n.includes('evm')) as SupportedNetworks[]) {
+        if (network !== wallet.network) {
+          const userSnapshotOnOtherNetwork = await userCollection
+            .where(`wallets.${network}`, 'array-contains', wallet.address)
+            .get()
+          if (!userSnapshotOnOtherNetwork.empty) {
+            const { user, id } = userSnapshotOnOtherNetwork.docs.map((doc) => ({ user: doc.data(), id: doc.id }))[0]
+            await validateAndWriteToFirestore(
+              { address: id, network },
+              {
+                wallets: {
+                  ...user.wallets,
+                  [wallet.network]: [...(user.wallets[wallet.network] || []), wallet.address],
+                },
+              },
+              user.investorType,
+              ['wallets']
+            )
+            return user as UserOrNull<T>
+          }
+        }
+      }
+    }
 
     if (userSnapshot.empty) {
       if (options?.suppressError) {
