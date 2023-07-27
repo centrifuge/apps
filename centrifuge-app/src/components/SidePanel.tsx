@@ -5,7 +5,7 @@ import { OverlayContainer, useModal, useOverlay, usePreventScroll } from '@react
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 
-type SidePanelProps = {
+export type SidePanelProps = {
   isOpen: boolean
   onClose: () => void
   children?: React.ReactNode
@@ -20,6 +20,7 @@ export function SidePanel(props: SidePanelProps) {
 }
 
 export function SidePanelInner({ children, isOpen, onClose }: SidePanelProps) {
+  const theme = useTheme()
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const { overlayProps, underlayProps } = useOverlay(
@@ -42,7 +43,13 @@ export function SidePanelInner({ children, isOpen, onClose }: SidePanelProps) {
           ml="auto"
           width={[`calc(100% - ${space[5]}px)`, 440]}
           p={3}
+          borderStyle="solid"
+          borderColor="borderPrimary"
+          borderLeftWidth={1}
           backgroundColor="backgroundPrimary"
+          style={{
+            boxShadow: `0px 0px 20px ${theme.colors.borderSecondary}`,
+          }}
           {...overlayProps}
           {...dialogProps}
           {...modalProps}

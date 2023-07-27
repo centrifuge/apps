@@ -4,7 +4,7 @@ import { Footer } from '../Footer'
 import { LogoLink } from '../LogoLink'
 import { Menu } from '../Menu'
 import { OnboardingStatus } from '../OnboardingStatus'
-import { SidePanel } from '../SidePanel'
+import { SidePanelProps } from '../SidePanel'
 import {
   FooterContainer,
   HeaderBackground,
@@ -17,7 +17,7 @@ import {
 
 type LayoutBaseProps = {
   children?: React.ReactNode
-  sidePanel?: typeof SidePanel
+  sidePanel?: React.ReactElement<SidePanelProps>
 }
 
 const PADDING_MAIN = [2, 2, 3, 5, 10]
