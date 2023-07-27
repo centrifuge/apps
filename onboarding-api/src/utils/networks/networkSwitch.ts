@@ -18,7 +18,7 @@ export class NetworkSwitch {
     } else if (this.network === 'evm' || this.network === 'evmOnSubstrate') {
       return verifyEthWallet(req, res)
     } else {
-      throw new Error('Unspported network')
+      throw new Error('Unsupported network')
     }
   }
 
@@ -32,7 +32,7 @@ export class NetworkSwitch {
     } else if (this.network === 'evm') {
       return validateEvmRemark(wallet, transactionInfo, expectedRemark)
     } else {
-      throw new Error('Unspported network')
+      throw new Error('Unsupported network')
     }
   }
 
@@ -42,7 +42,7 @@ export class NetworkSwitch {
     } else if (this.network === 'evm') {
       return addTinlakeInvestorToMemberList(wallet, poolId, trancheId)
     } else {
-      throw new Error('Unspported network')
+      throw new Error('Unsupported network')
     }
   }
 
@@ -52,7 +52,7 @@ export class NetworkSwitch {
     } else if (this.network === 'evm') {
       return getTinlakePoolById(poolId)
     } else {
-      throw new Error('Unspported network')
+      throw new Error('Unsupported network')
     }
   }
 }
