@@ -17,9 +17,8 @@ export class NetworkSwitch {
       return verifySubstrateWallet(req, res)
     } else if (this.network === 'evm' || this.network === 'evmOnSubstrate') {
       return verifyEthWallet(req, res)
-    } else {
-      throw new Error('Unsupported network')
     }
+    throw new Error('Unsupported network')
   }
 
   validateRemark = (
@@ -31,9 +30,8 @@ export class NetworkSwitch {
       return validateSubstrateRemark(wallet, transactionInfo, expectedRemark)
     } else if (this.network === 'evm') {
       return validateEvmRemark(wallet, transactionInfo, expectedRemark)
-    } else {
-      throw new Error('Unsupported network')
     }
+    throw new Error('Unsupported network')
   }
 
   addInvestorToMemberList = async (wallet: Request['wallet'], poolId: string, trancheId: string) => {
@@ -41,9 +39,8 @@ export class NetworkSwitch {
       return addCentInvestorToMemberList(wallet, poolId, trancheId)
     } else if (this.network === 'evm') {
       return addTinlakeInvestorToMemberList(wallet, poolId, trancheId)
-    } else {
-      throw new Error('Unsupported network')
     }
+    throw new Error('Unsupported network')
   }
 
   getPoolById = async (poolId: string) => {
@@ -51,8 +48,7 @@ export class NetworkSwitch {
       return getCentPoolById(poolId)
     } else if (this.network === 'evm') {
       return getTinlakePoolById(poolId)
-    } else {
-      throw new Error('Unsupported network')
     }
+    throw new Error('Unsupported network')
   }
 }
