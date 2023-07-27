@@ -192,6 +192,18 @@ export function useWriteOffGroups(poolId: string) {
   return result
 }
 
+export function useLoanChanges(poolId: string) {
+  const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) => cent.pools.getProposedLoanChanges([poolId]))
+
+  return result
+}
+
+export function usePoolChanges(poolId: string) {
+  const [result] = useCentrifugeQuery(['poolChanges', poolId], (cent) => cent.pools.getProposedPoolChanges([poolId]))
+
+  return result
+}
+
 export function usePodUrl(poolId: string) {
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)

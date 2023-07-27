@@ -2402,7 +2402,40 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function updateWriteOffGroups(
+  function getProposedLoanChanges(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.poolSystem.ProposedChange.is(event))
+
+        if (!event) return false
+
+        const { poolId: eventPoolId } = (event.toHuman() as any).event.data
+        return eventPoolId.replace(/\D/g, '') === poolId
+      })
+    )
+
+    return $api.pipe(
+      switchMap((api) => api.query.poolSystem.notedChange.entries(poolId)),
+      map((changes) => {
+        console.log('changes', changes)
+        return changes.map(([key, value]) => {
+          const hash = (key.toHuman() as any)[1] as string
+          const data = value.toPrimitive() as { change: any; submittedTime: number }
+          return {
+            hash,
+            submittedAt: new Date(data.submittedTime * 1000).toISOString(),
+            change: data.change,
+          }
+        })
+      }),
+      repeatWhen(() => $events)
+    )
+  }
+
+  function updateWriteOffPolicy(
     args: [poolId: string, writeOffGroups: { percentage: BN; overdueDays: number; penaltyInterestRate: BN }[]],
     options?: TransactionOptions
   ) {
@@ -2411,14 +2444,66 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.updateWriteOffPolicy(
+        const submittable = api.tx.loans.proposeWriteOffPolicy(
           poolId,
           writeOffGroups.map((g) => ({
-            percentage: g.percentage.toString(),
-            overdueDays: g.overdueDays,
-            penalty: g.penaltyInterestRate.toString(),
+            triggers: [{ PrincipalOverdue: g.overdueDays }],
+            status: {
+              percentage: g.percentage.toString(),
+              penalty: g.penaltyInterestRate.toString(),
+            },
           }))
         )
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function applyWriteOffPolicyUpdate(args: [poolId: string, hash: string], options?: TransactionOptions) {
+    const [poolId, hash] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.applyWriteOffPolicy(poolId, hash)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function getProposedPoolChanges(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    console.log('getProposedPoolChanges', getProposedPoolChanges)
+
+    return $api.pipe(
+      switchMap((api) => (console.log('api', api), api.query.poolSystem.scheduledUpdate(poolId))),
+      map((updateData) => {
+        const update = updateData.toPrimitive() as any
+        console.log('update', update, updateData)
+        if (!update) return null
+        console.log('whaat')
+        return {
+          changes: {
+            tranches: update.tranches.noChange === null ? null : update.tranches.newValue,
+            trancheMetadata: update.trancheMetadata.noChange === null ? null : update.trancheMetadata.newValue,
+            minEpochTime: update.minEpochTime.noChange === null ? null : update.minEpochTime.newValue,
+            maxNavAge: update.maxNavAge.noChange === null ? null : update.maxNavAge.newValue,
+          },
+          submittedAt: new Date(update.submittedAt * 1000).toISOString(),
+        }
+      })
+    )
+  }
+
+  function applyPoolUpdate(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.poolRegistry.executeUpdate(poolId)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -2499,7 +2584,11 @@ export function getPoolsModule(inst: Centrifuge) {
     getLoans,
     getPendingCollect,
     getWriteOffGroups,
-    updateWriteOffGroups,
+    getProposedLoanChanges,
+    getProposedPoolChanges,
+    updateWriteOffPolicy,
+    applyWriteOffPolicyUpdate,
+    applyPoolUpdate,
     adminWriteOff,
     getAvailablePoolId,
     getDailyPoolStates,
