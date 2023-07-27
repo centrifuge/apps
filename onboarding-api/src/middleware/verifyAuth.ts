@@ -1,8 +1,8 @@
 import { isAddress } from '@ethersproject/address'
 import { NextFunction, Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
-import { getValidSubstrateAddress } from '../utils/centrifuge'
 import { HttpError } from '../utils/httpError'
+import { getValidSubstrateAddress } from '../utils/networks/centrifuge'
 
 export const verifyAuth = async (req: Request, _res: Response, next: NextFunction) => {
   const { authorization } = req.headers

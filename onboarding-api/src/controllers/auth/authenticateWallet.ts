@@ -4,9 +4,9 @@ import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
 import { InferType, object, string, StringSchema } from 'yup'
 import { SupportedNetworks } from '../../database'
-import { getCentrifuge } from '../../utils/centrifuge'
 import { reportHttpError } from '../../utils/httpError'
-import { networkSwitch } from '../../utils/networkSwitch'
+import { getCentrifuge } from '../../utils/networks/centrifuge'
+import { NetworkSwitch } from '../../utils/networks/networkSwitch'
 import { validateInput } from '../../utils/validateInput'
 
 const verifyWalletInput = object({
@@ -40,8 +40,7 @@ export const authenticateWalletController = async (
 ) => {
   try {
     await validateInput(req.body, verifyWalletInput)
-    const verifyWallet = networkSwitch('verifyWallet', req.body.network)
-    const payload = await verifyWallet(req, res)
+    const payload = await new NetworkSwitch(req.body.network).verifiyWallet(req, res)
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '8h',

@@ -4,9 +4,9 @@ import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { onboardingBucket } from '../database'
-import { getCentrifuge } from './centrifuge'
-import { getPoolById } from './getPoolById'
 import { HttpError } from './httpError'
+import { getCentrifuge } from './networks/centrifuge'
+import { NetworkSwitch } from './networks/networkSwitch'
 
 interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
   name: string
@@ -24,7 +24,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
   name,
   email,
 }: SignatureInfo) => {
-  const { pool, metadata } = await getPoolById(poolId)
+  const { pool, metadata } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
   const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name as string
   const centrifuge = getCentrifuge()
   const signaturePage = await onboardingBucket.file('signature-page.pdf')

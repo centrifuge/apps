@@ -4,11 +4,11 @@ import { Wallet } from '@ethersproject/wallet'
 import { Request } from 'express'
 import { lastValueFrom } from 'rxjs'
 import { InferType } from 'yup'
-import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
+import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
+import { HttpError, reportHttpError } from '../httpError'
 import MemberListAdminAbi from './abi/MemberListAdmin.abi.json'
 import RemarkerAbi from './abi/Remarker.abi.json'
 import { getCentrifuge } from './centrifuge'
-import { HttpError, reportHttpError } from './httpError'
 
 export interface LaunchingPool extends BasePool {}
 
@@ -164,6 +164,7 @@ export const getTinlakePoolById = async (poolId: string) => {
     },
   }
   const pool = {
+    id,
     metadata: uri,
     tranches: [
       {

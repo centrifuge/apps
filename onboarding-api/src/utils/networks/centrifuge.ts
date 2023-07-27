@@ -5,9 +5,9 @@ import { cryptoWaitReady, decodeAddress, encodeAddress } from '@polkadot/util-cr
 import { Request } from 'express'
 import { combineLatest, combineLatestWith, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
-import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
-import { getPoolById } from './getPoolById'
-import { HttpError, reportHttpError } from './httpError'
+import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
+import { HttpError, reportHttpError } from '../httpError'
+import { NetworkSwitch } from './networkSwitch'
 
 const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
 
@@ -35,6 +35,9 @@ export const getCentPoolById = async (poolId: string) => {
   if (!metadata) {
     throw new Error(`Pool metadata not found for pool ${poolId}`)
   }
+  if (!pool) {
+    throw new Error(`Pool not found for id ${poolId}`)
+  }
   return { pool, metadata }
 }
 
@@ -43,7 +46,7 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
   const signer = await getSigner()
   const cent = getCentrifuge()
   const api = cent.getApi()
-  const { metadata } = await getPoolById(poolId)
+  const { metadata } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
   const walletAddress = await getValidSubstrateAddress(wallet)
 
   const hasPodReadAccess = (await firstValueFrom(cent.pools.getPoolPermissions([poolId])))?.[
