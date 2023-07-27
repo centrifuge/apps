@@ -20,7 +20,7 @@ export const verifyAuth = async (req: Request, _res: Response, next: NextFunctio
   }
   if (
     (network.includes('evm') && !isAddress(address)) ||
-    (network === 'substrate' && !getValidSubstrateAddress({ address, network }))
+    (network === 'substrate' && !(await getValidSubstrateAddress({ address, network })))
   ) {
     throw new HttpError(401, 'Invalid address')
   }

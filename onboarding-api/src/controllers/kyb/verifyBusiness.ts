@@ -48,7 +48,7 @@ export const verifyBusinessController = async (
       investorType: 'entity',
       address: null,
       kycReference: '',
-      manualKybReference: null,
+      manualKybReference: '',
       wallets: {
         evm: [],
         substrate: [],
@@ -78,7 +78,7 @@ export const verifyBusinessController = async (
       poolSteps: {},
     }
 
-    if (!(jurisdictionCode in KYB_COUNTRY_CODES)) {
+    if (!(jurisdictionCode.slice(0, 2) in KYB_COUNTRY_CODES)) {
       return startManualKyb(req, res, user)
     }
 

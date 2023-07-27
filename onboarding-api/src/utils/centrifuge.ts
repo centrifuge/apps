@@ -44,7 +44,7 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
   const cent = getCentrifuge()
   const api = cent.getApi()
   const { metadata } = await getPoolById(poolId)
-  const walletAddress = getValidSubstrateAddress(wallet)
+  const walletAddress = await getValidSubstrateAddress(wallet)
 
   const hasPodReadAccess = (await firstValueFrom(cent.pools.getPoolPermissions([poolId])))?.[
     walletAddress
@@ -173,10 +173,12 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
 }
 
 // https://polkadot.js.org/docs/util-crypto/examples/validate-address/
-export const getValidSubstrateAddress = (wallet: Request['wallet']) => {
+export const getValidSubstrateAddress = async (wallet: Request['wallet']) => {
   try {
     if (wallet.network === 'evmOnSubstrate') {
-      return evmToSubstrateAddress(wallet.address, Number(process.env.EVM_ON_SUBSTRATE_CHAIN_ID))
+      const cent = getCentrifuge()
+      const chainId = await firstValueFrom(cent.getApi().pipe(switchMap((api) => api.query.evmChainId.chainId())))
+      return cent.utils.formatAddress(evmToSubstrateAddress(wallet.address, Number(chainId.toString())))
     }
     const validAddress = encodeAddress(
       isHex(wallet.address) ? hexToU8a(wallet.address) : decodeAddress(wallet.address),
