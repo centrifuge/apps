@@ -6,8 +6,8 @@ import { config } from '../config'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
-import { LogoLink } from './LogoLink'
-import { Menu } from './Menu'
+import { LogoLink } from './LogoLink-deprecated'
+import { Menu } from './Menu-deprecated'
 import { OnboardingStatus } from './OnboardingStatus'
 
 type Props = {
