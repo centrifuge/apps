@@ -67,6 +67,8 @@ export type PaymentInfo = {
   weight: number
 }
 
+export type RewardDomain = 'Block' | 'Liquidity'
+
 const defaultConfig: Config = {
   network: 'centrifuge',
   centrifugeWsUrl: 'wss://fullnode.parachain.centrifuge.io',
@@ -98,6 +100,9 @@ const parachainTypes = {
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
   },
+  StakingCurrency: {
+    _enum: ['BlockRewards'],
+  },
   CurrencyId: {
     _enum: {
       Native: 'Native',
@@ -107,9 +112,6 @@ const parachainTypes = {
       ForeignAsset: 'u32',
       Staking: 'StakingCurrency',
     },
-  },
-  StakingCurrency: {
-    _enum: ['BlockRewards'],
   },
 }
 
