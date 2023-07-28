@@ -3,6 +3,7 @@ import { InferType } from 'yup'
 import { verifyEthWallet, verifySubstrateWallet } from '../../controllers/auth/authenticateWallet'
 import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
 import { SupportedNetworks } from '../../database'
+import { HttpError } from '../httpError'
 import { addCentInvestorToMemberList, getCentPoolById, validateSubstrateRemark } from './centrifuge'
 import { addTinlakeInvestorToMemberList, getTinlakePoolById, validateEvmRemark } from './tinlake'
 
@@ -31,7 +32,7 @@ export class NetworkSwitch {
     } else if (this.network === 'evm') {
       return validateEvmRemark(wallet, transactionInfo, expectedRemark)
     }
-    throw new Error('Unsupported network')
+    throw new HttpError(404, 'Unsupported network')
   }
 
   addInvestorToMemberList = async (wallet: Request['wallet'], poolId: string, trancheId: string) => {
@@ -40,7 +41,7 @@ export class NetworkSwitch {
     } else if (this.network === 'evm') {
       return addTinlakeInvestorToMemberList(wallet, poolId, trancheId)
     }
-    throw new Error('Unsupported network')
+    throw new HttpError(404, 'Unsupported network')
   }
 
   getPoolById = async (poolId: string) => {
@@ -49,6 +50,6 @@ export class NetworkSwitch {
     } else if (this.network === 'evm') {
       return getTinlakePoolById(poolId)
     }
-    throw new Error('Unsupported network')
+    throw new HttpError(404, 'Unsupported network')
   }
 }

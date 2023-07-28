@@ -33,10 +33,10 @@ export const getCentPoolById = async (poolId: string) => {
   const pool = pools.find((p) => p.id === poolId)
   const metadata = await firstValueFrom(cent.metadata.getMetadata(pool?.metadata!))
   if (!metadata) {
-    throw new Error(`Pool metadata not found for pool ${poolId}`)
+    throw new HttpError(404, `Pool metadata not found for pool ${poolId}`)
   }
   if (!pool) {
-    throw new Error(`Pool not found for id ${poolId}`)
+    throw new HttpError(404, `Pool not found for pool ${poolId}`)
   }
   return { pool, metadata }
 }
@@ -86,20 +86,20 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
             if (result?.Module?.error) {
               // @ts-expect-error
               const { name, section } = api.registry.findMetaError(event.data[0].asModule)
-              console.log(`Transaction error`, { walletAddress, poolId, trancheId, error: { section, name } })
-              throw new HttpError(400, 'Bad request')
+              console.log(`Extrinsic failed:`, { walletAddress, poolId, trancheId, error: { section, name } })
+              throw new HttpError(400, `Extrinsic failed: ${name}.${section}`)
             }
             if (event.method === 'ProxyExecuted' && result === 'Ok') {
               console.log(`Executed proxy to add to MemberList`, { walletAddress, poolId, trancheId })
             }
             if (event.method === 'ProxyExecuted' && result && typeof result === 'object' && 'Err' in result) {
-              console.log(`An error occured executing proxy to add to MemberList`, {
+              console.log(`Extrinsic failed in addCentInvestorToMemberList`, {
                 walletAddress,
                 poolId,
                 trancheId,
                 result: result.Err,
               })
-              throw new HttpError(400, 'Bad request')
+              throw new HttpError(400, 'Extrinsic failed')
             }
           })
         }
@@ -148,7 +148,7 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
         const txFee = new CurrencyBalance(paymentInfo.partialFee.toString(), api.registry.chainDecimals[0])
 
         if (currentNativeBalance.gte(txFee.muln(1.1))) {
-          throw new HttpError(400, 'Bad request: balance exceeded')
+          throw new HttpError(400, 'Balance exceeded')
         }
 
         // add 10% buffer to the transaction fee
@@ -163,8 +163,8 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
               console.log(`Executed proxy for transfer`, { walletAddress: wallet.address, result })
             }
             if (event.method === 'ExtrinsicFailed') {
-              console.log(`Extrinsic for transfer failed`, { walletAddress: wallet.address, result })
-              throw new HttpError(400, 'Bad request: extrinsic failed')
+              console.log(`Extrinsic failed`, { walletAddress: wallet.address, result })
+              throw new HttpError(400, 'Extrinsic failed')
             }
           })
         }
@@ -189,6 +189,6 @@ export const getValidSubstrateAddress = async (wallet: Request['wallet']) => {
     )
     return validAddress
   } catch (error) {
-    throw new Error('Invalid address')
+    throw new HttpError(400, 'Invalid substrate address')
   }
 }

@@ -129,7 +129,7 @@ export const getTinlakePoolById = async (poolId: string) => {
   const poolData = pools.active.find((p) => p.addresses.ROOT_CONTRACT === poolId)
 
   if (!poolData) {
-    throw new Error(`Tinlake pool with ID ${poolId} not found`)
+    throw new HttpError(404, `Tinlake pool ${poolId} not found`)
   }
 
   const id = poolData.addresses.ROOT_CONTRACT

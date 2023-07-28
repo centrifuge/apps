@@ -20,14 +20,14 @@ export const signAcceptanceAsIssuer = async ({ poolId, trancheId, wallet, invest
   const [signedAgreementExists] = await signedAgreement.exists()
 
   if (!signedAgreementExists) {
-    throw new HttpError(400, 'Signed agreement not found')
+    throw new HttpError(404, 'Signed agreement not found')
   }
 
   const acceptancePage = await onboardingBucket.file('acceptance-page.pdf')
   const [acceptancePageExists] = await acceptancePage.exists()
 
   if (!acceptancePageExists) {
-    throw new HttpError(400, 'Acceptance page not found')
+    throw new HttpError(404, 'Acceptance page not found')
   }
 
   const signedAgreementPdf = await signedAgreement.download()
