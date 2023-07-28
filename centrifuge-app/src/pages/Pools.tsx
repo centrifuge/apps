@@ -1,19 +1,14 @@
-import Centrifuge, { Pool, Rate } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
-import Decimal from 'decimal.js-light'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router-dom'
-// import { Shelf, Text } from '@centrifuge/fabric'
-// import * as React from 'react'
 import { LayoutBase } from '../components/LayoutBase'
-// import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
-// import { LoadBoundary } from '../components/LoadBoundary'
-import { MenuSwitch } from '../components/MenuSwitch'
-// import { PageWithSideBar } from '../components/PageWithSideBar'
+import { PoolCardProps } from '../components/PoolCard'
+import { PoolStatusKey } from '../components/PoolCard/PoolStatus'
 import { PoolFilter } from '../components/PoolFilter'
 import { filterPools } from '../components/PoolFilter/utils'
-// import { PoolList } from '../components/PoolList'
+import { PoolList } from '../components/PoolList'
 import { PoolsTokensShared } from '../components/PoolsTokensShared'
 import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
@@ -63,34 +58,9 @@ const Pools: React.FC = () => {
     <Stack gap={0} flex={1}>
       <PoolFilter />
 
-      {/* <PoolList
-      pools={filtered ? listedPools.filter(({ reserve }) => reserve.max.toFloat() > 0) : listedPools}
-      isLoading={metadataIsLoading}
-    /> */}
-
-      <Stack gap={1}>
-        {filteredPools?.map((pool) => (
-          <Grid key={pool.name} backgroundColor="pink" gridTemplateColumns="repeat(4, 1fr)">
-            <Box>{pool.name}</Box>
-            <Box>{pool.status}</Box>
-            <Box>{pool.assetClass}</Box>
-            <Box>{pool.valueLocked.toString()}</Box>
-          </Grid>
-        ))}
-      </Stack>
-
-      <MenuSwitch />
+      <PoolList pools={filteredPools} isLoading={metadataIsLoading} />
     </Stack>
   )
-}
-
-// Todo: move to PoolCard
-export type PoolCardProps = {
-  name: string
-  assetClass: string
-  valueLocked: Decimal
-  apr: Rate | null | undefined
-  status: string
 }
 
 async function formatPoolsData(pools: (Pool | TinlakePool)[], cent: Centrifuge): Promise<PoolCardProps[]> {
@@ -100,16 +70,19 @@ async function formatPoolsData(pools: (Pool | TinlakePool)[], cent: Centrifuge):
     const metaData = typeof pool.metadata === 'string' ? await metadataQueryFn(pool.metadata, cent) : pool.metadata
 
     return {
+      poolId: pool.id,
       name: metaData.pool.name as string,
       assetClass: metaData.pool.asset.class as string,
       valueLocked: getPoolValueLocked(pool),
+      currencySymbol: pool.currency.symbol,
       apr: mostSeniorTranche?.interestRatePerSec,
       status:
         tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
           ? 'Maker Pool'
           : pool.tranches.at(-1)?.capacity.toFloat()
           ? 'Open for investments'
-          : 'Closed',
+          : ('Closed' as PoolStatusKey),
+      iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
     }
   })
   const data = await Promise.all(promises)

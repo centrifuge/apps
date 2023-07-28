@@ -1,11 +1,11 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+// import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
-import { TinlakePool } from '../utils/tinlake/useTinlakePools'
-import { PoolCard } from './PoolCard'
+// import { TinlakePool } from '../utils/tinlake/useTinlakePools'
+import { PoolCard, PoolCardProps } from './PoolCard'
 
 type PoolListProps = {
-  pools: (Pool | TinlakePool)[]
+  pools: PoolCardProps[]
   isLoading?: boolean
 }
 
@@ -15,16 +15,12 @@ export function PoolList({ pools, isLoading }: PoolListProps) {
       <Stack as="ul" role="list" gap={1} minWidth={900}>
         {pools.map((pool) => {
           return (
-            <Box as="li" key={pool.id}>
-              <PoolCard pool={pool} />
+            <Box as="li" key={pool.poolId}>
+              <PoolCard {...pool} />
             </Box>
           )
         })}
-        {isLoading && (
-          <Box as="li">
-            <PoolCard />
-          </Box>
-        )}
+        {isLoading && <Box as="li">{/* <PoolCard /> */}</Box>}
       </Stack>
     </Box>
   )
