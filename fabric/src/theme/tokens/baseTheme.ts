@@ -31,6 +31,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
   },
   zIndices: {
     sticky: 10,
+    header: 30,
     overlay: 50,
     onTopOfTheWorld: 1000, // use sparingly, only for edge cases
   },

@@ -12,7 +12,7 @@ import { PoolLink } from './PoolLink'
 export function Menu() {
   // const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const pools = usePools() || []
-  const isLarge = useIsAboveBreakpoint('L')
+  const isXLarge = useIsAboveBreakpoint('XL')
   const address = useAddress('substrate')
 
   return (
@@ -23,13 +23,13 @@ export function Menu() {
       flexDirection={['row', 'row', 'column']}
       alignItems={['center', 'center', 'stretch']}
     >
-      <PageLink to="/pools" stacked={!isLarge}>
+      <PageLink to="/pools" stacked={!isXLarge}>
         <IconInvestments />
         Pools
       </PageLink>
 
       {config.network !== 'centrifuge' && (
-        <PageLink to="/nfts" stacked={!isLarge}>
+        <PageLink to="/nfts" stacked={!isXLarge}>
           <IconNft />
           NFTs
         </PageLink>
@@ -38,8 +38,8 @@ export function Menu() {
       <GovernanceMenu />
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
-        <IssuerMenu defaultOpen={isLarge} stacked={!isLarge} poolIds={pools.map(({ id }) => id)}>
-          {isLarge ? (
+        <IssuerMenu defaultOpen={isXLarge} stacked={!isXLarge} poolIds={pools.map(({ id }) => id)}>
+          {isXLarge ? (
             <Stack as="ul" gap={1}>
               {!!pools.length &&
                 pools.map((pool) => (

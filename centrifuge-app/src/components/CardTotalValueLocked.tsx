@@ -1,5 +1,6 @@
-import { Box, Card, Stack, Text, TextWithPlaceholder, Tooltip } from '@centrifuge/fabric'
+import { Box, Stack, Text, TextWithPlaceholder, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useTheme } from 'styled-components'
 import { config } from '../config'
 import { formatDate } from '../utils/date'
 import { Dec } from '../utils/Decimal'
@@ -9,6 +10,7 @@ import { DataPoint, TotalValueLocked } from './Charts/TotalValueLocked'
 import { tooltipText } from './Tooltips'
 
 export function CardTotalValueLocked() {
+  const { colors } = useTheme()
   const [hovered, setHovered] = React.useState<DataPoint | undefined>(undefined)
   const [, listedTokens] = useListedPools()
 
@@ -36,7 +38,19 @@ export function CardTotalValueLocked() {
   }, [listedTokens])
 
   return (
-    <Card role="article" variant="interactive" p={3} pb={chartHeight * 0.6} position="relative">
+    <Box
+      role="article"
+      borderRadius="card"
+      borderStyle="solid"
+      borderWidth={1}
+      borderColor="borderSecondary"
+      p={3}
+      pb={chartHeight * 0.6}
+      position="relative"
+      style={{
+        boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
+      }}
+    >
       <Stack style={{ pointerEvents: 'none' }}>
         {hovered ? (
           <>
@@ -73,6 +87,6 @@ export function CardTotalValueLocked() {
       >
         <TotalValueLocked setHovered={setHovered} chainTVL={totalValueLocked} />
       </Box>
-    </Card>
+    </Box>
   )
 }

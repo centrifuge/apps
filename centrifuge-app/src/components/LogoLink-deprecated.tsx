@@ -7,11 +7,13 @@ const [LogoMark, WordMark] = config.logo
 
 export function LogoLink() {
   const isMedium = useIsAboveBreakpoint('M')
-  const isLarge = useIsAboveBreakpoint('L')
+  const isXLarge = useIsAboveBreakpoint('XL')
 
   return (
-    <Box as={Link} to="/" display="block" width={[80, 80, 36, 108]}>
-      {isMedium && !isLarge ? <LogoMark /> : <WordMark />}
-    </Box>
+    <Link to="/">
+      <Box color="textPrimary" width={[80, 80, 36, 36, 120]}>
+        {isMedium && !isXLarge ? <LogoMark /> : <WordMark />}
+      </Box>
+    </Link>
   )
 }

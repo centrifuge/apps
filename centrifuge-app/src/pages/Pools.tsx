@@ -4,28 +4,30 @@ import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useLocation } from 'react-router-dom'
-import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
-import { LoadBoundary } from '../components/LoadBoundary'
+// import { Shelf, Text } from '@centrifuge/fabric'
+// import * as React from 'react'
+import { LayoutBase } from '../components/LayoutBase'
+// import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
+// import { LoadBoundary } from '../components/LoadBoundary'
 import { MenuSwitch } from '../components/MenuSwitch'
-import { PageWithSideBar } from '../components/PageWithSideBar'
+// import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolFilter } from '../components/PoolFilter'
 import { filterPools } from '../components/PoolFilter/utils'
+// import { PoolList } from '../components/PoolList'
+import { PoolsTokensShared } from '../components/PoolsTokensShared'
 import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useAsyncMemo } from '../utils/useAsyncMemo'
 import { useListedPools } from '../utils/useListedPools'
 import { metadataQueryFn } from '../utils/useMetadata'
 
-export const PoolsPage: React.FC = () => {
+export function PoolsPage() {
   return (
-    <PageWithSideBar sidebar>
-      <LoadBoundary>
-        <Box p={2}>
-          <CardTotalValueLocked />
-        </Box>
-      </LoadBoundary>
-      <Pools />
-    </PageWithSideBar>
+    <LayoutBase>
+      <PoolsTokensShared title="Pools">
+        <Pools />
+      </PoolsTokensShared>
+    </LayoutBase>
   )
 }
 
@@ -60,6 +62,11 @@ const Pools: React.FC = () => {
   return (
     <Stack gap={0} flex={1}>
       <PoolFilter />
+
+      {/* <PoolList
+      pools={filtered ? listedPools.filter(({ reserve }) => reserve.max.toFloat() > 0) : listedPools}
+      isLoading={metadataIsLoading}
+    /> */}
 
       <Stack gap={1}>
         {filteredPools?.map((pool) => (
