@@ -106,8 +106,10 @@ export function useOnboardingAuth() {
           const verified = (await verifiedRes.json()).verified
           return { verified }
         }
+        sessionStorage.clear()
         return { verified: false }
       } catch (error) {
+        sessionStorage.clear()
         return {
           verified: false,
         }
