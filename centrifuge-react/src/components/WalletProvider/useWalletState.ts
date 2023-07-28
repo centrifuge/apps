@@ -67,7 +67,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         walletDialog: action.payload
           ? { ...state.walletDialog, ...action.payload }
-          : { view: 'wallets', network: null, wallet: null },
+          : { view: 'networks', network: null, wallet: null },
       }
     case 'showWalletDialogAccounts':
       return {

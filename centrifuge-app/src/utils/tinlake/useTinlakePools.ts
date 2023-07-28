@@ -107,7 +107,7 @@ function parsePoolsMetadata(poolsMetadata: TinlakeMetadataPool[]): IpfsPools {
   return { active, upcoming, archived, launching }
 }
 
-function useIpfsPools(suspense = false) {
+export function useIpfsPools(suspense = false) {
   // TODO get hash from registry
   const cent = useCentrifuge()
   const uri = ethConfig.poolsHash
@@ -209,6 +209,7 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
     JUNIOR_MEMBERLIST: string
     COORDINATOR: string
     PILE: string
+    CLAIM_CFG: string
     MCD_VAT?: string
     MCD_JUG?: string
     MAKER_MGR?: string
