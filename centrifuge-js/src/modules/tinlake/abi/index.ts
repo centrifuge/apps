@@ -1,4 +1,5 @@
 import contractAbiAssessor from './Assessor.abi.json'
+import contractAbiClaimCFG from './ClaimCFG.abi.json'
 import contractAbiCoordinator from './EpochCoordinator.abi.json'
 import contractAbiFeed from './NAVFeed.abi.json'
 import contractAbiFeed2 from './NAVFeed_V2.abi.json'
@@ -22,4 +23,5 @@ export const abis = {
   JUNIOR_TRANCHE: contractAbiTranche,
   SENIOR_TRANCHE: contractAbiTranche,
   RESERVE: contractAbiReserve,
+  CLAIM_CFG: contractAbiClaimCFG,
 }
