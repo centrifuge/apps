@@ -8,6 +8,7 @@ import { SidePanelProps } from '../SidePanel'
 import {
   FooterContainer,
   HeaderBackground,
+  Inner,
   LogoContainer,
   MainContainer,
   Root,
@@ -25,28 +26,29 @@ const PADDING_MAIN = [2, 2, 3, 5, 10]
 export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
   return (
     <Root>
-      <HeaderBackground />
+      <Inner>
+        <HeaderBackground />
 
-      <LogoContainer>
-        <LogoLink />
-      </LogoContainer>
+        <LogoContainer>
+          <LogoLink />
+        </LogoContainer>
 
-      <WalletContainer pr={PADDING_MAIN}>
-        <WalletMenu menuItems={[<OnboardingStatus />]} />
-      </WalletContainer>
+        <WalletContainer pr={PADDING_MAIN}>
+          <WalletMenu menuItems={[<OnboardingStatus />]} />
+        </WalletContainer>
 
-      <ToolbarContainer as="aside">
-        <Menu />
-      </ToolbarContainer>
+        <ToolbarContainer as="aside">
+          <Menu />
+        </ToolbarContainer>
 
-      <MainContainer as="main" px={PADDING_MAIN} pt={[2, 3, 7, 10]} pb={4}>
-        {children}
-      </MainContainer>
+        <MainContainer as="main" px={PADDING_MAIN} pt={[2, 3, 7, 10]} pb={4}>
+          {children}
+        </MainContainer>
 
-      <FooterContainer>
-        <Footer />
-      </FooterContainer>
-
+        <FooterContainer>
+          <Footer />
+        </FooterContainer>
+      </Inner>
       {sidePanel}
     </Root>
   )

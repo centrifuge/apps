@@ -12,10 +12,9 @@ const BREAK_POINT_COLUMNS = 'M'
 // breakpoint from minimal to extended left sidebar width
 const BREAK_POINT_SIDEBAR_EXTENDED = 'L'
 
-export const Root = styled(Grid)`
+export const Root = styled(Box)`
   position: relative;
   min-height: 100vh;
-  max-width: ${LAYOUT_MAX_WIDTH}px;
 
   @supports (min-height: 100dvh) {
     min-height: 100dvh;
@@ -29,6 +28,11 @@ export const Root = styled(Grid)`
       height: 100dvh;
     }
   }
+`
+
+export const Inner = styled(Grid)`
+  max-width: ${LAYOUT_MAX_WIDTH}px;
+  min-height: 100%;
 
   align-items: start;
   grid-template-rows: 0px ${HEADER_HEIGHT}px 1fr auto ${TOOLBAR_HEIGHT}px;
