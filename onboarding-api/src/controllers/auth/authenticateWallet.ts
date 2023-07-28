@@ -4,7 +4,7 @@ import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
 import { InferType, object, string, StringSchema } from 'yup'
 import { SupportedNetworks } from '../../database'
-import { reportHttpError } from '../../utils/httpError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { getCentrifuge } from '../../utils/networks/centrifuge'
 import { NetworkSwitch } from '../../utils/networks/networkSwitch'
 import { validateInput } from '../../utils/validateInput'
@@ -63,7 +63,7 @@ export async function verifySubstrateWallet(req: Request, res: Response): Promis
 
   const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
   if (!cookieNonce || cookieNonce !== nonce) {
-    throw new Error('Invalid nonce')
+    throw new HttpError(400, 'Invalid nonce')
   }
 
   res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
@@ -89,26 +89,22 @@ export async function verifySubstrateWallet(req: Request, res: Response): Promis
 }
 
 export async function verifyEthWallet(req: Request, res: Response): Promise<Request['wallet']> {
-  try {
-    const { message, signature, address, nonce, network } = req.body
+  const { message, signature, address, nonce, network } = req.body
 
-    if (!isAddress(address)) {
-      throw new Error('Invalid address')
-    }
+  if (!isAddress(address)) {
+    throw new HttpError(400, 'Invalid address')
+  }
 
-    const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
+  const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
 
-    if (!cookieNonce || cookieNonce !== nonce) {
-      throw new Error('Invalid nonce')
-    }
+  if (!cookieNonce || cookieNonce !== nonce) {
+    throw new HttpError(400, 'Invalid nonce')
+  }
 
-    const decodedMessage = await new SiweMessage(message).verify({ signature })
-    res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
-    return {
-      address: decodedMessage.data.address,
-      network,
-    }
-  } catch (error) {
-    throw new Error('Invalid message or signature')
+  const decodedMessage = await new SiweMessage(message).verify({ signature })
+  res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
+  return {
+    address: decodedMessage.data.address,
+    network,
   }
 }

@@ -23,7 +23,7 @@ export const setVerifiedIdentityController = async (
     const user = await fetchUser(wallet)
 
     if (user.globalSteps.verifyIdentity.completed) {
-      throw new HttpError(400, 'Unable to process request')
+      throw new HttpError(400, 'Step aleady completed')
     }
 
     const status = await shuftiProRequest({ reference: user.kycReference }, { path: 'status', dryRun })

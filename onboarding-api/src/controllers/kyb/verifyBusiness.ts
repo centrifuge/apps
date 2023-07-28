@@ -33,14 +33,14 @@ export const verifyBusinessController = async (
     const userData = (await fetchUser(wallet, { suppressError: true })) as EntityUser
 
     if (userData?.globalSteps.verifyBusiness.completed) {
-      throw new HttpError(400, 'Business already verified')
+      throw new HttpError(400, 'Step aleady completed')
     }
 
     if (userData?.manualKybReference) {
       const status = await shuftiProRequest({ reference: userData.manualKybReference }, { path: 'status' })
 
       if (status.event === 'review.pending') {
-        throw new HttpError(400, 'Business already in review')
+        throw new HttpError(400, 'Manual review pending')
       }
     }
 
