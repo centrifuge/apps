@@ -3,6 +3,8 @@ import { TransactionRequest, TransactionResponse } from '@ethersproject/provider
 import BN from 'bn.js'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
+import { TransactionOptions } from '../types'
+import { CurrencyBalance } from '../utils/BN'
 import { calculateOptimalSolution, Orders, State } from '../utils/solver/tinlakeSolver'
 import { abis } from './tinlake/abi'
 
@@ -29,20 +31,29 @@ export type TinlakeContractAddresses = {
   JUNIOR_MEMBERLIST: string
   COORDINATOR: string
   PILE: string
+  CLAIM_CFG: string
   MCD_VAT?: string
   MCD_JUG?: string
   MAKER_MGR?: string
 }
+
 export type TinlakeContractVersions = {
   FEED?: number
   POOL_ADMIN?: number
 }
+
 export type TinlakeContractNames = keyof TinlakeContractAddresses
 type Abis = typeof abis
 type AbisNames = keyof Abis
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 const e27 = new BN(10).pow(new BN(27))
+
+type ClaimCFGRewardsInput = [
+  claimerAccountID: string, // ID of Centrifuge Chain account that should receive the rewards
+  amount: string, // amount that should be received
+  proof: Uint8Array[] // proof for the given claimer and amount
+]
 
 export function getTinlakeModule(inst: Centrifuge) {
   function contract(
@@ -361,6 +372,61 @@ export function getTinlakeModule(inst: Centrifuge) {
     throw new Error('Arrived at impossible current epoch state')
   }
 
+  // src: tinlake-apps > tinlake.js > src > actions > claimCFG.ts
+  // 1. getClaimCFGAccountID
+  // 2. updateClaimCFGAccountID
+  // these were used to link accounts -> not sure if this feature should be part of centrifuge-app or if it should be retired
+  async function getClaimCFGAccountID(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    args: [address: string],
+    options: TransactionRequest = {}
+  ) {
+    const [address] = args
+    const coordinator = contract(contractAddresses, contractVersions, 'CLAIM_CFG')
+
+    const tx = coordinator.accounts(address, options)
+    return pending(tx)
+  }
+
+  async function updateClaimCFGAccountID(
+    contractAddresses: TinlakeContractAddresses,
+    contractVersions: TinlakeContractVersions | undefined,
+    args: [centAddress: string],
+    options: TransactionRequest = {}
+  ) {
+    const [centAddress] = args
+    const coordinator = contract(contractAddresses, contractVersions, 'CLAIM_CFG')
+
+    const tx = coordinator.update(centAddress, options)
+    return pending(tx)
+  }
+
+  function claimCFGRewards(args: ClaimCFGRewardsInput, options?: TransactionOptions) {
+    const [claimerAccountID, amount, proof] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => {
+        const submittable = api.tx.claims.claim(claimerAccountID, amount, proof)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function claimedCFGRewards(args: [centAddr: string]) {
+    const [centAddr] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) =>
+        api.query.claims.claimedAmounts(centAddr).pipe(
+          map((claimed) => {
+            return new CurrencyBalance(claimed.toString(), api.registry.chainDecimals[0])
+          })
+        )
+      )
+    )
+  }
+
   return {
     updateInvestOrder,
     updateRedeemOrder,
@@ -371,6 +437,10 @@ export function getTinlakeModule(inst: Centrifuge) {
     solveEpoch,
     executeEpoch,
     contract,
+    getClaimCFGAccountID,
+    updateClaimCFGAccountID,
+    claimCFGRewards,
+    claimedCFGRewards,
   }
 }
 
