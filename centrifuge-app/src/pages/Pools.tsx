@@ -1,18 +1,20 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import Centrifuge, { Pool, Rate } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
+import { useLocation } from 'react-router-dom'
 import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
 import { LoadBoundary } from '../components/LoadBoundary'
 import { MenuSwitch } from '../components/MenuSwitch'
-import { PageHeader } from '../components/PageHeader'
-import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
-import { PoolList } from '../components/PoolList'
-import { PoolsSwitch } from '../components/PoolsSwitch'
-import { Tooltips } from '../components/Tooltips'
-import { config } from '../config'
-import { Dec } from '../utils/Decimal'
-import { formatBalance } from '../utils/formatting'
+import { PoolFilter } from '../components/PoolFilter'
+import { filterPools } from '../components/PoolFilter/utils'
+import { getPoolValueLocked } from '../utils/getPoolValueLocked'
+import { TinlakePool } from '../utils/tinlake/useTinlakePools'
+import { useAsyncMemo } from '../utils/useAsyncMemo'
 import { useListedPools } from '../utils/useListedPools'
+import { metadataQueryFn } from '../utils/useMetadata'
 
 export const PoolsPage: React.FC = () => {
   return (
@@ -28,56 +30,82 @@ export const PoolsPage: React.FC = () => {
 }
 
 const Pools: React.FC = () => {
-  const [filtered, setFiltered] = React.useState(true)
+  const cent = useCentrifuge()
+  const { search } = useLocation()
   const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
-  const totalValueLocked = React.useMemo(() => {
-    return (
-      listedTokens
-        ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance
-            .toDecimal()
-            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
-            .toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
-    )
-  }, [listedTokens])
 
-  const pageSummaryData = [
-    {
-      label: <Tooltips type="tvl" />,
-      value: formatBalance(Dec(totalValueLocked || 0), config.baseCurrency),
-    },
-    { label: 'Pools', value: listedPools?.length || 0 },
-    { label: <Tooltips type="tokens" />, value: listedTokens?.length || 0 },
-  ]
+  const pools = useAsyncMemo(async () => {
+    return !!listedPools?.length ? formatPoolsData(listedPools, cent) : []
+  }, [])
+
+  const filteredPools = React.useMemo(() => {
+    if (!pools?.length) {
+      return []
+    }
+
+    const searchParams = new URLSearchParams(search)
+    return filterPools(pools, searchParams)
+  }, [search, pools])
+
+  if (!listedPools.length) {
+    return (
+      <Shelf p={4} justifyContent="center" textAlign="center">
+        <Text variant="heading2" color="textSecondary">
+          There are no pools yet
+        </Text>
+      </Shelf>
+    )
+  }
 
   return (
     <Stack gap={0} flex={1}>
-      <PageHeader
-        title="Pools"
-        subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
-        actions={<MenuSwitch />}
-      />
+      <PoolFilter />
 
-      {listedPools?.length ? (
-        <>
-          <PageSummary data={pageSummaryData} />
-          <PoolList
-            pools={filtered ? listedPools.filter(({ reserve }) => reserve.max.toFloat() > 0) : listedPools}
-            isLoading={metadataIsLoading}
-          />
-          <Box mx={2} mt={3} p={2} borderWidth={0} borderTopWidth={1} borderStyle="solid" borderColor="borderSecondary">
-            <PoolsSwitch filtered={filtered} setFiltered={setFiltered} />
-          </Box>
-        </>
-      ) : (
-        <Shelf p={4} justifyContent="center" textAlign="center">
-          <Text variant="heading2" color="textSecondary">
-            There are no pools yet
-          </Text>
-        </Shelf>
-      )}
+      <Stack gap={1}>
+        {filteredPools?.map((pool) => (
+          <Grid key={pool.name} backgroundColor="pink" gridTemplateColumns="repeat(4, 1fr)">
+            <Box>{pool.name}</Box>
+            <Box>{pool.status}</Box>
+            <Box>{pool.assetClass}</Box>
+            <Box>{pool.valueLocked.toString()}</Box>
+          </Grid>
+        ))}
+      </Stack>
+
+      <MenuSwitch />
     </Stack>
   )
+}
+
+// Todo: move to PoolCard
+export type PoolCardProps = {
+  name: string
+  assetClass: string
+  valueLocked: Decimal
+  apr: Rate | null | undefined
+  status: string
+}
+
+async function formatPoolsData(pools: (Pool | TinlakePool)[], cent: Centrifuge): Promise<PoolCardProps[]> {
+  const promises = pools.map(async (pool) => {
+    const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
+    const mostSeniorTranche = pool?.tranches?.slice(1).at(-1)
+    const metaData = typeof pool.metadata === 'string' ? await metadataQueryFn(pool.metadata, cent) : pool.metadata
+
+    return {
+      name: metaData.pool.name as string,
+      assetClass: metaData.pool.asset.class as string,
+      valueLocked: getPoolValueLocked(pool),
+      apr: mostSeniorTranche?.interestRatePerSec,
+      status:
+        tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
+          ? 'Maker Pool'
+          : pool.tranches.at(-1)?.capacity.toFloat()
+          ? 'Open for investments'
+          : 'Closed',
+    }
+  })
+  const data = await Promise.all(promises)
+
+  return data
 }

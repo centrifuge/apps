@@ -21,7 +21,7 @@ type Result<T extends Schema> = {
   >
 }
 
-async function metadataQueryFn<T extends Schema>(uri: string, cent: Centrifuge, schema?: T) {
+export async function metadataQueryFn<T extends Schema>(uri: string, cent: Centrifuge, schema?: T) {
   try {
     const res = await lastValueFrom(cent.metadata.getMetadata(uri!))
 
