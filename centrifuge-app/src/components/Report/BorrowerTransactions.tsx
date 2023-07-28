@@ -2,7 +2,7 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useBorrowerTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
@@ -28,7 +28,7 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
         tx.epochId.split('-').at(-1)!,
         formatDate(tx.timestamp.toString()),
         formatBorrowerTransactionsType(tx.type),
-        tx.amount ? `${pool.currency} ${formatBalance(tx.amount)}` : '-',
+        tx.amount ? formatBalanceAbbreviated(tx.amount, pool.currency.symbol) : '-',
       ],
       heading: false,
     }))
