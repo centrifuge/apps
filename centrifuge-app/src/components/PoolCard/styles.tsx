@@ -22,6 +22,7 @@ export const Anchor = styled(Link)`
   height: 100%;
   border-radius: ${({ theme }) => theme.radii.card}px;
   background-color: transparent;
+  outline-offset: -2px;
 
   &:focus-visible {
     outline: ${({ theme }) => `2px solid ${theme.colors.textInteractive}`};

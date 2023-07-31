@@ -15,11 +15,10 @@ type PopoverProps = {
     ref: React.RefObject<HTMLDivElement>,
     state: OverlayTriggerState
   ) => React.ReactElement
-  isDismissable?: boolean
   placement?: AriaPositionProps['placement']
 }
 
-export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent, isDismissable = true, placement }) => {
+export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent, placement }) => {
   const state = useOverlayTriggerState({})
   const overlayRef = React.useRef<HTMLDivElement>(null)
   const triggerRef = React.useRef<HTMLDivElement>(null)
@@ -37,7 +36,7 @@ export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent, 
     {
       onClose: state.close,
       isOpen: state.isOpen,
-      isDismissable,
+      isDismissable: true,
     },
     overlayRef
   )

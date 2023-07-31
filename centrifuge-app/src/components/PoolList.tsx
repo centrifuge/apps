@@ -10,7 +10,7 @@ type PoolListProps = {
 export function PoolList({ pools, isLoading }: PoolListProps) {
   return (
     <Box overflow="auto">
-      <Stack as="ul" role="list" gap={1} minWidth={900}>
+      <Stack as="ul" role="list" gap={1} minWidth={900} py={1}>
         {isLoading
           ? Array(6)
               .fill(true)

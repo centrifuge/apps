@@ -1,6 +1,7 @@
-import { Box, Checkbox, IconFilter, Menu, Popover, Text } from '@centrifuge/fabric'
+import { Box, Checkbox, Divider, IconFilter, Menu, Popover, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
+import { FilterButton, QuickAction } from './styles'
 import { SearchKeys } from './types'
 import { toKebabCase } from './utils'
 
@@ -58,19 +59,18 @@ export function FilterMenu({ label, options, searchKey }: FilterMenuProps) {
   return (
     <Box position="relative">
       <Popover
-        isDismissable={false}
         placement="bottom left"
         renderTrigger={(props, ref, state) => (
-          <Text ref={ref} {...props} active={state.isOpen} as="button">
+          <FilterButton ref={ref} {...props} active={state.isOpen} forwardedAs="button" variant="body3">
             {label}
-            <IconFilter color={selectedOptions.length ? 'green' : 'black'} />
-          </Text>
+            <IconFilter color={selectedOptions.length ? 'textSelected' : 'textSecondary'} size="1em" />
+          </FilterButton>
         )}
         renderContent={(props, ref) => (
           <Box {...props} ref={ref}>
             <Menu width={300}>
-              <Box as="form" ref={form} p={2}>
-                <Box as="fieldset" borderWidth={0}>
+              <Stack as="form" ref={form} p={[2, 3]} gap={2}>
+                <Stack as="fieldset" borderWidth={0} gap={2}>
                   <Box as="legend" className="visually-hidden">
                     Filter {label} by:
                   </Box>
@@ -89,18 +89,20 @@ export function FilterMenu({ label, options, searchKey }: FilterMenuProps) {
                       />
                     )
                   })}
-                </Box>
+                </Stack>
+
+                <Divider borderColor="textPrimary" />
 
                 {selectedOptions.length === options.length ? (
-                  <button type="button" onClick={() => deselectAll()}>
+                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => deselectAll()}>
                     Deselect all
-                  </button>
+                  </QuickAction>
                 ) : (
-                  <button type="button" onClick={() => selectAll()}>
+                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => selectAll()}>
                     Select all
-                  </button>
+                  </QuickAction>
                 )}
-              </Box>
+              </Stack>
             </Menu>
           </Box>
         )}

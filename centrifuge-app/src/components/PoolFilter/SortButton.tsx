@@ -1,7 +1,8 @@
-import { IconChevronDown, IconChevronUp, Stack, Text } from '@centrifuge/fabric'
+import { IconChevronDown, IconChevronUp, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { SEARCH_KEYS } from './config'
+import { FilterButton } from './styles'
 import { SortBy } from './types'
 
 export type SortButtonProps = {
@@ -39,11 +40,10 @@ export function SortButton({ label, searchKey }: SortButtonProps) {
   }
 
   return (
-    <Text
-      as="button"
+    <FilterButton
+      forwardedAs="button"
       variant="body3"
       onClick={handleClick}
-      color={sorting.isActive ? 'green' : 'blue'}
       aria-label={
         !sorting.isActive
           ? `Sort ${label}`
@@ -55,10 +55,17 @@ export function SortButton({ label, searchKey }: SortButtonProps) {
     >
       {label}
 
-      <Stack as="span" width={14}>
-        <IconChevronUp size={14} color={sorting.isActive && sorting.direction === 'asc' ? 'green' : 'gray'} />
-        <IconChevronDown size={14} color={sorting.isActive && sorting.direction === 'desc' ? 'green' : 'gray'} />
+      <Stack as="span" width="1em">
+        <IconChevronUp
+          size="1em"
+          color={sorting.isActive && sorting.direction === 'asc' ? 'textSelected' : 'textSecondary'}
+        />
+        <IconChevronDown
+          size="1em"
+          color={sorting.isActive && sorting.direction === 'desc' ? 'textSelected' : 'textSecondary'}
+          style={{ marginTop: '-.4em' }}
+        />
       </Stack>
-    </Text>
+    </FilterButton>
   )
 }

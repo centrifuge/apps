@@ -55,7 +55,7 @@ function Pools() {
   }
 
   return (
-    <Stack gap={0} flex={1}>
+    <Stack gap={1}>
       <PoolFilter pools={pools} />
 
       {!filteredPools.length ? (
