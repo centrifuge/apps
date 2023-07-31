@@ -1,4 +1,3 @@
-import { config } from '../../config'
 import { FilterMenuProps } from './FilterMenu'
 import { SortButtonProps } from './SortButton'
 
@@ -14,12 +13,10 @@ export const SEARCH_KEYS = {
 export const poolFilterConfig = {
   assetClass: {
     label: 'Asset class',
-    options: [...config.assetClasses, 'Credit'], // todo: is 'Credit' tinlke specific or is the config outdated?
     searchKey: SEARCH_KEYS.ASSET_CLASS,
   } as FilterMenuProps,
   poolStatus: {
     label: 'Pool status',
-    options: ['Open for investments', 'Maker pool', 'Closed'],
     searchKey: SEARCH_KEYS.POOL_STATUS,
   } as FilterMenuProps,
   valueLocked: {

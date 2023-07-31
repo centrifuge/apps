@@ -17,14 +17,15 @@ export const COLUMNS = [columns_base, columns_base, columns_base, columns_extend
 export const COLUMN_GAPS = [3, 3, 6, 8]
 
 export type PoolCardProps = {
-  poolId: string
-  name: string
-  assetClass: string
-  valueLocked: Decimal
-  currencySymbol: string
-  apr: Rate | null | undefined
-  status: PoolStatusKey
+  poolId?: string
+  name?: string
+  assetClass?: string
+  valueLocked?: Decimal
+  currencySymbol?: string
+  apr?: Rate | null | undefined
+  status?: PoolStatusKey
   iconUri?: string
+  isLoading?: boolean
 }
 
 export function PoolCard({
@@ -36,6 +37,7 @@ export function PoolCard({
   apr,
   status,
   iconUri,
+  isLoading,
 }: PoolCardProps) {
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
@@ -45,7 +47,7 @@ export function PoolCard({
     <Root as="article">
       <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
-          <Eththumbnail show={poolId.startsWith('0x')}>
+          <Eththumbnail show={poolId?.startsWith('0x')}>
             {iconUri ? (
               <Box as="img" src={iconUri} alt="" height="iconMedium" width="iconMedium" />
             ) : (
@@ -53,20 +55,28 @@ export function PoolCard({
             )}
           </Eththumbnail>
 
-          <TextWithPlaceholder as="h2" variant="body2" color="textPrimary">
+          <TextWithPlaceholder as="h2" variant="body2" color="textPrimary" isLoading={isLoading}>
             <Ellipsis>{name}</Ellipsis>
           </TextWithPlaceholder>
         </Grid>
 
-        <TextWithPlaceholder as="span" variant="body2" color="textSecondary">
+        <TextWithPlaceholder as="span" variant="body2" color="textSecondary" isLoading={isLoading}>
           <Ellipsis>{assetClass}</Ellipsis>
         </TextWithPlaceholder>
 
-        <TextWithPlaceholder as="span" variant="body1" color="textPrimary" textAlign="right">
+        <TextWithPlaceholder as="span" variant="body1" color="textPrimary" textAlign="right" isLoading={isLoading}>
           <Ellipsis>{valueLocked ? formatBalance(valueLocked, currencySymbol) : '-'}</Ellipsis>
         </TextWithPlaceholder>
 
-        <TextWithPlaceholder as="span" variant="body1" color="textPrimary" fontWeight={500} textAlign="right">
+        <TextWithPlaceholder
+          as="span"
+          variant="body1"
+          color="textPrimary"
+          fontWeight={500}
+          textAlign="right"
+          isLoading={isLoading}
+          maxLines={1}
+        >
           <Ellipsis>
             {apr
               ? formatPercentage(apr.toAprPercent(), true, {

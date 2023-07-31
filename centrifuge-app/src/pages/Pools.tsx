@@ -1,6 +1,6 @@
 import Centrifuge, { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router-dom'
 import { LayoutBase } from '../components/LayoutBase'
@@ -26,14 +26,14 @@ export function PoolsPage() {
   )
 }
 
-const Pools: React.FC = () => {
+function Pools() {
   const cent = useCentrifuge()
   const { search } = useLocation()
   const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
 
   const pools = useAsyncMemo(async () => {
-    return !!listedPools?.length ? formatPoolsData(listedPools, cent) : []
-  }, [])
+    return !!listedPools?.length ? await formatPoolsData(listedPools, cent) : []
+  }, [listedPools.length])
 
   const filteredPools = React.useMemo(() => {
     if (!pools?.length) {
@@ -56,9 +56,17 @@ const Pools: React.FC = () => {
 
   return (
     <Stack gap={0} flex={1}>
-      <PoolFilter />
+      <PoolFilter pools={pools} />
 
-      <PoolList pools={filteredPools} isLoading={metadataIsLoading} />
+      {!filteredPools.length ? (
+        <Shelf px={2} mt={2} justifyContent="center">
+          <Box px={2} py={1} borderRadius="input" backgroundColor="secondarySelectedBackground">
+            <InlineFeedback status="info">No results found with these filters. Try different filters.</InlineFeedback>
+          </Box>
+        </Shelf>
+      ) : (
+        <PoolList pools={filteredPools} isLoading={metadataIsLoading} />
+      )}
     </Stack>
   )
 }

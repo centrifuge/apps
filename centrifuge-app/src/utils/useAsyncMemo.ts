@@ -2,24 +2,31 @@
 // source
 // https://github.com/awmleer/use-async-memo/blob/master/src/index.ts
 
-import { DependencyList, useEffect, useState } from 'react'
+import * as React from 'react'
 
-export function useAsyncMemo<T>(factory: () => Promise<T> | undefined | null, deps: DependencyList): T | undefined
-export function useAsyncMemo<T>(factory: () => Promise<T> | undefined | null, deps: DependencyList, initial: T): T
-export function useAsyncMemo<T>(factory: () => Promise<T> | undefined | null, deps: DependencyList, initial?: T) {
-  const [val, setVal] = useState<T | undefined>(initial)
-  useEffect(() => {
+export function useAsyncMemo<T>(factory: () => Promise<T> | undefined | null, deps: React.DependencyList): T | undefined
+export function useAsyncMemo<T>(factory: () => Promise<T> | undefined | null, deps: React.DependencyList, initial: T): T
+export function useAsyncMemo<T>(factory: () => Promise<T> | undefined | null, deps: React.DependencyList, initial?: T) {
+  const [val, setVal] = React.useState<T | undefined>(initial)
+
+  React.useEffect(() => {
     let cancel = false
     const promise = factory()
-    if (promise === undefined || promise === null) return
-    promise.then((val) => {
+
+    if (promise === undefined || promise === null) {
+      return
+    }
+
+    promise.then((result) => {
       if (!cancel) {
-        setVal(val)
+        setVal(result)
       }
     })
+
     return () => {
       cancel = true
     }
   }, deps)
+
   return val
 }

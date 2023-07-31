@@ -9,6 +9,6 @@ const statusColor: { [key in PoolStatusKey]: StatusChipProps['status'] } = {
   Closed: 'default',
 }
 
-export function PoolStatus({ status }: { status: PoolStatusKey }) {
-  return <StatusChip status={statusColor[status] ?? 'default'}>{status}</StatusChip>
+export function PoolStatus({ status }: { status?: PoolStatusKey }) {
+  return status ? <StatusChip status={statusColor[status] ?? 'default'}>{status}</StatusChip> : null
 }
