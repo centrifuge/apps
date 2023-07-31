@@ -1,14 +1,14 @@
-import { CurrencyBalance, CurrencyMetadata, Perquintill, TokenBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, CurrencyMetadata, Perquintill, Price, TokenBalance } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 
 export function formatBalance(
-  amount: CurrencyBalance | TokenBalance | Decimal | number,
+  amount: CurrencyBalance | TokenBalance | Price | Decimal | number,
   currency?: string | CurrencyMetadata,
   precision = 0,
   minPrecision = precision
 ) {
   const formattedAmount = (
-    amount instanceof TokenBalance || amount instanceof CurrencyBalance
+    amount instanceof TokenBalance || amount instanceof CurrencyBalance || amount instanceof Price
       ? amount.toFloat()
       : amount instanceof Decimal
       ? amount.toNumber()
