@@ -876,27 +876,47 @@ export function getPoolsModule(inst: Centrifuge) {
   function updateRedeemOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
     const address = inst.getActingAddress()
+    const { getAccountStakes } = inst.rewards
 
     return inst.getApi().pipe(
-      switchMap(
-        (api) => api.query.investments.redeemOrderId([poolId, trancheId]),
-        (api, rawOrderId) => ({ api, rawOrderId })
+      switchMap((api) =>
+        combineLatest([
+          api.query.investments.redeemOrderId([poolId, trancheId]),
+          getOrder([address, poolId, trancheId]),
+          getAccountStakes([address, poolId, trancheId]),
+        ]).pipe(
+          map(([rawOrderId, order, accountStakes]) => ({
+            api,
+            rawOrderId,
+            order,
+            accountStakes,
+          }))
+        )
       ),
-      combineLatestWith(getOrder([address, poolId, trancheId])),
       take(1),
-      switchMap(([{ api, rawOrderId }, order]) => {
-        const orderId = Number(rawOrderId.toHex() as string)
+      switchMap(({ api, rawOrderId, order, accountStakes }) => {
+        const orderId = Number(rawOrderId.toHex())
+        const { stake } = accountStakes
+
         let submittable
-        if ((!order.invest.isZero() || !order.redeem.isZero()) && order.submittedAt !== orderId) {
-          submittable = api.tx.utility.batchAll([
-            !order.invest.isZero()
-              ? api.tx.investments.collectInvestments([poolId, trancheId])
-              : api.tx.investments.collectRedemptions([poolId, trancheId]),
-            api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString()),
-          ])
-        } else {
-          submittable = api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString())
+        const redeemTx = api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString())
+
+        let unstakeTx
+        if (!stake.isZero()) {
+          const unstakeAmount = newOrder.gte(stake) ? stake : newOrder
+          unstakeTx = api.tx.liquidityRewards.unstake({ Tranche: [poolId, trancheId] }, unstakeAmount)
         }
+
+        if ((!order.invest.isZero() || !order.redeem.isZero()) && order.submittedAt !== orderId) {
+          const collectTx = !order.invest.isZero()
+            ? api.tx.investments.collectInvestments([poolId, trancheId])
+            : api.tx.investments.collectRedemptions([poolId, trancheId])
+
+          submittable = api.tx.utility.batchAll([unstakeTx, collectTx, redeemTx].filter(Boolean))
+        } else {
+          submittable = unstakeTx ? api.tx.utility.batchAll([unstakeTx, redeemTx]) : redeemTx
+        }
+
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -2352,7 +2372,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 tokenPrice = hexToBN(tokenPrice)
 
                 if (!remainingInvestCurrency.isZero()) {
-                  // Multiply invest fulfilment in this epoch with outstanding order amount to get executed amount
+                  // Multiply invest fulfillment in this epoch with outstanding order amount to get executed amount
                   const amount = remainingInvestCurrency.mul(investFulfillment).div(PerquintillBN)
                   // Divide by the token price to get the payout in tokens
                   if (!amount.isZero()) {
@@ -2555,6 +2575,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   return {
+    getPoolCurrency,
     createPool,
     updatePool,
     setMaxReserve,

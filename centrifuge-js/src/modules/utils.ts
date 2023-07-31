@@ -30,9 +30,19 @@ export function getUtilsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getCurrentBlock() {
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.system.number()),
+      map((data) => {
+        return data?.toPrimitive() as number
+      })
+    )
+  }
+
   return {
     ...utilsPure,
     formatAddress,
     getAvgTimePerBlock,
+    getCurrentBlock,
   }
 }

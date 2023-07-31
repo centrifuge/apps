@@ -40,3 +40,8 @@ export function formatMilliseconds(milliSeconds: number) {
   const hours = Math.max(Math.floor(minutes / 60))
   return { hours, minutes: minutes % 60, seconds: seconds % 60 }
 }
+
+export function millisecondsToDays(milliseconds: number): number {
+  const days = milliseconds / (1000 * 60 * 60 * 24)
+  return Math.round(days)
+}
