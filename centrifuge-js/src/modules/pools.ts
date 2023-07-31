@@ -2281,7 +2281,7 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getWriteOffGroups(args: [poolId: string]) {
+  function getWriteOffPolicy(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
 
@@ -2289,17 +2289,22 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.loans.writeOffPolicy(poolId)),
       map((writeOffGroupsValues) => {
         const writeOffGroups = writeOffGroupsValues.toJSON() as {
-          overdueDays: number
-          penalty: string
-          percentage: string
-        }[]
-        return writeOffGroups.map((g) => {
-          return {
-            overdueDays: g.overdueDays as number,
-            penaltyInterestRate: new Rate(hexToBN(g.penalty)),
-            percentage: new Rate(hexToBN(g.percentage)),
+          triggers: ({ principalOverdue: number } | { priceOutdated: number })[]
+          status: {
+            percentage: string
+            penalty: string
           }
-        })
+        }[]
+        return writeOffGroups
+          .map((g) => {
+            return {
+              overdueDays: (g.triggers.find((t) => 'principalOverdue' in t) as { principalOverdue: number })
+                ?.principalOverdue,
+              penaltyInterestRate: new Rate(hexToBN(g.status.penalty)),
+              percentage: new Rate(hexToBN(g.status.percentage)),
+            }
+          })
+          .filter((g) => g.overdueDays != null)
       })
     )
   }
@@ -2420,7 +2425,6 @@ export function getPoolsModule(inst: Centrifuge) {
     return $api.pipe(
       switchMap((api) => api.query.poolSystem.notedChange.entries(poolId)),
       map((changes) => {
-        console.log('changes', changes)
         return changes.map(([key, value]) => {
           const hash = (key.toHuman() as any)[1] as string
           const data = value.toPrimitive() as { change: any; submittedTime: number }
@@ -2475,15 +2479,11 @@ export function getPoolsModule(inst: Centrifuge) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    console.log('getProposedPoolChanges', getProposedPoolChanges)
-
     return $api.pipe(
       switchMap((api) => (console.log('api', api), api.query.poolSystem.scheduledUpdate(poolId))),
       map((updateData) => {
         const update = updateData.toPrimitive() as any
-        console.log('update', update, updateData)
         if (!update) return null
-        console.log('whaat')
         return {
           changes: {
             tranches: update.tranches.noChange === null ? null : update.tranches.newValue,
@@ -2583,7 +2583,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getPoolOrders,
     getLoans,
     getPendingCollect,
-    getWriteOffGroups,
+    getWriteOffPolicy,
     getProposedLoanChanges,
     getProposedPoolChanges,
     updateWriteOffPolicy,

@@ -187,7 +187,7 @@ export function useConstants() {
 }
 
 export function useWriteOffGroups(poolId: string) {
-  const [result] = useCentrifugeQuery(['writeOffGroups', poolId], (cent) => cent.pools.getWriteOffGroups([poolId]))
+  const [result] = useCentrifugeQuery(['writeOffGroups', poolId], (cent) => cent.pools.getWriteOffPolicy([poolId]))
 
   return result
 }
