@@ -9,7 +9,6 @@ import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { Eththumbnail } from '../EthThumbnail'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
 import { Anchor, Ellipsis, Root } from './styles'
-// Not passing a pool shows a placeholder card
 
 const columns_base = 'minmax(150px, 1fr) 1fr 140px 70px 150px'
 const columns_extended = 'minmax(150px, 1fr) 1fr 140px 100px 150px'

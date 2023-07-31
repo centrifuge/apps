@@ -1,4 +1,4 @@
-import { Box, IconFilter, Text } from '@centrifuge/fabric'
+import { Box, Checkbox, IconFilter, Menu, Popover, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { SearchKeys } from './types'
@@ -13,7 +13,6 @@ export type FilterMenuProps = {
 export function FilterMenu({ label, options, searchKey }: FilterMenuProps) {
   const history = useHistory()
   const { pathname, search } = useLocation()
-  const [isOpen, setIsOpen] = React.useState(false)
   const id = React.useId()
 
   const form = React.useRef<HTMLFormElement>(null)
@@ -58,41 +57,54 @@ export function FilterMenu({ label, options, searchKey }: FilterMenuProps) {
 
   return (
     <Box position="relative">
-      <Text as="button" id={`${id}-button`} aria-controls={`${id}-menu`} onClick={() => setIsOpen(!isOpen)}>
-        {label}
-        <IconFilter color={selectedOptions.length ? 'green' : 'black'} />
-      </Text>
+      <Popover
+        isDismissable={false}
+        placement="bottom left"
+        renderTrigger={(props, ref, state) => (
+          <Text ref={ref} {...props} active={state.isOpen} as="button">
+            {label}
+            <IconFilter color={selectedOptions.length ? 'green' : 'black'} />
+          </Text>
+        )}
+        renderContent={(props, ref) => (
+          <Box {...props} ref={ref}>
+            <Menu width={300}>
+              <Box as="form" ref={form} p={2}>
+                <Box as="fieldset" borderWidth={0}>
+                  <Box as="legend" className="visually-hidden">
+                    Filter {label} by:
+                  </Box>
+                  {options.map((option, index) => {
+                    const value = toKebabCase(option)
+                    const checked = selectedOptions.includes(value)
 
-      {isOpen && (
-        <Box as="form" ref={form} hidden={!isOpen} aria-labelledby={`${id}-button`} aria-expanded={!!isOpen}>
-          <Box as="fieldset">
-            <Box as="legend" className="visually-hidden">
-              Filter {label} by:
-            </Box>
-            {options.map((option, index) => {
-              const value = toKebabCase(option)
-              const checked = selectedOptions.includes(value)
-
-              return (
-                <Box as="label" key={`${value}${index}`} display="block">
-                  <input type="checkbox" name={searchKey} value={value} onChange={handleChange} checked={checked} />
-                  {option}
+                    return (
+                      <Checkbox
+                        key={`${value}${index}`}
+                        name={searchKey}
+                        value={value}
+                        onChange={handleChange}
+                        checked={checked}
+                        label={option}
+                      />
+                    )
+                  })}
                 </Box>
-              )
-            })}
-          </Box>
 
-          {selectedOptions.length === options.length ? (
-            <button type="button" onClick={() => deselectAll()}>
-              Deselect all
-            </button>
-          ) : (
-            <button type="button" onClick={() => selectAll()}>
-              Select all
-            </button>
-          )}
-        </Box>
-      )}
+                {selectedOptions.length === options.length ? (
+                  <button type="button" onClick={() => deselectAll()}>
+                    Deselect all
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => selectAll()}>
+                    Select all
+                  </button>
+                )}
+              </Box>
+            </Menu>
+          </Box>
+        )}
+      />
     </Box>
   )
 }
