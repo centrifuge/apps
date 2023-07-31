@@ -78,7 +78,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
       ? [balances.native.balance, balances.native.currency.symbol]
       : []
   const explorer = useGetExplorerUrl(connectedNetwork ?? undefined)
-  const subScanUrl = explorer.address(address, connectedNetwork ?? undefined)
+  const subScanUrl = explorer.address(address, isEvmOnSubstrate ? 'centrifuge' : connectedNetwork ?? undefined)
 
   return (
     <Popover
@@ -134,7 +134,12 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                   </Shelf>
 
                   <Shelf gap="2px">
-                    <IconButton onClick={() => copyToClipboard(formattedAddress)} title="Copy address to clipboard">
+                    <IconButton
+                      onClick={() =>
+                        copyToClipboard(isEvmOnSubstrate ? centrifuge.utils.formatAddress(address) : formattedAddress)
+                      }
+                      title="Copy address to clipboard"
+                    >
                       <IconCopy />
                     </IconButton>
                     {subScanUrl && (
