@@ -153,8 +153,8 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     {
                       label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
                       value: isTinlakePool
-                        ? 'riskGroup' in loan
-                        : 'value' in loan.pricing
+                        ? 'riskGroup' in loan && loan.riskGroup
+                        : 'value' in loan.pricing && loan.pricing.value
                         ? formatBalance(loan.pricing.value, pool?.currency.symbol)
                         : 'TBD',
                     },
