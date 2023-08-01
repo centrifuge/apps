@@ -22,7 +22,7 @@ export const getCentrifuge = () =>
 export const getSigner = async () => {
   await cryptoWaitReady()
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 })
-  // the pure proxxy controller (PURE_PROXY_CONTROLLER_SEED) is the wallet that controls the pure proxy being used to sign the transaction
+  // the pure proxy controller (PURE_PROXY_CONTROLLER_SEED) is the wallet that controls the pure proxy being used to sign the transaction
   // the pure proxy address (MEMBERLIST_ADMIN_PURE_PROXY) has to be given InvestorAdmin permissions on each pool before being able to whitelist investors
   return keyring.addFromMnemonic(process.env.PURE_PROXY_CONTROLLER_SEED)
 }
