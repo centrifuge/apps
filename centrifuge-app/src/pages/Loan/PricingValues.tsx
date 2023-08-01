@@ -10,6 +10,10 @@ type Props = {
 }
 
 export function PricingValues({ loan: { pricing }, pool }: Props) {
+  const isOutstandingDebtOrDiscountedCashFlow =
+    'valuationMethod' in pricing &&
+    (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
+
   if ('valuationMethod' in pricing && pricing.valuationMethod === 'oracle') {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
@@ -32,49 +36,43 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
     )
   }
 
-  if (
-    'valuationMethod' in pricing &&
-    (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
-  )
-    return (
-      <>
-        {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
-        {pricing.advanceRate && (
-          <LabelValueStack
-            label="Advance rate"
-            value={pricing.advanceRate && formatPercentage(pricing.advanceRate.toPercent())}
-          />
-        )}
+  return (
+    <>
+      {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
+      {isOutstandingDebtOrDiscountedCashFlow && (
         <LabelValueStack
-          label="Financing fee"
-          value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
+          label="Advance rate"
+          value={pricing.advanceRate && formatPercentage(pricing.advanceRate.toPercent())}
         />
-        {pricing.valuationMethod === 'discountedCashFlow' && (
-          <>
-            <LabelValueStack
-              label="Probability of default"
-              value={pricing.probabilityOfDefault && formatPercentage(pricing.probabilityOfDefault.toPercent())}
-            />
-            <LabelValueStack
-              label="Loss given default"
-              value={pricing.lossGivenDefault && formatPercentage(pricing.lossGivenDefault.toPercent())}
-            />
-            <LabelValueStack
-              label="Expected loss"
-              value={
-                pricing.lossGivenDefault &&
-                pricing.probabilityOfDefault &&
-                formatPercentage(pricing.lossGivenDefault.toFloat() * pricing.probabilityOfDefault.toFloat() * 100)
-              }
-            />
-            <LabelValueStack
-              label="Discount rate"
-              value={pricing.discountRate && formatPercentage(pricing.discountRate.toPercent())}
-            />
-          </>
-        )}
-      </>
-    )
-
-  return null
+      )}
+      <LabelValueStack
+        label="Financing fee"
+        value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
+      />
+      {isOutstandingDebtOrDiscountedCashFlow && pricing.valuationMethod === 'discountedCashFlow' && (
+        <>
+          <LabelValueStack
+            label="Probability of default"
+            value={pricing.probabilityOfDefault && formatPercentage(pricing.probabilityOfDefault.toPercent())}
+          />
+          <LabelValueStack
+            label="Loss given default"
+            value={pricing.lossGivenDefault && formatPercentage(pricing.lossGivenDefault.toPercent())}
+          />
+          <LabelValueStack
+            label="Expected loss"
+            value={
+              pricing.lossGivenDefault &&
+              pricing.probabilityOfDefault &&
+              formatPercentage(pricing.lossGivenDefault.toFloat() * pricing.probabilityOfDefault.toFloat() * 100)
+            }
+          />
+          <LabelValueStack
+            label="Discount rate"
+            value={pricing.discountRate && formatPercentage(pricing.discountRate.toPercent())}
+          />
+        </>
+      )}
+    </>
+  )
 }
