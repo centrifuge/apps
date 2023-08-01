@@ -3,7 +3,7 @@ import * as React from 'react'
 
 export const SupportedBrowserBanner = () => {
   const storageKey = 'browser-banner-seen'
-  const isSupported = navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1
+  const isSupported = navigator.userAgent.indexOf('Chrome') > -1
   const [isOpen, setIsOpen] = React.useState(false)
 
   React.useEffect(() => {
