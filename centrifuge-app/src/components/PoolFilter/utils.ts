@@ -1,4 +1,4 @@
-import { PoolCardProps } from '../../pages/Pools'
+import { PoolCardProps } from '../PoolCard'
 import { poolFilterConfig, SEARCH_KEYS } from './config'
 import { SortBy, SortDirection } from './types'
 
@@ -7,6 +7,10 @@ export function toKebabCase(string: string) {
 }
 
 export function filterPools(pools: PoolCardProps[], searchParams: URLSearchParams) {
+  if (searchParams.size === 0) {
+    return pools
+  }
+
   let filtered = pools
   const assetClasses = searchParams.getAll(poolFilterConfig.assetClass.searchKey)
   const poolStatuses = searchParams.getAll(poolFilterConfig.poolStatus.searchKey)
@@ -14,11 +18,11 @@ export function filterPools(pools: PoolCardProps[], searchParams: URLSearchParam
   const sortBy = searchParams.get('sort-by') as SortBy
 
   if (assetClasses.length) {
-    filtered = filtered.filter((pool) => assetClasses.includes(toKebabCase(pool.assetClass)))
+    filtered = filtered.filter((pool) => pool.assetClass && assetClasses.includes(toKebabCase(pool.assetClass)))
   }
 
   if (poolStatuses.length) {
-    filtered = filtered.filter((pool) => poolStatuses.includes(toKebabCase(pool.status)))
+    filtered = filtered.filter((pool) => pool.status && poolStatuses.includes(toKebabCase(pool.status)))
   }
 
   if (sortDirection && sortBy) {
@@ -29,7 +33,7 @@ export function filterPools(pools: PoolCardProps[], searchParams: URLSearchParam
 }
 
 const sortMap = {
-  [SEARCH_KEYS.VALUE_LOCKED]: (item: PoolCardProps) => item.valueLocked.toNumber(),
+  [SEARCH_KEYS.VALUE_LOCKED]: (item: PoolCardProps) => item.valueLocked?.toNumber() ?? 0,
   [SEARCH_KEYS.APR]: (item: PoolCardProps) => (item.apr ? item.apr.toDecimal().toNumber() : 0),
 }
 
