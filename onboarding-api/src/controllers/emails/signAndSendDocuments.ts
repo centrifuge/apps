@@ -9,11 +9,9 @@ import {
 } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
-import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
-import { getPoolById } from '../../utils/getPoolById'
 import { HttpError, reportHttpError } from '../../utils/httpError'
-import { validateEvmRemark } from '../../utils/tinlake'
+import { NetworkSwitch } from '../../utils/networks/networkSwitch'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
@@ -34,7 +32,7 @@ export const signAndSendDocumentsController = async (
     const { wallet } = req
 
     const { poolSteps, globalSteps, investorType, name, email, ...user } = await fetchUser(wallet)
-    const { metadata } = await getPoolById(poolId)
+    const { metadata } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
     if (
       investorType === 'individual' &&
       metadata?.onboarding?.kycRestrictedCountries?.includes(user.countryOfCitizenship)
@@ -51,11 +49,7 @@ export const signAndSendDocumentsController = async (
 
     const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
 
-    if (wallet.network === 'substrate') {
-      await validateRemark(transactionInfo, remark)
-    } else {
-      await validateEvmRemark(req.wallet, transactionInfo, remark)
-    }
+    await new NetworkSwitch(wallet.network).validateRemark(wallet, transactionInfo, remark)
 
     if (
       poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&

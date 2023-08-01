@@ -1,5 +1,6 @@
+import { Request } from 'express'
 import { sendEmail, templateIds } from '.'
-import { getPoolById } from '../utils/getPoolById'
+import { NetworkSwitch } from '../utils/networks/networkSwitch'
 
 const getTemplateId = (isGloballyOnboarding: boolean, isApproved: boolean) => {
   if (isGloballyOnboarding) {
@@ -18,6 +19,7 @@ const getTemplateId = (isGloballyOnboarding: boolean, isApproved: boolean) => {
 }
 
 export const sendVerifiedBusinessMessage = async (
+  wallet: Request['wallet'],
   to: string,
   isApproved: boolean,
   poolId?: string,
@@ -30,7 +32,7 @@ export const sendVerifiedBusinessMessage = async (
   let trancheName
 
   if (!isGloballyOnboarding) {
-    const poolData = await getPoolById(poolId)
+    const poolData = await new NetworkSwitch(wallet.network).getPoolById(poolId)
     pool = poolData.pool
     metadata = poolData.metadata
 

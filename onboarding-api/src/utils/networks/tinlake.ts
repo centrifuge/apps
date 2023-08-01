@@ -4,11 +4,11 @@ import { Wallet } from '@ethersproject/wallet'
 import { Request } from 'express'
 import { lastValueFrom } from 'rxjs'
 import { InferType } from 'yup'
-import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
+import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
+import { HttpError, reportHttpError } from '../httpError'
 import MemberListAdminAbi from './abi/MemberListAdmin.abi.json'
 import RemarkerAbi from './abi/Remarker.abi.json'
 import { getCentrifuge } from './centrifuge'
-import { HttpError, reportHttpError } from './httpError'
 
 export interface LaunchingPool extends BasePool {}
 
@@ -129,7 +129,7 @@ export const getTinlakePoolById = async (poolId: string) => {
   const poolData = pools.active.find((p) => p.addresses.ROOT_CONTRACT === poolId)
 
   if (!poolData) {
-    throw new Error(`Pool ${poolId} not found`)
+    throw new HttpError(404, `Tinlake pool ${poolId} not found`)
   }
 
   const id = poolData.addresses.ROOT_CONTRACT
@@ -164,6 +164,7 @@ export const getTinlakePoolById = async (poolId: string) => {
     },
   }
   const pool = {
+    id,
     metadata: uri,
     tranches: [
       {
@@ -207,11 +208,7 @@ export const validateEvmRemark = async (
   }
 }
 
-export const addTinlakeInvestorToMemberList = async (
-  walletAddress: Request['wallet']['address'],
-  poolId: string,
-  trancheId: string
-) => {
+export const addTinlakeInvestorToMemberList = async (wallet: Request['wallet'], poolId: string, trancheId: string) => {
   try {
     const pool = await getTinlakePoolById(poolId)
     const provider = new InfuraProvider(process.env.EVM_NETWORK, process.env.INFURA_KEY)
@@ -225,11 +222,12 @@ export const addTinlakeInvestorToMemberList = async (
     const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
     const tx = await memberAdminContract.functions.updateMember(
       memberlistAddress,
-      walletAddress,
+      wallet.address,
       OneHundredYearsFromNow,
       {
         gasLimit: 1000000,
-        maxPriorityFeePerGas: 4000000000, // 4 gwei
+        // TODO: find a better number, this is causing errors on goerli
+        // maxPriorityFeePerGas: 4000000000, // 4 gwei
       }
     )
     const finalizedTx = await tx.wait()
@@ -237,6 +235,6 @@ export const addTinlakeInvestorToMemberList = async (
     return { txHash: finalizedTx.transactionHash }
   } catch (e) {
     reportHttpError(e)
-    throw new HttpError(400, `Could not add ${walletAddress} to MemberList for pool ${poolId}`)
+    throw new HttpError(400, `Could not add ${wallet.address} to MemberList for pool ${poolId}`)
   }
 }

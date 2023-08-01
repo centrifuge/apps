@@ -13,6 +13,7 @@ import { lastValueFrom } from 'rxjs'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { ethConfig } from '../../../config'
 import { Dec } from '../../../utils/Decimal'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import RemarkerAbi from './abi/Remarker.abi.json'
 
 export const useSignRemark = (
@@ -22,6 +23,7 @@ export const useSignRemark = (
     {
       txHash: string
       blockNumber: string
+      isEvmOnSubstrate?: boolean
     },
     unknown
   >
@@ -33,19 +35,31 @@ export const useSignRemark = (
   const { updateTransaction, addOrUpdateTransaction } = useTransactions()
   const {
     connectedType,
+    isEvmOnSubstrate,
     substrate: { selectedAddress, selectedAccount },
   } = useWallet()
   const [expectedTxFee, setExpectedTxFee] = React.useState(Dec(0))
   const balances = useBalances(selectedAddress || '')
   const { authToken } = useOnboardingAuth()
+  const [account] = useSuitableAccounts({ actingAddress: [selectedAddress || ''] })
 
   const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
     onSuccess: async (_, result) => {
-      const txHash = result.txHash.toHex()
-      // @ts-expect-error
-      const blockNumber = result.blockNumber.toString()
       try {
-        await sendDocumentsToIssuer({ txHash, blockNumber })
+        let txHash: string
+        let blockNumber: string
+        // @ts-expect-error
+        if (isEvmOnSubstrate && result?.[0]?.wait) {
+          // @ts-expect-error
+          const evmResult = await result[0].wait()
+          txHash = evmResult?.transactionHash
+          blockNumber = evmResult?.blockNumber.toString()
+        } else {
+          txHash = result.txHash.toHex()
+          // @ts-expect-error
+          blockNumber = result.blockNumber.toString()
+        }
+        await sendDocumentsToIssuer({ txHash, blockNumber, isEvmOnSubstrate })
         setIsSubstrateTxLoading(false)
       } catch (e) {
         setIsSubstrateTxLoading(false)
@@ -53,44 +67,48 @@ export const useSignRemark = (
     },
   })
 
-  const signSubstrateRemark = async (args: [message: string]) => {
+  const getBalanceForSigning = async () => {
     const txIdSignRemark = Math.random().toString(36).substr(2)
-    setIsSubstrateTxLoading(true)
-    if (balances?.native.balance?.toDecimal().lt(expectedTxFee.mul(1.1))) {
+    addOrUpdateTransaction({
+      id: txIdSignRemark,
+      title: `Get ${balances?.native.currency.symbol}`,
+      status: 'pending',
+      args: [],
+    })
+    // add just enough native currency to be able to sign remark
+    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getBalanceForSigning`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (response.status !== 201) {
       addOrUpdateTransaction({
         id: txIdSignRemark,
         title: `Get ${balances?.native.currency.symbol}`,
-        status: 'pending',
-        args,
+        status: 'failed',
+        args: [],
       })
-      // add just enough native currency to be able to sign remark
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getBalanceForSigning`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
+      setIsSubstrateTxLoading(false)
+      throw new Error('Insufficient funds')
+    } else {
+      addOrUpdateTransaction({
+        id: txIdSignRemark,
+        title: `Get ${balances?.native.currency.symbol}`,
+        status: 'succeeded',
+        args: [],
       })
-
-      if (response.status !== 201) {
-        addOrUpdateTransaction({
-          id: txIdSignRemark,
-          title: `Get ${balances?.native.currency.symbol}`,
-          status: 'failed',
-          args,
-        })
-        setIsSubstrateTxLoading(false)
-        throw new Error('Insufficient funds')
-      } else {
-        addOrUpdateTransaction({
-          id: txIdSignRemark,
-          title: `Get ${balances?.native.currency.symbol}`,
-          status: 'succeeded',
-          args,
-        })
-      }
     }
-    substrateMutation.execute(args)
+  }
+
+  const signSubstrateRemark = async (args: [message: string]) => {
+    setIsSubstrateTxLoading(true)
+    if (!isEvmOnSubstrate && balances?.native.balance?.toDecimal().lt(expectedTxFee.mul(1.1))) {
+      await getBalanceForSigning()
+    }
+    substrateMutation.execute(args, { account })
   }
 
   useEffect(() => {
@@ -150,7 +168,7 @@ export const useSignRemark = (
     }
   }
 
-  return connectedType === 'evm'
+  return connectedType === 'evm' && !isEvmOnSubstrate
     ? { execute: signEvmRemark, isLoading: isEvmTxLoading }
     : { execute: signSubstrateRemark, isLoading: isSubstrateTxLoading }
 }
