@@ -58,7 +58,6 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       </Box>
 
       <DateRange
-        start={startDate}
         end={endDate}
         onSelection={(start, end, range) => {
           setRange(range)

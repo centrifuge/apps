@@ -5,7 +5,6 @@ import { Select, SelectOptionItem } from '../Select'
 export type DateRangeProps = {
   onSelection: (start: Date, end: Date, range: RangeOptionValue) => void
   defaultOption?: RangeOption
-  start: Date
   end: Date
 }
 
@@ -45,13 +44,9 @@ const getDate = {
   },
 } as const
 
-export function DateRange({ onSelection, defaultOption = rangeOptions[1], start, end }: DateRangeProps) {
+export function DateRange({ onSelection, defaultOption = rangeOptions[1], end }: DateRangeProps) {
   const [value, setValue] = React.useState(defaultOption.value)
-  const [startDate, setStartDate] = React.useState(start || new Date())
-
-  React.useEffect(() => {
-    setStartDate(getDate[defaultOption.value](end))
-  }, [])
+  const [startDate, setStartDate] = React.useState(getDate[defaultOption.value](end))
 
   React.useEffect(() => {
     onSelection(startDate, end, value)
