@@ -69,7 +69,8 @@ export const DataTable = <T extends Record<string, any>>({
   )
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
-  const [setNode, { scrollWidth }] = useElementScrollSize()
+  const ref = React.useRef(null)
+  const { scrollWidth } = useElementScrollSize(ref)
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
@@ -86,11 +87,7 @@ export const DataTable = <T extends Record<string, any>>({
   const showHeader = groupIndex === 0 || !groupIndex
 
   return (
-    <Stack
-      ref={setNode}
-      as={rounded && !lastGroupIndex ? Card : Stack}
-      minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}
-    >
+    <Stack ref={ref} as={rounded && !lastGroupIndex ? Card : Stack} minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}>
       <Shelf>
         {showHeader &&
           columns.map((col, i) => (
