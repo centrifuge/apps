@@ -380,12 +380,12 @@ export async function getWriteOffPercentage(pool: TinlakePool, loanId: number): 
     const writeOffGroup = loanRate.sub(1000)
     const { percentage } = await navFeed.writeOffs(writeOffGroup.toString())
 
-    return new BN(10).pow(new BN(27)).sub(new BN(percentage.toString()))
+    return Rate.fromFloat(1).sub(new BN(percentage.toString()))
   } else if (navFeed.writeOffGroups) {
     const writeOffGroups = await getWriteOffGroups(pool)
     let { percentage } = writeOffGroups[loanRate.sub(1000).toNumber()]
     if (percentage) {
-      percentage = new BN(10).pow(new BN(27)).sub(new BN(percentage.toString()))
+      percentage = Rate.fromFloat(1).sub(new BN(percentage.toString()))
 
       return percentage
     }
