@@ -10,8 +10,8 @@ import { Eththumbnail } from '../EthThumbnail'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
 import { Anchor, Ellipsis, Root } from './styles'
 
-const columns_base = 'minmax(150px, 1fr) 1fr 140px 70px 150px'
-const columns_extended = 'minmax(150px, 1fr) 1fr 140px 100px 150px'
+const columns_base = 'minmax(150px, 2fr) minmax(100px, 1fr) 140px 70px 150px'
+const columns_extended = 'minmax(200px, 2fr) minmax(100px, 1fr) 140px 100px 150px'
 export const COLUMNS = [columns_base, columns_base, columns_base, columns_extended]
 export const COLUMN_GAPS = [3, 3, 6, 8]
 
