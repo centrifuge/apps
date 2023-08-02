@@ -27,13 +27,24 @@ export function PoolFilter({ pools }: PoolFilterProps) {
         Pool name
       </Text>
 
-      <FilterMenu {...poolFilterConfig.assetClass} options={assetClasses} tooltip="assetClass" />
+      <FilterMenu
+        {...poolFilterConfig.assetClass}
+        options={assetClasses}
+        tooltip="Different asset classes to group real-world assets with similar characteristics."
+      />
 
-      <SortButton {...poolFilterConfig.valueLocked} />
+      <SortButton
+        {...poolFilterConfig.valueLocked}
+        tooltip="Value locked represents the current total value of pool tokens."
+      />
 
       <SortButton {...poolFilterConfig.apr} />
 
-      <FilterMenu {...poolFilterConfig.poolStatus} options={poolStatuses} tooltip="investment" />
+      <FilterMenu
+        {...poolFilterConfig.poolStatus}
+        options={poolStatuses}
+        tooltip="Pool status displays the type of pool, if open or closed for investment and if senior tranche is funded by Maker."
+      />
     </Grid>
   )
 }

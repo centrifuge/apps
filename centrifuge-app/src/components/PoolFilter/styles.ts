@@ -18,7 +18,6 @@ export const FilterButton = styled(Text)`
   display: flex;
   align-items: center;
   gap: 0.3em;
-  justify-self: end;
 
   ${sharedStyles}
 `

@@ -236,10 +236,8 @@ export const tooltipText = {
   },
 }
 
-export type TooltipType = keyof typeof tooltipText
-
 export type TooltipsProps = {
-  type: TooltipType
+  type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string
   props?: any

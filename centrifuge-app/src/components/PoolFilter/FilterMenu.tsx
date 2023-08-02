@@ -1,7 +1,6 @@
 import { Box, Checkbox, Divider, IconFilter, Menu, Popover, Stack, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-import { tooltipText, TooltipType } from '../Tooltips'
 import { FilterButton, QuickAction } from './styles'
 import { SearchKeys } from './types'
 import { toKebabCase } from './utils'
@@ -10,11 +9,10 @@ export type FilterMenuProps = {
   label: string
   options: string[]
   searchKey: SearchKeys['ASSET_CLASS' | 'POOL_STATUS']
-  tooltip: TooltipType
+  tooltip: string
 }
 
 export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuProps) {
-  const tooltipProps = tooltipText[tooltip]
   const history = useHistory()
   const { pathname, search } = useLocation()
   const id = React.useId()
@@ -66,7 +64,7 @@ export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuPro
         renderTrigger={(props, ref, state) => {
           return (
             <Box ref={ref}>
-              <Tooltip {...tooltipProps} {...props} style={{ display: 'block' }}>
+              <Tooltip body={tooltip} {...props} style={{ display: 'block' }}>
                 <FilterButton forwardedAs="span" variant="body3">
                   {label}
                   <IconFilter color={selectedOptions.length ? 'textSelected' : 'textSecondary'} size="1em" />
