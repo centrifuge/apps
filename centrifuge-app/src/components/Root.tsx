@@ -40,6 +40,7 @@ import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
+import { SupportedBrowserBanner } from './SupportedBrowserBanner'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -118,6 +119,7 @@ export function Root() {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
+            <SupportedBrowserBanner />
             <WalletProvider
               evmChains={evmChains}
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
