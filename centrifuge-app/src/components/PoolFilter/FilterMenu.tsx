@@ -95,6 +95,7 @@ export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuPro
                         onChange={handleChange}
                         checked={checked}
                         label={option}
+                        extendedClickArea
                       />
                     )
                   })}
