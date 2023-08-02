@@ -27,13 +27,13 @@ export function PoolFilter({ pools }: PoolFilterProps) {
         Pool name
       </Text>
 
-      <FilterMenu {...poolFilterConfig.assetClass} options={assetClasses} />
+      <FilterMenu {...poolFilterConfig.assetClass} options={assetClasses} tooltip="assetClass" />
 
       <SortButton {...poolFilterConfig.valueLocked} />
 
       <SortButton {...poolFilterConfig.apr} />
 
-      <FilterMenu {...poolFilterConfig.poolStatus} options={poolStatuses} />
+      <FilterMenu {...poolFilterConfig.poolStatus} options={poolStatuses} tooltip="investment" />
     </Grid>
   )
 }
