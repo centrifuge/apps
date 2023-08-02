@@ -33,7 +33,7 @@ export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
           <LogoLink />
         </LogoContainer>
 
-        <WalletContainer pr={PADDING_MAIN}>
+        <WalletContainer mr={PADDING_MAIN}>
           <WalletMenu menuItems={[<OnboardingStatus />]} />
         </WalletContainer>
 
