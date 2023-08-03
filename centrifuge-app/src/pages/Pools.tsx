@@ -1,4 +1,4 @@
-import Centrifuge, { Pool } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -12,9 +12,11 @@ import { PoolList } from '../components/PoolList'
 import { PoolsTokensShared } from '../components/PoolsTokensShared'
 import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
-import { useAsyncMemo } from '../utils/useAsyncMemo'
 import { useListedPools } from '../utils/useListedPools'
-import { metadataQueryFn } from '../utils/useMetadata'
+import { useMetadataMulti } from '../utils/useMetadata'
+
+type PoolMetaDataPartial = Partial<PoolMetadata> | undefined
+type MetaDataById = Record<string, PoolMetaDataPartial>
 
 export function PoolsPage() {
   return (
@@ -31,9 +33,15 @@ function Pools() {
   const { search } = useLocation()
   const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
 
-  const pools = useAsyncMemo(async () => {
-    return !!listedPools?.length ? await formatPoolsData(listedPools, cent) : []
-  }, [listedPools.length])
+  const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
+  const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
+    centPools?.map((p) => p.metadata) ?? []
+  ).map((q) => q.data)
+  const centPoolsMetaDataById = getMetasById(centPools, centPoolsMetaData)
+
+  const pools = React.useMemo(() => {
+    return !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
+  }, [listedPools, centPoolsMetaDataById])
 
   const filteredPools = React.useMemo(() => {
     if (!pools?.length) {
@@ -71,16 +79,30 @@ function Pools() {
   )
 }
 
-async function formatPoolsData(pools: (Pool | TinlakePool)[], cent: Centrifuge): Promise<PoolCardProps[]> {
-  const promises = pools.map(async (pool) => {
+function getMetasById(pools: Pool[], poolMetas: PoolMetaDataPartial[]) {
+  const result: MetaDataById = {}
+
+  pools.forEach(({ id: poolId }, index) => {
+    result[poolId] = poolMetas[index]
+  })
+
+  return result
+}
+
+function poolsToPoolCardProps(
+  pools: (Pool | TinlakePool)[],
+  metaDataById: MetaDataById,
+  cent: Centrifuge
+): PoolCardProps[] {
+  return pools.map((pool) => {
     const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
     const mostSeniorTranche = pool?.tranches?.slice(1).at(-1)
-    const metaData = typeof pool.metadata === 'string' ? await metadataQueryFn(pool.metadata, cent) : pool.metadata
+    const metaData = typeof pool.metadata === 'string' ? metaDataById[pool.id] : pool.metadata
 
     return {
       poolId: pool.id,
-      name: metaData.pool.name as string,
-      assetClass: metaData.pool.asset.class as string,
+      name: metaData?.pool?.name,
+      assetClass: metaData?.pool?.asset.class,
       valueLocked: getPoolValueLocked(pool),
       currencySymbol: pool.currency.symbol,
       apr: mostSeniorTranche?.interestRatePerSec,
@@ -93,7 +115,4 @@ async function formatPoolsData(pools: (Pool | TinlakePool)[], cent: Centrifuge):
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
     }
   })
-  const data = await Promise.all(promises)
-
-  return data
 }
