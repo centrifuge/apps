@@ -10,6 +10,7 @@ import { PageSection } from '../../../components/PageSection'
 import { formatPercentage } from '../../../utils/formatting'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { useConstants, useWriteOffGroups } from '../../../utils/usePools'
+import { PendingLoanChanges } from './PendingLoanChanges'
 import { WriteOffInput } from './WriteOffInput'
 
 export type Row = WriteOffGroup
@@ -60,7 +61,7 @@ export function WriteOffGroups() {
 
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update write-off policy',
-    (cent) => cent.pools.updateWriteOffGroups,
+    (cent) => cent.pools.updateWriteOffPolicy,
     {
       onSuccess: () => {
         setIsEditing(false)
@@ -91,7 +92,7 @@ export function WriteOffGroups() {
       let highestPenalty = 0
       let previousDays = -1
       writeOffGroups.forEach((g) => {
-        if (g.writeOff <= highestWriteOff) {
+        if ((g.writeOff as number) <= highestWriteOff) {
           let index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
           index = index === -1 ? 0 : index
           errors = setIn(
@@ -103,7 +104,7 @@ export function WriteOffGroups() {
           highestWriteOff = g.writeOff as number
         }
 
-        if (g.penaltyInterest < highestPenalty) {
+        if ((g.penaltyInterest as number) < highestPenalty) {
           let index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
           index = index === -1 ? 0 : index
           errors = setIn(
@@ -207,6 +208,7 @@ export function WriteOffGroups() {
             ) : (
               <DataTable data={sortedSavedGroups} columns={columns} />
             )}
+            <PendingLoanChanges poolId={poolId} />
           </Stack>
         </PageSection>
       </Form>

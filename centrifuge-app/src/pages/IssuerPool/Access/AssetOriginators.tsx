@@ -203,7 +203,7 @@ function AOForm({
 
             if (options?.multisig) {
               const otherSigners = sortAddresses(
-                options.multisig.signers.filter((signer) => !isSameAddress(signer, cent.getSignerAddress()))
+                options.multisig.signers.filter((signer) => !isSameAddress(signer, cent.getSignerAddress('substrate')))
               )
               console.log('multisig callData', tx.method.toHex())
               tx = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, tx, 0)

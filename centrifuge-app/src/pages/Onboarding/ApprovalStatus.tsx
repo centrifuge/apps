@@ -20,7 +20,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   const trancheId = pool.trancheId
   const poolName = pool.name
 
-  const onboardingStatus = onboardingUser.poolSteps?.[poolId]?.[trancheId].status.status
+  const onboardingStatus = onboardingUser?.poolSteps?.[poolId]?.[trancheId]?.status?.status
 
   const onFocus = () => {
     refetchOnboardingUser()
@@ -28,7 +28,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
 
   React.useEffect(() => {
     if (
-      onboardingUser.poolSteps?.[poolId]?.[trancheId].status.status === 'pending' ||
+      onboardingUser.poolSteps?.[poolId]?.[trancheId]?.status?.status === 'pending' ||
       (onboardingUser.investorType === 'entity' && onboardingUser?.manualKybStatus)
     ) {
       window.addEventListener('focus', onFocus)

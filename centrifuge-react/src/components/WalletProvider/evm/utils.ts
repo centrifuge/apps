@@ -111,7 +111,15 @@ export function isMetaMaskWallet(): boolean {
   // When using Brave browser, `isMetaMask` is set to true when using the built-in wallet
   // This function should return true only when using the MetaMask extension
   // https://wallet-docs.brave.com/ethereum/wallet-detection#compatability-with-metamask
-  return (window.ethereum?.isMetaMask ?? false) && !isBraveWallet()
+  return (window.ethereum?.isMetaMask ?? false) && !isBraveWallet() && !isTalismanWallet()
+}
+
+export function isTalismanWallet(): boolean {
+  return window.ethereum?.isTalisman ?? false
+}
+
+export function isSubWallet(): boolean {
+  return window.ethereum?.isSubWallet ?? false
 }
 
 export function isCoinbaseWallet(): boolean {

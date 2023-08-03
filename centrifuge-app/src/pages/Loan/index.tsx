@@ -1,7 +1,8 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
+  Button,
   IconNft,
   InteractiveCard,
   Shelf,
@@ -24,39 +25,52 @@ import { AnchorPillButton } from '../../components/PillButton'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
-import { LoanTemplate, LoanTemplateAttribute } from '../../types'
+import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
+import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
-import { useCanBorrowAsset } from '../../utils/usePermissions'
+import { useCanBorrowAsset, useCanSetOraclePrice } from '../../utils/usePermissions'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
+import { OraclePriceForm } from './OraclePriceForm'
 import { PricingValues } from './PricingValues'
+import { formatNftAttribute } from './utils'
 
 export const LoanPage: React.FC = () => {
+  const [showOraclePricing, setShowOraclePricing] = React.useState(false)
   return (
-    <PageWithSideBar sidebar={<LoanSidebar />}>
-      <Loan />
+    <PageWithSideBar sidebar={<LoanSidebar showOraclePricing={showOraclePricing} />}>
+      <Loan setShowOraclePricing={() => setShowOraclePricing(true)} />
     </PageWithSideBar>
   )
 }
 
-const LoanSidebar: React.FC = () => {
+function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
+  return loan.poolId.startsWith('0x')
+}
+
+const LoanSidebar: React.FC<{ showOraclePricing?: boolean }> = ({ showOraclePricing }) => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
   const canBorrow = useCanBorrowAsset(pid, aid)
 
-  if (!loan || loan.status === 'Closed' || !canBorrow) return null
+  if (!loan || loan.status === 'Closed' || !canBorrow || isTinlakeLoan(loan)) return null
 
-  return <FinanceForm loan={loan} />
+  return (
+    <Stack gap={2}>
+      {showOraclePricing && <OraclePriceForm loan={loan} />}
+      <FinanceForm loan={loan} />
+    </Stack>
+  )
 }
 
-const Loan: React.FC = () => {
+const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePricing }) => {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
@@ -69,6 +83,8 @@ const Loan: React.FC = () => {
   const cent = useCentrifuge()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
+  const address = useAddress()
+  const canOraclePrice = useCanSetOraclePrice(address)
 
   const name = truncateText((isTinlakePool ? loan?.asset.nftId : nftMetadata?.name) || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
@@ -110,6 +126,10 @@ const Loan: React.FC = () => {
               'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
                 ? [
                     {
+                      label: 'Maturity date',
+                      value: formatDate(loan.pricing.maturityDate),
+                    },
+                    {
                       label: 'Value',
                       value: formatBalance(
                         'outstandingDebt' in loan
@@ -133,8 +153,8 @@ const Loan: React.FC = () => {
                     {
                       label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
                       value: isTinlakePool
-                        ? 'riskGroup' in loan
-                        : 'value' in loan.pricing
+                        ? 'riskGroup' in loan && loan.riskGroup
+                        : 'value' in loan.pricing && loan.pricing.value
                         ? formatBalance(loan.pricing.value, pool?.currency.symbol)
                         : 'TBD',
                     },
@@ -170,7 +190,20 @@ const Loan: React.FC = () => {
             </PageSection>
           ) : null}
 
-          <PageSection title="Pricing">
+          <PageSection
+            title="Pricing"
+            headerRight={
+              canOraclePrice &&
+              setShowOraclePricing &&
+              loan.status !== 'Closed' &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod === 'oracle' && (
+                <Button variant="secondary" onClick={() => setShowOraclePricing()} small>
+                  Update price
+                </Button>
+              )
+            }
+          >
             <Shelf gap={3} flexWrap="wrap">
               <PricingValues loan={loan} pool={pool} />
             </Shelf>
@@ -189,7 +222,7 @@ const Loan: React.FC = () => {
                       const attribute = templateData.attributes?.[key]
                       if (!attribute) return null
                       const value = publicData[key] ?? privateData[key]
-                      const formatted = value ? formatValue(value, attribute) : '-'
+                      const formatted = value ? formatNftAttribute(value, attribute) : '-'
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
@@ -295,23 +328,4 @@ const Loan: React.FC = () => {
       ) : null}
     </Stack>
   )
-}
-
-function formatValue(value: any, attr: LoanTemplateAttribute) {
-  switch (attr.input.type) {
-    case 'number':
-      return `${(attr.input.decimals
-        ? new CurrencyBalance(value, attr.input.decimals).toFloat()
-        : Number(value)
-      ).toLocaleString('en')} ${attr.input.unit || ''}`
-    case 'currency':
-      return formatBalance(
-        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals) : Number(value),
-        attr.input.symbol
-      )
-    case 'date':
-      return formatDate(value)
-    default:
-      return value
-  }
 }

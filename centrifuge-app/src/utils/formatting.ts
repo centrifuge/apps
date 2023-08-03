@@ -1,19 +1,20 @@
-import { CurrencyBalance, CurrencyMetadata, Perquintill, TokenBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, CurrencyMetadata, Perquintill, Price, TokenBalance } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 
 export function formatBalance(
-  amount: CurrencyBalance | TokenBalance | Decimal | number,
+  amount: CurrencyBalance | TokenBalance | Price | Decimal | number,
   currency?: string | CurrencyMetadata,
-  precision = 0
+  precision = 0,
+  minPrecision = precision
 ) {
   const formattedAmount = (
-    amount instanceof TokenBalance || amount instanceof CurrencyBalance
+    amount instanceof TokenBalance || amount instanceof CurrencyBalance || amount instanceof Price
       ? amount.toFloat()
       : amount instanceof Decimal
       ? amount.toNumber()
       : amount
   ).toLocaleString('en', {
-    minimumFractionDigits: precision,
+    minimumFractionDigits: minPrecision,
     maximumFractionDigits: precision,
   })
   return currency ? `${formattedAmount} ${typeof currency === 'string' ? currency : currency.symbol}` : formattedAmount
@@ -41,7 +42,11 @@ export function formatBalanceAbbreviated(
   return currency ? `${formattedAmount} ${currency}` : formattedAmount
 }
 
-export function formatPercentage(amount: Perquintill | Decimal | number, includeSymbol = true) {
+export function formatPercentage(
+  amount: Perquintill | Decimal | number,
+  includeSymbol = true,
+  options: Intl.NumberFormatOptions = {}
+) {
   const formattedAmount = (
     amount instanceof Perquintill
       ? amount.toPercent().toNumber()
@@ -51,6 +56,7 @@ export function formatPercentage(amount: Perquintill | Decimal | number, include
   ).toLocaleString('en', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
+    ...options,
   })
   return includeSymbol ? `${formattedAmount}%` : formattedAmount
 }

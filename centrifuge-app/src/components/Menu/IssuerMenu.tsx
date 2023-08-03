@@ -20,11 +20,15 @@ export function IssuerMenu({ defaultOpen = false, poolIds = [], stacked, childre
   const offset = `calc(100% + 2 * ${space[1]}px)`
   const id = React.useId()
 
+  React.useEffect(() => {
+    setOpen(defaultOpen)
+  }, [defaultOpen])
+
   return (
-    <Box position={['static', 'static', 'relative', 'relative', 'static']}>
+    <Box position={['static', 'static', 'relative', 'static']}>
       {open && (
         <Box
-          display={['block', 'block', 'block', 'block', 'none']}
+          display={['block', 'block', 'block', 'none']}
           position="fixed"
           top="0"
           left="0"
@@ -55,12 +59,12 @@ export function IssuerMenu({ defaultOpen = false, poolIds = [], stacked, childre
         id={`${id}-menu`}
         aria-labelledby={`${id}-button`}
         aria-expanded={!!open}
-        position={['absolute', 'absolute', 'absolute', 'absolute', 'static']}
+        position={['absolute', 'absolute', 'absolute', 'static']}
         top={['auto', 'auto', 0, 0, 'auto']}
         bottom={[offset, offset, 'auto']}
         left={[1, 1, offset, offset, 'auto']}
-        width={[fullWidth, fullWidth, 150, 150, '100%']}
-        mt={[0, 0, 0, 0, 1]}
+        width={[fullWidth, fullWidth, 150, '100%']}
+        mt={[0, 0, 0, 1]}
       >
         {children}
       </Box>
