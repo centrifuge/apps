@@ -76,9 +76,8 @@ export function useMetadataMulti<T extends Schema>(
 ): UseQueryResult<Result<T>, unknown>[]
 export function useMetadataMulti<T extends Schema>(uris: (string | undefined)[], schema?: T) {
   const cent = useCentrifuge()
-  const filteredUris = uris?.filter(Boolean) as string[]
   const queries = useQueries(
-    filteredUris?.map((uri) => {
+    uris?.map((uri) => {
       return {
         queryKey: ['metadata', uri],
         queryFn: async () => metadataQueryFn(uri!, cent, schema),

@@ -195,7 +195,19 @@ export function useConstants() {
 }
 
 export function useWriteOffGroups(poolId: string) {
-  const [result] = useCentrifugeQuery(['writeOffGroups', poolId], (cent) => cent.pools.getWriteOffGroups([poolId]))
+  const [result] = useCentrifugeQuery(['writeOffGroups', poolId], (cent) => cent.pools.getWriteOffPolicy([poolId]))
+
+  return result
+}
+
+export function useLoanChanges(poolId: string) {
+  const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) => cent.pools.getProposedLoanChanges([poolId]))
+
+  return result
+}
+
+export function usePoolChanges(poolId: string) {
+  const [result] = useCentrifugeQuery(['poolChanges', poolId], (cent) => cent.pools.getProposedPoolChanges([poolId]))
 
   return result
 }

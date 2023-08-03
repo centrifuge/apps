@@ -1,13 +1,14 @@
+import { Request } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
-import { OnboardingUser, Wallet } from '../database'
+import { OnboardingUser } from '../database'
 
 export type VerifyEmailPayload = {
   email: string
-  wallet: Wallet[0]
+  wallet: Request['wallet']
 }
 
-export const sendVerifyEmailMessage = async (user: OnboardingUser, wallet: Wallet[0]) => {
+export const sendVerifyEmailMessage = async (user: OnboardingUser, wallet: Request['wallet']) => {
   if (!user?.email) {
     throw new Error('No email found')
   }

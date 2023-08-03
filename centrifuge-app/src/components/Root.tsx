@@ -40,6 +40,7 @@ import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
+import { SupportedBrowserBanner } from './SupportedBrowserBanner'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,6 +98,7 @@ const evmChains: EvmChains =
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
   const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
+  const [showEvmOnSubstrate, setShowEvmOnSubstrate] = React.useState(!!initialFlagsState.showEvmOnSubstrate)
 
   return (
     <>
@@ -117,11 +119,13 @@ export function Root() {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
+            <SupportedBrowserBanner />
             <WalletProvider
               evmChains={evmChains}
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
-              showAdvancedAccounts={showAdvancedAccounts}
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+              showAdvancedAccounts={showAdvancedAccounts}
+              evmOnSubstrate={showEvmOnSubstrate}
             >
               <OnboardingAuthProvider>
                 <OnboardingProvider>
@@ -129,6 +133,7 @@ export function Root() {
                     onChange={(state) => {
                       setIsThemeToggled(!!state.alternativeTheme)
                       setShowAdvancedAccounts(!!state.showAdvancedAccounts)
+                      setShowEvmOnSubstrate(!!state.showEvmOnSubstrate)
                     }}
                   >
                     <TransactionProvider>

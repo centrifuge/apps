@@ -9,6 +9,7 @@ import { LoadBoundary } from './LoadBoundary'
 import { LogoLink } from './LogoLink-deprecated'
 import { Menu } from './Menu-deprecated'
 import { OnboardingStatus } from './OnboardingStatus'
+import { TinlakeRewards } from './TinlakeRewards'
 
 type Props = {
   sidebar?: React.ReactNode
@@ -123,6 +124,8 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
               </Stack>
 
               <LoadBoundary>{sidebar}</LoadBoundary>
+
+              <TinlakeRewards />
             </Stack>
           )}
         </Box>
