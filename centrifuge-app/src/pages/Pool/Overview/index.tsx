@@ -90,7 +90,7 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { showWallets, connectedType, evm } = useWallet()
+  const { showNetworks, connectedType, evm } = useWallet()
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
@@ -126,6 +126,7 @@ export function PoolDetailOverview({
           : Dec(0),
         id: tranche.id,
         capacity: tranche.capacity,
+        tokenPrice: tranche.tokenPrice,
       }
     })
     .reverse()
@@ -198,12 +199,20 @@ export function PoolDetailOverview({
                       </Text>
                     }
                   />
+                  <LabelValueStack
+                    label="Token price"
+                    value={
+                      <TextWithPlaceholder isLoading={!token.tokenPrice}>
+                        {token.tokenPrice && formatBalance(token.tokenPrice, pool?.currency.symbol, 4, 2)}
+                      </TextWithPlaceholder>
+                    }
+                  />
                   {setSelectedToken && getTrancheAvailability(token.id) && (
                     <Button
                       variant="secondary"
                       onClick={() => {
                         if (!connectedType) {
-                          showWallets()
+                          showNetworks()
                         }
                         setSelectedToken(token.id)
                       }}

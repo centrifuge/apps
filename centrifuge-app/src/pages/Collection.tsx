@@ -12,11 +12,10 @@ import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { collectionMetadataSchema } from '../schemas'
-import { useAddress } from '../utils/useAddress'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
-import { isSameAddress } from '../utils/web3'
+import { useSuitableAccounts } from '../utils/usePermissions'
 
 export const CollectionPage: React.FC = () => {
   return (
@@ -32,15 +31,17 @@ const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
   } = useRouteMatch<{ cid: string }>()
-  const address = useAddress('substrate')
   const collection = useCollection(collectionId)
+
+  if (!collection) throw new Error('Collection not found')
+
   const nfts = useNFTs(collectionId)
   const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
+  const [account] = useSuitableAccounts({ actingAddress: [collection.owner] })
 
-  const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
-  const canMint = !isLoanCollection && isSameAddress(address, collection?.owner)
+  const canMint = !!account
 
   return (
     <Stack flex={1} pb={8}>

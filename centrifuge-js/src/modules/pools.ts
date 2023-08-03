@@ -20,7 +20,14 @@ import { Dec } from '../utils/Decimal'
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin'
+type AdminRole =
+  | 'PoolAdmin'
+  | 'Borrower'
+  | 'PricingAdmin'
+  | 'LiquidityAdmin'
+  | 'InvestorAdmin'
+  | 'LoanAdmin'
+  | 'PODReadAccess'
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
@@ -44,6 +51,7 @@ const AdminRoleBits = {
   LiquidityAdmin: 0b00001000,
   InvestorAdmin: 0b00010000,
   LoanAdmin: 0b00100000,
+  PODReadAccess: 0b01000000,
 }
 
 // const CurrencyRoleBits = {
@@ -66,7 +74,7 @@ type LoanInfoInput =
     }
   | {
       valuationMethod: 'oracle'
-      maxBorrowQuantity: string
+      maxBorrowAmount: string | null
       Isin: string
       maturityDate: Date
     }
@@ -98,7 +106,7 @@ export type LoanInfoData = {
           priceId: {
             isin: string
           }
-          maxBorrowQuantity: string
+          maxBorrowAmount: { noLimit: null } | { quantity: string }
         }
       }
     | {
@@ -148,7 +156,7 @@ export type ActiveLoanInfoData = {
             priceId: {
               isin: string
             }
-            maxBorrowQuantity: string
+            maxBorrowAmount: { noLimit: null } | { quantity: string }
           }
           outstandingQuantity: string
         }
@@ -318,13 +326,12 @@ type CreatedLoanData = {
 
 // type from chain
 type ActiveLoanData = ActiveLoanInfoData & {
-  loanId: string
   borrower: string
   writeOffPercentage: string
   originationDate: number
-  normalizedDebt: string
   totalBorrowed: string
   totalRepaid: string
+  normalizedDebt: string
 }
 
 // type from chain
@@ -351,7 +358,7 @@ export type InternalPricingInfo = {
 
 export type ExternalPricingInfo = {
   valuationMethod: 'oracle'
-  maxBorrowQuantity: CurrencyBalance | null
+  maxBorrowAmount: CurrencyBalance | null
   outstandingQuantity: CurrencyBalance
   Isin: string
   maturityDate: string
@@ -869,27 +876,47 @@ export function getPoolsModule(inst: Centrifuge) {
   function updateRedeemOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
     const address = inst.getActingAddress()
+    const { getAccountStakes } = inst.rewards
 
     return inst.getApi().pipe(
-      switchMap(
-        (api) => api.query.investments.redeemOrderId([poolId, trancheId]),
-        (api, rawOrderId) => ({ api, rawOrderId })
+      switchMap((api) =>
+        combineLatest([
+          api.query.investments.redeemOrderId([poolId, trancheId]),
+          getOrder([address, poolId, trancheId]),
+          getAccountStakes([address, poolId, trancheId]),
+        ]).pipe(
+          map(([rawOrderId, order, accountStakes]) => ({
+            api,
+            rawOrderId,
+            order,
+            accountStakes,
+          }))
+        )
       ),
-      combineLatestWith(getOrder([address, poolId, trancheId])),
       take(1),
-      switchMap(([{ api, rawOrderId }, order]) => {
-        const orderId = Number(rawOrderId.toHex() as string)
+      switchMap(({ api, rawOrderId, order, accountStakes }) => {
+        const orderId = Number(rawOrderId.toHex())
+        const { stake } = accountStakes
+
         let submittable
-        if ((!order.invest.isZero() || !order.redeem.isZero()) && order.submittedAt !== orderId) {
-          submittable = api.tx.utility.batchAll([
-            !order.invest.isZero()
-              ? api.tx.investments.collectInvestments([poolId, trancheId])
-              : api.tx.investments.collectRedemptions([poolId, trancheId]),
-            api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString()),
-          ])
-        } else {
-          submittable = api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString())
+        const redeemTx = api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString())
+
+        let unstakeTx
+        if (!stake.isZero()) {
+          const unstakeAmount = newOrder.gte(stake) ? stake : newOrder
+          unstakeTx = api.tx.liquidityRewards.unstake({ Tranche: [poolId, trancheId] }, unstakeAmount)
         }
+
+        if ((!order.invest.isZero() || !order.redeem.isZero()) && order.submittedAt !== orderId) {
+          const collectTx = !order.invest.isZero()
+            ? api.tx.investments.collectInvestments([poolId, trancheId])
+            : api.tx.investments.collectRedemptions([poolId, trancheId])
+
+          submittable = api.tx.utility.batchAll([unstakeTx, collectTx, redeemTx].filter(Boolean))
+        } else {
+          submittable = unstakeTx ? api.tx.utility.batchAll([unstakeTx, redeemTx]) : redeemTx
+        }
+
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -1075,7 +1102,15 @@ export function getPoolsModule(inst: Centrifuge) {
             const permissions = value.toJSON() as any
             roles.pools[poolId] = {
               roles: (
-                ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin'] as const
+                [
+                  'PoolAdmin',
+                  'Borrower',
+                  'PricingAdmin',
+                  'LiquidityAdmin',
+                  'InvestorAdmin',
+                  'LoanAdmin',
+                  'PODReadAccess',
+                ] as const
               ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
               tranches: {},
             }
@@ -1130,7 +1165,15 @@ export function getPoolsModule(inst: Centrifuge) {
               const permissions = value.toJSON() as any
               roles[account] = {
                 roles: (
-                  ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin'] as const
+                  [
+                    'PoolAdmin',
+                    'Borrower',
+                    'PricingAdmin',
+                    'LiquidityAdmin',
+                    'InvestorAdmin',
+                    'LoanAdmin',
+                    'PODReadAccess',
+                  ] as const
                 ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
                 tranches: {},
               }
@@ -1182,7 +1225,8 @@ export function getPoolsModule(inst: Centrifuge) {
                 priceId: {
                   isin: infoInput.Isin,
                 },
-                maxBorrowQuantity: infoInput.maxBorrowQuantity.toString(),
+                maxBorrowAmount:
+                  infoInput.maxBorrowAmount === null ? { noLimit: null } : { quantity: infoInput.maxBorrowAmount },
               },
             }
           : {
@@ -1220,6 +1264,26 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function financeExternalLoan(
+    args: [poolId: string, loanId: string, amount: CurrencyBalance, price: Rate, isin: string, aoProxy: string],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, amount, price, isin, aoProxy] = args
+    const $api = inst.getApi()
+    return $api.pipe(
+      switchMap((api) => {
+        const borrowSubmittable = api.tx.proxy.proxy(
+          aoProxy,
+          undefined,
+          api.tx.loans.borrow(poolId, loanId, amount.toString())
+        )
+        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
+        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, borrowSubmittable])
+        return inst.wrapSignAndSend(api, batchSubmittable, options)
+      })
+    )
+  }
+
   function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
     const $api = inst.getApi()
@@ -1242,6 +1306,27 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => {
         const submittable = api.tx.loans.repay(poolId, loanId, amount.toString(), uncheckedAmount.toString())
         return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function repayExternalLoanPartially(
+    args: [poolId: string, loanId: string, amount: BN, uncheckedAmount: BN, price: Rate, isin: string, aoProxy: string],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, amount, uncheckedAmount, price, isin, aoProxy] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const repaySubmittable = api.tx.proxy.proxy(
+          aoProxy,
+          undefined,
+          api.tx.loans.repay(poolId, loanId, amount.toString(), uncheckedAmount.toString())
+        )
+        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
+        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, repaySubmittable])
+        return inst.wrapSignAndSend(api, batchSubmittable, options)
       })
     )
   }
@@ -2066,6 +2151,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
+            api.events.priceOracle.NewFeedData.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
@@ -2148,10 +2234,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 : loan.pricing.internal.info
 
             const discount =
-              'maxBorrowAmount' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
+              'valuationMethod' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
                 ? pricingInfo.valuationMethod.discountedCashFlow
                 : undefined
-
             return {
               asset: {
                 collectionId: collectionId.toString(),
@@ -2163,14 +2248,13 @@ export function getPoolsModule(inst: Centrifuge) {
                       valuationMethod: 'oracle' as any,
                       // If the max borrow quantity is larger than 10k, this is assumed to be "limitless"
                       // TODO: replace by Option once data structure on chain changes
-                      maxBorrowQuantity: hexToBN(pricingInfo.maxBorrowQuantity).gt(
-                        new BN(10000).mul(new BN(10).pow(new BN(currency.decimals)))
-                      )
-                        ? null
-                        : new CurrencyBalance(hexToBN(pricingInfo.maxBorrowQuantity), currency.decimals),
+                      maxBorrowAmount:
+                        'noLimit' in pricingInfo.maxBorrowAmount
+                          ? null
+                          : new CurrencyBalance(hexToBN(pricingInfo.maxBorrowAmount.quantity), currency.decimals),
                       Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
                       maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
-                      oracle: oraclePrices[pricingInfo.priceId.isin] as any,
+                      oracle: oraclePrices[pricingInfo.priceId.isin] || { value: new Rate(0), timestamp: 0 },
                       outstandingQuantity:
                         'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
                           ? new CurrencyBalance(info.pricing.external.outstandingQuantity, currency.decimals)
@@ -2233,7 +2317,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   ? getOutstandingDebt(loan, currency.decimals, interestLastUpdated.toJSON() as number, interestData)
                   : new CurrencyBalance(
                       new BN(loan.pricing.external.outstandingQuantity)
-                        .mul(sharedInfo.pricing.oracle.value)
+                        .mul(sharedInfo.pricing.oracle?.value ?? new BN(0))
                         .div(new BN(10).pow(new BN(27))),
                       currency.decimals
                     )
@@ -2252,7 +2336,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 originationDate: new Date(loan.originationDate * 1000).toISOString(),
                 outstandingDebt,
                 normalizedDebt:
-                  'normalizedDebt' in loan ? new CurrencyBalance(hexToBN(loan.normalizedDebt), currency.decimals) : nil,
+                  'internal' in loan.pricing
+                    ? new CurrencyBalance(hexToBN(loan.pricing.internal.normalizedDebt), currency.decimals)
+                    : nil,
               }
             }
           )
@@ -2276,7 +2362,7 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getWriteOffGroups(args: [poolId: string]) {
+  function getWriteOffPolicy(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
 
@@ -2284,17 +2370,22 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.loans.writeOffPolicy(poolId)),
       map((writeOffGroupsValues) => {
         const writeOffGroups = writeOffGroupsValues.toJSON() as {
-          overdueDays: number
-          penalty: string
-          percentage: string
-        }[]
-        return writeOffGroups.map((g) => {
-          return {
-            overdueDays: g.overdueDays as number,
-            penaltyInterestRate: new Rate(hexToBN(g.penalty)),
-            percentage: new Rate(hexToBN(g.percentage)),
+          triggers: ({ principalOverdue: number } | { priceOutdated: number })[]
+          status: {
+            percentage: string
+            penalty: string
           }
-        })
+        }[]
+        return writeOffGroups
+          .map((g) => {
+            return {
+              overdueDays: (g.triggers.find((t) => 'principalOverdue' in t) as { principalOverdue: number })
+                ?.principalOverdue,
+              penaltyInterestRate: new Rate(hexToBN(g.status.penalty)),
+              percentage: new Rate(hexToBN(g.status.percentage)),
+            }
+          })
+          .filter((g) => g.overdueDays != null)
       })
     )
   }
@@ -2342,7 +2433,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 tokenPrice = hexToBN(tokenPrice)
 
                 if (!remainingInvestCurrency.isZero()) {
-                  // Multiply invest fulfilment in this epoch with outstanding order amount to get executed amount
+                  // Multiply invest fulfillment in this epoch with outstanding order amount to get executed amount
                   const amount = remainingInvestCurrency.mul(investFulfillment).div(PerquintillBN)
                   // Divide by the token price to get the payout in tokens
                   if (!amount.isZero()) {
@@ -2397,7 +2488,39 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function updateWriteOffGroups(
+  function getProposedLoanChanges(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.poolSystem.ProposedChange.is(event))
+
+        if (!event) return false
+
+        const { poolId: eventPoolId } = (event.toHuman() as any).event.data
+        return eventPoolId.replace(/\D/g, '') === poolId
+      })
+    )
+
+    return $api.pipe(
+      switchMap((api) => api.query.poolSystem.notedChange.entries(poolId)),
+      map((changes) => {
+        return changes.map(([key, value]) => {
+          const hash = (key.toHuman() as any)[1] as string
+          const data = value.toPrimitive() as { change: any; submittedTime: number }
+          return {
+            hash,
+            submittedAt: new Date(data.submittedTime * 1000).toISOString(),
+            change: data.change,
+          }
+        })
+      }),
+      repeatWhen(() => $events)
+    )
+  }
+
+  function updateWriteOffPolicy(
     args: [poolId: string, writeOffGroups: { percentage: BN; overdueDays: number; penaltyInterestRate: BN }[]],
     options?: TransactionOptions
   ) {
@@ -2406,14 +2529,62 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.updateWriteOffPolicy(
+        const submittable = api.tx.loans.proposeWriteOffPolicy(
           poolId,
           writeOffGroups.map((g) => ({
-            percentage: g.percentage.toString(),
-            overdueDays: g.overdueDays,
-            penalty: g.penaltyInterestRate.toString(),
+            triggers: [{ PrincipalOverdue: g.overdueDays }],
+            status: {
+              percentage: g.percentage.toString(),
+              penalty: g.penaltyInterestRate.toString(),
+            },
           }))
         )
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function applyWriteOffPolicyUpdate(args: [poolId: string, hash: string], options?: TransactionOptions) {
+    const [poolId, hash] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.applyWriteOffPolicy(poolId, hash)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function getProposedPoolChanges(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => (console.log('api', api), api.query.poolSystem.scheduledUpdate(poolId))),
+      map((updateData) => {
+        const update = updateData.toPrimitive() as any
+        if (!update) return null
+        return {
+          changes: {
+            tranches: update.tranches.noChange === null ? null : update.tranches.newValue,
+            trancheMetadata: update.trancheMetadata.noChange === null ? null : update.trancheMetadata.newValue,
+            minEpochTime: update.minEpochTime.noChange === null ? null : update.minEpochTime.newValue,
+            maxNavAge: update.maxNavAge.noChange === null ? null : update.maxNavAge.newValue,
+          },
+          submittedAt: new Date(update.submittedAt * 1000).toISOString(),
+        }
+      })
+    )
+  }
+
+  function applyPoolUpdate(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.poolRegistry.executeUpdate(poolId)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -2465,6 +2636,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   return {
+    getPoolCurrency,
     createPool,
     updatePool,
     setMaxReserve,
@@ -2481,7 +2653,9 @@ export function getPoolsModule(inst: Centrifuge) {
     getNextLoanId,
     createLoan,
     financeLoan,
+    financeExternalLoan,
     repayLoanPartially,
+    repayExternalLoanPartially,
     repayAndCloseLoan,
     closeLoan,
     getPool,
@@ -2491,8 +2665,12 @@ export function getPoolsModule(inst: Centrifuge) {
     getPoolOrders,
     getLoans,
     getPendingCollect,
-    getWriteOffGroups,
-    updateWriteOffGroups,
+    getWriteOffPolicy,
+    getProposedLoanChanges,
+    getProposedPoolChanges,
+    updateWriteOffPolicy,
+    applyWriteOffPolicyUpdate,
+    applyPoolUpdate,
     adminWriteOff,
     getAvailablePoolId,
     getDailyPoolStates,
@@ -2517,6 +2695,7 @@ function getOutstandingDebt(
   accrual?: InterestAccrual
 ) {
   if (!accrual) return new CurrencyBalance(0, currencyDecimals)
+  if (!('internal' in loan.pricing)) return new CurrencyBalance(0, currencyDecimals)
   const accRate = new Rate(hexToBN(accrual.accumulatedRate)).toDecimal()
   const rate = new Rate(hexToBN(accrual.interestRatePerSec)).toDecimal()
   const balance =

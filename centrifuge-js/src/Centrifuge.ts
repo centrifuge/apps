@@ -10,6 +10,7 @@ import { getPodModule } from './modules/pod'
 import { getPoolsModule } from './modules/pools'
 import { getProxiesModule } from './modules/proxies'
 import { getRemarkModule } from './modules/remark'
+import { getRewardsModule } from './modules/rewards'
 import { getTinlakeModule } from './modules/tinlake'
 import { getTokensModule } from './modules/tokens'
 import { getUtilsModule } from './modules/utils'
@@ -26,6 +27,7 @@ export class Centrifuge extends CentrifugeBase {
   tinlake = getTinlakeModule(this)
   multisig = getMultisigModule(this)
   remark = getRemarkModule(this)
+  rewards = getRewardsModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)
@@ -35,7 +37,7 @@ export class Centrifuge extends CentrifugeBase {
     return new Centrifuge({ ...this.config, signer, signingAddress: address })
   }
 
-  connectEvm(signer?: JsonRpcSigner) {
-    return new Centrifuge({ ...this.config, evmSigner: signer })
+  connectEvm(address: string, signer?: JsonRpcSigner, substrateEvmChainId?: number) {
+    return new Centrifuge({ ...this.config, evmSigner: signer, evmSigningAddress: address, substrateEvmChainId })
   }
 }
