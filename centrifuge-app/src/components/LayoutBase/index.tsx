@@ -21,7 +21,7 @@ type LayoutBaseProps = {
   sidePanel?: React.ReactElement<SidePanelProps>
 }
 
-const PADDING_MAIN = [2, 2, 3, 5, 10]
+const PADDING_MAIN = [2, 2, 3, 3, 5]
 
 export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
   return (
@@ -33,7 +33,7 @@ export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
           <LogoLink />
         </LogoContainer>
 
-        <WalletContainer pr={PADDING_MAIN}>
+        <WalletContainer mr={PADDING_MAIN}>
           <WalletMenu menuItems={[<OnboardingStatus />]} />
         </WalletContainer>
 

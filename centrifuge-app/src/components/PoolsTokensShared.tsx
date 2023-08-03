@@ -12,7 +12,7 @@ type PoolsTokensSharedProps = {
 
 export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
   return (
-    <Stack gap={2}>
+    <Stack gap={4}>
       <Stack>
         <Text as="h1" variant="heading1">
           {title}

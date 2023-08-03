@@ -131,7 +131,7 @@ export const WalletContainer = styled(Stack)`
   height: ${HEADER_HEIGHT}px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['S']}) {
-    min-width: 250px;
+    min-width: 264px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
@@ -140,7 +140,6 @@ export const WalletContainer = styled(Stack)`
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_SIDEBAR_EXTENDED]}) {
-    min-width: 350px;
     padding-top: ${({ theme }) => theme.space[3]}px;
   }
 `
