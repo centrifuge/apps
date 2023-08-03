@@ -1,15 +1,14 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useQuery } from 'react-query'
+import { useAddress } from '../useAddress'
 import { Call, multicall } from './multicall'
 import { IpfsPools, TokenResult } from './types'
 import { useIpfsPools } from './useTinlakePools'
 
 export function useTinlakePortfolio() {
   const ipfsPools = useIpfsPools(false)
-  const { evm } = useWallet()
-  const { selectedAddress: address } = evm
+  const address = useAddress('evm')
 
   const query = useQuery(['portfolio', address], () => getTinlakePortfolio(ipfsPools!, address!), {
     enabled: !!address && !!ipfsPools,
@@ -24,7 +23,7 @@ export enum TinlakeTranche {
 }
 
 async function getTinlakePortfolio(ipfsPools: IpfsPools, address: string) {
-  const toBN = (val: BN) => new CurrencyBalance(val, 18)
+  const toBN = (val: string) => new CurrencyBalance(val.toString(), 18)
 
   const calls: Call[] = ipfsPools.active.flatMap((pool) => [
     {
