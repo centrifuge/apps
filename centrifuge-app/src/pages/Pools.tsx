@@ -39,18 +39,8 @@ function Pools() {
   ).map((q) => q.data)
   const centPoolsMetaDataById = getMetasById(centPools, centPoolsMetaData)
 
-  const pools = React.useMemo(() => {
-    return !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
-  }, [listedPools, centPoolsMetaDataById])
-
-  const filteredPools = React.useMemo(() => {
-    if (!pools?.length) {
-      return []
-    }
-
-    const searchParams = new URLSearchParams(search)
-    return filterPools(pools, searchParams)
-  }, [search, pools])
+  const pools = !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
+  const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
 
   if (!listedPools.length) {
     return (
