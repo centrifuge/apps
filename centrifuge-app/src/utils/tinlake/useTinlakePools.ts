@@ -201,6 +201,7 @@ export function useTinlakeLoans(poolId: string) {
           ceiling: new CurrencyBalance(loan.ceiling, 18),
         },
         status: getTinlakeLoanStatus(loan, writeOffPercentage[loan.index]),
+        writeOffPercentage: writeOffPercentage[loan.index],
         totalBorrowed: new CurrencyBalance(loan.borrowsAggregatedAmount, 18),
         totalRepaid: new CurrencyBalance(loan.repaysAggregatedAmount, 18),
         dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
