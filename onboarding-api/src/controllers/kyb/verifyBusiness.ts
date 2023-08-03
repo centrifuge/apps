@@ -33,14 +33,14 @@ export const verifyBusinessController = async (
     const userData = (await fetchUser(wallet, { suppressError: true })) as EntityUser
 
     if (userData?.globalSteps.verifyBusiness.completed) {
-      throw new HttpError(400, 'Business already verified')
+      throw new HttpError(400, 'Step aleady completed')
     }
 
     if (userData?.manualKybReference) {
       const status = await shuftiProRequest({ reference: userData.manualKybReference }, { path: 'status' })
 
       if (status.event === 'review.pending') {
-        throw new HttpError(400, 'Business already in review')
+        throw new HttpError(400, 'Manual review pending')
       }
     }
 
@@ -48,8 +48,13 @@ export const verifyBusinessController = async (
       investorType: 'entity',
       address: null,
       kycReference: '',
-      manualKybReference: null,
-      wallet: [wallet],
+      manualKybReference: '',
+      wallets: {
+        evm: [],
+        substrate: [],
+        evmOnSubstrate: [],
+        ...{ [wallet.network]: [wallet.address] },
+      },
       name: null,
       dateOfBirth: null,
       countryOfCitizenship: null,
@@ -73,7 +78,7 @@ export const verifyBusinessController = async (
       poolSteps: {},
     }
 
-    if (!(jurisdictionCode in KYB_COUNTRY_CODES)) {
+    if (!(jurisdictionCode.slice(0, 2) in KYB_COUNTRY_CODES)) {
       return startManualKyb(req, res, user)
     }
 

@@ -2,9 +2,11 @@ import { isAddress } from '@polkadot/util-crypto'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { SiweMessage } from 'siwe'
-import { InferType, object, string } from 'yup'
-import { getCentrifuge, isValidSubstrateAddress } from '../../utils/centrifuge'
-import { reportHttpError } from '../../utils/httpError'
+import { InferType, object, string, StringSchema } from 'yup'
+import { SupportedNetworks } from '../../database'
+import { HttpError, reportHttpError } from '../../utils/httpError'
+import { getCentrifuge } from '../../utils/networks/centrifuge'
+import { NetworkSwitch } from '../../utils/networks/networkSwitch'
 import { validateInput } from '../../utils/validateInput'
 
 const verifyWalletInput = object({
@@ -29,6 +31,7 @@ const verifyWalletInput = object({
     then: (verifyWalletInput) => verifyWalletInput.required(),
   }),
   nonce: string().required(),
+  network: string().oneOf(['evm', 'substrate', 'evmOnSubstrate']) as StringSchema<SupportedNetworks>,
 })
 
 export const authenticateWalletController = async (
@@ -37,7 +40,8 @@ export const authenticateWalletController = async (
 ) => {
   try {
     await validateInput(req.body, verifyWalletInput)
-    const payload = req.body?.jw3t ? await verifySubstrateWallet(req, res) : await verifyEthWallet(req, res)
+    const payload = await new NetworkSwitch(req.body.network).verifiyWallet(req, res)
+
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '8h',
       audience: req.get('origin'),
@@ -50,19 +54,16 @@ export const authenticateWalletController = async (
 }
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
-async function verifySubstrateWallet(req: Request, res: Response) {
+export async function verifySubstrateWallet(req: Request, res: Response): Promise<Request['wallet']> {
   const { jw3t: token, nonce } = req.body
   const { verified, payload } = await await getCentrifuge().auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
   const address = payload.address
-  if (!isValidSubstrateAddress(address)) {
-    throw new Error('Invalid address')
-  }
 
   const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
   if (!cookieNonce || cookieNonce !== nonce) {
-    throw new Error('Invalid nonce')
+    throw new HttpError(400, 'Invalid nonce')
   }
 
   res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
@@ -83,31 +84,27 @@ async function verifySubstrateWallet(req: Request, res: Response) {
   }
   return {
     address,
-    network: 'substrate',
+    network: payload.network || 'substrate',
   }
 }
 
-async function verifyEthWallet(req: Request, res: Response) {
-  try {
-    const { message, signature, address, nonce } = req.body
+export async function verifyEthWallet(req: Request, res: Response): Promise<Request['wallet']> {
+  const { message, signature, address, nonce, network } = req.body
 
-    if (!isAddress(address)) {
-      throw new Error('Invalid address')
-    }
+  if (!isAddress(address)) {
+    throw new HttpError(400, 'Invalid address')
+  }
 
-    const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
+  const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
 
-    if (!cookieNonce || cookieNonce !== nonce) {
-      throw new Error('Invalid nonce')
-    }
+  if (!cookieNonce || cookieNonce !== nonce) {
+    throw new HttpError(400, 'Invalid nonce')
+  }
 
-    const decodedMessage = await new SiweMessage(message).verify({ signature })
-    res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
-    return {
-      address: decodedMessage.data.address,
-      network: 'evm',
-    }
-  } catch (error) {
-    throw new Error('Invalid message or signature')
+  const decodedMessage = await new SiweMessage(message).verify({ signature })
+  res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
+  return {
+    address: decodedMessage.data.address,
+    network,
   }
 }

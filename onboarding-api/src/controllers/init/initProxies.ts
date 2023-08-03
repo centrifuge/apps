@@ -4,10 +4,15 @@ import { u8aToHex } from '@polkadot/util'
 import { createKeyMulti, cryptoWaitReady } from '@polkadot/util-crypto'
 import { Request, Response } from 'express'
 import { combineLatestWith, lastValueFrom, switchMap, takeWhile } from 'rxjs'
-import { getCentrifuge } from '../../utils/centrifuge'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { getCentrifuge } from '../../utils/networks/centrifuge'
 
-// for development chain only
+// 1. Create pure proxy
+// 2. Fund pure proxy and controller
+// 3. Add PermissionManagement proxy to controller
+// 4. Add multi-sig proxy to controller so pure proxy can be switched out
+
+// for development chain only since it's the only chain that will reset after upgrades
 export const initProxiesController = async (req: Request, res: Response) => {
   try {
     await cryptoWaitReady()
