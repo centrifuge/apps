@@ -12,6 +12,7 @@ import {
   Thumbnail,
   truncate,
 } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { Identity } from '../../components/Identity'
@@ -165,8 +166,37 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     {
                       label: <Tooltips type="outstanding" />,
                       value:
-                        'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt, pool?.currency.symbol) : 'n/a',
+                        'outstandingDebt' in loan
+                          ? isTinlakePool && 'writeOffPercentage' in loan
+                            ? formatBalance(
+                                new CurrencyBalance(
+                                  loan.outstandingDebt.sub(
+                                    loan.outstandingDebt.mul(new BN(loan.writeOffPercentage).div(new BN(100)))
+                                  ),
+                                  pool.currency.decimals
+                                ),
+                                pool?.currency.symbol
+                              )
+                            : formatBalance(loan.outstandingDebt, pool?.currency.symbol)
+                          : 'n/a',
                     },
+                    ...(isTinlakePool
+                      ? [
+                          {
+                            label: <Tooltips type="appliedWriteOff" />,
+                            value:
+                              'writeOffPercentage' in loan
+                                ? formatBalance(
+                                    new CurrencyBalance(
+                                      loan.outstandingDebt.mul(new BN(loan.writeOffPercentage).div(new BN(100))),
+                                      pool.currency.decimals
+                                    ),
+                                    pool?.currency.symbol
+                                  )
+                                : 'n/a',
+                          },
+                        ]
+                      : []),
                   ]
             }
           />

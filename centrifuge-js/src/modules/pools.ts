@@ -407,6 +407,7 @@ export type TinlakeLoan = {
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
   originationDate: string
+  writeOffPercentage: string
 }
 
 // transformed type for UI

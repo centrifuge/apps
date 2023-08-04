@@ -27,7 +27,8 @@ export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => 
       bottom="24px"
       left="0"
       right="0"
-      justifyContent="center"
+      justifyContent="end"
+      minWidth="500px"
       px={2}
     >
       <Stack
@@ -35,13 +36,13 @@ export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => 
         {...modalProps}
         ref={ref}
         borderRadius="8px"
-        py="6px"
-        pr="0"
-        pl="2"
+        py="2"
+        px="2"
+        maxWidth="540px"
         backgroundColor={theme.colors.accentPrimary}
         style={{ boxShadow: theme.shadows.cardInteractive }}
       >
-        <Shelf gap="5">
+        <Shelf gap="1">
           <Text color={theme.colors.textInverted} variant="heading5">
             {title}
           </Text>
@@ -53,7 +54,7 @@ export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => 
             style={{ marginLeft: 'auto' }}
           />
         </Shelf>
-        <Text variant="body3" color={theme.colors.textInverted} style={{ paddingRight: '12px' }}>
+        <Text variant="body1" color={theme.colors.textInverted} style={{ paddingRight: '12px' }}>
           {children}
         </Text>
       </Stack>

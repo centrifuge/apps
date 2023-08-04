@@ -1,22 +1,23 @@
+import { Request } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
-import { onboardingBucket, Wallet } from '../database'
-import { getPoolById } from '../utils/getPoolById'
+import { onboardingBucket } from '../database'
 import { HttpError } from '../utils/httpError'
+import { NetworkSwitch } from '../utils/networks/networkSwitch'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string
-  wallet: Wallet[0]
+  wallet: Request['wallet']
   trancheId: string
 }
 
 export const sendDocumentsMessage = async (
-  wallet: Wallet[0],
+  wallet: Request['wallet'],
   poolId: string,
   trancheId: string,
   signedAgreement: Uint8Array
 ) => {
-  const { metadata, pool } = await getPoolById(poolId)
+  const { metadata, pool } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '14d',

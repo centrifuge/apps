@@ -1,7 +1,6 @@
 import * as crypto from 'crypto'
 import { NextFunction, Request, Response } from 'express'
-import { HttpError } from '../utils/httpError'
-import { ManualKybCallbackRequestBody } from '../utils/types'
+import { ManualKybCallbackRequestBody } from '../controllers/kyb/manualKybCallback'
 
 const isValidShuftiProRequest = (body: ManualKybCallbackRequestBody, signature: string | string[]) => {
   const requestBody = JSON.stringify(body)
@@ -30,7 +29,7 @@ export const shuftiProAuthMiddleware = (req: Request, res: Response, next: NextF
     if (isValid) {
       headers.origin = 'https://shuftipro.com'
     } else {
-      throw new HttpError(401, 'Unauthorized')
+      throw new Error('Unauthorized')
     }
   }
 

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { checkBalanceBeforeSigningRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { checkBalanceBeforeSigningRemark } from '../../utils/networks/centrifuge'
 
 export const getBalanceForSigningController = async (req: Request, res: Response) => {
   try {
