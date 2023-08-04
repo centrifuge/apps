@@ -114,7 +114,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
 
@@ -201,16 +200,16 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   This is calculated through the amount multiplied by the current price of the asset
                 </Text>
               </Stack>
-              {poolReserve.lessThan(availableFinancing) ||
-                ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowAmount && (
-                  <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
-                    <IconInfo size="iconMedium" />
-                    <Text variant="body3">
-                      The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
-                      than the available financing
-                    </Text>
-                  </Shelf>
-                ))}
+              {(poolReserve.lessThan(availableFinancing) ||
+                ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowAmount)) && (
+                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
+                  <IconInfo size="iconMedium" />
+                  <Text variant="body3">
+                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
+                    than the available financing
+                  </Text>
+                </Shelf>
+              )}
               <Stack px={1}>
                 <Button type="submit" loading={isFinanceLoading}>
                   Finance asset
