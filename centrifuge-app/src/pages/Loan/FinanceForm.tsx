@@ -1,4 +1,4 @@
-import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -64,7 +64,11 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   )
 
   function repayAll() {
-    doRepayAllTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })
+    const l = loan as ActiveLoan
+    doRepayAllTransaction([loan.poolId, loan.id, l.totalBorrowed.sub(l.repaid.principal)], {
+      account,
+      forceProxyType: 'Borrow',
+    })
   }
 
   const financeForm = useFormik<FinanceValues>({
@@ -84,8 +88,15 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doRepayTransaction([loan.poolId, loan.id, amount, new BN(0)], { account, forceProxyType: 'Borrow' })
+      const l = loan as ActiveLoan
+      const outstandingPrincipal = l.totalBorrowed.sub(l.repaid.principal)
+      let amount: BN = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
+      let interest = new BN(0)
+      if (amount.gt(outstandingPrincipal)) {
+        interest = amount.sub(outstandingPrincipal)
+        amount = outstandingPrincipal
+      }
+      doRepayTransaction([l.poolId, l.id, amount, interest, new BN(0)], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -100,12 +111,12 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   if (loan.status === 'Closed') {
     return null
   }
+
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
   const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
   const canRepayAll = debtWithMargin?.lte(balance)
-
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
 
@@ -145,6 +156,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                   return (
                     <CurrencyInput
                       {...field}
+                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                       label="Amount"
                       errorMessage={meta.touched ? meta.error : undefined}
                       secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
@@ -156,7 +168,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                   )
                 }}
               </Field>
-              {poolReserve.lessThan(availableFinancing) || (
+              {poolReserve.lessThan(availableFinancing) && (
                 <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
                   <IconInfo size="iconMedium" />
                   <Text variant="body3">
@@ -204,6 +216,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                     return (
                       <CurrencyInput
                         {...field}
+                        value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                         label="Amount"
                         errorMessage={meta.touched ? meta.error : undefined}
                         secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency.symbol, 2)} available`}
