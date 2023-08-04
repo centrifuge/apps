@@ -1,16 +1,47 @@
 import { useBalances } from '@centrifuge/centrifuge-react'
-import { Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useTheme } from 'styled-components'
 import { useAddress } from '../../utils/useAddress'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { Cubes } from './Cubes'
 
 export function PortfolioCta() {
+  const { colors } = useTheme()
   const address = useAddress()
   const balances = useBalances(address)
+  console.log('balances', balances)
+
+  const terms = [
+    {
+      title: 'Portfolio value',
+      value: '231,552 USD',
+    },
+    {
+      title: 'Accrued interest',
+      value: '231,552 USD',
+    },
+    {
+      title: 'CFG rewards',
+      value: '231,552 USD',
+    },
+  ]
 
   return (
-    <Card p={3} pb={5} as="article" position="relative" overflow="hidden">
+    <Box
+      as="article"
+      position="relative"
+      p={3}
+      pb={5}
+      overflow="hidden"
+      borderRadius="card"
+      borderStyle="solid"
+      borderWidth={1}
+      borderColor="borderSecondary"
+      style={{
+        boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
+      }}
+    >
       {!address && <Cubes />}
 
       <Stack gap={2} alignItems="start">
@@ -20,33 +51,17 @@ export function PortfolioCta() {
               Your portfolio
             </Text>
 
-            <Shelf as="dl" gap={6}>
-              <Stack gap="4px">
-                <Text as="dt" variant="body3">
-                  Portfolio value
-                </Text>
-                <Text as="dd" variant="body2">
-                  231,552 USD
-                </Text>
-              </Stack>
-
-              <Stack gap="4px">
-                <Text as="dt" variant="body3">
-                  Accrued interest
-                </Text>
-                <Text as="dd" variant="body2">
-                  231,552 USD
-                </Text>
-              </Stack>
-
-              <Stack gap="4px">
-                <Text as="dt" variant="body3">
-                  CFG rewards
-                </Text>
-                <Text as="dd" variant="body2">
-                  231,552 USD
-                </Text>
-              </Stack>
+            <Shelf as="dl" gap={6} flexWrap="wrap" rowGap={2}>
+              {terms.map(({ title, value }, index) => (
+                <Stack key={`${title}${index}`} gap="4px">
+                  <Text as="dt" variant="body3" whiteSpace="nowrap">
+                    {title}
+                  </Text>
+                  <Text as="dd" variant="body2" whiteSpace="nowrap">
+                    {value}
+                  </Text>
+                </Stack>
+              ))}
             </Shelf>
           </>
         ) : (
@@ -58,6 +73,6 @@ export function PortfolioCta() {
           </>
         )}
       </Stack>
-    </Card>
+    </Box>
   )
 }

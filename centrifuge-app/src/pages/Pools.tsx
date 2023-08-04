@@ -53,19 +53,21 @@ function Pools() {
   }
 
   return (
-    <Stack gap={1}>
-      <PoolFilter pools={pools} />
+    <Box overflow="auto">
+      <Stack gap={1} minWidth={900}>
+        <PoolFilter pools={pools} />
 
-      {!filteredPools.length ? (
-        <Shelf px={2} mt={2} justifyContent="center">
-          <Box px={2} py={1} borderRadius="input" backgroundColor="secondarySelectedBackground">
-            <InlineFeedback status="info">No results found with these filters. Try different filters.</InlineFeedback>
-          </Box>
-        </Shelf>
-      ) : (
-        <PoolList pools={filteredPools} isLoading={metadataIsLoading} />
-      )}
-    </Stack>
+        {!filteredPools.length ? (
+          <Shelf px={2} mt={2} justifyContent="center">
+            <Box px={2} py={1} borderRadius="input" backgroundColor="secondarySelectedBackground">
+              <InlineFeedback status="info">No results found with these filters. Try different filters.</InlineFeedback>
+            </Box>
+          </Shelf>
+        ) : (
+          <PoolList pools={filteredPools} isLoading={metadataIsLoading} />
+        )}
+      </Stack>
+    </Box>
   )
 }
 
