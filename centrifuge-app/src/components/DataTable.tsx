@@ -1,8 +1,10 @@
 import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
+import BN from 'bn.js'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
+import { useElementScrollSize } from '../utils/useElementScrollSize'
 
 type GroupedProps = {
   groupIndex?: number
@@ -19,6 +21,8 @@ export type DataTableProps<T = any> = {
   rounded?: boolean
   hoverable?: boolean
   summary?: T
+  pageSize?: number
+  page?: number
 } & GroupedProps
 
 export type OrderBy = 'asc' | 'desc'
@@ -34,9 +38,15 @@ export type Column = {
 const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
   if (order === 'asc') {
-    return data.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1))
+    return data.sort((a, b) => {
+      if (sortKey === 'nftIdSortKey') return new BN(a[sortKey]).gt(new BN(b[sortKey])) ? 1 : -1
+      return a[sortKey] > b[sortKey] ? 1 : -1
+    })
   }
-  return data.sort((a, b) => (b[sortKey] > a[sortKey] ? 1 : -1))
+  return data.sort((a, b) => {
+    if (sortKey === 'nftIdSortKey') return new BN(b[sortKey]).gt(new BN(a[sortKey])) ? 1 : -1
+    return b[sortKey] > a[sortKey] ? 1 : -1
+  })
 }
 
 export const DataTable = <T extends Record<string, any>>({
@@ -51,12 +61,16 @@ export const DataTable = <T extends Record<string, any>>({
   groupIndex,
   lastGroupIndex,
   defaultSortOrder = 'desc',
+  pageSize = Infinity,
+  page = 1,
 }: DataTableProps<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
+  const ref = React.useRef(null)
+  const { scrollWidth } = useElementScrollSize(ref)
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
@@ -65,14 +79,15 @@ export const DataTable = <T extends Record<string, any>>({
     setCurrentSortKey(sortKey)
   }
 
-  const sortedData = React.useMemo(
-    () => sorter([...data], orderBy[currentSortKey], currentSortKey),
-    [orderBy, data, currentSortKey]
-  )
+  const sortedAndPaginatedData = React.useMemo(() => {
+    const sortedData = sorter([...data], orderBy[currentSortKey], currentSortKey)
+    return sortedData.slice((page - 1) * pageSize, page * pageSize)
+  }, [orderBy, data, currentSortKey, page, pageSize])
 
   const showHeader = groupIndex === 0 || !groupIndex
+
   return (
-    <Stack as={rounded && !lastGroupIndex ? Card : Stack}>
+    <Stack ref={ref} as={rounded && !lastGroupIndex ? Card : Stack} minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}>
       <Shelf>
         {showHeader &&
           columns.map((col, i) => (
@@ -96,7 +111,7 @@ export const DataTable = <T extends Record<string, any>>({
           ))}
       </Shelf>
       <Stack>
-        {sortedData?.map((row, i) => (
+        {sortedAndPaginatedData?.map((row, i) => (
           <Row
             rounded={rounded}
             hoverable={hoverable}
@@ -178,7 +193,7 @@ const DataCol = styled(Text)<{ align: Column['align'] }>`
   white-space: nowrap;
 
   &:first-child {
-    padding-right: '16px';
+    padding-right: 16px;
   }
   ${({ align }) => {
     switch (align) {
@@ -186,14 +201,14 @@ const DataCol = styled(Text)<{ align: Column['align'] }>`
         return css({
           justifyContent: 'flex-start',
           '&:last-child': {
-            paddingRight: '16px',
+            paddingRight: 16,
           },
         })
       case 'center':
         return css({
           justifyContent: 'center',
           '&:last-child': {
-            paddingRight: '16px',
+            paddingRight: 16,
           },
         })
       case 'right':
@@ -203,7 +218,7 @@ const DataCol = styled(Text)<{ align: Column['align'] }>`
           justifyContent: 'flex-end',
 
           '&:last-child': {
-            paddingRight: '16px',
+            paddingRight: 16,
           },
         })
     }

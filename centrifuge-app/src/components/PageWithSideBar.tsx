@@ -1,24 +1,20 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, WalletMenu } from '@centrifuge/centrifuge-react'
+import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
-import { useAddress } from '../utils/useAddress'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
-import { Faucet } from './Faucet'
 import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
 import { LogoLink } from './LogoLink'
 import { Menu } from './Menu'
+import { OnboardingStatus } from './OnboardingStatus'
+import { TinlakeRewards } from './TinlakeRewards'
 
 type Props = {
   sidebar?: React.ReactNode
   children?: React.ReactNode
 }
-
-const MIN_DEVEL_BALANCE = 10
-const MIN_AUSD_BALANCE = 100
 
 const TOOLBAR_HEIGHT = 75
 const HEADER_HEIGHT = 56
@@ -28,14 +24,7 @@ export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
 export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
   const isMedium = useIsAboveBreakpoint('M')
-
   const theme = useTheme()
-  const balances = useBalances(useAddress())
-  const hasLowDevelBalance =
-    balances && new CurrencyBalance(balances.native.balance, 18).toDecimal().lte(MIN_DEVEL_BALANCE)
-  const aUSD = balances && balances.currencies.find((curr) => curr.currency.key === 'AUSD')
-  const hasLowAusdBalance =
-    (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currency.decimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
 
   return (
     <Grid
@@ -45,7 +34,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
         `"menu main" "menu sidebar"`,
         `"menu main sidebar"`,
       ]}
-      gridTemplateColumns={['1fr', '1fr', `${MENU_WIDTH}px 1fr`, `${MENU_WIDTH}px 1fr`, '235px 1fr 440px']}
+      gridTemplateColumns={['1fr', '1fr', `${MENU_WIDTH}px 1fr`, `${MENU_WIDTH}px 1fr 350px`, '235px 1fr 440px']}
       gridTemplateRows={[
         `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,
         `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,
@@ -75,7 +64,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           <Shelf justifyContent="space-between">
             <LogoLink />
             <Stack gap={4}>
-              <WalletMenu />
+              <WalletMenu menuItems={[<OnboardingStatus />]} />
             </Stack>
           </Shelf>
         ) : (
@@ -131,12 +120,12 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           ) : (
             <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
               <Stack mb={9} px={8} gap={4}>
-                <WalletMenu />
+                <WalletMenu menuItems={[<OnboardingStatus />]} />
               </Stack>
 
-              {import.meta.env.REACT_APP_FAUCET_URL && hasLowDevelBalance && hasLowAusdBalance && <Faucet />}
-
               <LoadBoundary>{sidebar}</LoadBoundary>
+
+              <TinlakeRewards />
             </Stack>
           )}
         </Box>

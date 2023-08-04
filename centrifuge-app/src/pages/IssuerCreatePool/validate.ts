@@ -3,7 +3,9 @@ import {
   combineAsync,
   imageFile,
   integer,
+  isin,
   max,
+  maxDecimals,
   maxFileSize,
   maxImageSize,
   maxLength,
@@ -31,12 +33,13 @@ export const validate = {
   currency: required(),
 
   issuerName: combine(required(), maxLength(100)),
+  issuerRepName: combine(required(), maxLength(100)),
   issuerDescription: combine(minLength(100), maxLength(1000)),
   issuerLogo: combineAsync(imageFile(), maxFileSize(1 * MB), maxImageSize(480, 480)),
   executiveSummary: combine(required(), mimeType('application/pdf'), maxFileSize(5 * MB)),
-  website: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
+  website: combine(required(), pattern(/^https?:\/\/.{4,}/, 'Not a valid URL')),
   forum: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
-  email: pattern(/@/, 'Not a valid email address'),
+  email: combine(pattern(/@/, 'Not a valid email address'), required()),
   issuerDetailTitle: combine(required(), maxLength(50)),
   issuerDetailBody: combine(required(), maxLength(3000)),
 
@@ -44,16 +47,18 @@ export const validate = {
   tokenName: combine(required(), maxLength(30)),
   symbolName: combine(required(), maxLength(12)),
   minInvestment: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
-  interestRate: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
-  minRiskBuffer: combine(required(), nonNegativeNumber(), max(100)),
+  interestRate: combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER)),
+  minRiskBuffer: combine(required(), positiveNumber(), max(100)),
 
   // risk groups
   groupName: maxLength(30),
-  advanceRate: combine(required(), nonNegativeNumber(), max(100)),
-  fee: combine(required(), nonNegativeNumber(), max(100)),
+  advanceRate: combine(required(), positiveNumber(), max(100)),
+  fee: combine(required(), positiveNumber(), max(100), maxDecimals(2)),
   probabilityOfDefault: combine(required(), nonNegativeNumber(), max(100)),
   discountRate: combine(required(), nonNegativeNumber(), max(100)),
   lossGivenDefault: combine(required(), nonNegativeNumber(), max(100)),
+  maxBorrowQuantity: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
+  Isin: combine(required(), minLength(12), maxLength(12), isin()),
 
   // write-off groups
   days: combine(required(), integer(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),

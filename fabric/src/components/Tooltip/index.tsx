@@ -1,5 +1,7 @@
+import { PlacementAxis } from '@react-aria/overlays'
 import { useTooltip, useTooltipTrigger } from '@react-aria/tooltip'
 import { useTooltipTriggerState } from '@react-stately/tooltip'
+import css, { CssFunctionReturnType } from '@styled-system/css'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Positioner } from '../Positioner'
@@ -14,19 +16,56 @@ export type TooltipProps = TextProps & {
 }
 
 const StyledTrigger = styled(Text)`
+  position: relative;
+  width: fit-content;
   padding: 0;
   border: 0;
   appearance: none;
   background: transparent;
-  position: relative;
   cursor: pointer;
   text-align: left;
   font-weight: 400;
   font-family: ${({ theme }) => theme.fonts.standard};
-  position: relative;
-  width: fit-content;
   text-decoration: underline dotted ${({ theme }) => theme.colors.textSecondary};
   text-underline-offset: 3px;
+`
+
+const placements: {
+  [key in PlacementAxis as string]: CssFunctionReturnType
+} = {
+  bottom: css({
+    top: 'calc( var(--size) * -1)',
+    left: 'calc(50% - var(--size))',
+  }),
+
+  top: css({
+    bottom: 'calc( var(--size) * -1)',
+    left: 'calc(50% - var(--size))',
+  }),
+
+  left: css({
+    top: 'calc(50% - var(--size))',
+    right: 'calc( var(--size) * -1)',
+  }),
+
+  right: css({
+    top: 'calc(50% - var(--size))',
+    left: 'calc( var(--size) * -1)',
+  }),
+}
+
+const Container = styled(Stack)<{ pointer: PlacementAxis }>`
+  filter: ${({ theme }) => `drop-shadow(${theme.shadows.cardInteractive})`};
+
+  &::before {
+    --size: 5px;
+
+    content: '';
+    position: absolute;
+    ${({ pointer }) => placements[pointer!]}
+    border: ${({ theme }) => `var(--size) solid ${theme.colors.backgroundPrimary}`};
+    transform: rotate(-45deg);
+  }
 `
 
 export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disabled, delay = 1000, ...textProps }) => {
@@ -50,23 +89,25 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
           targetRef={triggerRef}
           overlayRef={overlayRef}
           placement="top"
-          render={(positionProps) => (
-            <Stack
+          render={({ pointer, ...rest }) => (
+            <Container
               {...tooltipElementProps}
-              {...positionProps}
+              {...rest}
               ref={overlayRef}
-              backgroundColor="backgroundInverted"
+              backgroundColor="backgroundPrimary"
               p={1}
               borderRadius="tooltip"
               width={220}
+              gap="3px"
+              pointer={pointer}
             >
-              <Text variant="label2" color="textInverted">
-                {title}
-              </Text>
-              <Text variant="body3" color="textInverted">
-                {body}
-              </Text>
-            </Stack>
+              {!!title && (
+                <Text variant="body3" fontWeight={600}>
+                  {title}
+                </Text>
+              )}
+              <Text variant="body3">{body}</Text>
+            </Container>
           )}
         />
       )}

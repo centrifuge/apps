@@ -1,170 +1,188 @@
-import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
-import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { AnchorButton, Box, Button, Checkbox, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
 import * as React from 'react'
-import { useMutation, useQuery } from 'react-query'
-import { switchMap } from 'rxjs'
-import { useAuth } from '../../components/AuthProvider'
-import { useOnboarding } from '../../components/OnboardingProvider'
+import { boolean, object } from 'yup'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
+import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
+import { OnboardingUser } from '../../types'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
+import { useSignRemark } from './queries/useSignRemark'
 
 type Props = {
-  nextStep: () => void
-  backStep: () => void
   signedAgreementUrl: string | undefined
-  isSignedAgreementFetched: boolean
 }
 
-export const SignSubscriptionAgreement = ({
-  nextStep,
-  backStep,
-  signedAgreementUrl,
-  isSignedAgreementFetched,
-}: Props) => {
-  const [isAgreed, setIsAgreed] = React.useState(false)
-  const { authToken } = useAuth()
-  const { refetchOnboardingUser, onboardingUser, pool } = useOnboarding()
-  const { selectedAccount } = useWallet()
+const validationSchema = object({
+  isAgreed: boolean().oneOf([true], 'You must agree to the agreement'),
+})
 
-  const isCompleted =
-    onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
-    !!onboardingUser.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
+const GENERIC_SUBSCRIPTION_AGREEMENT = 'QmYuPPQuuc9ezYQtgTAupLDcLCBn9ZJgsPjG7mUx7qbN8G'
+
+export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
+  const { onboardingUser, pool, previousStep, nextStep } = useOnboarding<
+    NonNullable<OnboardingUser>,
+    NonNullable<OnboardingPool>
+  >()
+  const poolId = pool.id
+  const trancheId = pool.trancheId
+  const poolData = usePool(poolId)
+  const { data: poolMetadata } = usePoolMetadata(poolData)
+  const centrifuge = useCentrifuge()
+
+  const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed
+
+  const formik = useFormik({
+    initialValues: {
+      isAgreed: hasSignedAgreement,
+    },
+    validationSchema,
+    onSubmit: () => {
+      signRemark([`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`])
+    },
+  })
+
+  const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
+  const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
+
+  const unsignedAgreementUrl = poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
+    ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[trancheId].agreement?.uri!)
+    : !poolId.startsWith('0x')
+    ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    : null
+
+  // tinlake pools without subdocs cannot accept investors
+  const isPoolClosedToOnboarding = poolId.startsWith('0x') && !unsignedAgreementUrl
+  const isCountrySupported =
+    onboardingUser.investorType === 'entity'
+      ? !poolMetadata?.onboarding?.kybRestrictedCountries?.includes(onboardingUser.jurisdictionCode)
+      : !poolMetadata?.onboarding?.kycRestrictedCountries?.includes(onboardingUser.countryOfCitizenship)
 
   React.useEffect(() => {
-    if (isCompleted) {
-      setIsAgreed(true)
+    if (hasSignedAgreement) {
+      formik.setFieldValue('isAgreed', true)
     }
-  }, [isCompleted])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSignedAgreement])
 
-  const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useQuery(
-    ['unsignedSubscriptionAgreement', pool.id, pool.trancheId],
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${pool.id}&trancheId=${
-          pool.trancheId
-        }`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
-
-      const json = await response.json()
-
-      const documentBlob = new Blob([Uint8Array.from(json.unsignedAgreement.data).buffer], {
-        type: 'application/pdf',
-      })
-
-      return URL.createObjectURL(documentBlob)
-    },
-    {
-      enabled: !isCompleted,
-      refetchOnWindowFocus: false,
-    }
-  )
-
-  const { execute: signRemark, isLoading: isSigningTransaction } = useCentrifugeTransaction(
-    'sign remark',
-    (cent) => () =>
-      cent
-        .getApi()
-        .pipe(
-          switchMap((api) =>
-            cent.wrapSignAndSend(
-              api,
-              api.tx.system.remark(`Signed subscription agreement for pool: ${pool.id} tranche: ${pool.trancheId}`)
-            )
-          )
-        ),
-    {
-      onSuccess: async (_, result) => {
-        const extrinsicHash = result.txHash.toHex()
-        // @ts-expect-error
-        const blockNumber = result.blockNumber.toString()
-        await sendDocumentsToIssuer({ extrinsicHash, blockNumber })
-      },
-    }
-  )
-
-  const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useMutation(
-    ['onboardingStatus', selectedAccount?.address, pool.id, pool.trancheId],
-    async (transactionInfo: { extrinsicHash: string; blockNumber: string }) => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAndSendDocuments`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          transactionInfo,
-          trancheId: pool.trancheId,
-          poolId: pool.id,
-        }),
-        credentials: 'include',
-      })
-
-      if (response.status === 201) {
-        return response
-      }
-      throw response.statusText
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
-
-  const isAgreementFetched = React.useMemo(
-    () => isUnsignedAgreementFetched || isSignedAgreementFetched,
-    [isSignedAgreementFetched, isUnsignedAgreementFetched]
-  )
-
-  const handleSubmit = () => {
-    if (isCompleted) {
-      nextStep()
-    } else {
-      signRemark([])
-    }
-  }
-
-  return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>Sign subscription agreement</Text>
-        <Text fontSize={2}>Complete subscription agreement</Text>
-        {isAgreementFetched && (
-          <Box overflowY="scroll" height="500px">
-            <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
-          </Box>
-        )}
-      </Box>
-      <Checkbox
-        style={{
-          cursor: 'pointer',
-        }}
-        checked={isCompleted || isAgreed}
-        onChange={() => setIsAgreed((current) => !current)}
-        label={<Text style={{ cursor: 'pointer' }}>I agree to the agreement</Text>}
-        disabled={isSigningTransaction || isSending || isCompleted}
+  return !isPoolClosedToOnboarding && isCountrySupported ? (
+    <Content>
+      <ContentHeader
+        title="Sign subscription agreement"
+        body="Read the subscription agreement and click the box below to automatically e-sign the subscription agreement. You don't need to download and sign manually."
       />
-      <Shelf gap="2">
-        <Button onClick={() => backStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
+
+      <Stack gap={1} alignItems="start">
+        <Box
+          position="relative"
+          overflowY="auto"
+          minHeight="30vh"
+          maxHeight="500px"
+          borderWidth={unsignedAgreementUrl ? 1 : 0}
+          borderColor="borderPrimary"
+          borderStyle="solid"
+          borderRadius="tooltip"
+        >
+          {unsignedAgreementUrl ? (
+            <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementUrl) as string} />
+          ) : (
+            <Shelf
+              position="absolute"
+              top={0}
+              left={0}
+              width="100%"
+              height="100%"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Spinner size="iconLarge" />
+            </Shelf>
+          )}
+        </Box>
+
+        {!!unsignedAgreementUrl && (
+          <AnchorButton
+            href={signedAgreementUrl ?? unsignedAgreementUrl}
+            download={`subscription-agreement-pool-${pool.id}.pdf`}
+            variant="tertiary"
+            icon={IconDownload}
+            small
+            target="_blank"
+          >
+            Download agreement
+          </AnchorButton>
+        )}
+
+        {!!(poolId.startsWith('0x') && poolMetadata?.pool?.links.executiveSummary?.uri) && (
+          <AnchorButton
+            href={poolMetadata?.pool?.links.executiveSummary?.uri}
+            download={`executive-summary-pool-${pool.id}.pdf`}
+            variant="tertiary"
+            icon={IconDownload}
+            small
+            target="_blank"
+          >
+            Executive summary attachment
+          </AnchorButton>
+        )}
+      </Stack>
+      <Checkbox
+        {...formik.getFieldProps('isAgreed')}
+        checked={formik.values.isAgreed}
+        label={
+          <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
+            I hereby sign and agree to the terms of the subscription agreement
+          </Text>
+        }
+        disabled={isSigningTransaction || isSending || hasSignedAgreement}
+        errorMessage={formik.errors.isAgreed}
+      />
+
+      <ActionBar>
+        <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
         <Button
-          onClick={() => handleSubmit()}
+          onClick={hasSignedAgreement ? () => nextStep() : () => formik.handleSubmit()}
           loadingMessage="Signing"
           loading={isSigningTransaction || isSending}
-          disabled={!isAgreed || isSigningTransaction || isSending}
+          disabled={isSigningTransaction || isSending}
         >
-          {isCompleted ? 'Next' : 'Sign'}
+          {hasSignedAgreement ? 'Next' : 'Sign'}
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </Content>
+  ) : !isCountrySupported ? (
+    <Content>
+      <ContentHeader
+        title="Country not supported"
+        body={
+          <span>
+            This pool is currently not accepting new investors from your country. Please contact the issuer (
+            <a href={`mailto:${poolMetadata?.pool?.issuer.email}?subject=Onboarding&body=I’m reaching out about…`}>
+              {poolMetadata?.pool?.issuer.email}
+            </a>
+            ) for any questions.
+          </span>
+        }
+      />
+    </Content>
+  ) : (
+    <Content>
+      <ContentHeader
+        title="This pool is closed for onboarding"
+        body={
+          <span>
+            This pool is currently not accepting new investors. Please contact the issuer (
+            <a href={`mailto:${poolMetadata?.pool?.issuer.email}?subject=Onboarding&body=I’m reaching out about…`}>
+              {poolMetadata?.pool?.issuer.email}
+            </a>
+            ) for any questions.
+          </span>
+        }
+      />
+    </Content>
   )
 }

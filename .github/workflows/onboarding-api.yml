@@ -1,4 +1,4 @@
-name: 'onboarding-api'
+name: Onboarding API
 on:
   push:
     branches:
@@ -6,174 +6,93 @@ on:
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
+      - '.github/actions/deploy-gfunction'
+      - '.github/actions/build-function'
   pull_request:
-    types:
-      - 'opened'
-      - 'synchronize'
-      - 'reopened'
-      - 'closed'
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
-  workflow_dispatch:
+      - '.github/actions/deploy-gfunction'
+      - '.github/actions/build-function'
+  workflow_call:
     inputs:
-      release_tag:
-        description: Tag to checkout - Useful only if you select prodution environment
-        required: false
-        type: string
-
       deploy_env:
-        description: 'Environment to deploy, production will trigger an approval request'
-        required: true
-        type: choice
-        default: 'demo'
-        options:
-          - 'production'
-          - 'demo'
-
+        type: string
+        required: false
+env:
+ # This needs to match the env: settings in prod-deploy.yml
+  app_name: onboarding-api
+  function_handler: onboarding
+  artifact_name: "onboarding-api${{ inputs.deploy_env && format('-{0}', inputs.deploy_env) }}"
+concurrency:
+ # Fancy concurrency group string to allow for multi-staging deployments  
+  group:  'onboarding-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true    
+ 
 jobs:
-  cleanup-pr:
-    runs-on: ubuntu-latest
-    if: github.event.action == 'closed'
-    environment: preview
-    steps:
-      - name: Auth gcloud
-        id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
-        with:
-          workload_identity_provider: '${{ secrets.GWIP }}'
-          service_account: '${{ secrets.GSA }}'
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1
-      - name: Delete function
-        run: gcloud functions delete ${{env.app_name}} --region=${{ env.region }}
-      # ToDO: remove Cloudflare redirection
-
-  build:
-    if: github.event.action != 'closed'
+  build-onboarding-api:
+    if: ${{ inputs.deploy_env != 'production' }}
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: onboarding-api
     steps:
-      # Check out default first
-      - id: checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
-
-      - name: set checkout SHA
-        if: ${{ inputs.deploy_env == 'production' }}
-        id: ref
-        uses: ./.github/actions/checkout_prod
-        with:
-          deploy_prod: ${{ inputs.deploy_env == 'production' }}
-
-      - name: print current branch
-        if: ${{ inputs.deploy_env == 'production' }}
-        run: git status
-
-      - name: Setup Node
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
-        with:
-          node-version: 16
-          cache: yarn
-          # cache-dependency-path: onboarding-api/yarn.lock
-
-      - name: YARN install
-        run: yarn install
-
-      - name: Lint check
-        run: yarn lint
-
-      - name: Build function
-        run: yarn build
-
-      - name: Archive functions artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # @v3.1.2
-        with:
-          name: onboarding-api
-          retention-days: 1
-          path: onboarding-api/dist
-
-  prepare_deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - id: checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       - name: prepare env logic
         id: prepare
-        uses: ./.github/actions/deployment_strategy
+        uses: ./.github/actions/prepare-deploy
         with:
-          app_base_name: 'onboarding-api'
-          set_env: ${{ inputs.deploy_env }}
+          app_base_name: ${{ env.app_name }}
+          deploy_to: ${{ inputs.deploy_env }}
+                    
+      - name: build function
+        uses: ./.github/actions/build-function
+        with:
+          app_name: ${{ env.app_name }}
+          artifact_name: ${{ env.artifact_name }}
 
-      - name: Fail if prod deploy but no tag given
-        if: ${{ inputs.deploy_env == 'production' }}
-        shell: bash
-        run: |
-          if ${{ startsWith(inputs.release_tag, 'release') }}; then
-            # PROD
-            echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ inputs.release_tag }}"
-          else
-            echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
-          fi
-
+      - name: Archive staging artifacts
+        id: archive_staging
+        if: inputs.deploy_env == 'staging' && github.event_name == 'release'
+        uses: ./.github/actions/archive-release
+        with:
+          name: ${{ env.app_name }}
+          path: ./${{ env.app_name }}/dist
+          
     outputs:
       gh_env: ${{ steps.prepare.outputs.gh_env }}
-      app_name: ${{ steps.prepare.outputs.app_name }}
+      function_name: ${{ steps.prepare.outputs.function_name }}
 
-  deployment:
-    if: github.event.action != 'closed'
-    needs: [build, prepare_deploy]
-    runs-on: ubuntu-latest
-    environment: ${{ needs.prepare_deploy.outputs.gh_env }} # To control which Gcloud token is selected
-    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    env:
-      region: europe-central2
-    concurrency:
-      group: ${{ github.ref }}
-      cancel-in-progress: true
-    steps:
-      - name: retrieve artifacts
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
-        with:
-          name: onboarding-api
 
-      - name: list artifacts
-        run: ls -R
+  deploy-onboarding-api:
+      concurrency:
+       # Don't try to deploy the same function in parallel
+        group: deploy-${{ needs.build-onboarding-api.outputs.function_name }}
+        cancel-in-progress: true  
+      needs: build-onboarding-api
+      runs-on: ubuntu-latest
+      environment: ${{ needs.build-onboarding-api.outputs.gh_env }}
+      permissions:
+        contents: 'read'
+        id-token: 'write'
+      steps:
+        - name: Checkout
+          uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+          with:
+            path: apps  
 
-      - name: Auth gcloud
-        id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
-        with:
-          workload_identity_provider: '${{ secrets.GWIP }}'
-          service_account: '${{ secrets.GSA }}'
-
-      - name: Deploy to google functions
-        id: gclouddeploy
-        uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
-        with:
-          name: '${{ needs.prepare_deploy.outputs.app_name }}'
-          runtime: 'nodejs16'
-          region: '${{ env.region }}'
-          source_dir: './' # downlaod artifacts sets the current directory as the one in artifact.with.path
-          entry_point: 'onboarding'
-
-      - name: Print Gcloud functions URL
-        run: echo "::notice title=Function_URL::${{ steps.gclouddeploy.outputs.url }}"
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1
-
-      - name: Change function to allow_unathorized calls
-        run: |
-          gcloud functions add-iam-policy-binding ${{ needs.prepare_deploy.outputs.app_name }} \
-          --region=${{ env.region }} \
-          --member="allUsers" --role="roles/cloudfunctions.invoker"
-
-      # ToDo:
-      # - create a redirect rule in Cloudflare using CF_API_KEY
-      #   to proxy /onboard-api to the Gcloud URL transparently
+        - name: Deploy Gfunction
+          id: functionsdeploy
+          uses: ./apps/.github/actions/deploy-gfunction
+          with:
+            app_name: ${{ env.app_name }}
+            artifact_name: ${{ env.artifact_name }}
+            GWIP: ${{ secrets.GWIP }}
+            GSA: ${{ secrets.GSA }}
+            target: ${{ env.function_handler }}
+            service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
+            gcloud_region: ${{ vars.GCLOUD_REGION }}
+            deploy_env: ${{ inputs.deploy_env }}
+            

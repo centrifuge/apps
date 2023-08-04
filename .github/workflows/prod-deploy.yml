@@ -1,0 +1,162 @@
+name: Promote staging to PROD
+on:
+  release:
+    types:
+      - released     
+  workflow_dispatch:
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false # Wait for staging-deploy to finish
+
+jobs:
+  sync-staging-prod:
+    permissions:
+      contents: 'read'
+      id-token: 'write'  
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps    
+
+      - name: prepare env logic
+        id: prepare
+        uses: ./apps/.github/actions/prepare-deploy
+        with:
+          app_base_name: app
+          deploy_to: 'production'
+
+      - name: Auth gcloud
+        id: gauth
+        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        with:
+          workload_identity_provider: '${{ secrets.GWIP }}'
+          service_account: '${{ secrets.GSA }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1 
+
+      - name: Sync webpack from staging
+        run: gsutil -m rsync -d -r gs://app.staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
+  
+  retrieve-prod-assets:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: staging-deploy.yml
+          workflow_conclusion: "" # This will fail if the staging deployment isn't finished yet
+          # check_artifacts: true # This will search for the last available artifact, useful for testing
+
+      # Alternative: download from the release instead of 
+      # workflow artifacts
+      # - uses: dsaltares/fetch-gh-release-asset@master
+      #   with:
+      #     repo: 'centrifuge/apps'
+      #     version: 'tags/${{ github.ref_name }}'
+      #     file: ".*-api\\.zip"
+      #    # target: "./releases/"
+      #     regex: true
+      #     # target: 'subdir/${{ matrix.artifact_name }}.zip'
+      #     # token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Unzip release files
+      #   run: |
+      #     unzip pinning-api.zip -d pinning-api 1> /dev/null
+      #     unzip onboarding-api.zip -d onboarding-api 1> /dev/null
+
+      # Debug artifacts:
+      # - name: list artifact files
+      #   run: |
+      #     ls -la ./
+      #     ls -la pinning-api/
+      #     ls -la onboarding-api/
+      #     echo "Workspace PATH: ${{ github.workspace }}"
+      #     ls -la $GITHUB_WORKSPACE
+
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
+        with: 
+          name: onboarding-api
+          path: ${{ github.workspace }}/onboarding-api-staging/
+          if-no-files-found: error 
+          
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
+        with: 
+          name: pinning-api
+          path: ${{ github.workspace }}/pinning-api-staging/
+          if-no-files-found: error 
+
+  pinning-prod-deploy:
+    needs: retrieve-prod-assets
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      app_name: pinning-api
+      function_handler: pinningApi
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps  
+
+      - name: Deploy Gfunction
+        id: functionsdeploy
+        uses: ./apps/.github/actions/deploy-gfunction
+        with:
+          app_name: ${{ env.app_name }}
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+          target: ${{ env.function_handler }}
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
+          service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
+          deploy_env: production
+
+  onboarding-prod-deploy:
+    needs: retrieve-prod-assets
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      app_name: onboarding-api
+      function_handler: onboarding
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps  
+
+      - name: Deploy Gfunction
+        id: functionsdeploy
+        uses: ./apps/.github/actions/deploy-gfunction
+        with:
+          app_name: ${{ env.app_name }}
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+          target: ${{ env.function_handler }}
+          service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
+          deploy_env: production
+
+  prod-slack-notify:
+    needs: [sync-staging-prod, onboarding-prod-deploy, pinning-prod-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify prod deploy
+        uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: |
+            app.staging.centrifuge.io has been promoted to app.centrifuge.io and is now LIVE!
+            Check out the new release -> https://github.com/centrifuge/apps/releases/
+          SLACK_USERNAME: "Centrifuge GHA Bot"
+          SLACK_ICON: "https://centrifuge.io/favicon.ico"
+          SLACK_TITLE: "Centrifuge app has been promoted to prod."
+          SLACK_FOOTER: "Automatic message from centrifuge/apps repository Actions"           

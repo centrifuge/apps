@@ -1,8 +1,10 @@
+import type { JsonRpcSigner, TransactionRequest } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
-import { ISubmittableResult, Signer } from '@polkadot/types/types'
+import { DefinitionRpc, DefinitionsCall, ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
+import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
 import {
   bufferCount,
@@ -12,7 +14,6 @@ import {
   filter,
   firstValueFrom,
   from,
-  lastValueFrom,
   map,
   mergeWith,
   Observable,
@@ -28,8 +29,14 @@ import {
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { TransactionOptions } from './types'
+import { computeMultisig, evmToSubstrateAddress, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
+
+type ProxyType = string
+
+const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
+const EVM_DISPATCH_OVERHEAD_GAS = 50_000
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -41,12 +48,15 @@ export type Config = {
   altairSubqueryUrl: string
   metadataHost: string
   pinFile?: (b64URI: string) => Promise<{ uri: string }>
-  unpinFile?: (hash: string) => Promise<void>
+  pinJson?: (json: string) => Promise<{ uri: string }>
   signer?: Signer
   signingAddress?: AddressOrPair
+  evmSigner?: JsonRpcSigner
+  evmSigningAddress?: string
   printExtrinsics?: boolean
-  proxy?: string
+  proxies?: ([delegator: string, forceProxyType?: ProxyType] | string)[]
   debug?: boolean
+  substrateEvmChainId?: number
 }
 
 export type UserProvidedConfig = Partial<Config>
@@ -56,6 +66,8 @@ export type PaymentInfo = {
   partialFee: number | CurrencyBalance
   weight: number
 }
+
+export type RewardDomain = 'Block' | 'Liquidity'
 
 const defaultConfig: Config = {
   network: 'centrifuge',
@@ -83,9 +95,27 @@ const parachainTypes = {
     leafHash: 'Hash',
     sortedHashes: 'Vec<Hash>',
   },
+  PoolId: 'u64',
+  TrancheId: '[u8; 16]',
+  RewardDomain: {
+    _enum: ['Block', 'Liquidity'],
+  },
+  StakingCurrency: {
+    _enum: ['BlockRewards'],
+  },
+  CurrencyId: {
+    _enum: {
+      Native: 'Native',
+      Tranche: '(PoolId, TrancheId)',
+      KSM: 'KSM',
+      AUSD: 'AUSD',
+      ForeignAsset: 'u32',
+      Staking: 'StakingCurrency',
+    },
+  },
 }
 
-const parachainRpcMethods = {
+const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
   pools: {
     trancheTokenPrices: {
       description: 'Retrieve prices for all tranches',
@@ -98,6 +128,65 @@ const parachainRpcMethods = {
       type: 'Vec<u128>',
     },
   },
+  rewards: {
+    listCurrencies: {
+      description:
+        'List all reward currencies for the given domain and account. These currencies could be used as keys for the computeReward call',
+      params: [
+        {
+          name: 'domain',
+          type: 'RewardDomain',
+        },
+        {
+          name: 'account_id',
+          type: 'AccountId',
+        },
+      ],
+      type: 'Vec<CurrencyId>',
+    },
+    computeReward: {
+      description: 'Compute the claimable reward for the given triplet of domain, currency and account',
+      params: [
+        {
+          name: 'domain',
+          type: 'RewardDomain',
+        },
+        {
+          name: 'currency_id',
+          type: 'CurrencyId',
+        },
+        {
+          name: 'account_id',
+          type: 'AccountId',
+        },
+      ],
+      type: 'Option<Balance>',
+    },
+  },
+}
+
+const parachainRuntimeApi: DefinitionsCall = {
+  PoolsApi: [
+    {
+      // Runtime API calls must be in snake case (as defined in rust)
+      // However, RPCs are usually in camel case
+      methods: {
+        tranche_token_prices: parachainRpcMethods.pools.trancheTokenPrices,
+      },
+      version: 1,
+    },
+  ],
+  RewardsApi: [
+    {
+      // Runtime API calls must be in snake case (as defined in rust)
+      // However, RPCs are usually in camel case
+      methods: {
+        compute_reward: parachainRpcMethods.rewards.computeReward,
+        list_currencies: parachainRpcMethods.rewards.listCurrencies,
+      },
+      version: 1,
+    },
+  ],
 }
 
 type Events = ISubmittableResult['events']
@@ -124,7 +213,47 @@ export class CentrifugeBase {
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
-    if (options?.batch) return of(submittable)
+    const isEvmTx = this.config.evmSigner && !this.config.signer
+    let actualSubmittable = submittable
+
+    if (options?.batch) return of(actualSubmittable)
+
+    const proxies = (options?.proxies || this.config.proxies)?.map((p) =>
+      Array.isArray(p) ? p : ([p, undefined] as const)
+    )
+
+    let transferTx
+    if (options?.transferToActingAccount && (options?.multisig || proxies)) {
+      const multi = options?.multisig && computeMultisig(options.multisig)
+      transferTx = api.tx.balances.transfer(proxies?.at(-1)?.[0] || multi?.address, options.transferToActingAccount)
+    }
+
+    if (proxies && !options?.sendOnly) {
+      actualSubmittable = proxies.reduceRight(
+        (acc, [delegator, forceProxyType]) => api.tx.proxy.proxy(delegator, forceProxyType, acc),
+        actualSubmittable
+      )
+    }
+
+    if (options?.multisig) {
+      const otherSigners = sortAddresses(
+        options.multisig.signers.filter(
+          (signer) =>
+            !isSameAddress(
+              signer,
+              isEvmTx
+                ? evmToSubstrateAddress(this.config.evmSigningAddress!, this.config.substrateEvmChainId!)
+                : this.getSignerAddress()
+            )
+        )
+      )
+      console.log('multisig callData', actualSubmittable.method.toHex())
+      actualSubmittable = api.tx.multisig.asMulti(options.multisig.threshold, otherSigners, null, actualSubmittable, 0)
+    }
+
+    if (transferTx) {
+      actualSubmittable = api.tx.utility.batchAll([transferTx, actualSubmittable])
+    }
 
     if (this.config.printExtrinsics) {
       if (submittable.method.method === 'batchAll' || submittable.method.method === 'batch') {
@@ -145,28 +274,26 @@ export class CentrifugeBase {
       }
     }
 
+    if (isEvmTx) {
+      // TODO: signOnly and sendOnly
+      return this.wrapSubstrateEvmSignAndSend(api, actualSubmittable, options)
+    }
+
     const { signer, signingAddress } = this.getSigner()
 
     try {
-      let actualSubmittable = submittable
-      if (this.config.proxy && !options?.sendOnly) {
-        actualSubmittable = api.tx.proxy.proxy(this.config.proxy, undefined, submittable)
-      }
-
       const $paymentInfo = submittable.paymentInfo(signingAddress)
       const $balances = api.query.system.account(signingAddress)
 
       if (options?.paymentInfo) {
-        return lastValueFrom(
-          $paymentInfo.pipe(
-            map((paymentInfoRaw) => {
-              const paymentInfo = paymentInfoRaw.toJSON() as PaymentInfo
-              return {
-                ...paymentInfo,
-                partialFee: new CurrencyBalance(paymentInfo.partialFee, api.registry.chainDecimals[0]),
-              }
-            })
-          )
+        return $paymentInfo.pipe(
+          map((paymentInfoRaw) => {
+            const paymentInfo = paymentInfoRaw.toJSON() as any
+            return {
+              ...paymentInfo,
+              partialFee: new CurrencyBalance(hexToBn(paymentInfo.partialFee), api.registry.chainDecimals[0]),
+            }
+          })
         )
       }
 
@@ -223,6 +350,59 @@ export class CentrifugeBase {
     } catch (e) {
       return throwError(() => e)
     }
+  }
+
+  wrapSubstrateEvmSignAndSend<T extends TransactionOptions>(
+    _: ApiRx,
+    submittable: SubmittableExtrinsic<'rxjs'>,
+    options?: T
+  ) {
+    const address = evmToSubstrateAddress(this.config.evmSigningAddress!, this.config.substrateEvmChainId!)
+
+    return submittable.paymentInfo(address).pipe(
+      switchMap((paymentInfo) => {
+        const weight = paymentInfo.weight.refTime.toPrimitive() as number
+        const gas = Math.ceil(weight / 20_000) + EVM_DISPATCH_OVERHEAD_GAS
+        const tx: TransactionRequest = {
+          // type: 2,
+          to: EVM_DISPATCH_PRECOMPILE,
+          data: submittable.method.toHex(),
+          gasLimit: gas,
+          // gas: 0 // TODO: How to estimate gas here?,
+          // NOTE: value is unused, the Dispatch requires no additional payment beyond tx fees
+        }
+        const txPromise = this.config.evmSigner!.sendTransaction(tx)
+        return from(txPromise).pipe(
+          switchMap((response) => {
+            return from(response.wait()).pipe(
+              map((receipt) => [response, receipt] as const),
+              startWith([response, null] as const),
+              catchError(() => of([{ ...response, error: new Error('failed') }] as const)),
+              tap(([result, receipt]) => {
+                if ('error' in result || receipt?.status === 0) {
+                  options?.onStatusChange?.({
+                    events: [],
+                    dispatchError: {},
+                    status: {
+                      hash: { toHex: () => result.hash as any },
+                    },
+                  } as any)
+                } else {
+                  options?.onStatusChange?.({
+                    events: [],
+                    status: {
+                      isInBlock: receipt?.status === 1,
+                      isFinalized: receipt?.status === 1,
+                      hash: { toHex: () => result.hash as any },
+                    },
+                  } as any)
+                }
+              })
+            )
+          })
+        )
+      })
+    )
   }
 
   async querySubquery<T = any>(query: string, variables?: any) {
@@ -318,11 +498,11 @@ export class CentrifugeBase {
   }
 
   getApi() {
-    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods)
+    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi)
   }
 
   getApiPromise() {
-    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods))
+    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods, parachainRuntimeApi))
   }
 
   getRelayChainApi() {
@@ -365,8 +545,17 @@ export class CentrifugeBase {
     }
   }
 
-  getSignerAddress() {
-    const { signingAddress } = this.getSigner()
+  getSignerAddress(type?: 'substrate') {
+    const { signingAddress, evmSigningAddress } = this.config
+
+    if (!signingAddress) {
+      if (evmSigningAddress && this.config.substrateEvmChainId) {
+        return type === 'substrate'
+          ? evmToSubstrateAddress(evmSigningAddress, this.config.substrateEvmChainId)
+          : evmSigningAddress
+      }
+      throw new Error('no signer set')
+    }
 
     if (typeof signingAddress !== 'string' && 'address' in signingAddress) {
       return signingAddress.address
@@ -375,11 +564,24 @@ export class CentrifugeBase {
     return signingAddress as string
   }
 
-  setProxy(proxyAccount: string) {
-    this.config.proxy = proxyAccount
+  getActingAddress(txOptions?: TransactionOptions) {
+    if (txOptions?.proxies) {
+      const proxy = txOptions.proxies.at(-1)!
+      return typeof proxy === 'string' ? proxy : proxy[0]
+    }
+
+    if (txOptions?.multisig) {
+      return computeMultisig(txOptions.multisig).address
+    }
+
+    return this.getSignerAddress('substrate')
   }
 
-  clearProxy() {
-    this.config.proxy = undefined
+  setProxies(proxies: Config['proxies']) {
+    this.config.proxies = proxies
+  }
+
+  clearProxies() {
+    this.config.proxies = undefined
   }
 }

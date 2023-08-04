@@ -2,40 +2,54 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { OnboardingUser } from '../types'
-import { useAuth } from './AuthProvider'
+import { getActiveOnboardingStep } from '../utils/getActiveOnboardingStep'
+import { useOnboardingAuth } from './OnboardingAuthProvider'
 
-const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+export type OnboardingPool =
+  | {
+      trancheId: string
+      id: string
+      name: string
+      symbol: string
+    }
+  | null
+  | undefined
 
-const OnboardingContext = React.createContext<{
-  onboardingUser: OnboardingUser
+interface OnboardingContextType<User, Pool> {
+  onboardingUser: User
   refetchOnboardingUser: () => void
-  isOnboardingUserFetching: boolean
-  isOnboardingUserFetched: boolean
-  pool: {
-    title: string
-    trancheId: string
-    id: string
-  }
-} | null>(null)
+  pool: Pool
+  activeStep: number
+  setActiveStep: React.Dispatch<React.SetStateAction<number>>
+  nextStep: () => void
+  previousStep: () => void
+  isLoadingStep: boolean
+  setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
+}
 
-export function OnboardingProvider({ children }: { children?: React.ReactNode }) {
-  const { authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
-  const { selectedAccount } = useWallet()
+const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser, OnboardingPool> | null>(null)
 
-  // TODO: get the pool that the user is onboarding to from origin component
-  const pool = {
-    title: 'Real World Assets',
-    trancheId: '0x3c110ce706f70638909e08da4379b271',
-    id: '3878073193',
-  }
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  const {
+    pendingConnect: { isConnecting },
+    substrate: { selectedAccount: substrateAccount },
+    evm: { selectedAddress: evmAddress },
+    connectedType,
+  } = useWallet()
+  const { isAuth, isAuthFetched, authToken } = useOnboardingAuth()
+  const [activeStep, setActiveStep] = React.useState<number>(0)
+  const [pool, setPool] = React.useState<OnboardingPool>()
+
+  const nextStep = () => setActiveStep((current) => current + 1)
+  const previousStep = () => setActiveStep((current) => current - 1)
 
   const {
-    data: onboardingUserData,
+    data: onboardingUser,
     refetch: refetchOnboardingUser,
-    isFetching: isOnboardingUserFetching,
     isFetched: isOnboardingUserFetched,
+    isLoading: isOnboardingUserLoading,
   } = useQuery(
-    ['getUser', authToken],
+    ['get-user', authToken],
     async () => {
       if (authToken) {
         const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUser`, {
@@ -51,24 +65,59 @@ export function OnboardingProvider({ children }: { children?: React.ReactNode })
           throw new Error()
         }
 
-        return response.json()
+        try {
+          const json = await response.json()
+
+          return json
+        } catch (error) {
+          return null
+        }
       }
     },
     {
       refetchOnWindowFocus: false,
-      enabled: !!selectedAccount,
+      enabled: connectedType === 'evm' ? !!evmAddress : !!substrateAccount,
       retry: 1,
     }
   )
 
+  React.useEffect(() => {
+    // tried to connect but no wallet is connected
+    if (!isConnecting && !(substrateAccount || evmAddress)) {
+      return setActiveStep(1)
+    }
+    // wallet finished connection attempt, authentication was attempted, and user is not authenticated
+    if (!isConnecting && isOnboardingUserFetched && !isAuth) {
+      return setActiveStep(1)
+    }
+
+    // wallet finished connection attempt, user was fetched
+    if (!isConnecting && isOnboardingUserFetched) {
+      const isPendingManualKybReview = onboardingUser?.manualKybStatus === 'review.pending'
+
+      const activeOnboardingStep = getActiveOnboardingStep(
+        onboardingUser,
+        isPendingManualKybReview,
+        pool?.id,
+        pool?.trancheId
+      )
+
+      return setActiveStep(activeOnboardingStep)
+    }
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, substrateAccount, evmAddress, pool])
+
   return (
     <OnboardingContext.Provider
       value={{
-        onboardingUser: onboardingUserData || {},
+        setPool,
+        onboardingUser: onboardingUser || null,
         refetchOnboardingUser,
-        isOnboardingUserFetching,
-        isOnboardingUserFetched,
         pool,
+        activeStep,
+        nextStep,
+        previousStep,
+        setActiveStep,
+        isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading,
       }}
     >
       {children}
@@ -76,8 +125,11 @@ export function OnboardingProvider({ children }: { children?: React.ReactNode })
   )
 }
 
-export const useOnboarding = () => {
-  const ctx = React.useContext(OnboardingContext)
+export const useOnboarding = <
+  User extends OnboardingUser = OnboardingUser,
+  Pool extends OnboardingPool = OnboardingPool
+>() => {
+  const ctx = React.useContext(OnboardingContext) as OnboardingContextType<User, Pool>
   if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
 }

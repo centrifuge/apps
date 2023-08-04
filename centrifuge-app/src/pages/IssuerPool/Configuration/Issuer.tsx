@@ -11,16 +11,25 @@ import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
 
 type Values = Pick<
   CreatePoolValues,
-  'issuerName' | 'issuerLogo' | 'issuerDescription' | 'executiveSummary' | 'website' | 'forum' | 'email'
+  | 'issuerName'
+  | 'issuerRepName'
+  | 'issuerLogo'
+  | 'issuerDescription'
+  | 'executiveSummary'
+  | 'website'
+  | 'forum'
+  | 'email'
+  | 'details'
 >
 
-export const Issuer: React.FC = () => {
+export function Issuer() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
@@ -28,16 +37,19 @@ export const Issuer: React.FC = () => {
   const cent = useCentrifuge()
   const prefetchMetadata = usePrefetchMetadata()
   const { data: logoFile } = useFile(metadata?.pool?.issuer?.logo?.uri, 'logo')
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const initialValues: Values = React.useMemo(
     () => ({
       issuerName: metadata?.pool?.issuer?.name ?? '',
+      issuerRepName: metadata?.pool?.issuer?.repName ?? '',
       issuerLogo: logoFile ?? null,
       issuerDescription: metadata?.pool?.issuer?.description ?? '',
       executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : ('' as any),
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
       email: metadata?.pool?.issuer?.email ?? '',
+      details: metadata?.pool?.details,
     }),
     [metadata, logoFile]
   )
@@ -78,6 +90,7 @@ export const Issuer: React.FC = () => {
           ...oldMetadata.pool,
           issuer: {
             name: values.issuerName,
+            repName: values.issuerRepName,
             description: values.issuerDescription,
             email: values.email,
             logo:
@@ -90,10 +103,11 @@ export const Issuer: React.FC = () => {
             forum: values.forum,
             website: values.website,
           },
+          details: values.details,
         },
       }
 
-      execute([poolId, newPoolMetadata])
+      execute([poolId, newPoolMetadata], { account })
       actions.setSubmitting(false)
     },
   })

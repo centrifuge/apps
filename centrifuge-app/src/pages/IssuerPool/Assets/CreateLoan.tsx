@@ -1,10 +1,12 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import {
+  formatBalance,
   Transaction,
+  useBalances,
   useCentrifuge,
+  useCentrifugeConsts,
   useCentrifugeTransaction,
   useTransactions,
-  useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -20,7 +22,7 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
@@ -28,19 +30,18 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
-import { LoanTemplate } from '../../../types'
-import { truncateText } from '../../../utils/formatting'
+import { RouterLinkButton } from '../../../components/RouterLinkButton'
+import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
-import { useAddress } from '../../../utils/useAddress'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
-import { useMetadataMulti } from '../../../utils/useMetadata'
-import { useCollateralCollectionId } from '../../../utils/useNFTs'
-import { usePod } from '../../../utils/usePod'
+import { useMetadata } from '../../../utils/useMetadata'
+import { usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
+import { usePodAuth } from '../../../utils/usePodAuth'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { combine, max, maxLength, positiveNumber, required } from '../../../utils/validation'
+import { combine, max, maxLength, min, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
+import { PricingInput } from './PricingInput'
 
 export const IssuerCreateLoanPage: React.FC = () => {
   return (
@@ -50,111 +51,135 @@ export const IssuerCreateLoanPage: React.FC = () => {
   )
 }
 
-type FormValues = {
+export type CreateLoanFormValues = {
   image: File | null
   description: string
   assetName: string
-  templateId: string
   attributes: Record<string, string | number>
-}
-
-type Attribute = LoanTemplate['sections'][0]['attributes'][0]
-type TemplateFieldProps<T extends string> = Attribute & { type: T; name: string }
-
-const CurrencyField: React.VFC<TemplateFieldProps<'currency'>> = ({ name, label, currencySymbol }) => {
-  const form = useFormikContext()
-  return (
-    <Field name={name} validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))} key={label}>
-      {({ field, meta }: FieldProps) => {
-        return (
-          <CurrencyInput
-            {...field}
-            variant="small"
-            label={`${label}*`}
-            errorMessage={meta.touched ? meta.error : undefined}
-            currency={currencySymbol}
-            placeholder="0.00"
-            name={name}
-            onChange={(value) => form.setFieldValue(name, value)}
-          />
-        )
-      }}
-    </Field>
-  )
-}
-
-const DecimalField: React.VFC<TemplateFieldProps<'decimal'>> = ({ name, label }) => {
-  return <FieldWithErrorMessage name={name} as={NumberInput} label={`${label}*`} validate={required()} key={label} />
-}
-
-const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...attr }) => {
-  if ('options' in attr) {
-    return (
-      <Field name={name} validate={required()} key={label}>
-        {({ field, form }: any) => (
-          <Select
-            name={name}
-            placeholder="Select one"
-            label={`${label}*`}
-            options={attr.options.map((o) => ({ label: o, value: o }))}
-            value={field.value}
-            onChange={(event) => {
-              form.setFieldValue(name, event.target.value)
-            }}
-          />
-        )}
-      </Field>
-    )
+  pricing: {
+    valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle'
+    maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+    value: number | ''
+    maturityDate: string
+    advanceRate: number | ''
+    interestRate: number | ''
+    probabilityOfDefault: number | ''
+    lossGivenDefault: number | ''
+    discountRate: number | ''
+    maxBorrowQuantity: number | ''
+    Isin: string
   }
-
-  return <FieldWithErrorMessage name={name} as={TextInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const TimestampField: React.VFC<TemplateFieldProps<'timestamp'>> = ({ name, label }) => {
-  return <FieldWithErrorMessage name={name} as={DateInput} label={`${label}*`} validate={required()} key={label} />
-}
+type TemplateFieldProps = LoanTemplateAttribute & { name: string }
 
-const PercentageField: React.VFC<TemplateFieldProps<'percentage'>> = ({ name, label }) => {
-  return (
-    <FieldWithErrorMessage
-      name={name}
-      as={NumberInput}
-      label={`${label}*`}
-      validate={required()}
-      placeholder="0.00"
-      rightElement="%"
-      key={label}
-    />
-  )
-}
-
-const templateFields = {
-  currency: CurrencyField,
-  decimal: DecimalField,
-  string: StringField,
-  timestamp: TimestampField,
-  percentage: PercentageField,
+function TemplateField({ label, name, input }: TemplateFieldProps) {
+  switch (input.type) {
+    case 'single-select':
+      return (
+        <Field name={name} validate={required()} key={label}>
+          {({ field, form }: any) => (
+            <Select
+              placeholder="Select one"
+              label={`${label}*`}
+              options={input.options.map((o) => (typeof o === 'string' ? { label: o, value: o } : o))}
+              value={field.value ?? ''}
+              onChange={(event) => {
+                form.setFieldValue(name, event.target.value)
+              }}
+            />
+          )}
+        </Field>
+      )
+    case 'currency': {
+      return (
+        <Field
+          name={name}
+          validate={combine(required(), positiveNumber(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
+          key={label}
+        >
+          {({ field, meta, form }: FieldProps) => {
+            return (
+              <CurrencyInput
+                {...field}
+                variant="small"
+                label={`${label}*`}
+                errorMessage={meta.touched ? meta.error : undefined}
+                currency={input.symbol}
+                placeholder="0.00"
+                onChange={(value) => form.setFieldValue(name, value)}
+                min={input.min}
+                max={input.max}
+              />
+            )
+          }}
+        </Field>
+      )
+    }
+    case 'number':
+      return (
+        <FieldWithErrorMessage
+          name={name}
+          as={NumberInput}
+          label={`${label}*`}
+          placeholder={input.placeholder}
+          validate={combine(required(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
+          rightElement={input.unit}
+          min={input.min}
+          max={input.max}
+        />
+      )
+    case 'date':
+      return (
+        <FieldWithErrorMessage
+          name={name}
+          as={DateInput}
+          label={`${label}*`}
+          placeholder={input.placeholder}
+          validate={required()}
+          min={input.min}
+          max={input.max}
+        />
+      )
+    default: {
+      const { type, ...rest } = input.type as any
+      return (
+        <FieldWithErrorMessage
+          name={name}
+          as={type === 'textarea' ? TextAreaInput : TextInput}
+          label={`${label}*`}
+          validate={required()}
+          {...rest}
+        />
+      )
+    }
+  }
 }
 
 // 'integer' | 'decimal' | 'string' | 'bytes' | 'timestamp' | 'monetary'
 
-const IssuerCreateLoan: React.FC = () => {
+function IssuerCreateLoan() {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
   const history = useHistory()
-  const address = useAddress()
   const centrifuge = useCentrifuge()
-  const collateralCollectionId = useCollateralCollectionId(pid)
-  const { selectedAccount, proxy } = useWallet()
-  const { addTransaction, updateTransaction } = useTransactions()
 
-  const { isAuth, authToken } = useAuth()
+  const { addTransaction, updateTransaction } = useTransactions()
+  const {
+    loans: { loanDeposit },
+    chainSymbol,
+  } = useCentrifugeConsts()
+  const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
+  const { assetOriginators } = usePoolAccess(pid)
+  const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
+    ?.collateralCollections[0]?.id
+  const balances = useBalances(account?.actingAddress)
+
+  const { isAuthed, token } = usePodAuth(pid)
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
-  const podUrl = poolMetadata?.pod?.url
-
-  const { isLoggedIn } = usePod(podUrl)
+  const podUrl = poolMetadata?.pod?.node
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
@@ -177,18 +202,52 @@ const IssuerCreateLoan: React.FC = () => {
     }
   )
 
-  const form = useFormik<FormValues>({
+  const form = useFormik<CreateLoanFormValues>({
     initialValues: {
       image: null,
       description: '',
       assetName: '',
-      templateId: '',
       attributes: {},
+      pricing: {
+        valuationMethod: 'outstandingDebt',
+        maxBorrowAmount: 'upToTotalBorrowed',
+        value: '',
+        maturityDate: '',
+        advanceRate: '',
+        interestRate: '',
+        probabilityOfDefault: '',
+        lossGivenDefault: '',
+        discountRate: '',
+        maxBorrowQuantity: '',
+        Isin: '',
+      },
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken) return
+      if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
+      const { decimals } = pool.currency
+      const pricingInfo =
+        values.pricing.valuationMethod === 'oracle'
+          ? {
+              valuationMethod: values.pricing.valuationMethod,
+              maxBorrowAmount: values.pricing.maxBorrowQuantity
+                ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals).toString()
+                : null,
+              Isin: values.pricing.Isin || '',
+              maturityDate: new Date(values.pricing.maturityDate),
+            }
+          : {
+              valuationMethod: values.pricing.valuationMethod,
+              maxBorrowAmount: values.pricing.maxBorrowAmount,
+              value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+              maturityDate: new Date(values.pricing.maturityDate),
+              advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+              interestRate: Rate.fromPercent(values.pricing.interestRate),
+              probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
+              lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
+              discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
+            }
 
-      const txId = Math.random().toString(36).substr(2)
+      const txId = Math.random().toString(36).substring(2)
 
       const tx: Transaction = {
         id: txId,
@@ -198,8 +257,8 @@ const IssuerCreateLoan: React.FC = () => {
       }
       addTransaction(tx)
 
-      const attributes = valuesToPodAttributes(values.attributes, selectedTemplateMetadata) as any
-      attributes._template = { type: 'string', value: form.values.templateId }
+      const attributes = valuesToPodAttributes(values.attributes, templateMetadata as any) as any
+      attributes._template = { type: 'string', value: templateId }
 
       let imageMetadataHash
       if (values.image) {
@@ -210,25 +269,25 @@ const IssuerCreateLoan: React.FC = () => {
       try {
         const { documentId } = await centrifuge.pod.createDocument([
           podUrl,
-          authToken,
+          token,
           {
             attributes,
-            writeAccess: [address],
+            writeAccess: [account.actingAddress],
           },
         ])
 
-        const publicAttributes = selectedTemplateMetadata.sections
-          .filter((section) => section.public)
-          .flatMap((section) => section.attributes.map(({ label }) => labelToKey(label)))
+        const publicAttributes = Object.entries(templateMetadata.attributes!)
+          .filter(([, attr]) => attr.public)
+          .map(([key]) => key)
         publicAttributes.push('_template')
 
         const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
           podUrl,
-          authToken,
+          token,
           {
             documentId,
             collectionId: collateralCollectionId,
-            owner: address,
+            owner: account.actingAddress,
             publicAttributes,
             name: values.assetName,
             description: values.description,
@@ -238,23 +297,26 @@ const IssuerCreateLoan: React.FC = () => {
 
         updateTransaction(txId, { status: 'unconfirmed' })
 
-        const connectedCent = centrifuge.connect(selectedAccount!.address, selectedAccount!.signer as any)
-        if (proxy) {
-          connectedCent.setProxy(proxy.delegator)
-        }
+        const connectedCent = centrifuge.connect(account.signingAccount.address, account.signingAccount.signer as any)
 
         // Sign createLoan transaction
         const submittable = await lastValueFrom(
-          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 100 })
+          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
+            signOnly: true,
+            era: 100,
+            proxies: account.proxies?.map((p) => [p.delegator, p.types.includes('Borrow') ? 'Borrow' : undefined]),
+            multisig: account.multisig,
+          })
         )
 
         updateTransaction(txId, { status: 'pending' })
 
-        await centrifuge.pod.awaitJob([podUrl, authToken, jobId])
+        await centrifuge.pod.awaitJob([podUrl, token, jobId])
 
         // Send the signed createLoan transaction
         doTransaction([submittable], undefined, txId)
       } catch (e) {
+        console.error(e)
         updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create document NFT' })
       }
 
@@ -263,15 +325,8 @@ const IssuerCreateLoan: React.FC = () => {
   })
 
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
-  const templateMetadata = useMetadataMulti(templateIds)
-
-  const templateSelectOptions = templateIds.map((id, i) => ({
-    label: truncateText((templateMetadata[i].data as LoanTemplate)?.name ?? `Template ${i + 1}`, 30),
-    value: id,
-  }))
-
-  const selectedTemplateMetadata = templateMetadata[templateIds.findIndex((id) => id === form.values.templateId)]
-    ?.data as LoanTemplate
+  const templateId = templateIds.at(-1)
+  const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
@@ -282,6 +337,11 @@ const IssuerCreateLoan: React.FC = () => {
 
   const isPending = isTxLoading || form.isSubmitting
 
+  const balanceDec = balances?.native.balance.toDecimal()
+  const balanceLow = balanceDec?.lt(loanDeposit.toDecimal())
+
+  const errorMessage = balanceLow ? `The AO account needs at least ${formatBalance(loanDeposit, chainSymbol, 1)}` : null
+
   return (
     <FormikProvider value={form}>
       <Form ref={formRef} noValidate>
@@ -290,22 +350,39 @@ const IssuerCreateLoan: React.FC = () => {
             title="Create asset"
             subtitle={poolMetadata?.pool?.name}
             actions={
-              isLoggedIn && (
+              isAuthed && (
                 <>
+                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isPending} disabled={!form.values.templateId}>
+                  <Button
+                    type="submit"
+                    loading={isPending}
+                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
+                  >
                     Create
                   </Button>
                 </>
               )
             }
           />
-          {isLoggedIn ? (
+          {isAuthed ? (
             <>
-              <PageSection titleAddition="Select a template to enter the asset details.">
-                <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+              <PageSection>
+                {!templateId && (
+                  <Box
+                    mb={3}
+                    py={2}
+                    borderWidth={0}
+                    borderBottomWidth={1}
+                    borderColor="borderPrimary"
+                    borderStyle="solid"
+                  >
+                    <Text>Asset template is missing. Please create one first.</Text>
+                  </Box>
+                )}
+                <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
                     name="assetName"
@@ -313,45 +390,43 @@ const IssuerCreateLoan: React.FC = () => {
                     label="Asset name*"
                     placeholder=""
                     maxLength={100}
+                    disabled={!templateId}
                   />
-                  <Field name="templateId" validate={required()}>
-                    {({ field, form, meta }: any) => (
-                      <Select
-                        name="templateId"
-                        placeholder="Select template"
-                        label="Asset template"
-                        options={templateSelectOptions}
-                        value={field.value}
-                        onChange={(event) => {
-                          form.setFieldValue('templateId', event.target.value)
-                        }}
-                        errorMessage={meta.touched ? meta.error : undefined}
-                        disabled={isPending}
-                      />
-                    )}
-                  </Field>
+                  {!templateId && (
+                    <Box alignSelf="center" justifySelf="end">
+                      <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
+                        Create template
+                      </RouterLinkButton>
+                    </Box>
+                  )}
                 </Grid>
               </PageSection>
-              {selectedTemplateMetadata?.sections.map((section) => (
+              <PageSection title="Pricing">
+                <PricingInput poolId={pid} />
+              </PageSection>
+              {templateMetadata?.sections?.map((section) => (
                 <PageSection
                   title={section.name}
-                  titleAddition={section.public ? 'Public' : 'Private'}
+                  titleAddition={
+                    section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public) ? 'Public' : 'Private'
+                  }
                   key={section.name}
                 >
                   <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-                    {section.attributes?.map((attr) => {
-                      const Comp = templateFields[attr.type] as React.VFC<any>
-                      const name = `attributes.${labelToKey(attr.label)}`
-                      return <Comp {...attr} name={name} key={attr.label} />
+                    {section.attributes?.map((key) => {
+                      const attr = templateMetadata?.attributes?.[key]
+                      if (!attr) return null
+                      const name = `attributes.${key}`
+                      return <TemplateField {...attr} name={name} key={key} />
                     })}
                   </Grid>
                 </PageSection>
               ))}
 
-              {(selectedTemplateMetadata?.options.image || selectedTemplateMetadata?.options.description) && (
+              {(templateMetadata?.options?.image || templateMetadata?.options?.description) && (
                 <PageSection title="Description" titleAddition="Optional">
                   <Stack gap={3}>
-                    {selectedTemplateMetadata.options.image && (
+                    {templateMetadata.options.image && (
                       <Field name="image" validate={validate.nftImage}>
                         {({ field, meta, form }: FieldProps) => (
                           <ImageUpload
@@ -367,7 +442,7 @@ const IssuerCreateLoan: React.FC = () => {
                         )}
                       </Field>
                     )}
-                    {selectedTemplateMetadata.options.description && (
+                    {templateMetadata.options.description && (
                       <FieldWithErrorMessage
                         name="description"
                         as={TextAreaInput}
@@ -382,7 +457,7 @@ const IssuerCreateLoan: React.FC = () => {
             </>
           ) : podUrl ? (
             <Box py={8}>
-              <PodAuthSection podUrl={podUrl} message="You need to be logged in to create assets" />
+              <PodAuthSection poolId={pid} message="You need to be logged in to create assets" />
             </Box>
           ) : (
             !poolMetadataIsLoading && (
@@ -397,18 +472,14 @@ const IssuerCreateLoan: React.FC = () => {
   )
 }
 
-function labelToKey(label: string) {
-  return label.toLowerCase().replaceAll(/\s/g, '_')
-}
-
-function valuesToPodAttributes(values: FormValues['attributes'], template: LoanTemplate) {
+function valuesToPodAttributes(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
   return Object.fromEntries(
     template.sections.flatMap((section) =>
-      section.attributes.map((attr) => {
-        const key = labelToKey(attr.label)
+      section.attributes.map((key) => {
+        const attr = template.attributes[key]
         const value = values[key]
-        switch (attr.type) {
-          case 'timestamp':
+        switch (attr.input.type) {
+          case 'date':
             return [
               key,
               {
@@ -417,33 +488,37 @@ function valuesToPodAttributes(values: FormValues['attributes'], template: LoanT
               },
             ]
           case 'currency': {
-            const formatted = CurrencyBalance.fromFloat(value, attr.currencyDecimals).toString()
+            const formatted = attr.input.decimals
+              ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+              : String(value)
             return [
               key,
               {
                 type: 'monetary',
                 value: formatted,
                 monetary_value: {
-                  ID: attr.currencySymbol,
+                  ID: attr.input.symbol,
                   Value: formatted,
                   ChainID: 1,
                 },
               },
             ]
           }
-          case 'percentage':
+          case 'number':
             return [
               key,
               {
-                type: 'decimal',
-                value: String(value),
+                type: attr.input.decimals ? 'integer' : 'decimal',
+                value: attr.input.decimals
+                  ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
+                  : String(value),
               },
             ]
           default:
             return [
               key,
               {
-                type: attr.type,
+                type: 'string',
                 value: String(value),
               },
             ]

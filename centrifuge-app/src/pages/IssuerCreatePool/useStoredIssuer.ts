@@ -9,14 +9,14 @@ import { usePoolMetadata, usePools } from '../../utils/usePools'
  */
 export function useStoredIssuer() {
   const allPools = usePools()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
 
   const pools = React.useMemo(() => {
     if (!allPools || !permissions) {
       return []
     }
-    return allPools.filter(({ id, metadata }) => permissions?.pools[id]?.roles.includes('PoolAdmin') && metadata)
+    return allPools.filter(({ id, metadata }) => permissions?.pools[id]?.roles.includes('InvestorAdmin') && metadata)
   }, [allPools, permissions])
 
   const { data, isLoading } = usePoolMetadata(pools[0])

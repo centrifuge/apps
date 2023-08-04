@@ -1,5 +1,11 @@
 import { CollectionMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
-import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import {
+  ConnectionGuard,
+  useAsyncCallback,
+  useBalances,
+  useCentrifuge,
+  useCentrifugeTransaction,
+} from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -16,9 +22,9 @@ import * as React from 'react'
 import { Redirect } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
+import { Dec } from '../../utils/Decimal'
 import { getFileDataURI } from '../../utils/getFileDataURI'
-import { useAsyncCallback } from '../../utils/useAsyncCallback'
-import { useBalance } from '../../utils/useBalance'
+import { useAddress } from '../../utils/useAddress'
 import { ButtonGroup } from '../ButtonGroup'
 
 // TODO: replace with better fee estimate
@@ -28,17 +34,17 @@ const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const { selectedAccount } = useWallet()
   const [name, setName] = React.useState<string>('')
   const [description, setDescription] = React.useState<string>('')
   const [logo, setLogo] = React.useState<File | null>(null)
   const cent = useCentrifuge()
-  const balance = useBalance()
+  const address = useAddress('substrate')
+  const balances = useBalances(address)
   const [redirect, setRedirect] = React.useState<string>('')
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [termsAccepted, setTermsAccepted] = React.useState(false)
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!address
 
   const {
     execute: doTransaction,
@@ -65,18 +71,19 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     const collectionId = await cent.nfts.getAvailableCollectionId()
 
     let fileDataUri
+    let imageMetadataHash
     if (logo) {
       fileDataUri = await getFileDataURI(logo)
+      imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     }
 
-    const imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     const metadataValues: CollectionMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      image: imageMetadataHash.ipfsHash,
+      image: imageMetadataHash?.ipfsHash,
     }
 
-    doTransaction([collectionId, selectedAccount!.address, metadataValues])
+    doTransaction([collectionId, address, metadataValues])
   })
 
   // Only close if the modal is still showing the last created collection
@@ -101,7 +108,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     onClose()
   }
 
-  const balanceLow = !balance || balance < CREATE_FEE_ESTIMATE
+  const balanceDec = balances?.native.balance.toDecimal() ?? Dec(0)
+  const balanceLow = balanceDec.lt(CREATE_FEE_ESTIMATE)
   const isTxPending = metadataIsUploading || transactionIsPending
 
   const fieldDisabled = !isConnected || balanceLow || isTxPending
@@ -116,54 +124,56 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   return (
     <>
       <Dialog isOpen={open && !confirmOpen} onClose={close} title="Create new collection">
-        <form onSubmit={() => setConfirmOpen(true)}>
-          <Stack gap={3}>
-            <TextInput
-              label="Name"
-              value={name}
-              maxLength={collectionMetadataSchema.name.maxLength}
-              onChange={(e) => setName(e.target.value)}
-              disabled={fieldDisabled}
-            />
-            <TextAreaInput
-              label="Description"
-              value={description}
-              maxLength={collectionMetadataSchema.description.maxLength}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={fieldDisabled}
-            />
-            <FileUpload
-              label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
-              placeholder="Choose image"
-              file={logo}
-              onFileChange={(file) => setLogo(file)}
-              validate={(file) => {
-                if (!isImageFile(file)) {
-                  return 'File format not supported'
-                }
-                if (file.size > MAX_FILE_SIZE_IN_BYTES) {
-                  return 'File too large'
-                }
-              }}
-              accept="image/*"
-            />
-            <Shelf justifyContent="space-between">
-              {balanceLow && (
-                <Text variant="label1" color="criticalForeground">
-                  Your balance is too low ({(balance || 0).toFixed(2)} AIR)
-                </Text>
-              )}
-              <ButtonGroup ml="auto">
-                <Button variant="secondary" onClick={close}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={disabled}>
-                  Next
-                </Button>
-              </ButtonGroup>
-            </Shelf>
-          </Stack>
-        </form>
+        <ConnectionGuard networks={['centrifuge']}>
+          <form onSubmit={execute}>
+            <Stack gap={3}>
+              <TextInput
+                label="Name"
+                value={name}
+                maxLength={collectionMetadataSchema.name.maxLength}
+                onChange={(e) => setName(e.target.value)}
+                disabled={fieldDisabled}
+              />
+              <TextAreaInput
+                label="Description"
+                value={description}
+                maxLength={collectionMetadataSchema.description.maxLength}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={fieldDisabled}
+              />
+              <FileUpload
+                label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
+                placeholder="Choose image"
+                file={logo}
+                onFileChange={(file) => setLogo(file)}
+                validate={(file) => {
+                  if (!isImageFile(file)) {
+                    return 'File format not supported'
+                  }
+                  if (file.size > MAX_FILE_SIZE_IN_BYTES) {
+                    return 'File too large'
+                  }
+                }}
+                accept="image/*"
+              />
+              <Shelf justifyContent="space-between">
+                {balanceLow && (
+                  <Text variant="label1" color="criticalForeground">
+                    Your balance is too low ({(balanceDec || 0).toFixed(2)} AIR)
+                  </Text>
+                )}
+                <ButtonGroup ml="auto">
+                  <Button variant="secondary" onClick={close}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={disabled}>
+                    Next
+                  </Button>
+                </ButtonGroup>
+              </Shelf>
+            </Stack>
+          </form>
+        </ConnectionGuard>
       </Dialog>
       <Dialog isOpen={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <form onSubmit={execute}>

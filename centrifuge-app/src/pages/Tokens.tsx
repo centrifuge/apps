@@ -48,6 +48,7 @@ const TokenOverview: React.FC = () => {
               .toDecimal()
               .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
               .toNumber(),
+            tokenPrice: tranche.tokenPrice?.toFloat() ?? 0,
           }
         })
         .flat() || [],
@@ -80,7 +81,7 @@ const TokenOverview: React.FC = () => {
     <Stack gap={0} flex={1} mb="6">
       <PageHeader
         subtitle={`Pools and tokens${config.network === 'centrifuge' ? ' of real-world assets' : ''}`}
-        title="Investments"
+        title="Tokens"
         actions={<MenuSwitch />}
       />
       {tokens?.length ? (
@@ -112,6 +113,12 @@ const TokenOverview: React.FC = () => {
                 cell: () => <TextWithPlaceholder isLoading width={4} />,
                 flex: '4',
                 sortKey: 'yield',
+              },
+              {
+                header: 'Token Price',
+                cell: () => <TextWithPlaceholder isLoading width={4} />,
+                flex: '4',
+                sortKey: 'tokenPrice',
               },
               {
                 header: 'Protection',

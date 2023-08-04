@@ -9,12 +9,13 @@ import { Text } from '../Text'
 export type SelectOptionItem = {
   label: string
   value: string
+  disabled?: boolean
 }
 
 export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   options: SelectOptionItem[]
   label?: string | React.ReactElement
-  placeholder: string
+  placeholder?: string
   errorMessage?: string
 }
 
@@ -22,7 +23,7 @@ const StyledSelect = styled.select`
   appearance: none;
   background-color: transparent;
   border: none;
-  padding: 0 1em 0 0;
+  padding: ${({ theme }) => `0 ${theme.sizes.iconMedium}px 0 0`};
   margin: 0;
   width: 100%;
   font-family: inherit;
@@ -40,24 +41,36 @@ const StyledSelect = styled.select`
   }
 `
 
+const Chevron = styled(IconChevronDown)`
+  position: absolute;
+  top: 0;
+  right: 0;
+  pointer-events: none;
+`
+
 export const Select: React.FC<SelectProps> = ({ options, label, placeholder, errorMessage, disabled, ...rest }) => {
   return (
     <Stack gap={1} width="100%">
       <InputBox
-        width="100%"
-        label={label}
         as="div"
+        label={label}
         inputElement={
-          <StyledSelect disabled={disabled} {...rest}>
-            <option value="">{placeholder}</option>
-            {options.map((option, index) => (
-              <option key={`${index}${option.value}`} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </StyledSelect>
+          <>
+            <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
+            <StyledSelect disabled={disabled} {...rest}>
+              {placeholder && (
+                <option value="" disabled>
+                  {placeholder}
+                </option>
+              )}
+              {options.map((option, index) => (
+                <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
+                  {option.label}
+                </option>
+              ))}
+            </StyledSelect>
+          </>
         }
-        rightElement={<IconChevronDown color={disabled ? 'textSecondary' : 'textPrimary'} />}
       />
       {errorMessage && (
         <Box px={2}>

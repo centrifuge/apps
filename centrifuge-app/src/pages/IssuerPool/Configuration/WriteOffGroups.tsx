@@ -8,7 +8,9 @@ import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Column, DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { formatPercentage } from '../../../utils/formatting'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { useConstants, useWriteOffGroups } from '../../../utils/usePools'
+import { PendingLoanChanges } from './PendingLoanChanges'
 import { WriteOffInput } from './WriteOffInput'
 
 export type Row = WriteOffGroup
@@ -35,7 +37,7 @@ const columns: Column[] = [
   {
     align: 'right',
     header: 'Penalty fee',
-    cell: (row: Row) => formatPercentage(row.penaltyInterestRate.fractionToAprPercent()),
+    cell: (row: Row) => formatPercentage(row.penaltyInterestRate.toPercent()),
     flex: '3',
   },
 ]
@@ -48,39 +50,49 @@ const createEmptyWriteOffGroup = (): WriteOffGroupInput => ({
 
 export type WriteOffGroupValues = { writeOffGroups: WriteOffGroupInput[] }
 
-export const WriteOffGroups: React.FC = () => {
+export function WriteOffGroups() {
   const { pid: poolId } = useParams<{ pid: string }>()
+  const [isEditing, setIsEditing] = React.useState(false)
   const consts = useConstants()
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['LoanAdmin'] })
 
   const savedGroups = useWriteOffGroups(poolId)
   const sortedSavedGroups = [...(savedGroups ?? [])].sort((a, b) => a.overdueDays - b.overdueDays)
 
   const { execute, isLoading } = useCentrifugeTransaction(
-    'Update configuration',
-    (cent) => cent.pools.addWriteOffGroups,
-    {}
+    'Update write-off policy',
+    (cent) => cent.pools.updateWriteOffPolicy,
+    {
+      onSuccess: () => {
+        setIsEditing(false)
+      },
+    }
+  )
+  const initialValues = React.useMemo(
+    () => ({
+      writeOffGroups: savedGroups?.length
+        ? savedGroups.map((g) => ({
+            days: g.overdueDays,
+            writeOff: g.percentage.toPercent().toNumber(),
+            penaltyInterest: g.penaltyInterestRate.toPercent().toNumber(),
+          }))
+        : [createEmptyWriteOffGroup()],
+    }),
+    [savedGroups]
   )
 
   const form = useFormik<WriteOffGroupValues>({
     initialValues: { writeOffGroups: [] },
     validate: (values) => {
       let errors: FormikErrors<any> = {}
-      const writeOffGroups = [
-        ...(savedGroups ?? []).map((g) => ({
-          days: g.overdueDays,
-          writeOff: g.percentage.toPercent().toNumber(),
-          penaltyInterest: g.penaltyInterestRate.fractionToAprPercent().toNumber(),
-          saved: true,
-        })),
-        ...values.writeOffGroups,
-      ]
+      const writeOffGroups = [...values.writeOffGroups]
         .filter((g) => typeof g.days === 'number')
         .sort((a, b) => (a.days as number) - (b.days as number))
       let highestWriteOff = 0
       let highestPenalty = 0
       let previousDays = -1
       writeOffGroups.forEach((g) => {
-        if (g.writeOff <= highestWriteOff) {
+        if ((g.writeOff as number) <= highestWriteOff) {
           let index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
           index = index === -1 ? 0 : index
           errors = setIn(
@@ -92,7 +104,7 @@ export const WriteOffGroups: React.FC = () => {
           highestWriteOff = g.writeOff as number
         }
 
-        if (g.penaltyInterest < highestPenalty) {
+        if ((g.penaltyInterest as number) < highestPenalty) {
           let index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
           index = index === -1 ? 0 : index
           errors = setIn(
@@ -124,18 +136,19 @@ export const WriteOffGroups: React.FC = () => {
       const writeOffGroups = values.writeOffGroups.map((g) => ({
         overdueDays: g.days as number,
         percentage: Rate.fromPercent(g.writeOff),
-        penaltyInterestRate: Rate.fractionFromAprPercent(g.penaltyInterest),
+        penaltyInterestRate: Rate.fromPercent(g.penaltyInterest),
       }))
-      execute([poolId, writeOffGroups])
+      execute([poolId, writeOffGroups], { account })
       actions.setSubmitting(false)
     },
   })
 
   React.useEffect(() => {
+    if (isEditing && !isLoading) return
     form.resetForm()
-    form.setValues({ writeOffGroups: [] }, false)
+    form.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedGroups])
+  }, [initialValues, isEditing])
 
   const addButton = (
     <FieldArray name="writeOffGroups">
@@ -147,9 +160,9 @@ export const WriteOffGroups: React.FC = () => {
           }}
           small
           key="edit"
-          disabled={(savedGroups?.length ?? 0) + form.values.writeOffGroups.length >= (consts?.maxWriteOffGroups ?? 5)}
+          disabled={form.values.writeOffGroups.length >= (consts?.maxWriteOffPolicySize ?? 5) || !account}
         >
-          {(savedGroups?.length ?? 0) + form.values.writeOffGroups.length > 0 ? 'Add another' : 'Add'}
+          Add another
         </Button>
       )}
     </FieldArray>
@@ -159,14 +172,13 @@ export const WriteOffGroups: React.FC = () => {
     <FormikProvider value={form}>
       <Form>
         <PageSection
-          title="Write-off schedule"
+          title="Write-off policy"
           subtitle="At least one write-off activity is required"
           headerRight={
             <>
-              {form.values.writeOffGroups.length === 0 && addButton}
-              {form.values.writeOffGroups.length > 0 && (
+              {isEditing ? (
                 <ButtonGroup variant="small">
-                  <Button variant="secondary" onClick={() => form.resetForm()} small>
+                  <Button variant="secondary" onClick={() => setIsEditing(false)} small>
                     Cancel
                   </Button>
                   <Button
@@ -179,14 +191,24 @@ export const WriteOffGroups: React.FC = () => {
                     Done
                   </Button>
                 </ButtonGroup>
+              ) : (
+                <Button variant="secondary" onClick={() => setIsEditing(true)} small>
+                  Edit
+                </Button>
               )}
             </>
           }
         >
           <Stack gap={3}>
-            <DataTable data={sortedSavedGroups} columns={columns} />
-            <WriteOffInput />
-            <Box>{form.values.writeOffGroups.length > 0 && addButton}</Box>
+            {isEditing ? (
+              <>
+                <WriteOffInput />
+                <Box>{addButton}</Box>
+              </>
+            ) : (
+              <DataTable data={sortedSavedGroups} columns={columns} />
+            )}
+            <PendingLoanChanges poolId={poolId} />
           </Stack>
         </PageSection>
       </Form>

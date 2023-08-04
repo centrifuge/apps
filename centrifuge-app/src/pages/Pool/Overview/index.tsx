@@ -1,187 +1,104 @@
-import { useBalances } from '@centrifuge/centrifuge-react'
-import {
-  AnchorButton,
-  Button,
-  IconExternalLink,
-  InteractiveCard,
-  Shelf,
-  Stack,
-  Text,
-  TextWithPlaceholder,
-  Thumbnail,
-} from '@centrifuge/fabric'
+import { useWallet } from '@centrifuge/centrifuge-react'
+import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
-import { InvestRedeem } from '../../../components/InvestRedeem'
+import { Faucet } from '../../../components/Faucet'
+import { ActionsRef, InvestRedeem } from '../../../components/InvestRedeem/InvestRedeem'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import RiskGroupList from '../../../components/RiskGroupList'
+import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
+import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
-import { useAddress } from '../../../utils/useAddress'
+import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
+import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
-import { usePermissions } from '../../../utils/usePermissions'
-import { usePendingCollectMulti, usePool, usePoolMetadata } from '../../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
-const PriceYieldChart = React.lazy(() => import('../../../components/Charts/PriceYieldChart'))
 
-export const PoolDetailOverviewTab: React.FC = () => {
+export function PoolDetailOverviewTab() {
   const { state } = useLocation<{ token: string }>()
-  const [selectedToken, setSelectedToken] = React.useState(state?.token || null)
+  const [selectedToken, setSelectedToken] = React.useState(state?.token)
+
+  const investRef = React.useRef<{ setView(view: 'invest' | 'redeem'): void }>()
+
+  function setToken(token: string) {
+    setSelectedToken(token)
+    investRef.current?.setView('invest')
+  }
 
   return (
     <PageWithSideBar
       sidebar={
-        <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} key={selectedToken} />
+        <>
+          <Faucet />
+          <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
+        </>
       }
     >
       <PoolDetailHeader />
       <LoadBoundary>
-        <PoolDetailOverview selectedToken={selectedToken} setSelectedToken={setSelectedToken} />
+        <PoolDetailOverview selectedToken={selectedToken} setSelectedToken={setToken} />
       </LoadBoundary>
     </PageWithSideBar>
   )
 }
 
-const CentrifugeInvestBox: React.FC<{
-  selectedToken: string | null
-  setSelectedToken: (token: string | null) => void
-}> = ({ selectedToken, setSelectedToken }) => {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
-  const address = useAddress()
-  const permissions = usePermissions(address)
-  const balances = useBalances(address)
-
-  const seniorityMap: Record<string, number> = {}
-  pool?.tranches.forEach((t) => (seniorityMap[t.id] = t.seniority))
-  const allowedTrancheIds = Object.keys(pool ? permissions?.pools[poolId]?.tranches ?? {} : {}).sort((a, b) => {
-    const seniorityA = seniorityMap[a]
-    const seniorityB = seniorityMap[b]
-    return seniorityB - seniorityA
-  })
-
-  const orders = usePendingCollectMulti(poolId, allowedTrancheIds, address)
-
-  const hasInvestments = allowedTrancheIds.map((tid, i) => {
-    const trancheBalance =
-      balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === tid)?.balance.toDecimal() ?? Dec(0)
-    const order = orders?.[tid]
-    const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
-    const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
-    const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
-    return !combinedBalance.isZero()
-  })
-  const hasAnyInvestment = hasInvestments.some((inv) => inv)
-
-  if (pool && permissions && selectedToken && !allowedTrancheIds.includes(selectedToken)) {
-    // TODO: Redirect to onboarding
-    return <InvestRedeem poolId={poolId} trancheId={selectedToken} key="notallowed" />
-  }
-
-  if (pool && permissions && !allowedTrancheIds.length) {
-    // TODO: Show onboarding card
-    return <InvestRedeem poolId={poolId} key="notallowed" />
-  }
-
-  if (allowedTrancheIds.length && orders && !hasAnyInvestment) {
-    return (
-      <InvestRedeem
-        poolId={poolId}
-        defaultTrancheId={selectedToken ?? undefined}
-        autoFocus={!!selectedToken}
-        key={`1-${selectedToken}`}
-      />
-    )
-  }
-
-  if (allowedTrancheIds.length && orders && hasAnyInvestment) {
-    return (
-      <Stack gap={2}>
-        {allowedTrancheIds.map((tid, i) => {
-          if (hasInvestments[i] || tid === selectedToken) {
-            return (
-              <InvestRedeemBox
-                poolId={poolId}
-                tokenId={tid}
-                selectedToken={selectedToken}
-                setSelectedToken={setSelectedToken}
-                key={`2-${tid}-${selectedToken}`}
-              />
-            )
-          }
-          return null
-        })}
-      </Stack>
-    )
-  }
-
-  return null
-}
-export const PoolDetailSideBar: React.FC<{
-  selectedToken: string | null
-  setSelectedToken: (token: string | null) => void
-}> = ({ selectedToken, setSelectedToken }) => {
+export function PoolDetailSideBar({
+  selectedToken,
+  setSelectedToken,
+  investRef,
+}: {
+  selectedToken?: string
+  setSelectedToken?: (token: string) => void
+  investRef?: ActionsRef
+}) {
   const { pid: poolId } = useParams<{ pid: string }>()
 
-  // TODO: Tinlake invest box
-  if (poolId.startsWith('0x')) return null
-
-  return <CentrifugeInvestBox selectedToken={selectedToken} setSelectedToken={setSelectedToken} />
-}
-
-const InvestRedeemBox: React.FC<{
-  selectedToken: string | null
-  setSelectedToken: (token: string | null) => void
-  poolId: string
-  tokenId: string
-}> = ({ selectedToken, setSelectedToken, tokenId, poolId }) => {
-  const [view, setViewState] = React.useState<'start' | 'invest' | 'redeem'>(
-    selectedToken === tokenId ? 'invest' : 'start'
+  return (
+    <InvestRedeem
+      poolId={poolId}
+      trancheId={selectedToken}
+      onSetTrancheId={setSelectedToken}
+      networks={poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']}
+      actionsRef={investRef}
+    />
   )
-  function setView(value: React.SetStateAction<'start' | 'invest' | 'redeem'>) {
-    const newView = typeof value === 'function' ? value(view) : value
-    setViewState(newView)
-    if (newView === 'start') {
-      setSelectedToken(null)
-    } else if (newView === 'invest') {
-      setSelectedToken(tokenId)
-    }
-  }
-  return <InvestRedeem poolId={poolId} trancheId={tokenId} view={view} onSetView={setView} autoFocus />
 }
 
-const AverageMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
+function AverageMaturity({ poolId }: { poolId: string }) {
   return <>{useAverageMaturity(poolId)}</>
 }
 
-export const PoolDetailOverview: React.FC<{
+export function PoolDetailOverview({
+  setSelectedToken,
+}: {
   selectedToken?: string | null
-  setSelectedToken?: (token: string | null) => void
-}> = ({ setSelectedToken }) => {
+  setSelectedToken?: (token: string) => void
+}) {
   const { pid: poolId } = useParams<{ pid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const address = useAddress()
-  const permissions = usePermissions(address)
+  const { showNetworks, connectedType, evm } = useWallet()
+  const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
     {
       label: <Tooltips type="assetClass" />,
       value: <TextWithPlaceholder isLoading={metadataIsLoading}>{metadata?.pool?.asset.class}</TextWithPlaceholder>,
     },
-    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency.symbol) },
+    { label: <Tooltips type="valueLocked" />, value: formatBalance(getPoolValueLocked(pool), pool.currency.symbol) },
   ]
 
   if (!isTinlakePool) {
@@ -198,7 +115,7 @@ export const PoolDetailOverview: React.FC<{
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
-        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
+        apr: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
         name: tranche.currency.name,
@@ -209,6 +126,7 @@ export const PoolDetailOverview: React.FC<{
           : Dec(0),
         id: tranche.id,
         capacity: tranche.capacity,
+        tokenPrice: tranche.tokenPrice,
       }
     })
     .reverse()
@@ -218,6 +136,18 @@ export const PoolDetailOverview: React.FC<{
     if (hasScrolledToToken.current === true || id !== state?.token) return
     node.scrollIntoView({ behavior: 'smooth', block: 'center' })
     hasScrolledToToken.current = true
+  }
+
+  const getTrancheAvailability = (token: string) => {
+    if (isTinlakePool && metadata?.pool?.newInvestmentsStatus) {
+      const trancheName = token.split('-')[1] === '0' ? 'junior' : 'senior'
+
+      const isMember = tinlakePermissions?.[trancheName].inMemberlist
+
+      return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+    }
+
+    return true
   }
 
   return (
@@ -236,82 +166,70 @@ export const PoolDetailOverview: React.FC<{
         <Stack gap={2}>
           {tokens?.map((token, i) => (
             <div key={token.id} ref={(node) => node && handleTokenMount(node, token.id)}>
-              <InteractiveCard
-                isOpen={i === 0}
-                variant="collapsible"
-                icon={<Thumbnail label={token.symbol ?? ''} type="token" />}
-                title={<Text>{token.name}</Text>}
-                secondaryHeader={
-                  <Shelf gap={6}>
+              <PoolToken token={token} defaultOpen={i === 0}>
+                <Shelf gap={6}>
+                  <LabelValueStack
+                    label={<Tooltips variant="secondary" type="subordination" />}
+                    value={formatPercentage(token.protection)}
+                  />
+                  <LabelValueStack
+                    label={<Tooltips variant="secondary" type="valueLocked" />}
+                    value={formatBalance(token.valueLocked, pool?.currency.symbol)}
+                  />
+                  {token.seniority === 0 ? (
                     <LabelValueStack
-                      label={<Tooltips variant="secondary" type="protection" />}
-                      value={formatPercentage(token.protection)}
+                      label={<Tooltips variant="secondary" type="juniorTrancheYields" />}
+                      value="Variable"
                     />
+                  ) : (
                     <LabelValueStack
-                      label={<Tooltips variant="secondary" type="valueLocked" />}
-                      value={formatBalance(token.valueLocked, pool?.currency.symbol)}
+                      label={<Tooltips variant="secondary" type="seniorTokenAPR" />}
+                      value={formatPercentage(token.apr)}
                     />
-                    <LabelValueStack
-                      label={<Tooltips variant="secondary" type="apy" />}
-                      value={formatPercentage(token.apy)}
-                    />
-                    <LabelValueStack
-                      label="Capacity"
-                      value={
-                        <Text
-                          variant="body2"
-                          fontWeight={600}
-                          color={token.capacity.isZero() ? 'statusWarning' : 'statusOk'}
-                        >
-                          {formatBalanceAbbreviated(token.capacity, pool?.currency.symbol)}
-                        </Text>
-                      }
-                    />
-                    {setSelectedToken && (
-                      <Button
-                        variant={i === 0 ? 'primary' : 'secondary'}
-                        onClick={() => setSelectedToken(token.id)}
-                        style={{ marginLeft: 'auto' }}
-                        disabled={!permissions?.pools[poolId]?.tranches[token.id]}
+                  )}
+                  <LabelValueStack
+                    label="Capacity"
+                    value={
+                      <Text
+                        variant="body2"
+                        fontWeight={600}
+                        color={token.capacity.isZero() ? 'statusWarning' : 'statusOk'}
                       >
-                        Invest
-                      </Button>
-                    )}
-                  </Shelf>
-                }
-              >
-                <Stack maxHeight="300px">
-                  <React.Suspense fallback={<Spinner />}>
-                    <PriceYieldChart trancheId={token.id} />
-                  </React.Suspense>
-                </Stack>
-              </InteractiveCard>
+                        {formatBalanceAbbreviated(token.capacity, pool?.currency.symbol)}
+                      </Text>
+                    }
+                  />
+                  <LabelValueStack
+                    label="Token price"
+                    value={
+                      <TextWithPlaceholder isLoading={!token.tokenPrice}>
+                        {token.tokenPrice && formatBalance(token.tokenPrice, pool?.currency.symbol, 4, 2)}
+                      </TextWithPlaceholder>
+                    }
+                  />
+                  {setSelectedToken && getTrancheAvailability(token.id) && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        if (!connectedType) {
+                          showNetworks()
+                        }
+                        setSelectedToken(token.id)
+                      }}
+                      style={{ marginLeft: 'auto' }}
+                    >
+                      Invest
+                    </Button>
+                  )}
+                </Shelf>
+              </PoolToken>
             </div>
           ))}
         </Stack>
       </PageSection>
-      <PageSection
-        title="Issuer"
-        headerRight={
-          <AnchorButton
-            variant="secondary"
-            icon={IconExternalLink}
-            href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${address}`}
-            target="_blank"
-            small
-            disabled={!address}
-          >
-            View pool account
-          </AnchorButton>
-        }
-      >
+      <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />
       </PageSection>
-      {!isTinlakePool && (
-        <PageSection title=" Asset portfolio" titleAddition="By risk groups">
-          <RiskGroupList />
-        </PageSection>
-      )}
     </>
   )
 }

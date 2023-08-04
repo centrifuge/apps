@@ -2,17 +2,18 @@ import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { combineLatest } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Dec } from './Decimal'
-
-const SEC_PER_DAY = 24 * 60 * 60
+import { useTinlakeLoans } from './tinlake/useTinlakePools'
 
 export function useLoans(poolId: string) {
   const isTinlakePool = poolId.startsWith('0x')
-  const [result] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
+  const [centLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     suspense: true,
     enabled: !isTinlakePool,
   })
 
-  return result
+  const { data: tinlakeLoans } = useTinlakeLoans(poolId)
+
+  return isTinlakePool ? tinlakeLoans : centLoans
 }
 
 export function useLoansAcrossPools(poolIds?: string[]) {
@@ -30,8 +31,8 @@ export function useLoansAcrossPools(poolIds?: string[]) {
 
 export function useLoan(poolId: string, assetId: string) {
   const loans = useLoans(poolId)
-  const loan = loans?.find((loan) => loan.id === assetId)
-  return loan
+
+  return loans && [...loans].find((loan) => loan.id === assetId)
 }
 
 export function useNftDocumentId(collectionId?: string, nftId?: string) {
@@ -47,24 +48,46 @@ export function useNftDocumentId(collectionId?: string, nftId?: string) {
 }
 
 export function useAvailableFinancing(poolId: string, assetId: string) {
+  const isTinlakePool = poolId.startsWith('0x')
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
-  if (loan.status !== 'Active') return { current: Dec(0), initial: Dec(0) }
 
-  const debtWithMargin = loan.outstandingDebt
-    .toDecimal()
-    .add(loan.outstandingDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
-  if (!loan?.loanInfo) {
-    return { current: Dec(0), initial: Dec(0) }
+  if (!isTinlakePool && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
+    return loan.pricing.maxBorrowAmount
+      ? {
+          current: loan.pricing.maxBorrowAmount.toDecimal().sub(loan.pricing.outstandingQuantity.toDecimal()),
+          initial: loan.pricing.maxBorrowAmount.toDecimal(),
+          debtWithMargin: loan.pricing.maxBorrowAmount
+            .toDecimal()
+            .sub(loan.pricing.outstandingQuantity.toDecimal())
+            .mul(loan.pricing.oracle.value.toDecimal()),
+        }
+      : { current: Dec(100000000), initial: Dec(100000000) }
   }
 
-  const initialCeiling = loan.loanInfo.value.toDecimal().mul(loan.loanInfo.advanceRate.toDecimal())
+  const initialCeiling = isTinlakePool
+    ? 'ceiling' in loan.pricing
+      ? loan.pricing.ceiling.toDecimal()
+      : Dec(0)
+    : 'value' in loan.pricing && 'advanceRate' in loan.pricing
+    ? loan.pricing.value.toDecimal().mul(loan.pricing.advanceRate.toDecimal())
+    : Dec(0)
+
+  if (loan.status !== 'Active') return { current: initialCeiling, initial: initialCeiling }
+
+  const debtWithMargin =
+    'interestRate' in loan.pricing
+      ? loan.outstandingDebt
+          .toDecimal()
+          .add(loan.outstandingDebt.toDecimal().mul(loan.pricing.interestRate.toDecimal().div(365 * 8))) // Additional 3 hour interest as margin
+      : Dec(0)
+
   let ceiling = initialCeiling
-  if (loan.loanInfo.type === 'BulletLoan') {
+  if ('maxBorrowAmount' in loan.pricing && loan.pricing.maxBorrowAmount === 'upToTotalBorrowed') {
     ceiling = ceiling.minus(loan.totalBorrowed?.toDecimal() || 0)
   } else {
     ceiling = ceiling.minus(debtWithMargin)
     ceiling = ceiling.isNegative() ? Dec(0) : ceiling
   }
-  return { current: ceiling, initial: initialCeiling }
+  return { current: ceiling, initial: initialCeiling, debtWithMargin }
 }

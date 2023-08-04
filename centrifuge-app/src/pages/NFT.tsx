@@ -1,15 +1,5 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  IconArrowRight,
-  IconNft,
-  IconPlus,
-  Shelf,
-  Stack,
-  Text,
-  TextWithPlaceholder,
-} from '@centrifuge/fabric'
+import { Box, Button, IconArrowRight, IconNft, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
@@ -21,13 +11,11 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
-import { RouterLinkButton } from '../components/RouterLinkButton'
 import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
-import { useNFT } from '../utils/useNFTs'
-import { usePermissions } from '../utils/usePermissions'
+import { useCentNFT } from '../utils/useNFTs'
 import { isSameAddress } from '../utils/web3'
 
 export const NFTPage: React.FC = () => {
@@ -40,9 +28,8 @@ export const NFTPage: React.FC = () => {
 
 const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
-  const address = useAddress()
-  const permissions = usePermissions(address)
-  const nft = useNFT(collectionId, nftId)
+  const address = useAddress('substrate')
+  const nft = useCentNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
@@ -53,10 +40,6 @@ const NFT: React.FC = () => {
   const centrifuge = useCentrifuge()
 
   const imageUrl = nftMetadata?.image ? centrifuge.metadata.parseMetadataUrl(nftMetadata.image) : ''
-
-  const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
-  const canCreateLoan =
-    !isLoanCollection && permissions && Object.values(permissions.pools).some((p) => p.roles.includes('Borrower'))
 
   return (
     <Stack flex={1}>
@@ -77,16 +60,6 @@ const NFT: React.FC = () => {
                 address &&
                 (isSameAddress(nft.owner, address) ? (
                   <>
-                    {canCreateLoan && (
-                      <RouterLinkButton
-                        to={`/nfts/collection/${collectionId}/object/${nftId}/new-asset`}
-                        icon={IconPlus}
-                        small
-                        variant="secondary"
-                      >
-                        Create asset
-                      </RouterLinkButton>
-                    )}
                     {nft.sellPrice !== null ? (
                       <Button onClick={() => setUnlistOpen(true)} small variant="secondary">
                         Remove listing

@@ -1,8 +1,9 @@
-export function formatDate(timestamp: number | string | Date) {
+export function formatDate(timestamp: number | string | Date, options?: Intl.DateTimeFormatOptions) {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    ...options,
   })
 }
 
@@ -38,4 +39,9 @@ export function formatMilliseconds(milliSeconds: number) {
   const minutes = Math.max(0, Math.floor(seconds / 60))
   const hours = Math.max(Math.floor(minutes / 60))
   return { hours, minutes: minutes % 60, seconds: seconds % 60 }
+}
+
+export function millisecondsToDays(milliseconds: number): number {
+  const days = milliseconds / (1000 * 60 * 60 * 24)
+  return Math.round(days)
 }

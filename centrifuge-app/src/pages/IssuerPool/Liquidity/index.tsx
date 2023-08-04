@@ -1,18 +1,23 @@
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { useLiquidityAdmin } from '../../../utils/usePermissions'
+import { PendingMultisigs } from '../../../components/PendingMultisigs'
 import { PoolDetailLiquidity } from '../../Pool/Liquidity'
 import { IssuerPoolHeader } from '../Header'
 
-export const IssuerPoolLiquidityPage: React.FC = () => {
+export function IssuerPoolLiquidityPage() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isLiquidityAdmin = useLiquidityAdmin(poolId)
 
   return (
-    <PageWithSideBar sidebar={isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}>
+    <PageWithSideBar
+      sidebar={
+        <>
+          <MaxReserveForm poolId={poolId} />
+          <PendingMultisigs poolId={poolId} />
+        </>
+      }
+    >
       <IssuerPoolHeader />
       <LoadBoundary>
         <PoolDetailLiquidity />

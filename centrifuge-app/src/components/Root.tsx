@@ -1,26 +1,29 @@
 import { UserProvidedConfig } from '@centrifuge/centrifuge-js'
 import {
   CentrifugeProvider,
+  EvmChains,
   TransactionProvider,
   TransactionToasts,
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
+import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
-import { config } from '../config'
+import { config, ethConfig } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { CreateLoanFromNFTPage } from '../pages/CreateLoanFromNFT'
 import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
 import { IssuerCreateLoanPage } from '../pages/IssuerPool/Assets/CreateLoan'
 import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
+import { MultisigApprovalPage } from '../pages/MultisigApproval'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { OnboardingPage } from '../pages/Onboarding'
@@ -29,15 +32,15 @@ import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
-import { fetchLambda } from '../utils/fetchLambda'
-import { AuthProvider } from './AuthProvider'
+import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
+import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
-import { PodAuthProvider } from './PodAuthProvider'
+import { SupportedBrowserBanner } from './SupportedBrowserBanner'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,30 +52,53 @@ const queryClient = new QueryClient({
 
 const centConfig: UserProvidedConfig = {
   network: config.network,
-  kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
-  polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
-  altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
-  centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
+  kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
+  polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
+  altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
+  centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
   printExtrinsics: import.meta.env.NODE_ENV === 'development',
-  centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
-  altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
-  metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY,
+  centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
+  altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
+  metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY as string,
   pinFile: (b64URI) =>
-    fetchLambda('pinFile', {
+    pinToApi('pinFile', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ uri: b64URI }),
     }),
-  unpinFile: (hash) =>
-    fetchLambda('unpinFile', {
-      method: 'DELETE',
+  pinJson: (json) =>
+    pinToApi('pinJson', {
+      method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ hash }),
+      body: JSON.stringify({ json }),
     }),
 }
 
-export const Root: React.VFC = () => {
+const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
+
+const evmChains: EvmChains =
+  ethConfig.network === 'mainnet'
+    ? {
+        1: {
+          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+          iconUrl: ethereumLogo,
+        },
+      }
+    : {
+        1: {
+          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+          iconUrl: ethereumLogo,
+        },
+        5: {
+          urls: [`https://goerli.infura.io/v3/${infuraKey}`],
+          iconUrl: goerliLogo,
+        },
+      }
+
+export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
+  const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
+  const [showEvmOnSubstrate, setShowEvmOnSubstrate] = React.useState(!!initialFlagsState.showEvmOnSubstrate)
 
   return (
     <>
@@ -93,12 +119,25 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <WalletProvider>
-              <PodAuthProvider>
-                <AuthProvider>
-                  <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+            <SupportedBrowserBanner />
+            <WalletProvider
+              evmChains={evmChains}
+              subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+              walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+              showAdvancedAccounts={showAdvancedAccounts}
+              evmOnSubstrate={showEvmOnSubstrate}
+            >
+              <OnboardingAuthProvider>
+                <OnboardingProvider>
+                  <DebugFlags
+                    onChange={(state) => {
+                      setIsThemeToggled(!!state.alternativeTheme)
+                      setShowAdvancedAccounts(!!state.showAdvancedAccounts)
+                      setShowEvmOnSubstrate(!!state.showEvmOnSubstrate)
+                    }}
+                  >
                     <TransactionProvider>
-                      <TransactionToasts subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL} />
+                      <TransactionToasts />
                       <Router>
                         <LoadBoundary>
                           <Routes />
@@ -106,8 +145,8 @@ export const Root: React.VFC = () => {
                       </Router>
                     </TransactionProvider>
                   </DebugFlags>
-                </AuthProvider>
-              </PodAuthProvider>
+                </OnboardingProvider>
+              </OnboardingAuthProvider>
             </WalletProvider>
           </CentrifugeProvider>
         </FabricProvider>
@@ -116,14 +155,11 @@ export const Root: React.VFC = () => {
   )
 }
 
-const Routes: React.VFC = () => {
+function Routes() {
   return (
     <Switch>
       <Route path="/nfts/collection/:cid/object/mint">
         <MintNFTPage />
-      </Route>
-      <Route path="/nfts/collection/:cid/object/:nftid/new-asset">
-        <CreateLoanFromNFTPage />
       </Route>
       <Route path="/nfts/collection/:cid/object/:nftid">
         <NFTPage />
@@ -149,25 +185,23 @@ const Routes: React.VFC = () => {
       <Route path="/issuer/:pid">
         <IssuerPoolPage />
       </Route>
-      <Route path="/investments/:pid/assets/:aid">
+      <Route path="/pools/:pid/assets/:aid">
         <LoanPage />
       </Route>
-      <Route path="/investments/tokens">
+      <Route path="/pools/tokens">
         <TokenOverviewPage />
       </Route>
-      <Route path="/investments/:pid">
+      <Route path="/pools/:pid">
         <PoolDetailPage />
       </Route>
-      <Route path="/investments">
+      <Route path="/pools">
         <PoolsPage />
       </Route>
       <Route path="/disclaimer">
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingProvider>
-          <OnboardingPage />
-        </OnboardingProvider>
+        <OnboardingPage />
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
@@ -175,8 +209,11 @@ const Routes: React.VFC = () => {
       <Route exact path="/onboarding/updateInvestorStatus">
         <UpdateInvestorStatus />
       </Route>
+      <Route exact path="/multisig-approval">
+        <MultisigApprovalPage />
+      </Route>
       <Route exact path="/">
-        <Redirect to="/investments" />
+        <Redirect to="/pools" />
       </Route>
       <Route>
         <NotFoundPage />

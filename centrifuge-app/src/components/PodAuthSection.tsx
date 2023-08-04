@@ -1,36 +1,36 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, IconAlertCircle, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { usePod } from '../utils/usePod'
+import { usePodAuth } from '../utils/usePodAuth'
 
 type Props = {
-  podUrl: string
   message?: string
   buttonLabel?: string
+  poolId: string
 }
 
 export const PodAuthSection: React.FC<Props> = ({
-  podUrl,
   message = 'This information is private',
   buttonLabel = 'Authenticate',
+  poolId,
 }) => {
-  const { selectedAccount } = useWallet()
-  const { isLoggedIn, isPodLoading, loginError, login } = usePod(podUrl)
+  const { selectedAccount } = useWallet().substrate
+  const { isAuthing, isAuthed, authError, login } = usePodAuth(poolId)
 
-  return isLoggedIn ? null : (
+  return isAuthed ? null : (
     <Stack alignItems="center">
       <Shelf gap={2} justifyContent="center">
         <Shelf gap={1}>
           <IconAlertCircle size="iconSmall" /> <Text variant="body3">{message}</Text>
         </Shelf>
         {selectedAccount?.address && (
-          <Button onClick={() => login()} small loading={isPodLoading}>
+          <Button onClick={() => login()} small loading={isAuthing}>
             {buttonLabel}
           </Button>
         )}
       </Shelf>
       <>
-        {loginError && (
+        {authError && (
           <Text variant="body3" color="statusCritical">
             Failed to authenticate
           </Text>

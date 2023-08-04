@@ -1,55 +1,29 @@
 import { Request, Response } from 'express'
-import { fileTypeFromBuffer } from 'file-type'
-import { InferType, object, string } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { Subset } from '../../utils/types'
-import { validateInput } from '../../utils/validateInput'
 
-const uploadTaxInfoInput = object({
-  poolId: string().required(),
-  trancheId: string().required(),
-})
-
-const validateTaxInfoFile = async (file: Buffer) => {
-  if (file.length > 1024 * 1024) {
-    throw new HttpsError(400, 'Maximum file size allowed is 1MB')
+const validateFileSize = async (file?: Buffer) => {
+  if (!file) {
+    throw new HttpError(400, 'File not found')
   }
 
-  const fileString = file.toString('utf8')
-
-  const body = fileString.slice(fileString.indexOf('\r\n\r\n') + 4)
-  const type = await fileTypeFromBuffer(Buffer.from(body))
-
-  if (type?.mime !== 'application/pdf') {
-    throw new HttpsError(400, 'Only PDF files are allowed')
+  if (file.byteLength > 1024 * 1024) {
+    throw new HttpError(400, 'File size must be less than 1MB')
   }
 }
 
-export const uploadTaxInfoController = async (
-  req: Request<{}, {}, Buffer, InferType<typeof uploadTaxInfoInput>>,
-  res: Response
-) => {
+export const uploadTaxInfoController = async (req: Request, res: Response) => {
   try {
-    await validateTaxInfoFile(req.body)
-    await validateInput(req.query, uploadTaxInfoInput)
+    await validateFileSize(req.body)
+    const { wallet } = req
+    const user = await fetchUser(wallet)
 
-    const {
-      query: { poolId, trancheId },
-      walletAddress,
-    } = req
-
-    const user = await fetchUser(walletAddress)
-
-    await writeToOnboardingBucket(
-      Uint8Array.from(req.body),
-      `tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`
-    )
+    await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${wallet.address}.pdf`)
 
     const updatedUser: Subset<OnboardingUser> = {
-      steps: {
-        ...user.steps,
+      globalSteps: {
         verifyTaxInfo: {
           completed: true,
           timeStamp: new Date().toISOString(),
@@ -57,16 +31,12 @@ export const uploadTaxInfoController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['steps'])
+    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['globalSteps.verifyTaxInfo'])
 
-    const freshUserData = await fetchUser(walletAddress)
+    const freshUserData = await fetchUser(wallet)
     return res.status(200).send({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

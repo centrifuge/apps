@@ -1,4 +1,4 @@
-import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { ActiveLoan } from '@centrifuge/centrifuge-js'
 import * as React from 'react'
 import { daysBetween, formatAge } from './date'
 import { Dec } from './Decimal'
@@ -8,11 +8,11 @@ export const useAverageMaturity = (poolId: string) => {
   const loans = useLoans(poolId)
 
   const avgMaturity = React.useMemo(() => {
-    const assets = loans?.filter((asset) => asset.status === 'Active') as ActiveLoan[]
+    const assets = (loans && [...loans].filter((asset) => asset.status === 'Active')) as ActiveLoan[]
     const maturityPerAsset = assets.reduce((sum, asset) => {
-      if (asset?.loanInfo && asset.loanInfo.type !== 'CreditLine' && asset.outstandingDebt.gtn(0)) {
+      if ('maturityDate' in asset.pricing) {
         return sum.add(
-          Dec(daysBetween(asset.originationDate, asset.loanInfo.maturityDate)).mul(asset.outstandingDebt.toDecimal())
+          Dec(daysBetween(asset.originationDate, asset.pricing.maturityDate)).mul(asset.outstandingDebt.toDecimal())
         )
       }
       return sum

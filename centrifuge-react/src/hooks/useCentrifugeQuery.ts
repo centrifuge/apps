@@ -19,42 +19,22 @@ const RETRIES_BEFORE_THROWING = 2
 const RETRY_MIN_DELAY = 1000
 const RETRY_MAX_DELAY = 30000
 
+export type CentrifugeQueryOptions = { suspense?: boolean; enabled?: boolean; throwErrors?: boolean }
+
 export function useCentrifugeQuery<T = any>(
   key: readonly unknown[],
   queryCallback: (cent: Centrifuge) => Observable<T>,
-  options?: { suspense?: boolean; enabled?: boolean; throwErrors?: boolean }
+  options?: CentrifugeQueryOptions
 ): [T | null | undefined, Observable<T | null> | undefined] {
-  const { suspense, enabled = true, throwErrors: throwErrorsOption } = options || {}
+  const { suspense, enabled = true } = options || {}
   const cent = useCentrifuge()
   const centKey = useCentrifugeKey()
   const queryClient = useQueryClient()
 
-  const throwErrors = throwErrorsOption ?? suspense
-
   // Using react-query to cache the observable to ensure that all consumers subscribe to the same multicasted observable
   const { data: $source } = useQuery(
     ['querySource', centKey, ...key],
-    () => {
-      const source = queryCallback(cent).pipe(
-        // When an error is thrown, retry after a delay of RETRY_MIN_DELAY, doubling every attempt to a max of RETRY_MAX_DELAY.
-        // When using Suspense, an error will be thrown after RETRIES_BEFORE_THROWING retries.
-        retry({
-          count: RETRIES_BEFORE_THROWING,
-          delay: (_, errorCount) => timer(Math.min(RETRY_MIN_DELAY * 2 ** (errorCount - 1), RETRY_MAX_DELAY)),
-          resetOnSuccess: true,
-        }),
-        catchError((error) => {
-          console.error('useCentrifugeQuery: query threw an error: ', error)
-          if (throwErrors) throw error
-          return of(null)
-        }),
-        // Share the observable between subscriber and provide new subscriber the latest cached value.
-        // When there are no subscribers anymore, unsubscribe from the shared observable with a delay
-        // The delay is to avoid unsubscribing and resubscribing on page navigations.
-        shareReplayWithDelayedReset({ bufferSize: 1, resetDelay: 60000 })
-      )
-      return source
-    },
+    () => getQuerySource(cent, key, queryCallback, options),
     {
       suspense,
       staleTime: Infinity,
@@ -94,6 +74,35 @@ export function useCentrifugeQuery<T = any>(
   }, [$source])
 
   return [queryData, $source]
+}
+
+export function getQuerySource<T>(
+  cent: Centrifuge,
+  key: readonly unknown[],
+  queryCallback: (cent: Centrifuge) => Observable<T>,
+  options?: CentrifugeQueryOptions
+) {
+  const { suspense, throwErrors: throwErrorsOption } = options || {}
+  const throwErrors = throwErrorsOption ?? suspense
+  const source = queryCallback(cent).pipe(
+    // When an error is thrown, retry after a delay of RETRY_MIN_DELAY, doubling every attempt to a max of RETRY_MAX_DELAY.
+    // When using Suspense, an error will be thrown after RETRIES_BEFORE_THROWING retries.
+    retry({
+      count: RETRIES_BEFORE_THROWING,
+      delay: (_, errorCount) => timer(Math.min(RETRY_MIN_DELAY * 2 ** (errorCount - 1), RETRY_MAX_DELAY)),
+      resetOnSuccess: true,
+    }),
+    catchError((error) => {
+      console.error(`useCentrifugeQuery: query threw an error for key ${key}: `, error)
+      if (throwErrors) throw error
+      return of(null)
+    }),
+    // Share the observable between subscriber and provide new subscriber the latest cached value.
+    // When there are no subscribers anymore, unsubscribe from the shared observable with a delay
+    // The delay is to avoid unsubscribing and resubscribing on page navigations.
+    shareReplayWithDelayedReset({ bufferSize: 1, resetDelay: 60000 })
+  )
+  return source
 }
 
 export function shareReplayWithDelayedReset<T>(config?: {

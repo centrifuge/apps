@@ -1,19 +1,20 @@
+import { Request } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
 import { OnboardingUser } from '../database'
 
 export type VerifyEmailPayload = {
   email: string
-  walletAddress: string
+  wallet: Request['wallet']
 }
 
-export const sendVerifyEmailMessage = async (user: OnboardingUser) => {
+export const sendVerifyEmailMessage = async (user: OnboardingUser, wallet: Request['wallet']) => {
   if (!user?.email) {
     throw new Error('No email found')
   }
-  const payload: VerifyEmailPayload = { email: user.email, walletAddress: user.wallet.address }
+  const payload: VerifyEmailPayload = { email: user.email, wallet }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '10m',
+    expiresIn: '15m',
   })
 
   const message = {
@@ -33,7 +34,7 @@ export const sendVerifyEmailMessage = async (user: OnboardingUser) => {
     template_id: templateIds.verifyEmail,
     from: {
       name: 'Centrifuge',
-      email: `hello@centrifuge.io`,
+      email: 'hello@centrifuge.io',
     },
   }
   await sendEmail(message)

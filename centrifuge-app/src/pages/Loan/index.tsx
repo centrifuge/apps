@@ -1,8 +1,8 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
-  IconAlertCircle,
+  Button,
   IconNft,
   InteractiveCard,
   Shelf,
@@ -10,7 +10,9 @@ import {
   Text,
   TextWithPlaceholder,
   Thumbnail,
+  truncate,
 } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { Identity } from '../../components/Identity'
@@ -23,75 +25,77 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { Tooltips } from '../../components/Tooltips'
-import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
-import { LoanTemplate, LoanTemplateAttribute } from '../../types'
+import { LoanTemplate } from '../../types'
+import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
+import { formatBalance, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
-import { useNFT } from '../../utils/useNFTs'
-import { useCanBorrowAsset, usePermissions } from '../../utils/usePermissions'
-import { usePod } from '../../utils/usePod'
+import { useCentNFT } from '../../utils/useNFTs'
+import { useCanBorrowAsset, useCanSetOraclePrice } from '../../utils/usePermissions'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
-import { PricingForm } from './PricingForm'
-import { RiskGroupValues } from './RiskGroupValues'
-import { getMatchingRiskGroupIndex, LOAN_TYPE_LABELS } from './utils'
+import { OraclePriceForm } from './OraclePriceForm'
+import { PricingValues } from './PricingValues'
+import { formatNftAttribute } from './utils'
 
 export const LoanPage: React.FC = () => {
+  const [showOraclePricing, setShowOraclePricing] = React.useState(false)
   return (
-    <PageWithSideBar sidebar={<LoanSidebar />}>
-      <Loan />
+    <PageWithSideBar sidebar={<LoanSidebar showOraclePricing={showOraclePricing} />}>
+      <Loan setShowOraclePricing={() => setShowOraclePricing(true)} />
     </PageWithSideBar>
   )
 }
 
-const LoanSidebar: React.FC = () => {
-  const { pid, aid } = useParams<{ pid: string; aid: string }>()
-  const loan = useLoan(pid, aid)
-  const pool = usePool(pid) as Pool
-  const address = useAddress()
-  const permissions = usePermissions(address)
-  const canBorrow = useCanBorrowAsset(pid, aid)
-  const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
-
-  if (loan && pool && loan?.status === 'Created' && canPrice) {
-    return <PricingForm loan={loan} pool={pool} />
-  }
-
-  if (!loan || loan.status === 'Created' || !permissions || !canBorrow) return null
-
-  return <FinanceForm loan={loan} />
+function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
+  return loan.poolId.startsWith('0x')
 }
 
-const Loan: React.FC = () => {
+const LoanSidebar: React.FC<{ showOraclePricing?: boolean }> = ({ showOraclePricing }) => {
+  const { pid, aid } = useParams<{ pid: string; aid: string }>()
+  const loan = useLoan(pid, aid)
+  const canBorrow = useCanBorrowAsset(pid, aid)
+
+  if (!loan || loan.status === 'Closed' || !canBorrow || isTinlakeLoan(loan)) return null
+
+  return (
+    <Stack gap={2}>
+      {showOraclePricing && <OraclePriceForm loan={loan} />}
+      <FinanceForm loan={loan} />
+    </Stack>
+  )
+}
+
+const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePricing }) => {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+  const isTinlakePool = poolId.startsWith('0x')
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const pool = usePool(poolId)
   const loan = useLoan(poolId, assetId)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
-  const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
+  const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const history = useHistory()
   const cent = useCentrifuge()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
+  const address = useAddress()
+  const canOraclePrice = useCanSetOraclePrice(address)
 
-  const name = truncateText(nftMetadata?.name || 'Unnamed asset', 30)
+  const name = truncateText((isTinlakePool ? loan?.asset.nftId : nftMetadata?.name) || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const { data: templateData } = useMetadata<LoanTemplate>(
-    nftMetadata?.properties?._template && `ipfs://ipfs/${nftMetadata?.properties?._template}`
+    nftMetadata?.properties?._template && `ipfs://${nftMetadata?.properties?._template}`
   )
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
-  const podUrl = poolMetadata?.pod?.url
-  const { isLoggedIn } = usePod(podUrl)
-  const { data: document } = usePodDocument(podUrl, documentId)
+  const { data: document } = usePodDocument(poolId, documentId)
 
   const publicData = nftMetadata?.properties
     ? Object.fromEntries(Object.entries(nftMetadata.properties).map(([key, obj]: any) => [key, obj]))
@@ -99,8 +103,6 @@ const Loan: React.FC = () => {
   const privateData = document?.attributes
     ? Object.fromEntries(Object.entries(document.attributes).map(([key, obj]: any) => [key, obj.value]))
     : {}
-
-  const riskGroupIndex = loan && poolMetadata?.riskGroups && getMatchingRiskGroupIndex(loan, poolMetadata.riskGroups)
 
   return (
     <Stack>
@@ -111,197 +113,249 @@ const Loan: React.FC = () => {
         parent={{ to: `${basePath}/${poolId}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
-            {poolMetadata?.pool?.asset.class} asset by {nft?.owner && <Identity clickToCopy address={nft?.owner} />}
+            {poolMetadata?.pool?.asset.class} asset by{' '}
+            {isTinlakePool && loan && 'owner' in loan
+              ? truncate(loan.owner)
+              : nft?.owner && <Identity clickToCopy address={nft?.owner} />}
           </TextWithPlaceholder>
         }
       />
-      {loan &&
-        pool &&
-        (loan.status !== 'Created' ? (
-          <>
-            <PageSummary
-              data={[
-                {
-                  label: <Tooltips type="assetType" />,
-                  value: LOAN_TYPE_LABELS[loan.loanInfo.type],
-                },
-                {
-                  label: <Tooltips type="riskGroup" />,
-                  value: (
-                    <TextWithPlaceholder isLoading={metadataIsLoading}>
-                      {riskGroupIndex != null && riskGroupIndex > -1
-                        ? poolMetadata?.riskGroups?.[riskGroupIndex]?.name || `Risk group ${riskGroupIndex + 1}`
-                        : 'n/a'}
-                    </TextWithPlaceholder>
-                  ),
-                },
-                {
-                  label: <Tooltips type="collateralValue" />,
-                  value: formatBalance(loan.loanInfo.value, pool?.currency.symbol),
-                },
-                {
-                  label: <Tooltips type="availableFinancing" />,
-                  value: !availableFinancing.isZero()
-                    ? formatBalance(availableFinancing, pool?.currency.symbol)
-                    : 'n/a',
-                },
-                {
-                  label: <Tooltips type="outstanding" />,
-                  value: loan?.outstandingDebt?.gtn(0)
-                    ? formatBalance(loan.outstandingDebt, pool?.currency.symbol)
-                    : 'n/a',
-                },
-              ]}
-            />
+      {loan && pool && (
+        <>
+          <PageSummary
+            data={
+              'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                ? [
+                    {
+                      label: 'Maturity date',
+                      value: formatDate(loan.pricing.maturityDate),
+                    },
+                    {
+                      label: 'Value',
+                      value: formatBalance(
+                        'outstandingDebt' in loan
+                          ? loan.outstandingDebt
+                          : new CurrencyBalance(0, pool.currency.decimals),
+                        pool?.currency.symbol
+                      ),
+                    },
+                    {
+                      label: 'Quantity',
+                      value: formatBalance(
+                        new CurrencyBalance(loan.pricing.outstandingQuantity, pool?.currency.decimals)
+                      ),
+                    },
+                    {
+                      label: 'Price',
+                      value: `${loan.pricing.oracle.value.toDecimal()} ${pool?.currency.symbol}`,
+                    },
+                  ]
+                : [
+                    {
+                      label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
+                      value: isTinlakePool
+                        ? 'riskGroup' in loan && loan.riskGroup
+                        : 'value' in loan.pricing && loan.pricing.value
+                        ? formatBalance(loan.pricing.value, pool?.currency.symbol)
+                        : 'TBD',
+                    },
+                    {
+                      label: <Tooltips type="availableFinancing" />,
+                      value: formatBalance(availableFinancing, pool?.currency.symbol),
+                    },
+                    {
+                      label: <Tooltips type="outstanding" />,
+                      value:
+                        'outstandingDebt' in loan
+                          ? isTinlakePool && 'writeOffPercentage' in loan
+                            ? formatBalance(
+                                new CurrencyBalance(
+                                  loan.outstandingDebt.sub(
+                                    loan.outstandingDebt.mul(new BN(loan.writeOffPercentage).div(new BN(100)))
+                                  ),
+                                  pool.currency.decimals
+                                ),
+                                pool?.currency.symbol
+                              )
+                            : formatBalance(loan.outstandingDebt, pool?.currency.symbol)
+                          : 'n/a',
+                    },
+                    ...(isTinlakePool
+                      ? [
+                          {
+                            label: <Tooltips type="appliedWriteOff" />,
+                            value:
+                              'writeOffPercentage' in loan
+                                ? formatBalance(
+                                    new CurrencyBalance(
+                                      loan.outstandingDebt.mul(new BN(loan.writeOffPercentage).div(new BN(100))),
+                                      pool.currency.decimals
+                                    ),
+                                    pool?.currency.symbol
+                                  )
+                                : 'n/a',
+                          },
+                        ]
+                      : []),
+                  ]
+            }
+          />
 
+          {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&
+          'valuationMethod' in loan.pricing &&
+          loan.pricing.valuationMethod !== 'oracle' ? (
             <PageSection title="Financing & repayment cash flow">
               <Shelf gap={3} flexWrap="wrap">
-                <FinancingRepayment
-                  drawDownDate={loan.originationDate ? formatDate(loan.originationDate) : null}
-                  closingDate={loan.status === 'Closed' ? formatDate(loan.lastUpdated) : null}
-                  totalFinanced={formatBalance(loan.totalBorrowed, pool.currency)}
-                  totalRepaid={formatBalance(loan.totalRepaid, pool.currency)}
-                />
-              </Shelf>
-            </PageSection>
-
-            <PageSection title="Pricing">
-              <Shelf gap={3} flexWrap="wrap">
-                <RiskGroupValues
-                  values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
-                  loanType={loan?.loanInfo ? loan.loanInfo.type : config.defaultLoanType}
-                  showMaturityDate
-                />
-              </Shelf>
-            </PageSection>
-          </>
-        ) : (
-          <>
-            <PageSummary
-              data={[
-                { label: 'Asset type', value: '-' },
-                { label: 'Risk group', value: '-' },
-                { label: 'Collateral value', value: '-' },
-              ]}
-            />
-            <PageSection title="Price">
-              <Shelf gap={1} justifyContent="center">
-                <IconAlertCircle size="iconSmall" /> <Text variant="body3">The asset has not been priced yet</Text>
-              </Shelf>
-            </PageSection>
-          </>
-        ))}
-      {loan && nft && (
-        <>
-          {templateData?.sections?.map((section, i) => (
-            <PageSection title={section.name} titleAddition={section.public ? undefined : 'Private'} key={i}>
-              {section.public || document ? (
-                <Shelf gap={6} flexWrap="wrap">
-                  {section.attributes.map((attr) => {
-                    const key = labelToKey(attr.label)
-                    const value = section.public ? publicData[key] : privateData[key]
-                    const formatted = value ? formatValue(value, attr) : '-'
-                    return <LabelValueStack label={attr.label} value={formatted} key={key} />
-                  })}
-                </Shelf>
-              ) : !section.public && !isLoggedIn && podUrl ? (
-                <PodAuthSection podUrl={podUrl} buttonLabel="Authenticate to view" />
-              ) : null}
-            </PageSection>
-          ))}
-          <PageSection title="NFT">
-            <InteractiveCard
-              icon={<Thumbnail label="nft" type="nft" />}
-              title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
-              variant="button"
-              onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
-              secondaryHeader={
-                <Shelf gap={6}>
-                  <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
-                  <LabelValueStack
-                    label="Owner"
-                    value={nft?.owner ? <Identity clickToCopy address={nft?.owner} /> : ''}
+                {isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan ? (
+                  <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
+                ) : (
+                  <FinancingRepayment
+                    drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
+                    closingDate={null}
+                    totalFinanced={formatBalance('totalBorrowed' in loan ? loan.totalBorrowed : 0, pool.currency)}
+                    totalRepaid={formatBalance('totalBorrowed' in loan ? loan.totalRepaid : 0, pool.currency)}
                   />
-                </Shelf>
-              }
-            >
-              {(nftMetadata?.description || imageUrl) && (
-                <Shelf gap={3} alignItems="flex-start">
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flex="0 1 50%"
-                    style={{ aspectRatio: '1 / 1' }}
-                    backgroundColor="backgroundSecondary"
-                    borderRadius="8px"
-                    overflow="hidden"
-                  >
-                    {imageUrl ? (
-                      <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
-                    ) : (
-                      <IconNft color="white" size="250px" />
-                    )}
-                  </Box>
-                  <Stack gap={2}>
-                    <LabelValueStack
-                      label="Description"
-                      value={
-                        <TextWithPlaceholder
-                          isLoading={nftMetadataIsLoading}
-                          words={2}
-                          width={80}
-                          variance={30}
-                          variant="body2"
-                          style={{ wordBreak: 'break-word' }}
-                        >
-                          {nftMetadata?.description || 'No description'}
-                        </TextWithPlaceholder>
-                      }
-                    />
+                )}
+              </Shelf>
+            </PageSection>
+          ) : null}
 
-                    {imageUrl && (
-                      <LabelValueStack
-                        label="Image"
-                        value={
-                          <AnchorPillButton
-                            href={imageUrl}
-                            target="_blank"
-                            style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
-                          >
-                            Source file
-                          </AnchorPillButton>
-                        }
-                      />
-                    )}
-                  </Stack>
-                </Shelf>
-              )}
-            </InteractiveCard>
+          <PageSection
+            title="Pricing"
+            headerRight={
+              canOraclePrice &&
+              setShowOraclePricing &&
+              loan.status !== 'Closed' &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod === 'oracle' && (
+                <Button variant="secondary" onClick={() => setShowOraclePricing()} small>
+                  Update price
+                </Button>
+              )
+            }
+          >
+            <Shelf gap={3} flexWrap="wrap">
+              <PricingValues loan={loan} pool={pool} />
+            </Shelf>
           </PageSection>
         </>
       )}
+      {(loan && nft) || loan?.poolId.startsWith('0x') ? (
+        <>
+          {templateData?.sections?.map((section, i) => {
+            const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
+            return (
+              <PageSection title={section.name} titleAddition={isPublic ? undefined : 'Private'} key={i}>
+                {isPublic || document ? (
+                  <Shelf gap={6} flexWrap="wrap">
+                    {section.attributes.map((key) => {
+                      const attribute = templateData.attributes?.[key]
+                      if (!attribute) return null
+                      const value = publicData[key] ?? privateData[key]
+                      const formatted = value ? formatNftAttribute(value, attribute) : '-'
+                      return <LabelValueStack label={attribute.label} value={formatted} key={key} />
+                    })}
+                  </Shelf>
+                ) : !isPublic ? (
+                  <PodAuthSection poolId={poolId} buttonLabel="Authenticate to view" />
+                ) : null}
+              </PageSection>
+            )
+          })}
+
+          <PageSection title="NFT">
+            {isTinlakePool && 'owner' in loan ? (
+              <Shelf gap={6}>
+                <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
+                <LabelValueStack
+                  label="Owner"
+                  value={
+                    <Text
+                      style={{
+                        cursor: 'copy',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'normal',
+                      }}
+                      onClick={() => copyToClipboard(loan.owner || '')}
+                    >
+                      {truncate(loan.owner)}
+                    </Text>
+                  }
+                />
+              </Shelf>
+            ) : (
+              <InteractiveCard
+                icon={<Thumbnail label="nft" type="nft" />}
+                title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
+                variant="button"
+                onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
+                secondaryHeader={
+                  <Shelf gap={6}>
+                    <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
+                    <LabelValueStack
+                      label="Owner"
+                      value={nft?.owner ? <Identity clickToCopy address={nft.owner} /> : ''}
+                    />
+                  </Shelf>
+                }
+              >
+                {(nftMetadata?.description || imageUrl) && (
+                  <Shelf gap={3} alignItems="flex-start">
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flex="0 1 50%"
+                      style={{ aspectRatio: '1 / 1' }}
+                      backgroundColor="backgroundSecondary"
+                      borderRadius="8px"
+                      overflow="hidden"
+                    >
+                      {imageUrl ? (
+                        <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
+                      ) : (
+                        <IconNft color="white" size="250px" />
+                      )}
+                    </Box>
+                    <Stack gap={2}>
+                      <LabelValueStack
+                        label="Description"
+                        value={
+                          <TextWithPlaceholder
+                            isLoading={nftMetadataIsLoading}
+                            words={2}
+                            width={80}
+                            variance={30}
+                            variant="body2"
+                            style={{ wordBreak: 'break-word' }}
+                          >
+                            {nftMetadata?.description || 'No description'}
+                          </TextWithPlaceholder>
+                        }
+                      />
+
+                      {imageUrl && (
+                        <LabelValueStack
+                          label="Image"
+                          value={
+                            <AnchorPillButton
+                              href={imageUrl}
+                              target="_blank"
+                              style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                            >
+                              Source file
+                            </AnchorPillButton>
+                          }
+                        />
+                      )}
+                    </Stack>
+                  </Shelf>
+                )}
+              </InteractiveCard>
+            )}
+          </PageSection>
+        </>
+      ) : null}
     </Stack>
   )
-}
-
-function labelToKey(label: string) {
-  return label.toLowerCase().replaceAll(/\s/g, '_')
-}
-
-function formatValue(value: any, attr: LoanTemplateAttribute) {
-  switch (attr.type) {
-    case 'string':
-      return value
-    case 'percentage':
-      return formatPercentage(value, true)
-    case 'decimal':
-      return value.toLocaleString('en')
-    case 'currency':
-      return formatBalance(new CurrencyBalance(value.match(/^[\d.]+/)[0], attr.currencyDecimals), attr.currencySymbol)
-    case 'timestamp':
-      return formatDate(value)
-    default:
-      return ''
-  }
 }

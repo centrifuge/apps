@@ -1,15 +1,21 @@
 import { Request, Response } from 'express'
 import { array, date, InferType, object, string } from 'yup'
-import { validateAndWriteToFirestore } from '../../database'
+import { EntityUser, validateAndWriteToFirestore } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
+import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
 const confirmOwnersInput = object({
   ultimateBeneficialOwners: array(
     object({
       name: string().required(),
-      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+      dateOfBirth: date()
+        .required()
+        .min(new Date(1900, 0, 1))
+        .max(new Date(new Date().getFullYear() - 18, new Date().getMonth()), 'UBO must be 18 or older'),
+      countryOfResidency: string().required(),
+      countryOfCitizenship: string().required(),
     }).required()
   )
     .min(1)
@@ -22,39 +28,39 @@ export const confirmOwnersController = async (
 ) => {
   try {
     await validateInput(req.body, confirmOwnersInput)
-    const { walletAddress } = req
-    const user = await fetchUser(walletAddress)
+    const { wallet } = req
+    const user = await fetchUser(wallet)
+
     if (user.investorType !== 'entity') {
-      throw new HttpsError(404, 'Business not found')
+      throw new HttpError(400, 'User is not an entity')
     }
 
-    if (!user.steps.verifyBusiness.completed) {
-      throw new HttpsError(400, 'Business must be verified before confirming ownership')
+    if (!user.manualKybReference && !user.globalSteps.verifyBusiness.completed) {
+      throw new HttpError(400, 'Business must be verified before confirming ownership')
     }
 
-    if (user?.steps.confirmOwners.completed) {
-      throw new HttpsError(400, 'Owners already confirmed')
+    if (user?.globalSteps.confirmOwners.completed) {
+      throw new HttpError(400, 'Owners already confirmed')
     }
 
-    if (!user.steps.verifyEmail.completed) {
-      throw new HttpsError(400, 'Email must be verified before completing business verification')
+    if (!user.globalSteps.verifyEmail.completed) {
+      throw new HttpError(400, 'Email must be verified before confirming ownership')
     }
 
-    const verifyEntity = {
+    const verifyEntity: Subset<EntityUser> = {
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
-      steps: { ...user.steps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
+      globalSteps: { confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', ['steps', 'ultimateBeneficialOwners'])
+    await validateAndWriteToFirestore(wallet, verifyEntity, 'entity', [
+      'globalSteps.confirmOwners',
+      'ultimateBeneficialOwners',
+    ])
 
-    const freshUserData = await fetchUser(walletAddress)
+    const freshUserData = await fetchUser(wallet)
     return res.status(200).send({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
-    }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

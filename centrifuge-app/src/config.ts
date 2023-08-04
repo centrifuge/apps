@@ -1,5 +1,4 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
-import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
@@ -66,10 +65,9 @@ type EnvironmentConfig = {
     dark: DefaultTheme
   }
   defaultTheme: 'light' | 'dark'
-  baseCurrency: 'AUSD'
+  baseCurrency: 'USD'
   assetClasses: string[]
   defaultAssetClass: string
-  defaultLoanType: LoanInfo['type']
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
   defaultPodUrl: string
@@ -87,10 +85,9 @@ const ALTAIR: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'dark',
-  baseCurrency: 'AUSD',
+  baseCurrency: 'USD',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
-  defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,
@@ -105,16 +102,17 @@ const CENTRIFUGE: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'light',
-  baseCurrency: 'AUSD',
+  baseCurrency: 'USD',
   assetClasses: [
     'Consumer Credit',
     'Corporate Credit',
     'Commercial Real Estate',
     'Residential Real Estate',
     'Project Finance',
+    'Trade Finance',
+    'US Treasuries',
   ],
   defaultAssetClass: 'Consumer Credit',
-  defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,
@@ -126,13 +124,17 @@ const goerliConfig = {
   rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
-  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
+  remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
+  blockExplorerUrl: 'https://goerli.etherscan.io',
 }
 const mainnetConfig = {
   rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmNvauf8E6TkUiyF1ZgtYtntHz335tCswKp2uhBH1fiui1', // TODO: add registry to config and fetch poolHash
+  remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
+  blockExplorerUrl: 'https://etherscan.io',
 }
 
 export const ethConfig = {

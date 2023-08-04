@@ -1,5 +1,5 @@
-import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { AnchorButton, Box, IconExternalLink, Shelf, Text } from '@centrifuge/fabric'
+import { ActiveLoan } from '@centrifuge/centrifuge-js'
+import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -7,11 +7,8 @@ import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Tooltips } from '../../../components/Tooltips'
-import { ethConfig } from '../../../config'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
-import { TinlakePool } from '../../../utils/tinlake/useTinlakePools'
-import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useLoans } from '../../../utils/useLoans'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -19,7 +16,7 @@ import { PoolDetailSideBar } from '../Overview'
 
 export const PoolDetailAssetsTab: React.FC = () => {
   return (
-    <PageWithSideBar sidebar={<PoolDetailSideBar selectedToken={null} setSelectedToken={() => {}} />}>
+    <PageWithSideBar sidebar={<PoolDetailSideBar />}>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailAssets />
@@ -28,76 +25,56 @@ export const PoolDetailAssetsTab: React.FC = () => {
   )
 }
 
-const AverageMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
-  return <>{useAverageMaturity(poolId)}</>
-}
-
 export const PoolDetailAssets: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
-  const isTinlakePool = poolId.startsWith('0x')
 
-  if (isTinlakePool) {
+  if (!pool) return null
+
+  if (!loans?.length) {
     return (
-      <Shelf p="4" justifyContent="center">
-        <AnchorButton
-          href={new URL(
-            `/pool/${pool.id}/${(pool as TinlakePool).tinlakeMetadata.slug}/assets`,
-            ethConfig.tinlakeUrl
-          ).toString()}
-          target="_blank"
-          variant="secondary"
-          iconRight={IconExternalLink}
-        >
-          View assets on Tinlake
-        </AnchorButton>
+      <Shelf p="4">
+        <Text>No assets have been originated yet</Text>
       </Shelf>
     )
   }
 
-  if (!pool || !loans) return null
-
-  const ongoingAssets = loans?.filter(
-    (loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()
-  ) as ActiveLoan[]
+  const ongoingAssets = (loans &&
+    [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero())) as ActiveLoan[]
 
   const avgInterestRatePerSec = ongoingAssets
-    ?.reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec.toAprPercent() || Dec(0)), Dec(0))
-    .dividedBy(loans?.length)
+    .reduce<any>(
+      (curr, prev) => curr.add(('interestRate' in prev.pricing && prev.pricing.interestRate.toPercent()) || Dec(0)),
+      Dec(0)
+    )
+    .dividedBy(ongoingAssets.length)
     .toFixed(2)
     .toString()
 
   const avgAmount = ongoingAssets
     .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal() || Dec(0)), Dec(0))
-    .dividedBy(ongoingAssets?.length)
+    .dividedBy(ongoingAssets.length)
     .toDecimalPlaces(2)
 
+  const assetValue = formatBalance(pool.nav.latest.toDecimal().toNumber(), pool.currency.symbol)
+
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
-    { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
+    {
+      label: <Tooltips type="assetValue" />,
+      value: assetValue,
+    },
+    { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
     { label: <Tooltips type="averageFinancingFee" />, value: formatPercentage(avgInterestRatePerSec) },
     { label: <Tooltips type="averageAmount" />, value: formatBalance(avgAmount, pool.currency.symbol) },
   ]
 
-  if (!isTinlakePool) {
-    pageSummaryData.splice(1, 0, {
-      label: <Tooltips type="averageMaturity" />,
-      value: <AverageMaturity poolId={poolId} />,
-    })
-  }
-
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      {loans.length ? (
-        <Box px="5" py="2">
-          <LoanList loans={loans} />
-        </Box>
-      ) : (
-        <Shelf p="4">
-          <Text>No assets have been originated yet</Text>
-        </Shelf>
-      )}
+      <Box px="5" py="2">
+        <LoanList loans={loans} />
+      </Box>
     </>
   )
 }

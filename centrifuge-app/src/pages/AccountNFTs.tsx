@@ -1,8 +1,8 @@
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { ConnectButton } from '../components/ConnectButton'
 import { NFTCard } from '../components/NFTCard'
+import { OnboardingStatus } from '../components/OnboardingStatus'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -22,7 +22,7 @@ export const AccountNFTsPage: React.FC = () => {
 const COUNT_PER_PAGE = 16
 
 const AccountNFTs: React.FC = () => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const nfts = useAccountNfts(address)
   const collections = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
@@ -43,7 +43,7 @@ const AccountNFTs: React.FC = () => {
   if (!address) {
     return (
       <Shelf justifyContent="center">
-        <ConnectButton />
+        <WalletMenu menuItems={[<OnboardingStatus />]} />
       </Shelf>
     )
   }

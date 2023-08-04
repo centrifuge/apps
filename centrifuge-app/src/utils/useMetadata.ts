@@ -1,8 +1,8 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import { useCallback } from 'react'
 import { useQueries, useQuery, useQueryClient, UseQueryResult } from 'react-query'
+import { lastValueFrom } from 'rxjs'
 
 type Schema = {
   [key: string]: {
@@ -76,9 +76,8 @@ export function useMetadataMulti<T extends Schema>(
 ): UseQueryResult<Result<T>, unknown>[]
 export function useMetadataMulti<T extends Schema>(uris: (string | undefined)[], schema?: T) {
   const cent = useCentrifuge()
-  const filteredUris = uris?.filter(Boolean) as string[]
   const queries = useQueries(
-    filteredUris?.map((uri) => {
+    uris?.map((uri) => {
       return {
         queryKey: ['metadata', uri],
         queryFn: async () => metadataQueryFn(uri!, cent, schema),

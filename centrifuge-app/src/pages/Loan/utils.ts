@@ -1,43 +1,23 @@
-import { Loan as LoanType, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { LoanTemplateAttribute } from '../../types'
+import { formatDate } from '../../utils/date'
+import { formatBalance } from '../../utils/formatting'
 
-export const LOAN_FIELDS = {
-  BulletLoan: ['advanceRate', 'probabilityOfDefault', 'lossGivenDefault', 'value', 'discountRate', 'maturityDate'],
-  CreditLine: ['advanceRate', 'value'],
-  CreditLineWithMaturity: [
-    'advanceRate',
-    'probabilityOfDefault',
-    'lossGivenDefault',
-    'value',
-    'discountRate',
-    'maturityDate',
-  ],
-}
-
-export const LOAN_TYPE_LABELS = {
-  BulletLoan: 'Bullet loan',
-  CreditLine: 'Credit line',
-  CreditLineWithMaturity: 'Credit line with maturity',
-}
-
-export function getMatchingRiskGroupIndex(loan: LoanType, riskGroups: PoolMetadata['riskGroups']) {
-  if (loan.status === 'Created') {
-    return -1
+export function formatNftAttribute(value: any, attr: LoanTemplateAttribute) {
+  switch (attr.input.type) {
+    case 'number':
+      return `${(attr.input.decimals
+        ? new CurrencyBalance(value, attr.input.decimals).toFloat()
+        : Number(value)
+      ).toLocaleString('en')} ${attr.input.unit || ''}`
+    case 'currency':
+      return formatBalance(
+        attr.input.decimals ? new CurrencyBalance(value, attr.input.decimals) : Number(value),
+        attr.input.symbol
+      )
+    case 'date':
+      return formatDate(value)
+    default:
+      return value
   }
-  const loanInterestRatePerSec = loan.interestRatePerSec?.toApr().toFixed(4)
-  const loanAdvanceRate = loan.loanInfo.advanceRate.toFloat().toFixed(4)
-  const loanLossGivenDefault =
-    'lossGivenDefault' in loan.loanInfo ? loan.loanInfo.lossGivenDefault.toFloat().toFixed(4) : null
-  const loanProbabilityOfDefault =
-    'probabilityOfDefault' in loan.loanInfo ? loan.loanInfo.probabilityOfDefault.toFloat().toFixed(4) : null
-  const loanDiscountRate = 'discountRate' in loan.loanInfo ? loan.loanInfo.discountRate.toApr().toFixed(4) : null
-
-  return riskGroups.findIndex(
-    (g) =>
-      loanInterestRatePerSec === new Rate(g.interestRatePerSec).toApr().toFixed(4) &&
-      loanAdvanceRate === new Rate(g.advanceRate).toFloat().toFixed(4) &&
-      (!loanDiscountRate || loanDiscountRate === new Rate(g.discountRate).toApr().toFixed(4)) &&
-      (!loanProbabilityOfDefault ||
-        loanProbabilityOfDefault === new Rate(g.probabilityOfDefault).toFloat().toFixed(4)) &&
-      (!loanLossGivenDefault || loanLossGivenDefault === new Rate(g.lossGivenDefault).toFloat().toFixed(4))
-  )
 }

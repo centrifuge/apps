@@ -1,28 +1,42 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
-import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
+import { Buffer } from 'buffer'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
+  BorrowerTransactionType,
   InvestorTransactionType,
+  SubqueryBorrowerTransaction,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
-import { getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
+import {
+  addressToHex,
+  computeTrancheId,
+  getDateMonthsFromNow,
+  getDateYearsFromNow,
+  getRandomUint,
+  isSameAddress,
+} from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 
-const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
-
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
+type AdminRole =
+  | 'PoolAdmin'
+  | 'Borrower'
+  | 'PricingAdmin'
+  | 'LiquidityAdmin'
+  | 'InvestorAdmin'
+  | 'LoanAdmin'
+  | 'PODReadAccess'
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
@@ -44,8 +58,9 @@ const AdminRoleBits = {
   Borrower: 0b00000010,
   PricingAdmin: 0b00000100,
   LiquidityAdmin: 0b00001000,
-  MemberListAdmin: 0b00010000,
+  InvestorAdmin: 0b00010000,
   LoanAdmin: 0b00100000,
+  PODReadAccess: 0b01000000,
 }
 
 // const CurrencyRoleBits = {
@@ -57,104 +72,136 @@ export type PoolRoles = {
   roles: AdminRole[]
   tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
-
-export type LoanInfoInput =
+type LoanInfoInput =
   | {
-      type: 'BulletLoan'
+      valuationMethod: 'outstandingDebt'
+      maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+      value: BN
+      maturityDate: Date
       advanceRate: BN
+      interestRate: BN
+    }
+  | {
+      valuationMethod: 'oracle'
+      maxBorrowAmount: string | null
+      Isin: string
+      maturityDate: Date
+    }
+  | {
+      valuationMethod: 'discountedCashFlow'
       probabilityOfDefault: BN
       lossGivenDefault: BN
-      value: BN
       discountRate: BN
-      maturityDate: string
-    }
-  | {
-      type: 'CreditLine'
-      advanceRate: BN
+      maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
       value: BN
-    }
-  | {
-      type: 'CreditLineWithMaturity'
+      maturityDate: Date
       advanceRate: BN
-      probabilityOfDefault: BN
-      value: BN
-      discountRate: BN
-      maturityDate: string
-      lossGivenDefault: BN
+      interestRate: BN
     }
-
-const LOAN_INPUT_TRANSFORM = {
-  value: (v: BN) => v.toString(),
-  maturityDate: (v: string) => new Date(v).getTime() / 1000,
-  probabilityOfDefault: (v: BN) => v.toString(),
-  lossGivenDefault: (v: BN) => v.toString(),
-  discountRate: (v: BN) => v.toString(),
-  advanceRate: (v: BN) => v.toString(),
-}
-
-const LOAN_FIELDS = {
-  BulletLoan: ['advanceRate', 'probabilityOfDefault', 'lossGivenDefault', 'value', 'discountRate', 'maturityDate'],
-  CreditLine: ['advanceRate', 'value'],
-  CreditLineWithMaturity: [
-    'advanceRate',
-    'probabilityOfDefault',
-    'lossGivenDefault',
-    'value',
-    'discountRate',
-    'maturityDate',
-  ],
-}
-
-type LoanInfoData = {
-  bulletLoan?: {
-    advanceRate: string
-    value: string
-    probabilityOfDefault: string
-    lossGivenDefault: string
-    discountRate: string
-    maturityDate: number
+export type LoanInfoData = {
+  /// Specify the repayments schedule of the loan
+  schedule: {
+    maturity: { fixed: number }
+    interestPayments: 'None'
+    payDownSchedule: 'None'
   }
-  creditLine?: {
-    advanceRate: string
-    value: string
+
+  /// Collateral used for this loan
+  collateral: [string, string]
+
+  pricing:
+    | {
+        external: {
+          priceId: {
+            isin: string
+          }
+          maxBorrowAmount: { noLimit: null } | { quantity: string }
+        }
+      }
+    | {
+        internal: {
+          /// Valuation method of this loan
+          valuationMethod:
+            | { outstandingDebt: null }
+            | {
+                discountedCashFlow: {
+                  probabilityOfDefault: string
+                  lossGivenDefault: string
+                  discountRate: string
+                }
+              }
+          /// Value of the collateral used for this loan
+          collateralValue: string
+          /// Interest rate per second with any penalty applied
+          interestRate: string
+          maxBorrowAmount:
+            | { upToTotalBorrowed: { advanceRate: string } }
+            | { upToOutstandingDebt: { advanceRate: string } }
+        }
+      }
+
+  /// Restrictions of this loan
+  restrictions: {
+    borrows: 'NotWrittenOff'
+    repayments: 'None'
   }
-  creditLineWithMaturity?: {
-    advanceRate: string
-    value: string
-    probabilityOfDefault: string
-    lossGivenDefault: string
-    discountRate: string
-    maturityDate: number
+}
+
+export type ActiveLoanInfoData = {
+  /// Specify the repayments schedule of the loan
+  schedule: {
+    maturity: { fixed: number }
+    interestPayments: 'None'
+    payDownSchedule: 'None'
+  }
+
+  /// Collateral used for this loan
+  collateral: [string, string]
+
+  pricing:
+    | {
+        external: {
+          info: {
+            priceId: {
+              isin: string
+            }
+            maxBorrowAmount: { noLimit: null } | { quantity: string }
+          }
+          outstandingQuantity: string
+        }
+      }
+    | {
+        internal: {
+          info: {
+            /// Valuation method of this loan
+            valuationMethod:
+              | { outstandingDebt: null }
+              | {
+                  discountedCashFlow: {
+                    probabilityOfDefault: string
+                    lossGivenDefault: string
+                    discountRate: string
+                  }
+                }
+            /// Value of the collateral used for this loan
+            collateralValue: string
+            /// Interest rate per second with any penalty applied
+            interestRate: string
+            maxBorrowAmount:
+              | { upToTotalBorrowed: { advanceRate: string } }
+              | { upToOutstandingDebt: { advanceRate: string } }
+          }
+          normalizedDebt: string
+          writeOffPenalty: string
+        }
+      }
+
+  /// Restrictions of this loan
+  restrictions: {
+    borrows: 'NotWrittenOff'
+    repayments: 'None'
   }
 }
-
-type BulletLoan = {
-  type: 'BulletLoan'
-  advanceRate: Rate
-  probabilityOfDefault: Rate
-  lossGivenDefault: Rate
-  value: CurrencyBalance
-  discountRate: Rate
-  maturityDate: string
-}
-
-type CreditLine = {
-  type: 'CreditLine'
-  advanceRate: Rate
-  value: CurrencyBalance
-}
-
-type CreditLineWithMaturity = {
-  type: 'CreditLineWithMaturity'
-  advanceRate: Rate
-  probabilityOfDefault: Rate
-  value: CurrencyBalance
-  discountRate: Rate
-  maturityDate: string
-  lossGivenDefault: Rate
-}
-
-export type LoanInfo = BulletLoan | CreditLine | CreditLineWithMaturity
 
 type TrancheDetailsData = {
   trancheType:
@@ -179,7 +226,6 @@ type PoolDetailsData = {
   metadata?: string
   parameters: {
     minEpochTime: number
-    challengeTime: number
     maxNavAge: number
   }
   epoch: {
@@ -195,7 +241,7 @@ type PoolDetailsData = {
 }
 
 type NAVDetailsData = {
-  latest: string
+  value: string
   lastUpdated: number
 }
 
@@ -240,8 +286,6 @@ export type Pool = {
   value: CurrencyBalance
   createdAt: string | null
   tranches: Token[]
-  isInitialised: boolean
-  loanCollectionId: string | null
   reserve: {
     max: CurrencyBalance
     available: CurrencyBalance
@@ -253,7 +297,6 @@ export type Pool = {
     lastExecuted: number
     challengePeriodEnd: number
     status: 'submissionPeriod' | 'challengePeriod' | 'executionPeriod' | 'ongoing'
-    challengeTime: number
   }
   nav: {
     latest: CurrencyBalance
@@ -278,17 +321,6 @@ export enum LoanStatus {
 
 // type LoanStatus = 'Created' | 'Active' | 'Closed'
 
-type WrittenOfByAdmin = {
-  percentage: Rate
-  penaltyInterestRateRerSec: Rate
-}
-
-type WrittenOff = {
-  writeOffStatus: number
-}
-
-type WriteOffStatus = null | WrittenOff | WrittenOfByAdmin
-
 type InterestAccrual = {
   interestRatePerSec: string
   accumulatedRate: string
@@ -296,48 +328,95 @@ type InterestAccrual = {
 }
 
 // type from chain
-type LoanData = {
-  status: { [key in LoanStatus]: any }
-  collateral: [collectionId: string, nftId: string]
+type CreatedLoanData = {
+  borrower: string
+  info: LoanInfoData
 }
 
 // type from chain
-type ActiveLoanData = LoanData & {
-  loanId: number
-  interestRatePerSec: string
-  normalizedDebt: string
-  originationDate: number | null
-  loanType: { [key: string]: LoanInfoData }
-  adminWrittenOff: boolean
-  writeOffStatus: WriteOffStatus
-  totalBorrowed: string
-  totalRepaid: string
-  lastUpdated: number
-}
-
-// type from chain
-type ClosedLoanData = LoanData & {
-  loanId: number
-  interestRatePerSec: string
-  normalizedDebt: string
+type ActiveLoanData = ActiveLoanInfoData & {
+  borrower: string
+  writeOffPercentage: string
   originationDate: number
-  loanType: { [key: string]: LoanInfoData }
-  writeOffStatus: WriteOffStatus
   totalBorrowed: string
   totalRepaid: string
-  lastUpdated: number
+  normalizedDebt: string
 }
 
-// transformed type for UI
-export type DefaultLoan = {
-  status: 'Created'
-  id: string
-  poolId: string
-  closedAt: null
+// type from chain
+type ClosedLoanData = {
+  info: LoanInfoData
+  closedAt: number
+  totalBorrowed: string
+  totalRepaid: string
+}
+
+export type PricingInfo = InternalPricingInfo | ExternalPricingInfo
+
+export type InternalPricingInfo = {
+  valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
+  maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+  value: CurrencyBalance
+  maturityDate: string
+  advanceRate: Rate
+  interestRate: Rate
+  probabilityOfDefault?: Rate
+  lossGivenDefault?: Rate
+  discountRate?: Rate
+}
+
+export type ExternalPricingInfo = {
+  valuationMethod: 'oracle'
+  maxBorrowAmount: CurrencyBalance | null
+  outstandingQuantity: CurrencyBalance
+  Isin: string
+  maturityDate: string
+  oracle: {
+    value: Rate
+    timestamp: number
+  }
+}
+
+type TinlakePricingInfo = {
+  maturityDate: string
+  interestRate: Rate
+  ceiling: CurrencyBalance
+}
+
+export type TinlakeLoan = {
   asset: {
     collectionId: string
     nftId: string
   }
+  dateClosed: number
+  id: string
+  outstandingDebt: CurrencyBalance
+  owner: string
+  poolId: string
+  pricing: TinlakePricingInfo
+  riskGroup: string
+  status: 'Created' | 'Active' | 'Closed'
+  totalBorrowed: CurrencyBalance
+  totalRepaid: CurrencyBalance
+  originationDate: string
+  writeOffPercentage: string
+}
+
+// transformed type for UI
+export type CreatedLoan = {
+  status: 'Created'
+  id: string
+  poolId: string
+  pricing: PricingInfo
+  borrower: string
+  asset: {
+    collectionId: string
+    nftId: string
+  }
+  totalBorrowed: CurrencyBalance
+  totalRepaid: CurrencyBalance
+  normalizedDebt: CurrencyBalance
+  outstandingDebt: CurrencyBalance
 }
 
 // transformed type for UI
@@ -345,21 +424,21 @@ export type ActiveLoan = {
   status: 'Active'
   id: string
   poolId: string
-  interestRatePerSec: Rate
-  outstandingDebt: CurrencyBalance
-  normalizedDebt: CurrencyBalance
-  totalBorrowed: CurrencyBalance
-  totalRepaid: CurrencyBalance
-  lastUpdated: string
-  closedAt: null
-  originationDate: string
-  loanInfo: LoanInfo
-  adminWrittenOff?: boolean
-  writeOffStatus: WriteOffStatus
+  pricing: PricingInfo
+  borrower: string
   asset: {
     collectionId: string
     nftId: string
   }
+  writeOffStatus?: {
+    percentage: Rate
+    penaltyInterestRate: Rate
+  }
+  totalBorrowed: CurrencyBalance
+  totalRepaid: CurrencyBalance
+  originationDate: string
+  normalizedDebt: CurrencyBalance
+  outstandingDebt: CurrencyBalance
 }
 
 // transformed type for UI
@@ -367,23 +446,16 @@ export type ClosedLoan = {
   status: 'Closed'
   id: string
   poolId: string
-  interestRatePerSec: Rate
-  outstandingDebt: CurrencyBalance
-  normalizedDebt: CurrencyBalance
-  totalBorrowed: CurrencyBalance
-  totalRepaid: CurrencyBalance
-  lastUpdated: string
-  closedAt: string
-  originationDate?: string | null
-  loanInfo: LoanInfo
-  writeOffStatus: WriteOffStatus
+  pricing: PricingInfo
   asset: {
     collectionId: string
     nftId: string
   }
+  totalBorrowed: CurrencyBalance
+  totalRepaid: CurrencyBalance
 }
 
-export type Loan = DefaultLoan | ClosedLoan | ActiveLoan
+export type Loan = CreatedLoan | ClosedLoan | ActiveLoan
 
 export type AccountCurrencyBalance = {
   balance: CurrencyBalance
@@ -400,6 +472,8 @@ export type AccountTokenBalance = {
 export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
+  tokenName?: string
+  tokenSymbol?: string
 }
 
 export type DailyTrancheState = {
@@ -420,6 +494,12 @@ export type DailyPoolState = {
   currency: string
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
+
+  sumBorrowedAmountByPeriod: number | null
+  sumRepaidAmountByPeriod: number | null
+  sumInvestedAmountByPeriod: number | null
+  sumRedeemedAmountByPeriod: number | null
+  blockNumber: number
 }
 
 interface TrancheFormValues {
@@ -429,23 +509,17 @@ interface TrancheFormValues {
   minRiskBuffer: number | ''
   minInvestment: number | ''
 }
-interface RiskGroupFormValues {
-  groupName: string
-  advanceRate: number | ''
-  fee: number | ''
-  probabilityOfDefault: number | ''
-  lossGivenDefault: number | ''
-  discountRate: number | ''
-}
 
-export type IssuerDetails = {
+export type IssuerDetail = {
   title: string
   body: string
 }
 
+type FileType = { uri: string; mime: string }
+
 export interface PoolMetadataInput {
   // details
-  poolIcon: { uri: string; mime: string } | null
+  poolIcon: FileType | null
   poolName: string
   assetClass: string
   currency: string
@@ -457,18 +531,23 @@ export interface PoolMetadataInput {
 
   // issuer
   issuerName: string
-  issuerLogo?: { uri: string; mime: string } | null
+  issuerRepName: string
+  issuerLogo?: FileType | null
   issuerDescription: string
 
-  executiveSummary: { uri: string; mime: string } | null
+  executiveSummary: FileType | null
   website: string
   forum: string
   email: string
-  details?: IssuerDetails[]
+  details?: IssuerDetail[]
 
   // tranche
   tranches: TrancheFormValues[]
-  riskGroups: RiskGroupFormValues[]
+
+  adminMultisig?: {
+    signers: string[]
+    threshold: number
+  }
 }
 
 export type PoolStatus = 'open' | 'upcoming' | 'hidden'
@@ -478,32 +557,35 @@ export type PoolMetadata = {
   version?: number
   pool: {
     name: string
-    icon: { uri: string; mime: string } | null
+    icon: FileType | null
     asset: {
       class: string
     }
+    newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
+      repName: string
       name: string
       description: string
       email: string
-      logo?: { uri: string; mime: string } | null
+      logo?: FileType | null
     }
     links: {
-      executiveSummary: { uri: string; mime: string } | null
+      executiveSummary: FileType | null
       forum?: string
       website?: string
     }
-    details?: IssuerDetails[]
+    details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
   }
   pod?: {
-    url: string | null
+    node: string | null
+    indexer?: string | null
   }
   tranches: Record<
     string,
     {
-      icon?: { uri: string; mime: string } | null
+      icon?: FileType | null
       minInitialInvestment?: string
     }
   >
@@ -511,35 +593,17 @@ export type PoolMetadata = {
     id: string
     createdAt: string
   }[]
-  riskGroups: {
-    name: string | undefined
-    advanceRate: string
-    interestRatePerSec: string
-    probabilityOfDefault: string
-    lossGivenDefault: string
-    discountRate: string
-  }[]
-  // Not yet implemented
-  // onboarding: {
-  //   live: boolean
-  //   agreements: {
-  //     name: string
-  //     provider: 'docusign'
-  //     providerTemplateId: string
-  //     tranche: string
-  //     country: 'us | non-us'
-  //   }[]
-  //   issuer: {
-  //     name: string
-  //     email: string
-  //     restrictedCountryCodes: string[]
-  //     minInvestmentCurrency: number
-  //     nonSolicitationNotice: 'all' | 'non-us' | 'none'
-  //   }
-  // }
-  // bot: {
-  //   channelId: string
-  // }
+  adminMultisig?: {
+    signers: string[]
+    threshold: number
+  }
+  onboarding?: {
+    kybRestrictedCountries?: string[]
+    kycRestrictedCountries?: string[]
+    externalOnboardingUrl?: string
+    tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
+    podReadAccess?: boolean
+  }
 }
 
 type AssetCurrencyData = {
@@ -564,6 +628,30 @@ export type WriteOffGroup = {
   percentage: Rate
 }
 
+type InvestorTransaction = {
+  id: string
+  timestamp: string
+  accountId: string
+  trancheId: string
+  epochNumber: number
+  type: InvestorTransactionType
+  currencyAmount: CurrencyBalance | undefined
+  tokenAmount: CurrencyBalance | undefined
+  tokenPrice: Price | undefined
+  transactionFee: CurrencyBalance | null
+}
+
+type BorrowerTransaction = {
+  id: string
+  timestamp: string
+  poolId: string
+  accountId: string
+  epochId: string
+  loanId: string
+  type: BorrowerTransactionType
+  amount: CurrencyBalance | undefined
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -582,8 +670,7 @@ export function getPoolsModule(inst: Centrifuge) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata] = args
-
+    const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
@@ -608,81 +695,29 @@ export function getPoolsModule(inst: Centrifuge) {
             return pinPoolMetadata(metadata, poolId, currencyMeta.decimals, options)
           }),
           switchMap((pinnedMetadata) => {
-            let submittable
-            if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-              submittable = api.tx.poolRegistry.register(
-                admin,
-                poolId,
-                trancheInput,
-                currency,
-                maxReserve.toString(),
-                pinnedMetadata.ipfsHash
-              )
-            } else {
-              submittable = api.tx.utility.batchAll([
-                api.tx.uniques.create(collectionId, LoanPalletAccountId),
-                api.tx.poolRegistry.register(
-                  inst.getSignerAddress(),
-                  poolId,
-                  trancheInput,
-                  currency,
-                  maxReserve.toString(),
-                  pinnedMetadata.ipfsHash
-                ),
-                api.tx.permissions.add(
-                  { PoolRole: 'PoolAdmin' },
-                  admin,
-                  { Pool: poolId },
-                  {
-                    PoolRole: 'LoanAdmin',
-                  }
-                ),
-                api.tx.loans.initialisePool(poolId, collectionId),
-              ])
-            }
+            const tx = api.tx.poolRegistry.register(
+              admin,
+              poolId,
+              trancheInput,
+              currency,
+              maxReserve.toString(),
+              pinnedMetadata.ipfsHash
+            )
             if (options?.createType === 'propose') {
-              const proposalSubmittable = api.tx.utility.batchAll([
-                api.tx.democracy.notePreimage(submittable.method.toHex()),
-                api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
+              const proposalTx = api.tx.utility.batchAll([
+                api.tx.preimage.notePreimage(tx.method.toHex()),
+                api.tx.democracy.propose({ Inline: tx.method.hash }, api.consts.democracy.minimumDeposit),
               ])
-              return inst.wrapSignAndSend(api, proposalSubmittable, options)
+              return inst.wrapSignAndSend(api, proposalTx, options)
             }
             if (options?.createType === 'notePreimage') {
-              const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
-              return inst.wrapSignAndSend(api, preimageSubmittable, options)
+              const preimageTx = api.tx.preimage.notePreimage(tx.method.toHex())
+              return inst.wrapSignAndSend(api, preimageTx, options)
             }
-            return inst.wrapSignAndSend(api, submittable, options)
+            return inst.wrapSignAndSend(api, tx, options)
           })
         )
       )
-    )
-  }
-
-  function initialisePool(
-    args: [admin: string, poolId: string, loanCollectionId: string, collateralCollectionId?: string],
-    options?: TransactionOptions
-  ) {
-    const [admin, poolId, loanCollectionId, collateralCollectionId] = args
-
-    return inst.getApi().pipe(
-      switchMap((api) => {
-        const submittable = api.tx.utility.batchAll(
-          [
-            api.tx.uniques.create(loanCollectionId, LoanPalletAccountId),
-            collateralCollectionId && api.tx.uniques.create(collateralCollectionId, admin),
-            api.tx.permissions.add(
-              { PoolRole: 'PoolAdmin' },
-              admin,
-              { Pool: poolId },
-              {
-                PoolRole: 'LoanAdmin',
-              }
-            ),
-            api.tx.loans.initialisePool(poolId, loanCollectionId),
-          ].filter(Boolean)
-        )
-        return inst.wrapSignAndSend(api, submittable, options)
-      })
     )
   }
 
@@ -694,7 +729,7 @@ export function getPoolsModule(inst: Centrifuge) {
   ) {
     if (options?.paymentInfo) {
       const hash = '0'.repeat(46)
-      return of({ uri: `ipfs://ipfs/${hash}`, ipfsHash: hash })
+      return of({ uri: `ipfs://${hash}`, ipfsHash: hash })
     }
 
     const tranchesById: PoolMetadata['tranches'] = {}
@@ -704,7 +739,7 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     })
 
-    const formattedMetadata = {
+    const formattedMetadata: PoolMetadata = {
       version: 1,
       pool: {
         name: metadata.poolName,
@@ -712,6 +747,7 @@ export function getPoolsModule(inst: Centrifuge) {
         asset: { class: metadata.assetClass },
         issuer: {
           name: metadata.issuerName,
+          repName: metadata.issuerRepName,
           description: metadata.issuerDescription,
           email: metadata.email,
           logo: metadata.issuerLogo,
@@ -726,17 +762,10 @@ export function getPoolsModule(inst: Centrifuge) {
         listed: metadata.listed ?? true,
       },
       pod: {
-        url: metadata.podEndpoint ?? null,
+        node: metadata.podEndpoint ?? null,
       },
       tranches: tranchesById,
-      riskGroups: metadata.riskGroups.map((group) => ({
-        name: group.groupName,
-        advanceRate: Rate.fromPercent(group.advanceRate).toString(),
-        interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
-        probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
-        lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
-        discountRate: Rate.fromAprPercent(group.discountRate).toString(),
-      })),
+      adminMultisig: metadata.adminMultisig,
     }
 
     return inst.metadata.pinJson(formattedMetadata)
@@ -759,18 +788,28 @@ export function getPoolsModule(inst: Centrifuge) {
     const minEpochTime = minEpochTimeInput ? { newValue: minEpochTimeInput } : undefined
     const tranches = tranchesInput
       ? {
-          newValue: tranchesInput.map((t) => [
+          newValue: tranchesInput.map((t) =>
             t.interestRatePerSec
-              ? { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] }
-              : 'Residual',
-          ]),
+              ? { trancheType: { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] } }
+              : { trancheType: 'Residual', seniority: null }
+          ),
+        }
+      : undefined
+    const trancheMetadata = tranchesInput
+      ? {
+          newValue: tranchesInput,
         }
       : undefined
     const maxNavAge = maxNavAgeInput ? { newValue: maxNavAgeInput } : undefined
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.poolRegistry.update(poolId, { minEpochTime, tranches, maxNavAge })
+        const submittable = api.tx.poolRegistry.update(poolId, {
+          minEpochTime,
+          tranches,
+          maxNavAge,
+          trancheMetadata,
+        })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -781,10 +820,10 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [poolId, add, remove] = args
-    const signer = inst.getSignerAddress()
-    // Make sure a removal of the PoolAdmin role of the signer is the last tx in the batch, otherwise the later txs will fail
+    const self = inst.getActingAddress()
+    // Make sure a removal of the PoolAdmin role of the acting address is the last tx in the batch, otherwise the later txs will fail
     const sortedRemove = [...remove].sort(([addr, role]) =>
-      role === 'PoolAdmin' && isSameAddress(addr, signer) ? 1 : -1
+      role === 'PoolAdmin' && isSameAddress(addr, self) ? 1 : -1
     )
     const $api = inst.getApi()
 
@@ -793,7 +832,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const submittable = api.tx.utility.batchAll([
           ...add.map(([addr, role]) =>
             api.tx.permissions.add(
-              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
+              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
               addr,
               { Pool: poolId },
               { PoolRole: role }
@@ -801,7 +840,7 @@ export function getPoolsModule(inst: Centrifuge) {
           ),
           ...sortedRemove.map(([addr, role]) =>
             api.tx.permissions.remove(
-              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
+              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
               addr,
               { Pool: poolId },
               { PoolRole: role }
@@ -841,7 +880,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function updateInvestOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
 
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     return inst.getApi().pipe(
       switchMap(
@@ -870,28 +909,48 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function updateRedeemOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
+    const { getAccountStakes } = inst.rewards
 
     return inst.getApi().pipe(
-      switchMap(
-        (api) => api.query.investments.redeemOrderId([poolId, trancheId]),
-        (api, rawOrderId) => ({ api, rawOrderId })
+      switchMap((api) =>
+        combineLatest([
+          api.query.investments.redeemOrderId([poolId, trancheId]),
+          getOrder([address, poolId, trancheId]),
+          getAccountStakes([address, poolId, trancheId]),
+        ]).pipe(
+          map(([rawOrderId, order, accountStakes]) => ({
+            api,
+            rawOrderId,
+            order,
+            accountStakes,
+          }))
+        )
       ),
-      combineLatestWith(getOrder([address, poolId, trancheId])),
       take(1),
-      switchMap(([{ api, rawOrderId }, order]) => {
-        const orderId = Number(rawOrderId.toHex() as string)
+      switchMap(({ api, rawOrderId, order, accountStakes }) => {
+        const orderId = Number(rawOrderId.toHex())
+        const { stake } = accountStakes
+
         let submittable
-        if ((!order.invest.isZero() || !order.redeem.isZero()) && order.submittedAt !== orderId) {
-          submittable = api.tx.utility.batchAll([
-            !order.invest.isZero()
-              ? api.tx.investments.collectInvestments([poolId, trancheId])
-              : api.tx.investments.collectRedemptions([poolId, trancheId]),
-            api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString()),
-          ])
-        } else {
-          submittable = api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString())
+        const redeemTx = api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString())
+
+        let unstakeTx
+        if (!stake.isZero()) {
+          const unstakeAmount = newOrder.gte(stake) ? stake : newOrder
+          unstakeTx = api.tx.liquidityRewards.unstake({ Tranche: [poolId, trancheId] }, unstakeAmount)
         }
+
+        if ((!order.invest.isZero() || !order.redeem.isZero()) && order.submittedAt !== orderId) {
+          const collectTx = !order.invest.isZero()
+            ? api.tx.investments.collectInvestments([poolId, trancheId])
+            : api.tx.investments.collectRedemptions([poolId, trancheId])
+
+          submittable = api.tx.utility.batchAll([unstakeTx, collectTx, redeemTx].filter(Boolean))
+        } else {
+          submittable = unstakeTx ? api.tx.utility.batchAll([unstakeTx, redeemTx]) : redeemTx
+        }
+
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -911,14 +970,14 @@ export function getPoolsModule(inst: Centrifuge) {
             tranche.redeem.perquintill,
           ])
           const submittable = api.tx.utility.batchAll([
-            api.tx.loans.updateNav(poolId),
+            api.tx.loans.updatePortfolioValuation(poolId),
             api.tx.poolSystem.closeEpoch(poolId),
             api.tx.poolSystem.submitSolution(poolId, trancheSolution),
           ])
           return inst.wrapSignAndSend(api, submittable, options)
         }
         const submittable = api.tx.utility.batchAll([
-          api.tx.loans.updateNav(poolId),
+          api.tx.loans.updatePortfolioValuation(poolId),
           api.tx.poolSystem.closeEpoch(poolId),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
@@ -991,7 +1050,7 @@ export function getPoolsModule(inst: Centrifuge) {
   function collect(args: [poolId: string, trancheId?: string], options?: TransactionOptions) {
     const [poolId, trancheId] = args
     const $api = inst.getApi()
-    const address = inst.getSignerAddress()
+    const address = inst.getActingAddress()
 
     if (trancheId !== undefined) {
       return $api.pipe(
@@ -1077,7 +1136,15 @@ export function getPoolsModule(inst: Centrifuge) {
             const permissions = value.toJSON() as any
             roles.pools[poolId] = {
               roles: (
-                ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'LoanAdmin'] as const
+                [
+                  'PoolAdmin',
+                  'Borrower',
+                  'PricingAdmin',
+                  'LiquidityAdmin',
+                  'InvestorAdmin',
+                  'LoanAdmin',
+                  'PODReadAccess',
+                ] as const
               ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
               tranches: {},
             }
@@ -1128,11 +1195,19 @@ export function getPoolsModule(inst: Centrifuge) {
           map((permissionsData) => {
             const roles: { [account: string]: PoolRoles } = {}
             permissionsData.forEach((value, i) => {
-              const account = poolKeys[i][0]
+              const account = addressToHex(poolKeys[i][0])
               const permissions = value.toJSON() as any
               roles[account] = {
                 roles: (
-                  ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'LoanAdmin'] as const
+                  [
+                    'PoolAdmin',
+                    'Borrower',
+                    'PricingAdmin',
+                    'LiquidityAdmin',
+                    'InvestorAdmin',
+                    'LoanAdmin',
+                    'PODReadAccess',
+                  ] as const
                 ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
                 tranches: {},
               }
@@ -1159,34 +1234,86 @@ export function getPoolsModule(inst: Centrifuge) {
     return id
   }
 
-  function createLoan(args: [poolId: string, collectionId: string, nftId: string], options?: TransactionOptions) {
-    const [poolId, collectionId, nftId] = args
+  function createLoan(
+    args: [poolId: string, collectionId: string, nftId: string, info: LoanInfoInput],
+    options?: TransactionOptions
+  ) {
+    const [poolId, collectionId, nftId, infoInput] = args
     const $api = inst.getApi()
+
+    const info: LoanInfoData = {
+      /// Specify the repayments schedule of the loan
+      schedule: {
+        maturity: { fixed: Math.round(infoInput.maturityDate.getTime() / 1000) },
+        interestPayments: 'None',
+        payDownSchedule: 'None',
+      },
+
+      /// Collateral used for this loan
+      collateral: [collectionId, nftId],
+
+      pricing:
+        infoInput.valuationMethod === 'oracle'
+          ? {
+              external: {
+                priceId: {
+                  isin: infoInput.Isin,
+                },
+                maxBorrowAmount:
+                  infoInput.maxBorrowAmount === null ? { noLimit: null } : { quantity: infoInput.maxBorrowAmount },
+              },
+            }
+          : {
+              internal: {
+                valuationMethod:
+                  infoInput.valuationMethod === 'outstandingDebt'
+                    ? { outstandingDebt: null }
+                    : {
+                        discountedCashFlow: {
+                          probabilityOfDefault: infoInput.probabilityOfDefault.toString(),
+                          lossGivenDefault: infoInput.lossGivenDefault.toString(),
+                          discountRate: infoInput.discountRate.toString(),
+                        },
+                      },
+                /// Value of the collateral used for this loan
+                collateralValue: infoInput.value.toString(),
+                /// Interest rate per second with any penalty applied
+                interestRate: infoInput.interestRate.toString(),
+                maxBorrowAmount: {
+                  [infoInput.maxBorrowAmount]: { advanceRate: infoInput.advanceRate.toString() },
+                } as any,
+              },
+            },
+      restrictions: {
+        borrows: 'NotWrittenOff',
+        repayments: 'None',
+      },
+    }
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.create(poolId, [collectionId, nftId])
+        const submittable = api.tx.loans.create(poolId, info)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
 
-  function priceLoan(
-    args: [poolId: string, loanId: string, interestRatePerSec: Rate, loanInfoInput: LoanInfoInput],
+  function financeExternalLoan(
+    args: [poolId: string, loanId: string, amount: CurrencyBalance, price: Rate, isin: string, aoProxy: string],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, ratePerSec, loanInfoInput] = args
-    const ratePerYear = Rate.fromFloat(new Rate(ratePerSec).toApr().toDecimalPlaces(4))
-    const loanInfoFields = LOAN_FIELDS[loanInfoInput.type]
-    const loanInfo = loanInfoFields.map((key) => (LOAN_INPUT_TRANSFORM as any)[key]((loanInfoInput as any)[key]))
+    const [poolId, loanId, amount, price, isin, aoProxy] = args
     const $api = inst.getApi()
-
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.price(poolId, loanId, ratePerYear, {
-          [loanInfoInput.type]: loanInfo,
-        })
-        return inst.wrapSignAndSend(api, submittable, options)
+        const borrowSubmittable = api.tx.proxy.proxy(
+          aoProxy,
+          undefined,
+          api.tx.loans.borrow(poolId, loanId, amount.toString())
+        )
+        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
+        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, borrowSubmittable])
+        return inst.wrapSignAndSend(api, batchSubmittable, options)
       })
     )
   }
@@ -1194,7 +1321,6 @@ export function getPoolsModule(inst: Centrifuge) {
   function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
     const $api = inst.getApi()
-
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.borrow(poolId, loanId, amount.toString())
@@ -1203,14 +1329,38 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
-    const [poolId, loanId, amount] = args
+  function repayLoanPartially(
+    args: [poolId: string, loanId: string, amount: BN, uncheckedAmount: BN],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, amount, uncheckedAmount] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.repay(poolId, loanId, amount.toString())
+        const submittable = api.tx.loans.repay(poolId, loanId, amount.toString(), uncheckedAmount.toString())
         return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function repayExternalLoanPartially(
+    args: [poolId: string, loanId: string, amount: BN, uncheckedAmount: BN, price: Rate, isin: string, aoProxy: string],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, amount, uncheckedAmount, price, isin, aoProxy] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const repaySubmittable = api.tx.proxy.proxy(
+          aoProxy,
+          undefined,
+          api.tx.loans.repay(poolId, loanId, amount.toString(), uncheckedAmount.toString())
+        )
+        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
+        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, repaySubmittable])
+        return inst.wrapSignAndSend(api, batchSubmittable, options)
       })
     )
   }
@@ -1225,18 +1375,15 @@ export function getPoolsModule(inst: Centrifuge) {
       take(1),
       switchMap(([[api, loan], pool]) => {
         // Calculate the debt an hour from now to have some margin
-        const secondsPerHour = 60 * 60
         const debtWithMargin =
-          loan?.status === 'Active'
+          loan?.status === 'Active' && loan.pricing.valuationMethod !== 'oracle'
             ? loan.outstandingDebt
                 .toDecimal()
-                .add(
-                  loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
-                )
+                .add(loan.normalizedDebt.toDecimal().mul(loan.pricing.interestRate!.toDecimal().div(365 * 24)))
             : Dec(0)
         const amount = CurrencyBalance.fromFloat(debtWithMargin || 0, pool.currency.decimals).toString()
         const submittable = api.tx.utility.batchAll([
-          api.tx.loans.repay(poolId, loanId, amount),
+          api.tx.loans.repay(poolId, loanId, amount, '0'),
           api.tx.loans.close(poolId, loanId),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
@@ -1262,15 +1409,15 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.poolSystem.PoolCreated.is(event) ||
-            api.events.poolSystem.PoolUpdated.is(event) ||
-            api.events.poolSystem.MaxReserveSet.is(event) ||
+            api.events.poolRegistry.Registered.is(event) ||
             api.events.poolRegistry.MetadataSet.is(event) ||
+            api.events.poolSystem.Updated.is(event) ||
+            api.events.poolSystem.MaxReserveSet.is(event) ||
             api.events.poolSystem.EpochClosed.is(event) ||
             api.events.poolSystem.EpochExecuted.is(event) ||
+            api.events.poolSystem.SolutionSubmitted.is(event) ||
             api.events.investments.InvestOrderUpdated.is(event) ||
-            api.events.investments.RedeemOrderUpdated.is(event) ||
-            api.events.poolSystem.SolutionSubmitted.is(event)
+            api.events.investments.RedeemOrderUpdated.is(event)
         )
         return !!event
       })
@@ -1295,29 +1442,27 @@ export function getPoolsModule(inst: Centrifuge) {
           combineLatest([
             api.query.poolSystem.pool.entries(),
             api.query.poolRegistry.poolMetadata.entries(),
-            api.query.loans.poolNAV.entries(),
+            api.query.loans.portfolioValuation.entries(),
             api.query.poolSystem.epochExecution.entries(),
-            api.query.loans.poolToLoanNftClass.entries(),
             getCurrencies(),
           ]),
-        (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, rawLoanColIds, currencies]) => ({
+        (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies]) => ({
           api,
           rawPools,
           rawMetadatas,
           rawNavs,
           rawEpochExecutions,
-          rawLoanColIds,
           currencies,
         })
       ),
-      switchMap(({ api, rawPools, rawMetadatas, rawNavs, rawEpochExecutions, rawLoanColIds, currencies }) => {
+      switchMap(({ api, rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies }) => {
         if (!rawPools.length) return of([])
 
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const nav = navValue.toJSON() as unknown as NAVDetailsData
           acc[poolId] = {
-            latest: nav ? nav.latest : '0',
+            latest: nav ? nav.value : '0',
             lastUpdated: nav ? nav.lastUpdated : 0,
           }
           return acc
@@ -1332,13 +1477,6 @@ export function getPoolsModule(inst: Centrifuge) {
           }
           return acc
         }, {} as Record<string, Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>>)
-
-        const loanCollectionIdMap = rawLoanColIds.reduce((acc, [key, value]) => {
-          const poolId = formatPoolKey(key as StorageKey<[u32]>)
-          const colId = (value.toHuman() as string).replace(/\D/g, '')
-          acc[poolId] = colId
-          return acc
-        }, {} as Record<string, string>)
 
         const metadataMap = rawMetadatas.reduce((acc, [key, metadataValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
@@ -1389,7 +1527,6 @@ export function getPoolsModule(inst: Centrifuge) {
               const metadata = metadataMap[poolId]
               const navData = navMap[poolId]
               const epochExecution = epochExecutionMap[poolId]
-              const loanCollectionId = loanCollectionIdMap[poolId]
               const currency = findCurrency(currencies, pool.currency)!
 
               const poolValue = new CurrencyBalance(
@@ -1408,8 +1545,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 createdAt: null,
                 metadata,
                 currency,
-                isInitialised: !!loanCollectionId,
-                loanCollectionId: loanCollectionId ?? null,
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
                   const trancheKeyIndex = trancheIdToIndex[trancheId]
@@ -1475,10 +1610,10 @@ export function getPoolsModule(inst: Centrifuge) {
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
                   status: getEpochStatus(epochExecution, blockNumber),
                   challengePeriodEnd: epochExecution?.challengePeriodEnd,
-                  challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 parameters: {
                   ...pool.parameters,
+                  challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 nav: {
                   latest: navData?.latest
@@ -1563,7 +1698,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
         poolSnapshots(
           orderBy: BLOCK_NUMBER_ASC,
-          filter: { 
+          filter: {
             id: { startsWith: $poolId },
             timestamp: { greaterThan: $from, lessThan: $to }
           }) {
@@ -1572,11 +1707,17 @@ export function getPoolsModule(inst: Centrifuge) {
             timestamp
             totalReserve
             portfolioValuation
+
+            blockNumber
+            sumBorrowedAmountByPeriod
+            sumRepaidAmountByPeriod
+            sumInvestedAmountByPeriod
+            sumRedeemedAmountByPeriod
           }
         }
         trancheSnapshots(
           orderBy: BLOCK_NUMBER_ASC,
-          filter: { 
+          filter: {
             id: { startsWith: $poolId },
             timestamp: { greaterThan: $from, lessThan: $to }
           }) {
@@ -1620,7 +1761,7 @@ export function getPoolsModule(inst: Centrifuge) {
               (t) => t.timestamp === state.timestamp
             )
 
-            let tranches: { [trancheId: string]: DailyTrancheState } = {}
+            const tranches: { [trancheId: string]: DailyTrancheState } = {}
             trancheSnapshotsToday.forEach((tranche) => {
               const tid = tranche.trancheId.split('-')[1]
               tranches[tid] = {
@@ -1652,7 +1793,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `query($trancheId: String!) {
         trancheSnapshots(
           orderBy: BLOCK_NUMBER_ASC,
-          filter: { 
+          filter: {
             trancheId: { includes: $trancheId },
           }) {
           nodes {
@@ -1693,9 +1834,9 @@ export function getPoolsModule(inst: Centrifuge) {
         if (!poolStates) return []
         // group by month
         // todo: find last of each month
-        let poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
+        const poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
         poolStates.forEach((poolState) => {
-          const monthYear = new Date(poolState.timestamp).getMonth() + '-' + new Date(poolState.timestamp).getFullYear()
+          const monthYear = `${new Date(poolState.timestamp).getMonth()}-${new Date(poolState.timestamp).getFullYear()}`
           if (monthYear in poolStatesByMonth) {
             poolStatesByMonth[monthYear] = [...poolStatesByMonth[monthYear], poolState]
           } else {
@@ -1704,7 +1845,7 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         return Object.values(poolStatesByMonth).map((statesOneMonth) => {
-          let base = statesOneMonth[statesOneMonth.length - 1]
+          const base = statesOneMonth[statesOneMonth.length - 1]
           // todo: sum aggregated values (e.g. tranches.fulfilledInvestOrders)
 
           return base
@@ -1723,7 +1864,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `query($poolId: String!, $trancheId: String, $from: Datetime!, $to: Datetime!) {
         investorTransactions(
           orderBy: TIMESTAMP_ASC,
-          filter: { 
+          filter: {
             poolId: { equalTo: $poolId },
             timestamp: { greaterThan: $from, lessThan: $to },
             trancheId: { isNull: false, endsWith: $trancheId }
@@ -1747,8 +1888,8 @@ export function getPoolsModule(inst: Centrifuge) {
       {
         poolId,
         trancheId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
       }
     )
 
@@ -1776,11 +1917,54 @@ export function getPoolsModule(inst: Centrifuge) {
                   tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
                   transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
                 }
-              }) as unknown as any[], // TODO: add typing
+              }) as unknown as InvestorTransaction[],
             ]
           })
         )
       )
+    )
+  }
+
+  function getBorrowerTransactions(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      borrowerTransactions: { nodes: SubqueryBorrowerTransaction[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        borrowerTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: { 
+            poolId: { equalTo: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to },
+          }) {
+          nodes {
+            loanId
+            epochId
+            type
+            timestamp
+            amount
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
+        return data!.borrowerTransactions.nodes.map((tx) => ({
+          ...tx,
+          amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+          timestamp: new Date(tx.timestamp),
+        })) as unknown as BorrowerTransaction[]
+      })
     )
   }
 
@@ -1983,145 +2167,242 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
+            api.events.priceOracle.NewFeedData.is(event) ||
             api.events.loans.Created.is(event) ||
-            api.events.loans.Closed.is(event) ||
-            api.events.loans.Priced.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
-            api.events.loans.NAVUpdated.is(event)
+            api.events.loans.WrittenOff.is(event) ||
+            api.events.loans.Closed.is(event) ||
+            api.events.loans.PortfolioValuationUpdated.is(event)
         )
-        return !!event
+
+        if (!event) return false
+
+        const { poolId: eventPoolId } = (event.toHuman() as any).event.data
+        return eventPoolId.replace(/\D/g, '') === poolId
       })
     )
 
     return $api.pipe(
       switchMap(
-        (api) => combineLatest([api.query.loans.activeLoans(poolId), api.query.poolSystem.pool(poolId)]).pipe(take(1)),
-        (api, [activeLoanValues, poolValue]) => ({ api, activeLoanValues, poolValue })
+        (api) => api.query.poolSystem.pool(poolId).pipe(take(1)),
+        (api, poolValue) => ({ api, poolValue })
       ),
-      switchMap(({ api, activeLoanValues, poolValue }) => {
-        const $rates = api.query.interestAccrual.rates().pipe(take(1))
-        const $interestLastUpdated = api.query.interestAccrual.lastUpdated().pipe(take(1))
-        const $currencyMeta = api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency).pipe(take(1))
+      switchMap(({ api, poolValue }) => {
+        const $rates = api.query.interestAccrual.rates()
+        const $interestLastUpdated = api.query.interestAccrual.lastUpdated()
+        const $currencyMeta = api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency)
         return combineLatest([
-          api.query.loans.loan.entries(poolId),
-          of(activeLoanValues),
-          api.query.loans.closedLoans.entries(poolId),
+          api.query.loans.createdLoan.entries(poolId),
+          api.query.loans.activeLoans(poolId),
+          api.query.loans.closedLoan.entries(poolId),
+          api.query.priceOracle.values.entries(),
           $rates,
           $interestLastUpdated,
           $currencyMeta,
-        ])
+        ]).pipe(take(1))
       }),
-      map(([loanValues, activeLoanValues, closedLoansValues, rateValues, interestLastUpdated, rawCurrency]) => {
-        const currency = rawCurrency.toHuman() as AssetCurrencyData
-        const loans = (loanValues as any[]).map(([key, value]) => {
-          const loan = value.toJSON() as unknown as LoanData
-          const [collectionId, nftId] = loan.collateral
-          return {
-            id: formatLoanKey(key as StorageKey<[u32, u32]>),
-            poolId,
-            status: getLoanStatus(loan),
-            closedAt: loan.status.Closed?.closed_at
-              ? new Date(loan.status.Closed?.closed_at * 1000).toISOString()
-              : null,
-            asset: {
-              collectionId: collectionId.toString(),
-              nftId: hexToBN(nftId).toString(),
+      map(
+        ([
+          createdLoanValues,
+          activeLoanValues,
+          closedLoanValues,
+          oracles,
+          rateValues,
+          interestLastUpdated,
+          rawCurrency,
+        ]) => {
+          const oraclePrices = oracles.reduce(
+            (oracleValues, oracle) => {
+              // @ts-expect-error
+              const { timestamp, value } = oracle[1].toJSON()
+
+              oracleValues[`0x${oracle[0].toString().slice(-24)}`] = {
+                timestamp,
+                value: new Rate(hexToBN(value)),
+              }
+
+              return oracleValues
             },
-          } as DefaultLoan
-        })
-
-        const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
-        const rates = rateValues.toJSON() as InterestAccrual[]
-
-        const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset' | 'closedAt'>>>(
-          (prev, activeLoan) => {
-            const interestData = rates.find((rate) => rate.interestRatePerSec === activeLoan.interestRatePerSec)
-            const mapped = {
-              id: String(activeLoan.loanId),
-              poolId,
-              interestRatePerSec: new Rate(hexToBN(activeLoan.interestRatePerSec)),
-              outstandingDebt: getOutstandingDebt(
-                activeLoan,
-                currency.decimals,
-                interestLastUpdated.toJSON() as number,
-                interestData?.accumulatedRate
-              ),
-              normalizedDebt: new CurrencyBalance(hexToBN(activeLoan.normalizedDebt), currency.decimals),
-              totalBorrowed: new CurrencyBalance(hexToBN(activeLoan.totalBorrowed), currency.decimals),
-              totalRepaid: new CurrencyBalance(hexToBN(activeLoan.totalRepaid), currency.decimals),
-              lastUpdated: new Date(activeLoan.lastUpdated * 1000).toISOString(),
-              originationDate: activeLoan.originationDate
-                ? new Date(activeLoan.originationDate * 1000).toISOString()
-                : '',
-              loanInfo: getLoanInfo(activeLoan.loanType, currency.decimals),
-              adminWrittenOff: activeLoan.adminWrittenOff,
-              writeOffStatus: activeLoan.writeOffStatus,
+            {} as {
+              [isin: string]: {
+                timestamp: number
+                value: Rate
+              }
             }
-            return { ...prev, [String(activeLoan.loanId)]: mapped }
-          },
-          {}
-        )
+          )
 
-        const closedLoans = (closedLoansValues as any[]).reduce<
-          Record<string, Omit<ClosedLoan, 'status' | 'asset' | 'adminWrittenOff' | 'closedAt'>>
-        >((prev, [key, value]) => {
-          const closedLoan = value.toJSON() as ClosedLoanData
-          const loanId = formatLoanKey(key as StorageKey<[u32, u32]>)
-          const loan = {
-            id: loanId,
-            poolId,
-            interestRatePerSec: new Rate(hexToBN(closedLoan.interestRatePerSec)),
-            outstandingDebt: new CurrencyBalance(0, currency.decimals),
-            normalizedDebt: new CurrencyBalance(hexToBN(closedLoan.normalizedDebt), currency.decimals),
-            totalBorrowed: new CurrencyBalance(hexToBN(closedLoan.totalBorrowed), currency.decimals),
-            totalRepaid: new CurrencyBalance(hexToBN(closedLoan.totalRepaid), currency.decimals),
-            lastUpdated: new Date(closedLoan.lastUpdated * 1000).toISOString(),
-            originationDate: new Date(closedLoan.originationDate * 1000).toISOString(),
-            loanInfo: getLoanInfo(closedLoan.loanType, currency.decimals),
-            writeOffStatus: closedLoan.writeOffStatus,
+          const currency = rawCurrency.toHuman() as AssetCurrencyData
+          const rates = rateValues.toJSON() as InterestAccrual[]
+
+          function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
+            const info = 'info' in loan ? loan.info : loan
+            const [collectionId, nftId] = info.collateral
+
+            // Active loans have additinal info layer
+            const pricingInfo =
+              'info' in loan
+                ? 'external' in loan.info.pricing
+                  ? loan.info.pricing.external
+                  : loan.info.pricing.internal
+                : 'external' in loan.pricing
+                ? loan.pricing.external.info
+                : loan.pricing.internal.info
+
+            const discount =
+              'valuationMethod' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
+                ? pricingInfo.valuationMethod.discountedCashFlow
+                : undefined
+            return {
+              asset: {
+                collectionId: collectionId.toString(),
+                nftId: hexToBN(nftId).toString(),
+              },
+              pricing:
+                'priceId' in pricingInfo
+                  ? {
+                      valuationMethod: 'oracle' as any,
+                      // If the max borrow quantity is larger than 10k, this is assumed to be "limitless"
+                      // TODO: replace by Option once data structure on chain changes
+                      maxBorrowAmount:
+                        'noLimit' in pricingInfo.maxBorrowAmount
+                          ? null
+                          : new CurrencyBalance(hexToBN(pricingInfo.maxBorrowAmount.quantity), currency.decimals),
+                      Isin: Buffer.from(pricingInfo.priceId.isin.substring(2), 'hex').toString(),
+                      maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
+                      oracle: oraclePrices[pricingInfo.priceId.isin] || { value: new Rate(0), timestamp: 0 },
+                      outstandingQuantity:
+                        'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
+                          ? new CurrencyBalance(info.pricing.external.outstandingQuantity, currency.decimals)
+                          : new CurrencyBalance('0', currency.decimals),
+                    }
+                  : {
+                      valuationMethod: ('outstandingDebt' in pricingInfo.valuationMethod
+                        ? 'outstandingDebt'
+                        : 'discountedCashFlow') as any,
+                      maxBorrowAmount: Object.keys(pricingInfo.maxBorrowAmount)[0] as any,
+                      value: new CurrencyBalance(hexToBN(pricingInfo.collateralValue), currency.decimals),
+                      advanceRate: new Rate(hexToBN(Object.values(pricingInfo.maxBorrowAmount)[0].advanceRate)),
+                      probabilityOfDefault: discount?.probabilityOfDefault
+                        ? new Rate(hexToBN(discount.probabilityOfDefault))
+                        : undefined,
+                      lossGivenDefault: discount?.lossGivenDefault
+                        ? new Rate(hexToBN(discount.lossGivenDefault))
+                        : undefined,
+                      discountRate: discount?.discountRate ? new Rate(hexToBN(discount.discountRate)) : undefined,
+                      interestRate: new Rate(hexToBN(pricingInfo.interestRate)),
+                      maturityDate: new Date(info.schedule.maturity.fixed * 1000).toISOString(),
+                    },
+            }
           }
-          return { ...prev, [loanId]: loan }
-        }, {})
 
-        return loans.map((loan) => ({ ...loan, ...activeLoans[loan.id], ...closedLoans[loan.id] })) as Loan[]
-      }),
+          const createdLoans: CreatedLoan[] = (createdLoanValues as any[]).map(([key, value]) => {
+            const loan = value.toJSON() as unknown as CreatedLoanData
+            const nil = new CurrencyBalance(0, currency.decimals)
+            return {
+              ...getSharedLoanInfo(loan),
+              id: formatLoanKey(key as StorageKey<[u32, u32]>),
+              poolId,
+              status: 'Created',
+              borrower: addressToHex(loan.borrower),
+              totalBorrowed: nil,
+              totalRepaid: nil,
+              outstandingDebt: nil,
+              normalizedDebt: nil,
+            }
+          })
+
+          const activeLoans: ActiveLoan[] = (activeLoanValues.toJSON() as any[]).map(
+            ([loanId, loan]: [number, ActiveLoanData]) => {
+              const loanRate =
+                'internal' in loan.pricing
+                  ? new Rate(hexToBN(loan.pricing.internal.info.interestRate)).toDecimal().toString()
+                  : '0'
+              const interestData = rates.find(
+                (rate) => new Rate(hexToBN(rate.interestRatePerSec)).toApr().toDecimalPlaces(4).toString() === loanRate
+              )
+              const writeOffStatus = {
+                penaltyInterestRate: new Rate(0), // TODO: fix
+                percentage: new Rate(hexToBN(loan.writeOffPercentage)),
+              }
+
+              const sharedInfo = getSharedLoanInfo(loan)
+
+              const outstandingDebt =
+                'internal' in loan.pricing
+                  ? getOutstandingDebt(loan, currency.decimals, interestLastUpdated.toJSON() as number, interestData)
+                  : new CurrencyBalance(
+                      new BN(loan.pricing.external.outstandingQuantity)
+                        .mul(sharedInfo.pricing.oracle?.value ?? new BN(0))
+                        .div(new BN(10).pow(new BN(27))),
+                      currency.decimals
+                    )
+
+              const nil = new CurrencyBalance(0, currency.decimals)
+
+              return {
+                ...sharedInfo,
+                id: loanId.toString(),
+                poolId,
+                status: 'Active',
+                borrower: addressToHex(loan.borrower),
+                writeOffStatus: writeOffStatus.percentage.isZero() ? undefined : writeOffStatus,
+                totalBorrowed: new CurrencyBalance(hexToBN(loan.totalBorrowed), currency.decimals),
+                totalRepaid: new CurrencyBalance(hexToBN(loan.totalRepaid), currency.decimals),
+                originationDate: new Date(loan.originationDate * 1000).toISOString(),
+                outstandingDebt,
+                normalizedDebt:
+                  'internal' in loan.pricing
+                    ? new CurrencyBalance(hexToBN(loan.pricing.internal.normalizedDebt), currency.decimals)
+                    : nil,
+              }
+            }
+          )
+
+          const closedLoans: ClosedLoan[] = (closedLoanValues as any[]).map(([key, value]) => {
+            const loan = value.toJSON() as unknown as ClosedLoanData
+            return {
+              ...getSharedLoanInfo(loan),
+              id: formatLoanKey(key as StorageKey<[u32, u32]>),
+              poolId,
+              status: 'Closed',
+              totalBorrowed: new CurrencyBalance(hexToBN(loan.totalBorrowed), currency.decimals),
+              totalRepaid: new CurrencyBalance(hexToBN(loan.totalRepaid), currency.decimals),
+            }
+          })
+
+          return [...createdLoans, ...activeLoans, ...closedLoans] as Loan[]
+        }
+      ),
       repeatWhen(() => $events)
     )
   }
 
-  function getWriteOffGroups(args: [poolId: string]) {
+  function getWriteOffPolicy(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $events = inst.getEvents().pipe(
-      filter(({ api, events }) => {
-        const event = events.find(({ event }) => api.events.loans.WriteOffGroupAdded.is(event))
-
-        if (!event) return false
-
-        const [pid] = (event.toHuman() as any).event.data
-        return pid.replace(/\D/g, '') === poolId
-      })
-    )
-
     return $api.pipe(
-      switchMap((api) => api.query.loans.poolWriteOffGroups(poolId)),
+      switchMap((api) => api.query.loans.writeOffPolicy(poolId)),
       map((writeOffGroupsValues) => {
         const writeOffGroups = writeOffGroupsValues.toJSON() as {
-          overdueDays: number
-          penaltyInterestRatePerSec: string
-          percentage: string
-        }[]
-        return writeOffGroups.map((g) => {
-          return {
-            overdueDays: g.overdueDays as number,
-            penaltyInterestRate: new Rate(hexToBN(g.penaltyInterestRatePerSec)),
-            percentage: new Rate(hexToBN(g.percentage)),
+          triggers: ({ principalOverdue: number } | { priceOutdated: number })[]
+          status: {
+            percentage: string
+            penalty: string
           }
-        })
-      }),
-      repeatWhen(() => $events)
+        }[]
+        return writeOffGroups
+          .map((g) => {
+            return {
+              overdueDays: (g.triggers.find((t) => 'principalOverdue' in t) as { principalOverdue: number })
+                ?.principalOverdue,
+              penaltyInterestRate: new Rate(hexToBN(g.status.penalty)),
+              percentage: new Rate(hexToBN(g.status.percentage)),
+            }
+          })
+          .filter((g) => g.overdueDays != null)
+      })
     )
   }
 
@@ -2168,7 +2449,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 tokenPrice = hexToBN(tokenPrice)
 
                 if (!remainingInvestCurrency.isZero()) {
-                  // Multiply invest fulfilment in this epoch with outstanding order amount to get executed amount
+                  // Multiply invest fulfillment in this epoch with outstanding order amount to get executed amount
                   const amount = remainingInvestCurrency.mul(investFulfillment).div(PerquintillBN)
                   // Divide by the token price to get the payout in tokens
                   if (!amount.isZero()) {
@@ -2223,7 +2504,39 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function addWriteOffGroups(
+  function getProposedLoanChanges(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.poolSystem.ProposedChange.is(event))
+
+        if (!event) return false
+
+        const { poolId: eventPoolId } = (event.toHuman() as any).event.data
+        return eventPoolId.replace(/\D/g, '') === poolId
+      })
+    )
+
+    return $api.pipe(
+      switchMap((api) => api.query.poolSystem.notedChange.entries(poolId)),
+      map((changes) => {
+        return changes.map(([key, value]) => {
+          const hash = (key.toHuman() as any)[1] as string
+          const data = value.toPrimitive() as { change: any; submittedTime: number }
+          return {
+            hash,
+            submittedAt: new Date(data.submittedTime * 1000).toISOString(),
+            change: data.change,
+          }
+        })
+      }),
+      repeatWhen(() => $events)
+    )
+  }
+
+  function updateWriteOffPolicy(
     args: [poolId: string, writeOffGroups: { percentage: BN; overdueDays: number; penaltyInterestRate: BN }[]],
     options?: TransactionOptions
   ) {
@@ -2232,15 +2545,62 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.utility.batchAll(
-          writeOffGroups.map((g) =>
-            api.tx.loans.addWriteOffGroup(poolId, {
+        const submittable = api.tx.loans.proposeWriteOffPolicy(
+          poolId,
+          writeOffGroups.map((g) => ({
+            triggers: [{ PrincipalOverdue: g.overdueDays }],
+            status: {
               percentage: g.percentage.toString(),
-              overdueDays: g.overdueDays,
-              penaltyInterestRatePerSec: g.penaltyInterestRate.toString(),
-            })
-          )
+              penalty: g.penaltyInterestRate.toString(),
+            },
+          }))
         )
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function applyWriteOffPolicyUpdate(args: [poolId: string, hash: string], options?: TransactionOptions) {
+    const [poolId, hash] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.applyWriteOffPolicy(poolId, hash)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function getProposedPoolChanges(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => (console.log('api', api), api.query.poolSystem.scheduledUpdate(poolId))),
+      map((updateData) => {
+        const update = updateData.toPrimitive() as any
+        if (!update) return null
+        return {
+          changes: {
+            tranches: update.tranches.noChange === null ? null : update.tranches.newValue,
+            trancheMetadata: update.trancheMetadata.noChange === null ? null : update.trancheMetadata.newValue,
+            minEpochTime: update.minEpochTime.noChange === null ? null : update.minEpochTime.newValue,
+            maxNavAge: update.maxNavAge.noChange === null ? null : update.maxNavAge.newValue,
+          },
+          submittedAt: new Date(update.submittedAt * 1000).toISOString(),
+        }
+      })
+    )
+  }
+
+  function applyPoolUpdate(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.poolRegistry.executeUpdate(poolId)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -2292,8 +2652,8 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   return {
+    getPoolCurrency,
     createPool,
-    initialisePool,
     updatePool,
     setMaxReserve,
     setMetadata,
@@ -2308,24 +2668,31 @@ export function getPoolsModule(inst: Centrifuge) {
     updatePoolRoles,
     getNextLoanId,
     createLoan,
-    priceLoan,
     financeLoan,
+    financeExternalLoan,
     repayLoanPartially,
+    repayExternalLoanPartially,
     repayAndCloseLoan,
     closeLoan,
+    getPool,
     getPools,
     getBalances,
     getOrder,
     getPoolOrders,
     getLoans,
     getPendingCollect,
-    getWriteOffGroups,
-    addWriteOffGroups,
+    getWriteOffPolicy,
+    getProposedLoanChanges,
+    getProposedPoolChanges,
+    updateWriteOffPolicy,
+    applyWriteOffPolicyUpdate,
+    applyPoolUpdate,
     adminWriteOff,
     getAvailablePoolId,
     getDailyPoolStates,
     getMonthlyPoolStates,
     getInvestorTransactions,
+    getBorrowerTransactions,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
@@ -2337,50 +2704,20 @@ function hexToBN(value: string | number) {
   return new BN(value.toString().substring(2), 'hex')
 }
 
-function getLoanInfo(loanType: LoanInfoData, currencyDecimals: number): LoanInfo {
-  if (loanType.bulletLoan) {
-    return {
-      type: 'BulletLoan',
-      advanceRate: new Rate(hexToBN(loanType.bulletLoan.advanceRate)),
-      probabilityOfDefault: new Rate(hexToBN(loanType.bulletLoan.probabilityOfDefault)),
-      lossGivenDefault: new Rate(hexToBN(loanType.bulletLoan.lossGivenDefault)),
-      value: new CurrencyBalance(hexToBN(loanType.bulletLoan.value), currencyDecimals),
-      discountRate: new Rate(hexToBN(loanType.bulletLoan.discountRate)),
-      maturityDate: new Date(loanType.bulletLoan.maturityDate * 1000).toISOString(),
-    }
-  }
-  if (loanType.creditLine) {
-    return {
-      type: 'CreditLine',
-      advanceRate: new Rate(hexToBN(loanType.creditLine.advanceRate)),
-      value: new CurrencyBalance(hexToBN(loanType.creditLine.value), currencyDecimals),
-    }
-  }
-  if (loanType.creditLineWithMaturity) {
-    return {
-      type: 'CreditLineWithMaturity',
-      advanceRate: new Rate(hexToBN(loanType.creditLineWithMaturity.advanceRate)),
-      probabilityOfDefault: new Rate(hexToBN(loanType.creditLineWithMaturity.probabilityOfDefault)),
-      value: new CurrencyBalance(hexToBN(loanType.creditLineWithMaturity.value), currencyDecimals),
-      discountRate: new Rate(hexToBN(loanType.creditLineWithMaturity.discountRate)),
-      maturityDate: new Date(loanType.creditLineWithMaturity.maturityDate * 1000).toISOString(),
-      lossGivenDefault: new Rate(hexToBN(loanType.creditLineWithMaturity.lossGivenDefault)),
-    }
-  }
-
-  throw new Error(`Unrecognized loan info: ${JSON.stringify(loanType)}`)
-}
-
 function getOutstandingDebt(
   loan: ActiveLoanData,
   currencyDecimals: number,
   lastUpdated: number,
-  accumulatedRate?: InterestAccrual['accumulatedRate']
+  accrual?: InterestAccrual
 ) {
-  if (!accumulatedRate) return new CurrencyBalance(0, currencyDecimals)
-  const accRate = new Rate(hexToBN(accumulatedRate)).toDecimal()
-  const rate = new Rate(hexToBN(loan.interestRatePerSec)).toDecimal()
-  const normalizedDebt = new CurrencyBalance(hexToBN(loan.normalizedDebt), currencyDecimals).toDecimal()
+  if (!accrual) return new CurrencyBalance(0, currencyDecimals)
+  if (!('internal' in loan.pricing)) return new CurrencyBalance(0, currencyDecimals)
+  const accRate = new Rate(hexToBN(accrual.accumulatedRate)).toDecimal()
+  const rate = new Rate(hexToBN(accrual.interestRatePerSec)).toDecimal()
+  const balance =
+    'internal' in loan.pricing && !loan.normalizedDebt ? loan.pricing.internal.normalizedDebt : loan.normalizedDebt
+
+  const normalizedDebt = new CurrencyBalance(hexToBN(balance), currencyDecimals).toDecimal()
   const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
 
   const debtFromAccRate = normalizedDebt.mul(accRate)
@@ -2388,30 +2725,6 @@ function getOutstandingDebt(
   const debt = debtFromAccRate.add(debtSinceUpdated)
 
   return CurrencyBalance.fromFloat(debt, currencyDecimals)
-}
-
-function getLoanStatus(loanValue: LoanData) {
-  const status = Object.keys(loanValue.status)[0]
-  return `${status.charAt(0).toUpperCase()}${status.slice(1)}` as LoanStatus
-}
-
-function computeTrancheId(trancheIndex: number, poolId: string) {
-  const a = new BN(trancheIndex).toArray('le', 8)
-  const b = new BN(poolId).toArray('le', 8)
-  const data = Uint8Array.from(a.concat(b))
-
-  return toHex(hash(data, 16))
-}
-
-function toHex(data: Uint8Array) {
-  const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
-  const out = []
-
-  for (let i = 0; i < data.length; i++) {
-    out.push(hex[(data[i] >> 4) & 0xf])
-    out.push(hex[data[i] & 0xf])
-  }
-  return `0x${out.join('')}`
 }
 
 function getEpochStatus(epochExecution: Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>, blockNumber: number) {
@@ -2440,10 +2753,12 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
 }
 
 function parseCurrencyKey(key: CurrencyKey): CurrencyKey {
-  if (typeof key === 'string' || 'ForeignAsset' in key) return key
-  return {
-    Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+  if (typeof key !== 'string' && 'Tranche' in key) {
+    return {
+      Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+    }
   }
+  return key
 }
 
 function looksLike(a: any, b: any): boolean {

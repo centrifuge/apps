@@ -1,73 +1,107 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
-import { Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Checkbox, Shelf, Text } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
 import * as React from 'react'
-import { useAuth } from '../../components/AuthProvider'
+import { boolean, object } from 'yup'
 import { DataSharingAgreementDialog } from '../../components/Dialogs/DataSharingAgreementDialog'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
+import { useOnboardingAuth } from '../../components/OnboardingAuthProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 
 type Props = {
-  nextStep: () => void
+  globalOnboardingStatus: 'unverified' | 'pending' | 'verified'
 }
 
-const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+const validationSchema = object({
+  isAgreedToDataSharingAgreement: boolean().oneOf([true], 'You must agree to the data sharing agreement'),
+  hasSelectedWallet: boolean().oneOf([true], 'Please connect your wallet'),
+})
 
-export const LinkWallet = ({ nextStep }: Props) => {
+export const LinkWallet = ({ globalOnboardingStatus }: Props) => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = React.useState(false)
-  const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = React.useState(false)
+  const { nextStep } = useOnboarding()
+  const { login, isAuth, isLoading } = useOnboardingAuth()
+  const {
+    evm: { selectedAddress },
+    substrate: { selectedAccount },
+  } = useWallet()
 
-  const { selectedAccount } = useWallet()
-  const { login, isAuth } = useAuth()
+  const formik = useFormik({
+    initialValues: {
+      isAgreedToDataSharingAgreement: false,
+      hasSelectedWallet: false,
+    },
+    validationSchema,
+    onSubmit: () => {
+      login()
+    },
+  })
+
+  React.useEffect(() => {
+    if (selectedAccount?.address || selectedAddress) {
+      formik.setFieldValue('hasSelectedWallet', true, false)
+    }
+
+    if (!selectedAccount?.address && !selectedAddress) {
+      formik.setFieldValue('hasSelectedWallet', false, false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAccount?.address, selectedAddress])
 
   return (
-    <Stack gap={4}>
-      <Stack alignItems="flex-start" gap={4}>
-        <Text fontSize={5}>Connect and link your wallet</Text>
-        <Text>
-          To start, you need to connect your wallet and sign a message to verify the wallet. You also need to agree to
-          the data sharing agreement to continue with the identity verification process.
-        </Text>
+    <>
+      <Content>
+        <ContentHeader
+          title="Connect and link your wallet"
+          body={`${
+            globalOnboardingStatus === 'unverified'
+              ? 'To start, you need to connect '
+              : 'To continue with the onboarding, you need to re-connect '
+          }your wallet in the top right corner and sign a message to verify the wallet. You also need to agree to the data sharing agreement to continue with the identity verification process.`}
+        />
+
         <Shelf gap={1}>
           <Checkbox
-            style={{
-              cursor: 'pointer',
-            }}
-            checked={isAgreedToDataSharingAgreement || isAuth}
-            onChange={() => setIsAgreedToDataSharingAgreement((current) => !current)}
+            {...formik.getFieldProps('isAgreedToDataSharingAgreement')}
+            checked={isAuth || formik.values.isAgreedToDataSharingAgreement}
             disabled={isAuth}
-            label={
-              <Shelf gap="4px">
-                <Text style={{ cursor: 'pointer' }}>I agree to the</Text>
-                <button
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontFamily: 'Inter,sans-serif',
-                  }}
-                  onClick={() => setIsDataSharingAgreementDialogOpen(true)}
-                >
-                  <Text variant="body1" color="textInteractive">
-                    Data sharing agreement.
-                  </Text>
-                </button>
-              </Shelf>
-            }
+            errorMessage={formik.errors.isAgreedToDataSharingAgreement}
+            label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the</Text>}
           />
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'Inter,sans-serif',
+            }}
+            onClick={() => setIsDataSharingAgreementDialogOpen(true)}
+          >
+            <Text variant="body1" color="textInteractive">
+              data sharing agreement.
+            </Text>
+          </button>
           <DataSharingAgreementDialog
             isDialogOpen={isDataSharingAgreementDialogOpen}
             setIsDialogOpen={setIsDataSharingAgreementDialogOpen}
           />
         </Shelf>
+      </Content>
+
+      <ActionBar>
         {isAuth ? (
-          <Button onClick={() => nextStep()}>Next</Button>
+          <Button onClick={nextStep}>Next</Button>
         ) : (
           <Button
-            disabled={!selectedAccount || !isAgreedToDataSharingAgreement}
-            onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
+            loading={isLoading}
+            onClick={() => {
+              isAuth ? nextStep() : formik.handleSubmit()
+            }}
           >
-            Link your wallet
+            Continue
           </Button>
         )}
-      </Stack>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

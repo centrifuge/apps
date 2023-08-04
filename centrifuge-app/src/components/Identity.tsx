@@ -1,7 +1,9 @@
 import { isSameAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import { Text, TextProps } from '@centrifuge/fabric'
+import { Flex, Shelf, Text, TextProps } from '@centrifuge/fabric'
+import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
+import styled from 'styled-components'
 import { copyToClipboard } from '../utils/copyToClipboard'
 import { useAddress } from '../utils/useAddress'
 import { useIdentity } from '../utils/useIdentity'
@@ -9,16 +11,29 @@ import { truncate } from '../utils/web3'
 
 type Props = TextProps & {
   address: string
+  showIcon?: boolean
   clickToCopy?: boolean
   labelForConnectedAddress?: boolean | string
 }
 
+const IdenticonWrapper = styled(Flex)({
+  borderRadius: '50%',
+  overflow: 'hidden',
+  pointerEvents: 'none',
+})
+
 // TODO: Fix for when connected with a proxy
-export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnectedAddress = true, ...textProps }) => {
+export const Identity: React.FC<Props> = ({
+  showIcon,
+  address,
+  clickToCopy,
+  labelForConnectedAddress = true,
+  ...textProps
+}) => {
   const identity = useIdentity(address)
-  const myAddress = useAddress()
+  const myAddress = useAddress('substrate')
   const cent = useCentrifuge()
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
 
   const addr = cent.utils.formatAddress(address)
   const isMe = React.useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
@@ -31,7 +46,7 @@ export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnec
       ? selectedAccount?.name || display
       : labelForConnectedAddress
 
-  return (
+  const label = (
     <Text
       {...textProps}
       title={addr}
@@ -45,4 +60,16 @@ export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnec
       {isMe ? meLabel : display}
     </Text>
   )
+
+  if (showIcon) {
+    return (
+      <Shelf gap={2}>
+        <IdenticonWrapper>
+          <Identicon value={address} size={24} theme="polkadot" />
+        </IdenticonWrapper>
+        {label}
+      </Shelf>
+    )
+  }
+  return label
 }

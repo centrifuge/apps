@@ -14,7 +14,7 @@ type ChartData = {
   reserve: number
 }
 
-const ReserveCashDragChart: React.VFC = () => {
+export default function ReserveCashDragChart() {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolStates = useDailyPoolStates(poolId)
@@ -90,10 +90,7 @@ const ReserveCashDragChart: React.VFC = () => {
   )
 }
 
-const CustomLegend: React.VFC<{
-  currency: string
-  data: ChartData
-}> = ({ data, currency }) => {
+function CustomLegend({ data, currency }: { currency: string; data: ChartData }) {
   const theme = useTheme()
 
   return (
@@ -111,5 +108,3 @@ const CustomLegend: React.VFC<{
     </Shelf>
   )
 }
-
-export default ReserveCashDragChart

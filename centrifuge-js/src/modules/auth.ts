@@ -1,3 +1,4 @@
+import { AddressOrPair } from '@polkadot/api/types'
 import { Keyring } from '@polkadot/keyring'
 import { Signer } from '@polkadot/types/types'
 import * as jw3t from 'jw3t'
@@ -13,7 +14,8 @@ type TokenOptions = {
 }
 
 export function getAuthModule(inst: Centrifuge) {
-  async function generateJw3t(address: string, signer: Signer, options: TokenOptions = {}) {
+  async function generateJw3t(address: AddressOrPair, signer?: Signer, options: TokenOptions = {}) {
+    const addressString = typeof address === 'object' && 'address' in address ? address.address : address.toString()
     const header = {
       algorithm: 'sr25519',
       token_type: 'JW3T',
@@ -23,7 +25,7 @@ export function getAuthModule(inst: Centrifuge) {
     const now = Math.floor(Date.now() / 1000)
 
     const payload = {
-      address,
+      address: addressString,
       issued_at: String(now),
       expires_at: options.expiresAt || String(now + 60 * 60 * 24 * 30), // 30 days
       on_behalf_of: options.onBehalfOf,
@@ -33,12 +35,18 @@ export function getAuthModule(inst: Centrifuge) {
 
     const content = new jw3t.JW3TContent(header, payload)
 
-    const keyring = new Keyring({ type: 'sr25519' })
-    const account = keyring.addFromAddress(address)
+    let account
+    if (typeof address === 'object' && 'sign' in address) {
+      account = address
+    } else {
+      const keyring = new Keyring({ type: 'sr25519' })
+      account = keyring.addFromAddress(addressString)
+    }
 
     const polkaJsSigner = new jw3t.PolkaJsSigner({
+      // @ts-ignore KeyPair type mismatch
       account,
-      // @ts-expect-error Signer type version mismatch
+      // @ts-ignore Signer type mismatch
       signer,
     })
     const jw3tSigner = new jw3t.JW3TSigner(polkaJsSigner, content)

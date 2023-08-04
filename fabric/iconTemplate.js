@@ -28,6 +28,7 @@ const Svg = styled.svg<OwnProps>(props => css({
   width: props.size,
   height: props.size,
   color: props.color,
+  flexShrink: 0,
 }))
 
 function ${componentName}(props: Props) {

@@ -1,6 +1,6 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import * as React from 'react'
+import { lastValueFrom } from 'rxjs'
 import { useBlock } from './useBlock'
 import { usePool } from './usePools'
 
@@ -21,7 +21,7 @@ export const useChallengeTimeCountdown = (poolId: string) => {
         if (blocksRemaining <= 0) {
           setMinutesRemaining(0)
         }
-        setMinutesTotal(Math.ceil((pool.epoch.challengeTime * avgTimePerBlock) / 60000))
+        setMinutesTotal(Math.ceil((pool.parameters.challengeTime * avgTimePerBlock) / 60000))
         setMinutesRemaining(Math.ceil((blocksRemaining * avgTimePerBlock) / 60000))
       }
     }

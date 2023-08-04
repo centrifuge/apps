@@ -112,12 +112,6 @@ export function getPodModule() {
     return res
   }
 
-  async function getAccount(args: [podUrl: string, token: string, accountId: string]) {
-    const [podUrl, token, jobId] = args
-    const res = await callPod<JobResponse>(podUrl, `v2/jobs/${jobId}`, 'get', token)
-    return res
-  }
-
   const wait = (ms = 1000) => new Promise((res) => setTimeout(res, ms))
   async function awaitJob(args: [podUrl: string, token: string, jobId: string]) {
     let i = 100
@@ -135,6 +129,32 @@ export function getPodModule() {
     }
 
     throw new Error('Job timed out')
+  }
+
+  async function createAccount(args: [podUrl: string, token: string, address: `0x${string}`]) {
+    const [podUrl, token, address] = args
+    const res = await callPod(podUrl, 'v2/accounts/generate', 'post', token, {
+      account: {
+        identity: address,
+        precommit_enabled: true,
+        webhook_url: 'https://centrifuge.io',
+      },
+    })
+    return {
+      documentSigningKey: res.document_signing_public_key,
+      p2pDiscoveryKey: res.p2p_public_signing_key,
+      operatorAccountId: res.pod_operator_account_id,
+    }
+  }
+
+  async function getAccount(args: [podUrl: string, token: string, address: `0x${string}`]) {
+    const [podUrl, token, address] = args
+    const res = await callPod(podUrl, `v2/accounts/${address}`, 'get', token)
+    return {
+      documentSigningKey: res.document_signing_public_key,
+      p2pDiscoveryKey: res.p2p_public_signing_key,
+      operatorAccountId: res.pod_operator_account_id,
+    }
   }
 
   async function createDocument(args: [podUrl: string, token: string, document: CreateDocumentInput]) {
@@ -193,6 +213,7 @@ export function getPodModule() {
   return {
     getJob,
     getAccount,
+    createAccount,
     createDocument,
     commitDocumentAndMintNft,
     getPendingDocument,

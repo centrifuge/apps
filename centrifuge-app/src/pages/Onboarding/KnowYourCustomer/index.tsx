@@ -1,93 +1,68 @@
+import { Box, Button, Dialog, Flex, Stack } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
-import { useMutation } from 'react-query'
 import { boolean, date, object, string } from 'yup'
-import { useAuth } from '../../../components/AuthProvider'
 import { useOnboarding } from '../../../components/OnboardingProvider'
-import { AuthorizedSignerVerification } from './AuthorizedSignerVerification'
+import { useStartKYC } from '../queries/useStartKYC'
+import { useVerifyIdentity } from '../queries/useVerifyIdentity'
 import { IdentityVerification } from './IdentityVerification'
+import { SignerVerification } from './SignerVerification'
 
-type Props = {
-  nextStep: () => void
-  backStep: () => void
-}
+const getValidationSchema = (investorType: 'individual' | 'entity') =>
+  object({
+    name: string().required('Please enter a name'),
+    dateOfBirth: date()
+      .required('Please enter a date of birth')
+      .min(new Date(1900, 0, 1), 'Date of birth must be after 1900')
+      .max(new Date(new Date().getFullYear() - 18, new Date().getMonth()), 'You must be 18 or older'),
+    countryOfCitizenship: string().required('Please select a country of citizenship'),
+    countryOfResidency: string().required('Please select a country of residency'),
+    isAccurate: boolean().oneOf([true], 'You must confirm that the information is accurate'),
+    ...(investorType === 'individual' && {
+      email: string().email('Please enter a valid email address').required('Please enter an email address'),
+    }),
+  })
 
-const authorizedSignerInput = object({
-  name: string().required(),
-  dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
-  countryOfCitizenship: string().required(),
-  isAccurate: boolean().oneOf([true]),
-})
+export const KnowYourCustomer = () => {
+  const [isKnowYourCustomerDialogOpen, setIsKnowYourCustomerDialogOpen] = React.useState(false)
 
-export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
-  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
+  const [verificationDeclined, setVerificationDeclined] = React.useState(false)
 
-  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
+  const { onboardingUser } = useOnboarding()
 
-  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding()
-  const { authToken } = useAuth()
+  const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
-  const isCompleted = !!onboardingUser?.steps?.verifyIdentity.completed
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyIdentity.completed
+
+  const validationSchema = getValidationSchema(investorType)
 
   const formik = useFormik({
     initialValues: {
-      name: onboardingUser.name || '',
-      dateOfBirth: onboardingUser.dateOfBirth || '',
-      countryOfCitizenship: onboardingUser.countryOfCitizenship || '',
+      name: onboardingUser?.name || '',
+      dateOfBirth: onboardingUser?.dateOfBirth || '',
+      countryOfCitizenship: onboardingUser?.countryOfCitizenship || '',
+      countryOfResidency: onboardingUser?.countryOfResidency || '',
       isAccurate: !!isCompleted,
+      email: investorType === 'individual' ? onboardingUser?.email || '' : undefined,
     },
-    onSubmit: () => {
-      startKYC()
+    onSubmit: (values) => {
+      startKYC(values)
     },
-    validationSchema: authorizedSignerInput,
+    validationSchema,
     validateOnMount: true,
+    enableReinitialize: true,
   })
 
-  const {
-    mutate: startKYC,
-    data: startKYCData,
-    isLoading: isStartKYCLoading,
-  } = useMutation(async () => {
-    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/startKYC`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: formik.values.name,
-        dateOfBirth: formik.values.dateOfBirth,
-        countryOfCitizenship: formik.values.countryOfCitizenship,
-        ...(onboardingUser.investorType === undefined && { poolId: pool.id, trancheId: pool.trancheId }),
-      }),
-    })
+  const { mutate: startKYC, data: startKYCData, isLoading: isStartKYCLoading } = useStartKYC()
 
-    return response.json()
-  })
-
-  const { mutate: setVerifiedIdentity } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/setVerifiedIdentity`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      return response.json()
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
+  const { mutate: setVerifiedIdentity } = useVerifyIdentity()
 
   const handleVerifiedIdentity = (event: MessageEvent) => {
-    if (event.origin === 'https://app.shuftipro.com') {
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.accepted') {
       setVerifiedIdentity()
+    }
+    if (event.origin === 'https://app.shuftipro.com' && event.data.verification_status === 'verification.declined') {
+      setVerificationDeclined(true)
     }
   }
 
@@ -102,25 +77,39 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
 
   React.useEffect(() => {
     if (startKYCData?.verification_url) {
-      nextKnowYourCustomerStep()
+      setIsKnowYourCustomerDialogOpen(true)
     }
-  }, [startKYCData, refetchOnboardingUser])
+  }, [startKYCData])
 
-  if (activeKnowYourCustomerStep === 0) {
-    return (
-      <AuthorizedSignerVerification
-        nextStep={nextStep}
-        backStep={backStep}
-        formik={formik}
-        isLoading={isStartKYCLoading}
-        isCompleted={isCompleted}
-      />
-    )
-  }
-
-  if (activeKnowYourCustomerStep === 1) {
-    return <IdentityVerification verificationURL={startKYCData.verification_url} />
-  }
-
-  return null
+  return (
+    <>
+      <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
+      {startKYCData?.verification_url && (
+        <Dialog
+          isOpen={isKnowYourCustomerDialogOpen}
+          onClose={() => setIsKnowYourCustomerDialogOpen(false)}
+          width="850px"
+        >
+          <Stack justifyContent="space-between">
+            <Box height="500px">
+              <IdentityVerification verificationURL={startKYCData.verification_url} />
+            </Box>
+            {verificationDeclined && (
+              <Flex justifyContent="flex-end">
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setVerificationDeclined(false)
+                    setIsKnowYourCustomerDialogOpen(false)
+                  }}
+                >
+                  Restart verification
+                </Button>
+              </Flex>
+            )}
+          </Stack>
+        </Dialog>
+      )}
+    </>
+  )
 }

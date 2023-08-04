@@ -1,8 +1,9 @@
 import { Request, Response } from 'express'
 import { bool, InferType, object } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { fetchUser } from '../../utils/fetchUser'
-import { HttpsError } from '../../utils/httpsError'
+import { HttpError, reportHttpError } from '../../utils/httpError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
 
@@ -17,37 +18,38 @@ export const setVerifiedIdentityController = async (
   try {
     const {
       body: { dryRun },
-      walletAddress,
+      wallet,
     } = { ...req }
-    const user = await fetchUser(walletAddress)
+    const user = await fetchUser(wallet)
 
-    if (user.steps.verifyIdentity.completed) {
-      throw new HttpsError(400, 'Unable to process request')
+    if (user.globalSteps.verifyIdentity.completed) {
+      throw new HttpError(400, 'Step aleady completed')
     }
 
-    const status = await shuftiProRequest(req, { reference: user.kycReference }, { path: 'status', dryRun })
+    const status = await shuftiProRequest({ reference: user.kycReference }, { path: 'status', dryRun })
     if (status.event !== 'verification.accepted') {
-      throw new HttpsError(400, `Failed because ${status.reference} is in "${status.event}" state`)
+      throw new HttpError(400, `Failed because ${status.reference} is in "${status.event}" state`)
     }
+
+    const address = status.verification_data?.address?.full_address || null
 
     const updatedUser: Subset<OnboardingUser> = {
-      steps: {
-        ...user.steps,
+      address,
+      globalSteps: {
         verifyIdentity: {
           completed: true,
           timeStamp: new Date().toISOString(),
         },
       },
     }
-    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps'])
-    const freshUserData = await fetchUser(walletAddress)
-    return res.status(200).send({ ...freshUserData })
-  } catch (error) {
-    if (error instanceof HttpsError) {
-      console.log(error.message)
-      return res.status(error.code).send(error.message)
+    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['address', 'globalSteps.verifyIdentity'])
+    if (user.investorType === 'individual') {
+      await sendVerifyEmailMessage(user, wallet)
     }
-    console.log(error)
-    return res.status(500).send('An unexpected error occured')
+    const freshUserData = await fetchUser(wallet)
+    return res.status(200).send({ ...freshUserData })
+  } catch (e) {
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

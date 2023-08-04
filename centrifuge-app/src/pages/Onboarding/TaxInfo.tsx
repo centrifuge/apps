@@ -1,89 +1,99 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, Button, FileUpload, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Button } from '@centrifuge/fabric'
+import { useFormik } from 'formik'
 import * as React from 'react'
-import { useMutation, useQuery } from 'react-query'
-import { useAuth } from '../../components/AuthProvider'
+import { boolean, mixed, object } from 'yup'
+import { ConfirmResendEmailVerificationDialog } from '../../components/Dialogs/ConfirmResendEmailVerificationDialog'
+import { EditOnboardingEmailAddressDialog } from '../../components/Dialogs/EditOnboardingEmailAddressDialog'
+import {
+  ActionBar,
+  Content,
+  ContentHeader,
+  FileUpload,
+  Notification,
+  NotificationBar,
+} from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
+import { ValidationToast } from '../../components/ValidationToast'
+import { OnboardingUser } from '../../types'
+import { useTaxInfo } from './queries/useTaxInfo'
+import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
 
-type Props = {
-  nextStep: () => void
-  backStep: () => void
+const validationSchema = object({
+  taxInfo: mixed().required('Please upload a tax form'),
+  isEmailVerified: boolean().oneOf([true], 'Please verify your email address'),
+})
+
+const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; completed: boolean }) => {
+  const [isEditOnboardingEmailAddressDialogOpen, setIsEditOnboardingEmailAddressDialogOpen] = React.useState(false)
+  const [isConfirmResendEmailVerificationDialogOpen, setIsConfirmResendEmailVerificationDialogOpen] =
+    React.useState(false)
+
+  if (completed) {
+    return <Notification>Email address verified</Notification>
+  }
+
+  return (
+    <>
+      <Notification type="alert">
+        Please verify your email address. Email sent to {email}. If you did not receive an email,{' '}
+        <button onClick={() => setIsConfirmResendEmailVerificationDialogOpen(true)}>send again</button> or{' '}
+        <button onClick={() => setIsEditOnboardingEmailAddressDialogOpen(true)}>edit email</button>. Otherwise contact{' '}
+        <a href="mailto:support@centrifuge.io?subject=Onboarding email verification&body=I’m reaching out about…">
+          support@centrifuge.io
+        </a>
+        .
+      </Notification>
+
+      <EditOnboardingEmailAddressDialog
+        currentEmail={email}
+        isDialogOpen={isEditOnboardingEmailAddressDialogOpen}
+        setIsDialogOpen={setIsEditOnboardingEmailAddressDialogOpen}
+      />
+
+      <ConfirmResendEmailVerificationDialog
+        isDialogOpen={isConfirmResendEmailVerificationDialogOpen}
+        setIsDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
+      />
+    </>
+  )
 }
 
-export const TaxInfo = ({ backStep, nextStep }: Props) => {
-  const { selectedAccount } = useWallet()
-  const { refetchOnboardingUser, onboardingUser, pool } = useOnboarding()
-  const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
-  const { authToken } = useAuth()
+export const TaxInfo = () => {
+  const { onboardingUser, previousStep, nextStep, refetchOnboardingUser } = useOnboarding<NonNullable<OnboardingUser>>()
+  const { data: taxInfoData } = useTaxInfo()
+  const { mutate: uploadTaxInfo, isLoading } = useUploadTaxInfo()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed
+  const isCompleted = !!onboardingUser.globalSteps.verifyTaxInfo.completed
+  const isEmailVerified = !!onboardingUser.globalSteps.verifyEmail.completed
 
-  const { data: taxInfoData } = useQuery(
-    ['tax info', selectedAccount?.address],
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
-
-      const json = await response.json()
-
-      const documentBlob = new Blob([Uint8Array.from(json.taxInfo.data).buffer], {
-        type: 'application/pdf',
-      })
-
-      return URL.createObjectURL(documentBlob)
+  const formik = useFormik({
+    initialValues: {
+      taxInfo: undefined,
+      isEmailVerified,
     },
-    {
-      refetchOnWindowFocus: false,
-      enabled: !!onboardingUser?.steps?.verifyTaxInfo?.completed,
-    }
-  )
-
-  const { mutate: uploadTaxInfo, isLoading } = useMutation(
-    async () => {
-      if (taxInfo) {
-        const formData = new FormData()
-        formData.append('taxInfo', taxInfo)
-
-        const response = await fetch(
-          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
-          {
-            method: 'POST',
-            body: formData,
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              'Content-Type': 'multipart/form-data',
-            },
-            credentials: 'include',
-          }
-        )
-
-        if (response.status !== 200) {
-          throw new Error()
-        }
-
-        const json = await response.json()
-
-        if (!json.steps?.verifyTaxInfo?.completed) {
-          throw new Error()
-        }
-      }
+    validationSchema,
+    onSubmit: (values: { taxInfo: File | undefined }) => {
+      uploadTaxInfo(values.taxInfo)
     },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
+  })
+
+  const onFocus = () => {
+    refetchOnboardingUser()
+  }
+
+  React.useEffect(() => {
+    if (isEmailVerified) {
+      formik.setFieldValue('isEmailVerified', true)
+      window.removeEventListener('focus', onFocus)
+    } else {
+      window.addEventListener('focus', onFocus)
     }
-  )
+
+    return () => {
+      window.removeEventListener('focus', onFocus)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEmailVerified])
 
   const validateFileUpload = (file: File) => {
     if (file.type !== 'application/pdf') {
@@ -99,35 +109,50 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     if (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship !== 'us') {
       return {
         type: 'W-8BEN',
-        url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
+        url: 'https://www.irs.gov',
+        label: 'www.irs.gov',
       }
     }
 
     if (onboardingUser.investorType === 'entity' && !onboardingUser.jurisdictionCode.startsWith('us')) {
       return {
         type: 'W-8BEN-E',
-        url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',
+        url: 'https://www.irs.gov',
+        label: 'www.irs.gov',
       }
     }
 
     return {
       type: 'W9',
-      url: 'https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+      url: 'https://www.irs.gov',
+      label: 'www.irs.gov',
     }
   }, [onboardingUser])
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>Tax information</Text>
-        <Stack gap={4}>
-          <Text fontSize={2}>
-            Please complete and upload a {taxForm.type} form. The form can be found at{' '}
-            <a href={taxForm.url} target="_blank" rel="noreferrer">
-              {taxForm.url}
-            </a>
-            .
-          </Text>
+    <>
+      {formik.errors.isEmailVerified && <ValidationToast label={formik.errors.isEmailVerified} />}
+      <Content>
+        {!isCompleted && onboardingUser.investorType === 'individual' && (
+          <NotificationBar>
+            <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
+          </NotificationBar>
+        )}
+
+        <ContentHeader
+          title="Tax information"
+          body={
+            <>
+              Please complete and upload a {taxForm.type} form. The form can be found at{' '}
+              <a href={taxForm.url} target="_blank" rel="noreferrer">
+                {taxForm.label}
+              </a>
+              .
+            </>
+          }
+        />
+
+        <Box>
           {isCompleted ? (
             <Box>
               <AnchorButton variant="secondary" href={taxInfoData} target="__blank">
@@ -136,30 +161,32 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
             </Box>
           ) : (
             <FileUpload
-              placeholder="Upload file"
-              onFileChange={(file) => setTaxInfo(file)}
+              onFileChange={(file) => formik.setFieldValue('taxInfo', file)}
               disabled={isLoading || isCompleted}
-              file={taxInfo || null}
+              file={formik.values.taxInfo || null}
+              errorMessage={formik.touched.taxInfo ? formik.errors.taxInfo : undefined}
               validate={validateFileUpload}
+              accept=".pdf"
             />
           )}
-          <Shelf gap="2">
-            <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
-              Back
-            </Button>
-            <Button
-              onClick={() => {
-                isCompleted ? nextStep() : uploadTaxInfo()
-              }}
-              disabled={isCompleted ? false : isLoading || !taxInfo}
-              loading={isLoading}
-              loadingMessage="Uploading"
-            >
-              Next
-            </Button>
-          </Shelf>
-        </Stack>
-      </Box>
-    </Stack>
+        </Box>
+      </Content>
+
+      <ActionBar>
+        <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
+          Back
+        </Button>
+        <Button
+          onClick={() => {
+            isCompleted ? nextStep() : formik.handleSubmit()
+          }}
+          disabled={isLoading || (!formik.values.taxInfo && !taxInfoData) || !formik.values.isEmailVerified}
+          loading={isLoading}
+          loadingMessage="Uploading"
+        >
+          Next
+        </Button>
+      </ActionBar>
+    </>
   )
 }

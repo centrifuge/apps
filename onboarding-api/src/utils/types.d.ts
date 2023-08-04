@@ -1,3 +1,5 @@
+import { SupportedNetworks } from '../database'
+
 export type Subset<K> = {
   [attr in keyof K]?: K[attr] extends object
     ? Subset<K[attr]>
@@ -8,12 +10,13 @@ export type Subset<K> = {
     : K[attr]
 }
 
-export {}
-
 declare global {
   export namespace Express {
     export interface Request {
-      walletAddress: string
+      wallet: {
+        address: string
+        network: SupportedNetworks
+      }
     }
   }
   export namespace NodeJS {
@@ -23,6 +26,15 @@ declare global {
       JWT_SECRET: string
       REDIRECT_URL: string
       SENDGRID_API_KEY: string
+      MEMBERLIST_ADMIN_PURE_PROXY: string
+      COLLATOR_WSS_URL: string
+      RELAY_WSS_URL: string
+      INFURA_KEY: string
+      EVM_NETWORK: string
+      EVM_MEMBERLIST_ADMIN_PRIVATE_KEY: string
+      PURE_PROXY_CONTROLLER_SEED: string
+      ONBOARDING_STORAGE_BUCKET: string
+      EVM_ON_SUBSTRATE_CHAIN_ID: string
     }
   }
 }

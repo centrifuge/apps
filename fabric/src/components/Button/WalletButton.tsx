@@ -14,28 +14,32 @@ export type WalletButtonProps = Omit<
 > & {
   connectLabel?: string
   address?: string
+  displayAddress?: string
   alias?: string
   balance?: string
-  iconStyle?: IconTheme
+  icon?: IconTheme | React.ReactElement
 }
 
-const StyledButton = styled.button({
-  display: 'inline-block',
-  width: '100%',
-  padding: '0',
-  border: 'none',
-  appearance: 'none',
-  background: 'transparent',
-  outline: '0',
-  whiteSpace: 'nowrap',
-})
+const StyledButton = styled.button`
+  display: inline-block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  appearance: none;
+  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
+  outline: 0;
+  border-radius: 40px;
+  white-space: nowrap;
+`
 
 const IdenticonWrapper = styled(Flex)({
+  borderRadius: '50%',
+  overflow: 'hidden',
   pointerEvents: 'none',
 })
 
 export const WalletButton: React.VFC<WalletButtonProps> = ({
-  iconStyle = 'polkadot',
+  icon = 'polkadot',
   small = true,
   disabled,
   loading,
@@ -43,6 +47,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
   active,
   connectLabel = 'Connect wallet',
   address,
+  displayAddress = address,
   alias,
   balance,
   ...buttonProps
@@ -55,7 +60,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
         icon={
           address ? (
             <IdenticonWrapper>
-              <Identicon value={address} size={24} theme={iconStyle} />
+              {React.isValidElement(icon) ? icon : <Identicon value={address} size={24} theme={icon} />}
             </IdenticonWrapper>
           ) : undefined
         }
@@ -82,7 +87,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
           </Box>
         ) : (
           <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500} style={{ margin: address ? 0 : 'auto' }}>
-            {address ? truncate(address) : connectLabel}
+            {displayAddress ? truncate(displayAddress) : connectLabel}
           </Text>
         )}
         {address && balance && (

@@ -1,41 +1,36 @@
-import { isSameAddress, PoolRoles } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
-import { Button, Checkbox, Grid, IconMinusCircle, SearchInput, Shelf, Stack, Text } from '@centrifuge/fabric'
-import Identicon from '@polkadot/react-identicon'
+import { PoolRoles } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { Button, Checkbox, IconMinusCircle, Stack, Text } from '@centrifuge/fabric'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { useParams } from 'react-router'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { Tooltips } from '../../../components/Tooltips'
-import { usePoolPermissions } from '../../../utils/usePools'
-import { truncate } from '../../../utils/web3'
+import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
+import { AddAddressInput } from './AddAddressInput'
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
+type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin'
 
 type Admin = {
   address: string
   roles: { [key in AdminRole]?: boolean }
 }
 type PoolMetadataInput = {
-  search: string
   admins: Admin[]
 }
 type Row = Admin & { index: number }
 
-export const Admins: React.FC = () => {
-  const { pid: poolId } = useParams<{ pid: string }>()
+export function Admins({ poolId }: { poolId: string }) {
   const poolPermissions = usePoolPermissions(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
-  const { selectedAccount } = useWallet()
-  const me = selectedAccount?.address && encodeAddress(selectedAccount?.address)
+
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const initialValues: PoolMetadataInput = React.useMemo(
     () => ({
-      search: '',
       admins: poolPermissions
         ? Object.entries<PoolRoles>(poolPermissions)
             .filter(([, p]) => p.roles.length)
@@ -62,7 +57,7 @@ export const Admins: React.FC = () => {
         setIsEditing(false)
         return
       }
-      execute([poolId, add, remove])
+      execute([poolId, add, remove], { account })
     },
   })
 
@@ -126,8 +121,7 @@ export const Admins: React.FC = () => {
                       header: 'Address',
                       cell: (row: Admin) => (
                         <Text variant="body2">
-                          <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />{' '}
-                          {row.address === me && `(${selectedAccount?.name || 'you'})`}
+                          <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />
                         </Text>
                       ),
                       flex: '3',
@@ -160,23 +154,10 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="pricing" variant="secondary" />,
-                      cell: (row: Row) => (
-                        <Field
-                          name={`admins.${row.index}.roles.PricingAdmin`}
-                          as={Checkbox}
-                          type="checkbox"
-                          disabled={!isEditing || isLoading}
-                        />
-                      ),
-                      flex: '2',
-                    },
-                    {
-                      align: 'center',
                       header: <Tooltips type="whitelist" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
-                          name={`admins.${row.index}.roles.MemberListAdmin`}
+                          name={`admins.${row.index}.roles.InvestorAdmin`}
                           as={Checkbox}
                           type="checkbox"
                           disabled={!isEditing || isLoading}
@@ -226,19 +207,12 @@ export const Admins: React.FC = () => {
                   ]}
                 />
                 {isEditing && (
-                  <Grid columns={2} equalColumns gap={4} alignItems="center">
-                    <Field as={SearchInput} name="search" placeholder="Search to add address..." disabled={isLoading} />
-                    {form.values.search && !isLoading && (
-                      <SearchResult
-                        address={form.values.search}
-                        existingAddresses={form.values.admins.map((a) => a.address)}
-                        onAdd={() => {
-                          fldArr.push({ address: form.values.search, roles: {} })
-                          form.setFieldValue('search', '', false)
-                        }}
-                      />
-                    )}
-                  </Grid>
+                  <AddAddressInput
+                    existingAddresses={form.values.admins.map((a) => a.address)}
+                    onAdd={(address) => {
+                      fldArr.push({ address, roles: {} })
+                    }}
+                  />
                 )}
               </Stack>
             )}
@@ -249,52 +223,9 @@ export const Admins: React.FC = () => {
   )
 }
 
-const SearchResult: React.FC<{ address: string; onAdd: () => void; existingAddresses: string[] }> = ({
-  address,
-  onAdd,
-  existingAddresses,
-}) => {
-  const cent = useCentrifuge()
-  let truncated
-  try {
-    truncated = truncate(cent.utils.formatAddress(address))
-  } catch (e) {
-    //
-  }
+const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin']
 
-  if (!truncated) {
-    return (
-      <Text variant="label2" color="statusCritical">
-        Invalid address
-      </Text>
-    )
-  }
-
-  const exists = existingAddresses.some((addr) => isSameAddress(addr, address))
-
-  return (
-    <Shelf gap={2}>
-      <Shelf style={{ pointerEvents: 'none' }} gap="4px">
-        <Identicon value={address} size={16} theme="polkadot" />
-        <Text variant="label2" color="textPrimary">
-          {truncated}
-        </Text>
-      </Shelf>
-      <Button variant="secondary" onClick={onAdd} small disabled={exists}>
-        Add address
-      </Button>
-      {exists && (
-        <Text variant="label2" color="statusCritical">
-          Already added
-        </Text>
-      )}
-    </Shelf>
-  )
-}
-
-const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'LoanAdmin']
-
-function diffPermissions(storedValues: Admin[], formValues: Admin[]) {
+export function diffPermissions(storedValues: Admin[], formValues: Admin[], rolesToCheck = roles) {
   const storedObj = Object.fromEntries(storedValues.map((admin) => [admin.address, admin.roles]))
   const formObj = Object.fromEntries(formValues.map((admin) => [admin.address, admin.roles]))
   const addresses = [...new Set(storedValues.map((a) => a.address).concat(formValues.map((a) => a.address)))]
@@ -303,7 +234,7 @@ function diffPermissions(storedValues: Admin[], formValues: Admin[]) {
   const remove: [string, AdminRole][] = []
 
   addresses.forEach((addr) => {
-    roles.forEach((role) => {
+    rolesToCheck.forEach((role) => {
       const stored = !!storedObj[addr]?.[role as AdminRole]
       const value = !!formObj[addr]?.[role as AdminRole]
       if (stored !== value) {

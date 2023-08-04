@@ -1,77 +1,78 @@
-import { Box, Flex, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconArrowUpRight, Shelf, Spinner } from '@centrifuge/fabric'
 import React from 'react'
-import { useQuery } from 'react-query'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../../components/AuthProvider'
-import { Spinner } from '../../components/Spinner'
-import { config } from '../../config'
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const [_, WordMark] = config.logo
+import { useLocation } from 'react-router-dom'
+import { Container, Content, ContentHeader, Header, Layout } from '../../components/Onboarding'
+import { ethConfig } from '../../config'
+import { usePoolMetadata } from '../../utils/usePools'
+import { useUpdateInvestorStatus } from './queries/useUpdateInvestorStatus'
 
 export const UpdateInvestorStatus: React.FC = () => {
-  const { authToken } = useAuth()
   const { search } = useLocation()
-  const token = new URLSearchParams(search).get('token')
   const status = new URLSearchParams(search).get('status')
+  const token = new URLSearchParams(search).get('token')
+  const metadata = new URLSearchParams(search).get('metadata')
+  const network = new URLSearchParams(search).get('network')
 
-  const { error, data } = useQuery(
-    ['update investor status'],
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/updateInvestorStatus?token=${token}&status=${status}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status }),
-          credentials: 'include',
-        }
-      )
-
-      if (response.status === 204) {
-        return response
-      }
-      throw response.statusText
-    },
-    {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    }
-  )
-
+  const { data, isLoading } = useUpdateInvestorStatus()
+  const { data: poolMetadata } = usePoolMetadata({ metadata: metadata || undefined })
+  const poolName =
+    // @ts-expect-error
+    data && poolMetadata ? poolMetadata?.[data.poolId]?.metadata.name : poolMetadata ? poolMetadata.pool?.name : ''
+  const blockExplorerUrl =
+    network === 'evm' && data?.txHash
+      ? `${ethConfig.blockExplorerUrl}/tx/${data.txHash}`
+      : network === 'substrate' && data?.txHash
+      ? `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${data.txHash}`
+      : null
   return (
-    <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column" textAlign="center">
-      <Shelf as="header" justifyContent="space-between" gap={2} p={3}>
-        <Shelf alignItems="center" gap={3}>
-          <Box as={Link} to="/" width={110}>
-            <WordMark />
-          </Box>
-        </Shelf>
-      </Shelf>
-      <Grid
-        columns={1}
-        mx="150px"
-        my={5}
-        height="100%"
-        borderRadius="18px"
-        backgroundColor="backgroundPrimary"
-        alignItems="flex-start"
-        gridTemplateColumns="1fr"
-      >
-        <Stack
-          paddingTop={10}
-          paddingLeft={7}
-          paddingRight={7}
-          paddingBottom={6}
-          justifyContent="space-between"
-          minHeight="520px"
-        >
-          <Text fontSize={5}>{data ? `Investor was ${status}` : error ? 'An error occurred' : <Spinner />}</Text>
-        </Stack>
-      </Grid>
-    </Flex>
+    <Layout>
+      <Header walletMenu={false} />
+      <Container closeable={false}>
+        <Content>
+          {data && poolMetadata && data && token ? (
+            <>
+              <ContentHeader
+                title={`Investor was ${status}`}
+                body={
+                  status === 'approved'
+                    ? `The investor has been notified that they are now eligible to invest into the ${poolName}.`
+                    : `The investor has been notified that they have been rejected from investing in ${poolName}.`
+                }
+              />
+              <Shelf gap={2}>
+                <AnchorButton href="/" variant="primary">
+                  Return to Centrifuge App
+                </AnchorButton>
+                {blockExplorerUrl && (
+                  <AnchorButton
+                    variant="tertiary"
+                    iconRight={IconArrowUpRight}
+                    href={`${blockExplorerUrl}`}
+                    target="_blank"
+                    small
+                  >
+                    Transaction
+                  </AnchorButton>
+                )}
+              </Shelf>
+            </>
+          ) : isLoading ? (
+            <>
+              <ContentHeader
+                title="Updating investor status"
+                body={`The investor is being ${status} on-chain. This may take a few seconds.`}
+              />
+              <Box>
+                <Spinner size="iconLarge" />
+              </Box>
+            </>
+          ) : (
+            <>
+              <ContentHeader title="An error occured" body="Please contact info@centrifuge.io for more information." />
+            </>
+          )}
+        </Content>
+      </Container>
+    </Layout>
   )
 }

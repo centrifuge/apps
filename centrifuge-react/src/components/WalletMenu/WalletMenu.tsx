@@ -1,6 +1,11 @@
 import {
   Box,
-  IconCheck,
+  IconAnchor,
+  IconButton,
+  IconCopy,
+  IconExternalLink,
+  IconPower,
+  IconSwitch,
   Menu,
   MenuItem,
   MenuItemGroup,
@@ -10,38 +15,70 @@ import {
   Text,
   WalletButton,
 } from '@centrifuge/fabric'
-import Identicon from '@polkadot/react-identicon'
+import { getAddress } from '@ethersproject/address'
 import * as React from 'react'
-import styled from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
+import { useEns } from '../../hooks/useEns'
+import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
-import { useAddress, useWallet } from '../WalletProvider'
-import { ConnectMenu } from './ConnectMenu'
+import { useCentrifuge, useCentrifugeConsts } from '../CentrifugeProvider'
+import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
+import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
+import { Logo } from '../WalletProvider/SelectButton'
+import { useNetworkIcon } from '../WalletProvider/utils'
+import { ConnectButton } from './ConnectButton'
 
-export function WalletMenu() {
-  const { selectedAccount, accounts } = useWallet()
-  return selectedAccount && accounts?.length ? (
-    <Accounts />
+type WalletMenuProps = {
+  menuItems?: React.ReactNode[]
+}
+
+export function WalletMenu({ menuItems }: WalletMenuProps) {
+  const ctx = useWallet()
+  const { connectedType, pendingConnect, isEvmOnSubstrate } = ctx
+  const accounts = connectedType && ctx[isEvmOnSubstrate ? 'substrate' : 'evm'].accounts
+  const address = useAddress()
+  return address ? (
+    <ConnectedMenu menuItems={menuItems} />
   ) : accounts && !accounts.length ? (
-    <WalletButton connectLabel="No accounts available" disabled />
+    <ConnectButton label="No accounts available" />
   ) : (
-    <ConnectMenu />
+    <ConnectButton loading={pendingConnect.isConnecting} />
   )
 }
 
-const PROXY_TYPE_LABELS = {
-  Any: 'Any rights',
-  Borrow: 'Borrower',
-  Invest: 'Investor',
-  Price: 'Pricing',
-}
-
-function Accounts() {
-  const { selectedAccount, accounts, selectAccount, proxy, selectProxy, proxies, disconnect } = useWallet()
-  const address = useAddress()
-  const balances = useBalances(address)
-
-  if (!selectedAccount || !accounts) return null
+function ConnectedMenu({ menuItems }: WalletMenuProps) {
+  const address = useAddress()!
+  const centrifuge = useCentrifuge()
+  const consts = useCentrifugeConsts()
+  const ctx = useWallet()
+  const {
+    evm,
+    connectedType,
+    substrate,
+    disconnect,
+    showWallets,
+    showAccounts,
+    connectedNetwork,
+    connectedNetworkName,
+    isEvmOnSubstrate,
+  } = ctx
+  const formattedAddress =
+    connectedType === 'evm' ? getAddress(evm.selectedAddress!) : centrifuge.utils.formatAddress(address)
+  const wallet = ctx[connectedType!]?.selectedWallet
+  const { name: ensName, avatar } = useEns(connectedType === 'evm' ? evm.selectedAddress! : undefined)
+  const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
+  const { data: evmBalance } = useNativeBalance()
+  const evmCurrency = useNativeCurrency()
+  const [balance, symbol] =
+    connectedType === 'evm' && !isEvmOnSubstrate
+      ? evmBalance && evmCurrency
+        ? [evmBalance, evmCurrency.symbol]
+        : []
+      : balances
+      ? [balances.native.balance, balances.native.currency.symbol]
+      : []
+  const explorer = useGetExplorerUrl(connectedNetwork ?? undefined)
+  const subScanUrl = explorer.address(address, isEvmOnSubstrate ? 'centrifuge' : connectedNetwork ?? undefined)
 
   return (
     <Popover
@@ -49,100 +86,141 @@ function Accounts() {
         <Stack ref={ref} width="100%" alignItems="stretch">
           <WalletButton
             active={state.isOpen}
-            address={proxy?.delegator ?? selectedAccount.address}
-            alias={!proxy ? selectedAccount.name : undefined}
-            balance={
-              balances ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol) : undefined
+            address={address}
+            displayAddress={formattedAddress}
+            alias={
+              connectedType === 'evm'
+                ? ensName ?? undefined
+                : !substrate.selectedProxies
+                ? substrate.selectedAccount?.name
+                : undefined
+            }
+            balance={balance ? formatBalanceAbbreviated(balance, symbol) : undefined}
+            icon={
+              avatar ? (
+                <Box as="img" src={avatar} alt={ensName ?? ''} width="iconMedium" />
+              ) : connectedType === 'evm' && !isEvmOnSubstrate ? (
+                'ethereum'
+              ) : (
+                'polkadot'
+              )
             }
             {...props}
           />
         </Stack>
       )}
       renderContent={(props, ref, state) => (
-        <div {...props} ref={ref}>
+        <Box {...props} ref={ref} width={220}>
           <Menu>
-            {accounts.map((acc) => (
-              <MenuItemGroup key={acc.address}>
-                <MenuItem
-                  label={
-                    acc.name ? (
-                      <Text
-                        style={{
-                          display: 'block',
-                          maxWidth: '250px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
+            <MenuItemGroup>
+              <Stack
+                backgroundColor={isEvmOnSubstrate ? 'backgroundButtonTertiaryHover' : undefined}
+                pt={2}
+                pb={isEvmOnSubstrate ? 2 : 0}
+                px={2}
+                gap="4px"
+                alignItems={isEvmOnSubstrate ? 'flex-start' : 'center'}
+              >
+                {isEvmOnSubstrate && (
+                  <Text variant="heading5" color="textPrimary">
+                    Your Centrifuge account
+                  </Text>
+                )}
+                <Shelf gap={1} justifyContent="space-between">
+                  <Shelf gap={1}>
+                    <Text variant="interactive1" fontWeight={400}>
+                      {truncateAddress(isEvmOnSubstrate ? centrifuge.utils.formatAddress(address) : formattedAddress)}
+                    </Text>
+                  </Shelf>
+
+                  <Shelf gap="2px">
+                    <IconButton
+                      onClick={() =>
+                        copyToClipboard(isEvmOnSubstrate ? centrifuge.utils.formatAddress(address) : formattedAddress)
+                      }
+                      title="Copy address to clipboard"
+                    >
+                      <IconCopy />
+                    </IconButton>
+                    {subScanUrl && (
+                      <IconAnchor
+                        href={subScanUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`View account on ${subScanUrl}`}
                       >
-                        {acc.name}
-                      </Text>
-                    ) : (
-                      truncateAddress(acc.address)
-                    )
-                  }
-                  sublabel={acc.address}
-                  icon={
-                    <IdenticonWrapper>
-                      <Identicon value={acc.address} size={24} theme="polkadot" />
-                    </IdenticonWrapper>
-                  }
-                  iconRight={selectedAccount.address === acc.address && !proxy ? IconCheck : <Box width={16} />}
+                        <IconExternalLink />
+                      </IconAnchor>
+                    )}
+                  </Shelf>
+                </Shelf>
+                {isEvmOnSubstrate && <Text variant="body4">Send your {consts.chainSymbol} tokens here</Text>}
+              </Stack>
+
+              <Stack gap={0} mt={1} px={2} pb={1}>
+                <Text variant="label2" textAlign="center" color="textPrimary">
+                  Balance
+                </Text>
+                <Text fontSize={22} fontWeight={500} textAlign="center">
+                  {balance && formatBalanceAbbreviated(balance, symbol)}
+                </Text>
+              </Stack>
+            </MenuItemGroup>
+
+            {!!menuItems?.length && menuItems.map((item, index) => <MenuItemGroup key={index}>{item}</MenuItemGroup>)}
+
+            <MenuItemGroup>
+              <Box px={2} py={1}>
+                <Text variant="label2" color="textPrimary">
+                  Network
+                </Text>
+                <Shelf gap={1}>
+                  <Logo icon={useNetworkIcon(connectedNetwork!)} size="iconSmall" />
+                  <Text variant="interactive1">{connectedNetworkName}</Text>
+                </Shelf>
+              </Box>
+            </MenuItemGroup>
+
+            <MenuItemGroup>
+              {wallet && (
+                <Box px={2} py={1}>
+                  <Text variant="label2" color="textPrimary">
+                    Wallet
+                  </Text>
+                  <Shelf gap={1}>
+                    <Logo icon={wallet.logo.src} size="iconSmall" />
+                    <Text variant="interactive1">{wallet.title}</Text>
+                  </Shelf>
+                </Box>
+              )}
+              {connectedType === 'substrate' ? (
+                <MenuItem
+                  label="Switch account"
+                  icon={<IconSwitch size="iconSmall" />}
+                  minHeight={0}
                   onClick={() => {
                     state.close()
-                    selectAccount(acc.address)
+                    showAccounts()
                   }}
                 />
-                {proxies?.[acc.address]?.map((p) => (
-                  <MenuItem
-                    label={
-                      <Shelf alignItems="baseline" gap="5px">
-                        <Text
-                          variant="interactive2"
-                          color="inherit"
-                          style={{
-                            maxWidth: '100px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {acc.name || truncateAddress(acc.address)}
-                        </Text>
-                        <span>/</span>
-                        <span>{truncateAddress(p.delegator)}</span>
-                        <Text variant="label2">
-                          {p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}
-                        </Text>
-                      </Shelf>
-                    }
-                    sublabel={p.delegator}
-                    key={p.delegator}
-                    icon={
-                      <IdenticonWrapper>
-                        <Identicon value={p.delegator} size={24} theme="polkadot" />
-                      </IdenticonWrapper>
-                    }
-                    iconRight={
-                      selectedAccount.address === acc.address && proxy?.delegator === p.delegator ? (
-                        IconCheck
-                      ) : (
-                        <Box width={16} />
-                      )
-                    }
-                    onClick={() => {
-                      state.close()
-                      if (acc.address !== selectedAccount.address) selectAccount(acc.address)
-                      selectProxy(p.delegator)
-                    }}
-                  />
-                ))}
-              </MenuItemGroup>
-            ))}
+              ) : (
+                <MenuItem
+                  label="Switch wallet"
+                  icon={<IconSwitch size="iconSmall" />}
+                  minHeight={0}
+                  onClick={() => {
+                    state.close()
+                    showWallets(connectedNetwork, wallet)
+                  }}
+                />
+              )}
+            </MenuItemGroup>
+
             <MenuItemGroup>
               <MenuItem
                 label="Disconnect"
-                icon={<Box minWidth="iconMedium" />}
+                icon={<IconPower size="iconSmall" />}
+                minHeight={0}
                 onClick={() => {
                   state.close()
                   disconnect()
@@ -150,12 +228,8 @@ function Accounts() {
               />
             </MenuItemGroup>
           </Menu>
-        </div>
+        </Box>
       )}
     />
   )
 }
-
-const IdenticonWrapper = styled.div`
-  pointer-events: none;
-`

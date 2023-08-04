@@ -1,71 +1,116 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, TextAreaInput } from '@centrifuge/fabric'
-import { lastValueFrom } from '@polkadot/rpc-core/node_modules/rxjs'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
+import { lastValueFrom } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { LoanTemplate } from '../../../types'
-import { usePrefetchMetadata } from '../../../utils/useMetadata'
+import { useMetadata, usePrefetchMetadata } from '../../../utils/useMetadata'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
 
 const initialSchemaJSON = `{
-  "name":"Example asset template",
-  "options":{
-    "assetClasses":[],
-    "loanTypes":[],
-    "description":true,
-    "image":true
+  "options": {
+    "description": true,
+    "image": true
   },
-  "sections":[
+  "attributes": {
+    "key1": {
+      "label": "string value",
+      "type": {
+        "primitive": "string",
+        "statistics": "categorical",
+        "constructor": "String"
+      },
+      "input": {
+        "type": "text"
+      },
+      "output": null,
+      "public": true
+    },
+    "key2": {
+      "label": "number value",
+      "type": {
+        "primitive": "number",
+        "statistics": "categorical",
+        "constructor": "Number"
+      },
+      "input": {
+        "type": "number",
+        "unit": "%",
+        "min": 0,
+        "max": 100
+      },
+      "output": null,
+      "public": false
+    },
+    "key3": {
+      "label": "a date",
+      "type": {
+        "primitive": "string",
+        "statistics": "continuous",
+        "constructor": "Date"
+      },
+      "input": {
+        "type": "date"
+      },
+      "output": null,
+      "public": true
+    },
+    "key4": {
+      "label": "a currency value",
+      "type": {
+        "primitive": "string",
+        "statistics": "continuous",
+        "constructor": "Number"
+      },
+      "input": {
+        "type": "currency",
+        "symbol": "USD"
+      },
+      "output": null,
+      "public": true
+    },
+    "key5": {
+      "label": "A or B",
+      "type": {
+        "primitive": "string",
+        "statistics": "categorical",
+        "constructor": "String"
+      },
+      "input": {
+        "type": "single-select",
+        "options": ["A", "B"]
+      },
+      "output": null,
+      "public": true
+    }
+  },
+  "sections": [
     {
-      "name":"A public data section",
-      "public":true,
-      "attributes":[
-        {
-          "label":"Label 1",
-          "type":"percentage"
-        },
-        {
-          "label":"Label 2",
-          "type":"string",
-          "displayType":"single-select",
-          "options":["A","B"]
-        },
-        {
-          "label":"Label 3",
-          "type":"currency",
-          "currencySymbol":"USD",
-          "currencyDecimals": 6
-        },
-        {
-          "label":"Label 4",
-          "type":"timestamp"
-        }
+      "name": "A public data section",
+      "attributes": [
+        "key1",
+        "key3",
+        "key4",
+        "key5" 
       ]
     },
     {
-      "name":"A private data section",
-      "public":false,
-      "attributes":[
-        {
-          "label":"Label 5",
-          "type":"string"
-        },
-        {
-          "label":"Label 6",
-          "type":"decimal"
-        }
+      "name": "A private data section",
+      "attributes": [
+        "key2"
       ]
     }
   ]
 }`
 
-export const IssuerPoolCreateLoanTemplatePage: React.FC = () => {
+export function IssuerPoolCreateLoanTemplatePage() {
   return (
     <PageWithSideBar>
       <CreateLoanTemplate />
@@ -73,7 +118,7 @@ export const IssuerPoolCreateLoanTemplatePage: React.FC = () => {
   )
 }
 
-export const CreateLoanTemplate: React.FC = () => {
+export function CreateLoanTemplate() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
@@ -81,6 +126,8 @@ export const CreateLoanTemplate: React.FC = () => {
   const prefetchMetadata = usePrefetchMetadata()
   const [redirect, setRedirect] = React.useState('')
   const cent = useCentrifuge()
+  const { data: lastTemplateVersion } = useMetadata<LoanTemplate>(poolMetadata?.loanTemplates?.at(-1)?.id)
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
     'Create asset template',
@@ -102,9 +149,15 @@ export const CreateLoanTemplate: React.FC = () => {
         errors = setIn(errors, `metadata`, 'Must be a valid JSON string')
       } else {
         const obj: Partial<LoanTemplate> = JSON.parse(values.metadata)
-        const labels = obj?.sections?.flatMap((section) => section?.attributes.map((attr) => attr?.label)) ?? []
-        if (new Set(labels).size < labels.length) {
-          errors = setIn(errors, `metadata`, 'Attribute labels must be unique across sections')
+        const allSameVisibility = obj.sections?.every((section) =>
+          section.attributes.every((key) => {
+            const isPublic = obj.attributes?.[section.attributes[0]]?.public
+            const attr = obj.attributes?.[key]
+            return !!attr?.public === !!isPublic
+          })
+        )
+        if (!allSameVisibility) {
+          errors = setIn(errors, `metadata`, 'Attributes in a section must all be public or all be not public')
         }
       }
       return errors
@@ -124,12 +177,21 @@ export const CreateLoanTemplate: React.FC = () => {
 
       prefetchMetadata(templateMetadataHash.ipfsHash)
 
-      updateConfigTx([poolId, newPoolMetadata])
+      updateConfigTx([poolId, newPoolMetadata], { account })
       setSubmitting(false)
     },
   })
 
-  if (!poolMetadata) return null
+  React.useEffect(() => {
+    if (!lastTemplateVersion) return
+    form.resetForm()
+    form.setValues({ metadata: JSON.stringify(lastTemplateVersion, null, 2) }, false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastTemplateVersion])
+
+  if (!poolMetadata || (poolMetadata.loanTemplates?.[0] && !lastTemplateVersion)) return null
+
+  const isUpdating = !!poolMetadata.loanTemplates?.[0]
 
   if (redirect) {
     return <Redirect to={redirect} />
@@ -139,7 +201,7 @@ export const CreateLoanTemplate: React.FC = () => {
     <FormikProvider value={form}>
       <Form>
         <PageHeader
-          title="Create asset template"
+          title={`Version ${(poolMetadata.loanTemplates?.length ?? 0) + 1}`}
           subtitle={poolMetadata?.pool?.name}
           actions={
             <>
@@ -153,7 +215,7 @@ export const CreateLoanTemplate: React.FC = () => {
                 loadingMessage={isLoading ? 'Pending...' : undefined}
                 disabled={!form.isValid}
               >
-                Create
+                {isUpdating ? 'Update' : 'Create'}
               </Button>
             </>
           }

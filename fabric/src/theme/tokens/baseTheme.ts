@@ -12,6 +12,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     container: 1152,
     iconSmall: 16,
     iconMedium: 24,
+    iconRegular: 32,
     iconLarge: 40,
   },
   radii: {
@@ -29,8 +30,8 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     buttonActive: `4px 4px 1px var(--fabric-color-focus)`,
   },
   zIndices: {
-    sticky: 100,
-    overlay: 200,
+    sticky: 10,
+    overlay: 50,
     onTopOfTheWorld: 1000, // use sparingly, only for edge cases
   },
 }
