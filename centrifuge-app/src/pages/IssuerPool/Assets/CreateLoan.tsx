@@ -68,6 +68,7 @@ export type CreateLoanFormValues = {
     discountRate: number | ''
     maxBorrowQuantity: number | ''
     Isin: string
+    notional: number | ''
   }
 }
 
@@ -220,6 +221,7 @@ function IssuerCreateLoan() {
         discountRate: '',
         maxBorrowQuantity: '',
         Isin: '',
+        notional: '',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -234,6 +236,7 @@ function IssuerCreateLoan() {
                 : null,
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
+              interestRate: Rate.fromPercent(values.pricing.interestRate),
             }
           : {
               valuationMethod: values.pricing.valuationMethod,
