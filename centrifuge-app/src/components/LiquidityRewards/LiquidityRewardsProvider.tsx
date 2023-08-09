@@ -1,5 +1,5 @@
 import { Pool, TokenBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
@@ -16,6 +16,7 @@ export function LiquidityRewardsProvider(props: LiquidityRewardsProviderProps) {
 
 function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps) {
   const pool = usePool(poolId) as Pool
+  const consts = useCentrifugeConsts()
   const address = useAddress()
   const order = usePendingCollect(poolId, trancheId, address)
   const stakes = useAccountStakes(address, poolId, trancheId)
@@ -59,7 +60,10 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
     canStake,
     canUnstake,
     canClaim,
-    nativeCurrency: balances?.native.currency,
+    nativeCurrency: {
+      symbol: consts.chainSymbol,
+      decimals: consts.chainDecimals,
+    },
     isLoading: {
       claim: claim.isLoading,
       stake: stake.isLoading,
