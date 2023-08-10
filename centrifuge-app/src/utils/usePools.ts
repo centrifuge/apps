@@ -49,6 +49,18 @@ export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
+export function useAllTransactions(address?: string) {
+  const [result] = useCentrifugeQuery(
+    ['all transactions by address', address],
+    (cent) => cent.pools.getAllTransactions([address!]),
+    {
+      enabled: !!address,
+    }
+  )
+
+  return result
+}
+
 export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
     ['investorTransactions', poolId, trancheId, from, to],

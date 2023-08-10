@@ -1862,6 +1862,59 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getAllTransactions(args: [address: string]) {
+    const [address] = args
+
+    const $query = inst.getSubqueryObservable<{
+      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
+      borrowerTransactions: { nodes: { type: unknown; poolId: string }[] }
+    }>(
+      `query($address: String!) {
+        investorTransactions(filter: {
+          account: {
+            id: {
+              equalTo: $address
+            }
+          }
+        }) {
+          nodes {
+            type
+            poolId
+          }
+        }
+
+        borrowerTransactions(filter: {
+          account: {
+            id: {
+              equalTo: $address
+            }
+          }
+        }) {
+          nodes {
+            type
+            poolId
+          }
+        }
+      }
+    `,
+      {
+        address,
+      }
+    )
+    return $query.pipe(
+      map((data) => {
+        if (!data) {
+          return []
+        }
+
+        return {
+          investorTransactions: data.investorTransactions.nodes.map((entry) => entry),
+          borrowerTransactions: data.borrowerTransactions.nodes.map((entry) => entry),
+        }
+      })
+    )
+  }
+
   function getInvestorTransactions(args: [poolId: string, trancheId?: string, from?: Date, to?: Date]) {
     const [poolId, trancheId, from, to] = args
     const $api = inst.getApi()
@@ -2696,6 +2749,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
+    getAllTransactions,
   }
 }
 

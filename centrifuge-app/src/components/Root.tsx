@@ -31,6 +31,7 @@ import { EmailVerified } from '../pages/Onboarding/EmailVerified'
 import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
+import { PortfolioPage } from '../pages/Portfolio'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -196,6 +197,9 @@ function Routes() {
       </Route>
       <Route path="/pools">
         <PoolsPage />
+      </Route>
+      <Route path="/portfolio">
+        <PortfolioPage />
       </Route>
       <Route path="/disclaimer">
         <InvestmentDisclaimerPage />
