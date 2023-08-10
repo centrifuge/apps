@@ -14,7 +14,7 @@ export function SideNavigation({ items }: SideNavigationProps) {
   return (
     <SideNavigationContainer>
       {items.map(({ label, href, isActive }) => (
-        <SideNavigationItem href={href} isActive={isActive}>
+        <SideNavigationItem href={href} $isActive={isActive}>
           {label}
         </SideNavigationItem>
       ))}
@@ -30,12 +30,12 @@ export function SideNavigationContainer({ children }: { children: React.ReactNod
   )
 }
 
-export const SideNavigationItem = styled.a<{ isActive: boolean }>`
+export const SideNavigationItem = styled.a<{ $isActive: boolean }>`
   display: block;
   padding: 8px 16px;
   border-radius: 20px;
 
-  color: ${({ theme, isActive }) => (isActive ? theme.colors.textInverted : theme.colors.textPrimary)};
-  box-shadow: ${({ theme, isActive }) => (isActive ? theme.shadows.cardInteractive : 'none')};
-  background: ${({ theme, isActive }) => (isActive ? theme.colors.textSelected : 'transparent')};
+  color: ${({ theme, $isActive }) => ($isActive ? theme.colors.textInverted : theme.colors.textPrimary)};
+  box-shadow: ${({ theme, $isActive }) => ($isActive ? theme.shadows.cardInteractive : 'none')};
+  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.textSelected : 'transparent')};
 `
