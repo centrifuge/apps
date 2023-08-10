@@ -287,34 +287,32 @@ function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => v
           .map((acc) => {
             const actingAddress = acc.proxies?.at(-1)?.delegator || acc.multisig?.address || acc.signingAccount.address
             return (
-              <React.Fragment key={acc.signingAccount.address}>
-                <MenuItemGroup>
-                  <AccountButton
-                    address={actingAddress}
-                    icon={<AccountIcon id={actingAddress} />}
-                    label={<AccountName account={acc.signingAccount} proxies={acc.proxies} />}
-                    onClick={() => {
-                      onClose()
-                      selectAccount(
-                        acc.signingAccount.address,
-                        acc.proxies?.map((p) => p.delegator),
-                        acc.multisig?.address
-                      )
-                    }}
-                    selected={
-                      acc === selectedCombinedAccount ||
-                      (!selectedCombinedAccount &&
-                        selectedAddress === acc.signingAccount.address &&
-                        !acc.multisig &&
-                        !acc.proxies)
-                    }
-                    proxyRights={acc.proxies?.[0].types
-                      .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
-                      .join(' / ')}
-                    multisig={acc.multisig}
-                  />
-                </MenuItemGroup>
-              </React.Fragment>
+              <MenuItemGroup key={acc.signingAccount.address}>
+                <AccountButton
+                  address={actingAddress}
+                  icon={<AccountIcon id={actingAddress} />}
+                  label={<AccountName account={acc.signingAccount} proxies={acc.proxies} />}
+                  onClick={() => {
+                    onClose()
+                    selectAccount(
+                      acc.signingAccount.address,
+                      acc.proxies?.map((p) => p.delegator),
+                      acc.multisig?.address
+                    )
+                  }}
+                  selected={
+                    acc === selectedCombinedAccount ||
+                    (!selectedCombinedAccount &&
+                      selectedAddress === acc.signingAccount.address &&
+                      !acc.multisig &&
+                      !acc.proxies)
+                  }
+                  proxyRights={acc.proxies?.[0].types
+                    .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
+                    .join(' / ')}
+                  multisig={acc.multisig}
+                />
+              </MenuItemGroup>
             )
           })}
       </Card>
