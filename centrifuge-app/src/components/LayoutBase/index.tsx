@@ -41,7 +41,7 @@ export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
           <Menu />
         </ToolbarContainer>
 
-        <MainContainer as="main" px={PADDING_MAIN} pt={[2, 3, 7, 10]} pb={4}>
+        <MainContainer as="main" px={PADDING_MAIN} pt={3} pb={4}>
           {children}
         </MainContainer>
 
