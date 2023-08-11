@@ -32,6 +32,7 @@ import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { PortfolioPage } from '../pages/Portfolio'
+import { TransactionsPage } from '../pages/Portfolio/Transactions'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -197,6 +198,9 @@ function Routes() {
       </Route>
       <Route path="/pools">
         <PoolsPage />
+      </Route>
+      <Route path="/portfolio/transactions">
+        <TransactionsPage />
       </Route>
       <Route path="/portfolio">
         <PortfolioPage />

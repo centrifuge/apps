@@ -1,4 +1,13 @@
-import { Box, IconInvestments, IconNft, Menu as Panel, MenuItemGroup, Shelf, Stack } from '@centrifuge/fabric'
+import {
+  Box,
+  IconInvestments,
+  IconNft,
+  IconPieChart,
+  Menu as Panel,
+  MenuItemGroup,
+  Shelf,
+  Stack,
+} from '@centrifuge/fabric'
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
@@ -36,6 +45,11 @@ export function Menu() {
       )}
 
       <GovernanceMenu />
+
+      <PageLink to="/portfolio" stacked={!isXLarge}>
+        <IconPieChart />
+        Portfolio
+      </PageLink>
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isXLarge} stacked={!isXLarge} poolIds={pools.map(({ id }) => id)}>

@@ -1,9 +1,10 @@
 import { Box, Card, Grid, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { AddressTokens } from '../components/AddressTokens'
-import { AddressTransactions } from '../components/AddressTransactions'
-import { PageWithSideBar } from '../components/PageWithSideBar'
-import { useAddress } from '../utils/useAddress'
+import { Link } from 'react-router-dom'
+import { AddressTokens } from '../../components/AddressTokens'
+import { AddressTransactions } from '../../components/AddressTransactions'
+import { PageWithSideBar } from '../../components/PageWithSideBar'
+import { useAddress } from '../../utils/useAddress'
 
 export function PortfolioPage() {
   return (
@@ -42,7 +43,8 @@ function Portfolio() {
 
             <Box as="article" height={100}>
               <Text as="h2">Transaction history</Text>
-              <AddressTransactions />
+              <AddressTransactions count={4} />
+              <Link to="portfolio/transactions">View all</Link>
             </Box>
           </Grid>
 
@@ -52,7 +54,7 @@ function Portfolio() {
           </Box>
         </>
       ) : (
-        <Text as="strong">You need to connect a wallet to see your portfolio</Text>
+        <Text as="strong">You need to connect your wallet to see your portfolio</Text>
       )}
     </Stack>
   )
