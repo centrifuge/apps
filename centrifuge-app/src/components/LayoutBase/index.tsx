@@ -4,7 +4,7 @@ import { Footer } from '../Footer'
 import { LogoLink } from '../LogoLink'
 import { Menu } from '../Menu'
 import { OnboardingStatus } from '../OnboardingStatus'
-import { SidePanelProps } from '../SidePanel'
+import { SideDrawerProps } from '../SideDrawer'
 import {
   FooterContainer,
   HeaderBackground,
@@ -18,12 +18,12 @@ import {
 
 type LayoutBaseProps = {
   children?: React.ReactNode
-  sidePanel?: React.ReactElement<SidePanelProps>
+  sideDrawer?: React.ReactElement<SideDrawerProps>
 }
 
 const PADDING_MAIN = [2, 2, 3, 3, 5]
 
-export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
+export function LayoutBase({ children, sideDrawer }: LayoutBaseProps) {
   return (
     <Root>
       <Inner>
@@ -49,7 +49,7 @@ export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
           <Footer />
         </FooterContainer>
       </Inner>
-      {sidePanel}
+      {sideDrawer}
     </Root>
   )
 }
