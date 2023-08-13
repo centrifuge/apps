@@ -458,7 +458,7 @@ export type ActiveLoan = {
   normalizedDebt: CurrencyBalance
   outstandingDebt: CurrencyBalance
   presentValue: CurrencyBalance
-  interestAccrued: CurrencyBalance
+  outstandingInterest: CurrencyBalance
 }
 
 // transformed type for UI
@@ -2193,14 +2193,14 @@ export function getPoolsModule(inst: Centrifuge) {
           const activeLoansPortfolio: Record<
             string,
             {
-              interestAccrued: CurrencyBalance
+              outstandingInterest: CurrencyBalance
               presentValue: CurrencyBalance
             }
           > = {}
           ;(rawPortfolio as any).forEach(([key, value]: [Codec, Codec]) => {
             const data = value.toPrimitive() as any
             activeLoansPortfolio[String(key.toPrimitive())] = {
-              interestAccrued: new CurrencyBalance(data.interest_accrued, 27), // not sure
+              outstandingInterest: new CurrencyBalance(data.outstanding_interest, 27),
               presentValue: new CurrencyBalance(data.present_value, 27),
             }
           })
@@ -2377,7 +2377,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 originationDate: new Date(loan.originationDate * 1000).toISOString(),
                 outstandingDebt,
                 normalizedDebt: new CurrencyBalance(normalizedDebt, currency.decimals),
-                interestAccrued: portfolio.interestAccrued,
+                outstandingInterest: portfolio.outstandingInterest,
                 presentValue: portfolio.presentValue,
               }
             }
