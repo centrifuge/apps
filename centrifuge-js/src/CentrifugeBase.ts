@@ -113,7 +113,113 @@ const parachainTypes = {
       Staking: 'StakingCurrency',
     },
   },
+  InterestRate: {
+    _enum: {
+      Fixed: {
+        rate_per_year: 'u128',
+        compounding: {
+          _enum: {
+            Secondly: 'Secondly',
+          },
+        },
+      },
+    },
+  },
+  MaxBorrowAmount: {
+    _enum: {
+      UpToTotalBorrowed: { advance_rate: 'u128' },
+      UpToOutstandingDebt: { advance_rate: 'u128' },
+    },
+  },
+  ActiveInterestRate: {
+    interest_rate: 'InterestRate',
+    normalized_acc: 'u128',
+    penalty: 'u128',
+  },
+  ActiveLoan: {
+    schedule: {
+      maturity: {
+        _enum: {
+          Fixed: {
+            date: 'u64',
+            extension: 'u64',
+          },
+        },
+      },
+      interest_payments: {
+        _enum: {
+          None: null,
+        },
+      },
+      pay_down_schedule: {
+        _enum: {
+          None: null,
+        },
+      },
+    },
+    collateral: '(ClassId, InstanceId)',
+    restrictions: {
+      borrows: {
+        _enum: {
+          NotWrittenOff: 'NotWrittenOff',
+          FullOnce: 'FullOnce',
+        },
+      },
+      repayments: {
+        _enum: {
+          None: null,
+          Full: 'Full',
+        },
+      },
+    },
+    borrower: 'AccountId',
+    write_off_percentage: 'u128',
+    origination_date: 'u64',
+    pricing: {
+      _enum: {
+        Internal: {
+          info: {
+            collateral_value: 'u128',
+            valuation_method: {
+              _enum: {
+                DiscountedCashFlow: {
+                  probability_of_default: 'u128',
+                  loss_given_default: 'u128',
+                  discount_rate: 'InterestRate',
+                },
+                OutstandingDebt: 'OutstandingDebt',
+              },
+            },
+            max_borrow_amount: 'MaxBorrowAmount',
+          },
+          interest: 'ActiveInterestRate',
+        },
+        External: {
+          info: {
+            price_id: {
+              _enum: {
+                Isin: '[u8;12]',
+              },
+            },
+            max_borrow_amount: {
+              _enum: {
+                NoLimit: 'NoLimit',
+                Quantity: 'u128',
+              },
+            },
+            notional: 'u128',
+          },
+          outstanding_quantity: 'u128',
+          interest: 'ActiveInterestRate',
+        },
+      },
+    },
+    total_borrowed: 'u128',
+    total_repaid: 'u128',
+    repayments_on_schedule_until: 'u64',
+  },
   ActiveLoanInfo: {
+    active_loan: 'ActiveLoan',
     outstanding_principal: 'u128',
     outstanding_interest: 'u128',
     present_value: 'u128',
