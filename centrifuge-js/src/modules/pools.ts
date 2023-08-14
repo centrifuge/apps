@@ -2191,8 +2191,8 @@ export function getPoolsModule(inst: Centrifuge) {
           ;(rawPortfolio as any).forEach(([key, value]: [Codec, Codec]) => {
             const data = value.toPrimitive() as any
             activeLoansPortfolio[String(key.toPrimitive())] = {
-              outstandingPrincipal: new CurrencyBalance(data.outstanding_principal, 27), // not sure
-              outstandingInterest: new CurrencyBalance(data.outstanding_interest, 27), // not sure
+              outstandingPrincipal: new CurrencyBalance(data.outstanding_principal, 27), // not sure about the decimals
+              outstandingInterest: new CurrencyBalance(data.outstanding_interest, 27),
               presentValue: new CurrencyBalance(data.present_value, 27),
             }
           })
