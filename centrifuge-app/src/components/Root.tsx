@@ -83,6 +83,10 @@ const evmChains: EvmChains =
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
         },
+        43114: {
+          urls: ['https://api.avax.network/ext/bc/C/rpc'],
+          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
+        },
       }
     : {
         1: {
@@ -93,12 +97,21 @@ const evmChains: EvmChains =
           urls: [`https://goerli.infura.io/v3/${infuraKey}`],
           iconUrl: goerliLogo,
         },
+        43114: {
+          urls: ['https://api.avax.network/ext/bc/C/rpc'],
+          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
+        },
+        43113: {
+          urls: ['https://api.avax-test.network/ext/bc/C/rpc'],
+          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
+        },
       }
 
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
   const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
   const [showEvmOnSubstrate, setShowEvmOnSubstrate] = React.useState(!!initialFlagsState.showEvmOnSubstrate)
+  const [showAvalanche, setShowAvalanche] = React.useState(!!initialFlagsState.showAvalanche)
 
   return (
     <>
@@ -126,6 +139,7 @@ export function Root() {
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
               showAdvancedAccounts={showAdvancedAccounts}
               evmOnSubstrate={showEvmOnSubstrate}
+              showAvalanche={showAvalanche}
             >
               <OnboardingAuthProvider>
                 <OnboardingProvider>
@@ -134,6 +148,7 @@ export function Root() {
                       setIsThemeToggled(!!state.alternativeTheme)
                       setShowAdvancedAccounts(!!state.showAdvancedAccounts)
                       setShowEvmOnSubstrate(!!state.showEvmOnSubstrate)
+                      setShowAvalanche(!!state.showAvalanche)
                     }}
                   >
                     <TransactionProvider>
