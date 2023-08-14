@@ -521,7 +521,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
                 Collect{' '}
                 {formatBalance(
                   state.collectAmount,
-                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol,
                   2,
                   0
                 )}
@@ -692,7 +692,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
                 Collect{' '}
                 {formatBalance(
                   state.collectAmount,
-                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.nativeCurrency?.symbol,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol,
                   2,
                   0
                 )}
