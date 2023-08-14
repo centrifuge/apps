@@ -114,7 +114,8 @@ const parachainTypes = {
     },
   },
   ActiveLoanInfo: {
-    interest_accrued: 'u128',
+    outstanding_principal: 'u128',
+    outstanding_interest: 'u128',
     present_value: 'u128',
   },
 }
