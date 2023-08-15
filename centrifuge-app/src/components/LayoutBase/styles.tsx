@@ -1,11 +1,6 @@
-import { Box, Grid, Stack } from '@centrifuge/fabric'
+import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
 import styled from 'styled-components'
-
-const HEADER_HEIGHT = 60
-const TOOLBAR_HEIGHT = 50
-const LAYOUT_MAX_WIDTH = 1800
-const SIDEBAR_WIDTH = 80
-const SIDEBAR_WIDTH_EXTENDED = 220
+import { config } from './config'
 
 // the main breakpoint to switch from stacked to columns layout
 const BREAK_POINT_COLUMNS = 'M'
@@ -31,11 +26,10 @@ export const Root = styled(Box)`
 `
 
 export const Inner = styled(Grid)`
-  max-width: ${LAYOUT_MAX_WIDTH}px;
   min-height: 100%;
 
   align-items: start;
-  grid-template-rows: 0px ${HEADER_HEIGHT}px 1fr auto ${TOOLBAR_HEIGHT}px;
+  grid-template-rows: 0px ${config.HEADER_HEIGHT}px 1fr auto ${config.TOOLBAR_HEIGHT}px;
   grid-template-columns: auto 1fr;
   grid-template-areas:
     'header-background header-background'
@@ -45,8 +39,8 @@ export const Inner = styled(Grid)`
     'toolbar toolbar';
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
-    grid-template-rows: ${HEADER_HEIGHT}px minmax(max-content, 1fr) auto;
-    grid-template-columns: ${SIDEBAR_WIDTH}px 1fr;
+    grid-template-rows: ${config.HEADER_HEIGHT}px minmax(max-content, 1fr) auto;
+    grid-template-columns: ${config.SIDEBAR_WIDTH}px 1fr;
     grid-template-areas:
       'logo wallet'
       'toolbar main'
@@ -54,7 +48,7 @@ export const Inner = styled(Grid)`
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_SIDEBAR_EXTENDED]}) {
-    grid-template-columns: ${SIDEBAR_WIDTH_EXTENDED}px 1fr;
+    grid-template-columns: ${config.SIDEBAR_WIDTH_EXTENDED}px 1fr;
   }
 `
 
@@ -66,7 +60,7 @@ export const HeaderBackground = styled(Box)`
 
   grid-area: header-background;
   width: 100%;
-  height: ${HEADER_HEIGHT}px;
+  height: ${config.HEADER_HEIGHT}px;
 
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
   border-bottom: ${({ theme }) => `1px solid ${theme.colors.borderSecondary}`};
@@ -82,13 +76,13 @@ export const ToolbarContainer = styled(Box)`
   position: sticky;
   left: 0;
   bottom: 0;
-  height: ${TOOLBAR_HEIGHT}px;
+  height: ${config.TOOLBAR_HEIGHT}px;
 
   border-top: ${({ theme }) => `1px solid ${theme.colors.borderSecondary}`};
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
-    top: ${({ theme }) => theme.space[4] + HEADER_HEIGHT}px;
+    top: ${({ theme }) => theme.space[4] + config.HEADER_HEIGHT}px;
     bottom: auto;
     height: auto;
 
@@ -107,7 +101,7 @@ export const LogoContainer = styled(Stack)`
   top: 0;
 
   grid-area: logo;
-  height: ${HEADER_HEIGHT}px;
+  height: ${config.HEADER_HEIGHT}px;
   padding-left: ${({ theme }) => theme.space[2]}px;
   justify-content: center;
 
@@ -121,26 +115,25 @@ export const WalletContainer = styled(Stack)`
   z-index: ${({ theme }) => theme.zIndices.header};
   position: sticky;
   top: 0;
-
   grid-area: wallet;
-  justify-self: end;
-  align-self: center;
+  // WalletContainer & WalletPositioner are positioned above the main content and would block user interaction (click).
+  // disabling pointer-events here and enable again on WalletInner
+  pointer-events: none;
+`
+
+export const WalletPositioner = styled(Shelf)`
+  max-width: ${config.LAYOUT_MAX_WIDTH}px;
+  justify-content: flex-end;
+  align-items: flex-start;
+`
+
+export const WalletInner = styled(Stack)`
+  height: ${config.HEADER_HEIGHT}px;
   justify-content: center;
-
-  min-width: 200px;
-  height: ${HEADER_HEIGHT}px;
-
-  @media (min-width: ${({ theme }) => theme.breakpoints['S']}) {
-    min-width: 264px;
-  }
+  pointer-events: auto; // resetting pointer events
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
-    justify-content: start;
-    padding-top: ${({ theme }) => theme.space[2]}px;
-  }
-
-  @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_SIDEBAR_EXTENDED]}) {
-    padding-top: ${({ theme }) => theme.space[3]}px;
+    justify-content: flex-end;
   }
 `
 
@@ -149,7 +142,7 @@ export const MainContainer = styled(Box)`
   align-self: stretch;
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
-    margin-top: calc(${HEADER_HEIGHT}px * -1);
+    margin-top: calc(${config.HEADER_HEIGHT}px * -1);
     border-left: ${({ theme }) => `1px solid ${theme.colors.borderSecondary}`};
   }
 `
