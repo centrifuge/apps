@@ -36,7 +36,7 @@ async function getTinlakeUserRewards(ethAddr: string) {
 
   if (response?.ok) {
     const { data } = await response.json()
-    rewardBalances = data
+    ;({ rewardBalances } = data)
   } else {
     throw new Error(`Error occurred while fetching user rewards for user ${ethAddr}`)
   }
@@ -55,7 +55,7 @@ async function getTinlakeUserRewards(ethAddr: string) {
       : null
     transformed.totalEarnedRewards = new CurrencyBalance(new Decimal(rewardBalance.totalRewards).toFixed(0), 18)
     transformed.unlinkedRewards = new CurrencyBalance(new Decimal(rewardBalance.linkableRewards).toFixed(0), 18)
-    transformed.links = (rewardBalance.links as any[]).map((link: any) => ({
+    transformed.links = rewardBalance.links.map((link) => ({
       centAccountID: link.centAddress,
       earned: new CurrencyBalance(new Decimal(link.rewardsAccumulated).toFixed(0), 18),
     }))
