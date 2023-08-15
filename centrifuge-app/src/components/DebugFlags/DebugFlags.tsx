@@ -82,7 +82,7 @@ const Panel: React.FC<{
       {open && (
         <StyledOpenPanel width={400} gap="1">
           {Object.entries(flagsConfig).map(([key, obj]) => {
-            const used = usedKeys.has(key) || obj.alwaysShow
+            const used = usedKeys.has(key) || obj.type === 'component' || obj.alwaysShow
             const value = state[key as Key]
             const visible = used || !!showUnusedFlags
 
@@ -112,6 +112,8 @@ const Panel: React.FC<{
                   ))}
                 </select>
               )
+            } else if (obj.type === 'component') {
+              el = <obj.Component value={value} onChange={(val) => onChange(key as Key, val)} />
             } else {
               el = (
                 <input
