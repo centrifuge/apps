@@ -1,6 +1,6 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { formatBalance } from '../../utils/formatting'
 import { TinlakeTranche, useTinlakePortfolio } from '../../utils/tinlake/useTinlakePortfolio'
@@ -52,13 +52,7 @@ export function ClaimTinlakeRewards() {
   }
 
   if (activeLink?.claimable == null || activeLink?.claimed == null || claims == null) {
-    return (
-      <Box as={Card} p={2} pb={4}>
-        <Text as="strong" variant="body3">
-          Loading claimable rewards…
-        </Text>
-      </Box>
-    )
+    return null
   }
 
   const unclaimed = calcUnclaimed(activeLink)
@@ -125,7 +119,7 @@ export function ClaimTinlakeRewards() {
                   18
                 )
               )}{' '}
-              CFG
+              {consts.chainSymbol || 'CFG'}
             </Text>
           </Stack>
 

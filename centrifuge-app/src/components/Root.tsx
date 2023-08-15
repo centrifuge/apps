@@ -110,7 +110,6 @@ const evmChains: EvmChains =
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
   const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
-  const [showEvmOnSubstrate, setShowEvmOnSubstrate] = React.useState(!!initialFlagsState.showEvmOnSubstrate)
   const [showAvalanche, setShowAvalanche] = React.useState(!!initialFlagsState.showAvalanche)
 
   return (
@@ -138,7 +137,6 @@ export function Root() {
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
               showAdvancedAccounts={showAdvancedAccounts}
-              evmOnSubstrate={showEvmOnSubstrate}
               showAvalanche={showAvalanche}
             >
               <OnboardingAuthProvider>
@@ -147,7 +145,6 @@ export function Root() {
                     onChange={(state) => {
                       setIsThemeToggled(!!state.alternativeTheme)
                       setShowAdvancedAccounts(!!state.showAdvancedAccounts)
-                      setShowEvmOnSubstrate(!!state.showEvmOnSubstrate)
                       setShowAvalanche(!!state.showAvalanche)
                     }}
                   >

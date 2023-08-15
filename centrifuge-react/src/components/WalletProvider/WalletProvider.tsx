@@ -122,7 +122,6 @@ type WalletProviderProps = {
   walletConnectId?: string
   subscanUrl?: string
   showAdvancedAccounts?: boolean
-  evmOnSubstrate?: boolean
   showAvalanche?: boolean
 }
 
@@ -139,7 +138,6 @@ export function WalletProvider({
   walletConnectId,
   subscanUrl,
   showAdvancedAccounts,
-  evmOnSubstrate,
   showAvalanche,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
@@ -199,8 +197,8 @@ export function WalletProvider({
       firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
         return Object.fromEntries(
           Object.entries(proxies).map(([delegatee, ps]) => [
-            cent.utils.formatAddress(delegatee),
-            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+            utils.formatAddress(delegatee),
+            ps.map((p) => ({ ...p, delegator: utils.formatAddress(p.delegator) })),
           ])
         )
       }),
@@ -470,12 +468,7 @@ export function WalletProvider({
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog
-        evmChains={evmChains}
-        showAdvancedAccounts={showAdvancedAccounts}
-        evmOnSubstrate={evmOnSubstrate}
-        showAvalanche={showAvalanche}
-      />
+      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showAvalanche={showAvalanche} />
     </WalletContext.Provider>
   )
 }

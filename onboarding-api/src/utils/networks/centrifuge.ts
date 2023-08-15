@@ -1,7 +1,6 @@
 import Centrifuge, { CurrencyBalance, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { Keyring } from '@polkadot/keyring'
-import { hexToU8a, isHex } from '@polkadot/util'
-import { cryptoWaitReady, decodeAddress, encodeAddress } from '@polkadot/util-crypto'
+import { cryptoWaitReady, encodeAddress } from '@polkadot/util-crypto'
 import { Request } from 'express'
 import { combineLatest, combineLatestWith, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
@@ -175,18 +174,15 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
   return tx.txHash.toString()
 }
 
-// https://polkadot.js.org/docs/util-crypto/examples/validate-address/
 export const getValidSubstrateAddress = async (wallet: Request['wallet']) => {
   try {
+    const cent = getCentrifuge()
+    const centChainId = await cent.getChainId()
     if (wallet.network === 'evmOnSubstrate') {
-      const cent = getCentrifuge()
       const chainId = await firstValueFrom(cent.getApi().pipe(switchMap((api) => api.query.evmChainId.chainId())))
-      return cent.utils.formatAddress(evmToSubstrateAddress(wallet.address, Number(chainId.toString())))
+      return encodeAddress(evmToSubstrateAddress(wallet.address, Number(chainId.toString())), centChainId)
     }
-    const validAddress = encodeAddress(
-      isHex(wallet.address) ? hexToU8a(wallet.address) : decodeAddress(wallet.address),
-      getCentrifuge().getChainId()
-    )
+    const validAddress = encodeAddress(wallet.address, centChainId)
     return validAddress
   } catch (error) {
     throw new HttpError(400, 'Invalid substrate address')

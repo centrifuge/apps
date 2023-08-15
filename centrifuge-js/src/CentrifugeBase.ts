@@ -113,6 +113,10 @@ const parachainTypes = {
       Staking: 'StakingCurrency',
     },
   },
+  ActiveLoanInfo: {
+    interest_accrued: 'u128',
+    present_value: 'u128',
+  },
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
@@ -187,6 +191,37 @@ const parachainRuntimeApi: DefinitionsCall = {
       version: 1,
     },
   ],
+  LoansApi: [
+    {
+      methods: {
+        portfolio: {
+          description: 'Get active pool loan',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Vec<(u64, ActiveLoanInfo)>',
+        },
+        portfolio_loan: {
+          description: 'Get active pool loan',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+            {
+              name: 'loan_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Option<ActiveLoanInfo>',
+        },
+      },
+      version: 1,
+    },
+  ],
 }
 
 type Events = ISubmittableResult['events']
@@ -208,8 +243,8 @@ export class CentrifugeBase {
       this.config.network === 'centrifuge' ? this.config.centrifugeSubqueryUrl : this.config.altairSubqueryUrl
   }
 
-  getChainId() {
-    return this.config.network === 'centrifuge' ? 36 : 136
+  async getChainId() {
+    return this.getApiPromise().then((api) => api.registry.chainSS58 as number)
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {

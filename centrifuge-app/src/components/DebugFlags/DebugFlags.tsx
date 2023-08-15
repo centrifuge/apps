@@ -112,6 +112,8 @@ const Panel: React.FC<{
                   ))}
                 </select>
               )
+            } else if (obj.type === 'component') {
+              el = <obj.Component value={value} onChange={(val) => onChange(key as Key, val)} />
             } else {
               el = (
                 <input

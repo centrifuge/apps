@@ -29,7 +29,6 @@ import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
-  evmOnSubstrate?: boolean
   showAvalanche?: boolean
 }
 
@@ -39,7 +38,7 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, evmOnSubstrate, showAvalanche }: Props) {
+export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showAvalanche }: Props) {
   const evmChains = showAvalanche
     ? allEvmChains
     : Object.keys(allEvmChains)
@@ -67,10 +66,9 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, ev
   const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
 
   const sortedEvmWallets = sortEvmWallets(evm.connectors.filter((c) => c.shown))
-  const centWallets =
-    centEvmChainId && evmOnSubstrate
-      ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
-      : sortCentrifugeWallets(wallets)
+  const centWallets = centEvmChainId
+    ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
+    : sortCentrifugeWallets(wallets)
   const shownWallets = isCentChainSelected ? centWallets : selectedNetwork ? sortedEvmWallets : []
 
   function close() {

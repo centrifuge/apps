@@ -1,6 +1,7 @@
-import Centrifuge, { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Account, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { UserProvidedConfig } from '@centrifuge/centrifuge-js/dist/CentrifugeBase'
 import { ApiRx } from '@polkadot/api'
+import { encodeAddress } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
 import * as React from 'react'
 import { useQuery } from 'react-query'
@@ -90,6 +91,18 @@ export function useCentrifugeConsts() {
     identity: {
       basicDeposit: new CurrencyBalance(consts.identity.basicDeposit, chainDecimals),
       fieldDeposit: new CurrencyBalance(consts.identity.fieldDeposit, chainDecimals),
+    },
+  }
+}
+
+export function useCentrifugeUtils() {
+  const cent = useCentrifuge()
+  const consts = useCentrifugeConsts()
+
+  return {
+    ...cent.utils,
+    formatAddress(address: Account) {
+      return encodeAddress(address, consts.ss58Prefix)
     },
   }
 }
