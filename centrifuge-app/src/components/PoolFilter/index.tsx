@@ -22,7 +22,7 @@ export function PoolFilter({ pools }: PoolFilterProps) {
   }, [pools])
 
   return (
-    <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" px={2}>
+    <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" minWidth={900} px={2}>
       <Text as="span" variant="body3">
         Pool name
       </Text>
