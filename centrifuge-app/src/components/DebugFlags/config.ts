@@ -15,6 +15,7 @@ export type DebugFlagConfig =
       type: 'component'
       Component: React.FC<{ value: any; onChange: (v: any) => void }>
       default: null
+      alwaysShow?: boolean
     }
   | {
       type: 'checkbox'
@@ -110,5 +111,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'component',
     Component: ConvertEvmAddress,
     default: null,
+    alwaysShow: true,
   },
 }

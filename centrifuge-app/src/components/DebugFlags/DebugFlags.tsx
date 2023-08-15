@@ -82,7 +82,7 @@ const Panel: React.FC<{
       {open && (
         <StyledOpenPanel width={400} gap="1">
           {Object.entries(flagsConfig).map(([key, obj]) => {
-            const used = usedKeys.has(key) || obj.type === 'component' || obj.alwaysShow
+            const used = usedKeys.has(key) || obj.alwaysShow
             const value = state[key as Key]
             const visible = used || !!showUnusedFlags
 
