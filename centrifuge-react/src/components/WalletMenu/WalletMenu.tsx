@@ -21,7 +21,7 @@ import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
-import { useCentrifuge, useCentrifugeConsts } from '../CentrifugeProvider'
+import { useCentrifugeConsts, useCentrifugeUtils } from '../CentrifugeProvider'
 import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
@@ -48,8 +48,8 @@ export function WalletMenu({ menuItems }: WalletMenuProps) {
 
 function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
-  const centrifuge = useCentrifuge()
   const consts = useCentrifugeConsts()
+  const utils = useCentrifugeUtils()
   const ctx = useWallet()
   const {
     evm,
@@ -62,8 +62,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
     connectedNetworkName,
     isEvmOnSubstrate,
   } = ctx
-  const formattedAddress =
-    connectedType === 'evm' ? getAddress(evm.selectedAddress!) : centrifuge.utils.formatAddress(address)
+  const formattedAddress = connectedType === 'evm' ? getAddress(evm.selectedAddress!) : utils.formatAddress(address)
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? evm.selectedAddress! : undefined)
   const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
@@ -129,14 +128,14 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                 <Shelf gap={1} justifyContent="space-between">
                   <Shelf gap={1}>
                     <Text variant="interactive1" fontWeight={400}>
-                      {truncateAddress(isEvmOnSubstrate ? centrifuge.utils.formatAddress(address) : formattedAddress)}
+                      {truncateAddress(isEvmOnSubstrate ? utils.formatAddress(address) : formattedAddress)}
                     </Text>
                   </Shelf>
 
                   <Shelf gap="2px">
                     <IconButton
                       onClick={() =>
-                        copyToClipboard(isEvmOnSubstrate ? centrifuge.utils.formatAddress(address) : formattedAddress)
+                        copyToClipboard(isEvmOnSubstrate ? utils.formatAddress(address) : formattedAddress)
                       }
                       title="Copy address to clipboard"
                     >
