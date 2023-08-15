@@ -5,21 +5,21 @@ import { OverlayContainer, useModal, useOverlay, usePreventScroll } from '@react
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 
-export type SidePanelProps = {
+export type SideDrawerProps = {
   isOpen: boolean
   onClose: () => void
   children?: React.ReactNode
 }
 
-export function SidePanel(props: SidePanelProps) {
+export function SideDrawer(props: SideDrawerProps) {
   return props.isOpen ? (
     <OverlayContainer>
-      <SidePanelInner {...props} />
+      <SideDrawerInner {...props} />
     </OverlayContainer>
   ) : null
 }
 
-export function SidePanelInner({ children, isOpen, onClose }: SidePanelProps) {
+export function SideDrawerInner({ children, isOpen, onClose }: SideDrawerProps) {
   const theme = useTheme()
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)

@@ -9,7 +9,7 @@ type PoolListProps = {
 
 export function PoolList({ pools, isLoading }: PoolListProps) {
   return (
-    <Stack as="ul" role="list" gap={1} py={1}>
+    <Stack as="ul" role="list" gap={1} minWidth={900} py={1}>
       {isLoading
         ? Array(6)
             .fill(true)

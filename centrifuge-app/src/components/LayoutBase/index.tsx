@@ -4,7 +4,8 @@ import { Footer } from '../Footer'
 import { LogoLink } from '../LogoLink'
 import { Menu } from '../Menu'
 import { OnboardingStatus } from '../OnboardingStatus'
-import { SidePanelProps } from '../SidePanel'
+import { SideDrawerProps } from '../SideDrawer'
+import { config } from './config'
 import {
   FooterContainer,
   HeaderBackground,
@@ -14,16 +15,16 @@ import {
   Root,
   ToolbarContainer,
   WalletContainer,
+  WalletInner,
+  WalletPositioner,
 } from './styles'
 
 type LayoutBaseProps = {
   children?: React.ReactNode
-  sidePanel?: React.ReactElement<SidePanelProps>
+  sideDrawer?: React.ReactElement<SideDrawerProps>
 }
 
-const PADDING_MAIN = [2, 2, 3, 3, 5]
-
-export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
+export function LayoutBase({ children, sideDrawer }: LayoutBaseProps) {
   return (
     <Root>
       <Inner>
@@ -33,23 +34,25 @@ export function LayoutBase({ children, sidePanel }: LayoutBaseProps) {
           <LogoLink />
         </LogoContainer>
 
-        <WalletContainer mr={PADDING_MAIN}>
-          <WalletMenu menuItems={[<OnboardingStatus />]} />
+        <WalletContainer px={config.PADDING_MAIN}>
+          <WalletPositioner>
+            <WalletInner minWidth={config.WALLET_WIDTH}>
+              <WalletMenu menuItems={[<OnboardingStatus />]} />
+            </WalletInner>
+          </WalletPositioner>
         </WalletContainer>
 
         <ToolbarContainer as="aside">
           <Menu />
         </ToolbarContainer>
 
-        <MainContainer as="main" px={PADDING_MAIN} pt={[2, 3, 7, 10]} pb={4}>
-          {children}
-        </MainContainer>
+        <MainContainer as="main">{children}</MainContainer>
 
         <FooterContainer>
           <Footer />
         </FooterContainer>
       </Inner>
-      {sidePanel}
+      {sideDrawer}
     </Root>
   )
 }

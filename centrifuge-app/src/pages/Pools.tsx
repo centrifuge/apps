@@ -53,8 +53,8 @@ function Pools() {
   }
 
   return (
-    <Box overflow="auto">
-      <Stack gap={1} minWidth={900}>
+    <Stack gap={1}>
+      <Box overflow="auto">
         <PoolFilter pools={pools} />
 
         {!filteredPools.length ? (
@@ -66,8 +66,8 @@ function Pools() {
         ) : (
           <PoolList pools={filteredPools} isLoading={metadataIsLoading} />
         )}
-      </Stack>
-    </Box>
+      </Box>
+    </Stack>
   )
 }
 

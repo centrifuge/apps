@@ -20,7 +20,7 @@ export function MenuSwitch() {
   return (
     <SideNavigationContainer>
       {links.map(({ to, label }) => (
-        <SideNavigationItem key={to} as={Link} to={to} isActive={pathname === to}>
+        <SideNavigationItem key={to} as={Link} to={to} $isActive={pathname === to}>
           {label}
         </SideNavigationItem>
       ))}
