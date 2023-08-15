@@ -197,8 +197,8 @@ export function WalletProvider({
       firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
         return Object.fromEntries(
           Object.entries(proxies).map(([delegatee, ps]) => [
-            cent.utils.formatAddress(delegatee),
-            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+            utils.formatAddress(delegatee),
+            ps.map((p) => ({ ...p, delegator: utils.formatAddress(p.delegator) })),
           ])
         )
       }),
