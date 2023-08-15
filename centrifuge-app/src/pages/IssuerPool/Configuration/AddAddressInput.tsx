@@ -1,5 +1,5 @@
 import { isSameAddress } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Button, Grid, SearchInput, Shelf, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import { useState } from 'react'
@@ -14,10 +14,10 @@ export function AddAddressInput({
 }) {
   const [address, setAddress] = useState('')
 
-  const cent = useCentrifuge()
+  const utils = useCentrifugeUtils()
   let truncated
   try {
-    truncated = truncate(cent.utils.formatAddress(address))
+    truncated = truncate(utils.formatAddress(address))
   } catch (e) {
     //
   }

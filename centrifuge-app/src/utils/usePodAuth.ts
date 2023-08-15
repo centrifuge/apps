@@ -1,5 +1,10 @@
-import { CombinedSubstrateAccount, useCentrifuge, useCentrifugeApi, useWallet } from '@centrifuge/centrifuge-react'
-import { encodeAddress } from '@polkadot/util-crypto'
+import {
+  CombinedSubstrateAccount,
+  useCentrifuge,
+  useCentrifugeApi,
+  useCentrifugeUtils,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import { useMutation, useQuery } from 'react-query'
 import { useSuitableAccounts } from './usePermissions'
 import { usePodUrl } from './usePools'
@@ -13,6 +18,7 @@ export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAc
   const account = accountOverride || selectedCombinedAccount || suitableAccounts[0]
   const cent = useCentrifuge()
   const api = useCentrifugeApi()
+  const utils = useCentrifugeUtils()
 
   const proxy = account?.proxies?.at(-1)
   const proxyType = proxy?.types.includes('Any')
@@ -43,12 +49,12 @@ export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAc
         const { address, signer } = account.signingAccount
 
         const { token, payload } = await cent.auth.generateJw3t(
-          encodeAddress(address, api.registry.chainSS58),
+          utils.formatAddress(address),
           // @ts-ignore
           signer,
           proxy
             ? {
-                onBehalfOf: encodeAddress(proxy.delegator, api.registry.chainSS58),
+                onBehalfOf: utils.formatAddress(proxy.delegator),
                 proxyType,
               }
             : undefined
