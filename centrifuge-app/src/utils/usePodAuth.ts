@@ -1,10 +1,4 @@
-import {
-  CombinedSubstrateAccount,
-  useCentrifuge,
-  useCentrifugeApi,
-  useCentrifugeUtils,
-  useWallet,
-} from '@centrifuge/centrifuge-react'
+import { CombinedSubstrateAccount, useCentrifuge, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import { useMutation, useQuery } from 'react-query'
 import { useSuitableAccounts } from './usePermissions'
 import { usePodUrl } from './usePools'
@@ -17,7 +11,6 @@ export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAc
   const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
   const account = accountOverride || selectedCombinedAccount || suitableAccounts[0]
   const cent = useCentrifuge()
-  const api = useCentrifugeApi()
   const utils = useCentrifugeUtils()
 
   const proxy = account?.proxies?.at(-1)
