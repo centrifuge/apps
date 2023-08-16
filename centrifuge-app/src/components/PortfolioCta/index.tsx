@@ -20,7 +20,7 @@ export function PortfolioCta() {
   const consts = useCentrifugeConsts()
   const [, listedTokens] = useListedPools()
 
-  const stakes = balances?.tranches.map(({ poolId, trancheId }) => ({ poolId, trancheId }))
+  const stakes = balances?.tranches.map(({ poolId, trancheId }) => ({ poolId, trancheId })) ?? []
   const rewards = useComputeLiquidityRewards(address, stakes)
 
   const currencies = balances?.currencies.map(({ balance }) => balance.toDecimal()) ?? []
