@@ -1,4 +1,4 @@
-import { useCentrifugeQueries, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 
@@ -48,19 +48,15 @@ export function useRewardCurrencyGroup(poolId?: string, trancheId?: string) {
 }
 
 export function useComputeLiquidityRewards(address?: string, tranches?: { poolId: string; trancheId: string }[]) {
-  const [results] = useCentrifugeQueries(
-    tranches!.map(
-      ({ poolId, trancheId }) => ({
-        queryKey: ['compute liquidity rewards', address, poolId, trancheId],
-        queryCallback: (cent) => cent.rewards.computeReward([address!, poolId!, trancheId!, 'Liquidity']),
-      }),
-      {
-        enabled: !!address && !!tranches && tranches.length > 0,
-      }
-    )
+  const [result] = useCentrifugeQuery(
+    ['compute liquidity rewards', address, tranches?.map(({ trancheId }) => trancheId).join('')],
+    (cent) => cent.rewards.computeReward([address!, tranches!, 'Liquidity']),
+    {
+      enabled: !!address && !!tranches && tranches.length > 0,
+    }
   )
 
-  return results.filter(Boolean).reduce((a, b) => a?.add(b || Dec(0)), Dec(0)) ?? Dec(0)
+  return result ?? Dec(0)
 }
 
 // list of all staked currencyIds
