@@ -32,6 +32,7 @@ const verifyWalletInput = object({
   }),
   nonce: string().required(),
   network: string().oneOf(['evm', 'substrate', 'evmOnSubstrate']) as StringSchema<SupportedNetworks>,
+  chainId: string().required(),
 })
 
 export const authenticateWalletController = async (
@@ -56,7 +57,7 @@ export const authenticateWalletController = async (
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 export async function verifySubstrateWallet(req: Request, res: Response): Promise<Request['wallet']> {
   const { jw3t: token, nonce } = req.body
-  const { verified, payload } = await await getCentrifuge().auth.verify(token!)
+  const { verified, payload } = await getCentrifuge().auth.verify(token!)
 
   const onBehalfOf = payload?.on_behalf_of
   const address = payload.address
@@ -85,11 +86,12 @@ export async function verifySubstrateWallet(req: Request, res: Response): Promis
   return {
     address,
     network: payload.network || 'substrate',
+    chainId: payload.chainId,
   }
 }
 
 export async function verifyEthWallet(req: Request, res: Response): Promise<Request['wallet']> {
-  const { message, signature, address, nonce, network } = req.body
+  const { message, signature, address, nonce, network, chainId } = req.body
 
   if (!isAddress(address)) {
     throw new HttpError(400, 'Invalid address')
@@ -106,5 +108,6 @@ export async function verifyEthWallet(req: Request, res: Response): Promise<Requ
   return {
     address: decodedMessage.data.address,
     network,
+    chainId,
   }
 }

@@ -16,7 +16,7 @@ const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonP
 export function OnboardingAuthProvider({ children }: { children: React.ReactNode }) {
   const {
     substrate: { selectedWallet, selectedProxies, selectedAccount, evmChainId },
-    evm: { selectedAddress },
+    evm: { selectedAddress, ...evm },
     isEvmOnSubstrate,
   } = useWallet()
   const cent = useCentrifuge()
@@ -53,7 +53,7 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
       } else if (isEvmOnSubstrate && selectedAddress && provider?.getSigner()) {
         await loginWithEvm(selectedAddress, provider.getSigner(), evmChainId)
       } else if (selectedAddress && provider?.getSigner()) {
-        await loginWithEvm(selectedAddress, provider.getSigner())
+        await loginWithEvm(selectedAddress, provider.getSigner(), evm.chainId)
       }
       throw new Error('network not supported')
     } catch {
@@ -175,13 +175,14 @@ const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], 
     const { token, payload } = await cent.auth.generateJw3t(address, signer)
 
     if (token) {
+      const centChainId = await cent.getChainId()
       const authTokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ jw3t: token, nonce, network: 'substrate' }),
+        body: JSON.stringify({ jw3t: token, nonce, network: 'substrate', chainId: centChainId }),
       })
       if (authTokenRes.status !== 200) {
         throw new Error('Failed to authenticate wallet')
@@ -216,7 +217,7 @@ Please sign to authenticate your wallet
 
 URI: ${origin}
 Version: 1
-Chain ID: ${evmChainId ? evmChainId : import.meta.env.REACT_APP_TINLAKE_NETWORK === 'mainnet' ? 1 : 5 /* goerli */}
+Chain ID: ${evmChainId || 1}
 Nonce: ${nonce}
 Issued At: ${new Date().toISOString()}`
 
@@ -232,7 +233,8 @@ Issued At: ${new Date().toISOString()}`
       signature: signedMessage,
       address,
       nonce,
-      network: evmChainId ? 'evmOnSubstrate' : 'evm',
+      network: evmChainId === 2000 ? 'evmOnSubstrate' : 'evm',
+      chainId: evmChainId || 1,
     }),
   })
   if (tokenRes.status !== 200) {
