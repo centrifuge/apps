@@ -26,7 +26,7 @@ import css from '@styled-system/css'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
@@ -64,7 +64,7 @@ type Props = {
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
 
-export function InvestRedeem({ networks = ['centrifuge'], ...rest }: Props) {
+export function InvestRedeem({ networks = ['centrifuge', 43114, 43113], ...rest }: Props) {
   const getNetworkName = useGetNetworkName()
   return (
     <LoadBoundary>
@@ -142,6 +142,7 @@ function useAllowedTranches(poolId: string) {
 }
 
 function InvestRedeemState(props: Props) {
+  const { connectedNetwork } = useWallet()
   const { poolId, trancheId: trancheIdProp, onSetTrancheId, actionsRef } = props
   const allowedTranches = useAllowedTranches(poolId)
   const pool = usePool(poolId)
@@ -166,6 +167,9 @@ function InvestRedeemState(props: Props) {
     setTrancheId(id)
   }
 
+  if (typeof connectedNetwork === 'number' && [43113, 43114].includes(connectedNetwork)) {
+    return <OnboardingButton networks={[43113, 43114]} />
+  }
   return (
     <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
       <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
@@ -313,15 +317,25 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
 const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
   const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
-  const pool = usePool(state.poolId)
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
+  const history = useHistory()
+
+  if (!state)
+    return (
+      <Stack as={Card} gap={2} p={2}>
+        <Text variant="body1">Onboarding with Avalanche is still a work in progress.</Text>
+        <Button onClick={() => history.push(`/onboarding?poolId=${poolId}&trancheId=${pool.tranches[0].id}`)}>
+          Onboard to junior (beta)
+        </Button>
+      </Stack>
+    )
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
-  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'closed'
+  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state?.trancheId]?.openForOnboarding ? 'open' : 'closed'
   const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
-
-  const history = useHistory()
 
   const getOnboardingButtonText = () => {
     if (connectedType) {
