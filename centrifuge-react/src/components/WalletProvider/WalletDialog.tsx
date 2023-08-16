@@ -29,6 +29,7 @@ import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
+  showAvalanche?: boolean
 }
 
 const title = {
@@ -37,7 +38,15 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({ evmChains, showAdvancedAccounts }: Props) {
+export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showAvalanche }: Props) {
+  const evmChains = showAvalanche
+    ? allEvmChains
+    : Object.keys(allEvmChains)
+        .filter((chain) => !['43114', '43113'].includes(chain))
+        .reduce((obj, key) => {
+          obj[key] = allEvmChains[key]
+          return obj
+        }, {})
   const ctx = useWallet()
   const centEvmChainId = useCentEvmChainId()
   const {

@@ -83,6 +83,10 @@ const evmChains: EvmChains =
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
         },
+        43114: {
+          urls: ['https://api.avax.network/ext/bc/C/rpc'],
+          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
+        },
       }
     : {
         1: {
@@ -93,11 +97,20 @@ const evmChains: EvmChains =
           urls: [`https://goerli.infura.io/v3/${infuraKey}`],
           iconUrl: goerliLogo,
         },
+        43114: {
+          urls: ['https://api.avax.network/ext/bc/C/rpc'],
+          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
+        },
+        43113: {
+          urls: ['https://api.avax-test.network/ext/bc/C/rpc'],
+          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
+        },
       }
 
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
   const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
+  const [showAvalanche, setShowAvalanche] = React.useState(!!initialFlagsState.showAvalanche)
 
   return (
     <>
@@ -124,6 +137,7 @@ export function Root() {
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
               showAdvancedAccounts={showAdvancedAccounts}
+              showAvalanche={showAvalanche}
             >
               <OnboardingAuthProvider>
                 <OnboardingProvider>
@@ -131,6 +145,7 @@ export function Root() {
                     onChange={(state) => {
                       setIsThemeToggled(!!state.alternativeTheme)
                       setShowAdvancedAccounts(!!state.showAdvancedAccounts)
+                      setShowAvalanche(!!state.showAvalanche)
                     }}
                   >
                     <TransactionProvider>
