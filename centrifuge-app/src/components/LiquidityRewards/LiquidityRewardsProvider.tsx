@@ -20,7 +20,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
   const address = useAddress()
   const order = usePendingCollect(poolId, trancheId, address)
   const stakes = useAccountStakes(address, poolId, trancheId)
-  const rewards = useComputeLiquidityRewards(address, poolId, trancheId)
+  const rewards = useComputeLiquidityRewards(address, [{ poolId, trancheId }])
   const balances = useBalances(address)
   const countdown = useClaimCountdown()
   const rewardCurrencyGroup = useRewardCurrencyGroup(poolId, trancheId)

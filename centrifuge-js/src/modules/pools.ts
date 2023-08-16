@@ -2057,7 +2057,12 @@ export function getPoolsModule(inst: Centrifuge) {
 
             rawBalances.forEach(([rawKey, rawValue]) => {
               const key = parseCurrencyKey((rawKey.toHuman() as any)[1] as CurrencyKey)
-              const value = rawValue.toJSON() as { free: string | number }
+              const value = rawValue.toJSON() as {
+                free: string | number
+                reserved: string | number
+                frozen: string | number
+              }
+
               const currency = findCurrency(currencies, key)
 
               if (!currency) return
@@ -2065,19 +2070,23 @@ export function getPoolsModule(inst: Centrifuge) {
               if (typeof key !== 'string' && 'Tranche' in key) {
                 const [pid, trancheId] = key.Tranche
                 const poolId = pid.replace(/\D/g, '')
-                if (value.free !== 0) {
+                if (value.free !== 0 || value.reserved !== 0) {
+                  const balance = hexToBN(value.free).add(hexToBN(value.reserved))
+
                   balances.tranches.push({
                     currency,
                     poolId,
                     trancheId,
-                    balance: new TokenBalance(hexToBN(value.free), currency.decimals),
+                    balance: new TokenBalance(balance, currency.decimals),
                   })
                 }
               } else {
-                if (value.free !== 0) {
+                if (value.free !== 0 || value.reserved !== 0) {
+                  const balance = hexToBN(value.free).add(hexToBN(value.reserved))
+
                   balances.currencies.push({
                     currency,
-                    balance: new CurrencyBalance(hexToBN(value.free), currency.decimals),
+                    balance: new CurrencyBalance(balance, currency.decimals),
                   })
                 }
               }

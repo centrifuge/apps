@@ -1,8 +1,15 @@
-import { useBalances } from '@centrifuge/centrifuge-react'
+import { ActiveLoan } from '@centrifuge/centrifuge-js'
+import { useBalances, useCentrifugeConsts } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
+import { config } from '../../config'
+import { Dec } from '../../utils/Decimal'
+import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
+import { useListedPools } from '../../utils/useListedPools'
+import { useLoansAcrossPools } from '../../utils/useLoans'
+import { useComputeLiquidityRewards } from '../LiquidityRewards/hooks'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { Cubes } from './Cubes'
 
@@ -10,20 +17,41 @@ export function PortfolioCta() {
   const { colors } = useTheme()
   const address = useAddress()
   const balances = useBalances(address)
-  console.log('balances', balances)
+  const consts = useCentrifugeConsts()
+  const [, listedTokens] = useListedPools()
+
+  const stakes = balances?.tranches.map(({ poolId, trancheId }) => ({ poolId, trancheId }))
+  const rewards = useComputeLiquidityRewards(address, stakes)
+
+  const currencies = balances?.currencies.map(({ balance }) => balance.toDecimal()) ?? []
+  const tranches =
+    balances?.tranches.map(({ balance, trancheId }) => {
+      const token = listedTokens.find(({ id }) => id === trancheId)
+      return balance.toDecimal().mul(token?.tokenPrice?.toDecimal() ?? Dec(0))
+    }) ?? []
+  const investedValue = [...currencies, ...tranches].reduce((a, b) => a.add(b), Dec(0))
+
+  const pools = balances?.tranches.map(({ poolId }) => poolId) ?? []
+  const loans = useLoansAcrossPools(pools) ?? []
+  const activeLoans = loans?.filter(({ status }) => status === 'Active') as ActiveLoan[]
+  const accruedInterest = activeLoans
+    .map(({ interestAccrued }) => interestAccrued.toDecimal())
+    .reduce((a, b) => a.add(b), Dec(0))
 
   const terms = [
     {
       title: 'Portfolio value',
-      value: '231,552 USD',
+      value: investedValue.gte(1000)
+        ? formatBalanceAbbreviated(investedValue, config.baseCurrency)
+        : formatBalance(investedValue, config.baseCurrency),
     },
     {
       title: 'Accrued interest',
-      value: '231,552 USD',
+      value: formatBalance(accruedInterest, config.baseCurrency),
     },
     {
       title: 'CFG rewards',
-      value: '231,552 USD',
+      value: formatBalance(rewards, consts.chainSymbol, 2),
     },
   ]
 
