@@ -1866,9 +1866,42 @@ export function getPoolsModule(inst: Centrifuge) {
     const [address] = args
 
     const $query = inst.getSubqueryObservable<{
-      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
-      borrowerTransactions: { nodes: { type: unknown; poolId: string }[] }
-      outstandingOrders: { nodes: { poolId: string }[] }
+      investorTransactions: {
+        nodes: {
+          timestamp: string
+          type: string
+          pool: {
+            metadata: string
+          }
+          tranche: {
+            id: string
+            tokenPrice: string
+          }
+        }[]
+      }
+      borrowerTransactions: {
+        nodes: {
+          timestamp: string
+          type: unknown
+          pool: {
+            metadata: string
+          }
+        }[]
+      }
+      outstandingOrders: {
+        nodes: {
+          timestamp: string
+          pool: {
+            metadata: string
+          }
+          tranche: {
+            id: string
+            tokenPrice: string
+          }
+          redeemAmount: string
+          investAmount: string
+        }[]
+      }
     }>(
       `query($address: String!) {
         investorTransactions(filter: {
@@ -1877,8 +1910,15 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         }) {
           nodes {
+            timestamp
             type
-            poolId
+            pool {
+              metadata
+            }
+            tranche {
+              id
+              tokenPrice
+            }
           }
         }
 
@@ -1889,7 +1929,11 @@ export function getPoolsModule(inst: Centrifuge) {
         }) {
           nodes {
             type
-            poolId
+            pool {
+              metadata
+            }
+            timestamp
+            amount
           }
         }
 
@@ -1899,7 +1943,16 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         }) {
           nodes {
-            poolId
+            timestamp
+            pool {
+              metadata
+            }
+            tranche {
+              id
+              tokenPrice
+            }
+            redeemAmount
+            investAmount
           }
         }
       }
@@ -1910,14 +1963,10 @@ export function getPoolsModule(inst: Centrifuge) {
     )
     return $query.pipe(
       map((data) => {
-        if (!data) {
-          return []
-        }
-
         return {
-          investorTransactions: data.investorTransactions.nodes.map((entry) => entry),
-          borrowerTransactions: data.borrowerTransactions.nodes.map((entry) => entry),
-          outstandingOrders: data.outstandingOrders.nodes.map((entry) => entry),
+          investorTransactions: data?.investorTransactions.nodes.map((entry) => entry) ?? [],
+          borrowerTransactions: data?.borrowerTransactions.nodes.map((entry) => entry) ?? [],
+          outstandingOrders: data?.outstandingOrders.nodes.map((entry) => entry) ?? [],
         }
       })
     )
