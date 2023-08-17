@@ -1,4 +1,5 @@
 import BN from 'bn.js'
+import { forkJoin } from 'rxjs'
 import { combineLatestWith, filter, map, repeat, switchMap } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { RewardDomain } from '../CentrifugeBase'
@@ -6,9 +7,10 @@ import { Account, TransactionOptions } from '../types'
 import { TokenBalance } from '../utils/BN'
 
 export function getRewardsModule(inst: Centrifuge) {
-  function computeReward(args: [address: Account, poolId: string, trancheId: string, rewardDomain: RewardDomain]) {
-    const [address, poolId, trancheId, rewardDomain] = args
-    const currencyId = { Tranche: [poolId, trancheId] }
+  function computeReward(
+    args: [address: Account, tranches: { poolId: string; trancheId: string }[], rewardDomain: RewardDomain]
+  ) {
+    const [address, tranches, rewardDomain] = args
 
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
@@ -18,11 +20,19 @@ export function getRewardsModule(inst: Centrifuge) {
     )
 
     return inst.getApi().pipe(
-      switchMap((api) => api.call.rewardsApi.computeReward(rewardDomain, currencyId, address)),
+      switchMap((api) => {
+        const computeRewardObservables = tranches.map(({ poolId, trancheId }) =>
+          api.call.rewardsApi.computeReward(rewardDomain, { Tranche: [poolId, trancheId] }, address)
+        )
+        return forkJoin(computeRewardObservables)
+      }),
       map((data) => {
-        const reward = data?.toPrimitive() as string
+        const rewards = data
+          ?.map((entry) => entry.toPrimitive() as string)
+          .map((entry) => new BN(entry))
+          .reduce((a, b) => a.add(b), new BN(0))
 
-        return reward ? new TokenBalance(reward, 18).toDecimal() : null
+        return data ? new TokenBalance(rewards, 18).toDecimal() : null
       }),
       repeat({ delay: () => $events })
     )

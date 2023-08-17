@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { AddressTokens } from '../../components/AddressTokens'
 import { AddressTransactions } from '../../components/AddressTransactions'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
+import { PortfolioRewards } from '../../components/PortfolioRewards'
 import { useAddress } from '../../utils/useAddress'
 
 export function PortfolioPage() {
@@ -26,14 +27,12 @@ function Portfolio() {
 
       {!!address ? (
         <>
-          <Grid gridTemplateColumns={['2fr 1fr']} gap={4}>
-            <Card as="article" height={100}>
+          <Grid gridTemplateColumns={['1.5fr 1fr']} gap={4}>
+            <Card as="article">
               <Text as="h2">Portfolio stats</Text>
             </Card>
 
-            <Card as="article" height={100}>
-              <Text as="h2">CFG rewards</Text>
-            </Card>
+            <PortfolioRewards />
           </Grid>
 
           <Grid columns={2} equalColumns gap={4}>
