@@ -1,5 +1,5 @@
 import { userCollection } from '../../database'
-import { HttpError } from '../../utils/httpError'
+import { reportHttpError } from '../../utils/httpError'
 
 /**
  *
@@ -19,6 +19,7 @@ import { HttpError } from '../../utils/httpError'
  * This migration needs to be run in the prod database when the next release goes out. Then this method can be deleted.
  */
 export const migrateWalletsController = async (req, res) => {
+  let failedMigrations = 0
   try {
     const userSanpshot = await userCollection.get()
     const users = userSanpshot?.docs.map((doc) => {
@@ -27,36 +28,41 @@ export const migrateWalletsController = async (req, res) => {
 
     for (const user of users) {
       const { wallet, ...rest } = user
-      const [newWallets] = wallet.map((wal) => {
-        if (wal.network === 'evm') {
+      if (wallet?.length > 0) {
+        const [newWallets] = wallet.map((wal) => {
+          if (wal.network === 'evm') {
+            return {
+              evm: [wal.address],
+              substrate: [],
+              evmOnSubstrate: [],
+            }
+          } else if (wal.network === 'substrate') {
+            return {
+              evm: [],
+              substrate: [wal.address],
+              evmOnSubstrate: [],
+            }
+          }
           return {
-            evm: [wal.address],
+            evm: [],
             substrate: [],
             evmOnSubstrate: [],
           }
-        } else if (wal.network === 'substrate') {
-          return {
-            evm: [],
-            substrate: [wal.address],
-            evmOnSubstrate: [],
-          }
+        })
+        const theUser = {
+          ...rest,
+          wallets: newWallets,
         }
-        return {
-          evm: [],
-          substrate: [],
-          evmOnSubstrate: [],
-        }
-      })
-      const theUser = {
-        ...rest,
-        wallets: newWallets,
+        await userCollection.doc(wallet[0].address).set(theUser)
+      } else {
+        failedMigrations = failedMigrations + 1
+        console.log(`user wallet not found or already migrated: ${JSON.stringify(user)}`)
       }
-      await userCollection.doc(wallet[0].address).set(theUser)
     }
 
-    return res.json({ complete: true })
+    return res.json({ complete: true, failedMigrations, totalUsers: users.length })
   } catch (e) {
-    // @ts-expect-error
-    throw new HttpError(500, e.message)
+    const error = reportHttpError(e)
+    return res.status(error.code).send({ error: error.message })
   }
 }

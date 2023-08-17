@@ -29,7 +29,7 @@ import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
-  evmOnSubstrate?: boolean
+  showAvalanche?: boolean
 }
 
 const title = {
@@ -38,7 +38,15 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }: Props) {
+export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showAvalanche }: Props) {
+  const evmChains = showAvalanche
+    ? allEvmChains
+    : Object.keys(allEvmChains)
+        .filter((chain) => !['43114', '43113'].includes(chain))
+        .reduce((obj, key) => {
+          obj[key] = allEvmChains[key]
+          return obj
+        }, {})
   const ctx = useWallet()
   const centEvmChainId = useCentEvmChainId()
   const {
@@ -58,10 +66,9 @@ export function WalletDialog({ evmChains, showAdvancedAccounts, evmOnSubstrate }
   const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
 
   const sortedEvmWallets = sortEvmWallets(evm.connectors.filter((c) => c.shown))
-  const centWallets =
-    centEvmChainId && evmOnSubstrate
-      ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
-      : sortCentrifugeWallets(wallets)
+  const centWallets = centEvmChainId
+    ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
+    : sortCentrifugeWallets(wallets)
   const shownWallets = isCentChainSelected ? centWallets : selectedNetwork ? sortedEvmWallets : []
 
   function close() {
@@ -284,37 +291,35 @@ function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => v
       <Card maxHeight="50vh" style={{ overflow: 'auto' }} mt={3}>
         {combinedAccounts
           .filter((acc) => showAdvancedAccounts || (!acc.proxies && !acc.multisig))
-          .map((acc) => {
+          .map((acc, index) => {
             const actingAddress = acc.proxies?.at(-1)?.delegator || acc.multisig?.address || acc.signingAccount.address
             return (
-              <React.Fragment key={acc.signingAccount.address}>
-                <MenuItemGroup>
-                  <AccountButton
-                    address={actingAddress}
-                    icon={<AccountIcon id={actingAddress} />}
-                    label={<AccountName account={acc.signingAccount} proxies={acc.proxies} />}
-                    onClick={() => {
-                      onClose()
-                      selectAccount(
-                        acc.signingAccount.address,
-                        acc.proxies?.map((p) => p.delegator),
-                        acc.multisig?.address
-                      )
-                    }}
-                    selected={
-                      acc === selectedCombinedAccount ||
-                      (!selectedCombinedAccount &&
-                        selectedAddress === acc.signingAccount.address &&
-                        !acc.multisig &&
-                        !acc.proxies)
-                    }
-                    proxyRights={acc.proxies?.[0].types
-                      .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
-                      .join(' / ')}
-                    multisig={acc.multisig}
-                  />
-                </MenuItemGroup>
-              </React.Fragment>
+              <MenuItemGroup key={`${acc.signingAccount.address}${index}`}>
+                <AccountButton
+                  address={actingAddress}
+                  icon={<AccountIcon id={actingAddress} />}
+                  label={<AccountName account={acc.signingAccount} proxies={acc.proxies} />}
+                  onClick={() => {
+                    onClose()
+                    selectAccount(
+                      acc.signingAccount.address,
+                      acc.proxies?.map((p) => p.delegator),
+                      acc.multisig?.address
+                    )
+                  }}
+                  selected={
+                    acc === selectedCombinedAccount ||
+                    (!selectedCombinedAccount &&
+                      selectedAddress === acc.signingAccount.address &&
+                      !acc.multisig &&
+                      !acc.proxies)
+                  }
+                  proxyRights={acc.proxies?.[0].types
+                    .map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type)
+                    .join(' / ')}
+                  multisig={acc.multisig}
+                />
+              </MenuItemGroup>
             )
           })}
       </Card>
