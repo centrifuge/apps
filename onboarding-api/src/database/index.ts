@@ -2,7 +2,7 @@ import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
 import { Request } from 'express'
-import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
+import { array, bool, date, InferType, lazy, mixed, number, NumberSchema, object, string, StringSchema } from 'yup'
 import { HttpError } from '../utils/httpError'
 import { Subset } from '../utils/types'
 
@@ -34,6 +34,7 @@ export const transactionInfoSchema = object({
   txHash: string().required(),
   blockNumber: string().required(),
   isEvmOnSubstrate: bool().optional(),
+  chainId: mixed().oneOf([string(), number()]).required() as StringSchema<'centrifuge'> | NumberSchema,
 })
 export type TransactionInfo = InferType<typeof transactionInfoSchema>
 
