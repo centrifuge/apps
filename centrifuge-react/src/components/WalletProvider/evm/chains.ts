@@ -11,7 +11,9 @@ type ExtendedChainInformation = BasicChainInformation & {
   blockExplorerUrl: string
 }
 
-export type EvmChains = { [chainId in 1 | 5]?: BasicChainInformation } | { [chainId: number]: ExtendedChainInformation }
+export type EvmChains =
+  | { [chainId in 1 | 5 | 43113 | 43114]?: BasicChainInformation }
+  | { [chainId: number]: ExtendedChainInformation }
 
 export function getAddChainParameters(chains: EvmChains, chainId: number): AddEthereumChainParameter | number {
   const chainInfo = chains[chainId]
@@ -50,6 +52,16 @@ const chainExtendedInfo = {
     name: 'Görli',
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     blockExplorerUrl: 'https://goerli.etherscan.io/',
+  },
+  43113: {
+    name: 'Fuji',
+    nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
+    blockExplorerUrl: 'https://testnet.snowtrace.io/',
+  },
+  43114: {
+    name: 'Avalanche',
+    nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
+    blockExplorerUrl: 'https://snowtrace.io/',
   },
 }
 
