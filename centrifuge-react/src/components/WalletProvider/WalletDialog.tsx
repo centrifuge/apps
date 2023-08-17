@@ -291,10 +291,10 @@ function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => v
       <Card maxHeight="50vh" style={{ overflow: 'auto' }} mt={3}>
         {combinedAccounts
           .filter((acc) => showAdvancedAccounts || (!acc.proxies && !acc.multisig))
-          .map((acc) => {
+          .map((acc, index) => {
             const actingAddress = acc.proxies?.at(-1)?.delegator || acc.multisig?.address || acc.signingAccount.address
             return (
-              <MenuItemGroup key={acc.signingAccount.address}>
+              <MenuItemGroup key={`${acc.signingAccount.address}${index}`}>
                 <AccountButton
                   address={actingAddress}
                   icon={<AccountIcon id={actingAddress} />}
