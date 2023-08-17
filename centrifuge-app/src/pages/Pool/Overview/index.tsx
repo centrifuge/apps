@@ -69,7 +69,9 @@ export function PoolDetailSideBar({
       poolId={poolId}
       trancheId={selectedToken}
       onSetTrancheId={setSelectedToken}
-      networks={poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge', 43113, 43114]}
+      networks={
+        poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge', 43113, 43114, 8453, 84531]
+      }
       actionsRef={investRef}
     />
   )

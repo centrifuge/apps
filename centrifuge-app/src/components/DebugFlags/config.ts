@@ -35,6 +35,7 @@ export type Key =
   | 'batchMintNFTs'
   | 'persistDebugFlags'
   | 'showAvalanche'
+  | 'showBase'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
@@ -69,6 +70,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     alwaysShow: true,
   },
   showAvalanche: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  showBase: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

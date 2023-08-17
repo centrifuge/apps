@@ -64,7 +64,7 @@ type Props = {
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
 
-export function InvestRedeem({ networks = ['centrifuge', 43114, 43113], ...rest }: Props) {
+export function InvestRedeem({ networks = ['centrifuge', 43114, 43113, 8453, 84531], ...rest }: Props) {
   const getNetworkName = useGetNetworkName()
   return (
     <LoadBoundary>
@@ -169,6 +169,9 @@ function InvestRedeemState(props: Props) {
 
   if (typeof connectedNetwork === 'number' && [43113, 43114].includes(connectedNetwork)) {
     return <OnboardingButton networks={[43113, 43114]} />
+  }
+  if (typeof connectedNetwork === 'number' && [8453, 84531].includes(connectedNetwork)) {
+    return <OnboardingButton networks={[8453, 84531]} />
   }
   return (
     <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
@@ -315,7 +318,7 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
 }
 
 const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
-  const { showWallets, showNetworks, connectedType } = useWallet()
+  const { showWallets, showNetworks, connectedType, connectedNetworkName } = useWallet()
   const { state } = useInvestRedeem()
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
@@ -326,9 +329,9 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
   if (!state)
     return (
       <Stack as={Card} gap={2} p={2}>
-        <Text variant="body1">Onboarding with Avalanche is still a work in progress.</Text>
+        <Text variant="body1">Onboarding with {connectedNetworkName} is still a work in progress.</Text>
         <Button onClick={() => history.push(`/onboarding?poolId=${poolId}&trancheId=${pool.tranches[0].id}`)}>
-          Onboard to junior (beta)
+          Onboard to junior
         </Button>
       </Stack>
     )
