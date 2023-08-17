@@ -51,9 +51,9 @@ export const TextWithPlaceholder: React.FC<TextWithPlaceholderProps> = ({
       {isLoading ? (
         <LoadingWrapper $lines={maxLines} $isLoading={isLoading}>
           {Array.from({ length: words }, (_, i) => (
-            <React.Fragment key={i}>
-              <Text as={Loading}>{getWord(width + Math.round((((rand * 10 ** i) % 1) - 0.5) * variance * 2))}</Text>{' '}
-            </React.Fragment>
+            <Text key={i}>
+              <Loading as="span">{getWord(width + Math.round((((rand * 10 ** i) % 1) - 0.5) * variance * 2))}</Loading>{' '}
+            </Text>
           ))}
         </LoadingWrapper>
       ) : (
