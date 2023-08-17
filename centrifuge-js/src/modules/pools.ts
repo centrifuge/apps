@@ -1868,13 +1868,12 @@ export function getPoolsModule(inst: Centrifuge) {
     const $query = inst.getSubqueryObservable<{
       investorTransactions: { nodes: SubqueryInvestorTransaction[] }
       borrowerTransactions: { nodes: { type: unknown; poolId: string }[] }
+      outstandingOrders: { nodes: { poolId: string }[] }
     }>(
       `query($address: String!) {
         investorTransactions(filter: {
-          account: {
-            id: {
-              equalTo: $address
-            }
+          accountId: {
+            equalTo: $address
           }
         }) {
           nodes {
@@ -1884,14 +1883,22 @@ export function getPoolsModule(inst: Centrifuge) {
         }
 
         borrowerTransactions(filter: {
-          account: {
-            id: {
-              equalTo: $address
-            }
+          accountId: {
+            equalTo: $address
           }
         }) {
           nodes {
             type
+            poolId
+          }
+        }
+
+        outstandingOrders(filter: {
+          accountId: {
+            equalTo: $address
+          }
+        }) {
+          nodes {
             poolId
           }
         }
@@ -1910,6 +1917,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return {
           investorTransactions: data.investorTransactions.nodes.map((entry) => entry),
           borrowerTransactions: data.borrowerTransactions.nodes.map((entry) => entry),
+          outstandingOrders: data.outstandingOrders.nodes.map((entry) => entry),
         }
       })
     )
