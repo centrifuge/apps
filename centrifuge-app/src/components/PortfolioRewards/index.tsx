@@ -1,5 +1,5 @@
-import { useAddress, useBalances, useCentrifugeConsts } from '@centrifuge/centrifuge-react'
-import { Box, Grid, Stack, Text } from '@centrifuge/fabric'
+import { useAddress, useBalances, useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { Box, Button, Grid, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { formatBalance } from '../../utils/formatting'
@@ -14,6 +14,11 @@ export function PortfolioRewards() {
 
   const stakes = balances?.tranches.map(({ poolId, trancheId }) => ({ poolId, trancheId })) ?? []
   const rewards = useComputeLiquidityRewards(address, stakes)
+
+  const { execute, isLoading } = useCentrifugeTransaction(
+    'Claim CFG liquidity rewards',
+    (cent) => cent.rewards.claimLiquidityRewards
+  )
 
   return (
     <Grid
@@ -44,6 +49,20 @@ export function PortfolioRewards() {
             {formatBalance(rewards, consts.chainSymbol, 2)}
           </Text>
         </Stack>
+
+        {!!rewards && rewards.gt(0) && (
+          <Box>
+            <Button
+              onClick={() => execute([stakes])}
+              loading={isLoading}
+              loadingMessage="Claiming…"
+              disabled={!stakes.length}
+              small
+            >
+              Claim
+            </Button>
+          </Box>
+        )}
       </Stack>
 
       <Box mt={3} alignSelf="end">

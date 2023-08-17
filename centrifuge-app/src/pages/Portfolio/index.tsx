@@ -20,10 +20,14 @@ function Portfolio() {
 
   return (
     <Stack gap={4}>
-      <Box as="header">
-        <Text as="h1">Your portfolio</Text>
-        <Text as="p">Track and manage your portfolio</Text>
-      </Box>
+      <Stack as="header" gap={1}>
+        <Text as="h1" variant="heading1">
+          Your portfolio
+        </Text>
+        <Text as="p" variant="label1">
+          Track and manage your portfolio
+        </Text>
+      </Stack>
 
       {!!address ? (
         <>
@@ -35,21 +39,19 @@ function Portfolio() {
             <PortfolioRewards />
           </Grid>
 
-          <Grid columns={2} equalColumns gap={4}>
-            <Box as="article" height={100}>
-              <Text as="h2">Allocation</Text>
-            </Box>
-
-            <Box as="article" height={100}>
-              <Text as="h2">Transaction history</Text>
-              <AddressTransactions count={4} />
-              <Link to="portfolio/transactions">View all</Link>
-            </Box>
-          </Grid>
-
           <Box as="article">
             <Text as="h2">Token overview</Text>
             <AddressTokens />
+          </Box>
+
+          <Box as="article" height={100}>
+            <Text as="h2">Transaction history</Text>
+            <AddressTransactions count={4} />
+            <Link to="portfolio/transactions">View all</Link>
+          </Box>
+
+          <Box as="article" height={100}>
+            <Text as="h2">Allocation</Text>
           </Box>
         </>
       ) : (

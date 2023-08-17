@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { forkJoin } from 'rxjs'
-import { combineLatestWith, filter, map, repeat, switchMap } from 'rxjs/operators'
+import { combineLatestWith, map, repeat, switchMap } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { RewardDomain } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
@@ -11,13 +11,7 @@ export function getRewardsModule(inst: Centrifuge) {
     args: [address: Account, tranches: { poolId: string; trancheId: string }[], rewardDomain: RewardDomain]
   ) {
     const [address, tranches, rewardDomain] = args
-
-    const $events = inst.getEvents().pipe(
-      filter(({ api, events }) => {
-        const event = events.find(({ event }) => api.events.liquidityRewards.NewEpoch.is(event))
-        return !!event
-      })
-    )
+    const $events = inst.getEvents()
 
     return inst.getApi().pipe(
       switchMap((api) => {
@@ -123,13 +117,21 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
-  function claimLiquidityRewards(args: [poolId: string, trancheId: string], options?: TransactionOptions) {
-    const [poolId, trancheId] = args
+  function claimLiquidityRewards(
+    args: [tranches: { poolId: string; trancheId: string }[]],
+    options?: TransactionOptions
+  ) {
+    const [tranches] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.liquidityRewards.claimReward({ Tranche: [poolId, trancheId] })
+        const submittable = api.tx.utility.batchAll(
+          tranches.flatMap((tranche) => {
+            return api.tx.liquidityRewards.claimReward({ Tranche: [tranche.poolId, tranche.trancheId] })
+          })
+        )
+
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
