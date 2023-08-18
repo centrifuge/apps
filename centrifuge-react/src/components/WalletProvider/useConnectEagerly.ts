@@ -17,7 +17,7 @@ export function useConnectEagerly(
   async function tryReconnect() {
     try {
       setIsTrying(true)
-      const { wallet: source, type } = getPersisted()
+      const { wallet: source, type, address } = getPersisted()
       const isProbablyGnosis = window !== window.parent
 
       if ((type === 'evm' && source) || isProbablyGnosis) {
@@ -36,7 +36,7 @@ export function useConnectEagerly(
           await wallet.connector.activate()
         }
 
-        dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
+        dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet, selectedAddress: address } })
         dispatch({ type: 'setConnectedType', payload: 'evm' })
       } else if (type === 'substrate' && source) {
         // This script might have loaded quicker than the wallet extension,

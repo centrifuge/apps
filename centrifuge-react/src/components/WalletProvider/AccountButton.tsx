@@ -1,9 +1,11 @@
 import { ComputedMultisig } from '@centrifuge/centrifuge-js'
-import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Flex, Shelf, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
+import { IconTheme } from '@polkadot/react-identicon/types'
 import { WalletAccount } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
+import { useEvmNativeBalance, useEvmNativeCurrency } from '.'
 import { useBalances } from '../../hooks/useBalances'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useCentrifugeUtils } from '../CentrifugeProvider'
@@ -37,10 +39,11 @@ const Root = styled(Shelf)<{ selected: boolean }>`
   }
 `
 
-const IdenticonWrapper = styled.span`
-  display: block;
-  pointer-events: none;
-`
+const IdenticonWrapper = styled(Flex)({
+  borderRadius: '50%',
+  overflow: 'hidden',
+  pointerEvents: 'none',
+})
 
 export function AccountButton({
   address,
@@ -53,9 +56,11 @@ export function AccountButton({
 }: AccountButtonProps) {
   const { connectedType } = useWallet()
   const balances = useBalances(connectedType === 'substrate' ? address : undefined)
-  const balance = balances
-    ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol)
-    : undefined
+  const { data: evmBalance } = useEvmNativeBalance(connectedType === 'evm' ? address : undefined)
+  const evmCurrency = useEvmNativeCurrency()
+  const balance = connectedType === 'substrate' ? balances?.native.balance : evmBalance
+  const symbol = connectedType === 'substrate' ? balances?.native.currency.symbol : evmCurrency?.symbol
+  const formattedBalance = balance ? formatBalanceAbbreviated(balance, symbol) : undefined
   const utils = useCentrifugeUtils()
 
   return (
@@ -111,21 +116,21 @@ export function AccountButton({
         )}
       </Box>
 
-      {balance && (
+      {formattedBalance && (
         <Text as="span" variant="body2" fontWeight={400} textAlign="right">
-          {balance}
+          {formattedBalance}
         </Text>
       )}
     </Root>
   )
 }
 
-export function AccountIcon({ id }: { id: string }) {
+export function AccountIcon({ id, theme = 'polkadot' }: { id: string; theme?: IconTheme }) {
   const { sizes } = useTheme()
 
   return (
     <IdenticonWrapper>
-      <Identicon value={id} size={sizes.iconRegular as number} theme="polkadot" />
+      <Identicon value={id} size={sizes.iconRegular as number} theme={theme} />
     </IdenticonWrapper>
   )
 }

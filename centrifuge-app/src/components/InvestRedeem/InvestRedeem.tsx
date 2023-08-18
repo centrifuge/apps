@@ -28,14 +28,14 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from
 import * as React from 'react'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
+import { ethConfig } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
-import { useTinlakePermissions } from '../../utils/tinlake/useTinlakePermissions'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { usePermissions } from '../../utils/usePermissions'
+import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
@@ -64,8 +64,17 @@ type Props = {
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
 
-export function InvestRedeem({ networks = ['centrifuge'], ...rest }: Props) {
+export function InvestRedeem({ poolId, ...rest }: Props) {
   const getNetworkName = useGetNetworkName()
+  const { data: domains } = useActiveDomains(poolId)
+
+  const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
+  if (domains) {
+    networks.push(...domains.map((d) => d.chainId))
+  }
+
+  console.log('networks', networks)
+
   return (
     <LoadBoundary>
       <ConnectionGuard
@@ -74,7 +83,7 @@ export function InvestRedeem({ networks = ['centrifuge'], ...rest }: Props) {
           networks.length > 1 ? 'networks' : 'network'
         }. To be able to invest and redeem you need to switch the network.`}
       >
-        <InvestRedeemState networks={networks} {...rest} />
+        <InvestRedeemState networks={networks} poolId={poolId} {...rest} />
       </ConnectionGuard>
     </LoadBoundary>
   )
@@ -113,47 +122,47 @@ function EpochBusy({ busy }: { busy?: boolean }) {
   ) : null
 }
 
-function useAllowedTranches(poolId: string) {
-  const address = useAddress()
-  const { connectedType } = useWallet()
-  const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
-  const isTinlakePool = poolId.startsWith('0x')
-  const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
-  const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
+// function useAllowedTranches(poolId: string) {
+//   const address = useAddress()
+//   const { connectedType } = useWallet()
+//   const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
+//   const isTinlakePool = poolId.startsWith('0x')
+//   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
+//   const pool = usePool(poolId)
+//   const { data: metadata } = usePoolMetadata(pool)
 
-  const allowedTrancheIds = isTinlakePool
-    ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
-        (tranche) => {
-          if (tranche && metadata?.pool?.newInvestmentsStatus) {
-            const trancheName = tranche.split('-')[1] === '0' ? 'junior' : 'senior'
+//   const allowedTrancheIds = isTinlakePool
+//     ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
+//         (tranche) => {
+//           if (tranche && metadata?.pool?.newInvestmentsStatus) {
+//             const trancheName = tranche.split('-')[1] === '0' ? 'junior' : 'senior'
 
-            const isMember = tinlakePermissions?.[trancheName].inMemberlist
+//             const isMember = tinlakePermissions?.[trancheName].inMemberlist
 
-            return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
-          }
+//             return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+//           }
 
-          return false
-        }
-      )
-    : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
+//           return false
+//         }
+//       )
+//     : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
 
-  return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
-}
+//   return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
+// }
 
 function InvestRedeemState(props: Props) {
   const { poolId, trancheId: trancheIdProp, onSetTrancheId, actionsRef } = props
-  const allowedTranches = useAllowedTranches(poolId)
+  // const allowedTranches = useAllowedTranches(poolId)
   const pool = usePool(poolId)
   const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
   const [trancheId, setTrancheId] = useControlledState<string>(pool.tranches.at(-1)!.id, trancheIdProp, onSetTrancheId)
 
-  React.useEffect(() => {
-    if (allowedTranches.at(-1)?.id) {
-      setTrancheId(allowedTranches.at(-1)!.id)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allowedTranches[0]])
+  // React.useEffect(() => {
+  //   if (allowedTranches.at(-1)?.id) {
+  //     setTrancheId(allowedTranches.at(-1)!.id)
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [allowedTranches[0]])
 
   React.useImperativeHandle(actionsRef, () => ({
     setView: (view) => {
@@ -192,12 +201,12 @@ type InnerProps = Props & {
 function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
-  const allowedTranches = useAllowedTranches(state.poolId)
+  // const allowedTranches = useAllowedTranches(state.poolId)
   const isTinlakePool = state.poolId.startsWith('0x')
-  const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
+  // const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
 
   const { data: metadata } = usePoolMetadata(pool)
-  const { connectedType } = useWallet()
+  const { connectedType, isEvmOnSubstrate } = useWallet()
 
   let actualView = view
   if (state.order) {
@@ -209,105 +218,102 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   const canOnlyInvest =
     state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
-  if (!isTinlakePool || availableTranches.length) {
-    return (
-      <>
-        <Stack as={Card} gap={2} p={2}>
-          <Stack alignItems="center">
-            <Box pb={1}>
-              <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
-            </Box>
-            {connectedType && (
-              <>
-                <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-                  {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
-                </TextWithPlaceholder>
-                <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-                  {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)}
-                </TextWithPlaceholder>
-              </>
-            )}
-            <Box bleedX={2} mt={1} alignSelf="stretch">
-              <Divider borderColor="borderSecondary" />
-            </Box>
-          </Stack>
-          {availableTranches.length > 1 && (
-            <Select
-              name="token"
-              placeholder="Select a token"
-              options={availableTranches
-                .map((tranche) => ({
-                  label: tranche.currency.symbol ?? '',
-                  value: tranche.id,
-                }))
-                .reverse()}
-              value={state.trancheId}
-              onChange={(event) => setTrancheId(event.target.value as any)}
-            />
-          )}
-          {connectedType && state.isDataLoading ? (
-            <Spinner />
-          ) : state.isAllowedToInvest ? (
+  return (
+    <>
+      <Stack as={Card} gap={2} p={2}>
+        <Stack alignItems="center">
+          <Box pb={1}>
+            <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
+          </Box>
+          {connectedType && (
             <>
-              {canOnlyInvest ? (
-                <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
-              ) : actualView === 'start' ? (
-                <>
-                  {state.order &&
-                    (!state.order.payoutTokenAmount.isZero() ? (
-                      <SuccessBanner
-                        title="Investment successful"
-                        body={`${formatBalance(
-                          state.order.investCurrency,
-                          state.poolCurrency?.symbol
-                        )} was successfully invested`}
-                      />
-                    ) : !state.order.payoutCurrencyAmount.isZero() ? (
-                      <SuccessBanner title="Redemption successful" />
-                    ) : null)}
-                  <EpochBusy busy={state.isPoolBusy} />
-                  <Stack p={1} gap={1}>
-                    <Grid gap={1} columns={2} equalColumns>
-                      <Button variant="secondary" small onClick={() => setView('redeem')} disabled={state.isPoolBusy}>
-                        Redeem
-                      </Button>
-                      <Button variant="primary" small onClick={() => setView('invest')} disabled={state.isPoolBusy}>
-                        Invest more
-                      </Button>
-                    </Grid>
-                    <Box alignSelf="center">
-                      <TransactionsLink />
-                    </Box>
-                  </Stack>
-                </>
-              ) : actualView === 'invest' ? (
-                <InvestForm onCancel={() => setView('start')} autoFocus />
-              ) : (
-                <RedeemForm onCancel={() => setView('start')} autoFocus />
-              )}
+              <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
+                {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
+              </TextWithPlaceholder>
+              <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
+                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)}
+              </TextWithPlaceholder>
             </>
-          ) : (
-            // TODO: Show whether onboarding is in progress
-            <Stack gap={2}>
-              <Text variant="body3">
-                {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
-                verified “accredited investors”.{' '}
-                <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
-                  Learn more
-                </AnchorTextLink>
-              </Text>
-              <Stack px={1}>
-                <OnboardingButton networks={networks} />
-              </Stack>
-            </Stack>
           )}
+          <Box bleedX={2} mt={1} alignSelf="stretch">
+            <Divider borderColor="borderSecondary" />
+          </Box>
         </Stack>
+        {pool.tranches.length > 1 && (
+          <Select
+            name="token"
+            placeholder="Select a token"
+            options={pool.tranches
+              .map((tranche) => ({
+                label: tranche.currency.symbol ?? '',
+                value: tranche.id,
+              }))
+              .reverse()}
+            value={state.trancheId}
+            onChange={(event) => setTrancheId(event.target.value as any)}
+          />
+        )}
+        {connectedType && state.isDataLoading ? (
+          <Spinner />
+        ) : state.isAllowedToInvest ? (
+          <>
+            {canOnlyInvest ? (
+              <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
+            ) : actualView === 'start' ? (
+              <>
+                {state.order &&
+                  (!state.order.payoutTokenAmount.isZero() ? (
+                    <SuccessBanner
+                      title="Investment successful"
+                      body={`${formatBalance(
+                        state.order.investCurrency,
+                        state.poolCurrency?.symbol
+                      )} was successfully invested`}
+                    />
+                  ) : !state.order.payoutCurrencyAmount.isZero() ? (
+                    <SuccessBanner title="Redemption successful" />
+                  ) : null)}
+                <EpochBusy busy={state.isPoolBusy} />
+                <Stack p={1} gap={1}>
+                  <Grid gap={1} columns={2} equalColumns>
+                    <Button variant="secondary" small onClick={() => setView('redeem')} disabled={state.isPoolBusy}>
+                      Redeem
+                    </Button>
+                    <Button variant="primary" small onClick={() => setView('invest')} disabled={state.isPoolBusy}>
+                      Invest more
+                    </Button>
+                  </Grid>
+                  <Box alignSelf="center">
+                    <TransactionsLink />
+                  </Box>
+                </Stack>
+              </>
+            ) : actualView === 'invest' ? (
+              <InvestForm onCancel={() => setView('start')} autoFocus />
+            ) : (
+              <RedeemForm onCancel={() => setView('start')} autoFocus />
+            )}
+          </>
+        ) : (
+          // TODO: Show whether onboarding is in progress
+          <Stack gap={2}>
+            <Text variant="body3">
+              {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
+              verified “accredited investors”.{' '}
+              <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
+                Learn more
+              </AnchorTextLink>
+            </Text>
+            <Stack px={1}>
+              <OnboardingButton networks={networks} />
+            </Stack>
+          </Stack>
+        )}
+      </Stack>
 
-        {!isTinlakePool && <LiquidityRewardsContainer />}
-      </>
-    )
-  }
-  return null
+      {!isTinlakePool && (connectedType === 'substrate' || isEvmOnSubstrate) && <LiquidityRewardsContainer />}
+    </>
+  )
 }
 
 const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
@@ -431,7 +437,12 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
   const isCollecting = state.pendingAction === 'collect' && isPending
 
-  function renderInput(cancelCb?: () => void, preSubmitAction?: { onClick: () => void; loading?: boolean }) {
+  console.log('state', state)
+
+  function renderInput(
+    cancelCb?: () => void,
+    preSubmitAction?: { onClick: () => void; loading?: boolean; label: string }
+  ) {
     return (
       <Stack gap={2}>
         <EpochBusy busy={state.isPoolBusy} />
@@ -489,7 +500,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
         ) : null}
         <Stack px={1} gap={1}>
           {preSubmitAction ? (
-            <Button {...preSubmitAction}>{investLabel}</Button>
+            <Button {...preSubmitAction}>{preSubmitAction.label}</Button>
           ) : (
             <Button
               type="submit"
@@ -549,7 +560,11 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             }}
           />
         ) : state.needsPoolCurrencyApproval ? (
-          renderInput(onCancel, { onClick: actions.approvePoolCurrency, loading: isApproving })
+          renderInput(onCancel, {
+            onClick: actions.approvePoolCurrency,
+            loading: isApproving,
+            label: `Approve ${state.poolCurrency?.symbol}`,
+          })
         ) : (
           renderInput(onCancel)
         )}

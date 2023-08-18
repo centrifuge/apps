@@ -1868,6 +1868,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/centrifuge-js@workspace:centrifuge-js"
   dependencies:
+    "@ethersproject/abi": ^5.6.0
+    "@ethersproject/bignumber": ^5.7.0
     "@ethersproject/contracts": ^5.6.0
     "@ethersproject/providers": ^5.6.0
     "@ethersproject/units": ^5.6.0
@@ -1876,6 +1878,7 @@ __metadata:
     "@polkadot/types": ~10.3.4
     "@types/isomorphic-fetch": ^0.0.36
     "@types/jest": ^27.0.3
+    "@types/lodash": ^4
     "@types/node": ^16.11.12
     "@typescript-eslint/eslint-plugin": ^4.32.0
     "@typescript-eslint/parser": ^4.32.0
@@ -1887,6 +1890,7 @@ __metadata:
     isomorphic-fetch: ^3.0.0
     jest: ^27.4.3
     jw3t: ^1.0.8
+    lodash: ^4.17.21
     npm-run-all: 4.1.5
     ts-jest: ^27.1.1
     typescript: ~4.4.4
@@ -2590,7 +2594,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/abi@npm:5.7.0, @ethersproject/abi@npm:^5.7.0":
+"@ethersproject/abi@npm:5.7.0, @ethersproject/abi@npm:^5.6.0, @ethersproject/abi@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/abi@npm:5.7.0"
   dependencies:
@@ -8618,6 +8622,13 @@ __metadata:
   version: 3.0.2
   resolution: "@types/linkify-it@npm:3.0.2"
   checksum: 5a17cd75e30cd395de8cc3c91a6a7f49e0254a7aa57d8a6a740ba099016177ceceae72af8e81a66c10f6a455336de4e38f8c0d9408b60e6999c1836656e5a2ac
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4":
+  version: 4.14.197
+  resolution: "@types/lodash@npm:4.14.197"
+  checksum: 5368b3d8c3ec66d6611acc054f073e2296bfca75442f1c6df1572405efd4b677d2c8412d0b6ff8e87491aac17dd332798ee30757c2b468461ef1fabdd6c68f45
   languageName: node
   linkType: hard
 

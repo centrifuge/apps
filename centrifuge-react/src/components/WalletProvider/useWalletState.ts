@@ -18,6 +18,7 @@ const initialState: State = {
   },
   evm: {
     selectedWallet: null,
+    selectedAddress: null,
   },
   substrate: {
     accounts: null,
@@ -185,11 +186,13 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
         persist({
           type: 'evm',
           wallet: evmConnectors.find((c) => c.connector === state.evm.selectedWallet!.connector)!.id,
-          address: evmState.accounts[0],
+          address: reducerState.evm.selectedAddress || evmState.accounts[0],
         })
       }
       if (!evmState.accounts) {
         dispatch({ type: 'reset' })
+      } else if (reducerState.evm.selectedAddress && !evmState.accounts.includes(reducerState.evm.selectedAddress)) {
+        dispatch({ type: 'evmSetState', payload: { selectedAddress: evmState.accounts[0] } })
       }
     } else if (state.connectedType === 'substrate') {
       if (state.substrate.selectedAccountAddress) {

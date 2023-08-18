@@ -46,10 +46,11 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
         .reduce((obj, key) => {
           obj[key] = allEvmChains[key]
           return obj
-        }, {})
+        }, {} as EvmChains)
   const ctx = useWallet()
   const centEvmChainId = useCentEvmChainId()
   const {
+    connectedType,
     pendingConnect: { isConnecting, wallet: pendingWallet, isError: isConnectError },
     walletDialog: { view, network: selectedNetwork, wallet: selectedWallet },
     dispatch,
@@ -78,7 +79,8 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
   async function connect(wallet: Wallet | EvmConnectorMeta) {
     try {
       const accounts = await doConnect(wallet, selectedNetwork!)
-      if (accounts?.length! > 1 && 'extensionName' in wallet) {
+      console.log('accounts', accounts)
+      if (accounts?.length! > 1) {
         dispatch({ type: 'showWalletDialogAccounts' })
       } else {
         close()
@@ -248,7 +250,11 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                 )
               }
             >
-              <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
+              {connectedType === 'evm' ? (
+                <EvmAccounts onClose={close} />
+              ) : (
+                <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
+              )}
             </SelectionStep>
           </>
         )}
@@ -324,6 +330,39 @@ function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => v
               </React.Fragment>
             )
           })}
+      </Card>
+    </>
+  )
+}
+
+export function EvmAccounts({ onClose }: { onClose: () => void }) {
+  const {
+    evm: { accounts, selectedAddress, selectAccount },
+  } = useWallet()
+
+  if (!accounts) return null
+
+  return (
+    <>
+      <Card maxHeight="50vh" style={{ overflow: 'auto' }} mt={3}>
+        {accounts.map((address) => {
+          return (
+            <React.Fragment key={address}>
+              <MenuItemGroup>
+                <AccountButton
+                  address={address}
+                  icon={<AccountIcon id={address} theme="ethereum" />}
+                  label={address}
+                  onClick={() => {
+                    onClose()
+                    selectAccount(address)
+                  }}
+                  selected={selectedAddress === address}
+                />
+              </MenuItemGroup>
+            </React.Fragment>
+          )
+        })}
       </Card>
     </>
   )

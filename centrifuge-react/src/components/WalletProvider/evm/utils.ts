@@ -90,7 +90,7 @@ export function useNativeBalance(address?: string) {
 
 export function useNativeCurrency() {
   const { evm } = useWallet()
-  if (!evm.chainId) return null
+  if (!evm.chainId) return undefined
   const chain = getChainInfo(evm.chains, evm.chainId)
   return chain.nativeCurrency
 }

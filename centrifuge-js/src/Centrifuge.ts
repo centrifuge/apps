@@ -3,6 +3,7 @@ import { AddressOrPair } from '@polkadot/api/types'
 import { Signer } from '@polkadot/types/types'
 import { CentrifugeBase, UserProvidedConfig } from './CentrifugeBase'
 import { getAuthModule } from './modules/auth'
+import { getLiquidityPoolsModule } from './modules/liquidityPools'
 import { getMetadataModule } from './modules/metadata'
 import { getMultisigModule } from './modules/multisig'
 import { getNftsModule } from './modules/nfts'
@@ -18,6 +19,7 @@ import { getUtilsModule } from './modules/utils'
 export class Centrifuge extends CentrifugeBase {
   nfts = getNftsModule(this)
   pools = getPoolsModule(this)
+  liquidityPools = getLiquidityPoolsModule(this)
   utils = getUtilsModule(this)
   proxies = getProxiesModule(this)
   metadata = getMetadataModule(this)

@@ -13,7 +13,6 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
@@ -65,13 +64,7 @@ export function PoolDetailSideBar({
   const { pid: poolId } = useParams<{ pid: string }>()
 
   return (
-    <InvestRedeem
-      poolId={poolId}
-      trancheId={selectedToken}
-      onSetTrancheId={setSelectedToken}
-      networks={poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']}
-      actionsRef={investRef}
-    />
+    <InvestRedeem poolId={poolId} trancheId={selectedToken} onSetTrancheId={setSelectedToken} actionsRef={investRef} />
   )
 }
 
