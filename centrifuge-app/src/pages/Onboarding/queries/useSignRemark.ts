@@ -1,4 +1,5 @@
 import {
+  Network,
   useBalances,
   useCentrifuge,
   useCentrifugeTransaction,
@@ -24,6 +25,7 @@ export const useSignRemark = (
       txHash: string
       blockNumber: string
       isEvmOnSubstrate?: boolean
+      chainId: Network
     },
     unknown
   >
@@ -37,6 +39,7 @@ export const useSignRemark = (
     connectedType,
     isEvmOnSubstrate,
     substrate: { selectedAddress, selectedAccount },
+    connectedNetwork,
   } = useWallet()
   const [expectedTxFee, setExpectedTxFee] = React.useState(Dec(0))
   const balances = useBalances(selectedAddress || '')
@@ -59,7 +62,12 @@ export const useSignRemark = (
           // @ts-expect-error
           blockNumber = result.blockNumber.toString()
         }
-        await sendDocumentsToIssuer({ txHash, blockNumber, isEvmOnSubstrate })
+        await sendDocumentsToIssuer({
+          txHash,
+          blockNumber,
+          isEvmOnSubstrate,
+          chainId: connectedNetwork || 'centrifuge',
+        })
         setIsSubstrateTxLoading(false)
       } catch (e) {
         setIsSubstrateTxLoading(false)
@@ -152,6 +160,7 @@ export const useSignRemark = (
       await sendDocumentsToIssuer({
         txHash: result.hash,
         blockNumber: finalizedTx.blockNumber.toString(),
+        chainId: connectedNetwork || 'centrifuge',
       })
       updateTransaction(txId, () => ({
         status: 'succeeded',

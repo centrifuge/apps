@@ -1,4 +1,4 @@
-import { useTransactions } from '@centrifuge/centrifuge-react'
+import { Network, useTransactions } from '@centrifuge/centrifuge-react'
 import { useMutation } from 'react-query'
 import { useOnboardingAuth } from '../../../components/OnboardingAuthProvider'
 import { OnboardingPool, useOnboarding } from '../../../components/OnboardingProvider'
@@ -14,7 +14,7 @@ export const useSignAndSendDocuments = () => {
   const trancheId = pool.trancheId
 
   const mutation = useMutation(
-    async (transactionInfo: { txHash: string; blockNumber: string }) => {
+    async (transactionInfo: { txHash: string; blockNumber: string; chainId: Network }) => {
       addOrUpdateTransaction({
         id: txIdSendDocs,
         title: `Send documents to issuers`,
