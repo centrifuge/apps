@@ -7,6 +7,7 @@ import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
+  BorrowerTransactionType,
   InvestorTransactionType,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
@@ -1869,31 +1870,28 @@ export function getPoolsModule(inst: Centrifuge) {
       investorTransactions: {
         nodes: {
           timestamp: string
-          type: string
-          pool: {
-            metadata: string
-          }
-          tranche: {
-            id: string
-            tokenPrice: string
-          }
+          type: InvestorTransactionType
+          poolId: string
+          hash: string
+          tokenAmount: string
+          tokenPrice: string
         }[]
       }
       borrowerTransactions: {
         nodes: {
           timestamp: string
-          type: unknown
-          pool: {
-            metadata: string
-          }
+          type: BorrowerTransactionType
+          poolId: string
+          amount: string
+          hash: string
         }[]
       }
       outstandingOrders: {
         nodes: {
           timestamp: string
-          pool: {
-            metadata: string
-          }
+          poolId: string
+          hash: string
+
           tranche: {
             id: string
             tokenPrice: string
@@ -1912,13 +1910,11 @@ export function getPoolsModule(inst: Centrifuge) {
           nodes {
             timestamp
             type
-            pool {
-              metadata
-            }
-            tranche {
-              id
-              tokenPrice
-            }
+            poolId
+            hash
+            
+            tokenAmount
+            tokenPrice
           }
         }
 
@@ -1928,11 +1924,10 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         }) {
           nodes {
-            type
-            pool {
-              metadata
-            }
             timestamp
+            type
+            poolId
+            hash
             amount
           }
         }
@@ -1944,15 +1939,15 @@ export function getPoolsModule(inst: Centrifuge) {
         }) {
           nodes {
             timestamp
-            pool {
-              metadata
-            }
+            redeemAmount
+            investAmount
+            poolId
+            hash
+
             tranche {
               id
               tokenPrice
             }
-            redeemAmount
-            investAmount
           }
         }
       }

@@ -44,11 +44,13 @@ function Portfolio() {
             <AddressTokens />
           </Box>
 
-          <Box as="article">
-            <Text as="h2">Transaction history</Text>
+          <Stack as="article" gap={2}>
+            <Text as="h2" variant="heading2">
+              Transaction history
+            </Text>
             <AddressTransactions count={4} />
             <Link to="portfolio/transactions">View all</Link>
-          </Box>
+          </Stack>
 
           <Box as="article" height={100}>
             <Text as="h2">Allocation</Text>

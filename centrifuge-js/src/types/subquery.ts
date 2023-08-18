@@ -47,19 +47,41 @@ export type InvestorTransactionType =
   | 'REDEEM_EXECUTION'
   | 'TRANSFER_IN'
   | 'TRANSFER_OUT'
+  | 'INVEST_COLLECT'
+  | 'REDEEM_COLLECT'
 
 export type SubqueryInvestorTransaction = {
   __typename?: 'InvestorTransaction'
   id: string
   timestamp: string
   accountId: string
+  poolId: string
   trancheId: string
   epochNumber: number
   type: InvestorTransactionType
+  hash: string
   currencyAmount?: number | null
-  tokenAmount?: number | null
-  tokenPrice?: number | null
+  tokenAmount?: number | string | null
+  tokenPrice?: number | string | null
   transactionFee?: number | null
+}
+
+export type BorrowerTransactionType = 'CREATED' | 'BORROWED' | 'REPAID' | 'CLOSED'
+
+export type SubqueryBorrowerTransaction = {
+  timestamp: string
+  type: BorrowerTransactionType
+  amount: string
+  poolId: string
+  hash: string
+}
+
+export type SubqueryOutstandingOrder = {
+  timestamp: string
+  investAmount: string
+  redeemAmount: string
+  poolId: string
+  hash: string
 }
 
 export type SubqueryEpoch = {
