@@ -72,13 +72,18 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       setPendingAction(name)
     }
   }
+  React.useEffect(() => {
+    if (pendingAction && pendingTransaction?.status === 'succeeded') {
+      refetchInvestment()
+      refetchBalance()
+      refetchBalances()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTransaction?.status])
 
   function useActionSucceeded(cb: (action: InvestRedeemAction) => void) {
     React.useEffect(() => {
       if (pendingAction && pendingTransaction?.status === 'succeeded') {
-        refetchInvestment()
-        refetchBalance()
-        refetchBalances()
         cb(pendingAction)
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps

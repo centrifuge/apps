@@ -44,7 +44,7 @@ export function useActiveDomains(poolId: string) {
       return [
         {
           chainId: 5,
-          managerAddress: '0xB21A283d9317907e6437b1136b0e937baB89343b',
+          managerAddress: '0x253836e3520b2aa66328d17b65411591d4227df6',
         },
       ]
     },

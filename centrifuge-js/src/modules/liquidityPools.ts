@@ -61,6 +61,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function withdraw(args: [lpAddress: string, withdraw: BN, receiver?: string], options: TransactionRequest = {}) {
+    const [lpAddress, withdraw, receiver] = args
+    const user = inst.getSignerAddress('evm')
+    return pending(
+      contract(lpAddress, ABI.LiquidityPool).withdraw(withdraw.toString(), receiver ?? user, user, options)
+    )
+  }
+
   function getDomainRouters() {
     return inst.getApi().pipe(
       switchMap((api) => api.query.connectorsGateway.domainRouters.entries()),
@@ -224,6 +232,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         returns: [['tokenBalance', toTokenBalance(currency.decimals)]],
       },
       {
+        target: lp,
+        call: ['function maxMint(address) view returns (uint256)', user],
+        returns: [['maxMint', toTokenBalance(currency.decimals)]],
+      },
+      {
+        target: lp,
+        call: ['function maxWithdraw(address) view returns (uint256)', user],
+        returns: [['maxWithdraw', toCurrencyBalance(currency.decimals)]],
+      },
+      {
         target: currency.address,
         call: ['function balanceOf(address) view returns (uint256)', user],
         returns: [['currencyBalance', toCurrencyBalance(currency.decimals)]],
@@ -236,11 +254,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     ]
 
     const pool = await multicall<{
-      tokenPrice: string
+      tokenPrice: Price
       lastPriceUpdate: number
       isAllowedToInvest: boolean
       tokenBalance: TokenBalance
+      maxMint: TokenBalance
       currencyBalance: CurrencyBalance
+      maxWithdraw: CurrencyBalance
       managerAllowance: CurrencyBalance
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
@@ -251,6 +271,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   return {
     updateInvestOrder,
     updateRedeemOrder,
+    withdraw,
     approveManagerForCurrency,
     getDomainRouters,
     getManagerFromRouter,
