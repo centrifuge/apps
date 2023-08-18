@@ -46,7 +46,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
     .reduce((obj, key) => {
       obj[key] = allEvmChains[key]
       return obj
-    }, {})
+    }, {}) as EvmChains
   const ctx = useWallet()
   const centEvmChainId = useCentEvmChainId()
   const {
