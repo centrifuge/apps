@@ -77,7 +77,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
         heading: false,
       }
     })
-  }, [transactions])
+  }, [transactions, pool.currency, pool.tranches])
 
   const dataUrl = React.useMemo(() => {
     if (!data.length) {
