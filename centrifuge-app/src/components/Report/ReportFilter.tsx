@@ -10,7 +10,6 @@ type ReportFilterProps = {
 export function ReportFilter({ pool }: ReportFilterProps) {
   const {
     csvData,
-    startDate,
     setStartDate,
     endDate,
     setEndDate,
