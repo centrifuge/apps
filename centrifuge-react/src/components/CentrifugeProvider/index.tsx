@@ -5,4 +5,5 @@ export {
   useCentrifugeApi,
   useCentrifugeConsts,
   useCentrifugeKey,
+  useCentrifugeUtils,
 } from './CentrifugeProvider'
