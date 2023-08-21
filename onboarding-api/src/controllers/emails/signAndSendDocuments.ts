@@ -47,7 +47,8 @@ export const signAndSendDocumentsController = async (
       throw new HttpError(400, 'Country not supported by issuer')
     }
 
-    const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
+    const remark = `I hereby sign the subscription agreement of pool ${poolId} and tranche ${trancheId}: ${metadata
+      .onboarding.tranches[trancheId].agreement?.uri!}`
 
     await new NetworkSwitch(wallet.network).validateRemark(wallet, transactionInfo, remark)
 

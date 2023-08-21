@@ -61,7 +61,7 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
 
 // pool steps
-onboarding.post('/signAndSendDocuments', canOnboardToTinlakeTranche, verifyAuth, signAndSendDocumentsController)
+onboarding.post('/signAndSendDocuments', verifyAuth, canOnboardToTinlakeTranche, signAndSendDocumentsController)
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
 
 // getters
