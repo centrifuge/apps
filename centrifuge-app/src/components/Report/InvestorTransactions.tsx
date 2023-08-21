@@ -89,7 +89,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
 
     return getCSVDownloadUrl(formatted)
-  }, [data, headers])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
 
   React.useEffect(() => {
     setCsvData(
