@@ -89,7 +89,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
 
     return getCSVDownloadUrl(formatted)
-  }, [data])
+  }, [data, headers])
 
   React.useEffect(() => {
     setCsvData(
@@ -102,7 +102,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     )
 
     return () => setCsvData(undefined)
-  }, [dataUrl])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataUrl, pool.id, startDate, endDate])
 
   if (!transactions) {
     return <Spinner mt={2} />

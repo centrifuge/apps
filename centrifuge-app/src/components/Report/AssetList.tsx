@@ -86,7 +86,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
 
     return getCSVDownloadUrl(formatted)
-  }, [data, headers])
+  }, [data])
 
   React.useEffect(() => {
     setCsvData(
@@ -99,6 +99,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     )
 
     return () => setCsvData(undefined)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataUrl, pool.id, startDate, endDate])
 
   if (!loans) {

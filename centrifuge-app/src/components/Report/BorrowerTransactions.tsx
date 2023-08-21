@@ -12,6 +12,8 @@ import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import { formatBorrowerTransactionsType } from './utils'
 
+const headers = ['Asset ID', 'Epoch', 'Date', 'Type', 'Token amount']
+
 export function BorrowerTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData } = React.useContext(ReportContext)
   const transactions = useBorrowerTransactions(pool.id, startDate, endDate)
@@ -32,9 +34,8 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
       ],
       heading: false,
     }))
-  }, [transactions])
+  }, [transactions, pool.currency.symbol])
 
-  const headers = ['Asset ID', 'Epoch', 'Date', 'Type', 'Token amount']
   const columnWidths = ['150px', '100px', '120px', '100px', '200px']
 
   const columns = headers.map((col, index) => ({
@@ -67,7 +68,8 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
     )
 
     return () => setCsvData(undefined)
-  }, [dataUrl])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataUrl, startDate, endDate, pool.id])
 
   if (!transactions) {
     return <Spinner mt={2} />
