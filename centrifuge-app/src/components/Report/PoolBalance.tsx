@@ -44,7 +44,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         flex: '0 0 120px',
       }))
     )
-  }, [poolStates])
+  }, [poolStates, groupBy])
 
   const overviewRecords: TableDataRow[] = React.useMemo(() => {
     return [
@@ -69,7 +69,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         heading: false,
       },
     ]
-  }, [poolStates])
+  }, [poolStates, pool.currency.symbol])
 
   const priceRecords: TableDataRow[] = React.useMemo(() => {
     return [
@@ -93,7 +93,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           heading: false,
         })) || []
     )
-  }, [poolStates])
+  }, [poolStates, pool.currency.symbol, pool?.tranches])
 
   const inOutFlowRecords: TableDataRow[] = React.useMemo(() => {
     return [
@@ -137,7 +137,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           })) || []
       )
     )
-  }, [poolStates])
+  }, [poolStates, pool.currency.symbol, pool?.tranches])
 
   const headers = columns.map(({ header }) => header)
 
@@ -147,6 +147,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
 
     return getCSVDownloadUrl(formatted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overviewRecords, priceRecords, inOutFlowRecords])
 
   React.useEffect(() => {
@@ -156,7 +157,8 @@ export function PoolBalance({ pool }: { pool: Pool }) {
     })
 
     return () => setCsvData(undefined)
-  }, [dataUrl])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataUrl, pool.id, startDate, endDate])
 
   if (!poolStates) {
     return <Spinner mt={2} />
