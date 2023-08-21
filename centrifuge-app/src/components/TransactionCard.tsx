@@ -1,13 +1,14 @@
-import { BorrowerTransactionType, InvestorTransactionType, Pool } from '@centrifuge/centrifuge-js'
+import { BorrowerTransactionType, CurrencyBalance, InvestorTransactionType, Pool } from '@centrifuge/centrifuge-js'
 import { Box, Grid, IconExternalLink, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../utils/date'
+import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export type TransactionCardProps = {
   date: number
   action: InvestorTransactionType | BorrowerTransactionType | 'PENDING_ORDER'
-  amount: unknown
+  amount: CurrencyBalance
   poolId: string
   hash: string
   trancheId?: string
@@ -21,7 +22,7 @@ export function TransactionCard({ date, action, amount, poolId, hash, trancheId 
   // console.log('data', data)
 
   // console.log('pool', pool)
-  // console.log('token', token)
+  // console.log('amount', amount.toString())
 
   if (!pool || !data) {
     return null
@@ -58,7 +59,7 @@ export function TransactionCard({ date, action, amount, poolId, hash, trancheId 
       </Stack>
 
       <Text as="span" variant="interactive2">
-        {amount}
+        {formatBalance(amount.toDecimal(), pool.currency)}
       </Text>
 
       {!!subScanUrl && !!hash && (

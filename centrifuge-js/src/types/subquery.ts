@@ -61,8 +61,8 @@ export type SubqueryInvestorTransaction = {
   type: InvestorTransactionType
   hash: string
   currencyAmount?: number | null
-  tokenAmount?: number | string | null
-  tokenPrice?: number | string | null
+  tokenAmount?: number | null
+  tokenPrice?: number | null
   transactionFee?: number | null
 }
 

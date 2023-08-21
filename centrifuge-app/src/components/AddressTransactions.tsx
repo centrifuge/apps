@@ -1,10 +1,7 @@
-import {
-  SubqueryBorrowerTransaction,
-  SubqueryInvestorTransaction,
-  SubqueryOutstandingOrder,
-} from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, SubqueryBorrowerTransaction, SubqueryOutstandingOrder } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Stack } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useAddress } from '../utils/useAddress'
 import { useAllTransactions } from '../utils/usePools'
@@ -14,6 +11,7 @@ type AddressTransactionsProps = {
   count?: number
 }
 
+// }: Pick<SubqueryInvestorTransaction, 'timestamp' | 'type' | 'poolId' | 'hash' | 'tokenAmount' | 'tokenPrice'>) => {
 const formatters = {
   investorTransactions: ({
     timestamp,
@@ -22,19 +20,29 @@ const formatters = {
     hash,
     tokenAmount,
     tokenPrice,
-  }: Pick<SubqueryInvestorTransaction, 'timestamp' | 'type' | 'poolId' | 'hash' | 'tokenAmount' | 'tokenPrice'>) =>
-    ({
+    currencyAmount,
+  }: {
+    timestamp: string
+    type: string
+    poolId: string
+    hash: string
+    tokenAmount: CurrencyBalance
+    tokenPrice: BN // Price
+    currencyAmount: CurrencyBalance
+  }) => {
+    return {
       date: new Date(timestamp).getTime(),
       action: type,
-      amount: 0, // tokenAmount && tokenPrice
+      amount: tokenAmount,
       poolId,
       hash,
-    } as TransactionCardProps),
+    } //as TransactionCardProps
+  },
   borrowerTransactions: ({ timestamp, type, amount, poolId, hash }: SubqueryBorrowerTransaction) =>
     ({
       date: new Date(timestamp).getTime(),
       action: type,
-      amount,
+      amount: new CurrencyBalance(0, 0),
       poolId,
       hash,
     } as TransactionCardProps),
@@ -42,7 +50,7 @@ const formatters = {
     ({
       date: new Date(timestamp).getTime(),
       action: 'PENDING_ORDER',
-      amount: 0,
+      amount: new CurrencyBalance(0, 0),
       poolId,
       hash,
     } as TransactionCardProps),

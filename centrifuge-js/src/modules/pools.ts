@@ -1875,6 +1875,12 @@ export function getPoolsModule(inst: Centrifuge) {
           hash: string
           tokenAmount: string
           tokenPrice: string
+          currencyAmount: string
+          pool: {
+            currency: {
+              decimals: number
+            }
+          }
         }[]
       }
       borrowerTransactions: {
@@ -1915,6 +1921,12 @@ export function getPoolsModule(inst: Centrifuge) {
             
             tokenAmount
             tokenPrice
+            currencyAmount
+            pool {
+              currency {
+                decimals
+              }
+            }
           }
         }
 
@@ -1956,10 +1968,25 @@ export function getPoolsModule(inst: Centrifuge) {
         address,
       }
     )
+
+    // tokenPrice = hexToBN(tokenPrice)
     return $query.pipe(
       map((data) => {
         return {
-          investorTransactions: data?.investorTransactions.nodes.map((entry) => entry) ?? [],
+          investorTransactions:
+            data?.investorTransactions.nodes.map((entry) => ({
+              ...entry,
+              // tokenAmount: new BN(entry.tokenAmount || 0),
+              // tokenPrice: new BN(entry.tokenPrice || 0),
+              // currencyAmount: new BN(entry.currencyAmount || 0),
+              tokenAmount: entry.tokenAmount
+                ? new CurrencyBalance(entry.tokenAmount, entry.pool.currency.decimals)
+                : undefined,
+              tokenPrice: entry.tokenPrice ? new Price(entry.tokenPrice) : undefined,
+              currencyAmount: entry.currencyAmount
+                ? new CurrencyBalance(entry.currencyAmount, entry.pool.currency.decimals)
+                : undefined,
+            })) ?? [],
           borrowerTransactions: data?.borrowerTransactions.nodes.map((entry) => entry) ?? [],
           outstandingOrders: data?.outstandingOrders.nodes.map((entry) => entry) ?? [],
         }
