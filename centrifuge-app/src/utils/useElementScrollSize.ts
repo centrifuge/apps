@@ -34,6 +34,8 @@ export function useElementScrollSize(ref: React.MutableRefObject<HTMLElement | n
     window.addEventListener('resize', debouncedHandler)
     handleSize()
     return () => window.removeEventListener('resize', debouncedHandler)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref?.current])
 
   return { scrollWidth: size.scrollWidth, scrollHeight: size.scrollHeight }
