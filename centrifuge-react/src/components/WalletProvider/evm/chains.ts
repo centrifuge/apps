@@ -53,6 +53,21 @@ const chainExtendedInfo = {
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     blockExplorerUrl: 'https://goerli.etherscan.io/',
   },
+  136: {
+    name: 'Centrifuge',
+    nativeCurrency: { name: 'CFG', symbol: 'CFG', decimals: 18 },
+    blockExplorerUrl: 'https://www.subscan.io/',
+  },
+  36: {
+    name: 'Centrifuge',
+    nativeCurrency: { name: 'Altair', symbol: 'AIR', decimals: 18 },
+    blockExplorerUrl: 'https://www.subscan.io/',
+  },
+  2000: {
+    name: 'Centrifuge',
+    nativeCurrency: { name: 'Centrifuge', symbol: 'CFG', decimals: 18 },
+    blockExplorerUrl: 'https://www.subscan.io/',
+  },
   8453: {
     name: 'Base',
     nativeCurrency: { name: 'Base', symbol: 'bETH', decimals: 18 },
@@ -63,7 +78,6 @@ const chainExtendedInfo = {
     nativeCurrency: { name: 'Base Goerli', symbol: 'gbETH', decimals: 18 },
     blockExplorerUrl: 'https://goerli.basescan.org/',
   },
-
   43113: {
     name: 'Fuji',
     nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
