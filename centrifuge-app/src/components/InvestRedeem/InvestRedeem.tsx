@@ -64,7 +64,7 @@ type Props = {
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
 
-export function InvestRedeem({ networks = ['centrifuge', 43114, 43113, 8453, 84531], ...rest }: Props) {
+export function InvestRedeem({ networks = ['centrifuge'], ...rest }: Props) {
   const getNetworkName = useGetNetworkName()
   return (
     <LoadBoundary>
@@ -142,7 +142,6 @@ function useAllowedTranches(poolId: string) {
 }
 
 function InvestRedeemState(props: Props) {
-  const { connectedNetwork } = useWallet()
   const { poolId, trancheId: trancheIdProp, onSetTrancheId, actionsRef } = props
   const allowedTranches = useAllowedTranches(poolId)
   const pool = usePool(poolId)
@@ -167,12 +166,6 @@ function InvestRedeemState(props: Props) {
     setTrancheId(id)
   }
 
-  if (typeof connectedNetwork === 'number' && [43113, 43114].includes(connectedNetwork)) {
-    return <OnboardingButton networks={[43113, 43114]} />
-  }
-  if (typeof connectedNetwork === 'number' && [8453, 84531].includes(connectedNetwork)) {
-    return <OnboardingButton networks={[8453, 84531]} />
-  }
   return (
     <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
       <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
@@ -317,24 +310,14 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   return null
 }
 
-const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
-  const { showWallets, showNetworks, connectedType, connectedNetworkName } = useWallet()
+const OnboardingButton = ({ networks }: { networks: Network[] | undefined; trancheId?: string }) => {
+  const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
   const history = useHistory()
-
-  if (!state)
-    return (
-      <Stack as={Card} gap={2} p={2}>
-        <Text variant="body1">Onboarding with {connectedNetworkName} is still a work in progress.</Text>
-        <Button onClick={() => history.push(`/onboarding?poolId=${poolId}&trancheId=${pool.tranches[0].id}`)}>
-          Onboard to junior
-        </Button>
-      </Stack>
-    )
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
   const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state?.trancheId]?.openForOnboarding ? 'open' : 'closed'

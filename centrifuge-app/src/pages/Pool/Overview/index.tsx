@@ -1,4 +1,4 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
@@ -63,15 +63,25 @@ export function PoolDetailSideBar({
   investRef?: ActionsRef
 }) {
   const { pid: poolId } = useParams<{ pid: string }>()
+  const [centChainId, setCentChainId] = React.useState<number | undefined>()
+  const cent = useCentrifuge()
+  React.useEffect(() => {
+    ;(async () => {
+      const id = await cent.getChainId()
+      setCentChainId(id)
+    })()
+  }, [cent])
+  const isTinlakePool = poolId.startsWith('0x')
+  const tinlakeNetworks = [ethConfig.network === 'goerli' ? 5 : 1]
+  // TODO: fetch supported networks from centrifuge chain
+  const centrifugeNetworks = [centChainId || 36, 43113, 84531].filter(Boolean)
 
   return (
     <InvestRedeem
       poolId={poolId}
       trancheId={selectedToken}
       onSetTrancheId={setSelectedToken}
-      networks={
-        poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge', 43113, 43114, 8453, 84531]
-      }
+      networks={isTinlakePool ? tinlakeNetworks : centrifugeNetworks}
       actionsRef={investRef}
     />
   )
