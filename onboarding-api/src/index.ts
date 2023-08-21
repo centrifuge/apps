@@ -13,7 +13,6 @@ import { initProxiesController } from './controllers/init/initProxies'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { manualKybCallbackController } from './controllers/kyb/manualKybCallback'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
-import { migrateWalletsController } from './controllers/migrations/migrateWallets'
 import { getGlobalOnboardingStatusController } from './controllers/user/getGlobalOnboardingStatus'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
@@ -73,8 +72,5 @@ onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 
 // init
 onboarding.get('/initProxies', initProxiesController)
-
-// migrations
-onboarding.get('/migrateWallets', migrateWalletsController)
 
 exports.onboarding = onboarding
