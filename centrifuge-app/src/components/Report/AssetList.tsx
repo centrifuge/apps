@@ -11,6 +11,29 @@ import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 
+const headers = [
+  'ID',
+  'Status',
+  'Collateral value',
+  'Outstanding',
+  'Total financed',
+  'Total repaid',
+  'Financing date',
+  'Maturity date',
+  'Financing fee',
+  'Advance rate',
+  'PD',
+  'LGD',
+  'Discount rate',
+]
+
+const columns = headers.map((col, index) => ({
+  align: 'left',
+  header: col,
+  cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
+  flex: index === 0 ? '0 0 50px' : '0 0 120px',
+}))
+
 export function AssetList({ pool }: { pool: Pool }) {
   const loans = useLoans(pool.id) as Loan[]
   const { setCsvData, startDate, endDate } = React.useContext(ReportContext)
@@ -52,29 +75,6 @@ export function AssetList({ pool }: { pool: Pool }) {
         heading: false,
       }))
   }, [loans, pool.currency.symbol])
-
-  const headers = [
-    'ID',
-    'Status',
-    'Collateral value',
-    'Outstanding',
-    'Total financed',
-    'Total repaid',
-    'Financing date',
-    'Maturity date',
-    'Financing fee',
-    'Advance rate',
-    'PD',
-    'LGD',
-    'Discount rate',
-  ]
-
-  const columns = headers.map((col, index) => ({
-    align: 'left',
-    header: col,
-    cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-    flex: index === 0 ? '0 0 50px' : '0 0 120px',
-  }))
 
   const dataUrl = React.useMemo(() => {
     if (!data.length) {
