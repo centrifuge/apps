@@ -1,4 +1,3 @@
-// import { Loan } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Loan, Pool, Rate } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -52,7 +51,7 @@ export function AssetList({ pool }: { pool: Pool }) {
         ],
         heading: false,
       }))
-  }, [loans])
+  }, [loans, pool.currency.symbol])
 
   const headers = [
     'ID',
@@ -87,7 +86,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
 
     return getCSVDownloadUrl(formatted)
-  }, [data])
+  }, [data, headers])
 
   React.useEffect(() => {
     setCsvData(
@@ -100,7 +99,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     )
 
     return () => setCsvData(undefined)
-  }, [dataUrl])
+  }, [dataUrl, pool.id, startDate, endDate])
 
   if (!loans) {
     return <Spinner />
