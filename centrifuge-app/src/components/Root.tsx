@@ -122,8 +122,8 @@ const evmChains: EvmChains =
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
   const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
-  const [showAvalanche, setShowAvalanche] = React.useState(!!initialFlagsState.showAvalanche)
-  const [showBase, setShowBase] = React.useState(!!initialFlagsState.showBase)
+  const [showAvalanche, setShowAvalanche] = React.useState(initialFlagsState.showAvalanche)
+  const [showBase, setShowBase] = React.useState(initialFlagsState.showBase)
 
   return (
     <>
