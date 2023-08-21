@@ -5,7 +5,7 @@ export type GroupBy = 'day' | 'month'
 
 export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'borrower-tx'
 
-export type ReportContext = {
+export type ReportContextType = {
   csvData?: CsvDataProps
   setCsvData: (data?: CsvDataProps) => void
 
@@ -56,7 +56,7 @@ const defaultContext = {
   setActiveTranche() {},
 }
 
-export const ReportContext = React.createContext<ReportContext>(defaultContext)
+export const ReportContext = React.createContext<ReportContextType>(defaultContext)
 
 export function ReportContextProvider({ children }: { children: React.ReactNode }) {
   const [csvData, setCsvData] = React.useState<CsvDataProps | undefined>(undefined)
