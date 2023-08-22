@@ -460,8 +460,8 @@ export type ActiveLoan = {
   originationDate: string
   normalizedDebt: CurrencyBalance
   outstandingDebt: CurrencyBalance
-  presentValue: CurrencyBalance
-  interestAccrued: CurrencyBalance
+  outstandingPrincipal: CurrencyBalance
+  outstandingInterest: CurrencyBalance
 }
 
 // transformed type for UI
@@ -2238,7 +2238,6 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.interestAccrual.rates(),
           api.query.interestAccrual.lastUpdated(),
           api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency),
-          api.call.loansApi.portfolio(poolId),
         ]).pipe(take(1))
       }),
       map(
@@ -2250,25 +2249,9 @@ export function getPoolsModule(inst: Centrifuge) {
           rateValues,
           interestLastUpdated,
           rawCurrency,
-          rawPortfolio,
         ]) => {
           const currency = rawCurrency.toHuman() as AssetCurrencyData
           const rates = rateValues.toPrimitive() as InterestAccrual[]
-
-          const activeLoansPortfolio: Record<
-            string,
-            {
-              interestAccrued: CurrencyBalance
-              presentValue: CurrencyBalance
-            }
-          > = {}
-          ;(rawPortfolio as any).forEach(([key, value]: [Codec, Codec]) => {
-            const data = value.toPrimitive() as any
-            activeLoansPortfolio[String(key.toPrimitive())] = {
-              interestAccrued: new CurrencyBalance(data.interest_accrued, 27), // not sure
-              presentValue: new CurrencyBalance(data.present_value, 27),
-            }
-          })
 
           const oraclePrices: Record<
             string,
@@ -2382,7 +2365,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   new Rate(rate.interestRatePerSec).toApr().toDecimalPlaces(4).toString() ===
                   sharedInfo.pricing.interestRate.toDecimal().toString()
               )
-              const portfolio = activeLoansPortfolio[loanId.toString()]
               const penaltyRate =
                 'external' in loan.pricing
                   ? loan.pricing.external.interest.penalty
@@ -2397,29 +2379,42 @@ export function getPoolsModule(inst: Centrifuge) {
                 percentage: new Rate(loan.writeOffPercentage),
               }
 
-              const outstandingDebt =
-                'internal' in loan.pricing
-                  ? getOutstandingDebt(
-                      loan,
-                      currency.decimals,
-                      interestLastUpdated.toPrimitive() as number,
-                      interestData
-                    )
-                  : CurrencyBalance.fromFloat(
-                      new CurrencyBalance(loan.pricing.external.outstandingQuantity, 27)
-                        .toDecimal()
-                        .mul(
-                          new CurrencyBalance(
-                            sharedInfo.pricing.oracle?.value ?? new BN(0),
-                            currency.decimals
-                          ).toDecimal()
-                        ),
-                      currency.decimals
-                    )
-
               const repaidPrincipal = new CurrencyBalance(loan.totalRepaid.principal, currency.decimals)
               const repaidInterest = new CurrencyBalance(loan.totalRepaid.interest, currency.decimals)
               const repaidUnscheduled = new CurrencyBalance(loan.totalRepaid.unscheduled, currency.decimals)
+              const outstandingDebt = getOutstandingDebt(
+                loan,
+                currency.decimals,
+                interestLastUpdated.toPrimitive() as number,
+                interestData
+              )
+              let outstandingPrincipal: CurrencyBalance
+              let outstandingInterest: CurrencyBalance
+              if ('internal' in loan.pricing) {
+                outstandingPrincipal = new CurrencyBalance(
+                  new BN(loan.totalBorrowed).sub(repaidPrincipal),
+                  currency.decimals
+                )
+                outstandingInterest = new CurrencyBalance(outstandingDebt.sub(outstandingPrincipal), currency.decimals)
+              } else {
+                const quantity = new CurrencyBalance(loan.pricing.external.outstandingQuantity, 27).toDecimal()
+                outstandingPrincipal = CurrencyBalance.fromFloat(
+                  quantity.mul(
+                    new CurrencyBalance(sharedInfo.pricing.oracle?.value ?? new BN(0), currency.decimals).toDecimal()
+                  ),
+                  currency.decimals
+                )
+                outstandingInterest = CurrencyBalance.fromFloat(
+                  outstandingDebt
+                    .toDecimal()
+                    .sub(
+                      quantity.mul(
+                        new CurrencyBalance(loan.pricing.external.info.notional, currency.decimals).toDecimal()
+                      )
+                    ),
+                  currency.decimals
+                )
+              }
               return {
                 ...sharedInfo,
                 id: loanId.toString(),
@@ -2440,8 +2435,8 @@ export function getPoolsModule(inst: Centrifuge) {
                 originationDate: new Date(loan.originationDate * 1000).toISOString(),
                 outstandingDebt,
                 normalizedDebt: new CurrencyBalance(normalizedDebt, currency.decimals),
-                interestAccrued: portfolio.interestAccrued,
-                presentValue: portfolio.presentValue,
+                outstandingPrincipal,
+                outstandingInterest,
               }
             }
           )
@@ -2788,14 +2783,12 @@ function getOutstandingDebt(
   accrual?: InterestAccrual
 ) {
   if (!accrual) return new CurrencyBalance(0, currencyDecimals)
-  if (!('internal' in loan.pricing)) return new CurrencyBalance(0, currencyDecimals)
   const accRate = new Rate(accrual.accumulatedRate).toDecimal()
   const rate = new Rate(accrual.interestRatePerSec).toDecimal()
-
   const balance =
-    'internal' in loan.pricing && !loan.normalizedDebt
+    'internal' in loan.pricing
       ? loan.pricing.internal.interest.normalizedAcc
-      : loan.normalizedDebt
+      : loan.pricing.external.interest.normalizedAcc
 
   const normalizedDebt = new CurrencyBalance(balance, currencyDecimals).toDecimal()
   const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
