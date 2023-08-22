@@ -8,7 +8,7 @@ export function AddressTokens() {
   const address = useAddress()
   const balances = useBalances(address)
 
-  return (
+  return !!balances?.tranches && !!balances?.tranches.length ? (
     <Stack gap={1}>
       <Grid gridTemplateColumns={TOKEN_CARD_COLUMNS} gap={TOKEN_CARD_GAP} px={2}>
         <Text as="span" variant="body3">
@@ -26,14 +26,14 @@ export function AddressTokens() {
       </Grid>
 
       <Stack as="ul" role="list" gap={1}>
-        {!!balances?.tranches &&
-          balances?.tranches.length &&
-          balances.tranches.map((tranche, index) => (
-            <Box key={`${tranche.trancheId}${index}`} as="li">
-              <TokenCard {...tranche} />
-            </Box>
-          ))}
+        {balances.tranches.map((tranche, index) => (
+          <Box key={`${tranche.trancheId}${index}`} as="li">
+            <TokenCard {...tranche} />
+          </Box>
+        ))}
       </Stack>
     </Stack>
+  ) : (
+    <Text>No data</Text>
   )
 }

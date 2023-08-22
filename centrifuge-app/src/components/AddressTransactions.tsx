@@ -79,7 +79,7 @@ export function AddressTransactions({ count }: AddressTransactionsProps) {
 
   const transactions = formattedTransactions.slice(0, count ?? formattedTransactions.length)
 
-  return !!formattedTransactions.length ? (
+  return !!transactions.length ? (
     <Stack>
       <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
         <Text variant="body3">Action</Text>
@@ -105,5 +105,7 @@ export function AddressTransactions({ count }: AddressTransactionsProps) {
         ))}
       </Stack>
     </Stack>
-  ) : null
+  ) : (
+    <Text>No data</Text>
+  )
 }
