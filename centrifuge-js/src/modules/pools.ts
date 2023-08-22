@@ -1,8 +1,8 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
-import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { combineLatest, EMPTY, expand, firstValueFrom, forkJoin, from, Observable, of, startWith } from 'rxjs'
+import { combineLatestWith, filter, map, mergeMap, repeatWhen, switchMap, take, toArray } from 'rxjs/operators'
 import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -1872,15 +1872,11 @@ export function getPoolsModule(inst: Centrifuge) {
           timestamp: string
           type: InvestorTransactionType
           poolId: string
+          trancheId: string
           hash: string
           tokenAmount: string
           tokenPrice: string
           currencyAmount: string
-          pool: {
-            currency: {
-              decimals: number
-            }
-          }
         }[]
       }
       borrowerTransactions: {
@@ -1896,14 +1892,13 @@ export function getPoolsModule(inst: Centrifuge) {
         nodes: {
           timestamp: string
           poolId: string
+          trancheId: string
           hash: string
-
-          tranche: {
-            id: string
-            tokenPrice: string
-          }
           redeemAmount: string
           investAmount: string
+          tranche: {
+            tokenPrice: string
+          }
         }[]
       }
     }>(
@@ -1917,16 +1912,11 @@ export function getPoolsModule(inst: Centrifuge) {
             timestamp
             type
             poolId
+            trancheId
             hash
-            
             tokenAmount
             tokenPrice
             currencyAmount
-            pool {
-              currency {
-                decimals
-              }
-            }
           }
         }
 
@@ -1954,10 +1944,9 @@ export function getPoolsModule(inst: Centrifuge) {
             redeemAmount
             investAmount
             poolId
+            trancheId
             hash
-
             tranche {
-              id
               tokenPrice
             }
           }
@@ -1969,27 +1958,62 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     )
 
-    // tokenPrice = hexToBN(tokenPrice)
     return $query.pipe(
-      map((data) => {
-        return {
-          investorTransactions:
-            data?.investorTransactions.nodes.map((entry) => ({
-              ...entry,
-              // tokenAmount: new BN(entry.tokenAmount || 0),
-              // tokenPrice: new BN(entry.tokenPrice || 0),
-              // currencyAmount: new BN(entry.currencyAmount || 0),
-              tokenAmount: entry.tokenAmount
-                ? new CurrencyBalance(entry.tokenAmount, entry.pool.currency.decimals)
-                : undefined,
-              tokenPrice: entry.tokenPrice ? new Price(entry.tokenPrice) : undefined,
-              currencyAmount: entry.currencyAmount
-                ? new CurrencyBalance(entry.currencyAmount, entry.pool.currency.decimals)
-                : undefined,
-            })) ?? [],
-          borrowerTransactions: data?.borrowerTransactions.nodes.map((entry) => entry) ?? [],
-          outstandingOrders: data?.outstandingOrders.nodes.map((entry) => entry) ?? [],
-        }
+      mergeMap((data) => {
+        const investorTransactions$ = from(data?.investorTransactions.nodes || []).pipe(
+          mergeMap((entry) => {
+            return getPoolCurrency([entry.poolId]).pipe(
+              map((poolCurrency) => ({
+                ...entry,
+                tokenAmount: new CurrencyBalance(entry.tokenAmount || 0, poolCurrency.decimals),
+                tokenPrice: new Price(entry.tokenPrice || 0),
+                currencyAmount: new CurrencyBalance(entry.currencyAmount || 0, poolCurrency.decimals),
+                trancheId: entry.trancheId.split('-')[1],
+              }))
+            )
+          }),
+          toArray()
+        )
+
+        const borrowerTransactions$ = from(data?.borrowerTransactions.nodes || []).pipe(
+          mergeMap((entry) => {
+            return getPoolCurrency([entry.poolId]).pipe(
+              map((poolCurrency) => ({
+                ...entry,
+                amount: new CurrencyBalance(entry.amount || 0, poolCurrency.decimals),
+              }))
+            )
+          }),
+          toArray()
+        )
+
+        const outstandingOrders$ = from(data?.outstandingOrders.nodes || []).pipe(
+          mergeMap((entry) => {
+            return getPoolCurrency([entry.poolId]).pipe(
+              map((poolCurrency) => {
+                const tokenPrice = new Price(entry.tranche.tokenPrice)
+
+                return {
+                  ...entry,
+                  investAmount: new CurrencyBalance(entry.investAmount || 0, poolCurrency.decimals),
+                  redeemAmount: new CurrencyBalance(entry.redeemAmount || 0, poolCurrency.decimals),
+                  trancheId: entry.trancheId.split('-')[1],
+                }
+              })
+            )
+          }),
+          toArray()
+        )
+
+        return forkJoin([investorTransactions$, borrowerTransactions$, outstandingOrders$]).pipe(
+          map(([investorTransactions, borrowerTransactions, outstandingOrders]) => {
+            return {
+              investorTransactions,
+              borrowerTransactions,
+              outstandingOrders,
+            }
+          })
+        )
       })
     )
   }

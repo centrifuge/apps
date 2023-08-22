@@ -1,3 +1,5 @@
+import { CurrencyBalance, Price } from '../utils/BN'
+
 export type SubqueryPoolSnapshot = {
   __typename?: 'PoolSnapshot'
   id: string
@@ -60,9 +62,9 @@ export type SubqueryInvestorTransaction = {
   epochNumber: number
   type: InvestorTransactionType
   hash: string
-  currencyAmount?: number | null
-  tokenAmount?: number | null
-  tokenPrice?: number | null
+  currencyAmount?: CurrencyBalance | number | null
+  tokenAmount?: CurrencyBalance | number | null
+  tokenPrice?: Price | number | null
   transactionFee?: number | null
 }
 
@@ -71,16 +73,17 @@ export type BorrowerTransactionType = 'CREATED' | 'BORROWED' | 'REPAID' | 'CLOSE
 export type SubqueryBorrowerTransaction = {
   timestamp: string
   type: BorrowerTransactionType
-  amount: string
+  amount: CurrencyBalance
   poolId: string
   hash: string
 }
 
 export type SubqueryOutstandingOrder = {
   timestamp: string
-  investAmount: string
-  redeemAmount: string
+  investAmount: CurrencyBalance
+  redeemAmount: CurrencyBalance
   poolId: string
+  trancheId: string
   hash: string
 }
 

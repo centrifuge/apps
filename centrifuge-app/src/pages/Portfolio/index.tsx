@@ -48,7 +48,7 @@ function Portfolio() {
             <Text as="h2" variant="heading2">
               Transaction history
             </Text>
-            <AddressTransactions count={4} />
+            <AddressTransactions count={3} />
             <Link to="portfolio/transactions">View all</Link>
           </Stack>
 

@@ -4,6 +4,7 @@ import * as React from 'react'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
+import { TransactionTypeChip } from './TransactionTypeChip'
 
 export type TransactionCardProps = {
   date: number
@@ -14,15 +15,14 @@ export type TransactionCardProps = {
   trancheId?: string
 }
 
+export const TRANSACTION_CARD_COLUMNS = `150px 100px 250px 150px 1fr`
+export const TRANSACTION_CARD_GAP = 4
+
 export function TransactionCard({ date, action, amount, poolId, hash, trancheId }: TransactionCardProps) {
   const pool = usePool(poolId) as Pool
   const { data } = usePoolMetadata(pool)
   const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
   const subScanUrl = import.meta.env.REACT_APP_SUBSCAN_URL
-  // console.log('data', data)
-
-  // console.log('pool', pool)
-  // console.log('amount', amount.toString())
 
   if (!pool || !data) {
     return null
@@ -30,14 +30,17 @@ export function TransactionCard({ date, action, amount, poolId, hash, trancheId 
 
   return (
     <Grid
-      gridTemplateColumns={`250px 100px 250px 150px 1fr`}
+      gridTemplateColumns={TRANSACTION_CARD_COLUMNS}
+      gap={TRANSACTION_CARD_GAP}
       alignItems="start"
       py={1}
       borderBottomWidth={1}
       borderBottomColor="borderPrimary"
       borderBottomStyle="solid"
     >
-      <Text as="span">{action}</Text>
+      <Box>
+        <TransactionTypeChip type={action} />
+      </Box>
 
       <Text as="time" variant="interactive2" datetime={date}>
         {formatDate(date, {
@@ -58,9 +61,11 @@ export function TransactionCard({ date, action, amount, poolId, hash, trancheId 
         )}
       </Stack>
 
-      <Text as="span" variant="interactive2">
-        {formatBalance(amount.toDecimal(), pool.currency)}
-      </Text>
+      <Box justifySelf="end">
+        <Text as="span" variant="interactive2">
+          {formatBalance(amount, pool.currency)}
+        </Text>
+      </Box>
 
       {!!subScanUrl && !!hash && (
         <Box
@@ -68,8 +73,10 @@ export function TransactionCard({ date, action, amount, poolId, hash, trancheId 
           href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
           target="_blank"
           rel="noopener noreferrer"
+          justifySelf="end"
+          aria-label="Transaction on Subscan.io"
         >
-          <IconExternalLink size="iconSmall" />
+          <IconExternalLink size="iconSmall" color="textPrimary" />
         </Box>
       )}
     </Grid>

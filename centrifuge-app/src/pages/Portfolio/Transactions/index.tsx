@@ -18,13 +18,16 @@ function Transactions() {
   return (
     <Stack>
       <Box as="header">
-        <Text as="h1">Transactions</Text>
-        {!!address ? (
-          <AddressTransactions />
-        ) : (
-          <Text as="strong">You need to connect your wallet to see your transactions</Text>
-        )}
+        <Text as="h1" variant="heading1">
+          Transaction history
+        </Text>
       </Box>
+
+      {!!address ? (
+        <AddressTransactions />
+      ) : (
+        <Text as="strong">You need to connect your wallet to see your transactions</Text>
+      )}
     </Stack>
   )
 }

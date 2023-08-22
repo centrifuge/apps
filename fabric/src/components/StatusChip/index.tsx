@@ -15,10 +15,11 @@ const colors = {
   critical: 'statusCritical',
 }
 
-const Wrapper = styled.span<{ $color: string }>((props) =>
+const Chip = styled(Text)<{ $borderColor: string }>((props) =>
   css({
+    display: 'inline-block',
     padding: '0 8px',
-    borderColor: props.$color,
+    borderColor: props.$borderColor,
     borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: '20px',
@@ -27,11 +28,10 @@ const Wrapper = styled.span<{ $color: string }>((props) =>
 
 export const StatusChip: React.FC<StatusChipProps> = ({ status, children }) => {
   const color = colors[status]
+
   return (
-    <Wrapper $color={color}>
-      <Text variant="label2" lineHeight="20px" color={color}>
-        {children}
-      </Text>
-    </Wrapper>
+    <Chip forwardedAs="span" variant="label2" lineHeight="20px" color={color} $borderColor={color}>
+      {children}
+    </Chip>
   )
 }
