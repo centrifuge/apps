@@ -39,6 +39,9 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
   return (
     <>
       {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
+      {pricing.maturityExtensionDays && (
+        <LabelValueStack label="Extension period" value={`${pricing.maturityExtensionDays} days`} />
+      )}
       {isOutstandingDebtOrDiscountedCashFlow && (
         <LabelValueStack
           label="Advance rate"

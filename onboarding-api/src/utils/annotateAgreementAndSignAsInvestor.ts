@@ -8,7 +8,7 @@ import { HttpError } from './httpError'
 import { getCentrifuge } from './networks/centrifuge'
 import { NetworkSwitch } from './networks/networkSwitch'
 
-interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
+interface SignatureInfo extends Omit<InferType<typeof signAndSendDocumentsInput>, 'debugEmail'> {
   name: string
   wallet: Request['wallet']
   email: string

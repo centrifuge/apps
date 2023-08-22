@@ -113,10 +113,6 @@ const parachainTypes = {
       Staking: 'StakingCurrency',
     },
   },
-  ActiveLoanInfo: {
-    interest_accrued: 'u128',
-    present_value: 'u128',
-  },
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
@@ -187,37 +183,6 @@ const parachainRuntimeApi: DefinitionsCall = {
       methods: {
         compute_reward: parachainRpcMethods.rewards.computeReward,
         list_currencies: parachainRpcMethods.rewards.listCurrencies,
-      },
-      version: 1,
-    },
-  ],
-  LoansApi: [
-    {
-      methods: {
-        portfolio: {
-          description: 'Get active pool loan',
-          params: [
-            {
-              name: 'pool_id',
-              type: 'u64',
-            },
-          ],
-          type: 'Vec<(u64, ActiveLoanInfo)>',
-        },
-        portfolio_loan: {
-          description: 'Get active pool loan',
-          params: [
-            {
-              name: 'pool_id',
-              type: 'u64',
-            },
-            {
-              name: 'loan_id',
-              type: 'u64',
-            },
-          ],
-          type: 'Option<ActiveLoanInfo>',
-        },
       },
       version: 1,
     },

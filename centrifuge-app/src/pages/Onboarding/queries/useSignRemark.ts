@@ -124,9 +124,14 @@ export const useSignRemark = (
       if (selectedAccount && selectedAccount.signer) {
         const api = await centrifuge.connect(selectedAccount.address, selectedAccount.signer as any)
         const paymentInfo = await lastValueFrom(
-          api.remark.signRemark([`Signed subscription agreement for pool: 12324565 tranche: 0xacbdefghijklmn`], {
-            paymentInfo: selectedAccount.address,
-          })
+          api.remark.signRemark(
+            [
+              `I hereby sign the subscription agreement of pool [POOL_ID] and tranche [TRANCHE_ID]: [IPFS_HASH_OF_TEMPLATE]`,
+            ],
+            {
+              paymentInfo: selectedAccount.address,
+            }
+          )
         )
         const txFee = paymentInfo.partialFee.toDecimal()
         setExpectedTxFee(txFee)

@@ -61,6 +61,7 @@ export type CreateLoanFormValues = {
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
     value: number | ''
     maturityDate: string
+    maturityExtensionDays: number
     advanceRate: number | ''
     interestRate: number | ''
     probabilityOfDefault: number | ''
@@ -214,6 +215,7 @@ function IssuerCreateLoan() {
         maxBorrowAmount: 'upToTotalBorrowed',
         value: '',
         maturityDate: '',
+        maturityExtensionDays: 0,
         advanceRate: '',
         interestRate: '',
         probabilityOfDefault: '',
@@ -236,6 +238,7 @@ function IssuerCreateLoan() {
                 : null,
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
+              maturityExtensionDays: values.pricing.maturityExtensionDays,
               interestRate: Rate.fromPercent(values.pricing.interestRate),
               notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
             }
@@ -244,6 +247,7 @@ function IssuerCreateLoan() {
               maxBorrowAmount: values.pricing.maxBorrowAmount,
               value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
               maturityDate: new Date(values.pricing.maturityDate),
+              maturityExtensionDays: values.pricing.maturityExtensionDays,
               advanceRate: Rate.fromPercent(values.pricing.advanceRate),
               interestRate: Rate.fromPercent(values.pricing.interestRate),
               probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
