@@ -15,7 +15,7 @@ export function useInvestRedeem() {
 export function InvestRedeemProvider(props: Props) {
   const isTinlakePool = props.poolId.startsWith('0x')
   const { connectedNetwork } = useWallet()
-  if (connectedNetwork && [1, 5, 43113, 43114, 8453, 84531].includes(connectedNetwork as any)) {
+  if (connectedNetwork && [1, 5, 8453, 84531].includes(connectedNetwork as any)) {
     return null
   }
 

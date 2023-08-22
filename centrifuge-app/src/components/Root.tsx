@@ -83,10 +83,6 @@ const evmChains: EvmChains =
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
         },
-        43114: {
-          urls: ['https://api.avax.network/ext/bc/C/rpc'],
-          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
-        },
         8453: {
           urls: ['https://mainnet.base.org'],
           iconUrl: 'https://docs.base.org/img/logo_dark.svg',
@@ -109,21 +105,12 @@ const evmChains: EvmChains =
           urls: ['https://goerli.base.org'],
           iconUrl: 'https://docs.base.org/img/logo.svg',
         },
-        43114: {
-          urls: ['https://api.avax.network/ext/bc/C/rpc'],
-          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
-        },
-        43113: {
-          urls: ['https://api.avax-test.network/ext/bc/C/rpc'],
-          iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=013',
-        },
       }
 
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
   const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
-  const [showAvalanche, setShowAvalanche] = React.useState(initialFlagsState.showAvalanche)
-  const [showBase, setShowBase] = React.useState(initialFlagsState.showBase)
+  const [showBase, setShowBase] = React.useState(!!initialFlagsState.showBase)
 
   return (
     <>
@@ -150,7 +137,6 @@ export function Root() {
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
               showAdvancedAccounts={showAdvancedAccounts}
-              showAvalanche={showAvalanche}
               showBase={showBase}
             >
               <OnboardingAuthProvider>
@@ -159,7 +145,6 @@ export function Root() {
                     onChange={(state) => {
                       setIsThemeToggled(!!state.alternativeTheme)
                       setShowAdvancedAccounts(!!state.showAdvancedAccounts)
-                      setShowAvalanche(!!state.showAvalanche)
                       setShowBase(!!state.showBase)
                     }}
                   >

@@ -8,18 +8,20 @@ import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendD
 import { HttpError } from '../httpError'
 import RemarkerAbi from './abi/Remarker.abi.json'
 
-const getEvmProvider = (chainId: number | string): Provider => {
+const getEvmProvider = (chainId: number | string, isEvmOnCentChain?: boolean): Provider => {
+  if (isEvmOnCentChain) {
+    return new InfuraProvider(chainId, process.env.INFURA_KEY)
+  }
   switch (chainId.toString()) {
     case '1': // eth mainnet
     case '5': // goerli
-    case '2000': // cent on evm
       return new InfuraProvider(chainId, process.env.INFURA_KEY)
     case '8453': // base mainnet
       return new JsonRpcProvider('https://mainnet.base.org')
     case '84531': // base goerli
       return new JsonRpcProvider('https://goerli.base.org')
     default:
-      throw new HttpError(404, 'Unsupported chainId')
+      throw new HttpError(404, `Unsupported chainId ${chainId}`)
   }
 }
 
@@ -28,7 +30,7 @@ export const validateEvmRemark = async (
   transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
   expectedRemark: string
 ) => {
-  const provider = getEvmProvider(transactionInfo.chainId)
+  const provider = getEvmProvider(transactionInfo.chainId, transactionInfo?.isEvmOnSubstrate)
   const remarkerAddress = '0x3E39db43035981c2C31F7Ffa4392f25231bE4477'
   const contract = new Contract(remarkerAddress, RemarkerAbi).connect(provider)
   const filteredEvents = await contract.queryFilter(

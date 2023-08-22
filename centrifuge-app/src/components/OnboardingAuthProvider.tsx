@@ -51,7 +51,7 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
       if (selectedAccount?.address && selectedWallet?.signer) {
         await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer, cent, proxy)
       } else if (isEvmOnSubstrate && selectedAddress && provider?.getSigner()) {
-        await loginWithEvm(selectedAddress, provider.getSigner(), evmChainId)
+        await loginWithEvm(selectedAddress, provider.getSigner(), evmChainId, isEvmOnSubstrate)
       } else if (selectedAddress && provider?.getSigner()) {
         await loginWithEvm(selectedAddress, provider.getSigner(), evm.chainId)
       }
@@ -197,7 +197,7 @@ const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], 
   }
 }
 
-const loginWithEvm = async (address: string, signer: any, evmChainId?: number) => {
+const loginWithEvm = async (address: string, signer: any, evmChainId?: number, isEvmOnSubstrate?: boolean) => {
   const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
     method: 'POST',
     headers: {
@@ -233,7 +233,7 @@ Issued At: ${new Date().toISOString()}`
       signature: signedMessage,
       address,
       nonce,
-      network: evmChainId === 2000 ? 'evmOnSubstrate' : 'evm',
+      network: isEvmOnSubstrate ? 'evmOnSubstrate' : 'evm',
       chainId: evmChainId || 1,
     }),
   })
