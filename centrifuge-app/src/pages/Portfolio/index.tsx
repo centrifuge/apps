@@ -40,7 +40,9 @@ function Portfolio() {
           </Grid>
 
           <Box as="article">
-            <Text as="h2">Token overview</Text>
+            <Text as="h2" variant="heading2">
+              Token overview
+            </Text>
             <AddressTokens />
           </Box>
 
