@@ -1,5 +1,5 @@
 import { isSameAddress } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import { Flex, Shelf, Text, TextProps } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
@@ -32,12 +32,12 @@ export const Identity: React.FC<Props> = ({
 }) => {
   const identity = useIdentity(address)
   const myAddress = useAddress('substrate')
-  const cent = useCentrifuge()
+  const utils = useCentrifugeUtils()
   const { selectedAccount } = useWallet().substrate
 
-  const addr = cent.utils.formatAddress(address)
+  const addr = utils.formatAddress(address)
   const isMe = React.useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
-  const truncated = truncate(cent.utils.formatAddress(address))
+  const truncated = truncate(utils.formatAddress(address))
   const display = identity?.display || truncated
   const meLabel =
     !isMe || !labelForConnectedAddress

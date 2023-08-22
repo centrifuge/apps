@@ -33,6 +33,11 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
   const centrifuge = useCentrifuge()
 
   const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed
+  const unsignedAgreementUrl = poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
+    ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[trancheId].agreement?.uri!)
+    : !poolId.startsWith('0x')
+    ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    : null
 
   const formik = useFormik({
     initialValues: {
@@ -40,18 +45,14 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
     },
     validationSchema,
     onSubmit: () => {
-      signRemark([`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`])
+      signRemark([
+        `I hereby sign the subscription agreement of pool ${poolId} and tranche ${trancheId}: ${poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri}`,
+      ])
     },
   })
 
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
-
-  const unsignedAgreementUrl = poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
-    ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[trancheId].agreement?.uri!)
-    : !poolId.startsWith('0x')
-    ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
-    : null
 
   // tinlake pools without subdocs cannot accept investors
   const isPoolClosedToOnboarding = poolId.startsWith('0x') && !unsignedAgreementUrl

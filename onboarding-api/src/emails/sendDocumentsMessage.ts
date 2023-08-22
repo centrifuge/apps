@@ -15,7 +15,8 @@ export const sendDocumentsMessage = async (
   wallet: Request['wallet'],
   poolId: string,
   trancheId: string,
-  signedAgreement: Uint8Array
+  signedAgreement: Uint8Array,
+  debugEmail?: string
 ) => {
   const { metadata, pool } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
@@ -36,7 +37,7 @@ export const sendDocumentsMessage = async (
       {
         to: [
           {
-            email: metadata?.pool?.issuer?.email,
+            email: debugEmail ?? metadata?.pool?.issuer?.email,
           },
         ],
         dynamic_template_data: {

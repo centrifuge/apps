@@ -208,8 +208,8 @@ export class CentrifugeBase {
       this.config.network === 'centrifuge' ? this.config.centrifugeSubqueryUrl : this.config.altairSubqueryUrl
   }
 
-  getChainId() {
-    return this.config.network === 'centrifuge' ? 36 : 136
+  async getChainId() {
+    return this.getApiPromise().then((api) => api.registry.chainSS58 as number)
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
