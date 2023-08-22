@@ -125,7 +125,6 @@ const goerliConfig = {
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
   poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
-  remarkerAddress: '0x6E395641087a4938861d7ada05411e3146175F58',
   blockExplorerUrl: 'https://goerli.etherscan.io',
 }
 const mainnetConfig = {
@@ -133,13 +132,13 @@ const mainnetConfig = {
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
   poolsHash: 'QmNvauf8E6TkUiyF1ZgtYtntHz335tCswKp2uhBH1fiui1', // TODO: add registry to config and fetch poolHash
-  remarkerAddress: '0x075f37451e7a4877f083aa070dd47a6969af2ced',
   blockExplorerUrl: 'https://etherscan.io',
 }
 
 export const ethConfig = {
   network: ethNetwork,
   multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
+  remarkerAddress: '0x3E39db43035981c2C31F7Ffa4392f25231bE4477', // Same for all networks
   ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),
 }
 

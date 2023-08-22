@@ -2,13 +2,15 @@ import { Box, Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { useClaimCountdown } from './hooks'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
 
 export function LiquidityRewardsClaimer() {
   const {
-    state: { countdown, rewards, canClaim, isLoading, nativeCurrency },
+    state: { rewards, canClaim, isLoading, nativeCurrency },
     actions: { claim },
   } = useLiquidityRewards()
+  const claimCountdown = useClaimCountdown()
 
   const rewardsAmount =
     rewards && !rewards?.isZero()
@@ -36,9 +38,9 @@ export function LiquidityRewardsClaimer() {
           </Button>
         </Shelf>
 
-        {!!countdown && (
+        {!!claimCountdown && (
           <Text as="span" variant="body3">
-            New rounds of rewards will be available in {countdown}
+            New rounds of rewards will be available in {claimCountdown}
           </Text>
         )}
       </Stack>

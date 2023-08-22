@@ -1,7 +1,7 @@
 import Centrifuge, { CurrencyBalance, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { Keyring } from '@polkadot/keyring'
 import { cryptoWaitReady, encodeAddress } from '@polkadot/util-crypto'
-import { Request } from 'express'
+import { Request, Response } from 'express'
 import { combineLatest, combineLatestWith, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
@@ -186,5 +186,41 @@ export const getValidSubstrateAddress = async (wallet: Request['wallet']) => {
     return validAddress
   } catch (error) {
     throw new HttpError(400, 'Invalid substrate address')
+  }
+}
+
+const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+export async function verifySubstrateWallet(req: Request, res: Response): Promise<Request['wallet']> {
+  const { jw3t: token, nonce } = req.body
+  const { verified, payload } = await getCentrifuge().auth.verify(token!)
+
+  const onBehalfOf = payload?.on_behalf_of
+  const address = payload.address
+
+  const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
+  if (!cookieNonce || cookieNonce !== nonce) {
+    throw new HttpError(400, 'Invalid nonce')
+  }
+
+  res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
+
+  if (verified && onBehalfOf) {
+    const isVerifiedProxy = await getCentrifuge().auth.verifyProxy(
+      address,
+      onBehalfOf,
+      AUTHORIZED_ONBOARDING_PROXY_TYPES
+    )
+    if (isVerifiedProxy.verified) {
+      req.wallet.address = address
+    } else if (verified && !onBehalfOf) {
+      req.wallet.address = address
+    } else {
+      throw new Error()
+    }
+  }
+  return {
+    address,
+    network: payload.network || 'substrate',
+    chainId: payload.chainId,
   }
 }

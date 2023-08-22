@@ -10,18 +10,18 @@ export const verifyAuth = async (req: Request, _res: Response, next: NextFunctio
       throw new Error('Unauthorized')
     }
     const token = authorization.split(' ')[1]
-    const { address, network, aud } = (await jwt.verify(token, process.env.JWT_SECRET)) as Request['wallet'] &
+    const { address, network, chainId, aud } = (await jwt.verify(token, process.env.JWT_SECRET)) as Request['wallet'] &
       jwt.JwtPayload
     if (!address || aud !== req.get('origin')) {
       throw new Error('Unauthorized')
     }
     if (
       (network.includes('evm') && !isAddress(address)) ||
-      (network === 'substrate' && !(await getValidSubstrateAddress({ address, network })))
+      (network === 'substrate' && !(await getValidSubstrateAddress({ address, network, chainId })))
     ) {
       throw new Error('Unauthorized')
     }
-    req.wallet = { address, network }
+    req.wallet = { address, network, chainId }
     next()
   } catch (e) {
     throw new Error('Unauthorized')

@@ -34,6 +34,7 @@ export const transactionInfoSchema = object({
   txHash: string().required(),
   blockNumber: string().required(),
   isEvmOnSubstrate: bool().optional(),
+  chainId: string().required(),
 })
 export type TransactionInfo = InferType<typeof transactionInfoSchema>
 

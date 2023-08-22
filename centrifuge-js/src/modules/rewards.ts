@@ -126,11 +126,14 @@ export function getRewardsModule(inst: Centrifuge) {
   }
 
   function getAccountStakes(args: [address: Account, poolId: string, trancheId: string]) {
-    const [address, poolId, trancheId] = args
+    const [addressEvm, poolId, trancheId] = args
     const { getPoolCurrency } = inst.pools
-
     return inst.getApi().pipe(
-      switchMap((api) => api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })),
+      combineLatestWith(inst.getChainId()),
+      switchMap(([api, chainId]) => {
+        const address = inst.utils.evmToSubstrateAddress(addressEvm.toString(), chainId)
+        return api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })
+      }),
       combineLatestWith(getPoolCurrency([poolId])),
       map(([data, currency]) => {
         const { stake, pendingStake, rewardTally, lastCurrencyMovement } = data.toPrimitive() as {
