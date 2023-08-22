@@ -8,6 +8,7 @@ import { IssuerPoolViewLoanTemplatePage } from './Configuration/ViewLoanTemplate
 import { IssuerPoolInvestorsPage } from './Investors'
 import { IssuerPoolLiquidityPage } from './Liquidity'
 import { IssuerPoolOverviewPage } from './Overview'
+import { IssuerPoolReportingPage } from './Reporting'
 
 export const IssuerPoolPage: React.FC = () => {
   const { path } = useRouteMatch()
@@ -21,6 +22,7 @@ export const IssuerPoolPage: React.FC = () => {
       <Route path={`${path}/access`} component={IssuerPoolAccessPage} />
       <Route path={`${path}/assets`} component={IssuerPoolAssetPage} />
       <Route path={`${path}/liquidity`} component={IssuerPoolLiquidityPage} />
+      <Route path={`${path}/reporting`} component={IssuerPoolReportingPage} />
       <Route path={path} component={IssuerPoolOverviewPage} />
     </Switch>
   )

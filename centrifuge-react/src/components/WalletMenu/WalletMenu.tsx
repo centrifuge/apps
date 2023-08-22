@@ -16,18 +16,16 @@ import {
   WalletButton,
 } from '@centrifuge/fabric'
 import { getAddress } from '@ethersproject/address'
-import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
-import { useCentrifuge } from '../CentrifugeProvider'
+import { useCentrifugeConsts, useCentrifugeUtils } from '../CentrifugeProvider'
 import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
-import { useNeworkIcon } from '../WalletProvider/UserSelection'
-import { getWalletIcon, getWalletLabel } from '../WalletProvider/WalletDialog'
+import { useNetworkIcon } from '../WalletProvider/utils'
 import { ConnectButton } from './ConnectButton'
 
 type WalletMenuProps = {
@@ -50,7 +48,8 @@ export function WalletMenu({ menuItems }: WalletMenuProps) {
 
 function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
-  const centrifuge = useCentrifuge()
+  const consts = useCentrifugeConsts()
+  const utils = useCentrifugeUtils()
   const ctx = useWallet()
   const {
     evm,
@@ -63,10 +62,9 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
     connectedNetworkName,
     isEvmOnSubstrate,
   } = ctx
-  const formattedAddress =
-    connectedType === 'evm' ? getAddress(evm.selectedAddress!) : centrifuge.utils.formatAddress(address)
+  const formattedAddress = connectedType === 'evm' ? getAddress(evm.selectedAddress!) : utils.formatAddress(address)
   const wallet = ctx[connectedType!]?.selectedWallet
-  const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
+  const { name: ensName, avatar } = useEns(connectedType === 'evm' ? evm.selectedAddress! : undefined)
   const balances = useBalances(connectedType !== 'evm' || isEvmOnSubstrate ? address : undefined)
   const { data: evmBalance } = useNativeBalance()
   const evmCurrency = useNativeCurrency()
@@ -79,7 +77,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
       ? [balances.native.balance, balances.native.currency.symbol]
       : []
   const explorer = useGetExplorerUrl(connectedNetwork ?? undefined)
-  const subScanUrl = explorer.address(address, connectedNetwork ?? undefined)
+  const subScanUrl = explorer.address(address, isEvmOnSubstrate ? 'centrifuge' : connectedNetwork ?? undefined)
 
   return (
     <Popover
@@ -114,32 +112,49 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
         <Box {...props} ref={ref} width={220}>
           <Menu>
             <MenuItemGroup>
-              <Shelf px={2} pt={1} gap={1} alignItems="center" justifyContent="space-between">
-                <Shelf alignItems="center" gap={1}>
-                  <Box style={{ pointerEvents: 'none' }}>
-                    <Identicon value={formattedAddress} size={17} theme="polkadot" />
-                  </Box>
-                  <Text variant="interactive1" fontWeight={400}>
-                    {truncateAddress(formattedAddress)}
+              <Stack
+                backgroundColor={isEvmOnSubstrate ? 'backgroundButtonTertiaryHover' : undefined}
+                pt={2}
+                pb={isEvmOnSubstrate ? 2 : 0}
+                px={2}
+                gap="4px"
+                alignItems={isEvmOnSubstrate ? 'flex-start' : 'center'}
+              >
+                {isEvmOnSubstrate && (
+                  <Text variant="heading5" color="textPrimary">
+                    Your Centrifuge account
                   </Text>
-                </Shelf>
+                )}
+                <Shelf gap={1} justifyContent="space-between">
+                  <Shelf gap={1}>
+                    <Text variant="interactive1" fontWeight={400}>
+                      {truncateAddress(isEvmOnSubstrate ? utils.formatAddress(address) : formattedAddress)}
+                    </Text>
+                  </Shelf>
 
-                <Shelf alignItems="center" gap="2px">
-                  <IconButton onClick={() => copyToClipboard(formattedAddress)} title="Copy address to clipboard">
-                    <IconCopy />
-                  </IconButton>
-                  {subScanUrl && (
-                    <IconAnchor
-                      href={subScanUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`View account on ${subScanUrl}`}
+                  <Shelf gap="2px">
+                    <IconButton
+                      onClick={() =>
+                        copyToClipboard(isEvmOnSubstrate ? utils.formatAddress(address) : formattedAddress)
+                      }
+                      title="Copy address to clipboard"
                     >
-                      <IconExternalLink />
-                    </IconAnchor>
-                  )}
+                      <IconCopy />
+                    </IconButton>
+                    {subScanUrl && (
+                      <IconAnchor
+                        href={subScanUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`View account on ${subScanUrl}`}
+                      >
+                        <IconExternalLink />
+                      </IconAnchor>
+                    )}
+                  </Shelf>
                 </Shelf>
-              </Shelf>
+                {isEvmOnSubstrate && <Text variant="body4">Send your {consts.chainSymbol} tokens here</Text>}
+              </Stack>
 
               <Stack gap={0} mt={1} px={2} pb={1}>
                 <Text variant="label2" textAlign="center" color="textPrimary">
@@ -159,7 +174,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                   Network
                 </Text>
                 <Shelf gap={1}>
-                  <Logo icon={useNeworkIcon(connectedNetwork!)} size="iconSmall" />
+                  <Logo icon={useNetworkIcon(connectedNetwork!)} size="iconSmall" />
                   <Text variant="interactive1">{connectedNetworkName}</Text>
                 </Shelf>
               </Box>
@@ -172,8 +187,8 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                     Wallet
                   </Text>
                   <Shelf gap={1}>
-                    <Logo icon={getWalletIcon(wallet)} size="iconSmall" />
-                    <Text variant="interactive1">{getWalletLabel(wallet)}</Text>
+                    <Logo icon={wallet.logo.src} size="iconSmall" />
+                    <Text variant="interactive1">{wallet.title}</Text>
                   </Shelf>
                 </Box>
               )}

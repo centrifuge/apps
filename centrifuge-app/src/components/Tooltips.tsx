@@ -234,6 +234,14 @@ const tooltipText = {
     label: 'Issuer representive name',
     body: 'This is the full legal name of the authorized representive of the pool.',
   },
+  appliedWriteOff: {
+    label: 'Applied write-off',
+    body: 'The applied write-off is the amount of the outstanding financing that has been written off by the issuer.',
+  },
+  maturityExtensionDays: {
+    label: 'Extension period',
+    body: 'Number of days the maturity can be extended without restrictions.',
+  },
 }
 
 export type TooltipsProps = {

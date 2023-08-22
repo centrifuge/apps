@@ -32,7 +32,6 @@ export const shuftiProRequest = async (payload: any, options?: { dryRun?: boolea
 
     const data = await shuftiRes.json()
     if (data.error) {
-      console.log(data.error.message)
       throw new HttpError(400, `${payload.reference} ${data.error.message}`)
     }
     return data

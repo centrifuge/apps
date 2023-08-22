@@ -18,6 +18,7 @@ export type TokenTableData = {
   seniority: number
   poolId: string
   poolCurrency: string
+  tokenPrice: number
 }
 
 type Props = {
@@ -48,6 +49,12 @@ const columns: Column[] = [
     sortKey: 'yield',
   },
   {
+    header: <SortableTableHeader label="Token price" />,
+    cell: (token: TokenTableData) => formatBalance(token.tokenPrice, token.poolCurrency, 4, 2),
+    flex: '4',
+    sortKey: 'tokenPrice',
+  },
+  {
     header: <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => (token.protection ? formatPercentage(token.protection) : ''),
     flex: '4',
@@ -55,7 +62,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Value locked" />,
-    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.poolCurrency),
+    cell: (token: TokenTableData) => formatBalance(token.valueLocked, token.poolCurrency),
     flex: '4',
     sortKey: 'valueLocked',
   },

@@ -1,4 +1,4 @@
-import { CurrencyBalance, findBalance, Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, ExternalPricingInfo, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Button,
@@ -70,14 +70,20 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       quantity: '',
     },
     onSubmit: (values, actions) => {
-      const price = Rate.fromFloat(values.price)
-      const amount = new CurrencyBalance(
-        price.muln(values.quantity || 0).div(new BN(10).pow(new BN(27 - pool.currency.decimals))),
-        pool.currency.decimals
+      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
+      const quantity = CurrencyBalance.fromFloat(
+        values.quantity,
+        27 // TODO: Will be 18 decimals after next chain update
       )
 
-      // @ts-expect-error
-      doFinanceTransaction([loan.poolId, loan.id, amount, price, loan.pricing.Isin, account.actingAddress])
+      doFinanceTransaction([
+        loan.poolId,
+        loan.id,
+        quantity,
+        price,
+        (loan.pricing as ExternalPricingInfo).Isin,
+        account.actingAddress,
+      ])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -89,13 +95,19 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       quantity: '',
     },
     onSubmit: (values, actions) => {
-      const price = Rate.fromFloat(values.price)
-      const amount = new CurrencyBalance(
-        price.muln(values.quantity || 0).div(new BN(10).pow(new BN(27 - pool.currency.decimals))),
-        pool.currency.decimals
-      )
-      // @ts-expect-error
-      doRepayTransaction([loan.poolId, loan.id, amount, new BN(0), price, loan.pricing.Isin, account.actingAddress])
+      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
+      const quantity = CurrencyBalance.fromFloat(values.quantity, 27)
+
+      doRepayTransaction([
+        loan.poolId,
+        loan.id,
+        quantity,
+        new BN(0),
+        new BN(0),
+        price,
+        (loan.pricing as ExternalPricingInfo).Isin,
+        account.actingAddress,
+      ])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -114,7 +126,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
 
@@ -179,6 +190,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       currency={pool.currency.symbol}
                       onChange={(value) => form.setFieldValue('price', value)}
                       placeholder="0.0"
+                      precision={6}
                     />
                   )
                 }}
@@ -200,16 +212,16 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   This is calculated through the amount multiplied by the current price of the asset
                 </Text>
               </Stack>
-              {poolReserve.lessThan(availableFinancing) ||
-                ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowAmount && (
-                  <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
-                    <IconInfo size="iconMedium" />
-                    <Text variant="body3">
-                      The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
-                      than the available financing
-                    </Text>
-                  </Shelf>
-                ))}
+              {(poolReserve.lessThan(availableFinancing) ||
+                ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowAmount)) && (
+                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
+                  <IconInfo size="iconMedium" />
+                  <Text variant="body3">
+                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
+                    than the available financing
+                  </Text>
+                </Shelf>
+              )}
               <Stack px={1}>
                 <Button type="submit" loading={isFinanceLoading}>
                   Finance asset
@@ -227,11 +239,11 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="label1">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${
-                    loan.pricing.outstandingQuantity
-                      .div(new BN(10).pow(new BN(pool?.currency.decimals - 2)))
-                      .toNumber() / 100
-                  } @ ${formatBalance(loan.pricing.oracle.value.toDecimal(), pool?.currency.symbol, 2)}`
+                ? `${loan.pricing.outstandingQuantity.toFloat()} @ ${formatBalance(
+                    loan.pricing.oracle.value,
+                    pool?.currency.symbol,
+                    2
+                  )}`
                 : ''}
             </Text>
           </Shelf>

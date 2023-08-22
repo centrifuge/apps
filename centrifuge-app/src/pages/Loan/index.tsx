@@ -2,6 +2,7 @@ import { CurrencyBalance, Loan as LoanType, TinlakeLoan } from '@centrifuge/cent
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
+  Button,
   IconNft,
   InteractiveCard,
   Shelf,
@@ -11,6 +12,7 @@ import {
   Thumbnail,
   truncate,
 } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { Identity } from '../../components/Identity'
@@ -28,10 +30,11 @@ import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
+import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
-import { useCanBorrowAsset } from '../../utils/usePermissions'
+import { useCanBorrowAsset, useCanSetOraclePrice } from '../../utils/usePermissions'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
@@ -41,9 +44,10 @@ import { PricingValues } from './PricingValues'
 import { formatNftAttribute } from './utils'
 
 export const LoanPage: React.FC = () => {
+  const [showOraclePricing, setShowOraclePricing] = React.useState(false)
   return (
-    <PageWithSideBar sidebar={<LoanSidebar />}>
-      <Loan />
+    <PageWithSideBar sidebar={<LoanSidebar showOraclePricing={showOraclePricing} />}>
+      <Loan setShowOraclePricing={() => setShowOraclePricing(true)} />
     </PageWithSideBar>
   )
 }
@@ -52,7 +56,7 @@ function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
   return loan.poolId.startsWith('0x')
 }
 
-const LoanSidebar: React.FC = () => {
+const LoanSidebar: React.FC<{ showOraclePricing?: boolean }> = ({ showOraclePricing }) => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
   const canBorrow = useCanBorrowAsset(pid, aid)
@@ -61,13 +65,13 @@ const LoanSidebar: React.FC = () => {
 
   return (
     <Stack gap={2}>
-      <OraclePriceForm loan={loan} />
+      {showOraclePricing && <OraclePriceForm loan={loan} />}
       <FinanceForm loan={loan} />
     </Stack>
   )
 }
 
-const Loan: React.FC = () => {
+const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePricing }) => {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
@@ -80,6 +84,8 @@ const Loan: React.FC = () => {
   const cent = useCentrifuge()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
+  const address = useAddress()
+  const canOraclePrice = useCanSetOraclePrice(address)
 
   const name = truncateText((isTinlakePool ? loan?.asset.nftId : nftMetadata?.name) || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
@@ -135,9 +141,7 @@ const Loan: React.FC = () => {
                     },
                     {
                       label: 'Quantity',
-                      value: formatBalance(
-                        new CurrencyBalance(loan.pricing.outstandingQuantity, pool?.currency.decimals)
-                      ),
+                      value: formatBalance(loan.pricing.outstandingQuantity),
                     },
                     {
                       label: 'Price',
@@ -148,8 +152,8 @@ const Loan: React.FC = () => {
                     {
                       label: <Tooltips type={isTinlakePool ? 'riskGroup' : 'collateralValue'} />,
                       value: isTinlakePool
-                        ? 'riskGroup' in loan
-                        : 'value' in loan.pricing
+                        ? 'riskGroup' in loan && loan.riskGroup
+                        : 'value' in loan.pricing && loan.pricing.value
                         ? formatBalance(loan.pricing.value, pool?.currency.symbol)
                         : 'TBD',
                     },
@@ -160,8 +164,37 @@ const Loan: React.FC = () => {
                     {
                       label: <Tooltips type="outstanding" />,
                       value:
-                        'outstandingDebt' in loan ? formatBalance(loan.outstandingDebt, pool?.currency.symbol) : 'n/a',
+                        'outstandingDebt' in loan
+                          ? isTinlakePool && 'writeOffPercentage' in loan
+                            ? formatBalance(
+                                new CurrencyBalance(
+                                  loan.outstandingDebt.sub(
+                                    loan.outstandingDebt.mul(new BN(loan.writeOffPercentage).div(new BN(100)))
+                                  ),
+                                  pool.currency.decimals
+                                ),
+                                pool?.currency.symbol
+                              )
+                            : formatBalance(loan.outstandingDebt, pool?.currency.symbol)
+                          : 'n/a',
                     },
+                    ...(isTinlakePool
+                      ? [
+                          {
+                            label: <Tooltips type="appliedWriteOff" />,
+                            value:
+                              'writeOffPercentage' in loan
+                                ? formatBalance(
+                                    new CurrencyBalance(
+                                      loan.outstandingDebt.mul(new BN(loan.writeOffPercentage).div(new BN(100))),
+                                      pool.currency.decimals
+                                    ),
+                                    pool?.currency.symbol
+                                  )
+                                : 'n/a',
+                          },
+                        ]
+                      : []),
                   ]
             }
           />
@@ -185,7 +218,20 @@ const Loan: React.FC = () => {
             </PageSection>
           ) : null}
 
-          <PageSection title="Pricing">
+          <PageSection
+            title="Pricing"
+            headerRight={
+              canOraclePrice &&
+              setShowOraclePricing &&
+              loan.status !== 'Closed' &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod === 'oracle' && (
+                <Button variant="secondary" onClick={() => setShowOraclePricing()} small>
+                  Update price
+                </Button>
+              )
+            }
+          >
             <Shelf gap={3} flexWrap="wrap">
               <PricingValues loan={loan} pool={pool} />
             </Shelf>

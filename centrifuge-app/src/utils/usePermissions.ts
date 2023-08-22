@@ -1,4 +1,11 @@
-import { addressToHex, Collection, computeMultisig, evmToSubstrateAddress, PoolRoles } from '@centrifuge/centrifuge-js'
+import {
+  addressToHex,
+  Collection,
+  computeMultisig,
+  evmToSubstrateAddress,
+  isSameAddress,
+  PoolRoles,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
@@ -59,6 +66,18 @@ export function usePoolPermissions(poolId?: string) {
 export function useCanBorrow(poolId: string) {
   const [account] = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] })
   return !!account
+}
+
+export function useCanSetOraclePrice(address?: string) {
+  const [members] = useCentrifugeQuery(['oracleMembers'], (cent) =>
+    cent.getApi().pipe(
+      switchMap((api) => api.query.priceOracleMembership.members()),
+      map((memberData) => {
+        return memberData.toJSON() as string[]
+      })
+    )
+  )
+  return address && !!members?.find((addr) => isSameAddress(addr, address))
 }
 
 // Returns whether the connected address can borrow against a specific asset from a pool

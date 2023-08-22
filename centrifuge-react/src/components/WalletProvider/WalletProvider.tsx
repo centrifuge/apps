@@ -26,6 +26,7 @@ export type WalletContextType = {
   scopedNetworks: Network[] | null
   setScopedNetworks: (scopedNetwork: Network[] | null) => void
   dispatch: (action: Action) => void
+  showNetworks: (network?: State['walletDialog']['network']) => void
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
   walletDialog: State['walletDialog']
@@ -121,7 +122,7 @@ type WalletProviderProps = {
   walletConnectId?: string
   subscanUrl?: string
   showAdvancedAccounts?: boolean
-  evmOnSubstrate?: boolean
+  showAvalanche?: boolean
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
@@ -137,7 +138,7 @@ export function WalletProvider({
   walletConnectId,
   subscanUrl,
   showAdvancedAccounts,
-  evmOnSubstrate,
+  showAvalanche,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
 
@@ -196,8 +197,8 @@ export function WalletProvider({
       firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
         return Object.fromEntries(
           Object.entries(proxies).map(([delegatee, ps]) => [
-            cent.utils.formatAddress(delegatee),
-            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+            utils.formatAddress(delegatee),
+            ps.map((p) => ({ ...p, delegator: utils.formatAddress(p.delegator) })),
           ])
         )
       }),
@@ -241,10 +242,12 @@ export function WalletProvider({
   )
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {
-    const mappedAccounts = accounts.map((acc) => ({
-      ...acc,
-      address: addressToHex(acc.address),
-    }))
+    const mappedAccounts = accounts
+      .map((acc) => ({
+        ...acc,
+        address: addressToHex(acc.address),
+      }))
+      .filter((acc) => (acc as any).type !== 'ethereum')
 
     const { address: persistedAddress } = getPersisted()
     const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
@@ -418,6 +421,8 @@ export function WalletProvider({
       scopedNetworks,
       setScopedNetworks,
       dispatch,
+      showNetworks: (network?: State['walletDialog']['network']) =>
+        dispatch({ type: 'showWalletDialog', payload: { view: 'networks', network, wallet: null } }),
       showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
         dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),
       showAccounts: () => dispatch({ type: 'showWalletDialogAccounts', payload: { network: state.evm.chainId } }),
@@ -463,7 +468,7 @@ export function WalletProvider({
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} evmOnSubstrate={evmOnSubstrate} />
+      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showAvalanche={showAvalanche} />
     </WalletContext.Provider>
   )
 }

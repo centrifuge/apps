@@ -1,8 +1,6 @@
 import { sendEmail, templateIds } from '.'
-import { getPoolById } from '../utils/getPoolById'
 
-export const sendRejectInvestorMessage = async (to: string, poolId: string) => {
-  const { metadata } = await getPoolById(poolId)
+export const sendRejectInvestorMessage = async (to: string, metadata: Record<string, any>) => {
   const message = {
     personalizations: [
       {
