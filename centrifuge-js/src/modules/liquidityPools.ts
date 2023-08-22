@@ -4,6 +4,7 @@ import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@
 import BN from 'bn.js'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
+import { TransactionOptions } from '../types'
 import { CurrencyBalance, Price, Rate, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
@@ -34,6 +35,28 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         return from(response.wait()).pipe(
           map(() => response),
           startWith(response)
+        )
+      })
+    )
+  }
+
+  function enablePoolOnDomain(args: [poolId: string, chainId: number], options?: TransactionOptions) {
+    const [poolId, chainId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        return api.query.poolSystem.pool(poolId).pipe(
+          switchMap((rawPool) => {
+            const pool = rawPool.toPrimitive() as any
+            const tx = api.tx.utility.batchAll([
+              api.tx.connectors.addPool(poolId, { EVM: chainId }),
+              ...pool.tranches.ids.flatMap((trancheId: string) =>
+                api.tx.connectors.addTranche(poolId, trancheId, { EVM: chainId })
+              ),
+            ])
+            return inst.wrapSignAndSend(api, tx, options)
+          })
         )
       })
     )
@@ -138,7 +161,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    console.log('lpData', lpData)
+    console.log('lpData', lpData, managerAddress, poolId, trancheId)
 
     const assetData = await multicall<{ assets?: string[] }>(
       lpData.lps.map((lpAddress, i) => ({
@@ -269,6 +292,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   return {
+    enablePoolOnDomain,
     updateInvestOrder,
     updateRedeemOrder,
     withdraw,
