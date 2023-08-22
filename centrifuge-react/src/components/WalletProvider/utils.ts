@@ -1,7 +1,7 @@
 import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
-import { CentrifugeContext } from '../CentrifugeProvider/CentrifugeProvider'
+import { CentrifugeContext, useCentrifugeUtils } from '../CentrifugeProvider/CentrifugeProvider'
 import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { Network } from './types'
@@ -50,6 +50,7 @@ export function useGetExplorerUrl(network?: Network) {
     substrate: { subscanUrl },
     connectedNetwork,
   } = useWallet()
+  const utils = useCentrifugeUtils()
 
   function getEvmUrl(networkOverride?: Network) {
     const netw = networkOverride || network || connectedNetwork
@@ -60,7 +61,11 @@ export function useGetExplorerUrl(network?: Network) {
     address: (address: string, networkOverride?: Network) => {
       try {
         const evmUrl = getEvmUrl(networkOverride)
-        return (evmUrl ? new URL(`/address/${address}`, evmUrl) : new URL(`/account/${address}`, subscanUrl)).toString()
+        return (
+          evmUrl
+            ? new URL(`/address/${address}`, evmUrl)
+            : new URL(`/account/${utils.formatAddress(address)}`, subscanUrl)
+        ).toString()
       } catch {
         return ''
       }

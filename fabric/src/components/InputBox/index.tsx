@@ -13,6 +13,7 @@ export type InputBoxProps = {
   rightElement?: React.ReactNode
   disabled?: boolean
   active?: boolean
+  outlined?: boolean
 }
 
 const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean }>`

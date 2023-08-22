@@ -7,12 +7,21 @@ import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
+  BorrowerTransactionType,
   InvestorTransactionType,
+  SubqueryBorrowerTransaction,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
-import { addressToHex, computeTrancheId, getDateYearsFromNow, getRandomUint, isSameAddress } from '../utils'
+import {
+  addressToHex,
+  computeTrancheId,
+  getDateMonthsFromNow,
+  getDateYearsFromNow,
+  getRandomUint,
+  isSameAddress,
+} from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
 
@@ -457,7 +466,7 @@ export type ActiveLoan = {
   originationDate: string
   normalizedDebt: CurrencyBalance
   outstandingDebt: CurrencyBalance
-  presentValue: CurrencyBalance
+  outstandingPrincipal: CurrencyBalance
   outstandingInterest: CurrencyBalance
 }
 
@@ -646,6 +655,30 @@ export type WriteOffGroup = {
   overdueDays: number
   penaltyInterestRate: Rate
   percentage: Rate
+}
+
+type InvestorTransaction = {
+  id: string
+  timestamp: string
+  accountId: string
+  trancheId: string
+  epochNumber: number
+  type: InvestorTransactionType
+  currencyAmount: CurrencyBalance | undefined
+  tokenAmount: CurrencyBalance | undefined
+  tokenPrice: Price | undefined
+  transactionFee: CurrencyBalance | null
+}
+
+type BorrowerTransaction = {
+  id: string
+  timestamp: string
+  poolId: string
+  accountId: string
+  epochId: string
+  loanId: string
+  type: BorrowerTransactionType
+  amount: CurrencyBalance | undefined
 }
 
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
@@ -1907,8 +1940,8 @@ export function getPoolsModule(inst: Centrifuge) {
       {
         poolId,
         trancheId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
       }
     )
 
@@ -1936,11 +1969,54 @@ export function getPoolsModule(inst: Centrifuge) {
                   tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
                   transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
                 }
-              }) as unknown as any[], // TODO: add typing
+              }) as unknown as InvestorTransaction[],
             ]
           })
         )
       )
+    )
+  }
+
+  function getBorrowerTransactions(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      borrowerTransactions: { nodes: SubqueryBorrowerTransaction[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        borrowerTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: { 
+            poolId: { equalTo: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to },
+          }) {
+          nodes {
+            loanId
+            epochId
+            type
+            timestamp
+            amount
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
+        return data!.borrowerTransactions.nodes.map((tx) => ({
+          ...tx,
+          amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+          timestamp: new Date(tx.timestamp),
+        })) as unknown as BorrowerTransaction[]
+      })
     )
   }
 
@@ -2173,7 +2249,6 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.interestAccrual.rates(),
           api.query.interestAccrual.lastUpdated(),
           api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency),
-          api.call.loansApi.portfolio(poolId),
         ]).pipe(take(1))
       }),
       map(
@@ -2185,11 +2260,11 @@ export function getPoolsModule(inst: Centrifuge) {
           rateValues,
           interestLastUpdated,
           rawCurrency,
-          rawPortfolio,
         ]) => {
           const currency = rawCurrency.toHuman() as AssetCurrencyData
           const rates = rateValues.toPrimitive() as InterestAccrual[]
 
+<<<<<<< HEAD
           const activeLoansPortfolio: Record<
             string,
             {
@@ -2205,6 +2280,8 @@ export function getPoolsModule(inst: Centrifuge) {
             }
           })
 
+=======
+>>>>>>> origin
           const oraclePrices: Record<
             string,
             {
@@ -2319,7 +2396,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   new Rate(rate.interestRatePerSec).toApr().toDecimalPlaces(4).toString() ===
                   sharedInfo.pricing.interestRate.toDecimal().toString()
               )
-              const portfolio = activeLoansPortfolio[loanId.toString()]
               const penaltyRate =
                 'external' in loan.pricing
                   ? loan.pricing.external.interest.penalty
@@ -2334,29 +2410,42 @@ export function getPoolsModule(inst: Centrifuge) {
                 percentage: new Rate(loan.writeOffPercentage),
               }
 
-              const outstandingDebt =
-                'internal' in loan.pricing
-                  ? getOutstandingDebt(
-                      loan,
-                      currency.decimals,
-                      interestLastUpdated.toPrimitive() as number,
-                      interestData
-                    )
-                  : CurrencyBalance.fromFloat(
-                      new CurrencyBalance(loan.pricing.external.outstandingQuantity, 27)
-                        .toDecimal()
-                        .mul(
-                          new CurrencyBalance(
-                            sharedInfo.pricing.oracle?.value ?? new BN(0),
-                            currency.decimals
-                          ).toDecimal()
-                        ),
-                      currency.decimals
-                    )
-
               const repaidPrincipal = new CurrencyBalance(loan.totalRepaid.principal, currency.decimals)
               const repaidInterest = new CurrencyBalance(loan.totalRepaid.interest, currency.decimals)
               const repaidUnscheduled = new CurrencyBalance(loan.totalRepaid.unscheduled, currency.decimals)
+              const outstandingDebt = getOutstandingDebt(
+                loan,
+                currency.decimals,
+                interestLastUpdated.toPrimitive() as number,
+                interestData
+              )
+              let outstandingPrincipal: CurrencyBalance
+              let outstandingInterest: CurrencyBalance
+              if ('internal' in loan.pricing) {
+                outstandingPrincipal = new CurrencyBalance(
+                  new BN(loan.totalBorrowed).sub(repaidPrincipal),
+                  currency.decimals
+                )
+                outstandingInterest = new CurrencyBalance(outstandingDebt.sub(outstandingPrincipal), currency.decimals)
+              } else {
+                const quantity = new CurrencyBalance(loan.pricing.external.outstandingQuantity, 27).toDecimal()
+                outstandingPrincipal = CurrencyBalance.fromFloat(
+                  quantity.mul(
+                    new CurrencyBalance(sharedInfo.pricing.oracle?.value ?? new BN(0), currency.decimals).toDecimal()
+                  ),
+                  currency.decimals
+                )
+                outstandingInterest = CurrencyBalance.fromFloat(
+                  outstandingDebt
+                    .toDecimal()
+                    .sub(
+                      quantity.mul(
+                        new CurrencyBalance(loan.pricing.external.info.notional, currency.decimals).toDecimal()
+                      )
+                    ),
+                  currency.decimals
+                )
+              }
               return {
                 ...sharedInfo,
                 id: loanId.toString(),
@@ -2377,8 +2466,13 @@ export function getPoolsModule(inst: Centrifuge) {
                 originationDate: new Date(loan.originationDate * 1000).toISOString(),
                 outstandingDebt,
                 normalizedDebt: new CurrencyBalance(normalizedDebt, currency.decimals),
+<<<<<<< HEAD
                 outstandingInterest: portfolio.outstandingInterest,
                 presentValue: portfolio.presentValue,
+=======
+                outstandingPrincipal,
+                outstandingInterest,
+>>>>>>> origin
               }
             }
           )
@@ -2706,6 +2800,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyPoolStates,
     getMonthlyPoolStates,
     getInvestorTransactions,
+    getBorrowerTransactions,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
@@ -2724,14 +2819,12 @@ function getOutstandingDebt(
   accrual?: InterestAccrual
 ) {
   if (!accrual) return new CurrencyBalance(0, currencyDecimals)
-  if (!('internal' in loan.pricing)) return new CurrencyBalance(0, currencyDecimals)
   const accRate = new Rate(accrual.accumulatedRate).toDecimal()
   const rate = new Rate(accrual.interestRatePerSec).toDecimal()
-
   const balance =
-    'internal' in loan.pricing && !loan.normalizedDebt
+    'internal' in loan.pricing
       ? loan.pricing.internal.interest.normalizedAcc
-      : loan.normalizedDebt
+      : loan.pricing.external.interest.normalizedAcc
 
   const normalizedDebt = new CurrencyBalance(balance, currencyDecimals).toDecimal()
   const secondsSinceUpdated = Date.now() / 1000 - lastUpdated

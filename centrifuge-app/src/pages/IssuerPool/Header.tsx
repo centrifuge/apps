@@ -19,6 +19,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const theme = useTheme()
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const isTinlakePool = pool.id.startsWith('0x')
 
   return (
     <>
@@ -63,6 +64,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
             <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
+            {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>}
             <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/access`}>Access</NavigationTabsItem>

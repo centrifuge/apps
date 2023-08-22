@@ -13,7 +13,6 @@ import { initProxiesController } from './controllers/init/initProxies'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { manualKybCallbackController } from './controllers/kyb/manualKybCallback'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
-import { migrateWalletsController } from './controllers/migrations/migrateWallets'
 import { getGlobalOnboardingStatusController } from './controllers/user/getGlobalOnboardingStatus'
 import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
@@ -61,7 +60,7 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
 
 // pool steps
-onboarding.post('/signAndSendDocuments', canOnboardToTinlakeTranche, verifyAuth, signAndSendDocumentsController)
+onboarding.post('/signAndSendDocuments', verifyAuth, canOnboardToTinlakeTranche, signAndSendDocumentsController)
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
 
 // getters
@@ -73,8 +72,5 @@ onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
 
 // init
 onboarding.get('/initProxies', initProxiesController)
-
-// migrations
-onboarding.get('/migrateWallets', migrateWalletsController)
 
 exports.onboarding = onboarding

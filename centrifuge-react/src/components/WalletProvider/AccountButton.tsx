@@ -6,7 +6,7 @@ import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
-import { useCentrifuge } from '../CentrifugeProvider'
+import { useCentrifugeUtils } from '../CentrifugeProvider'
 import { Proxy } from './types'
 import { useWallet } from './WalletProvider'
 
@@ -56,7 +56,7 @@ export function AccountButton({
   const balance = balances
     ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol)
     : undefined
-  const cent = useCentrifuge()
+  const utils = useCentrifugeUtils()
 
   return (
     <Root
@@ -89,7 +89,7 @@ export function AccountButton({
               backgroundColor="accentPrimary"
               opacity={0.5}
             />
-            Multisig: {truncateAddress(cent.utils.formatAddress(multisig.address))}
+            Multisig: {truncateAddress(utils.formatAddress(multisig.address))}
           </Text>
         )}
         {proxyRights && (
@@ -131,7 +131,7 @@ export function AccountIcon({ id }: { id: string }) {
 }
 
 export function AccountName({ account, proxies }: { account: WalletAccount; proxies?: Proxy[] }) {
-  const cent = useCentrifuge()
+  const utils = useCentrifugeUtils()
   return (
     <Text as="span" variant="body2" fontWeight={300} style={{ display: 'block' }}>
       {account.name && (
@@ -142,12 +142,12 @@ export function AccountName({ account, proxies }: { account: WalletAccount; prox
         </>
       )}
       {proxies?.map((p) => (
-        <React.Fragment key={p.delegator}>
+        <span key={p.delegator}>
           <Text as="span" color="textDisabled">
             |
           </Text>{' '}
-          {truncateAddress(cent.utils.formatAddress(p.delegator))}{' '}
-        </React.Fragment>
+          {truncateAddress(utils.formatAddress(p.delegator))}{' '}
+        </span>
       ))}
     </Text>
   )
