@@ -1,7 +1,7 @@
 import { isAddress } from '@polkadot/util-crypto'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
-import { InferType, object, string, StringSchema } from 'yup'
+import { InferType, number, object, string, StringSchema } from 'yup'
 import { SupportedNetworks } from '../../database'
 import { reportHttpError } from '../../utils/httpError'
 import { NetworkSwitch } from '../../utils/networks/networkSwitch'
@@ -30,7 +30,7 @@ const verifyWalletInput = object({
   }),
   nonce: string().required(),
   network: string().oneOf(['evm', 'substrate', 'evmOnSubstrate']) as StringSchema<SupportedNetworks>,
-  chainId: string().required(),
+  chainId: number().required(),
 })
 
 export const authenticateWalletController = async (
