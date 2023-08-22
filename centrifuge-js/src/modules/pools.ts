@@ -28,6 +28,7 @@ import { Dec } from '../utils/Decimal'
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 const MaxU128 = '340282366920938463463374607431768211455'
+const SEC_PER_DAY = 24 * 60 * 60
 
 type AdminRole =
   | 'PoolAdmin'
@@ -78,6 +79,7 @@ type LoanInfoInput =
       maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
       value: BN
       maturityDate: Date
+      maturityExtensionDays: number
       advanceRate: BN
       interestRate: BN
     }
@@ -86,6 +88,7 @@ type LoanInfoInput =
       maxBorrowAmount: BN | null
       Isin: string
       maturityDate: Date
+      maturityExtensionDays: number
       interestRate: BN
       notional: BN
     }
@@ -97,6 +100,7 @@ type LoanInfoInput =
       maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
       value: BN
       maturityDate: Date
+      maturityExtensionDays: number
       advanceRate: BN
       interestRate: BN
     }
@@ -374,6 +378,7 @@ export type InternalPricingInfo = {
   maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
   value: CurrencyBalance
   maturityDate: string
+  maturityExtensionDays: number
   advanceRate: Rate
   interestRate: Rate
   probabilityOfDefault?: Rate
@@ -387,6 +392,7 @@ export type ExternalPricingInfo = {
   outstandingQuantity: CurrencyBalance
   Isin: string
   maturityDate: string
+  maturityExtensionDays: number
   oracle: {
     value: CurrencyBalance
     timestamp: number
@@ -1267,7 +1273,12 @@ export function getPoolsModule(inst: Centrifuge) {
     const info: LoanInfoData = {
       /// Specify the repayments schedule of the loan
       schedule: {
-        maturity: { fixed: { date: Math.round(infoInput.maturityDate.getTime() / 1000), extension: 0 } },
+        maturity: {
+          fixed: {
+            date: Math.round(infoInput.maturityDate.getTime() / 1000),
+            extension: infoInput.maturityExtensionDays * SEC_PER_DAY,
+          },
+        },
         interestPayments: 'None',
         payDownSchedule: 'None',
       },
@@ -2310,6 +2321,7 @@ export function getPoolsModule(inst: Centrifuge) {
                           : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 27),
                       Isin: pricingInfo.priceId.isin,
                       maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
+                      maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
                       oracle: oraclePrices[pricingInfo.priceId.isin] || {
                         value: new CurrencyBalance(0, currency.decimals),
                         timestamp: 0,
@@ -2337,6 +2349,7 @@ export function getPoolsModule(inst: Centrifuge) {
                         : undefined,
                       interestRate: new Rate(interestRate),
                       maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
+                      maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
                     },
             }
           }
