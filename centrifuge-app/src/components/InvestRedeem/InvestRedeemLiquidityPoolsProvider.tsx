@@ -1,0 +1,154 @@
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { useEvmNativeBalance, useEvmNativeCurrency } from '@centrifuge/centrifuge-react'
+import { TransactionRequest } from '@ethersproject/providers'
+import BN from 'bn.js'
+import * as React from 'react'
+import { Dec } from '../../utils/Decimal'
+import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
+import { useAddress } from '../../utils/useAddress'
+import { useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
+import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
+import { InvestRedeemContext } from './InvestRedeemProvider'
+import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
+
+export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
+  const centAddress = useAddress('substrate')
+  const evmAddress = useAddress('evm')
+  const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
+  const evmNativeCurrency = useEvmNativeCurrency()
+  const order = usePendingCollect(poolId, trancheId, centAddress)
+  const pool = usePool(poolId) as Pool
+  const [pendingAction, setPendingAction] = React.useState<InvestRedeemAction>()
+  const { isLoading: isLpsLoading } = useLiquidityPools(poolId, trancheId)
+  const {
+    data: lpInvest,
+    refetch: refetchInvest,
+    isLoading: isInvestmentLoading,
+  } = useLiquidityPoolInvestment(poolId, trancheId)
+  const isAllowedToInvest = lpInvest?.isAllowedToInvest
+  const tranche = pool.tranches.find((t) => t.id === trancheId)
+  const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
+  const trancheMeta = metadata?.tranches?.[trancheId]
+
+  if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
+
+  const trancheBalance = lpInvest?.tokenBalance?.toDecimal() ?? Dec(0)
+
+  const price = lpInvest?.tokenPrice?.toDecimal() ?? Dec(1)
+  const investToCollect = lpInvest?.maxMint.toDecimal() ?? Dec(0)
+  const currencyToCollect = lpInvest?.maxWithdraw.toDecimal() ?? Dec(0)
+  const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
+  const combinedTrancheBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
+  const investmentValue = combinedTrancheBalance.mul(price)
+  const poolCurBalance = lpInvest?.currencyBalance.toDecimal() ?? Dec(0)
+  const poolCurBalanceCombined = poolCurBalance
+    .add(currencyToCollect)
+    .add(order?.remainingInvestCurrency.toDecimal() ?? 0)
+
+  const isCalculatingOrders = pool.epoch.status !== 'ongoing'
+
+  const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrder)
+  const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.updateRedeemOrder)
+  const collect = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.withdraw)
+  const approvePoolCurrency = useEvmTransaction('Invest', (cent) => cent.liquidityPools.approveManagerForCurrency)
+  const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateInvestOrder)
+  const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateRedeemOrder)
+
+  const txActions = {
+    invest,
+    redeem,
+    collect,
+    approvePoolCurrency,
+    approveTrancheToken: undefined,
+    cancelInvest,
+    cancelRedeem,
+  }
+  const pendingTransaction = pendingAction && txActions[pendingAction]?.lastCreatedTransaction
+
+  function doAction<T = any>(
+    name: InvestRedeemAction,
+    fn: (arg: T) => any[],
+    opt?: TransactionRequest
+  ): (args?: T) => void {
+    return (args) => {
+      txActions[name]?.execute(fn(args!) as any, opt)
+      setPendingAction(name)
+    }
+  }
+
+  React.useEffect(() => {
+    if (pendingAction && pendingTransaction?.status === 'succeeded') {
+      refetchInvest()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTransaction?.status])
+
+  function useActionSucceeded(cb: (action: InvestRedeemAction) => void) {
+    React.useEffect(() => {
+      if (pendingAction && pendingTransaction?.status === 'succeeded') {
+        cb(pendingAction)
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pendingTransaction?.status])
+  }
+
+  const state: InvestRedeemState = {
+    poolId,
+    trancheId,
+    isDataLoading: isLpsLoading || isInvestmentLoading || isMetadataLoading,
+    isAllowedToInvest,
+    isPoolBusy: isCalculatingOrders,
+    isFirstInvestment: order?.submittedAt === 0 && order.investCurrency.isZero(),
+    nativeCurrency: evmNativeCurrency,
+    trancheCurrency: tranche.currency,
+    poolCurrency: lpInvest && {
+      decimals: lpInvest.currencyDecimals,
+      symbol: lpInvest.currencySymbol,
+    },
+    capacity: tranche.capacity.toDecimal(),
+    minInitialInvestment: new CurrencyBalance(
+      trancheMeta?.minInitialInvestment ?? 0,
+      pool.currency.decimals
+    ).toDecimal(),
+    nativeBalance: evmNativeBalance?.toDecimal() ?? Dec(0),
+    poolCurrencyBalance: poolCurBalance,
+    poolCUrrencyBalanceWithPending: poolCurBalanceCombined,
+    trancheBalance,
+    trancheBalanceWithPending: combinedTrancheBalance,
+    investmentValue,
+    tokenPrice: price,
+    order: order
+      ? {
+          investCurrency: order.investCurrency.toDecimal(),
+          redeemToken: order.redeemToken.toDecimal(),
+          payoutCurrencyAmount: order.payoutCurrencyAmount.toDecimal(),
+          payoutTokenAmount: order.payoutTokenAmount.toDecimal(),
+          remainingInvestCurrency: order.remainingInvestCurrency.toDecimal(),
+          remainingRedeemToken: order.remainingRedeemToken.toDecimal(),
+        }
+      : null,
+    collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
+    collectType: investToCollect.gt(0) ? 'invest' : currencyToCollect.gt(0) ? 'redeem' : null,
+    needsToCollectBeforeOrder: investToCollect.gt(0) || currencyToCollect.gt(0),
+    needsPoolCurrencyApproval: lpInvest?.managerAllowance.isZero() ?? false,
+    needsTrancheTokenApproval: false,
+    pendingAction,
+    pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
+  }
+
+  const actions: InvestRedeemActions = {
+    invest: doAction('invest', (newOrder: BN) => [lpInvest?.lpAddress, newOrder]),
+    redeem: doAction('redeem', (newOrder: BN) => [lpInvest?.lpAddress, newOrder]),
+    collect: doAction('collect', () => [lpInvest?.lpAddress, lpInvest?.maxWithdraw]),
+    approvePoolCurrency: doAction('approvePoolCurrency', () => [lpInvest?.managerAddress, lpInvest?.currencyAddress]),
+    approveTrancheToken: () => {},
+    cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, new BN(0)]),
+    cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, new BN(0)]),
+  }
+
+  const hooks = {
+    useActionSucceeded,
+  }
+
+  return <InvestRedeemContext.Provider value={{ state, actions, hooks }}>{children}</InvestRedeemContext.Provider>
+}
