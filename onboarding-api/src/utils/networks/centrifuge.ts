@@ -76,7 +76,6 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
         }
         // add investor to liquidity pools if they are investing on any domain other than centrifuge
         if (wallet.network === 'evm') {
-          console.log('submitting updateMember extrinsic')
           const updateMemberSubmittable = api.tx.connectors.updateMember(
             poolId,
             trancheId,
@@ -85,12 +84,7 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
             },
             OneHundredYearsFromNow
           )
-          const proxiedUpdateMemberSubmittable = api.tx.proxy.proxy(
-            pureProxyAddress,
-            undefined,
-            updateMemberSubmittable
-          )
-          batchSubmittable.push(proxiedUpdateMemberSubmittable)
+          batchSubmittable.push(updateMemberSubmittable)
         }
         return api.tx.utility.batchAll(batchSubmittable).signAndSend(signer)
       }),
