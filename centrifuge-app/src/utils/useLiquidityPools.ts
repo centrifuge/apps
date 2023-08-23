@@ -16,37 +16,41 @@ export function useActiveDomains(poolId: string) {
   const query = useQuery(
     ['activeDomains', poolId, routers?.length],
     async () => {
-      // const results = await Promise.allSettled(
-      //   routers!.map(async (r) => {
-      //     const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
-      //       rpcProvider: getProvider(r.chainId),
-      //     })
-      //     const pool = await cent.liquidityPools.getPool([manager, poolId], { rpcProvider: getProvider(r.chainId) })
-      //     return [manager, pool] as const
-      //   })
-      // )
-      // console.log('res', results)
-      // return results!
-      //   .map((result, i) => {
-      //     if (result.status === 'rejected') return null
-      //     const [manager, pool] = result.value
-      //     const router = routers![i]
-      //     if (!pool.isActive) return null
-      //     return {
-      //       chainId: router.chainId,
-      //       managerAddress: manager,
-      //     }
-      //   })
-      //   .filter(Boolean) as {
-      //   chainId: number
-      //   managerAddress: string
-      // }[]
-      return [
-        {
-          chainId: 5,
-          managerAddress: '0x253836e3520b2aa66328d17b65411591d4227df6',
-        },
-      ]
+      const results = await Promise.allSettled(
+        routers!.map(async (r) => {
+          const rpcProvider = getProvider(r.chainId)
+          console.log('rpcProvider', rpcProvider)
+          const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
+            rpcProvider,
+          })
+          const pool = await cent.liquidityPools.getPool([manager, poolId], { rpcProvider })
+          return [manager, pool] as const
+        })
+      )
+      return results
+        .map((result, i) => {
+          if (result.status === 'rejected') {
+            console.error(result.reason)
+            return null
+          }
+          const [manager, pool] = result.value
+          const router = routers![i]
+          if (!pool.isActive) return null
+          return {
+            chainId: router.chainId,
+            managerAddress: manager,
+          }
+        })
+        .filter(Boolean) as {
+        chainId: number
+        managerAddress: string
+      }[]
+      // return [
+      //   {
+      //     chainId: 5,
+      //     managerAddress: '0xd0150fFD04C931100251347C533e69BC5a239dF6',
+      //   },
+      // ]
     },
     {
       enabled: !!routers?.length && !poolId.startsWith('0x'),
@@ -90,6 +94,8 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
 
   const { data: lps } = useLiquidityPools(poolId, trancheId)
   const lp = lps?.[lpIndex ?? 0]
+
+  console.log('lps', lps)
 
   const query = useQuery(
     ['lpInvestment', chainId, lp?.lpAddress, selectedAddress],

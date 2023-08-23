@@ -47,9 +47,12 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const isCalculatingOrders = pool.epoch.status !== 'ongoing'
 
+  const collectType = investToCollect.gt(0) ? 'invest' : currencyToCollect.gt(0) ? 'redeem' : null
+
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrder)
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.updateRedeemOrder)
-  const collect = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.withdraw)
+  const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
+  const collectRedeem = useEvmTransaction('Collect', (cent) => cent.liquidityPools.withdraw)
   const approvePoolCurrency = useEvmTransaction('Invest', (cent) => cent.liquidityPools.approveManagerForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateRedeemOrder)
@@ -57,7 +60,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const txActions = {
     invest,
     redeem,
-    collect,
+    collect: collectType === 'invest' ? collectInvest : collectRedeem,
     approvePoolCurrency,
     approveTrancheToken: undefined,
     cancelInvest,
@@ -128,7 +131,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         }
       : null,
     collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
-    collectType: investToCollect.gt(0) ? 'invest' : currencyToCollect.gt(0) ? 'redeem' : null,
+    collectType,
     needsToCollectBeforeOrder: investToCollect.gt(0) || currencyToCollect.gt(0),
     needsPoolCurrencyApproval: lpInvest?.managerAllowance.isZero() ?? false,
     needsTrancheTokenApproval: false,
@@ -139,7 +142,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const actions: InvestRedeemActions = {
     invest: doAction('invest', (newOrder: BN) => [lpInvest?.lpAddress, newOrder]),
     redeem: doAction('redeem', (newOrder: BN) => [lpInvest?.lpAddress, newOrder]),
-    collect: doAction('collect', () => [lpInvest?.lpAddress, lpInvest?.maxWithdraw]),
+    collect: doAction('collect', () =>
+      collectType === 'invest' ? [lpInvest?.lpAddress, lpInvest?.maxMint] : [lpInvest?.lpAddress, lpInvest?.maxWithdraw]
+    ),
     approvePoolCurrency: doAction('approvePoolCurrency', () => [lpInvest?.managerAddress, lpInvest?.currencyAddress]),
     approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, new BN(0)]),

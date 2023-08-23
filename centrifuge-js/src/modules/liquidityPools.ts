@@ -26,7 +26,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   function contract(contractAddress: string, abi: ContractInterface, options?: EvmQueryOptions) {
     const provider = inst.config.evmSigner ?? options?.rpcProvider
     if (!provider) throw new Error('Needs provider')
-    return new Contract(contractAddress, abi, inst.config.evmSigner)
+    return new Contract(contractAddress, abi, provider)
   }
 
   function pending(txPromise: Promise<TransactionResponse>) {
@@ -84,11 +84,25 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function mint(args: [lpAddress: string, mint: BN, receiver?: string], options: TransactionRequest = {}) {
+    const [lpAddress, mint, receiver] = args
+    const user = inst.getSignerAddress('evm')
+    return pending(
+      contract(lpAddress, ABI.LiquidityPool).mint(mint.toString(), receiver ?? user, {
+        ...options,
+        gasLimit: 200000,
+      })
+    )
+  }
+
   function withdraw(args: [lpAddress: string, withdraw: BN, receiver?: string], options: TransactionRequest = {}) {
     const [lpAddress, withdraw, receiver] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).withdraw(withdraw.toString(), receiver ?? user, user, options)
+      contract(lpAddress, ABI.LiquidityPool).withdraw(withdraw.toString(), receiver ?? user, user, {
+        ...options,
+        gasLimit: 200000,
+      })
     )
   }
 
@@ -100,7 +114,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         return [
           {
             chainId: 5,
-            router: '0x3f82851463C172DBDc1229cA06170fF89f5638dC',
+            router: '0x205b09C1C11A0a86cbc1066CC7B54C7952427439',
           },
         ]
       })
@@ -109,7 +123,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    const managerAddress = await contract(router, ABI.Router, options).investmentManager()
+    const gatewayAddress = await contract(router, ABI.Router, options).gateway()
+    const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
   }
 
@@ -295,6 +310,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     enablePoolOnDomain,
     updateInvestOrder,
     updateRedeemOrder,
+    mint,
     withdraw,
     approveManagerForCurrency,
     getDomainRouters,
