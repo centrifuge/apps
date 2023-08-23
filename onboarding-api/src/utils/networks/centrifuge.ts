@@ -61,6 +61,9 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
           { Pool: poolId },
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
         )
+        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
+        const batchSubmittable = [proxiedSubmittable]
+        // give the investor PODReadAccess if they issuer enabled it
         if (!hasPodReadAccess && metadata?.onboarding?.podReadAccess) {
           const podSubmittable = api.tx.permissions.add(
             { PoolRole: 'InvestorAdmin' },
@@ -68,13 +71,28 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
             { Pool: poolId },
             { PoolRole: 'PODReadAccess' }
           )
-          const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
           const proxiedPodSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, podSubmittable)
-          const batchSubmittable = api.tx.utility.batchAll([proxiedPodSubmittable, proxiedSubmittable])
-          return batchSubmittable.signAndSend(signer)
+          batchSubmittable.push(proxiedPodSubmittable)
         }
-        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
-        return proxiedSubmittable.signAndSend(signer)
+        // add investor to liquidity pools if they are investing on any domain other than centrifuge
+        if (wallet.network === 'evm') {
+          console.log('submitting updateMember extrinsic')
+          const updateMemberSubmittable = api.tx.connectors.updateMember(
+            poolId,
+            trancheId,
+            {
+              EVM: [wallet.chainId, wallet.address],
+            },
+            OneHundredYearsFromNow
+          )
+          const proxiedUpdateMemberSubmittable = api.tx.proxy.proxy(
+            pureProxyAddress,
+            undefined,
+            updateMemberSubmittable
+          )
+          batchSubmittable.push(proxiedUpdateMemberSubmittable)
+        }
+        return api.tx.utility.batchAll(batchSubmittable).signAndSend(signer)
       }),
       combineLatestWith(api),
       takeWhile(([{ events, isFinalized }, api]) => {
