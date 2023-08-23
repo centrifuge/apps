@@ -198,7 +198,10 @@ export const getValidSubstrateAddress = async (wallet: Request['wallet']) => {
     const centChainId = await cent.getChainId()
     if (wallet.network === 'evmOnSubstrate') {
       const chainId = await firstValueFrom(cent.getApi().pipe(switchMap((api) => api.query.evmChainId.chainId())))
-      return encodeAddress(evmToSubstrateAddress(wallet.address, Number(chainId.toString())), centChainId)
+      return evmToSubstrateAddress(wallet.address, Number(chainId.toString()))
+    }
+    if (wallet.network === 'evm') {
+      return evmToSubstrateAddress(wallet.address, wallet.chainId)
     }
     const validAddress = encodeAddress(wallet.address, centChainId)
     return validAddress
