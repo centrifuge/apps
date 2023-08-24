@@ -45,6 +45,7 @@ import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { InvestRedeemProvider, useInvestRedeem } from './InvestRedeemProvider'
+import { InvestRedeemState as InvestRedeemContextState } from './types'
 
 export type ActionsRef = React.MutableRefObject<
   | {
@@ -72,8 +73,6 @@ export function InvestRedeem({ poolId, ...rest }: Props) {
   if (domains) {
     networks.push(...domains.map((d) => d.chainId))
   }
-
-  console.log('networks', networks)
 
   return (
     <LoadBoundary>
@@ -201,6 +200,7 @@ type InnerProps = Props & {
 function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
+  console.log('state', state)
   // const allowedTranches = useAllowedTranches(state.poolId)
   const isTinlakePool = state.poolId.startsWith('0x')
   // const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
@@ -411,8 +411,8 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-      if (validateNumberInput(values.amount, 0, state.poolCUrrencyBalanceWithPending)) {
-        errors.amount = validateNumberInput(values.amount, 0, state.poolCUrrencyBalanceWithPending)
+      if (validateNumberInput(values.amount, 0, state.poolCurrencyBalanceWithPending)) {
+        errors.amount = validateNumberInput(values.amount, 0, state.poolCurrencyBalanceWithPending)
       } else if (hasPendingOrder && Dec(values.amount).eq(pendingInvest)) {
         errors.amount = 'Equals current order'
       } else if (!allowInvestBelowMin && state.isFirstInvestment && Dec(values.amount).lt(state.minInitialInvestment)) {
@@ -437,11 +437,9 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
   const isCollecting = state.pendingAction === 'collect' && isPending
 
-  console.log('state', state)
-
   function renderInput(
     cancelCb?: () => void,
-    preSubmitAction?: { onClick: () => void; loading?: boolean; label: string }
+    preSubmitAction?: { onClick: () => void; loading?: boolean; label?: string }
   ) {
     return (
       <Stack gap={2}>
@@ -468,9 +466,9 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
                 secondaryLabel={
                   state.poolCurrencyBalance &&
                   state.poolCurrency &&
-                  `${formatBalance(state.poolCUrrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
+                  `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
                 }
-                onSetMax={() => form.setFieldValue('amount', state.poolCUrrencyBalanceWithPending)}
+                onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
                 autoFocus={autoFocus}
               />
             )
@@ -500,7 +498,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
         ) : null}
         <Stack px={1} gap={1}>
           {preSubmitAction ? (
-            <Button {...preSubmitAction}>{preSubmitAction.label}</Button>
+            <Button {...preSubmitAction}>{preSubmitAction.label ?? investLabel}</Button>
           ) : (
             <Button
               type="submit"
@@ -550,6 +548,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
           <PendingOrder
             type="invest"
             pool={pool}
+            state={state}
             amount={pendingInvest}
             onCancelOrder={() => actions.cancelInvest()}
             isCancelling={isCancelling}
@@ -563,7 +562,6 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
           renderInput(onCancel, {
             onClick: actions.approvePoolCurrency,
             loading: isApproving,
-            label: `Approve ${state.poolCurrency?.symbol}`,
           })
         ) : (
           renderInput(onCancel)
@@ -616,7 +614,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
     },
     onSubmit: (values, formActions) => {
       const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(state.tokenPrice)
-      actions.redeem(TokenBalance.fromFloat(amount, pool.currency.decimals ?? 18))
+      actions.redeem(TokenBalance.fromFloat(amount, state.poolCurrency?.decimals ?? 18))
       formActions.setSubmitting(false)
     },
     validate: (values) => {
@@ -660,8 +658,8 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
               disabled={isRedeeming}
               onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
               onChange={(value) => form.setFieldValue('amount', value)}
-              currency={pool.currency.symbol}
-              secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool.currency.symbol, 2)} available`}
+              currency={state.poolCurrency?.symbol}
+              secondaryLabel={`${formatBalance(roundDown(maxRedeem), state.poolCurrency?.symbol, 2)} available`}
               autoFocus={autoFocus}
             />
           )}
@@ -725,6 +723,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
           <PendingOrder
             type="redeem"
             pool={pool}
+            state={state}
             amount={pendingRedeem.mul(state.tokenPrice)}
             onCancelOrder={() => actions.cancelRedeem()}
             isCancelling={isCancelling}
@@ -805,10 +804,11 @@ const PendingOrder: React.FC<{
   type: 'invest' | 'redeem'
   amount: Decimal
   pool: Pool | TinlakePool
+  state: InvestRedeemContextState
   onCancelOrder: () => void
   isCancelling: boolean
   onChangeOrder: () => void
-}> = ({ type, amount, pool, onCancelOrder, isCancelling, onChangeOrder }) => {
+}> = ({ type, amount, pool, state, onCancelOrder, isCancelling, onChangeOrder }) => {
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id!)
   const calculatingOrders = pool.epoch.status !== 'ongoing'
   return (
@@ -825,7 +825,7 @@ const PendingOrder: React.FC<{
           <Shelf gap={1}>
             <IconClock size="iconSmall" />
             <Text variant="body2" fontWeight={500}>
-              {formatBalance(amount, pool.currency.symbol)} locked
+              {formatBalance(amount, state.poolCurrency?.symbol)} locked
             </Text>
           </Shelf>
           <Text variant="body3">

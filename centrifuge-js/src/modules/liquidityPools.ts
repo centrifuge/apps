@@ -5,7 +5,7 @@ import BN from 'bn.js'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
-import { CurrencyBalance, Price, Rate, TokenBalance } from '../utils/BN'
+import { CurrencyBalance, Price, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
 
@@ -18,8 +18,6 @@ type EvmQueryOptions = {
 const toCurrencyBalance = (decimals: number) => (val: BigNumber) => new CurrencyBalance(val.toString(), decimals)
 const toTokenBalance = (decimals: number) => (val: BigNumber) => new TokenBalance(val.toString(), decimals)
 const toDateString = (val: BigNumber) => new Date(val.toNumber() * 1000).toISOString()
-const toNumber = (val: BigNumber) => val.toNumber()
-const toRate = (val: BigNumber) => new Rate(val.toString())
 const toPrice = (val: BigNumber) => new Price(val.toString())
 
 export function getLiquidityPoolsModule(inst: Centrifuge) {
@@ -142,20 +140,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     })
     return pool
   }
-  async function getTest(args: [connector: string, poolId: string], options?: EvmQueryOptions) {
-    const [connector] = args
-    const calls: Call[] = [
-      {
-        target: connector,
-        call: ['function assessor() view returns (address)'],
-        returns: [['address']],
-      },
-    ]
-    const test = await multicall<{ poolId: string; createdAt: number; isActive: boolean }>(calls, {
-      rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
-    })
-    return test
-  }
 
   async function getLiquidityPools(
     args: [managerAddress: string, poolId: string, trancheId: string],
@@ -176,8 +160,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    console.log('lpData', lpData, managerAddress, poolId, trancheId)
-
     const assetData = await multicall<{ assets?: string[] }>(
       lpData.lps.map((lpAddress, i) => ({
         target: lpAddress,
@@ -189,7 +171,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    console.log('assetData', assetData)
     if (!assetData.assets?.length) return []
 
     const currencyData = await multicall<{ currencies: { currencySymbol: string; currencyDecimals: number }[] }>(
@@ -210,8 +191,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
       }
     )
-
-    console.log('currencyData', currencyData)
 
     const result = lpData.lps.map((addr, i) => ({
       lpAddress: addr,
@@ -245,8 +224,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
       }
     )
-
-    console.log('currencyData', currency)
 
     const calls: Call[] = [
       {
@@ -287,7 +264,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       {
         target: currency.address,
         call: ['function allowance(address, address) view returns (uint)', user, manager],
-        returns: [['managerAllowance', toCurrencyBalance(currency.decimals)]],
+        returns: [['managerCurrencyAllowance', toCurrencyBalance(currency.decimals)]],
+      },
+      {
+        target: lp,
+        call: ['function allowance(address, address) view returns (uint)', user, manager],
+        returns: [['managerTrancheTokenAllowance', toCurrencyBalance(currency.decimals)]],
       },
     ]
 
@@ -299,10 +281,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       maxMint: TokenBalance
       currencyBalance: CurrencyBalance
       maxWithdraw: CurrencyBalance
-      managerAllowance: CurrencyBalance
+      managerCurrencyAllowance: CurrencyBalance
+      managerTrancheTokenAllowance: CurrencyBalance
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
+
+    // TODO: Remove. just for testing
+    if (pool.tokenPrice.isZero()) {
+      pool.tokenPrice = Price.fromFloat(1)
+    }
     return pool
   }
 
@@ -318,7 +306,5 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     getPool,
     getLiquidityPools,
     getLiquidityPoolInvestment,
-    getTest,
-    contract,
   }
 }

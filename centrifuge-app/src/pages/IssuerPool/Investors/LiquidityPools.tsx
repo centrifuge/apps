@@ -69,6 +69,7 @@ function EnableButton({ poolId, chainId }: { poolId: string; chainId: number }) 
     },
     {
       enabled: !!managerAddress,
+      staleTime: Infinity,
     }
   )
   const { execute, isLoading } = useCentrifugeTransaction(

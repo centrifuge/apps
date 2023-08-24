@@ -53,7 +53,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.updateRedeemOrder)
   const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Collect', (cent) => cent.liquidityPools.withdraw)
-  const approvePoolCurrency = useEvmTransaction('Invest', (cent) => cent.liquidityPools.approveManagerForCurrency)
+  const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveManagerForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateRedeemOrder)
 
@@ -61,8 +61,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     invest,
     redeem,
     collect: collectType === 'invest' ? collectInvest : collectRedeem,
-    approvePoolCurrency,
-    approveTrancheToken: undefined,
+    approvePoolCurrency: approve,
+    approveTrancheToken: approve,
     cancelInvest,
     cancelRedeem,
   }
@@ -115,7 +115,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     ).toDecimal(),
     nativeBalance: evmNativeBalance?.toDecimal() ?? Dec(0),
     poolCurrencyBalance: poolCurBalance,
-    poolCUrrencyBalanceWithPending: poolCurBalanceCombined,
+    poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,
     trancheBalanceWithPending: combinedTrancheBalance,
     investmentValue,
@@ -133,8 +133,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
     collectType,
     needsToCollectBeforeOrder: investToCollect.gt(0) || currencyToCollect.gt(0),
-    needsPoolCurrencyApproval: lpInvest?.managerAllowance.isZero() ?? false,
-    needsTrancheTokenApproval: false,
+    needsPoolCurrencyApproval: lpInvest?.managerCurrencyAllowance.isZero() ?? false,
+    needsTrancheTokenApproval: lpInvest?.managerTrancheTokenAllowance.isZero() ?? false,
     pendingAction,
     pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
   }
@@ -146,7 +146,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       collectType === 'invest' ? [lpInvest?.lpAddress, lpInvest?.maxMint] : [lpInvest?.lpAddress, lpInvest?.maxWithdraw]
     ),
     approvePoolCurrency: doAction('approvePoolCurrency', () => [lpInvest?.managerAddress, lpInvest?.currencyAddress]),
-    approveTrancheToken: () => {},
+    approveTrancheToken: doAction('approveTrancheToken', () => [lpInvest?.managerAddress, lpInvest?.lpAddress]),
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, new BN(0)]),
     cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, new BN(0)]),
   }
