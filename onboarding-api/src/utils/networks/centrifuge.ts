@@ -61,6 +61,9 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
           { Pool: poolId },
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
         )
+        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
+        const batchSubmittable = [proxiedSubmittable]
+        // give the investor PODReadAccess if they issuer enabled it
         if (!hasPodReadAccess && metadata?.onboarding?.podReadAccess) {
           const podSubmittable = api.tx.permissions.add(
             { PoolRole: 'InvestorAdmin' },
@@ -68,13 +71,22 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
             { Pool: poolId },
             { PoolRole: 'PODReadAccess' }
           )
-          const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
           const proxiedPodSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, podSubmittable)
-          const batchSubmittable = api.tx.utility.batchAll([proxiedPodSubmittable, proxiedSubmittable])
-          return batchSubmittable.signAndSend(signer)
+          batchSubmittable.push(proxiedPodSubmittable)
         }
-        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
-        return proxiedSubmittable.signAndSend(signer)
+        // add investor to liquidity pools if they are investing on any domain other than centrifuge
+        if (wallet.network === 'evm') {
+          const updateMemberSubmittable = api.tx.connectors.updateMember(
+            poolId,
+            trancheId,
+            {
+              EVM: [wallet.chainId, wallet.address],
+            },
+            OneHundredYearsFromNow
+          )
+          batchSubmittable.push(updateMemberSubmittable)
+        }
+        return api.tx.utility.batchAll(batchSubmittable).signAndSend(signer)
       }),
       combineLatestWith(api),
       takeWhile(([{ events, isFinalized }, api]) => {
@@ -181,7 +193,10 @@ export const getValidSubstrateAddress = async (wallet: Request['wallet']) => {
     const centChainId = await cent.getChainId()
     if (wallet.network === 'evmOnSubstrate') {
       const chainId = await firstValueFrom(cent.getApi().pipe(switchMap((api) => api.query.evmChainId.chainId())))
-      return encodeAddress(evmToSubstrateAddress(wallet.address, Number(chainId.toString())), centChainId)
+      return evmToSubstrateAddress(wallet.address, Number(chainId.toString()))
+    }
+    if (wallet.network === 'evm') {
+      return evmToSubstrateAddress(wallet.address, wallet.chainId)
     }
     const validAddress = encodeAddress(wallet.address, centChainId)
     return validAddress
