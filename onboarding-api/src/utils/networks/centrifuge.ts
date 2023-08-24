@@ -131,12 +131,13 @@ export const validateSubstrateRemark = async (
 }
 
 export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet']) => {
+  const address = await getValidSubstrateAddress(wallet)
   const signer = await getSigner()
   const $api = getCentrifuge().getApi()
   const $paymentInfo = $api
-    .pipe(switchMap((api) => api.tx.system.remarkWithEvent('Signing for pool').paymentInfo(wallet.address)))
+    .pipe(switchMap((api) => api.tx.system.remarkWithEvent('Signing for pool').paymentInfo(address)))
     .pipe(take(1))
-  const $nativeBalance = $api.pipe(switchMap((api) => api.query.system.account(wallet.address))).pipe(take(1))
+  const $nativeBalance = $api.pipe(switchMap((api) => api.query.system.account(address))).pipe(take(1))
   const tx = await lastValueFrom(
     combineLatest([$api, $paymentInfo, $nativeBalance]).pipe(
       switchMap(([api, paymentInfo, nativeBalance]) => {
@@ -151,7 +152,7 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
         }
 
         // add 10% buffer to the transaction fee
-        const submittable = api.tx.tokens.transfer({ Id: wallet.address }, 'Native', txFee.add(txFee.muln(1.1)))
+        const submittable = api.tx.tokens.transfer({ Id: address }, 'Native', txFee.add(txFee.muln(1.1)))
         return submittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
@@ -159,10 +160,10 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
           events.forEach(({ event }) => {
             const result = event.data[0]?.toHuman()
             if (event.method === 'ProxyExecuted' && result === 'Ok') {
-              console.log(`Executed proxy for transfer`, { walletAddress: wallet.address, result })
+              console.log(`Executed proxy for transfer`, { walletAddress: address, result })
             }
             if (event.method === 'ExtrinsicFailed') {
-              console.log(`Extrinsic failed`, { walletAddress: wallet.address, result })
+              console.log(`Extrinsic failed`, { walletAddress: address, result })
               throw new HttpError(400, 'Extrinsic failed')
             }
           })
