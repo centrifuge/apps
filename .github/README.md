@@ -1,15 +1,4 @@
-# Monorepo for the Centrifuge applications.
-
-## Setup
-
-Make sure you have installed Yarn and NVM.
-
-1. Use Node v14.15.1: `nvm use`
-2. Install dependencies: `yarn install`
-3. Install `husky`: `yarn postinstall`
-4. Add `.env` files with the right environment variables to each project.
-
-It's also recommended to run Prettier automatically in your editor, e.g. using [this VS Code plugin](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
+# Monorepo for the Centrifuge applications
 
 ## Preparing Envs (e.g when the dev chain data is reset)
 
@@ -24,9 +13,10 @@ It's also recommended to run Prettier automatically in your editor, e.g. using [
 
 Setup pure proxy to sign transactions (whitelisting & transfer tokens).
 
-1. Run `/initProxies` to create the pure proxy, fund it, and give it sufficient permissions
-2. Copy the resulting pure proxy address and add it to the env varibles: `MEMBERLIST_ADMIN_PURE_PROXY` (onboarding-api) and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` (centrifuge-app)
-3. Enable onboarding for each new pool under /issuer/<poolId>/investors
+1. Use sudo in polkadot UI to give Alice enough currency to distribute (tokens.setBalance()). For currencyId select ForeignAsset and submit the transacton once with ForeignAsset 1 and once with ForeignAsset 2
+2. Run `/initProxies` to create the pure proxy, fund it, and give it sufficient permissions
+3. Copy the resulting pure proxy address and add it to the env varibles: `MEMBERLIST_ADMIN_PURE_PROXY` (onboarding-api) and `REACT_APP_MEMBERLIST_ADMIN_PURE_PROXY` (centrifuge-app)
+4. Enable onboarding for each new pool under /issuer/<poolId>/investors
 
 ### Asset Originator POD Access
 
