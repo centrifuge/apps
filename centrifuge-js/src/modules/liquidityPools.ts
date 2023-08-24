@@ -147,21 +147,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   ) {
     const [managerAddress, poolId, trancheId] = args
 
-    const lpData = await multicall<{ lps: string[] }>(
-      [
-        {
-          target: managerAddress,
-          call: ['function getLiquidityPoolsForTranche(uint64, bytes16) view returns (address[])', poolId, trancheId],
-          returns: [['lps']],
-        },
-      ],
-      {
-        rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
-      }
+    const lps: string[] = await contract(managerAddress, ABI.InvestmentManager, options).getLiquidityPoolsForTranche(
+      poolId,
+      trancheId
     )
 
     const assetData = await multicall<{ assets?: string[] }>(
-      lpData.lps.map((lpAddress, i) => ({
+      lps.map((lpAddress, i) => ({
         target: lpAddress,
         call: ['function asset() view returns (address)'],
         returns: [[`assets[${i}]`]],
@@ -192,7 +184,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    const result = lpData.lps.map((addr, i) => ({
+    const result = lps.map((addr, i) => ({
       lpAddress: addr,
       currencyAddress: assetData.assets![i],
       managerAddress,
