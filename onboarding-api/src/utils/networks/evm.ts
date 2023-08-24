@@ -8,17 +8,17 @@ import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendD
 import { HttpError } from '../httpError'
 import RemarkerAbi from './abi/Remarker.abi.json'
 
-const getEvmProvider = (chainId: number | string, isEvmOnCentChain?: boolean): Provider => {
+const getEvmProvider = (chainId: number, isEvmOnCentChain?: boolean): Provider => {
   if (isEvmOnCentChain) {
     return new InfuraProvider(chainId, process.env.INFURA_KEY)
   }
-  switch (chainId.toString()) {
-    case '1': // eth mainnet
-    case '5': // goerli
+  switch (chainId) {
+    case 1: // eth mainnet
+    case 5: // goerli
       return new InfuraProvider(chainId, process.env.INFURA_KEY)
-    case '8453': // base mainnet
+    case 8453: // base mainnet
       return new JsonRpcProvider('https://mainnet.base.org')
-    case '84531': // base goerli
+    case 84531: // base goerli
       return new JsonRpcProvider('https://goerli.base.org')
     default:
       throw new HttpError(404, `Unsupported chainId ${chainId}`)
