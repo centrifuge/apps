@@ -69,7 +69,7 @@ const listFormatter = new Intl.ListFormat('en')
 export function InvestRedeem({ poolId, ...rest }: Props) {
   const getNetworkName = useGetNetworkName()
   const { data: domains } = useActiveDomains(poolId)
-  const { setScopedNetworks, scopedNetworks } = useWallet()
+  const { setScopedNetworks } = useWallet()
 
   const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
   if (domains) {
@@ -81,8 +81,6 @@ export function InvestRedeem({ poolId, ...rest }: Props) {
     return () => setScopedNetworks(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [networks])
-
-  console.log('scopedNetworks', scopedNetworks)
 
   return (
     <LoadBoundary>
@@ -212,7 +210,6 @@ type InnerProps = Props & {
 function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
-  console.log('state', state)
   const isTinlakePool = state.poolId.startsWith('0x')
 
   const { data: metadata } = usePoolMetadata(pool)

@@ -19,7 +19,6 @@ export function useActiveDomains(poolId: string) {
       const results = await Promise.allSettled(
         routers!.map(async (r) => {
           const rpcProvider = getProvider(r.chainId)
-          console.log('rpcProvider', rpcProvider)
           const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
             rpcProvider,
           })
@@ -95,8 +94,6 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   const { data: lps } = useLiquidityPools(poolId, trancheId)
   const lp = lps?.[lpIndex ?? 0]
 
-  console.log('lps', lps)
-
   const query = useQuery(
     ['lpInvestment', chainId, lp?.lpAddress, selectedAddress],
     async () => ({
@@ -110,8 +107,6 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
       enabled: !!lp && !!selectedAddress,
     }
   )
-
-  console.log('lpInvest', query.data)
 
   return query
 }
