@@ -51,7 +51,6 @@ export async function multicall<T = Record<string, any>>(calls: Call[], options:
   }
 
   const interfaces = calls.map((c) => {
-    // console.log('c.call[0]', c.call[0])
     const int = new Interface([c.call[0] as string])
     return [int, int.fragments[0].name] as const
   })
@@ -61,11 +60,8 @@ export async function multicall<T = Record<string, any>>(calls: Call[], options:
     callData: interfaces[i][0].encodeFunctionData(interfaces[i][1], c.call.slice(1)),
   }))
 
-  // console.log('encoded', encoded, interfaces, contract)
-
   const results = await contract.callStatic.aggregate3(encoded)
 
-  // console.log('results', results)
   const transformed: Record<string, any> = {}
   calls.forEach((c, i) => {
     const { returnData, success } = results[i]
@@ -78,7 +74,6 @@ export async function multicall<T = Record<string, any>>(calls: Call[], options:
       set(transformed, key, (transform ?? identity)(value))
     })
   })
-  // console.log('transformed', transformed)
 
   return transformed as T
 }
