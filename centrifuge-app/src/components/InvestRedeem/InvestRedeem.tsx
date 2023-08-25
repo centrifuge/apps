@@ -26,7 +26,7 @@ import css from '@styled-system/css'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { ethConfig } from '../../config'
 import { Dec } from '../../utils/Decimal'
@@ -316,18 +316,18 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   )
 }
 
-const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
+const OnboardingButton = ({ networks }: { networks: Network[] | undefined; trancheId?: string }) => {
   const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
-  const pool = usePool(state.poolId)
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
+  const history = useHistory()
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
-  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'closed'
+  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state?.trancheId]?.openForOnboarding ? 'open' : 'closed'
   const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
-
-  const history = useHistory()
 
   const getOnboardingButtonText = () => {
     if (connectedType) {

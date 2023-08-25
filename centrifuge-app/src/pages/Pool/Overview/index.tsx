@@ -62,7 +62,6 @@ export function PoolDetailSideBar({
   investRef?: ActionsRef
 }) {
   const { pid: poolId } = useParams<{ pid: string }>()
-
   return (
     <InvestRedeem poolId={poolId} trancheId={selectedToken} onSetTrancheId={setSelectedToken} actionsRef={investRef} />
   )

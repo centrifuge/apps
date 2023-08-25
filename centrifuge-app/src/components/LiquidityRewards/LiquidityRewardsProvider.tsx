@@ -5,7 +5,7 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useAddress } from '../../utils/useAddress'
 import { usePendingCollect, usePool } from '../../utils/usePools'
-import { useAccountStakes, useClaimCountdown, useComputeLiquidityRewards, useRewardCurrencyGroup } from './hooks'
+import { useAccountStakes, useComputeLiquidityRewards, useRewardCurrencyGroup } from './hooks'
 import { LiquidityRewardsContext } from './LiquidityRewardsContext'
 import { LiquidityRewardsActions, LiquidityRewardsProviderProps, LiquidityRewardsState } from './types'
 
@@ -23,7 +23,6 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
   const stakes = useAccountStakes(address, poolId, trancheId)
   const rewards = useComputeLiquidityRewards(address, poolId, trancheId)
   const balances = useBalances(address)
-  const countdown = useClaimCountdown()
   const rewardCurrencyGroup = useRewardCurrencyGroup(poolId, trancheId)
 
   const trancheBalance =
@@ -53,7 +52,6 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
 
   const state: LiquidityRewardsState = {
     tranche,
-    countdown,
     rewards,
     stakeableAmount,
     combinedStakes,

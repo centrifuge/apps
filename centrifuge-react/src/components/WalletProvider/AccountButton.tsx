@@ -147,12 +147,12 @@ export function AccountName({ account, proxies }: { account: WalletAccount; prox
         </>
       )}
       {proxies?.map((p) => (
-        <React.Fragment key={p.delegator}>
+        <span key={p.delegator}>
           <Text as="span" color="textDisabled">
             |
           </Text>{' '}
           {truncateAddress(utils.formatAddress(p.delegator))}{' '}
-        </React.Fragment>
+        </span>
       ))}
     </Text>
   )

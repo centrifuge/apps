@@ -1,7 +1,7 @@
 import Centrifuge, { CurrencyBalance, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { Keyring } from '@polkadot/keyring'
 import { cryptoWaitReady, encodeAddress } from '@polkadot/util-crypto'
-import { Request } from 'express'
+import { Request, Response } from 'express'
 import { combineLatest, combineLatestWith, firstValueFrom, lastValueFrom, switchMap, take, takeWhile } from 'rxjs'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
@@ -61,6 +61,9 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
           { Pool: poolId },
           { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
         )
+        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
+        const batchSubmittable = [proxiedSubmittable]
+        // give the investor PODReadAccess if they issuer enabled it
         if (!hasPodReadAccess && metadata?.onboarding?.podReadAccess) {
           const podSubmittable = api.tx.permissions.add(
             { PoolRole: 'InvestorAdmin' },
@@ -68,13 +71,22 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
             { Pool: poolId },
             { PoolRole: 'PODReadAccess' }
           )
-          const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
           const proxiedPodSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, podSubmittable)
-          const batchSubmittable = api.tx.utility.batchAll([proxiedPodSubmittable, proxiedSubmittable])
-          return batchSubmittable.signAndSend(signer)
+          batchSubmittable.push(proxiedPodSubmittable)
         }
-        const proxiedSubmittable = api.tx.proxy.proxy(pureProxyAddress, undefined, submittable)
-        return proxiedSubmittable.signAndSend(signer)
+        // add investor to liquidity pools if they are investing on any domain other than centrifuge
+        if (wallet.network === 'evm') {
+          const updateMemberSubmittable = api.tx.connectors.updateMember(
+            poolId,
+            trancheId,
+            {
+              EVM: [wallet.chainId, wallet.address],
+            },
+            OneHundredYearsFromNow
+          )
+          batchSubmittable.push(updateMemberSubmittable)
+        }
+        return api.tx.utility.batchAll(batchSubmittable).signAndSend(signer)
       }),
       combineLatestWith(api),
       takeWhile(([{ events, isFinalized }, api]) => {
@@ -131,12 +143,13 @@ export const validateSubstrateRemark = async (
 }
 
 export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet']) => {
+  const address = await getValidSubstrateAddress(wallet)
   const signer = await getSigner()
   const $api = getCentrifuge().getApi()
   const $paymentInfo = $api
-    .pipe(switchMap((api) => api.tx.system.remarkWithEvent('Signing for pool').paymentInfo(wallet.address)))
+    .pipe(switchMap((api) => api.tx.system.remarkWithEvent('Signing for pool').paymentInfo(address)))
     .pipe(take(1))
-  const $nativeBalance = $api.pipe(switchMap((api) => api.query.system.account(wallet.address))).pipe(take(1))
+  const $nativeBalance = $api.pipe(switchMap((api) => api.query.system.account(address))).pipe(take(1))
   const tx = await lastValueFrom(
     combineLatest([$api, $paymentInfo, $nativeBalance]).pipe(
       switchMap(([api, paymentInfo, nativeBalance]) => {
@@ -151,7 +164,7 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
         }
 
         // add 10% buffer to the transaction fee
-        const submittable = api.tx.tokens.transfer({ Id: wallet.address }, 'Native', txFee.add(txFee.muln(1.1)))
+        const submittable = api.tx.tokens.transfer({ Id: address }, 'Native', txFee.add(txFee.muln(1.1)))
         return submittable.signAndSend(signer)
       }),
       takeWhile(({ events, isFinalized }) => {
@@ -159,10 +172,10 @@ export const checkBalanceBeforeSigningRemark = async (wallet: Request['wallet'])
           events.forEach(({ event }) => {
             const result = event.data[0]?.toHuman()
             if (event.method === 'ProxyExecuted' && result === 'Ok') {
-              console.log(`Executed proxy for transfer`, { walletAddress: wallet.address, result })
+              console.log(`Executed proxy for transfer`, { walletAddress: address, result })
             }
             if (event.method === 'ExtrinsicFailed') {
-              console.log(`Extrinsic failed`, { walletAddress: wallet.address, result })
+              console.log(`Extrinsic failed`, { walletAddress: address, result })
               throw new HttpError(400, 'Extrinsic failed')
             }
           })
@@ -180,11 +193,50 @@ export const getValidSubstrateAddress = async (wallet: Request['wallet']) => {
     const centChainId = await cent.getChainId()
     if (wallet.network === 'evmOnSubstrate') {
       const chainId = await firstValueFrom(cent.getApi().pipe(switchMap((api) => api.query.evmChainId.chainId())))
-      return encodeAddress(evmToSubstrateAddress(wallet.address, Number(chainId.toString())), centChainId)
+      return evmToSubstrateAddress(wallet.address, Number(chainId.toString()))
+    }
+    if (wallet.network === 'evm') {
+      return evmToSubstrateAddress(wallet.address, wallet.chainId)
     }
     const validAddress = encodeAddress(wallet.address, centChainId)
     return validAddress
   } catch (error) {
     throw new HttpError(400, 'Invalid substrate address')
+  }
+}
+
+const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+export async function verifySubstrateWallet(req: Request, res: Response): Promise<Request['wallet']> {
+  const { jw3t: token, nonce } = req.body
+  const { verified, payload } = await getCentrifuge().auth.verify(token!)
+
+  const onBehalfOf = payload?.on_behalf_of
+  const address = payload.address
+
+  const cookieNonce = req.signedCookies[`onboarding-auth-${address.toLowerCase()}`]
+  if (!cookieNonce || cookieNonce !== nonce) {
+    throw new HttpError(400, 'Invalid nonce')
+  }
+
+  res.clearCookie(`onboarding-auth-${address.toLowerCase()}`)
+
+  if (verified && onBehalfOf) {
+    const isVerifiedProxy = await getCentrifuge().auth.verifyProxy(
+      address,
+      onBehalfOf,
+      AUTHORIZED_ONBOARDING_PROXY_TYPES
+    )
+    if (isVerifiedProxy.verified) {
+      req.wallet.address = address
+    } else if (verified && !onBehalfOf) {
+      req.wallet.address = address
+    } else {
+      throw new Error()
+    }
+  }
+  return {
+    address,
+    network: payload.network || 'substrate',
+    chainId: payload.chainId,
   }
 }

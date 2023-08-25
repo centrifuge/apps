@@ -15,12 +15,11 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
     isEvmOnSubstrate,
     connectedType,
     connectedNetwork,
-    evm: { chains, selectedWallet },
+    evm: { selectedWallet },
     substrate: { evmChainId },
     showWallets,
     connect,
   } = useWallet()
-
   const getName = useGetNetworkName()
 
   if (!connectedNetwork) {
@@ -65,7 +64,7 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
                     <MenuItemGroup>
                       {networks.map((network) => (
                         <MenuItem
-                          label={network === 'centrifuge' ? 'Centrifuge' : chains[network]?.name}
+                          label={getName(network)}
                           onClick={() => {
                             state.close()
                             switchNetwork(network)

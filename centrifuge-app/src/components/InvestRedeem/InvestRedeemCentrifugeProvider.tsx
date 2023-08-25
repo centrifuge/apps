@@ -23,7 +23,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
-  const combinedStakes = useLiquidityRewards().state?.combinedStakes
+  const liquidityState = useLiquidityRewards().state
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -33,7 +33,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const price = tranche.tokenPrice?.toDecimal() ?? Dec(1)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
-  const stakedAmount = combinedStakes ?? Dec(0)
+  const stakedAmount = liquidityState?.combinedStakes ?? Dec(0)
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem).add(stakedAmount)
   const investmentValue = combinedBalance.mul(price)
   const poolCurBalance =
