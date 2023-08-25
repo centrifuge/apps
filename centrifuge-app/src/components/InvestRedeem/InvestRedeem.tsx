@@ -31,11 +31,13 @@ import styled from 'styled-components'
 import { ethConfig } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
+import { useTinlakePermissions } from '../../utils/tinlake/useTinlakePermissions'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
+import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
@@ -68,11 +70,20 @@ const listFormatter = new Intl.ListFormat('en')
 export function InvestRedeem({ poolId, ...rest }: Props) {
   const getNetworkName = useGetNetworkName()
   const { data: domains } = useActiveDomains(poolId)
+  const { setScopedNetworks, scopedNetworks } = useWallet()
 
   const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
   if (domains) {
     networks.push(...domains.map((d) => d.chainId))
   }
+
+  React.useEffect(() => {
+    setScopedNetworks(networks)
+    return () => setScopedNetworks(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [networks])
+
+  console.log('scopedNetworks', scopedNetworks)
 
   return (
     <LoadBoundary>
@@ -121,47 +132,49 @@ function EpochBusy({ busy }: { busy?: boolean }) {
   ) : null
 }
 
-// function useAllowedTranches(poolId: string) {
-//   const address = useAddress()
-//   const { connectedType } = useWallet()
-//   const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
-//   const isTinlakePool = poolId.startsWith('0x')
-//   const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
-//   const pool = usePool(poolId)
-//   const { data: metadata } = usePoolMetadata(pool)
+function useAllowedTranches(poolId: string) {
+  const address = useAddress()
+  const { connectedType, isEvmOnSubstrate } = useWallet()
+  const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
+  const isTinlakePool = poolId.startsWith('0x')
+  const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
+  const pool = usePool(poolId)
+  const { data: metadata } = usePoolMetadata(pool)
 
-//   const allowedTrancheIds = isTinlakePool
-//     ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
-//         (tranche) => {
-//           if (tranche && metadata?.pool?.newInvestmentsStatus) {
-//             const trancheName = tranche.split('-')[1] === '0' ? 'junior' : 'senior'
+  const allowedTrancheIds = isTinlakePool
+    ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
+        (tranche) => {
+          if (tranche && metadata?.pool?.newInvestmentsStatus) {
+            const trancheName = tranche.split('-')[1] === '0' ? 'junior' : 'senior'
 
-//             const isMember = tinlakePermissions?.[trancheName].inMemberlist
+            const isMember = tinlakePermissions?.[trancheName].inMemberlist
 
-//             return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
-//           }
+            return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
+          }
 
-//           return false
-//         }
-//       )
-//     : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
+          return false
+        }
+      )
+    : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
 
-//   return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
-// }
+  if (connectedType === 'evm' && !isEvmOnSubstrate) return pool.tranches
+
+  return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
+}
 
 function InvestRedeemState(props: Props) {
   const { poolId, trancheId: trancheIdProp, onSetTrancheId, actionsRef } = props
-  // const allowedTranches = useAllowedTranches(poolId)
+  const allowedTranches = useAllowedTranches(poolId)
   const pool = usePool(poolId)
   const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
   const [trancheId, setTrancheId] = useControlledState<string>(pool.tranches.at(-1)!.id, trancheIdProp, onSetTrancheId)
 
-  // React.useEffect(() => {
-  //   if (allowedTranches.at(-1)?.id) {
-  //     setTrancheId(allowedTranches.at(-1)!.id)
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [allowedTranches[0]])
+  React.useEffect(() => {
+    if (allowedTranches.at(-1)?.id) {
+      setTrancheId(allowedTranches.at(-1)!.id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedTranches[0]])
 
   React.useImperativeHandle(actionsRef, () => ({
     setView: (view) => {
@@ -201,9 +214,7 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   console.log('state', state)
-  // const allowedTranches = useAllowedTranches(state.poolId)
   const isTinlakePool = state.poolId.startsWith('0x')
-  // const availableTranches = isTinlakePool ? allowedTranches : pool.tranches
 
   const { data: metadata } = usePoolMetadata(pool)
   const { connectedType, isEvmOnSubstrate } = useWallet()
