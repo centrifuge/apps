@@ -135,6 +135,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     needsToCollectBeforeOrder: investToCollect.gt(0) || currencyToCollect.gt(0),
     needsPoolCurrencyApproval: lpInvest?.managerCurrencyAllowance.isZero() ?? false,
     needsTrancheTokenApproval: lpInvest?.managerTrancheTokenAllowance.isZero() ?? false,
+    canChangeOrder: false,
     pendingAction,
     pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
   }

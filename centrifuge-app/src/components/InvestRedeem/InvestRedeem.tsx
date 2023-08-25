@@ -22,12 +22,10 @@ import {
   Thumbnail,
   useControlledState,
 } from '@centrifuge/fabric'
-import css from '@styled-system/css'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router-dom'
-import styled from 'styled-components'
 import { ethConfig } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
@@ -47,6 +45,7 @@ import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { InvestRedeemProvider, useInvestRedeem } from './InvestRedeemProvider'
+import { LightButton } from './LightButton'
 import { InvestRedeemState as InvestRedeemContextState } from './types'
 
 export type ActionsRef = React.MutableRefObject<
@@ -786,31 +785,6 @@ const SuccessBanner: React.FC<{ title: string; body?: string }> = ({ title, body
   )
 }
 
-const LightButton = styled.button<{ $left?: boolean }>(
-  {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    border: 0,
-    appearance: 'none',
-    height: 36,
-    cursor: 'pointer',
-  },
-  (props) =>
-    css({
-      color: 'textPrimary',
-      borderBottomLeftRadius: props.$left ? 'card' : undefined,
-      borderBottomRightRadius: props.$left ? undefined : 'card',
-      backgroundColor: 'secondarySelectedBackground',
-      '&:hover, &:focus-visible': {
-        color: 'textSelected',
-      },
-      '&:disabled': {
-        cursor: 'not-allowed',
-      },
-    })
-)
-
 const PendingOrder: React.FC<{
   type: 'invest' | 'redeem'
   amount: Decimal
@@ -846,7 +820,7 @@ const PendingOrder: React.FC<{
           </Text>
         </Stack>
         <Grid gap="1px" columns={2} equalColumns>
-          <LightButton type="button" $left onClick={onCancelOrder} disabled={isCancelling || calculatingOrders}>
+          <LightButton type="button" onClick={onCancelOrder} disabled={isCancelling || calculatingOrders}>
             {isCancelling ? (
               <Spinner size="iconSmall" />
             ) : (
@@ -855,11 +829,13 @@ const PendingOrder: React.FC<{
               </Text>
             )}
           </LightButton>
-          <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling || calculatingOrders}>
-            <Text variant="body2" color="inherit">
-              Change order
-            </Text>
-          </LightButton>
+          {state.canChangeOrder && (
+            <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling || calculatingOrders}>
+              <Text variant="body2" color="inherit">
+                Change order
+              </Text>
+            </LightButton>
+          )}
         </Grid>
       </Stack>
       <TransactionsLink />

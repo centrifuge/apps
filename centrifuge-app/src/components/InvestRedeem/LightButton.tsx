@@ -1,7 +1,7 @@
 import css from '@styled-system/css'
 import styled from 'styled-components'
 
-export const LightButton = styled.button<{ $left?: boolean; $right?: boolean }>(
+export const LightButton = styled.button(
   {
     display: 'flex',
     justifyContent: 'center',
@@ -14,14 +14,18 @@ export const LightButton = styled.button<{ $left?: boolean; $right?: boolean }>(
   (props) =>
     css({
       color: 'textPrimary',
-      borderBottomLeftRadius: props.$left ? 'card' : undefined,
-      borderBottomRightRadius: props.$right ? 'card' : undefined,
       backgroundColor: 'secondarySelectedBackground',
       '&:hover, &:focus-visible': {
         color: 'textSelected',
       },
       '&:disabled': {
         cursor: 'not-allowed',
+      },
+      '&:first-child': {
+        borderBottomLeftRadius: 'card',
+      },
+      '&:last-child': {
+        borderBottomRightRadius: 'card',
       },
     })
 )

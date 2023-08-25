@@ -115,6 +115,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     needsToCollectBeforeOrder: false,
     needsPoolCurrencyApproval: false,
     needsTrancheTokenApproval: false,
+    canChangeOrder: true,
     pendingAction,
     pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
   }

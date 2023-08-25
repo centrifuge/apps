@@ -47,6 +47,7 @@ export type InvestRedeemState = {
   needsToCollectBeforeOrder: boolean
   needsPoolCurrencyApproval: boolean
   needsTrancheTokenApproval: boolean
+  canChangeOrder: boolean
   pendingAction?: InvestRedeemAction | null
   pendingTransaction?: Transaction | null
 }
