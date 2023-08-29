@@ -109,6 +109,11 @@ export function getDateYearsFromNow(years: number) {
   return new Date(new Date().setFullYear(new Date().getFullYear() + years))
 }
 
+export function getDateMonthsFromNow(month: number) {
+  const date = new Date()
+  return new Date(date.setMonth(date.getMonth() + month))
+}
+
 export function addressToHex(addr: string) {
   return u8aToHex(decodeAddress(addr))
 }
@@ -129,4 +134,12 @@ export function computeMultisig(multisig: Multisig): ComputedMultisig {
     signers: sortAddresses(multisig.signers).map(addressToHex),
     threshold: multisig.threshold,
   }
+}
+
+export function evmToSubstrateAddress(address: string, chainId: number) {
+  // Bytes EVM\0 as suffix
+  const suffix = '45564d00'
+  const chainHex = chainId.toString(16).padStart(4, '0')
+
+  return `0x${address.substring(2).toLowerCase()}000000000000${chainHex}${suffix}`
 }

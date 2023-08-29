@@ -7,6 +7,7 @@ import { Dec } from '../../utils/Decimal'
 import { useAddress } from '../../utils/useAddress'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
+import { useLiquidityRewards } from '../LiquidityRewards/LiquidityRewardsContext'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
 
@@ -22,6 +23,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
+  const { state: liquidityState } = useLiquidityRewards()
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -31,7 +33,8 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const price = tranche.tokenPrice?.toDecimal() ?? Dec(1)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
-  const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
+  const stakedAmount = liquidityState?.combinedStakes ?? Dec(0)
+  const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem).add(stakedAmount)
   const investmentValue = combinedBalance.mul(price)
   const poolCurBalance =
     (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) ?? Dec(0)
@@ -107,6 +110,8 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
           remainingRedeemToken: order.remainingRedeemToken.toDecimal(),
         }
       : null,
+    collectAmount: Dec(0),
+    collectType: null,
     needsToCollectBeforeOrder: false,
     needsPoolCurrencyApproval: false,
     needsTrancheTokenApproval: false,

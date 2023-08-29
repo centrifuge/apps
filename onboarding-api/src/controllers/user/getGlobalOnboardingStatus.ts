@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
 import { InferType, mixed, object, string } from 'yup'
+import { SupportedNetworks } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
 import { reportHttpError } from '../../utils/httpError'
-import { SupportedNetworks } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
 const getGlobalOnboardingStatusInput = object({

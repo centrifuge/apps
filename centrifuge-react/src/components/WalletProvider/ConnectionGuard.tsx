@@ -1,7 +1,7 @@
 import { Button, Card, IconChevronDown, Menu, MenuItem, MenuItemGroup, Popover, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Network } from './types'
-import { useNetworkName } from './utils'
+import { useGetNetworkName } from './utils'
 import { useWallet } from './WalletProvider'
 
 type Props = {
@@ -12,28 +12,35 @@ type Props = {
 
 export function ConnectionGuard({ networks, children, body = 'Unsupported network.' }: Props) {
   const {
+    isEvmOnSubstrate,
     connectedType,
     connectedNetwork,
-    evm: { chains, selectedWallet },
+    evm: { selectedWallet },
+    substrate: { evmChainId },
     showWallets,
     connect,
   } = useWallet()
+  const getName = useGetNetworkName()
 
   if (!connectedNetwork) {
     return <>{children}</>
   }
 
-  if (connectedNetwork && networks.includes(connectedNetwork)) return <>{children}</>
+  if (
+    connectedNetwork &&
+    (networks.includes(connectedNetwork) || (networks.includes('centrifuge') && isEvmOnSubstrate))
+  )
+    return <>{children}</>
 
   function switchNetwork(target: Network) {
-    if (connectedType === 'evm' && selectedWallet && typeof target === 'number') {
-      connect(selectedWallet, target)
+    if (connectedType === 'evm' && selectedWallet) {
+      connect(selectedWallet, target === 'centrifuge' ? evmChainId : target)
     } else {
       showWallets(target)
     }
   }
 
-  const name = useNetworkName(networks[0])
+  const name = getName(networks[0])
 
   if (connectedNetwork) {
     return (
@@ -57,7 +64,7 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
                     <MenuItemGroup>
                       {networks.map((network) => (
                         <MenuItem
-                          label={network === 'centrifuge' ? 'Centrifuge' : chains[network]?.name}
+                          label={getName(network)}
                           onClick={() => {
                             state.close()
                             switchNetwork(network)

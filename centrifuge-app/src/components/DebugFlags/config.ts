@@ -1,3 +1,6 @@
+import React from 'react'
+import { ConvertEvmAddress } from './components/ConvertEvmAddress'
+
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
   import.meta.env.MODE === 'development' || params.get('debug') != null || !!localStorage.getItem('debugFlags')
@@ -6,6 +9,12 @@ export type DebugFlagConfig =
   | {
       type: 'text'
       default: string
+      alwaysShow?: boolean
+    }
+  | {
+      type: 'component'
+      Component: React.FC<{ value: any; onChange: (v: any) => void }>
+      default: null
       alwaysShow?: boolean
     }
   | {
@@ -22,8 +31,10 @@ export type DebugFlagConfig =
 
 export type Key =
   | 'address'
+  | 'evmAddress'
   | 'batchMintNFTs'
   | 'persistDebugFlags'
+  | 'showBase'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
@@ -33,9 +44,14 @@ export type Key =
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
   | 'showPodAccountCreation'
+  | 'convertEvmAddress'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
+    type: 'text',
+    default: '',
+  },
+  evmAddress: {
     type: 'text',
     default: '',
   },
@@ -48,6 +64,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   alternativeTheme: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  showBase: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
@@ -84,6 +105,12 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   showAdvancedAccounts: {
     type: 'checkbox',
     default: false,
+    alwaysShow: true,
+  },
+  convertEvmAddress: {
+    type: 'component',
+    Component: ConvertEvmAddress,
+    default: null,
     alwaysShow: true,
   },
 }

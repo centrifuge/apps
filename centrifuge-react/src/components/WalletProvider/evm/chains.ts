@@ -11,7 +11,9 @@ type ExtendedChainInformation = BasicChainInformation & {
   blockExplorerUrl: string
 }
 
-export type EvmChains = { [chainId in 1 | 5]?: BasicChainInformation } | { [chainId: number]: ExtendedChainInformation }
+export type EvmChains =
+  | { [chainId in 1 | 5 | 8453 | 84531]?: BasicChainInformation }
+  | { [chainId: number]: ExtendedChainInformation }
 
 export function getAddChainParameters(chains: EvmChains, chainId: number): AddEthereumChainParameter | number {
   const chainInfo = chains[chainId]
@@ -50,6 +52,16 @@ const chainExtendedInfo = {
     name: 'Görli',
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     blockExplorerUrl: 'https://goerli.etherscan.io/',
+  },
+  8453: {
+    name: 'Base',
+    nativeCurrency: { name: 'Base', symbol: 'bETH', decimals: 18 },
+    blockExplorerUrl: 'https://basescan.org/',
+  },
+  84531: {
+    name: 'Base Goerli',
+    nativeCurrency: { name: 'Base Goerli', symbol: 'gbETH', decimals: 18 },
+    blockExplorerUrl: 'https://goerli.basescan.org/',
   },
 }
 

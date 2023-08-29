@@ -9,6 +9,7 @@ import { verifyTokenController } from './controllers/auth/verifyToken'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { signAndSendDocumentsController } from './controllers/emails/signAndSendDocuments'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
+import { initProxiesController } from './controllers/init/initProxies'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { manualKybCallbackController } from './controllers/kyb/manualKybCallback'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
@@ -59,7 +60,7 @@ onboarding.post('/setVerifiedIdentity', verifyAuth, setVerifiedIdentityControlle
 onboarding.post('/uploadTaxInfo', verifyAuth, fileUpload, uploadTaxInfoController)
 
 // pool steps
-onboarding.post('/signAndSendDocuments', canOnboardToTinlakeTranche, verifyAuth, signAndSendDocumentsController)
+onboarding.post('/signAndSendDocuments', verifyAuth, canOnboardToTinlakeTranche, signAndSendDocumentsController)
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
 
 // getters
@@ -68,5 +69,8 @@ onboarding.get('/getGlobalOnboardingStatus', getGlobalOnboardingStatusController
 onboarding.post('/getBalanceForSigning', verifyAuth, getBalanceForSigningController)
 onboarding.get('/getSignedAgreement', verifyAuth, getSignedAgreementController)
 onboarding.get('/getTaxInfo', verifyAuth, getTaxInfoController)
+
+// init
+onboarding.get('/initProxies', initProxiesController)
 
 exports.onboarding = onboarding

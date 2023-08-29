@@ -4,11 +4,11 @@ import { PDFDocument } from 'pdf-lib'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { onboardingBucket } from '../database'
-import { getCentrifuge } from './centrifuge'
-import { getPoolById } from './getPoolById'
 import { HttpError } from './httpError'
+import { getCentrifuge } from './networks/centrifuge'
+import { NetworkSwitch } from './networks/networkSwitch'
 
-interface SignatureInfo extends InferType<typeof signAndSendDocumentsInput> {
+interface SignatureInfo extends Omit<InferType<typeof signAndSendDocumentsInput>, 'debugEmail'> {
   name: string
   wallet: Request['wallet']
   email: string
@@ -24,7 +24,7 @@ export const annotateAgreementAndSignAsInvestor = async ({
   name,
   email,
 }: SignatureInfo) => {
-  const { pool, metadata } = await getPoolById(poolId)
+  const { pool, metadata } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
   const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name as string
   const centrifuge = getCentrifuge()
   const signaturePage = await onboardingBucket.file('signature-page.pdf')
@@ -36,8 +36,9 @@ export const annotateAgreementAndSignAsInvestor = async ({
 
   const unsignedAgreementUrl = metadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
     ? centrifuge.metadata.parseMetadataUrl(metadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri)
-    : wallet.network === 'substrate'
-    ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
+    : !pool.id.startsWith('0x')
+    ? // TODO: remove generic and don't allow onboarding if agreement is not uploaded
+      centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
 
   // tinlake pools that are closed for onboarding don't have agreements in their metadata
@@ -113,7 +114,7 @@ Agreement hash: ${unsignedAgreementUrl}`,
   })
 
   // all tinlake agreements require the executive summary to be appended
-  if (wallet.network === 'evm') {
+  if (pool.id.startsWith('0x')) {
     const execSummaryRes = await fetch(metadata.pool.links.executiveSummary.uri)
     const execSummary = Buffer.from(await execSummaryRes.arrayBuffer())
     const execSummaryPdf = await PDFDocument.load(execSummary)

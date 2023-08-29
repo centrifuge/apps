@@ -1,32 +1,33 @@
+import { Request } from 'express'
 import { PDFDocument, StandardFonts } from 'pdf-lib'
 import { onboardingBucket } from '../database'
-import { getPoolById } from './getPoolById'
 import { HttpError } from './httpError'
+import { NetworkSwitch } from './networks/networkSwitch'
 
 type SignatureInfo = {
   poolId: string
   trancheId: string
-  walletAddress: string
+  wallet: Request['wallet']
   investorName: string
 }
 
-export const signAcceptanceAsIssuer = async ({ poolId, trancheId, walletAddress, investorName }: SignatureInfo) => {
+export const signAcceptanceAsIssuer = async ({ poolId, trancheId, wallet, investorName }: SignatureInfo) => {
   const countersignedAgreement = await PDFDocument.create()
 
   const signedAgreement = await onboardingBucket.file(
-    `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+    `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
   )
   const [signedAgreementExists] = await signedAgreement.exists()
 
   if (!signedAgreementExists) {
-    throw new HttpError(400, 'Signed agreement not found')
+    throw new HttpError(404, 'Signed agreement not found')
   }
 
   const acceptancePage = await onboardingBucket.file('acceptance-page.pdf')
   const [acceptancePageExists] = await acceptancePage.exists()
 
   if (!acceptancePageExists) {
-    throw new HttpError(400, 'Acceptance page not found')
+    throw new HttpError(404, 'Acceptance page not found')
   }
 
   const signedAgreementPdf = await signedAgreement.download()
@@ -48,7 +49,7 @@ export const signAcceptanceAsIssuer = async ({ poolId, trancheId, walletAddress,
 
   const lastPage = pages[pages.length - 1]
 
-  const { metadata, pool } = await getPoolById(poolId)
+  const { metadata, pool } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
 
   const issuerRepName = metadata?.pool.issuer.repName
 

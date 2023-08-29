@@ -10,12 +10,18 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
+import { Contract } from '@ethersproject/contracts'
+import { InfuraProvider } from '@ethersproject/providers'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
 import { ethConfig } from '../../config'
 import { Dec } from '../Decimal'
+import feedv1Abi from './abis/NAVFeed_V1.abi.json'
+import feedv2Abi from './abis/NAVFeed_V2.abi.json'
+import feedv3Abi from './abis/NAVFeed_V3.abi.json'
+import pileAbi from './abis/Pile.abi.json'
 import { currencies } from './currencies'
 import { Call, multicall } from './multicall'
 import { Fixed27Base } from './ratios'
@@ -107,7 +113,7 @@ function parsePoolsMetadata(poolsMetadata: TinlakeMetadataPool[]): IpfsPools {
   return { active, upcoming, archived, launching }
 }
 
-function useIpfsPools(suspense = false) {
+export function useIpfsPools(suspense = false) {
   // TODO get hash from registry
   const cent = useCentrifuge()
   const uri = ethConfig.poolsHash
@@ -141,12 +147,43 @@ export function useTinlakePools(suspense = false) {
 }
 
 export function useTinlakeLoans(poolId: string) {
+  const tinlakePools = useTinlakePools()
+
+  const pool = tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
+
   return useQuery(
-    ['tinlakePoolLoans', poolId],
+    ['tinlakePoolLoans', poolId, pool],
     async () => {
       const loans = await getTinlakeLoans(poolId)
 
-      // @ts-expect-error
+      const writeOffPercentagePromises = loans.map(async (loan) => {
+        if (pool) {
+          const writeOffPercentage = await getWriteOffPercentage(pool, loan.index)
+
+          if (writeOffPercentage.isZero()) {
+            return {
+              loanId: loan.index,
+              percentage: '0',
+            }
+          }
+
+          return {
+            loanId: loan.index,
+            percentage: writeOffPercentage.div(new BN(10).pow(new BN(25))).toString(),
+          }
+        }
+
+        return {
+          loanId: loan.index,
+          percentage: '0',
+        }
+      })
+
+      const writeOffPercentage = (await Promise.all(writeOffPercentagePromises)).reduce((acc, curr) => {
+        acc[curr.loanId] = curr.percentage
+        return acc
+      }, {} as { [key: number]: string })
+
       return loans.map((loan) => ({
         asset: {
           nftId: loan.nftId,
@@ -163,7 +200,8 @@ export function useTinlakeLoans(poolId: string) {
           ),
           ceiling: new CurrencyBalance(loan.ceiling, 18),
         },
-        status: getTinlakeLoanStatus(loan),
+        status: getTinlakeLoanStatus(loan, writeOffPercentage[loan.index]),
+        writeOffPercentage: writeOffPercentage[loan.index],
         totalBorrowed: new CurrencyBalance(loan.borrowsAggregatedAmount, 18),
         totalRepaid: new CurrencyBalance(loan.repaysAggregatedAmount, 18),
         dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
@@ -172,7 +210,7 @@ export function useTinlakeLoans(poolId: string) {
       })) as TinlakeLoan[]
     },
     {
-      enabled: !!poolId && !!poolId.startsWith('0x'),
+      enabled: !!pool && !!poolId && !!poolId.startsWith('0x'),
       staleTime: Infinity,
       suspense: true,
     }
@@ -210,6 +248,7 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
     JUNIOR_MEMBERLIST: string
     COORDINATOR: string
     PILE: string
+    CLAIM_CFG: string
     MCD_VAT?: string
     MCD_JUG?: string
     MAKER_MGR?: string
@@ -224,8 +263,8 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
   version: 2 | 3
 }
 
-function getTinlakeLoanStatus(loan: TinlakeLoanData) {
-  if (loan.financingDate && loan.debt === '0') {
+function getTinlakeLoanStatus(loan: TinlakeLoanData, writeOffPercentage: string) {
+  if (loan.financingDate && (loan.debt === '0' || writeOffPercentage === '100')) {
     return 'Closed'
   }
   if (!loan.financingDate) {
@@ -240,7 +279,7 @@ async function getTinlakeLoans(poolId: string) {
     loans: unknown[]
   }[] = []
 
-  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+  const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -277,7 +316,10 @@ async function getTinlakeLoans(poolId: string) {
   })
 
   if (response?.ok) {
-    const { data } = await response.json()
+    const { data, errors } = await response.json()
+    if (errors?.length) {
+      throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Errors: ${errors}`)
+    }
     pools = data.pools
   } else {
     throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Status: ${response?.status}`)
@@ -291,6 +333,68 @@ async function getTinlakeLoans(poolId: string) {
   }, [])
 
   return loans
+}
+
+async function getWriteOffGroups(pool: TinlakePool) {
+  const feedAbi = pool.versions?.FEED === 2 ? feedv2Abi : feedv3Abi
+  const provider = new InfuraProvider()
+
+  const navFeed = new Contract(pool.addresses.FEED, feedAbi, provider)
+
+  const groups = []
+  let i = 0
+  const maxWriteOffGroups = 100
+  while (i < maxWriteOffGroups) {
+    try {
+      const group = await navFeed.writeOffGroups(i)
+      groups.push(group)
+      i += 1
+    } catch (e) {
+      return groups
+    }
+  }
+  return groups
+}
+
+export async function getWriteOffPercentage(pool: TinlakePool, loanId: number): Promise<BN> {
+  const feedAbi = (() => {
+    if (pool.versions?.FEED === 2) {
+      return feedv2Abi
+    }
+    if (pool.versions?.FEED === 3) {
+      return feedv3Abi
+    }
+    return feedv1Abi
+  })()
+
+  const provider = new InfuraProvider()
+  const pile = new Contract(pool.addresses.PILE, pileAbi, provider)
+  const navFeed = new Contract(pool.addresses.FEED, feedAbi, provider)
+
+  const loanRate = await pile.loanRates(loanId)
+
+  if (loanRate.lt(1000)) {
+    return new BN(0)
+  }
+
+  if (navFeed.writeOffs) {
+    const writeOffGroup = loanRate.sub(1000)
+    const { percentage } = await navFeed.writeOffs(writeOffGroup.toString())
+
+    return Rate.fromFloat(1).sub(new BN(percentage.toString()))
+  } else if (navFeed.writeOffGroups) {
+    const writeOffGroups = await getWriteOffGroups(pool)
+    let { percentage } = writeOffGroups[loanRate.sub(1000).toNumber()]
+    if (percentage) {
+      percentage = Rate.fromFloat(1).sub(new BN(percentage.toString()))
+
+      return percentage
+    }
+
+    return new BN(0)
+  }
+
+  return new BN(0)
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
@@ -479,64 +583,68 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
   const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
   const capacityGivenMaxDropRatioPerPool: { [key: string]: BN } = {}
   Object.keys(multicallData).forEach((poolId: string) => {
-    const state = multicallData[poolId]
+    try {
+      const state = multicallData[poolId]
 
-    // Investments will reduce the creditline and therefore reduce the senior debt
-    const newUsedCreditline = state.unusedCreditline
-      ? BN.max(
-          new BN(0),
-          (state.usedCreditline || new BN(0))
-            .sub(state.pendingSeniorInvestments)
-            .sub(state.pendingJuniorInvestments)
-            .add(state.pendingSeniorRedemptions)
-            .add(state.pendingJuniorRedemptions)
-        )
-      : new BN(0)
+      // Investments will reduce the creditline and therefore reduce the senior debt
+      const newUsedCreditline = state.unusedCreditline
+        ? BN.max(
+            new BN(0),
+            (state.usedCreditline || new BN(0))
+              .sub(state.pendingSeniorInvestments)
+              .sub(state.pendingJuniorInvestments)
+              .add(state.pendingSeniorRedemptions)
+              .add(state.pendingJuniorRedemptions)
+          )
+        : new BN(0)
 
-    const newUnusedCreditline = state.unusedCreditline ? state.availableCreditline?.sub(newUsedCreditline) : new BN(0)
+      const newUnusedCreditline = state.unusedCreditline ? state.availableCreditline?.sub(newUsedCreditline) : new BN(0)
 
-    const newReserve = BN.max(
-      new BN(0),
-      state.reserve
+      const newReserve = BN.max(
+        new BN(0),
+        state.reserve
+          .add(state.pendingSeniorInvestments)
+          .add(state.pendingJuniorInvestments)
+          .sub(state.pendingSeniorRedemptions)
+          .sub(state.pendingJuniorRedemptions)
+          .sub(newUsedCreditline)
+      )
+
+      const capacityGivenMaxReserve = BN.max(
+        new BN(0),
+        state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
+      )
+
+      // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
+      const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+        ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+        : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+      // TODO: the change in senior balance should be multiplied by the mat here
+      const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+        ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+        : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+      const newSeniorAsset = newSeniorDebt
+        .add(newSeniorBalance)
         .add(state.pendingSeniorInvestments)
-        .add(state.pendingJuniorInvestments)
         .sub(state.pendingSeniorRedemptions)
-        .sub(state.pendingJuniorRedemptions)
-        .sub(newUsedCreditline)
-    )
 
-    const capacityGivenMaxReserve = BN.max(
-      new BN(0),
-      state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
-    )
+      const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
+      const maxPoolSize = newJuniorAsset
+        .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state?.maxSeniorRatio)))
+        .div(new BN(10).pow(new BN(6)))
 
-    // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
-    const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
-      ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
-      : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+      const maxSeniorAsset = maxPoolSize.sub(newJuniorAsset)
 
-    // TODO: the change in senior balance should be multiplied by the mat here
-    const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
-      ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
-      : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+      const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
 
-    const newSeniorAsset = newSeniorDebt
-      .add(newSeniorBalance)
-      .add(state.pendingSeniorInvestments)
-      .sub(state.pendingSeniorRedemptions)
-
-    const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
-    const maxPoolSize = newJuniorAsset
-      .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state.maxSeniorRatio)))
-      .div(new BN(10).pow(new BN(6)))
-
-    const maxSeniorAsset = maxPoolSize.sub(newJuniorAsset)
-
-    const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
-
-    capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
-    capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
-    capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
+      capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
+      capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
+      capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
+    } catch (e) {
+      console.error(e)
+    }
   })
 
   const combined = pools.active.map((p) => {
@@ -684,7 +792,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           id: `${id}-1`,
           seniority: 1,
           balance: data.seniorBalance,
-          minRiskBuffer: Rate.fromFloat(Dec(1).sub(data.maxSeniorRatio.toDecimal())),
+          minRiskBuffer: Rate.fromFloat(Dec(1).sub(data.maxSeniorRatio.toDecimal() || Dec(0))),
           currentRiskBuffer: Rate.fromFloat(Dec(1).sub(data.seniorRatio.toDecimal())),
           interestRatePerSec: data.seniorInterestRate,
           lastUpdatedInterest: new Date().toISOString(),

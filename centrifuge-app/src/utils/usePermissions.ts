@@ -1,4 +1,11 @@
-import { addressToHex, Collection, computeMultisig, PoolRoles } from '@centrifuge/centrifuge-js'
+import {
+  addressToHex,
+  Collection,
+  computeMultisig,
+  evmToSubstrateAddress,
+  isSameAddress,
+  PoolRoles,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useMemo } from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
@@ -61,6 +68,18 @@ export function useCanBorrow(poolId: string) {
   return !!account
 }
 
+export function useCanSetOraclePrice(address?: string) {
+  const [members] = useCentrifugeQuery(['oracleMembers'], (cent) =>
+    cent.getApi().pipe(
+      switchMap((api) => api.query.priceOracleMembership.members()),
+      map((memberData) => {
+        return memberData.toJSON() as string[]
+      })
+    )
+  )
+  return address && !!members?.find((addr) => isSameAddress(addr, address))
+}
+
 // Returns whether the connected address can borrow against a specific asset from a pool
 export function useCanBorrowAsset(poolId: string, assetId: string) {
   return !!useBorrower(poolId, assetId)
@@ -90,11 +109,16 @@ type SuitableConfig = {
 export function useSuitableAccounts(config: SuitableConfig) {
   const { actingAddress, poolId, poolRole, proxyType } = config
   const {
-    substrate: { selectedAccount, combinedAccounts },
+    isEvmOnSubstrate,
+    substrate: { selectedAccount, combinedAccounts, evmChainId },
+    evm: { selectedAddress },
   } = useWallet()
+  const signingAddress = isEvmOnSubstrate
+    ? evmToSubstrateAddress(selectedAddress!, evmChainId!)
+    : selectedAccount?.address
   const permissions = usePoolPermissions(poolId)
   const accounts = (combinedAccounts ?? [])?.filter((acc) => {
-    if (acc.signingAccount.address !== selectedAccount?.address) return false
+    if (acc.signingAccount.address !== signingAddress) return false
     if (actingAddress && !actingAddress.includes(acc.actingAddress)) return false
     if (
       acc.proxies &&

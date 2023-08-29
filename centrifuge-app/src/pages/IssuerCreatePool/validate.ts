@@ -59,6 +59,7 @@ export const validate = {
   lossGivenDefault: combine(required(), nonNegativeNumber(), max(100)),
   maxBorrowQuantity: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   Isin: combine(required(), minLength(12), maxLength(12), isin()),
+  maturityExtensionDays: combine(required(), positiveNumber(), max(365 * 2 /* 2 years */)),
 
   // write-off groups
   days: combine(required(), integer(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),

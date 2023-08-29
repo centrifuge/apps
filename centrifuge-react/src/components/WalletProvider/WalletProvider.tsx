@@ -1,4 +1,4 @@
-import { addressToHex, ComputedMultisig, Multisig } from '@centrifuge/centrifuge-js'
+import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -6,9 +6,9 @@ import { Web3ReactState } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import * as React from 'react'
 import { useQuery } from 'react-query'
-import { firstValueFrom } from 'rxjs'
+import { firstValueFrom, map, switchMap } from 'rxjs'
 import { ReplacedError, useAsyncCallback } from '../../hooks/useAsyncCallback'
-import { useCentrifuge } from '../CentrifugeProvider'
+import { useCentrifuge, useCentrifugeApi, useCentrifugeConsts } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
 import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
 import { getStore } from './evm/utils'
@@ -19,16 +19,18 @@ import { useGetNetworkName } from './utils'
 import { WalletDialog } from './WalletDialog'
 
 export type WalletContextType = {
+  isEvmOnSubstrate: boolean
   connectedType: 'evm' | 'substrate' | null
   connectedNetwork: State['walletDialog']['network']
   connectedNetworkName: string | null
   scopedNetworks: Network[] | null
   setScopedNetworks: (scopedNetwork: Network[] | null) => void
   dispatch: (action: Action) => void
+  showNetworks: (network?: State['walletDialog']['network']) => void
   showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) => void
   showAccounts: () => void
   walletDialog: State['walletDialog']
-  connect: (wallet: Wallet | EvmConnectorMeta, chainId?: number) => Promise<SubstrateAccount[] | string[] | undefined>
+  connect: (wallet: Wallet | EvmConnectorMeta, network?: Network) => Promise<SubstrateAccount[] | string[] | undefined>
   disconnect: () => void
   pendingConnect: {
     isConnecting: boolean
@@ -36,6 +38,7 @@ export type WalletContextType = {
     wallet: Wallet | EvmConnectorMeta | null
   }
   substrate: {
+    evmChainId?: number
     accounts: SubstrateAccount[] | null
     proxies: Record<string, Proxy[]> | undefined
     multisigs: ComputedMultisig[]
@@ -69,29 +72,64 @@ export function useWallet() {
   return ctx
 }
 
-export function useAddress(typeOverride?: 'substrate' | 'evm') {
-  const { connectedType, evm, substrate } = useWallet()
-  const type = typeOverride ?? connectedType
+export function useAddress(type?: 'substrate' | 'evm') {
+  const { connectedType, evm, substrate, isEvmOnSubstrate } = useWallet()
   if (type === 'evm') {
     return evm.accounts?.[0]
   }
+  if (isEvmOnSubstrate) {
+    return (
+      substrate.selectedCombinedAccount?.actingAddress ||
+      (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts[0], substrate.evmChainId!) : undefined)
+    )
+  }
+  if (connectedType === 'evm') {
+    return evm.accounts?.[0]
+  }
   return substrate.selectedCombinedAccount?.actingAddress || substrate.selectedAccount?.address
+}
+
+export function useCentEvmChainId() {
+  const cent = useCentrifuge()
+  const api = useCentrifugeApi()
+  const { data: centEvmChainId } = useQuery(
+    ['evmChainId'],
+    () => {
+      try {
+        return firstValueFrom(
+          cent.getApi().pipe(
+            switchMap((api) => api.query.evmChainId.chainId()),
+            map((chainIdData) => chainIdData.toPrimitive() as number)
+          )
+        )
+      } catch {
+        return undefined
+      }
+    },
+    {
+      staleTime: Infinity,
+      suspense: true,
+      enabled: !!api.query.evmChainId,
+    }
+  )
+  return centEvmChainId
 }
 
 type WalletProviderProps = {
   children: React.ReactNode
   evmChains?: EvmChains
   evmAdditionalConnectors?: EvmConnectorMeta[]
+  walletConnectId?: string
   subscanUrl?: string
   showAdvancedAccounts?: boolean
-  walletConnectId?: string
+  showBase?: boolean
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
 
 export function WalletProvider({
   children,
-  evmChains = {
+  evmChains: evmChainsProp = {
     1: {
       urls: ['https://cloudflare-eth.com'],
     },
@@ -100,16 +138,46 @@ export function WalletProvider({
   walletConnectId,
   subscanUrl,
   showAdvancedAccounts,
+  showBase,
 }: WalletProviderProps) {
-  if (!evmChains[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
+  if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
+
+  const cent = useCentrifuge()
+  const consts = useCentrifugeConsts()
+  const centEvmChainId = useCentEvmChainId()
+
+  const evmChains = React.useMemo(() => {
+    const centUrl = new URL(cent.parachainUrl)
+    centUrl.protocol = 'https:'
+    const chains = {
+      ...evmChainsProp,
+    }
+    if (centEvmChainId) {
+      chains[centEvmChainId] = {
+        urls: [centUrl.toString()],
+        iconUrl: '',
+        name: 'Centrifuge',
+        nativeCurrency: {
+          name: consts.chainSymbol,
+          symbol: consts.chainSymbol,
+          decimals: consts.chainDecimals,
+        },
+        blockExplorerUrl: 'https://etherscan.io/',
+      }
+    }
+    return chains
+  }, [centEvmChainId])
+
   const evmConnectors =
     cachedEvmConnectors ||
     (cachedEvmConnectors = getEvmConnectors(getEvmUrls(evmChains), {
       additionalConnectors: evmAdditionalConnectors,
       walletConnectId,
+      substrateEvmChainId: centEvmChainId,
     }))
 
   const [state, dispatch] = useWalletStateInternal(evmConnectors)
+  const isEvmOnSubstrate = state.connectedType === 'evm' && state.evm.chainId === centEvmChainId
 
   const unsubscribeRef = React.useRef<(() => void) | null>()
 
@@ -129,21 +197,33 @@ export function WalletProvider({
       firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
         return Object.fromEntries(
           Object.entries(proxies).map(([delegatee, ps]) => [
-            cent.utils.formatAddress(delegatee),
-            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+            utils.formatAddress(delegatee),
+            ps.map((p) => ({ ...p, delegator: utils.formatAddress(p.delegator) })),
           ])
         )
       }),
       */
-  const cent = useCentrifuge()
+  const evmSubstrateAccounts = isEvmOnSubstrate
+    ? state.evm.accounts?.map((addr) => ({
+        address: evmToSubstrateAddress(addr, centEvmChainId!),
+        source: state.evm.selectedWallet!.id,
+        wallet: state.evm.selectedWallet as any,
+      }))
+    : null
   const { data: proxies } = useQuery(
-    ['proxies', state.substrate.accounts?.map((acc) => acc.address), state.substrate.multisigs.map((m) => m.address)],
+    [
+      'proxies',
+      state.substrate.accounts?.map((acc) => acc.address),
+      state.substrate.multisigs.map((m) => m.address),
+      evmSubstrateAccounts?.map((acc) => acc.address),
+    ],
     () =>
       firstValueFrom(
         cent.proxies.getMultiUserProxies([
           (state.substrate.accounts || [])
             .map((acc) => acc.address)
-            .concat(state.substrate.multisigs.map((m) => m.address)),
+            .concat(state.substrate.multisigs.map((m) => m.address))
+            .concat(evmSubstrateAccounts?.map((acc) => acc.address) || []),
         ])
       ),
     {
@@ -162,10 +242,12 @@ export function WalletProvider({
   )
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {
-    const mappedAccounts = accounts.map((acc) => ({
-      ...acc,
-      address: addressToHex(acc.address),
-    }))
+    const mappedAccounts = accounts
+      .map((acc) => ({
+        ...acc,
+        address: addressToHex(acc.address),
+      }))
+      .filter((acc) => (acc as any).type !== 'ethereum')
 
     const { address: persistedAddress } = getPersisted()
     const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
@@ -226,33 +308,40 @@ export function WalletProvider({
     return accounts
   }, [])
 
-  const connectEvm = React.useCallback(async (wallet: EvmConnectorMeta, chainId?: number) => {
-    const { connector } = wallet
-    try {
-      const accounts = await setPendingConnect(wallet, async () => {
-        await (connector instanceof WalletConnectV2
-          ? connector.activate(chainId)
-          : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))
-        return getStore(wallet.connector).getState().accounts
-      })
+  const connectEvm = React.useCallback(
+    async (wallet: EvmConnectorMeta, network?: Network) => {
+      const chainId = network === 'centrifuge' ? centEvmChainId : network
+      const { connector } = wallet
+      try {
+        const accounts = await setPendingConnect(wallet, async () => {
+          await (connector instanceof WalletConnectV2
+            ? connector.activate(chainId)
+            : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))
+          return getStore(wallet.connector).getState().accounts
+        })
 
-      dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
-      dispatch({ type: 'setConnectedType', payload: 'evm' })
+        dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
+        dispatch({ type: 'setConnectedType', payload: 'evm' })
 
-      return accounts
-    } catch (error) {
-      if (error instanceof ReplacedError) return
-      console.error(error)
-      throw error
-    }
-  }, [])
+        return accounts
+      } catch (error) {
+        if (error instanceof ReplacedError) return
+        console.error(error)
+        throw error
+      }
+    },
+    [evmChains]
+  )
 
-  const connect = React.useCallback(async (wallet: Wallet | EvmConnectorMeta, chainId?: number) => {
-    if ('connector' in wallet) {
-      return connectEvm(wallet, chainId)
-    }
-    return connectSubstrate(wallet)
-  }, [])
+  const connect = React.useCallback(
+    async (wallet: Wallet | EvmConnectorMeta, network?: Network) => {
+      if ('connector' in wallet) {
+        return connectEvm(wallet, network)
+      }
+      return connectSubstrate(wallet)
+    },
+    [connectEvm, connectSubstrate]
+  )
 
   const disconnect = React.useCallback(async () => {
     evmConnectors.forEach((connectorMeta) => {
@@ -274,14 +363,14 @@ export function WalletProvider({
 
   const isTryingToConnectEagerly = useConnectEagerly((wallet) => connect(wallet), dispatch, evmConnectors)
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
-  const getNetworkName = useGetNetworkName(evmChains)
+  const getNetworkName = useGetNetworkName(evmChains, centEvmChainId ?? null)
 
   const [scopedNetworks, setScopedNetworks] = React.useState<WalletContextType['scopedNetworks']>(null)
 
   const ctx: WalletContextType = React.useMemo(() => {
     const combinedProxies = { ...proxies, ...nestedProxies }
     const combinedSubstrateAccounts =
-      state.substrate.accounts?.flatMap((account) => {
+      (evmSubstrateAccounts || state.substrate.accounts)?.flatMap((account) => {
         const { address } = account
         const multisigs = state.substrate.multisigs.filter((multi) =>
           multi.signers.find((signer) => signer === address)
@@ -326,11 +415,14 @@ export function WalletProvider({
       state.connectedType === 'evm' ? state.evm.chainId! : state.connectedType === 'substrate' ? 'centrifuge' : null
     return {
       connectedType: state.connectedType,
+      isEvmOnSubstrate,
       connectedNetwork,
       connectedNetworkName: connectedNetwork ? getNetworkName(connectedNetwork) : null,
       scopedNetworks,
       setScopedNetworks,
       dispatch,
+      showNetworks: (network?: State['walletDialog']['network']) =>
+        dispatch({ type: 'showWalletDialog', payload: { view: 'networks', network, wallet: null } }),
       showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
         dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),
       showAccounts: () => dispatch({ type: 'showWalletDialogAccounts', payload: { network: state.evm.chainId } }),
@@ -344,6 +436,8 @@ export function WalletProvider({
       disconnect,
       substrate: {
         ...state.substrate,
+        evmChainId: centEvmChainId,
+        accounts: evmSubstrateAccounts || state.substrate.accounts,
         combinedAccounts: combinedSubstrateAccounts,
         selectedAccount: selectedSubstrateAccount,
         selectedAddress: selectedSubstrateAccount?.address || null,
@@ -374,7 +468,7 @@ export function WalletProvider({
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} />
+      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showBase={showBase} />
     </WalletContext.Provider>
   )
 }

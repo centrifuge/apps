@@ -1,4 +1,4 @@
-import { Shelf } from '@centrifuge/fabric'
+import { Shelf, ShelfProps } from '@centrifuge/fabric'
 import { ThemeSize } from '@centrifuge/fabric/dist/utils/types'
 import * as React from 'react'
 import styled, { keyframes, useTheme } from 'styled-components'
@@ -25,11 +25,16 @@ const StyledSpinner = styled.div<{ $size: string }>`
   animation: ${rotate} 0.6s linear infinite;
 `
 
-export const Spinner: React.FC<{ size?: string | number }> = ({ size = '48px' }) => {
+type SpinnerProps = ShelfProps & {
+  size?: string | number
+}
+
+export function Spinner({ size = '48px', ...shelfProps }: SpinnerProps) {
   const theme = useTheme()
   const sizePx = toPx(theme.sizes[size as ThemeSize] || size)
+
   return (
-    <Shelf justifyContent="center">
+    <Shelf justifyContent="center" {...shelfProps}>
       <StyledSpinner $size={sizePx} />
     </Shelf>
   )

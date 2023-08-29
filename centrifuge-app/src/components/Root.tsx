@@ -40,6 +40,7 @@ import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingAuthProvider } from './OnboardingAuthProvider'
 import { OnboardingProvider } from './OnboardingProvider'
+import { SupportedBrowserBanner } from './SupportedBrowserBanner'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +83,10 @@ const evmChains: EvmChains =
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
         },
+        8453: {
+          urls: ['https://mainnet.base.org'],
+          iconUrl: 'https://docs.base.org/img/logo_dark.svg',
+        },
       }
     : {
         1: {
@@ -92,11 +97,20 @@ const evmChains: EvmChains =
           urls: [`https://goerli.infura.io/v3/${infuraKey}`],
           iconUrl: goerliLogo,
         },
+        8453: {
+          urls: ['https://mainnet.base.org'],
+          iconUrl: 'https://docs.base.org/img/logo.svg',
+        },
+        84531: {
+          urls: ['https://goerli.base.org'],
+          iconUrl: 'https://docs.base.org/img/logo.svg',
+        },
       }
 
 export function Root() {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
   const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
+  const [showBase, setShowBase] = React.useState(!!initialFlagsState.showBase)
 
   return (
     <>
@@ -117,11 +131,13 @@ export function Root() {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
+            <SupportedBrowserBanner />
             <WalletProvider
               evmChains={evmChains}
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
-              showAdvancedAccounts={showAdvancedAccounts}
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+              showAdvancedAccounts={showAdvancedAccounts}
+              showBase={showBase}
             >
               <OnboardingAuthProvider>
                 <OnboardingProvider>
@@ -129,6 +145,7 @@ export function Root() {
                     onChange={(state) => {
                       setIsThemeToggled(!!state.alternativeTheme)
                       setShowAdvancedAccounts(!!state.showAdvancedAccounts)
+                      setShowBase(!!state.showBase)
                     }}
                   >
                     <TransactionProvider>

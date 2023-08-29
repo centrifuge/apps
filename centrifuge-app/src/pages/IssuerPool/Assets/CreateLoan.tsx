@@ -61,6 +61,7 @@ export type CreateLoanFormValues = {
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
     value: number | ''
     maturityDate: string
+    maturityExtensionDays: number
     advanceRate: number | ''
     interestRate: number | ''
     probabilityOfDefault: number | ''
@@ -68,6 +69,7 @@ export type CreateLoanFormValues = {
     discountRate: number | ''
     maxBorrowQuantity: number | ''
     Isin: string
+    notional: number | ''
   }
 }
 
@@ -213,6 +215,7 @@ function IssuerCreateLoan() {
         maxBorrowAmount: 'upToTotalBorrowed',
         value: '',
         maturityDate: '',
+        maturityExtensionDays: 0,
         advanceRate: '',
         interestRate: '',
         probabilityOfDefault: '',
@@ -220,6 +223,7 @@ function IssuerCreateLoan() {
         discountRate: '',
         maxBorrowQuantity: '',
         Isin: '',
+        notional: '',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -229,15 +233,21 @@ function IssuerCreateLoan() {
         values.pricing.valuationMethod === 'oracle'
           ? {
               valuationMethod: values.pricing.valuationMethod,
-              maxBorrowQuantity: CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals).toString(),
+              maxBorrowAmount: values.pricing.maxBorrowQuantity
+                ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals)
+                : null,
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
+              maturityExtensionDays: values.pricing.maturityExtensionDays,
+              interestRate: Rate.fromPercent(values.pricing.interestRate),
+              notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
             }
           : {
               valuationMethod: values.pricing.valuationMethod,
               maxBorrowAmount: values.pricing.maxBorrowAmount,
               value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
               maturityDate: new Date(values.pricing.maturityDate),
+              maturityExtensionDays: values.pricing.maturityExtensionDays,
               advanceRate: Rate.fromPercent(values.pricing.advanceRate),
               interestRate: Rate.fromPercent(values.pricing.interestRate),
               probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
@@ -367,7 +377,7 @@ function IssuerCreateLoan() {
           />
           {isAuthed ? (
             <>
-              <PageSection titleAddition={templateId && 'Select a template to enter the asset details.'}>
+              <PageSection>
                 {!templateId && (
                   <Box
                     mb={3}

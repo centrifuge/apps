@@ -1,3 +1,4 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { InvestRedeemCentrifugeProvider } from './InvestRedeemCentrifugeProvider'
 import { InvestRedeemTinlakeProvider } from './InvestRedeemTinlakeProvider'
@@ -13,6 +14,11 @@ export function useInvestRedeem() {
 
 export function InvestRedeemProvider(props: Props) {
   const isTinlakePool = props.poolId.startsWith('0x')
+  const { connectedNetwork } = useWallet()
+  if (connectedNetwork && [1, 5, 8453, 84531].includes(connectedNetwork as any)) {
+    return null
+  }
+
   const Comp = isTinlakePool ? InvestRedeemTinlakeProvider : InvestRedeemCentrifugeProvider
 
   return <Comp {...props} />

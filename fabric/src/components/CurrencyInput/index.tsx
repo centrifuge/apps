@@ -94,7 +94,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   placeholder = '0.0',
   variant = 'large',
   initialValue,
-  precision = 2,
+  precision = 6,
   ...inputProps
 }) => {
   const [value, setValue] = React.useState(initialValue ? formatThousandSeparator(initialValue) : '')
@@ -108,7 +108,8 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     }
   }
 
-  React.useEffect(() => {
+  // TODO: fix jank when typing more decimals than precision allows
+  React.useLayoutEffect(() => {
     if (inputProps.value) {
       const inputFormatted = formatThousandSeparator(
         Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision

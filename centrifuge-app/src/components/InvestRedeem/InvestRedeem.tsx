@@ -26,7 +26,7 @@ import css from '@styled-system/css'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
@@ -39,6 +39,8 @@ import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
 import { useDebugFlags } from '../DebugFlags'
+import { LiquidityRewardsContainer } from '../LiquidityRewards/LiquidityRewardsContainer'
+import { LiquidityRewardsProvider } from '../LiquidityRewards/LiquidityRewardsProvider'
 import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
@@ -165,15 +167,17 @@ function InvestRedeemState(props: Props) {
   }
 
   return (
-    <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
-      <InvestRedeemInner
-        {...props}
-        trancheId={trancheId}
-        view={view}
-        setView={setView}
-        setTrancheId={handleSetTrancheId}
-      />
-    </InvestRedeemProvider>
+    <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
+      <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
+        <InvestRedeemInner
+          {...props}
+          trancheId={trancheId}
+          view={view}
+          setView={setView}
+          setTrancheId={handleSetTrancheId}
+        />
+      </InvestRedeemProvider>
+    </LiquidityRewardsProvider>
   )
 }
 
@@ -207,113 +211,117 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
 
   if (!isTinlakePool || availableTranches.length) {
     return (
-      <Stack as={Card} gap={2} p={2}>
-        <Stack alignItems="center">
-          <Box pb={1}>
-            <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
-          </Box>
-          {connectedType && (
-            <>
-              <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-                {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
-              </TextWithPlaceholder>
-              <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
-              </TextWithPlaceholder>
-            </>
-          )}
-          <Box bleedX={2} mt={1} alignSelf="stretch">
-            <Divider borderColor="borderSecondary" />
-          </Box>
-        </Stack>
-        {availableTranches.length > 1 && (
-          <Select
-            name="token"
-            placeholder="Select a token"
-            options={availableTranches
-              .map((tranche) => ({
-                label: tranche.currency.symbol ?? '',
-                value: tranche.id,
-              }))
-              .reverse()}
-            value={state.trancheId}
-            onChange={(event) => setTrancheId(event.target.value as any)}
-          />
-        )}
-        {connectedType && state.isDataLoading ? (
-          <Spinner />
-        ) : state.isAllowedToInvest ? (
-          <>
-            {canOnlyInvest ? (
-              <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
-            ) : actualView === 'start' ? (
+      <>
+        <Stack as={Card} gap={2} p={2}>
+          <Stack alignItems="center">
+            <Box pb={1}>
+              <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
+            </Box>
+            {connectedType && (
               <>
-                {state.order &&
-                  (!state.order.payoutTokenAmount.isZero() ? (
-                    <SuccessBanner
-                      title="Investment successful"
-                      body={`${formatBalance(
-                        state.order.investCurrency,
-                        state.poolCurrency?.symbol
-                      )} was successfully invested`}
-                    />
-                  ) : !state.order.payoutCurrencyAmount.isZero() ? (
-                    <SuccessBanner title="Redemption successful" />
-                  ) : null)}
-                <EpochBusy busy={state.isPoolBusy} />
-                <Stack p={1} gap={1}>
-                  <Grid gap={1} columns={2} equalColumns>
-                    <Button variant="secondary" small onClick={() => setView('redeem')} disabled={state.isPoolBusy}>
-                      Redeem
-                    </Button>
-                    <Button variant="primary" small onClick={() => setView('invest')} disabled={state.isPoolBusy}>
-                      Invest more
-                    </Button>
-                  </Grid>
-                  <Box alignSelf="center">
-                    <TransactionsLink />
-                  </Box>
-                </Stack>
+                <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
+                  {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
+                </TextWithPlaceholder>
+                <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
+                  {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)}
+                </TextWithPlaceholder>
               </>
-            ) : actualView === 'invest' ? (
-              <InvestForm onCancel={() => setView('start')} autoFocus />
-            ) : (
-              <RedeemForm onCancel={() => setView('start')} autoFocus />
             )}
-          </>
-        ) : (
-          // TODO: Show whether onboarding is in progress
-          <Stack gap={2}>
-            <Text variant="body3">
-              {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
-              verified “accredited investors”.{' '}
-              <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
-                Learn more
-              </AnchorTextLink>
-            </Text>
-            <Stack px={1}>
-              <OnboardingButton networks={networks} />
-            </Stack>
+            <Box bleedX={2} mt={1} alignSelf="stretch">
+              <Divider borderColor="borderSecondary" />
+            </Box>
           </Stack>
-        )}
-      </Stack>
+          {availableTranches.length > 1 && (
+            <Select
+              name="token"
+              placeholder="Select a token"
+              options={availableTranches
+                .map((tranche) => ({
+                  label: tranche.currency.symbol ?? '',
+                  value: tranche.id,
+                }))
+                .reverse()}
+              value={state.trancheId}
+              onChange={(event) => setTrancheId(event.target.value as any)}
+            />
+          )}
+          {connectedType && state.isDataLoading ? (
+            <Spinner />
+          ) : state.isAllowedToInvest ? (
+            <>
+              {canOnlyInvest ? (
+                <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
+              ) : actualView === 'start' ? (
+                <>
+                  {state.order &&
+                    (!state.order.payoutTokenAmount.isZero() ? (
+                      <SuccessBanner
+                        title="Investment successful"
+                        body={`${formatBalance(
+                          state.order.investCurrency,
+                          state.poolCurrency?.symbol
+                        )} was successfully invested`}
+                      />
+                    ) : !state.order.payoutCurrencyAmount.isZero() ? (
+                      <SuccessBanner title="Redemption successful" />
+                    ) : null)}
+                  <EpochBusy busy={state.isPoolBusy} />
+                  <Stack p={1} gap={1}>
+                    <Grid gap={1} columns={2} equalColumns>
+                      <Button variant="secondary" small onClick={() => setView('redeem')} disabled={state.isPoolBusy}>
+                        Redeem
+                      </Button>
+                      <Button variant="primary" small onClick={() => setView('invest')} disabled={state.isPoolBusy}>
+                        Invest more
+                      </Button>
+                    </Grid>
+                    <Box alignSelf="center">
+                      <TransactionsLink />
+                    </Box>
+                  </Stack>
+                </>
+              ) : actualView === 'invest' ? (
+                <InvestForm onCancel={() => setView('start')} autoFocus />
+              ) : (
+                <RedeemForm onCancel={() => setView('start')} autoFocus />
+              )}
+            </>
+          ) : (
+            // TODO: Show whether onboarding is in progress
+            <Stack gap={2}>
+              <Text variant="body3">
+                {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
+                verified “accredited investors”.{' '}
+                <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
+                  Learn more
+                </AnchorTextLink>
+              </Text>
+              <Stack px={1}>
+                <OnboardingButton networks={networks} />
+              </Stack>
+            </Stack>
+          )}
+        </Stack>
+
+        {!isTinlakePool && <LiquidityRewardsContainer />}
+      </>
     )
   }
   return null
 }
 
-const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
-  const { showWallets, connectedType } = useWallet()
+const OnboardingButton = ({ networks }: { networks: Network[] | undefined; trancheId?: string }) => {
+  const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
-  const pool = usePool(state.poolId)
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
+  const history = useHistory()
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
-  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'closed'
+  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state?.trancheId]?.openForOnboarding ? 'open' : 'closed'
   const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
-
-  const history = useHistory()
 
   const getOnboardingButtonText = () => {
     if (connectedType) {
@@ -334,7 +342,11 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => 
 
   const handleClick = () => {
     if (!connectedType) {
-      showWallets(networks?.length === 1 ? networks[0] : undefined)
+      if (networks && networks.length >= 1) {
+        showWallets(networks[0])
+      } else {
+        showNetworks()
+      }
     } else if (investStatus === 'request') {
       window.open(`mailto:${metadata?.pool?.issuer.email}?subject=New%20Investment%20Inquiry`)
     } else if (metadata?.onboarding?.externalOnboardingUrl) {
@@ -506,7 +518,13 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>
@@ -671,7 +689,13 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             <InlineFeedback>Need to collect before placing another order</InlineFeedback>
             <Stack px={1} gap={1}>
               <Button onClick={actions.collect} loading={isCollecting}>
-                Collect
+                Collect{' '}
+                {formatBalance(
+                  state.collectAmount,
+                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol,
+                  2,
+                  0
+                )}
               </Button>
               {onCancel && (
                 <Button variant="secondary" onClick={onCancel}>

@@ -2,9 +2,9 @@ import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
 import { Request } from 'express'
-import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
+import { array, bool, date, InferType, lazy, mixed, number, object, string, StringSchema } from 'yup'
 import { HttpError } from '../utils/httpError'
-import { Subset, SupportedNetworks } from '../utils/types'
+import { Subset } from '../utils/types'
 
 dotenv.config()
 
@@ -22,19 +22,19 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
-const walletSchema = array()
-  .of(
-    object({
-      address: string().required(),
-      network: string().required() as StringSchema<SupportedNetworks>,
-    })
-  )
-  .required()
+const walletSchema = object({
+  evm: array().of(string()),
+  substrate: array().of(string()),
+  evmOnSubstrate: array().of(string()),
+}).required()
 export type Wallet = InferType<typeof walletSchema>
+export type SupportedNetworks = keyof Wallet
 
 export const transactionInfoSchema = object({
   txHash: string().required(),
   blockNumber: string().required(),
+  isEvmOnSubstrate: bool().optional(),
+  chainId: number().required(),
 })
 export type TransactionInfo = InferType<typeof transactionInfoSchema>
 
@@ -94,7 +94,7 @@ const globalStepsSchema = object({
 
 export const entityUserSchema = object({
   investorType: string().default('entity') as StringSchema<Entity>,
-  wallet: walletSchema,
+  wallets: walletSchema,
   kycReference: string().optional(),
   email: string().email().required(),
   businessName: string().required(),
@@ -113,7 +113,7 @@ export const entityUserSchema = object({
 
 export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
-  wallet: walletSchema,
+  wallets: walletSchema,
   kycReference: string().optional(),
   email: string().default(null).nullable(), // TODO: coming soon
   name: string().required(),
@@ -164,7 +164,9 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
     // mergeFields implies that the user has already been created
     if (typeof mergeFields !== 'undefined') {
       const mergeValidations = (mergeFields as string[]).map((field) => schema.validateAt(field, data))
-      const userSnapshot = await userCollection.where(`wallet`, 'array-contains', wallet).get()
+      const userSnapshot = await userCollection
+        .where(`wallets.${wallet.network}`, 'array-contains', wallet.address)
+        .get()
       if (userSnapshot.empty) {
         throw new Error('User not found')
       }

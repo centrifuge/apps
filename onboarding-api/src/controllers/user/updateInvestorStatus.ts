@@ -1,3 +1,4 @@
+import { Pool } from '@centrifuge/centrifuge-js'
 import { Request, Response } from 'express'
 import { InferType, object, string, StringSchema } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
@@ -5,9 +6,9 @@ import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMess
 import { sendApproveIssuerMessage } from '../../emails/sendApproveIssuerMessage'
 import { UpdateInvestorStatusPayload } from '../../emails/sendDocumentsMessage'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
-import { addInvestorToMemberList } from '../../utils/addInvestorToMemberList'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpError, reportHttpError } from '../../utils/httpError'
+import { NetworkSwitch } from '../../utils/networks/networkSwitch'
 import { signAcceptanceAsIssuer } from '../../utils/signAcceptanceAsIssuer'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
@@ -29,6 +30,14 @@ export const updateInvestorStatusController = async (
     } = req
     const payload = verifyJwt<UpdateInvestorStatusPayload>(token)
     const { poolId, trancheId, wallet } = payload
+
+    const network = new NetworkSwitch(wallet.network)
+    const { pool, metadata } = await network.getPoolById(poolId)
+    const tranche = pool?.tranches.find((t) => t.id === trancheId)
+    if (!pool || !tranche) {
+      throw new HttpError(400, `Pool ${poolId} not found`)
+    }
+
     const user = await fetchUser(wallet)
 
     const incompleteSteps = Object.entries(user.globalSteps).filter(([name, step]) => {
@@ -79,7 +88,7 @@ export const updateInvestorStatusController = async (
       const countersignedAgreementPDF = await signAcceptanceAsIssuer({
         poolId,
         trancheId,
-        walletAddress: wallet.address,
+        wallet,
         investorName: user.name as string,
       })
 
@@ -88,21 +97,27 @@ export const updateInvestorStatusController = async (
         `signed-subscription-agreements/${wallet.address}/${poolId}/${trancheId}.pdf`
       )
 
-      const { txHash } = await addInvestorToMemberList(wallet, poolId, trancheId)
+      const { txHash } = await network.addInvestorToMemberList(wallet, poolId, trancheId)
       await Promise.all([
-        sendApproveInvestorMessage(user.email, poolId, trancheId, countersignedAgreementPDF),
-        sendApproveIssuerMessage(wallet.address, poolId, trancheId, countersignedAgreementPDF),
+        sendApproveInvestorMessage(
+          user.email,
+          poolId,
+          tranche as Pool['tranches'][0],
+          metadata,
+          countersignedAgreementPDF
+        ),
+        sendApproveIssuerMessage(wallet.address, metadata, tranche as Pool['tranches'][0], countersignedAgreementPDF),
         validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
       ])
       return res.status(200).send({ status: 'approved', poolId, trancheId, txHash })
     } else if (user?.email && status === 'rejected') {
       await Promise.all([
-        sendRejectInvestorMessage(user.email, poolId),
+        sendRejectInvestorMessage(user.email, metadata),
         validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
       ])
       return res.status(200).send({ status: 'rejected', poolId, trancheId })
     }
-    throw new HttpError(400, 'Investor status may have already been updated')
+    throw new HttpError(400, 'Something went wrong whitelisting or sending email')
   } catch (e) {
     const error = reportHttpError(e)
     return res.status(error.code).send({ error: error.message })

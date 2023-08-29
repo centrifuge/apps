@@ -30,13 +30,13 @@ export function PricingInput({ poolId }: { poolId: string }) {
       </Field>
       {values.pricing.valuationMethod === 'oracle' && (
         <>
-          <FieldWithErrorMessage
+          {/* <FieldWithErrorMessage
             as={NumberInput}
             label={<Tooltips type="financingFee" variant="secondary" label="Max quantity*" />}
             placeholder="0"
             name="pricing.maxBorrowQuantity"
             validate={validate.maxBorrowQuantity}
-          />
+          /> */}
           <FieldWithErrorMessage
             as={TextInput}
             label={<Tooltips type="financingFee" variant="secondary" label="ISIN*" />}
@@ -44,6 +44,19 @@ export function PricingInput({ poolId }: { poolId: string }) {
             name="pricing.Isin"
             validate={validate.Isin}
           />
+          <Field name="pricing.notional" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
+            {({ field, meta, form }: FieldProps) => (
+              <CurrencyInput
+                {...field}
+                label="Notional*"
+                placeholder="0.00"
+                errorMessage={meta.touched ? meta.error : undefined}
+                currency={pool?.currency.symbol}
+                onChange={(value) => form.setFieldValue('pricing.notional', value)}
+                variant="small"
+              />
+            )}
+          </Field>
         </>
       )}
 
@@ -92,19 +105,26 @@ export function PricingInput({ poolId }: { poolId: string }) {
         // Max 5 years from now
         max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
       />
+      <FieldWithErrorMessage
+        as={NumberInput}
+        label={<Tooltips type="maturityExtensionDays" variant="secondary" label="Extension period*" />}
+        placeholder={0}
+        rightElement="days"
+        name="pricing.maturityExtensionDays"
+        validate={validate.maturityExtensionDays}
+      />
 
+      <FieldWithErrorMessage
+        as={NumberInput}
+        label={<Tooltips type="financingFee" variant="secondary" label="Financing fee*" />}
+        placeholder="0.00"
+        rightElement="%"
+        name="pricing.interestRate"
+        validate={validate.fee}
+      />
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
         values.pricing.valuationMethod === 'outstandingDebt') && (
         <>
-          <FieldWithErrorMessage
-            as={NumberInput}
-            label={<Tooltips type="financingFee" variant="secondary" label="Financing fee*" />}
-            placeholder="0.00"
-            rightElement="%"
-            name="pricing.interestRate"
-            validate={validate.fee}
-          />
-
           <FieldWithErrorMessage
             as={NumberInput}
             label={<Tooltips type="advanceRate" variant="secondary" label="Advance rate*" />}

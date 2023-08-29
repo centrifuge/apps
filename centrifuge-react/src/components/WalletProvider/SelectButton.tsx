@@ -1,7 +1,8 @@
-import { Box, Shelf, Spinner, Text } from '@centrifuge/fabric'
+import { Box, FabricTheme, Shelf, Spinner, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
-import { NetworkIconProps } from './UserSelection'
+import type { State } from './types'
+import { useNetworkIcon } from './utils'
 
 type SelectButtonProps = {
   active?: boolean
@@ -152,4 +153,14 @@ function FallbackLogo() {
   const { sizes } = useTheme()
 
   return <Box width={sizes.iconRegular} height={sizes.iconRegular} borderRadius="50%" backgroundColor="textDisabled" />
+}
+
+export type NetworkIconProps = {
+  network: Exclude<State['walletDialog']['network'], null>
+  size?: FabricTheme['sizes']['iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge']
+  disabled?: boolean
+}
+
+export function NetworkIcon({ network, size = 'iconRegular' }: NetworkIconProps) {
+  return <Logo icon={useNetworkIcon(network)} size={size} />
 }

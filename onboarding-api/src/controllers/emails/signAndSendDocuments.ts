@@ -9,11 +9,9 @@ import {
 } from '../../database'
 import { sendDocumentsMessage } from '../../emails/sendDocumentsMessage'
 import { annotateAgreementAndSignAsInvestor } from '../../utils/annotateAgreementAndSignAsInvestor'
-import { validateRemark } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
-import { getPoolById } from '../../utils/getPoolById'
 import { HttpError, reportHttpError } from '../../utils/httpError'
-import { validateEvmRemark } from '../../utils/tinlake'
+import { NetworkSwitch } from '../../utils/networks/networkSwitch'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
@@ -21,6 +19,7 @@ export const signAndSendDocumentsInput = object({
   poolId: string().required(),
   trancheId: string().required(),
   transactionInfo: transactionInfoSchema.required(),
+  debugEmail: string().optional(), // sends email to specified address instead of issuer
 })
 
 export const signAndSendDocumentsController = async (
@@ -30,32 +29,29 @@ export const signAndSendDocumentsController = async (
   try {
     await validateInput(req.body, signAndSendDocumentsInput)
 
-    const { poolId, trancheId, transactionInfo } = req.body
+    const { poolId, trancheId, transactionInfo, debugEmail } = req.body
     const { wallet } = req
 
     const { poolSteps, globalSteps, investorType, name, email, ...user } = await fetchUser(wallet)
-    const { metadata } = await getPoolById(poolId)
+    const { metadata } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
     if (
       investorType === 'individual' &&
-      metadata?.onboarding?.kycRestrictedCountries.includes(user.countryOfCitizenship)
+      metadata?.onboarding?.kycRestrictedCountries?.includes(user.countryOfCitizenship)
     ) {
       throw new HttpError(400, 'Country not supported by issuer')
     }
 
     if (
       investorType === 'entity' &&
-      metadata?.onboarding?.kybRestrictedCountries.includes((user as EntityUser).jurisdictionCode!)
+      metadata?.onboarding?.kybRestrictedCountries?.includes((user as EntityUser).jurisdictionCode!)
     ) {
       throw new HttpError(400, 'Country not supported by issuer')
     }
 
-    const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
+    const remark = `I hereby sign the subscription agreement of pool ${poolId} and tranche ${trancheId}: ${metadata
+      .onboarding.tranches[trancheId].agreement?.uri!}`
 
-    if (wallet.network === 'substrate') {
-      await validateRemark(transactionInfo, remark)
-    } else {
-      await validateEvmRemark(req.wallet, transactionInfo, remark)
-    }
+    await new NetworkSwitch(wallet.network).validateRemark(wallet, transactionInfo, remark)
 
     if (
       poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed &&
@@ -79,7 +75,7 @@ export const signAndSendDocumentsController = async (
     )
 
     if ((investorType === 'entity' && globalSteps.verifyBusiness.completed) || investorType === 'individual') {
-      await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
+      await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF, debugEmail)
     }
 
     const updatedUser: Subset<OnboardingUser> = {

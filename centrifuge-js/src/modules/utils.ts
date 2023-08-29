@@ -1,16 +1,10 @@
-import { encodeAddress } from '@polkadot/util-crypto'
 import { combineLatest, map, switchMap, take } from 'rxjs'
 import { CentrifugeBase } from '../CentrifugeBase'
-import { Account } from '../types'
 import * as utilsPure from '../utils'
 
 const RANGE_FOR_BLOCKTIME_AVG = 10
 
 export function getUtilsModule(inst: CentrifugeBase) {
-  function formatAddress(address: Account) {
-    return encodeAddress(address, inst.getChainId())
-  }
-
   function getAvgTimePerBlock() {
     const $currentBlock = inst.getBlocks().pipe(take(1))
     const $prevBlock = $currentBlock.pipe(
@@ -30,9 +24,18 @@ export function getUtilsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getCurrentBlock() {
+    return inst.getApi().pipe(
+      switchMap((api) => api.query.system.number()),
+      map((data) => {
+        return data?.toPrimitive() as number
+      })
+    )
+  }
+
   return {
     ...utilsPure,
-    formatAddress,
     getAvgTimePerBlock,
+    getCurrentBlock,
   }
 }

@@ -67,7 +67,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         walletDialog: action.payload
           ? { ...state.walletDialog, ...action.payload }
-          : { view: 'wallets', network: null, wallet: null },
+          : { view: 'networks', network: null, wallet: null },
       }
     case 'showWalletDialogAccounts':
       return {
@@ -130,7 +130,6 @@ type PersistState = {
   type: 'substrate' | 'evm'
   wallet: string
   address: string
-  chainId?: number
 }
 
 export function getPersistedMultisigs(): Multisig[] {
@@ -187,7 +186,6 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
           type: 'evm',
           wallet: evmConnectors.find((c) => c.connector === state.evm.selectedWallet!.connector)!.id,
           address: evmState.accounts[0],
-          chainId: evmState.chainId,
         })
       }
       if (!evmState.accounts) {
@@ -204,21 +202,6 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
     }
     persistMultisigs(state.substrate.multisigs)
   }, [state])
-
-  // React.useEffect(() => {
-  //   Promise.resolve().then(() =>
-  //     dispatch({
-  //       type: 'substrateAddMultisig',
-  //       payload: {
-  //         signers: [
-  //           'kAKbmHS8q5ceJHQgfAGwYtuhTTNxEAra5WRtsPnai1jSeNoUD',
-  //           'kAJy3k3GUNt14LfK8Uht37kN1LUehTnoQHGMt98i6Erf4xzSD',
-  //         ],
-  //         threshold: 2,
-  //       },
-  //     })
-  //   )
-  // }, [])
 
   return [state, dispatch] as const
 }

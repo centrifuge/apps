@@ -1,23 +1,47 @@
+import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
-import { CentrifugeContext } from '../CentrifugeProvider/CentrifugeProvider'
+import { CentrifugeContext, useCentrifugeUtils } from '../CentrifugeProvider/CentrifugeProvider'
 import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { Network } from './types'
 import { useWallet } from './WalletProvider'
 
-export function getNetworkName(network: Network, evmChains: EvmChains, centrifugeNetworkName = 'Centrifuge') {
-  return network === 'centrifuge' ? centrifugeNetworkName : getChainInfo(evmChains, network)?.name ?? 'Unknown'
+export function getNetworkName(
+  network: Network,
+  evmChains: EvmChains,
+  centrifugeNetworkName = 'Centrifuge',
+  substrateEvmChainId?: number | null
+) {
+  return network === 'centrifuge' || network === substrateEvmChainId
+    ? centrifugeNetworkName
+    : getChainInfo(evmChains, network)?.name ?? 'Unknown'
 }
 
-export function useGetNetworkName(evmChains = useWallet().evm.chains) {
+export function useGetNetworkName(
+  evmChains = useWallet().evm.chains,
+  substrateEvmChainId: number | null | undefined = useWallet().substrate.evmChainId
+) {
   const { centrifuge } = React.useContext(CentrifugeContext)
   const centNetworkName = centrifuge?.config.network === 'altair' ? 'Altair' : 'Centrifuge'
-  return (network: Network) => getNetworkName(network, evmChains, centNetworkName)
+  return (network: Network) => getNetworkName(network, evmChains, centNetworkName, substrateEvmChainId)
 }
 
 export function useNetworkName(network: Network) {
   return useGetNetworkName()(network)
+}
+
+export function useGetNetworkIcon() {
+  const {
+    evm,
+    substrate: { evmChainId },
+  } = useWallet()
+  return (network: Network) =>
+    network === 'centrifuge' || network === evmChainId ? centrifugeLogo : evm.chains[network]?.iconUrl ?? ''
+}
+
+export function useNetworkIcon(network: Network) {
+  return useGetNetworkIcon()(network)
 }
 
 export function useGetExplorerUrl(network?: Network) {
@@ -26,6 +50,7 @@ export function useGetExplorerUrl(network?: Network) {
     substrate: { subscanUrl },
     connectedNetwork,
   } = useWallet()
+  const utils = useCentrifugeUtils()
 
   function getEvmUrl(networkOverride?: Network) {
     const netw = networkOverride || network || connectedNetwork
@@ -36,7 +61,11 @@ export function useGetExplorerUrl(network?: Network) {
     address: (address: string, networkOverride?: Network) => {
       try {
         const evmUrl = getEvmUrl(networkOverride)
-        return (evmUrl ? new URL(`/address/${address}`, evmUrl) : new URL(`/account/${address}`, subscanUrl)).toString()
+        return (
+          evmUrl
+            ? new URL(`/address/${address}`, evmUrl)
+            : new URL(`/account/${utils.formatAddress(address)}`, subscanUrl)
+        ).toString()
       } catch {
         return ''
       }

@@ -9,7 +9,7 @@ const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
-const tooltipText = {
+export const tooltipText = {
   assetType: {
     label: 'Asset type',
     body: 'This refers to the asset type used to finance the asset. This can e.g. be bullet loans or interest bearing loans. The asset type determines in particular the cash flow profile of the financing.',
@@ -233,6 +233,14 @@ const tooltipText = {
   issuerRepName: {
     label: 'Issuer representive name',
     body: 'This is the full legal name of the authorized representive of the pool.',
+  },
+  appliedWriteOff: {
+    label: 'Applied write-off',
+    body: 'The applied write-off is the amount of the outstanding financing that has been written off by the issuer.',
+  },
+  maturityExtensionDays: {
+    label: 'Extension period',
+    body: 'Number of days the maturity can be extended without restrictions.',
   },
 }
 

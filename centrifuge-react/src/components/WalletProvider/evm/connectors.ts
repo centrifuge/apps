@@ -1,13 +1,16 @@
+import { IconArrowRight } from '@centrifuge/fabric'
 import coinbasewalletLogo from '@centrifuge/fabric/assets/logos/coinbasewallet.svg'
 import metamaskLogo from '@centrifuge/fabric/assets/logos/metamask.svg'
 import walletconnectLogo from '@centrifuge/fabric/assets/logos/walletconnect.svg'
+import subWalletLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/SubWalletLogo.svg'
+import talismanLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/TalismanLogo.svg'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import { isMobile } from '../../../utils/device'
-import { createConnector, isCoinbaseWallet, isInjected } from './utils'
+import { createConnector, isCoinbaseWallet, isInjected, isMetaMaskWallet, isSubWallet, isTalismanWallet } from './utils'
 
 export type EvmConnectorMeta = {
   id: string
@@ -48,7 +51,9 @@ export function getEvmConnectors(
           chains: chains,
           optionalChains: chains.slice(1),
           showQrModal: true,
-          rpcMap: urls,
+          rpcMap: Object.entries(urls).reduce((prev, curr) => {
+            return { ...prev, [`eip155:${curr[0]}`]: curr[1] }
+          }, {}),
         },
       })
   )
@@ -83,11 +88,12 @@ export function getEvmConnectors(
     },
     {
       id: 'metamask',
-      title: 'MetaMask',
+      get title() {
+        return getBrowserWalletMeta().title
+      },
       installUrl: 'https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn',
-      logo: {
-        src: metamaskLogo,
-        alt: 'MetaMask',
+      get logo() {
+        return getBrowserWalletMeta().logo
       },
       connector: metaMask,
       get installed() {
@@ -97,7 +103,7 @@ export function getEvmConnectors(
         return !isMobile() || this.installed
       },
     },
-    {
+    walletConnect && {
       id: 'walletconnect',
       title: 'WalletConnect',
       installUrl: '',
@@ -130,5 +136,42 @@ export function getEvmConnectors(
       },
     },
     ...(additionalConnectors ?? []),
-  ]
+  ].filter(Boolean) as EvmConnectorMeta[]
+}
+
+function getBrowserWalletMeta() {
+  switch (true) {
+    case isSubWallet():
+      return {
+        title: 'Subwallet (EVM)',
+        logo: {
+          src: subWalletLogo,
+          alt: 'Subwallet',
+        },
+      }
+    case isTalismanWallet():
+      return {
+        title: 'Talisman (EVM)',
+        logo: {
+          src: talismanLogo,
+          alt: 'Talisman',
+        },
+      }
+    case !isMetaMaskWallet():
+      return {
+        title: 'Browser Wallet',
+        logo: {
+          src: IconArrowRight,
+          alt: 'Browser Wallet',
+        },
+      }
+    default:
+      return {
+        title: 'MetaMask',
+        logo: {
+          src: metamaskLogo,
+          alt: 'MetaMask',
+        },
+      }
+  }
 }
