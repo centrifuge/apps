@@ -1,76 +1,113 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { Box, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { MenuSwitch } from '../components/MenuSwitch'
-import { PageHeader } from '../components/PageHeader'
-import { PageSummary } from '../components/PageSummary'
-import { PageWithSideBar } from '../components/PageWithSideBar'
+import { useLocation } from 'react-router-dom'
+import { LayoutBase } from '../components/LayoutBase'
+import { PoolCardProps } from '../components/PoolCard'
+import { PoolStatusKey } from '../components/PoolCard/PoolStatus'
+import { PoolFilter } from '../components/PoolFilter'
+import { filterPools } from '../components/PoolFilter/utils'
 import { PoolList } from '../components/PoolList'
-import { PoolsSwitch } from '../components/PoolsSwitch'
-import { Tooltips } from '../components/Tooltips'
-import { config } from '../config'
-import { Dec } from '../utils/Decimal'
-import { formatBalance } from '../utils/formatting'
+import { PoolsTokensShared } from '../components/PoolsTokensShared'
+import { getPoolValueLocked } from '../utils/getPoolValueLocked'
+import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useListedPools } from '../utils/useListedPools'
+import { useMetadataMulti } from '../utils/useMetadata'
 
-export const PoolsPage: React.FC = () => {
+type PoolMetaDataPartial = Partial<PoolMetadata> | undefined
+type MetaDataById = Record<string, PoolMetaDataPartial>
+
+export function PoolsPage() {
   return (
-    <PageWithSideBar sidebar>
-      <Pools />
-    </PageWithSideBar>
+    <LayoutBase>
+      <PoolsTokensShared title="Pools">
+        <Pools />
+      </PoolsTokensShared>
+    </LayoutBase>
   )
 }
 
-const Pools: React.FC = () => {
-  const [filtered, setFiltered] = React.useState(true)
+function Pools() {
+  const cent = useCentrifuge()
+  const { search } = useLocation()
   const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
-  const totalValueLocked = React.useMemo(() => {
-    return (
-      listedTokens
-        ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance
-            .toDecimal()
-            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
-            .toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
-    )
-  }, [listedTokens])
+  console.log('listedPools', listedPools)
 
-  const pageSummaryData = [
-    {
-      label: <Tooltips type="tvl" />,
-      value: formatBalance(Dec(totalValueLocked || 0), config.baseCurrency),
-    },
-    { label: 'Pools', value: listedPools?.length || 0 },
-    { label: <Tooltips type="tokens" />, value: listedTokens?.length || 0 },
-  ]
+  const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
+  const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
+    centPools?.map((p) => p.metadata) ?? []
+  ).map((q) => q.data)
+  const centPoolsMetaDataById = getMetasById(centPools, centPoolsMetaData)
+
+  const pools = !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
+  console.log('pools', pools)
+  const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
+  console.log('flfitleirlerpOPopolp', filteredPools)
+
+  if (!listedPools.length) {
+    return (
+      <Shelf p={4} justifyContent="center" textAlign="center">
+        <Text variant="heading2" color="textSecondary">
+          There are no pools yet
+        </Text>
+      </Shelf>
+    )
+  }
 
   return (
-    <Stack gap={0} flex={1}>
-      <PageHeader
-        title="Pools"
-        subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
-        actions={<MenuSwitch />}
-      />
+    <Stack gap={1}>
+      <Box overflow="auto">
+        <PoolFilter pools={pools} />
 
-      {listedPools?.length ? (
-        <>
-          <PageSummary data={pageSummaryData} />
-          <PoolList
-            pools={filtered ? listedPools.filter(({ reserve }) => reserve.max.toFloat() > 0) : listedPools}
-            isLoading={metadataIsLoading}
-          />
-          <Box mx={2} mt={3} p={2} borderWidth={0} borderTopWidth={1} borderStyle="solid" borderColor="borderSecondary">
-            <PoolsSwitch filtered={filtered} setFiltered={setFiltered} />
-          </Box>
-        </>
-      ) : (
-        <Shelf p={4} justifyContent="center" textAlign="center">
-          <Text variant="heading2" color="textSecondary">
-            There are no pools yet
-          </Text>
-        </Shelf>
-      )}
+        {!filteredPools.length ? (
+          <Shelf px={2} mt={2} justifyContent="center">
+            <Box px={2} py={1} borderRadius="input" backgroundColor="secondarySelectedBackground">
+              <InlineFeedback status="info">No results found with these filters. Try different filters.</InlineFeedback>
+            </Box>
+          </Shelf>
+        ) : (
+          <PoolList pools={filteredPools} isLoading={metadataIsLoading} />
+        )}
+      </Box>
     </Stack>
   )
+}
+
+function getMetasById(pools: Pool[], poolMetas: PoolMetaDataPartial[]) {
+  const result: MetaDataById = {}
+
+  pools.forEach(({ id: poolId }, index) => {
+    result[poolId] = poolMetas[index]
+  })
+
+  return result
+}
+
+function poolsToPoolCardProps(
+  pools: (Pool | TinlakePool)[],
+  metaDataById: MetaDataById,
+  cent: Centrifuge
+): PoolCardProps[] {
+  return pools.map((pool) => {
+    const tinlakePool = pool.id?.startsWith('0x') && (pool as TinlakePool)
+    const mostSeniorTranche = pool?.tranches?.slice(1).at(-1)
+    const metaData = typeof pool.metadata === 'string' ? metaDataById[pool.id] : pool.metadata
+
+    return {
+      poolId: pool.id,
+      name: metaData?.pool?.name,
+      assetClass: metaData?.pool?.asset.class,
+      valueLocked: getPoolValueLocked(pool),
+      currencySymbol: pool.currency.symbol,
+      apr: mostSeniorTranche?.interestRatePerSec,
+      status:
+        tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
+          ? 'Maker Pool'
+          : pool.tranches.at(-1)?.capacity.toFloat()
+          ? 'Open for investments'
+          : ('Closed' as PoolStatusKey),
+      iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
+    }
+  })
 }

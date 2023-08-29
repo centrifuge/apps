@@ -1,21 +1,28 @@
-import { Pool } from '@centrifuge/centrifuge-js'
-import { Grid } from '@centrifuge/fabric'
+import { Box, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
-import { TinlakePool } from '../utils/tinlake/useTinlakePools'
-import { PoolCard } from './PoolCard'
+import { PoolCard, PoolCardProps } from './PoolCard'
 
-type Props = {
-  pools: (Pool | TinlakePool)[]
+type PoolListProps = {
+  pools: PoolCardProps[]
   isLoading?: boolean
 }
 
-export const PoolList: React.FC<Props> = ({ pools, isLoading }) => {
+export function PoolList({ pools, isLoading }: PoolListProps) {
   return (
-    <Grid columns={[1, 2]} gap={[3, 2]} m={[2, 3]} equalColumns>
-      {pools.map((pool) => {
-        return <PoolCard key={pool.id} pool={pool} />
-      })}
-      {isLoading && <PoolCard />}
-    </Grid>
+    <Stack as="ul" role="list" gap={1} minWidth={970} py={1}>
+      {isLoading
+        ? Array(6)
+            .fill(true)
+            .map((_, index) => (
+              <Box as="li" key={index}>
+                <PoolCard isLoading={true} />
+              </Box>
+            ))
+        : pools.map((pool) => (
+            <Box as="li" key={pool.poolId}>
+              <PoolCard {...pool} />
+            </Box>
+          ))}
+    </Stack>
   )
 }
