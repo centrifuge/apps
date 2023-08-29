@@ -31,8 +31,7 @@ export function PoolsPage() {
 function Pools() {
   const cent = useCentrifuge()
   const { search } = useLocation()
-  const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
-  console.log('listedPools', listedPools)
+  const [listedPools, _listedTokens, metadataIsLoading] = useListedPools()
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -41,9 +40,7 @@ function Pools() {
   const centPoolsMetaDataById = getMetasById(centPools, centPoolsMetaData)
 
   const pools = !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
-  console.log('pools', pools)
   const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
-  console.log('flfitleirlerpOPopolp', filteredPools)
 
   if (!listedPools.length) {
     return (
