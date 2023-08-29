@@ -60,25 +60,24 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function approveManagerForCurrency(
-    args: [managerAddress: string, currencyAddress: string],
-    options: TransactionRequest = {}
-  ) {
-    const [managerAddress, currencyAddress] = args
-    return pending(contract(currencyAddress, ABI.Currency).approve(managerAddress, maxUint256, options))
+  function approveForCurrency(args: [address: string, currencyAddress: string], options: TransactionRequest = {}) {
+    const [address, currencyAddress] = args
+    return pending(contract(currencyAddress, ABI.Currency).approve(address, maxUint256, options))
   }
 
   function updateInvestOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
     const [lpAddress, order] = args
+    const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), { ...options, gasLimit: 300000 })
+      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, { ...options, gasLimit: 300000 })
     )
   }
 
   function updateRedeemOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
     const [lpAddress, order] = args
+    const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), { ...options, gasLimit: 300000 })
+      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, { ...options, gasLimit: 300000 })
     )
   }
 
@@ -292,7 +291,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     updateRedeemOrder,
     mint,
     withdraw,
-    approveManagerForCurrency,
+    approveForCurrency,
     getDomainRouters,
     getManagerFromRouter,
     getPool,

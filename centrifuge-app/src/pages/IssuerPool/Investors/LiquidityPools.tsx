@@ -1,4 +1,10 @@
-import { useCentrifuge, useCentrifugeTransaction, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
+import {
+  useCentrifuge,
+  useCentrifugeTransaction,
+  useGetNetworkName,
+  useNetworkName,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import { Button, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useQuery } from 'react-query'
@@ -72,8 +78,10 @@ function EnableButton({ poolId, chainId }: { poolId: string; chainId: number }) 
       staleTime: Infinity,
     }
   )
+
+  const name = useNetworkName(chainId)
   const { execute, isLoading } = useCentrifugeTransaction(
-    'Update investor',
+    `Enable ${name}`,
     (cent) => cent.liquidityPools.enablePoolOnDomain
   )
 

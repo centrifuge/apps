@@ -387,6 +387,10 @@ type InvestFormProps = {
   investLabel?: string
 }
 
+function toNumber(n: '' | number | Decimal) {
+  return n instanceof Decimal ? n.toNumber() : Number(n)
+}
+
 function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest' }: InvestFormProps) {
   const { state, actions, hooks } = useInvestRedeem()
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
@@ -565,7 +569,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
               setChangeOrderFormShown(true)
             }}
           />
-        ) : state.needsPoolCurrencyApproval ? (
+        ) : state.needsPoolCurrencyApproval(toNumber(form.values.amount)) ? (
           renderInput(onCancel, {
             onClick: actions.approvePoolCurrency,
             loading: isApproving,
@@ -740,7 +744,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
               setChangeOrderFormShown(true)
             }}
           />
-        ) : state.needsTrancheTokenApproval ? (
+        ) : state.needsTrancheTokenApproval(toNumber(form.values.amount)) ? (
           renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
         ) : (
           renderInput(onCancel)

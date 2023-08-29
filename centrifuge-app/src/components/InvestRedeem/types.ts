@@ -45,8 +45,8 @@ export type InvestRedeemState = {
   collectAmount: Decimal
   collectType: 'invest' | 'redeem' | null
   needsToCollectBeforeOrder: boolean
-  needsPoolCurrencyApproval: boolean
-  needsTrancheTokenApproval: boolean
+  needsPoolCurrencyApproval: (amount: number) => boolean
+  needsTrancheTokenApproval: (amount: number) => boolean
   canChangeOrder: boolean
   pendingAction?: InvestRedeemAction | null
   pendingTransaction?: Transaction | null

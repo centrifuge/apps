@@ -78,7 +78,6 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
   async function connect(wallet: Wallet | EvmConnectorMeta) {
     try {
       const accounts = await doConnect(wallet, selectedNetwork!)
-      console.log('accounts', accounts)
       if (accounts?.length! > 1) {
         dispatch({ type: 'showWalletDialogAccounts' })
       } else {

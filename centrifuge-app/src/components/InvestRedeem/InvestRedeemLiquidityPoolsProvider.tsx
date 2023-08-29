@@ -53,7 +53,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.updateRedeemOrder)
   const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Collect', (cent) => cent.liquidityPools.withdraw)
-  const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveManagerForCurrency)
+  const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.updateRedeemOrder)
 
@@ -133,8 +133,16 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
     collectType,
     needsToCollectBeforeOrder: investToCollect.gt(0) || currencyToCollect.gt(0),
-    needsPoolCurrencyApproval: lpInvest?.managerCurrencyAllowance.isZero() ?? false,
-    needsTrancheTokenApproval: lpInvest?.managerTrancheTokenAllowance.isZero() ?? false,
+    needsPoolCurrencyApproval: (amount) => (
+      console.log(
+        'lpInvest.managerCurrencyAllowance.toFloat() < amount',
+        lpInvest?.managerCurrencyAllowance.toFloat(),
+        amount
+      ),
+      lpInvest ? lpInvest.managerCurrencyAllowance.toFloat() < amount : false
+    ),
+    needsTrancheTokenApproval: (amount) =>
+      lpInvest ? lpInvest.managerTrancheTokenAllowance.toFloat() < amount : false,
     canChangeOrder: false,
     pendingAction,
     pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
