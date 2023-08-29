@@ -2,6 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
+import { signERC2612Permit } from 'eth-permit'
 import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
@@ -10,14 +11,20 @@ import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
 
 type EvmQueryOptions = {
   rpcProvider?: JsonRpcProvider
 }
 
+export type Permit = {
+  deadline: number | string
+  r: string
+  s: string
+  v: number
+}
 const toCurrencyBalance = (decimals: number) => (val: BigNumber) => new CurrencyBalance(val.toString(), decimals)
 const toTokenBalance = (decimals: number) => (val: BigNumber) => new TokenBalance(val.toString(), decimals)
-const toDateString = (val: BigNumber) => new Date(val.toNumber() * 1000).toISOString()
 const toPrice = (val: BigNumber) => new Price(val.toString())
 
 export function getLiquidityPoolsModule(inst: Centrifuge) {
@@ -65,6 +72,18 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pending(contract(currencyAddress, ABI.Currency).approve(address, maxUint256, options))
   }
 
+  async function signPermit(args: [address: string, currencyAddress: string]) {
+    const [address, currencyAddress] = args
+    const permit = await signERC2612Permit(
+      inst.config.evmSigner,
+      currencyAddress,
+      inst.getSignerAddress('evm'),
+      address,
+      maxUint256
+    )
+    return permit as Permit
+  }
+
   function updateInvestOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
@@ -78,6 +97,34 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const user = inst.getSignerAddress('evm')
     return pending(
       contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, { ...options, gasLimit: 300000 })
+    )
+  }
+
+  function updateInvestOrderWithPermit(
+    args: [lpAddress: string, order: BN, permit: Permit],
+    options: TransactionRequest = {}
+  ) {
+    const [lpAddress, order, { deadline, r, s, v }] = args
+    const user = inst.getSignerAddress('evm')
+    return pending(
+      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, deadline, v, r, s, {
+        ...options,
+        gasLimit: 300000,
+      })
+    )
+  }
+
+  function updateRedeemOrderWithPermit(
+    args: [lpAddress: string, order: BN, permit: Permit],
+    options: TransactionRequest = {}
+  ) {
+    const [lpAddress, order, { deadline, r, s, v }] = args
+    const user = inst.getSignerAddress('evm')
+    return pending(
+      contract(lpAddress, ABI.LiquidityPool).requestRedeemWithPermit(order.toString(), user, deadline, v, r, s, {
+        ...options,
+        gasLimit: 300000,
+      })
     )
   }
 
@@ -111,7 +158,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         return [
           {
             chainId: 5,
-            router: '0x205b09C1C11A0a86cbc1066CC7B54C7952427439',
+            // router: '0x205b09C1C11A0a86cbc1066CC7B54C7952427439',
+            router: '0x6627eC6b0e467D02117bE6949189054102EAe177',
           },
         ]
       })
@@ -120,6 +168,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
+    return '0xa83BF9425E84BCf915691e193c154FB90DfeaA1c'
     const gatewayAddress = await contract(router, ABI.Router, options).gateway()
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
@@ -146,42 +195,67 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   ) {
     const [managerAddress, poolId, trancheId] = args
 
-    const lps: string[] = await contract(managerAddress, ABI.InvestmentManager, options).getLiquidityPoolsForTranche(
-      poolId,
-      trancheId
-    )
+    // const lps: string[] = await contract(managerAddress, ABI.InvestmentManager, options).getLiquidityPoolsForTranche(
+    //   poolId,
+    //   trancheId
+    // )
+
+    const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
 
     const assetData = await multicall<{ assets?: string[] }>(
-      lps.map((lpAddress, i) => ({
-        target: lpAddress,
-        call: ['function asset() view returns (address)'],
-        returns: [[`assets[${i}]`]],
-      })),
+      [
+        ...lps.map(
+          (lpAddress, i) =>
+            ({
+              target: lpAddress,
+              call: ['function asset() view returns (address)'],
+              returns: [[`assets[${i}]`]],
+            } as Call)
+        ),
+      ],
       {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
       }
     )
+
+    console.log('assetData', assetData)
 
     if (!assetData.assets?.length) return []
 
-    const currencyData = await multicall<{ currencies: { currencySymbol: string; currencyDecimals: number }[] }>(
-      assetData.assets.flatMap((assetAddress, i) => [
-        {
-          target: assetAddress,
-          call: ['function symbol() view returns (string)'],
-          returns: [[`currencies[${i}].currencySymbol`]],
-        },
-
-        {
-          target: assetAddress,
-          call: ['function decimals() view returns (uint8)'],
-          returns: [[`currencies[${i}].currencyDecimals`]],
-        },
-      ]),
+    const currencyData = await multicall<{
+      currencies: { currencySymbol: string; currencyDecimals: number; currencySupportsPermit?: boolean }[]
+    }>(
+      [
+        ...assetData.assets.flatMap(
+          (assetAddress, i) =>
+            [
+              {
+                target: assetAddress,
+                call: ['function symbol() view returns (string)'],
+                returns: [[`currencies[${i}].currencySymbol`]],
+              },
+              {
+                target: assetAddress,
+                call: ['function decimals() view returns (uint8)'],
+                returns: [[`currencies[${i}].currencyDecimals`]],
+              },
+              {
+                target: assetAddress,
+                call: ['function PERMIT_TYPEHASH() view returns (bytes32)'],
+                returns: [
+                  [`currencies[${i}].currencySupportsPermit`, (typeHash: string) => typeHash === PERMIT_TYPEHASH],
+                ],
+                allowFailure: true,
+              },
+            ] as Call[]
+        ),
+      ],
       {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
       }
     )
+
+    console.log('currencyData', currencyData, assetData)
 
     const result = lps.map((addr, i) => ({
       lpAddress: addr,
@@ -224,11 +298,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       },
       {
         target: lp,
-        call: ['function lastPriceUpdate() view returns (uint256)'],
-        returns: [['lastPriceUpdate', toDateString]],
-      },
-      {
-        target: lp,
         call: ['function hasMember(address) view returns (bool)', user],
         returns: [['isAllowedToInvest']],
       },
@@ -266,7 +335,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     const pool = await multicall<{
       tokenPrice: Price
-      lastPriceUpdate: number
       isAllowedToInvest: boolean
       tokenBalance: TokenBalance
       maxMint: TokenBalance
@@ -277,6 +345,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
+
+    console.log('pool.anagerCurrencyAllowance', pool.managerCurrencyAllowance)
 
     // TODO: Remove. just for testing
     if (pool.tokenPrice.isZero()) {
@@ -289,9 +359,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     enablePoolOnDomain,
     updateInvestOrder,
     updateRedeemOrder,
+    updateInvestOrderWithPermit,
+    updateRedeemOrderWithPermit,
     mint,
     withdraw,
     approveForCurrency,
+    signPermit,
     getDomainRouters,
     getManagerFromRouter,
     getPool,

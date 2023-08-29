@@ -1,5 +1,5 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
-import { useEvmNativeBalance, useEvmNativeCurrency } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useEvmNativeBalance, useEvmNativeCurrency } from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -18,6 +18,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const evmNativeCurrency = useEvmNativeCurrency()
   const order = usePendingCollect(poolId, trancheId, centAddress)
   const pool = usePool(poolId) as Pool
+  const cent = useCentrifuge()
   const [pendingAction, setPendingAction] = React.useState<InvestRedeemAction>()
   const { isLoading: isLpsLoading } = useLiquidityPools(poolId, trancheId)
   const {
@@ -50,6 +51,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const collectType = investToCollect.gt(0) ? 'invest' : currencyToCollect.gt(0) ? 'redeem' : null
 
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrder)
+  const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrderWithPermit)
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.updateRedeemOrder)
   const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Collect', (cent) => cent.liquidityPools.withdraw)
@@ -70,7 +72,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   function doAction<T = any>(
     name: InvestRedeemAction,
-    fn: (arg: T) => any[],
+    fn: (arg: T) => any[] | Promise<any[]>,
     opt?: TransactionRequest
   ): (args?: T) => void {
     return (args) => {
@@ -133,29 +135,33 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
     collectType,
     needsToCollectBeforeOrder: investToCollect.gt(0) || currencyToCollect.gt(0),
-    needsPoolCurrencyApproval: (amount) => (
-      console.log(
-        'lpInvest.managerCurrencyAllowance.toFloat() < amount',
-        lpInvest?.managerCurrencyAllowance.toFloat(),
-        amount
-      ),
-      lpInvest ? lpInvest.managerCurrencyAllowance.toFloat() < amount : false
-    ),
-    needsTrancheTokenApproval: (amount) =>
-      lpInvest ? lpInvest.managerTrancheTokenAllowance.toFloat() < amount : false,
+    needsPoolCurrencyApproval: (amount) =>
+      lpInvest ? lpInvest.managerCurrencyAllowance.toFloat() < amount && !lpInvest.currencySupportsPermit : false,
+    // Tranche tokens always support permits
+    needsTrancheTokenApproval: () => false,
     canChangeOrder: false,
     pendingAction,
     pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
   }
 
   const actions: InvestRedeemActions = {
-    invest: doAction('invest', (newOrder: BN) => [lpInvest?.lpAddress, newOrder]),
+    invest: async (newOrder: BN) => {
+      if (!lpInvest) return
+      if (lpInvest.managerCurrencyAllowance.lt(newOrder) && lpInvest.currencySupportsPermit) {
+        const permit = await cent.liquidityPools.signPermit([lpInvest.lpAddress, lpInvest.currencyAddress])
+        investWithPermit.execute([lpInvest.lpAddress, newOrder, permit])
+      } else {
+        invest.execute([lpInvest.lpAddress, newOrder])
+      }
+      setPendingAction('invest')
+    },
     redeem: doAction('redeem', (newOrder: BN) => [lpInvest?.lpAddress, newOrder]),
     collect: doAction('collect', () =>
       collectType === 'invest' ? [lpInvest?.lpAddress, lpInvest?.maxMint] : [lpInvest?.lpAddress, lpInvest?.maxWithdraw]
     ),
     approvePoolCurrency: doAction('approvePoolCurrency', () => [lpInvest?.managerAddress, lpInvest?.currencyAddress]),
-    approveTrancheToken: doAction('approveTrancheToken', () => [lpInvest?.managerAddress, lpInvest?.lpAddress]),
+    // approveTrancheToken: doAction('approveTrancheToken', () => [lpInvest?.managerAddress, lpInvest?.lpAddress]),
+    approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, new BN(0)]),
     cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, new BN(0)]),
   }

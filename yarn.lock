@@ -1887,6 +1887,7 @@ __metadata:
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^4.0.0
+    eth-permit: ^0.2.3
     isomorphic-fetch: ^3.0.0
     jest: ^27.4.3
     jw3t: ^1.0.8
@@ -15943,6 +15944,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eth-permit@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "eth-permit@npm:0.2.3"
+  dependencies:
+    utf8: ^3.0.0
+  checksum: 101c7dfe69152c7349b4fcbf62aab6bb028c4029d50bcddbeced6be6316040945c0493604c85efbbfe4fb54fd3de23d5ba551545a8462465369a80e0f8052cb6
+  languageName: node
+  linkType: hard
+
 "eth-query@npm:^2.1.2":
   version: 2.1.2
   resolution: "eth-query@npm:2.1.2"
@@ -27548,7 +27558,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"utf8@npm:3.0.0":
+"utf8@npm:3.0.0, utf8@npm:^3.0.0":
   version: 3.0.0
   resolution: "utf8@npm:3.0.0"
   checksum: 5a82761c09db35965210fcd10edc92b52a3ed2be7756858856341d5c4cf029a25b2d96b0c79fd1b8cd38a339913d0536e8918130f150e7fe2d9b8e3954bb9dac
