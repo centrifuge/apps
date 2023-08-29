@@ -37,7 +37,7 @@ export const sendDocumentsMessage = async (
       {
         to: [
           {
-            email: debugEmail ?? metadata?.pool?.issuer?.email,
+            email: debugEmail || metadata?.pool?.issuer?.email,
           },
         ],
         dynamic_template_data: {
