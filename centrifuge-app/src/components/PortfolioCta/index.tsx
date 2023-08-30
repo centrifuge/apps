@@ -57,7 +57,7 @@ export function PortfolioCta() {
     },
   ]
 
-  return (
+  return showPortfolio ? (
     <Box
       as="article"
       position="relative"
@@ -67,9 +67,9 @@ export function PortfolioCta() {
       borderRadius="card"
       borderStyle="solid"
       borderWidth={1}
-      borderColor={address && showPortfolio ? 'borderSecondary' : 'transparent'}
+      borderColor={'borderSecondary'}
       style={{
-        boxShadow: address && showPortfolio ? `0px 3px 2px -2px ${colors.borderPrimary}` : '',
+        boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
       }}
     >
       {!address && <Cubes />}
@@ -77,26 +77,21 @@ export function PortfolioCta() {
       <Stack gap={2} alignItems="start">
         {address ? (
           <>
-            {showPortfolio && (
-              <>
-                {' '}
-                <Text as="h2" variant="heading2">
-                  Your portfolio
-                </Text>
-                <Shelf as="dl" gap={6} flexWrap="wrap" rowGap={2}>
-                  {terms.map(({ title, value }, index) => (
-                    <Stack key={`${title}${index}`} gap="4px">
-                      <Text as="dt" variant="body3" whiteSpace="nowrap">
-                        {title}
-                      </Text>
-                      <Text as="dd" variant="body2" whiteSpace="nowrap">
-                        {value}
-                      </Text>
-                    </Stack>
-                  ))}
-                </Shelf>
-              </>
-            )}
+            <Text as="h2" variant="heading2">
+              Your portfolio
+            </Text>
+            <Shelf as="dl" gap={6} flexWrap="wrap" rowGap={2}>
+              {terms.map(({ title, value }, index) => (
+                <Stack key={`${title}${index}`} gap="4px">
+                  <Text as="dt" variant="body3" whiteSpace="nowrap">
+                    {title}
+                  </Text>
+                  <Text as="dd" variant="body2" whiteSpace="nowrap">
+                    {value}
+                  </Text>
+                </Stack>
+              ))}
+            </Shelf>
           </>
         ) : (
           <>
@@ -108,5 +103,28 @@ export function PortfolioCta() {
         )}
       </Stack>
     </Box>
-  )
+  ) : !address ? (
+    <Box
+      as="article"
+      position="relative"
+      p={3}
+      pb={5}
+      overflow="hidden"
+      borderRadius="card"
+      borderStyle="solid"
+      borderWidth={1}
+      borderColor={'borderSecondary'}
+      style={{
+        boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
+      }}
+    >
+      {!address && <Cubes />}
+      <Stack gap={2} alignItems="start">
+        <Text as="h2" variant="body1" style={{ maxWidth: '35ch' }}>
+          Pools on Centrifuge let investors earn yield from real-world assets.
+        </Text>
+        <Button onClick={() => showNetworks()}>Get started</Button>
+      </Stack>
+    </Box>
+  ) : null
 }
