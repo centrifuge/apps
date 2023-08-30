@@ -45,6 +45,7 @@ export type Key =
   | 'editAdminConfig'
   | 'showPodAccountCreation'
   | 'convertEvmAddress'
+  | 'showPortfolio'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -111,6 +112,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'component',
     Component: ConvertEvmAddress,
     default: null,
+    alwaysShow: true,
+  },
+  showPortfolio: {
+    type: 'checkbox',
+    default: false,
     alwaysShow: true,
   },
 }
