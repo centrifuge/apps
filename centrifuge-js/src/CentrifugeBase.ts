@@ -85,7 +85,7 @@ const relayChainTypes = {}
 const parachainTypes = {
   ActiveLoanInfo: {
     activeLoan: 'PalletLoansEntitiesLoansActiveLoan',
-    presentvalue: 'Balance',
+    presentValue: 'Balance',
     outstandingPrincipal: 'Balance',
     outstandingInterest: 'Balance'
   }
