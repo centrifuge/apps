@@ -117,7 +117,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     needsTrancheTokenApproval: () => false,
     canChangeOrder: true,
     pendingAction,
-    pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
+    pendingTransaction,
   }
 
   const actions: InvestRedeemActions = {
