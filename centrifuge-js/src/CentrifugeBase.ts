@@ -87,8 +87,11 @@ const parachainTypes = {
     activeLoan: 'PalletLoansEntitiesLoansActiveLoan',
     presentValue: 'Balance',
     outstandingPrincipal: 'Balance',
-    outstandingInterest: 'Balance'
-  }
+    outstandingInterest: 'Balance',
+  },
+  RewardDomain: {
+    _enum: ['Block', 'Liquidity'],
+  },
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
@@ -129,7 +132,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
         },
         {
           name: 'currency_id',
-          type: 'CurrencyId',
+          type: 'CfgTypesTokensCurrencyId',
         },
         {
           name: 'account_id',
