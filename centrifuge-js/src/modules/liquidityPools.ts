@@ -168,7 +168,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    return '0xa83BF9425E84BCf915691e193c154FB90DfeaA1c'
+    return '0x91924F801C8989fbaaa4F4CDf96adfb8ad5014d8'
     const gatewayAddress = await contract(router, ABI.Router, options).gateway()
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
@@ -200,9 +200,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     //   trancheId
     // )
 
-    const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
+    const lps = ['0x4E683165ACcbBCF95dAe7c4e77359c3a8C666cC6']
 
-    const assetData = await multicall<{ assets?: string[] }>(
+    const assetData = await multicall<{ assets?: string[]; share: string }>(
       [
         ...lps.map(
           (lpAddress, i) =>
@@ -212,6 +212,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               returns: [[`assets[${i}]`]],
             } as Call)
         ),
+
+        {
+          target: lps[0],
+          call: ['function share() view returns (address)'],
+          returns: [['share']],
+        },
       ],
       {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
@@ -224,6 +230,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     const currencyData = await multicall<{
       currencies: { currencySymbol: string; currencyDecimals: number; currencySupportsPermit?: boolean }[]
+      trancheTokenSupportsPermit?: boolean
     }>(
       [
         ...assetData.assets.flatMap(
@@ -249,6 +256,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               },
             ] as Call[]
         ),
+        {
+          target: assetData.share,
+          call: ['function PERMIT_TYPEHASH() view returns (bytes32)'],
+          returns: [[`trancheTokenSupportsPermit`, (typeHash: string) => typeHash === PERMIT_TYPEHASH]],
+          allowFailure: true,
+        },
       ],
       {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
@@ -261,6 +274,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       lpAddress: addr,
       currencyAddress: assetData.assets![i],
       managerAddress,
+      trancheTokenSupportsPermit: currencyData.trancheTokenSupportsPermit,
       ...currencyData.currencies[i],
     }))
     return result
