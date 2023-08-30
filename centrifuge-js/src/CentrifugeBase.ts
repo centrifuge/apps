@@ -82,7 +82,14 @@ const defaultConfig: Config = {
 
 const relayChainTypes = {}
 
-const parachainTypes = {}
+const parachainTypes = {
+  ActiveLoanInfo: {
+    activeLoan: 'PalletLoansEntitiesLoansActiveLoan',
+    presentvalue: 'Balance',
+    outstandingPrincipal: 'Balance',
+    outstandingInterest: 'Balance'
+  }
+}
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
   pools: {
@@ -167,7 +174,7 @@ const parachainRuntimeApi: DefinitionsCall = {
               type: 'u64',
             },
           ],
-          type: 'Vec<(u64, PalletLoansEntitiesLoansActiveLoan)>',
+          type: 'Vec<(u64, ActiveLoanInfo)>',
         },
         portfolio_loan: {
           description: 'Get active pool loan',
