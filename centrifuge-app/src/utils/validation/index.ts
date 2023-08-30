@@ -1,5 +1,6 @@
 import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
+import { daysBetween } from '../date'
 import { getImageDimensions } from '../getImageDimensions'
 
 const MB = 1024 ** 2
@@ -133,6 +134,24 @@ export const isin = (err?: CustomError) => (val?: any) => {
 
   // validate the check digit
   return match[3] === calcISINCheck(match[1] + match[2]).toString() ? '' : getError(`Not a valid ISIN`, err, val)
+}
+
+export const maturityDate = (err?: CustomError) => (val?: any) => {
+  const date = new Date(val)
+
+  const isOneDayFromNow = daysBetween(date, new Date(Date.now() + 24 * 60 * 60 * 1000)) > 0
+
+  if (isOneDayFromNow) {
+    return getError(`Must be at least one day from now`, err, val)
+  }
+
+  const isWithinFiveYearsFromNow = daysBetween(date, new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000)) < 0
+
+  if (isWithinFiveYearsFromNow) {
+    return getError(`Must be within 5 years from now`, err, val)
+  }
+
+  return ''
 }
 
 /**

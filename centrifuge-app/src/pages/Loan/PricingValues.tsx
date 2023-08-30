@@ -1,4 +1,4 @@
-import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -25,13 +25,14 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
         <LabelValueStack label="ISIN" value={pricing.Isin} />
         <LabelValueStack
           label="Current price"
-          value={`${formatBalance(pricing.oracle.value.toDecimal(), pool.currency.symbol, 6, 2)}`}
+          value={`${formatBalance(
+            new CurrencyBalance(pricing.oracle.value.toString(), 18).toDecimal(),
+            pool.currency.symbol,
+            6,
+            2
+          )}`}
         />
         <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
-        <LabelValueStack label="Valuation method" value="Oracle" />
-        {pricing.maxBorrowAmount && (
-          <LabelValueStack label="Max quantity" value={pricing.maxBorrowAmount.toDecimal().toString()} />
-        )}
       </>
     )
   }
@@ -39,7 +40,7 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
   return (
     <>
       {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
-      {pricing.maturityExtensionDays && (
+      {'maturityExtensionDays' in pricing && (
         <LabelValueStack label="Extension period" value={`${pricing.maturityExtensionDays} days`} />
       )}
       {isOutstandingDebtOrDiscountedCashFlow && (
@@ -49,7 +50,7 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
         />
       )}
       <LabelValueStack
-        label="Financing fee"
+        label="Interest rate"
         value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
       />
       {isOutstandingDebtOrDiscountedCashFlow && pricing.valuationMethod === 'discountedCashFlow' && (

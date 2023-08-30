@@ -30,16 +30,9 @@ export function PricingInput({ poolId }: { poolId: string }) {
       </Field>
       {values.pricing.valuationMethod === 'oracle' && (
         <>
-          {/* <FieldWithErrorMessage
-            as={NumberInput}
-            label={<Tooltips type="financingFee" variant="secondary" label="Max quantity*" />}
-            placeholder="0"
-            name="pricing.maxBorrowQuantity"
-            validate={validate.maxBorrowQuantity}
-          /> */}
           <FieldWithErrorMessage
             as={TextInput}
-            label={<Tooltips type="financingFee" variant="secondary" label="ISIN*" />}
+            label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
             placeholder="010101010000"
             name="pricing.Isin"
             validate={validate.Isin}
@@ -48,10 +41,9 @@ export function PricingInput({ poolId }: { poolId: string }) {
             {({ field, meta, form }: FieldProps) => (
               <CurrencyInput
                 {...field}
-                label="Notional*"
+                label={<Tooltips type="notionalValue" variant="secondary" label="Notional value*" />}
                 placeholder="0.00"
                 errorMessage={meta.touched ? meta.error : undefined}
-                currency={pool?.currency.symbol}
                 onChange={(value) => form.setFieldValue('pricing.notional', value)}
                 variant="small"
               />
@@ -95,8 +87,16 @@ export function PricingInput({ poolId }: { poolId: string }) {
         </>
       )}
       <FieldWithErrorMessage
+        as={NumberInput}
+        label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
+        placeholder="0.00"
+        rightElement="%"
+        name="pricing.interestRate"
+        validate={validate.interestRate}
+      />
+      <FieldWithErrorMessage
         as={DateInput}
-        validate={required()}
+        validate={validate.maturityDate}
         name="pricing.maturityDate"
         label="Maturity date*"
         type="date"
@@ -107,21 +107,13 @@ export function PricingInput({ poolId }: { poolId: string }) {
       />
       <FieldWithErrorMessage
         as={NumberInput}
-        label={<Tooltips type="maturityExtensionDays" variant="secondary" label="Extension period*" />}
+        label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
         placeholder={0}
-        rightElement="days"
-        name="pricing.maturityExtensionDays"
-        validate={validate.maturityExtensionDays}
+        rightElement="%"
+        name="pricing.maxPriceVariation"
+        validate={validate.maxPriceVariation}
       />
 
-      <FieldWithErrorMessage
-        as={NumberInput}
-        label={<Tooltips type="financingFee" variant="secondary" label="Financing fee*" />}
-        placeholder="0.00"
-        rightElement="%"
-        name="pricing.interestRate"
-        validate={validate.fee}
-      />
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
         values.pricing.valuationMethod === 'outstandingDebt') && (
         <>

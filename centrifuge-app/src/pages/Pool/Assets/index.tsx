@@ -65,7 +65,7 @@ export const PoolDetailAssets: React.FC = () => {
       value: assetValue,
     },
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
-    { label: <Tooltips type="averageFinancingFee" />, value: formatPercentage(avgInterestRatePerSec) },
+    { label: <Tooltips type="averageInterestRate" />, value: formatPercentage(avgInterestRatePerSec) },
     { label: <Tooltips type="averageAmount" />, value: formatBalance(avgAmount, pool.currency.symbol) },
   ]
 

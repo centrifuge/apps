@@ -1,16 +1,6 @@
 import { CurrencyBalance, ExternalPricingInfo, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import {
-  Button,
-  Card,
-  CurrencyInput,
-  IconInfo,
-  InlineFeedback,
-  NumberInput,
-  Shelf,
-  Stack,
-  Text,
-} from '@centrifuge/fabric'
+import { Box, Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -25,12 +15,12 @@ import { combine, max, positiveNumber } from '../../utils/validation'
 
 type FinanceValues = {
   price: number | '' | Decimal
-  quantity: number | ''
+  faceValue: number | ''
 }
 
 type RepayValues = {
   price: number | '' | Decimal
-  quantity: number | ''
+  faceValue: number | ''
 }
 
 export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
@@ -67,19 +57,16 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
       price: '',
-      quantity: '',
+      faceValue: '',
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = CurrencyBalance.fromFloat(
-        values.quantity,
-        27 // TODO: Will be 18 decimals after next chain update
-      )
+      const faceValue = CurrencyBalance.fromFloat(values.faceValue, 18)
 
       doFinanceTransaction([
         loan.poolId,
         loan.id,
-        quantity,
+        faceValue,
         price,
         (loan.pricing as ExternalPricingInfo).Isin,
         account.actingAddress,
@@ -92,11 +79,14 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const repayForm = useFormik<RepayValues>({
     initialValues: {
       price: '',
-      quantity: '',
+      faceValue: '',
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = CurrencyBalance.fromFloat(values.quantity, 27)
+      const quantity = CurrencyBalance.fromFloat(
+        (values.faceValue as number) / (values.price as number),
+        pool.currency.decimals
+      )
 
       doRepayTransaction([
         loan.poolId,
@@ -132,38 +122,27 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   return (
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
-        <Stack>
-          <Shelf justifyContent="space-between">
-            <Text variant="label1">Total financed</Text>
-            <Text variant="label1">
-              {formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}
-            </Text>
-          </Shelf>
-        </Stack>
+        <Box paddingY={1}>
+          <Text variant="heading4">
+            To finance the asset, enter face value and settlement price of the treasury bill.
+          </Text>
+        </Box>
         {availableFinancing.greaterThan(0) && !maturityDatePassed && (
           <FormikProvider value={financeForm}>
             <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-              <Field
-                name="quantity"
-                validate={combine(
-                  positiveNumber(),
-                  max(
-                    loan.pricing.maxBorrowAmount
-                      ?.toDecimal()
-                      .sub(loan.pricing.outstandingQuantity?.toDecimal() || Dec(0))
-                      .toNumber() ?? Infinity,
-                    'Quantity exeeds max borrow quantity'
-                  )
-                )}
-              >
-                {({ field, meta }: FieldProps) => {
+              <Field name="faceValue" validate={combine(positiveNumber())}>
+                {({ field, meta, form }: FieldProps) => {
                   return (
-                    <NumberInput
+                    <CurrencyInput
                       {...field}
-                      label="Quantity"
+                      label="Face value"
                       disabled={isFinanceLoading}
                       errorMessage={meta.touched ? meta.error : undefined}
-                      placeholder="0"
+                      placeholder="0.0"
+                      precision={6}
+                      variant="small"
+                      onChange={(value) => form.setFieldValue('faceValue', value)}
+                      currency={pool.currency.symbol}
                     />
                   )
                 }}
@@ -183,7 +162,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   return (
                     <CurrencyInput
                       {...field}
-                      label="Price"
+                      label="Settlement price"
                       variant="small"
                       disabled={isFinanceLoading}
                       errorMessage={meta.touched ? meta.error : undefined}
@@ -201,7 +180,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   <Text variant="body3">
                     {financeForm.values.price && !Number.isNaN(financeForm.values.price as number)
                       ? formatBalance(
-                          Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0)),
+                          Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.faceValue || 0)),
                           pool?.currency.symbol,
                           2
                         )
@@ -231,16 +210,19 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
           </FormikProvider>
         )}
       </Stack>
-
       <Stack as={Card} gap={2} p={2}>
+        <Box paddingY={1}>
+          <Text variant="heading4">To repay the asset, enter face value and settlement price of the asset.</Text>
+        </Box>
+
         <Stack>
           <Shelf justifyContent="space-between">
-            <Text variant="label1">Outstanding</Text>
+            <Text variant="label2">Outstanding</Text>
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="label1">
+            <Text variant="label2">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
                 ? `${loan.pricing.outstandingQuantity.toFloat()} @ ${formatBalance(
-                    loan.pricing.oracle.value,
+                    new CurrencyBalance(loan.pricing.oracle.value, 18),
                     pool?.currency.symbol,
                     2
                   )}`
@@ -254,21 +236,21 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
             <FormikProvider value={repayForm}>
               <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
                 <Field
-                  validate={combine(
-                    positiveNumber(),
-                    max(loan.pricing.outstandingQuantity.toDecimal().toNumber(), 'Quantity exceeds outstanding'),
-                    max(debt.toNumber(), 'Amount exceeds outstanding')
-                  )}
-                  name="quantity"
+                  validate={combine(positiveNumber(), max(debt.toNumber(), 'Amount exceeds outstanding'))}
+                  name="faceValue"
                 >
-                  {({ field, meta }: FieldProps) => {
+                  {({ field, meta, form }: FieldProps) => {
                     return (
-                      <NumberInput
+                      <CurrencyInput
                         {...field}
-                        label="Quantity"
+                        label="Face value"
                         disabled={isRepayLoading}
                         errorMessage={meta.touched ? meta.error : undefined}
-                        placeholder="0"
+                        placeholder="0.0"
+                        precision={6}
+                        variant="small"
+                        onChange={(value) => form.setFieldValue('faceValue', value)}
+                        currency={pool.currency.symbol}
                       />
                     )
                   }}
@@ -286,11 +268,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       <CurrencyInput
                         {...field}
                         variant="small"
-                        label="Price"
+                        label="Settlement price"
                         disabled={isRepayLoading}
                         errorMessage={meta.touched ? meta.error : undefined}
                         currency={pool.currency.symbol}
                         onChange={(value) => form.setFieldValue('price', value)}
+                        placeholder="0.0"
+                        precision={6}
                       />
                     )
                   }}
@@ -301,7 +285,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     <Text variant="body3">
                       {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                         ? formatBalance(
-                            Dec(repayForm.values.price || 0).mul(Dec(repayForm.values.quantity || 0)),
+                            Dec(repayForm.values.price || 0).mul(Dec(repayForm.values.faceValue || 0)),
                             pool?.currency.symbol,
                             2
                           )

@@ -397,6 +397,8 @@ export type ExternalPricingInfo = {
     value: CurrencyBalance
     timestamp: number
   }
+  notional: CurrencyBalance
+  interestRate: Rate
 }
 
 type TinlakePricingInfo = {
@@ -671,7 +673,7 @@ type InvestorTransaction = {
   transactionFee: CurrencyBalance | null
 }
 
-type BorrowerTransaction = {
+export type BorrowerTransaction = {
   id: string
   timestamp: string
   poolId: string
@@ -2248,7 +2250,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
         borrowerTransactions(
           orderBy: TIMESTAMP_ASC,
-          filter: { 
+          filter: {
             poolId: { equalTo: $poolId },
             timestamp: { greaterThan: $from, lessThan: $to },
           }) {

@@ -82,9 +82,9 @@ export const tooltipText = {
     label: 'Ongoing assets',
     body: 'Number of assets currently being financed in the pool and awaiting repayment.',
   },
-  averageFinancingFee: {
-    label: 'Average financing fee',
-    body: 'The average financing fee of the active assets in the pool.',
+  averageInterestRate: {
+    label: 'Average interest rate',
+    body: 'The average interest rate of the active assets in the pool.',
   },
   averageAmount: {
     label: 'Average amount',
@@ -134,9 +134,9 @@ export const tooltipText = {
     label: 'Advance rate',
     body: 'The advance rate is the percentage amount of the value of the collateral that an issuer can borrow from the pool against the NFT representing the collateral.',
   },
-  financingFee: {
-    label: 'Financing fee',
-    body: 'The financing fee is the rate at which the outstanding amount of an individual financing accrues interest. It is expressed as an "APR" (Annual Percentage Rate) and compounds interest every second.',
+  interestRate: {
+    label: 'Interest Rate',
+    body: 'The interest rate is the rate at which the outstanding amount of an individual financing accrues interest. It is expressed as an “APR” (Annual Percentage Rate) and compounds every second.',
   },
   probabilityOfDefault: {
     label: 'Prob of default',
@@ -241,6 +241,18 @@ export const tooltipText = {
   maturityExtensionDays: {
     label: 'Extension period',
     body: 'Number of days the maturity can be extended without restrictions.',
+  },
+  maxPriceVariation: {
+    label: 'Max price variation',
+    body: 'The maximum price variation defines the price difference between settlement and oracle price.',
+  },
+  isin: {
+    label: 'ISIN',
+    body: 'An International Securities Identification Number (ISIN) is a code that uniquely identifies a security globally for the purposes of facilitating clearing, reporting and settlement of trades.',
+  },
+  notionalValue: {
+    label: 'Notional value',
+    body: 'The notional value is the total value of the underlying asset.',
   },
 }
 

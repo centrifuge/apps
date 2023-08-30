@@ -1,4 +1,4 @@
-import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { BorrowerTransaction, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useEffect } from 'react'
 import { useQuery } from 'react-query'
@@ -77,6 +77,26 @@ export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) 
   const [result] = useCentrifugeQuery(
     ['borrowerTransactions', poolId, from, to],
     (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
+export function useBorrowerAssetTransactions(poolId: string, assetId: string, from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['borrowerAssetTransactions', poolId, assetId, from, to],
+    (cent) => {
+      const borrowerTransactions = cent.pools.getBorrowerTransactions([poolId, from, to])
+
+      return borrowerTransactions.pipe(
+        map((transactions: BorrowerTransaction[]) =>
+          transactions.filter((transaction) => transaction.loanId.split('-')[1] === assetId)
+        )
+      )
+    },
     {
       suspense: true,
     }
