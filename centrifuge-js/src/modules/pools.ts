@@ -1839,6 +1839,67 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getDailyTVL() {
+    const $query = inst.getSubqueryObservable<{
+      poolSnapshots: {
+        nodes: {
+          portfolioValuation: string
+          totalReserve: string
+          periodStart: string
+          pool: {
+            currency: {
+              decimals: number
+            }
+          }
+        }[]
+      }
+    }>(
+      `query {
+        poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
+          nodes {
+            portfolioValuation
+            totalReserve
+            periodStart
+            pool {
+              currency {
+                decimals
+              }
+            }
+          }
+        }
+      }`
+    )
+
+    return $query.pipe(
+      map((data) => {
+        if (!data) {
+          return []
+        }
+
+        const mergedMap = new Map()
+        const formatted = data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
+          dateInMilliseconds: new Date(periodStart).getTime(),
+          tvl: new CurrencyBalance(
+            new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
+            pool.currency.decimals
+          ).toDecimal(),
+        }))
+
+        formatted.forEach((entry) => {
+          const { dateInMilliseconds, tvl } = entry
+
+          if (mergedMap.has(dateInMilliseconds)) {
+            mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
+          } else {
+            mergedMap.set(dateInMilliseconds, tvl)
+          }
+        })
+
+        return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+      })
+    )
+  }
+
   function getDailyTrancheStates(args: [trancheId: string]) {
     const [trancheId] = args
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
@@ -2083,7 +2144,12 @@ export function getPoolsModule(inst: Centrifuge) {
 
             rawBalances.forEach(([rawKey, rawValue]) => {
               const key = parseCurrencyKey((rawKey.toHuman() as any)[1] as CurrencyKey)
-              const value = rawValue.toJSON() as { free: string | number }
+              const value = rawValue.toJSON() as {
+                free: string | number
+                reserved: string | number
+                frozen: string | number
+              }
+
               const currency = findCurrency(currencies, key)
 
               if (!currency) return
@@ -2091,19 +2157,23 @@ export function getPoolsModule(inst: Centrifuge) {
               if (typeof key !== 'string' && 'Tranche' in key) {
                 const [pid, trancheId] = key.Tranche
                 const poolId = pid.replace(/\D/g, '')
-                if (value.free !== 0) {
+                if (value.free !== 0 || value.reserved !== 0) {
+                  const balance = hexToBN(value.free).add(hexToBN(value.reserved))
+
                   balances.tranches.push({
                     currency,
                     poolId,
                     trancheId,
-                    balance: new TokenBalance(hexToBN(value.free), currency.decimals),
+                    balance: new TokenBalance(balance, currency.decimals),
                   })
                 }
               } else {
-                if (value.free !== 0) {
+                if (value.free !== 0 || value.reserved !== 0) {
+                  const balance = hexToBN(value.free).add(hexToBN(value.reserved))
+
                   balances.currencies.push({
                     currency,
-                    balance: new CurrencyBalance(hexToBN(value.free), currency.decimals),
+                    balance: new CurrencyBalance(balance, currency.decimals),
                   })
                 }
               }
@@ -2781,6 +2851,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
+    getDailyTVL,
   }
 }
 
