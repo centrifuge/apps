@@ -65,11 +65,13 @@ export const useSignRemark = (
           // @ts-expect-error
           blockNumber = result.blockNumber.toString()
         }
+        const chainId = connectedNetwork === 'centrifuge' ? await centrifuge.getChainId() : connectedNetwork
+
         await sendDocumentsToIssuer({
           txHash,
           blockNumber,
           isEvmOnSubstrate,
-          chainId: connectedNetwork || 'centrifuge',
+          chainId: chainId || 136,
         })
         setIsSubstrateTxLoading(false)
       } catch (e) {
