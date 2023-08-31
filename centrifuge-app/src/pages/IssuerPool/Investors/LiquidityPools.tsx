@@ -68,7 +68,7 @@ function EnableButton({ poolId, chainId }: { poolId: string; chainId: number }) 
         await Promise.any(
           pool.tranches.map((t) =>
             cent.liquidityPools
-              .getLiquidityPools([managerAddress!, poolId, t.id], {
+              .getLiquidityPools([managerAddress!, poolId, t.id, chainId], {
                 rpcProvider: getProvider(chainId),
               })
               .then((r) => {

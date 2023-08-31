@@ -3,7 +3,7 @@ import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
-import { from, map, startWith, switchMap } from 'rxjs'
+import { firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { CurrencyBalance, Price, TokenBalance } from '../utils/BN'
@@ -159,21 +159,29 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.connectorsGateway.domainRouters.entries()),
       map((rawRouters) => {
         console.log('rawRouters', rawRouters)
-        return [
-          {
-            chainId: 5,
-            // router: '0x205b09C1C11A0a86cbc1066CC7B54C7952427439',
-            router: '0x6627eC6b0e467D02117bE6949189054102EAe177',
-          },
-        ]
+        return rawRouters
+          .map(([rawKey, rawValue]) => {
+            const key = (rawKey.toHuman() as ['Centrifuge' | { EVM: string }])[0]
+            if (typeof key === 'string') return null
+            const value = rawValue.toPrimitive() as any
+            const chainId = Number(key.EVM.replace(/\D/g, ''))
+            const router = 'axelarXCM' in value ? value.axelarXCM.router?.xcmDomain?.contractAddress : ''
+            if (!router) return null
+
+            return {
+              chainId,
+              router,
+            }
+          })
+          .filter(Boolean) as { chainId: number; router: string }[]
       })
     )
   }
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    return '0xa83BF9425E84BCf915691e193c154FB90DfeaA1c'
-    const gatewayAddress = await contract(router, ABI.Router, options).gateway()
+    const MOCK_router = '0x49d80873b5Bf0F7B54483269c51C5B312f34F9D0'
+    const gatewayAddress = await contract(MOCK_router, ABI.Router, options).gateway()
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
   }
@@ -207,21 +215,61 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   async function getLiquidityPools(
-    args: [managerAddress: string, poolId: string, trancheId: string],
+    args: [managerAddress: string, poolId: string, trancheId: string, chainId: number],
     options?: EvmQueryOptions
   ) {
     const [managerAddress, poolId, trancheId] = args
 
-    // const lps: string[] = await contract(managerAddress, ABI.InvestmentManager, options).getLiquidityPoolsForTranche(
-    //   poolId,
-    //   trancheId
-    // )
+    const currencies = await firstValueFrom(inst.pools.getCurrencies())
 
-    const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
+    const currencyIds = [1] // TODO: Filter currencies to find those with the right chainId
+
+    const tokenManager: string = await contract(managerAddress, ABI.InvestmentManager, options).tokenManager()
+
+    // const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
+    const stablesData = await multicall<{ currencyAddresses?: string[] }>(
+      [
+        ...currencyIds.map(
+          (currencyId, i) =>
+            ({
+              target: tokenManager,
+              call: ['function currencyIdToAddress(uint128) view returns (address)', currencyId],
+              returns: [[`currencyAddresses[${i}]`]],
+            } as Call)
+        ),
+      ],
+      {
+        rpcProvider: getProvider(options)!,
+      }
+    )
+    if (!stablesData.currencyAddresses?.length) return []
+
+    const lpData = await multicall<{ lps?: string[] }>(
+      [
+        ...stablesData.currencyAddresses.map(
+          (currencyAddr, i) =>
+            ({
+              target: managerAddress,
+              call: [
+                'function getLiquidityPool(uint64, bytes16, address) view returns (address)',
+                poolId,
+                trancheId,
+                currencyAddr,
+              ],
+              returns: [[`lps[${i}]`]],
+            } as Call)
+        ),
+      ],
+      {
+        rpcProvider: getProvider(options)!,
+      }
+    )
+
+    if (!lpData.lps?.length) return []
 
     const assetData = await multicall<{ assets?: string[]; share: string }>(
       [
-        ...lps.map(
+        ...lpData.lps.map(
           (lpAddress, i) =>
             ({
               target: lpAddress,
@@ -229,9 +277,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               returns: [[`assets[${i}]`]],
             } as Call)
         ),
-
         {
-          target: lps[0],
+          target: lpData.lps[0],
           call: ['function share() view returns (address)'],
           returns: [['share']],
         },
@@ -248,6 +295,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const currencyData = await multicall<{
       currencies: { currencySymbol: string; currencyDecimals: number; currencySupportsPermit?: boolean }[]
       trancheTokenSupportsPermit?: boolean
+      trancheTokenSymbol: string
+      trancheTokenDecimals: number
     }>(
       [
         ...assetData.assets.flatMap(
@@ -279,6 +328,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           returns: [[`trancheTokenSupportsPermit`, (typeHash: string) => typeHash === PERMIT_TYPEHASH]],
           allowFailure: true,
         },
+        {
+          target: assetData.share,
+          call: ['function symbol() view returns (string)'],
+          returns: [['trancheTokenSymbol']],
+        },
+        {
+          target: assetData.share,
+          call: ['function decimals() view returns (uint8)'],
+          returns: [['trancheTokenDecimals']],
+        },
       ],
       {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
@@ -287,33 +346,35 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     console.log('currencyData', currencyData, assetData)
 
-    const result = lps.map((addr, i) => ({
+    const result = lpData.lps.map((addr, i) => ({
       lpAddress: addr,
       currencyAddress: assetData.assets![i],
       managerAddress,
       trancheTokenSupportsPermit: currencyData.trancheTokenSupportsPermit,
+      trancheTokenSymbol: currencyData.trancheTokenSymbol,
+      trancheTokenDecimals: currencyData.trancheTokenDecimals,
       ...currencyData.currencies[i],
     }))
     return result
   }
 
   async function getLiquidityPoolInvestment(
-    args: [user: string, managerAddress: string, lpAddress: string],
+    args: [user: string, managerAddress: string, lpAddress: string, currencyAddress: string],
     options?: EvmQueryOptions
   ) {
-    const [user, manager, lp] = args
+    const [user, manager, lp, currencyAddress] = args
 
-    const currency = await multicall<{ address: string; decimals: number }>(
+    const currency = await multicall<{ trancheDecimals: number; currencyDecimals: number }>(
       [
         {
-          target: lp,
-          call: ['function asset() view returns (address)'],
-          returns: [['address']],
+          target: currencyAddress,
+          call: ['function decimals() view returns (uint8)'],
+          returns: [['currencyDecimals']],
         },
         {
           target: lp,
           call: ['function decimals() view returns (uint8)'],
-          returns: [['decimals']],
+          returns: [['trancheDecimals']],
         },
       ],
       {
@@ -335,32 +396,32 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       {
         target: lp,
         call: ['function balanceOf(address) view returns (uint256)', user],
-        returns: [['tokenBalance', toTokenBalance(currency.decimals)]],
+        returns: [['tokenBalance', toTokenBalance(currency.trancheDecimals)]],
       },
       {
         target: lp,
         call: ['function maxMint(address) view returns (uint256)', user],
-        returns: [['maxMint', toTokenBalance(currency.decimals)]],
+        returns: [['maxMint', toTokenBalance(currency.trancheDecimals)]],
       },
       {
         target: lp,
         call: ['function maxWithdraw(address) view returns (uint256)', user],
-        returns: [['maxWithdraw', toCurrencyBalance(currency.decimals)]],
+        returns: [['maxWithdraw', toCurrencyBalance(currency.currencyDecimals)]],
       },
       {
-        target: currency.address,
+        target: currencyAddress,
         call: ['function balanceOf(address) view returns (uint256)', user],
-        returns: [['currencyBalance', toCurrencyBalance(currency.decimals)]],
+        returns: [['currencyBalance', toCurrencyBalance(currency.currencyDecimals)]],
       },
       {
-        target: currency.address,
+        target: currencyAddress,
         call: ['function allowance(address, address) view returns (uint)', user, manager],
-        returns: [['managerCurrencyAllowance', toCurrencyBalance(currency.decimals)]],
+        returns: [['managerCurrencyAllowance', toCurrencyBalance(currency.currencyDecimals)]],
       },
       {
         target: lp,
         call: ['function allowance(address, address) view returns (uint)', user, manager],
-        returns: [['managerTrancheTokenAllowance', toCurrencyBalance(currency.decimals)]],
+        returns: [['managerTrancheTokenAllowance', toTokenBalance(currency.trancheDecimals)]],
       },
     ]
 
