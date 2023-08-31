@@ -1383,10 +1383,10 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function financeExternalLoan(
-    args: [poolId: string, loanId: string, quantity: BN, price: BN, isin: string, aoProxy: string],
+    args: [poolId: string, loanId: string, quantity: BN, price: BN, aoProxy: string],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, price, isin, aoProxy] = args
+    const [poolId, loanId, quantity, price, aoProxy] = args
     const $api = inst.getApi()
     return $api.pipe(
       switchMap((api) => {
@@ -1397,9 +1397,7 @@ export function getPoolsModule(inst: Centrifuge) {
             external: { quantity: quantity.toString(), settlementPrice: price.toString() },
           })
         )
-        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
-        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, borrowSubmittable])
-        return inst.wrapSignAndSend(api, batchSubmittable, options)
+        return inst.wrapSignAndSend(api, borrowSubmittable, options)
       })
     )
   }
@@ -1435,19 +1433,10 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function repayExternalLoanPartially(
-    args: [
-      poolId: string,
-      loanId: string,
-      quantity: BN,
-      interest: BN,
-      unscheduled: BN,
-      price: BN,
-      isin: string,
-      aoProxy: string
-    ],
+    args: [poolId: string, loanId: string, quantity: BN, interest: BN, unscheduled: BN, price: BN, aoProxy: string],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, interest, unscheduled, price, isin, aoProxy] = args
+    const [poolId, loanId, quantity, interest, unscheduled, price, aoProxy] = args
     const $api = inst.getApi()
 
     return $api.pipe(
@@ -1461,9 +1450,7 @@ export function getPoolsModule(inst: Centrifuge) {
             unscheduled: unscheduled.toString(),
           })
         )
-        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
-        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, repaySubmittable])
-        return inst.wrapSignAndSend(api, batchSubmittable, options)
+        return inst.wrapSignAndSend(api, repaySubmittable, options)
       })
     )
   }

@@ -1,4 +1,4 @@
-import { CurrencyBalance, ExternalPricingInfo, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -63,14 +63,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
       const faceValue = CurrencyBalance.fromFloat(values.faceValue, 18)
 
-      doFinanceTransaction([
-        loan.poolId,
-        loan.id,
-        faceValue,
-        price,
-        (loan.pricing as ExternalPricingInfo).Isin,
-        account.actingAddress,
-      ])
+      doFinanceTransaction([loan.poolId, loan.id, faceValue, price, account.actingAddress])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -88,16 +81,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
         pool.currency.decimals
       )
 
-      doRepayTransaction([
-        loan.poolId,
-        loan.id,
-        quantity,
-        new BN(0),
-        new BN(0),
-        price,
-        (loan.pricing as ExternalPricingInfo).Isin,
-        account.actingAddress,
-      ])
+      doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price, account.actingAddress])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
