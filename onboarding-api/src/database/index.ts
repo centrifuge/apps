@@ -22,7 +22,7 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
-const walletSchema = object({
+export const walletSchema = object({
   evm: array().of(string()),
   substrate: array().of(string()),
   evmOnSubstrate: array().of(string()),
@@ -115,7 +115,7 @@ export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallets: walletSchema,
   kycReference: string().optional(),
-  email: string().default(null).nullable(), // TODO: coming soon
+  email: string().default(null).nullable(),
   name: string().required(),
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(), // TODO: validate with list of countries
