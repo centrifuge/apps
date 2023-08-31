@@ -135,7 +135,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
 
   return (
     <Stack>
-      <Box mt={2}>
+      <Box mt={2} ml={2}>
         <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
           {poolMetadata?.pool?.name ?? 'Pool assets'}
         </RouterLinkButton>
@@ -165,7 +165,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
         <>
           <PageSummary
             title={
-              <Box mx={4} paddingTop={3}>
+              <Box paddingTop={3}>
                 <Shelf gap="2">
                   <Text variant="heading2">Details</Text>
                   <LoanLabel loan={loan} />
@@ -196,7 +196,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&
           'valuationMethod' in loan.pricing &&
           loan.pricing.valuationMethod !== 'oracle' ? (
-            <PageSection title={<Box mx={4}>Financing & repayment cash flow</Box>}>
+            <PageSection title={<Box>Financing & repayment cash flow</Box>}>
               <Shelf gap={3} flexWrap="wrap">
                 {isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan ? (
                   <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
@@ -213,7 +213,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           ) : null}
 
           {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
-            <PageSection title={<Box mx={4}>Holdings</Box>}>
+            <PageSection title={<Box>Holdings</Box>}>
               <Shelf gap={6} flexWrap="wrap">
                 <HoldingsValues
                   loan={loan as LoanType & { pricing: ExternalPricingInfo }}
@@ -224,7 +224,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
             </PageSection>
           )}
 
-          <PageSection title={<Box mx={4}>Pricing</Box>}>
+          <PageSection title={<Box>Pricing</Box>}>
             <Stack>
               <Shelf gap={6} flexWrap="wrap">
                 <PricingValues loan={loan} pool={pool} />
@@ -244,7 +244,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           </PageSection>
 
           {loan.status === 'Active' && (
-            <PageSection title={<Box mx={4}>Remaining maturity</Box>}>
+            <PageSection title={<Box>Remaining maturity</Box>}>
               <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
                 <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
                 <Box width="60%" backgroundColor="borderSecondary" position="relative">
@@ -266,7 +266,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           {borrowerAssetTransactions?.length ? (
             <PageSection
               title={
-                <Flex ml={4}>
+                <Flex>
                   <Text>Transaction history</Text>
                 </Flex>
               }
@@ -281,11 +281,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           {templateData?.sections?.map((section, i) => {
             const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
             return (
-              <PageSection
-                title={<Box ml={4}>{section.name}</Box>}
-                titleAddition={isPublic ? undefined : 'Private'}
-                key={i}
-              >
+              <PageSection title={<Box>{section.name}</Box>} titleAddition={isPublic ? undefined : 'Private'} key={i}>
                 {isPublic || document ? (
                   <Shelf gap={6} flexWrap="wrap">
                     {section.attributes.map((key) => {
@@ -303,7 +299,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
             )
           })}
 
-          <PageSection title={<Box mx={4}>NFT</Box>}>
+          <PageSection title={<Box>NFT</Box>}>
             {isTinlakePool && 'owner' in loan ? (
               <Shelf gap={6}>
                 <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />

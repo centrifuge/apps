@@ -18,7 +18,6 @@ export const PageSummary: React.FC<Props> = ({ data, children, title }) => {
       {title}
       <Shelf
         gap="6"
-        pl={4}
         py="3"
         style={{
           boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
