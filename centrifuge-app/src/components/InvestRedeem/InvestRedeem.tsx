@@ -455,6 +455,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
     return (
       <Stack gap={2}>
         <EpochBusy busy={state.isPoolBusy} />
+        {state.statusMessage && <InlineFeedback>{state.statusMessage}</InlineFeedback>}
         {nativeBalanceTooLow && (
           <InlineFeedback>
             {state.nativeCurrency && `${state.nativeCurrency.symbol} balance is too low.`}

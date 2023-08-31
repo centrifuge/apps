@@ -6,7 +6,7 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
-import { useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
+import { useLiquidityPoolInvestment, useLiquidityPools, useLPEvents } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
@@ -28,6 +28,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     refetch: refetchInvest,
     isLoading: isInvestmentLoading,
   } = useLiquidityPoolInvestment(poolId, trancheId)
+
+  const { data: lpEvents } = useLPEvents(poolId, trancheId, lpInvest?.lpAddress)
   const isAllowedToInvest = lpInvest?.isAllowedToInvest
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
@@ -80,6 +82,12 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       ? 'redeem'
       : pendingActionState
   const pendingTransaction = pendingActionState && txActions[pendingActionState]?.lastCreatedTransaction
+  let statusMessage
+  if (order?.remainingInvestCurrency.isZero() && lpEvents?.find((e) => e.event === 'DepositRequested')) {
+    statusMessage = 'Investment order is currently being bridged and will show up soon'
+  } else if (order?.remainingRedeemToken.isZero() && lpEvents?.find((e) => e.event === 'RedeemRequested')) {
+    statusMessage = 'Redemption order is currently being bridged and will show up soon'
+  }
 
   function doAction<T = any>(
     name: InvestRedeemAction,
@@ -155,6 +163,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     canChangeOrder: false,
     pendingAction,
     pendingTransaction,
+    statusMessage,
   }
 
   const actions: InvestRedeemActions = {

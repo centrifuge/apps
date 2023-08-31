@@ -83,6 +83,28 @@ export function useLiquidityPools(poolId: string, trancheId: string) {
   return query
 }
 
+export function useLPEvents(poolId: string, trancheId: string, lpAddress?: string) {
+  const {
+    evm: { chainId, getProvider, selectedAddress },
+  } = useWallet()
+  const cent = useCentrifuge()
+  const { data: lps } = useLiquidityPools(poolId, trancheId)
+  const lp = lps?.find((l) => l.lpAddress === lpAddress)
+
+  const query = useQuery(
+    ['lpDepositedEvents', chainId, lp?.lpAddress, selectedAddress],
+    () =>
+      cent.liquidityPools.getRecentLPEvents([lp!.lpAddress, selectedAddress!], {
+        rpcProvider: getProvider(chainId!),
+      }),
+
+    {
+      enabled: !!lp && !!selectedAddress,
+    }
+  )
+  return query
+}
+
 export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lpIndex?: number) {
   const {
     evm: { chainId, getProvider, selectedAddress },

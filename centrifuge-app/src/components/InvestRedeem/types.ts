@@ -50,6 +50,7 @@ export type InvestRedeemState = {
   canChangeOrder: boolean
   pendingAction?: InvestRedeemAction | null
   pendingTransaction?: Transaction | null
+  statusMessage?: string
 }
 
 export type ActionOptions = {

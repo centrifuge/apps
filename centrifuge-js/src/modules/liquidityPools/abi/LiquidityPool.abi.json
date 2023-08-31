@@ -1,4 +1,6 @@
 [
+  "event DepositRequested(address indexed, uint256)",
+  "event RedeemRequested(address indexed, uint256)",
   "function mint(uint256, address) public returns (uint256)",
   "function withdraw(uint256, address, address) public returns (uint256)",
   "function requestDeposit(uint256, address) public",

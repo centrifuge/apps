@@ -64,14 +64,22 @@ function EnableButton({ poolId, chainId }: { poolId: string; chainId: number }) 
   const { data: isEnabled, isLoading: isFetching } = useQuery(
     ['poolLps', poolId],
     async () => {
-      const results = await Promise.allSettled(
-        pool.tranches.map((t) =>
-          cent.liquidityPools.getLiquidityPools([managerAddress!, poolId, t.id], {
-            rpcProvider: getProvider(chainId),
-          })
+      try {
+        await Promise.any(
+          pool.tranches.map((t) =>
+            cent.liquidityPools
+              .getLiquidityPools([managerAddress!, poolId, t.id], {
+                rpcProvider: getProvider(chainId),
+              })
+              .then((r) => {
+                if (!r.length) throw new Error('tranche not enabled')
+              })
+          )
         )
-      )
-      return results.some((result) => result.status === 'fulfilled' && result.value.length > 0)
+        return true
+      } catch {
+        return false
+      }
     },
     {
       enabled: !!managerAddress,

@@ -45,6 +45,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getProvider(options?: EvmQueryOptions) {
+    return options?.rpcProvider ?? inst.config.evmSigner?.provider
+  }
+
   function enablePoolOnDomain(args: [poolId: string, chainId: number], options?: TransactionOptions) {
     const [poolId, chainId] = args
     const $api = inst.getApi()
@@ -168,10 +172,23 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    return '0x91924F801C8989fbaaa4F4CDf96adfb8ad5014d8'
+    return '0xa83BF9425E84BCf915691e193c154FB90DfeaA1c'
     const gatewayAddress = await contract(router, ABI.Router, options).gateway()
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
+  }
+
+  async function getRecentLPEvents(args: [lpAddress: string, user: string], options?: EvmQueryOptions) {
+    const [lpAddress, user] = args
+    const blockNumber = await getProvider(options)!.getBlockNumber()
+    const cont = contract(lpAddress, ABI.LiquidityPool, options)
+    const depositFilter = cont.filters.DepositRequested(user)
+    const redeemFilter = cont.filters.RedeemRequested(user)
+    const events = await Promise.all([
+      cont.queryFilter(depositFilter, blockNumber - 300),
+      cont.queryFilter(redeemFilter, blockNumber - 300),
+    ])
+    return events.flat()
   }
 
   async function getPool(args: [connector: string, poolId: string], options?: EvmQueryOptions) {
@@ -184,7 +201,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       },
     ]
     const pool = await multicall<{ poolId: string; createdAt: number; isActive: boolean }>(calls, {
-      rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
+      rpcProvider: getProvider(options)!,
     })
     return pool
   }
@@ -200,7 +217,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     //   trancheId
     // )
 
-    const lps = ['0x4E683165ACcbBCF95dAe7c4e77359c3a8C666cC6']
+    const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
 
     const assetData = await multicall<{ assets?: string[]; share: string }>(
       [
@@ -220,7 +237,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         },
       ],
       {
-        rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
+        rpcProvider: getProvider(options)!,
       }
     )
 
@@ -384,5 +401,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     getPool,
     getLiquidityPools,
     getLiquidityPoolInvestment,
+    getRecentLPEvents,
   }
 }
