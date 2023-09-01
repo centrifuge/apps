@@ -14,7 +14,10 @@ export const useGlobalOnboardingStatus = () => {
     async () => {
       if (selectedWallet && selectedWallet.address) {
         const chainId = await cent.getChainId()
-        const address = encodeAddress(selectedWallet.address, chainId)
+        const address =
+          selectedWallet.network === 'substrate'
+            ? encodeAddress(selectedWallet.address, chainId)
+            : selectedWallet.address
         const response = await fetch(
           `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getGlobalOnboardingStatus?address=${address}&network=${
             selectedWallet.network
