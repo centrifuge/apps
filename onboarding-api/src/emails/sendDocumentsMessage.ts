@@ -52,7 +52,6 @@ export const sendDocumentsMessage = async (
             token
           )}&status=approved&metadata=${pool?.metadata}&network=${wallet.network}`,
           disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
-          poolName: metadata?.pool.name,
           trancheName: tranche?.currency.name,
           investorEmail,
         },

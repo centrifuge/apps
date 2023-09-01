@@ -15,7 +15,6 @@ export const sendRejectInvestorMessage = async (
           },
         ],
         dynamic_template_data: {
-          poolName: metadata?.pool.name,
           issuerEmail: metadata.pool.issuer.email,
           trancheName: tranche?.currency.name,
         },

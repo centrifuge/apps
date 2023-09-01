@@ -20,7 +20,6 @@ export const sendApproveIssuerMessage = async (
         ],
         dynamic_template_data: {
           trancheName: tranche.currency.name,
-          poolName: metadata?.pool.name,
           investorEmail: user.email,
         },
       },
