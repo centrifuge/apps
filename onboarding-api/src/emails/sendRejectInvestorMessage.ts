@@ -1,6 +1,11 @@
+import { Pool } from '@centrifuge/centrifuge-js'
 import { sendEmail, templateIds } from '.'
 
-export const sendRejectInvestorMessage = async (to: string, metadata: Record<string, any>) => {
+export const sendRejectInvestorMessage = async (
+  to: string,
+  tranche: Pool['tranches'][0],
+  metadata: Record<string, any>
+) => {
   const message = {
     personalizations: [
       {
@@ -12,6 +17,7 @@ export const sendRejectInvestorMessage = async (to: string, metadata: Record<str
         dynamic_template_data: {
           poolName: metadata?.pool.name,
           issuerEmail: metadata.pool.issuer.email,
+          trancheName: tranche?.currency.name,
         },
       },
     ],

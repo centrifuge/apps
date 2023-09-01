@@ -2,6 +2,7 @@ import { Request } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
 import { onboardingBucket } from '../database'
+import { fetchUser } from '../utils/fetchUser'
 import { HttpError } from '../utils/httpError'
 import { NetworkSwitch } from '../utils/networks/networkSwitch'
 
@@ -11,6 +12,7 @@ export type UpdateInvestorStatusPayload = {
   trancheId: string
 }
 
+// send documents to issuer to approve or reject the prospective investor
 export const sendDocumentsMessage = async (
   wallet: Request['wallet'],
   poolId: string,
@@ -19,6 +21,8 @@ export const sendDocumentsMessage = async (
   debugEmail?: string
 ) => {
   const { metadata, pool } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
+  const tranche = pool?.tranches.find((t) => t.id === trancheId)
+  const investorEmail = (await fetchUser(wallet)).email
   const payload: UpdateInvestorStatusPayload = { wallet, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '14d',
@@ -48,6 +52,9 @@ export const sendDocumentsMessage = async (
             token
           )}&status=approved&metadata=${pool?.metadata}&network=${wallet.network}`,
           disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
+          poolName: metadata?.pool.name,
+          trancheName: tranche?.currency.name,
+          investorEmail,
         },
       },
     ],
