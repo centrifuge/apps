@@ -3,7 +3,7 @@ import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
-import { firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
+import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { CurrencyBalance, Price, TokenBalance } from '../utils/BN'
@@ -53,16 +53,22 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [poolId, chainId] = args
     const $api = inst.getApi()
 
-    return $api.pipe(
-      switchMap((api) => {
+    return getDomainCurrencyIds([chainId]).pipe(
+      combineLatestWith($api),
+      switchMap(([currencyIds, api]) => {
         return api.query.poolSystem.pool(poolId).pipe(
           switchMap((rawPool) => {
             const pool = rawPool.toPrimitive() as any
             const tx = api.tx.utility.batchAll([
               api.tx.connectors.addPool(poolId, { EVM: chainId }),
-              ...pool.tranches.ids.flatMap((trancheId: string) =>
-                api.tx.connectors.addTranche(poolId, trancheId, { EVM: chainId })
-              ),
+              ...pool.tranches.ids.flatMap((trancheId: string) => [
+                api.tx.connectors.addTranche(poolId, trancheId, { EVM: chainId }),
+                // Ensure the domain currencies are enabled
+                // Using a batch, because theoretically they could have been enabled already for a different domain
+                api.tx.utility.batch(
+                  currencyIds.map((cid) => api.tx.connectors.allowPoolCurrency(poolId, trancheId, cid))
+                ),
+              ]),
             ])
             return inst.wrapSignAndSend(api, tx, options)
           })
@@ -214,15 +220,23 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pool
   }
 
+  function getDomainCurrencyIds(args: [chainId: number]) {
+    const [chainId] = args
+    return inst.pools.getCurrencies().pipe(
+      map(() => {
+        const currencyIds = [1] // TODO: Filter currencies to find those with the right chainId
+        return currencyIds
+      })
+    )
+  }
+
   async function getLiquidityPools(
     args: [managerAddress: string, poolId: string, trancheId: string, chainId: number],
     options?: EvmQueryOptions
   ) {
-    const [managerAddress, poolId, trancheId] = args
+    const [managerAddress, poolId, trancheId, chainId] = args
 
-    const currencies = await firstValueFrom(inst.pools.getCurrencies())
-
-    const currencyIds = [1] // TODO: Filter currencies to find those with the right chainId
+    const currencyIds = await firstValueFrom(getDomainCurrencyIds([chainId]))
 
     const tokenManager: string = await contract(managerAddress, ABI.InvestmentManager, options).tokenManager()
 
