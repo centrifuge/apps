@@ -104,7 +104,7 @@ function poolsToPoolCardProps(
       status:
         tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
           ? 'Maker Pool'
-          : pool.tranches.at(-1)?.capacity.toFloat()
+          : pool.tranches.at(0)?.capacity.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
           ? 'Open for investments'
           : ('Closed' as PoolStatusKey),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
