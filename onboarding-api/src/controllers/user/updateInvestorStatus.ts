@@ -106,13 +106,13 @@ export const updateInvestorStatusController = async (
           metadata,
           countersignedAgreementPDF
         ),
-        sendApproveIssuerMessage(wallet.address, metadata, tranche as Pool['tranches'][0], countersignedAgreementPDF),
+        sendApproveIssuerMessage(wallet, metadata, tranche as Pool['tranches'][0], countersignedAgreementPDF),
         validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
       ])
       return res.status(200).send({ status: 'approved', poolId, trancheId, txHash })
     } else if (user?.email && status === 'rejected') {
       await Promise.all([
-        sendRejectInvestorMessage(user.email, metadata),
+        sendRejectInvestorMessage(user.email, tranche as Pool['tranches'][0], metadata),
         validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['poolSteps']),
       ])
       return res.status(200).send({ status: 'rejected', poolId, trancheId })
