@@ -114,7 +114,7 @@ export function getDateMonthsFromNow(month: number) {
   return new Date(date.setMonth(date.getMonth() + month))
 }
 
-export function addressToHex(addr: string) {
+export function addressToHex(addr: string | Uint8Array) {
   return u8aToHex(decodeAddress(addr))
 }
 

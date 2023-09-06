@@ -2,7 +2,7 @@ import { Box, IconInvestments, IconNft, Menu as Panel, MenuItemGroup, Shelf, Sta
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
-import { usePools } from '../../utils/usePools'
+import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
@@ -10,8 +10,7 @@ import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
 export function Menu() {
-  // const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
-  const pools = usePools() || []
+  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
 
@@ -38,15 +37,14 @@ export function Menu() {
       <GovernanceMenu />
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
-        <IssuerMenu defaultOpen={isLarge} stacked={!isLarge} poolIds={pools.map(({ id }) => id)}>
+        <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>
           {isLarge ? (
             <Stack as="ul" gap={1}>
-              {!!pools.length &&
-                pools.map((pool) => (
-                  <Box key={pool.id} as="li" pl={4}>
-                    <PoolLink pool={pool} />
-                  </Box>
-                ))}
+              {pools.map((pool) => (
+                <Box key={pool.id} as="li" pl={4}>
+                  <PoolLink pool={pool} />
+                </Box>
+              ))}
               {address && config.poolCreationType === 'immediate' && (
                 <Shelf justifyContent="center" as="li" mt={1}>
                   <CreatePool />

@@ -2,7 +2,7 @@ import { Box, IconInvestments, IconNft, Menu as Panel, MenuItemGroup, Shelf, Sta
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
-import { usePools } from '../../utils/usePools'
+import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
@@ -10,8 +10,7 @@ import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
 export function Menu() {
-  // const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
-  const pools = usePools() || []
+  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isXLarge = useIsAboveBreakpoint('XL')
   const address = useAddress('substrate')
 
@@ -38,7 +37,7 @@ export function Menu() {
       <GovernanceMenu />
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
-        <IssuerMenu defaultOpen={isXLarge} stacked={!isXLarge} poolIds={pools.map(({ id }) => id)}>
+        <IssuerMenu defaultOpen={isXLarge} stacked={!isXLarge}>
           {isXLarge ? (
             <Stack as="ul" gap={1}>
               {!!pools.length &&
