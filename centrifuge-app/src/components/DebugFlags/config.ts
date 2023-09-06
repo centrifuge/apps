@@ -1,4 +1,5 @@
 import React from 'react'
+import { config } from '../../config'
 import { ConvertEvmAddress } from './components/ConvertEvmAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
@@ -46,6 +47,7 @@ export type Key =
   | 'showPodAccountCreation'
   | 'convertEvmAddress'
   | 'showPortfolio'
+  | 'poolCreationType'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -118,5 +120,14 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
+  },
+  poolCreationType: {
+    type: 'select',
+    default: config.poolCreationType || 'immediate',
+    options: {
+      immediate: 'immediate',
+      propose: 'propose',
+      notePreimage: 'notePreimage',
+    },
   },
 }
