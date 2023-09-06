@@ -25,7 +25,7 @@ export async function fetchUser<T>(wallet: Request['wallet'], options?: OptionsO
         if (!userSnapshotOnOtherNetwork.empty) {
           const { user, id } = userSnapshotOnOtherNetwork.docs.map((doc) => ({ user: doc.data(), id: doc.id }))[0]
           await validateAndWriteToFirestore(
-            { address: id, network },
+            { address: id, network, chainId: wallet.chainId },
             {
               wallets: {
                 ...user.wallets,

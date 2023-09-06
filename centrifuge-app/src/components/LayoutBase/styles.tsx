@@ -113,7 +113,7 @@ export const LogoContainer = styled(Stack)`
 
 export const WalletContainer = styled(Stack)`
   z-index: ${({ theme }) => theme.zIndices.header};
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   grid-area: wallet;
   // WalletContainer & WalletPositioner are positioned above the main content and would block user interaction (click).

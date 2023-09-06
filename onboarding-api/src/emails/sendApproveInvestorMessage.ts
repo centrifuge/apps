@@ -17,7 +17,6 @@ export const sendApproveInvestorMessage = async (
           },
         ],
         dynamic_template_data: {
-          poolName: poolMetadata?.pool.name,
           trancheName: tranche?.currency.name,
           poolUrl: `${process.env.REDIRECT_URL}/pools/${poolId}`,
         },

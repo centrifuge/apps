@@ -9,6 +9,7 @@ import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useListedPools } from '../../utils/useListedPools'
 import { useLoansAcrossPools } from '../../utils/useLoans'
+import { useDebugFlags } from '../DebugFlags'
 import { useComputeLiquidityRewards } from '../LiquidityRewards/hooks'
 import { Cubes } from './Cubes'
 
@@ -19,6 +20,7 @@ export function PortfolioCta() {
   const balances = useBalances(address)
   const consts = useCentrifugeConsts()
   const [, listedTokens] = useListedPools()
+  const { showPortfolio } = useDebugFlags()
 
   const stakes = balances?.tranches.map(({ poolId, trancheId }) => ({ poolId, trancheId })) ?? []
   const rewards = useComputeLiquidityRewards(address, stakes)
@@ -55,7 +57,7 @@ export function PortfolioCta() {
     },
   ]
 
-  return (
+  return showPortfolio ? (
     <Box
       as="article"
       position="relative"
@@ -65,7 +67,7 @@ export function PortfolioCta() {
       borderRadius="card"
       borderStyle="solid"
       borderWidth={1}
-      borderColor="borderSecondary"
+      borderColor={'borderSecondary'}
       style={{
         boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
       }}
@@ -78,7 +80,6 @@ export function PortfolioCta() {
             <Text as="h2" variant="heading2">
               Your portfolio
             </Text>
-
             <Shelf as="dl" gap={6} flexWrap="wrap" rowGap={2}>
               {terms.map(({ title, value }, index) => (
                 <Stack key={`${title}${index}`} gap="4px">
@@ -102,5 +103,28 @@ export function PortfolioCta() {
         )}
       </Stack>
     </Box>
-  )
+  ) : !address ? (
+    <Box
+      as="article"
+      position="relative"
+      p={3}
+      pb={5}
+      overflow="hidden"
+      borderRadius="card"
+      borderStyle="solid"
+      borderWidth={1}
+      borderColor={'borderSecondary'}
+      style={{
+        boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
+      }}
+    >
+      {!address && <Cubes />}
+      <Stack gap={2} alignItems="start">
+        <Text as="h2" variant="body1" style={{ maxWidth: '35ch' }}>
+          Pools on Centrifuge let investors earn yield from real-world assets.
+        </Text>
+        <Button onClick={() => showNetworks()}>Get started</Button>
+      </Stack>
+    </Box>
+  ) : null
 }
