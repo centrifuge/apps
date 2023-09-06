@@ -1153,8 +1153,8 @@ export function getPoolsModule(inst: Centrifuge) {
         )
         if (!event) return false
 
-        const [accountId] = (event.toJSON() as any).event.data
-        return addressSet.has(accountId)
+        const [accountId] = (event.toHuman() as any).event.data
+        return addressSet.has(addressToHex(accountId))
       })
     )
 
