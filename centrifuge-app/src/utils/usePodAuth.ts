@@ -8,7 +8,9 @@ import { usePodUrl } from './usePools'
 export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAccount) {
   const { selectedCombinedAccount } = useWallet().substrate
   const podUrl = usePodUrl(poolId)
-  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
+  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] }).filter(
+    (acc) => acc.proxies?.length === 1
+  )
   const account = accountOverride || selectedCombinedAccount || suitableAccounts[0]
   const cent = useCentrifuge()
   const utils = useCentrifugeUtils()
