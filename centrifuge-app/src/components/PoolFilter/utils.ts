@@ -16,7 +16,6 @@ export function filterPools(pools: PoolCardProps[], searchParams: URLSearchParam
   filtered = filtered.filter(
     (pool) => pool.status && (poolStatuses.size ? poolStatuses.has(toKebabCase(pool.status)) : pool.status !== 'Closed')
   )
-  console.log('filtered', filtered)
 
   if (assetClasses.size) {
     filtered = filtered.filter((pool) => pool.assetClass && assetClasses.has(toKebabCase(pool.assetClass)))

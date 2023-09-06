@@ -76,7 +76,7 @@ export const addCentInvestorToMemberList = async (wallet: Request['wallet'], poo
         }
         // add investor to liquidity pools if they are investing on any domain other than centrifuge
         if (wallet.network === 'evm') {
-          const updateMemberSubmittable = api.tx.connectors.updateMember(
+          const updateMemberSubmittable = api.tx.liquidityPools.updateMember(
             poolId,
             trancheId,
             {
