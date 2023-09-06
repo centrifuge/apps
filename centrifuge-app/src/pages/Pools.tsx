@@ -31,8 +31,7 @@ export function PoolsPage() {
 function Pools() {
   const cent = useCentrifuge()
   const { search } = useLocation()
-  const [listedPools, listedTokens, metadataIsLoading] = useListedPools()
-  console.log('listedPools', listedPools)
+  const [listedPools, _listedTokens, metadataIsLoading] = useListedPools()
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -41,9 +40,7 @@ function Pools() {
   const centPoolsMetaDataById = getMetasById(centPools, centPoolsMetaData)
 
   const pools = !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
-  console.log('pools', pools)
   const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
-  console.log('flfitleirlerpOPopolp', filteredPools)
 
   if (!listedPools.length) {
     return (
@@ -104,7 +101,7 @@ function poolsToPoolCardProps(
       status:
         tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
           ? 'Maker Pool'
-          : pool.tranches.at(-1)?.capacity.toFloat()
+          : pool.tranches.at(0)?.capacity.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
           ? 'Open for investments'
           : ('Closed' as PoolStatusKey),
       iconUri: metaData?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metaData?.pool?.icon?.uri) : undefined,
