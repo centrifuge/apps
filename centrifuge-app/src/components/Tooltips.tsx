@@ -9,7 +9,7 @@ const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
-const tooltipText = {
+export const tooltipText = {
   assetType: {
     label: 'Asset type',
     body: 'This refers to the asset type used to finance the asset. This can e.g. be bullet loans or interest bearing loans. The asset type determines in particular the cash flow profile of the financing.',

@@ -83,35 +83,14 @@ const defaultConfig: Config = {
 const relayChainTypes = {}
 
 const parachainTypes = {
-  // NFTs
-  ClassId: 'u64',
-  InstanceId: 'u128',
-  // Crowdloan
-  RootHashOf: 'Hash',
-  TrieIndex: 'u32',
-  RelayChainAccountId: 'AccountId',
-  ParachainAccountIdOf: 'AccountId',
-  Proof: {
-    leafHash: 'Hash',
-    sortedHashes: 'Vec<Hash>',
+  ActiveLoanInfo: {
+    activeLoan: 'PalletLoansEntitiesLoansActiveLoan',
+    presentValue: 'Balance',
+    outstandingPrincipal: 'Balance',
+    outstandingInterest: 'Balance',
   },
-  PoolId: 'u64',
-  TrancheId: '[u8; 16]',
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
-  },
-  StakingCurrency: {
-    _enum: ['BlockRewards'],
-  },
-  CurrencyId: {
-    _enum: {
-      Native: 'Native',
-      Tranche: '(PoolId, TrancheId)',
-      KSM: 'KSM',
-      AUSD: 'AUSD',
-      ForeignAsset: 'u32',
-      Staking: 'StakingCurrency',
-    },
   },
 }
 
@@ -142,7 +121,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
           type: 'AccountId',
         },
       ],
-      type: 'Vec<CurrencyId>',
+      type: 'Vec<CfgTypesTokensCurrencyId>',
     },
     computeReward: {
       description: 'Compute the claimable reward for the given triplet of domain, currency and account',
@@ -153,7 +132,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
         },
         {
           name: 'currency_id',
-          type: 'CurrencyId',
+          type: 'CfgTypesTokensCurrencyId',
         },
         {
           name: 'account_id',
@@ -183,6 +162,37 @@ const parachainRuntimeApi: DefinitionsCall = {
       methods: {
         compute_reward: parachainRpcMethods.rewards.computeReward,
         list_currencies: parachainRpcMethods.rewards.listCurrencies,
+      },
+      version: 1,
+    },
+  ],
+  LoansApi: [
+    {
+      methods: {
+        portfolio: {
+          description: 'Get active pool loan',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Vec<(u64, ActiveLoanInfo)>',
+        },
+        portfolio_loan: {
+          description: 'Get active pool loan',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+            {
+              name: 'loan_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Option<PalletLoansEntitiesLoansActiveLoan>',
+        },
       },
       version: 1,
     },

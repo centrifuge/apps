@@ -1,12 +1,15 @@
 import { Pool } from '@centrifuge/centrifuge-js'
+import { Request } from 'express'
 import { sendEmail, templateIds } from '.'
+import { fetchUser } from '../utils/fetchUser'
 
 export const sendApproveIssuerMessage = async (
-  walletAddress: string,
+  wallet: Request['wallet'],
   metadata: Record<string, any>,
   tranche: Pool['tranches'][0],
   countersignedAgreementPDF: Uint8Array
 ) => {
+  const user = await fetchUser(wallet)
   const message = {
     personalizations: [
       {
@@ -16,7 +19,8 @@ export const sendApproveIssuerMessage = async (
           },
         ],
         dynamic_template_data: {
-          tokenName: tranche.currency.name,
+          trancheName: tranche.currency.name,
+          investorEmail: user.email,
         },
       },
     ],
@@ -28,7 +32,7 @@ export const sendApproveIssuerMessage = async (
     attachments: [
       {
         content: Buffer.from(countersignedAgreementPDF).toString('base64'),
-        filename: `${walletAddress}-${tranche.currency.name?.replaceAll(' ', '-')}-subscription-agreement.pdf`,
+        filename: `${wallet.address}-${tranche.currency.name?.replaceAll(' ', '-')}-subscription-agreement.pdf`,
         type: 'application/pdf',
         disposition: 'attachment',
       },

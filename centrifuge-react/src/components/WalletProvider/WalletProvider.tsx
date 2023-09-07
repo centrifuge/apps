@@ -42,6 +42,7 @@ export type WalletContextType = {
     evmChainId?: number
     accounts: SubstrateAccount[] | null
     proxies: Record<string, Proxy[]> | undefined
+    proxiesAreLoading: boolean
     multisigs: ComputedMultisig[]
     combinedAccounts: CombinedSubstrateAccount[] | null
     selectedAccount: SubstrateAccount | null
@@ -214,7 +215,7 @@ export function WalletProvider({
         wallet: state.evm.selectedWallet as any,
       }))
     : null
-  const { data: proxies } = useQuery(
+  const { data: proxies, isLoading: proxiesAreLoading } = useQuery(
     [
       'proxies',
       state.substrate.accounts?.map((acc) => acc.address),
@@ -236,7 +237,7 @@ export function WalletProvider({
   )
 
   const delegatees = [...new Set(Object.values(proxies ?? {})?.flatMap((p) => p.map((d) => d.delegator)))]
-  const { data: nestedProxies } = useQuery(
+  const { data: nestedProxies, isLoading: nestedProxiesAreLoading } = useQuery(
     ['nestedProxies', delegatees],
     () => firstValueFrom(cent.proxies.getMultiUserProxies([delegatees])),
     {
@@ -460,6 +461,7 @@ export function WalletProvider({
         selectedProxies: selectedCombinedAccount?.proxies || null,
         selectedMultisig: selectedCombinedAccount?.multisig || null,
         proxies: combinedProxies,
+        proxiesAreLoading: nestedProxiesAreLoading || proxiesAreLoading,
         subscanUrl,
       },
       evm: {

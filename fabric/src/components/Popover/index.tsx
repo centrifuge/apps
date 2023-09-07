@@ -1,5 +1,5 @@
 import { FocusScope } from '@react-aria/focus'
-import { useOverlay, useOverlayTrigger } from '@react-aria/overlays'
+import { AriaPositionProps, useOverlay, useOverlayTrigger } from '@react-aria/overlays'
 import { OverlayTriggerState, useOverlayTriggerState } from '@react-stately/overlays'
 import * as React from 'react'
 import { Positioner } from '../Positioner'
@@ -15,9 +15,10 @@ type PopoverProps = {
     ref: React.RefObject<HTMLDivElement>,
     state: OverlayTriggerState
   ) => React.ReactElement
+  placement?: AriaPositionProps['placement']
 }
 
-export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent }) => {
+export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent, placement }) => {
   const state = useOverlayTriggerState({})
   const overlayRef = React.useRef<HTMLDivElement>(null)
   const triggerRef = React.useRef<HTMLDivElement>(null)
@@ -46,6 +47,7 @@ export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent }
       {state.isOpen && (
         <Positioner
           isShown
+          placement={placement}
           targetRef={triggerRef}
           overlayRef={overlayRef}
           render={(positionProps) => (

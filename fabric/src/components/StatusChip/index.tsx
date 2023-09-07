@@ -17,11 +17,13 @@ const colors = {
 
 const Wrapper = styled.span<{ $color: string }>((props) =>
   css({
+    display: 'inline-block',
     padding: '0 8px',
     borderColor: props.$color,
     borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: '20px',
+    whiteSpace: 'nowrap',
   })
 )
 

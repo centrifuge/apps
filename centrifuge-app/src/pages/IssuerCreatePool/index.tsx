@@ -1,4 +1,4 @@
-import { CurrencyBalance, isSameAddress, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, isSameAddress, Perquintill, Rate, TransactionOptions } from '@centrifuge/centrifuge-js'
 import { CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   useBalances,
@@ -25,6 +25,7 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
@@ -154,6 +155,8 @@ function CreatePoolForm() {
   const [preimageHash, setPreimageHash] = React.useState('')
   const [createdPoolId, setCreatedPoolId] = React.useState('')
   const [multisigData, setMultisigData] = React.useState<{ hash: string; callData: string }>()
+  const { poolCreationType } = useDebugFlags()
+  const createType = (poolCreationType as TransactionOptions['createType']) || config.poolCreationType || 'immediate'
 
   React.useEffect(() => {
     // If the hash can't be found on Pinata the request can take a long time to time out
@@ -182,7 +185,7 @@ function CreatePoolForm() {
     notePreimage: 'Note preimage',
   }
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    `${txMessage[config.poolCreationType || 'immediate']} 2/2`,
+    `${txMessage[createType]} 2/2`,
     (cent) =>
       (
         args: [
@@ -251,7 +254,7 @@ function CreatePoolForm() {
       onSuccess: (args) => {
         if (form.values.adminMultisigEnabled) setIsMultisigDialogOpen(true)
         const [, , , poolId] = args
-        if (config.poolCreationType === 'immediate') {
+        if (createType === 'immediate') {
           setCreatedPoolId(poolId)
         }
       },
@@ -259,7 +262,7 @@ function CreatePoolForm() {
   )
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
-    `${txMessage[config.poolCreationType || 'immediate']} 1/2`,
+    `${txMessage[createType]} 1/2`,
     (cent) => {
       return (_: [nextTx: (adminProxy: string, aoProxy: string) => void], options) =>
         cent.getApi().pipe(
@@ -395,7 +398,7 @@ function CreatePoolForm() {
               CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
               metadataValues,
             ],
-            { createType: config.poolCreationType }
+            { createType }
           )
         },
       ])
@@ -420,7 +423,7 @@ function CreatePoolForm() {
   }, [isStoredIssuerLoading])
 
   React.useEffect(() => {
-    if (config.poolCreationType === 'notePreimage') {
+    if (createType === 'notePreimage') {
       const $events = centrifuge
         .getEvents()
         .pipe(
@@ -436,7 +439,7 @@ function CreatePoolForm() {
         .subscribe()
       return () => $events.unsubscribe()
     }
-  }, [centrifuge])
+  }, [centrifuge, createType])
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)

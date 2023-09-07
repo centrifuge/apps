@@ -683,6 +683,18 @@ type BorrowerTransaction = {
   amount: CurrencyBalance | undefined
 }
 
+export type Permissions = {
+  pools: {
+    [poolId: string]: PoolRoles
+  }
+  currencies: {
+    [currency: string]: {
+      roles: CurrencyRole[]
+      holder: boolean
+    }
+  }
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -1126,8 +1138,14 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getUserPermissions(args: [address: Account]) {
-    const [address] = args
+  function getUserPermissions<T extends Account | Account[]>(
+    args: [address: T]
+  ): T extends Array<Account> ? Observable<Permissions[]> : Observable<Permissions> {
+    const [maybeArray] = args
+    const addresses = (Array.isArray(maybeArray) ? (maybeArray as Account[]) : [maybeArray as Account]).map(
+      (addr) => addressToHex(addr) as string
+    )
+    const addressSet = new Set(addresses)
     const $api = inst.getApi()
 
     const $events = inst.getEvents().pipe(
@@ -1137,59 +1155,76 @@ export function getPoolsModule(inst: Centrifuge) {
         )
         if (!event) return false
 
-        const [accountId] = (event.toJSON() as any).event.data
-        return isSameAddress(address, accountId)
+        const [accountId] = (event.toHuman() as any).event.data
+        return addressSet.has(addressToHex(accountId))
       })
     )
 
     return $api.pipe(
-      switchMap((api) => api.query.permissions.permission.entries(address)),
-      map((permissionsData) => {
-        const roles: {
-          pools: {
-            [poolId: string]: PoolRoles
-          }
-          currencies: {
-            [currency: string]: {
-              roles: CurrencyRole[]
-              holder: boolean
-            }
-          }
-        } = {
-          pools: {},
-          currencies: {},
-        }
-
-        permissionsData.forEach(([keys, value]) => {
-          const key = (keys.toHuman() as any)[1] as { Pool: string } | { Currency: any }
-          if ('Pool' in key) {
-            const poolId = key.Pool.replace(/\D/g, '')
-            const permissions = value.toJSON() as any
-            roles.pools[poolId] = {
-              roles: (
-                [
-                  'PoolAdmin',
-                  'Borrower',
-                  'PricingAdmin',
-                  'LiquidityAdmin',
-                  'InvestorAdmin',
-                  'LoanAdmin',
-                  'PODReadAccess',
+      switchMap((api) =>
+        api.query.permissions.permission.keys().pipe(
+          switchMap((keys) => {
+            const userKeys = keys
+              .map((key) => {
+                const [account, scope] = key.toHuman() as any as [string, { Pool: string } | { Currency: any }]
+                return [
+                  addressToHex(account),
+                  'Pool' in scope ? { Pool: scope.Pool.replace(/\D/g, '') } : scope,
                 ] as const
-              ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
-              tranches: {},
-            }
-            permissions.trancheInvestor.info
-              .filter((info: any) => info.permissionedTill * 1000 > Date.now())
-              .forEach((info: any) => {
-                roles.pools[poolId].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
               })
-          }
-        })
-        return roles
-      }),
+              .filter(([account, scope]) => {
+                return 'Pool' in scope && addressSet.has(account)
+              })
+            return api.query.permissions.permission.multi(userKeys).pipe(
+              map((permissionsData) => {
+                const permissionsByAddressIndex: Permissions[] = []
+
+                function setPoolRoles(user: string, poolId: string, roles: PoolRoles) {
+                  const i = addresses.indexOf(user)
+                  const obj = permissionsByAddressIndex[i] ?? {
+                    pools: {},
+                    currencies: {},
+                  }
+                  obj.pools[poolId] = roles
+                  permissionsByAddressIndex[i] = obj
+                }
+                permissionsData.forEach((value, i) => {
+                  const [account, scope] = userKeys[i]
+                  if ('Pool' in scope) {
+                    const poolId = scope.Pool.replace(/\D/g, '')
+                    const permissions = value.toJSON() as any
+                    const roles: PoolRoles = {
+                      roles: (
+                        [
+                          'PoolAdmin',
+                          'Borrower',
+                          'PricingAdmin',
+                          'LiquidityAdmin',
+                          'InvestorAdmin',
+                          'LoanAdmin',
+                          'PODReadAccess',
+                        ] as const
+                      ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
+                      tranches: {},
+                    }
+                    permissions.trancheInvestor.info
+                      .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+                      .forEach((info: any) => {
+                        roles.tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                      })
+
+                    setPoolRoles(account, poolId, roles)
+                  }
+                })
+                return Array.isArray(maybeArray) ? permissionsByAddressIndex : permissionsByAddressIndex[0]
+              })
+            )
+          })
+        )
+      ),
+
       repeatWhen(() => $events)
-    )
+    ) as any
   }
 
   function getPoolPermissions(args: [poolId: string]) {
@@ -1843,6 +1878,67 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getDailyTVL() {
+    const $query = inst.getSubqueryObservable<{
+      poolSnapshots: {
+        nodes: {
+          portfolioValuation: string
+          totalReserve: string
+          periodStart: string
+          pool: {
+            currency: {
+              decimals: number
+            }
+          }
+        }[]
+      }
+    }>(
+      `query {
+        poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
+          nodes {
+            portfolioValuation
+            totalReserve
+            periodStart
+            pool {
+              currency {
+                decimals
+              }
+            }
+          }
+        }
+      }`
+    )
+
+    return $query.pipe(
+      map((data) => {
+        if (!data) {
+          return []
+        }
+
+        const mergedMap = new Map()
+        const formatted = data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
+          dateInMilliseconds: new Date(periodStart).getTime(),
+          tvl: new CurrencyBalance(
+            new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
+            pool.currency.decimals
+          ).toDecimal(),
+        }))
+
+        formatted.forEach((entry) => {
+          const { dateInMilliseconds, tvl } = entry
+
+          if (mergedMap.has(dateInMilliseconds)) {
+            mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
+          } else {
+            mergedMap.set(dateInMilliseconds, tvl)
+          }
+        })
+
+        return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+      })
+    )
+  }
+
   function getDailyTrancheStates(args: [trancheId: string]) {
     const [trancheId] = args
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
@@ -2089,7 +2185,12 @@ export function getPoolsModule(inst: Centrifuge) {
 
             rawBalances.forEach(([rawKey, rawValue]) => {
               const key = parseCurrencyKey((rawKey.toHuman() as any)[1] as CurrencyKey)
-              const value = rawValue.toJSON() as { free: string | number }
+              const value = rawValue.toJSON() as {
+                free: string | number
+                reserved: string | number
+                frozen: string | number
+              }
+
               const currency = findCurrency(currencies, key)
 
               if (!currency) return
@@ -2097,19 +2198,23 @@ export function getPoolsModule(inst: Centrifuge) {
               if (typeof key !== 'string' && 'Tranche' in key) {
                 const [pid, trancheId] = key.Tranche
                 const poolId = pid.replace(/\D/g, '')
-                if (value.free !== 0) {
+                if (value.free !== 0 || value.reserved !== 0) {
+                  const balance = hexToBN(value.free).add(hexToBN(value.reserved))
+
                   balances.tranches.push({
                     currency,
                     poolId,
                     trancheId,
-                    balance: new TokenBalance(hexToBN(value.free), currency.decimals),
+                    balance: new TokenBalance(balance, currency.decimals),
                   })
                 }
               } else {
-                if (value.free !== 0) {
+                if (value.free !== 0 || value.reserved !== 0) {
+                  const balance = hexToBN(value.free).add(hexToBN(value.reserved))
+
                   balances.currencies.push({
                     currency,
-                    balance: new CurrencyBalance(hexToBN(value.free), currency.decimals),
+                    balance: new CurrencyBalance(balance, currency.decimals),
                   })
                 }
               }
@@ -2787,6 +2892,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
+    getDailyTVL,
   }
 }
 

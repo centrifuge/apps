@@ -9,32 +9,35 @@ import { Text } from '../Text'
 type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string | React.ReactElement
   errorMessage?: string
+  extendedClickArea?: boolean
 }
 
-export const Checkbox: React.VFC<CheckboxProps> = ({ label, errorMessage, ...checkboxProps }) => {
+export const Checkbox: React.VFC<CheckboxProps> = ({ label, errorMessage, extendedClickArea, ...checkboxProps }) => {
   return (
-    <label>
-      <Shelf as={Text} gap={1} alignItems="center">
-        <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
-          <StyledCheckbox type="checkbox" {...checkboxProps} />
-          <StyledOutline />
-        </StyledWrapper>
-        {label && (
-          <Stack gap={1} flex={1}>
-            {typeof label === 'string' && (
-              <Text variant="body1" color={checkboxProps.disabled ? 'textDisabled' : 'textPrimary'}>
-                {label}
-              </Text>
-            )}
-            {React.isValidElement(label) && label}
-            {errorMessage && (
-              <Text variant="label2" color="statusCritical">
-                {errorMessage}
-              </Text>
-            )}
-          </Stack>
-        )}
-      </Shelf>
+    <Box position="relative">
+      <StyledLabel $extendedClickArea={!!extendedClickArea}>
+        <Shelf as={Text} gap={1} alignItems="center" position="relative">
+          <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
+            <StyledCheckbox type="checkbox" {...checkboxProps} />
+            <StyledOutline />
+          </StyledWrapper>
+          {label && (
+            <Stack gap={1} flex={1}>
+              {typeof label === 'string' && (
+                <Text variant="body1" color={checkboxProps.disabled ? 'textDisabled' : 'textPrimary'}>
+                  {label}
+                </Text>
+              )}
+              {React.isValidElement(label) && label}
+              {errorMessage && (
+                <Text variant="label2" color="statusCritical">
+                  {errorMessage}
+                </Text>
+              )}
+            </Stack>
+          )}
+        </Shelf>
+      </StyledLabel>
       {!label && errorMessage && (
         <Box mt={1}>
           <Text variant="label2" color="statusCritical">
@@ -42,9 +45,34 @@ export const Checkbox: React.VFC<CheckboxProps> = ({ label, errorMessage, ...che
           </Text>
         </Box>
       )}
-    </label>
+    </Box>
   )
 }
+
+const StyledLabel = styled.label<{ $extendedClickArea: boolean }>`
+  cursor: pointer;
+  user-select: none;
+
+  &:before {
+    --offset: 10px;
+
+    content: '';
+    display: ${({ $extendedClickArea }) => ($extendedClickArea ? 'block' : 'none')};
+    position: absolute;
+    top: calc(var(--offset) * -1);
+    left: calc(var(--offset) * -1);
+    width: calc(100% + var(--offset) * 2);
+    height: calc(100% + var(--offset) * 2);
+    background-color: ${({ theme }) => theme.colors.borderSecondary};
+    border-radius: ${({ theme }) => theme.radii.tooltip}px;
+    opacity: 0;
+    transition: opacity 0.1s linear;
+  }
+
+  &:hover:before {
+    opacity: 1;
+  }
+`
 
 const StyledOutline = styled.span`
   display: none;
