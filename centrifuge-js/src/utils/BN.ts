@@ -55,7 +55,7 @@ export class TokenBalance extends CurrencyBalance {
 }
 
 export class Price extends BNSubType {
-  static decimals = 27
+  static decimals = 18
   static fromFloat(number: Numeric) {
     return Price._fromFloat<Price>(number)
   }
