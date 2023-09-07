@@ -6,14 +6,13 @@ import { Toggle } from './Toggle'
 
 type IssuerMenuProps = {
   defaultOpen?: boolean
-  poolIds?: string[]
   stacked?: boolean
   children?: React.ReactNode
 }
 
-export function IssuerMenu({ defaultOpen = false, poolIds = [], stacked, children }: IssuerMenuProps) {
+export function IssuerMenu({ defaultOpen = false, stacked, children }: IssuerMenuProps) {
   const match = useRouteMatch<{ pid: string }>('/issuer/:pid')
-  const isActive = match && poolIds.includes(match.params.pid)
+  const isActive = !!match
   const [open, setOpen] = React.useState(defaultOpen)
   const { space } = useTheme()
   const fullWidth = `calc(100vw - 2 * ${space[1]}px)`

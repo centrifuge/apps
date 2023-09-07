@@ -26,7 +26,7 @@ import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../util
 import { Dec } from '../utils/Decimal'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
-const PriceBN = new BN(10).pow(new BN(27))
+const PriceBN = new BN(10).pow(new BN(18))
 const MaxU128 = '340282366920938463463374607431768211455'
 const SEC_PER_DAY = 24 * 60 * 60
 
@@ -681,6 +681,18 @@ type BorrowerTransaction = {
   amount: CurrencyBalance | undefined
 }
 
+export type Permissions = {
+  pools: {
+    [poolId: string]: PoolRoles
+  }
+  currencies: {
+    [currency: string]: {
+      roles: CurrencyRole[]
+      holder: boolean
+    }
+  }
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -730,7 +742,8 @@ export function getPoolsModule(inst: Centrifuge) {
               trancheInput,
               currency,
               maxReserve.toString(),
-              pinnedMetadata.ipfsHash
+              pinnedMetadata.ipfsHash,
+              []
             )
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
@@ -1124,8 +1137,14 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getUserPermissions(args: [address: Account]) {
-    const [address] = args
+  function getUserPermissions<T extends Account | Account[]>(
+    args: [address: T]
+  ): T extends Array<Account> ? Observable<Permissions[]> : Observable<Permissions> {
+    const [maybeArray] = args
+    const addresses = (Array.isArray(maybeArray) ? (maybeArray as Account[]) : [maybeArray as Account]).map(
+      (addr) => addressToHex(addr) as string
+    )
+    const addressSet = new Set(addresses)
     const $api = inst.getApi()
 
     const $events = inst.getEvents().pipe(
@@ -1135,59 +1154,76 @@ export function getPoolsModule(inst: Centrifuge) {
         )
         if (!event) return false
 
-        const [accountId] = (event.toJSON() as any).event.data
-        return isSameAddress(address, accountId)
+        const [accountId] = (event.toHuman() as any).event.data
+        return addressSet.has(addressToHex(accountId))
       })
     )
 
     return $api.pipe(
-      switchMap((api) => api.query.permissions.permission.entries(address)),
-      map((permissionsData) => {
-        const roles: {
-          pools: {
-            [poolId: string]: PoolRoles
-          }
-          currencies: {
-            [currency: string]: {
-              roles: CurrencyRole[]
-              holder: boolean
-            }
-          }
-        } = {
-          pools: {},
-          currencies: {},
-        }
-
-        permissionsData.forEach(([keys, value]) => {
-          const key = (keys.toHuman() as any)[1] as { Pool: string } | { Currency: any }
-          if ('Pool' in key) {
-            const poolId = key.Pool.replace(/\D/g, '')
-            const permissions = value.toJSON() as any
-            roles.pools[poolId] = {
-              roles: (
-                [
-                  'PoolAdmin',
-                  'Borrower',
-                  'PricingAdmin',
-                  'LiquidityAdmin',
-                  'InvestorAdmin',
-                  'LoanAdmin',
-                  'PODReadAccess',
+      switchMap((api) =>
+        api.query.permissions.permission.keys().pipe(
+          switchMap((keys) => {
+            const userKeys = keys
+              .map((key) => {
+                const [account, scope] = key.toHuman() as any as [string, { Pool: string } | { Currency: any }]
+                return [
+                  addressToHex(account),
+                  'Pool' in scope ? { Pool: scope.Pool.replace(/\D/g, '') } : scope,
                 ] as const
-              ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
-              tranches: {},
-            }
-            permissions.trancheInvestor.info
-              .filter((info: any) => info.permissionedTill * 1000 > Date.now())
-              .forEach((info: any) => {
-                roles.pools[poolId].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
               })
-          }
-        })
-        return roles
-      }),
+              .filter(([account, scope]) => {
+                return 'Pool' in scope && addressSet.has(account)
+              })
+            return api.query.permissions.permission.multi(userKeys).pipe(
+              map((permissionsData) => {
+                const permissionsByAddressIndex: Permissions[] = []
+
+                function setPoolRoles(user: string, poolId: string, roles: PoolRoles) {
+                  const i = addresses.indexOf(user)
+                  const obj = permissionsByAddressIndex[i] ?? {
+                    pools: {},
+                    currencies: {},
+                  }
+                  obj.pools[poolId] = roles
+                  permissionsByAddressIndex[i] = obj
+                }
+                permissionsData.forEach((value, i) => {
+                  const [account, scope] = userKeys[i]
+                  if ('Pool' in scope) {
+                    const poolId = scope.Pool.replace(/\D/g, '')
+                    const permissions = value.toJSON() as any
+                    const roles: PoolRoles = {
+                      roles: (
+                        [
+                          'PoolAdmin',
+                          'Borrower',
+                          'PricingAdmin',
+                          'LiquidityAdmin',
+                          'InvestorAdmin',
+                          'LoanAdmin',
+                          'PODReadAccess',
+                        ] as const
+                      ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
+                      tranches: {},
+                    }
+                    permissions.trancheInvestor.info
+                      .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+                      .forEach((info: any) => {
+                        roles.tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                      })
+
+                    setPoolRoles(account, poolId, roles)
+                  }
+                })
+                return Array.isArray(maybeArray) ? permissionsByAddressIndex : permissionsByAddressIndex[0]
+              })
+            )
+          })
+        )
+      ),
+
       repeatWhen(() => $events)
-    )
+    ) as any
   }
 
   function getPoolPermissions(args: [poolId: string]) {
