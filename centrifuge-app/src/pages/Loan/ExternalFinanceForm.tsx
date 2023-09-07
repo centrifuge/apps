@@ -11,7 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, max, positiveNumber } from '../../utils/validation'
+import { combine, max, positiveNumber, settlementPrice } from '../../utils/validation'
 
 type FinanceValues = {
   price: number | '' | Decimal
@@ -134,7 +134,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
               <Field
                 name="price"
                 validate={combine(
-                  positiveNumber(),
+                  settlementPrice(),
                   max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
                   max(
                     maxBorrow.toNumber(),
@@ -241,7 +241,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                 </Field>
                 <Field
                   validate={combine(
-                    positiveNumber(),
+                    settlementPrice(),
                     max(balance.toNumber(), 'Amount exceeds balance'),
                     max(debt.toNumber(), 'Amount exceeds outstanding')
                   )}
