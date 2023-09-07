@@ -7,7 +7,7 @@ import { Text } from '../Text'
 
 export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> &
   Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
-    currency?: string
+    currency?: React.ReactNode
     onSetMax?: () => void
     variant?: 'small' | 'large'
     onChange?: (value: number) => void

@@ -52,8 +52,8 @@ export type CurrencyMetadata = {
   symbol: string
   isPoolCurrency: boolean
   isPermissioned: boolean
-  additional: any
-  location: any
+  additional?: any
+  location?: any
 }
 
 const AdminRoleBits = {
@@ -2845,9 +2845,15 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
 }
 
 function parseCurrencyKey(key: CurrencyKey): CurrencyKey {
-  if (typeof key !== 'string' && 'Tranche' in key) {
-    return {
-      Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+  if (typeof key === 'object') {
+    if ('Tranche' in key) {
+      return {
+        Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+      }
+    } else if ('ForeignAsset' in key) {
+      return {
+        ForeignAsset: Number(String(key.ForeignAsset).replace(/\D/g, '')),
+      }
     }
   }
   return key
