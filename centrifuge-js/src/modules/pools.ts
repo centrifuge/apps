@@ -742,7 +742,8 @@ export function getPoolsModule(inst: Centrifuge) {
               trancheInput,
               currency,
               maxReserve.toString(),
-              pinnedMetadata.ipfsHash
+              pinnedMetadata.ipfsHash,
+              []
             )
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
