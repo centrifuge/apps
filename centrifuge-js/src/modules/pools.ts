@@ -26,7 +26,7 @@ import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../util
 import { Dec } from '../utils/Decimal'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
-const PriceBN = new BN(10).pow(new BN(27))
+const PriceBN = new BN(10).pow(new BN(18))
 const MaxU128 = '340282366920938463463374607431768211455'
 const SEC_PER_DAY = 24 * 60 * 60
 
