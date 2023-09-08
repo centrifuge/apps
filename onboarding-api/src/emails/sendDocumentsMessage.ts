@@ -1,9 +1,8 @@
 import { Request } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
-import { onboardingBucket } from '../database'
+import { fetchTaxInfo } from '../utils/fetchTaxInfo'
 import { fetchUser } from '../utils/fetchUser'
-import { HttpError } from '../utils/httpError'
 import { NetworkSwitch } from '../utils/networks/networkSwitch'
 
 export type UpdateInvestorStatusPayload = {
@@ -28,13 +27,23 @@ export const sendDocumentsMessage = async (
     expiresIn: '14d',
   })
 
-  const taxInfoFile = await onboardingBucket.file(`tax-information/${wallet.address}.pdf`)
-  const [taxInfoExists] = await taxInfoFile.exists()
-
-  if (!taxInfoExists) {
-    throw new HttpError(400, 'Tax info not found')
+  const attachments = [
+    {
+      content: Buffer.from(signedAgreement).toString('base64'),
+      filename: 'pool-agreement.pdf',
+      type: 'application/pdf',
+      disposition: 'attachment',
+    },
+  ]
+  const taxInfoPDF = metadata.onboarding.taxInfoRequired ? await fetchTaxInfo(wallet) : null
+  if (taxInfoPDF) {
+    attachments.push({
+      content: taxInfoPDF[0].toString('base64'),
+      filename: 'tax-info.pdf',
+      type: 'application/pdf',
+      disposition: 'attachment',
+    })
   }
-  const taxInfoPDF = await taxInfoFile.download()
 
   const message = {
     personalizations: [
@@ -62,20 +71,7 @@ export const sendDocumentsMessage = async (
       name: 'Centrifuge',
       email: 'hello@centrifuge.io',
     },
-    attachments: [
-      {
-        content: taxInfoPDF[0].toString('base64'),
-        filename: 'tax-info.pdf',
-        type: 'application/pdf',
-        disposition: 'attachment',
-      },
-      {
-        content: Buffer.from(signedAgreement).toString('base64'),
-        filename: 'pool-agreement.pdf',
-        type: 'application/pdf',
-        disposition: 'attachment',
-      },
-    ],
+    attachments,
   }
   await sendEmail(message)
 }
