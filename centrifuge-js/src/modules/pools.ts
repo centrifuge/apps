@@ -1215,7 +1215,12 @@ export function getPoolsModule(inst: Centrifuge) {
                     setPoolRoles(account, poolId, roles)
                   }
                 })
-                return Array.isArray(maybeArray) ? permissionsByAddressIndex : permissionsByAddressIndex[0]
+                return Array.isArray(maybeArray)
+                  ? permissionsByAddressIndex
+                  : permissionsByAddressIndex[0] ?? {
+                      pools: {},
+                      currencies: {},
+                    }
               })
             )
           })
