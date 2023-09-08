@@ -76,19 +76,13 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         countryOfCitizenship: body.countryOfCitizenship,
         countryOfResidency: body.countryOfResidency,
         globalSteps: {
-          verifyIdentity: {
-            completed: false,
-            timeStamp: null,
-          },
-          verifyEmail: {
-            completed: false,
-            timeStamp: null,
-          },
+          verifyIdentity: { completed: false, timeStamp: null },
+          verifyEmail: { completed: false, timeStamp: null },
           verifyAccreditation: { completed: false, timeStamp: null },
-          verifyTaxInfo: { completed: false, timeStamp: null },
         },
         poolSteps: {},
         email: body.email as string,
+        taxDocument: null,
       }
       await validateAndWriteToFirestore(wallet, newUser, 'individual')
     }

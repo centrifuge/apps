@@ -38,7 +38,7 @@ export const sendDocumentsMessage = async (
   const taxInfoPDF = metadata.onboarding.taxInfoRequired ? await fetchTaxInfo(wallet) : null
   if (taxInfoPDF) {
     attachments.push({
-      content: taxInfoPDF[0].toString('base64'),
+      content: taxInfoPDF.toString('base64'),
       filename: 'tax-info.pdf',
       type: 'application/pdf',
       disposition: 'attachment',
