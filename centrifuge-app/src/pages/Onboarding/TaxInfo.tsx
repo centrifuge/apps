@@ -15,7 +15,7 @@ type TaxInfoProps = {
 export const TaxInfo = ({ value, setValue, touched, error }: TaxInfoProps) => {
   const { onboardingUser, pool } = useOnboarding<NonNullable<OnboardingUser>>()
   const { data: taxInfoData } = useTaxInfo()
-  const [uploadNewFile, setUploadNewFile] = React.useState(false)
+  const [uploadNewFile, setUploadNewFile] = React.useState(true)
 
   React.useEffect(() => {
     if (!uploadNewFile && taxInfoData) {
