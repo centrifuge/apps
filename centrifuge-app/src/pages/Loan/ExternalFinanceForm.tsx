@@ -61,9 +61,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const faceValue = CurrencyBalance.fromFloat(values.faceValue, 18)
+      const quantity = CurrencyBalance.fromFloat((values.faceValue as number) / (values.price as number), 18)
 
-      doFinanceTransaction([loan.poolId, loan.id, faceValue, price, account.actingAddress])
+      doFinanceTransaction([loan.poolId, loan.id, quantity, price, account.actingAddress])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -76,10 +76,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = CurrencyBalance.fromFloat(
-        (values.faceValue as number) / (values.price as number),
-        pool.currency.decimals
-      )
+      const quantity = CurrencyBalance.fromFloat((values.faceValue as number) / (values.price as number), 18)
 
       doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price, account.actingAddress])
       actions.setSubmitting(false)
@@ -207,7 +204,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="label2">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${loan.pricing.outstandingQuantity.toFloat()} @ ${formatBalance(
+                ? `${Dec(loan.pricing.outstandingQuantity.toString()).div('1e18').toFixed(2)} @ ${formatBalance(
                     new CurrencyBalance(loan.pricing.oracle.value, 18),
                     pool?.currency.symbol,
                     2

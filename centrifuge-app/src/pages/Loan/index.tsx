@@ -186,8 +186,12 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
               {
                 label: 'Current value',
                 value: formatBalance(
-                  'outstandingDebt' in loan ? loan.outstandingDebt : new CurrencyBalance(0, pool.currency.decimals),
-                  pool?.currency.symbol
+                  'outstandingDebt' in loan
+                    ? new CurrencyBalance(loan.outstandingDebt, 21)
+                    : new CurrencyBalance(0, 18),
+                  pool?.currency.symbol,
+                  6,
+                  2
                 ),
               },
             ]}
@@ -271,7 +275,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                 </Flex>
               }
             >
-              <TransactionTable transactions={borrowerAssetTransactions} />
+              <TransactionTable transactions={borrowerAssetTransactions} currency={pool.currency.symbol} />
             </PageSection>
           ) : null}
         </>

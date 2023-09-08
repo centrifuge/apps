@@ -8,9 +8,10 @@ import { formatBalance } from '../../utils/formatting'
 
 type Props = {
   transactions: BorrowerTransaction[]
+  currency: string
 }
 
-export const TransactionTable = ({ transactions }: Props) => {
+export const TransactionTable = ({ transactions, currency }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
       if (a.timestamp > b.timestamp) {
@@ -75,19 +76,22 @@ export const TransactionTable = ({ transactions }: Props) => {
         // {
         //   align: 'left',
         //   header: 'Settle price',
-        //   cell: (row) => formatBalance(row.settlePrice, 'USD'),
+        //   cell: (row) => formatBalance(row.settlePrice, currency),
         //   flex: '3',
         // },
         {
           align: 'left',
-          header: 'Net flow',
-          cell: (row) => (row.netFlow ? formatBalance(new CurrencyBalance(row.netFlow, 27), 'USD') : '-'),
+          header: 'Face flow',
+          cell: (row) =>
+            row.netFlow
+              ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(new CurrencyBalance(row.netFlow, 24), currency)}`
+              : '-',
           flex: '3',
         },
         {
           align: 'left',
           header: 'Position',
-          cell: (row) => formatBalance(row.position, 'USD'),
+          cell: (row) => formatBalance(new CurrencyBalance(row.position, 24), currency),
           flex: '3',
         },
         // TODO: add link to transaction

@@ -105,14 +105,14 @@ export function PricingInput({ poolId }: { poolId: string }) {
         // Max 5 years from now
         max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
       />
-      <FieldWithErrorMessage
+      {/* <FieldWithErrorMessage
         as={NumberInput}
         label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
         placeholder={0}
         rightElement="%"
         name="pricing.maxPriceVariation"
         validate={validate.maxPriceVariation}
-      />
+      /> */}
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
         values.pricing.valuationMethod === 'outstandingDebt') && (

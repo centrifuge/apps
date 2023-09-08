@@ -70,6 +70,7 @@ export type CreateLoanFormValues = {
     maxBorrowQuantity: number | ''
     Isin: string
     notional: number | ''
+    maxPriceVariation: number | ''
   }
 }
 
@@ -224,6 +225,7 @@ function IssuerCreateLoan() {
         maxBorrowQuantity: '',
         Isin: '',
         notional: '',
+        maxPriceVariation: '',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -233,14 +235,15 @@ function IssuerCreateLoan() {
         values.pricing.valuationMethod === 'oracle'
           ? {
               valuationMethod: values.pricing.valuationMethod,
+              // maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
+              maxPriceVariation: '1000000000000000000000000000000',
               maxBorrowAmount: values.pricing.maxBorrowQuantity
                 ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals)
                 : null,
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
-              maturityExtensionDays: values.pricing.maturityExtensionDays,
               interestRate: Rate.fromPercent(values.pricing.interestRate),
-              notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
+              notional: CurrencyBalance.fromFloat(values.pricing.notional, 18),
             }
           : {
               valuationMethod: values.pricing.valuationMethod,

@@ -86,9 +86,9 @@ type LoanInfoInput =
   | {
       valuationMethod: 'oracle'
       maxBorrowAmount: BN | null
+      maxPriceVariation: BN
       Isin: string
       maturityDate: Date
-      maturityExtensionDays: number
       interestRate: BN
       notional: BN
     }
@@ -127,6 +127,7 @@ export type LoanInfoData = {
           }
           maxBorrowAmount: { noLimit: null } | { quantity: string }
           notional: string
+          maxPriceVariation: string
         }
       }
     | {
@@ -1320,7 +1321,7 @@ export function getPoolsModule(inst: Centrifuge) {
         maturity: {
           fixed: {
             date: Math.round(infoInput.maturityDate.getTime() / 1000),
-            extension: infoInput.maturityExtensionDays * SEC_PER_DAY,
+            extension: 'maturityExtensionDays' in infoInput ? infoInput.maturityExtensionDays * SEC_PER_DAY : 0,
           },
         },
         interestPayments: 'None',
@@ -1344,6 +1345,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   infoInput.maxBorrowAmount === null
                     ? { noLimit: null }
                     : { quantity: infoInput.maxBorrowAmount.toString() },
+                maxPriceVariation: infoInput.maxPriceVariation!.toString(),
                 notional: infoInput.notional.toString(),
               },
             }
