@@ -164,7 +164,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   <Text variant="body3">
                     {financeForm.values.price && !Number.isNaN(financeForm.values.price as number)
                       ? formatBalance(
-                          Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.faceValue || 0)),
+                          Dec(financeForm.values.price || 0)
+                            .mul(Dec(financeForm.values.faceValue || 0))
+                            .div(100),
                           pool?.currency.symbol,
                           2
                         )
@@ -269,7 +271,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     <Text variant="body3">
                       {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                         ? formatBalance(
-                            Dec(repayForm.values.price || 0).mul(Dec(repayForm.values.faceValue || 0)),
+                            Dec(repayForm.values.price || 0)
+                              .mul(Dec(repayForm.values.faceValue || 0))
+                              .div(100),
                             pool?.currency.symbol,
                             2
                           )

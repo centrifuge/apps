@@ -32,8 +32,8 @@ export const positiveNumber = (err?: CustomError) => (val?: any) => {
 }
 
 export const settlementPrice = (err?: CustomError) => (val?: any) => {
-  const regex = /^\d{1,3}\.\d{0,6}$/
-  return val.test(regex) ? '' : getError(`Value must be in the format of (1-3).(0-6) digits`, err, val)
+  const regex = new RegExp(/^\d{1,3}\.\d{0,6}$/)
+  return regex.test(val) ? '' : getError(`Value must be in the format of (1-3).(0-6) digits`, err, val)
 }
 
 export const maxDecimals = (decimals: number, err?: CustomError) => (val?: any) => {
