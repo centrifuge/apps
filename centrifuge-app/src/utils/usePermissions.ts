@@ -12,7 +12,7 @@ import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
 import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
-import { usePool, usePoolMetadata } from './usePools'
+import { usePool, usePoolMetadata, usePools } from './usePools'
 
 export function usePermissions(address?: string) {
   const [result] = useCentrifugeQuery(['permissions', address], (cent) => cent.pools.getUserPermissions([address!]), {
@@ -29,38 +29,38 @@ export function usePoolPermissions(poolId?: string) {
   return result
 }
 
-// export function useUserPermissionsMulti(addresses: string[]) {
-//   const [results] = useCentrifugeQueries(
-//     addresses.map((address) => ({
-//       queryKey: ['permissions', address],
-//       queryCallback: (cent) => cent.pools.getUserPermissions([address!]),
-//     }))
-//   )
+export function useUserPermissionsMulti(addresses: string[], options?: { enabled?: boolean }) {
+  const [result] = useCentrifugeQuery(
+    ['permissions', ...addresses],
+    (cent) => cent.pools.getUserPermissions([addresses]),
+    {
+      enabled: !!addresses.length && options?.enabled !== false,
+    }
+  )
+  return result
+}
 
-//   return results
-// }
+// Better name welcomed lol
+export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
+  const {
+    substrate: { combinedAccounts, proxiesAreLoading },
+  } = useWallet()
+  const actingAddresses = [...new Set(combinedAccounts?.map((acc) => acc.actingAddress))]
+  const permissionsResult = useUserPermissionsMulti(actingAddresses, { enabled: !proxiesAreLoading })
 
-// // Better name welcomed lol
-// export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
-//   const {
-//     substrate: { combinedAccounts },
-//   } = useWallet()
-//   const actingAddresses = [...new Set(combinedAccounts?.map((acc) => acc.actingAddress))]
-//   const permissionResults = useUserPermissionsMulti(actingAddresses)
+  const poolIds = new Set(
+    permissionsResult
+      ?.map((permissions) =>
+        Object.entries(permissions?.pools || {}).map(([poolId, roles]) => (roles.roles.length ? poolId : []))
+      )
+      .flat(2)
+  )
 
-//   const poolIds = new Set(
-//     permissionResults
-//       .map((permissions) =>
-//         Object.entries(permissions?.pools || {}).map(([poolId, roles]) => (roles.roles.length ? poolId : []))
-//       )
-//       .flat(2)
-//   )
+  const pools = usePools(false)
+  const filtered = pools?.filter((p) => poolIds.has(p.id))
 
-//   const pools = usePools(false)
-//   const filtered = pools?.filter((p) => poolIds.has(p.id))
-
-//   return filtered
-// }
+  return filtered
+}
 
 // Returns whether the connected address can borrow from a pool in principle
 export function useCanBorrow(poolId: string) {
