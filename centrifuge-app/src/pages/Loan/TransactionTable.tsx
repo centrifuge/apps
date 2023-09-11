@@ -32,8 +32,8 @@ export const TransactionTable = ({ transactions, currency }: Props) => {
     return sortedTransactions.map((transaction, index, array) => ({
       type: transaction.type,
       transactionDate: transaction.timestamp,
-      // settlePrice: TODO: add subquery query for fetching settle price
-      netFlow: transaction.amount,
+      settlePrice: transaction.settlementPrice ? new CurrencyBalance(transaction.settlementPrice, 6) : null,
+      faceFlow: transaction.amount,
       position: array.slice(0, index + 1).reduce((sum, trx) => {
         if (trx.type === 'BORROWED') {
           sum = new CurrencyBalance(sum.add(trx.amount || new CurrencyBalance(0, 27)), 27)
@@ -72,26 +72,45 @@ export const TransactionTable = ({ transactions, currency }: Props) => {
           cell: (row) => formatDate(row.transactionDate),
           flex: '3',
         },
-        // TODO: add subquery query for fetching settle price
-        // {
-        //   align: 'left',
-        //   header: 'Settle price',
-        //   cell: (row) => formatBalance(row.settlePrice, currency),
-        //   flex: '3',
-        // },
+
         {
           align: 'left',
           header: 'Face flow',
           cell: (row) =>
-            row.netFlow
-              ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(new CurrencyBalance(row.netFlow, 24), currency)}`
+            row.faceFlow
+              ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(
+                  new CurrencyBalance(row.faceFlow, 24),
+                  currency,
+                  6,
+                  2
+                )}`
+              : '-',
+          flex: '3',
+        },
+        {
+          align: 'left',
+          header: 'Settle price',
+          cell: (row) => (row.settlePrice ? formatBalance(row.settlePrice, currency, 6, 2) : '-'),
+          flex: '3',
+        },
+        {
+          align: 'left',
+          header: 'Net cash flow',
+          cell: (row) =>
+            row.faceFlow && row.settlePrice
+              ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(
+                  new CurrencyBalance(row.faceFlow.mul(row.settlePrice), 32),
+                  currency,
+                  6,
+                  2
+                )}`
               : '-',
           flex: '3',
         },
         {
           align: 'left',
           header: 'Position',
-          cell: (row) => formatBalance(new CurrencyBalance(row.position, 24), currency),
+          cell: (row) => formatBalance(new CurrencyBalance(row.position, 24), currency, 6, 2),
           flex: '3',
         },
         // TODO: add link to transaction
