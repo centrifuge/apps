@@ -1,12 +1,12 @@
 import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
-import { formatBalance, roundDown } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
@@ -157,8 +157,8 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
               </Field>
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
-                  <Text variant="body3">Total amount</Text>
-                  <Text variant="body3">
+                  <Text variant="emphasized">Total principal</Text>
+                  <Text variant="emphasized">
                     {financeForm.values.price && !Number.isNaN(financeForm.values.price as number)
                       ? formatBalance(
                           Dec(financeForm.values.price || 0)
@@ -171,16 +171,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   </Text>
                 </Shelf>
               </Stack>
-              {(poolReserve.lessThan(availableFinancing) ||
-                ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowAmount)) && (
-                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
-                  <IconInfo size="iconMedium" />
-                  <Text variant="body3">
-                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
-                    than the available financing
-                  </Text>
-                </Shelf>
-              )}
               <Stack px={1}>
                 <Button type="submit" loading={isFinanceLoading}>
                   Finance asset
@@ -261,8 +251,8 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                 </Field>
                 <Stack gap={1}>
                   <Shelf justifyContent="space-between">
-                    <Text variant="body3">Total amount</Text>
-                    <Text variant="body3">
+                    <Text variant="emphasized">Total principal</Text>
+                    <Text variant="emphasized">
                       {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                         ? formatBalance(
                             Dec(repayForm.values.price || 0)
@@ -275,12 +265,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     </Text>
                   </Shelf>
                 </Stack>
-                {balance.lessThan(debt) && (
-                  <InlineFeedback>
-                    Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than
-                    the outstanding balance.
-                  </InlineFeedback>
-                )}
                 <Stack gap={1} px={1}>
                   <Button type="submit" disabled={isRepayLoading} loading={isRepayLoading}>
                     Repay asset

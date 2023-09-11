@@ -1,5 +1,4 @@
 import { CurrencyBalance, Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -7,8 +6,6 @@ import {
   Flex,
   IconChevronLeft,
   IconExternalLink,
-  IconNft,
-  InteractiveCard,
   Shelf,
   Stack,
   Text,
@@ -18,14 +15,12 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
-import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
-import { AnchorPillButton } from '../../components/PillButton'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
@@ -92,7 +87,6 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const history = useHistory()
-  const cent = useCentrifuge()
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const address = useAddress()
   const canOraclePrice = useCanSetOraclePrice(address)
@@ -103,7 +97,6 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
 
   const name = truncateText((isTinlakePool ? loan?.asset.nftId : nftMetadata?.name) || 'Unnamed asset', 30)
-  const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const { data: templateData } = useMetadata<LoanTemplate>(
     nftMetadata?.properties?._template && `ipfs://${nftMetadata?.properties?._template}`
@@ -297,7 +290,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           ) : null}
         </>
       )}
-      {(loan && nft) || loan?.poolId.startsWith('0x') ? (
+      {(loan && nft) || isTinlakePool ? (
         <>
           {templateData?.sections?.map((section, i) => {
             const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
@@ -320,8 +313,8 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
             )
           })}
 
-          <PageSection title={<Box>NFT</Box>}>
-            {isTinlakePool && 'owner' in loan ? (
+          {isTinlakePool && loan && 'owner' in loan ? (
+            <PageSection title={<Box>NFT</Box>}>
               <Shelf gap={6}>
                 <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
                 <LabelValueStack
@@ -340,77 +333,8 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                   }
                 />
               </Shelf>
-            ) : (
-              <InteractiveCard
-                icon={<Thumbnail label="nft" type="nft" />}
-                title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
-                variant="button"
-                onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
-                secondaryHeader={
-                  <Shelf gap={6}>
-                    <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
-                    <LabelValueStack
-                      label="Owner"
-                      value={nft?.owner ? <Identity clickToCopy address={nft.owner} /> : ''}
-                    />
-                  </Shelf>
-                }
-              >
-                {(nftMetadata?.description || imageUrl) && (
-                  <Shelf gap={3} alignItems="flex-start">
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      flex="0 1 50%"
-                      style={{ aspectRatio: '1 / 1' }}
-                      backgroundColor="backgroundSecondary"
-                      borderRadius="8px"
-                      overflow="hidden"
-                    >
-                      {imageUrl ? (
-                        <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
-                      ) : (
-                        <IconNft color="white" size="250px" />
-                      )}
-                    </Box>
-                    <Stack gap={2}>
-                      <LabelValueStack
-                        label="Description"
-                        value={
-                          <TextWithPlaceholder
-                            isLoading={nftMetadataIsLoading}
-                            words={2}
-                            width={80}
-                            variance={30}
-                            variant="body2"
-                            style={{ wordBreak: 'break-word' }}
-                          >
-                            {nftMetadata?.description || 'No description'}
-                          </TextWithPlaceholder>
-                        }
-                      />
-
-                      {imageUrl && (
-                        <LabelValueStack
-                          label="Image"
-                          value={
-                            <AnchorPillButton
-                              href={imageUrl}
-                              target="_blank"
-                              style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
-                            >
-                              Source file
-                            </AnchorPillButton>
-                          }
-                        />
-                      )}
-                    </Stack>
-                  </Shelf>
-                )}
-              </InteractiveCard>
-            )}
-          </PageSection>
+            </PageSection>
+          ) : null}
         </>
       ) : null}
     </Stack>
