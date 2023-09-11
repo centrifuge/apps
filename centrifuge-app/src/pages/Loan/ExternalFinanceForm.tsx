@@ -170,9 +170,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       : `0.00 ${pool.currency.symbol}`}
                   </Text>
                 </Shelf>
-                <Text variant="body3" color="textSecondary">
-                  This is calculated through the amount multiplied by the current price of the asset
-                </Text>
               </Stack>
               {(poolReserve.lessThan(availableFinancing) ||
                 ('valuationMethod' in loan.pricing && !loan.pricing.maxBorrowAmount)) && (
@@ -277,9 +274,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                         : `0.00 ${pool.currency.symbol}`}
                     </Text>
                   </Shelf>
-                  <Text variant="body3" color="textSecondary">
-                    This is calculated through the amount multiplied by the current price of the asset
-                  </Text>
                 </Stack>
                 {balance.lessThan(debt) && (
                   <InlineFeedback>

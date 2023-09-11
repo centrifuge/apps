@@ -1,6 +1,6 @@
 import { BorrowerTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { BorrowerTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
-import { StatusChip } from '@centrifuge/fabric'
+import { StatusChip, Tooltip } from '@centrifuge/fabric'
 import { useMemo } from 'react'
 import { DataTable } from '../../components/DataTable'
 import { formatDate } from '../../utils/date'
@@ -75,7 +75,14 @@ export const TransactionTable = ({ transactions, currency, loanType }: Props) =>
         {
           align: 'left',
           header: 'Transaction date',
-          cell: (row) => formatDate(row.transactionDate),
+          cell: (row) => (
+            <Tooltip
+              title="Transaction date"
+              body={formatDate(row.transactionDate, { hour: 'numeric', minute: 'numeric', second: 'numeric' })}
+            >
+              {formatDate(row.transactionDate)}
+            </Tooltip>
+          ),
           flex: '3',
         },
 
@@ -116,7 +123,8 @@ export const TransactionTable = ({ transactions, currency, loanType }: Props) =>
         {
           align: 'left',
           header: 'Position',
-          cell: (row) => formatBalance(new CurrencyBalance(row.position, 24), currency, 6, 2),
+          cell: (row) =>
+            row.position.isZero() ? '-' : formatBalance(new CurrencyBalance(row.position, 24), currency, 6, 2),
           flex: '3',
         },
         // TODO: add link to transaction
