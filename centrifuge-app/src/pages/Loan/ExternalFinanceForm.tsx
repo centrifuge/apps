@@ -10,7 +10,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
-import { usePool } from '../../utils/usePools'
+import { useBorrowerAssetTransactions, usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber, settlementPrice } from '../../utils/validation'
 
 type FinanceValues = {
@@ -90,6 +90,8 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
+  const borrowerAssetTransactions = useBorrowerAssetTransactions(loan.poolId, loan.id)
+
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
   }
@@ -99,6 +101,17 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+
+  const currentFace =
+    borrowerAssetTransactions?.reduce((sum, trx) => {
+      if (trx.type === 'BORROWED') {
+        sum = new CurrencyBalance(sum.add(trx.amount || new CurrencyBalance(0, 27)), 27)
+      }
+      if (trx.type === 'REPAID') {
+        sum = new CurrencyBalance(sum.sub(trx.amount || new CurrencyBalance(0, 27)), 27)
+      }
+      return sum
+    }, new CurrencyBalance(0, 27)) || new CurrencyBalance(0, 27)
 
   return (
     <Stack gap={3}>
@@ -191,11 +204,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="label2">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? `${Dec(loan.pricing.outstandingQuantity.toString()).div('1e18').toFixed(2)} @ ${formatBalance(
-                    new CurrencyBalance(loan.pricing.oracle.value, 18),
-                    pool?.currency.symbol,
-                    2
-                  )}`
+                ? formatBalance(new CurrencyBalance(currentFace, 24), pool.currency.symbol, 6, 2)
                 : ''}
             </Text>
           </Shelf>
