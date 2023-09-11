@@ -27,8 +27,8 @@ jobs:
     with:
       deploy_env: moonbeam-alpha
 
-  faucet-moonbeam-alpha:
-    uses: ./.github/workflows/faucet-api.yml
-    secrets: inherit
-    with:
-      deploy_env: moonbeam-alpha
+  # faucet-moonbeam-alpha:
+  #   uses: ./.github/workflows/faucet-api.yml
+  #   secrets: inherit
+  #   with:
+  #     deploy_env: moonbeam-alpha
