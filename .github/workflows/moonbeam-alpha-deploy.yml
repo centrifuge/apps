@@ -1,0 +1,34 @@
+name: "Moonbeam dev (alpha) deployments (manual)"
+on:
+  push:
+    branches: main
+  pull_request:
+    paths:
+      - '.github/workflows/moonbeam-alpha-deploy.yml'
+  
+jobs:
+  app-moonbeam-alpha:
+    uses: ./.github/workflows/centrifuge-app.yml
+    secrets: inherit
+    with:
+      deploy_env: moonbeam-alpha
+
+
+  pinning-moonbeam-alpha:
+    uses:  ./.github/workflows/pinning-api.yml
+    secrets: inherit
+    with:
+      deploy_env: moonbeam-alpha
+
+
+  onboarding-moonbeam-alpha:
+    uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+    with:
+      deploy_env: moonbeam-alpha
+
+  faucet-moonbeam-alpha:
+    uses: ./.github/workflows/faucet-api.yml
+    secrets: inherit
+    with:
+      deploy_env: moonbeam-alpha
