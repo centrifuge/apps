@@ -55,7 +55,11 @@ export function HoldingsValues({ pool, transactions }: Props) {
       />
       <LabelValueStack
         label="Average settle price"
-        value={`${formatBalance(new CurrencyBalance(netSpent.div(currentFace), 6), pool.currency.symbol, 2, 2)}`}
+        value={
+          netSpent.isZero()
+            ? '-'
+            : `${formatBalance(new CurrencyBalance(netSpent.div(currentFace), 6), pool.currency.symbol, 2, 2)}`
+        }
       />
     </>
   )
