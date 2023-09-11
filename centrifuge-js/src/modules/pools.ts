@@ -2269,7 +2269,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.borrowerTransactions.nodes.map((tx) => ({
           ...tx,
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
-          timestamp: new Date(tx.timestamp),
+          timestamp: new Date(`${tx.timestamp}+00:00`),
         })) as unknown as BorrowerTransaction[]
       })
     )
