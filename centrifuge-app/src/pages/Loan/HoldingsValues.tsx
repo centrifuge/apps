@@ -10,7 +10,7 @@ type Props = {
 }
 
 export function HoldingsValues({ loan: { pricing }, pool, transactions }: Props) {
-  const currentHolding =
+  const netCash =
     transactions?.reduce((sum, trx) => {
       if (trx.type === 'REPAID') {
         sum = new CurrencyBalance(
@@ -33,7 +33,7 @@ export function HoldingsValues({ loan: { pricing }, pool, transactions }: Props)
       return sum
     }, new CurrencyBalance(0, 27)) || new CurrencyBalance(0, 27)
 
-  const currentTotalFace =
+  const currentFace =
     transactions?.reduce((sum, trx) => {
       if (trx.type === 'BORROWED') {
         sum = new CurrencyBalance(sum.add(trx.amount || new CurrencyBalance(0, 27)), 27)
@@ -47,26 +47,21 @@ export function HoldingsValues({ loan: { pricing }, pool, transactions }: Props)
   return (
     <>
       <LabelValueStack
-        label="Current total face"
-        value={`${formatBalance(new CurrencyBalance(currentTotalFace, 24), pool.currency.symbol, 6, 2)}`}
+        label="Current face"
+        value={`${formatBalance(new CurrencyBalance(currentFace, 24), pool.currency.symbol, 6, 2)}`}
       />
       <LabelValueStack
-        label="Current holding"
-        value={`${formatBalance(new CurrencyBalance(currentHolding, 32), pool.currency.symbol, 6, 2)}`}
+        label="Net cash"
+        value={`${formatBalance(new CurrencyBalance(netCash, 32), pool.currency.symbol, 6, 2)}`}
       />
       <LabelValueStack
         label="Average price"
-        value={`${formatBalance(
-          new CurrencyBalance(currentHolding.div(currentTotalFace), 6),
-          pool.currency.symbol,
-          2,
-          2
-        )}`}
+        value={`${formatBalance(new CurrencyBalance(netCash.div(currentFace), 6), pool.currency.symbol, 2, 2)}`}
       />
       <LabelValueStack
         label="Current value"
         value={`${formatBalance(
-          new CurrencyBalance(currentTotalFace.mul(pricing.oracle.value), 44),
+          new CurrencyBalance(currentFace.mul(pricing.oracle.value), 44),
           pool.currency.symbol,
           6,
           2

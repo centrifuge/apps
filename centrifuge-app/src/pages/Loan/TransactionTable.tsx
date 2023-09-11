@@ -9,9 +9,10 @@ import { formatBalance } from '../../utils/formatting'
 type Props = {
   transactions: BorrowerTransaction[]
   currency: string
+  loanType: 'external' | 'internal'
 }
 
-export const TransactionTable = ({ transactions, currency }: Props) => {
+export const TransactionTable = ({ transactions, currency, loanType }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
       if (a.timestamp > b.timestamp) {
@@ -52,6 +53,13 @@ export const TransactionTable = ({ transactions, currency }: Props) => {
     return 'default'
   }
 
+  const getStatusText = (type: BorrowerTransactionType) => {
+    if (loanType === 'external' && type === 'BORROWED') return 'Purchase'
+    if (loanType === 'external' && type === 'REPAID') return 'Sale'
+
+    return `${type[0]}${type.slice(1).toLowerCase()}`
+  }
+
   return (
     <DataTable
       data={assetTransactions.reverse()}
@@ -60,9 +68,7 @@ export const TransactionTable = ({ transactions, currency }: Props) => {
           align: 'left',
           header: 'Type',
           cell: (row: { type: BorrowerTransactionType }) => (
-            <StatusChip status={getStatusChipType(row.type)}>{`${row.type[0]}${row.type
-              .slice(1)
-              .toLowerCase()}`}</StatusChip>
+            <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>
           ),
           flex: '3',
         },

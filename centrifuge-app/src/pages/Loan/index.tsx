@@ -275,7 +275,15 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                 </Flex>
               }
             >
-              <TransactionTable transactions={borrowerAssetTransactions} currency={pool.currency.symbol} />
+              <TransactionTable
+                transactions={borrowerAssetTransactions}
+                currency={pool.currency.symbol}
+                loanType={
+                  'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                    ? 'external'
+                    : 'internal'
+                }
+              />
             </PageSection>
           ) : null}
         </>
