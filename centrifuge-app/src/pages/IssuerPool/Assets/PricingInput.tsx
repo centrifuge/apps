@@ -3,7 +3,7 @@ import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
 import { usePool } from '../../../utils/usePools'
-import { combine, max, positiveNumber, required } from '../../../utils/validation'
+import { combine, max, nonNegativeNumber, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
 import { CreateLoanFormValues } from './CreateLoan'
 
@@ -92,7 +92,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
         placeholder="0.00"
         rightElement="%"
         name="pricing.interestRate"
-        validate={validate.interestRate}
+        validate={combine(required(), nonNegativeNumber(), max(100))}
       />
       <FieldWithErrorMessage
         as={DateInput}
