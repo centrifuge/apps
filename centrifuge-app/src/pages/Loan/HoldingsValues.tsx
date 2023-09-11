@@ -1,16 +1,15 @@
-import { BorrowerTransaction, CurrencyBalance, ExternalPricingInfo, Loan, Pool } from '@centrifuge/centrifuge-js'
+import { BorrowerTransaction, CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatBalance } from '../../utils/formatting'
 
 type Props = {
-  loan: Loan & { pricing: ExternalPricingInfo }
   pool: Pool
   transactions?: BorrowerTransaction[] | null
 }
 
-export function HoldingsValues({ loan: { pricing }, pool, transactions }: Props) {
-  const netCash =
+export function HoldingsValues({ pool, transactions }: Props) {
+  const netSpent =
     transactions?.reduce((sum, trx) => {
       if (trx.type === 'REPAID') {
         sum = new CurrencyBalance(
@@ -51,21 +50,12 @@ export function HoldingsValues({ loan: { pricing }, pool, transactions }: Props)
         value={`${formatBalance(new CurrencyBalance(currentFace, 24), pool.currency.symbol, 6, 2)}`}
       />
       <LabelValueStack
-        label="Net cash"
-        value={`${formatBalance(new CurrencyBalance(netCash, 32), pool.currency.symbol, 6, 2)}`}
+        label="Net spent"
+        value={`${formatBalance(new CurrencyBalance(netSpent, 32), pool.currency.symbol, 6, 2)}`}
       />
       <LabelValueStack
-        label="Average price"
-        value={`${formatBalance(new CurrencyBalance(netCash.div(currentFace), 6), pool.currency.symbol, 2, 2)}`}
-      />
-      <LabelValueStack
-        label="Current value"
-        value={`${formatBalance(
-          new CurrencyBalance(currentFace.mul(pricing.oracle.value), 44),
-          pool.currency.symbol,
-          6,
-          2
-        )}`}
+        label="Average settle price"
+        value={`${formatBalance(new CurrencyBalance(netSpent.div(currentFace), 6), pool.currency.symbol, 2, 2)}`}
       />
     </>
   )

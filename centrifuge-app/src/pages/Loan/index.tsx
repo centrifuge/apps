@@ -1,4 +1,4 @@
-import { CurrencyBalance, ExternalPricingInfo, Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
@@ -133,6 +133,17 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
     return 0
   }, [originationDate, loan?.pricing.maturityDate])
 
+  const currentFace =
+    borrowerAssetTransactions?.reduce((sum, trx) => {
+      if (trx.type === 'BORROWED') {
+        sum = new CurrencyBalance(sum.add(trx.amount || new CurrencyBalance(0, 27)), 27)
+      }
+      if (trx.type === 'REPAID') {
+        sum = new CurrencyBalance(sum.sub(trx.amount || new CurrencyBalance(0, 27)), 27)
+      }
+      return sum
+    }, new CurrencyBalance(0, 27)) || new CurrencyBalance(0, 27)
+
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -183,17 +194,19 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                 label: 'Maturity date',
                 value: formatDate(loan.pricing.maturityDate),
               },
-              {
-                label: 'Current value',
-                value: formatBalance(
-                  'outstandingDebt' in loan
-                    ? new CurrencyBalance(loan.outstandingDebt, 21)
-                    : new CurrencyBalance(0, 18),
-                  pool?.currency.symbol,
-                  6,
-                  2
-                ),
-              },
+              ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                ? [
+                    {
+                      label: 'Current value',
+                      value: `${formatBalance(
+                        new CurrencyBalance(currentFace.mul(loan.pricing.oracle.value), 44),
+                        pool.currency.symbol,
+                        6,
+                        2
+                      )}`,
+                    },
+                  ]
+                : []),
             ]}
           />
 
@@ -219,11 +232,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
             <PageSection title={<Box>Holdings</Box>}>
               <Shelf gap={6} flexWrap="wrap">
-                <HoldingsValues
-                  loan={loan as LoanType & { pricing: ExternalPricingInfo }}
-                  pool={pool as Pool}
-                  transactions={borrowerAssetTransactions}
-                />
+                <HoldingsValues pool={pool as Pool} transactions={borrowerAssetTransactions} />
               </Shelf>
             </PageSection>
           )}
