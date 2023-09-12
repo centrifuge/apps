@@ -126,6 +126,10 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
     return 0
   }, [originationDate, loan?.pricing.maturityDate])
 
+  const latestSettlementPrice = borrowerAssetTransactions?.length
+    ? borrowerAssetTransactions[borrowerAssetTransactions.length - 1]?.settlementPrice
+    : null
+
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -219,7 +223,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           <PageSection title={<Box>Pricing</Box>}>
             <Stack>
               <Shelf gap={6} flexWrap="wrap">
-                <PricingValues loan={loan} pool={pool} />
+                <PricingValues loan={loan} pool={pool} latestSettlementPrice={latestSettlementPrice} />
               </Shelf>
               {canOraclePrice &&
                 setShowOraclePricing &&
