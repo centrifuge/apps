@@ -43,7 +43,7 @@ type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
 export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: string, permissionedTill: number] }
 
-export type CurrencyKey = string | { ForeignAsset: number } | { Tranche: [string, string] }
+export type CurrencyKey = string | { ForeignAsset: string } | { Tranche: [string, string] }
 
 export type CurrencyMetadata = {
   key: CurrencyKey
@@ -1216,7 +1216,8 @@ export function getPoolsModule(inst: Centrifuge) {
                     setPoolRoles(account, poolId, roles)
                   }
                 })
-                return Array.isArray(maybeArray) ? permissionsByAddressIndex : permissionsByAddressIndex[0]
+                return Array.isArray(maybeArray)
+                  ? permissionsByAddressIndex
               })
             )
           })
@@ -2950,7 +2951,7 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
   return balances.find((balance) => looksLike(balance.currency.key, key))
 }
 
-function parseCurrencyKey(key: CurrencyKey): CurrencyKey {
+export function parseCurrencyKey(key: CurrencyKey | { foreignAsset: number | string }): CurrencyKey {
   if (typeof key === 'object') {
     if ('Tranche' in key) {
       return {
@@ -2958,7 +2959,11 @@ function parseCurrencyKey(key: CurrencyKey): CurrencyKey {
       }
     } else if ('ForeignAsset' in key) {
       return {
-        ForeignAsset: Number(String(key.ForeignAsset).replace(/\D/g, '')),
+        ForeignAsset: String(key.ForeignAsset).replace(/\D/g, ''),
+      }
+    } else if ('foreignAsset' in key) {
+      return {
+        ForeignAsset: String(key.foreignAsset).replace(/\D/g, ''),
       }
     }
   }
