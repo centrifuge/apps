@@ -33,7 +33,7 @@ export const useTaxInfo = () => {
     },
     {
       refetchOnWindowFocus: false,
-      enabled: !!onboardingUser?.globalSteps?.verifyTaxInfo?.completed,
+      enabled: !!onboardingUser?.taxDocument,
     }
   )
 

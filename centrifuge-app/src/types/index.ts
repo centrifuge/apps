@@ -88,10 +88,6 @@ type PoolOnboardingSteps = {
 }
 
 type IndividualUserSteps = {
-  verifyTaxInfo: {
-    completed: boolean
-    timeStamp: string | null
-  }
   verifyAccreditation: {
     completed: boolean | null
     timeStamp: string | null
@@ -135,6 +131,7 @@ export type EntityUser = {
   kycReference: string
   manualKybReference: string | null
   manualKybStatus?: 'review.pending' | 'verification.accepted' | 'verification.declined' | 'request.pending'
+  taxDocument?: string | null
 }
 
 type IndividualUser = {
@@ -149,6 +146,7 @@ type IndividualUser = {
   globalSteps: IndividualUserSteps
   poolSteps: PoolOnboardingSteps
   kycReference: string
+  taxDocument?: string | null
 }
 
 export type OnboardingUser = IndividualUser | EntityUser

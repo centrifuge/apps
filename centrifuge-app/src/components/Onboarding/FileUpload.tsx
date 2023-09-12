@@ -131,7 +131,7 @@ export function FileUpload({
   }
 
   return (
-    <Stack gap={1} width="100%" height={280}>
+    <Stack gap={1} width="100%" height={150}>
       <Box
         px={2}
         py={1}
@@ -157,7 +157,7 @@ export function FileUpload({
           tabIndex={-1}
           ref={inputRef}
         />
-        <Stack gap={4} height="100%" justifyContent="center" alignItems="center">
+        <Stack gap={2} height="100%" justifyContent="center" alignItems="center">
           {curFile ? (
             <>
               <Shelf gap={1}>
@@ -189,11 +189,6 @@ export function FileUpload({
           ) : (
             <>
               <Stack gap={1} alignItems="center">
-                <Text as="span" variant="body1" textAlign="center">
-                  Drop a file to upload
-                  <br />
-                  or
-                </Text>
                 <UploadButton
                   forwardedAs="button"
                   variant="body1"

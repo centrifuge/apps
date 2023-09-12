@@ -15,7 +15,6 @@ import { LinkWallet } from './LinkWallet'
 import { useGlobalOnboardingStatus } from './queries/useGlobalOnboardingStatus'
 import { useSignedAgreement } from './queries/useSignedAgreement'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
-import { TaxInfo } from './TaxInfo'
 import { UltimateBeneficialOwners } from './UltimateBeneficialOwners'
 
 export const OnboardingPage: React.FC = () => {
@@ -77,7 +76,6 @@ export const OnboardingPage: React.FC = () => {
             {investorType === 'individual' && (activeStep > 2 || !!onboardingUser?.investorType) && (
               <>
                 <Step label="Identity verification" />
-                <Step label="Tax information" />
                 {onboardingUser?.countryOfCitizenship === 'us' && <Step label="Accreditation" />}
                 {pool ? (
                   <>
@@ -94,7 +92,6 @@ export const OnboardingPage: React.FC = () => {
                 <Step label="Business information" />
                 <Step label="Confirm ultimate beneficial owners" />
                 <Step label="Authorized signer verification" />
-                <Step label="Tax information" />
                 {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode.startsWith('us') && (
                   <Step label="Accreditation" />
                 )}
@@ -119,55 +116,53 @@ export const OnboardingPage: React.FC = () => {
             {activeStep === 3 && <KnowYourBusiness />}
             {activeStep === 4 && <UltimateBeneficialOwners />}
             {activeStep === 5 && <KnowYourCustomer />}
-            {activeStep === 6 && <TaxInfo />}
             {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us') ? (
               <>
-                {activeStep === 7 && <Accreditation />}
+                {activeStep === 6 && <Accreditation />}
                 {pool ? (
                   <>
-                    {activeStep === 8 && (
+                    {activeStep === 7 && (
                       <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData as string} />
                     )}
 
-                    {activeStep === 9 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                    {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
-                  activeStep === 8 && <GlobalStatus />
+                  activeStep === 7 && <GlobalStatus />
                 )}
               </>
             ) : pool ? (
               <>
-                {activeStep === 7 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
-                {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 6 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (
-              activeStep === 7 && <GlobalStatus />
+              activeStep === 6 && <GlobalStatus />
             )}
           </>
         )}
         {investorType === 'individual' && (
           <>
             {activeStep === 3 && <KnowYourCustomer />}
-            {activeStep === 4 && <TaxInfo />}
             {onboardingUser?.investorType === 'individual' && onboardingUser.countryOfCitizenship === 'us' ? (
               <>
-                {activeStep === 5 && <Accreditation />}
+                {activeStep === 4 && <Accreditation />}
                 {pool ? (
                   <>
-                    {activeStep === 6 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
-                    {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                    {activeStep === 5 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
+                    {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
-                  activeStep === 6 && <GlobalStatus />
+                  activeStep === 5 && <GlobalStatus />
                 )}
               </>
             ) : pool ? (
               <>
-                {activeStep === 5 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
-                {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 4 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 5 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (
-              activeStep === 5 && <GlobalStatus />
+              activeStep === 4 && <GlobalStatus />
             )}
           </>
         )}
