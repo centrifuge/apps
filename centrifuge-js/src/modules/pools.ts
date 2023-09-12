@@ -471,6 +471,7 @@ export type ActiveLoan = {
   outstandingDebt: CurrencyBalance
   outstandingPrincipal: CurrencyBalance
   outstandingInterest: CurrencyBalance
+  presentValue: CurrencyBalance
 }
 
 // transformed type for UI

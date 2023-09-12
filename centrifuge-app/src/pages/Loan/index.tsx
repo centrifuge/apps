@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -126,17 +126,6 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
     return 0
   }, [originationDate, loan?.pricing.maturityDate])
 
-  const currentFace =
-    borrowerAssetTransactions?.reduce((sum, trx) => {
-      if (trx.type === 'BORROWED') {
-        sum = new CurrencyBalance(sum.add(trx.amount || new CurrencyBalance(0, 27)), 27)
-      }
-      if (trx.type === 'REPAID') {
-        sum = new CurrencyBalance(sum.sub(trx.amount || new CurrencyBalance(0, 27)), 27)
-      }
-      return sum
-    }, new CurrencyBalance(0, 27)) || new CurrencyBalance(0, 27)
-
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -189,16 +178,11 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                 label: 'Maturity date',
                 value: formatDate(loan.pricing.maturityDate),
               },
-              ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+              ...('presentValue' in loan
                 ? [
                     {
                       label: 'Current value',
-                      value: `${formatBalance(
-                        new CurrencyBalance(currentFace.mul(loan.pricing.oracle.value), 44),
-                        pool.currency.symbol,
-                        6,
-                        2
-                      )}`,
+                      value: `${formatBalance(loan.presentValue, pool.currency.symbol, 6, 2)}`,
                     },
                   ]
                 : []),
