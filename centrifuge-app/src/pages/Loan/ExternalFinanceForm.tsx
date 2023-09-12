@@ -1,5 +1,5 @@
 import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
@@ -145,11 +145,26 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                 name="price"
                 validate={combine(
                   settlementPrice(),
-                  max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
-                  max(
-                    maxBorrow.toNumber(),
-                    `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
-                  )
+                  (val: any) => {
+                    const num = val instanceof Decimal ? val.toNumber() : val
+                    const financeAmount = num * (financeForm.values.faceValue || 1)
+
+                    return financeAmount > availableFinancing.toNumber()
+                      ? `Amount exceeds available reserve (${formatBalance(
+                          availableFinancing,
+                          pool?.currency.symbol,
+                          2
+                        )})`
+                      : ''
+                  },
+                  (val: any) => {
+                    const num = val instanceof Decimal ? val.toNumber() : val
+                    const financeAmount = num * (financeForm.values.faceValue || 1)
+
+                    return financeAmount > maxBorrow.toNumber()
+                      ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
+                      : ''
+                  }
                 )}
               >
                 {({ field, meta, form }: FieldProps) => {
@@ -237,8 +252,25 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                 <Field
                   validate={combine(
                     settlementPrice(),
-                    max(balance.toNumber(), 'Amount exceeds balance'),
-                    max(debt.toNumber(), 'Amount exceeds outstanding')
+                    (val: any) => {
+                      const num = val instanceof Decimal ? val.toNumber() : val
+                      const repayAmount = num * (repayForm.values.faceValue || 1)
+
+                      return repayAmount > balance.toNumber()
+                        ? `Your wallet balance (${formatBalance(
+                            roundDown(balance),
+                            pool?.currency.symbol,
+                            2
+                          )}) is smaller than
+                    the outstanding balance.`
+                        : ''
+                    },
+                    (val: any) => {
+                      const num = val instanceof Decimal ? val.toNumber() : val
+                      const repayAmount = num * (repayForm.values.faceValue || 1)
+
+                      return repayAmount > debt.toNumber() ? 'Amount exceeds outstanding' : ''
+                    }
                   )}
                   name="price"
                 >
