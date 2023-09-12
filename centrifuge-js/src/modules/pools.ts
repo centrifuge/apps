@@ -2513,6 +2513,7 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.interestAccrual.rates(),
           api.query.interestAccrual.lastUpdated(),
           api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
+          api.call.loansApi.portfolio(poolId), // TODO: remove loans.activeLoans and use values from this runtime call
         ]).pipe(take(1))
       }),
       map(
@@ -2524,6 +2525,7 @@ export function getPoolsModule(inst: Centrifuge) {
           rateValues,
           interestLastUpdated,
           rawCurrency,
+          rawPortfolio,
         ]) => {
           const currency = rawCurrency.toPrimitive() as AssetCurrencyData
           const rates = rateValues.toPrimitive() as InterestAccrual[]
@@ -2540,6 +2542,20 @@ export function getPoolsModule(inst: Centrifuge) {
             oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
               timestamp,
               value: new CurrencyBalance(value, currency.decimals),
+            }
+          })
+
+          const activeLoansPortfolio: Record<
+            string,
+            {
+              presentValue: CurrencyBalance
+            }
+          > = {}
+
+          ;(rawPortfolio as any).forEach(([key, value]: [Codec, Codec]) => {
+            const data = value.toPrimitive() as any
+            activeLoansPortfolio[String(key.toPrimitive())] = {
+              presentValue: new CurrencyBalance(data.presentValue, currency.decimals),
             }
           })
 
@@ -2642,6 +2658,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   new Rate(rate.interestRatePerSec).toApr().toDecimalPlaces(4).toString() ===
                   sharedInfo.pricing.interestRate.toDecimal().toString()
               )
+              const portfolio = activeLoansPortfolio[loanId.toString()]
               const penaltyRate =
                 'external' in loan.pricing
                   ? loan.pricing.external.interest.penalty
@@ -2714,6 +2731,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 normalizedDebt: new CurrencyBalance(normalizedDebt, currency.decimals),
                 outstandingPrincipal,
                 outstandingInterest,
+                presentValue: portfolio.presentValue,
               }
             }
           )
