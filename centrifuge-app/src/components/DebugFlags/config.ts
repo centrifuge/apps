@@ -47,6 +47,7 @@ export type Key =
   | 'showPodAccountCreation'
   | 'convertEvmAddress'
   | 'showPortfolio'
+  | 'showSwaps'
   | 'poolCreationType'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
@@ -119,7 +120,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   showPortfolio: {
     type: 'checkbox',
     default: false,
-    alwaysShow: true,
+  },
+  showSwaps: {
+    type: 'checkbox',
+    default: false,
   },
   poolCreationType: {
     type: 'select',
