@@ -163,8 +163,6 @@ export function Orders({ buyOrSell }: OrdersProps) {
     { enabled: !!currencies }
   )
 
-  console.log('orders', orders)
-
   const filtered = orders?.filter(
     (order) =>
       !buyOrSell ||
@@ -244,7 +242,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
 
   const disabled = balanceLow || (isTransferEnabled && !isEvmAddress(tranferReceiverAddress))
 
-  if (!account) return
+  if (!account) return null
 
   return (
     <Dialog isOpen={open} onClose={close} title="Fulfill order">
@@ -332,8 +330,4 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
       </form>
     </Dialog>
   )
-}
-
-function formatPrice(number: number) {
-  return number.toLocaleString('en', { maximumSignificantDigits: 2 })
 }
