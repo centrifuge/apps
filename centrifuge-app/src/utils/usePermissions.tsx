@@ -6,7 +6,13 @@ import {
   isSameAddress,
   PoolRoles,
 } from '@centrifuge/centrifuge-js'
-import { truncateAddress, useCentrifugeQuery, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
+import {
+  CombinedSubstrateAccount,
+  truncateAddress,
+  useCentrifugeQuery,
+  useCentrifugeUtils,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import { Select } from '@centrifuge/fabric'
 import * as React from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
@@ -109,7 +115,7 @@ type SuitableConfig = {
 
 export function useSuitableAccountPicker(config: SuitableConfig) {
   const accounts = useSuitableAccounts(config)
-  const [account, setAccount] = React.useState(accounts[0])
+  const [account, setAccount] = React.useState<CombinedSubstrateAccount | undefined>(accounts[0])
   const utils = useCentrifugeUtils()
 
   const pickerElement =
