@@ -403,7 +403,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
   const toCurrencyBalance = (val: BigNumber) => new CurrencyBalance(val.toString(), 18)
   const toTokenBalance = (val: BigNumber) => new TokenBalance(val.toString(), 18)
   const toRate = (val: BigNumber) => new Rate(val.toString())
-  const toPrice = (val: BigNumber) => new Price(val.toString())
+  const toPrice = (val: BigNumber) => new Rate(val.toString())
 
   const calls: Call[] = []
   pools.active.forEach((pool) => {

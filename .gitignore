@@ -31,3 +31,4 @@ yarn-error.log
 !.env.demo
 !.env.catalyst
 !.env.production
+!.env.moonbeam-alpha
