@@ -40,7 +40,7 @@ import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCurrencies } from '../../utils/useCurrencies'
-import { useSuitableAccountPicker } from '../../utils/usePermissions'
+import { useSuitableAccounts } from '../../utils/usePermissions'
 import { ButtonGroup } from '../ButtonGroup'
 import { Column, DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
@@ -180,7 +180,7 @@ export function Orders({ buyOrSell }: OrdersProps) {
 }
 
 export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onClose: () => void; order: SwapOrder }) {
-  const [account, accountPicker] = useSuitableAccountPicker({})
+  const [account] = useSuitableAccounts({})
   const utils = useCentrifugeUtils()
   const balances = useBalances(account?.actingAddress)
   const api = useCentrifugeApi()

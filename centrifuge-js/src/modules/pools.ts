@@ -52,6 +52,8 @@ export type CurrencyMetadata = {
   symbol: string
   isPoolCurrency: boolean
   isPermissioned: boolean
+  additional?: any
+  location?: any
 }
 
 const AdminRoleBits = {
@@ -1770,6 +1772,8 @@ export function getPoolsModule(inst: Centrifuge) {
                   symbol: value.symbol,
                   isPoolCurrency: value.additional.poolCurrency,
                   isPermissioned: value.additional.permissioned,
+                  additional: value.additional,
+                  location: value.location,
                 }
                 return currency
               })
@@ -2145,6 +2149,8 @@ export function getPoolsModule(inst: Centrifuge) {
             symbol: value.symbol,
             isPoolCurrency: value.additional.poolCurrency,
             isPermissioned: value.additional.permissioned,
+            additional: value.additional,
+            location: value.location,
           }
           return currency
         })
