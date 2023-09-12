@@ -24,7 +24,7 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
       <>
         <LabelValueStack label="ISIN" value={pricing.Isin} />
         <LabelValueStack
-          label="Current price"
+          label="Latest price"
           value={`${formatBalance(
             new CurrencyBalance(pricing.oracle.value.toString(), 18).toDecimal(),
             pool.currency.symbol,

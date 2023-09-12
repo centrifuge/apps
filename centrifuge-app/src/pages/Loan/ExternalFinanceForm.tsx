@@ -118,7 +118,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       <Stack as={Card} gap={2} p={2}>
         <Box paddingY={1}>
           <Text variant="heading4">
-            To finance the asset, enter face value and settlement price of the treasury bill.
+            To finance the asset, enter face value and settlement price of the transaction.
           </Text>
         </Box>
         {availableFinancing.greaterThan(0) && !maturityDatePassed && (

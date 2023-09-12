@@ -27,7 +27,7 @@ import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
-import { daysBetween, formatDate } from '../../utils/date'
+import { daysBetween, formatDate, isValidDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useLoan, useNftDocumentId } from '../../utils/useLoans'
@@ -181,7 +181,9 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                 ?.filter((key) => templateMetadata?.attributes?.[key].public)
                 .map((key) => ({
                   label: templateMetadata?.attributes?.[key].label,
-                  value: nftMetadata?.properties[key],
+                  value: isValidDate(nftMetadata?.properties[key])
+                    ? formatDate(nftMetadata?.properties[key])
+                    : nftMetadata?.properties[key],
                 })) || []),
               {
                 label: 'Maturity date',

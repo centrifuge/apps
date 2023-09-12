@@ -32,8 +32,12 @@ export const positiveNumber = (err?: CustomError) => (val?: any) => {
 }
 
 export const settlementPrice = (err?: CustomError) => (val?: any) => {
+  if (val < 1) {
+    return getError('Value must be equal to or larger than 1', err, val)
+  }
+
   const regex = new RegExp(/^\d{1,3}(?:\.\d{1,6})?$/)
-  return regex.test(val) ? '' : getError(`Value must be in the format of (1-3).(0-6) digits`, err, val)
+  return regex.test(val) ? '' : getError('Value must be in the format of (1-3).(0-6) digits', err, val)
 }
 
 export const maxDecimals = (decimals: number, err?: CustomError) => (val?: any) => {
