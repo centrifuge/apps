@@ -51,7 +51,6 @@ export const EditOnboardingEmailAddressDialog = ({ isDialogOpen, setIsDialogOpen
       onClose={() => setIsDialogOpen(false)}
       title={<Text variant="heading2">Edit Email Address</Text>}
     >
-      {/* <Box p={4}> */}
       <Stack gap={3}>
         <TextInput value={currentEmail} label="Current Email Address" disabled />
         <TextInput value={newEmail} label="New Email Address" onChange={(event) => setNewEmail(event.target.value)} />
@@ -69,7 +68,6 @@ export const EditOnboardingEmailAddressDialog = ({ isDialogOpen, setIsDialogOpen
           </Button>
         </Shelf>
       </Stack>
-      {/* </Box> */}
     </Dialog>
   )
 }
