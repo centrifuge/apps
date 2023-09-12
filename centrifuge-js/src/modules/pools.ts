@@ -43,7 +43,7 @@ type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
 export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: string, permissionedTill: number] }
 
-export type CurrencyKey = string | { ForeignAsset: number } | { Tranche: [string, string] }
+export type CurrencyKey = string | { ForeignAsset: string } | { Tranche: [string, string] }
 
 export type CurrencyMetadata = {
   key: CurrencyKey
@@ -2950,10 +2950,20 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
   return balances.find((balance) => looksLike(balance.currency.key, key))
 }
 
-function parseCurrencyKey(key: CurrencyKey): CurrencyKey {
-  if (typeof key !== 'string' && 'Tranche' in key) {
-    return {
-      Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+export function parseCurrencyKey(key: CurrencyKey | { foreignAsset: number | string }): CurrencyKey {
+  if (typeof key === 'object') {
+    if ('Tranche' in key) {
+      return {
+        Tranche: [key.Tranche[0].replace(/\D/g, ''), key.Tranche[1]],
+      }
+    } else if ('ForeignAsset' in key) {
+      return {
+        ForeignAsset: String(key.ForeignAsset).replace(/\D/g, ''),
+      }
+    } else if ('foreignAsset' in key) {
+      return {
+        ForeignAsset: String(key.foreignAsset).replace(/\D/g, ''),
+      }
     }
   }
   return key
