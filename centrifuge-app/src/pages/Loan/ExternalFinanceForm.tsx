@@ -147,7 +147,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   settlementPrice(),
                   (val: any) => {
                     const num = val instanceof Decimal ? val.toNumber() : val
-                    const financeAmount = num * (financeForm.values.faceValue || 1)
+                    const financeAmount = (num * (financeForm.values.faceValue || 1)) / 100
 
                     return financeAmount > availableFinancing.toNumber()
                       ? `Amount exceeds available reserve (${formatBalance(
@@ -159,7 +159,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   },
                   (val: any) => {
                     const num = val instanceof Decimal ? val.toNumber() : val
-                    const financeAmount = num * (financeForm.values.faceValue || 1)
+                    const financeAmount = (num * (financeForm.values.faceValue || 1)) / 100
 
                     return financeAmount > maxBorrow.toNumber()
                       ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
@@ -254,7 +254,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     settlementPrice(),
                     (val: any) => {
                       const num = val instanceof Decimal ? val.toNumber() : val
-                      const repayAmount = num * (repayForm.values.faceValue || 1)
+                      const repayAmount = (num * (repayForm.values.faceValue || 1)) / 100
 
                       return repayAmount > balance.toNumber()
                         ? `Your wallet balance (${formatBalance(
@@ -267,7 +267,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     },
                     (val: any) => {
                       const num = val instanceof Decimal ? val.toNumber() : val
-                      const repayAmount = num * (repayForm.values.faceValue || 1)
+                      const repayAmount = (num * (repayForm.values.faceValue || 1)) / 100
 
                       return repayAmount > debt.toNumber() ? 'Amount exceeds outstanding' : ''
                     }
