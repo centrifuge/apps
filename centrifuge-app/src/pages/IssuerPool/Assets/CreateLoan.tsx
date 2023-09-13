@@ -235,8 +235,7 @@ function IssuerCreateLoan() {
         values.pricing.valuationMethod === 'oracle'
           ? {
               valuationMethod: values.pricing.valuationMethod,
-              // maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
-              maxPriceVariation: '1000000000000000000000000000000',
+              maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
               maxBorrowAmount: values.pricing.maxBorrowQuantity
                 ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals)
                 : null,

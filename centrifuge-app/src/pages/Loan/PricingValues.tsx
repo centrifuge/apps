@@ -10,7 +10,7 @@ type Props = {
   latestSettlementPrice: string | null
 }
 
-export function PricingValues({ loan, loan: { pricing }, pool, latestSettlementPrice }: Props) {
+export function PricingValues({ loan: { pricing }, pool, latestSettlementPrice }: Props) {
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
     (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
