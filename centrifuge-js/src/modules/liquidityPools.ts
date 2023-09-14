@@ -12,6 +12,7 @@ import * as ABI from './liquidityPools/abi'
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
+const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 type EvmQueryOptions = {
   rpcProvider?: JsonRpcProvider
@@ -60,13 +61,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           switchMap((rawPool) => {
             const pool = rawPool.toPrimitive() as any
             const tx = api.tx.utility.batchAll([
-              api.tx.connectors.addPool(poolId, { EVM: chainId }),
+              api.tx.liquidityPools.addPool(poolId, { EVM: chainId }),
               ...pool.tranches.ids.flatMap((trancheId: string) => [
-                api.tx.connectors.addTranche(poolId, trancheId, { EVM: chainId }),
+                api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
                 // Ensure the domain currencies are enabled
                 // Using a batch, because theoretically they could have been enabled already for a different domain
                 api.tx.utility.batch(
-                  currencyIds.map((cid) => api.tx.connectors.allowPoolCurrency(poolId, trancheId, cid))
+                  currencyIds.map((cid) => api.tx.liquidityPools.allowPoolCurrency(poolId, trancheId, cid))
                 ),
               ]),
             ])
@@ -162,9 +163,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   function getDomainRouters() {
     return inst.getApi().pipe(
-      switchMap((api) => api.query.connectorsGateway.domainRouters.entries()),
+      switchMap((api) => api.query.liquidityPoolsGateway.domainRouters.entries()),
       map((rawRouters) => {
         console.log('rawRouters', rawRouters)
+        return [{ chainId: 5, router: '0x7B4d13fE32Fd91eb002cb4A43A374519aD3DF5eC' }]
         return rawRouters
           .map(([rawKey, rawValue]) => {
             const key = (rawKey.toHuman() as ['Centrifuge' | { EVM: string }])[0]
@@ -186,7 +188,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    const MOCK_router = '0x49d80873b5Bf0F7B54483269c51C5B312f34F9D0'
+    const MOCK_router = '0x7B4d13fE32Fd91eb002cb4A43A374519aD3DF5eC'
     const gatewayAddress = await contract(MOCK_router, ABI.Router, options).gateway()
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
@@ -238,7 +240,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     const currencyIds = await firstValueFrom(getDomainCurrencyIds([chainId]))
 
-    const tokenManager: string = await contract(managerAddress, ABI.InvestmentManager, options).tokenManager()
+    const poolManager: string = await contract(managerAddress, ABI.InvestmentManager, options).poolManager()
 
     // const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
     const stablesData = await multicall<{ currencyAddresses?: string[] }>(
@@ -246,7 +248,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         ...currencyIds.map(
           (currencyId, i) =>
             ({
-              target: tokenManager,
+              target: poolManager,
               call: ['function currencyIdToAddress(uint128) view returns (address)', currencyId],
               returns: [[`currencyAddresses[${i}]`]],
             } as Call)
@@ -263,7 +265,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         ...stablesData.currencyAddresses.map(
           (currencyAddr, i) =>
             ({
-              target: managerAddress,
+              target: poolManager,
               call: [
                 'function getLiquidityPool(uint64, bytes16, address) view returns (address)',
                 poolId,
@@ -404,7 +406,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       },
       {
         target: lp,
-        call: ['function hasMember(address) view returns (bool)', user],
+        call: ['function checkTransferRestriction(address, address, uint) view returns (bool)', NULL_ADDRESS, user, 0],
         returns: [['isAllowedToInvest']],
       },
       {
