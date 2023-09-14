@@ -1,4 +1,4 @@
-name: "Deploy main branch"
+name: deploy-main
 on:
   push:
     branches: main
@@ -8,11 +8,11 @@ on:
   
 jobs:
   trigger:
-    name: deploy-${{ matrix.env_target }}
+    name: deploy-${{ matrix.env }}
     strategy:
       matrix:
-        env_taget: [moonbeam-aplha, ff-prod, development]
+        env: ['moonbeam-aplha', 'ff-prod', 'development']
     uses: ./.github/workflows/deploy_all.yml
     secrets: inherit
     with:
-      environment: ${{ matrix.env_target }}
+      environment: ${{ matrix.env }}
