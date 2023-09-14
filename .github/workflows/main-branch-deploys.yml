@@ -11,7 +11,7 @@ jobs:
     name: deploy-${{ matrix.env }}
     strategy:
       matrix:
-        env: ['moonbeam-aplha', 'ff-prod', 'development']
+        env: ['moonbeam-alpha', 'ff-prod', 'development']
     uses: ./.github/workflows/deploy_all.yml
     secrets: inherit
     with:
