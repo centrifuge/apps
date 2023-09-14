@@ -9,10 +9,11 @@ import { formatBalance } from '../../utils/formatting'
 type Props = {
   transactions: BorrowerTransaction[]
   currency: string
+  decimals: number
   loanType: 'external' | 'internal'
 }
 
-export const TransactionTable = ({ transactions, currency, loanType }: Props) => {
+export const TransactionTable = ({ transactions, currency, loanType, decimals }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
       if (a.timestamp > b.timestamp) {
@@ -33,7 +34,7 @@ export const TransactionTable = ({ transactions, currency, loanType }: Props) =>
     return sortedTransactions.map((transaction, index, array) => ({
       type: transaction.type,
       transactionDate: transaction.timestamp,
-      settlePrice: transaction.settlementPrice ? new CurrencyBalance(transaction.settlementPrice, 6) : null,
+      settlePrice: transaction.settlementPrice ? new CurrencyBalance(transaction.settlementPrice, decimals) : null,
       faceFlow: transaction.amount,
       position: array.slice(0, index + 1).reduce((sum, trx) => {
         if (trx.type === 'BORROWED') {
@@ -45,7 +46,7 @@ export const TransactionTable = ({ transactions, currency, loanType }: Props) =>
         return sum
       }, new CurrencyBalance(0, 27)),
     }))
-  }, [transactions])
+  }, [transactions, decimals])
 
   const getStatusChipType = (type: BorrowerTransactionType) => {
     if (type === 'BORROWED' || type === 'CREATED' || type === 'PRICED') return 'info'

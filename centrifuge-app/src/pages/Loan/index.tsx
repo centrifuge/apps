@@ -275,6 +275,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     ? 'external'
                     : 'internal'
                 }
+                decimals={pool.currency.decimals}
               />
             </PageSection>
           ) : null}

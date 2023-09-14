@@ -1,7 +1,6 @@
-import { CurrencyBalance, Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, Price } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, CurrencyInput, Flex, IconArrowDown, Stack, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -29,7 +28,7 @@ export function OraclePriceForm({
 
   const { execute: doOraclePriceTransaction, isLoading: isOraclePriceLoading } = useCentrifugeTransaction(
     'Set oracle price',
-    (cent) => (args: [price: string], options) => {
+    (cent) => (args: [price: Price], options) => {
       const [price] = args
       return cent.getApi().pipe(
         switchMap((api) => {
@@ -57,7 +56,7 @@ export function OraclePriceForm({
       newPrice: '',
     },
     onSubmit: (values, actions) => {
-      const newPrice = new BN(Rate.fromFloat(values.newPrice).toString()).div(new BN(10).pow(new BN(9))).toString()
+      const newPrice = Price.fromFloat(values.newPrice)
       doOraclePriceTransaction([newPrice])
       actions.setSubmitting(false)
     },

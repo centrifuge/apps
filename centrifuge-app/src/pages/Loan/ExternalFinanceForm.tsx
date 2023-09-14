@@ -1,4 +1,4 @@
-import { CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, findBalance, Loan as LoanType, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -61,7 +61,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = CurrencyBalance.fromFloat((values.faceValue as number) / (values.price as number), 18)
+      const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
 
       doFinanceTransaction([loan.poolId, loan.id, quantity, price, account.actingAddress])
       actions.setSubmitting(false)
@@ -76,7 +76,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = CurrencyBalance.fromFloat((values.faceValue as number) / (values.price as number), 18)
+      const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
 
       doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price, account.actingAddress])
       actions.setSubmitting(false)
@@ -145,11 +145,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                 name="price"
                 validate={combine(
                   settlementPrice(),
-                  (val: any) => {
+                  (val) => {
                     const num = val instanceof Decimal ? val.toNumber() : val
-                    const financeAmount = (num * (financeForm.values.faceValue || 1)) / 100
+                    const financeAmount = Dec(num)
+                      .mul(financeForm.values.faceValue || 1)
+                      .div(100)
 
-                    return financeAmount > availableFinancing.toNumber()
+                    return financeAmount.gt(availableFinancing)
                       ? `Amount exceeds available reserve (${formatBalance(
                           availableFinancing,
                           pool?.currency.symbol,
@@ -157,11 +159,12 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                         )})`
                       : ''
                   },
-                  (val: any) => {
-                    const num = val instanceof Decimal ? val.toNumber() : val
-                    const financeAmount = (num * (financeForm.values.faceValue || 1)) / 100
+                  (val) => {
+                    const financeAmount = Dec(val)
+                      .mul(financeForm.values.faceValue || 1)
+                      .div(100)
 
-                    return financeAmount > maxBorrow.toNumber()
+                    return financeAmount.gt(maxBorrow)
                       ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
                       : ''
                   }
@@ -219,7 +222,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="label2">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? formatBalance(new CurrencyBalance(currentFace, 24), pool.currency.symbol, 6, 2)
+                ? formatBalance(currentFace, pool.currency.symbol, 6, 2)
                 : ''}
             </Text>
           </Shelf>
@@ -252,11 +255,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                 <Field
                   validate={combine(
                     settlementPrice(),
-                    (val: any) => {
+                    (val) => {
                       const num = val instanceof Decimal ? val.toNumber() : val
-                      const repayAmount = (num * (repayForm.values.faceValue || 1)) / 100
+                      const repayAmount = Dec(num)
+                        .mul(repayForm.values.faceValue || 1)
+                        .div(100)
 
-                      return repayAmount > balance.toNumber()
+                      return repayAmount.gt(balance)
                         ? `Your wallet balance (${formatBalance(
                             roundDown(balance),
                             pool?.currency.symbol,
@@ -265,11 +270,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     the outstanding balance.`
                         : ''
                     },
-                    (val: any) => {
+                    (val) => {
                       const num = val instanceof Decimal ? val.toNumber() : val
-                      const repayAmount = (num * (repayForm.values.faceValue || 1)) / 100
+                      const repayAmount = Dec(num)
+                        .mul(repayForm.values.faceValue || 1)
+                        .div(100)
 
-                      return repayAmount > debt.toNumber() ? 'Amount exceeds outstanding' : ''
+                      return repayAmount.gt(debt) ? 'Amount exceeds outstanding' : ''
                     }
                   )}
                   name="price"
