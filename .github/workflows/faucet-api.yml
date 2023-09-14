@@ -11,12 +11,8 @@ on:
       deploy_env:
         type: string
         required: false
-        default: demo
 env:
   app_name: faucet-api
-  # For now deploy only on demo when triggered with workflow_call:
-  deploy_to: ${{ inputs.deploy_env && 'demo' || '' }}
-  # deploy_to: ${{ inputs_deploy_env }}
   function_handler: faucet
 concurrency:
   group: 'faucet-api--${{ inputs.deploy_env || github.event.inputs.deploy_env }}@${{ github.event.name }}${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
@@ -49,6 +45,9 @@ jobs:
       function_name: ${{ steps.prepare.outputs.function_name }}
 
   deploy-faucet:
+    # if: ${{ inputs.deploy_env == 'demo' }} || ${{ inputs.deploy_env == 'development' }}
+    # For now deploy only to demo
+    if:  ${{ inputs.deploy_env == 'demo' }}
     concurrency:
       group: deploy-${{ needs.build-faucet.outputs.function_name }}
       cancel-in-progress: false
@@ -74,4 +73,4 @@ jobs:
           target: ${{ env.function_handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
           service_account: '${{ vars.FIRESTORE_SA }}'
-          deploy_env: ${{ env.deploy_to }}
+          deploy_env: ${{ inputs.deploy_env }}
