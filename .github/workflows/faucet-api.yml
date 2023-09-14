@@ -1,13 +1,5 @@
 name: Faucet API
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'faucet-api/**'
-      - '.github/workflows/faucet-api.yml'
-      - '.github/actions/deploy-gfunction'
-      - '.github/actions/build-function'
   pull_request:
     paths:
       - 'faucet-api/**'

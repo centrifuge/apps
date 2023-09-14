@@ -1,14 +1,5 @@
 name: Centrifuge App
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'centrifuge-app/**'
-      - 'centrifuge-js/**'
-      - 'centrifuge-react/**'
-      - '.github/workflows/centrifuge-app.yml'
-      - '.github/actions/deploy-gcs'
   pull_request:
     paths:
       - 'centrifuge-app/**'

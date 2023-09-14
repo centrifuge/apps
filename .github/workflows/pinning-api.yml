@@ -1,13 +1,5 @@
 name: Pinning API
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'pinning-api/**'
-      - '.github/workflows/pinning-api.yml'
-      - '.github/actions/deploy-gfunction'
-      - '.github/actions/build-function'
   pull_request:
     paths:
       - 'pinning-api/**'

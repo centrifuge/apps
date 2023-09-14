@@ -1,13 +1,5 @@
 name: Onboarding API
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'onboarding-api/**'
-      - '.github/workflows/onboarding-api.yml'
-      - '.github/actions/deploy-gfunction'
-      - '.github/actions/build-function'
   pull_request:
     paths:
       - 'onboarding-api/**'
