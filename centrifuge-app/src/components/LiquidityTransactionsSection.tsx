@@ -104,7 +104,7 @@ export default function LiquidityTransactionsSection({
       : []
   }, [chartData, dataColors, tooltips, pool.currency.symbol])
 
-  return (
+  return chartData?.length ? (
     <PageSection
       title={title}
       titleAddition={
@@ -133,5 +133,5 @@ export default function LiquidityTransactionsSection({
         <StackedBarChart data={chartData} names={dataNames} colors={dataColors} currency={pool.currency.symbol} />
       )}
     </PageSection>
-  )
+  ) : null
 }
