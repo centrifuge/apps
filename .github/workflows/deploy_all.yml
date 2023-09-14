@@ -1,0 +1,41 @@
+name: "Deploy all apps"
+on:
+  # Allow this wofkflow as a universal "deployer" to 
+  # call from other workflows.
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:
+  app:
+    name: app-${{ inputs.environment}}
+    uses: ./.github/workflows/centrifuge-app.yml
+    secrets: inherit
+    with:
+      deploy_env: ${{ inputs.environment}}
+
+
+  pinning:
+    name: pinning-${{ inputs.environment}}
+    uses:  ./.github/workflows/pinning-api.yml
+    secrets: inherit
+    with:
+      deploy_env: ${{ inputs.environment}}
+
+
+  onboarding:
+    name: onboarding-${{ inputs.environment}}
+    uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+    with:
+      deploy_env: ${{ inputs.environment}}
+
+  faucet:
+    name: faucet-${{ inputs.environment}}
+    if: ${{ inputs.environment == 'demo'  || inputs.environment == 'development' }}
+    uses: ./.github/workflows/faucet-api.yml
+    secrets: inherit
+    with:
+      deploy_env: ${{ inputs.environment}}

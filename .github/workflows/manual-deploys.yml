@@ -1,0 +1,19 @@
+name: Deploy to Catalyst and demo
+on:
+  workflow_dispatch:
+      inputs:
+          environment:
+            type: choice
+            description: where to deploy
+            options:
+                - demo
+                - catalyst
+jobs:
+  trigger:
+    strategy:
+      matrix:
+        env_taget: [moonbeam-aplha, ff-prod, development]
+    uses: ./.github/workflows/deploy_all.yml
+    secrets: inherit
+    with:
+      environment: ${{ matrix.environment }}              

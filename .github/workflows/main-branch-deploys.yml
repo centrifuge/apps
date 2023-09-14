@@ -1,0 +1,17 @@
+name: "Moonbeam dev (alpha) deployments (manual)"
+on:
+  push:
+    branches: main
+  pull_request:
+    paths:
+      - '.github/workflows/main-branch-deploys.yml'
+  
+jobs:
+  trigger:
+    strategy:
+      matrix:
+        env_taget: [moonbeam-aplha, ff-prod, development]
+    uses: ./.github/workflows/deploy_all.yml
+    secrets: inherit
+    with:
+      environment: ${{ matrix.env_target }}
