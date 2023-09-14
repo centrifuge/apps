@@ -19,7 +19,7 @@ env:
   # deploy_to: ${{ inputs_deploy_env }}
   function_handler: faucet
 concurrency:
-  group: 'faucet-api@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: 'faucet-api--${{ inputs.deploy_env || github.event.inputs.deploy_env }}@${{ github.event.name }}${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
 jobs:

@@ -18,7 +18,7 @@ env:
   artifact_name: "pinning-api${{ inputs.deploy_env && format('-{0}', inputs.deploy_env) }}"
 concurrency:
  # Fancy concurrency group string to allow for multi-staging deployments  
-  group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }}@${{ github.event.name }}${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true    
 jobs:
   build-pinning-api:
@@ -43,7 +43,7 @@ jobs:
         uses: ./.github/actions/build-function
         with:
           app_name: ${{ env.app_name }}
-          artifact_name: ${{ env.artifact_name }}
+          artifact_name: ${{ steps.prepare.outputs.function_name }}
 
       - name: Archive staging artifacts
         id: archive_staging
@@ -60,7 +60,7 @@ jobs:
   deploy-pinning-api:
     concurrency:
      # Don't try to deploy the same function in parallel
-      group: deploy-${{ needs.build-pinning-api.outputs.function_name }}
+      group: deploy-${{ needs.build-pinning-api.outputs.function_name }}-${{ github.event.name }}
       cancel-in-progress: true
     needs: build-pinning-api
     runs-on: ubuntu-latest
@@ -79,7 +79,7 @@ jobs:
         uses: ./apps/.github/actions/deploy-gfunction
         with:
           app_name: ${{ env.app_name }}
-          artifact_name: ${{ env.artifact_name }}
+          artifact_name: ${{ needs.build-pinning-api.outputs.function_name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           target: ${{ env.function_handler }}
