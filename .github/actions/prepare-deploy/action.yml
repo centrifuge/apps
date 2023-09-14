@@ -80,7 +80,7 @@ runs:
           echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-dev.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=development" >> $GITHUB_OUTPUT
-        if ${{ inputs.deploy_to == 'ff-production' }}; then
+        elif ${{ inputs.deploy_to == 'ff-production' }}; then
           # FF-PRODUCTION
           # A build from the DEV env that points to prod
           echo "function_name=${{ inputs.app_base_name }}-ff-production" >> $GITHUB_OUTPUT

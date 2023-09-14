@@ -1,4 +1,4 @@
-name: "Moonbeam dev (alpha) deployments (manual)"
+name: "Deploy main branch"
 on:
   push:
     branches: main
@@ -8,6 +8,7 @@ on:
   
 jobs:
   trigger:
+    name: deploy-${{ matrix.env_target }}
     strategy:
       matrix:
         env_taget: [moonbeam-aplha, ff-prod, development]
