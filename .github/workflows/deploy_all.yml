@@ -19,24 +19,24 @@ jobs:
 
   pinning:
     if: ${{ inputs.environment != 'ff-prod' }}
-    name: pinning-${{ inputs.environment}}
+    name: pinning-${{ inputs.environment || 'disabled'}}
     uses:  ./.github/workflows/pinning-api.yml
     secrets: inherit
     with:
-      deploy_env: ${{ inputs.environment}}
+      deploy_env: ${{ inputs.environment }}
 
 
   onboarding:
     if: ${{ inputs.environment != 'ff-prod' }}
-    name: onboarding-${{ inputs.environment}}
+    name: onboarding-${{ inputs.environment || 'disabled' }}
     uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
     with:
       deploy_env: ${{ inputs.environment}}
 
   faucet:
-    name: faucet-${{ inputs.environment}}
     if: ${{ inputs.environment == 'demo'  || inputs.environment == 'development' }}
+    name: faucet-${{ inputs.environment || 'disabled'}}
     uses: ./.github/workflows/faucet-api.yml
     secrets: inherit
     with:
