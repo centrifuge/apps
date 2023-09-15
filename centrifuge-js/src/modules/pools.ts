@@ -733,7 +733,7 @@ export function getPoolsModule(inst: Centrifuge) {
         api.query.ormlAssetRegistry.metadata(currency).pipe(
           take(1),
           switchMap((rawCurrencyMeta) => {
-            const currencyMeta = rawCurrencyMeta.toHuman() as AssetCurrencyData
+            const currencyMeta = rawCurrencyMeta.toPrimitive() as AssetCurrencyData
             return pinPoolMetadata(metadata, poolId, currencyMeta.decimals, options)
           }),
           switchMap((pinnedMetadata) => {
@@ -1760,12 +1760,13 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) =>
         api.query.poolSystem.pool(poolId).pipe(
           switchMap((rawPool) => {
-            const pool = rawPool.toHuman() as any
-            return api.query.ormlAssetRegistry.metadata(pool.currency).pipe(
+            const pool = rawPool.toPrimitive() as any
+            const curKey = parseCurrencyKey(pool.currency)
+            return api.query.ormlAssetRegistry.metadata(curKey).pipe(
               map((rawCurrencyMeta) => {
-                const value = rawCurrencyMeta.toHuman() as AssetCurrencyData
+                const value = rawCurrencyMeta.toPrimitive() as AssetCurrencyData
                 const currency: CurrencyMetadata = {
-                  key: pool.currency,
+                  key: curKey,
                   decimals: value.decimals,
                   name: value.name,
                   symbol: value.symbol,
@@ -2137,8 +2138,8 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.ormlAssetRegistry.metadata.entries()),
       map((rawMetas) => {
         const metas = rawMetas.map(([rawKey, rawValue]) => {
-          const key = parseCurrencyKey((rawKey.toHuman() as any)[0] as CurrencyKey)
-          const value = rawValue.toHuman() as AssetCurrencyData
+          const key = parseCurrencyKey((rawKey.toHuman() as any)[0])
+          const value = rawValue.toPrimitive() as AssetCurrencyData
           const currency: CurrencyMetadata = {
             key,
             decimals: value.decimals,
@@ -2360,7 +2361,7 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.priceOracle.values.entries(),
           api.query.interestAccrual.rates(),
           api.query.interestAccrual.lastUpdated(),
-          api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency),
+          api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
         ]).pipe(take(1))
       }),
       map(
@@ -2373,7 +2374,7 @@ export function getPoolsModule(inst: Centrifuge) {
           interestLastUpdated,
           rawCurrency,
         ]) => {
-          const currency = rawCurrency.toHuman() as AssetCurrencyData
+          const currency = rawCurrency.toPrimitive() as AssetCurrencyData
           const rates = rateValues.toPrimitive() as InterestAccrual[]
 
           const oraclePrices: Record<
