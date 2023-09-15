@@ -20,18 +20,21 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
     const { wallet } = req
     const user = await fetchUser(wallet)
 
-    await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${wallet.address}.pdf`)
-
-    const updatedUser: Subset<OnboardingUser> = {
-      globalSteps: {
-        verifyTaxInfo: {
-          completed: true,
-          timeStamp: new Date().toISOString(),
-        },
-      },
+    let taxDocument = ''
+    if (user?.taxDocument) {
+      const taxDoc = user.taxDocument.split('/')
+      const version = taxDoc[taxDoc.length - 1].split('.')[0].split('_')[1] ?? '0'
+      const newVersion = Number(version) + 1
+      taxDocument = `tax-information/${wallet.address}_${newVersion}.pdf`
+    } else {
+      taxDocument = `tax-information/${wallet.address}.pdf`
     }
 
-    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['globalSteps.verifyTaxInfo'])
+    const updatedUser: Subset<OnboardingUser> = {
+      taxDocument: `${process.env.ONBOARDING_STORAGE_BUCKET}/${taxDocument}`,
+    }
+    await writeToOnboardingBucket(Uint8Array.from(req.body), taxDocument)
+    await validateAndWriteToFirestore(wallet, updatedUser, user.investorType, ['taxDocument'])
 
     const freshUserData = await fetchUser(wallet)
     return res.status(200).send({ ...freshUserData })

@@ -34,6 +34,11 @@ export const signAndSendDocumentsController = async (
 
     const { poolSteps, globalSteps, investorType, name, email, ...user } = await fetchUser(wallet)
     const { metadata } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
+
+    if (metadata.onboarding?.requireTaxInfo && !user.taxDocument) {
+      throw new HttpError(400, 'Tax info required')
+    }
+
     if (
       investorType === 'individual' &&
       metadata?.onboarding?.kycRestrictedCountries?.includes(user.countryOfCitizenship)

@@ -78,10 +78,6 @@ const globalStepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  verifyTaxInfo: object({
-    completed: bool(),
-    timeStamp: string().nullable(),
-  }),
   verifyAccreditation: object({
     completed: bool(),
     timeStamp: string().nullable(),
@@ -109,6 +105,7 @@ export const entityUserSchema = object({
   poolSteps: poolStepsSchema,
   manualKybReference: string().nullable().default(null),
   address: string().nullable().default(null),
+  taxDocument: string().nullable().default(null),
 })
 
 export const individualUserSchema = object({
@@ -120,9 +117,10 @@ export const individualUserSchema = object({
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(), // TODO: validate with list of countries
   countryOfResidency: string().required(), // TODO: validate with list of countries
-  globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'verifyEmail']),
+  globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyEmail']).optional(),
   poolSteps: poolStepsSchema,
   address: string().nullable().default(null),
+  taxDocument: string().nullable().default(null),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>

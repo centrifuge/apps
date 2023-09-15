@@ -205,7 +205,10 @@ function CreatePoolForm() {
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
         console.log('adminMultisig', multisigAddr)
         const poolArgs = args.slice(2) as any
-        return combineLatest([cent.getApi(), cent.pools.createPool(poolArgs, { batch: true })]).pipe(
+        return combineLatest([
+          cent.getApi(),
+          cent.pools.createPool(poolArgs, { createType: options?.createType, batch: true }),
+        ]).pipe(
           switchMap(([api, poolSubmittable]) => {
             const adminProxyDelegate = multisigAddr ?? address
             const otherMultisigSigners =

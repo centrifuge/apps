@@ -38,6 +38,7 @@ type OnboardingSettingsInput = {
   externalOnboardingUrl?: string
   openForOnboarding: { [trancheId: string]: boolean }
   podReadAccess: boolean
+  taxInfoRequired: boolean
 }
 
 export const OnboardingSettings = () => {
@@ -122,6 +123,7 @@ export const OnboardingSettings = () => {
         {}
       ),
       podReadAccess: !!poolMetadata?.onboarding?.podReadAccess || false,
+      taxInfoRequired: !!poolMetadata?.onboarding?.taxInfoRequired || true,
     }
   }, [pool, poolMetadata, centrifuge.metadata])
 
@@ -202,6 +204,7 @@ export const OnboardingSettings = () => {
           kybRestrictedCountries,
           externalOnboardingUrl: useExternalUrl ? values.externalOnboardingUrl : undefined,
           podReadAccess: values.podReadAccess,
+          taxInfoRequired: values.taxInfoRequired,
         },
       }
 
@@ -360,6 +363,15 @@ export const OnboardingSettings = () => {
                 label="Automatically give new investors access to private asset-level data"
                 checked={formik.values.podReadAccess}
                 onChange={(e) => formik.setFieldValue('podReadAccess', !!e.target.checked)}
+                disabled={!isEditing || formik.isSubmitting || isLoading}
+              />
+            </Stack>
+            <Stack gap={2}>
+              <Text variant="heading4">Tax document requirement</Text>
+              <Checkbox
+                label="Require investors to upload tax documents before signing the subscription agreement"
+                checked={formik.values.taxInfoRequired}
+                onChange={(e) => formik.setFieldValue('taxInfoRequired', !!e.target.checked)}
                 disabled={!isEditing || formik.isSubmitting || isLoading}
               />
             </Stack>

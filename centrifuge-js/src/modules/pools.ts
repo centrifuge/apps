@@ -634,6 +634,7 @@ export type PoolMetadata = {
     externalOnboardingUrl?: string
     tranches: { [trancheId: string]: { agreement: FileType | undefined; openForOnboarding: boolean } }
     podReadAccess?: boolean
+    taxInfoRequired?: boolean
   }
 }
 

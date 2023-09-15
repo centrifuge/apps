@@ -77,7 +77,7 @@ const defaultConfig: Config = {
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
   centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools',
   altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-altair',
-  metadataHost: 'https://altair.mypinata.cloud',
+  metadataHost: 'https://centrifuge.mypinata.cloud',
 }
 
 const relayChainTypes = {}
