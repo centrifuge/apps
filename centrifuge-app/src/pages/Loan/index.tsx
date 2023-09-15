@@ -186,7 +186,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                 ? [
                     {
                       label: 'Current value',
-                      value: `${formatBalance(loan.presentValue, pool.currency.symbol, 6, 2)}`,
+                      value: `${formatBalance(loan.presentValue, pool.currency.symbol, 2, 2)}`,
                     },
                   ]
                 : []),

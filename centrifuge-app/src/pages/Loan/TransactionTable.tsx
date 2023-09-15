@@ -1,6 +1,7 @@
 import { BorrowerTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { BorrowerTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { StatusChip, Tooltip } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import { useMemo } from 'react'
 import { DataTable } from '../../components/DataTable'
 import { formatDate } from '../../utils/date'
@@ -34,7 +35,9 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals }:
     return sortedTransactions.map((transaction, index, array) => ({
       type: transaction.type,
       transactionDate: transaction.timestamp,
-      settlePrice: transaction.settlementPrice ? new CurrencyBalance(transaction.settlementPrice, decimals) : null,
+      settlePrice: transaction.settlementPrice
+        ? new CurrencyBalance(new BN(transaction.settlementPrice).mul(new BN(100)), decimals)
+        : null,
       faceFlow: transaction.amount,
       position: array.slice(0, index + 1).reduce((sum, trx) => {
         if (trx.type === 'BORROWED') {
@@ -93,9 +96,9 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals }:
           cell: (row) =>
             row.faceFlow
               ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(
-                  new CurrencyBalance(row.faceFlow, 24),
+                  new CurrencyBalance(new BN(row.faceFlow).mul(new BN(100)), decimals),
                   currency,
-                  6,
+                  2,
                   2
                 )}`
               : '-',
@@ -113,9 +116,11 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals }:
           cell: (row) =>
             row.faceFlow && row.settlePrice
               ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(
-                  new CurrencyBalance(row.faceFlow.mul(row.settlePrice), 32),
+                  new CurrencyBalance(row.faceFlow, decimals)
+                    .toDecimal()
+                    .mul(new CurrencyBalance(row.settlePrice, decimals).toDecimal()),
                   currency,
-                  6,
+                  2,
                   2
                 )}`
               : '-',
@@ -125,7 +130,9 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals }:
           align: 'left',
           header: 'Position',
           cell: (row) =>
-            row.position.isZero() ? '-' : formatBalance(new CurrencyBalance(row.position, 24), currency, 6, 2),
+            row.position.isZero()
+              ? '-'
+              : formatBalance(new CurrencyBalance(new BN(row.position).mul(new BN(100)), decimals), currency, 2, 2),
           flex: '3',
         },
         // TODO: add link to transaction

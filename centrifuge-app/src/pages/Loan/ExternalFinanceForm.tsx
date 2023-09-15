@@ -60,7 +60,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       faceValue: '',
     },
     onSubmit: (values, actions) => {
-      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
+      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
       const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
 
       doFinanceTransaction([loan.poolId, loan.id, quantity, price, account.actingAddress])
@@ -75,7 +75,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       faceValue: '',
     },
     onSubmit: (values, actions) => {
-      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
+      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
       const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
 
       doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price, account.actingAddress])
@@ -105,13 +105,19 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const currentFace =
     borrowerAssetTransactions?.reduce((sum, trx) => {
       if (trx.type === 'BORROWED') {
-        sum = new CurrencyBalance(sum.add(trx.amount || new CurrencyBalance(0, 27)), 27)
+        sum = new CurrencyBalance(
+          sum.add(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+          pool.currency.decimals
+        )
       }
       if (trx.type === 'REPAID') {
-        sum = new CurrencyBalance(sum.sub(trx.amount || new CurrencyBalance(0, 27)), 27)
+        sum = new CurrencyBalance(
+          sum.sub(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+          pool.currency.decimals
+        )
       }
       return sum
-    }, new CurrencyBalance(0, 27)) || new CurrencyBalance(0, 27)
+    }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
 
   return (
     <Stack gap={3}>
@@ -222,7 +228,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="label2">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? formatBalance(currentFace, pool.currency.symbol, 6, 2)
+                ? formatBalance(currentFace, pool.currency.symbol, 2, 2)
                 : ''}
             </Text>
           </Shelf>
