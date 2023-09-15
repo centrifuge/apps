@@ -10,7 +10,7 @@ on:
 
 jobs:
   app:
-    name: app-${{ inputs.environment}}
+    name: web-app
     uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
     with:
@@ -19,7 +19,7 @@ jobs:
 
   pinning:
     if: ${{ inputs.environment != 'ff-prod' }}
-    name: pinning-${{ inputs.environment || 'disabled'}}
+    name: pinning-api-gfunction
     uses:  ./.github/workflows/pinning-api.yml
     secrets: inherit
     with:
@@ -28,7 +28,7 @@ jobs:
 
   onboarding:
     if: ${{ inputs.environment != 'ff-prod' }}
-    name: onboarding-${{ inputs.environment || 'disabled' }}
+    name: onboarding-api-gfunction
     uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
     with:
@@ -36,7 +36,7 @@ jobs:
 
   faucet:
     if: ${{ inputs.environment == 'demo'  || inputs.environment == 'development' }}
-    name: faucet-${{ inputs.environment || 'disabled'}}
+    name: faucet-api-gfunction
     uses: ./.github/workflows/faucet-api.yml
     secrets: inherit
     with:
