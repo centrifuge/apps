@@ -91,7 +91,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       reference: kycReference,
       callback_url: '',
       email: userData?.email ?? '',
-      country: body.countryOfCitizenship,
+      country: '',
       language: 'EN',
       redirect_url: '',
       verification_mode: 'any',
