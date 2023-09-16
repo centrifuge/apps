@@ -1,4 +1,4 @@
-import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Pool, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -39,7 +39,26 @@ function Pools() {
   ).map((q) => q.data)
   const centPoolsMetaDataById = getMetasById(centPools, centPoolsMetaData)
 
-  const pools = !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
+  const upcomingPools = [
+    {
+      apr: Rate.fromApr(0.08),
+      assetClass: 'Real Estate Bridge Loans',
+      iconUri: 'https://storage.googleapis.com/tinlake/pool-media/new-silver-2/icon.svg',
+      name: 'New Silver Series 3',
+      status: 'Upcoming' as PoolStatusKey,
+    },
+    {
+      apr: Rate.fromApr(0.15),
+      assetClass: 'Voluntary Carbon Offsets',
+      iconUri: 'https://storage.googleapis.com/tinlake/pool-media/flowcarbon-1/FlowcarbonBadge.svg',
+      name: 'Flowcarbon Nature Offsets Series 2',
+      status: 'Upcoming' as PoolStatusKey,
+    },
+  ]
+
+  const pools = !!listedPools?.length
+    ? [...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent), ...upcomingPools]
+    : [...upcomingPools]
   const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
 
   if (!listedPools.length) {

@@ -1,5 +1,5 @@
 import { Rate } from '@centrifuge/centrifuge-js'
-import { Box, Grid, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import { Box, Grid, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
@@ -70,7 +70,7 @@ export function PoolCard({
           variant="body1"
           color="textPrimary"
           fontWeight={500}
-          textAlign="right"
+          textAlign="left"
           isLoading={isLoading}
           maxLines={1}
         >
@@ -82,6 +82,7 @@ export function PoolCard({
                 })
               : '—'}
           </Ellipsis>
+          {status === 'Upcoming' ? <Text variant="body3"> target</Text> : ''}
         </TextWithPlaceholder>
 
         <Box>
@@ -89,7 +90,7 @@ export function PoolCard({
         </Box>
       </Grid>
 
-      <Anchor to={`${basePath}/${poolId}`} aria-label="Go to pool details" />
+      {status === 'Upcoming' ? null : <Anchor to={`${basePath}/${poolId}`} aria-label="Go to pool details" />}
     </Root>
   )
 }
