@@ -26,7 +26,7 @@ type RepayValues = {
 export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
-  const balances = useBalances(account.actingAddress)
+  const balances = useBalances(account.signingAccount.address)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
