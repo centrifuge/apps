@@ -1,5 +1,5 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useEvmNativeBalance, useEvmNativeCurrency } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useEvmNativeBalance, useEvmNativeCurrency, useEvmProvider } from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -14,6 +14,8 @@ import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as P
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
+
+  console.log('evmAddress', evmAddress)
   const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
   const evmNativeCurrency = useEvmNativeCurrency()
   const order = usePendingCollect(poolId, trancheId, centAddress)
@@ -28,6 +30,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     refetch: refetchInvest,
     isLoading: isInvestmentLoading,
   } = useLiquidityPoolInvestment(poolId, trancheId)
+  const provider = useEvmProvider()
 
   const { data: lpEvents } = useLPEvents(poolId, trancheId, lpInvest?.lpAddress)
   const isAllowedToInvest = lpInvest?.isAllowedToInvest
@@ -176,7 +179,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         lpInvest.currencySupportsPermit &&
         pendingAction !== 'approvePoolCurrency'
       ) {
-        const permit = await cent.liquidityPools.signPermit([lpInvest.lpAddress, lpInvest.currencyAddress])
+        const signer = provider!.getSigner()
+        const connectedCent = cent.connectEvm(evmAddress!, signer)
+        const permit = await connectedCent.liquidityPools.signPermit([lpInvest.lpAddress, lpInvest.currencyAddress])
         investWithPermit.execute([lpInvest.lpAddress, newOrder, permit])
         setPendingAction('investWithPermit')
       } else {
@@ -191,7 +196,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         lpInvest.trancheTokenSupportsPermit &&
         pendingAction !== 'approveTrancheToken'
       ) {
-        const permit = await cent.liquidityPools.signPermit([lpInvest.lpAddress, lpInvest.currencyAddress])
+        const signer = provider!.getSigner()
+        const connectedCent = cent.connectEvm(evmAddress!, signer)
+        const permit = await connectedCent.liquidityPools.signPermit([lpInvest.lpAddress, lpInvest.currencyAddress])
         redeemWithPermit.execute([lpInvest.lpAddress, newOrder, permit])
         setPendingAction('redeemWithPermit')
       } else {

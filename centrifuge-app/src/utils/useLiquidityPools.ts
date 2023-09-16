@@ -26,30 +26,30 @@ export function useActiveDomains(poolId: string) {
           return [manager, pool] as const
         })
       )
-      // return results
-      //   .map((result, i) => {
-      //     if (result.status === 'rejected') {
-      //       console.error(result.reason)
-      //       return null
-      //     }
-      //     const [manager, pool] = result.value
-      //     const router = routers![i]
-      //     if (!pool.isActive) return null
-      //     return {
-      //       chainId: router.chainId,
-      //       managerAddress: manager,
-      //     }
-      //   })
-      //   .filter(Boolean) as {
-      //   chainId: number
-      //   managerAddress: string
-      // }[]
-      return [
-        {
-          chainId: 5,
-          managerAddress: '0xa8775Fe0453aA649403EffAa2b4b80307df1DB68',
-        },
-      ]
+      return results
+        .map((result, i) => {
+          if (result.status === 'rejected') {
+            console.error(result.reason)
+            return null
+          }
+          const [manager, pool] = result.value
+          const router = routers![i]
+          if (!pool?.isActive) return null
+          return {
+            chainId: router.chainId,
+            managerAddress: manager,
+          }
+        })
+        .filter(Boolean) as {
+        chainId: number
+        managerAddress: string
+      }[]
+      // return [
+      //   {
+      //     chainId: 5,
+      //     managerAddress: '0xa8775Fe0453aA649403EffAa2b4b80307df1DB68',
+      //   },
+      // ]
     },
     {
       enabled: !!routers?.length && !poolId.startsWith('0x'),
@@ -60,10 +60,10 @@ export function useActiveDomains(poolId: string) {
   return query
 }
 
-export function useLiquidityPools(_poolId: string, _trancheId: string) {
+export function useLiquidityPools(poolId: string, trancheId: string) {
   // TODO: only for testing, remove
-  const poolId = '1171854325'
-  const trancheId = '0x102f4ef817340a8839a515d2c73a7c1d'
+  // const poolId = '1171854325'
+  // const trancheId = '0x102f4ef817340a8839a515d2c73a7c1d'
   const {
     evm: { chainId, getProvider },
   } = useWallet()

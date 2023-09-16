@@ -55,9 +55,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [poolId, chainId] = args
     const $api = inst.getApi()
 
-    return getDomainCurrencyIds([chainId]).pipe(
+    return getDomainCurrencies([chainId]).pipe(
       combineLatestWith($api),
-      switchMap(([currencyIds, api]) => {
+      switchMap(([currencies, api]) => {
         return api.query.poolSystem.pool(poolId).pipe(
           switchMap((rawPool) => {
             const pool = rawPool.toPrimitive() as any
@@ -68,7 +68,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 // Ensure the domain currencies are enabled
                 // Using a batch, because theoretically they could have been enabled already for a different domain
                 api.tx.utility.batch(
-                  currencyIds.map((cid) => api.tx.liquidityPools.allowPoolCurrency(poolId, trancheId, cid))
+                  currencies.map((cur) => api.tx.liquidityPools.allowPoolCurrency(poolId, trancheId, cur.key))
                 ),
               ]),
             ])
@@ -167,14 +167,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.liquidityPoolsGateway.domainRouters.entries()),
       map((rawRouters) => {
         console.log('rawRouters', rawRouters)
-        return [{ chainId: 5, router: '0x6c299123aCdB40Fc5E029049d1a8b4D47355Cfeb' }]
+        // return [{ chainId: 5, router: '0x6c299123aCdB40Fc5E029049d1a8b4D47355Cfeb' }]
         return rawRouters
           .map(([rawKey, rawValue]) => {
             const key = (rawKey.toHuman() as ['Centrifuge' | { EVM: string }])[0]
             if (typeof key === 'string') return null
             const value = rawValue.toPrimitive() as any
             const chainId = Number(key.EVM.replace(/\D/g, ''))
-            const router = 'axelarXCM' in value ? value.axelarXCM.router?.xcmDomain?.contractAddress : ''
+            const router = 'axelarXCM' in value ? value.axelarXCM.axelarTargetContract : ''
             if (!router) return null
 
             return {
@@ -189,8 +189,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    const MOCK_router = '0x6c299123aCdB40Fc5E029049d1a8b4D47355Cfeb'
-    const gatewayAddress = await contract(MOCK_router, ABI.Router, options).gateway()
+    // const MOCK_router = '0x6c299123aCdB40Fc5E029049d1a8b4D47355Cfeb'
+    const gatewayAddress = await contract(router, ABI.Router, options).gateway()
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
   }
@@ -208,32 +208,46 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return events.flat()
   }
 
-  async function getPool(args: [connector: string, poolId: string], options?: EvmQueryOptions) {
-    const [connector, poolId] = args
-    const calls: Call[] = [
-      {
-        target: connector,
-        call: ['function pools(uint64) view returns (uint64,uint256,bool)', poolId],
-        returns: [['poolId'], ['createdAt'], ['isActive']],
-      },
-    ]
-    const pool = await multicall<{ poolId: string; createdAt: number; isActive: boolean }>(calls, {
-      rpcProvider: getProvider(options)!,
-    })
-    return pool
+  async function getPool(args: [investmentManager: string, poolId: string], options?: EvmQueryOptions) {
+    const [investmentManager, poolId] = args
+
+    const poolManager = await contract(investmentManager, ABI.InvestmentManager, options).poolManager()
+    console.log('poolManager', poolManager, poolId)
+    const pool = await contract(poolManager, ABI.PoolManager, options).pools(poolId)
+    console.log('pool', pool)
+    return pool[0].toString() === poolId ? { isActive: true } : undefined
   }
 
-  function getDomainCurrencyIds(args: [chainId: number]) {
+  // function getDomainCurrencyIds(args: [chainId: number]) {
+  //   const [chainId] = args
+  //   return inst.pools.getCurrencies().pipe(
+  //     map((currencies) => {
+  //       // TODO: for testing, remove
+  //       return [1]
+  //       return currencies
+  //         .filter(
+  //           (cur) => getCurrencyChainId(cur) === chainId && typeof cur.key === 'object' && 'ForeignAsset' in cur.key
+  //         )
+  //         .map((cur) => (cur.key as any).ForeignAsset)
+  //     })
+  //   )
+  // }
+
+  function getDomainCurrencies(args: [chainId: number]) {
     const [chainId] = args
     return inst.pools.getCurrencies().pipe(
       map((currencies) => {
         // TODO: for testing, remove
-        return [1]
+        // return [1]
         return currencies
           .filter(
-            (cur) => getCurrencyChainId(cur) === chainId && typeof cur.key === 'object' && 'ForeignAsset' in cur.key
+            (cur) =>
+              getCurrencyChainId(cur) === chainId &&
+              !!getCurrencyEvmAddress(cur) &&
+              typeof cur.key === 'object' &&
+              'ForeignAsset' in cur.key
           )
-          .map((cur) => (cur.key as any).ForeignAsset)
+          .map((cur) => ({ ...cur, address: getCurrencyEvmAddress(cur)! }))
       })
     )
   }
@@ -244,44 +258,44 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   ) {
     const [managerAddress, poolId, trancheId, chainId] = args
 
-    const currencyIds = await firstValueFrom(getDomainCurrencyIds([chainId]))
+    const currencies = await firstValueFrom(getDomainCurrencies([chainId]))
 
-    console.log('currencyIds', currencyIds)
+    console.log('currencies', currencies)
 
     const poolManager: string = await contract(managerAddress, ABI.InvestmentManager, options).poolManager()
 
     // const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
-    const stablesData = await multicall<{ currencyAddresses?: string[] }>(
-      [
-        ...currencyIds.map(
-          (currencyId, i) =>
-            ({
-              target: poolManager,
-              call: ['function currencyIdToAddress(uint128) view returns (address)', currencyId],
-              returns: [[`currencyAddresses[${i}]`]],
-            } as Call)
-        ),
-      ],
-      {
-        rpcProvider: getProvider(options)!,
-      }
-    )
+    // const stablesData = await multicall<{ currencyAddresses?: string[] }>(
+    //   [
+    //     ...currencies.map(
+    //       (currency, i) =>
+    //         ({
+    //           target: poolManager,
+    //           call: ['function currencyIdToAddress(uint128) view returns (address)', currencyId],
+    //           returns: [[`currencyAddresses[${i}]`]],
+    //         } as Call)
+    //     ),
+    //   ],
+    //   {
+    //     rpcProvider: getProvider(options)!,
+    //   }
+    // )
 
-    console.log('stablesData', stablesData)
-    const currencyAddresses = stablesData.currencyAddresses?.filter((addr) => addr !== NULL_ADDRESS)
-    if (!currencyAddresses?.length) return []
+    // console.log('stablesData', stablesData)
+    // const currencyAddresses = stablesData.currencyAddresses?.filter((addr) => addr !== NULL_ADDRESS)
+    if (!currencies?.length) return []
 
     const lpData = await multicall<{ lps?: string[] }>(
       [
-        ...currencyAddresses.map(
-          (currencyAddr, i) =>
+        ...currencies.map(
+          (currency, i) =>
             ({
               target: poolManager,
               call: [
                 'function getLiquidityPool(uint64, bytes16, address) view returns (address)',
                 poolId,
                 trancheId,
-                currencyAddr,
+                currency.address,
               ],
               returns: [[`lps[${i}]`]],
             } as Call)
@@ -293,11 +307,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
 
     console.log('lpData', lpData)
-    if (!lpData.lps?.length) return []
+    const lps = lpData.lps?.filter((lp) => lp !== NULL_ADDRESS)
+    if (!lps?.length) return []
 
     const assetData = await multicall<{ assets?: string[]; share: string }>(
       [
-        ...lpData.lps.map(
+        ...lps.map(
           (lpAddress, i) =>
             ({
               target: lpAddress,
@@ -306,7 +321,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             } as Call)
         ),
         {
-          target: lpData.lps[0],
+          target: lps[0],
           call: ['function share() view returns (address)'],
           returns: [['share']],
         },
@@ -340,14 +355,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 call: ['function decimals() view returns (uint8)'],
                 returns: [[`currencies[${i}].currencyDecimals`]],
               },
-              {
-                target: assetAddress,
-                call: ['function PERMIT_TYPEHASH() view returns (bytes32)'],
-                returns: [
-                  [`currencies[${i}].currencySupportsPermit`, (typeHash: string) => typeHash === PERMIT_TYPEHASH],
-                ],
-                allowFailure: true,
-              },
+              // {
+              //   target: assetAddress,
+              //   call: ['function PERMIT_TYPEHASH() view returns (bytes32)'],
+              //   returns: [
+              //     [`currencies[${i}].currencySupportsPermit`, (typeHash: string) => typeHash === PERMIT_TYPEHASH],
+              //   ],
+              //   allowFailure: true,
+              // },
             ] as Call[]
         ),
         {
@@ -374,7 +389,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     console.log('currencyData', currencyData, assetData)
 
-    const result = lpData.lps.map((addr, i) => ({
+    const result = lps.map((addr, i) => ({
       lpAddress: addr,
       currencyAddress: assetData.assets![i],
       managerAddress,
@@ -497,4 +512,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 export function getCurrencyChainId(currency: CurrencyMetadata) {
   const chainId = currency.location?.v3?.interior?.x3?.[1]?.globalConsensus?.ethereum?.chainId
   return chainId != null ? Number(chainId) : undefined
+}
+
+export function getCurrencyEvmAddress(currency: CurrencyMetadata) {
+  return currency.location?.v3?.interior?.x3?.[2]?.accountKey20?.key as string | undefined
 }

@@ -466,6 +466,7 @@ export function WalletProvider({
       },
       evm: {
         ...state.evm,
+        accounts: state.evm.accounts && [state.evm.accounts?.[0]],
         selectedAddress: state.evm.selectedAddress || state.evm.accounts?.[0] || null,
         connectors: evmConnectors,
         chains: evmChains,
