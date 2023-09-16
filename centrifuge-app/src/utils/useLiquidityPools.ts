@@ -47,7 +47,7 @@ export function useActiveDomains(poolId: string) {
       return [
         {
           chainId: 5,
-          managerAddress: '0x083f637f07609bef01EeCFa5d7fD033c91f5290D',
+          managerAddress: '0xa8775Fe0453aA649403EffAa2b4b80307df1DB68',
         },
       ]
     },
@@ -61,6 +61,7 @@ export function useActiveDomains(poolId: string) {
 }
 
 export function useLiquidityPools(_poolId: string, _trancheId: string) {
+  // TODO: only for testing, remove
   const poolId = '1171854325'
   const trancheId = '0x102f4ef817340a8839a515d2c73a7c1d'
   const {
