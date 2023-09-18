@@ -9,6 +9,7 @@ export type SortButtonProps = {
   label: string
   searchKey: SortBy
   tooltip?: string
+  justifySelf?: 'start' | 'end'
 }
 
 type Sorting = {
@@ -16,7 +17,7 @@ type Sorting = {
   direction: string | null
 }
 
-export function SortButton({ label, searchKey, tooltip }: SortButtonProps) {
+export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: SortButtonProps) {
   const history = useHistory()
   const { pathname, search } = useLocation()
 
@@ -58,7 +59,7 @@ export function SortButton({ label, searchKey, tooltip }: SortButtonProps) {
             : `Sort ${label} ascending`
         }
         aria-live
-        style={{ justifySelf: 'end' }}
+        style={{ justifySelf }}
       >
         <FilterButton forwardedAs="span" variant="body3">
           {label}
@@ -82,7 +83,7 @@ export function SortButton({ label, searchKey, tooltip }: SortButtonProps) {
           : `Sort ${label} ascending`
       }
       aria-live
-      style={{ justifySelf: 'end' }}
+      style={{ justifySelf }}
     >
       {label}
 

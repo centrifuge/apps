@@ -1,12 +1,13 @@
 import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
 import * as React from 'react'
 
-export type PoolStatusKey = 'Maker Pool' | 'Open for investments' | 'Closed'
+export type PoolStatusKey = 'Maker Pool' | 'Open for investments' | 'Closed' | 'Upcoming'
 
 const statusColor: { [key in PoolStatusKey]: StatusChipProps['status'] } = {
   'Maker Pool': 'ok',
   'Open for investments': 'info',
   Closed: 'default',
+  Upcoming: 'default',
 }
 
 export function PoolStatus({ status }: { status?: PoolStatusKey }) {
