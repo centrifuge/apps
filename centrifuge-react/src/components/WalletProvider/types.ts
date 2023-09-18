@@ -26,7 +26,6 @@ export type State = {
   }
   evm: {
     selectedWallet: EvmConnectorMeta | null
-    selectedAddress: string | null
   }
   substrate: {
     accounts: SubstrateAccount[] | null

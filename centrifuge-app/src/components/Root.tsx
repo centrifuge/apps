@@ -7,6 +7,7 @@ import {
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
 import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
@@ -77,16 +78,12 @@ const centConfig: UserProvidedConfig = {
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
-const evmChains: EvmChains =
+const baseEvmChains: EvmChains =
   ethConfig.network === 'mainnet'
     ? {
         1: {
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
-        },
-        8453: {
-          urls: ['https://mainnet.base.org'],
-          iconUrl: 'https://docs.base.org/img/logo_dark.svg',
         },
       }
     : {
@@ -98,20 +95,49 @@ const evmChains: EvmChains =
           urls: [`https://goerli.infura.io/v3/${infuraKey}`],
           iconUrl: goerliLogo,
         },
-        8453: {
-          urls: ['https://mainnet.base.org'],
-          iconUrl: baseLogo,
-        },
-        84531: {
-          urls: ['https://goerli.base.org'],
-          iconUrl: baseLogo,
-        },
       }
-
+const evmChains = {
+  ...baseEvmChains,
+  8453: {
+    name: 'Base',
+    nativeCurrency: { name: 'Base', symbol: 'bETH', decimals: 18 },
+    blockExplorerUrl: 'https://basescan.org/',
+    urls: ['https://mainnet.base.org'],
+    iconUrl: baseLogo,
+  },
+  84531: {
+    name: 'Base Goerli',
+    nativeCurrency: { name: 'Base Goerli', symbol: 'gbETH', decimals: 18 },
+    blockExplorerUrl: 'https://goerli.basescan.org/',
+    urls: ['https://goerli.base.org'],
+    iconUrl: baseLogo,
+  },
+  42161: {
+    name: 'Arbitrum One',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://arbiscan.io/',
+    urls: ['https://arb1.arbitrum.io/rpc'],
+    iconUrl: arbitrumLogo,
+  },
+  421613: {
+    name: 'Arbitrum Goerli',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://goerli.arbiscan.io/',
+    urls: ['https://goerli-rollup.arbitrum.io/rpc'],
+    iconUrl: arbitrumLogo,
+  },
+}
 export function Root() {
-  const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
-  const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
-  const [showBase, setShowBase] = React.useState(!!initialFlagsState.showBase)
+  const [debugState, setDebugState] = React.useState(initialFlagsState)
+  const isThemeToggled = debugState.alternativeTheme
 
   return (
     <>
@@ -137,18 +163,13 @@ export function Root() {
               evmChains={evmChains}
               subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
-              showAdvancedAccounts={showAdvancedAccounts}
-              showBase={showBase}
+              showAdvancedAccounts={debugState.showAdvancedAccounts as any}
+              showBase={debugState.showBase as any}
+              showTestNets={debugState.showTestNets as any}
             >
               <OnboardingAuthProvider>
                 <OnboardingProvider>
-                  <DebugFlags
-                    onChange={(state) => {
-                      setIsThemeToggled(!!state.alternativeTheme)
-                      setShowAdvancedAccounts(!!state.showAdvancedAccounts)
-                      setShowBase(!!state.showBase)
-                    }}
-                  >
+                  <DebugFlags onChange={(state) => setDebugState(state)}>
                     <TransactionProvider>
                       <TransactionToasts />
                       <Router>

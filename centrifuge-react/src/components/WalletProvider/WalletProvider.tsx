@@ -61,7 +61,6 @@ export type WalletContextType = {
     chains: EvmChains
     selectedWallet: EvmConnectorMeta | null
     selectedAddress: string | null
-    selectAccount: (address: string) => void
     getProvider(chainId: number): JsonRpcProvider
   }
 }
@@ -79,16 +78,16 @@ export function useWallet() {
 export function useAddress(type?: 'substrate' | 'evm') {
   const { connectedType, evm, substrate, isEvmOnSubstrate } = useWallet()
   if (type === 'evm' || (!type && connectedType === 'evm' && !isEvmOnSubstrate)) {
-    return evm.selectedAddress ?? undefined
+    return evm.accounts?.[0] ?? undefined
   }
   if (isEvmOnSubstrate) {
     return (
       substrate.selectedCombinedAccount?.actingAddress ||
-      (evm.selectedAddress ? evmToSubstrateAddress(evm.selectedAddress, substrate.evmChainId!) : undefined)
+      (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts?.[0], substrate.evmChainId!) : undefined)
     )
   }
   if (type === 'substrate' && connectedType === 'evm') {
-    return evm.selectedAddress ? evmToSubstrateAddress(evm.selectedAddress, evm.chainId!) : undefined
+    return evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts?.[0], evm.chainId!) : undefined
   }
   return substrate.selectedCombinedAccount?.actingAddress || substrate.selectedAccount?.address
 }
@@ -127,6 +126,7 @@ type WalletProviderProps = {
   subscanUrl?: string
   showAdvancedAccounts?: boolean
   showBase?: boolean
+  showTestNets?: boolean
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
@@ -144,6 +144,7 @@ export function WalletProvider({
   subscanUrl,
   showAdvancedAccounts,
   showBase,
+  showTestNets,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
 
@@ -467,15 +468,9 @@ export function WalletProvider({
       evm: {
         ...state.evm,
         accounts: state.evm.accounts && [state.evm.accounts?.[0]],
-        selectedAddress: state.evm.selectedAddress || state.evm.accounts?.[0] || null,
+        selectedAddress: state.evm.accounts?.[0] || null,
         connectors: evmConnectors,
         chains: evmChains,
-        selectAccount: (address: string) => {
-          dispatch({
-            type: 'evmSetState',
-            payload: { selectedAddress: address },
-          })
-        },
         getProvider: (chainId: number) => {
           return (
             cachedProviders[chainId] ||
@@ -489,7 +484,12 @@ export function WalletProvider({
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showBase={showBase} />
+      <WalletDialog
+        evmChains={evmChains}
+        showAdvancedAccounts={showAdvancedAccounts}
+        showBase={showBase}
+        showTestNets={showTestNets}
+      />
     </WalletContext.Provider>
   )
 }

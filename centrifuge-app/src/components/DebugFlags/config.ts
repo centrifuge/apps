@@ -1,5 +1,5 @@
 import React from 'react'
-import { config } from '../../config'
+import { config, isTestEnv } from '../../config'
 import { ConvertEvmAddress } from './components/ConvertEvmAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
@@ -47,6 +47,7 @@ export type Key =
   | 'showPodAccountCreation'
   | 'convertEvmAddress'
   | 'showPortfolio'
+  | 'showTestNets'
   | 'poolCreationType'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
@@ -74,6 +75,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   showBase: {
     type: 'checkbox',
     default: false,
+    alwaysShow: true,
+  },
+  showTestNets: {
+    type: 'checkbox',
+    default: isTestEnv,
     alwaysShow: true,
   },
   editPoolConfig: {

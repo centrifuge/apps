@@ -31,6 +31,7 @@ type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
   showBase?: boolean
+  showTestNets?: boolean
 }
 
 const title = {
@@ -39,9 +40,10 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showBase }: Props) {
+export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showBase, showTestNets }: Props) {
   const evmChains = Object.keys(allEvmChains)
     .filter((chain) => (!showBase ? !['8453', '84531'].includes(chain) : true))
+    .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113'].includes(chain) : true))
     .reduce((obj, key) => {
       obj[key] = allEvmChains[key]
       return obj
@@ -246,11 +248,9 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                 )
               }
             >
-              {connectedType === 'evm' ? (
-                <EvmAccounts onClose={close} />
-              ) : (
+              {connectedType === 'substrate' ? (
                 <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
-              )}
+              ) : null}
             </SelectionStep>
           </>
         )}
@@ -324,39 +324,6 @@ function SubstrateAccounts({ onClose, showAdvancedAccounts }: { onClose: () => v
               </MenuItemGroup>
             )
           })}
-      </Card>
-    </>
-  )
-}
-
-export function EvmAccounts({ onClose }: { onClose: () => void }) {
-  const {
-    evm: { accounts, selectedAddress, selectAccount },
-  } = useWallet()
-
-  if (!accounts) return null
-
-  return (
-    <>
-      <Card maxHeight="50vh" style={{ overflow: 'auto' }} mt={3}>
-        {accounts.map((address) => {
-          return (
-            <React.Fragment key={address}>
-              <MenuItemGroup>
-                <AccountButton
-                  address={address}
-                  icon={<AccountIcon id={address} theme="ethereum" />}
-                  label={address}
-                  onClick={() => {
-                    onClose()
-                    selectAccount(address)
-                  }}
-                  selected={selectedAddress === address}
-                />
-              </MenuItemGroup>
-            </React.Fragment>
-          )
-        })}
       </Card>
     </>
   )
