@@ -68,8 +68,11 @@ const listFormatter = new Intl.ListFormat('en')
 
 export function InvestRedeem({ poolId, ...rest }: Props) {
   const getNetworkName = useGetNetworkName()
-  const { data: domains } = useActiveDomains(poolId)
-  const { setScopedNetworks } = useWallet()
+  const { setScopedNetworks, connectedType, isEvmOnSubstrate } = useWallet()
+
+  const isLiquidityPools = !poolId.startsWith('0x') && connectedType === 'evm' && !isEvmOnSubstrate
+
+  const { data: domains } = useActiveDomains(poolId, isLiquidityPools)
 
   const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
   if (domains) {
