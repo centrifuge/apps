@@ -33,6 +33,7 @@ import { EmailVerified } from '../pages/Onboarding/EmailVerified'
 import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
+import { SwapsPage } from '../pages/Swaps'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -246,6 +247,9 @@ function Routes() {
       </Route>
       <Route exact path="/multisig-approval">
         <MultisigApprovalPage />
+      </Route>
+      <Route path="/swaps">
+        <SwapsPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/pools" />

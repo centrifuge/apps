@@ -2989,6 +2989,10 @@ export function parseCurrencyKey(key: CurrencyKey | { foreignAsset: number | str
   return key
 }
 
+export function isSameCurrency(a: CurrencyKey, b: CurrencyKey) {
+  return looksLike(parseCurrencyKey(a), parseCurrencyKey(b))
+}
+
 function looksLike(a: any, b: any): boolean {
   return isPrimitive(b)
     ? b === a

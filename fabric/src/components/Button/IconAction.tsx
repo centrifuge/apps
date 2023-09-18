@@ -35,3 +35,6 @@ export const IconAnchor = styled.a`
 export const IconButton = styled.button`
   ${iconActionStyles}
 `
+IconButton.defaultProps = {
+  type: 'button',
+}
