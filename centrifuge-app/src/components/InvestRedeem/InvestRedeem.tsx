@@ -532,7 +532,6 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
                 </Button>
               )}
             </Stack>
-            ``
           </Stack>
         ) : changeOrderFormShown ? (
           state.needsPoolCurrencyApproval ? (
