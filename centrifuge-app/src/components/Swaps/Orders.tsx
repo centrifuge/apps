@@ -9,6 +9,7 @@ import {
   parseCurrencyKey,
   Rate,
 } from '@centrifuge/centrifuge-js'
+import { getCurrencyChainId } from '@centrifuge/centrifuge-js/dist/modules/liquidityPools'
 import {
   truncateAddress,
   useBalances,
@@ -190,10 +191,8 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
   const balanceDec =
     (balances && findBalance(balances.currencies, order.buyCurrency.key))?.balance.toDecimal() || Dec(0)
   const orderBuyDec = order.buyAmount.toDecimal()
-  let orderBuyCurrencyEVMChain = order.buyCurrency.location?.V3?.interior?.X3?.find((i: any) => !!i.GlobalConsensus)
-    ?.GlobalConsensus?.Ethereum?.chainId
-  let orderSellCurrencyEVMChain = order.sellCurrency.location?.V3?.interior?.X3?.find((i: any) => !!i.GlobalConsensus)
-    ?.GlobalConsensus?.Ethereum?.chainId
+  let orderBuyCurrencyEVMChain = getCurrencyChainId(order.buyCurrency)
+  let orderSellCurrencyEVMChain = getCurrencyChainId(order.sellCurrency)
 
   console.log('orderBuyCurrencyEVMChain', orderBuyCurrencyEVMChain, orderSellCurrencyEVMChain)
 
