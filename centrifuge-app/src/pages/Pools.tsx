@@ -31,7 +31,7 @@ export function PoolsPage() {
 function Pools() {
   const cent = useCentrifuge()
   const { search } = useLocation()
-  const [listedPools, _listedTokens, metadataIsLoading] = useListedPools()
+  const [listedPools, , metadataIsLoading] = useListedPools()
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -57,7 +57,28 @@ function Pools() {
   ]
 
   const pools = !!listedPools?.length
-    ? [...upcomingPools, ...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent)]
+    ? [
+        ...upcomingPools,
+        ...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent).map((pool) => {
+          if (pool.name?.includes('Anemoy Liquid Treasury Fund')) {
+            return {
+              ...pool,
+              status: 'Upcoming' as PoolStatusKey,
+              apr: Rate.fromApr(0.05),
+            }
+          }
+
+          return pool
+        }),
+      ].sort((a, b) => {
+        if (a.status === 'Upcoming') {
+          return -1
+        }
+        if (b.status === 'Upcoming') {
+          return 1
+        }
+        return 0
+      })
     : [...upcomingPools]
   const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
 
