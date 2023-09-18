@@ -598,7 +598,8 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
 
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
 
-  const maxRedeem = state.trancheBalanceWithPending.mul(state.tokenPrice)
+  const maxRedeemTokens = state.trancheBalanceWithPending
+  const maxRedeemCurrency = maxRedeemTokens.mul(state.tokenPrice)
   const tokenSymbol = state.trancheCurrency?.symbol
 
   hooks.useActionSucceeded((action) => {
@@ -628,16 +629,16 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
       amount: '',
     },
     onSubmit: (values, formActions) => {
-      const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(state.tokenPrice)
-      actions.redeem(TokenBalance.fromFloat(amount, state.poolCurrency?.decimals ?? 18))
+      const amountTokens = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(state.tokenPrice)
+      actions.redeem(TokenBalance.fromFloat(amountTokens, state.poolCurrency?.decimals ?? 18))
       formActions.setSubmitting(false)
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-      const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(state.tokenPrice)
-      if (validateNumberInput(amount, 0, maxRedeem)) {
-        errors.amount = validateNumberInput(amount, 0, maxRedeem)
-      } else if (hasPendingOrder && amount.eq(pendingRedeem)) {
+      const amountTokens = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(state.tokenPrice)
+      if (validateNumberInput(amountTokens, 0, maxRedeemTokens)) {
+        errors.amount = validateNumberInput(amountTokens, 0, maxRedeemTokens)
+      } else if (hasPendingOrder && amountTokens.eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
       }
 
@@ -674,7 +675,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
               onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
               onChange={(value) => form.setFieldValue('amount', value)}
               currency={state.poolCurrency?.symbol}
-              secondaryLabel={`${formatBalance(roundDown(maxRedeem), state.poolCurrency?.symbol, 2)} available`}
+              secondaryLabel={`${formatBalance(roundDown(maxRedeemCurrency), state.poolCurrency?.symbol, 2)} available`}
               autoFocus={autoFocus}
             />
           )}
@@ -685,7 +686,12 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
               <Text variant="body3">Token amount</Text>
               <Text variant="body3" width={12} variance={0}>
                 {!state.tokenPrice.isZero() &&
-                  `~${formatBalance(Dec(form.values.amount).div(state.tokenPrice), tokenSymbol)}`}
+                  `~${formatBalance(
+                    form.values.amount instanceof Decimal
+                      ? form.values.amount
+                      : Dec(form.values.amount).div(state.tokenPrice),
+                    tokenSymbol
+                  )}`}
               </Text>
             </Shelf>
           </Stack>

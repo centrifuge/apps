@@ -1,18 +1,18 @@
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
 
-export function useDomainRouters() {
-  const [data] = useCentrifugeQuery(['domainRouters'], (cent) => cent.liquidityPools.getDomainRouters())
+export function useDomainRouters(suspense?: boolean) {
+  const [data] = useCentrifugeQuery(['domainRouters'], (cent) => cent.liquidityPools.getDomainRouters(), { suspense })
 
   return data
 }
 
-export function useActiveDomains(poolId: string) {
+export function useActiveDomains(poolId: string, suspense?: boolean) {
   const {
     evm: { getProvider },
   } = useWallet()
   const cent = useCentrifuge()
-  const routers = useDomainRouters()
+  const routers = useDomainRouters(suspense)
   const query = useQuery(
     ['activeDomains', poolId, routers?.length],
     async () => {
@@ -54,6 +54,7 @@ export function useActiveDomains(poolId: string) {
     {
       enabled: !!routers?.length && !poolId.startsWith('0x'),
       staleTime: Infinity,
+      suspense,
     }
   )
 

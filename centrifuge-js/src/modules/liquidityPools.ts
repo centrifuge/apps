@@ -218,21 +218,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pool[0].toString() === poolId ? { isActive: true } : undefined
   }
 
-  // function getDomainCurrencyIds(args: [chainId: number]) {
-  //   const [chainId] = args
-  //   return inst.pools.getCurrencies().pipe(
-  //     map((currencies) => {
-  //       // TODO: for testing, remove
-  //       return [1]
-  //       return currencies
-  //         .filter(
-  //           (cur) => getCurrencyChainId(cur) === chainId && typeof cur.key === 'object' && 'ForeignAsset' in cur.key
-  //         )
-  //         .map((cur) => (cur.key as any).ForeignAsset)
-  //     })
-  //   )
-  // }
-
   function getDomainCurrencies(args: [chainId: number]) {
     const [chainId] = args
     return inst.pools.getCurrencies().pipe(
