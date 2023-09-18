@@ -1623,6 +1623,11 @@ export function getPoolsModule(inst: Centrifuge) {
               const epochExecution = epochExecutionMap[poolId]
               const currency = findCurrency(currencies, pool.currency)!
 
+              // TODO: remove, temporary UI fix
+              if (currency.symbol === 'LpEthUSDC') {
+                currency.symbol = 'USDC'
+              }
+
               const poolValue = new CurrencyBalance(
                 pool.tranches.tranches.reduce((prev: BN, tranche: TrancheDetailsData) => {
                   return new BN(prev.add(new BN(hexToBN(tranche.debt))).add(new BN(hexToBN(tranche.reserve))))
