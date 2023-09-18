@@ -451,6 +451,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         call: ['function allowance(address, address) view returns (uint)', user, manager],
         returns: [['managerTrancheTokenAllowance', toTokenBalance(currency.trancheDecimals)]],
       },
+      {
+        target: manager,
+        call: ['function userDepositRequest(address, address) view returns (uint256)', lp, user],
+        returns: [['pendingInvest', toCurrencyBalance(currency.currencyDecimals)]],
+      },
+      {
+        target: manager,
+        call: ['function userRedeemRequest(address, address) view returns (uint)', lp, user],
+        returns: [['pendingRedeem', toTokenBalance(currency.trancheDecimals)]],
+      },
     ]
 
     const pool = await multicall<{
@@ -462,6 +472,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       maxWithdraw: CurrencyBalance
       managerCurrencyAllowance: CurrencyBalance
       managerTrancheTokenAllowance: CurrencyBalance
+      pendingInvest: CurrencyBalance
+      pendingRedeem: TokenBalance
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
