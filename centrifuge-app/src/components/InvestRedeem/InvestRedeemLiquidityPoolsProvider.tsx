@@ -53,7 +53,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const isCalculatingOrders = pool.epoch.status !== 'ongoing'
 
-  const collectType = investToCollect.gt(0) ? 'invest' : currencyToCollect.gt(0) ? 'redeem' : null
+  const collectType = currencyToCollect.gt(0) ? 'redeem' : investToCollect.gt(0) ? 'invest' : null
 
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrder)
   const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrderWithPermit)
@@ -164,6 +164,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         : false,
     canChangeOrder: false,
     canCancelOrder: false,
+    showRedeemCollect: true, // collectType === 'redeem',
     pendingAction,
     pendingTransaction,
     statusMessage: undefined,

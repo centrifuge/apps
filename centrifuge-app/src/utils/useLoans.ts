@@ -16,6 +16,7 @@ export function useLoans(poolId: string) {
   return isTinlakePool ? tinlakeLoans : centLoans
 }
 
+// TODO: Only get data from portfolio runtime API
 export function useLoansAcrossPools(poolIds?: string[]) {
   const [result] = useCentrifugeQuery(
     ['loansAcrossPools', poolIds],

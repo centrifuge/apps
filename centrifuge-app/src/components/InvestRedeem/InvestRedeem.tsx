@@ -211,7 +211,7 @@ type InnerProps = Props & {
 }
 
 function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
-  const { state } = useInvestRedeem()
+  const { state, actions } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const isTinlakePool = state.poolId.startsWith('0x')
 
@@ -293,6 +293,13 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
                       Invest more
                     </Button>
                   </Grid>
+                  {state.showRedeemCollect && (
+                    <Box alignSelf="center">
+                      <Button variant="tertiary" onClick={actions.collect} small>
+                        Withdraw available funds
+                      </Button>
+                    </Box>
+                  )}
                   <Box alignSelf="center">
                     <TransactionsLink />
                   </Box>
@@ -527,6 +534,11 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
           {cancelCb && (
             <Button variant="secondary" onClick={cancelCb} disabled={state.isPoolBusy || nativeBalanceTooLow}>
               Cancel
+            </Button>
+          )}
+          {state.showRedeemCollect && !cancelCb && (
+            <Button variant="tertiary" onClick={actions.collect} small>
+              Withdraw available funds
             </Button>
           )}
         </Stack>
