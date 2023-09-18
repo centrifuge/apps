@@ -5,11 +5,11 @@ import {
   CurrencyMetadata,
   findBalance,
   findCurrency,
+  getCurrencyChainId,
   isSameCurrency,
   parseCurrencyKey,
   Rate,
 } from '@centrifuge/centrifuge-js'
-import { getCurrencyChainId } from '@centrifuge/centrifuge-js/dist/modules/liquidityPools'
 import {
   truncateAddress,
   useBalances,
