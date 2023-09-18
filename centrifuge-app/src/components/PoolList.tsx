@@ -1,11 +1,19 @@
 import { Box, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
+import styled from 'styled-components'
 import { PoolCard, PoolCardProps } from './PoolCard'
+import { PoolStatusKey } from './PoolCard/PoolStatus'
 
 type PoolListProps = {
   pools: PoolCardProps[]
   isLoading?: boolean
 }
+
+const PoolCardBox = styled<typeof Box & { status?: PoolStatusKey }>(Box)`
+  &:hover {
+    cursor: ${(props) => (props.status === 'Upcoming' ? 'not-allowed' : 'default')};
+  }
+`
 
 export function PoolList({ pools, isLoading }: PoolListProps) {
   return (
@@ -19,9 +27,9 @@ export function PoolList({ pools, isLoading }: PoolListProps) {
               </Box>
             ))
         : pools.map((pool) => (
-            <Box as="li" key={pool.poolId}>
+            <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
               <PoolCard {...pool} />
-            </Box>
+            </PoolCardBox>
           ))}
     </Stack>
   )
