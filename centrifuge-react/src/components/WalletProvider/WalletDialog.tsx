@@ -31,6 +31,7 @@ type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
   showBase?: boolean
+  showArbitrum?: boolean
   showTestNets?: boolean
 }
 
@@ -40,9 +41,16 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showBase, showTestNets }: Props) {
+export function WalletDialog({
+  evmChains: allEvmChains,
+  showAdvancedAccounts,
+  showBase,
+  showArbitrum,
+  showTestNets,
+}: Props) {
   const evmChains = Object.keys(allEvmChains)
     .filter((chain) => (!showBase ? !['8453', '84531'].includes(chain) : true))
+    .filter((chain) => (!showArbitrum ? !['42161', '421613'].includes(chain) : true))
     .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113'].includes(chain) : true))
     .reduce((obj, key) => {
       obj[key] = allEvmChains[key]

@@ -126,6 +126,7 @@ type WalletProviderProps = {
   subscanUrl?: string
   showAdvancedAccounts?: boolean
   showBase?: boolean
+  showArbitrum?: boolean
   showTestNets?: boolean
 }
 
@@ -144,6 +145,7 @@ export function WalletProvider({
   subscanUrl,
   showAdvancedAccounts,
   showBase,
+  showArbitrum,
   showTestNets,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
@@ -488,6 +490,7 @@ export function WalletProvider({
         evmChains={evmChains}
         showAdvancedAccounts={showAdvancedAccounts}
         showBase={showBase}
+        showArbitrum={showArbitrum}
         showTestNets={showTestNets}
       />
     </WalletContext.Provider>

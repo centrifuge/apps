@@ -165,6 +165,7 @@ export function Root() {
               walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
               showAdvancedAccounts={debugState.showAdvancedAccounts as any}
               showBase={debugState.showBase as any}
+              showArbitrum={debugState.showArbitrum as any}
               showTestNets={debugState.showTestNets as any}
             >
               <OnboardingAuthProvider>
