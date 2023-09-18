@@ -534,7 +534,11 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             </Stack>
           </Stack>
         ) : changeOrderFormShown ? (
-          renderInput(() => setChangeOrderFormShown(false))
+          state.needsPoolCurrencyApproval ? (
+            renderInput(onCancel, { onClick: actions.approvePoolCurrency, loading: isApproving })
+          ) : (
+            renderInput(onCancel)
+          )
         ) : hasPendingOrder ? (
           <PendingOrder
             type="invest"
@@ -705,7 +709,11 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             </Stack>
           </Stack>
         ) : changeOrderFormShown ? (
-          renderInput(() => setChangeOrderFormShown(false))
+          state.needsTrancheTokenApproval ? (
+            renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
+          ) : (
+            renderInput(onCancel)
+          )
         ) : hasPendingOrder ? (
           <PendingOrder
             type="redeem"
