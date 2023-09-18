@@ -830,16 +830,18 @@ const PendingOrder: React.FC<{
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>
-        <Grid gap="1px" columns={state.canChangeOrder ? 2 : 1} equalColumns>
-          <LightButton type="button" onClick={onCancelOrder} disabled={isCancelling || calculatingOrders}>
-            {isCancelling ? (
-              <Spinner size="iconSmall" />
-            ) : (
-              <Text variant="body2" color="inherit">
-                Cancel
-              </Text>
-            )}
-          </LightButton>
+        <Grid gap="1px" columns={state.canChangeOrder && state.canCancelOrder ? 2 : 1} equalColumns>
+          {state.canCancelOrder && (
+            <LightButton type="button" onClick={onCancelOrder} disabled={isCancelling || calculatingOrders}>
+              {isCancelling ? (
+                <Spinner size="iconSmall" />
+              ) : (
+                <Text variant="body2" color="inherit">
+                  Cancel
+                </Text>
+              )}
+            </LightButton>
+          )}
           {state.canChangeOrder && (
             <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling || calculatingOrders}>
               <Text variant="body2" color="inherit">

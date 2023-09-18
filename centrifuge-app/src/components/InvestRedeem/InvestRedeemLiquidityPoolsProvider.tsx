@@ -163,6 +163,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         ? lpInvest.managerTrancheTokenAllowance.toFloat() < amount && !lpInvest.trancheTokenSupportsPermit
         : false,
     canChangeOrder: false,
+    canCancelOrder: false,
     pendingAction,
     pendingTransaction,
     statusMessage: undefined,
