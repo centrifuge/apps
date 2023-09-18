@@ -7,6 +7,7 @@ import {
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
 import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
@@ -99,11 +100,11 @@ const evmChains: EvmChains =
         },
         8453: {
           urls: ['https://mainnet.base.org'],
-          iconUrl: 'https://docs.base.org/img/logo.svg',
+          iconUrl: baseLogo,
         },
         84531: {
           urls: ['https://goerli.base.org'],
-          iconUrl: 'https://docs.base.org/img/logo.svg',
+          iconUrl: baseLogo,
         },
       }
 
