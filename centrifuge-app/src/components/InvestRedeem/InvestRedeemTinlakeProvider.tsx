@@ -127,7 +127,6 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     needsTrancheTokenApproval: () => !!trancheInvestment?.tokenAllowance.isZero(),
     canChangeOrder: true,
     canCancelOrder: true,
-    showRedeemCollect: false,
     pendingAction,
     pendingTransaction,
   }

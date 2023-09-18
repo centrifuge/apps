@@ -249,25 +249,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     const poolManager: string = await contract(managerAddress, ABI.InvestmentManager, options).poolManager()
 
-    // const lps = ['0x6627eC6b0e467D02117bE6949189054102EAe177']
-    // const stablesData = await multicall<{ currencyAddresses?: string[] }>(
-    //   [
-    //     ...currencies.map(
-    //       (currency, i) =>
-    //         ({
-    //           target: poolManager,
-    //           call: ['function currencyIdToAddress(uint128) view returns (address)', currencyId],
-    //           returns: [[`currencyAddresses[${i}]`]],
-    //         } as Call)
-    //     ),
-    //   ],
-    //   {
-    //     rpcProvider: getProvider(options)!,
-    //   }
-    // )
-
-    // console.log('stablesData', stablesData)
-    // const currencyAddresses = stablesData.currencyAddresses?.filter((addr) => addr !== NULL_ADDRESS)
     if (!currencies?.length) return []
 
     const lpData = await multicall<{ lps?: string[] }>(

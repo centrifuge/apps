@@ -164,7 +164,6 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         : false,
     canChangeOrder: false,
     canCancelOrder: false,
-    showRedeemCollect: true, // collectType === 'redeem',
     pendingAction,
     pendingTransaction,
     statusMessage: undefined,
