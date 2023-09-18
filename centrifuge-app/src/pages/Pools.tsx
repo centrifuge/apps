@@ -57,7 +57,7 @@ function Pools() {
   ]
 
   const pools = !!listedPools?.length
-    ? [...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent), ...upcomingPools]
+    ? [...upcomingPools, ...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent)]
     : [...upcomingPools]
   const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
 
