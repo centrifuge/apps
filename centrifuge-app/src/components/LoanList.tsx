@@ -20,7 +20,7 @@ import { formatBalance } from '../utils/formatting'
 import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
@@ -205,6 +205,7 @@ function AssetName({ loan }: { loan: Row }) {
 function Amount({ loan }: { loan: Row }) {
   const pool = usePool(loan.poolId)
   const { current } = useAvailableFinancing(loan.poolId, loan.id)
+  const { currentFace } = useBorrowerAssetTransactions(loan.poolId, loan.id)
 
   function getAmount(l: Row) {
     switch (l.status) {
@@ -218,6 +219,10 @@ function Amount({ loan }: { loan: Row }) {
 
         if (l.outstandingDebt.isZero()) {
           return formatBalance(l.totalRepaid, pool?.currency.symbol)
+        }
+
+        if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
+          return formatBalance(currentFace, pool?.currency.symbol)
         }
 
         return formatBalance(l.outstandingDebt, pool?.currency.symbol)

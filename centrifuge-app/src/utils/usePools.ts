@@ -1,9 +1,19 @@
-import Centrifuge, { BorrowerTransaction, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, {
+  BorrowerTransaction,
+  CurrencyBalance,
+  ExternalPricingInfo,
+  Pool,
+  PoolMetadata,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
+import { Dec } from './Decimal'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
+import { useLoans } from './useLoans'
 import { useMetadata } from './useMetadata'
 
 export function usePools(suspense = true) {
@@ -85,7 +95,82 @@ export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) 
   return result
 }
 
+export function useAverageAmount(poolId: string) {
+  const borrowerTransactions = useBorrowerTransactions(poolId)
+  const pool = usePool(poolId)
+  const loans = useLoans(poolId)
+
+  if (!loans || !pool || !borrowerTransactions) return new BN(0)
+
+  const getLatestPrice = (assetId: string) => {
+    const pricing = loans.find((loan) => loan.id === assetId)?.pricing as ExternalPricingInfo
+
+    const borrowerAssetTransactions = borrowerTransactions.filter(
+      (borrowerTransaction) => borrowerTransaction.id === assetId
+    )
+
+    const latestSettlementPrice = borrowerAssetTransactions?.length
+      ? borrowerAssetTransactions[borrowerAssetTransactions.length - 1]?.settlementPrice
+      : null
+
+    if (latestSettlementPrice && pricing.oracle.value.isZero()) {
+      return new CurrencyBalance(latestSettlementPrice, pool.currency.decimals)
+    }
+
+    return new CurrencyBalance(pricing.oracle.value.toString(), 18)
+  }
+
+  const poolsByLoanId =
+    borrowerTransactions.reduce((pools, pool) => {
+      const [, assetId] = pool.loanId.split('-')
+
+      const somePool = { ...pool, oracleValue: getLatestPrice(assetId) }
+      if (pools[assetId]) {
+        pools[assetId] = [...pools[assetId], somePool]
+      } else {
+        pools[assetId] = [somePool]
+      }
+
+      return pools
+    }, {} as Record<string, Array<BorrowerTransaction & { oracleValue: CurrencyBalance }>>) || {}
+
+  const currentFaces = Object.entries(poolsByLoanId).reduce((sum, [assetId, transactions]) => {
+    const item =
+      transactions.reduce((sum, trx) => {
+        if (trx.type === 'BORROWED') {
+          sum = new CurrencyBalance(
+            sum.add(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+            pool.currency.decimals
+          )
+        }
+        if (trx.type === 'REPAID') {
+          sum = new CurrencyBalance(
+            sum.sub(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+            pool.currency.decimals
+          )
+        }
+        return sum
+      }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
+
+    sum = { ...sum, [assetId]: item }
+
+    return sum
+  }, {} as Record<string, CurrencyBalance>)
+
+  const currentValues = Object.entries(currentFaces).reduce((values, [assetId, currentFace]) => {
+    values[assetId] = currentFace.toDecimal().mul(getLatestPrice(assetId).toDecimal()).div(100)
+
+    return values
+  }, {} as Record<string, Decimal>)
+
+  return Object.values(currentValues)
+    .reduce((sum, value) => sum.add(value), Dec(0))
+    .div(loans.length)
+}
+
 export function useBorrowerAssetTransactions(poolId: string, assetId: string, from?: Date, to?: Date) {
+  const pool = usePool(poolId)
+
   const [result] = useCentrifugeQuery(
     ['borrowerAssetTransactions', poolId, assetId, from, to],
     (cent) => {
@@ -99,10 +184,28 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
     },
     {
       suspense: true,
+      enabled: !!pool,
     }
   )
 
-  return result
+  const currentFace =
+    result?.reduce((sum, trx) => {
+      if (trx.type === 'BORROWED') {
+        sum = new CurrencyBalance(
+          sum.add(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+          pool.currency.decimals
+        )
+      }
+      if (trx.type === 'REPAID') {
+        sum = new CurrencyBalance(
+          sum.sub(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+          pool.currency.decimals
+        )
+      }
+      return sum
+    }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
+
+  return { borrowerAssetTransactions: result, currentFace }
 }
 
 export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {

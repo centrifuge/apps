@@ -90,7 +90,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const borrowerAssetTransactions = useBorrowerAssetTransactions(loan.poolId, loan.id)
+  const { currentFace } = useBorrowerAssetTransactions(loan.poolId, loan.id)
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
@@ -101,23 +101,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
-
-  const currentFace =
-    borrowerAssetTransactions?.reduce((sum, trx) => {
-      if (trx.type === 'BORROWED') {
-        sum = new CurrencyBalance(
-          sum.add(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
-          pool.currency.decimals
-        )
-      }
-      if (trx.type === 'REPAID') {
-        sum = new CurrencyBalance(
-          sum.sub(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
-          pool.currency.decimals
-        )
-      }
-      return sum
-    }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
 
   return (
     <Stack gap={3}>

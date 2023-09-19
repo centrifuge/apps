@@ -7,10 +7,10 @@ import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 type Props = {
   loan: Loan | TinlakeLoan
   pool: Pool | TinlakePool
-  latestSettlementPrice: string | null
+  latestPrice: CurrencyBalance
 }
 
-export function PricingValues({ loan: { pricing }, pool, latestSettlementPrice }: Props) {
+export function PricingValues({ loan: { pricing }, pool, latestPrice }: Props) {
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
     (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
@@ -21,20 +21,12 @@ export function PricingValues({ loan: { pricing }, pool, latestSettlementPrice }
 
     const days = getAge(new Date(pricing.oracle.timestamp).toISOString())
 
-    const getLatestPrice = () => {
-      if (latestSettlementPrice && pricing.oracle.value.isZero()) {
-        return new CurrencyBalance(latestSettlementPrice, pool.currency.decimals)
-      }
-
-      return new CurrencyBalance(pricing.oracle.value.toString(), 18).toDecimal()
-    }
-
     return (
       <>
         <LabelValueStack label="ISIN" value={pricing.Isin} />
         <LabelValueStack
-          label="Latest price"
-          value={`${formatBalance(getLatestPrice(), pool.currency.symbol, 6, 2)}`}
+          label={`Latest price${pricing.oracle.value.isZero() ? ' (settlement)' : ''}`}
+          value={`${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}`}
         />
         <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
       </>

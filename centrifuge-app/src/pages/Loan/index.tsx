@@ -1,4 +1,4 @@
-import { Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -90,7 +90,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const address = useAddress()
   const canOraclePrice = useCanSetOraclePrice(address)
-  const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, assetId)
+  const { borrowerAssetTransactions, currentFace } = useBorrowerAssetTransactions(poolId, assetId)
 
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
@@ -126,9 +126,21 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
     return 0
   }, [originationDate, loan?.pricing.maturityDate])
 
-  const latestSettlementPrice = borrowerAssetTransactions?.length
-    ? borrowerAssetTransactions[borrowerAssetTransactions.length - 1]?.settlementPrice
-    : null
+  const getLatestPrice = () => {
+    if (loan?.pricing && 'oracle' in loan.pricing) {
+      const latestSettlementPrice = borrowerAssetTransactions?.length
+        ? borrowerAssetTransactions[borrowerAssetTransactions.length - 1]?.settlementPrice
+        : null
+
+      if (latestSettlementPrice && loan.pricing.oracle.value.isZero()) {
+        return new CurrencyBalance(latestSettlementPrice, pool.currency.decimals)
+      }
+
+      return new CurrencyBalance(loan.pricing.oracle.value.toString(), 18)
+    }
+
+    return new CurrencyBalance(0, 18)
+  }
 
   return (
     <Stack>
@@ -186,7 +198,12 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                 ? [
                     {
                       label: 'Current value',
-                      value: `${formatBalance(loan.presentValue, pool.currency.symbol, 2, 2)}`,
+                      value: `${formatBalance(
+                        currentFace.toDecimal().mul(getLatestPrice().toDecimal()).div(100),
+                        pool.currency.symbol,
+                        2,
+                        2
+                      )}`,
                     },
                   ]
                 : []),
@@ -223,7 +240,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           <PageSection title={<Box>Pricing</Box>}>
             <Stack>
               <Shelf gap={6} flexWrap="wrap">
-                <PricingValues loan={loan} pool={pool} latestSettlementPrice={latestSettlementPrice} />
+                <PricingValues loan={loan} pool={pool} latestPrice={getLatestPrice()} />
               </Shelf>
               {canOraclePrice &&
                 setShowOraclePricing &&

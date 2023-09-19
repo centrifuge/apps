@@ -10,7 +10,7 @@ import { Tooltips } from '../../../components/Tooltips'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
-import { usePool } from '../../../utils/usePools'
+import { useAverageAmount, usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 import { PoolDetailSideBar } from '../Overview'
 
@@ -29,6 +29,7 @@ export const PoolDetailAssets: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
+  const averageAmount = useAverageAmount(poolId)
 
   if (!pool) return null
 
@@ -52,10 +53,14 @@ export const PoolDetailAssets: React.FC = () => {
     .toFixed(2)
     .toString()
 
-  const avgAmount = ongoingAssets
-    .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal() || Dec(0)), Dec(0))
-    .dividedBy(ongoingAssets.length)
-    .toDecimalPlaces(2)
+  const isExternal = 'valuationMethod' in loans[0].pricing && loans[0].pricing.valuationMethod === 'oracle'
+
+  const avgAmount = isExternal
+    ? averageAmount
+    : ongoingAssets
+        .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal() || Dec(0)), Dec(0))
+        .dividedBy(ongoingAssets.length)
+        .toDecimalPlaces(2)
 
   const assetValue = formatBalance(pool.nav.latest.toDecimal().toNumber(), pool.currency.symbol)
 
