@@ -1390,17 +1390,13 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [poolId: string, loanId: string, quantity: BN, price: BN, aoProxy: string],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, price, aoProxy] = args
+    const [poolId, loanId, quantity, price] = args
     const $api = inst.getApi()
     return $api.pipe(
       switchMap((api) => {
-        const borrowSubmittable = api.tx.proxy.proxy(
-          aoProxy,
-          undefined,
-          api.tx.loans.borrow(poolId, loanId, {
-            external: { quantity: quantity.toString(), settlementPrice: price.toString() },
-          })
-        )
+        const borrowSubmittable = api.tx.loans.borrow(poolId, loanId, {
+          external: { quantity: quantity.toString(), settlementPrice: price.toString() },
+        })
         return inst.wrapSignAndSend(api, borrowSubmittable, options)
       })
     )
@@ -1440,20 +1436,16 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [poolId: string, loanId: string, quantity: BN, interest: BN, unscheduled: BN, price: BN, aoProxy: string],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, interest, unscheduled, price, aoProxy] = args
+    const [poolId, loanId, quantity, interest, unscheduled, price] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const repaySubmittable = api.tx.proxy.proxy(
-          aoProxy,
-          undefined,
-          api.tx.loans.repay(poolId, loanId, {
-            principal: { external: { quantity: quantity.toString(), settlementPrice: price.toString() } },
-            interest: interest.toString(),
-            unscheduled: unscheduled.toString(),
-          })
-        )
+        const repaySubmittable = api.tx.loans.repay(poolId, loanId, {
+          principal: { external: { quantity: quantity.toString(), settlementPrice: price.toString() } },
+          interest: interest.toString(),
+          unscheduled: unscheduled.toString(),
+        })
         return inst.wrapSignAndSend(api, repaySubmittable, options)
       })
     )

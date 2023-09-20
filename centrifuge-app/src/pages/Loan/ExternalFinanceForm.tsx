@@ -26,7 +26,7 @@ type RepayValues = {
 export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
-  const balances = useBalances(account.signingAccount.address)
+  const balances = useBalances(account.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
@@ -63,7 +63,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
       const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
 
-      doFinanceTransaction([loan.poolId, loan.id, quantity, price, account.actingAddress])
+      doFinanceTransaction([loan.poolId, loan.id, quantity, price, account.actingAddress], {
+        account,
+      })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -78,7 +80,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
       const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
 
-      doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price, account.actingAddress])
+      doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price, account.actingAddress], {
+        account,
+      })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
