@@ -100,7 +100,13 @@ export function useAverageAmount(poolId: string) {
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
 
-  if (!loans || !pool || !borrowerTransactions) return new BN(0)
+  if (
+    !loans?.length ||
+    !pool ||
+    !borrowerTransactions ||
+    !('valuationMethod' in loans[0].pricing && loans[0].pricing.valuationMethod === 'oracle')
+  )
+    return new BN(0)
 
   const getLatestPrice = (assetId: string) => {
     const pricing = loans.find((loan) => loan.id === assetId)?.pricing as ExternalPricingInfo

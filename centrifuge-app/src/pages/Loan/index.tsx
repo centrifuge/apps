@@ -232,7 +232,11 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
           {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
             <PageSection title={<Box>Holdings</Box>}>
               <Shelf gap={6} flexWrap="wrap">
-                <HoldingsValues pool={pool as Pool} transactions={borrowerAssetTransactions} />
+                <HoldingsValues
+                  pool={pool as Pool}
+                  transactions={borrowerAssetTransactions}
+                  currentFace={currentFace}
+                />
               </Shelf>
             </PageSection>
           )}

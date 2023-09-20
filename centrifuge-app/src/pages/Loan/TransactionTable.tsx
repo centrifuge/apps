@@ -130,7 +130,7 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals }:
           align: 'left',
           header: 'Position',
           cell: (row) =>
-            row.position.isZero()
+            row.type === 'CREATED'
               ? '-'
               : formatBalance(new CurrencyBalance(new BN(row.position).mul(new BN(100)), decimals), currency, 2, 2),
           flex: '3',

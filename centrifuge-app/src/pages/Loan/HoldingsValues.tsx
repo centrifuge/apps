@@ -1,31 +1,18 @@
 import { BorrowerTransaction, CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import { LabelValueStack } from '../../components/LabelValueStack'
-import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 
 type Props = {
   pool: Pool
   transactions?: BorrowerTransaction[] | null
+  currentFace: CurrencyBalance
 }
 
-export function HoldingsValues({ pool, transactions }: Props) {
+export function HoldingsValues({ pool, transactions, currentFace }: Props) {
   const netSpent =
     transactions?.reduce((sum, trx) => {
       if (trx.type === 'REPAID') {
-        sum = new CurrencyBalance(
-          sum.sub(
-            trx.amount && trx.settlementPrice
-              ? new BN(trx.amount.mul(new BN(trx.settlementPrice).mul(new BN(100)))).div(
-                  new BN(10).pow(new BN(pool.currency.decimals))
-                )
-              : new CurrencyBalance(0, pool.currency.decimals)
-          ),
-          pool.currency.decimals
-        )
-      }
-
-      if (trx.type === 'BORROWED') {
         sum = new CurrencyBalance(
           sum.add(
             trx.amount && trx.settlementPrice
@@ -38,25 +25,47 @@ export function HoldingsValues({ pool, transactions }: Props) {
         )
       }
 
+      if (trx.type === 'BORROWED') {
+        sum = new CurrencyBalance(
+          sum.sub(
+            trx.amount && trx.settlementPrice
+              ? new BN(trx.amount.mul(new BN(trx.settlementPrice).mul(new BN(100)))).div(
+                  new BN(10).pow(new BN(pool.currency.decimals))
+                )
+              : new CurrencyBalance(0, pool.currency.decimals)
+          ),
+          pool.currency.decimals
+        )
+      }
+
       return sum
     }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
 
-  const currentFace =
-    transactions?.reduce((sum, trx) => {
-      if (trx.type === 'BORROWED') {
-        sum = new CurrencyBalance(
-          sum.add(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
-          pool.currency.decimals
-        )
-      }
-      if (trx.type === 'REPAID') {
-        sum = new CurrencyBalance(
-          sum.sub(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
-          pool.currency.decimals
-        )
-      }
-      return sum
-    }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
+  const getAverageSettlePrice = () => {
+    const settlementTransactions =
+      transactions?.reduce((sum, trx) => {
+        if (!new BN(trx.settlementPrice || 0).isZero()) {
+          sum = sum.add(new BN(1))
+        }
+        return sum
+      }, new BN(0)) || new BN(0)
+
+    if (settlementTransactions.isZero()) {
+      return new CurrencyBalance(0, pool.currency.decimals)
+    }
+
+    return (
+      transactions?.reduce((sum, trx) => {
+        if (!new BN(trx.settlementPrice || 0).isZero()) {
+          sum = new CurrencyBalance(
+            sum.add(trx.settlementPrice ? new BN(trx.settlementPrice) : new CurrencyBalance(0, pool.currency.decimals)),
+            pool.currency.decimals
+          )
+        }
+        return sum
+      }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
+    ).div(settlementTransactions)
+  }
 
   return (
     <>
@@ -71,10 +80,10 @@ export function HoldingsValues({ pool, transactions }: Props) {
       <LabelValueStack
         label="Average settle price"
         value={
-          netSpent.isZero()
+          getAverageSettlePrice().isZero()
             ? '-'
             : `${formatBalance(
-                Dec(netSpent.toNumber()).div(Dec(currentFace.toNumber())).mul(100),
+                new CurrencyBalance(getAverageSettlePrice().mul(new BN(100)), pool.currency.decimals),
                 pool.currency.symbol,
                 2,
                 2
