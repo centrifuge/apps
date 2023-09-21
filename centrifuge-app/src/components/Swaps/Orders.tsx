@@ -197,7 +197,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
   console.log('orderBuyCurrencyEVMChain', orderBuyCurrencyEVMChain, orderSellCurrencyEVMChain)
 
   const { execute, reset, isLoading, lastCreatedTransaction } = useCentrifugeTransaction(
-    'Set oracle price',
+    'Fulfill order',
     (cent) => (args: [transferTo: string | null], options) => {
       const [transferTo] = args
       const swapTx = api.tx.orderBook.fillOrderFull(order.id)
