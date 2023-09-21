@@ -19,7 +19,6 @@ import { config, ethConfig } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { ConvertAddressPage } from '../pages/ConvertAddress'
 import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
@@ -251,9 +250,6 @@ function Routes() {
       </Route>
       <Route path="/swaps">
         <SwapsPage />
-      </Route>
-      <Route path="/convert">
-        <ConvertAddressPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/pools" />

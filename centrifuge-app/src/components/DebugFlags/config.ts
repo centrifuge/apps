@@ -1,6 +1,6 @@
 import React from 'react'
 import { config, isTestEnv } from '../../config'
-import { ConvertAddressButton } from './components/ConvertAddressButton'
+import { ConvertAddress } from './components/ConvertAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
@@ -125,7 +125,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   },
   convertAddress: {
     type: 'component',
-    Component: ConvertAddressButton,
+    Component: ConvertAddress,
     default: null,
     alwaysShow: true,
   },
