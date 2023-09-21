@@ -1,6 +1,6 @@
 import React from 'react'
 import { config, isTestEnv } from '../../config'
-import { ConvertEvmAddress } from './components/ConvertEvmAddress'
+import { ConvertAddressButton } from './components/ConvertAddressButton'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
@@ -46,7 +46,7 @@ export type Key =
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
   | 'showPodAccountCreation'
-  | 'convertEvmAddress'
+  | 'convertAddress'
   | 'showPortfolio'
   | 'showTestNets'
   | 'showSwaps'
@@ -123,9 +123,9 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     alwaysShow: true,
   },
-  convertEvmAddress: {
+  convertAddress: {
     type: 'component',
-    Component: ConvertEvmAddress,
+    Component: ConvertAddressButton,
     default: null,
     alwaysShow: true,
   },

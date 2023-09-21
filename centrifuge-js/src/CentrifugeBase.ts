@@ -197,6 +197,23 @@ const parachainRuntimeApi: DefinitionsCall = {
       version: 1,
     },
   ],
+  AccountConversionApi: [
+    {
+      methods: {
+        conversion_of: {
+          description: 'Get converted address',
+          params: [
+            {
+              name: 'location',
+              type: 'XcmV3MultiLocation',
+            },
+          ],
+          type: 'Option<AccountId32>',
+        },
+      },
+      version: 1,
+    },
+  ],
 }
 
 type Events = ISubmittableResult['events']

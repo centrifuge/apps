@@ -19,6 +19,7 @@ import { config, ethConfig } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
+import { ConvertAddressPage } from '../pages/ConvertAddress'
 import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
@@ -158,32 +159,32 @@ export function Root() {
           <GlobalStyle />
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
-            <DemoBanner />
-            <SupportedBrowserBanner />
-            <WalletProvider
-              evmChains={evmChains}
-              subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
-              walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
-              showAdvancedAccounts={debugState.showAdvancedAccounts as any}
-              showBase={debugState.showBase as any}
-              showArbitrum={debugState.showArbitrum as any}
-              showTestNets={debugState.showTestNets as any}
-            >
-              <OnboardingAuthProvider>
-                <OnboardingProvider>
-                  <DebugFlags onChange={(state) => setDebugState(state)}>
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <Router>
+            <Router>
+              <DemoBanner />
+              <SupportedBrowserBanner />
+              <WalletProvider
+                evmChains={evmChains}
+                subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+                walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+                showAdvancedAccounts={debugState.showAdvancedAccounts as any}
+                showBase={debugState.showBase as any}
+                showArbitrum={debugState.showArbitrum as any}
+                showTestNets={debugState.showTestNets as any}
+              >
+                <OnboardingAuthProvider>
+                  <OnboardingProvider>
+                    <DebugFlags onChange={(state) => setDebugState(state)}>
+                      <TransactionProvider>
+                        <TransactionToasts />
                         <LoadBoundary>
                           <Routes />
                         </LoadBoundary>
-                      </Router>
-                    </TransactionProvider>
-                  </DebugFlags>
-                </OnboardingProvider>
-              </OnboardingAuthProvider>
-            </WalletProvider>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </OnboardingProvider>
+                </OnboardingAuthProvider>
+              </WalletProvider>
+            </Router>
           </CentrifugeProvider>
         </FabricProvider>
       </QueryClientProvider>
@@ -250,6 +251,9 @@ function Routes() {
       </Route>
       <Route path="/swaps">
         <SwapsPage />
+      </Route>
+      <Route path="/convert">
+        <ConvertAddressPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/pools" />
