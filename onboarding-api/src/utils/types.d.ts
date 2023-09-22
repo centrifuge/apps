@@ -16,6 +16,7 @@ declare global {
       wallet: {
         address: string
         network: SupportedNetworks
+        chainId: number
       }
     }
   }

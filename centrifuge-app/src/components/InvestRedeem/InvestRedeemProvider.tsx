@@ -13,6 +13,7 @@ export function useInvestRedeem() {
 
 export function InvestRedeemProvider(props: Props) {
   const isTinlakePool = props.poolId.startsWith('0x')
+
   const Comp = isTinlakePool ? InvestRedeemTinlakeProvider : InvestRedeemCentrifugeProvider
 
   return <Comp {...props} />

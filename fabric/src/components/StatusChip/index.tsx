@@ -23,6 +23,7 @@ const Chip = styled(Text)<{ $borderColor: string }>((props) =>
     borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: '20px',
+    whiteSpace: 'nowrap',
   })
 )
 

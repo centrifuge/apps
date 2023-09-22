@@ -41,6 +41,7 @@ export type WalletContextType = {
     evmChainId?: number
     accounts: SubstrateAccount[] | null
     proxies: Record<string, Proxy[]> | undefined
+    proxiesAreLoading: boolean
     multisigs: ComputedMultisig[]
     combinedAccounts: CombinedSubstrateAccount[] | null
     selectedAccount: SubstrateAccount | null
@@ -122,7 +123,7 @@ type WalletProviderProps = {
   walletConnectId?: string
   subscanUrl?: string
   showAdvancedAccounts?: boolean
-  showAvalanche?: boolean
+  showBase?: boolean
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
@@ -138,7 +139,7 @@ export function WalletProvider({
   walletConnectId,
   subscanUrl,
   showAdvancedAccounts,
-  showAvalanche,
+  showBase,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
 
@@ -210,7 +211,7 @@ export function WalletProvider({
         wallet: state.evm.selectedWallet as any,
       }))
     : null
-  const { data: proxies } = useQuery(
+  const { data: proxies, isLoading: proxiesAreLoading } = useQuery(
     [
       'proxies',
       state.substrate.accounts?.map((acc) => acc.address),
@@ -232,7 +233,7 @@ export function WalletProvider({
   )
 
   const delegatees = [...new Set(Object.values(proxies ?? {})?.flatMap((p) => p.map((d) => d.delegator)))]
-  const { data: nestedProxies } = useQuery(
+  const { data: nestedProxies, isLoading: nestedProxiesAreLoading } = useQuery(
     ['nestedProxies', delegatees],
     () => firstValueFrom(cent.proxies.getMultiUserProxies([delegatees])),
     {
@@ -454,6 +455,7 @@ export function WalletProvider({
         selectedProxies: selectedCombinedAccount?.proxies || null,
         selectedMultisig: selectedCombinedAccount?.multisig || null,
         proxies: combinedProxies,
+        proxiesAreLoading: nestedProxiesAreLoading || proxiesAreLoading,
         subscanUrl,
       },
       evm: {
@@ -468,7 +470,7 @@ export function WalletProvider({
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showAvalanche={showAvalanche} />
+      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showBase={showBase} />
     </WalletContext.Provider>
   )
 }

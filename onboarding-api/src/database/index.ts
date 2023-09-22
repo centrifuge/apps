@@ -2,7 +2,7 @@ import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
 import { Request } from 'express'
-import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
+import { array, bool, date, InferType, lazy, mixed, number, object, string, StringSchema } from 'yup'
 import { HttpError } from '../utils/httpError'
 import { Subset } from '../utils/types'
 
@@ -22,7 +22,7 @@ const uboSchema = object({
   countryOfCitizenship: string().required(),
 })
 
-const walletSchema = object({
+export const walletSchema = object({
   evm: array().of(string()),
   substrate: array().of(string()),
   evmOnSubstrate: array().of(string()),
@@ -34,6 +34,7 @@ export const transactionInfoSchema = object({
   txHash: string().required(),
   blockNumber: string().required(),
   isEvmOnSubstrate: bool().optional(),
+  chainId: number().required(),
 })
 export type TransactionInfo = InferType<typeof transactionInfoSchema>
 
@@ -77,10 +78,6 @@ const globalStepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  verifyTaxInfo: object({
-    completed: bool(),
-    timeStamp: string().nullable(),
-  }),
   verifyAccreditation: object({
     completed: bool(),
     timeStamp: string().nullable(),
@@ -108,20 +105,22 @@ export const entityUserSchema = object({
   poolSteps: poolStepsSchema,
   manualKybReference: string().nullable().default(null),
   address: string().nullable().default(null),
+  taxDocument: string().nullable().default(null),
 })
 
 export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallets: walletSchema,
   kycReference: string().optional(),
-  email: string().default(null).nullable(), // TODO: coming soon
+  email: string().default(null).nullable(),
   name: string().required(),
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(), // TODO: validate with list of countries
   countryOfResidency: string().required(), // TODO: validate with list of countries
-  globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'verifyEmail']),
+  globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyEmail']).optional(),
   poolSteps: poolStepsSchema,
   address: string().nullable().default(null),
+  taxDocument: string().nullable().default(null),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>

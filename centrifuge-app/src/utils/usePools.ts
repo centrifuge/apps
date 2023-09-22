@@ -73,6 +73,18 @@ export function useInvestorTransactions(poolId: string, trancheId?: string, from
   return result
 }
 
+export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['borrowerTransactions', poolId, from, to],
+    (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
 export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
   if (poolId.startsWith('0x')) throw new Error('Only works with Centrifuge Pools')
   const [result] = useCentrifugeQuery(
@@ -94,6 +106,14 @@ export function useDailyTrancheStates(trancheId: string) {
       suspense: true,
     }
   )
+
+  return result
+}
+
+export function useDailyTVL() {
+  const [result] = useCentrifugeQuery(['daily TVL'], (cent) => cent.pools.getDailyTVL(), {
+    suspense: true,
+  })
 
   return result
 }

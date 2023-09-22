@@ -4,22 +4,23 @@ import { useSendVerifyEmail } from '../../pages/Onboarding/queries/useSendVerify
 type Props = {
   isDialogOpen: boolean
   setIsDialogOpen: (isDialogOpen: boolean) => void
+  currentEmail: string
 }
 
-export const ConfirmResendEmailVerificationDialog = ({ isDialogOpen, setIsDialogOpen }: Props) => {
+export const ConfirmResendEmailVerificationDialog = ({ isDialogOpen, setIsDialogOpen, currentEmail }: Props) => {
   const { mutate: sendVerifyEmail, isLoading } = useSendVerifyEmail()
 
   return (
     <Dialog
-      width="25%"
+      width="30%"
       isOpen={isLoading ? true : isDialogOpen}
       onClose={() => setIsDialogOpen(false)}
-      title={<Text variant="heading1">Send Confirmation Email</Text>}
+      title={<Text variant="heading2">Send Confirmation Email</Text>}
     >
-      <Box p={2}>
-        <Stack gap={4}>
-          <Text variant="body1">Are you sure you want to resend a confirmation email?</Text>
-          <Shelf justifyContent="flex-end" gap={2}>
+      <Box>
+        <Stack gap={3}>
+          <Text variant="body1">Are you sure you want to resend a confirmation email to {currentEmail}?</Text>
+          <Shelf gap={2} justifyContent="flex-end">
             <Button onClick={() => setIsDialogOpen(false)} variant="secondary" disabled={isLoading}>
               Cancel
             </Button>

@@ -26,7 +26,7 @@ import css from '@styled-system/css'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
@@ -310,18 +310,18 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
   return null
 }
 
-const OnboardingButton = ({ networks }: { networks: Network[] | undefined }) => {
+const OnboardingButton = ({ networks }: { networks: Network[] | undefined; trancheId?: string }) => {
   const { showWallets, showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
-  const pool = usePool(state.poolId)
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
+  const history = useHistory()
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
-  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state.trancheId].openForOnboarding ? 'open' : 'closed'
+  const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state?.trancheId]?.openForOnboarding ? 'open' : 'closed'
   const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
-
-  const history = useHistory()
 
   const getOnboardingButtonText = () => {
     if (connectedType) {
@@ -534,7 +534,11 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             </Stack>
           </Stack>
         ) : changeOrderFormShown ? (
-          renderInput(() => setChangeOrderFormShown(false))
+          state.needsPoolCurrencyApproval ? (
+            renderInput(onCancel, { onClick: actions.approvePoolCurrency, loading: isApproving })
+          ) : (
+            renderInput(onCancel)
+          )
         ) : hasPendingOrder ? (
           <PendingOrder
             type="invest"
@@ -705,7 +709,11 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             </Stack>
           </Stack>
         ) : changeOrderFormShown ? (
-          renderInput(() => setChangeOrderFormShown(false))
+          state.needsTrancheTokenApproval ? (
+            renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
+          ) : (
+            renderInput(onCancel)
+          )
         ) : hasPendingOrder ? (
           <PendingOrder
             type="redeem"

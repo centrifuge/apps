@@ -4,6 +4,7 @@ import BN from 'bn.js'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
+import { useElementScrollSize } from '../utils/useElementScrollSize'
 
 type GroupedProps = {
   groupIndex?: number
@@ -68,6 +69,8 @@ export const DataTable = <T extends Record<string, any>>({
   )
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
+  const ref = React.useRef(null)
+  const { scrollWidth } = useElementScrollSize(ref)
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
@@ -82,8 +85,9 @@ export const DataTable = <T extends Record<string, any>>({
   }, [orderBy, data, currentSortKey, page, pageSize])
 
   const showHeader = groupIndex === 0 || !groupIndex
+
   return (
-    <Stack as={rounded && !lastGroupIndex ? Card : Stack}>
+    <Stack ref={ref} as={rounded && !lastGroupIndex ? Card : Stack} minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}>
       <Shelf>
         {showHeader &&
           columns.map((col, i) => (
@@ -189,7 +193,7 @@ const DataCol = styled(Text)<{ align: Column['align'] }>`
   white-space: nowrap;
 
   &:first-child {
-    padding-right: '16px';
+    padding-right: 16px;
   }
   ${({ align }) => {
     switch (align) {
@@ -197,14 +201,14 @@ const DataCol = styled(Text)<{ align: Column['align'] }>`
         return css({
           justifyContent: 'flex-start',
           '&:last-child': {
-            paddingRight: '16px',
+            paddingRight: 16,
           },
         })
       case 'center':
         return css({
           justifyContent: 'center',
           '&:last-child': {
-            paddingRight: '16px',
+            paddingRight: 16,
           },
         })
       case 'right':
@@ -214,7 +218,7 @@ const DataCol = styled(Text)<{ align: Column['align'] }>`
           justifyContent: 'flex-end',
 
           '&:last-child': {
-            paddingRight: '16px',
+            paddingRight: 16,
           },
         })
     }

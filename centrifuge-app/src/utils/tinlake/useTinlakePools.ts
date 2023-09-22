@@ -279,7 +279,7 @@ async function getTinlakeLoans(poolId: string) {
     loans: unknown[]
   }[] = []
 
-  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+  const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -403,7 +403,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
   const toCurrencyBalance = (val: BigNumber) => new CurrencyBalance(val.toString(), 18)
   const toTokenBalance = (val: BigNumber) => new TokenBalance(val.toString(), 18)
   const toRate = (val: BigNumber) => new Rate(val.toString())
-  const toPrice = (val: BigNumber) => new Price(val.toString())
+  const toPrice = (val: BigNumber) => new Rate(val.toString())
 
   const calls: Call[] = []
   pools.active.forEach((pool) => {
@@ -583,64 +583,68 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
   const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
   const capacityGivenMaxDropRatioPerPool: { [key: string]: BN } = {}
   Object.keys(multicallData).forEach((poolId: string) => {
-    const state = multicallData[poolId]
+    try {
+      const state = multicallData[poolId]
 
-    // Investments will reduce the creditline and therefore reduce the senior debt
-    const newUsedCreditline = state.unusedCreditline
-      ? BN.max(
-          new BN(0),
-          (state.usedCreditline || new BN(0))
-            .sub(state.pendingSeniorInvestments)
-            .sub(state.pendingJuniorInvestments)
-            .add(state.pendingSeniorRedemptions)
-            .add(state.pendingJuniorRedemptions)
-        )
-      : new BN(0)
+      // Investments will reduce the creditline and therefore reduce the senior debt
+      const newUsedCreditline = state.unusedCreditline
+        ? BN.max(
+            new BN(0),
+            (state.usedCreditline || new BN(0))
+              .sub(state.pendingSeniorInvestments)
+              .sub(state.pendingJuniorInvestments)
+              .add(state.pendingSeniorRedemptions)
+              .add(state.pendingJuniorRedemptions)
+          )
+        : new BN(0)
 
-    const newUnusedCreditline = state.unusedCreditline ? state.availableCreditline?.sub(newUsedCreditline) : new BN(0)
+      const newUnusedCreditline = state.unusedCreditline ? state.availableCreditline?.sub(newUsedCreditline) : new BN(0)
 
-    const newReserve = BN.max(
-      new BN(0),
-      state.reserve
+      const newReserve = BN.max(
+        new BN(0),
+        state.reserve
+          .add(state.pendingSeniorInvestments)
+          .add(state.pendingJuniorInvestments)
+          .sub(state.pendingSeniorRedemptions)
+          .sub(state.pendingJuniorRedemptions)
+          .sub(newUsedCreditline)
+      )
+
+      const capacityGivenMaxReserve = BN.max(
+        new BN(0),
+        state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
+      )
+
+      // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
+      const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+        ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+        : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+      // TODO: the change in senior balance should be multiplied by the mat here
+      const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+        ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+        : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+      const newSeniorAsset = newSeniorDebt
+        .add(newSeniorBalance)
         .add(state.pendingSeniorInvestments)
-        .add(state.pendingJuniorInvestments)
         .sub(state.pendingSeniorRedemptions)
-        .sub(state.pendingJuniorRedemptions)
-        .sub(newUsedCreditline)
-    )
 
-    const capacityGivenMaxReserve = BN.max(
-      new BN(0),
-      state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
-    )
+      const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
+      const maxPoolSize = newJuniorAsset
+        .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state?.maxSeniorRatio)))
+        .div(new BN(10).pow(new BN(6)))
 
-    // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
-    const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
-      ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
-      : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+      const maxSeniorAsset = maxPoolSize.sub(newJuniorAsset)
 
-    // TODO: the change in senior balance should be multiplied by the mat here
-    const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
-      ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
-      : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+      const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
 
-    const newSeniorAsset = newSeniorDebt
-      .add(newSeniorBalance)
-      .add(state.pendingSeniorInvestments)
-      .sub(state.pendingSeniorRedemptions)
-
-    const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
-    const maxPoolSize = newJuniorAsset
-      .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state.maxSeniorRatio)))
-      .div(new BN(10).pow(new BN(6)))
-
-    const maxSeniorAsset = maxPoolSize.sub(newJuniorAsset)
-
-    const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
-
-    capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
-    capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
-    capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
+      capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
+      capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
+      capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
+    } catch (e) {
+      console.error(e)
+    }
   })
 
   const combined = pools.active.map((p) => {
@@ -788,7 +792,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           id: `${id}-1`,
           seniority: 1,
           balance: data.seniorBalance,
-          minRiskBuffer: Rate.fromFloat(Dec(1).sub(data.maxSeniorRatio.toDecimal())),
+          minRiskBuffer: Rate.fromFloat(Dec(1).sub(data.maxSeniorRatio.toDecimal() || Dec(0))),
           currentRiskBuffer: Rate.fromFloat(Dec(1).sub(data.seniorRatio.toDecimal())),
           interestRatePerSec: data.seniorInterestRate,
           lastUpdatedInterest: new Date().toISOString(),

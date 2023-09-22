@@ -105,6 +105,14 @@ export function PricingInput({ poolId }: { poolId: string }) {
         // Max 5 years from now
         max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
       />
+      <FieldWithErrorMessage
+        as={NumberInput}
+        label={<Tooltips type="maturityExtensionDays" variant="secondary" label="Extension period*" />}
+        placeholder={0}
+        rightElement="days"
+        name="pricing.maturityExtensionDays"
+        validate={validate.maturityExtensionDays}
+      />
 
       <FieldWithErrorMessage
         as={NumberInput}

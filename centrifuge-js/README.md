@@ -42,7 +42,7 @@ Altair collator websocket URL.
 
 #### `metadataHost`
 
-Default value: `https://altair.mypinata.cloud`
+Default value: `https://centrifuge.mypinata.cloud`
 
 IPFS gateway url for retrieving metadata.
 

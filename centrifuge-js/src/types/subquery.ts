@@ -68,23 +68,18 @@ export type SubqueryInvestorTransaction = {
   transactionFee?: number | null
 }
 
-export type BorrowerTransactionType = 'CREATED' | 'BORROWED' | 'REPAID' | 'CLOSED'
+export type BorrowerTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
 
 export type SubqueryBorrowerTransaction = {
+  __typename?: 'BorrowerTransaction'
+  id: string
   timestamp: string
+  poolId: string
+  accountId: string
+  epochId: string
+  loanId: string
   type: BorrowerTransactionType
-  amount: CurrencyBalance
-  poolId: string
-  hash: string
-}
-
-export type SubqueryOutstandingOrder = {
-  timestamp: string
-  investAmount: CurrencyBalance
-  redeemAmount: CurrencyBalance
-  poolId: string
-  trancheId: string
-  hash: string
+  amount?: number | null
 }
 
 export type SubqueryEpoch = {

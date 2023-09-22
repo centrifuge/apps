@@ -1,4 +1,5 @@
 import React from 'react'
+import { config } from '../../config'
 import { ConvertEvmAddress } from './components/ConvertEvmAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
@@ -34,7 +35,7 @@ export type Key =
   | 'evmAddress'
   | 'batchMintNFTs'
   | 'persistDebugFlags'
-  | 'showAvalanche'
+  | 'showBase'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
@@ -45,6 +46,8 @@ export type Key =
   | 'editAdminConfig'
   | 'showPodAccountCreation'
   | 'convertEvmAddress'
+  | 'showPortfolio'
+  | 'poolCreationType'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -68,7 +71,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     alwaysShow: true,
   },
-  showAvalanche: {
+  showBase: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
@@ -112,5 +115,19 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     Component: ConvertEvmAddress,
     default: null,
     alwaysShow: true,
+  },
+  showPortfolio: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  poolCreationType: {
+    type: 'select',
+    default: config.poolCreationType || 'immediate',
+    options: {
+      immediate: 'immediate',
+      propose: 'propose',
+      notePreimage: 'notePreimage',
+    },
   },
 }

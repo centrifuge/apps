@@ -11,7 +11,7 @@ import {
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
-import { usePools } from '../../utils/usePools'
+import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
@@ -19,9 +19,8 @@ import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
 export function Menu() {
-  // const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
-  const pools = usePools() || []
-  const isXLarge = useIsAboveBreakpoint('XL')
+  const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
+  const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
 
   return (
@@ -32,13 +31,13 @@ export function Menu() {
       flexDirection={['row', 'row', 'column']}
       alignItems={['center', 'center', 'stretch']}
     >
-      <PageLink to="/pools" stacked={!isXLarge}>
+      <PageLink to="/pools" stacked={!isLarge}>
         <IconInvestments />
         Pools
       </PageLink>
 
       {config.network !== 'centrifuge' && (
-        <PageLink to="/nfts" stacked={!isXLarge}>
+        <PageLink to="/nfts" stacked={!isLarge}>
           <IconNft />
           NFTs
         </PageLink>
@@ -52,15 +51,14 @@ export function Menu() {
       </PageLink>
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
-        <IssuerMenu defaultOpen={isXLarge} stacked={!isXLarge} poolIds={pools.map(({ id }) => id)}>
-          {isXLarge ? (
+        <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>
+          {isLarge ? (
             <Stack as="ul" gap={1}>
-              {!!pools.length &&
-                pools.map((pool) => (
-                  <Box key={pool.id} as="li" pl={4}>
-                    <PoolLink pool={pool} />
-                  </Box>
-                ))}
+              {pools.map((pool) => (
+                <Box key={pool.id} as="li" pl={4}>
+                  <PoolLink pool={pool} />
+                </Box>
+              ))}
               {address && config.poolCreationType === 'immediate' && (
                 <Shelf justifyContent="center" as="li" mt={1}>
                   <CreatePool />

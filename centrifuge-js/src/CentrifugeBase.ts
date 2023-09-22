@@ -77,45 +77,20 @@ const defaultConfig: Config = {
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
   centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools',
   altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-altair',
-  metadataHost: 'https://altair.mypinata.cloud',
+  metadataHost: 'https://centrifuge.mypinata.cloud',
 }
 
 const relayChainTypes = {}
 
 const parachainTypes = {
-  // NFTs
-  ClassId: 'u64',
-  InstanceId: 'u128',
-  // Crowdloan
-  RootHashOf: 'Hash',
-  TrieIndex: 'u32',
-  RelayChainAccountId: 'AccountId',
-  ParachainAccountIdOf: 'AccountId',
-  Proof: {
-    leafHash: 'Hash',
-    sortedHashes: 'Vec<Hash>',
+  ActiveLoanInfo: {
+    activeLoan: 'PalletLoansEntitiesLoansActiveLoan',
+    presentValue: 'Balance',
+    outstandingPrincipal: 'Balance',
+    outstandingInterest: 'Balance',
   },
-  PoolId: 'u64',
-  TrancheId: '[u8; 16]',
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
-  },
-  StakingCurrency: {
-    _enum: ['BlockRewards'],
-  },
-  CurrencyId: {
-    _enum: {
-      Native: 'Native',
-      Tranche: '(PoolId, TrancheId)',
-      KSM: 'KSM',
-      AUSD: 'AUSD',
-      ForeignAsset: 'u32',
-      Staking: 'StakingCurrency',
-    },
-  },
-  ActiveLoanInfo: {
-    interest_accrued: 'u128',
-    present_value: 'u128',
   },
 }
 
@@ -146,7 +121,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
           type: 'AccountId',
         },
       ],
-      type: 'Vec<CurrencyId>',
+      type: 'Vec<CfgTypesTokensCurrencyId>',
     },
     computeReward: {
       description: 'Compute the claimable reward for the given triplet of domain, currency and account',
@@ -157,7 +132,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
         },
         {
           name: 'currency_id',
-          type: 'CurrencyId',
+          type: 'CfgTypesTokensCurrencyId',
         },
         {
           name: 'account_id',
@@ -216,7 +191,7 @@ const parachainRuntimeApi: DefinitionsCall = {
               type: 'u64',
             },
           ],
-          type: 'Option<ActiveLoanInfo>',
+          type: 'Option<PalletLoansEntitiesLoansActiveLoan>',
         },
       },
       version: 1,

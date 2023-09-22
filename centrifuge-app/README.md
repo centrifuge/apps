@@ -2,35 +2,50 @@
 
 ## Data and UI Architecture
 
-- `centrifuge-js`: fetch data from the chain or subquery.
-- `fabric`: all design system elements (run storybook in fabric to see everything available).
+UI
 
-## Commands
+- `centrifuge-js`: library to interact with the Centrifuge chain and subquery
+- `fabric`: design system elements and components
+- `centrifuge-react`: reusable React component and hooks (wallets, queries, transactions)
 
-#### `yarn start`
+Cloud functions
 
-Running `yarn start` will start the following processes:
-Start a development server that watches the different workspace modules and the react app (using Vite)
+- `onboarding-api`: KYC/KYB and investor whitelisting
+- `faucet-api`: dev chain faucet
+- `pinning-api`: pin documents to Pinata (IPFS)
 
-#### `yarn start:deps`  
-It will start a development mode on the dependencies (`fabric` & `centrifuge-js`), to allow HMR to work when making changes
+Indexing
 
-#### `yarn build` or `yarn build --mode $ENV` or `yarn build immutable`
+- [pools-subql](https://github.com/centrifuge/pools-subql): subquery to index pools and assets
 
-Build all dependencies, functions, and app with libraries.
+## Development
+
+### Prerequisites
+
+- node v16
+- yarn
+
+### Setup
+
+1. copy [.env.development](./.env-config/env.development) to `.env.development.local`
+2. Install modules:
+   ```bash
+   $ yarn
+   ```
+3. Start the development server:
+   ```bash
+   $ yarn start
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Other useful information
 
-This app uses [`vite`](https://vitejs.dev/guide/) but serve, build and bundle.
+This app uses [`vite`](https://vitejs.dev/guide/) to serve, build and bundle.
 
-To reference env variables in code please use the vite standard `import.meta.env.ENV_VARIABLE`.
-
-Check the Vite  configuration file to find where we keep env file. Vite automatically grabs the right file when building with the `--mode` flag. [More info here](https://vitejs.dev/guide/env-and-mode.html)
-
-> in Netlify functions you still need to reference env variables with `process.env`
+To reference env variables in code please use the viste standard `import.meta.env.ENV_VARIABLE`.
 
 ## Deployments
 
-Up-to-date info in k-f's Knowledge Base: 
+Up-to-date info in k-f's Knowledge Base:
 
 https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view#Environments-amp-Deployments

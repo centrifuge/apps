@@ -19,6 +19,7 @@ export const signAndSendDocumentsInput = object({
   poolId: string().required(),
   trancheId: string().required(),
   transactionInfo: transactionInfoSchema.required(),
+  debugEmail: string().optional(), // sends email to specified address instead of issuer
 })
 
 export const signAndSendDocumentsController = async (
@@ -28,11 +29,16 @@ export const signAndSendDocumentsController = async (
   try {
     await validateInput(req.body, signAndSendDocumentsInput)
 
-    const { poolId, trancheId, transactionInfo } = req.body
+    const { poolId, trancheId, transactionInfo, debugEmail } = req.body
     const { wallet } = req
 
     const { poolSteps, globalSteps, investorType, name, email, ...user } = await fetchUser(wallet)
     const { metadata } = await new NetworkSwitch(wallet.network).getPoolById(poolId)
+
+    if (metadata.onboarding?.requireTaxInfo && !user.taxDocument) {
+      throw new HttpError(400, 'Tax info required')
+    }
+
     if (
       investorType === 'individual' &&
       metadata?.onboarding?.kycRestrictedCountries?.includes(user.countryOfCitizenship)
@@ -47,7 +53,8 @@ export const signAndSendDocumentsController = async (
       throw new HttpError(400, 'Country not supported by issuer')
     }
 
-    const remark = `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`
+    const remark = `I hereby sign the subscription agreement of pool ${poolId} and tranche ${trancheId}: ${metadata
+      .onboarding.tranches[trancheId].agreement?.uri!}`
 
     await new NetworkSwitch(wallet.network).validateRemark(wallet, transactionInfo, remark)
 
@@ -73,7 +80,7 @@ export const signAndSendDocumentsController = async (
     )
 
     if ((investorType === 'entity' && globalSteps.verifyBusiness.completed) || investorType === 'individual') {
-      await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF)
+      await sendDocumentsMessage(wallet, poolId, trancheId, signedAgreementPDF, debugEmail)
     }
 
     const updatedUser: Subset<OnboardingUser> = {

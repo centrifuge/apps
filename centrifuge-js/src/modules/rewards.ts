@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { forkJoin } from 'rxjs'
-import { combineLatestWith, map, repeat, switchMap } from 'rxjs/operators'
+import { combineLatestWith, filter, map, repeat, switchMap } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { RewardDomain } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
@@ -11,7 +11,13 @@ export function getRewardsModule(inst: Centrifuge) {
     args: [address: Account, tranches: { poolId: string; trancheId: string }[], rewardDomain: RewardDomain]
   ) {
     const [address, tranches, rewardDomain] = args
-    const $events = inst.getEvents()
+
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.liquidityRewards.NewEpoch.is(event))
+        return !!event
+      })
+    )
 
     return inst.getApi().pipe(
       switchMap((api) => {
@@ -138,11 +144,14 @@ export function getRewardsModule(inst: Centrifuge) {
   }
 
   function getAccountStakes(args: [address: Account, poolId: string, trancheId: string]) {
-    const [address, poolId, trancheId] = args
+    const [addressEvm, poolId, trancheId] = args
     const { getPoolCurrency } = inst.pools
-
     return inst.getApi().pipe(
-      switchMap((api) => api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })),
+      combineLatestWith(inst.getChainId()),
+      switchMap(([api, chainId]) => {
+        const address = inst.utils.evmToSubstrateAddress(addressEvm.toString(), chainId)
+        return api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })
+      }),
       combineLatestWith(getPoolCurrency([poolId])),
       map(([data, currency]) => {
         const { stake, pendingStake, rewardTally, lastCurrencyMovement } = data.toPrimitive() as {

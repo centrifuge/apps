@@ -1,21 +1,15 @@
 import { Request, Response } from 'express'
-import { InferType, mixed, object, string } from 'yup'
-import { SupportedNetworks } from '../../database'
+import { walletSchema } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
 import { reportHttpError } from '../../utils/httpError'
 import { validateInput } from '../../utils/validateInput'
 
-const getGlobalOnboardingStatusInput = object({
-  address: string().required(),
-  network: mixed<SupportedNetworks>().required().oneOf(['evm', 'substrate']),
-})
-
 export const getGlobalOnboardingStatusController = async (
-  req: Request<{}, {}, {}, InferType<typeof getGlobalOnboardingStatusInput>>,
+  req: Request<{}, {}, {}, Request['wallet']>,
   res: Response
 ) => {
   try {
-    await validateInput(req.query, getGlobalOnboardingStatusInput)
+    await validateInput(req.query, walletSchema)
 
     const user = await fetchUser(req.query, { suppressError: true })
 
