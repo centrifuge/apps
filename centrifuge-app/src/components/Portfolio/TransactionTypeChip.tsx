@@ -1,11 +1,12 @@
 import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
 import * as React from 'react'
-import { TransactionCardProps } from './TransactionCard'
+import { TransactionCardProps } from './Transactions'
 
 type TransactionTypeProps = {
   type: TransactionCardProps['action']
 }
 
+// @ts-expect-error
 const states: {
   [Key in TransactionCardProps['action']]: {
     label: string

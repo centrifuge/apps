@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { formatBalance } from '../../utils/formatting'
 import { useComputeLiquidityRewards } from '../LiquidityRewards/hooks'
-import { Coins } from './Coins'
+import { CoinsSvg } from './CoinsSvg'
 
 export function Rewards() {
   const { colors } = useTheme()
@@ -67,7 +67,7 @@ export function Rewards() {
       </Stack>
 
       <Box mt={3} alignSelf="end">
-        <Coins />
+        <CoinsSvg />
       </Box>
     </Grid>
   )
