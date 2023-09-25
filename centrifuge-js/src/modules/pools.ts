@@ -2143,8 +2143,6 @@ export function getPoolsModule(inst: Centrifuge) {
           mergeMap((entry) => {
             return getPoolCurrency([entry.poolId]).pipe(
               map((poolCurrency) => {
-                const tokenPrice = new Price(entry.tranche.tokenPrice)
-
                 return {
                   ...entry,
                   investAmount: new CurrencyBalance(entry.investAmount || 0, poolCurrency.decimals),
