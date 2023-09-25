@@ -37,7 +37,7 @@ export function PoolCard({
   iconUri,
   isLoading,
 }: PoolCardProps) {
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
   const { sizes } = useTheme()
 
   return (

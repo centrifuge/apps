@@ -6,7 +6,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useComputeLiquidityRewards } from '../LiquidityRewards/hooks'
 import { Coins } from './Coins'
 
-export function PortfolioRewards() {
+export function Rewards() {
   const { colors } = useTheme()
   const consts = useCentrifugeConsts()
   const address = useAddress()
@@ -34,6 +34,7 @@ export function PortfolioRewards() {
       style={{
         boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
       }}
+      bg="white"
     >
       <Stack gap={2}>
         <Text as="h2" variant="heading2">
