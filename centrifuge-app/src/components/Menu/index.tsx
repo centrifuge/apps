@@ -22,7 +22,6 @@ import { PoolLink } from './PoolLink'
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
-  const isXLarge = useIsAboveBreakpoint('XL')
   const address = useAddress('substrate')
   const { showPortfolio } = useDebugFlags()
 
@@ -48,8 +47,8 @@ export function Menu() {
 
       <GovernanceMenu />
 
-      {showPortfolio && (
-        <PageLink to="/portfolio" stacked={!isXLarge}>
+      {showPortfolio && address && (
+        <PageLink to="/portfolio" stacked={!isLarge}>
           <IconPieChart />
           Portfolio
         </PageLink>
