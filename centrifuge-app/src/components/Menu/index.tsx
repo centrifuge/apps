@@ -12,6 +12,7 @@ import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
+import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
@@ -21,7 +22,9 @@ import { PoolLink } from './PoolLink'
 export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
+  const isXLarge = useIsAboveBreakpoint('XL')
   const address = useAddress('substrate')
+  const { showPortfolio } = useDebugFlags()
 
   return (
     <Shelf
@@ -45,10 +48,12 @@ export function Menu() {
 
       <GovernanceMenu />
 
-      <PageLink to="/portfolio" stacked={!isXLarge}>
-        <IconPieChart />
-        Portfolio
-      </PageLink>
+      {showPortfolio && (
+        <PageLink to="/portfolio" stacked={!isXLarge}>
+          <IconPieChart />
+          Portfolio
+        </PageLink>
+      )}
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>
