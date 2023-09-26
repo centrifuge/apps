@@ -26,3 +26,5 @@ export type Multisig = {
 }
 
 export type ComputedMultisig = Multisig & { address: string }
+
+export * from './subquery'
