@@ -23,11 +23,10 @@ import { useCentNFT } from '../utils/useNFTs'
 import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
-import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
+import LoanLabel from './LoanLabel'
 
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
-  statusLabel: string
   originationDateSortKey: string
 }
 
@@ -120,7 +119,6 @@ export function LoanList({ loans }: Props) {
 
   const rows: Row[] = loans.map((loan) => {
     return {
-      statusLabel: getLoanLabelStatus(loan)[1],
       nftIdSortKey: loan.asset.nftId,
       idSortKey: parseInt(loan.id, 10),
       outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),

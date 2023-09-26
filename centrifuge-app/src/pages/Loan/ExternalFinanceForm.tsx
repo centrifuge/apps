@@ -1,4 +1,4 @@
-import { CurrencyBalance, findBalance, Loan as LoanType, Price } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, ExternalPricingInfo, findBalance, Loan as LoanType, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -61,9 +61,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
-      const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
+      const quantity = Price.fromFloat(
+        Price.fromFloat(values.faceValue)
+          .div((loan.pricing as ExternalPricingInfo).notional)
+          .toString()
+      )
 
-      doFinanceTransaction([loan.poolId, loan.id, quantity, price, account.actingAddress], {
+      doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
         account,
       })
       actions.setSubmitting(false)
@@ -78,9 +82,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
-      const quantity = Price.fromFloat((values.faceValue as number) / (values.price as number))
+      const quantity = Price.fromFloat(
+        Price.fromFloat(values.faceValue)
+          .div((loan.pricing as ExternalPricingInfo).notional)
+          .toString()
+      )
 
-      doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price, account.actingAddress], {
+      doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price], {
         account,
       })
       actions.setSubmitting(false)

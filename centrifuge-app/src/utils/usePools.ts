@@ -89,6 +89,7 @@ export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) 
     (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
     {
       suspense: true,
+      enabled: !poolId.startsWith('0x'),
     }
   )
 
@@ -190,7 +191,7 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
     },
     {
       suspense: true,
-      enabled: !!pool,
+      enabled: !!pool && !poolId.startsWith('0x'),
     }
   )
 
