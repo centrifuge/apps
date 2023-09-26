@@ -39,11 +39,11 @@ export function InvestorStatus() {
   } = useWallet()
   const { pid: poolId } = useParams<{ pid: string }>()
   const [address, setAddress] = React.useState('')
-  const [chain, setChain] = React.useState<number>()
+  const [chain, setChain] = React.useState<number | ''>('')
   const validator = chain ? isEvmAddress : isAddress
   const validAddress = validator(address) ? address : undefined
   const utils = useCentrifugeUtils()
-  const centAddress = chain ? utils.evmToSubstrateAddress(address, chain) : validAddress
+  const centAddress = chain && validAddress ? utils.evmToSubstrateAddress(address, chain) : validAddress
   const permissions = usePermissions(centAddress)
 
   console.log('permissions', permissions)
@@ -98,10 +98,13 @@ export function InvestorStatus() {
           {showLiquidityPoolsOptions && (
             <Select
               value={chain}
-              options={Object.keys(chains).map((chainId) => ({
-                value: chainId,
-                label: `${chainId} - ${getChainInfo(chains, Number(chainId)).name}`,
-              }))}
+              options={[
+                { value: '', label: 'Centrifuge' },
+                ...Object.keys(chains).map((chainId) => ({
+                  value: chainId,
+                  label: `${chainId} - ${getChainInfo(chains, Number(chainId)).name}`,
+                })),
+              ]}
               onChange={(e) => {
                 setChain(e.target.value as any)
               }}
