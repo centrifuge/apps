@@ -37,7 +37,7 @@ export function PoolCard({
   iconUri,
   isLoading,
 }: PoolCardProps) {
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
   const { sizes } = useTheme()
 
   return (
@@ -82,7 +82,7 @@ export function PoolCard({
                 })
               : '—'}
           </Ellipsis>
-          {status === 'Upcoming' ? <Text variant="body3"> target</Text> : ''}
+          {status === 'Upcoming' && apr ? <Text variant="body3"> target</Text> : ''}
         </TextWithPlaceholder>
 
         <Box>
