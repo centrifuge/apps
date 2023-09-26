@@ -129,9 +129,8 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
 
   const getLatestPrice = () => {
     if (loan?.pricing && 'oracle' in loan.pricing) {
-      const latestSettlementPrice = borrowerAssetTransactions?.[borrowerAssetTransactions.length - 1].settlementPrice
-        ? new BN(borrowerAssetTransactions[borrowerAssetTransactions.length - 1].settlementPrice || '').mul(new BN(100))
-        : null
+      const settlementPrice = borrowerAssetTransactions?.[borrowerAssetTransactions.length - 1].settlementPrice
+      const latestSettlementPrice = settlementPrice ? new BN(settlementPrice).mul(new BN(100)) : null
 
       if (latestSettlementPrice && loan.pricing.oracle.value.isZero()) {
         return new CurrencyBalance(latestSettlementPrice, pool.currency.decimals)

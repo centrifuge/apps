@@ -1387,7 +1387,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function financeExternalLoan(
-    args: [poolId: string, loanId: string, quantity: BN, price: BN, aoProxy: string],
+    args: [poolId: string, loanId: string, quantity: BN, price: BN],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, quantity, price] = args
@@ -1433,7 +1433,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function repayExternalLoanPartially(
-    args: [poolId: string, loanId: string, quantity: BN, interest: BN, unscheduled: BN, price: BN, aoProxy: string],
+    args: [poolId: string, loanId: string, quantity: BN, interest: BN, unscheduled: BN, price: BN],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, quantity, interest, unscheduled, price] = args
