@@ -41,7 +41,15 @@ type AdminRole =
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
-export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: string, permissionedTill: number] }
+export type PoolRoleInput =
+  | AdminRole
+  | {
+      TrancheInvestor: [
+        trancheId: string,
+        permissionedTill: number,
+        evmDomains?: [chainId: number, domainAddress: string][]
+      ]
+    }
 
 export type CurrencyKey = string | { ForeignAsset: string } | { Tranche: [string, string] }
 
@@ -875,22 +883,34 @@ export function getPoolsModule(inst: Centrifuge) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll([
-          ...add.map(([addr, role]) =>
-            api.tx.permissions.add(
-              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
-              addr,
-              { Pool: poolId },
-              { PoolRole: role }
-            )
-          ),
-          ...sortedRemove.map(([addr, role]) =>
-            api.tx.permissions.remove(
-              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
-              addr,
-              { Pool: poolId },
-              { PoolRole: role }
-            )
-          ),
+          ...add.flatMap(([addr, role]) => {
+            const [trancheId, validTill, evmDomains = []] = typeof role === 'string' ? [] : role.TrancheInvestor
+            return [
+              api.tx.permissions.add(
+                { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
+                addr,
+                { Pool: poolId },
+                { PoolRole: typeof role === 'string' ? role : { TrancheInvestor: role.TrancheInvestor.slice(0, 2) } }
+              ),
+              ...evmDomains.map((domain) =>
+                api.tx.liquidityPools.updateMember(poolId, trancheId, { EVM: domain }, validTill)
+              ),
+            ]
+          }),
+          ...sortedRemove.flatMap(([addr, role]) => {
+            const [trancheId, validTill, evmDomains = []] = typeof role === 'string' ? [] : role.TrancheInvestor
+            return [
+              api.tx.permissions.remove(
+                { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'InvestorAdmin' },
+                addr,
+                { Pool: poolId },
+                { PoolRole: role }
+              ),
+              ...evmDomains.map((domain) =>
+                api.tx.liquidityPools.updateMember(poolId, trancheId, { EVM: domain }, validTill)
+              ),
+            ]
+          }),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
       })

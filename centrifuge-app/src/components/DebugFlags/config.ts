@@ -50,6 +50,7 @@ export type Key =
   | 'showPortfolio'
   | 'showTestNets'
   | 'showSwaps'
+  | 'showLiquidityPoolsOptions'
   | 'poolCreationType'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
@@ -94,6 +95,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editAdminConfig: {
+    type: 'checkbox',
+    default: false,
+  },
+  showLiquidityPoolsOptions: {
     type: 'checkbox',
     default: false,
   },
