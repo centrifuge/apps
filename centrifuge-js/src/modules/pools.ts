@@ -11,6 +11,7 @@ import {
   InvestorTransactionType,
   SubqueryBorrowerTransaction,
   SubqueryInvestorTransaction,
+  SubqueryOutstandingOrder,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
@@ -2015,44 +2016,12 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getAllTransactions(args: [address: string]) {
+  function getTransactionsByAddress(args: [address: string]) {
     const [address] = args
 
     const $query = inst.getSubqueryObservable<{
-      investorTransactions: {
-        nodes: {
-          timestamp: string
-          type: InvestorTransactionType
-          poolId: string
-          trancheId: string
-          hash: string
-          tokenAmount: string
-          tokenPrice: string
-          currencyAmount: string
-        }[]
-      }
-      borrowerTransactions: {
-        nodes: {
-          timestamp: string
-          type: BorrowerTransactionType
-          poolId: string
-          amount: string
-          hash: string
-        }[]
-      }
-      outstandingOrders: {
-        nodes: {
-          timestamp: string
-          poolId: string
-          trancheId: string
-          hash: string
-          redeemAmount: string
-          investAmount: string
-          tranche: {
-            tokenPrice: string
-          }
-        }[]
-      }
+      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
+      outstandingOrders: { nodes: SubqueryOutstandingOrder[] }
     }>(
       `query($address: String!) {
         investorTransactions(filter: {
@@ -2071,39 +2040,6 @@ export function getPoolsModule(inst: Centrifuge) {
             currencyAmount
           }
         }
-
-        borrowerTransactions(filter: {
-          accountId: {
-            equalTo: $address
-          }
-        }) {
-          nodes {
-            timestamp
-            type
-            poolId
-            hash
-            amount
-          }
-        }
-
-        outstandingOrders(filter: {
-          accountId: {
-            equalTo: $address
-          }
-        }) {
-          nodes {
-            timestamp
-            redeemAmount
-            investAmount
-            poolId
-            trancheId
-            hash
-            tranche {
-              tokenPrice
-            }
-          }
-        }
-      }
     `,
       {
         address,
@@ -2112,55 +2048,27 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $query.pipe(
       mergeMap((data) => {
-        const investorTransactions$ = from(data?.investorTransactions.nodes || []).pipe(
-          mergeMap((entry) => {
-            return getPoolCurrency([entry.poolId]).pipe(
-              map((poolCurrency) => ({
-                ...entry,
-                tokenAmount: new CurrencyBalance(entry.tokenAmount || 0, poolCurrency.decimals),
-                tokenPrice: new Price(entry.tokenPrice || 0),
-                currencyAmount: new CurrencyBalance(entry.currencyAmount || 0, poolCurrency.decimals),
-                trancheId: entry.trancheId.split('-')[1],
-              }))
-            )
-          }),
-          toArray()
-        )
-
-        const borrowerTransactions$ = from(data?.borrowerTransactions.nodes || []).pipe(
-          mergeMap((entry) => {
-            return getPoolCurrency([entry.poolId]).pipe(
-              map((poolCurrency) => ({
-                ...entry,
-                amount: new CurrencyBalance(entry.amount || 0, poolCurrency.decimals),
-              }))
-            )
-          }),
-          toArray()
-        )
-
-        const outstandingOrders$ = from(data?.outstandingOrders.nodes || []).pipe(
-          mergeMap((entry) => {
-            return getPoolCurrency([entry.poolId]).pipe(
-              map((poolCurrency) => {
-                return {
+        const $investorTransactions = from(data?.investorTransactions.nodes || [])
+          // .pipe(distinct(({ hash }) => hash))
+          .pipe(
+            mergeMap((entry) => {
+              return getPoolCurrency([entry.poolId]).pipe(
+                map((poolCurrency) => ({
                   ...entry,
-                  investAmount: new CurrencyBalance(entry.investAmount || 0, poolCurrency.decimals),
-                  redeemAmount: new CurrencyBalance(entry.redeemAmount || 0, poolCurrency.decimals),
+                  tokenAmount: new CurrencyBalance(entry.tokenAmount || 0, poolCurrency.decimals),
+                  tokenPrice: new Price(entry.tokenPrice || 0),
+                  currencyAmount: new CurrencyBalance(entry.currencyAmount || 0, poolCurrency.decimals),
                   trancheId: entry.trancheId.split('-')[1],
-                }
-              })
-            )
-          }),
-          toArray()
-        )
+                }))
+              )
+            }),
+            toArray()
+          )
 
-        return forkJoin([investorTransactions$, borrowerTransactions$, outstandingOrders$]).pipe(
-          map(([investorTransactions, borrowerTransactions, outstandingOrders]) => {
+        return forkJoin([$investorTransactions]).pipe(
+          map(([investorTransactions]) => {
             return {
               investorTransactions,
-              borrowerTransactions,
-              outstandingOrders,
             }
           })
         )
@@ -3052,7 +2960,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
-    getAllTransactions,
+    getTransactionsByAddress,
     getDailyTVL,
   }
 }

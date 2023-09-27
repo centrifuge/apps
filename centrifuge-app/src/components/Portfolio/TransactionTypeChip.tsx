@@ -35,11 +35,11 @@ const states: {
   },
   INVEST_EXECUTION: {
     label: 'Invest execution',
-    status: 'default',
+    status: 'ok',
   },
   REDEEM_EXECUTION: {
     label: 'Redeem execution',
-    status: 'default',
+    status: 'info',
   },
   TRANSFER_IN: {
     label: 'Transfer in',

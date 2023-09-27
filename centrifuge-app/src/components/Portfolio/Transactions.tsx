@@ -1,90 +1,39 @@
-import {
-  BorrowerTransactionType,
-  CurrencyBalance,
-  InvestorTransactionType,
-  Pool,
-  SubqueryInvestorTransaction,
-} from '@centrifuge/centrifuge-js'
-import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import { BorrowerTransactionType, CurrencyBalance, InvestorTransactionType, Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconExternalLink, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../utils/date'
+import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { useAllTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
+import { usePool, usePoolMetadata, useTransactionsByAddress } from '../../utils/usePools'
 import { TransactionTypeChip } from './TransactionTypeChip'
 
-export const TRANSACTION_CARD_COLUMNS = `150px 100px 250px 150px 1fr`
+export const TRANSACTION_CARD_COLUMNS = `150px 125px 200px 150px 1fr`
 export const TRANSACTION_CARD_GAP = 4
 
 type AddressTransactionsProps = {
   count?: number
 }
 
-type SubqueryBorrowerTransaction = any
-type SubqueryOutstandingOrder = any
-
-const formatters = {
-  investorTransactions: ({
-    timestamp,
-    type,
-    poolId,
-    hash,
-    tokenAmount,
-    tokenPrice,
-    currencyAmount,
-    trancheId,
-  }: Omit<SubqueryInvestorTransaction, 'id' | 'accountId' | 'epochNumber'>) => {
-    return {
-      date: new Date(timestamp).getTime(),
-      action: type,
-      amount: tokenAmount,
-      poolId,
-      hash,
-      trancheId,
-    } as TransactionCardProps
-  },
-  borrowerTransactions: ({ timestamp, type, amount, poolId, hash }: SubqueryBorrowerTransaction) =>
-    ({
-      date: new Date(timestamp).getTime(),
-      action: type,
-      amount,
-      poolId,
-      hash,
-    } as TransactionCardProps),
-  outstandingOrders: ({ timestamp, investAmount, redeemAmount, poolId, hash, trancheId }: SubqueryOutstandingOrder) =>
-    ({
-      date: new Date(timestamp).getTime(),
-      action: 'PENDING_ORDER',
-      amount: investAmount.add(redeemAmount),
-      poolId,
-      hash,
-      trancheId,
-    } as TransactionCardProps),
-}
-
 export function Transactions({ count }: AddressTransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
-  const formattedAddress = formatAddress(address || '')
-  const allTransactions = useAllTransactions(formattedAddress)
-  const formattedTransactions: TransactionCardProps[] = []
+  const transactions = useTransactionsByAddress(formatAddress(address || ''))
 
-  if (allTransactions) {
-    const { borrowerTransactions, investorTransactions, outstandingOrders } = allTransactions
+  const investorTransactions =
+    transactions?.investorTransactions.map((tx) => {
+      return {
+        date: new Date(tx.timestamp).getTime(),
+        action: tx.type,
+        amount: tx.tokenAmount,
+        poolId: tx.poolId,
+        hash: tx.hash,
+        trancheId: tx.trancheId,
+      }
+    }) || []
 
-    investorTransactions.forEach((transaction) =>
-      formattedTransactions.push(formatters.investorTransactions(transaction))
-    )
-    borrowerTransactions.forEach((transaction) =>
-      formattedTransactions.push(formatters.borrowerTransactions(transaction))
-    )
-    outstandingOrders.forEach((transaction) => formattedTransactions.push(formatters.outstandingOrders(transaction)))
-  }
-
-  const transactions = formattedTransactions.slice(0, count ?? formattedTransactions.length)
-
-  return !!transactions.length ? (
+  return !!investorTransactions.slice(0, count ?? investorTransactions.length) ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
         Transaction history
@@ -93,21 +42,17 @@ export function Transactions({ count }: AddressTransactionsProps) {
         <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
           <Text variant="body3">Action</Text>
 
-          <Text as="button" variant="body3">
-            Transaction date
-          </Text>
+          <Text variant="body3">Transaction date</Text>
 
           <Text variant="body3">Token</Text>
 
           <Box justifySelf="end">
-            <Text as="button" variant="body3">
-              Amount
-            </Text>
+            <Text variant="body3">Amount</Text>
           </Box>
         </Grid>
 
         <Stack as="ul" role="list">
-          {transactions.map((transaction, index) => (
+          {investorTransactions.slice(0, count ?? investorTransactions.length).map((transaction, index) => (
             <Box as="li" key={`${transaction.poolId}${index}`}>
               <TransactionListItem {...transaction} />
             </Box>
@@ -131,7 +76,9 @@ export type TransactionCardProps = {
 export function TransactionListItem({ date, action, amount, poolId, hash, trancheId }: TransactionCardProps) {
   const pool = usePool(poolId) as Pool
   const { data } = usePoolMetadata(pool)
+  console.log('🚀 ~ data:', data)
   const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
+  console.log('🚀 ~ token:', token)
   const subScanUrl = import.meta.env.REACT_APP_SUBSCAN_URL
 
   if (!pool || !data) {
@@ -162,10 +109,10 @@ export function TransactionListItem({ date, action, amount, poolId, hash, tranch
 
       <Stack gap={1}>
         <Text as="span" variant="interactive2">
-          {!!token ? token.currency?.name : data.pool?.name}
+          {!!token ? token.currency?.name.split(data.pool?.name || '') : data.pool?.name}
         </Text>
         {!!token && (
-          <Text as="span" variant="interactive2" color="textSecondary">
+          <Text as="span" variant="interactive2" color="textDisabled">
             {data?.pool?.name}
           </Text>
         )}
@@ -173,14 +120,14 @@ export function TransactionListItem({ date, action, amount, poolId, hash, tranch
 
       <Box justifySelf="end">
         <Text as="span" variant="interactive2">
-          {formatBalance(amount, pool.currency.symbol)}
+          {formatBalanceAbbreviated(amount, pool.currency.symbol)}
         </Text>
       </Box>
 
       {!!subScanUrl && !!hash && (
         <Box
           as="a"
-          href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
+          href={`${subScanUrl}/extrinsic/${hash}`}
           target="_blank"
           rel="noopener noreferrer"
           justifySelf="end"
