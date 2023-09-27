@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/centrifuge/apps/compare/fabric/v1.3.0...fabric/v1.3.1) (2023-09-27)
+
+
+### Bug Fixes
+
+* **fabric:** npm ([db8d7d5](https://github.com/centrifuge/apps/commit/db8d7d56ddf29409c989003d17b80dab11c8e624))
+
 ## 1.3.0 (2023-09-27)
 
 
