@@ -1,14 +1,5 @@
 name: Centrifuge App
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'centrifuge-app/**'
-      - 'centrifuge-js/**'
-      - 'centrifuge-react/**'
-      - '.github/workflows/centrifuge-app.yml'
-      - '.github/actions/deploy-gcs'
   pull_request:
     paths:
       - 'centrifuge-app/**'
@@ -23,7 +14,7 @@ on:
         required: false
 # Fancy concurrency group string to allow for multi-staging deployments
 concurrency:
-  group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }}@${{ github.event.name }}${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true      
 env:
   artifact_name: "webpack${{ inputs.deploy_env && format('-{0}', inputs.deploy_env) }}"
@@ -103,7 +94,7 @@ jobs:
   deploy-app:
     concurrency:
        # Do not sync the same bucket in parallel
-      group: deploy-${{ needs.build-app.outputs.front_url }}
+      group: deploy-${{ needs.build-app.outputs.front_url }}-${{ github.event.name }}
       cancel-in-progress: true    
     permissions:
       contents: 'read'
