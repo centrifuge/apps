@@ -3,26 +3,21 @@ import * as React from 'react'
 import { TransactionCardProps } from './Transactions'
 
 type TransactionTypeProps = {
-  type: TransactionCardProps['action']
+  type: TransactionCardProps['type']
 }
 
-// @ts-expect-error
 const states: {
-  [Key in TransactionCardProps['action']]: {
+  [Key in TransactionCardProps['type']]: {
     label: string
     status: StatusChipProps['status']
   }
 } = {
-  PENDING_ORDER: {
-    label: 'Pending order',
-    status: 'default',
-  },
   INVEST_ORDER_UPDATE: {
-    label: 'Invest order update',
+    label: 'Pending invest',
     status: 'default',
   },
   REDEEM_ORDER_UPDATE: {
-    label: 'Redeem order update',
+    label: 'Pending redemption',
     status: 'default',
   },
   INVEST_ORDER_CANCEL: {
@@ -34,11 +29,11 @@ const states: {
     status: 'default',
   },
   INVEST_EXECUTION: {
-    label: 'Invest execution',
+    label: 'Invest',
     status: 'ok',
   },
   REDEEM_EXECUTION: {
-    label: 'Redeem execution',
+    label: 'Redeem',
     status: 'info',
   },
   TRANSFER_IN: {
@@ -71,6 +66,10 @@ const states: {
   },
   CLOSED: {
     label: 'Closed',
+    status: 'default',
+  },
+  PRICED: {
+    label: 'Priced',
     status: 'default',
   },
 }

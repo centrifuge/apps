@@ -2,7 +2,7 @@ import { BorrowerTransactionType, CurrencyBalance, InvestorTransactionType, Pool
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconExternalLink, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useRouteMatch } from 'react-router-dom'
 import { formatDate } from '../../utils/date'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
@@ -21,6 +21,7 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
   const transactions = useTransactionsByAddress(formatAddress(address || ''))
+  const match = useRouteMatch('/portfolio/transactions')
 
   const investorTransactions =
     transactions?.investorTransactions
@@ -28,7 +29,7 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
       .map((tx) => {
         return {
           date: new Date(tx.timestamp).getTime(),
-          action: tx.type,
+          type: tx.type,
           amount: tx.tokenAmount,
           poolId: tx.poolId,
           hash: tx.hash,
@@ -39,8 +40,9 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
   return !!investorTransactions.slice(0, count ?? investorTransactions.length) ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
-        Transaction history
+        {match ? null : 'Transaction history'}
       </Text>
+
       <Stack>
         <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
           <Text variant="body3">Action</Text>
@@ -62,21 +64,21 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
           ))}
         </Stack>
       </Stack>
-      <Link to="portfolio/transactions">View all</Link>
+      {match ? null : <Link to="portfolio/transactions">View all</Link>}
     </Stack>
   ) : null
 }
 
 export type TransactionCardProps = {
   date: number
-  action: InvestorTransactionType | BorrowerTransactionType | 'PENDING_ORDER'
+  type: InvestorTransactionType | BorrowerTransactionType
   amount: CurrencyBalance
   poolId: string
   hash: string
   trancheId?: string
 }
 
-export function TransactionListItem({ date, action, amount, poolId, hash, trancheId }: TransactionCardProps) {
+export function TransactionListItem({ date, type, amount, poolId, hash, trancheId }: TransactionCardProps) {
   const pool = usePool(poolId) as Pool
   const { data } = usePoolMetadata(pool)
   const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
@@ -97,7 +99,7 @@ export function TransactionListItem({ date, action, amount, poolId, hash, tranch
       borderBottomStyle="solid"
     >
       <Box>
-        <TransactionTypeChip type={action} />
+        <TransactionTypeChip type={type} />
       </Box>
 
       <Text as="time" variant="interactive2" datetime={date}>
