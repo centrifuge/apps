@@ -14,24 +14,27 @@ export const TRANSACTION_CARD_GAP = 4
 
 type AddressTransactionsProps = {
   count?: number
+  txTypes?: InvestorTransactionType[]
 }
 
-export function Transactions({ count }: AddressTransactionsProps) {
+export function Transactions({ count, txTypes }: AddressTransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
   const transactions = useTransactionsByAddress(formatAddress(address || ''))
 
   const investorTransactions =
-    transactions?.investorTransactions.map((tx) => {
-      return {
-        date: new Date(tx.timestamp).getTime(),
-        action: tx.type,
-        amount: tx.tokenAmount,
-        poolId: tx.poolId,
-        hash: tx.hash,
-        trancheId: tx.trancheId,
-      }
-    }) || []
+    transactions?.investorTransactions
+      .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
+      .map((tx) => {
+        return {
+          date: new Date(tx.timestamp).getTime(),
+          action: tx.type,
+          amount: tx.tokenAmount,
+          poolId: tx.poolId,
+          hash: tx.hash,
+          trancheId: tx.trancheId,
+        }
+      }) || []
 
   return !!investorTransactions.slice(0, count ?? investorTransactions.length) ? (
     <Stack as="article" gap={2}>
@@ -76,9 +79,7 @@ export type TransactionCardProps = {
 export function TransactionListItem({ date, action, amount, poolId, hash, trancheId }: TransactionCardProps) {
   const pool = usePool(poolId) as Pool
   const { data } = usePoolMetadata(pool)
-  console.log('🚀 ~ data:', data)
   const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
-  console.log('🚀 ~ token:', token)
   const subScanUrl = import.meta.env.REACT_APP_SUBSCAN_URL
 
   if (!pool || !data) {

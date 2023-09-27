@@ -50,9 +50,12 @@ function Portfolio() {
             <Rewards />
           </Grid>
         </BasePadding>
-        <BasePadding>
+        <BasePadding gap={3}>
           <InvestedTokens />
-          <Transactions count={3} />
+          <Transactions
+            count={3}
+            txTypes={['INVEST_EXECUTION', 'REDEEM_EXECUTION', 'INVEST_ORDER_UPDATE', 'REDEEM_ORDER_UPDATE']}
+          />
           <AssetAllocation />
         </BasePadding>
         <BasePadding>

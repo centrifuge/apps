@@ -11,7 +11,6 @@ import {
   InvestorTransactionType,
   SubqueryBorrowerTransaction,
   SubqueryInvestorTransaction,
-  SubqueryOutstandingOrder,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
@@ -2021,7 +2020,6 @@ export function getPoolsModule(inst: Centrifuge) {
 
     const $query = inst.getSubqueryObservable<{
       investorTransactions: { nodes: SubqueryInvestorTransaction[] }
-      outstandingOrders: { nodes: SubqueryOutstandingOrder[] }
     }>(
       `query($address: String!) {
         investorTransactions(filter: {
@@ -2040,6 +2038,7 @@ export function getPoolsModule(inst: Centrifuge) {
             currencyAmount
           }
         }
+      }
     `,
       {
         address,
@@ -2047,7 +2046,7 @@ export function getPoolsModule(inst: Centrifuge) {
     )
 
     return $query.pipe(
-      mergeMap((data) => {
+      switchMap((data) => {
         const $investorTransactions = from(data?.investorTransactions.nodes || [])
           // .pipe(distinct(({ hash }) => hash))
           .pipe(
