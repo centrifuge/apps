@@ -5,7 +5,8 @@
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "scripts": {
     "build": "yarn build:icons && tsc",
