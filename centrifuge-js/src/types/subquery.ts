@@ -81,6 +81,7 @@ export type SubqueryBorrowerTransaction = {
   type: BorrowerTransactionType
   amount?: number | null
   settlementPrice: string | null
+  quantity: string | null
 }
 
 export type SubqueryEpoch = {

@@ -685,6 +685,7 @@ export type BorrowerTransaction = {
   type: BorrowerTransactionType
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
+  quantity: string | null
 }
 
 export type Permissions = {
@@ -2244,6 +2245,7 @@ export function getPoolsModule(inst: Centrifuge) {
             timestamp
             amount
             settlementPrice
+            quantity
           }
         }
       }

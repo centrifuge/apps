@@ -1,4 +1,4 @@
-import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
   IconChevronRight,
@@ -11,6 +11,7 @@ import {
   Thumbnail,
   usePagination,
 } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import { useParams, useRouteMatch } from 'react-router'
 import { formatNftAttribute } from '../pages/Loan/utils'
 import { nftMetadataSchema } from '../schemas'
@@ -20,7 +21,7 @@ import { formatBalance } from '../utils/formatting'
 import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
-import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../utils/usePools'
+import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
 import LoanLabel from './LoanLabel'
@@ -203,7 +204,14 @@ function AssetName({ loan }: { loan: Row }) {
 function Amount({ loan }: { loan: Row }) {
   const pool = usePool(loan.poolId)
   const { current } = useAvailableFinancing(loan.poolId, loan.id)
-  const { currentFace } = useBorrowerAssetTransactions(loan.poolId, loan.id)
+
+  const currentFace =
+    loan?.pricing && 'outstandingQuantity' in loan.pricing
+      ? new CurrencyBalance(
+          loan.pricing.outstandingQuantity.mul(loan.pricing.notional).div(new BN(10).pow(new BN(18))),
+          18
+        )
+      : null
 
   function getAmount(l: Row) {
     switch (l.status) {
@@ -219,7 +227,7 @@ function Amount({ loan }: { loan: Row }) {
           return formatBalance(l.totalRepaid, pool?.currency.symbol)
         }
 
-        if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
+        if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && currentFace) {
           return formatBalance(currentFace, pool?.currency.symbol)
         }
 

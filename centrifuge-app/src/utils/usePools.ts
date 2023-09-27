@@ -7,13 +7,11 @@ import Centrifuge, {
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
-import Decimal from 'decimal.js-light'
 import { useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
-import { Dec } from './Decimal'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
-import { useLoans } from './useLoans'
+import { useLoan, useLoans } from './useLoans'
 import { useMetadata } from './useMetadata'
 
 export function usePools(suspense = true) {
@@ -142,22 +140,38 @@ export function useAverageAmount(poolId: string) {
     }, {} as Record<string, Array<BorrowerTransaction & { oracleValue: CurrencyBalance }>>) || {}
 
   const currentFaces = Object.entries(poolsByLoanId).reduce((sum, [assetId, transactions]) => {
+    const pricing = loans.find((loan) => loan.id === assetId)?.pricing as ExternalPricingInfo
+
     const item =
       transactions.reduce((sum, trx) => {
         if (trx.type === 'BORROWED') {
           sum = new CurrencyBalance(
-            sum.add(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+            sum.add(
+              trx.quantity
+                ? new CurrencyBalance(
+                    new BN(trx.quantity).mul((pricing as ExternalPricingInfo).notional).div(new BN(10).pow(new BN(18))),
+                    18
+                  )
+                : new CurrencyBalance(0, pool.currency.decimals)
+            ),
             pool.currency.decimals
           )
         }
         if (trx.type === 'REPAID') {
           sum = new CurrencyBalance(
-            sum.sub(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+            sum.sub(
+              trx.quantity
+                ? new CurrencyBalance(
+                    new BN(trx.quantity).mul((pricing as ExternalPricingInfo).notional).div(new BN(10).pow(new BN(18))),
+                    18
+                  )
+                : new CurrencyBalance(0, pool.currency.decimals)
+            ),
             pool.currency.decimals
           )
         }
         return sum
-      }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
+      }, new CurrencyBalance(0, 18)) || new CurrencyBalance(0, 18)
 
     sum = { ...sum, [assetId]: item }
 
@@ -165,18 +179,22 @@ export function useAverageAmount(poolId: string) {
   }, {} as Record<string, CurrencyBalance>)
 
   const currentValues = Object.entries(currentFaces).reduce((values, [assetId, currentFace]) => {
-    values[assetId] = currentFace.toDecimal().mul(getLatestPrice(assetId).toDecimal()).div(100)
-
+    values[assetId] = new BN(currentFace).mul(getLatestPrice(assetId)).div(new BN(100))
     return values
-  }, {} as Record<string, Decimal>)
+  }, {} as Record<string, BN>)
 
-  return Object.values(currentValues)
-    .reduce((sum, value) => sum.add(value), Dec(0))
-    .div(loans.length)
+  return new CurrencyBalance(
+    Object.values(currentValues)
+      .reduce((sum, value) => sum.add(value), new BN(0))
+      .div(new BN(loans.length))
+      .div(new BN(10).pow(new BN(18))),
+    18
+  )
 }
 
 export function useBorrowerAssetTransactions(poolId: string, assetId: string, from?: Date, to?: Date) {
   const pool = usePool(poolId)
+  const loan = useLoan(poolId, assetId)
 
   const [result] = useCentrifugeQuery(
     ['borrowerAssetTransactions', poolId, assetId, from, to],
@@ -191,7 +209,7 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
     },
     {
       suspense: true,
-      enabled: !!pool && !poolId.startsWith('0x'),
+      enabled: !!pool && !poolId.startsWith('0x') && !!loan,
     }
   )
 
@@ -199,13 +217,31 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
     result?.reduce((sum, trx) => {
       if (trx.type === 'BORROWED') {
         sum = new CurrencyBalance(
-          sum.add(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+          sum.add(
+            trx.quantity
+              ? new CurrencyBalance(
+                  new BN(trx.quantity)
+                    .mul((loan!.pricing as ExternalPricingInfo).notional)
+                    .div(new BN(10).pow(new BN(18))),
+                  18
+                )
+              : new CurrencyBalance(0, pool.currency.decimals)
+          ),
           pool.currency.decimals
         )
       }
       if (trx.type === 'REPAID') {
         sum = new CurrencyBalance(
-          sum.sub(trx.amount ? new BN(trx.amount).mul(new BN(100)) : new CurrencyBalance(0, pool.currency.decimals)),
+          sum.sub(
+            trx.quantity
+              ? new CurrencyBalance(
+                  new BN(trx.quantity)
+                    .mul((loan!.pricing as ExternalPricingInfo).notional)
+                    .div(new BN(10).pow(new BN(18))),
+                  18
+                )
+              : new CurrencyBalance(0, pool.currency.decimals)
+          ),
           pool.currency.decimals
         )
       }

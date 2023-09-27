@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan as LoanType, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -91,7 +91,15 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const address = useAddress()
   const canOraclePrice = useCanSetOraclePrice(address)
-  const { borrowerAssetTransactions, currentFace } = useBorrowerAssetTransactions(poolId, assetId)
+  const { borrowerAssetTransactions } = useBorrowerAssetTransactions(poolId, assetId)
+
+  const currentFace =
+    loan?.pricing && 'outstandingQuantity' in loan.pricing
+      ? new CurrencyBalance(
+          loan.pricing.outstandingQuantity.mul(loan.pricing.notional).div(new BN(10).pow(new BN(18))),
+          18
+        )
+      : null
 
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
@@ -237,6 +245,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     pool={pool as Pool}
                     transactions={borrowerAssetTransactions}
                     currentFace={currentFace}
+                    pricing={loan.pricing as PricingInfo}
                   />
                 </Shelf>
               </PageSection>
@@ -298,6 +307,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                       : 'internal'
                   }
                   decimals={pool.currency.decimals}
+                  pricing={loan.pricing as PricingInfo}
                 />
               </PageSection>
             ) : null}

@@ -223,7 +223,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="label2">
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? formatBalance(currentFace, pool.currency.symbol, 2, 2)
+                ? formatBalance(new CurrencyBalance(currentFace, 18), pool.currency.symbol, 2, 2)
                 : ''}
             </Text>
           </Shelf>
