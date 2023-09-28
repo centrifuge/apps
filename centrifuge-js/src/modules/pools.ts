@@ -2015,18 +2015,17 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getTransactionsByAddress(args: [address: string]) {
-    const [address] = args
+  function getTransactionsByAddress(args: [address: string, count?: number, txTypes?: InvestorTransactionType[]]) {
+    const [address, count, txTypes] = args
 
     const $query = inst.getSubqueryObservable<{
       investorTransactions: { nodes: SubqueryInvestorTransaction[] }
     }>(
-      `query($address: String!) {
-        investorTransactions(filter: {
-          accountId: {
-            equalTo: $address
-          }
-        }) {
+      `query ($address: String) {
+        investorTransactions(
+          filter: {accountId: {equalTo: $address}}
+          orderBy: TIMESTAMP_DESC
+        ) {
           nodes {
             timestamp
             type
@@ -2064,11 +2063,10 @@ export function getPoolsModule(inst: Centrifuge) {
 
         return forkJoin([$investorTransactions]).pipe(
           map(([investorTransactions]) => {
-            investorTransactions.sort((a, b) => {
-              return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            })
             return {
-              investorTransactions,
+              investorTransactions: investorTransactions
+                .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
+                .slice(0, count || investorTransactions.length),
             }
           })
         )

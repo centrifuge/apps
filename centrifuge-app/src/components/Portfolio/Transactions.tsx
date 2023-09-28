@@ -38,15 +38,14 @@ type AddressTransactionsProps = {
 export function Transactions({ count, txTypes }: AddressTransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
-  const transactions = useTransactionsByAddress(formatAddress(address || ''))
+  const transactions = useTransactionsByAddress(formatAddress(address || ''), count, txTypes)
   const match = useRouteMatch('/portfolio/transactions')
   const [sortKey, setSortKey] = React.useState<'date' | 'amount'>('date')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
 
-  const investorTransactions = React.useMemo(() => {
+  const investorTransactions: TransactionCardProps[] = React.useMemo(() => {
     const txs =
       transactions?.investorTransactions
-        .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
         .map((tx) => {
           return {
             date: new Date(tx.timestamp).getTime(),
@@ -66,10 +65,10 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
             return 1
           }
         }) || []
-    return sortOrder === 'asc' ? txs : txs.reverse()
+    return sortOrder === 'asc' ? txs.reverse() : txs
   }, [sortKey, transactions, sortOrder])
 
-  return !!investorTransactions.slice(0, count ?? investorTransactions.length) ? (
+  return !!investorTransactions ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
         {match ? null : 'Transaction history'}
@@ -127,7 +126,7 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
         </Grid>
 
         <Stack as="ul" role="list">
-          {investorTransactions.slice(0, count ?? investorTransactions.length).map((transaction, index) => (
+          {investorTransactions.map((transaction, index) => (
             <Box as="li" key={`${transaction.poolId}${index}`}>
               <TransactionListItem {...transaction} />
             </Box>
@@ -136,7 +135,7 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
       </Stack>
       <Box>
         {match ? null : (
-          <AnchorButton variant="tertiary" href="portfolio/transactions" icon={IconEye}>
+          <AnchorButton small variant="tertiary" href="portfolio/transactions" icon={IconEye}>
             View all
           </AnchorButton>
         )}
