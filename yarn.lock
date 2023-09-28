@@ -1916,7 +1916,7 @@ __metadata:
     "@storybook/addon-links": ^6.5.16
     "@storybook/builder-vite": ^0.1.41
     "@storybook/react": ^6.5.16
-    "@subwallet/wallet-connect": ^0.2.3
+    "@subwallet/wallet-connect": 0.2.5
     "@types/babel__core": ^7
     "@types/bn.js": ^5
     "@types/eslint": ^7
@@ -7952,7 +7952,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/wallet-connect@npm:^0.2.3":
+"@subwallet/wallet-connect@npm:0.2.5, @subwallet/wallet-connect@npm:^0.2.3":
   version: 0.2.5
   resolution: "@subwallet/wallet-connect@npm:0.2.5"
   dependencies:

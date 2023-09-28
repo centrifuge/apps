@@ -1,11 +1,12 @@
 {
   "name": "@centrifuge/fabric",
-  "version": "1.2.0",
+  "version": "1.3.5",
   "description": "Fabric Component Library",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "scripts": {
     "build": "yarn build:icons && tsc",
