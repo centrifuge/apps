@@ -16,11 +16,10 @@ import {
 import BN from 'bn.js'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { AssetSummary } from '../../components/AssetSummary'
 import { LabelValueStack } from '../../components/LabelValueStack'
-import LoanLabel from '../../components/LoanLabel'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
-import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
@@ -182,15 +181,8 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
         pool &&
         (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
           <>
-            <PageSummary
-              title={
-                <Box paddingTop={3}>
-                  <Shelf gap="2">
-                    <Text variant="heading2">Details</Text>
-                    <LoanLabel loan={loan} />
-                  </Shelf>
-                </Box>
-              }
+            <AssetSummary
+              loan={loan}
               data={[
                 ...(templateMetadata?.keyAttributes
                   ?.filter((key) => templateMetadata?.attributes?.[key].public)
