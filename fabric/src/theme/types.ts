@@ -38,11 +38,13 @@ type ColorName =
 type ColorValue = string
 
 type ThemeColors = {
-  [k in ColorName | (string & {})]: ColorValue
-} & {
   accentScale: Record<number, string>
   yellowScale: Record<number, string>
   blueScale: Record<number, string>
+} & {
+  [k in ColorName]: ColorValue
+} & {
+  [k in string & {}]: any
 }
 
 // Lengths
@@ -72,7 +74,7 @@ type SpaceName = 'gutterMobile' | 'gutterTablet' | 'gutterDesktop'
 type SpaceValue = number
 
 type ThemeSpace = SpaceValue[] & {
-  [k in SpaceName | (string & {})]: SpaceValue
+  [k in SpaceName]: SpaceValue
 }
 
 // Typography
