@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.3](https://github.com/centrifuge/apps/compare/fabric/v1.3.2...fabric/v1.3.3) (2023-09-28)
+
+
+### Bug Fixes
+
+* **fabric:** theme types ([54e6a7c](https://github.com/centrifuge/apps/commit/54e6a7c8691fc5e7ea55804d6123e1a6f8417136))
+
 ### [1.3.2](https://github.com/centrifuge/apps/compare/fabric/v1.3.1...fabric/v1.3.2) (2023-09-27)
 
 
