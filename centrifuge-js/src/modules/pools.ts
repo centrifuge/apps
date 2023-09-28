@@ -2047,25 +2047,26 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $query.pipe(
       switchMap((data) => {
-        const $investorTransactions = from(data?.investorTransactions.nodes || [])
-          // .pipe(distinct(({ hash }) => hash))
-          .pipe(
-            mergeMap((entry) => {
-              return getPoolCurrency([entry.poolId]).pipe(
-                map((poolCurrency) => ({
-                  ...entry,
-                  tokenAmount: new CurrencyBalance(entry.tokenAmount || 0, poolCurrency.decimals),
-                  tokenPrice: new Price(entry.tokenPrice || 0),
-                  currencyAmount: new CurrencyBalance(entry.currencyAmount || 0, poolCurrency.decimals),
-                  trancheId: entry.trancheId.split('-')[1],
-                }))
-              )
-            }),
-            toArray()
-          )
+        const $investorTransactions = from(data?.investorTransactions.nodes || []).pipe(
+          mergeMap((entry) => {
+            return getPoolCurrency([entry.poolId]).pipe(
+              map((poolCurrency) => ({
+                ...entry,
+                tokenAmount: new TokenBalance(entry.tokenAmount || 0, poolCurrency.decimals),
+                tokenPrice: new Price(entry.tokenPrice || 0),
+                currencyAmount: new CurrencyBalance(entry.currencyAmount || 0, poolCurrency.decimals),
+                trancheId: entry.trancheId.split('-')[1],
+              }))
+            )
+          }),
+          toArray()
+        )
 
         return forkJoin([$investorTransactions]).pipe(
           map(([investorTransactions]) => {
+            investorTransactions.sort((a, b) => {
+              return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            })
             return {
               investorTransactions,
             }

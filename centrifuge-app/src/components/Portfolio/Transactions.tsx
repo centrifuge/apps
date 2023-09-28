@@ -1,10 +1,28 @@
-import { BorrowerTransactionType, CurrencyBalance, InvestorTransactionType, Pool } from '@centrifuge/centrifuge-js'
+import {
+  BorrowerTransactionType,
+  CurrencyBalance,
+  InvestorTransactionType,
+  Pool,
+  TokenBalance,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Box, Grid, IconExternalLink, Stack, Text } from '@centrifuge/fabric'
+import {
+  AnchorButton,
+  Box,
+  Grid,
+  IconChevronDown,
+  IconChevronUp,
+  IconExternalLink,
+  IconEye,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link, useRouteMatch } from 'react-router-dom'
+import { useRouteMatch } from 'react-router-dom'
+import styled from 'styled-components'
 import { formatDate } from '../../utils/date'
-import { formatBalanceAbbreviated } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { usePool, usePoolMetadata, useTransactionsByAddress } from '../../utils/usePools'
 import { TransactionTypeChip } from './TransactionTypeChip'
@@ -22,20 +40,34 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
   const address = useAddress()
   const transactions = useTransactionsByAddress(formatAddress(address || ''))
   const match = useRouteMatch('/portfolio/transactions')
+  const [sortKey, setSortKey] = React.useState<'date' | 'amount'>('date')
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
 
-  const investorTransactions =
-    transactions?.investorTransactions
-      .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
-      .map((tx) => {
-        return {
-          date: new Date(tx.timestamp).getTime(),
-          type: tx.type,
-          amount: tx.tokenAmount,
-          poolId: tx.poolId,
-          hash: tx.hash,
-          trancheId: tx.trancheId,
-        }
-      }) || []
+  const investorTransactions = React.useMemo(() => {
+    const txs =
+      transactions?.investorTransactions
+        .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
+        .map((tx) => {
+          return {
+            date: new Date(tx.timestamp).getTime(),
+            type: tx.type,
+            poolId: tx.poolId,
+            hash: tx.hash,
+            trancheId: tx.trancheId,
+            amount: tx.currencyAmount,
+          }
+        })
+        .sort((a, b) => {
+          if (sortKey === 'date') {
+            return new Date(b.date).getTime() - new Date(a.date).getTime()
+          } else if (sortKey === 'amount') {
+            return b.amount.toDecimal().minus(a.amount.toDecimal()).toNumber()
+          } else {
+            return 1
+          }
+        }) || []
+    return sortOrder === 'asc' ? txs : txs.reverse()
+  }, [sortKey, transactions, sortOrder])
 
   return !!investorTransactions.slice(0, count ?? investorTransactions.length) ? (
     <Stack as="article" gap={2}>
@@ -46,14 +78,52 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
       <Stack>
         <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
           <Text variant="body3">Action</Text>
-
-          <Text variant="body3">Transaction date</Text>
+          <SortButton
+            as="button"
+            onClick={() => {
+              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+              setSortKey('date')
+            }}
+            gap={1}
+          >
+            <Text variant="body3">Transaction date</Text>
+            <Stack as="span" width="1em" style={{ marginTop: '-.3em' }}>
+              <IconChevronUp
+                size="1em"
+                color={sortKey === 'date' && sortOrder === 'asc' ? 'textSelected' : 'textSecondary'}
+              />
+              <IconChevronDown
+                size="1em"
+                color={sortKey === 'date' && sortOrder === 'desc' ? 'textSelected' : 'textSecondary'}
+                style={{ marginTop: '-.4em' }}
+              />
+            </Stack>
+          </SortButton>
 
           <Text variant="body3">Token</Text>
 
-          <Box justifySelf="end">
+          <SortButton
+            as="button"
+            onClick={() => {
+              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+              setSortKey('amount')
+            }}
+            gap={1}
+            justifyContent="flex-end"
+          >
             <Text variant="body3">Amount</Text>
-          </Box>
+            <Stack as="span" width="1em" style={{ marginTop: '-.3em' }}>
+              <IconChevronUp
+                size="1em"
+                color={sortKey === 'amount' && sortOrder === 'asc' ? 'textSelected' : 'textSecondary'}
+              />
+              <IconChevronDown
+                size="1em"
+                color={sortKey === 'amount' && sortOrder === 'desc' ? 'textSelected' : 'textSecondary'}
+                style={{ marginTop: '-.4em' }}
+              />
+            </Stack>
+          </SortButton>
         </Grid>
 
         <Stack as="ul" role="list">
@@ -64,7 +134,13 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
           ))}
         </Stack>
       </Stack>
-      {match ? null : <Link to="portfolio/transactions">View all</Link>}
+      <Box>
+        {match ? null : (
+          <AnchorButton variant="tertiary" href="portfolio/transactions" icon={IconEye}>
+            View all
+          </AnchorButton>
+        )}
+      </Box>
     </Stack>
   ) : null
 }
@@ -72,11 +148,19 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
 export type TransactionCardProps = {
   date: number
   type: InvestorTransactionType | BorrowerTransactionType
-  amount: CurrencyBalance
+  amount: CurrencyBalance | TokenBalance
   poolId: string
   hash: string
   trancheId?: string
 }
+
+const SortButton = styled(Shelf)`
+  background: initial;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: flex-start;
+`
 
 export function TransactionListItem({ date, type, amount, poolId, hash, trancheId }: TransactionCardProps) {
   const pool = usePool(poolId) as Pool
@@ -112,7 +196,7 @@ export function TransactionListItem({ date, type, amount, poolId, hash, trancheI
 
       <Stack gap={1}>
         <Text as="span" variant="interactive2">
-          {!!token ? token.currency?.name.split(data.pool?.name || '') : data.pool?.name}
+          {!!token ? token?.currency?.name.split(`${data?.pool?.name} ` || '').at(-1) : data.pool?.name}
         </Text>
         {!!token && (
           <Text as="span" variant="interactive2" color="textDisabled">
@@ -123,7 +207,7 @@ export function TransactionListItem({ date, type, amount, poolId, hash, trancheI
 
       <Box justifySelf="end">
         <Text as="span" variant="interactive2">
-          {formatBalanceAbbreviated(amount, pool.currency.symbol)}
+          {formatBalance(amount.toDecimal(), pool.currency.symbol)}
         </Text>
       </Box>
 

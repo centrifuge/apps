@@ -13,11 +13,11 @@ const states: {
   }
 } = {
   INVEST_ORDER_UPDATE: {
-    label: 'Pending invest',
+    label: 'Invest order placed',
     status: 'default',
   },
   REDEEM_ORDER_UPDATE: {
-    label: 'Pending redemption',
+    label: 'Redeem order placed',
     status: 'default',
   },
   INVEST_ORDER_CANCEL: {
@@ -29,11 +29,11 @@ const states: {
     status: 'default',
   },
   INVEST_EXECUTION: {
-    label: 'Invest',
+    label: 'Invest executed',
     status: 'ok',
   },
   REDEEM_EXECUTION: {
-    label: 'Redeem',
+    label: 'Redeem executed',
     status: 'info',
   },
   TRANSFER_IN: {
