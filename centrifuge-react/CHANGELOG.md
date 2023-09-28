@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/centrifuge/apps/compare/centrifuge-react/v0.1.0...centrifuge-react/v0.1.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* **centrifuge-react:** polkadot versions ([2c1da2d](https://github.com/centrifuge/apps/commit/2c1da2d53265e5d73b4ccc18fbd4922f1a76fbf4))
+* **fabric:** subwallet ([be88c6b](https://github.com/centrifuge/apps/commit/be88c6b4979b038e735995c89196c8744fdef8b0))
+
 ## 0.1.0 (2023-09-27)
 
 
