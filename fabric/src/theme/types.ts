@@ -38,13 +38,11 @@ type ColorName =
 type ColorValue = string
 
 type ThemeColors = {
+  [k in ColorName]: ColorValue
+} & {
   accentScale: Record<number, string>
   yellowScale: Record<number, string>
   blueScale: Record<number, string>
-} & {
-  [k in ColorName]: ColorValue
-} & {
-  [k in string & {}]: any
 }
 
 // Lengths
@@ -60,14 +58,14 @@ type SizeName = 'dialog' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegul
 type SizeValue = string | number
 
 type ThemeSizes = {
-  [k in SizeName | (string & {})]: SizeValue
+  [k in SizeName]: SizeValue
 }
 
 type RadiusName = 'card' | 'input' | 'tooltip'
 type RadiusValue = number
 
 type ThemeRadii = {
-  [k in RadiusName | (string & {})]: RadiusValue
+  [k in RadiusName]: RadiusValue
 }
 
 type SpaceName = 'gutterMobile' | 'gutterTablet' | 'gutterDesktop'
@@ -106,14 +104,14 @@ type TypographyValue = Partial<{
 }>
 
 export type ThemeTypography = {
-  [k in TextVariantName | (string & {})]: TypographyValue
+  [k in TextVariantName]: TypographyValue
 }
 
 type FontName = 'standard'
 type FontValue = string
 
 type ThemeFonts = {
-  [k in FontName | (string & {})]: FontValue
+  [k in FontName]: FontValue
 }
 
 // Shadows
@@ -122,13 +120,13 @@ type ShadowName = 'buttonActive' | 'cardInteractive' | 'cardOverlay' | 'cardActi
 type ShadowValue = string
 
 type ThemeShadows = {
-  [k in ShadowName | (string & {})]: ShadowValue
+  [k in ShadowName]: ShadowValue
 }
 
 type ZIndexName = 'sticky' | 'header' | 'overlay' | 'onTopOfTheWorld'
 type ZIndexValue = number
 type ThemeZIndices = {
-  [k in ZIndexName | (string & {})]: ZIndexValue
+  [k in ZIndexName]: ZIndexValue
 }
 
 export type FabricTheme = {
