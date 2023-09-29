@@ -90,7 +90,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const address = useAddress()
   const canOraclePrice = useCanSetOraclePrice(address)
-  const { borrowerAssetTransactions } = useBorrowerAssetTransactions(poolId, assetId)
+  const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, assetId)
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing

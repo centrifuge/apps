@@ -213,42 +213,7 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
     }
   )
 
-  const currentFace =
-    result?.reduce((sum, trx) => {
-      if (trx.type === 'BORROWED') {
-        sum = new CurrencyBalance(
-          sum.add(
-            trx.quantity
-              ? new CurrencyBalance(
-                  new BN(trx.quantity)
-                    .mul((loan!.pricing as ExternalPricingInfo).notional)
-                    .div(new BN(10).pow(new BN(18))),
-                  18
-                )
-              : new CurrencyBalance(0, pool.currency.decimals)
-          ),
-          pool.currency.decimals
-        )
-      }
-      if (trx.type === 'REPAID') {
-        sum = new CurrencyBalance(
-          sum.sub(
-            trx.quantity
-              ? new CurrencyBalance(
-                  new BN(trx.quantity)
-                    .mul((loan!.pricing as ExternalPricingInfo).notional)
-                    .div(new BN(10).pow(new BN(18))),
-                  18
-                )
-              : new CurrencyBalance(0, pool.currency.decimals)
-          ),
-          pool.currency.decimals
-        )
-      }
-      return sum
-    }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
-
-  return { borrowerAssetTransactions: result, currentFace }
+  return result
 }
 
 export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {

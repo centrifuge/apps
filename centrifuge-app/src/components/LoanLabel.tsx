@@ -2,7 +2,6 @@ import { ActiveLoan, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { StatusChip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { daysBetween } from '../utils/date'
-import { useBorrowerAssetTransactions } from '../utils/usePools'
 
 type LabelStatus = 'default' | 'info' | 'ok' | 'warning' | 'critical'
 
@@ -10,7 +9,7 @@ interface Props {
   loan: Loan | TinlakeLoan
 }
 
-export function getLoanLabelStatus(l: Loan | TinlakeLoan, isExternalAssetRepaid: boolean): [LabelStatus, string] {
+export function getLoanLabelStatus(l: Loan | TinlakeLoan, isExternalAssetRepaid?: boolean): [LabelStatus, string] {
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
   if (l.status === 'Active' && (l as ActiveLoan).writeOffStatus) return ['critical', 'Write-off']
@@ -39,10 +38,12 @@ export function getLoanLabelStatus(l: Loan | TinlakeLoan, isExternalAssetRepaid:
 }
 
 const LoanLabel: React.FC<Props> = ({ loan }) => {
-  const { currentFace, borrowerAssetTransactions } = useBorrowerAssetTransactions(loan.poolId, loan.id)
+  const currentFace =
+    loan.pricing && 'outstandingQuantity' in loan.pricing
+      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
+      : null
 
-  const isExternalAssetRepaid =
-    currentFace.isZero() && !!borrowerAssetTransactions?.find((trx) => trx.type === 'BORROWED')
+  const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
   const [status, text] = getLoanLabelStatus(loan, isExternalAssetRepaid)
   return <StatusChip status={status}>{text}</StatusChip>
 }
