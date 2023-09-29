@@ -1,5 +1,4 @@
 import { BorrowerTransaction, CurrencyBalance, ExternalPricingInfo, Pool, PricingInfo } from '@centrifuge/centrifuge-js'
-import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { Dec } from '../../utils/Decimal'
@@ -27,29 +26,24 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
     }, Dec(0)) || Dec(0)
 
   const getAverageSettlePrice = () => {
-    const settlementTransactions =
-      transactions?.reduce((sum, trx) => {
-        if (!new BN(trx.settlementPrice || 0).isZero()) {
-          sum = sum.add(new BN(1))
-        }
-        return sum
-      }, new BN(0)) || new BN(0)
+    if (!transactions?.length) return Dec(0)
 
-    if (settlementTransactions.isZero()) {
-      return new CurrencyBalance(0, pool.currency.decimals)
-    }
+    const weightedSum = transactions.reduce((sum, trx) => {
+      if (trx.settlementPrice && trx.amount) {
+        return sum.add(
+          new CurrencyBalance(trx.settlementPrice, pool.currency.decimals).toDecimal().mul(trx.amount.toDecimal())
+        )
+      }
 
-    return (
-      transactions?.reduce((sum, trx) => {
-        if (!new BN(trx.settlementPrice || 0).isZero()) {
-          sum = new CurrencyBalance(
-            sum.add(trx.settlementPrice ? new BN(trx.settlementPrice) : new CurrencyBalance(0, pool.currency.decimals)),
-            pool.currency.decimals
-          )
-        }
-        return sum
-      }, new CurrencyBalance(0, pool.currency.decimals)) || new CurrencyBalance(0, pool.currency.decimals)
-    ).div(settlementTransactions)
+      return sum
+    }, Dec(0))
+
+    const sumOfAmounts = transactions.reduce(
+      (sum, trx) => sum.add(trx.amount ? new CurrencyBalance(trx.amount, pool.currency.decimals).toDecimal() : Dec(0)),
+      Dec(0)
+    )
+
+    return weightedSum.div(sumOfAmounts)
   }
 
   return (
@@ -64,12 +58,7 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
         value={
           getAverageSettlePrice().isZero()
             ? '-'
-            : `${formatBalance(
-                new CurrencyBalance(getAverageSettlePrice(), pool.currency.decimals),
-                pool.currency.symbol,
-                2,
-                2
-              )}`
+            : `${formatBalance(getAverageSettlePrice(), pool.currency.symbol, 2, 2)}`
         }
       />
       <LabelValueStack
