@@ -11,7 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, max, positiveNumber, settlementPrice } from '../../utils/validation'
+import { combine, max, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
 
 type FinanceValues = {
   price: number | '' | Decimal
@@ -23,7 +23,11 @@ type RepayValues = {
   faceValue: number | ''
 }
 
-export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
+type ExternalLoan = LoanType & {
+  pricing: ExternalPricingInfo
+}
+
+export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account.actingAddress)
@@ -61,9 +65,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = Price.fromFloat(
-        Dec(values.faceValue).div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
-      )
+      const quantity = Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal()))
 
       doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
         account,
@@ -80,9 +82,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = Price.fromFloat(
-        Dec(values.faceValue).div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
-      )
+      const quantity = Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal()))
 
       doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price], {
         account,
@@ -144,7 +144,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     const num = val instanceof Decimal ? val.toNumber() : val
                     const financeAmount = Dec(num)
                       .mul(financeForm.values.faceValue || 1)
-                      .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
+                      .div(loan.pricing.notional.toDecimal())
 
                     return financeAmount.gt(availableFinancing)
                       ? `Amount exceeds available reserve (${formatBalance(
@@ -157,12 +157,13 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   (val) => {
                     const financeAmount = Dec(val)
                       .mul(financeForm.values.faceValue || 1)
-                      .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
+                      .div(loan.pricing.notional.toDecimal())
 
                     return financeAmount.gt(maxBorrow)
-                      ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
+                      ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool.currency.symbol, 2)})`
                       : ''
-                  }
+                  },
+                  maxPriceVariance(loan.pricing)
                 )}
               >
                 {({ field, meta, form }: FieldProps) => {
@@ -189,7 +190,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       ? formatBalance(
                           Dec(financeForm.values.price || 0)
                             .mul(Dec(financeForm.values.faceValue || 0))
-                            .div((loan.pricing as ExternalPricingInfo).notional.toDecimal()),
+                            .div(loan.pricing.notional.toDecimal()),
                           pool?.currency.symbol,
                           2
                         )
@@ -250,7 +251,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       const num = val instanceof Decimal ? val.toNumber() : val
                       const repayAmount = Dec(num)
                         .mul(repayForm.values.faceValue || 1)
-                        .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
+                        .div(loan.pricing.notional.toDecimal())
 
                       return repayAmount.gt(balance)
                         ? `Your wallet balance (${formatBalance(
@@ -265,10 +266,11 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       const num = val instanceof Decimal ? val.toNumber() : val
                       const repayAmount = Dec(num)
                         .mul(repayForm.values.faceValue || 1)
-                        .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
+                        .div(loan.pricing.notional.toDecimal())
 
                       return repayAmount.gt(debt) ? 'Amount exceeds outstanding' : ''
-                    }
+                    },
+                    maxPriceVariance(loan.pricing)
                   )}
                   name="price"
                 >
@@ -296,7 +298,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                         ? formatBalance(
                             Dec(repayForm.values.price || 0)
                               .mul(Dec(repayForm.values.faceValue || 0))
-                              .div((loan.pricing as ExternalPricingInfo).notional.toDecimal()),
+                              .div(loan.pricing.notional.toDecimal()),
                             pool?.currency.symbol,
                             2
                           )

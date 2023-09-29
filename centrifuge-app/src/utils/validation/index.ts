@@ -1,6 +1,9 @@
+import { CurrencyBalance, ExternalPricingInfo } from '@centrifuge/centrifuge-js'
 import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { daysBetween } from '../date'
+import { Dec } from '../Decimal'
+import { formatPercentage } from '../formatting'
 import { getImageDimensions } from '../getImageDimensions'
 
 const MB = 1024 ** 2
@@ -38,6 +41,21 @@ export const settlementPrice = (err?: CustomError) => (val?: any) => {
 
   const regex = new RegExp(/^\d{1,3}(?:\.\d{1,6})?$/)
   return regex.test(val) ? '' : getError('Value must be in the format of (1-3).(0-6) digits', err, val)
+}
+
+export const maxPriceVariance = (pricing: ExternalPricingInfo, err?: CustomError) => (val?: any) => {
+  const maxVariation = new CurrencyBalance(pricing.oracle.value, 18)
+    .toDecimal()
+    .mul(pricing.maxPriceVariation.toDecimal())
+
+  if (
+    Dec(val).gt(new CurrencyBalance(pricing.oracle.value, 18).toDecimal().add(maxVariation)) ||
+    Dec(val).lt(new CurrencyBalance(pricing.oracle.value, 18).toDecimal().sub(maxVariation))
+  ) {
+    return `Settlement price exceeds max price variation of ${formatPercentage(pricing.maxPriceVariation.toPercent())}`
+  }
+
+  return ''
 }
 
 export const maxDecimals = (decimals: number, err?: CustomError) => (val?: any) => {

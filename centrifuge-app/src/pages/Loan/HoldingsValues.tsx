@@ -1,4 +1,4 @@
-import { BorrowerTransaction, CurrencyBalance, ExternalPricingInfo, Pool, PricingInfo } from '@centrifuge/centrifuge-js'
+import { BorrowerTransaction, CurrencyBalance, ExternalPricingInfo, Pool } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { Dec } from '../../utils/Decimal'
@@ -8,7 +8,7 @@ type Props = {
   pool: Pool
   transactions?: BorrowerTransaction[] | null
   currentFace: Decimal | null
-  pricing: PricingInfo
+  pricing: ExternalPricingInfo
 }
 
 export function HoldingsValues({ pool, transactions, currentFace, pricing }: Props) {
@@ -61,14 +61,8 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
             : `${formatBalance(getAverageSettlePrice(), pool.currency.symbol, 2, 2)}`
         }
       />
-      <LabelValueStack
-        label="Notional"
-        value={`${formatBalance((pricing as ExternalPricingInfo).notional, pool.currency.symbol, 2, 2)}`}
-      />
-      <LabelValueStack
-        label="Quantity"
-        value={`${formatBalance((pricing as ExternalPricingInfo).outstandingQuantity, undefined, 2, 0)}`}
-      />
+      <LabelValueStack label="Notional" value={`${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}`} />
+      <LabelValueStack label="Quantity" value={`${formatBalance(pricing.outstandingQuantity, undefined, 2, 0)}`} />
     </>
   )
 }

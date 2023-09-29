@@ -234,7 +234,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     pool={pool as Pool}
                     transactions={borrowerAssetTransactions}
                     currentFace={currentFace}
-                    pricing={loan.pricing as PricingInfo}
+                    pricing={loan.pricing}
                   />
                 </Shelf>
               </PageSection>

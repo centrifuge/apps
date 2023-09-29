@@ -177,6 +177,7 @@ export type ActiveLoanInfoData = {
             }
             maxBorrowAmount: { noLimit: null } | { quantity: string }
             notional: string
+            maxPriceVariation: string
           }
           outstandingQuantity: string
           interest: {
@@ -384,6 +385,7 @@ export type InternalPricingInfo = {
 export type ExternalPricingInfo = {
   valuationMethod: 'oracle'
   maxBorrowAmount: CurrencyBalance | null
+  maxPriceVariation: Rate
   outstandingQuantity: CurrencyBalance
   Isin: string
   maturityDate: string
@@ -2592,6 +2594,7 @@ export function getPoolsModule(inst: Centrifuge) {
                         : new CurrencyBalance(0, 18),
                     interestRate: new Rate(interestRate),
                     notional: new CurrencyBalance(pricingInfo.notional, currency.decimals),
+                    maxPriceVariation: new Rate(pricingInfo.maxPriceVariation),
                   }
                 : {
                     valuationMethod: ('outstandingDebt' in pricingInfo.valuationMethod
