@@ -13,7 +13,6 @@ import {
   Thumbnail,
   truncate,
 } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { AssetSummary } from '../../components/AssetSummary'
@@ -28,6 +27,7 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useLoan, useNftDocumentId } from '../../utils/useLoans'
@@ -134,13 +134,13 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
   const getLatestPrice = () => {
     if (loan?.pricing && 'oracle' in loan.pricing) {
       const settlementPrice = borrowerAssetTransactions?.[borrowerAssetTransactions.length - 1]?.settlementPrice
-      const latestSettlementPrice = settlementPrice ? new BN(settlementPrice).mul(new BN(100)) : null
+      const latestSettlementPrice = settlementPrice ? Dec(settlementPrice) : null
 
       if (latestSettlementPrice && loan.pricing.oracle.value.isZero()) {
-        return new CurrencyBalance(latestSettlementPrice, pool.currency.decimals)
+        return new CurrencyBalance(latestSettlementPrice.toString(), pool.currency.decimals)
       }
 
-      return new CurrencyBalance(loan.pricing.oracle.value.toString(), 18)
+      return new CurrencyBalance(loan.pricing.oracle.value, 18)
     }
 
     return new CurrencyBalance(0, 18)
