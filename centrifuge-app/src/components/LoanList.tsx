@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
   IconChevronRight,
@@ -11,7 +11,6 @@ import {
   Thumbnail,
   usePagination,
 } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import { useParams, useRouteMatch } from 'react-router'
 import { formatNftAttribute } from '../pages/Loan/utils'
 import { nftMetadataSchema } from '../schemas'
@@ -207,10 +206,7 @@ function Amount({ loan }: { loan: Row }) {
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
-      ? new CurrencyBalance(
-          loan.pricing.outstandingQuantity.mul(loan.pricing.notional).div(new BN(10).pow(new BN(18))),
-          18
-        )
+      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
       : null
 
   function getAmount(l: Row) {
