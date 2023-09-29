@@ -30,20 +30,20 @@ import { TransactionTypeChip } from './TransactionTypeChip'
 export const TRANSACTION_CARD_COLUMNS = `150px 125px 200px 150px 1fr`
 export const TRANSACTION_CARD_GAP = 4
 
-type AddressTransactionsProps = {
+type TransactionsProps = {
   count?: number
   txTypes?: InvestorTransactionType[]
 }
 
-export function Transactions({ count, txTypes }: AddressTransactionsProps) {
+export function Transactions({ count, txTypes }: TransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
   const transactions = useTransactionsByAddress(formatAddress(address || ''), count, txTypes)
-  const match = useRouteMatch('/portfolio/transactions')
+  const match = useRouteMatch('/history')
   const [sortKey, setSortKey] = React.useState<'date' | 'amount'>('date')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
 
-  const investorTransactions: TransactionCardProps[] = React.useMemo(() => {
+  const investorTransactions: TransactionListItemProps[] = React.useMemo(() => {
     const txs =
       transactions?.investorTransactions
         .map((tx) => {
@@ -68,13 +68,13 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
     return sortOrder === 'asc' ? txs.reverse() : txs
   }, [sortKey, transactions, sortOrder])
 
-  return !!investorTransactions ? (
+  return !!investorTransactions.length ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
         {match ? null : 'Transaction history'}
       </Text>
 
-      <Stack>
+      <Stack gap={2}>
         <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
           <Text variant="body3">Action</Text>
           <SortButton
@@ -135,7 +135,7 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
       </Stack>
       <Box>
         {match ? null : (
-          <AnchorButton small variant="tertiary" href="portfolio/transactions" icon={IconEye}>
+          <AnchorButton small variant="tertiary" href="history" icon={IconEye}>
             View all
           </AnchorButton>
         )}
@@ -144,7 +144,7 @@ export function Transactions({ count, txTypes }: AddressTransactionsProps) {
   ) : null
 }
 
-export type TransactionCardProps = {
+export type TransactionListItemProps = {
   date: number
   type: InvestorTransactionType | BorrowerTransactionType
   amount: CurrencyBalance | TokenBalance
@@ -153,15 +153,7 @@ export type TransactionCardProps = {
   trancheId?: string
 }
 
-const SortButton = styled(Shelf)`
-  background: initial;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: flex-start;
-`
-
-export function TransactionListItem({ date, type, amount, poolId, hash, trancheId }: TransactionCardProps) {
+export function TransactionListItem({ date, type, amount, poolId, hash, trancheId }: TransactionListItemProps) {
   const pool = usePool(poolId) as Pool
   const { data } = usePoolMetadata(pool)
   const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
@@ -225,3 +217,11 @@ export function TransactionListItem({ date, type, amount, poolId, hash, trancheI
     </Grid>
   )
 }
+
+const SortButton = styled(Shelf)`
+  background: initial;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: flex-start;
+`
