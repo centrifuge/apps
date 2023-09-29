@@ -1,106 +1,131 @@
-import {
-  useCentrifuge,
-  useCentrifugeTransaction,
-  useGetNetworkName,
-  useNetworkName,
-  useWallet,
-} from '@centrifuge/centrifuge-react'
-import { Button, Text } from '@centrifuge/fabric'
+import { useCentrifugeTransaction, useGetNetworkName, useNetworkName } from '@centrifuge/centrifuge-react'
+import { Accordion, Button, Stack } from '@centrifuge/fabric'
 import React from 'react'
-import { useQuery } from 'react-query'
 import { useParams } from 'react-router'
-import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
-import { useActiveDomains, useDomainRouters } from '../../../utils/useLiquidityPools'
+import { useEvmTransaction } from '../../../utils/tinlake/useEvmTransaction'
+import { Domain, useActiveDomains } from '../../../utils/useLiquidityPools'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 
-type Row = { chainId: number }
+function getDomainStatus(domain: Domain) {
+  if (!domain.isActive) {
+    return 'inactive'
+  }
+  if (Object.values(domain.liquidityPools).every((t) => Object.values(t).every((p) => !!p))) {
+    return 'deployed'
+  }
+  return 'deploying'
+}
 
 export function LiquidityPools() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
-  const domains = useDomainRouters()
+  const { data: domains } = useActiveDomains(poolId)
   const getName = useGetNetworkName()
+
+  const titles = {
+    inactive: 'Not active',
+    deploying: 'Action needed',
+    deployed: 'Active',
+  }
 
   return (
     <PageSection
       title="Connected blockchains"
       subtitle="View liquidity on all blockchains that this pool is connected to, and enable investments on new blockchains."
     >
-      {pool?.tranches && domains && (
-        <DataTable
-          data={domains}
-          columns={[
-            {
-              align: 'left',
-              header: 'Blockchain',
-              cell: (row: Row) => <Text variant="body2">{getName(row.chainId)}</Text>,
-              flex: '4',
-            },
-            {
-              align: 'center',
-              header: '',
-              cell: (row: Row) => <EnableButton poolId={poolId} chainId={row.chainId} />,
-              flex: '1',
-            },
-          ]}
-        />
-      )}
+      <Accordion
+        items={
+          domains?.map((domain) => ({
+            title: (
+              <>
+                {getName(domain.chainId)} {titles[getDomainStatus(domain)]}
+              </>
+            ),
+            body: <PoolDomain poolId={poolId} domain={domain} />,
+          })) ?? []
+        }
+      />
     </PageSection>
   )
 }
 
-function EnableButton({ poolId, chainId }: { poolId: string; chainId: number }) {
+function PoolDomain({ poolId, domain }: { poolId: string; domain: Domain }) {
   const pool = usePool(poolId)
-  const {
-    evm: { getProvider },
-  } = useWallet()
-  const cent = useCentrifuge()
-  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
-  const { data: domains } = useActiveDomains(poolId)
-  const managerAddress = domains?.find((d) => d.chainId === chainId)?.managerAddress
-  const { data: isEnabled, isLoading: isFetching } = useQuery(
-    ['poolLps', poolId],
-    async () => {
-      try {
-        await Promise.any(
-          pool.tranches.map((t) =>
-            cent.liquidityPools
-              .getLiquidityPools([managerAddress!, poolId, t.id, chainId], {
-                rpcProvider: getProvider(chainId),
-              })
-              .then((r) => {
-                if (!r.length) throw new Error('tranche not enabled')
-              })
-          )
-        )
-        return true
-      } catch {
-        return false
-      }
-    },
-    {
-      enabled: !!managerAddress,
-      staleTime: Infinity,
-    }
+  return (
+    <Stack>
+      <EnableButton poolId={poolId} domain={domain} />
+      {pool.tranches.map((t) => (
+        <>
+          {domain.undeployedTranches[t.id] && <DeployTrancheButton poolId={poolId} trancheId={t.id} domain={domain} />}
+          {domain.currencies.map((currency, i) => (
+            <>
+              {domain.trancheTokenExists[t.id] && !domain.liquidityPools[t.id][currency.address] && (
+                <DeployLPButton poolId={poolId} trancheId={t.id} domain={domain} currencyIndex={i} />
+              )}
+            </>
+          ))}
+        </>
+      ))}
+    </Stack>
   )
+}
 
-  const name = useNetworkName(chainId)
+function DeployTrancheButton({ poolId, trancheId, domain }: { poolId: string; trancheId: string; domain: Domain }) {
+  const pool = usePool(poolId)
+
+  const { execute, isLoading } = useEvmTransaction(`Deploy tranche`, (cent) => cent.liquidityPools.deployTranche)
+  const tranche = pool.tranches.find((t) => t.id === trancheId)!
+
+  return (
+    <Button loading={isLoading} onClick={() => execute([domain.managerAddress, poolId, trancheId])} small>
+      Deploy tranche: {tranche.currency.name}
+    </Button>
+  )
+}
+
+function DeployLPButton({
+  poolId,
+  trancheId,
+  currencyIndex,
+  domain,
+}: {
+  poolId: string
+  trancheId: string
+  domain: Domain
+  currencyIndex: number
+}) {
+  const pool = usePool(poolId)
+
+  const { execute, isLoading } = useEvmTransaction(
+    `Deploy liquidity pool`,
+    (cent) => cent.liquidityPools.deployLiquidityPool
+  )
+  const tranche = pool.tranches.find((t) => t.id === trancheId)!
+
+  return (
+    <Button
+      loading={isLoading}
+      onClick={() => execute([domain.managerAddress, poolId, trancheId, domain.currencies[currencyIndex].address])}
+      small
+    >
+      Deploy tranche/currency liquidity pool: {tranche.currency.name} / {domain.currencies[currencyIndex].name}
+    </Button>
+  )
+}
+
+function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
+  const name = useNetworkName(domain.chainId)
   const { execute, isLoading } = useCentrifugeTransaction(
     `Enable ${name}`,
     (cent) => cent.liquidityPools.enablePoolOnDomain
   )
 
   return (
-    <Button
-      disabled={isEnabled}
-      loading={isLoading || isFetching}
-      onClick={() => execute([poolId, chainId], { account })}
-      small
-    >
-      {isEnabled ? 'Enabled' : 'Enable'}
+    <Button loading={isLoading} onClick={() => execute([poolId, domain.chainId], { account })} small>
+      Enable
     </Button>
   )
 }

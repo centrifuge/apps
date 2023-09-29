@@ -69,7 +69,7 @@ export async function multicall<T = Record<string, any>>(calls: Call[], options:
     const [int, name] = interfaces[i]
     const parsed = int.decodeFunctionResult(name, returnData)
     parsed.forEach((value, j) => {
-      const [key, transform] = c.returns[j]
+      const [key, transform] = c.returns[j] ?? []
       if (!key) return
       set(transformed, key, (transform ?? identity)(value))
     })

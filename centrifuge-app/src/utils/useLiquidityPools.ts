@@ -1,3 +1,4 @@
+import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
 
@@ -5,6 +6,11 @@ export function useDomainRouters(suspense?: boolean) {
   const [data] = useCentrifugeQuery(['domainRouters'], (cent) => cent.liquidityPools.getDomainRouters(), { suspense })
 
   return data
+}
+
+export type Domain = (ReturnType<Centrifuge['liquidityPools']['getPool']> extends Promise<infer T> ? T : never) & {
+  chainId: number
+  managerAddress: string
 }
 
 export function useActiveDomains(poolId: string, suspense?: boolean) {
@@ -22,34 +28,28 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
           const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
             rpcProvider,
           })
-          const pool = await cent.liquidityPools.getPool([manager, poolId], { rpcProvider })
+          const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
           return [manager, pool] as const
         })
       )
+      console.log('results', results)
       return results
         .map((result, i) => {
           if (result.status === 'rejected') {
             console.error(result.reason)
-            return null
+            return null as never
           }
           const [manager, pool] = result.value
           const router = routers![i]
-          if (!pool?.isActive) return null
-          return {
+          if (!pool?.isActive) return null as never
+          const domain: Domain = {
+            ...pool,
             chainId: router.chainId,
             managerAddress: manager,
           }
+          return domain
         })
-        .filter(Boolean) as {
-        chainId: number
-        managerAddress: string
-      }[]
-      // return [
-      //   {
-      //     chainId: 5,
-      //     managerAddress: '0xa8775Fe0453aA649403EffAa2b4b80307df1DB68',
-      //   },
-      // ]
+        .filter(Boolean)
     },
     {
       enabled: !!routers?.length && !poolId.startsWith('0x'),
@@ -62,9 +62,6 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
 }
 
 export function useLiquidityPools(poolId: string, trancheId: string) {
-  // TODO: only for testing, remove
-  // const poolId = '1171854325'
-  // const trancheId = '0x102f4ef817340a8839a515d2c73a7c1d'
   const {
     evm: { chainId, getProvider },
   } = useWallet()

@@ -6,7 +6,7 @@ import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
 export type AccordionProps = BoxProps & {
-  items: { title: string; body: string }[]
+  items: { title: React.ReactNode; body: React.ReactNode }[]
 }
 
 const Root = styled(Box)`

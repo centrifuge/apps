@@ -79,6 +79,24 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function deployTranche(
+    args: [poolManager: string, poolId: string, trancheId: string],
+    options: TransactionRequest = {}
+  ) {
+    const [poolManager, poolId, trancheId] = args
+    return pending(contract(poolManager, ABI.PoolManager).deployTranche(poolId, trancheId, options))
+  }
+
+  function deployLiquidityPool(
+    args: [poolManager: string, poolId: string, trancheId: string, currencyAddress: string],
+    options: TransactionRequest = {}
+  ) {
+    const [poolManager, poolId, trancheId, currencyAddress] = args
+    return pending(
+      contract(poolManager, ABI.PoolManager).deployLiquidityPool(poolId, trancheId, currencyAddress, options)
+    )
+  }
+
   function approveForCurrency(args: [address: string, currencyAddress: string], options: TransactionRequest = {}) {
     const [address, currencyAddress] = args
     return pending(contract(currencyAddress, ABI.Currency).approve(address, maxUint256, options))
@@ -166,8 +184,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return inst.getApi().pipe(
       switchMap((api) => api.query.liquidityPoolsGateway.domainRouters.entries()),
       map((rawRouters) => {
-        console.log('rawRouters', rawRouters)
-        // return [{ chainId: 5, router: '0x6c299123aCdB40Fc5E029049d1a8b4D47355Cfeb' }]
         return rawRouters
           .map(([rawKey, rawValue]) => {
             const key = (rawKey.toHuman() as ['Centrifuge' | { EVM: string }])[0]
@@ -189,7 +205,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    // const MOCK_router = '0x6c299123aCdB40Fc5E029049d1a8b4D47355Cfeb'
     const gatewayAddress = await contract(router, ABI.Router, options).gateway()
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
@@ -208,22 +223,86 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return events.flat()
   }
 
-  async function getPool(args: [investmentManager: string, poolId: string], options?: EvmQueryOptions) {
-    const [investmentManager, poolId] = args
+  async function getPool(
+    args: [chainId: number, investmentManager: string, poolId: string],
+    options?: EvmQueryOptions
+  ) {
+    const [chainId, investmentManager, poolId] = args
 
-    const poolManager = await contract(investmentManager, ABI.InvestmentManager, options).poolManager()
-    console.log('poolManager', poolManager, poolId)
-    const pool = await contract(poolManager, ABI.PoolManager, options).pools(poolId)
-    console.log('pool', pool)
-    return pool[0].toString() === poolId ? { isActive: true } : undefined
+    const trancheIds = await firstValueFrom(
+      inst.getApi().pipe(
+        switchMap((api) => api.query.poolSystem.pool(poolId)),
+        map((rawPool) => {
+          const pool = rawPool.toPrimitive() as any
+          return pool.tranches.ids as string[]
+        })
+      )
+    )
+
+    const currencies = await firstValueFrom(getDomainCurrencies([chainId]))
+
+    const poolManager = (await contract(investmentManager, ABI.InvestmentManager, options).poolManager()) as string
+    console.log('poolManager', investmentManager, poolManager, poolId, trancheIds, currencies)
+
+    const poolData = await multicall<{
+      isActive: boolean
+      undeployedTranches: Record<string, boolean>
+      trancheTokenExists: Record<string, boolean>
+      liquidityPools: Record<string, Record<string, string | null>>
+    }>(
+      [
+        ...trancheIds.flatMap(
+          (trancheId) =>
+            [
+              {
+                target: poolManager,
+                call: [
+                  'function undeployedTranches(uint64,bytes16) view returns (uint8,string,string)',
+                  poolId,
+                  trancheId,
+                ],
+                returns: [[`undeployedTranches[${trancheId}]`, (dec) => !!dec]],
+              },
+              {
+                target: poolManager,
+                call: ['function getTrancheToken(uint64,bytes16) view returns (address)', poolId, trancheId],
+                returns: [[`trancheTokenExists[${trancheId}]`, (addr) => addr !== NULL_ADDRESS]],
+              },
+              ...(currencies.flatMap((currency) => ({
+                target: poolManager,
+                call: [
+                  'function getLiquidityPool(uint64,bytes16,address) view returns (address)',
+                  poolId,
+                  trancheId,
+                  currency.address,
+                ],
+                returns: [
+                  [
+                    `liquidityPools[${trancheId}][${currency.address}]`,
+                    (addr) => (addr !== NULL_ADDRESS ? addr : null),
+                  ],
+                ],
+              })) as Call[]),
+            ] as Call[]
+        ),
+        {
+          target: poolManager,
+          call: ['function pools(uint64) view returns (uint256)', poolId],
+          returns: [['isActive', (createdAt) => createdAt !== 0]],
+        },
+      ],
+      {
+        rpcProvider: getProvider(options)!,
+      }
+    )
+
+    return { ...poolData, poolManager, currencies }
   }
 
   function getDomainCurrencies(args: [chainId: number]) {
     const [chainId] = args
     return inst.pools.getCurrencies().pipe(
       map((currencies) => {
-        // TODO: for testing, remove
-        // return [1]
         return currencies
           .filter(
             (cur) =>
@@ -244,8 +323,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [managerAddress, poolId, trancheId, chainId] = args
 
     const currencies = await firstValueFrom(getDomainCurrencies([chainId]))
-
-    console.log('currencies', currencies)
 
     const poolManager: string = await contract(managerAddress, ABI.InvestmentManager, options).poolManager()
 
@@ -470,6 +547,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   return {
     enablePoolOnDomain,
+    deployTranche,
+    deployLiquidityPool,
     updateInvestOrder,
     updateRedeemOrder,
     updateInvestOrderWithPermit,
