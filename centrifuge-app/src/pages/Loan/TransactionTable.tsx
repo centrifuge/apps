@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import { useMemo } from 'react'
 import { DataTable } from '../../components/DataTable'
 import { formatDate } from '../../utils/date'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 
 type Props = {
@@ -35,48 +36,39 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
 
     return sortedTransactions.map((transaction, index, array) => ({
       type: transaction.type,
+      amount: transaction.amount,
+      quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
       transactionDate: transaction.timestamp,
       settlePrice: transaction.settlementPrice
-        ? new CurrencyBalance(new BN(transaction.settlementPrice).mul(new BN(100)), decimals)
+        ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
         : null,
       faceFlow:
         transaction.quantity && (pricing as ExternalPricingInfo).notional
-          ? new CurrencyBalance(
-              new BN(transaction.quantity)
-                .mul((pricing as ExternalPricingInfo).notional)
-                .div(new BN(10).pow(new BN(18))),
-              18
-            )
+          ? new CurrencyBalance(transaction.quantity, 18)
+              .toDecimal()
+              .mul((pricing as ExternalPricingInfo).notional.toDecimal())
           : null,
       position: array.slice(0, index + 1).reduce((sum, trx) => {
         if (trx.type === 'BORROWED') {
-          sum = new CurrencyBalance(
-            sum.add(
-              trx.quantity
-                ? new CurrencyBalance(
-                    new BN(trx.quantity).mul((pricing as ExternalPricingInfo).notional).div(new BN(10).pow(new BN(18))),
-                    18
-                  )
-                : new CurrencyBalance(0, decimals)
-            ),
-            decimals
+          sum = sum.add(
+            trx.quantity
+              ? new CurrencyBalance(trx.quantity, 18)
+                  .toDecimal()
+                  .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+              : Dec(0)
           )
         }
         if (trx.type === 'REPAID') {
-          sum = new CurrencyBalance(
-            sum.sub(
-              trx.quantity
-                ? new CurrencyBalance(
-                    new BN(trx.quantity).mul((pricing as ExternalPricingInfo).notional).div(new BN(10).pow(new BN(18))),
-                    18
-                  )
-                : new CurrencyBalance(0, decimals)
-            ),
-            decimals
+          sum = sum.sub(
+            trx.quantity
+              ? new CurrencyBalance(trx.quantity, 18)
+                  .toDecimal()
+                  .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+              : Dec(0)
           )
         }
         return sum
-      }, new CurrencyBalance(0, 18)),
+      }, Dec(0)),
     }))
   }, [transactions, decimals, pricing])
 
@@ -128,6 +120,12 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
         },
         {
           align: 'left',
+          header: 'Quantity',
+          cell: (row) => (row.quantity ? formatBalance(row.quantity, undefined, 2, 0) : '-'),
+          flex: '2',
+        },
+        {
+          align: 'left',
           header: 'Settle price',
           cell: (row) => (row.settlePrice ? formatBalance(row.settlePrice, currency, 6, 2) : '-'),
           flex: '3',
@@ -136,21 +134,13 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
           align: 'left',
           header: 'Net cash flow',
           cell: (row) =>
-            row.faceFlow && row.settlePrice
-              ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(
-                  row.faceFlow.toDecimal().mul(new CurrencyBalance(row.settlePrice, decimals).toDecimal().div(100)),
-                  currency,
-                  2,
-                  2
-                )}`
-              : '-',
+            row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, currency, 2, 2)}` : '-',
           flex: '3',
         },
         {
           align: 'left',
           header: 'Position',
-          cell: (row) =>
-            row.type === 'CREATED' ? '-' : formatBalance(new CurrencyBalance(row.position, 18), currency, 2, 2),
+          cell: (row) => (row.type === 'CREATED' ? '-' : formatBalance(row.position, currency, 2, 2)),
           flex: '3',
         },
         // TODO: add link to transaction

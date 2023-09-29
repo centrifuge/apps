@@ -46,6 +46,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
                 errorMessage={meta.touched ? meta.error : undefined}
                 onChange={(value) => form.setFieldValue('pricing.notional', value)}
                 variant="small"
+                currency={pool.currency.symbol}
               />
             )}
           </Field>

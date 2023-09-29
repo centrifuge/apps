@@ -10,7 +10,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
-import { useBorrowerAssetTransactions, usePool } from '../../utils/usePools'
+import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber, settlementPrice } from '../../utils/validation'
 
 type FinanceValues = {
@@ -60,11 +60,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       faceValue: '',
     },
     onSubmit: (values, actions) => {
-      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
+      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
       const quantity = Price.fromFloat(
-        Price.fromFloat(values.faceValue)
-          .div((loan.pricing as ExternalPricingInfo).notional)
-          .toString()
+        Dec(values.faceValue).div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
       )
 
       doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
@@ -81,11 +79,9 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
       faceValue: '',
     },
     onSubmit: (values, actions) => {
-      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals).div(new BN(100))
+      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
       const quantity = Price.fromFloat(
-        Price.fromFloat(values.faceValue)
-          .div((loan.pricing as ExternalPricingInfo).notional)
-          .toString()
+        Dec(values.faceValue).div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
       )
 
       doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price], {
@@ -101,8 +97,6 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
-
-  const { currentFace } = useBorrowerAssetTransactions(loan.poolId, loan.id)
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
@@ -150,7 +144,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                     const num = val instanceof Decimal ? val.toNumber() : val
                     const financeAmount = Dec(num)
                       .mul(financeForm.values.faceValue || 1)
-                      .div(100)
+                      .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
 
                     return financeAmount.gt(availableFinancing)
                       ? `Amount exceeds available reserve (${formatBalance(
@@ -163,7 +157,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                   (val) => {
                     const financeAmount = Dec(val)
                       .mul(financeForm.values.faceValue || 1)
-                      .div(100)
+                      .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
 
                     return financeAmount.gt(maxBorrow)
                       ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
@@ -195,7 +189,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       ? formatBalance(
                           Dec(financeForm.values.price || 0)
                             .mul(Dec(financeForm.values.faceValue || 0))
-                            .div(100),
+                            .div((loan.pricing as ExternalPricingInfo).notional.toDecimal()),
                           pool?.currency.symbol,
                           2
                         )
@@ -221,11 +215,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
           <Shelf justifyContent="space-between">
             <Text variant="label2">Outstanding</Text>
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="label2">
-              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                ? formatBalance(new CurrencyBalance(currentFace, 18), pool.currency.symbol, 2, 2)
-                : ''}
-            </Text>
+            <Text variant="label2">{formatBalance(loan.outstandingDebt, pool.currency.symbol, 2, 2)}</Text>
           </Shelf>
         </Stack>
 
@@ -260,7 +250,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       const num = val instanceof Decimal ? val.toNumber() : val
                       const repayAmount = Dec(num)
                         .mul(repayForm.values.faceValue || 1)
-                        .div(100)
+                        .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
 
                       return repayAmount.gt(balance)
                         ? `Your wallet balance (${formatBalance(
@@ -275,7 +265,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                       const num = val instanceof Decimal ? val.toNumber() : val
                       const repayAmount = Dec(num)
                         .mul(repayForm.values.faceValue || 1)
-                        .div(100)
+                        .div((loan.pricing as ExternalPricingInfo).notional.toDecimal())
 
                       return repayAmount.gt(debt) ? 'Amount exceeds outstanding' : ''
                     }
@@ -306,7 +296,7 @@ export function ExternalFinanceForm({ loan }: { loan: LoanType }) {
                         ? formatBalance(
                             Dec(repayForm.values.price || 0)
                               .mul(Dec(repayForm.values.faceValue || 0))
-                              .div(100),
+                              .div((loan.pricing as ExternalPricingInfo).notional.toDecimal()),
                             pool?.currency.symbol,
                             2
                           )

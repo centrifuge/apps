@@ -94,10 +94,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
-      ? new CurrencyBalance(
-          loan.pricing.outstandingQuantity.mul(loan.pricing.notional).div(new BN(10).pow(new BN(18))),
-          18
-        )
+      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
       : null
 
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
@@ -136,7 +133,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
 
   const getLatestPrice = () => {
     if (loan?.pricing && 'oracle' in loan.pricing) {
-      const settlementPrice = borrowerAssetTransactions?.[borrowerAssetTransactions.length - 1].settlementPrice
+      const settlementPrice = borrowerAssetTransactions?.[borrowerAssetTransactions.length - 1]?.settlementPrice
       const latestSettlementPrice = settlementPrice ? new BN(settlementPrice).mul(new BN(100)) : null
 
       if (latestSettlementPrice && loan.pricing.oracle.value.isZero()) {

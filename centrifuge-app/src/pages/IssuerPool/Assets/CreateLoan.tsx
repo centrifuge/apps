@@ -237,12 +237,12 @@ function IssuerCreateLoan() {
               valuationMethod: values.pricing.valuationMethod,
               maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
               maxBorrowAmount: values.pricing.maxBorrowQuantity
-                ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals)
+                ? Price.fromFloat(values.pricing.maxBorrowQuantity)
                 : null,
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
               interestRate: Rate.fromPercent(values.pricing.interestRate),
-              notional: Price.fromFloat(values.pricing.notional),
+              notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
             }
           : {
               valuationMethod: values.pricing.valuationMethod,

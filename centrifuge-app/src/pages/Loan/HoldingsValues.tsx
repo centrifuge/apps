@@ -1,6 +1,7 @@
 import { BorrowerTransaction, CurrencyBalance, ExternalPricingInfo, Pool, PricingInfo } from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import { LabelValueStack } from '../../components/LabelValueStack'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 
 type Props = {
@@ -14,43 +15,15 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
   const netSpent =
     transactions?.reduce((sum, trx) => {
       if (trx.type === 'REPAID') {
-        sum = new CurrencyBalance(
-          sum.add(
-            trx.quantity && trx.settlementPrice
-              ? new CurrencyBalance(
-                  new BN(trx.quantity)
-                    .mul((pricing as ExternalPricingInfo).notional)
-                    .mul(new BN(trx.settlementPrice))
-                    .div(new BN(10).pow(new BN(18)))
-                    .div(new BN(10).pow(new BN(6))),
-                  18
-                )
-              : new CurrencyBalance(0, pool.currency.decimals)
-          ),
-          18
-        )
+        sum = trx.amount ? sum.add(trx.amount.toDecimal()) : sum
       }
 
       if (trx.type === 'BORROWED') {
-        sum = new CurrencyBalance(
-          sum.sub(
-            trx.quantity && trx.settlementPrice
-              ? new CurrencyBalance(
-                  new BN(trx.quantity)
-                    .mul((pricing as ExternalPricingInfo).notional)
-                    .mul(new BN(trx.settlementPrice))
-                    .div(new BN(10).pow(new BN(18)))
-                    .div(new BN(10).pow(new BN(6))),
-                  18
-                )
-              : new CurrencyBalance(0, pool.currency.decimals)
-          ),
-          18
-        )
+        sum = trx.amount ? sum.sub(trx.amount.toDecimal()) : sum
       }
 
       return sum
-    }, new CurrencyBalance(0, 18)) || new CurrencyBalance(0, 18)
+    }, Dec(0)) || Dec(0)
 
   const getAverageSettlePrice = () => {
     const settlementTransactions =
@@ -80,7 +53,10 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
 
   return (
     <>
-      <LabelValueStack label="Current face" value={`${formatBalance(currentFace!, pool.currency.symbol, 2, 2)}`} />
+      <LabelValueStack
+        label="Current face"
+        value={currentFace ? `${formatBalance(currentFace, pool.currency.symbol, 2, 2)}` : '-'}
+      />
       <LabelValueStack label="Net spent" value={`${formatBalance(netSpent, pool.currency.symbol, 2, 2)}`} />
       <LabelValueStack
         label="Average settle price"
@@ -88,12 +64,20 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
           getAverageSettlePrice().isZero()
             ? '-'
             : `${formatBalance(
-                new CurrencyBalance(getAverageSettlePrice().mul(new BN(100)), pool.currency.decimals),
+                new CurrencyBalance(getAverageSettlePrice(), pool.currency.decimals),
                 pool.currency.symbol,
                 2,
                 2
               )}`
         }
+      />
+      <LabelValueStack
+        label="Notional"
+        value={`${formatBalance((pricing as ExternalPricingInfo).notional, pool.currency.symbol, 2, 2)}`}
+      />
+      <LabelValueStack
+        label="Quantity"
+        value={`${formatBalance((pricing as ExternalPricingInfo).outstandingQuantity, undefined, 2, 0)}`}
       />
     </>
   )

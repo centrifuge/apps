@@ -2544,6 +2544,8 @@ export function getPoolsModule(inst: Centrifuge) {
             string,
             {
               presentValue: CurrencyBalance
+              outstandingPrincipal: CurrencyBalance
+              outstandingInterest: CurrencyBalance
             }
           > = {}
 
@@ -2551,6 +2553,8 @@ export function getPoolsModule(inst: Centrifuge) {
             const data = value.toPrimitive() as any
             activeLoansPortfolio[String(key.toPrimitive())] = {
               presentValue: new CurrencyBalance(data.presentValue, currency.decimals),
+              outstandingPrincipal: new CurrencyBalance(data.outstandingPrincipal, currency.decimals),
+              outstandingInterest: new CurrencyBalance(data.outstandingInterest, currency.decimals),
             }
           })
 
@@ -2593,7 +2597,7 @@ export function getPoolsModule(inst: Centrifuge) {
                       maxBorrowAmount:
                         'noLimit' in pricingInfo.maxBorrowAmount
                           ? null
-                          : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 27),
+                          : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 18),
                       Isin: pricingInfo.priceId.isin,
                       maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
                       maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
@@ -2603,8 +2607,8 @@ export function getPoolsModule(inst: Centrifuge) {
                       },
                       outstandingQuantity:
                         'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
-                          ? new CurrencyBalance(info.pricing.external.outstandingQuantity, 27) // TODO: Will be 18 after next chain update
-                          : new CurrencyBalance(0, 27),
+                          ? new CurrencyBalance(info.pricing.external.outstandingQuantity, 18)
+                          : new CurrencyBalance(0, 18),
                       interestRate: new Rate(interestRate),
                       notional: new CurrencyBalance(pricingInfo.notional, currency.decimals),
                     }
@@ -2671,39 +2675,10 @@ export function getPoolsModule(inst: Centrifuge) {
               const repaidPrincipal = new CurrencyBalance(loan.totalRepaid.principal, currency.decimals)
               const repaidInterest = new CurrencyBalance(loan.totalRepaid.interest, currency.decimals)
               const repaidUnscheduled = new CurrencyBalance(loan.totalRepaid.unscheduled, currency.decimals)
-              const outstandingDebt = getOutstandingDebt(
-                loan,
-                currency.decimals,
-                interestLastUpdated.toPrimitive() as number,
-                interestData
+              const outstandingDebt = new CurrencyBalance(
+                portfolio.outstandingInterest.add(portfolio.outstandingPrincipal),
+                currency.decimals
               )
-              let outstandingPrincipal: CurrencyBalance
-              let outstandingInterest: CurrencyBalance
-              if ('internal' in loan.pricing) {
-                outstandingPrincipal = new CurrencyBalance(
-                  new BN(loan.totalBorrowed).sub(repaidPrincipal),
-                  currency.decimals
-                )
-                outstandingInterest = new CurrencyBalance(outstandingDebt.sub(outstandingPrincipal), currency.decimals)
-              } else {
-                const quantity = new CurrencyBalance(loan.pricing.external.outstandingQuantity, 27).toDecimal()
-                outstandingPrincipal = CurrencyBalance.fromFloat(
-                  quantity.mul(
-                    new CurrencyBalance(sharedInfo.pricing.oracle?.value ?? new BN(0), currency.decimals).toDecimal()
-                  ),
-                  currency.decimals
-                )
-                outstandingInterest = CurrencyBalance.fromFloat(
-                  outstandingDebt
-                    .toDecimal()
-                    .sub(
-                      quantity.mul(
-                        new CurrencyBalance(loan.pricing.external.info.notional, currency.decimals).toDecimal()
-                      )
-                    ),
-                  currency.decimals
-                )
-              }
               return {
                 ...sharedInfo,
                 id: loanId.toString(),
@@ -2724,8 +2699,8 @@ export function getPoolsModule(inst: Centrifuge) {
                 originationDate: new Date(loan.originationDate * 1000).toISOString(),
                 outstandingDebt,
                 normalizedDebt: new CurrencyBalance(normalizedDebt, currency.decimals),
-                outstandingPrincipal,
-                outstandingInterest,
+                outstandingPrincipal: portfolio.outstandingPrincipal,
+                outstandingInterest: portfolio.outstandingInterest,
                 presentValue: portfolio.presentValue,
               }
             }
@@ -3066,30 +3041,6 @@ export function getPoolsModule(inst: Centrifuge) {
 function hexToBN(value: string | number) {
   if (typeof value === 'number') return new BN(value)
   return new BN(value.toString().substring(2), 'hex')
-}
-
-function getOutstandingDebt(
-  loan: ActiveLoanData,
-  currencyDecimals: number,
-  lastUpdated: number,
-  accrual?: InterestAccrual
-) {
-  if (!accrual) return new CurrencyBalance(0, currencyDecimals)
-  const accRate = new Rate(accrual.accumulatedRate).toDecimal()
-  const rate = new Rate(accrual.interestRatePerSec).toDecimal()
-  const balance =
-    'internal' in loan.pricing
-      ? loan.pricing.internal.interest.normalizedAcc
-      : loan.pricing.external.interest.normalizedAcc
-
-  const normalizedDebt = new CurrencyBalance(balance, currencyDecimals).toDecimal()
-  const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
-
-  const debtFromAccRate = normalizedDebt.mul(accRate)
-  const debtSinceUpdated = normalizedDebt.mul(rate.minus(1).mul(secondsSinceUpdated))
-  const debt = debtFromAccRate.add(debtSinceUpdated)
-
-  return CurrencyBalance.fromFloat(debt, currencyDecimals)
 }
 
 function getEpochStatus(epochExecution: Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>, blockNumber: number) {
