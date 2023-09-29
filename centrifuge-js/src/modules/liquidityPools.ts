@@ -84,7 +84,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     options: TransactionRequest = {}
   ) {
     const [poolManager, poolId, trancheId] = args
-    return pending(contract(poolManager, ABI.PoolManager).deployTranche(poolId, trancheId, options))
+    return pending(
+      contract(poolManager, ABI.PoolManager).deployTranche(poolId, trancheId, { ...options, gasLimit: 5000000 })
+    )
   }
 
   function deployLiquidityPool(
@@ -93,7 +95,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   ) {
     const [poolManager, poolId, trancheId, currencyAddress] = args
     return pending(
-      contract(poolManager, ABI.PoolManager).deployLiquidityPool(poolId, trancheId, currencyAddress, options)
+      contract(poolManager, ABI.PoolManager).deployLiquidityPool(poolId, trancheId, currencyAddress, {
+        ...options,
+        gasLimit: 5000000,
+      })
     )
   }
 

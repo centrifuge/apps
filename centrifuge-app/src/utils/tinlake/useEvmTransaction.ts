@@ -16,7 +16,7 @@ export function useEvmTransaction<T extends Array<any>>(
   transactionCallback: (
     centrifuge: Centrifuge
   ) => (args: T, options?: TransactionRequest) => Observable<TransactionResponse>,
-  options: { onSuccess?: (args: T, result: any) => void; onError?: (error: any) => void } = {}
+  options: { onSuccess?: (args: T, result: any) => void; onError?: (error: any) => void; chainId?: number } = {}
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
   const { showWallets, evm, walletDialog } = useWallet()
@@ -64,7 +64,7 @@ export function useEvmTransaction<T extends Array<any>>(
 
     if (!selectedAddress || !provider) {
       pendingTransaction.current = { id, args, options }
-      showWallets(1)
+      showWallets(chainId ?? 1)
     } else {
       doTransaction(id, args, options)
     }
