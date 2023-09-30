@@ -684,6 +684,10 @@ export type BorrowerTransaction = {
   quantity: string | null
 }
 
+export type ExternalLoan = Loan & {
+  pricing: ExternalPricingInfo
+}
+
 export type Permissions = {
   pools: {
     [poolId: string]: PoolRoles

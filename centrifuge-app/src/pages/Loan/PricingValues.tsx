@@ -1,16 +1,21 @@
-import { CurrencyBalance, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { getLatestPrice } from '../../utils/getLatestPrice'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
+import { useBorrowerTransactions } from '../../utils/usePools'
 
 type Props = {
   loan: Loan | TinlakeLoan
   pool: Pool | TinlakePool
-  latestPrice: CurrencyBalance
 }
 
-export function PricingValues({ loan: { pricing }, pool, latestPrice }: Props) {
+export function PricingValues({ loan, pool }: Props) {
+  const { pricing } = loan
+
+  const borrowerTransactions = useBorrowerTransactions(loan.poolId)
+
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
     (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
@@ -21,12 +26,17 @@ export function PricingValues({ loan: { pricing }, pool, latestPrice }: Props) {
 
     const days = getAge(new Date(pricing.oracle.timestamp).toISOString())
 
+    const borrowerAssetTransactions = borrowerTransactions?.filter(
+      (borrowerTransaction) => borrowerTransaction.loanId === `${loan.poolId}-${loan.id}`
+    )
+    const latestPrice = getLatestPrice(pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals)
+
     return (
       <>
         <LabelValueStack label="ISIN" value={pricing.Isin} />
         <LabelValueStack
-          label={`Latest price${pricing.oracle.value.isZero() ? ' (settlement)' : ''}`}
-          value={`${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}`}
+          label={`Latest price${pricing.oracle.value.isZero() && latestPrice ? ' (settlement)' : ''}`}
+          value={latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-'}
         />
         <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
       </>

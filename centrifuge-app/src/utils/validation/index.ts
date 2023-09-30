@@ -44,6 +44,8 @@ export const settlementPrice = (err?: CustomError) => (val?: any) => {
 }
 
 export const maxPriceVariance = (pricing: ExternalPricingInfo, err?: CustomError) => (val?: any) => {
+  if (pricing.oracle.value.isZero()) return ''
+
   const maxVariation = new CurrencyBalance(pricing.oracle.value, 18)
     .toDecimal()
     .mul(pricing.maxPriceVariation.toDecimal())

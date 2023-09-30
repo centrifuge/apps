@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -27,7 +27,6 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
-import { Dec } from '../../utils/Decimal'
 import { formatBalance, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useLoan, useNftDocumentId } from '../../utils/useLoans'
@@ -131,21 +130,6 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
     return 0
   }, [originationDate, loan?.pricing.maturityDate])
 
-  const getLatestPrice = () => {
-    if (loan?.pricing && 'oracle' in loan.pricing) {
-      const settlementPrice = borrowerAssetTransactions?.[borrowerAssetTransactions.length - 1]?.settlementPrice
-      const latestSettlementPrice = settlementPrice ? Dec(settlementPrice) : null
-
-      if (latestSettlementPrice && loan.pricing.oracle.value.isZero()) {
-        return new CurrencyBalance(latestSettlementPrice.toString(), pool.currency.decimals)
-      }
-
-      return new CurrencyBalance(loan.pricing.oracle.value, 18)
-    }
-
-    return new CurrencyBalance(0, 18)
-  }
-
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -243,7 +227,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
             <PageSection title={<Box>Pricing</Box>}>
               <Stack>
                 <Shelf gap={6} flexWrap="wrap">
-                  <PricingValues loan={loan} pool={pool} latestPrice={getLatestPrice()} />
+                  <PricingValues loan={loan} pool={pool} />
                 </Shelf>
                 {canOraclePrice &&
                   setShowOraclePricing &&
