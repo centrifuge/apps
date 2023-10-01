@@ -184,7 +184,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
               </Field>
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
-                  <Text variant="emphasized">Total principal</Text>
+                  <Text variant="emphasized">Total amount</Text>
                   <Text variant="emphasized">
                     {financeForm.values.price && !Number.isNaN(financeForm.values.price as number)
                       ? formatBalance(
@@ -209,7 +209,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
       </Stack>
       <Stack as={Card} gap={2} p={2}>
         <Box paddingY={1}>
-          <Text variant="heading4">To repay the asset, enter face value and settlement price of the asset.</Text>
+          <Text variant="heading4">To repay the asset, enter face value and settlement price of the transaction.</Text>
         </Box>
 
         <Stack>
@@ -261,17 +261,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
                           )}) is smaller than
                     the outstanding balance.`
                         : ''
-                    },
-                    (val) => {
-                      const num = val instanceof Decimal ? val.toNumber() : val
-                      const repayAmount = Dec(num)
-                        .mul(repayForm.values.faceValue || 1)
-                        .div(loan.pricing.notional.toDecimal())
-
-                      return repayAmount.gt(debt) ? 'Amount exceeds outstanding' : ''
-                    },
-                    maxPriceVariance(loan.pricing)
-                  )}
+                    }
                   name="price"
                 >
                   {({ field, meta, form }: FieldProps) => {
@@ -292,7 +282,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
                 </Field>
                 <Stack gap={1}>
                   <Shelf justifyContent="space-between">
-                    <Text variant="emphasized">Total principal</Text>
+                    <Text variant="emphasized">Total amount</Text>
                     <Text variant="emphasized">
                       {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                         ? formatBalance(
