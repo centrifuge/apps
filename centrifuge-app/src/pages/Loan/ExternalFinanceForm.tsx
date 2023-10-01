@@ -261,7 +261,9 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
                           )}) is smaller than
                     the outstanding balance.`
                         : ''
-                    }
+                    },
+                    maxPriceVariance(loan.pricing)
+                  )}
                   name="price"
                 >
                   {({ field, meta, form }: FieldProps) => {
