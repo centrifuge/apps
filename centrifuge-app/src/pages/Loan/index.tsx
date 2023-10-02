@@ -1,4 +1,4 @@
-import { Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -181,14 +181,17 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                       },
                     ]
                   : []),
-                ...('presentValue' in loan
-                  ? [
-                      {
-                        label: 'Current value',
-                        value: `${formatBalance(loan.presentValue, pool.currency.symbol, 2, 2)}`,
-                      },
-                    ]
-                  : []),
+                ...[
+                  {
+                    label: 'Current value',
+                    value: `${formatBalance(
+                      'presentValue' in loan ? loan.presentValue : new CurrencyBalance(0, pool.currency.decimals),
+                      pool.currency.symbol,
+                      2,
+                      2
+                    )}`,
+                  },
+                ],
               ]}
             />
 
@@ -203,8 +206,21 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     <FinancingRepayment
                       drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
                       closingDate={null}
-                      totalFinanced={formatBalance('totalBorrowed' in loan ? loan.totalBorrowed : 0, pool.currency)}
-                      totalRepaid={formatBalance('totalBorrowed' in loan ? loan.totalRepaid : 0, pool.currency)}
+                      outstandingPrincipal={formatBalance(
+                        'outstandingPrincipal' in loan ? loan.outstandingPrincipal : 0,
+                        pool.currency
+                      )}
+                      outstandingInterest={formatBalance(
+                        'outstandingInterest' in loan ? loan.outstandingInterest : 0,
+                        pool.currency
+                      )}
+                      repaidPrincipal={formatBalance('repaid' in loan ? loan.repaid.principal : 0, pool.currency)}
+                      repaidInterest={formatBalance('repaid' in loan ? loan.repaid.interest : 0, pool.currency)}
+                      repaidUnscheduled={
+                        'repaid' in loan && !loan.repaid.unscheduled.isZero()
+                          ? formatBalance(loan.repaid.unscheduled, pool.currency)
+                          : null
+                      }
                     />
                   )}
                 </Shelf>

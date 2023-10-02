@@ -261,7 +261,7 @@ function IssuerCreateLoan() {
 
       const tx: Transaction = {
         id: txId,
-        title: 'Create document',
+        title: 'Create asset',
         status: 'creating',
         args: [],
       }
@@ -327,7 +327,7 @@ function IssuerCreateLoan() {
         doTransaction([submittable], undefined, txId)
       } catch (e) {
         console.error(e)
-        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create document NFT' })
+        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create asset' })
       }
 
       setSubmitting(false)
