@@ -76,7 +76,7 @@ function Provider({ poolId, trancheId, children }: LiquidityRewardsProviderProps
         return
       }
 
-      claim.execute([poolId, trancheId])
+      claim.execute([[{ poolId, trancheId }]])
     },
     stake: () => {
       if (!pool.currency || !order || !order.payoutTokenAmount || !trancheId) {

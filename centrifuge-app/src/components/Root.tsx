@@ -33,6 +33,8 @@ import { EmailVerified } from '../pages/Onboarding/EmailVerified'
 import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
+import { PortfolioPage } from '../pages/Portfolio'
+import { TransactionsPage } from '../pages/Portfolio/Transactions'
 import { SwapsPage } from '../pages/Swaps'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
@@ -232,6 +234,12 @@ function Routes() {
       </Route>
       <Route path="/pools">
         <PoolsPage />
+      </Route>
+      <Route path="/portfolio/transactions">
+        <TransactionsPage />
+      </Route>
+      <Route path="/portfolio">
+        <PortfolioPage />
       </Route>
       <Route path="/disclaimer">
         <InvestmentDisclaimerPage />

@@ -38,7 +38,7 @@ export function PoolFilter({ pools }: PoolFilterProps) {
         tooltip="Value locked represents the current total value of pool tokens."
       />
 
-      <SortButton {...poolFilterConfig.apr} />
+      <SortButton {...poolFilterConfig.apr} justifySelf="start" />
 
       <FilterMenu
         {...poolFilterConfig.poolStatus}

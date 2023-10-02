@@ -2,6 +2,7 @@ import {
   Box,
   IconInvestments,
   IconNft,
+  IconPieChart,
   IconSwitch,
   Menu as Panel,
   MenuItemGroup,
@@ -23,7 +24,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps } = useDebugFlags()
+  const { showSwaps, showPortfolio } = useDebugFlags()
 
   return (
     <Shelf
@@ -46,6 +47,13 @@ export function Menu() {
       )}
 
       <GovernanceMenu />
+
+      {showPortfolio && address && (
+        <PageLink to="/portfolio" stacked={!isLarge}>
+          <IconPieChart />
+          Portfolio
+        </PageLink>
+      )}
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>

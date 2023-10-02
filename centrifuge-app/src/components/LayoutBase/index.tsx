@@ -1,5 +1,5 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
-import { Stack, Text } from '@centrifuge/fabric'
+import { Box, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Footer } from '../Footer'
 import { LoadBoundary } from '../LoadBoundary'
@@ -7,8 +7,7 @@ import { LogoLink } from '../LogoLink'
 import { Menu } from '../Menu'
 import { OnboardingStatus } from '../OnboardingStatus'
 import { SideDrawerProps } from '../SideDrawer'
-import { BaseSection } from './BaseSection'
-import { config } from './config'
+import { BasePadding } from './BasePadding'
 import {
   FooterContainer,
   HeaderBackground,
@@ -37,9 +36,9 @@ export function LayoutBase({ children, sideDrawer }: LayoutBaseProps) {
           <LogoLink />
         </LogoContainer>
 
-        <WalletContainer px={config.PADDING_MAIN}>
+        <WalletContainer px={[2, 2, 3, 3, 5]}>
           <WalletPositioner>
-            <WalletInner minWidth={config.WALLET_WIDTH}>
+            <WalletInner minWidth={[200, 264]}>
               <WalletMenu menuItems={[<OnboardingStatus />]} />
             </WalletInner>
           </WalletPositioner>
@@ -50,7 +49,9 @@ export function LayoutBase({ children, sideDrawer }: LayoutBaseProps) {
         </ToolbarContainer>
 
         <LoadBoundary>
-          <MainContainer as="main">{children}</MainContainer>
+          <MainContainer as="main">
+            <Box maxWidth={1800}>{children}</Box>
+          </MainContainer>
         </LoadBoundary>
 
         <FooterContainer>
@@ -72,7 +73,7 @@ export function LayoutMain({
   children: React.ReactNode
 }) {
   return (
-    <BaseSection pt={3} pb={4}>
+    <BasePadding>
       <Stack gap={4}>
         <Stack>
           <Text as="h1" variant="heading1">
@@ -87,6 +88,6 @@ export function LayoutMain({
 
         {children}
       </Stack>
-    </BaseSection>
+    </BasePadding>
   )
 }
