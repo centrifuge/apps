@@ -1,8 +1,18 @@
-import { Box, IconInvestments, IconNft, Menu as Panel, MenuItemGroup, Shelf, Stack } from '@centrifuge/fabric'
+import {
+  Box,
+  IconInvestments,
+  IconNft,
+  IconPieChart,
+  Menu as Panel,
+  MenuItemGroup,
+  Shelf,
+  Stack,
+} from '@centrifuge/fabric'
 import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
+import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
@@ -13,6 +23,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
+  const { showPortfolio } = useDebugFlags()
 
   return (
     <Shelf
@@ -35,6 +46,13 @@ export function Menu() {
       )}
 
       <GovernanceMenu />
+
+      {showPortfolio && address && (
+        <PageLink to="/portfolio" stacked={!isLarge}>
+          <IconPieChart />
+          Portfolio
+        </PageLink>
+      )}
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>

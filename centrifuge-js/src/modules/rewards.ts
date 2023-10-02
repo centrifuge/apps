@@ -123,13 +123,21 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
-  function claimLiquidityRewards(args: [poolId: string, trancheId: string], options?: TransactionOptions) {
-    const [poolId, trancheId] = args
+  function claimLiquidityRewards(
+    args: [tranches: { poolId: string; trancheId: string }[]],
+    options?: TransactionOptions
+  ) {
+    const [tranches] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.liquidityRewards.claimReward({ Tranche: [poolId, trancheId] })
+        const submittable = api.tx.utility.batchAll(
+          tranches.flatMap((tranche) => {
+            return api.tx.liquidityRewards.claimReward({ Tranche: [tranche.poolId, tranche.trancheId] })
+          })
+        )
+
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )

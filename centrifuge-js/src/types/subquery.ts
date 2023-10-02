@@ -1,3 +1,5 @@
+import { CurrencyBalance, Price } from '../utils/BN'
+
 export type SubqueryPoolSnapshot = {
   __typename?: 'PoolSnapshot'
   id: string
@@ -55,12 +57,14 @@ export type SubqueryInvestorTransaction = {
   id: string
   timestamp: string
   accountId: string
+  poolId: string
   trancheId: string
   epochNumber: number
   type: InvestorTransactionType
-  currencyAmount?: number | null
-  tokenAmount?: number | null
-  tokenPrice?: number | null
+  hash: string
+  currencyAmount?: CurrencyBalance | number | null
+  tokenAmount?: CurrencyBalance | number | null
+  tokenPrice?: Price | number | null
   transactionFee?: number | null
 }
 
