@@ -9,7 +9,7 @@ import { TransactionOptions } from '../types'
 import { CurrencyBalance, Price, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
-import { CurrencyMetadata } from './pools'
+import { CurrencyKey, CurrencyMetadata } from './pools'
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
@@ -51,8 +51,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return options?.rpcProvider ?? inst.config.evmSigner?.provider
   }
 
-  function enablePoolOnDomain(args: [poolId: string, chainId: number], options?: TransactionOptions) {
-    const [poolId, chainId] = args
+  function enablePoolOnDomain(
+    args: [poolId: string, chainId: number, currencyKeysToAdd: CurrencyKey[]],
+    options?: TransactionOptions
+  ) {
+    const [poolId, chainId, currencyKeysToAdd] = args
     const $api = inst.getApi()
 
     return getDomainCurrencies([chainId]).pipe(
@@ -62,6 +65,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           switchMap((rawPool) => {
             const pool = rawPool.toPrimitive() as any
             const tx = api.tx.utility.batchAll([
+              ...(currencyKeysToAdd?.map((key) => api.tx.liquidityPools.addCurrency(key)) ?? []),
               api.tx.liquidityPools.addPool(poolId, { EVM: chainId }),
               ...pool.tranches.ids.flatMap((trancheId: string) => [
                 api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
@@ -252,8 +256,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const poolData = await multicall<{
       isActive: boolean
       undeployedTranches: Record<string, boolean>
-      trancheTokenExists: Record<string, boolean>
+      trancheTokens: Record<string, string>
       liquidityPools: Record<string, Record<string, string | null>>
+      currencyNeedsAdding: Record<string, boolean>
     }>(
       [
         ...trancheIds.flatMap(
@@ -271,7 +276,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               {
                 target: poolManager,
                 call: ['function getTrancheToken(uint64,bytes16) view returns (address)', poolId, trancheId],
-                returns: [[`trancheTokenExists[${trancheId}]`, (addr) => addr !== NULL_ADDRESS]],
+                returns: [[`trancheTokens[${trancheId}]`, (addr) => (addr !== NULL_ADDRESS ? addr : null)]],
               },
               ...(currencies.flatMap((currency) => ({
                 target: poolManager,
@@ -295,6 +300,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           call: ['function pools(uint64) view returns (uint256)', poolId],
           returns: [['isActive', (createdAt) => createdAt !== 0]],
         },
+        ...(currencies.flatMap((currency) => ({
+          target: poolManager,
+          call: ['function currencyAddressToId(address) view returns (uint128)', currency.address],
+          returns: [[`currencyNeedsAdding[${currency.address}]`, (id) => !id]],
+        })) as Call[]),
       ],
       {
         rpcProvider: getProvider(options)!,
