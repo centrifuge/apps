@@ -1,19 +1,10 @@
-import Centrifuge, {
-  BorrowerTransaction,
-  CurrencyBalance,
-  ExternalLoan,
-  ExternalPricingInfo,
-  Pool,
-  PoolMetadata,
-} from '@centrifuge/centrifuge-js'
+import Centrifuge, { ActiveLoan, BorrowerTransaction, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
-import Decimal from 'decimal.js-light'
 import { useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
 import { Dec } from './Decimal'
-import { getLatestPrice } from './getLatestPrice'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
 import { useLoan, useLoans } from './useLoans'
 import { useMetadata } from './useMetadata'
@@ -99,94 +90,16 @@ export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) 
 }
 
 export function useAverageAmount(poolId: string) {
-  const borrowerTransactions = useBorrowerTransactions(poolId)
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
 
-  if (
-    !loans?.length ||
-    !pool ||
-    !borrowerTransactions ||
-    !('valuationMethod' in loans[0].pricing && loans[0].pricing.valuationMethod === 'oracle')
-  )
-    return new BN(0)
+  if (!loans?.length || !pool) return new BN(0)
 
-  const poolsByLoanId =
-    borrowerTransactions.reduce((pools, trx) => {
-      const [, assetId] = trx.loanId.split('-')
-
-      const loan = loans.find((loan) => loan.id === assetId) as ExternalLoan
-      const borrowerAssetTransactions = borrowerTransactions?.filter(
-        (borrowerTransaction) => borrowerTransaction.loanId === `${loan.poolId}-${loan.id}`
-      )
-
-      if (pools[assetId]) {
-        pools[assetId] = [
-          ...pools[assetId],
-          {
-            ...trx,
-            oracleValue: getLatestPrice(loan.pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals),
-          },
-        ]
-      } else {
-        pools[assetId] = [
-          {
-            ...trx,
-            oracleValue: getLatestPrice(loan.pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals),
-          },
-        ]
-      }
-
-      return pools
-    }, {} as Record<string, Array<BorrowerTransaction & { oracleValue: CurrencyBalance | null }>>) || {}
-
-  const currentFaces = Object.entries(poolsByLoanId).reduce((sum, [assetId, transactions]) => {
-    const pricing = loans.find((loan) => loan.id === assetId)?.pricing as ExternalPricingInfo
-
-    const currentFace =
-      transactions.reduce((sum, trx) => {
-        if (trx.type === 'BORROWED') {
-          sum = sum.add(
-            trx.quantity
-              ? new CurrencyBalance(trx.quantity, 18)
-                  .toDecimal()
-                  .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-              : Dec(0)
-          )
-        }
-        if (trx.type === 'REPAID') {
-          sum = sum.sub(
-            trx.quantity
-              ? new CurrencyBalance(trx.quantity, 18)
-                  .toDecimal()
-                  .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-              : Dec(0)
-          )
-        }
-        return sum
-      }, Dec(0)) || Dec(0)
-
-    sum = { ...sum, [assetId]: currentFace }
-
-    return sum
-  }, {} as Record<string, Decimal>)
-
-  const currentValues = Object.entries(currentFaces).reduce((values, [assetId, currentFace]) => {
-    const loan = loans.find((loan) => loan.id === assetId) as ExternalLoan
-    const borrowerAssetTransactions = borrowerTransactions?.filter(
-      (borrowerTransaction) => borrowerTransaction.loanId === `${loan.poolId}-${loan.id}`
-    )
-
-    const latestPrice = getLatestPrice(loan.pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals)
-      ?.toDecimal()
-      .div(100)
-
-    values[assetId] = currentFace.mul(latestPrice || Dec(1))
-    return values
-  }, {} as Record<string, Decimal>)
-
-  return Object.values(currentValues)
-    .reduce((sum, value) => sum.add(value), Dec(0))
+  return loans
+    .reduce((sum, loan) => {
+      if (loan.status !== 'Active') return sum
+      return sum.add((loan as ActiveLoan).presentValue.toDecimal())
+    }, Dec(0))
     .div(loans.filter((loan) => loan.status === 'Active').length)
 }
 

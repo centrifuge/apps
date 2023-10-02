@@ -55,6 +55,8 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
               ? new CurrencyBalance(trx.quantity, 18)
                   .toDecimal()
                   .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+              : trx.amount
+              ? trx.amount.toDecimal()
               : Dec(0)
           )
         }
@@ -64,6 +66,8 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
               ? new CurrencyBalance(trx.quantity, 18)
                   .toDecimal()
                   .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+              : trx.amount
+              ? trx.amount.toDecimal()
               : Dec(0)
           )
         }
@@ -81,6 +85,9 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
   const getStatusText = (type: BorrowerTransactionType) => {
     if (loanType === 'external' && type === 'BORROWED') return 'Purchase'
     if (loanType === 'external' && type === 'REPAID') return 'Sale'
+
+    if (loanType === 'internal' && type === 'BORROWED') return 'Financed'
+    if (loanType === 'internal' && type === 'REPAID') return 'Repaid'
 
     return `${type[0]}${type.slice(1).toLowerCase()}`
   }
