@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { IconChevronDown } from '../..'
+import { IconChevronDown } from '../../icon'
 import { Box } from '../Box'
 import { InputBox } from '../InputBox'
 import { Stack } from '../Stack'
