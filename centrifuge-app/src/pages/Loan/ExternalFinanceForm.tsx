@@ -11,7 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, max, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
 
 type FinanceValues = {
   price: number | '' | Decimal
@@ -74,6 +74,11 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
     },
     validateOnMount: true,
   })
+
+  const currentFace =
+    loan?.pricing && 'outstandingQuantity' in loan.pricing
+      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
+      : null
 
   const repayForm = useFormik<RepayValues>({
     initialValues: {
@@ -212,22 +217,20 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
           <Text variant="heading4">To repay the asset, enter face value and settlement price of the transaction.</Text>
         </Box>
 
-        <Stack>
-          <Shelf justifyContent="space-between">
-            <Text variant="label2">Outstanding</Text>
-            {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="label2">{formatBalance(loan.outstandingDebt, pool.currency.symbol, 2, 2)}</Text>
-          </Shelf>
-        </Stack>
+        {currentFace ? (
+          <Stack>
+            <Shelf justifyContent="space-between">
+              <Text variant="label2">Current face</Text>
+              <Text variant="label2">{formatBalance(currentFace, pool.currency.symbol, 2, 2)}</Text>
+            </Shelf>
+          </Stack>
+        ) : null}
 
         {loan.status !== 'Created' &&
           (debt.gt(0) ? (
             <FormikProvider value={repayForm}>
               <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-                <Field
-                  validate={combine(positiveNumber(), max(debt.toNumber(), 'Amount exceeds outstanding'))}
-                  name="faceValue"
-                >
+                <Field validate={combine(positiveNumber())} name="faceValue">
                   {({ field, meta, form }: FieldProps) => {
                     return (
                       <CurrencyInput
