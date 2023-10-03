@@ -1,6 +1,6 @@
-import { Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, Price } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, Stack } from '@centrifuge/fabric'
+import { Box, Button, Card, CurrencyInput, Flex, IconArrowDown, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -11,17 +11,24 @@ import { usePool } from '../../utils/usePools'
 import { combine, positiveNumber } from '../../utils/validation'
 
 type PriceValues = {
-  price: number | '' | Decimal
+  currentPrice: number | Decimal
+  newPrice: number | ''
 }
 
-export function OraclePriceForm({ loan }: { loan: LoanType }) {
+export function OraclePriceForm({
+  loan,
+  setShowOraclePricing,
+}: {
+  loan: LoanType
+  setShowOraclePricing: (showOraclePricing: boolean) => void
+}) {
   const address = useAddress()
   const canPrice = useCanSetOraclePrice(address)
   const pool = usePool(loan.poolId)
 
   const { execute: doOraclePriceTransaction, isLoading: isOraclePriceLoading } = useCentrifugeTransaction(
     'Set oracle price',
-    (cent) => (args: [price: Rate], options) => {
+    (cent) => (args: [price: Price], options) => {
       const [price] = args
       return cent.getApi().pipe(
         switchMap((api) => {
@@ -37,17 +44,20 @@ export function OraclePriceForm({ loan }: { loan: LoanType }) {
     {
       onSuccess: () => {
         oraclePriceForm.resetForm()
+        setShowOraclePricing(false)
       },
     }
   )
 
   const oraclePriceForm = useFormik<PriceValues>({
     initialValues: {
-      price: '',
+      currentPrice:
+        'oracle' in loan.pricing ? new CurrencyBalance(loan.pricing.oracle.value.toString(), 18).toDecimal() : 0,
+      newPrice: '',
     },
     onSubmit: (values, actions) => {
-      const price = Rate.fromFloat(values.price)
-      doOraclePriceTransaction([price])
+      const newPrice = Price.fromFloat(values.newPrice)
+      doOraclePriceTransaction([newPrice])
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -68,24 +78,45 @@ export function OraclePriceForm({ loan }: { loan: LoanType }) {
   return (
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
+        <Box paddingY={1}>
+          <Text variant="heading4">Update price</Text>
+        </Box>
         <FormikProvider value={oraclePriceForm}>
           <Stack as={Form} gap={2} noValidate ref={priceFormRef}>
-            <Field validate={combine(positiveNumber())} name="price">
+            <Field name="currentPrice">
+              {({ field }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    variant="small"
+                    label="Current price"
+                    disabled
+                    precision={6}
+                    currency={pool.currency.symbol}
+                  />
+                )
+              }}
+            </Field>
+            <Flex justifyContent="center">
+              <IconArrowDown />
+            </Flex>
+            <Field validate={combine(positiveNumber())} name="newPrice">
               {({ field, meta, form }: FieldProps) => {
                 return (
                   <CurrencyInput
                     {...field}
                     variant="small"
-                    label="Price"
+                    label="New price"
                     errorMessage={meta.touched ? meta.error : undefined}
                     disabled={isOraclePriceLoading}
                     currency={pool.currency.symbol}
-                    onChange={(value) => form.setFieldValue('price', value)}
+                    onChange={(value) => form.setFieldValue('newPrice', value)}
                     precision={6}
                   />
                 )
               }}
             </Field>
+            <Text variant="body3">Current exchange rate: 1 USD = 1 {pool.currency.symbol}</Text>
             <Button type="submit" disabled={isOraclePriceLoading} loading={isOraclePriceLoading}>
               Update price
             </Button>
