@@ -1,13 +1,12 @@
 import { IconChevronDown, IconChevronUp, Stack, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-import { SEARCH_KEYS } from './config'
-import { FilterButton } from './styles'
-import { SortBy } from './types'
+import { SEARCH_KEYS } from './PoolFilter/config'
+import { FilterButton } from './PoolFilter/styles'
 
 export type SortButtonProps = {
   label: string
-  searchKey: SortBy
+  searchKey: string
   tooltip?: string
   justifySelf?: 'start' | 'end'
 }

@@ -1,5 +1,5 @@
+import { SortButtonProps } from '../SortButton'
 import { FilterMenuProps } from './FilterMenu'
-import { SortButtonProps } from './SortButton'
 
 export const SEARCH_KEYS = {
   SORT_BY: 'sort-by',

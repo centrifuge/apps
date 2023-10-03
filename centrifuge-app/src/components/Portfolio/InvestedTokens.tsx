@@ -1,89 +1,70 @@
-import { AccountTokenBalance, Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances } from '@centrifuge/centrifuge-react'
+import { useAddress, useBalances } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
-import { useAddress } from '../../utils/useAddress'
-import { usePool } from '../../utils/usePools'
+import { useMemo } from 'react'
+import { useLocation } from 'react-router'
+import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
+import { useTinlakePools } from '../../utils/tinlake/useTinlakePools'
+import { usePools } from '../../utils/usePools'
+import { SortButton } from '../SortButton'
+import { sortTokens } from './sortTokens'
+import { TokenListItem } from './TokenListItem'
 
-const TOKEN_ITEM_COLUMNS = `250px 200px 100px 150px 1FR`
-const TOKEN_ITEM_GAP = 4
+export const InvestedTokens = () => {
+  const { search } = useLocation()
 
-export function InvestedTokens() {
   const address = useAddress()
-  const balances = useBalances(address)
+  const centBalances = useBalances(address)
+  const { data: tinlakeBalances } = useTinlakeBalances()
 
-  return !!balances?.tranches && !!balances?.tranches.length ? (
-    <>
-      <Box as="article">
-        <Text as="h2" variant="heading2">
-          Portfolio Composition
-        </Text>
-      </Box>
-      <Stack gap={1}>
-        <Grid gridTemplateColumns={TOKEN_ITEM_COLUMNS} gap={TOKEN_ITEM_GAP} px={2}>
+  const { data: tinlakePools } = useTinlakePools()
+  const pools = usePools()
+
+  const balances = useMemo(() => {
+    return [
+      ...(centBalances?.tranches || []),
+      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []),
+    ]
+  }, [centBalances, tinlakeBalances])
+
+  const sortedTokens =
+    balances.length && pools && tinlakePools
+      ? sortTokens(
+          balances,
+          {
+            centPools: pools,
+            tinlakePools: tinlakePools.pools,
+          },
+          new URLSearchParams(search)
+        )
+      : []
+
+  return sortedTokens.length ? (
+    <Stack as="article" gap={2}>
+      <Text as="h2" variant="heading2">
+        Portfolio composition
+      </Text>
+
+      <Box overflow="auto">
+        <Grid gridTemplateColumns="150px 150px 150px 150px" gap={3} alignItems="start" px={2}>
           <Text as="span" variant="body3">
             Token
           </Text>
-          <Text as="button" variant="body3">
-            Position
-          </Text>
+
+          <SortButton label="Position" searchKey="position" justifySelf="start" />
+
           <Text as="span" variant="body3">
             Token price
           </Text>
-          <Text as="button" variant="body3">
-            Market value
-          </Text>
+
+          <SortButton label="Market Value" searchKey="market-value" justifySelf="start" />
         </Grid>
 
-        <Stack as="ul" role="list" gap={1}>
-          {balances.tranches.map((tranche, index) => (
-            <Box key={`${tranche.trancheId}${index}`} as="li">
-              <TokenListItem {...tranche} />
-            </Box>
+        <Stack as="ul" role="list" gap={1} py={1}>
+          {balances.map((balance, index) => (
+            <TokenListItem key={index} {...balance} />
           ))}
         </Stack>
-      </Stack>
-    </>
+      </Box>
+    </Stack>
   ) : null
-}
-
-type TokenCardProps = AccountTokenBalance
-export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCardProps) {
-  const pool = usePool(poolId) as Pool
-  const isTinlakePool = poolId?.startsWith('0x')
-
-  if (isTinlakePool) {
-    return null
-  }
-
-  const tranche = pool.tranches.find(({ id }) => id === trancheId)
-
-  return (
-    <Grid
-      gridTemplateColumns={TOKEN_ITEM_COLUMNS}
-      gap={TOKEN_ITEM_GAP}
-      padding={2}
-      borderStyle="solid"
-      borderWidth={1}
-      borderColor="borderSecondary"
-    >
-      <Text as="span" variant="body2">
-        {currency.name}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {formatBalance(balance, tranche?.currency.symbol)}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {tranche?.tokenPrice ? formatBalance(tranche.tokenPrice.toDecimal(), tranche.currency.symbol, 4) : '-'}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {tranche?.tokenPrice
-          ? formatBalance(balance.toDecimal().mul(tranche.tokenPrice.toDecimal()), tranche.currency.symbol, 4)
-          : '-'}
-      </Text>
-    </Grid>
-  )
 }
