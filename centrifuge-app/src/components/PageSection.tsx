@@ -89,7 +89,7 @@ export const PageSection: React.FC<Props> = ({
           {headerRight}
         </Shelf>
       )}
-      <Box pl={[0, 0, 4]}>{collapsible ? <Collapsible open={open}>{children}</Collapsible> : children}</Box>
+      <Box pl={[0, 0, 0]}>{collapsible ? <Collapsible open={open}>{children}</Collapsible> : children}</Box>
     </Stack>
   )
 }

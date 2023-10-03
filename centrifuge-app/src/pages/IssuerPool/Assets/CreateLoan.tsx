@@ -1,4 +1,4 @@
-import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
 import {
   formatBalance,
   Transaction,
@@ -70,6 +70,7 @@ export type CreateLoanFormValues = {
     maxBorrowQuantity: number | ''
     Isin: string
     notional: number | ''
+    maxPriceVariation: number | ''
   }
 }
 
@@ -224,6 +225,7 @@ function IssuerCreateLoan() {
         maxBorrowQuantity: '',
         Isin: '',
         notional: '',
+        maxPriceVariation: '',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -233,12 +235,12 @@ function IssuerCreateLoan() {
         values.pricing.valuationMethod === 'oracle'
           ? {
               valuationMethod: values.pricing.valuationMethod,
+              maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
               maxBorrowAmount: values.pricing.maxBorrowQuantity
-                ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals)
+                ? Price.fromFloat(values.pricing.maxBorrowQuantity)
                 : null,
               Isin: values.pricing.Isin || '',
               maturityDate: new Date(values.pricing.maturityDate),
-              maturityExtensionDays: values.pricing.maturityExtensionDays,
               interestRate: Rate.fromPercent(values.pricing.interestRate),
               notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
             }
@@ -259,7 +261,7 @@ function IssuerCreateLoan() {
 
       const tx: Transaction = {
         id: txId,
-        title: 'Create document',
+        title: 'Create asset',
         status: 'creating',
         args: [],
       }
@@ -325,7 +327,7 @@ function IssuerCreateLoan() {
         doTransaction([submittable], undefined, txId)
       } catch (e) {
         console.error(e)
-        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create document NFT' })
+        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create asset' })
       }
 
       setSubmitting(false)

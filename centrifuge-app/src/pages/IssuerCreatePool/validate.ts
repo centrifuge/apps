@@ -4,12 +4,14 @@ import {
   imageFile,
   integer,
   isin,
+  maturityDate,
   max,
   maxDecimals,
   maxFileSize,
   maxImageSize,
   maxLength,
   mimeType,
+  min,
   minLength,
   nonNegativeNumber,
   pattern,
@@ -49,6 +51,8 @@ export const validate = {
   minInvestment: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   interestRate: combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER)),
   minRiskBuffer: combine(required(), positiveNumber(), max(100)),
+  maxPriceVariation: combine(required(), min(0), max(10000)),
+  maturityDate: combine(required(), maturityDate()),
 
   // risk groups
   groupName: maxLength(30),

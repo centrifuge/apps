@@ -45,3 +45,8 @@ export function millisecondsToDays(milliseconds: number): number {
   const days = milliseconds / (1000 * 60 * 60 * 24)
   return Math.round(days)
 }
+
+export function isValidDate(value: string) {
+  const date = new Date(value)
+  return !isNaN(date.getTime())
+}
