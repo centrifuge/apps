@@ -2505,12 +2505,12 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.loans.activeLoans(poolId),
           api.query.loans.closedLoan.entries(poolId),
           api.query.priceOracle.values.entries(),
-          api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
+          api.query.ormlAssetRegistry.metadata(poolValue.toPrimitive()),
           api.call.loansApi.portfolio(poolId), // TODO: remove loans.activeLoans and use values from this runtime call
         ]).pipe(take(1))
       }),
-      map(([createdLoanValues, activeLoanValues, closedLoanValues, oracles, rawCurrency, rawPortfolio]) => {
-        const currency = rawCurrency.toPrimitive() as AssetCurrencyData
+      map(([createdLoanValues, activeLoanValues, closedLoanValues, oracles, assetMetadata, rawPortfolio]) => {
+        const currency = (assetMetadata.toPrimitive() as { currency: AssetCurrencyData })?.currency || { decimals: 0 }
 
         const oraclePrices: Record<
           string,
