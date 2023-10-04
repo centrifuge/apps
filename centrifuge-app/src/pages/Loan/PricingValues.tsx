@@ -2,14 +2,20 @@ import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { getLatestPrice } from '../../utils/getLatestPrice'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
+import { useBorrowerTransactions } from '../../utils/usePools'
 
 type Props = {
   loan: Loan | TinlakeLoan
   pool: Pool | TinlakePool
 }
 
-export function PricingValues({ loan: { pricing }, pool }: Props) {
+export function PricingValues({ loan, pool }: Props) {
+  const { pricing } = loan
+
+  const borrowerTransactions = useBorrowerTransactions(loan.poolId)
+
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
     (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
@@ -20,18 +26,19 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
 
     const days = getAge(new Date(pricing.oracle.timestamp).toISOString())
 
+    const borrowerAssetTransactions = borrowerTransactions?.filter(
+      (borrowerTransaction) => borrowerTransaction.loanId === `${loan.poolId}-${loan.id}`
+    )
+    const latestPrice = getLatestPrice(pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals)
+
     return (
       <>
         <LabelValueStack label="ISIN" value={pricing.Isin} />
         <LabelValueStack
-          label="Current price"
-          value={`${formatBalance(pricing.oracle.value.toDecimal(), pool.currency.symbol, 6, 2)}`}
+          label={`Latest price${pricing.oracle.value.isZero() && latestPrice ? ' (settlement)' : ''}`}
+          value={latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-'}
         />
         <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
-        <LabelValueStack label="Valuation method" value="Oracle" />
-        {pricing.maxBorrowAmount && (
-          <LabelValueStack label="Max quantity" value={pricing.maxBorrowAmount.toDecimal().toString()} />
-        )}
       </>
     )
   }
@@ -39,7 +46,7 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
   return (
     <>
       {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
-      {pricing.maturityExtensionDays && (
+      {'maturityExtensionDays' in pricing && (
         <LabelValueStack label="Extension period" value={`${pricing.maturityExtensionDays} days`} />
       )}
       {isOutstandingDebtOrDiscountedCashFlow && (
@@ -49,7 +56,7 @@ export function PricingValues({ loan: { pricing }, pool }: Props) {
         />
       )}
       <LabelValueStack
-        label="Financing fee"
+        label="Interest rate"
         value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
       />
       {isOutstandingDebtOrDiscountedCashFlow && pricing.valuationMethod === 'discountedCashFlow' && (

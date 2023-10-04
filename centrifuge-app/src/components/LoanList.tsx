@@ -23,11 +23,10 @@ import { useCentNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
-import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
+import LoanLabel from './LoanLabel'
 
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
-  statusLabel: string
   originationDateSortKey: string
 }
 
@@ -120,7 +119,6 @@ export function LoanList({ loans }: Props) {
 
   const rows: Row[] = loans.map((loan) => {
     return {
-      statusLabel: getLoanLabelStatus(loan)[1],
       nftIdSortKey: loan.asset.nftId,
       idSortKey: parseInt(loan.id, 10),
       outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
@@ -206,6 +204,11 @@ function Amount({ loan }: { loan: Row }) {
   const pool = usePool(loan.poolId)
   const { current } = useAvailableFinancing(loan.poolId, loan.id)
 
+  const currentFace =
+    loan?.pricing && 'outstandingQuantity' in loan.pricing
+      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
+      : null
+
   function getAmount(l: Row) {
     switch (l.status) {
       case 'Closed':
@@ -218,6 +221,10 @@ function Amount({ loan }: { loan: Row }) {
 
         if (l.outstandingDebt.isZero()) {
           return formatBalance(l.totalRepaid, pool?.currency.symbol)
+        }
+
+        if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && currentFace) {
+          return formatBalance(currentFace, pool?.currency.symbol)
         }
 
         return formatBalance(l.outstandingDebt, pool?.currency.symbol)

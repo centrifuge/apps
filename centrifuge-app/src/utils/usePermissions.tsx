@@ -38,7 +38,7 @@ export function usePoolPermissions(poolId?: string) {
 
 export function useUserPermissionsMulti(addresses: string[], options?: { enabled?: boolean }) {
   const [result] = useCentrifugeQuery(
-    ['permissions', ...addresses],
+    ['permissionsMulti', ...addresses],
     (cent) => cent.pools.getUserPermissions([addresses]),
     {
       enabled: !!addresses.length && options?.enabled !== false,
