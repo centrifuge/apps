@@ -12,7 +12,7 @@ import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
-import { useConstants, usePool, usePoolMetadata } from '../../../utils/usePools'
+import { useConstants, usePool, usePoolChanges, usePoolMetadata } from '../../../utils/usePools'
 import { TrancheInput } from '../../IssuerCreatePool/TrancheInput'
 import { validate } from '../../IssuerCreatePool/validate'
 
@@ -25,7 +25,8 @@ export function EpochAndTranches() {
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'], proxyType: ['Borrow'] })
+  const changes = usePoolChanges(poolId)
 
   const columns: Column[] = [
     {
@@ -177,7 +178,7 @@ export function EpochAndTranches() {
       ]
       execute(
         [poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches: hasTrancheChanges ? tranches : undefined }],
-        { account }
+        { account, forceProxyType: 'Borrow' }
       )
       actions.setSubmitting(false)
     },

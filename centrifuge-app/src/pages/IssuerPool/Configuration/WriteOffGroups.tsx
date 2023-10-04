@@ -54,7 +54,7 @@ export function WriteOffGroups() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
   const consts = useConstants()
-  const [account] = useSuitableAccounts({ poolId, poolRole: ['LoanAdmin'] })
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
 
   const savedGroups = useWriteOffGroups(poolId)
   const sortedSavedGroups = [...(savedGroups ?? [])].sort((a, b) => a.overdueDays - b.overdueDays)
@@ -186,6 +186,7 @@ export function WriteOffGroups() {
                     small
                     loading={isLoading || form.isSubmitting}
                     loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
+                    disabled={!account}
                     key="done"
                   >
                     Done
