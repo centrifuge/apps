@@ -15,7 +15,7 @@ import {
 import { useTheme } from 'styled-components'
 import { usePool } from '../../utils/usePools'
 import { Eththumbnail } from '../EthThumbnail'
-import { Ellipsis, Root } from '../ListItemCardStyles'
+import { Root } from '../ListItemCardStyles'
 
 export type TokenCardProps = AccountTokenBalance
 
@@ -40,33 +40,25 @@ export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCar
             )}
           </Eththumbnail>
 
-          <Text as="h2" variant="body2" color="textPrimary">
-            <Ellipsis>{currency.name}</Ellipsis>
+          <Text textOverflow="ellipsis" variant="body2">
+            {currency.name}
           </Text>
         </Grid>
 
-        <Text as="span" variant="body2" color="textPrimary">
-          <Ellipsis>{formatBalance(balance, currency.symbol)}</Ellipsis>
+        <Text textOverflow="ellipsis" variant="body2">
+          {formatBalance(balance, currency.symbol)}
         </Text>
 
-        <Text as="span" variant="body2" color="textPrimary">
-          <Ellipsis>
-            {trancheInfo?.tokenPrice
-              ? formatBalance(trancheInfo.tokenPrice.toDecimal(), trancheInfo.currency.symbol, 4)
-              : '-'}
-          </Ellipsis>
+        <Text textOverflow="ellipsis" variant="body2">
+          {trancheInfo?.tokenPrice
+            ? formatBalance(trancheInfo.tokenPrice.toDecimal(), trancheInfo.currency.symbol, 4)
+            : '-'}
         </Text>
 
-        <Text as="span" variant="body2" color="textPrimary">
-          <Ellipsis>
-            {trancheInfo?.tokenPrice
-              ? formatBalance(
-                  balance.toDecimal().mul(trancheInfo.tokenPrice.toDecimal()),
-                  trancheInfo.currency.symbol,
-                  4
-                )
-              : '-'}
-          </Ellipsis>
+        <Text textOverflow="ellipsis" variant="body2">
+          {trancheInfo?.tokenPrice
+            ? formatBalance(balance.toDecimal().mul(trancheInfo.tokenPrice.toDecimal()), trancheInfo.currency.symbol, 4)
+            : '-'}
         </Text>
 
         <Shelf gap={2} justifySelf="end">
