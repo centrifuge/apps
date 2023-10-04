@@ -9,6 +9,8 @@ import { SortButton } from '../SortButton'
 import { sortTokens } from './sortTokens'
 import { TokenListItem } from './TokenListItem'
 
+export const COLUMN_GAPS = '250px 180px 150px 180px'
+
 export const InvestedTokens = () => {
   const { search } = useLocation()
 
@@ -45,7 +47,7 @@ export const InvestedTokens = () => {
       </Text>
 
       <Box overflow="auto">
-        <Grid gridTemplateColumns="150px 150px 150px 150px" gap={3} alignItems="start" px={2}>
+        <Grid gridTemplateColumns={COLUMN_GAPS} gap={3} alignItems="start" px={2}>
           <Text as="span" variant="body3">
             Token
           </Text>

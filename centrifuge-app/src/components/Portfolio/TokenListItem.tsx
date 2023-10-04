@@ -12,12 +12,17 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { usePool } from '../../utils/usePools'
 import { Eththumbnail } from '../EthThumbnail'
 import { Root } from '../ListItemCardStyles'
+import { COLUMN_GAPS } from './InvestedTokens'
 
 export type TokenCardProps = AccountTokenBalance
+
+const TokenName = styled(Text)`
+  text-wrap: nowrap;
+`
 
 export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCardProps) {
   const { sizes } = useTheme()
@@ -29,8 +34,8 @@ export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCar
   const icon = (trancheInfo?.poolMetadata as PoolMetadata).tranches?.[trancheId].icon?.uri
 
   return (
-    <Root as="article">
-      <Grid gridTemplateColumns="150px 150px 150px 150px 1fr" gap={3} p={2} alignItems="center">
+    <Root as="article" minWidth="1060px">
+      <Grid gridTemplateColumns={`${COLUMN_GAPS} 1fr`} gap={3} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={isTinlakePool}>
             {icon ? (
@@ -40,9 +45,9 @@ export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCar
             )}
           </Eththumbnail>
 
-          <Text textOverflow="ellipsis" variant="body2">
+          <TokenName textOverflow="ellipsis" variant="body2">
             {currency.name}
-          </Text>
+          </TokenName>
         </Grid>
 
         <Text textOverflow="ellipsis" variant="body2">
