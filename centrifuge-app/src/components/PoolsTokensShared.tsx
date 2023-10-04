@@ -29,7 +29,9 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
           <LoadBoundary>
             <CardTotalValueLocked />
           </LoadBoundary>
-          <PortfolioCta />
+          <LoadBoundary>
+            <PortfolioCta />
+          </LoadBoundary>
         </Grid>
 
         <Stack alignItems="end">
