@@ -1,5 +1,5 @@
-import { AccountTokenBalance, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { formatBalance } from '@centrifuge/centrifuge-react'
+import { AccountTokenBalance } from '@centrifuge/centrifuge-js'
+import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -13,7 +13,7 @@ import {
   Thumbnail,
 } from '@centrifuge/fabric'
 import styled, { useTheme } from 'styled-components'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { Eththumbnail } from '../EthThumbnail'
 import { Root } from '../ListItemCardStyles'
 import { COLUMN_GAPS } from './InvestedTokens'
@@ -27,11 +27,13 @@ const TokenName = styled(Text)`
 export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCardProps) {
   const { sizes } = useTheme()
   const pool = usePool(poolId, false)
+  const { data: metadata } = usePoolMetadata(pool)
+  const cent = useCentrifuge()
 
   const isTinlakePool = poolId.startsWith('0x')
 
   const trancheInfo = pool?.tranches.find(({ id }) => id === trancheId)
-  const icon = (trancheInfo?.poolMetadata as PoolMetadata).tranches?.[trancheId].icon?.uri
+  const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
 
   return (
     <Root as="article" minWidth="1060px">
