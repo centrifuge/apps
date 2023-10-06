@@ -25,7 +25,6 @@ export const useSignRemark = (
     {
       txHash: string
       blockNumber: string
-      isEvmOnSubstrate?: boolean
       chainId: Network
     },
     unknown
@@ -52,29 +51,13 @@ export const useSignRemark = (
   const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
     onSuccess: async (_, result) => {
       try {
-        let txHash: string
-        let blockNumber: string
-        // @ts-expect-error
-        if (isEvmOnSubstrate && result?.[0]?.wait) {
-          // @ts-expect-error
-          const evmResult = await result[0].wait()
-          txHash = evmResult?.transactionHash
-          blockNumber = evmResult?.blockNumber.toString()
-        } else {
-          txHash = result.txHash.toHex()
-          // @ts-expect-error
-          blockNumber = result.blockNumber.toString()
-        }
         const chainId = connectedNetwork === 'centrifuge' ? await centrifuge.getChainId() : connectedNetwork
-
         await sendDocumentsToIssuer({
-          txHash,
-          blockNumber,
-          isEvmOnSubstrate,
+          txHash: result.txHash,
+          blockNumber: result.blockNumber.toString(),
           chainId: chainId || 136,
         })
-        setIsSubstrateTxLoading(false)
-      } catch (e) {
+      } finally {
         setIsSubstrateTxLoading(false)
       }
     },
@@ -151,6 +134,7 @@ export const useSignRemark = (
       }
     }
     executePaymentInfo()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [centrifuge, selectedAccount])
 
   const signEvmRemark = async (args: [message: string]) => {
