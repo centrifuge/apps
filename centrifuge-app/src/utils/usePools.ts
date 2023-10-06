@@ -1,7 +1,7 @@
 import Centrifuge, { ActiveLoan, BorrowerTransaction, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
 import { Dec } from './Decimal'
@@ -239,43 +239,73 @@ export function usePoolMetadata(
   return typeof pool?.metadata === 'string' ? data : tinlakeData
 }
 
-export function useConstants() {
-  const centrifuge = useCentrifuge()
-  const { data } = useQuery(
-    ['constants'],
-    async () => {
-      const api = await centrifuge.getApiPromise()
-      return {
-        minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toHuman()),
-        maxTranches: Number(api.consts.poolSystem.maxTranches.toHuman()),
-        challengeTime: Number(api.consts.poolSystem.challengeTime.toHuman()),
-        maxWriteOffPolicySize: Number(api.consts.loans.maxWriteOffPolicySize.toHuman()),
-      }
-    },
-    {
-      staleTime: Infinity,
-    }
-  )
-
-  return data
-}
-
 export function useWriteOffGroups(poolId: string) {
   const [result] = useCentrifugeQuery(['writeOffGroups', poolId], (cent) => cent.pools.getWriteOffPolicy([poolId]))
 
   return result
 }
 
+const POOL_CHANGE_DELAY = 1000 * 60 * 60 * 24 * 7 // Currently hard-coded to 1 week on chain, will probably change to a constant we can query
+
 export function useLoanChanges(poolId: string) {
+  const poolOrders = usePoolOrders(poolId)
+
   const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) => cent.pools.getProposedLoanChanges([poolId]))
 
-  return result
+  const policyChanges = useMemo(() => {
+    const hasLockedRedemptions = (poolOrders?.reduce((acc, cur) => acc + cur.activeRedeem.toFloat(), 0) ?? 0) > 0
+
+    return result
+      ?.filter(({ change }) => !!change.loan?.policy?.length)
+      .map((policy) => {
+        const waitingPeriodDone = new Date(policy.submittedAt).getTime() + POOL_CHANGE_DELAY < Date.now()
+        return {
+          ...policy,
+          status: !waitingPeriodDone
+            ? ('waiting' as const)
+            : hasLockedRedemptions
+            ? ('blocked' as const)
+            : ('ready' as const),
+        }
+      })
+  }, [poolOrders, result])
+
+  return { policyChanges }
 }
 
 export function usePoolChanges(poolId: string) {
+  const pool = usePool(poolId)
+  const poolOrders = usePoolOrders(poolId)
+  const consts = useCentrifugeConsts()
   const [result] = useCentrifugeQuery(['poolChanges', poolId], (cent) => cent.pools.getProposedPoolChanges([poolId]))
 
-  return result
+  return useMemo(
+    () => {
+      if (!result) return result
+      const submittedTime = new Date(result.submittedAt).getTime()
+      const waitingPeriodDone = submittedTime + consts.poolSystem.minUpdateDelay * 1000 < Date.now()
+      const hasLockedRedemptions = (poolOrders?.reduce((acc, cur) => acc + cur.activeRedeem.toFloat(), 0) ?? 0) > 0
+      const isEpochOngoing = pool.epoch.status === 'ongoing'
+      const epochNeedsClosing = submittedTime > new Date(pool.epoch.lastClosed).getTime()
+      return {
+        ...result,
+        status: !waitingPeriodDone
+          ? ('waiting' as const)
+          : hasLockedRedemptions || !isEpochOngoing || epochNeedsClosing
+          ? ('blocked' as const)
+          : ('ready' as const),
+        blockedBy: epochNeedsClosing
+          ? ('epochNeedsClosing' as const)
+          : hasLockedRedemptions
+          ? ('redemptions' as const)
+          : !isEpochOngoing
+          ? ('epochIsClosing' as const)
+          : null,
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [result, poolOrders, pool]
+  )
 }
 
 export function usePodUrl(poolId: string) {

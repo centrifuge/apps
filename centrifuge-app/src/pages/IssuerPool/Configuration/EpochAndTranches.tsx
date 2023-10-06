@@ -1,6 +1,6 @@
 import { CurrencyBalance, Perquintill, PoolMetadata, PoolMetadataInput, Rate } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Grid, NumberInput, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { Button, Grid, NumberInput, Shelf, Stack, StatusChip, Text, Thumbnail } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -12,7 +12,7 @@ import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
-import { useConstants, usePool, usePoolChanges, usePoolMetadata } from '../../../utils/usePools'
+import { usePool, usePoolChanges, usePoolMetadata } from '../../../utils/usePools'
 import { TrancheInput } from '../../IssuerCreatePool/TrancheInput'
 import { validate } from '../../IssuerCreatePool/validate'
 
@@ -27,6 +27,11 @@ export function EpochAndTranches() {
   const { data: metadata } = usePoolMetadata(pool)
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'], proxyType: ['Borrow'] })
   const changes = usePoolChanges(poolId)
+
+  const { execute: executeApply, isLoading: isApplyLoading } = useCentrifugeTransaction(
+    'Apply pool update',
+    (cent) => cent.pools.applyPoolUpdate
+  )
 
   const columns: Column[] = [
     {
@@ -86,7 +91,7 @@ export function EpochAndTranches() {
     [pool, metadata]
   )
 
-  const consts = useConstants()
+  const consts = useCentrifugeConsts()
 
   const epochHours = Math.floor((pool?.parameters.minEpochTime ?? 0) / 3600)
   const epochMinutes = Math.floor(((pool?.parameters.minEpochTime ?? 0) / 60) % 60)
@@ -199,7 +204,7 @@ export function EpochAndTranches() {
 
   const hasChanges = Object.entries(form.values).some(([k, v]) => (initialValues as any)[k] !== v)
 
-  const delay = consts?.minUpdateDelay ? consts.minUpdateDelay / (60 * 60 * 24) : null
+  const delay = consts.poolSystem.minUpdateDelay / (60 * 60 * 24)
 
   const trancheData = [...tranches].reverse()
 
@@ -207,14 +212,15 @@ export function EpochAndTranches() {
     <FormikProvider value={form}>
       <Form>
         <PageSection
-          title="Epoch and tranches"
-          subtitle={
-            delay
-              ? `Changes take ${
-                  delay < 0.5 ? `${Math.ceil(delay / 24)} hours` : `${Math.round(delay)} days`
-                } to take effect`
-              : undefined
+          title={
+            <Shelf gap={1}>
+              Epoch and tranches{' '}
+              {changes && changes.status !== 'ready' && <StatusChip status="info">Pending changes</StatusChip>}
+            </Shelf>
           }
+          subtitle={`Changes take ${
+            delay < 0.5 ? `${Math.ceil(delay / 24)} hour(s)` : `${Math.round(delay)} day(s)`
+          } to take effect`}
           headerRight={
             isEditing ? (
               <ButtonGroup variant="small">
@@ -233,9 +239,22 @@ export function EpochAndTranches() {
                 </Button>
               </ButtonGroup>
             ) : (
-              <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
-                Edit
-              </Button>
+              <ButtonGroup>
+                {changes?.status === 'ready' && (
+                  <Button
+                    small
+                    loading={isApplyLoading}
+                    disabled={!account}
+                    onClick={() => executeApply([poolId], { account })}
+                    key="apply"
+                  >
+                    Apply changes
+                  </Button>
+                )}
+                <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
+                  Edit
+                </Button>
+              </ButtonGroup>
             )
           }
         >

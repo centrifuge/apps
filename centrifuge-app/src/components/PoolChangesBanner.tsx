@@ -6,25 +6,23 @@ import { RouterTextLink } from './TextLink'
 export type PoolChangesBannerProps = {
   poolId: string
 }
-const STORAGE_KEY = 'poolChangesBannerDismissedAt'
+const STORAGE_KEY = 'poolChangesBannerDismissed'
 
 export function PoolChangesBanner({ poolId }: PoolChangesBannerProps) {
-  const changes = usePoolChanges(poolId)
-  const loanChanges = useLoanChanges(poolId)
+  const poolChanges = usePoolChanges(poolId)
+  const { policyChanges } = useLoanChanges(poolId)
   const [isOpen, setIsOpen] = React.useState(false)
 
   React.useEffect(() => {
-    const dismissedAt = new Date(localStorage.getItem(STORAGE_KEY) ?? 0)
-    if (
-      (changes && new Date(changes.submittedAt) > dismissedAt) ||
-      (loanChanges?.length && new Date(loanChanges.at(-1)!.submittedAt) > dismissedAt)
-    ) {
+    const dismissed = !!sessionStorage.getItem(STORAGE_KEY)
+    const hasReady = policyChanges?.some((change) => change.status === 'ready') || poolChanges?.status === 'ready'
+    if (!dismissed && hasReady) {
       setIsOpen(true)
     }
-  }, [changes, loanChanges])
+  }, [poolChanges, policyChanges])
 
   function onClose() {
-    localStorage.setItem(STORAGE_KEY, new Date(Date.now()).toISOString())
+    sessionStorage.setItem(STORAGE_KEY, '1')
     setIsOpen(false)
   }
 
