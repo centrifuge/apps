@@ -218,9 +218,9 @@ export function EpochAndTranches() {
               {changes && changes.status !== 'ready' && <StatusChip status="info">Pending changes</StatusChip>}
             </Shelf>
           }
-          subtitle={`Changes take ${
+          subtitle={`Changes require ${
             delay < 0.5 ? `${Math.ceil(delay / 24)} hour(s)` : `${Math.round(delay)} day(s)`
-          } to take effect`}
+          } and no oustanding redeem orders before they can be enabled`}
           headerRight={
             isEditing ? (
               <ButtonGroup variant="small">
