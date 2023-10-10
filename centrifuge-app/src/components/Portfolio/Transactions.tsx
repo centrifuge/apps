@@ -14,9 +14,12 @@ import {
   IconChevronUp,
   IconExternalLink,
   IconEye,
+  Pagination,
+  PaginationContainer,
   Shelf,
   Stack,
   Text,
+  usePagination,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router-dom'
@@ -42,6 +45,10 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
   const match = useRouteMatch('/history')
   const [sortKey, setSortKey] = React.useState<'date' | 'amount'>('date')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+  const pagination = usePagination({
+    data: transactions?.investorTransactions,
+    pageSize: 10,
+  })
 
   const investorTransactions: TransactionListItemProps[] = React.useMemo(() => {
     const txs =
@@ -64,83 +71,91 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
           } else {
             return 1
           }
-        }) || []
+        })
+        .slice((pagination.page - 1) * pagination.pageSize, pagination.page * pagination.pageSize) || []
     return sortOrder === 'asc' ? txs.reverse() : txs
-  }, [sortKey, transactions, sortOrder])
+  }, [sortKey, transactions, sortOrder, pagination])
 
   return !!investorTransactions.length ? (
-    <Stack as="article" gap={2}>
-      <Text as="h2" variant="heading2">
-        {match ? null : 'Transaction history'}
-      </Text>
+    <PaginationContainer pagination={pagination}>
+      <Stack as="article" gap={2}>
+        <Text as="h2" variant="heading2">
+          {match ? null : 'Transaction history'}
+        </Text>
 
-      <Stack gap={2}>
-        <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
-          <Text variant="body3">Action</Text>
-          <SortButton
-            as="button"
-            onClick={() => {
-              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-              setSortKey('date')
-            }}
-            gap={1}
-          >
-            <Text variant="body3">Transaction date</Text>
-            <Stack as="span" width="1em" style={{ marginTop: '-.3em' }}>
-              <IconChevronUp
-                size="1em"
-                color={sortKey === 'date' && sortOrder === 'asc' ? 'textSelected' : 'textSecondary'}
-              />
-              <IconChevronDown
-                size="1em"
-                color={sortKey === 'date' && sortOrder === 'desc' ? 'textSelected' : 'textSecondary'}
-                style={{ marginTop: '-.4em' }}
-              />
-            </Stack>
-          </SortButton>
+        <Stack gap={2}>
+          <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
+            <Text variant="body3">Action</Text>
+            <SortButton
+              as="button"
+              onClick={() => {
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                setSortKey('date')
+              }}
+              gap={1}
+            >
+              <Text variant="body3">Transaction date</Text>
+              <Stack as="span" width="1em" style={{ marginTop: '-.3em' }}>
+                <IconChevronUp
+                  size="1em"
+                  color={sortKey === 'date' && sortOrder === 'asc' ? 'textSelected' : 'textSecondary'}
+                />
+                <IconChevronDown
+                  size="1em"
+                  color={sortKey === 'date' && sortOrder === 'desc' ? 'textSelected' : 'textSecondary'}
+                  style={{ marginTop: '-.4em' }}
+                />
+              </Stack>
+            </SortButton>
 
-          <Text variant="body3">Token</Text>
+            <Text variant="body3">Token</Text>
 
-          <SortButton
-            as="button"
-            onClick={() => {
-              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-              setSortKey('amount')
-            }}
-            gap={1}
-            justifyContent="flex-end"
-          >
-            <Text variant="body3">Amount</Text>
-            <Stack as="span" width="1em" style={{ marginTop: '-.3em' }}>
-              <IconChevronUp
-                size="1em"
-                color={sortKey === 'amount' && sortOrder === 'asc' ? 'textSelected' : 'textSecondary'}
-              />
-              <IconChevronDown
-                size="1em"
-                color={sortKey === 'amount' && sortOrder === 'desc' ? 'textSelected' : 'textSecondary'}
-                style={{ marginTop: '-.4em' }}
-              />
-            </Stack>
-          </SortButton>
-        </Grid>
+            <SortButton
+              as="button"
+              onClick={() => {
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                setSortKey('amount')
+              }}
+              gap={1}
+              justifyContent="flex-end"
+            >
+              <Text variant="body3">Amount</Text>
+              <Stack as="span" width="1em" style={{ marginTop: '-.3em' }}>
+                <IconChevronUp
+                  size="1em"
+                  color={sortKey === 'amount' && sortOrder === 'asc' ? 'textSelected' : 'textSecondary'}
+                />
+                <IconChevronDown
+                  size="1em"
+                  color={sortKey === 'amount' && sortOrder === 'desc' ? 'textSelected' : 'textSecondary'}
+                  style={{ marginTop: '-.4em' }}
+                />
+              </Stack>
+            </SortButton>
+          </Grid>
 
-        <Stack as="ul" role="list">
-          {investorTransactions.map((transaction, index) => (
-            <Box as="li" key={`${transaction.poolId}${index}`}>
-              <TransactionListItem {...transaction} />
-            </Box>
-          ))}
+          <Stack as="ul" role="list">
+            {investorTransactions.map((transaction, index) => (
+              <Box as="li" key={`${transaction.poolId}${index}`}>
+                <TransactionListItem {...transaction} />
+              </Box>
+            ))}
+          </Stack>
         </Stack>
-      </Stack>
-      <Box>
         {match ? null : (
-          <AnchorButton small variant="tertiary" href="history" icon={IconEye}>
-            View all
-          </AnchorButton>
+          <Box>
+            <AnchorButton small variant="tertiary" href="history" icon={IconEye}>
+              View all
+            </AnchorButton>
+          </Box>
         )}
-      </Box>
-    </Stack>
+        {pagination.pageCount > 1 && (
+          <Shelf>
+            <Pagination />
+          </Shelf>
+        )}
+      </Stack>
+    </PaginationContainer>
   ) : null
 }
 
