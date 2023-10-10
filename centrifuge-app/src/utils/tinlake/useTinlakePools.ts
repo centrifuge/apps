@@ -192,6 +192,7 @@ export function useTinlakeLoans(poolId: string) {
         id: loan.index.toString(),
         originationDate: loan.financingDate ? new Date(Number(loan.financingDate) * 1000).toISOString() : null,
         outstandingDebt: new CurrencyBalance(loan.debt, 18),
+        presentValue: new CurrencyBalance(loan.debt, 18),
         poolId: loan.pool.id,
         pricing: {
           maturityDate: Number(loan.maturityDate) ? new Date(Number(loan.maturityDate) * 1000).toISOString() : null,
