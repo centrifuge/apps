@@ -1,6 +1,6 @@
 {
   "name": "@centrifuge/centrifuge-react",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Centrifuge React Library",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepare": "yarn build",
+    "build:deps": "cd ../centrifuge-js && yarn build && cd ../fabric && yarn build && cd ../centrifuge-react",
+    "prepare": "yarn build:deps && yarn build",
     "bump": "standard-version --sign",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",

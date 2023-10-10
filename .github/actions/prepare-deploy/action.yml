@@ -70,11 +70,6 @@ runs:
           echo "function_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-demo.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=demo" >> $GITHUB_OUTPUT
-        elif ${{ contains(inputs.deploy_to, 'moonbeam-alpha') }}; then
-          # moonbeam-alpha
-          echo "function_name=${{ inputs.app_base_name }}-moonbeam-alpha" >> $GITHUB_OUTPUT
-          echo "front_url=${{ inputs.app_base_name }}-moonbeam-alpha.k-f.dev" >> $GITHUB_OUTPUT
-          echo "env_name=moonbeam-alpha" >> $GITHUB_OUTPUT          
         elif  ${{ github.ref == 'refs/heads/main' }}; then
           # DEV
           echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
