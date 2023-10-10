@@ -86,9 +86,9 @@ type LoanInfoInput =
   | {
       valuationMethod: 'oracle'
       maxBorrowAmount: BN | null
+      maxPriceVariation: BN
       Isin: string
       maturityDate: Date
-      maturityExtensionDays: number
       interestRate: BN
       notional: BN
     }
@@ -127,6 +127,7 @@ export type LoanInfoData = {
           }
           maxBorrowAmount: { noLimit: null } | { quantity: string }
           notional: string
+          maxPriceVariation: string
         }
       }
     | {
@@ -176,6 +177,7 @@ export type ActiveLoanInfoData = {
             }
             maxBorrowAmount: { noLimit: null } | { quantity: string }
             notional: string
+            maxPriceVariation: string
           }
           outstandingQuantity: string
           interest: {
@@ -337,12 +339,6 @@ export enum LoanStatus {
 
 // type LoanStatus = 'Created' | 'Active' | 'Closed'
 
-type InterestAccrual = {
-  interestRatePerSec: string
-  accumulatedRate: string
-  referenceCount: number
-}
-
 // type from chain
 type CreatedLoanData = {
   borrower: string
@@ -389,6 +385,7 @@ export type InternalPricingInfo = {
 export type ExternalPricingInfo = {
   valuationMethod: 'oracle'
   maxBorrowAmount: CurrencyBalance | null
+  maxPriceVariation: Rate
   outstandingQuantity: CurrencyBalance
   Isin: string
   maturityDate: string
@@ -397,6 +394,8 @@ export type ExternalPricingInfo = {
     value: CurrencyBalance
     timestamp: number
   }
+  notional: CurrencyBalance
+  interestRate: Rate
 }
 
 type TinlakePricingInfo = {
@@ -468,6 +467,7 @@ export type ActiveLoan = {
   outstandingDebt: CurrencyBalance
   outstandingPrincipal: CurrencyBalance
   outstandingInterest: CurrencyBalance
+  presentValue: CurrencyBalance
 }
 
 // transformed type for UI
@@ -671,7 +671,7 @@ type InvestorTransaction = {
   transactionFee: CurrencyBalance | null
 }
 
-type BorrowerTransaction = {
+export type BorrowerTransaction = {
   id: string
   timestamp: string
   poolId: string
@@ -680,6 +680,12 @@ type BorrowerTransaction = {
   loanId: string
   type: BorrowerTransactionType
   amount: CurrencyBalance | undefined
+  settlementPrice: string | null
+  quantity: string | null
+}
+
+export type ExternalLoan = Loan & {
+  pricing: ExternalPricingInfo
 }
 
 export type Permissions = {
@@ -1318,7 +1324,7 @@ export function getPoolsModule(inst: Centrifuge) {
         maturity: {
           fixed: {
             date: Math.round(infoInput.maturityDate.getTime() / 1000),
-            extension: infoInput.maturityExtensionDays * SEC_PER_DAY,
+            extension: 'maturityExtensionDays' in infoInput ? infoInput.maturityExtensionDays * SEC_PER_DAY : 0,
           },
         },
         interestPayments: 'None',
@@ -1342,6 +1348,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   infoInput.maxBorrowAmount === null
                     ? { noLimit: null }
                     : { quantity: infoInput.maxBorrowAmount.toString() },
+                maxPriceVariation: infoInput.maxPriceVariation!.toString(),
                 notional: infoInput.notional.toString(),
               },
             }
@@ -1381,23 +1388,17 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function financeExternalLoan(
-    args: [poolId: string, loanId: string, quantity: BN, price: BN, isin: string, aoProxy: string],
+    args: [poolId: string, loanId: string, quantity: BN, price: BN],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, price, isin, aoProxy] = args
+    const [poolId, loanId, quantity, price] = args
     const $api = inst.getApi()
     return $api.pipe(
       switchMap((api) => {
-        const borrowSubmittable = api.tx.proxy.proxy(
-          aoProxy,
-          undefined,
-          api.tx.loans.borrow(poolId, loanId, {
-            external: { quantity: quantity.toString(), settlementPrice: price.toString() },
-          })
-        )
-        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
-        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, borrowSubmittable])
-        return inst.wrapSignAndSend(api, batchSubmittable, options)
+        const borrowSubmittable = api.tx.loans.borrow(poolId, loanId, {
+          external: { quantity: quantity.toString(), settlementPrice: price.toString() },
+        })
+        return inst.wrapSignAndSend(api, borrowSubmittable, options)
       })
     )
   }
@@ -1433,35 +1434,20 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function repayExternalLoanPartially(
-    args: [
-      poolId: string,
-      loanId: string,
-      quantity: BN,
-      interest: BN,
-      unscheduled: BN,
-      price: BN,
-      isin: string,
-      aoProxy: string
-    ],
+    args: [poolId: string, loanId: string, quantity: BN, interest: BN, unscheduled: BN, price: BN],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, interest, unscheduled, price, isin, aoProxy] = args
+    const [poolId, loanId, quantity, interest, unscheduled, price] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const repaySubmittable = api.tx.proxy.proxy(
-          aoProxy,
-          undefined,
-          api.tx.loans.repay(poolId, loanId, {
-            principal: { external: { quantity: quantity.toString(), settlementPrice: price.toString() } },
-            interest: interest.toString(),
-            unscheduled: unscheduled.toString(),
-          })
-        )
-        const oracleFeedSubmittable = api.tx.priceOracle.feedValues([[{ Isin: isin }, price]])
-        const batchSubmittable = api.tx.utility.batchAll([oracleFeedSubmittable, repaySubmittable])
-        return inst.wrapSignAndSend(api, batchSubmittable, options)
+        const repaySubmittable = api.tx.loans.repay(poolId, loanId, {
+          principal: { external: { quantity: quantity.toString(), settlementPrice: price.toString() } },
+          interest: interest.toString(),
+          unscheduled: unscheduled.toString(),
+        })
+        return inst.wrapSignAndSend(api, repaySubmittable, options)
       })
     )
   }
@@ -2154,7 +2140,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
         borrowerTransactions(
           orderBy: TIMESTAMP_ASC,
-          filter: { 
+          filter: {
             poolId: { equalTo: $poolId },
             timestamp: { greaterThan: $from, lessThan: $to },
           }) {
@@ -2164,6 +2150,8 @@ export function getPoolsModule(inst: Centrifuge) {
             type
             timestamp
             amount
+            settlementPrice
+            quantity
           }
         }
       }
@@ -2182,7 +2170,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.borrowerTransactions.nodes.map((tx) => ({
           ...tx,
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
-          timestamp: new Date(tx.timestamp),
+          timestamp: new Date(`${tx.timestamp}+00:00`),
         })) as unknown as BorrowerTransaction[]
       })
     )
@@ -2423,229 +2411,204 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.loans.activeLoans(poolId),
           api.query.loans.closedLoan.entries(poolId),
           api.query.priceOracle.values.entries(),
-          api.query.interestAccrual.rates(),
-          api.query.interestAccrual.lastUpdated(),
           api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
+          api.call.loansApi.portfolio(poolId), // TODO: remove loans.activeLoans and use values from this runtime call
         ]).pipe(take(1))
       }),
-      map(
-        ([
-          createdLoanValues,
-          activeLoanValues,
-          closedLoanValues,
-          oracles,
-          rateValues,
-          interestLastUpdated,
-          rawCurrency,
-        ]) => {
-          const currency = rawCurrency.toPrimitive() as AssetCurrencyData
-          const rates = rateValues.toPrimitive() as InterestAccrual[]
+      map(([createdLoanValues, activeLoanValues, closedLoanValues, oracles, rawCurrency, rawPortfolio]) => {
+        const currency = rawCurrency.toPrimitive() as AssetCurrencyData
 
-          const oraclePrices: Record<
-            string,
-            {
-              timestamp: number
-              value: CurrencyBalance
-            }
-          > = {}
-          oracles.forEach((oracle) => {
-            const { timestamp, value } = oracle[1].toPrimitive() as any
-            oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
-              timestamp,
-              value: new CurrencyBalance(value, currency.decimals),
-            }
-          })
+        const oraclePrices: Record<
+          string,
+          {
+            timestamp: number
+            value: CurrencyBalance
+          }
+        > = {}
+        oracles.forEach((oracle) => {
+          const { timestamp, value } = oracle[1].toPrimitive() as any
+          oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
+            timestamp,
+            value: new CurrencyBalance(value, currency.decimals),
+          }
+        })
 
-          function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
-            const info = 'info' in loan ? loan.info : loan
-            const [collectionId, nftId] = info.collateral
+        const activeLoansPortfolio: Record<
+          string,
+          {
+            presentValue: CurrencyBalance
+            outstandingPrincipal: CurrencyBalance
+            outstandingInterest: CurrencyBalance
+          }
+        > = {}
 
-            // Active loans have additinal info layer
-            const pricingInfo =
-              'info' in loan
-                ? 'external' in loan.info.pricing
-                  ? loan.info.pricing.external
-                  : loan.info.pricing.internal
-                : 'external' in loan.pricing
-                ? loan.pricing.external.info
-                : loan.pricing.internal.info
+        ;(rawPortfolio as any).forEach(([key, value]: [Codec, Codec]) => {
+          const data = value.toPrimitive() as any
+          activeLoansPortfolio[String(key.toPrimitive())] = {
+            presentValue: new CurrencyBalance(data.presentValue, currency.decimals),
+            outstandingPrincipal: new CurrencyBalance(data.outstandingPrincipal, currency.decimals),
+            outstandingInterest: new CurrencyBalance(data.outstandingInterest, currency.decimals),
+          }
+        })
 
-            const interestRate =
-              'info' in loan
-                ? loan.info.interestRate.fixed.ratePerYear
-                : 'external' in loan.pricing
-                ? loan.pricing.external.interest.interestRate.fixed.ratePerYear
-                : loan.pricing.internal.interest.interestRate.fixed.ratePerYear
+        function getSharedLoanInfo(loan: CreatedLoanData | ActiveLoanData | ClosedLoanData) {
+          const info = 'info' in loan ? loan.info : loan
+          const [collectionId, nftId] = info.collateral
 
-            const discount =
-              'valuationMethod' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
-                ? pricingInfo.valuationMethod.discountedCashFlow
-                : undefined
-            return {
-              asset: {
-                collectionId: collectionId.toString(),
-                nftId: nftId.toString(),
-              },
-              pricing:
-                'priceId' in pricingInfo
-                  ? {
-                      valuationMethod: 'oracle' as any,
-                      // If the max borrow quantity is larger than 10k, this is assumed to be "limitless"
-                      // TODO: replace by Option once data structure on chain changes
-                      maxBorrowAmount:
-                        'noLimit' in pricingInfo.maxBorrowAmount
-                          ? null
-                          : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 27),
-                      Isin: pricingInfo.priceId.isin,
-                      maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
-                      maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
-                      oracle: oraclePrices[pricingInfo.priceId.isin] || {
-                        value: new CurrencyBalance(0, currency.decimals),
-                        timestamp: 0,
-                      },
-                      outstandingQuantity:
-                        'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
-                          ? new CurrencyBalance(info.pricing.external.outstandingQuantity, 27) // TODO: Will be 18 after next chain update
-                          : new CurrencyBalance(0, 27),
-                      interestRate: new Rate(interestRate),
-                      notional: new CurrencyBalance(pricingInfo.notional, currency.decimals),
-                    }
-                  : {
-                      valuationMethod: ('outstandingDebt' in pricingInfo.valuationMethod
-                        ? 'outstandingDebt'
-                        : 'discountedCashFlow') as any,
-                      maxBorrowAmount: Object.keys(pricingInfo.maxBorrowAmount)[0] as any,
-                      value: new CurrencyBalance(pricingInfo.collateralValue, currency.decimals),
-                      advanceRate: new Rate(Object.values(pricingInfo.maxBorrowAmount)[0].advanceRate),
-                      probabilityOfDefault: discount?.probabilityOfDefault
-                        ? new Rate(discount.probabilityOfDefault)
-                        : undefined,
-                      lossGivenDefault: discount?.lossGivenDefault ? new Rate(discount.lossGivenDefault) : undefined,
-                      discountRate: discount?.discountRate
-                        ? new Rate(discount.discountRate.fixed.ratePerYear)
-                        : undefined,
-                      interestRate: new Rate(interestRate),
-                      maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
-                      maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
+          // Active loans have additinal info layer
+          const pricingInfo =
+            'info' in loan
+              ? 'external' in loan.info.pricing
+                ? loan.info.pricing.external
+                : loan.info.pricing.internal
+              : 'external' in loan.pricing
+              ? loan.pricing.external.info
+              : loan.pricing.internal.info
+
+          const interestRate =
+            'info' in loan
+              ? loan.info.interestRate.fixed.ratePerYear
+              : 'external' in loan.pricing
+              ? loan.pricing.external.interest.interestRate.fixed.ratePerYear
+              : loan.pricing.internal.interest.interestRate.fixed.ratePerYear
+
+          const discount =
+            'valuationMethod' in pricingInfo && 'discountedCashFlow' in pricingInfo.valuationMethod
+              ? pricingInfo.valuationMethod.discountedCashFlow
+              : undefined
+          return {
+            asset: {
+              collectionId: collectionId.toString(),
+              nftId: nftId.toString(),
+            },
+            pricing:
+              'priceId' in pricingInfo
+                ? {
+                    valuationMethod: 'oracle' as any,
+                    // If the max borrow quantity is larger than 10k, this is assumed to be "limitless"
+                    // TODO: replace by Option once data structure on chain changes
+                    maxBorrowAmount:
+                      'noLimit' in pricingInfo.maxBorrowAmount
+                        ? null
+                        : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 18),
+                    Isin: pricingInfo.priceId.isin,
+                    maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
+                    maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
+                    oracle: oraclePrices[pricingInfo.priceId.isin] || {
+                      value: new CurrencyBalance(0, currency.decimals),
+                      timestamp: 0,
                     },
+                    outstandingQuantity:
+                      'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
+                        ? new CurrencyBalance(info.pricing.external.outstandingQuantity, 18)
+                        : new CurrencyBalance(0, 18),
+                    interestRate: new Rate(interestRate),
+                    notional: new CurrencyBalance(pricingInfo.notional, currency.decimals),
+                    maxPriceVariation: new Rate(pricingInfo.maxPriceVariation),
+                  }
+                : {
+                    valuationMethod: ('outstandingDebt' in pricingInfo.valuationMethod
+                      ? 'outstandingDebt'
+                      : 'discountedCashFlow') as any,
+                    maxBorrowAmount: Object.keys(pricingInfo.maxBorrowAmount)[0] as any,
+                    value: new CurrencyBalance(pricingInfo.collateralValue, currency.decimals),
+                    advanceRate: new Rate(Object.values(pricingInfo.maxBorrowAmount)[0].advanceRate),
+                    probabilityOfDefault: discount?.probabilityOfDefault
+                      ? new Rate(discount.probabilityOfDefault)
+                      : undefined,
+                    lossGivenDefault: discount?.lossGivenDefault ? new Rate(discount.lossGivenDefault) : undefined,
+                    discountRate: discount?.discountRate
+                      ? new Rate(discount.discountRate.fixed.ratePerYear)
+                      : undefined,
+                    interestRate: new Rate(interestRate),
+                    maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
+                    maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
+                  },
+          }
+        }
+
+        const createdLoans: CreatedLoan[] = (createdLoanValues as any[]).map(([key, value]) => {
+          const loan = value.toPrimitive() as unknown as CreatedLoanData
+          const nil = new CurrencyBalance(0, currency.decimals)
+          return {
+            ...getSharedLoanInfo(loan),
+            id: formatLoanKey(key as StorageKey<[u32, u32]>),
+            poolId,
+            status: 'Created',
+            borrower: addressToHex(loan.borrower),
+            totalBorrowed: nil,
+            totalRepaid: nil,
+            outstandingDebt: nil,
+            normalizedDebt: nil,
+          }
+        })
+
+        const activeLoans: ActiveLoan[] = (activeLoanValues.toPrimitive() as any[]).map(
+          ([loanId, loan]: [number, ActiveLoanData]) => {
+            const sharedInfo = getSharedLoanInfo(loan)
+            const portfolio = activeLoansPortfolio[loanId.toString()]
+            const penaltyRate =
+              'external' in loan.pricing
+                ? loan.pricing.external.interest.penalty
+                : loan.pricing.internal.interest.penalty
+            const normalizedDebt =
+              'external' in loan.pricing
+                ? loan.pricing.external.interest.normalizedAcc
+                : loan.pricing.internal.interest.normalizedAcc
+
+            const writeOffStatus = {
+              penaltyInterestRate: new Rate(penaltyRate),
+              percentage: new Rate(loan.writeOffPercentage),
+            }
+
+            const repaidPrincipal = new CurrencyBalance(loan.totalRepaid.principal, currency.decimals)
+            const repaidInterest = new CurrencyBalance(loan.totalRepaid.interest, currency.decimals)
+            const repaidUnscheduled = new CurrencyBalance(loan.totalRepaid.unscheduled, currency.decimals)
+            const outstandingDebt = new CurrencyBalance(
+              portfolio.outstandingInterest.add(portfolio.outstandingPrincipal),
+              currency.decimals
+            )
+            return {
+              ...sharedInfo,
+              id: loanId.toString(),
+              poolId,
+              status: 'Active',
+              borrower: addressToHex(loan.borrower),
+              writeOffStatus: writeOffStatus.percentage.isZero() ? undefined : writeOffStatus,
+              totalBorrowed: new CurrencyBalance(loan.totalBorrowed, currency.decimals),
+              totalRepaid: new CurrencyBalance(
+                repaidPrincipal.add(repaidInterest).add(repaidUnscheduled),
+                currency.decimals
+              ),
+              repaid: {
+                principal: repaidPrincipal,
+                interest: repaidInterest,
+                unscheduled: repaidUnscheduled,
+              },
+              originationDate: new Date(loan.originationDate * 1000).toISOString(),
+              outstandingDebt,
+              normalizedDebt: new CurrencyBalance(normalizedDebt, currency.decimals),
+              outstandingPrincipal: portfolio.outstandingPrincipal,
+              outstandingInterest: portfolio.outstandingInterest,
+              presentValue: portfolio.presentValue,
             }
           }
+        )
 
-          const createdLoans: CreatedLoan[] = (createdLoanValues as any[]).map(([key, value]) => {
-            const loan = value.toPrimitive() as unknown as CreatedLoanData
-            const nil = new CurrencyBalance(0, currency.decimals)
-            return {
-              ...getSharedLoanInfo(loan),
-              id: formatLoanKey(key as StorageKey<[u32, u32]>),
-              poolId,
-              status: 'Created',
-              borrower: addressToHex(loan.borrower),
-              totalBorrowed: nil,
-              totalRepaid: nil,
-              outstandingDebt: nil,
-              normalizedDebt: nil,
-            }
-          })
+        const closedLoans: ClosedLoan[] = (closedLoanValues as any[]).map(([key, value]) => {
+          const loan = value.toPrimitive() as unknown as ClosedLoanData
+          return {
+            ...getSharedLoanInfo(loan),
+            id: formatLoanKey(key as StorageKey<[u32, u32]>),
+            poolId,
+            status: 'Closed',
+            totalBorrowed: new CurrencyBalance(loan.totalBorrowed, currency.decimals),
+            totalRepaid: new CurrencyBalance(loan.totalRepaid, currency.decimals),
+          }
+        })
 
-          const activeLoans: ActiveLoan[] = (activeLoanValues.toPrimitive() as any[]).map(
-            ([loanId, loan]: [number, ActiveLoanData]) => {
-              const sharedInfo = getSharedLoanInfo(loan)
-              const interestData = rates.find(
-                (rate) =>
-                  new Rate(rate.interestRatePerSec).toApr().toDecimalPlaces(4).toString() ===
-                  sharedInfo.pricing.interestRate.toDecimal().toString()
-              )
-              const penaltyRate =
-                'external' in loan.pricing
-                  ? loan.pricing.external.interest.penalty
-                  : loan.pricing.internal.interest.penalty
-              const normalizedDebt =
-                'external' in loan.pricing
-                  ? loan.pricing.external.interest.normalizedAcc
-                  : loan.pricing.internal.interest.normalizedAcc
-
-              const writeOffStatus = {
-                penaltyInterestRate: new Rate(penaltyRate),
-                percentage: new Rate(loan.writeOffPercentage),
-              }
-
-              const repaidPrincipal = new CurrencyBalance(loan.totalRepaid.principal, currency.decimals)
-              const repaidInterest = new CurrencyBalance(loan.totalRepaid.interest, currency.decimals)
-              const repaidUnscheduled = new CurrencyBalance(loan.totalRepaid.unscheduled, currency.decimals)
-              const outstandingDebt = getOutstandingDebt(
-                loan,
-                currency.decimals,
-                interestLastUpdated.toPrimitive() as number,
-                interestData
-              )
-              let outstandingPrincipal: CurrencyBalance
-              let outstandingInterest: CurrencyBalance
-              if ('internal' in loan.pricing) {
-                outstandingPrincipal = new CurrencyBalance(
-                  new BN(loan.totalBorrowed).sub(repaidPrincipal),
-                  currency.decimals
-                )
-                outstandingInterest = new CurrencyBalance(outstandingDebt.sub(outstandingPrincipal), currency.decimals)
-              } else {
-                const quantity = new CurrencyBalance(loan.pricing.external.outstandingQuantity, 27).toDecimal()
-                outstandingPrincipal = CurrencyBalance.fromFloat(
-                  quantity.mul(
-                    new CurrencyBalance(sharedInfo.pricing.oracle?.value ?? new BN(0), currency.decimals).toDecimal()
-                  ),
-                  currency.decimals
-                )
-                outstandingInterest = CurrencyBalance.fromFloat(
-                  outstandingDebt
-                    .toDecimal()
-                    .sub(
-                      quantity.mul(
-                        new CurrencyBalance(loan.pricing.external.info.notional, currency.decimals).toDecimal()
-                      )
-                    ),
-                  currency.decimals
-                )
-              }
-              return {
-                ...sharedInfo,
-                id: loanId.toString(),
-                poolId,
-                status: 'Active',
-                borrower: addressToHex(loan.borrower),
-                writeOffStatus: writeOffStatus.percentage.isZero() ? undefined : writeOffStatus,
-                totalBorrowed: new CurrencyBalance(loan.totalBorrowed, currency.decimals),
-                totalRepaid: new CurrencyBalance(
-                  repaidPrincipal.add(repaidInterest).add(repaidUnscheduled),
-                  currency.decimals
-                ),
-                repaid: {
-                  principal: repaidPrincipal,
-                  interest: repaidInterest,
-                  unscheduled: repaidUnscheduled,
-                },
-                originationDate: new Date(loan.originationDate * 1000).toISOString(),
-                outstandingDebt,
-                normalizedDebt: new CurrencyBalance(normalizedDebt, currency.decimals),
-                outstandingPrincipal,
-                outstandingInterest,
-              }
-            }
-          )
-
-          const closedLoans: ClosedLoan[] = (closedLoanValues as any[]).map(([key, value]) => {
-            const loan = value.toPrimitive() as unknown as ClosedLoanData
-            return {
-              ...getSharedLoanInfo(loan),
-              id: formatLoanKey(key as StorageKey<[u32, u32]>),
-              poolId,
-              status: 'Closed',
-              totalBorrowed: new CurrencyBalance(loan.totalBorrowed, currency.decimals),
-              totalRepaid: new CurrencyBalance(loan.totalRepaid, currency.decimals),
-            }
-          })
-
-          return [...createdLoans, ...activeLoans, ...closedLoans] as Loan[]
-        }
-      ),
+        return [...createdLoans, ...activeLoans, ...closedLoans] as Loan[]
+      }),
       repeatWhen(() => $events)
     )
   }
@@ -2966,30 +2929,6 @@ export function getPoolsModule(inst: Centrifuge) {
 function hexToBN(value: string | number) {
   if (typeof value === 'number') return new BN(value)
   return new BN(value.toString().substring(2), 'hex')
-}
-
-function getOutstandingDebt(
-  loan: ActiveLoanData,
-  currencyDecimals: number,
-  lastUpdated: number,
-  accrual?: InterestAccrual
-) {
-  if (!accrual) return new CurrencyBalance(0, currencyDecimals)
-  const accRate = new Rate(accrual.accumulatedRate).toDecimal()
-  const rate = new Rate(accrual.interestRatePerSec).toDecimal()
-  const balance =
-    'internal' in loan.pricing
-      ? loan.pricing.internal.interest.normalizedAcc
-      : loan.pricing.external.interest.normalizedAcc
-
-  const normalizedDebt = new CurrencyBalance(balance, currencyDecimals).toDecimal()
-  const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
-
-  const debtFromAccRate = normalizedDebt.mul(accRate)
-  const debtSinceUpdated = normalizedDebt.mul(rate.minus(1).mul(secondsSinceUpdated))
-  const debt = debtFromAccRate.add(debtSinceUpdated)
-
-  return CurrencyBalance.fromFloat(debt, currencyDecimals)
 }
 
 function getEpochStatus(epochExecution: Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>, blockNumber: number) {

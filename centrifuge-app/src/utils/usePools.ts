@@ -1,9 +1,18 @@
-import Centrifuge, { InvestorTransactionType, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, {
+  BorrowerTransactionType,
+  InvestorTransactionType,
+  Loan,
+  Pool,
+  PoolMetadata,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import BN from 'bn.js'
 import { useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
+import { Dec } from './Decimal'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
+import { useLoan, useLoans } from './useLoans'
 import { useMetadata } from './useMetadata'
 
 export function usePools(suspense = true) {
@@ -79,6 +88,45 @@ export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) 
     (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
     {
       suspense: true,
+      enabled: !poolId.startsWith('0x'),
+    }
+  )
+
+  return result
+}
+
+export function useAverageAmount(poolId: string) {
+  const pool = usePool(poolId)
+  const loans = useLoans(poolId)
+
+  if (!loans?.length || !pool) return new BN(0)
+
+  return (loans as Loan[])
+    .reduce((sum, loan) => {
+      if (loan.status !== 'Active') return sum
+      return sum.add(loan.presentValue.toDecimal())
+    }, Dec(0))
+    .div(loans.filter((loan) => loan.status === 'Active').length)
+}
+
+export function useBorrowerAssetTransactions(poolId: string, assetId: string, from?: Date, to?: Date) {
+  const pool = usePool(poolId)
+  const loan = useLoan(poolId, assetId)
+
+  const [result] = useCentrifugeQuery(
+    ['borrowerAssetTransactions', poolId, assetId, from, to],
+    (cent) => {
+      const borrowerTransactions = cent.pools.getBorrowerTransactions([poolId, from, to])
+
+      return borrowerTransactions.pipe(
+        map((transactions: BorrowerTransactionType[]) =>
+          transactions.filter((transaction) => transaction.loanId.split('-')[1] === assetId)
+        )
+      )
+    },
+    {
+      suspense: true,
+      enabled: !!pool && !poolId.startsWith('0x') && !!loan,
     }
   )
 

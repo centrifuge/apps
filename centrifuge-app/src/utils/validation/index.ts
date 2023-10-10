@@ -1,5 +1,9 @@
+import { CurrencyBalance, ExternalPricingInfo } from '@centrifuge/centrifuge-js'
 import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
+import { daysBetween } from '../date'
+import { Dec } from '../Decimal'
+import { formatPercentage } from '../formatting'
 import { getImageDimensions } from '../getImageDimensions'
 
 const MB = 1024 ** 2
@@ -28,6 +32,32 @@ export const nonNegativeNumber = (err?: CustomError) => (val?: any) => {
 export const positiveNumber = (err?: CustomError) => (val?: any) => {
   const num = val instanceof Decimal ? val.toNumber() : val
   return Number.isFinite(num) && num > 0 ? '' : getError(`Value must be positive`, err, num)
+}
+
+export const settlementPrice = (err?: CustomError) => (val?: any) => {
+  if (val < 1) {
+    return getError('Value must be equal to or larger than 1', err, val)
+  }
+
+  const regex = new RegExp(/^\d{1,3}(?:\.\d{1,6})?$/)
+  return regex.test(val) ? '' : getError('Value must be in the format of (1-3).(0-6) digits', err, val)
+}
+
+export const maxPriceVariance = (pricing: ExternalPricingInfo, err?: CustomError) => (val?: any) => {
+  if (pricing.oracle.value.isZero()) return ''
+
+  const maxVariation = new CurrencyBalance(pricing.oracle.value, 18)
+    .toDecimal()
+    .mul(pricing.maxPriceVariation.toDecimal())
+
+  if (
+    Dec(val).gt(new CurrencyBalance(pricing.oracle.value, 18).toDecimal().add(maxVariation)) ||
+    Dec(val).lt(new CurrencyBalance(pricing.oracle.value, 18).toDecimal().sub(maxVariation))
+  ) {
+    return `Settlement price exceeds max price variation of ${formatPercentage(pricing.maxPriceVariation.toPercent())}`
+  }
+
+  return ''
 }
 
 export const maxDecimals = (decimals: number, err?: CustomError) => (val?: any) => {
@@ -128,11 +158,28 @@ export const isin = (err?: CustomError) => (val?: any) => {
     /(AD|AE|AF|AG|AI|AL|AM|AO|AQ|AR|AS|AT|AU|AW|AX|AZ|BA|BB|BD|BE|BF|BG|BH|BI|BJ|BL|BM|BN|BO|BQ|BR|BS|BT|BV|BW|BY|BZ|CA|CC|CD|CF|CG|CH|CI|CK|CL|CM|CN|CO|CR|CU|CV|CW|CX|CY|CZ|DE|DJ|DK|DM|DO|DZ|EC|EE|EG|EH|ER|ES|ET|FI|FJ|FK|FM|FO|FR|GA|GB|GD|GE|GF|GG|GH|GI|GL|GM|GN|GP|GQ|GR|GS|GT|GU|GW|GY|HK|HM|HN|HR|HT|HU|ID|IE|IL|IM|IN|IO|IQ|IR|IS|IT|JE|JM|JO|JP|KE|KG|KH|KI|KM|KN|KP|KR|KW|KY|KZ|LA|LB|LC|LI|LK|LR|LS|LT|LU|LV|LY|MA|MC|MD|ME|MF|MG|MH|MK|ML|MM|MN|MO|MP|MQ|MR|MS|MT|MU|MV|MW|MX|MY|MZ|NA|NC|NE|NF|NG|NI|NL|NO|NP|NR|NU|NZ|OM|PA|PE|PF|PG|PH|PK|PL|PM|PN|PR|PS|PT|PW|PY|QA|RE|RO|RS|RU|RW|SA|SB|SC|SD|SE|SG|SH|SI|SJ|SK|SL|SM|SN|SO|SR|SS|ST|SV|SX|SY|SZ|TC|TD|TF|TG|TH|TJ|TK|TL|TM|TN|TO|TR|TT|TV|TW|TZ|UA|UG|UM|US|UY|UZ|VA|VC|VE|VG|VI|VN|VU|WF|WS|YE|YT|ZA|ZM|ZW)([0-9A-Z]{9})([0-9])/gm
 
   const match = regex.exec(val.toString())
-  console.log(match)
   if (match?.length !== 4) return getError(`Not a valid ISIN`, err, val)
 
   // validate the check digit
   return match[3] === calcISINCheck(match[1] + match[2]).toString() ? '' : getError(`Not a valid ISIN`, err, val)
+}
+
+export const maturityDate = (err?: CustomError) => (val?: any) => {
+  const date = new Date(val)
+
+  const isOneDayFromNow = daysBetween(date, new Date(Date.now() + 24 * 60 * 60 * 1000)) > 0
+
+  if (isOneDayFromNow) {
+    return getError(`Must be at least one day from now`, err, val)
+  }
+
+  const isWithinFiveYearsFromNow = daysBetween(date, new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000)) < 0
+
+  if (isWithinFiveYearsFromNow) {
+    return getError(`Must be within 5 years from now`, err, val)
+  }
+
+  return ''
 }
 
 /**

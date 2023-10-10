@@ -1,6 +1,4 @@
 import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
-import { combineLatest } from 'rxjs'
-import { map } from 'rxjs/operators'
 import { Dec } from './Decimal'
 import { useTinlakeLoans } from './tinlake/useTinlakePools'
 
@@ -14,19 +12,6 @@ export function useLoans(poolId: string) {
   const { data: tinlakeLoans } = useTinlakeLoans(poolId)
 
   return isTinlakePool ? tinlakeLoans : centLoans
-}
-
-export function useLoansAcrossPools(poolIds?: string[]) {
-  const [result] = useCentrifugeQuery(
-    ['loansAcrossPools', poolIds],
-    (cent) => combineLatest(poolIds!.map((poolId) => cent.pools.getLoans([poolId]))).pipe(map((loans) => loans.flat())),
-    {
-      suspense: true,
-      enabled: poolIds && poolIds.length > 0,
-    }
-  )
-
-  return result
 }
 
 export function useLoan(poolId: string, assetId: string) {

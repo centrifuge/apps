@@ -20,7 +20,7 @@ const headers = [
   'Total repaid',
   'Financing date',
   'Maturity date',
-  'Financing fee',
+  'Interest rate',
   'Advance rate',
   'PD',
   'LGD',

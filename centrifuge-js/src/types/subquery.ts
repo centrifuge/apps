@@ -80,6 +80,8 @@ export type SubqueryBorrowerTransaction = {
   loanId: string
   type: BorrowerTransactionType
   amount?: number | null
+  settlementPrice: string | null
+  quantity: string | null
 }
 
 export type SubqueryOutstandingOrder = {
