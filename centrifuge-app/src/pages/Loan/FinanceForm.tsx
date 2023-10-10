@@ -1,4 +1,4 @@
-import { ActiveLoan, CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -24,7 +24,7 @@ type RepayValues = {
 
 export const FinanceForm = ({ loan }: { loan: LoanType }) => {
   const isExternalAsset = 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-  return isExternalAsset ? <ExternalFinanceForm loan={loan} /> : <InternalFinanceForm loan={loan} />
+  return isExternalAsset ? <ExternalFinanceForm loan={loan as ExternalLoan} /> : <InternalFinanceForm loan={loan} />
 }
 
 function InternalFinanceForm({ loan }: { loan: LoanType }) {

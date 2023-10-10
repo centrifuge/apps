@@ -1,4 +1,4 @@
-import Centrifuge, { ActiveLoan, BorrowerTransaction, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { BorrowerTransaction, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useEffect } from 'react'
@@ -95,10 +95,10 @@ export function useAverageAmount(poolId: string) {
 
   if (!loans?.length || !pool) return new BN(0)
 
-  return loans
+  return (loans as Loan[])
     .reduce((sum, loan) => {
       if (loan.status !== 'Active') return sum
-      return sum.add((loan as ActiveLoan).presentValue.toDecimal())
+      return sum.add(loan.presentValue.toDecimal())
     }, Dec(0))
     .div(loans.filter((loan) => loan.status === 'Active').length)
 }
