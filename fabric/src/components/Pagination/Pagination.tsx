@@ -105,7 +105,12 @@ export function Pagination({ pagination }: { pagination?: PaginationState }) {
         </Text>
       )}
       {pages.map((n) => (
-        <StyledButton onClick={() => goToPage(n)} $active={page === n} aria-label={`Go to page ${n}`}>
+        <StyledButton
+          key={`pagr-nr-${n}`}
+          onClick={() => goToPage(n)}
+          $active={page === n}
+          aria-label={`Go to page ${n}`}
+        >
           <Text variant="interactive1" color="inherit">
             {n}
           </Text>
