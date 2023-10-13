@@ -1,8 +1,8 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, forkJoin, from, Observable, of, startWith } from 'rxjs'
-import { combineLatestWith, filter, map, mergeMap, repeatWhen, switchMap, take, toArray } from 'rxjs/operators'
+import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
+import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -2032,31 +2032,30 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $query.pipe(
       switchMap((data) => {
-        const $investorTransactions = from(data?.investorTransactions.nodes || []).pipe(
-          mergeMap((entry) => {
-            return getPoolCurrency([entry.poolId]).pipe(
-              map((poolCurrency) => ({
-                ...entry,
-                tokenAmount: new TokenBalance(entry.tokenAmount || 0, poolCurrency.decimals),
-                tokenPrice: new Price(entry.tokenPrice || 0),
-                currencyAmount: new CurrencyBalance(entry.currencyAmount || 0, poolCurrency.decimals),
-                trancheId: entry.trancheId.split('-')[1],
-              }))
-            )
-          }),
-          toArray()
-        )
-
-        return forkJoin([$investorTransactions]).pipe(
-          map(([investorTransactions]) => {
-            return {
-              investorTransactions: investorTransactions
-                .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
-                .slice(0, count || investorTransactions.length),
-            }
+        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId)) ?? []
+        const $poolCurrencies = Array.from(poolIds).map((poolId) => getPoolCurrency([poolId]))
+        return combineLatest([$query, ...$poolCurrencies]).pipe(
+          map(([data, ...currencies]) => {
+            return data?.investorTransactions.nodes.map((tx) => {
+              const currencyIndex = Array.from(poolIds).indexOf(tx.poolId)
+              const poolCurrency = currencies[currencyIndex]
+              return {
+                ...tx,
+                tokenAmount: new TokenBalance(tx.tokenAmount || 0, poolCurrency.decimals),
+                tokenPrice: new Price(tx.tokenPrice || 0),
+                currencyAmount: new CurrencyBalance(tx.currencyAmount || 0, poolCurrency.decimals),
+                trancheId: tx.trancheId.split('-')[1],
+              }
+            })
           })
         )
-      })
+      }),
+      map((investorTransactions) => ({
+        investorTransactions:
+          investorTransactions
+            ?.filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
+            .slice(0, count || investorTransactions.length) ?? [],
+      }))
     )
   }
 
