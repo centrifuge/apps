@@ -106,7 +106,7 @@ export function useAverageAmount(poolId: string) {
       if (loan.status !== 'Active') return sum
       return sum.add(loan.presentValue.toDecimal())
     }, Dec(0))
-    .div(loans.filter((loan) => loan.status === 'Active').length)
+    .div((loans as Loan[]).filter((loan) => loan.status === 'Active').length)
 }
 
 export function useBorrowerAssetTransactions(poolId: string, assetId: string, from?: Date, to?: Date) {
