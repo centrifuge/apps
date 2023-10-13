@@ -178,14 +178,16 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
               <Pagination />
             </Shelf>
           )}
-          <AnchorButton
-            small
-            variant="secondary"
-            href={getCSVDownloadUrl(csvData)}
-            download={`transaction-history-${address}.csv`}
-          >
-            Export as CSV
-          </AnchorButton>
+          {!match ? null : (
+            <AnchorButton
+              small
+              variant="secondary"
+              href={getCSVDownloadUrl(csvData)}
+              download={`transaction-history-${address}.csv`}
+            >
+              Export as CSV
+            </AnchorButton>
+          )}
         </Shelf>
       </Stack>
     </PaginationContainer>
