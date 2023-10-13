@@ -26,8 +26,9 @@ import { useRouteMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
+import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAddress } from '../../utils/useAddress'
-import { usePool, usePoolMetadata, useTransactionsByAddress } from '../../utils/usePools'
+import { usePool, usePoolMetadata, usePools, useTransactionsByAddress } from '../../utils/usePools'
 import { TransactionTypeChip } from './TransactionTypeChip'
 
 export const TRANSACTION_CARD_COLUMNS = `150px 125px 200px 150px 1fr`
@@ -49,6 +50,7 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
     data: transactions?.investorTransactions,
     pageSize: 10,
   })
+  const pools = usePools()
 
   const investorTransactions: TransactionListItemProps[] = React.useMemo(() => {
     const txs =
@@ -71,12 +73,33 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
           } else {
             return 1
           }
-        })
-        .slice((pagination.page - 1) * pagination.pageSize, pagination.page * pagination.pageSize) || []
+        }) || []
     return sortOrder === 'asc' ? txs.reverse() : txs
   }, [sortKey, transactions, sortOrder, pagination])
 
-  return !!investorTransactions.length ? (
+  const paginatedInvestorTransactions = React.useMemo(() => {
+    return investorTransactions.slice(
+      (pagination.page - 1) * pagination.pageSize,
+      pagination.page * pagination.pageSize
+    )
+  }, [investorTransactions, pagination])
+
+  const csvData: any = React.useMemo(() => {
+    if (!investorTransactions || !investorTransactions?.length) {
+      return undefined
+    }
+    return investorTransactions.map((entry) => {
+      const pool = pools?.find((pool) => pool.id === entry.poolId)
+      return {
+        'Transaction date': `"${formatDate(entry.date)}"`,
+        Action: entry.type,
+        Token: pool ? pool.tranches.find(({ id }) => id === entry.trancheId)?.currency.name : undefined,
+        Amount: pool ? `"${formatBalance(entry.amount.toDecimal(), pool.currency.symbol)}"` : undefined,
+      }
+    })
+  }, [investorTransactions])
+
+  return !!paginatedInvestorTransactions.length ? (
     <PaginationContainer pagination={pagination}>
       <Stack as="article" gap={2}>
         <Text as="h2" variant="heading2">
@@ -135,7 +158,7 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
           </Grid>
 
           <Stack as="ul" role="list">
-            {investorTransactions.map((transaction, index) => (
+            {paginatedInvestorTransactions.map((transaction, index) => (
               <Box as="li" key={`${transaction.poolId}${index}`}>
                 <TransactionListItem {...transaction} />
               </Box>
@@ -149,11 +172,21 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
             </AnchorButton>
           </Box>
         )}
-        {pagination.pageCount > 1 && (
-          <Shelf>
-            <Pagination />
-          </Shelf>
-        )}
+        <Shelf justifyContent="space-between">
+          {pagination.pageCount > 1 && (
+            <Shelf>
+              <Pagination />
+            </Shelf>
+          )}
+          <AnchorButton
+            small
+            variant="secondary"
+            href={getCSVDownloadUrl(csvData)}
+            download={`transaction-history-${address}.csv`}
+          >
+            Export as CSV
+          </AnchorButton>
+        </Shelf>
       </Stack>
     </PaginationContainer>
   ) : null
@@ -173,64 +206,66 @@ export function TransactionListItem({ date, type, amount, poolId, hash, trancheI
   const { data } = usePoolMetadata(pool)
   const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
   const subScanUrl = import.meta.env.REACT_APP_SUBSCAN_URL
+  console.log('🚀 ~ subScanUrl:', subScanUrl)
 
   if (!pool || !data) {
     return null
   }
 
-  return (
-    <Grid
-      gridTemplateColumns={TRANSACTION_CARD_COLUMNS}
-      gap={TRANSACTION_CARD_GAP}
-      alignItems="start"
-      py={1}
-      borderBottomWidth={1}
-      borderBottomColor="borderPrimary"
-      borderBottomStyle="solid"
+  return !!subScanUrl && !!hash ? (
+    <Box
+      as="a"
+      href={`${subScanUrl}/extrinsic/${hash}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Transaction on Subscan.io"
     >
-      <Box>
-        <TransactionTypeChip type={type} />
-      </Box>
-
-      <Text as="time" variant="interactive2" datetime={date}>
-        {formatDate(date, {
-          day: '2-digit',
-          month: '2-digit',
-          year: '2-digit',
-        })}
-      </Text>
-
-      <Stack gap={1}>
-        <Text as="span" variant="interactive2">
-          {!!token ? token?.currency?.name.split(`${data?.pool?.name} ` || '').at(-1) : data.pool?.name}
-        </Text>
-        {!!token && (
-          <Text as="span" variant="interactive2" color="textDisabled">
-            {data?.pool?.name}
-          </Text>
-        )}
-      </Stack>
-
-      <Box justifySelf="end">
-        <Text as="span" variant="interactive2">
-          {formatBalance(amount.toDecimal(), pool.currency.symbol)}
-        </Text>
-      </Box>
-
-      {!!subScanUrl && !!hash && (
-        <Box
-          as="a"
-          href={`${subScanUrl}/extrinsic/${hash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          justifySelf="end"
-          aria-label="Transaction on Subscan.io"
-        >
-          <IconExternalLink size="iconSmall" color="textPrimary" />
+      <Grid
+        gridTemplateColumns={TRANSACTION_CARD_COLUMNS}
+        gap={TRANSACTION_CARD_GAP}
+        alignItems="start"
+        py={1}
+        borderBottomWidth={1}
+        borderBottomColor="borderPrimary"
+        borderBottomStyle="solid"
+      >
+        <Box>
+          <TransactionTypeChip type={type} />
         </Box>
-      )}
-    </Grid>
-  )
+
+        <Text as="time" variant="interactive2" datetime={date}>
+          {formatDate(date, {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+          })}
+        </Text>
+
+        <Stack gap={1}>
+          <Text as="span" variant="interactive2">
+            {!!token ? token?.currency?.name.split(`${data?.pool?.name} ` || '').at(-1) : data.pool?.name}
+          </Text>
+          {!!token && (
+            <Text as="span" variant="interactive2" color="textDisabled">
+              {data?.pool?.name}
+            </Text>
+          )}
+        </Stack>
+
+        <Box justifySelf="end">
+          <Text as="span" variant="interactive2">
+            {formatBalance(amount.toDecimal(), pool.currency.symbol)}
+          </Text>
+        </Box>
+
+        {!!subScanUrl && !!hash && (
+          <Box justifySelf="end">
+            <IconExternalLink size="iconSmall" color="textPrimary" />
+          </Box>
+        )}
+      </Grid>
+    </Box>
+  ) : null
 }
 
 const SortButton = styled(Shelf)`
