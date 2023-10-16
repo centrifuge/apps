@@ -11,7 +11,12 @@ export function getProxiesModule(inst: CentrifugeBase) {
     const $api = inst.getApi()
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        const event = events.find(({ event }) => api.events.proxy.PureCreated.is(event))
+        const event = events.find(
+          ({ event }) =>
+            api.events.proxy.PureCreated.is(event) ||
+            api.events.proxy.PureAdded.is(event) ||
+            api.events.proxy.PureRemoved.is(event)
+        )
         return !!event
       })
     )
