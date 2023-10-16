@@ -1,5 +1,5 @@
 import Centrifuge, {
-  BorrowerTransactionType,
+  BorrowerTransaction,
   InvestorTransactionType,
   Loan,
   Pool,
@@ -119,7 +119,7 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
       const borrowerTransactions = cent.pools.getBorrowerTransactions([poolId, from, to])
 
       return borrowerTransactions.pipe(
-        map((transactions: BorrowerTransactionType[]) =>
+        map((transactions: BorrowerTransaction[]) =>
           transactions.filter((transaction) => transaction.loanId.split('-')[1] === assetId)
         )
       )

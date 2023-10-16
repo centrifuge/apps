@@ -208,7 +208,6 @@ export function TransactionListItem({ date, type, amount, poolId, hash, trancheI
   const { data } = usePoolMetadata(pool)
   const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
   const subScanUrl = import.meta.env.REACT_APP_SUBSCAN_URL
-  console.log('🚀 ~ subScanUrl:', subScanUrl)
 
   if (!pool || !data) {
     return null

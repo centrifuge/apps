@@ -1,13 +1,13 @@
 import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
 import * as React from 'react'
-import { TransactionCardProps } from './Transactions'
+import { TransactionListItemProps } from './Transactions'
 
 type TransactionTypeProps = {
-  type: TransactionCardProps['type']
+  type: TransactionListItemProps['type']
 }
 
 const states: {
-  [Key in TransactionCardProps['type']]: {
+  [Key in TransactionListItemProps['type']]: {
     label: string
     status: StatusChipProps['status']
   }
