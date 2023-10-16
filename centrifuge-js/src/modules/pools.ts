@@ -2901,7 +2901,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const update = updateData.toPrimitive() as any
         if (!update?.changes) return null
         const { changes, submittedAt } = update
-        console.log('update', update)
+        
         return {
           changes: {
             tranches: changes.tranches.noChange === null ? null : changes.tranches.newValue,
