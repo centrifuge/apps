@@ -8,6 +8,7 @@ import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom, map, switchMap } from 'rxjs'
 import { ReplacedError, useAsyncCallback } from '../../hooks/useAsyncCallback'
+import { useCentrifugeQuery } from '../../hooks/useCentrifugeQuery'
 import { useCentrifuge, useCentrifugeApi, useCentrifugeConsts } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
 import { EvmConnectorMeta, getEvmConnectors } from './evm/connectors'
@@ -191,19 +192,6 @@ export function WalletProvider({
     },
     []
   )
-
-  /*
-  ['allProxies'],
-    () =>
-      firstValueFrom(cent.proxies.getAllProxies()).then((proxies) => {
-        return Object.fromEntries(
-          Object.entries(proxies).map(([delegatee, ps]) => [
-            utils.formatAddress(delegatee),
-            ps.map((p) => ({ ...p, delegator: utils.formatAddress(p.delegator) })),
-          ])
-        )
-      }),
-      */
   const evmSubstrateAccounts = isEvmOnSubstrate
     ? state.evm.accounts?.map((addr) => ({
         address: evmToSubstrateAddress(addr, centEvmChainId!),
@@ -211,36 +199,39 @@ export function WalletProvider({
         wallet: state.evm.selectedWallet as any,
       }))
     : null
-  const { data: proxies, isLoading: proxiesAreLoading } = useQuery(
-    [
-      'proxies',
-      state.substrate.accounts?.map((acc) => acc.address),
-      state.substrate.multisigs.map((m) => m.address),
-      evmSubstrateAccounts?.map((acc) => acc.address),
-    ],
-    () =>
-      firstValueFrom(
-        cent.proxies.getMultiUserProxies([
-          (state.substrate.accounts || [])
-            .map((acc) => acc.address)
-            .concat(state.substrate.multisigs.map((m) => m.address))
-            .concat(evmSubstrateAccounts?.map((acc) => acc.address) || []),
-        ])
-      ),
-    {
-      staleTime: Infinity,
-    }
-  )
 
-  const delegatees = [...new Set(Object.values(proxies ?? {})?.flatMap((p) => p.map((d) => d.delegator)))]
-  const { data: nestedProxies, isLoading: nestedProxiesAreLoading } = useQuery(
-    ['nestedProxies', delegatees],
-    () => firstValueFrom(cent.proxies.getMultiUserProxies([delegatees])),
-    {
-      enabled: !!Object.keys(proxies ?? {})?.length,
-      staleTime: Infinity,
-    }
-  )
+  // const { data: proxies, isLoading: proxiesAreLoading } = useQuery(
+  //   [
+  //     'proxies',
+  //     state.substrate.accounts?.map((acc) => acc.address),
+  //     state.substrate.multisigs.map((m) => m.address),
+  //     evmSubstrateAccounts?.map((acc) => acc.address),
+  //   ],
+  //   () =>
+  //     firstValueFrom(
+  //       cent.proxies.getMultiUserProxies([
+  //         (state.substrate.accounts || [])
+  //           .map((acc) => acc.address)
+  //           .concat(state.substrate.multisigs.map((m) => m.address))
+  //           .concat(evmSubstrateAccounts?.map((acc) => acc.address) || []),
+  //       ])
+  //     ),
+  //   {
+  //     staleTime: Infinity,
+  //   }
+  // )
+
+  // const delegatees = [...new Set(Object.values(proxies ?? {})?.flatMap((p) => p.map((d) => d.delegator)))]
+  // const { data: nestedProxies, isLoading: nestedProxiesAreLoading } = useQuery(
+  //   ['nestedProxies', delegatees],
+  //   () => firstValueFrom(cent.proxies.getMultiUserProxies([delegatees])),
+  //   {
+  //     enabled: !!Object.keys(proxies ?? {})?.length,
+  //     staleTime: Infinity,
+  //   }
+  // )
+
+  const [proxies] = useCentrifugeQuery(['allProxies'], (cent) => cent.proxies.getAllProxies())
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {
     const mappedAccounts = accounts
@@ -369,7 +360,9 @@ export function WalletProvider({
   const [scopedNetworks, setScopedNetworks] = React.useState<WalletContextType['scopedNetworks']>(null)
 
   const ctx: WalletContextType = React.useMemo(() => {
-    const combinedProxies = { ...proxies, ...nestedProxies }
+    const combinedProxies = {
+      ...proxies,
+    }
     const combinedSubstrateAccounts =
       (evmSubstrateAccounts || state.substrate.accounts)?.flatMap((account) => {
         const { address } = account
@@ -455,7 +448,7 @@ export function WalletProvider({
         selectedProxies: selectedCombinedAccount?.proxies || null,
         selectedMultisig: selectedCombinedAccount?.multisig || null,
         proxies: combinedProxies,
-        proxiesAreLoading: nestedProxiesAreLoading || proxiesAreLoading,
+        proxiesAreLoading: !proxies,
         subscanUrl,
       },
       evm: {
@@ -465,7 +458,7 @@ export function WalletProvider({
         chains: evmChains,
       },
     }
-  }, [connect, disconnect, selectAccount, proxies, nestedProxies, state, isConnectError, isConnecting])
+  }, [connect, disconnect, selectAccount, proxies, state, isConnectError, isConnecting])
 
   return (
     <WalletContext.Provider value={ctx}>
