@@ -32,14 +32,7 @@ export function AssetAllocation({ address }: { address: string }) {
     valueByClass[asset!] = valueByClass[asset!]?.add(balance.balance.toDecimal().mul(price))
   })
 
-  console.log(
-    'metas',
-    metas.map((m) => m.data),
-    assetClasses,
-    balances?.tranches,
-    valueByClass
-  )
-  const shades = [800, 600, 400, 200]
+  const shades = [600, 800, 200, 400]
   const tableDataWithColor = assetClasses.map((item, index) => {
     const nextShade = shades[index % shades.length]
     return {
