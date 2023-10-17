@@ -1,4 +1,4 @@
-export async function fetchFromTinlakeSubgraph(query: string, variables?: unknown) {
+export async function fetchFromTinlakeSubgraph(query: string, variables?: object) {
   const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

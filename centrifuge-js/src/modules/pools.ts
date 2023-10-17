@@ -420,7 +420,7 @@ export type TinlakeLoan = {
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
   originationDate: string
-  writeOffPercentage: string
+  writeOffPercentage: Rate
 }
 
 // transformed type for UI

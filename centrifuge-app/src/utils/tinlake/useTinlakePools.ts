@@ -10,18 +10,12 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
-import { Contract } from '@ethersproject/contracts'
-import { InfuraProvider } from '@ethersproject/providers'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
 import { ethConfig } from '../../config'
 import { Dec } from '../Decimal'
-import feedv1Abi from './abis/NAVFeed_V1.abi.json'
-import feedv2Abi from './abis/NAVFeed_V2.abi.json'
-import feedv3Abi from './abis/NAVFeed_V3.abi.json'
-import pileAbi from './abis/Pile.abi.json'
 import { currencies } from './currencies'
 import { Call, multicall } from './multicall'
 import { Fixed27Base } from './ratios'
@@ -145,54 +139,27 @@ export function useTinlakePools(suspense = false) {
     suspense,
   })
 }
-
 export function useTinlakeLoans(poolId: string) {
-  const tinlakePools = useTinlakePools()
+  const tinlakePools = useTinlakePools(true)
 
   const pool = tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
   return useQuery(
-    ['tinlakePoolLoans', poolId, pool],
+    ['tinlakePoolLoans', poolId.toLowerCase()],
     async () => {
       const loans = await getTinlakeLoans(poolId)
+      const writeOffPercentages = await getWriteOffPercentages(pool!, loans)
 
-      const writeOffPercentagePromises = loans.map(async (loan) => {
-        if (pool) {
-          const writeOffPercentage = await getWriteOffPercentage(pool, loan.index)
-
-          if (writeOffPercentage.isZero()) {
-            return {
-              loanId: loan.index,
-              percentage: '0',
-            }
-          }
-
-          return {
-            loanId: loan.index,
-            percentage: writeOffPercentage.div(new BN(10).pow(new BN(25))).toString(),
-          }
-        }
-
-        return {
-          loanId: loan.index,
-          percentage: '0',
-        }
-      })
-
-      const writeOffPercentage = (await Promise.all(writeOffPercentagePromises)).reduce((acc, curr) => {
-        acc[curr.loanId] = curr.percentage
-        return acc
-      }, {} as { [key: number]: string })
-
-      return loans.map((loan) => ({
+      return loans.map((loan, i) => ({
         asset: {
           nftId: loan.nftId,
-          collectionId: loan.pool.id,
+          collectionId: poolId,
         },
         id: loan.index.toString(),
         originationDate: loan.financingDate ? new Date(Number(loan.financingDate) * 1000).toISOString() : null,
         outstandingDebt: new CurrencyBalance(loan.debt, 18),
-        poolId: loan.pool.id,
+        presentValue: new CurrencyBalance(loan.debt, 18),
+        poolId,
         pricing: {
           maturityDate: Number(loan.maturityDate) ? new Date(Number(loan.maturityDate) * 1000).toISOString() : null,
           interestRate: new Rate(
@@ -200,8 +167,8 @@ export function useTinlakeLoans(poolId: string) {
           ),
           ceiling: new CurrencyBalance(loan.ceiling, 18),
         },
-        status: getTinlakeLoanStatus(loan, writeOffPercentage[loan.index]),
-        writeOffPercentage: writeOffPercentage[loan.index],
+        status: getTinlakeLoanStatus(loan, writeOffPercentages[i]),
+        writeOffPercentage: writeOffPercentages[i],
         totalBorrowed: new CurrencyBalance(loan.borrowsAggregatedAmount, 18),
         totalRepaid: new CurrencyBalance(loan.repaysAggregatedAmount, 18),
         dateClosed: loan.closed ? new Date(Number(loan.closed) * 1000).toISOString() : 0,
@@ -263,8 +230,8 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
   version: 2 | 3
 }
 
-function getTinlakeLoanStatus(loan: TinlakeLoanData, writeOffPercentage: string) {
-  if (loan.financingDate && (loan.debt === '0' || writeOffPercentage === '100')) {
+function getTinlakeLoanStatus(loan: TinlakeLoanData, writeOffPercentage: Rate) {
+  if (loan.financingDate && (loan.debt === '0' || writeOffPercentage.toFloat() === 1)) {
     return 'Closed'
   }
   if (!loan.financingDate) {
@@ -335,66 +302,53 @@ async function getTinlakeLoans(poolId: string) {
   return loans
 }
 
-async function getWriteOffGroups(pool: TinlakePool) {
-  const feedAbi = pool.versions?.FEED === 2 ? feedv2Abi : feedv3Abi
-  const provider = new InfuraProvider()
-
-  const navFeed = new Contract(pool.addresses.FEED, feedAbi, provider)
-
-  const groups = []
-  let i = 0
-  const maxWriteOffGroups = 100
-  while (i < maxWriteOffGroups) {
+export async function getWriteOffPercentages(pool: TinlakePool, loans: any[]) {
+  let writeOffGroups: { percentage: BN; overdueDays: number }[] = []
+  if (pool.versions?.FEED === 2) {
+    const calls: Call[] = Array.from({ length: 100 /* Max number of write-off groups */ }).map((_, i) => ({
+      target: pool.addresses.FEED,
+      call: ['writeOffGroups(uint256)(uint128,uint128)', i],
+      returns: [[`groups[${i}].percentage`, toBN], [`groups[${i}].overdueDays`]],
+    }))
     try {
-      const group = await navFeed.writeOffGroups(i)
-      groups.push(group)
-      i += 1
-    } catch (e) {
-      return groups
-    }
-  }
-  return groups
-}
-
-export async function getWriteOffPercentage(pool: TinlakePool, loanId: number): Promise<BN> {
-  const feedAbi = (() => {
-    if (pool.versions?.FEED === 2) {
-      return feedv2Abi
-    }
-    if (pool.versions?.FEED === 3) {
-      return feedv3Abi
-    }
-    return feedv1Abi
-  })()
-
-  const provider = new InfuraProvider()
-  const pile = new Contract(pool.addresses.PILE, pileAbi, provider)
-  const navFeed = new Contract(pool.addresses.FEED, feedAbi, provider)
-
-  const loanRate = await pile.loanRates(loanId)
-
-  if (loanRate.lt(1000)) {
-    return new BN(0)
+      const data = await multicall<{ groups: { percentage: BN; overdueDays: number }[] }>(calls)
+      writeOffGroups.push(...data.groups)
+    } catch {}
   }
 
-  if (navFeed.writeOffs) {
-    const writeOffGroup = loanRate.sub(1000)
-    const { percentage } = await navFeed.writeOffs(writeOffGroup.toString())
+  const rateCalls: Call[] = loans.map((loan, i) => ({
+    target: pool.addresses.PILE,
+    call: ['loanRates(uint256)(uint256)', loan.index],
+    returns: [[`rates[${i}]`, (val) => val.toNumber()]],
+  }))
 
-    return Rate.fromFloat(1).sub(new BN(percentage.toString()))
-  } else if (navFeed.writeOffGroups) {
-    const writeOffGroups = await getWriteOffGroups(pool)
-    let { percentage } = writeOffGroups[loanRate.sub(1000).toNumber()]
-    if (percentage) {
-      percentage = Rate.fromFloat(1).sub(new BN(percentage.toString()))
+  const loanRates = await multicall<{ rates: number[]; groups: any }>(rateCalls)
 
-      return percentage
-    }
+  if (writeOffGroups.length) {
+    const percentages = loans.map((_, i) => {
+      if (loanRates.rates[i] < 1000) return new Rate(0)
+      const rate = loanRates.rates[i] - 1000
+      const group = writeOffGroups[rate]
+      return group.percentage ? new Rate(Rate.fromFloat(1).sub(group.percentage)) : new Rate(0)
+    })
+    return percentages
+  }
+  if (!pool.versions?.FEED || pool.versions.FEED === 1) {
+    const calls = loans
+      .map((_, i) => ({
+        target: pool.addresses.FEED,
+        call: ['writeOffs(uint256)(uint256,uint256)', loanRates.rates[i] - 1000],
+        returns: [[''], [`percentages[${i}]`, toBN]],
+      }))
+      .filter((_, i) => loanRates.rates[i] >= 1000) as Call[]
 
-    return new BN(0)
+    const { percentages } = await multicall<{ percentages: BN[] }>(calls)
+    return loans.map((_, i) => {
+      return percentages?.[i] ? new Rate(Rate.fromFloat(1).sub(percentages[i])) : new Rate(0)
+    })
   }
 
-  return new BN(0)
+  return loans.map(() => new Rate(0))
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
@@ -869,4 +823,8 @@ interface State {
     minEpochTime: number
   }
   submissionPeriod: boolean
+}
+
+function toBN(val: BigNumber) {
+  return new BN(val.toString())
 }
