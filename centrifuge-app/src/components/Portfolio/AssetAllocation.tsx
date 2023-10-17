@@ -33,19 +33,17 @@ export function AssetAllocation({ address }: { address: string }) {
   })
 
   const shades = [600, 800, 200, 400]
-  const tableDataWithColor = assetClasses.map((item, index) => {
-    const nextShade = shades[index % shades.length]
-    return {
-      name: assetClassLabels[item as AssetClass] ?? item,
-      share: valueByClass[item].toNumber(),
-      color: theme.colors.accentScale[nextShade],
-      labelColor: nextShade >= 500 ? 'white' : 'black',
-    }
-  })
-
-  const sharesForPie = tableDataWithColor.map(({ name, color, labelColor, share }) => {
-    return { value: Number(share), name: name, color, labelColor }
-  })
+  const shares = assetClasses
+    .map((item, index) => {
+      const nextShade = shades[index % shades.length]
+      return {
+        name: assetClassLabels[item as AssetClass] ?? item,
+        value: valueByClass[item].toNumber(),
+        color: theme.colors.accentScale[nextShade],
+        labelColor: nextShade >= 500 ? 'white' : 'black',
+      }
+    })
+    .sort((a, b) => (b.value > a.value ? 1 : a === b ? 0 : -1))
 
   return !!balances?.tranches && !!balances?.tranches.length ? (
     <Stack gap={2}>
@@ -53,9 +51,9 @@ export function AssetAllocation({ address }: { address: string }) {
         Allocation
       </Text>
       <Shelf gap={8}>
-        <AssetClassChart data={sharesForPie} />
+        <AssetClassChart data={shares} />
         <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>
-          {tableDataWithColor.map((cell, i) => (
+          {shares.map((cell, i) => (
             <>
               {i > 0 && <Box width="1px" backgroundColor="borderSecondary" />}
               <LabelValueStack
@@ -78,7 +76,7 @@ export function AssetAllocation({ address }: { address: string }) {
                 }
                 value={
                   <Box ml={22}>
-                    <Text variant="heading2">{formatBalanceAbbreviated(cell.share, 'USD')}</Text>
+                    <Text variant="heading2">{formatBalanceAbbreviated(cell.value, 'USD')}</Text>
                   </Box>
                 }
                 key={i}
