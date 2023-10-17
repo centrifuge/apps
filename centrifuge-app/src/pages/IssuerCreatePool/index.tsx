@@ -49,11 +49,16 @@ import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
 
-const ASSET_CLASSES = config.assetClasses.map((label) => ({
-  label,
-  value: label,
+const assetClassLabels = {
+  privateCredit: 'Private Credit',
+  publicCredit: 'Public Credit',
+}
+type AssetClass = 'publicCredit' | 'privateCredit'
+
+const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
+  label: assetClassLabels[key as AssetClass],
+  value: key,
 }))
-const DEFAULT_ASSET_CLASS = config.defaultAssetClass
 
 export const IssuerCreatePoolPage: React.FC = () => {
   return (
@@ -98,7 +103,8 @@ export type CreatePoolValues = Omit<
 const initialValues: CreatePoolValues = {
   poolIcon: null,
   poolName: '',
-  assetClass: DEFAULT_ASSET_CLASS,
+  assetClass: 'privateCredit',
+  subAssetClass: '',
   currency: '',
   maxReserve: '',
   epochHours: 23, // in hours
@@ -453,6 +459,11 @@ function CreatePoolForm() {
     .add(collectionDeposit.toDecimal())
   const deposit = createDeposit.add(proxyDeposit.toDecimal())
 
+  const subAssetClasses = config.assetClasses[form.values.assetClass].map((label) => ({
+    label,
+    value: label,
+  }))
+
   return (
     <>
       <PreimageHashDialog
@@ -534,11 +545,30 @@ function CreatePoolForm() {
                     <Select
                       name="assetClass"
                       label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                      onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
+                      onChange={(event) => {
+                        form.setFieldValue('assetClass', event.target.value)
+                        form.setFieldValue('subAssetClass', '', false)
+                      }}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
                       options={ASSET_CLASSES}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
+                <Field name="subAssetClass" validate={validate.subAssetClass}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <Select
+                      name="subAssetClass"
+                      label="Secondary asset class"
+                      onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={subAssetClasses}
                       placeholder="Select..."
                     />
                   )}
