@@ -18,13 +18,15 @@ import { Eththumbnail } from '../EthThumbnail'
 import { Root } from '../ListItemCardStyles'
 import { COLUMN_GAPS } from './InvestedTokens'
 
-export type TokenCardProps = AccountTokenBalance
+export type TokenCardProps = AccountTokenBalance & {
+  canInvestRedeem?: boolean
+}
 
 const TokenName = styled(Text)`
   text-wrap: nowrap;
 `
 
-export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCardProps) {
+export function TokenListItem({ balance, currency, poolId, trancheId, canInvestRedeem }: TokenCardProps) {
   const { sizes } = useTheme()
   const pool = usePool(poolId, false)
   const { data: metadata } = usePoolMetadata(pool)
@@ -36,7 +38,7 @@ export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCar
   const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
 
   return (
-    <Root as="article" minWidth="1060px">
+    <Root as="article" minWidth="1280px">
       <Grid gridTemplateColumns={`${COLUMN_GAPS} 1fr`} gap={3} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={isTinlakePool}>
@@ -68,27 +70,34 @@ export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCar
             : '-'}
         </Text>
 
-        <Shelf gap={2} justifySelf="end">
-          {isTinlakePool ? (
-            <AnchorButton
-              variant="tertiary"
-              icon={IconExternalLink}
-              href="https://legacy.tinlake.centrifuge.io/portfolio"
-              target="_blank"
-            >
-              View on Tinlake
-            </AnchorButton>
-          ) : (
-            <>
-              <Button variant="tertiary" icon={IconMinus}>
-                Redeem
-              </Button>
-              <Button variant="tertiary" icon={IconPlus}>
-                Invest
-              </Button>
-            </>
-          )}
-        </Shelf>
+        <Text textOverflow="ellipsis" variant="body2">
+          {/* TODO: calculate unrealized p&l */}
+          {trancheInfo?.tokenPrice?.toDecimal().mul(100000).toDecimalPlaces(0).toString()}
+        </Text>
+
+        {canInvestRedeem && (
+          <Shelf gap={2} justifySelf="end">
+            {isTinlakePool ? (
+              <AnchorButton
+                variant="tertiary"
+                icon={IconExternalLink}
+                href="https://legacy.tinlake.centrifuge.io/portfolio"
+                target="_blank"
+              >
+                View on Tinlake
+              </AnchorButton>
+            ) : (
+              <>
+                <Button variant="tertiary" icon={IconMinus}>
+                  Redeem
+                </Button>
+                <Button variant="tertiary" icon={IconPlus}>
+                  Invest
+                </Button>
+              </>
+            )}
+          </Shelf>
+        )}
       </Grid>
     </Root>
   )

@@ -3,7 +3,7 @@ import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { TokenCardProps } from './TokenListItem'
 
 export const sortTokens = (
-  tranches: TokenCardProps[],
+  tokens: TokenCardProps[],
   pools: {
     centPools: Pool[]
     tinlakePools: TinlakePool[]
@@ -14,7 +14,7 @@ export const sortTokens = (
   const sortBy = searchParams.get('sort-by')
 
   if (sortBy === 'market-value') {
-    tranches.sort((trancheA, trancheB) => {
+    tokens.sort((trancheA, trancheB) => {
       const valueA = sortMarketValue(trancheA, pools)
       const valueB = sortMarketValue(trancheB, pools)
 
@@ -22,29 +22,55 @@ export const sortTokens = (
     })
   }
 
+  if (sortBy === 'unrealized-pl') {
+    tokens.sort((tokenA, tokenB) => {
+      const valueA = sortUnrealizedPL(tokenA, pools)
+      const valueB = sortUnrealizedPL(tokenB, pools)
+
+      return sortDirection === 'asc' ? valueA - valueB : valueB - valueA
+    })
+  }
+
   if (sortBy === 'position' || (!sortDirection && !sortBy)) {
-    tranches.sort(({ balance: balanceA }, { balance: balanceB }) =>
+    tokens.sort(({ balance: balanceA }, { balance: balanceB }) =>
       sortDirection === 'asc'
         ? balanceA.toDecimal().toNumber() - balanceB.toDecimal().toNumber()
         : balanceB.toDecimal().toNumber() - balanceA.toDecimal().toNumber()
     )
   }
 
-  return tranches
+  return tokens
 }
 
 const sortMarketValue = (
-  tranche: TokenCardProps,
+  token: TokenCardProps,
   pools: {
     centPools: Pool[]
     tinlakePools: TinlakePool[]
   }
 ) => {
-  const pool = tranche.poolId.startsWith('0x')
-    ? pools.tinlakePools?.find((p) => p.id.toLowerCase() === tranche.poolId.toLowerCase())
-    : pools.centPools?.find((p) => p.id === tranche.poolId)
+  const pool = token.poolId.startsWith('0x')
+    ? pools.tinlakePools?.find((p) => p.id.toLowerCase() === token.poolId.toLowerCase())
+    : pools.centPools?.find((p) => p.id === token.poolId)
 
-  const poolTranche = pool?.tranches.find(({ id }) => id === tranche.trancheId)
+  const poolTranche = pool?.tranches.find(({ id }) => id === token.trancheId)
 
-  return poolTranche?.tokenPrice ? tranche.balance.toDecimal().mul(poolTranche.tokenPrice.toDecimal()).toNumber() : 0
+  return poolTranche?.tokenPrice ? token.balance.toDecimal().mul(poolTranche.tokenPrice.toDecimal()).toNumber() : 0
+}
+
+const sortUnrealizedPL = (
+  token: TokenCardProps,
+  pools: {
+    centPools: Pool[]
+    tinlakePools: TinlakePool[]
+  }
+) => {
+  /* TODO: calculate unrealized p&l */
+  const pool = token.poolId.startsWith('0x')
+    ? pools.tinlakePools?.find((p) => p.id.toLowerCase() === token.poolId.toLowerCase())
+    : pools.centPools?.find((p) => p.id === token.poolId)
+
+  const poolTranche = pool?.tranches.find(({ id }) => id === token.trancheId)
+
+  return poolTranche?.tokenPrice ? poolTranche.tokenPrice.toDecimal().mul(100000).toDecimalPlaces(0).toNumber() : 0
 }
