@@ -69,7 +69,7 @@ export const sendDocumentsMessage = async (
     template_id: templateIds.updateInvestorStatus,
     from: {
       name: 'Centrifuge',
-      email: 'hello@centrifuge.io',
+      email: 'support@centrifuge.io',
     },
     attachments,
   }
