@@ -44,7 +44,6 @@ function TooltipContent({ payload, currency, total }: TooltipProps<any, any> & {
         <Text variant="body2">{payload[0].name}</Text>
         <Shelf justifyContent="space-between">
           <Text variant="heading3">{formatBalanceAbbreviated(payload[0].value, currency)}</Text>
-
           <Text variant="body2">{formatPercentage((payload[0].value / total) * 100)}</Text>
         </Shelf>
       </TooltipContainer>
