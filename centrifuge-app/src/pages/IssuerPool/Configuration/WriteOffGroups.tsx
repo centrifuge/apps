@@ -1,6 +1,6 @@
 import { Rate, WriteOffGroup } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Stack } from '@centrifuge/fabric'
+import { useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { Box, Button, Shelf, Stack, StatusChip } from '@centrifuge/fabric'
 import { FieldArray, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -9,8 +9,7 @@ import { Column, DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { formatPercentage } from '../../../utils/formatting'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
-import { useConstants, useWriteOffGroups } from '../../../utils/usePools'
-import { PendingLoanChanges } from './PendingLoanChanges'
+import { useLoanChanges, useWriteOffGroups } from '../../../utils/usePools'
 import { WriteOffInput } from './WriteOffInput'
 
 export type Row = WriteOffGroup
@@ -53,8 +52,15 @@ export type WriteOffGroupValues = { writeOffGroups: WriteOffGroupInput[] }
 export function WriteOffGroups() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
-  const consts = useConstants()
-  const [account] = useSuitableAccounts({ poolId, poolRole: ['LoanAdmin'] })
+  const consts = useCentrifugeConsts()
+  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
+  const { policyChanges } = useLoanChanges(poolId)
+  const latestPolicyChange = policyChanges?.at(-1)
+
+  const { execute: executeApply, isLoading: isApplyLoading } = useCentrifugeTransaction(
+    'Apply write-off policy',
+    (cent) => cent.pools.applyWriteOffPolicyUpdate
+  )
 
   const savedGroups = useWriteOffGroups(poolId)
   const sortedSavedGroups = [...(savedGroups ?? [])].sort((a, b) => a.overdueDays - b.overdueDays)
@@ -160,7 +166,7 @@ export function WriteOffGroups() {
           }}
           small
           key="edit"
-          disabled={form.values.writeOffGroups.length >= (consts?.maxWriteOffPolicySize ?? 5) || !account}
+          disabled={form.values.writeOffGroups.length >= consts.loans.maxWriteOffPolicySize || !account}
         >
           Add another
         </Button>
@@ -172,7 +178,14 @@ export function WriteOffGroups() {
     <FormikProvider value={form}>
       <Form>
         <PageSection
-          title="Write-off policy"
+          title={
+            <Shelf gap={1}>
+              Write-off policy{' '}
+              {latestPolicyChange && latestPolicyChange.status !== 'ready' && (
+                <StatusChip status="info">Pending changes</StatusChip>
+              )}
+            </Shelf>
+          }
           subtitle="At least one write-off activity is required"
           headerRight={
             <>
@@ -186,15 +199,29 @@ export function WriteOffGroups() {
                     small
                     loading={isLoading || form.isSubmitting}
                     loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
+                    disabled={!account}
                     key="done"
                   >
                     Done
                   </Button>
                 </ButtonGroup>
               ) : (
-                <Button variant="secondary" onClick={() => setIsEditing(true)} small>
-                  Edit
-                </Button>
+                <ButtonGroup>
+                  {latestPolicyChange?.status === 'ready' && (
+                    <Button
+                      small
+                      loading={isApplyLoading}
+                      disabled={!account}
+                      onClick={() => executeApply([poolId, latestPolicyChange.hash], { account })}
+                      key="apply"
+                    >
+                      Apply changes
+                    </Button>
+                  )}
+                  <Button variant="secondary" onClick={() => setIsEditing(true)} small>
+                    Edit
+                  </Button>
+                </ButtonGroup>
               )}
             </>
           }
@@ -208,7 +235,6 @@ export function WriteOffGroups() {
             ) : (
               <DataTable data={sortedSavedGroups} columns={columns} />
             )}
-            <PendingLoanChanges poolId={poolId} />
           </Stack>
         </PageSection>
       </Form>
