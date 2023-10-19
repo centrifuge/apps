@@ -24,12 +24,15 @@ export function AssetAllocation({ address }: { address: string }) {
   const metas = usePoolMetadataMulti(filteredPools)
   const assetClasses = [...new Set(metas.map((m) => m.data?.pool?.asset?.class as string).filter(Boolean))]
   const valueByClass: Record<string, Decimal> = Object.fromEntries(assetClasses.map((item) => [item, Dec(0)]))
+  let total = Dec(0)
   balances?.tranches.forEach((balance) => {
     const poolIndex = filteredPools.findIndex((p) => p.id === balance.poolId)
     const price =
       filteredPools[poolIndex]?.tranches.find((t) => t.id === balance.trancheId)?.tokenPrice?.toDecimal() ?? Dec(0)
     const asset = metas[poolIndex].data?.pool?.asset?.class
-    valueByClass[asset!] = valueByClass[asset!]?.add(balance.balance.toDecimal().mul(price))
+    const value = balance.balance.toDecimal().mul(price)
+    total = total.add(value)
+    valueByClass[asset!] = valueByClass[asset!]?.add(value)
   })
 
   const shades = [600, 800, 200, 400]
@@ -51,7 +54,7 @@ export function AssetAllocation({ address }: { address: string }) {
         Allocation
       </Text>
       <Shelf gap={8}>
-        <AssetClassChart data={shares} />
+        <AssetClassChart data={shares} currency="USD" total={total.toNumber()} />
         <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>
           {shares.map((cell, i) => (
             <>
