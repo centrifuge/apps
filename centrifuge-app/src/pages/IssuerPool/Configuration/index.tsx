@@ -4,7 +4,7 @@ import { useDebugFlags } from '../../../components/DebugFlags'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PendingMultisigs } from '../../../components/PendingMultisigs'
-import { usePoolAdmin } from '../../../utils/usePermissions'
+import { useCanBorrow, usePoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
@@ -28,10 +28,12 @@ export function IssuerPoolConfigurationPage() {
 function IssuerPoolConfiguration() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const { editPoolConfig } = useDebugFlags()
+  const isPoolAdmin = !!usePoolAdmin(poolId)
+  const isBorrower = useCanBorrow(poolId)
 
   return (
     <Stack>
-      {!!usePoolAdmin(poolId) && (
+      {(isPoolAdmin || isBorrower) && (
         <>
           <Details />
           <Issuer />
