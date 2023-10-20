@@ -33,6 +33,8 @@ import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { PortfolioPage } from '../pages/Portfolio'
 import { TransactionsPage } from '../pages/Portfolio/Transactions'
+import { PrimePage } from '../pages/Prime'
+import { PrimeDetailPage } from '../pages/Prime/Detail'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -216,6 +218,12 @@ function Routes() {
       </Route>
       <Route path="/portfolio">
         <PortfolioPage />
+      </Route>
+      <Route path="/prime/:dao">
+        <PrimeDetailPage />
+      </Route>
+      <Route path="/prime">
+        <PrimePage />
       </Route>
       <Route path="/disclaimer">
         <InvestmentDisclaimerPage />
