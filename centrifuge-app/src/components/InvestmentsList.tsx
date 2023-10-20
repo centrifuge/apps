@@ -64,7 +64,7 @@ const Token: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) =
 const AssetClass: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  return <>{metadata?.pool?.asset.class}</>
+  return <>{metadata?.pool?.asset.subClass}</>
 }
 
 const TokenBalance: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {

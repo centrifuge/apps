@@ -118,7 +118,7 @@ const AssetClass: React.VFC<RowProps> = ({ token }) => {
   const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
     <TextWithPlaceholder isLoading={isLoading} variant="body2">
-      {metadata?.pool?.asset.class}
+      {metadata?.pool?.asset.subClass}
     </TextWithPlaceholder>
   )
 }
