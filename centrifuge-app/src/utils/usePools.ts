@@ -2,12 +2,12 @@ import Centrifuge, { BorrowerTransaction, Loan, Pool, PoolMetadata } from '@cent
 import { useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useEffect, useMemo } from 'react'
-import { useQuery } from 'react-query'
+import { useQueries, useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
 import { Dec } from './Decimal'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
 import { useLoan, useLoans } from './useLoans'
-import { useMetadata } from './useMetadata'
+import { useMetadata, useMetadataMulti } from './useMetadata'
 
 export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
@@ -237,6 +237,34 @@ export function usePoolMetadata(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.data])
   return typeof pool?.metadata === 'string' ? data : tinlakeData
+}
+export function usePoolMetadataMulti(pools?: (Pool | TinlakePool)[]) {
+  const poolsIndexed = pools?.map((p, i) => [i, p, 'isTinlakePool' in p] as const) ?? []
+  const indices: Record<number, number> = {}
+  const centPools = poolsIndexed?.filter(([, , isTinlake]) => !isTinlake)
+  const tinlakePools = poolsIndexed?.filter(([, , isTinlake]) => isTinlake)
+  centPools.forEach(([pi], qi) => {
+    indices[pi] = qi
+  })
+  tinlakePools.forEach(([pi], qi) => {
+    indices[pi] = qi
+  })
+
+  const centData = useMetadataMulti<PoolMetadata>(centPools?.map(([, p]) => p.metadata as string) ?? [])
+  const tinlakeData = useQueries(
+    tinlakePools?.map(([, p]) => {
+      return {
+        queryKey: ['tinlakeMetadata', p.id],
+        queryFn: () => p.metadata as PoolMetadata,
+        enabled: !!p.metadata,
+        staleTime: Infinity,
+      }
+    })
+  )
+  return poolsIndexed.map(([poolIndex, , isTinlake]) => {
+    const queryIndex = indices[poolIndex]
+    return isTinlake ? tinlakeData[queryIndex] : centData[queryIndex]
+  })
 }
 
 export function useWriteOffGroups(poolId: string) {

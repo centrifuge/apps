@@ -611,7 +611,8 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         name: p.metadata.name,
         icon: p.metadata.media?.icon ? { uri: p.metadata.media.icon, mime: 'image/svg' } : null,
         asset: {
-          class: p.metadata.asset,
+          class: 'privateCredit',
+          subClass: p.metadata.asset,
         },
         newInvestmentsStatus: p.metadata.newInvestmentsStatus,
         issuer: {

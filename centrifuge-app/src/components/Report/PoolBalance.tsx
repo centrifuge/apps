@@ -1,6 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
@@ -86,7 +87,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) =>
-              state.tranches[token.id].price
+              state.tranches[token.id]?.price
                 ? formatBalanceAbbreviated(state.tranches[token.id].price?.toFloat()!, pool.currency.symbol)
                 : '1.000'
             ) || [],
@@ -110,7 +111,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) =>
-              formatBalanceAbbreviated(state.tranches[token.id].fulfilledInvestOrders.toDecimal(), pool.currency.symbol)
+              formatBalanceAbbreviated(
+                state.tranches[token.id]?.fulfilledInvestOrders.toDecimal() ?? Dec(0),
+                pool.currency.symbol
+              )
             ) || [],
           heading: false,
         })) || [],
@@ -129,7 +133,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
             value:
               poolStates?.map((state) =>
                 formatBalanceAbbreviated(
-                  state.tranches[token.id].fulfilledRedeemOrders.toDecimal(),
+                  state.tranches[token.id]?.fulfilledRedeemOrders.toDecimal() ?? Dec(0),
                   pool.currency.symbol
                 )
               ) || [],
