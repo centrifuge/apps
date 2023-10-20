@@ -18,7 +18,7 @@ export class NetworkSwitch {
     this.network = network
   }
 
-  verifiyWallet = (req: Request, res: Response) => {
+  verifyWallet = (req: Request, res: Response) => {
     if (this.network === 'substrate') {
       return verifySubstrateWallet(req, res)
     } else if (this.network === 'evm' || this.network === 'evmOnSubstrate') {

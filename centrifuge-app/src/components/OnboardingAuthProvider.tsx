@@ -2,6 +2,8 @@ import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeUtils, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { Wallet } from '@subwallet/wallet-connect/types'
+import { BigNumber, ethers } from 'ethers'
+import { hashMessage } from 'ethers/lib/utils'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 
@@ -222,20 +224,41 @@ Nonce: ${nonce}
 Issued At: ${new Date().toISOString()}`
 
   const signedMessage = await signer?.signMessage(message)
-  const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({
+
+  let body
+
+  if (signedMessage === '0x') {
+    const messageHash = hashMessage(message)
+
+    const isValid = await isValidSignature(signer, address, messageHash, evmChainId || 1)
+
+    if (isValid) {
+      body = JSON.stringify({
+        safeAddress: address,
+        messageHash,
+        evmChainId,
+      })
+    } else {
+      throw new Error('Invalid signature')
+    }
+  } else {
+    body = JSON.stringify({
       message,
       signature: signedMessage,
       address,
       nonce,
       network: isEvmOnSubstrate ? 'evmOnSubstrate' : 'evm',
       chainId: evmChainId || 1,
-    }),
+    })
+  }
+
+  const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body,
   })
   if (tokenRes.status !== 200) {
     throw new Error('Failed to authenticate wallet')
@@ -248,4 +271,51 @@ Issued At: ${new Date().toISOString()}`
       JSON.stringify({ signed: token.token, payload: message })
     )
   }
+}
+
+const isValidSignature = async (provider: any, safeAddress: string, messageHash: string, evmChainId: number) => {
+  const MAGIC_VALUE_BYTES = '0x20c13b0b'
+
+  const safeContract = new ethers.Contract(
+    safeAddress,
+    [
+      'function isValidSignature(bytes calldata _data, bytes calldata _signature) public view returns (bytes4)',
+      'function getMessageHash(bytes memory message) public view returns (bytes32)',
+      'function getThreshold() public view returns (uint256)',
+    ],
+    provider
+  )
+
+  const safeMessageHash = await safeContract.getMessageHash(messageHash)
+
+  const safeMessage = await fetchSafeMessage(safeMessageHash, evmChainId)
+
+  if (!safeMessage) {
+    throw new Error('Unable to fetch SafeMessage')
+  }
+
+  const threshold = BigNumber.from(await safeContract.getThreshold()).toNumber()
+
+  if (!threshold || threshold > safeMessage.confirmations.length) {
+    throw new Error('Threshold has not been met')
+  }
+
+  const response = await safeContract.isValidSignature(messageHash, safeMessage?.preparedSignature)
+
+  return response === MAGIC_VALUE_BYTES
+}
+
+const TX_SERVICE_URLS: Record<string, string> = {
+  '1': 'https://safe-transaction-mainnet.safe.global/api',
+  '5': 'https://safe-transaction-goerli.staging.5afe.dev/api',
+}
+
+const fetchSafeMessage = async (safeMessageHash: string, chainId: number) => {
+  const TX_SERVICE_URL = TX_SERVICE_URLS[chainId.toString()]
+
+  const response = await fetch(`${TX_SERVICE_URL}/v1/messages/${safeMessageHash}/`, {
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+  return response.json()
 }
