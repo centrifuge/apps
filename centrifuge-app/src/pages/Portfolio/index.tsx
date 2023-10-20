@@ -53,7 +53,7 @@ function Portfolio() {
         <BasePadding>
           <InvestedTokens />
           <Transactions count={3} />
-          <AssetAllocation />
+          <AssetAllocation address={address} />
         </BasePadding>
         <BasePadding>
           <Stack as="article" gap={2}>

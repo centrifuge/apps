@@ -550,7 +550,8 @@ export interface PoolMetadataInput {
   // details
   poolIcon: FileType | null
   poolName: string
-  assetClass: string
+  assetClass: 'publicCredit' | 'privateCredit'
+  subAssetClass: string
   currency: string
   maxReserve: number | ''
   epochHours: number | ''
@@ -588,7 +589,8 @@ export type PoolMetadata = {
     name: string
     icon: FileType | null
     asset: {
-      class: string
+      class: 'publicCredit' | 'privateCredit'
+      subClass: string
     }
     newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
@@ -793,7 +795,7 @@ export function getPoolsModule(inst: Centrifuge) {
       pool: {
         name: metadata.poolName,
         icon: metadata.poolIcon,
-        asset: { class: metadata.assetClass },
+        asset: { class: metadata.assetClass, subClass: metadata.subAssetClass },
         issuer: {
           name: metadata.issuerName,
           repName: metadata.issuerRepName,
