@@ -51,7 +51,10 @@ export function Details() {
     () => ({
       poolName: metadata?.pool?.name ?? '',
       poolIcon: iconFile ?? null,
-      assetClass: metadata?.pool?.asset?.class ?? 'privateCredit',
+      assetClass:
+        metadata?.pool?.asset?.class && Object.keys(config.assetClasses).includes(metadata.pool.asset.class)
+          ? metadata.pool.asset.class
+          : 'privateCredit',
       subAssetClass: metadata?.pool?.asset?.subClass ?? '',
       podEndpoint: metadata?.pod?.node ?? '',
       listed: metadata?.pool?.listed ?? false,
