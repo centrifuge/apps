@@ -63,41 +63,6 @@ function Prime() {
 
 type Row = DAO & { value?: number; networkName: string }
 
-export const columns: Column[] = [
-  {
-    align: 'left',
-    header: 'DAO',
-    cell: (row: Row) => (
-      <Shelf gap={1}>
-        <Box as="img" src={row.icon} alt={row.name} width="iconSmall" height="iconSmall" borderRadius="50%" />
-        <Text>{row.name}</Text>
-      </Shelf>
-    ),
-    flex: '1',
-  },
-  {
-    align: 'left',
-    header: 'Network',
-    cell: (row: Row) => <Text>{row.networkName}</Text>,
-    flex: '3',
-  },
-  {
-    header: <SortableTableHeader label="Portfolio value" />,
-    cell: (row: Row) => (
-      <TextWithPlaceholder isLoading={!row.value}>{row.value && formatBalance(row.value, 'USD')}</TextWithPlaceholder>
-    ),
-    flex: '3',
-    sortKey: 'value',
-  },
-  {
-    header: 'Profit',
-    cell: (row: Row) => (
-      <TextWithPlaceholder isLoading={!row.value}>{row.value && formatPercentage(row.value)}</TextWithPlaceholder>
-    ),
-    flex: '3',
-  },
-]
-
 function DaoPortfoliosTable() {
   const utils = useCentrifugeUtils()
   const cent = useCentrifuge()
@@ -118,6 +83,43 @@ function DaoPortfoliosTable() {
     value: data?.[i].native.balance.toFloat(),
     networkName: getNetworkName(dao.network),
   }))
+
+  const uniqueNetworks = [...new Set(DAOs.map((dao) => dao.network))]
+
+  const columns: Column[] = [
+    {
+      align: 'left',
+      header: 'DAO',
+      cell: (row: Row) => (
+        <Shelf gap={1}>
+          <Box as="img" src={row.icon} alt={row.name} width="iconSmall" height="iconSmall" borderRadius="50%" />
+          <Text>{row.name}</Text>
+        </Shelf>
+      ),
+      flex: '1',
+    },
+    {
+      align: 'left',
+      header: 'Network',
+      cell: (row: Row) => <Text>{row.networkName}</Text>,
+      flex: '3',
+    },
+    {
+      header: <SortableTableHeader label="Portfolio value" />,
+      cell: (row: Row) => (
+        <TextWithPlaceholder isLoading={!row.value}>{row.value && formatBalance(row.value, 'USD')}</TextWithPlaceholder>
+      ),
+      flex: '3',
+      sortKey: 'value',
+    },
+    {
+      header: 'Profit',
+      cell: (row: Row) => (
+        <TextWithPlaceholder isLoading={!row.value}>{row.value && formatPercentage(row.value)}</TextWithPlaceholder>
+      ),
+      flex: '3',
+    },
+  ]
 
   return (
     <LayoutSection title="DAO portfolios">
