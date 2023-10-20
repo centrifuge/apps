@@ -123,10 +123,11 @@ export function Details() {
 
   const currency = pool?.currency.symbol ?? ''
 
-  const subAssetClasses = config.assetClasses[form.values.assetClass].map((label) => ({
-    label,
-    value: label,
-  }))
+  const subAssetClasses =
+    config.assetClasses[form.values.assetClass]?.map((label) => ({
+      label,
+      value: label,
+    })) ?? []
 
   return (
     <FormikProvider value={form}>

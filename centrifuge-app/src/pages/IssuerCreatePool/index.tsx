@@ -459,10 +459,11 @@ function CreatePoolForm() {
     .add(collectionDeposit.toDecimal())
   const deposit = createDeposit.add(proxyDeposit.toDecimal())
 
-  const subAssetClasses = config.assetClasses[form.values.assetClass].map((label) => ({
-    label,
-    value: label,
-  }))
+  const subAssetClasses =
+    config.assetClasses[form.values.assetClass]?.map((label) => ({
+      label,
+      value: label,
+    })) ?? []
 
   return (
     <>
