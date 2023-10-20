@@ -251,7 +251,11 @@ export function Details() {
               <Box as={icon ? 'img' : 'div'} width="iconLarge" height="iconLarge" src={icon} />
               <LabelValueStack label="Pool name" value={metadata?.pool?.name} />
 
-              <LabelValueStack label="Asset class" value={metadata?.pool?.asset.class} />
+              <LabelValueStack
+                label="Asset class"
+                value={assetClassLabels[metadata?.pool?.asset.class as AssetClass] ?? metadata?.pool?.asset.class}
+              />
+              <LabelValueStack label="Secondary asset class" value={metadata?.pool?.asset.subClass} />
 
               <LabelValueStack label="Currency" value={currency} />
               <LabelValueStack label="POD endpoint" value={metadata?.pod?.node ?? '-'} />
