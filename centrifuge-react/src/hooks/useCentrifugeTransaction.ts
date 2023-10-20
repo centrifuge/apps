@@ -9,6 +9,9 @@ import { PalletError } from '../utils/errors'
 
 export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
   account?: CombinedSubstrateAccount
+  // If a transaction can be done via a proxy other than Any, pass the allowed types here,
+  // to make sure the transaction selects the right one.
+  // Otherwise by default it will try the transaction with the Any proxy type
   forceProxyType?: string | string[]
 }
 

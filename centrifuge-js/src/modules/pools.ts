@@ -2901,15 +2901,17 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.poolSystem.scheduledUpdate(poolId)),
       map((updateData) => {
         const update = updateData.toPrimitive() as any
-        if (!update) return null
+        if (!update?.changes) return null
+        const { changes, submittedAt } = update
+        
         return {
           changes: {
-            tranches: update.tranches.noChange === null ? null : update.tranches.newValue,
-            trancheMetadata: update.trancheMetadata.noChange === null ? null : update.trancheMetadata.newValue,
-            minEpochTime: update.minEpochTime.noChange === null ? null : update.minEpochTime.newValue,
-            maxNavAge: update.maxNavAge.noChange === null ? null : update.maxNavAge.newValue,
+            tranches: changes.tranches.noChange === null ? null : changes.tranches.newValue,
+            trancheMetadata: changes.trancheMetadata.noChange === null ? null : changes.trancheMetadata.newValue,
+            minEpochTime: changes.minEpochTime.noChange === null ? null : changes.minEpochTime.newValue,
+            maxNavAge: changes.maxNavAge.noChange === null ? null : changes.maxNavAge.newValue,
           },
-          submittedAt: new Date(update.submittedAt * 1000).toISOString(),
+          submittedAt: new Date(submittedAt * 1000).toISOString(),
         }
       })
     )
