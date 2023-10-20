@@ -70,6 +70,7 @@ export function useCentrifugeConsts() {
           .add(depositPerByte.mul(new BN(LOAN_NFT_DATA_BYTES))),
         chainDecimals
       ),
+      maxWriteOffPolicySize: Number(api.consts.loans.maxWriteOffPolicySize.toPrimitive()),
     },
     proxy: {
       proxyDepositBase: new CurrencyBalance(consts.proxy.proxyDepositBase, chainDecimals),
@@ -84,6 +85,9 @@ export function useCentrifugeConsts() {
     },
     poolSystem: {
       poolDeposit: new CurrencyBalance(consts.poolSystem.poolDeposit, chainDecimals),
+      minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toPrimitive()),
+      maxTranches: Number(api.consts.poolSystem.maxTranches.toPrimitive()),
+      challengeTime: Number(api.consts.poolSystem.challengeTime.toPrimitive()),
     },
     keystore: {
       keyDeposit: CurrencyBalance.fromFloat(100, chainDecimals),

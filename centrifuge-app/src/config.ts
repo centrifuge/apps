@@ -66,8 +66,7 @@ type EnvironmentConfig = {
   }
   defaultTheme: 'light' | 'dark'
   baseCurrency: 'USD'
-  assetClasses: string[]
-  defaultAssetClass: string
+  assetClasses: Record<'publicCredit' | 'privateCredit', string[]>
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
   defaultPodUrl: string
@@ -86,8 +85,7 @@ const ALTAIR: EnvironmentConfig = {
   },
   defaultTheme: 'dark',
   baseCurrency: 'USD',
-  assetClasses: ['Art NFTs'],
-  defaultAssetClass: 'Art NFTs',
+  assetClasses: { privateCredit: ['Art NFTs'], publicCredit: [] },
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,
@@ -103,16 +101,17 @@ const CENTRIFUGE: EnvironmentConfig = {
   },
   defaultTheme: 'light',
   baseCurrency: 'USD',
-  assetClasses: [
-    'Consumer Credit',
-    'Corporate Credit',
-    'Commercial Real Estate',
-    'Residential Real Estate',
-    'Project Finance',
-    'Trade Finance',
-    'US Treasuries',
-  ],
-  defaultAssetClass: 'Consumer Credit',
+  assetClasses: {
+    privateCredit: [
+      'Consumer Credit',
+      'Corporate Credit',
+      'Commercial Real Estate',
+      'Residential Real Estate',
+      'Project Finance',
+      'Trade Finance',
+    ],
+    publicCredit: ['Corporate Bonds', 'US Treasuries'],
+  },
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,

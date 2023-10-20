@@ -550,7 +550,8 @@ export interface PoolMetadataInput {
   // details
   poolIcon: FileType | null
   poolName: string
-  assetClass: string
+  assetClass: 'publicCredit' | 'privateCredit'
+  subAssetClass: string
   currency: string
   maxReserve: number | ''
   epochHours: number | ''
@@ -588,7 +589,8 @@ export type PoolMetadata = {
     name: string
     icon: FileType | null
     asset: {
-      class: string
+      class: 'publicCredit' | 'privateCredit'
+      subClass: string
     }
     newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
@@ -793,7 +795,7 @@ export function getPoolsModule(inst: Centrifuge) {
       pool: {
         name: metadata.poolName,
         icon: metadata.poolIcon,
-        asset: { class: metadata.assetClass },
+        asset: { class: metadata.assetClass, subClass: metadata.subAssetClass },
         issuer: {
           name: metadata.issuerName,
           repName: metadata.issuerRepName,
@@ -2804,15 +2806,17 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.poolSystem.scheduledUpdate(poolId)),
       map((updateData) => {
         const update = updateData.toPrimitive() as any
-        if (!update) return null
+        if (!update?.changes) return null
+        const { changes, submittedAt } = update
+        
         return {
           changes: {
-            tranches: update.tranches.noChange === null ? null : update.tranches.newValue,
-            trancheMetadata: update.trancheMetadata.noChange === null ? null : update.trancheMetadata.newValue,
-            minEpochTime: update.minEpochTime.noChange === null ? null : update.minEpochTime.newValue,
-            maxNavAge: update.maxNavAge.noChange === null ? null : update.maxNavAge.newValue,
+            tranches: changes.tranches.noChange === null ? null : changes.tranches.newValue,
+            trancheMetadata: changes.trancheMetadata.noChange === null ? null : changes.trancheMetadata.newValue,
+            minEpochTime: changes.minEpochTime.noChange === null ? null : changes.minEpochTime.newValue,
+            maxNavAge: changes.maxNavAge.noChange === null ? null : changes.maxNavAge.newValue,
           },
-          submittedAt: new Date(update.submittedAt * 1000).toISOString(),
+          submittedAt: new Date(submittedAt * 1000).toISOString(),
         }
       })
     )

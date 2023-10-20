@@ -52,11 +52,8 @@ function Portfolio() {
         </BasePadding>
         <BasePadding gap={3}>
           <InvestedTokens />
-          <Transactions
-            count={3}
-            txTypes={['INVEST_EXECUTION', 'REDEEM_EXECUTION', 'INVEST_ORDER_UPDATE', 'REDEEM_ORDER_UPDATE']}
-          />
-          <AssetAllocation />
+          <Transactions count={3} />
+          <AssetAllocation address={address} />
         </BasePadding>
         <BasePadding>
           <Stack as="article" gap={2}>
