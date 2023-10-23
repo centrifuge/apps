@@ -1,10 +1,4 @@
-import Centrifuge, {
-  BorrowerTransaction,
-  InvestorTransactionType,
-  Loan,
-  Pool,
-  PoolMetadata,
-} from '@centrifuge/centrifuge-js'
+import Centrifuge, { BorrowerTransaction, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useEffect, useMemo } from 'react'
@@ -58,10 +52,10 @@ export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
-export function useTransactionsByAddress(address?: string, count?: number, txTypes?: InvestorTransactionType[]) {
+export function useTransactionsByAddress(address?: string) {
   const [result] = useCentrifugeQuery(
-    ['txByAddress', count, address, txTypes],
-    (cent) => cent.pools.getTransactionsByAddress([address!, count, txTypes]),
+    ['txByAddress', address],
+    (cent) => cent.pools.getTransactionsByAddress([address!]),
     {
       enabled: !!address,
     }

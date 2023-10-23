@@ -2004,7 +2004,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function getTransactionsByAddress(args: [address: string, count?: number, txTypes?: InvestorTransactionType[]]) {
-    const [address, count, txTypes] = args
+    const [address] = args
 
     const $query = inst.getSubqueryObservable<{
       investorTransactions: { nodes: SubqueryInvestorTransaction[] }
@@ -2036,9 +2036,9 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((data) => {
         const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId)) ?? []
         const $poolCurrencies = Array.from(poolIds).map((poolId) => getPoolCurrency([poolId]))
-        return combineLatest([$query, ...$poolCurrencies]).pipe(
-          map(([data, ...currencies]) => {
-            return data?.investorTransactions.nodes.map((tx) => {
+        return combineLatest($poolCurrencies).pipe(
+          map((currencies) => {
+            const txs = data?.investorTransactions.nodes.map((tx) => {
               const currencyIndex = Array.from(poolIds).indexOf(tx.poolId)
               const poolCurrency = currencies[currencyIndex]
               return {
@@ -2049,15 +2049,12 @@ export function getPoolsModule(inst: Centrifuge) {
                 trancheId: tx.trancheId.split('-')[1],
               }
             })
+            return {
+              investorTransactions: txs || [],
+            }
           })
         )
-      }),
-      map((investorTransactions) => ({
-        investorTransactions:
-          investorTransactions
-            ?.filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
-            .slice(0, count || investorTransactions.length) ?? [],
-      }))
+      })
     )
   }
 
@@ -2808,7 +2805,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const update = updateData.toPrimitive() as any
         if (!update?.changes) return null
         const { changes, submittedAt } = update
-        
+
         return {
           changes: {
             tranches: changes.tranches.noChange === null ? null : changes.tranches.newValue,
