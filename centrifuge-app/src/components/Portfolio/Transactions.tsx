@@ -20,15 +20,17 @@ import {
   Stack,
   Text,
   usePagination,
+  VisualButton,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router-dom'
+import { Link, useRouteMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAddress } from '../../utils/useAddress'
 import { usePool, usePoolMetadata, usePools, useTransactionsByAddress } from '../../utils/usePools'
+import { Spinner } from '../Spinner'
 import { TransactionTypeChip } from './TransactionTypeChip'
 
 export const TRANSACTION_CARD_COLUMNS = `150px 125px 200px 150px 1fr`
@@ -42,12 +44,12 @@ type TransactionsProps = {
 export function Transactions({ count, txTypes }: TransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
-  const transactions = useTransactionsByAddress(formatAddress(address || ''), count, txTypes)
+  const transactions = useTransactionsByAddress(formatAddress(address || ''))
   const match = useRouteMatch('/history')
   const [sortKey, setSortKey] = React.useState<'date' | 'amount'>('date')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
   const pagination = usePagination({
-    data: transactions?.investorTransactions,
+    data: transactions?.investorTransactions || [],
     pageSize: 10,
   })
   const pools = usePools()
@@ -55,6 +57,8 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
   const investorTransactions: TransactionListItemProps[] = React.useMemo(() => {
     const txs =
       transactions?.investorTransactions
+        .slice(0, count || transactions?.investorTransactions.length)
+        .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
         .map((tx) => {
           return {
             date: new Date(tx.timestamp).getTime(),
@@ -75,7 +79,7 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
           }
         }) || []
     return sortOrder === 'asc' ? txs.reverse() : txs
-  }, [sortKey, transactions, sortOrder, pagination])
+  }, [sortKey, transactions, sortOrder, txTypes, count])
 
   const paginatedInvestorTransactions = React.useMemo(() => {
     return investorTransactions.slice(
@@ -166,14 +170,16 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
           </Stack>
         </Stack>
         {match ? null : (
-          <Box>
-            <AnchorButton small variant="tertiary" href="history" icon={IconEye}>
-              View all
-            </AnchorButton>
-          </Box>
+          <Link to="/history">
+            <Box display="inline-block">
+              <VisualButton small variant="tertiary" icon={IconEye}>
+                View all
+              </VisualButton>
+            </Box>
+          </Link>
         )}
         <Shelf justifyContent="space-between">
-          {pagination.pageCount > 1 && (
+          {match && pagination.pageCount > 1 && (
             <Shelf>
               <Pagination />
             </Shelf>
@@ -191,7 +197,9 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
         </Shelf>
       </Stack>
     </PaginationContainer>
-  ) : null
+  ) : (
+    <Spinner />
+  )
 }
 
 export type TransactionListItemProps = {
