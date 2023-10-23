@@ -65,12 +65,8 @@ export function useAllTransactions(address?: string) {
 }
 
 export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
-  const [result] = useCentrifugeQuery(
-    ['investorTransactions', poolId, trancheId, from, to],
-    (cent) => cent.pools.getInvestorTransactions([poolId, trancheId, from, to]),
-    {
-      suspense: true,
-    }
+  const [result] = useCentrifugeQuery(['investorTransactions', poolId, trancheId, from, to], (cent) =>
+    cent.pools.getInvestorTransactions([poolId, trancheId, from, to])
   )
 
   return result
@@ -81,7 +77,6 @@ export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) 
     ['borrowerTransactions', poolId, from, to],
     (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
     {
-      suspense: true,
       enabled: !poolId.startsWith('0x'),
     }
   )
@@ -119,7 +114,6 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
       )
     },
     {
-      suspense: true,
       enabled: !!pool && !poolId.startsWith('0x') && !!loan,
     }
   )
