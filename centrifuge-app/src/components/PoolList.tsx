@@ -119,7 +119,7 @@ export function poolsToPoolCardProps(
     return {
       poolId: pool.id,
       name: metaData?.pool?.name,
-      assetClass: metaData?.pool?.asset.class,
+      assetClass: metaData?.pool?.asset.subClass,
       valueLocked: getPoolValueLocked(pool),
       currencySymbol: pool.currency.symbol,
       apr: mostSeniorTranche?.interestRatePerSec,
