@@ -90,12 +90,12 @@ export function PoolList() {
               ? Array(6)
                   .fill(true)
                   .map((_, index) => (
-                    <Box as="li" key={index}>
+                    <Box as="li" key={`pool-list-loading-${index}`}>
                       <PoolCard isLoading={true} />
                     </Box>
                   ))
               : filteredPools.map((pool) => (
-                  <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
+                  <PoolCardBox as="li" key={`pool-list-${pool.poolId}-${Math.random()}`} status={pool.status}>
                     <PoolCard {...pool} />
                   </PoolCardBox>
                 ))}
