@@ -237,6 +237,8 @@ Issued At: ${new Date().toISOString()}`
         safeAddress: address,
         messageHash,
         evmChainId,
+        network: 'evmOnSafe',
+        nonce,
       })
     } else {
       throw new Error('Invalid signature')

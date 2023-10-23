@@ -1,7 +1,9 @@
 import { isAddress } from '@ethersproject/address'
 import { Contract } from '@ethersproject/contracts'
 import { InfuraProvider, JsonRpcProvider, Provider } from '@ethersproject/providers'
+import { BigNumber, ethers } from 'ethers'
 import { Request, Response } from 'express'
+import fetch from 'node-fetch'
 import { SiweMessage } from 'siwe'
 import { InferType } from 'yup'
 import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
@@ -65,4 +67,73 @@ export async function verifyEvmWallet(req: Request, res: Response): Promise<Requ
     network,
     chainId,
   }
+}
+
+export const verifySafeWallet = async (req: Request, res: Response) => {
+  const { safeAddress, messageHash, evmChainId, nonce } = req.body
+  const MAGIC_VALUE_BYTES = '0x20c13b0b'
+
+  if (!isAddress(safeAddress)) {
+    throw new HttpError(400, 'Invalid address')
+  }
+
+  const cookieNonce = req.signedCookies[`onboarding-auth-${safeAddress.toLowerCase()}`]
+
+  if (!cookieNonce || cookieNonce !== nonce) {
+    throw new HttpError(400, 'Invalid nonce')
+  }
+
+  const provider = new InfuraProvider(req.body.evmChainId, process.env.INFURA_KEY)
+  const safeContract = new ethers.Contract(
+    safeAddress,
+    [
+      'function isValidSignature(bytes calldata _data, bytes calldata _signature) public view returns (bytes4)',
+      'function getMessageHash(bytes memory message) public view returns (bytes32)',
+      'function getThreshold() public view returns (uint256)',
+    ],
+    provider
+  )
+
+  const safeMessageHash = await safeContract.getMessageHash(messageHash)
+
+  const safeMessage = await fetchSafeMessage(safeMessageHash, evmChainId)
+
+  if (!safeMessage) {
+    throw new HttpError(400, 'Unable to fetch SafeMessage')
+  }
+
+  const threshold = BigNumber.from(await safeContract.getThreshold()).toNumber()
+
+  if (!threshold || threshold > safeMessage.confirmations.length) {
+    throw new HttpError(400, 'Threshold has not been met')
+  }
+
+  const response = await safeContract.isValidSignature(messageHash, safeMessage?.preparedSignature)
+
+  if (response === MAGIC_VALUE_BYTES) {
+    res.clearCookie(`onboarding-auth-${safeAddress.toLowerCase()}`)
+
+    return {
+      address: safeAddress,
+      chainId: evmChainId,
+      network: 'evm',
+    }
+  }
+
+  throw new HttpError(400, 'Invalid signature')
+}
+
+const TX_SERVICE_URLS: Record<string, string> = {
+  '1': 'https://safe-transaction-mainnet.safe.global/api',
+  '5': 'https://safe-transaction-goerli.staging.5afe.dev/api',
+}
+
+const fetchSafeMessage = async (safeMessageHash: string, chainId: number) => {
+  const TX_SERVICE_URL = TX_SERVICE_URLS[chainId.toString()]
+
+  const response = await fetch(`${TX_SERVICE_URL}/v1/messages/${safeMessageHash}/`, {
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+  return response.json()
 }

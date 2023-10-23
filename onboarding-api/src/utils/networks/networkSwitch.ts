@@ -9,18 +9,20 @@ import {
   validateSubstrateRemark,
   verifySubstrateWallet,
 } from './centrifuge'
-import { validateEvmRemark, verifyEvmWallet } from './evm'
+import { validateEvmRemark, verifyEvmWallet, verifySafeWallet } from './evm'
 import { addTinlakeInvestorToMemberList, getTinlakePoolById } from './tinlake'
 
 export class NetworkSwitch {
-  network: SupportedNetworks
-  constructor(network: SupportedNetworks = 'substrate') {
+  network: SupportedNetworks | 'evmOnSafe'
+  constructor(network: SupportedNetworks | 'evmOnSafe' = 'substrate') {
     this.network = network
   }
 
   verifyWallet = (req: Request, res: Response) => {
     if (this.network === 'substrate') {
       return verifySubstrateWallet(req, res)
+    } else if (this.network === 'evmOnSafe') {
+      return verifySafeWallet(req, res)
     } else if (this.network === 'evm' || this.network === 'evmOnSubstrate') {
       return verifyEvmWallet(req, res)
     }
