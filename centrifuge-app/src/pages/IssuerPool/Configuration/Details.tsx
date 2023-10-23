@@ -20,11 +20,19 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
 
-type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'podEndpoint'> & { listed: boolean }
+type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'subAssetClass' | 'podEndpoint'> & {
+  listed: boolean
+}
 
-const ASSET_CLASSES = config.assetClasses.map((label) => ({
-  label,
-  value: label,
+const assetClassLabels = {
+  privateCredit: 'Private Credit',
+  publicCredit: 'Public Credit',
+}
+type AssetClass = 'publicCredit' | 'privateCredit'
+
+const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
+  label: assetClassLabels[key as AssetClass],
+  value: key,
 }))
 
 export function Details() {
@@ -43,7 +51,11 @@ export function Details() {
     () => ({
       poolName: metadata?.pool?.name ?? '',
       poolIcon: iconFile ?? null,
-      assetClass: metadata?.pool?.asset?.class ?? '',
+      assetClass:
+        metadata?.pool?.asset?.class && Object.keys(config.assetClasses).includes(metadata.pool.asset.class)
+          ? metadata.pool.asset.class
+          : 'privateCredit',
+      subAssetClass: metadata?.pool?.asset?.subClass ?? '',
       podEndpoint: metadata?.pod?.node ?? '',
       listed: metadata?.pool?.listed ?? false,
     }),
@@ -80,6 +92,7 @@ export function Details() {
           icon: iconUri ? { uri: iconUri, mime: values.poolIcon!.type } : oldMetadata.pool.icon,
           asset: {
             class: values.assetClass,
+            subClass: values.subAssetClass,
           },
           listed: values.listed,
         },
@@ -112,6 +125,12 @@ export function Details() {
   const icon = cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri ?? '')
 
   const currency = pool?.currency.symbol ?? ''
+
+  const subAssetClasses =
+    config.assetClasses[form.values.assetClass]?.map((label) => ({
+      label,
+      value: label,
+    })) ?? []
 
   return (
     <FormikProvider value={form}>
@@ -172,11 +191,28 @@ export function Details() {
                   <Select
                     name="assetClass"
                     label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                    onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
+                    onChange={(event) => {
+                      form.setFieldValue('assetClass', event.target.value)
+                      form.setFieldValue('subAssetClass', '', false)
+                    }}
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     value={field.value}
                     options={ASSET_CLASSES}
+                    placeholder="Select..."
+                  />
+                )}
+              </Field>
+              <Field name="subAssetClass" validate={validate.subAssetClass}>
+                {({ field, meta, form }: FieldProps) => (
+                  <Select
+                    name="subAssetClass"
+                    label="Secondary asset class"
+                    onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
+                    onBlur={field.onBlur}
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    value={field.value}
+                    options={subAssetClasses}
                     placeholder="Select..."
                   />
                 )}
@@ -215,7 +251,11 @@ export function Details() {
               <Box as={icon ? 'img' : 'div'} width="iconLarge" height="iconLarge" src={icon} />
               <LabelValueStack label="Pool name" value={metadata?.pool?.name} />
 
-              <LabelValueStack label="Asset class" value={metadata?.pool?.asset.class} />
+              <LabelValueStack
+                label="Asset class"
+                value={assetClassLabels[metadata?.pool?.asset.class as AssetClass] ?? metadata?.pool?.asset.class}
+              />
+              <LabelValueStack label="Secondary asset class" value={metadata?.pool?.asset.subClass} />
 
               <LabelValueStack label="Currency" value={currency} />
               <LabelValueStack label="POD endpoint" value={metadata?.pod?.node ?? '-'} />
