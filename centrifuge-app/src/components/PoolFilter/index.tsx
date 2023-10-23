@@ -16,8 +16,8 @@ export function PoolFilter({ pools }: PoolFilterProps) {
     }
 
     return [
-      [...new Set(pools.map(({ assetClass }) => assetClass))],
-      [...new Set(pools.map(({ status }) => status))],
+      [...new Set(pools.map(({ assetClass }) => assetClass).filter(Boolean))],
+      [...new Set(pools.map(({ status }) => status).filter(Boolean))],
     ] as [string[], string[]]
   }, [pools])
 
