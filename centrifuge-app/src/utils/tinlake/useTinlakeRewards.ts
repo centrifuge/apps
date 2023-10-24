@@ -9,13 +9,15 @@ import { RewardBalance, RewardClaim, RewardDayTotals, RewardsData, UserRewardsDa
 async function getTinlakeUserRewards(ethAddr: string) {
   let rewardBalances: RewardBalance[] = []
 
-  const response = await fetch('https://graph.centrifuge.io/tinlake', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query: `
+  const response = await fetch(
+    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/1.0.2/gn',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
         query GetRewardBalances($address: String!) {
           rewardBalances(where: {id: $address}) {
             links {
@@ -28,11 +30,12 @@ async function getTinlakeUserRewards(ethAddr: string) {
           }
         }
         `,
-      variables: {
-        address: ethAddr.toLowerCase(),
-      },
-    }),
-  })
+        variables: {
+          address: ethAddr.toLowerCase(),
+        },
+      }),
+    }
+  )
 
   if (response?.ok) {
     const { data } = await response.json()
@@ -73,13 +76,15 @@ export function useTinlakeUserRewards(ethAddr?: string | null) {
 async function getTinlakeRewards(): Promise<RewardsData | null> {
   let rewardDayTotals: RewardDayTotals[] = []
 
-  const response = await fetch('https://graph.centrifuge.io/tinlake', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query: `
+  const response = await fetch(
+    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/1.0.2/gn',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
         query GetRewardDayTotals {
           rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
             dropRewardRate
@@ -90,8 +95,9 @@ async function getTinlakeRewards(): Promise<RewardsData | null> {
           }
         }
         `,
-    }),
-  })
+      }),
+    }
+  )
 
   if (response?.ok) {
     const { data } = await response.json()
