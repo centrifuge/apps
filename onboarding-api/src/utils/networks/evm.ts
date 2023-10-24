@@ -109,10 +109,9 @@ export const verifySafeWallet = async (req: Request, res: Response) => {
   }
 
   const response = await safeContract.isValidSignature(messageHash, safeMessage?.preparedSignature)
+  res.clearCookie(`onboarding-auth-${safeAddress.toLowerCase()}`)
 
   if (response === MAGIC_VALUE_BYTES) {
-    res.clearCookie(`onboarding-auth-${safeAddress.toLowerCase()}`)
-
     return {
       address: safeAddress,
       chainId: evmChainId,
