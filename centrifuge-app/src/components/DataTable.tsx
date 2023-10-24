@@ -297,7 +297,6 @@ export function FilterableTableHeader({
     if (!form.current) return
     const formData = new FormData(form.current)
     const entries = formData.getAll(key) as string[]
-    console.log('entries', entries)
     filters.setFilter(key, entries)
   }
 
@@ -310,7 +309,6 @@ export function FilterableTableHeader({
   }
   const state = filters.getState()
   const selectedOptions = state[key] as Set<string> | undefined
-  console.log('state', state)
 
   return (
     <Box position="relative">
@@ -346,7 +344,7 @@ export function FilterableTableHeader({
                   {optionKeys.map((option, index) => {
                     const label = Array.isArray(options) ? option : options[option]
                     const checked = filters.hasFilter(key, option)
-                    console.log('checked', filters.hasFilter(key, option))
+
                     return (
                       <Checkbox
                         key={index}
