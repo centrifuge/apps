@@ -66,7 +66,7 @@ export function PoolDetailSideBar({
   const isTinlakePool = poolId.startsWith('0x')
   const tinlakeNetworks = [ethConfig.network === 'goerli' ? 5 : 1] as Network[]
   // TODO: fetch supported networks from centrifuge chain
-  const centrifugeNetworks = ['centrifuge', 1, 5] as Network[]
+  const centrifugeNetworks = ['centrifuge'] as Network[]
 
   return (
     <InvestRedeem
