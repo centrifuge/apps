@@ -12,6 +12,11 @@ const sharedStyles = css`
     outline: ${({ theme }) => `2px solid ${theme.colors.textSelected}`};
     outline-offset: 4px;
   }
+  &:hover,
+  &:hover > svg {
+    cursor: pointer;
+    color: ${({ theme }) => theme.colors.textInteractiveHover};
+  }
 `
 
 export const FilterButton = styled(Text)`

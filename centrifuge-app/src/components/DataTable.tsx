@@ -1,10 +1,25 @@
-import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Box,
+  Card,
+  Checkbox,
+  Divider,
+  IconArrowDown,
+  IconFilter,
+  Menu,
+  Popover,
+  Shelf,
+  Stack,
+  Text,
+  Tooltip,
+} from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import BN from 'bn.js'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
 import { useElementScrollSize } from '../utils/useElementScrollSize'
+import { FiltersState } from '../utils/useFilters'
+import { FilterButton, QuickAction } from './PoolFilter/styles'
 
 type GroupedProps = {
   groupIndex?: number
@@ -230,11 +245,15 @@ const HeaderCol = styled(DataCol)`
   align-items: center;
 `
 
-export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; align?: Column['align'] }> = ({
+export function SortableTableHeader({
   label,
   orderBy,
   align,
-}) => {
+}: {
+  label: string
+  orderBy?: OrderBy
+  align?: Column['align']
+}) {
   return (
     <StyledHeader>
       {(!align || align === 'right') && (
@@ -253,6 +272,112 @@ export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; 
         />
       )}
     </StyledHeader>
+  )
+}
+
+export function FilterableTableHeader({
+  filterKey: key,
+  label,
+  options,
+  filters,
+  align,
+  tooltip,
+}: {
+  filterKey: string
+  label: string
+  options: string[] | Record<string, string>
+  filters: FiltersState
+  align?: Column['align']
+  tooltip?: string
+}) {
+  const optionKeys = Array.isArray(options) ? options : Object.keys(options)
+  const form = React.useRef<HTMLFormElement>(null)
+
+  function handleChange() {
+    if (!form.current) return
+    const formData = new FormData(form.current)
+    const entries = formData.getAll(key) as string[]
+    console.log('entries', entries)
+    filters.setFilter(key, entries)
+  }
+
+  function deselectAll() {
+    filters.setFilter(key, [])
+  }
+
+  function selectAll() {
+    filters.setFilter(key, optionKeys)
+  }
+  const state = filters.getState()
+  const selectedOptions = state[key] as Set<string> | undefined
+  console.log('state', state)
+
+  return (
+    <Box position="relative">
+      <Popover
+        placement="bottom left"
+        renderTrigger={(props, ref, state) => {
+          return (
+            <Box ref={ref}>
+              {tooltip ? (
+                <Tooltip body={tooltip} {...props} style={{ display: 'block' }}>
+                  <FilterButton forwardedAs="span" variant="body3">
+                    {label}
+                    <IconFilter color={selectedOptions?.size ? 'textSelected' : 'textSecondary'} size="1em" />
+                  </FilterButton>
+                </Tooltip>
+              ) : (
+                <FilterButton forwardedAs="button" type="button" variant="body3" {...props}>
+                  {label}
+                  <IconFilter color={selectedOptions?.size ? 'textSelected' : 'textSecondary'} size="1em" />
+                </FilterButton>
+              )}
+            </Box>
+          )
+        }}
+        renderContent={(props, ref) => (
+          <Box {...props} ref={ref}>
+            <Menu width={300}>
+              <Stack as="form" ref={form} p={[2, 3]} gap={2}>
+                <Stack as="fieldset" borderWidth={0} gap={2}>
+                  <Box as="legend" className="visually-hidden">
+                    Filter {label} by:
+                  </Box>
+                  {optionKeys.map((option, index) => {
+                    const label = Array.isArray(options) ? option : options[option]
+                    const checked = filters.hasFilter(key, option)
+                    console.log('checked', filters.hasFilter(key, option))
+                    return (
+                      <Checkbox
+                        key={index}
+                        name={key}
+                        value={option}
+                        onChange={handleChange}
+                        checked={checked}
+                        label={label}
+                        extendedClickArea
+                      />
+                    )
+                  })}
+                </Stack>
+
+                <Divider borderColor="textPrimary" />
+
+                {selectedOptions?.size === optionKeys.length ? (
+                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => deselectAll()}>
+                    Deselect all
+                  </QuickAction>
+                ) : (
+                  <QuickAction variant="body1" forwardedAs="button" type="button" onClick={() => selectAll()}>
+                    Select all
+                  </QuickAction>
+                )}
+              </Stack>
+            </Menu>
+          </Box>
+        )}
+      />
+    </Box>
   )
 }
 

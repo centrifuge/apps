@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { IconChevronRight } from '../../icon'
-import useControlledState from '../../utils/useControlledState'
+import { useControlledState } from '../../utils/useControlledState'
 import { Box } from '../Box'
 import { VisualButton } from '../Button'
 import { Card, CardProps } from '../Card'

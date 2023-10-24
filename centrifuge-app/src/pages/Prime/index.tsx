@@ -3,10 +3,11 @@ import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder }
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
 import aaveLogo from '../../assets/images/aave-token-logo.svg'
-import { Column, DataTable, SortableTableHeader } from '../../components/DataTable'
+import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { useFilters } from '../../utils/useFilters'
 
 type DAO = {
   slug: string
@@ -21,6 +22,13 @@ const DAOs: DAO[] = [
     slug: 'aave',
     name: 'Aave',
     network: 1,
+    address: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f',
+    icon: aaveLogo,
+  },
+  {
+    slug: 'gnosis',
+    name: 'Gnosis',
+    network: 5,
     address: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f',
     icon: aaveLogo,
   },
@@ -78,13 +86,15 @@ function DaoPortfoliosTable() {
     return result
   })
 
-  const rows: Row[] = DAOs.map((dao, i) => ({
+  const mapped: Row[] = DAOs.map((dao, i) => ({
     ...dao,
     value: data?.[i].native.balance.toFloat(),
     networkName: getNetworkName(dao.network),
   }))
 
   const uniqueNetworks = [...new Set(DAOs.map((dao) => dao.network))]
+  const filters = useFilters({ data: mapped })
+  console.log('filters.data', filters.data)
 
   const columns: Column[] = [
     {
@@ -100,7 +110,14 @@ function DaoPortfoliosTable() {
     },
     {
       align: 'left',
-      header: 'Network',
+      header: (
+        <FilterableTableHeader
+          filterKey="network"
+          filters={filters}
+          label="Network"
+          options={Object.fromEntries(uniqueNetworks.map((chain) => [chain, getNetworkName(chain)]))}
+        />
+      ),
       cell: (row: Row) => <Text>{row.networkName}</Text>,
       flex: '3',
     },
@@ -123,7 +140,7 @@ function DaoPortfoliosTable() {
 
   return (
     <LayoutSection title="DAO portfolios">
-      <DataTable columns={columns} data={rows} onRowClicked={(row: Row) => `/prime/${row.slug}`} />
+      <DataTable columns={columns} data={filters.data} onRowClicked={(row: Row) => `/prime/${row.slug}`} />
     </LayoutSection>
   )
 }
