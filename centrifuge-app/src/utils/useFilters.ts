@@ -13,6 +13,17 @@ export function useFilters<T>({ key: prefix = 'f_', data = [], useSearchParams =
   const history = useHistory()
   const { search } = useLocation()
   const [params, setParams] = React.useState(() => new URLSearchParams(useSearchParams ? search : undefined))
+  const state: Record<string, Set<string>> = {}
+
+  for (const [prefixedKey, value] of params.entries()) {
+    if (!prefixedKey.startsWith(prefix)) continue
+    const key = prefixedKey.slice(prefix.length)
+    if (state[key]) {
+      state[key].add(value)
+    } else {
+      state[key] = new Set([value])
+    }
+  }
 
   const setFilter = useEventCallback((key: string, value: string[]) => {
     setParams((prev) => {
@@ -29,30 +40,18 @@ export function useFilters<T>({ key: prefix = 'f_', data = [], useSearchParams =
     })
   })
 
-  React.useEffect(() => {
-    history.replace({ search: params.toString() })
-  }, [params, history])
-
-  const state: Record<string, Set<string>> = {}
-
   const hasFilter = useEventCallback((key: string, value: string) => {
     return !!state[key]?.has(String(value))
   })
 
   const getState = useGetLatest(state)
 
-  for (const [prefixedKey, value] of params.entries()) {
-    if (!prefixedKey.startsWith(prefix)) continue
-    const key = prefixedKey.slice(prefix.length)
-    if (state[key]) {
-      state[key].add(value)
-    } else {
-      state[key] = new Set([value])
-    }
-  }
-
   const entries = Object.entries(state)
   const filtered = data.filter((entry) => entries.every(([key, set]) => set.has(String(get(entry, key)))))
+
+  React.useEffect(() => {
+    history.replace({ search: params.toString() })
+  }, [params, history])
 
   return {
     setFilter,

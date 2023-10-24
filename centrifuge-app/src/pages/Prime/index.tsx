@@ -1,3 +1,4 @@
+import { Price } from '@centrifuge/centrifuge-js'
 import { Network, useCentrifuge, useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import { useQuery } from 'react-query'
@@ -6,8 +7,10 @@ import aaveLogo from '../../assets/images/aave-token-logo.svg'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
+import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useFilters } from '../../utils/useFilters'
+import { useSubquery } from '../../utils/useSubquery'
 
 type DAO = {
   slug: string
@@ -21,15 +24,8 @@ const DAOs: DAO[] = [
   {
     slug: 'aave',
     name: 'Aave',
-    network: 1,
-    address: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f',
-    icon: aaveLogo,
-  },
-  {
-    slug: 'gnosis',
-    name: 'Gnosis',
-    network: 5,
-    address: '0x423420Ae467df6e90291fd0252c0A8a637C1e03f',
+    network: 'centrifuge',
+    address: 'kALNreUp6oBmtfG87fe7MakWR8BnmQ4SmKjjfG27iVd3nuTue',
     icon: aaveLogo,
   },
 ]
@@ -47,12 +43,14 @@ function Prime() {
     <>
       <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5}>
         <Text variant="heading1">Centrifuge Prime</Text>
-        <Text variant="body1">
-          Centrifuge Prime was built to meet the needs of large decentralized organizations and protocols. Through
-          Centrifuge Prime, DeFi native organizations can integrate with the largest financial markets in the world and
-          take advantage of real yields from real economic activity - all onchain. Assets tailored to your needs,
-          processes adapted to your governance, and all through decentralized rails.
-        </Text>
+        <Box maxWidth={800}>
+          <Text variant="body1">
+            Centrifuge Prime was built to meet the needs of large decentralized organizations and protocols. Through
+            Centrifuge Prime, DeFi native organizations can integrate with the largest financial markets in the world
+            and take advantage of real yields from real economic activity - all onchain. Assets tailored to your needs,
+            processes adapted to your governance, and all through decentralized rails.
+          </Text>
+        </Box>
         <Box bleedX={2} bleedY={1}>
           <AnchorButton
             href="https://centrifuge.io/prime/"
@@ -69,32 +67,80 @@ function Prime() {
   )
 }
 
-type Row = DAO & { value?: number; networkName: string }
+type Row = DAO & { value?: number; profit?: number; networkName: string; firstInvestment?: Date }
 
 function DaoPortfoliosTable() {
   const utils = useCentrifugeUtils()
   const cent = useCentrifuge()
   const getNetworkName = useGetNetworkName()
-  const { data } = useQuery(['daoPortfolios'], async () => {
-    const result = await Promise.all(
-      DAOs.map((dao) => {
-        const address =
-          typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
-        return firstValueFrom(cent.pools.getBalances([address]))
-      })
-    )
-    return result
-  })
 
-  const mapped: Row[] = DAOs.map((dao, i) => ({
+  const daos = DAOs.map((dao) => ({
     ...dao,
-    value: data?.[i].native.balance.toFloat(),
-    networkName: getNetworkName(dao.network),
+    address: utils.formatAddress(
+      typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
+    ),
   }))
 
-  const uniqueNetworks = [...new Set(DAOs.map((dao) => dao.network))]
+  // TODO: Update to use new portfolio Runtime API
+  const { data, isLoading: isPortfoliosLoading } = useQuery(['daoPortfolios', daos.map((dao) => dao.address)], () =>
+    Promise.all(daos.map((dao) => firstValueFrom(cent.pools.getBalances([dao.address]))))
+  )
+
+  const { data: subData, isLoading: isSubqueryLoading } = useSubquery(
+    `query ($accounts: [String!]) {
+      accounts(
+        filter: {id: {in: $accounts}}
+      ) {
+        nodes {
+          id
+          investorTransactions {
+            nodes {
+              timestamp
+              tokenPrice
+              tranche {
+                tokenPrice
+                trancheId
+              }
+            }
+          }
+        }
+      }
+    }`,
+    {
+      accounts: daos.map((dao) => dao.address),
+    }
+  )
+
+  const mapped: Row[] = daos.map((dao, i) => {
+    const investTxs = subData?.accounts.nodes.find((n: any) => n.id === dao.address)?.investorTransactions.nodes
+    const trancheBalances =
+      data?.[i].tranches && Object.fromEntries(data[i].tranches.map((t) => [t.trancheId, t.balance.toFloat()]))
+    const yields =
+      trancheBalances &&
+      Object.keys(trancheBalances).map((tid) => {
+        const firstTx = investTxs?.find((tx: any) => tx.tranche.trancheId === tid)
+        const initialTokenPrice = firstTx && new Price(firstTx.tokenPrice).toFloat()
+        const tokenPrice = firstTx && new Price(firstTx.tranche.tokenPrice).toFloat()
+        const profit = tokenPrice / initialTokenPrice - 1
+        return [tid, profit] as const
+      })
+    const totalValue = trancheBalances && Object.values(trancheBalances)?.reduce((acc, balance) => acc + balance, 0)
+    const weightedYield =
+      yields &&
+      totalValue &&
+      yields.reduce((acc, [tid, profit]) => acc + profit * trancheBalances![tid], 0) / totalValue
+
+    return {
+      ...dao,
+      value: totalValue ?? 0,
+      profit: weightedYield ? weightedYield * 100 : 0,
+      networkName: getNetworkName(dao.network),
+      firstInvestment: investTxs?.[0] && new Date(investTxs[0].timestamp),
+    }
+  })
+
+  const uniqueNetworks = [...new Set(daos.map((dao) => dao.network))]
   const filters = useFilters({ data: mapped })
-  console.log('filters.data', filters.data)
 
   const columns: Column[] = [
     {
@@ -124,15 +170,29 @@ function DaoPortfoliosTable() {
     {
       header: <SortableTableHeader label="Portfolio value" />,
       cell: (row: Row) => (
-        <TextWithPlaceholder isLoading={!row.value}>{row.value && formatBalance(row.value, 'USD')}</TextWithPlaceholder>
+        <TextWithPlaceholder isLoading={isPortfoliosLoading}>
+          {row.value != null && formatBalance(row.value, 'USD')}
+        </TextWithPlaceholder>
       ),
       flex: '3',
       sortKey: 'value',
     },
     {
-      header: 'Profit',
+      header: <SortableTableHeader label="Profit" />,
       cell: (row: Row) => (
-        <TextWithPlaceholder isLoading={!row.value}>{row.value && formatPercentage(row.value)}</TextWithPlaceholder>
+        <TextWithPlaceholder isLoading={isPortfoliosLoading || isSubqueryLoading}>
+          {row.profit != null && formatPercentage(row.profit)}
+        </TextWithPlaceholder>
+      ),
+      flex: '3',
+      sortKey: 'profit',
+    },
+    {
+      header: 'First investment',
+      cell: (row: Row) => (
+        <TextWithPlaceholder isLoading={isSubqueryLoading}>
+          {row.firstInvestment ? formatDate(row.firstInvestment) : '-'}
+        </TextWithPlaceholder>
       ),
       flex: '3',
     },
@@ -140,7 +200,13 @@ function DaoPortfoliosTable() {
 
   return (
     <LayoutSection title="DAO portfolios">
-      <DataTable columns={columns} data={filters.data} onRowClicked={(row: Row) => `/prime/${row.slug}`} />
+      <DataTable
+        columns={columns}
+        data={filters.data}
+        defaultSortKey="value"
+        defaultSortOrder="desc"
+        onRowClicked={(row: Row) => `/prime/${row.slug}`}
+      />
     </LayoutSection>
   )
 }
