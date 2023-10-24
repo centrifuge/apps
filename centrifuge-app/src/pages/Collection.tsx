@@ -17,7 +17,7 @@ import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
 import { useSuitableAccounts } from '../utils/usePermissions'
 
-export const CollectionPage: React.FC = () => {
+export default function CollectionPage() {
   return (
     <PageWithSideBar>
       <Collection />

@@ -8,7 +8,7 @@ import { Dec } from '../utils/Decimal'
 import { useListedPools } from '../utils/useListedPools'
 import { usePools } from '../utils/usePools'
 
-export function TokenOverviewPage() {
+export default function TokenOverviewPage() {
   return (
     <LayoutBase>
       <PoolsTokensShared title="Tokens">

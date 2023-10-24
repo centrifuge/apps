@@ -5,7 +5,7 @@ import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 
-export const NotFoundPage: React.FC = () => {
+export default function NotFoundPag() {
   return (
     <PageWithSideBar>
       <Pools />
