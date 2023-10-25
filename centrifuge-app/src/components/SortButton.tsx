@@ -1,8 +1,9 @@
-import { IconChevronDown, IconChevronUp, Stack, Tooltip } from '@centrifuge/fabric'
+import { Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
+import { FilterButton } from './FilterButton'
 import { SEARCH_KEYS } from './PoolFilter/config'
-import { FilterButton } from './PoolFilter/styles'
+import { SortChevrons } from './SortChevrons'
 
 export type SortButtonProps = {
   label: string
@@ -63,7 +64,7 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
         <FilterButton forwardedAs="span" variant="body3">
           {label}
 
-          <Inner sorting={sorting} />
+          <SortChevrons sorting={sorting} />
         </FilterButton>
       </Tooltip>
     )
@@ -86,23 +87,7 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
     >
       {label}
 
-      <Inner sorting={sorting} />
+      <SortChevrons sorting={sorting} />
     </FilterButton>
-  )
-}
-
-function Inner({ sorting }: { sorting: Sorting }) {
-  return (
-    <Stack as="span" width="1em">
-      <IconChevronUp
-        size="1em"
-        color={sorting.isActive && sorting.direction === 'asc' ? 'textSelected' : 'textSecondary'}
-      />
-      <IconChevronDown
-        size="1em"
-        color={sorting.isActive && sorting.direction === 'desc' ? 'textSelected' : 'textSecondary'}
-        style={{ marginTop: '-.4em' }}
-      />
-    </Stack>
   )
 }

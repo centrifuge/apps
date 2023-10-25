@@ -1,5 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
+import { SortOptions } from './InvestedTokens'
 import { TokenCardProps } from './TokenListItem'
 
 export const sortTokens = (
@@ -8,11 +9,9 @@ export const sortTokens = (
     centPools: Pool[]
     tinlakePools: TinlakePool[]
   },
-  searchParams: URLSearchParams
+  sortOptions: SortOptions
 ) => {
-  const sortDirection = searchParams.get('sort')
-  const sortBy = searchParams.get('sort-by')
-
+  const { sortBy, sortDirection } = sortOptions
   if (sortBy === 'market-value') {
     tokens.sort((trancheA, trancheB) => {
       const valueA = sortMarketValue(trancheA, pools)

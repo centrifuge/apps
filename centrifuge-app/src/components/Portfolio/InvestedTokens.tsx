@@ -1,19 +1,24 @@
 import { useAddress, useBalances } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Stack, Text } from '@centrifuge/fabric'
-import { useMemo } from 'react'
-import { useLocation } from 'react-router'
+import { useMemo, useState } from 'react'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { useTinlakePools } from '../../utils/tinlake/useTinlakePools'
 import { usePools } from '../../utils/usePools'
-import { SortButton } from '../SortButton'
+import { FilterButton } from '../FilterButton'
+import { SortChevrons } from '../SortChevrons'
 import { sortTokens } from './sortTokens'
 import { TokenListItem } from './TokenListItem'
 
 export const COLUMN_GAPS = '200px 140px 140px 140px'
 
+export type SortOptions = {
+  sortBy: 'position' | 'market-value'
+  sortDirection: 'asc' | 'desc'
+}
+
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export const InvestedTokens = ({ canInvestRedeem = false }) => {
-  const { search } = useLocation()
+  const [sortOptions, setSortOptions] = useState<SortOptions>({ sortBy: 'position', sortDirection: 'desc' })
 
   const address = useAddress()
   const centBalances = useBalances(address)
@@ -37,9 +42,16 @@ export const InvestedTokens = ({ canInvestRedeem = false }) => {
             centPools: pools,
             tinlakePools: tinlakePools.pools,
           },
-          new URLSearchParams(search)
+          sortOptions
         )
       : []
+
+  const handleSort = (sortOption: SortOptions['sortBy']) => {
+    setSortOptions((prev) => ({
+      sortBy: sortOption,
+      sortDirection: prev.sortBy !== sortOption ? 'desc' : prev.sortDirection === 'asc' ? 'desc' : 'asc',
+    }))
+  }
 
   return sortedTokens.length ? (
     <Stack as="article" gap={2}>
@@ -53,13 +65,23 @@ export const InvestedTokens = ({ canInvestRedeem = false }) => {
             Token
           </Text>
 
-          <SortButton label="Position" searchKey="position" justifySelf="start" />
+          <FilterButton forwardedAs="span" variant="body3" onClick={() => handleSort('position')}>
+            Position
+            <SortChevrons
+              sorting={{ isActive: sortOptions.sortBy === 'position', direction: sortOptions.sortDirection }}
+            />
+          </FilterButton>
 
           <Text as="span" variant="body3">
             Token price
           </Text>
 
-          <SortButton label="Market Value" searchKey="market-value" justifySelf="start" />
+          <FilterButton forwardedAs="span" variant="body3" onClick={() => handleSort('market-value')}>
+            Market Value
+            <SortChevrons
+              sorting={{ isActive: sortOptions.sortBy === 'market-value', direction: sortOptions.sortDirection }}
+            />
+          </FilterButton>
         </Grid>
 
         <Stack as="ul" role="list" gap={1} py={1}>
