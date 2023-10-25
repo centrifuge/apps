@@ -1,9 +1,9 @@
 import { Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-import { FilterButton } from './FilterButton'
-import { SEARCH_KEYS } from './PoolFilter/config'
-import { SortChevrons } from './SortChevrons'
+import { FilterButton } from '../FilterButton'
+import { SortChevrons } from '../SortChevrons'
+import { SEARCH_KEYS } from './config'
 
 export type SortButtonProps = {
   label: string
