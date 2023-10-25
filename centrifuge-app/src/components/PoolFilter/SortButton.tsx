@@ -4,10 +4,11 @@ import { useHistory, useLocation } from 'react-router-dom'
 import { FilterButton } from '../FilterButton'
 import { SortChevrons } from '../SortChevrons'
 import { SEARCH_KEYS } from './config'
+import { SortBy } from './types'
 
 export type SortButtonProps = {
   label: string
-  searchKey: string
+  searchKey: SortBy
   tooltip?: string
   justifySelf?: 'start' | 'end'
 }

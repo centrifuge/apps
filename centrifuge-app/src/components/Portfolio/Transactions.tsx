@@ -7,7 +7,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconExternalLink, Stack, Text } from '@centrifuge/fabric'
-import { isAddress as isValidEVMAddress } from '@ethersproject/address'
+import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate } from '../../utils/date'
 import { useAddress } from '../../utils/useAddress'
@@ -66,7 +66,7 @@ const formatters = {
 export function Transactions({ count }: AddressTransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
-  const formattedAddress = address && isValidEVMAddress(address) ? address : formatAddress(address || '')
+  const formattedAddress = formatAddress(address || '')
   const allTransactions = useAllTransactions(formattedAddress)
   const formattedTransactions: TransactionCardProps[] = []
 
