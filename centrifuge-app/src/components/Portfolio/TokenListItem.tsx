@@ -34,11 +34,12 @@ export function TokenListItem({ balance, currency, poolId, trancheId, canInvestR
 
   const isTinlakePool = poolId.startsWith('0x')
 
+  // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
   const trancheInfo = pool?.tranches.find(({ id }) => id === trancheId)
   const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
 
   return (
-    <Root as="article" minWidth="1280px">
+    <Root as="article" minWidth="1060px">
       <Grid gridTemplateColumns={`${COLUMN_GAPS} 1fr`} gap={3} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={isTinlakePool}>
@@ -68,11 +69,6 @@ export function TokenListItem({ balance, currency, poolId, trancheId, canInvestR
           {trancheInfo?.tokenPrice
             ? formatBalance(balance.toDecimal().mul(trancheInfo.tokenPrice.toDecimal()), trancheInfo.currency.symbol, 4)
             : '-'}
-        </Text>
-
-        <Text textOverflow="ellipsis" variant="body2">
-          {/* TODO: calculate unrealized p&l */}
-          {trancheInfo?.tokenPrice?.toDecimal().mul(100000).toDecimalPlaces(0).toString()}
         </Text>
 
         {canInvestRedeem && (

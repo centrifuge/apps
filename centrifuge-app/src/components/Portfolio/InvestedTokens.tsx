@@ -9,7 +9,7 @@ import { SortButton } from '../SortButton'
 import { sortTokens } from './sortTokens'
 import { TokenListItem } from './TokenListItem'
 
-export const COLUMN_GAPS = '250px 180px 150px 180px 180px'
+export const COLUMN_GAPS = '250px 180px 150px 180px'
 
 export const InvestedTokens = ({ canInvestRedeem = true }) => {
   const { search } = useLocation()
@@ -59,8 +59,6 @@ export const InvestedTokens = ({ canInvestRedeem = true }) => {
           </Text>
 
           <SortButton label="Market Value" searchKey="market-value" justifySelf="start" />
-
-          <SortButton label="Unrealized P&L" searchKey="unrealized-pl" justifySelf="start" />
         </Grid>
 
         <Stack as="ul" role="list" gap={1} py={1}>

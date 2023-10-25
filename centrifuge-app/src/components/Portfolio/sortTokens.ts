@@ -22,15 +22,6 @@ export const sortTokens = (
     })
   }
 
-  if (sortBy === 'unrealized-pl') {
-    tokens.sort((tokenA, tokenB) => {
-      const valueA = sortUnrealizedPL(tokenA, pools)
-      const valueB = sortUnrealizedPL(tokenB, pools)
-
-      return sortDirection === 'asc' ? valueA - valueB : valueB - valueA
-    })
-  }
-
   if (sortBy === 'position' || (!sortDirection && !sortBy)) {
     tokens.sort(({ balance: balanceA }, { balance: balanceB }) =>
       sortDirection === 'asc'
@@ -53,24 +44,8 @@ const sortMarketValue = (
     ? pools.tinlakePools?.find((p) => p.id.toLowerCase() === token.poolId.toLowerCase())
     : pools.centPools?.find((p) => p.id === token.poolId)
 
+  // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
   const poolTranche = pool?.tranches.find(({ id }) => id === token.trancheId)
 
   return poolTranche?.tokenPrice ? token.balance.toDecimal().mul(poolTranche.tokenPrice.toDecimal()).toNumber() : 0
-}
-
-const sortUnrealizedPL = (
-  token: TokenCardProps,
-  pools: {
-    centPools: Pool[]
-    tinlakePools: TinlakePool[]
-  }
-) => {
-  /* TODO: calculate unrealized p&l */
-  const pool = token.poolId.startsWith('0x')
-    ? pools.tinlakePools?.find((p) => p.id.toLowerCase() === token.poolId.toLowerCase())
-    : pools.centPools?.find((p) => p.id === token.poolId)
-
-  const poolTranche = pool?.tranches.find(({ id }) => id === token.trancheId)
-
-  return poolTranche?.tokenPrice ? poolTranche.tokenPrice.toDecimal().mul(100000).toDecimalPlaces(0).toNumber() : 0
 }
