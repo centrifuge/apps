@@ -37,7 +37,6 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
       const buyDec = lastChanged === 'buy' ? buy : Dec(sell).div(price)
       const buyAmount = CurrencyBalance.fromFloat(buyDec, buyCurrency!.decimals)
       const buyPrice = Rate.fromFloat(price)
-      console.log('buy', buy, buyAmount, buyCurrencyKey, sellCurrencyKey)
       return cent.wrapSignAndSend(
         api,
         api.tx.orderBook.createOrderV1(buyCurrencyKey, sellCurrencyKey, buyAmount, buyPrice),

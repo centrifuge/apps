@@ -211,7 +211,7 @@ type InnerProps = Props & {
 }
 
 function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
-  const { state, actions } = useInvestRedeem()
+  const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
   const isTinlakePool = state.poolId.startsWith('0x')
 

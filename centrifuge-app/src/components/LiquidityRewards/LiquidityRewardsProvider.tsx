@@ -10,7 +10,6 @@ import { LiquidityRewardsContext } from './LiquidityRewardsContext'
 import { LiquidityRewardsActions, LiquidityRewardsProviderProps, LiquidityRewardsState } from './types'
 
 export function LiquidityRewardsProvider(props: LiquidityRewardsProviderProps) {
-  // const { connectedType, isEvmOnSubstrate } = useWallet()
   const isTinlakePool = props.poolId.startsWith('0x')
   return !isTinlakePool ? <Provider {...props} /> : <>{props.children}</>
 }

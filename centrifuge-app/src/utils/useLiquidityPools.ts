@@ -32,7 +32,6 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
           return [manager, pool] as const
         })
       )
-      console.log('results', results)
       return results
         .map((result, i) => {
           if (result.status === 'rejected') {

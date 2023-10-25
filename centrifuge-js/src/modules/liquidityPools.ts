@@ -251,7 +251,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const currencies = await firstValueFrom(getDomainCurrencies([chainId]))
 
     const poolManager = (await contract(investmentManager, ABI.InvestmentManager, options).poolManager()) as string
-    console.log('poolManager', investmentManager, poolManager, poolId, trancheIds, currencies)
 
     const poolData = await multicall<{
       isActive: boolean
@@ -364,7 +363,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    console.log('lpData', lpData)
     const lps = lpData.lps?.filter((lp) => lp !== NULL_ADDRESS)
     if (!lps?.length) return []
 
@@ -389,8 +387,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    console.log('assetData', assetData)
-
     if (!assetData.assets?.length) return []
 
     const currencyData = await multicall<{
@@ -413,6 +409,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 call: ['function decimals() view returns (uint8)'],
                 returns: [[`currencies[${i}].currencyDecimals`]],
               },
+              // TODO: Enable again after testing that it works
               // {
               //   target: assetAddress,
               //   call: ['function PERMIT_TYPEHASH() view returns (bytes32)'],
@@ -444,8 +441,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
       }
     )
-
-    console.log('currencyData', currencyData, assetData)
 
     const result = lps.map((addr, i) => ({
       lpAddress: addr,
@@ -551,12 +546,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
 
-    console.log('pool.anagerCurrencyAllowance', pool.managerCurrencyAllowance)
-
-    // TODO: Remove. just for testing
-    if (pool.tokenPrice.isZero()) {
-      pool.tokenPrice = Price.fromFloat(1)
-    }
     return pool
   }
 

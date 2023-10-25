@@ -194,8 +194,6 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
   let orderBuyCurrencyEVMChain = getCurrencyChainId(order.buyCurrency)
   let orderSellCurrencyEVMChain = getCurrencyChainId(order.sellCurrency)
 
-  console.log('orderBuyCurrencyEVMChain', orderBuyCurrencyEVMChain, orderSellCurrencyEVMChain)
-
   const { execute, reset, isLoading, lastCreatedTransaction } = useCentrifugeTransaction(
     'Fulfill order',
     (cent) => (args: [transferTo: string | null], options) => {

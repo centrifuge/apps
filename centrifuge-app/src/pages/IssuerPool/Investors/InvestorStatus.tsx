@@ -46,7 +46,6 @@ export function InvestorStatus() {
   const centAddress = chain && validAddress ? utils.evmToSubstrateAddress(address, chain) : validAddress
   const permissions = usePermissions(centAddress)
 
-  console.log('permissions', permissions)
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
   const { showLiquidityPoolsOptions } = useDebugFlags()
 

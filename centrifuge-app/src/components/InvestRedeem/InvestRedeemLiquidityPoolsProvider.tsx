@@ -15,7 +15,6 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
 
-  console.log('evmAddress', evmAddress)
   const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
   const evmNativeCurrency = useEvmNativeCurrency()
   const centOrder = usePendingCollect(poolId, trancheId, centAddress)
