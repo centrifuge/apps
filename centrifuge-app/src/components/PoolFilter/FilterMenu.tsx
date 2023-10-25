@@ -1,7 +1,8 @@
 import { Box, Checkbox, Divider, IconFilter, Menu, Popover, Stack, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-import { FilterButton, QuickAction } from './styles'
+import { FilterButton } from '../FilterButton'
+import { QuickAction } from '../QuickAction'
 import { SearchKeys } from './types'
 import { toKebabCase } from './utils'
 

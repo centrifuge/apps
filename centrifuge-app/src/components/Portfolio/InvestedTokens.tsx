@@ -1,89 +1,95 @@
-import { AccountTokenBalance, Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances } from '@centrifuge/centrifuge-react'
+import { useAddress, useBalances } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
-import { useAddress } from '../../utils/useAddress'
-import { usePool } from '../../utils/usePools'
+import { useMemo, useState } from 'react'
+import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
+import { useTinlakePools } from '../../utils/tinlake/useTinlakePools'
+import { usePools } from '../../utils/usePools'
+import { FilterButton } from '../FilterButton'
+import { SortChevrons } from '../SortChevrons'
+import { sortTokens } from './sortTokens'
+import { TokenListItem } from './TokenListItem'
 
-const TOKEN_ITEM_COLUMNS = `250px 200px 100px 150px 1FR`
-const TOKEN_ITEM_GAP = 4
+export const COLUMN_GAPS = '200px 140px 140px 140px'
 
-export function InvestedTokens() {
+export type SortOptions = {
+  sortBy: 'position' | 'market-value'
+  sortDirection: 'asc' | 'desc'
+}
+
+// TODO: change canInvestRedeem to default to true once the drawer is implemented
+export const InvestedTokens = ({ canInvestRedeem = false }) => {
+  const [sortOptions, setSortOptions] = useState<SortOptions>({ sortBy: 'position', sortDirection: 'desc' })
+
   const address = useAddress()
-  const balances = useBalances(address)
+  const centBalances = useBalances(address)
+  const { data: tinlakeBalances } = useTinlakeBalances()
 
-  return !!balances?.tranches && !!balances?.tranches.length ? (
-    <>
-      <Box as="article">
-        <Text as="h2" variant="heading2">
-          Portfolio Composition
-        </Text>
-      </Box>
-      <Stack gap={1}>
-        <Grid gridTemplateColumns={TOKEN_ITEM_COLUMNS} gap={TOKEN_ITEM_GAP} px={2}>
+  const { data: tinlakePools } = useTinlakePools()
+  const pools = usePools()
+
+  const balances = useMemo(() => {
+    return [
+      ...(centBalances?.tranches || []),
+      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []),
+    ]
+  }, [centBalances, tinlakeBalances])
+
+  const sortedTokens =
+    balances.length && pools && tinlakePools
+      ? sortTokens(
+          balances,
+          {
+            centPools: pools,
+            tinlakePools: tinlakePools.pools,
+          },
+          sortOptions
+        )
+      : []
+
+  const handleSort = (sortOption: SortOptions['sortBy']) => {
+    setSortOptions((prev) => ({
+      sortBy: sortOption,
+      sortDirection: prev.sortBy !== sortOption ? 'desc' : prev.sortDirection === 'asc' ? 'desc' : 'asc',
+    }))
+  }
+
+  return sortedTokens.length ? (
+    <Stack as="article" gap={2}>
+      <Text as="h2" variant="heading2">
+        Portfolio
+      </Text>
+
+      <Box overflow="auto">
+        <Grid gridTemplateColumns={COLUMN_GAPS} gap={3} alignItems="start" px={2}>
           <Text as="span" variant="body3">
             Token
           </Text>
-          <Text as="button" variant="body3">
+
+          <FilterButton forwardedAs="span" variant="body3" onClick={() => handleSort('position')}>
             Position
-          </Text>
+            <SortChevrons
+              sorting={{ isActive: sortOptions.sortBy === 'position', direction: sortOptions.sortDirection }}
+            />
+          </FilterButton>
+
           <Text as="span" variant="body3">
             Token price
           </Text>
-          <Text as="button" variant="body3">
-            Market value
-          </Text>
+
+          <FilterButton forwardedAs="span" variant="body3" onClick={() => handleSort('market-value')}>
+            Market Value
+            <SortChevrons
+              sorting={{ isActive: sortOptions.sortBy === 'market-value', direction: sortOptions.sortDirection }}
+            />
+          </FilterButton>
         </Grid>
 
-        <Stack as="ul" role="list" gap={1}>
-          {balances.tranches.map((tranche, index) => (
-            <Box key={`${tranche.trancheId}${index}`} as="li">
-              <TokenListItem {...tranche} />
-            </Box>
+        <Stack as="ul" role="list" gap={1} py={1}>
+          {balances.map((balance, index) => (
+            <TokenListItem key={index} canInvestRedeem={canInvestRedeem} {...balance} />
           ))}
         </Stack>
-      </Stack>
-    </>
+      </Box>
+    </Stack>
   ) : null
-}
-
-type TokenCardProps = AccountTokenBalance
-export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCardProps) {
-  const pool = usePool(poolId) as Pool
-  const isTinlakePool = poolId?.startsWith('0x')
-
-  if (isTinlakePool) {
-    return null
-  }
-
-  const tranche = pool.tranches.find(({ id }) => id === trancheId)
-
-  return (
-    <Grid
-      gridTemplateColumns={TOKEN_ITEM_COLUMNS}
-      gap={TOKEN_ITEM_GAP}
-      padding={2}
-      borderStyle="solid"
-      borderWidth={1}
-      borderColor="borderSecondary"
-    >
-      <Text as="span" variant="body2">
-        {currency.name}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {formatBalance(balance, tranche?.currency.symbol)}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {tranche?.tokenPrice ? formatBalance(tranche.tokenPrice.toDecimal(), tranche.currency.symbol, 4) : '-'}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {tranche?.tokenPrice
-          ? formatBalance(balance.toDecimal().mul(tranche.tokenPrice.toDecimal()), tranche.currency.symbol, 4)
-          : '-'}
-      </Text>
-    </Grid>
-  )
 }
