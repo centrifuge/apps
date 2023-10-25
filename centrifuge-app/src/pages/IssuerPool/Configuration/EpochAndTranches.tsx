@@ -45,26 +45,31 @@ export function EpochAndTranches() {
           </Text>
         </Shelf>
       ),
+      width: 'minmax(150px, 1fr)',
     },
     {
       align: 'left',
       header: 'Token symbol',
       cell: (token: Row) => token.symbolName,
+      width: 'min-content',
     },
     {
       align: 'left',
       header: 'Min. investment',
       cell: (token: Row) => (token.minInvestment ? formatBalance(token.minInvestment, pool?.currency.symbol) : '-'),
+      width: 'min-content',
     },
     {
       align: 'right',
       header: 'Min. subordination',
       cell: (token: Row) => (token.minRiskBuffer ? formatPercentage(token.minRiskBuffer) : '-'),
+      width: 'min-content',
     },
     {
       align: 'right',
       header: 'Fixed interest (APR)',
       cell: (token: Row) => (token.interestRate ? formatPercentage(token.interestRate) : '-'),
+      width: 'min-content',
     },
   ]
 
