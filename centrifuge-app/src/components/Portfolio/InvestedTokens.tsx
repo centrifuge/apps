@@ -9,9 +9,10 @@ import { SortButton } from '../SortButton'
 import { sortTokens } from './sortTokens'
 import { TokenListItem } from './TokenListItem'
 
-export const COLUMN_GAPS = '250px 180px 150px 180px'
+export const COLUMN_GAPS = '200px 140px 140px 140px'
 
-export const InvestedTokens = ({ canInvestRedeem = true }) => {
+// TODO: change canInvestRedeem to default to true once the drawer is implemented
+export const InvestedTokens = ({ canInvestRedeem = false }) => {
   const { search } = useLocation()
 
   const address = useAddress()

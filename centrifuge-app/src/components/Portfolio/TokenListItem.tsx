@@ -39,7 +39,7 @@ export function TokenListItem({ balance, currency, poolId, trancheId, canInvestR
   const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
 
   return (
-    <Root as="article" minWidth="1060px">
+    <Root as="article" minWidth="960px">
       <Grid gridTemplateColumns={`${COLUMN_GAPS} 1fr`} gap={3} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={isTinlakePool}>
