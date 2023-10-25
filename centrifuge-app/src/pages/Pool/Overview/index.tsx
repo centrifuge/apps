@@ -88,7 +88,7 @@ export function PoolDetailOverview({
   const pageSummaryData = [
     {
       label: <Tooltips type="assetClass" />,
-      value: <TextWithPlaceholder isLoading={metadataIsLoading}>{metadata?.pool?.asset.class}</TextWithPlaceholder>,
+      value: <TextWithPlaceholder isLoading={metadataIsLoading}>{metadata?.pool?.asset.subClass}</TextWithPlaceholder>,
     },
     { label: <Tooltips type="valueLocked" />, value: formatBalance(getPoolValueLocked(pool), pool.currency.symbol) },
   ]

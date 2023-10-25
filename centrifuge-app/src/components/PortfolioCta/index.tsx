@@ -1,4 +1,3 @@
-import { ActiveLoan } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeConsts, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -8,7 +7,6 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useListedPools } from '../../utils/useListedPools'
-import { useLoansAcrossPools } from '../../utils/useLoans'
 import { useDebugFlags } from '../DebugFlags'
 import { useComputeLiquidityRewards } from '../LiquidityRewards/hooks'
 import { Cubes } from './Cubes'
@@ -33,23 +31,12 @@ export function PortfolioCta() {
     }) ?? []
   const investedValue = [...currencies, ...tranches].reduce((a, b) => a.add(b), Dec(0))
 
-  const pools = balances?.tranches.map(({ poolId }) => poolId) ?? []
-  const loans = useLoansAcrossPools(pools) ?? []
-  const activeLoans = loans?.filter(({ status }) => status === 'Active') as ActiveLoan[]
-  const accruedInterest = activeLoans
-    .map(({ outstandingInterest }) => outstandingInterest.toDecimal())
-    .reduce((a, b) => a.add(b), Dec(0))
-
   const terms = [
     {
       title: 'Portfolio value',
       value: investedValue.gte(1000)
         ? formatBalanceAbbreviated(investedValue, config.baseCurrency)
         : formatBalance(investedValue, config.baseCurrency),
-    },
-    {
-      title: 'Accrued interest',
-      value: formatBalance(accruedInterest, config.baseCurrency),
     },
     {
       title: 'CFG rewards',

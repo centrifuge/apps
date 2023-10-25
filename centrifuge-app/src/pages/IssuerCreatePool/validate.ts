@@ -27,6 +27,7 @@ export const validate = {
   poolName: combine(required(), maxLength(100)),
   poolIcon: combine(required(), mimeType('image/svg+xml', 'Icon must be an SVG file')),
   assetClass: required(),
+  subAssetClass: required(),
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   podEndpoint: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
 

@@ -51,20 +51,7 @@ export function PoolList() {
   ]
 
   const pools = !!listedPools?.length
-    ? [
-        ...upcomingPools,
-        ...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent).map((pool) => {
-          if (pool.name?.includes('Anemoy Liquid Treasury Fund')) {
-            return {
-              ...pool,
-              status: 'Upcoming' as PoolStatusKey,
-              apr: Rate.fromApr(0.05),
-            }
-          }
-
-          return pool
-        }),
-      ].sort((a, b) => {
+    ? [...upcomingPools, ...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent)].sort((a, b) => {
         if (a.status === 'Upcoming') {
           return -1
         }
@@ -132,7 +119,7 @@ export function poolsToPoolCardProps(
     return {
       poolId: pool.id,
       name: metaData?.pool?.name,
-      assetClass: metaData?.pool?.asset.class,
+      assetClass: metaData?.pool?.asset.subClass,
       valueLocked: getPoolValueLocked(pool),
       currencySymbol: pool.currency.symbol,
       apr: mostSeniorTranche?.interestRatePerSec,

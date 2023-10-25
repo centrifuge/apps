@@ -28,7 +28,7 @@ import {
   throwError,
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
-import { TransactionOptions } from './types'
+import { TransactionErrorResult, TransactionOptions, TransactionResult } from './types'
 import { computeMultisig, evmToSubstrateAddress, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
@@ -310,7 +310,7 @@ export class CentrifugeBase {
 
     try {
       const $paymentInfo = submittable.paymentInfo(signingAddress)
-      const $balances = api.query.system.account(signingAddress)
+      const $balances = api.query.system.account(this.getSignerAddress())
 
       if (options?.paymentInfo) {
         return $paymentInfo.pipe(
@@ -351,11 +351,7 @@ export class CentrifugeBase {
               switchMap(() => actualSubmittable.signAndSend(signingAddress, { signer, era: options?.era }))
             )
       ).pipe(
-        tap((result) => {
-          options?.onStatusChange?.(result)
-          if (result.status.isInBlock) this.getTxCompletedEvents().next(result.events)
-        }),
-        takeWhile((result) => {
+        map((result) => {
           const errors = result.events.filter(({ event }) => {
             const possibleProxyErr = event.data[0]?.toHuman()
             return (
@@ -369,9 +365,21 @@ export class CentrifugeBase {
           if (errors.length && this.config.debug) {
             console.log('🚨 error', JSON.stringify(errors))
           }
-          const hasError = !!(result.dispatchError || errors.length)
-
-          return !result.status.isInBlock && !hasError
+          return {
+            data: result,
+            events: result.events,
+            status: result.status.type,
+            error: result.dispatchError || errors[0],
+            txHash: result.txHash.toHuman() as string,
+            blockNumber: (result as any).blockNumber ? Number((result as any).blockNumber?.toString()) : undefined,
+          }
+        }),
+        tap((result) => {
+          options?.onStatusChange?.(result)
+          if (result.status === 'InBlock') this.getTxCompletedEvents().next(result.events)
+        }),
+        takeWhile((result) => {
+          return result.status !== 'InBlock' && !result.error
         }, true)
       )
     } catch (e) {
@@ -404,26 +412,31 @@ export class CentrifugeBase {
             return from(response.wait()).pipe(
               map((receipt) => [response, receipt] as const),
               startWith([response, null] as const),
-              catchError(() => of([{ ...response, error: new Error('failed') }] as const)),
-              tap(([result, receipt]) => {
-                if ('error' in result || receipt?.status === 0) {
-                  options?.onStatusChange?.({
-                    events: [],
-                    dispatchError: {},
-                    status: {
-                      hash: { toHex: () => result.hash as any },
-                    },
-                  } as any)
-                } else {
-                  options?.onStatusChange?.({
-                    events: [],
-                    status: {
-                      isInBlock: receipt?.status === 1,
-                      isFinalized: receipt?.status === 1,
-                      hash: { toHex: () => result.hash as any },
-                    },
-                  } as any)
+              map(([response, receipt]) => {
+                const result: TransactionResult = {
+                  data: { response, receipt: receipt ?? undefined },
+                  // TODO: Events
+                  events: [],
+                  status: receipt ? 'InBlock' : 'Broadcast',
+                  error: receipt?.status === 0 ? new Error('failed') : undefined,
+                  txHash: response.hash,
+                  blockNumber: receipt?.blockNumber,
                 }
+                return result
+              }),
+              catchError(() => {
+                const result: TransactionErrorResult = {
+                  data: { response, receipt: undefined },
+                  events: [],
+                  status: 'Invalid',
+                  error: new Error('failed'),
+                  txHash: response.hash,
+                  blockNumber: undefined,
+                }
+                return of(result)
+              }),
+              tap((result) => {
+                options?.onStatusChange?.(result)
               })
             )
           })
