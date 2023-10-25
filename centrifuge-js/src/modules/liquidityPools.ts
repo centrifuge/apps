@@ -135,7 +135,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, { ...options, gasLimit: 300000 })
+      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, {
+        ...options,
+        gasLimit: 300000,
+      })
     )
   }
 
@@ -144,23 +147,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     options: TransactionRequest = {}
   ) {
     const [lpAddress, order, { deadline, r, s, v }] = args
-    const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, deadline, v, r, s, {
-        ...options,
-        gasLimit: 300000,
-      })
-    )
-  }
-
-  function updateRedeemOrderWithPermit(
-    args: [lpAddress: string, order: BN, permit: Permit],
-    options: TransactionRequest = {}
-  ) {
-    const [lpAddress, order, { deadline, r, s, v }] = args
-    const user = inst.getSignerAddress('evm')
-    return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeemWithPermit(order.toString(), user, deadline, v, r, s, {
+      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), deadline, v, r, s, {
         ...options,
         gasLimit: 300000,
       })
@@ -297,7 +285,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         {
           target: poolManager,
           call: ['function pools(uint64) view returns (uint256)', poolId],
-          returns: [['isActive', (createdAt) => createdAt !== 0]],
+          returns: [['isActive', (createdAt: BigNumber) => !createdAt.isZero()]],
         },
         ...(currencies.flatMap((currency) => ({
           target: poolManager,
@@ -556,7 +544,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     updateInvestOrder,
     updateRedeemOrder,
     updateInvestOrderWithPermit,
-    updateRedeemOrderWithPermit,
     mint,
     withdraw,
     approveForCurrency,

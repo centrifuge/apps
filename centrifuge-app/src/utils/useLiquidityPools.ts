@@ -40,7 +40,6 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
           }
           const [manager, pool] = result.value
           const router = routers![i]
-          if (!pool?.isActive) return null as never
           const domain: Domain = {
             ...pool,
             chainId: router.chainId,

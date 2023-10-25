@@ -20,9 +20,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const centOrder = usePendingCollect(poolId, trancheId, centAddress)
   const pool = usePool(poolId) as Pool
   const cent = useCentrifuge()
-  const [pendingActionState, setPendingAction] = React.useState<
-    InvestRedeemAction | 'investWithPermit' | 'redeemWithPermit'
-  >()
+  const [pendingActionState, setPendingAction] = React.useState<InvestRedeemAction | 'investWithPermit'>()
   const { isLoading: isLpsLoading } = useLiquidityPools(poolId, trancheId)
   const {
     data: lpInvest,
@@ -57,7 +55,6 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrder)
   const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.updateInvestOrderWithPermit)
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.updateRedeemOrder)
-  const redeemWithPermit = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.updateRedeemOrderWithPermit)
   const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Withdraw', (cent) => cent.liquidityPools.withdraw)
   const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
@@ -68,19 +65,13 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     invest,
     investWithPermit,
     redeem,
-    redeemWithPermit,
     collect: collectType === 'invest' ? collectInvest : collectRedeem,
     approvePoolCurrency: approve,
     approveTrancheToken: approve,
     cancelInvest,
     cancelRedeem,
   }
-  const pendingAction =
-    pendingActionState === 'investWithPermit'
-      ? 'invest'
-      : pendingActionState === 'redeemWithPermit'
-      ? 'redeem'
-      : pendingActionState
+  const pendingAction = pendingActionState === 'investWithPermit' ? 'invest' : pendingActionState
   const pendingTransaction = pendingActionState && txActions[pendingActionState]?.lastCreatedTransaction
   // let statusMessage
   // if (order?.remainingInvestCurrency.isZero() && lpEvents?.find((e) => e.event === 'DepositRequested')) {
@@ -157,10 +148,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     needsToCollectBeforeOrder: false,
     needsPoolCurrencyApproval: (amount) =>
       lpInvest ? lpInvest.managerCurrencyAllowance.toFloat() < amount && !lpInvest.currencySupportsPermit : false,
-    needsTrancheTokenApproval: (amount) =>
-      lpInvest
-        ? lpInvest.managerTrancheTokenAllowance.toFloat() < amount && !lpInvest.trancheTokenSupportsPermit
-        : false,
+    needsTrancheTokenApproval: () => false,
     canChangeOrder: false,
     canCancelOrder: false,
     pendingAction,
@@ -180,10 +168,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       ) {
         const signer = provider!.getSigner()
         const connectedCent = cent.connectEvm(evmAddress!, signer)
-        const permit = await connectedCent.liquidityPools.signPermit([
-          lpInvest.managerAddress,
-          lpInvest.currencyAddress,
-        ])
+        const permit = await connectedCent.liquidityPools.signPermit([lpInvest.lpAddress, lpInvest.currencyAddress])
         investWithPermit.execute([lpInvest.lpAddress, newOrder, permit])
         setPendingAction('investWithPermit')
       } else {
@@ -193,23 +178,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     },
     redeem: async (newOrder: BN) => {
       if (!lpInvest) return
-      if (
-        lpInvest.managerTrancheTokenAllowance.lt(newOrder) &&
-        lpInvest.trancheTokenSupportsPermit &&
-        pendingAction !== 'approveTrancheToken'
-      ) {
-        const signer = provider!.getSigner()
-        const connectedCent = cent.connectEvm(evmAddress!, signer)
-        const permit = await connectedCent.liquidityPools.signPermit([
-          lpInvest.managerAddress,
-          lpInvest.currencyAddress,
-        ])
-        redeemWithPermit.execute([lpInvest.lpAddress, newOrder, permit])
-        setPendingAction('redeemWithPermit')
-      } else {
-        redeem.execute([lpInvest.lpAddress, newOrder])
-        setPendingAction('redeem')
-      }
+      redeem.execute([lpInvest.lpAddress, newOrder])
+      setPendingAction('redeem')
     },
     collect: doAction('collect', () =>
       collectType === 'invest' ? [lpInvest?.lpAddress, lpInvest?.maxMint] : [lpInvest?.lpAddress, lpInvest?.maxWithdraw]

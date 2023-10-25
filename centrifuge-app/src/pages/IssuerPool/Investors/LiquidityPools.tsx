@@ -10,6 +10,7 @@ import React from 'react'
 import { useParams } from 'react-router'
 import { PageSection } from '../../../components/PageSection'
 import { AnchorTextLink } from '../../../components/TextLink'
+import { find } from '../../../utils/helpers'
 import { useEvmTransaction } from '../../../utils/tinlake/useEvmTransaction'
 import { Domain, useActiveDomains } from '../../../utils/useLiquidityPools'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
@@ -122,7 +123,7 @@ function DeployTrancheButton({
   const { execute, isLoading } = useEvmTransaction(`Deploy tranche`, (cent) => cent.liquidityPools.deployTranche, {
     onSuccess,
   })
-  const tranche = pool.tranches.find((t) => t.id === trancheId)!
+  const tranche = find(pool.tranches, (t) => t.id === trancheId)!
 
   return (
     <Button loading={isLoading} onClick={() => execute([domain.poolManager, poolId, trancheId])} small>
@@ -151,7 +152,7 @@ function DeployLPButton({
     (cent) => cent.liquidityPools.deployLiquidityPool,
     { onSuccess }
   )
-  const tranche = pool.tranches.find((t) => t.id === trancheId)!
+  const tranche = find(pool.tranches, (t) => t.id === trancheId)!
 
   return (
     <Button
