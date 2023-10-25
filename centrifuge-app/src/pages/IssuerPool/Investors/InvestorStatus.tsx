@@ -109,13 +109,11 @@ export const InvestorStatus: React.FC = () => {
                     {row.currency.name}
                   </Text>
                 ),
-                flex: '1',
               },
               {
                 align: 'left',
                 header: 'Investment',
                 cell: (row: Token) => <InvestedCell address={validAddress} poolId={poolId} trancheId={row.id} />,
-                flex: '1',
               },
               {
                 header: '',
@@ -135,7 +133,6 @@ export const InvestorStatus: React.FC = () => {
                     </Button>
                   )
                 },
-                flex: '1',
               },
             ]}
           />

@@ -382,7 +382,6 @@ function AOForm({
                               <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
                             </Text>
                           ),
-                          flex: '3',
                         },
                         {
                           header: '',
@@ -395,7 +394,7 @@ function AOForm({
                                 disabled={isLoading}
                               />
                             ),
-                          flex: '0 0 72px',
+                          width: '72px',
                         },
                       ]}
                     />
