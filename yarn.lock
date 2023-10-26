@@ -1809,11 +1809,8 @@ __metadata:
     "@ethersproject/bignumber": ^5.7.0
     "@ethersproject/contracts": ^5.6.0
     "@ethersproject/providers": ^5.6.0
-    "@ethersproject/units": ^5.6.0
     "@makerdao/multicall": ^0.12.0
-    "@polkadot/extension-dapp": ~0.45.5
     "@polkadot/react-identicon": ~3.1.4
-    "@stablelib/blake2b": ^1.0.1
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
     "@subwallet/wallet-connect": ^0.2.3
@@ -1831,7 +1828,6 @@ __metadata:
     "@typescript-eslint/parser": 5.30.5
     "@vitejs/plugin-react": ^2
     "@web3modal/standalone": ^2.4.2
-    axios: ^0.24.0
     babel-plugin-styled-components: ^2.0.7
     bn.js: ^5.2.1
     esbuild-darwin-64: ^0.14.49
@@ -1840,9 +1836,7 @@ __metadata:
     eslint-config-prettier: 8.5.0
     eslint-config-react-app: ^7.0.1
     eslint-plugin-react: 7.30.1
-    form-data: ^4.0.0
     formik: ^2.2.9
-    jw3t: ^1.0.10
     merkletreejs: ^0.3.10
     nodemon: ^2.0.20
     npm-run-all: ^4.1.5
@@ -1870,10 +1864,10 @@ __metadata:
   dependencies:
     "@ethersproject/contracts": ^5.6.0
     "@ethersproject/providers": ^5.6.0
-    "@ethersproject/units": ^5.6.0
     "@polkadot/api": ~10.3.4
     "@polkadot/keyring": ^11.1.3
     "@polkadot/types": ~10.3.4
+    "@stablelib/blake2b": ^1.0.1
     "@types/isomorphic-fetch": ^0.0.36
     "@types/jest": ^27.0.3
     "@types/node": ^16.11.12
@@ -1905,7 +1899,6 @@ __metadata:
     "@ethersproject/bignumber": ^5.6.0
     "@ethersproject/networks": ^5.6.0
     "@ethersproject/providers": ^5.6.0
-    "@ethersproject/units": ^5.6.0
     "@mdx-js/preact": ^2.1.1
     "@mdx-js/react": ^1.6.22
     "@polkadot/extension-dapp": ~0.45.5
@@ -2932,7 +2925,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/units@npm:5.7.0, @ethersproject/units@npm:^5.6.0":
+"@ethersproject/units@npm:5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/units@npm:5.7.0"
   dependencies:
@@ -11160,15 +11153,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.24.0":
-  version: 0.24.0
-  resolution: "axios@npm:0.24.0"
-  dependencies:
-    follow-redirects: ^1.14.4
-  checksum: e741dfea07def55be7b1082824d71f54f7859b9c3c75a86c6a74b91c6e48bb461aceac683f77867313f89ff40ef5f2d1d2a1fe1953fcb71bdc1c1fc0fc069925
-  languageName: node
-  linkType: hard
-
 "axios@npm:^0.26.0":
   version: 0.26.1
   resolution: "axios@npm:0.26.1"
@@ -16665,7 +16649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.4, follow-redirects@npm:^1.14.8, follow-redirects@npm:^1.15.0":
+"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.8, follow-redirects@npm:^1.15.0":
   version: 1.15.2
   resolution: "follow-redirects@npm:1.15.2"
   peerDependenciesMeta:

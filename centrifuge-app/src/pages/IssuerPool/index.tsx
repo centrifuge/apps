@@ -11,7 +11,7 @@ import { IssuerPoolLiquidityPage } from './Liquidity'
 import { IssuerPoolOverviewPage } from './Overview'
 import { IssuerPoolReportingPage } from './Reporting'
 
-export function IssuerPoolPage() {
+export default function IssuerPoolPage() {
   const { path } = useRouteMatch()
   const { pid: poolId } = useParams<{ pid: string }>()
 
