@@ -20,7 +20,8 @@ import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
 import { useElementScrollSize } from '../utils/useElementScrollSize'
 import { FiltersState } from '../utils/useFilters'
-import { FilterButton, QuickAction } from './PoolFilter/styles'
+import { FilterButton } from './FilterButton'
+import { QuickAction } from './QuickAction'
 
 type GroupedProps = {
   groupIndex?: number
@@ -275,14 +276,12 @@ export function FilterableTableHeader({
   label,
   options,
   filters,
-  align,
   tooltip,
 }: {
   filterKey: string
   label: string
   options: string[] | Record<string, string>
   filters: FiltersState
-  align?: Column['align']
   tooltip?: string
 }) {
   const optionKeys = Array.isArray(options) ? options : Object.keys(options)
@@ -316,13 +315,13 @@ export function FilterableTableHeader({
                 <Tooltip body={tooltip} {...props} style={{ display: 'block' }}>
                   <FilterButton forwardedAs="span" variant="body3">
                     {label}
-                    <IconFilter color={selectedOptions?.size ? 'textSelected' : 'textSecondary'} size="1em" />
+                    <IconFilter color={selectedOptions?.size ? 'textSelected' : 'currentColor'} size="1em" />
                   </FilterButton>
                 </Tooltip>
               ) : (
                 <FilterButton forwardedAs="button" type="button" variant="body3" {...props}>
                   {label}
-                  <IconFilter color={selectedOptions?.size ? 'textSelected' : 'textSecondary'} size="1em" />
+                  <IconFilter color={selectedOptions?.size ? 'textSelected' : 'currentColor'} size="1em" />
                 </FilterButton>
               )}
             </Box>

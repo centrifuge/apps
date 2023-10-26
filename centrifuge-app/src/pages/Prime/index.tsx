@@ -152,7 +152,6 @@ function DaoPortfoliosTable() {
           <Text>{row.name}</Text>
         </Shelf>
       ),
-      flex: '1',
     },
     {
       align: 'left',
@@ -165,7 +164,6 @@ function DaoPortfoliosTable() {
         />
       ),
       cell: (row: Row) => <Text>{row.networkName}</Text>,
-      flex: '3',
     },
     {
       header: <SortableTableHeader label="Portfolio value" />,
@@ -174,7 +172,6 @@ function DaoPortfoliosTable() {
           {row.value != null && formatBalance(row.value, 'USD')}
         </TextWithPlaceholder>
       ),
-      flex: '3',
       sortKey: 'value',
     },
     {
@@ -184,17 +181,17 @@ function DaoPortfoliosTable() {
           {row.profit != null && formatPercentage(row.profit)}
         </TextWithPlaceholder>
       ),
-      flex: '3',
       sortKey: 'profit',
     },
     {
+      align: 'left',
       header: 'First investment',
       cell: (row: Row) => (
         <TextWithPlaceholder isLoading={isSubqueryLoading}>
           {row.firstInvestment ? formatDate(row.firstInvestment) : '-'}
         </TextWithPlaceholder>
       ),
-      flex: '3',
+      width: '5fr',
     },
   ]
 
