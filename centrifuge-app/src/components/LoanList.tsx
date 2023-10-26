@@ -51,7 +51,6 @@ export function LoanList({ loans }: Props) {
       return {
         align: 'left',
         header: attr.label,
-        flex: '2',
         cell: (l: Row) => <AssetMetadataField name={key} attribute={attr} loan={l} />,
       }
     }) || []
@@ -61,16 +60,16 @@ export function LoanList({ loans }: Props) {
       align: 'left',
       header: <SortableTableHeader label="Asset" />,
       cell: (l: Row) => <AssetName loan={l} />,
-      flex: '2',
       sortKey: 'idSortKey',
+      width: 'minmax(150px, 1fr)',
     },
     isTinlakePool && {
       align: 'left',
       header: <SortableTableHeader label="NFT ID" />,
       cell: (l: Row) =>
         l.asset.nftId.length >= 9 ? `${l.asset.nftId.slice(0, 4)}...${l.asset.nftId.slice(-4)}` : l.asset.nftId,
-      flex: '2',
       sortKey: 'nftIdSortKey',
+      width: 'minmax(150px, 1fr)',
     },
     ...(additionalColumns?.length
       ? additionalColumns
@@ -85,7 +84,6 @@ export function LoanList({ loans }: Props) {
                   formatDate(l.originationDate)
                 : ''
             },
-            flex: '2',
             sortKey: 'originationDateSortKey',
           },
         ]),
@@ -93,27 +91,24 @@ export function LoanList({ loans }: Props) {
       align: 'left',
       header: <SortableTableHeader label="Maturity date" />,
       cell: (l: Row) => (l.pricing.maturityDate ? formatDate(l.pricing.maturityDate) : ''),
-      flex: '2',
       sortKey: 'maturityDate',
     },
     {
-      align: 'left',
+      align: 'right',
       header: <SortableTableHeader label="Amount" />,
       cell: (l: Row) => <Amount loan={l} />,
-      flex: '2',
       sortKey: 'outstandingDebtSortKey',
     },
     {
       align: 'left',
       header: <SortableTableHeader label="Status" />,
       cell: (l: Row) => <LoanLabel loan={l} />,
-      flex: '2',
       sortKey: 'statusLabel',
     },
     {
       header: '',
       cell: () => <IconChevronRight size={24} color="textPrimary" />,
-      flex: '0 0 52px',
+      width: '52px',
     },
   ].filter(Boolean) as Column[]
 
@@ -141,15 +136,17 @@ export function LoanList({ loans }: Props) {
     <PaginationContainer pagination={pagination}>
       <Stack gap={2}>
         <LoadBoundary>
-          <DataTable
-            data={rows}
-            columns={columns}
-            defaultSortKey="idSortKey"
-            defaultSortOrder="desc"
-            onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
-            pageSize={20}
-            page={pagination.page}
-          />
+          <Box overflow="auto" width="100%" borderWidth="0 1px" borderStyle="solid" borderColor="borderSecondary">
+            <DataTable
+              data={rows}
+              columns={columns}
+              defaultSortKey="idSortKey"
+              defaultSortOrder="desc"
+              onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+              pageSize={20}
+              page={pagination.page}
+            />
+          </Box>
         </LoadBoundary>
         {pagination.pageCount > 1 && (
           <Box alignSelf="center">
