@@ -43,7 +43,7 @@ import { combine, max, maxLength, min, positiveNumber, required } from '../../..
 import { validate } from '../../IssuerCreatePool/validate'
 import { PricingInput } from './PricingInput'
 
-export const IssuerCreateLoanPage: React.FC = () => {
+export default function IssuerCreateLoanPage() {
   return (
     <PageWithSideBar>
       <IssuerCreateLoan />

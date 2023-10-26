@@ -15,7 +15,7 @@ import { useMetadata } from '../utils/useMetadata'
 import { useAccountNfts } from '../utils/useNFTs'
 import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
-export const CollectionsPage: React.FC = () => {
+export default function CollectionsPage() {
   return (
     <PageWithSideBar>
       <Collections />

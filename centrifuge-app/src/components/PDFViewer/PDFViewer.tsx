@@ -3,10 +3,10 @@ import * as React from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
 import 'react-pdf/dist/esm/Page/TextLayer.css'
-import { Spinner } from './Spinner'
+import { Spinner } from '../Spinner'
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
 
-export const PDFViewer = ({ file }: { file: string }) => {
+export default function PDFViewerInternal({ file }: { file: string }) {
   const [numPages, setNumPages] = React.useState(0)
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {

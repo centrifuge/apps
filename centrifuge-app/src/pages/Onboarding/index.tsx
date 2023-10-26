@@ -17,7 +17,7 @@ import { useSignedAgreement } from './queries/useSignedAgreement'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 import { UltimateBeneficialOwners } from './UltimateBeneficialOwners'
 
-export const OnboardingPage: React.FC = () => {
+export default function OnboardingPage() {
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
   const { search } = useLocation()
   const poolId = new URLSearchParams(search).get('poolId')

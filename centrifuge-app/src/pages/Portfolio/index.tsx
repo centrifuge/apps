@@ -10,7 +10,7 @@ import { Rewards } from '../../components/Portfolio/Rewards'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
 
-export function PortfolioPage() {
+export default function PortfolioPage() {
   return (
     <LayoutBase>
       <Portfolio />

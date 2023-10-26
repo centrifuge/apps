@@ -43,7 +43,7 @@ import { PricingValues } from './PricingValues'
 import { TransactionTable } from './TransactionTable'
 import { formatNftAttribute } from './utils'
 
-export const LoanPage: React.FC = () => {
+export default function LoanPage() {
   const [showOraclePricing, setShowOraclePricing] = React.useState(false)
   return (
     <PageWithSideBar

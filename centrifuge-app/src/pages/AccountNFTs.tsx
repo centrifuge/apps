@@ -11,7 +11,7 @@ import { useAddress } from '../utils/useAddress'
 import { useCollections } from '../utils/useCollections'
 import { useAccountNfts } from '../utils/useNFTs'
 
-export const AccountNFTsPage: React.FC = () => {
+export default function AccountNFTsPage() {
   return (
     <PageWithSideBar>
       <AccountNFTs />
