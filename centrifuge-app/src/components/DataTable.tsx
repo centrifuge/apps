@@ -1,4 +1,4 @@
-import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Grid, IconChevronDown, IconChevronUp, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -18,7 +18,6 @@ export type DataTableProps<T = any> = {
   onRowClicked?: (row: T) => string | LinkProps['to']
   defaultSortKey?: string
   defaultSortOrder?: OrderBy
-  rounded?: boolean
   hoverable?: boolean
   summary?: T
   pageSize?: number
@@ -31,7 +30,6 @@ export type Column = {
   header: string | React.ReactElement
   cell: (row: any, index: number) => React.ReactNode
   align?: string
-  flex?: string
   sortKey?: string
   width?: string
 }
@@ -55,7 +53,6 @@ export const DataTable = <T extends Record<string, any>>({
   keyField,
   onRowClicked,
   defaultSortKey,
-  rounded = true,
   hoverable = false,
   summary,
   groupIndex,
@@ -86,77 +83,97 @@ export const DataTable = <T extends Record<string, any>>({
 
   const showHeader = groupIndex === 0 || !groupIndex
 
+  const templateColumns = `[start] ${columns.map((col) => col.width ?? 'minmax(min-content, 1fr)').join(' ')} [end]`
+
   return (
-    <Stack ref={ref} as={rounded && !lastGroupIndex ? Card : Stack} minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}>
-      <Shelf>
-        {showHeader &&
-          columns.map((col, i) => (
-            <HeaderCol
-              key={i}
-              style={{ flex: col.flex }}
-              tabIndex={col?.sortKey ? 0 : undefined}
-              as={col?.sortKey ? 'button' : 'div'}
-              onClick={col?.sortKey ? () => updateSortOrder(col.sortKey) : () => undefined}
-              align={col?.align}
-            >
-              <Text variant="label2">
+    <TableGrid
+      gridTemplateColumns={templateColumns}
+      gridAutoRows="auto"
+      gap={0}
+      rowGap={0}
+      ref={ref}
+      minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}
+    >
+      {showHeader && (
+        <HeaderRow templateColumns={templateColumns}>
+          {columns.map((col, i) => (
+            <HeaderCol key={i} align={col?.align}>
+              <Text variant="body3">
                 {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header)
                   ? React.cloneElement(col.header as React.ReactElement<any>, {
-                      align: col?.align,
                       orderBy: orderBy[col.sortKey],
+                      onClick: () => updateSortOrder(col.sortKey),
                     })
                   : col.header}
               </Text>
             </HeaderCol>
           ))}
-      </Shelf>
-      <Stack>
-        {sortedAndPaginatedData?.map((row, i) => (
-          <Row
-            rounded={rounded}
-            hoverable={hoverable}
-            as={onRowClicked ? Link : 'div'}
-            to={onRowClicked && (() => onRowClicked(row))}
-            key={keyField ? row[keyField] : i}
-            tabIndex={onRowClicked ? 0 : undefined}
-          >
-            {columns.map((col, index) => (
-              <DataCol
-                variant="body2"
-                style={{ flex: col.width !== undefined ? 'auto' : col.flex, width: col.width }}
-                align={col?.align}
-                key={index}
-              >
-                {col.cell(row, i)}
-              </DataCol>
-            ))}
-          </Row>
-        ))}
-        {/* summary row is not included in sorting */}
-        {summary && (
-          <Row rounded={rounded && groupIndex === lastGroupIndex}>
-            {columns.map((col, i) => (
-              <DataCol variant="body2" key={`${col.sortKey}-${i}`} style={{ flex: col.flex }} align={col?.align}>
-                {col.cell(summary, i)}
-              </DataCol>
-            ))}
-          </Row>
-        )}
-      </Stack>
-    </Stack>
+        </HeaderRow>
+      )}
+      {sortedAndPaginatedData?.map((row, i) => (
+        <DataRow
+          hoverable={hoverable}
+          as={onRowClicked ? Link : 'div'}
+          to={onRowClicked && (() => onRowClicked(row))}
+          key={keyField ? row[keyField] : i}
+          tabIndex={onRowClicked ? 0 : undefined}
+          templateColumns={templateColumns}
+        >
+          {columns.map((col, index) => (
+            <DataCol variant="body2" align={col?.align} key={index}>
+              {col.cell(row, i)}
+            </DataCol>
+          ))}
+        </DataRow>
+      ))}
+      {/* summary row is not included in sorting */}
+      {summary && (
+        <DataRow templateColumns={templateColumns}>
+          {columns.map((col, i) => (
+            <DataCol variant="body2" key={`${col.sortKey}-${i}`} align={col?.align}>
+              {col.cell(summary, i)}
+            </DataCol>
+          ))}
+        </DataRow>
+      )}
+      {groupIndex != null && groupIndex !== lastGroupIndex && (
+        <Row>
+          <DataCol />
+        </Row>
+      )}
+    </TableGrid>
   )
 }
 
-const Row = styled(Shelf)<any>`
-  ${({ rounded, hoverable, as: comp }) =>
+const TableGrid = styled(Grid)``
+
+const Row = styled('div')<any>`
+  display: grid;
+  // Fallback for browsers that don't support subgrid
+  // Tables will look a bit wonky in those browsers
+  // TODO: Remove when browser support is sufficient
+  grid-template-columns: ${(props) => props.templateColumns};
+  grid-template-columns: subgrid;
+  grid-column: start / end;
+  box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderSecondary}, 1px 0 0 0 ${theme.colors.borderSecondary}`};
+`
+
+const HeaderRow = styled(Row)<any>(
+  css({
+    backgroundColor: 'backgroundSecondary',
+    borderStyle: 'solid',
+    borderWidth: '1px 0',
+    borderColor: 'borderSecondary',
+  })
+)
+
+const DataRow = styled(Row)<any>`
+  ${({ hoverable, as: comp }) =>
     css({
-      height: '48px',
       width: '100%',
-      appearance: 'none',
-      border: 'none',
       borderBottomStyle: 'solid',
       borderBottomWidth: '1px',
-      borderBottomColor: 'borderPrimary',
+      borderBottomColor: 'borderSecondary',
       backgroundColor: 'transparent',
       // using a&:hover caused the background sometimes not to update when switching themes
       '&:hover':
@@ -173,94 +190,79 @@ const Row = styled(Shelf)<any>`
       '&:focus-visible': {
         boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
       },
-      '&:last-child': rounded
-        ? {
-            borderBottomLeftRadius: 'card',
-            borderBottomRightRadius: 'card',
-          }
-        : {},
     })}
 `
 
 const DataCol = styled(Text)<{ align: Column['align'] }>`
   background: initial;
   border: none;
-  padding: 8px 0 8px 16px;
+  padding: 8px 16px;
   display: flex;
-  flex: 1 1 160px;
+  align-items: center;
+  flex: 1;
   max-width: 100%;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
 
-  &:first-child {
-    padding-right: 16px;
-  }
   ${({ align }) => {
     switch (align) {
       case 'left':
         return css({
           justifyContent: 'flex-start',
-          '&:last-child': {
-            paddingRight: 16,
-          },
         })
       case 'center':
         return css({
           justifyContent: 'center',
-          '&:last-child': {
-            paddingRight: 16,
-          },
         })
       case 'right':
       default:
         return css({
           textAlign: 'right',
           justifyContent: 'flex-end',
-
-          '&:last-child': {
-            paddingRight: 16,
-          },
         })
     }
   }}
 `
 
 const HeaderCol = styled(DataCol)`
-  height: 48px;
+  height: 32px;
   align-items: center;
+
+  &:has(:focus-visible) {
+    box-shadow: inset 0 0 0 3px var(--fabric-color-focus);
+  }
 `
 
-export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; align?: Column['align'] }> = ({
+export function SortableTableHeader({
   label,
   orderBy,
-  align,
-}) => {
+  onClick,
+}: {
+  label: string
+  orderBy?: OrderBy
+  onClick?: () => void
+}) {
   return (
-    <StyledHeader>
-      {(!align || align === 'right') && (
-        <IconArrowDown
-          color={orderBy ? 'currentColor' : 'transparent'}
-          size={16}
-          style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
-      )}
+    <StyledHeader gap="4px" as="button" onClick={onClick}>
       {label}
-      {align && (align === 'left' || align === 'center') && (
-        <IconArrowDown
-          color={orderBy ? 'currentColor' : 'transparent'}
-          size={16}
-          style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
-      )}
+      <Stack>
+        {(orderBy === 'asc' || !orderBy) && <IconChevronUp size={14} style={{ marginBottom: !orderBy ? -3.5 : 0 }} />}
+        {(orderBy === 'desc' || !orderBy) && <IconChevronDown size={14} style={{ marginTop: !orderBy ? -3.5 : 0 }} />}
+      </Stack>
     </StyledHeader>
   )
 }
 
 const StyledHeader = styled(Shelf)`
   color: ${({ theme }) => theme.colors.textSecondary};
+  cursor: pointer;
+  appearance: none;
+  border: none;
+  background: transparent;
 
   &:hover,
-  &:hover > svg {
+  &:focus-visible {
     cursor: pointer;
     color: ${({ theme }) => theme.colors.textInteractiveHover};
   }
