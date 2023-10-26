@@ -54,17 +54,16 @@ export function LoanTemplates() {
                 {row.name}
               </Text>
             ),
-            flex: '3',
+            width: '3fr',
           },
           {
             header: 'Created',
             cell: (row: Row) => row.createdAt && formatDate(row.createdAt),
-            flex: '1',
           },
           {
             header: '',
             cell: () => <IconChevronRight size={24} color="textPrimary" />,
-            flex: '0 0 72px',
+            width: '72px',
           },
         ]}
       />

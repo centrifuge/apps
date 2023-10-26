@@ -34,36 +34,32 @@ const columns: Column[] = [
     align: 'left',
     header: 'Token',
     cell: (token: TokenTableData) => <TokenName token={token} />,
-    flex: '9',
+    width: 'minmax(200px, 3fr)',
   },
   {
     align: 'left',
     header: 'Asset class',
+    width: 'minmax(100px, 2fr)',
     cell: (token: TokenTableData) => <AssetClass token={token} />,
-    flex: '6',
   },
   {
     header: <SortableTableHeader label="Yield" />,
     cell: (token: TokenTableData) => (token.yield ? `Target: ${formatPercentage(token.yield)}` : ''),
-    flex: '4',
     sortKey: 'yield',
   },
   {
     header: <SortableTableHeader label="Token price" />,
     cell: (token: TokenTableData) => formatBalance(token.tokenPrice, token.poolCurrency, 4, 2),
-    flex: '4',
     sortKey: 'tokenPrice',
   },
   {
     header: <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => (token.protection ? formatPercentage(token.protection) : ''),
-    flex: '4',
     sortKey: 'protection',
   },
   {
     header: <SortableTableHeader label="Value locked" />,
     cell: (token: TokenTableData) => formatBalance(token.valueLocked, token.poolCurrency),
-    flex: '4',
     sortKey: 'valueLocked',
   },
   {
@@ -73,14 +69,13 @@ const columns: Column[] = [
         {formatBalanceAbbreviated(token.capacity, token.poolCurrency)}
       </Text>
     ),
-    flex: '4',
     sortKey: 'capacity',
   },
 
   {
     header: '',
     cell: () => <IconChevronRight size={24} color="textPrimary" />,
-    flex: '0 1 52px',
+    width: '52px',
   },
 ]
 
@@ -92,7 +87,6 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       data={tokens}
       columns={columns}
       defaultSortKey="valueLocked"
-      rounded={false}
       onRowClicked={(token: TokenTableData) => ({
         pathname: `${basePath}/${token.poolId}`,
         state: { token: token.id },
@@ -103,7 +97,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   return (
-    <Shelf gap="2">
+    <Shelf gap="2" width="100%">
       <Eththumbnail show={token.poolId.startsWith('0x')} size="small">
         <Thumbnail label={token.currency.symbol} size="small" />
       </Eththumbnail>
