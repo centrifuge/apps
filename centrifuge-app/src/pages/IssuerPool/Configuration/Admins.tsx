@@ -124,7 +124,7 @@ export function Admins({ poolId }: { poolId: string }) {
                           <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />
                         </Text>
                       ),
-                      flex: '3',
+                      width: 'max-content',
                     },
                     {
                       align: 'center',
@@ -137,7 +137,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -150,7 +149,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -163,7 +161,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -176,7 +173,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -189,7 +185,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       header: '',
@@ -202,7 +197,7 @@ export function Admins({ poolId }: { poolId: string }) {
                             disabled={isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                           />
                         ),
-                      flex: '0 0 72px',
+                      width: '72px',
                     },
                   ]}
                 />

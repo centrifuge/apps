@@ -29,7 +29,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         align: 'left',
         header: '',
         cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body2'}>{row.name}</Text>,
-        flex: '0 0 200px',
+        width: '200px',
       },
     ].concat(
       poolStates.map((state, index) => ({
@@ -42,7 +42,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
             : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
         }`,
         cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-        flex: '0 0 120px',
+        width: '120px',
       }))
     )
   }, [poolStates, groupBy])
@@ -169,10 +169,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
   }
 
   return poolStates?.length > 0 ? (
-    <DataTableGroup rounded={false}>
-      <DataTable data={overviewRecords} columns={columns} hoverable rounded={false} />
-      <DataTable data={priceRecords} columns={columns} hoverable rounded={false} />
-      <DataTable data={inOutFlowRecords} columns={columns} hoverable rounded={false} />
+    <DataTableGroup>
+      <DataTable data={overviewRecords} columns={columns} hoverable />
+      <DataTable data={priceRecords} columns={columns} hoverable />
+      <DataTable data={inOutFlowRecords} columns={columns} hoverable />
     </DataTableGroup>
   ) : (
     <UserFeedback reportType="Pool balance" />

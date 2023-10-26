@@ -454,7 +454,6 @@ const RestrictedCountriesTable = ({
                   align: 'left',
                   header: 'Countries',
                   cell: (row: Row) => <Text variant="body2">{row.country}</Text>,
-                  flex: '3',
                 },
                 {
                   header: '',
@@ -467,7 +466,7 @@ const RestrictedCountriesTable = ({
                         disabled={isLoading}
                       />
                     ),
-                  flex: '0 0 72px',
+                  width: '72px',
                 },
               ]}
             />

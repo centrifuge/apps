@@ -39,13 +39,11 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     'Token amount',
     'Price',
   ]
-  const columnWidths = ['220px', '150px', '100px', '120px', '300px', '180px', '180px', '180px']
 
   const columns = headers.map((col, index) => ({
     align: 'left',
     header: col,
     cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-    flex: `0 0 ${columnWidths[index]}`,
   }))
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -111,7 +109,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <DataTable data={data} columns={columns} hoverable rounded={false} />
+    <DataTable data={data} columns={columns} hoverable />
   ) : (
     <UserFeedback reportType="Investor transactions" />
   )

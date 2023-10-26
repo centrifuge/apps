@@ -31,7 +31,6 @@ const columns = headers.map((col, index) => ({
   align: 'left',
   header: col,
   cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-  flex: index === 0 ? '0 0 50px' : '0 0 120px',
 }))
 
 export function AssetList({ pool }: { pool: Pool }) {
@@ -106,9 +105,5 @@ export function AssetList({ pool }: { pool: Pool }) {
     return <Spinner />
   }
 
-  return data.length > 0 ? (
-    <DataTable data={data} columns={columns} hoverable rounded={false} />
-  ) : (
-    <UserFeedback reportType="Assets" />
-  )
+  return data.length > 0 ? <DataTable data={data} columns={columns} hoverable /> : <UserFeedback reportType="Assets" />
 }
