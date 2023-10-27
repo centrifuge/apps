@@ -102,7 +102,6 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
           cell: (row: { type: BorrowerTransactionType }) => (
             <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>
           ),
-          flex: '3',
         },
         {
           align: 'left',
@@ -115,7 +114,6 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
               {formatDate(row.transactionDate)}
             </Tooltip>
           ),
-          flex: '3',
         },
 
         {
@@ -123,32 +121,27 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
           header: 'Face flow',
           cell: (row) =>
             row.faceFlow ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceFlow, currency, 2, 2)}` : '-',
-          flex: '3',
         },
         {
           align: 'left',
           header: 'Quantity',
           cell: (row) => (row.quantity ? formatBalance(row.quantity, undefined, 2, 0) : '-'),
-          flex: '2',
         },
         {
           align: 'left',
           header: 'Settle price',
           cell: (row) => (row.settlePrice ? formatBalance(row.settlePrice, currency, 6, 2) : '-'),
-          flex: '3',
         },
         {
           align: 'left',
           header: 'Net cash flow',
           cell: (row) =>
             row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, currency, 2, 2)}` : '-',
-          flex: '3',
         },
         {
           align: 'left',
           header: 'Position',
           cell: (row) => (row.type === 'CREATED' ? '-' : formatBalance(row.position, currency, 2, 2)),
-          flex: '3',
         },
         // TODO: add link to transaction
         // {
@@ -159,7 +152,6 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
         //        <IconExternalLink />
         //     </IconAnchor>
         //   ),
-        //   flex: '3',
         // },
       ]}
     />

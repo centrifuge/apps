@@ -26,12 +26,10 @@ export const columns: Column[] = [
     align: 'left',
     header: 'Order',
     cell: (row: LiquidityTableRow) => row.order,
-    flex: '3',
   },
   {
     header: 'Locked',
     cell: (row: LiquidityTableRow) => <LockedRow row={row} />,
-    flex: '3',
   },
   // {
   //   header: 'Executing',

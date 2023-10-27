@@ -3,7 +3,7 @@ import { LayoutBase } from '../components/LayoutBase'
 import { PoolList } from '../components/PoolList'
 import { PoolsTokensShared } from '../components/PoolsTokensShared'
 
-export function PoolsPage() {
+export default function PoolsPage() {
   return (
     <LayoutBase>
       <PoolsTokensShared title="Pools">

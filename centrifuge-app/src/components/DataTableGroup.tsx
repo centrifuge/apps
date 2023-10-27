@@ -1,16 +1,10 @@
-import { Card, Stack } from '@centrifuge/fabric'
+import { Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { DataTableProps } from './DataTable'
 
-export function DataTableGroup({
-  children,
-  rounded = true,
-}: {
-  children: React.ReactElement<DataTableProps>[]
-  rounded?: boolean
-}) {
+export function DataTableGroup({ children }: { children: React.ReactElement<DataTableProps>[] }) {
   return (
-    <Stack as={rounded ? Card : undefined} gap="3">
+    <Stack>
       {React.Children.map(children, (child, index) => {
         return React.isValidElement(child)
           ? React.cloneElement(child, {

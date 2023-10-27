@@ -6,8 +6,10 @@ import { formatDate } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useListedPools } from '../utils/useListedPools'
-import { DataPoint, TotalValueLocked } from './Charts/TotalValueLocked'
+import type { DataPoint } from './Charts/TotalValueLocked'
 import { tooltipText } from './Tooltips'
+
+const TotalValueLocked = React.lazy(() => import('./Charts/TotalValueLocked'))
 
 export function CardTotalValueLocked() {
   const { colors } = useTheme()

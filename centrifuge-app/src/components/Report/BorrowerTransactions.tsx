@@ -36,13 +36,10 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
     }))
   }, [transactions, pool.currency.symbol])
 
-  const columnWidths = ['150px', '100px', '120px', '100px', '200px']
-
   const columns = headers.map((col, index) => ({
     align: 'left',
     header: col,
     cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-    flex: `0 0 ${columnWidths[index]}`,
   }))
 
   const dataUrl = React.useMemo(() => {
@@ -76,7 +73,7 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <DataTable data={data} columns={columns} hoverable rounded={false} />
+    <DataTable data={data} columns={columns} hoverable />
   ) : (
     <UserFeedback reportType="Borrower transactions" />
   )

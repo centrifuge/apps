@@ -5,7 +5,7 @@ import {
   Pool,
   TokenBalance,
 } from '@centrifuge/centrifuge-js'
-import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -22,11 +22,11 @@ import {
   usePagination,
   VisualButton,
 } from '@centrifuge/fabric'
+import { isAddress as isValidEVMAddress } from '@ethersproject/address'
 import * as React from 'react'
 import { Link, useRouteMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { formatDate } from '../../utils/date'
-import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAddress } from '../../utils/useAddress'
 import { usePool, usePoolMetadata, usePools, useTransactionsByAddress } from '../../utils/usePools'
@@ -44,6 +44,7 @@ type TransactionsProps = {
 export function Transactions({ count, txTypes }: TransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
+  const formattedAddress = address && isValidEVMAddress(address) ? address : formatAddress(address || '')
   const transactions = useTransactionsByAddress(formatAddress(address || ''))
   const match = useRouteMatch('/history')
   const [sortKey, setSortKey] = React.useState<'date' | 'amount'>('date')

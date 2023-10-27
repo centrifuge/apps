@@ -8,7 +8,7 @@ import { PageWithSideBar } from '../components/PageWithSideBar'
 import { usePendingMultisigActions } from '../components/PendingMultisigs'
 import { truncate } from '../utils/web3'
 
-export function MultisigApprovalPage() {
+export default function MultisigApprovalPage() {
   const { search } = useLocation()
   const {
     substrate: { accounts, selectedAddress, selectAccount },

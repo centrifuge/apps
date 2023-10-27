@@ -15,7 +15,7 @@ type TotalValueLockedProps = {
   setHovered: (entry: DataPoint | undefined) => void
 }
 
-export function TotalValueLocked({ chainTVL, setHovered }: TotalValueLockedProps) {
+export default function TotalValueLocked({ chainTVL, setHovered }: TotalValueLockedProps) {
   const centrifugeTVL = useDailyTVL()
   const tinlakeTVL = useDailyTinlakeTVL()
   const chartColor = '#ff8c00'

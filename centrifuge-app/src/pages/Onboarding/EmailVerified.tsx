@@ -7,7 +7,7 @@ import { useVerifyEmail } from './queries/useVerifyEmail'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
-export const EmailVerified: React.FC = () => {
+export default function EmailVerified() {
   const { error, data } = useVerifyEmail()
 
   return (
