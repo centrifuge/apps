@@ -1,13 +1,13 @@
+import { BorrowerTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js'
 import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
 import * as React from 'react'
-import { TransactionListItemProps } from './Transactions'
 
 type TransactionTypeProps = {
-  type: TransactionListItemProps['type']
+  type: InvestorTransactionType | BorrowerTransactionType
 }
 
 const states: {
-  [Key in TransactionListItemProps['type']]: {
+  [Key in InvestorTransactionType | BorrowerTransactionType]: {
     label: string
     status: StatusChipProps['status']
   }

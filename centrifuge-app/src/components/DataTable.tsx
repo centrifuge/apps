@@ -108,85 +108,83 @@ export const DataTable = <T extends Record<string, any>>({
 
   return (
     <PaginationContainer pagination={pagination}>
-      <Stack gap={pageSize || csvExportData ? 3 : 0}>
-        <TableGrid
-          gridTemplateColumns={templateColumns}
-          gridAutoRows="auto"
-          gap={0}
-          rowGap={0}
-          ref={ref}
-          minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}
-        >
-          {showHeader && (
-            <HeaderRow templateColumns={templateColumns}>
-              {columns.map((col, i) => (
-                <HeaderCol key={i} align={col?.align}>
-                  <Text variant="body3">
-                    {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header)
-                      ? React.cloneElement(col.header as React.ReactElement<any>, {
-                          orderBy: orderBy[col.sortKey],
-                          onClick: () => updateSortOrder(col.sortKey),
-                        })
-                      : col.header}
-                  </Text>
-                </HeaderCol>
-              ))}
-            </HeaderRow>
-          )}
-          {sortedAndPaginatedData?.map((row, i) => (
-            <DataRow
-              hoverable={hoverable}
-              as={onRowClicked ? Link : 'div'}
-              to={onRowClicked && (() => onRowClicked(row))}
-              key={keyField ? row[keyField] : i}
-              tabIndex={onRowClicked ? 0 : undefined}
-              templateColumns={templateColumns}
-            >
-              {columns.map((col, index) => (
-                <DataCol variant="body2" align={col?.align} key={index}>
-                  {col.cell(row, i)}
-                </DataCol>
-              ))}
-            </DataRow>
-          ))}
-          {/* summary row is not included in sorting */}
-          {summary && (
-            <DataRow templateColumns={templateColumns}>
-              {columns.map((col, i) => (
-                <DataCol variant="body2" key={`${col.sortKey}-${i}`} align={col?.align}>
-                  {col.cell(summary, i)}
-                </DataCol>
-              ))}
-            </DataRow>
-          )}
-          {groupIndex != null && groupIndex !== lastGroupIndex && (
-            <Row>
-              <DataCol />
-            </Row>
-          )}
-          {pagination.pageCount > 1 || csvExportData ? (
-            <Row templateColumns={templateColumns} hideBorder>
-              {pagination.pageCount > 1 && (
-                <Shelf marginTop={3}>
-                  <Pagination />
-                </Shelf>
-              )}
-              {csvExportData && (
-                <Box marginTop={3} style={{ gridColumn: columns.length, justifySelf: 'end' }}>
-                  <AnchorButton
-                    small
-                    variant="secondary"
-                    href={getCSVDownloadUrl(csvExportData)}
-                    download={csvExportFileName}
-                  >
-                    Export as CSV
-                  </AnchorButton>
-                </Box>
-              )}
-            </Row>
-          ) : null}
-        </TableGrid>
-      </Stack>
+      <TableGrid
+        gridTemplateColumns={templateColumns}
+        gridAutoRows="auto"
+        gap={0}
+        rowGap={0}
+        ref={ref}
+        minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}
+      >
+        {showHeader && (
+          <HeaderRow templateColumns={templateColumns}>
+            {columns.map((col, i) => (
+              <HeaderCol key={i} align={col?.align}>
+                <Text variant="body3">
+                  {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header)
+                    ? React.cloneElement(col.header as React.ReactElement<any>, {
+                        orderBy: orderBy[col.sortKey],
+                        onClick: () => updateSortOrder(col.sortKey),
+                      })
+                    : col.header}
+                </Text>
+              </HeaderCol>
+            ))}
+          </HeaderRow>
+        )}
+        {sortedAndPaginatedData?.map((row, i) => (
+          <DataRow
+            hoverable={hoverable}
+            as={onRowClicked ? Link : 'div'}
+            to={onRowClicked && (() => onRowClicked(row))}
+            key={keyField ? row[keyField] : i}
+            tabIndex={onRowClicked ? 0 : undefined}
+            templateColumns={templateColumns}
+          >
+            {columns.map((col, index) => (
+              <DataCol variant="body2" align={col?.align} key={index}>
+                {col.cell(row, i)}
+              </DataCol>
+            ))}
+          </DataRow>
+        ))}
+        {/* summary row is not included in sorting */}
+        {summary && (
+          <DataRow templateColumns={templateColumns}>
+            {columns.map((col, i) => (
+              <DataCol variant="body2" key={`${col.sortKey}-${i}`} align={col?.align}>
+                {col.cell(summary, i)}
+              </DataCol>
+            ))}
+          </DataRow>
+        )}
+        {groupIndex != null && groupIndex !== lastGroupIndex && (
+          <Row>
+            <DataCol />
+          </Row>
+        )}
+        {pagination.pageCount > 1 || csvExportData ? (
+          <Row templateColumns={templateColumns} hideBorder>
+            {pagination.pageCount > 1 && (
+              <Shelf marginTop={3}>
+                <Pagination />
+              </Shelf>
+            )}
+            {csvExportData && (
+              <Box marginTop={3} style={{ gridColumn: columns.length, justifySelf: 'end' }}>
+                <AnchorButton
+                  small
+                  variant="secondary"
+                  href={getCSVDownloadUrl(csvExportData)}
+                  download={csvExportFileName}
+                >
+                  Export as CSV
+                </AnchorButton>
+              </Box>
+            )}
+          </Row>
+        ) : null}
+      </TableGrid>
     </PaginationContainer>
   )
 }

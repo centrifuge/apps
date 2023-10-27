@@ -8,7 +8,7 @@ export default function TransactionHistoryPage() {
   return (
     <LayoutBase>
       <BasePadding>
-        <Stack as="article" gap={2}>
+        <Stack as="article" gap={4}>
           <Text as="h2" variant="heading2">
             Transaction history
           </Text>
