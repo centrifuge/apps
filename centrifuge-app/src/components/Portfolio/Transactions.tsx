@@ -26,12 +26,12 @@ import { isAddress as isValidEVMAddress } from '@ethersproject/address'
 import * as React from 'react'
 import { Link, useRouteMatch } from 'react-router-dom'
 import styled from 'styled-components'
+import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
+import { Spinner } from '../../components/Spinner'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAddress } from '../../utils/useAddress'
 import { usePool, usePoolMetadata, usePools, useTransactionsByAddress } from '../../utils/usePools'
-import { Spinner } from '../Spinner'
-import { TransactionTypeChip } from './TransactionTypeChip'
 
 export const TRANSACTION_CARD_COLUMNS = `150px 125px 200px 150px 1fr`
 export const TRANSACTION_CARD_GAP = 4
@@ -41,7 +41,7 @@ type TransactionsProps = {
   txTypes?: InvestorTransactionType[]
 }
 
-export function Transactions({ count, txTypes }: TransactionsProps) {
+export default function Transactions({ count, txTypes }: TransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
   const formattedAddress = address && isValidEVMAddress(address) ? address : formatAddress(address || '')
@@ -106,11 +106,7 @@ export function Transactions({ count, txTypes }: TransactionsProps) {
 
   return !!paginatedInvestorTransactions.length ? (
     <PaginationContainer pagination={pagination}>
-      <Stack as="article" gap={2}>
-        <Text as="h2" variant="heading2">
-          {match ? null : 'Transaction history'}
-        </Text>
-
+      <Stack gap={2}>
         <Stack gap={2}>
           <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
             <Text variant="body3">Action</Text>

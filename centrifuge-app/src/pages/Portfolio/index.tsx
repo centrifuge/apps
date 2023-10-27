@@ -7,7 +7,7 @@ import { PoolList } from '../../components/PoolList'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
 import { Rewards } from '../../components/Portfolio/Rewards'
-import { Transactions } from '../../components/Portfolio/Transactions'
+import Transactions from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
 
 export default function PortfolioPage() {
