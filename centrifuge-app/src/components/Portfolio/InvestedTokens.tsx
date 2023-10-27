@@ -166,9 +166,7 @@ export const InvestedTokens = ({ canInvestRedeem = false }) => {
       <Text as="h2" variant="heading2">
         Portfolio
       </Text>
-      <Box overflow="auto">
-        <DataTable columns={columns} data={tableData} />
-      </Box>
+      <DataTable columns={columns} data={tableData} />
     </Stack>
   ) : null
 }
