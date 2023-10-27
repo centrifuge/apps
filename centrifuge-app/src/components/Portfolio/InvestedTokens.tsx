@@ -36,7 +36,7 @@ const columns: Column[] = [
     align: 'left',
     header: 'Token',
     cell: (token: Row) => {
-      return <Token {...token} />
+      return <TokenWithIcon {...token} />
     },
     width: '250px',
   },
@@ -152,7 +152,7 @@ export const InvestedTokens = ({ canInvestRedeem = false }) => {
   ) : null
 }
 
-const Token = ({ poolId, currency }: Row) => {
+const TokenWithIcon = ({ poolId, currency }: Row) => {
   const pool = usePool(poolId, false)
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
