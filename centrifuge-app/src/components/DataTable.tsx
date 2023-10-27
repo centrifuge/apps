@@ -374,7 +374,7 @@ export function FilterableTableHeader({
 }
 
 const StyledHeader = styled(Shelf)`
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.textPrimary};
   cursor: pointer;
   appearance: none;
   border: none;
