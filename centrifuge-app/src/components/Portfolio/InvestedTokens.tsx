@@ -35,27 +35,8 @@ const columns: Column[] = [
   {
     align: 'left',
     header: 'Token',
-    cell: ({ currency, poolId }: Row) => {
-      const pool = usePool(poolId, false)
-      const { data: metadata } = usePoolMetadata(pool)
-      const cent = useCentrifuge()
-      const { sizes } = useTheme()
-      const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
-      return (
-        <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
-          <Eththumbnail show={!!poolId.startsWith('0x')}>
-            {icon ? (
-              <Box as="img" src={icon} alt="" height="iconMedium" width="iconMedium" />
-            ) : (
-              <Thumbnail type="pool" label="LP" size="small" />
-            )}
-          </Eththumbnail>
-
-          <Text textOverflow="ellipsis" variant="body3">
-            {currency.name}
-          </Text>
-        </Grid>
-      )
+    cell: (token: Row) => {
+      return <Token {...token} />
     },
     width: '250px',
   },
@@ -169,4 +150,27 @@ export const InvestedTokens = ({ canInvestRedeem = false }) => {
       <DataTable columns={columns} data={tableData} />
     </Stack>
   ) : null
+}
+
+const Token = ({ poolId, currency }: Row) => {
+  const pool = usePool(poolId, false)
+  const { data: metadata } = usePoolMetadata(pool)
+  const cent = useCentrifuge()
+  const { sizes } = useTheme()
+  const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
+  return (
+    <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
+      <Eththumbnail show={!!poolId.startsWith('0x')}>
+        {icon ? (
+          <Box as="img" src={icon} alt="" height="iconMedium" width="iconMedium" />
+        ) : (
+          <Thumbnail type="pool" label="LP" size="small" />
+        )}
+      </Eththumbnail>
+
+      <Text textOverflow="ellipsis" variant="body3">
+        {currency.name}
+      </Text>
+    </Grid>
+  )
 }
