@@ -31,7 +31,7 @@ type AggregateOptions = {
 
 type PostProcess<T = any> = (v: any) => T
 
-type Return = [string] | [string, PostProcess]
+type Return = [string] | [string, PostProcess] | []
 
 export type Call = {
   target: string

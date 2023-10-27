@@ -5,6 +5,5 @@
   "function withdraw(uint256, address, address) public returns (uint256)",
   "function requestDeposit(uint256, address) public",
   "function requestRedeem(uint256, address, address) public",
-  "function requestDepositWithPermit(uint256, address, uint256, uint8, bytes32, bytes32) public",
-  "function requestRedeemWithPermit(uint256, address, uint256, uint8, bytes32, bytes32) public"
+  "function requestDepositWithPermit(uint256, uint256, uint8, bytes32, bytes32) public"
 ]

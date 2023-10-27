@@ -39,7 +39,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const trancheBalance = lpInvest?.tokenBalance?.toDecimal() ?? Dec(0)
 
-  const price = lpInvest?.tokenPrice?.toDecimal() ?? Dec(1)
+  const price = tranche?.tokenPrice?.toDecimal() ?? Dec(1)
   const investToCollect = lpInvest?.maxMint.toDecimal() ?? Dec(0)
   const currencyToCollect = lpInvest?.maxWithdraw.toDecimal() ?? Dec(0)
   const pendingRedeem = lpInvest?.pendingRedeem.toDecimal() ?? Dec(0)
@@ -147,7 +147,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     collectType,
     needsToCollectBeforeOrder: false,
     needsPoolCurrencyApproval: (amount) =>
-      lpInvest ? lpInvest.managerCurrencyAllowance.toFloat() < amount && !lpInvest.currencySupportsPermit : false,
+      lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !lpInvest.currencySupportsPermit : false,
     needsTrancheTokenApproval: () => false,
     canChangeOrder: false,
     canCancelOrder: false,
@@ -162,7 +162,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       // If the last tx was an approve, we may not have refetched the allowance yet,
       // so assume the allowance is enough to do a normal invest
       if (
-        lpInvest.managerCurrencyAllowance.lt(newOrder) &&
+        lpInvest.lpCurrencyAllowance.lt(newOrder) &&
         lpInvest.currencySupportsPermit &&
         pendingAction !== 'approvePoolCurrency'
       ) {
