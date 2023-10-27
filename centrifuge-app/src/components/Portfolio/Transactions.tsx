@@ -152,24 +152,29 @@ export default function Transactions({ count, txTypes }: TransactionsProps) {
   }, [investorTransactions])
 
   return !!investorTransactions.length ? (
-    <Stack gap={2}>
+    <Stack as="article" gap={match ? 5 : 2}>
+      <Text as="h2" variant="heading2">
+        Transaction history
+      </Text>
       <Stack gap={2}>
-        <DataTable
-          data={investorTransactions}
-          columns={columns}
-          pageSize={match ? 15 : undefined}
-          csvExportData={match ? csvData : undefined}
-          csvExportFileName={match ? `transaction-history-${address}.csv` : undefined}
-        />
-        {match ? null : (
-          <Link to="/history">
-            <Box display="inline-block">
-              <VisualButton small variant="tertiary" icon={IconEye}>
-                View all
-              </VisualButton>
-            </Box>
-          </Link>
-        )}
+        <Stack gap={2}>
+          <DataTable
+            data={investorTransactions}
+            columns={columns}
+            pageSize={match ? 15 : undefined}
+            csvExportData={match ? csvData : undefined}
+            csvExportFileName={match ? `transaction-history-${address}.csv` : undefined}
+          />
+          {match ? null : (
+            <Link to="/history">
+              <Box display="inline-block">
+                <VisualButton small variant="tertiary" icon={IconEye}>
+                  View all
+                </VisualButton>
+              </Box>
+            </Link>
+          )}
+        </Stack>
       </Stack>
     </Stack>
   ) : (
