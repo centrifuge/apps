@@ -12,9 +12,6 @@ import { useAddress } from '../../utils/useAddress'
 import { usePools, useTransactionsByAddress } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 
-export const TRANSACTION_CARD_COLUMNS = `150px 125px 200px 150px 1fr`
-export const TRANSACTION_CARD_GAP = 4
-
 type TransactionsProps = {
   count?: number
   txTypes?: InvestorTransactionType[]
@@ -136,7 +133,7 @@ export default function Transactions({ count, txTypes }: TransactionsProps) {
     return txs
   }, [transactions, txTypes, count])
 
-  const csvData: any = React.useMemo(() => {
+  const csvData = React.useMemo(() => {
     if (!investorTransactions || !investorTransactions?.length) {
       return undefined
     }
