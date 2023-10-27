@@ -95,7 +95,7 @@ export function PoolList() {
                     </Box>
                   ))
               : filteredPools.map((pool) => (
-                  <PoolCardBox as="li" key={`pool-list-${pool.poolId}-${Math.random()}`} status={pool.status}>
+                  <PoolCardBox as="li" key={`pool-list-${pool.name}-${pool.poolId}`} status={pool.status}>
                     <PoolCard {...pool} />
                   </PoolCardBox>
                 ))}
