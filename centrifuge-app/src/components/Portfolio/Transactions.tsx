@@ -70,7 +70,7 @@ const columns: Column[] = [
     header: 'Token price',
     cell: ({ tranche }: Row) => (
       <Text as="span" variant="body3">
-        {formatBalance(tranche?.tokenPrice?.toDecimal() || Dec(1), tranche?.currency.symbol, 3)}
+        {formatBalance(tranche?.tokenPrice?.toDecimal() || Dec(1), tranche?.currency.symbol, 4)}
       </Text>
     ),
     width: '125px',

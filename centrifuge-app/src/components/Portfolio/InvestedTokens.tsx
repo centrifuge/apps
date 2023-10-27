@@ -65,7 +65,7 @@ const columns: Column[] = [
     cell: ({ tokenPrice }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalance(tokenPrice.toDecimal() || 1, 'USDT', 3)}
+          {formatBalance(tokenPrice.toDecimal() || 1, 'USDT', 4)}
         </Text>
       )
     },
@@ -129,7 +129,7 @@ const columns: Column[] = [
         )
       )
     },
-    width: '300px',
+    width: '325px',
   },
 ]
 
