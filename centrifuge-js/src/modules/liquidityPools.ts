@@ -110,14 +110,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pending(contract(currencyAddress, ABI.Currency).approve(address, maxUint256, options))
   }
 
-  async function signPermit(args: [spender: string, currencyAddress: string]) {
-    const [spender, currencyAddress] = args
+  async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
+    const [spender, currencyAddress, amount] = args
     const permit = await signERC2612Permit(
       inst.config.evmSigner,
       currencyAddress,
       inst.getSignerAddress('evm'),
       spender,
-      maxUint256
+      amount.toString()
     )
     return permit as Permit
   }

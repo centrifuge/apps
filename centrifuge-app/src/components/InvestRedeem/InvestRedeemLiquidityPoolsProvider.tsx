@@ -168,7 +168,11 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       ) {
         const signer = provider!.getSigner()
         const connectedCent = cent.connectEvm(evmAddress!, signer)
-        const permit = await connectedCent.liquidityPools.signPermit([lpInvest.lpAddress, lpInvest.currencyAddress])
+        const permit = await connectedCent.liquidityPools.signPermit([
+          lpInvest.lpAddress,
+          lpInvest.currencyAddress,
+          newOrder,
+        ])
         investWithPermit.execute([lpInvest.lpAddress, newOrder, permit])
         setPendingAction('investWithPermit')
       } else {
