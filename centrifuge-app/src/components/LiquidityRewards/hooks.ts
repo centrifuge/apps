@@ -7,7 +7,6 @@ export function useAccountStakes(address?: string, poolId?: string, trancheId?: 
     ['stakes', address, poolId, trancheId],
     (cent) => cent.rewards.getAccountStakes([address!, poolId!, trancheId!]),
     {
-      suspense: true,
       enabled: !!address && !!poolId && !!trancheId,
     }
   )

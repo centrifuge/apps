@@ -17,6 +17,7 @@ import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { MetaMask } from '@web3-react/metamask'
 import * as React from 'react'
+import { Network } from '.'
 import { AccountButton, AccountIcon, AccountName } from './AccountButton'
 import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
@@ -30,6 +31,8 @@ type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
   showBase?: boolean
+  showArbitrum?: boolean
+  showTestNets?: boolean
 }
 
 const title = {
@@ -38,9 +41,17 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showBase }: Props) {
+export function WalletDialog({
+  evmChains: allEvmChains,
+  showAdvancedAccounts,
+  showBase,
+  showArbitrum,
+  showTestNets,
+}: Props) {
   const evmChains = Object.keys(allEvmChains)
     .filter((chain) => (!showBase ? !['8453', '84531'].includes(chain) : true))
+    .filter((chain) => (!showArbitrum ? !['42161', '421613'].includes(chain) : true))
+    .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113'].includes(chain) : true))
     .reduce((obj, key) => {
       obj[key] = allEvmChains[key]
       return obj
@@ -48,6 +59,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
   const ctx = useWallet()
   const centEvmChainId = useCentEvmChainId()
   const {
+    connectedType,
     pendingConnect: { isConnecting, wallet: pendingWallet, isError: isConnectError },
     walletDialog: { view, network: selectedNetwork, wallet: selectedWallet },
     dispatch,
@@ -86,12 +98,9 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
     }
   }
 
-  function walletButtonMuted() {
-    return Boolean(
-      scopedNetworks &&
-        ((isCentChainSelected && !scopedNetworks.includes('centrifuge')) ||
-          (typeof selectedNetwork === 'number' && !scopedNetworks.includes(selectedNetwork)))
-    )
+  function isMuted(network: Network) {
+    if (!scopedNetworks) return false
+    return !scopedNetworks.includes(network)
   }
 
   return (
@@ -128,23 +137,24 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
               logo={<Logo icon={centrifugeLogo} />}
               onClick={() => showWallets('centrifuge')}
               active={isCentChainSelected}
-              muted={Boolean(scopedNetworks && !scopedNetworks.includes('centrifuge'))}
+              muted={isMuted('centrifuge')}
             >
               {getNetworkName('centrifuge')}
             </SelectButton>
 
-            {Object.entries(evmChains).map(([chainId, chain]) => {
-              const info = getChainInfo(evmChains, Number(chainId))
+            {Object.entries(evmChains).map(([chainIdString, chain]) => {
+              const chainId = Number(chainIdString)
+              const info = getChainInfo(evmChains, chainId)
 
-              if (Number(chainId) === evmChainId) return null
+              if (chainId === evmChainId) return null
 
               return (
                 <SelectButton
                   key={chainId}
                   logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
-                  onClick={() => showWallets(Number(chainId))}
-                  active={selectedNetwork === Number(chainId)}
-                  muted={Boolean(scopedNetworks && scopedNetworks.includes('centrifuge'))}
+                  onClick={() => showWallets(chainId)}
+                  active={selectedNetwork === chainId}
+                  muted={isMuted(chainId)}
                 >
                   {info.name}
                 </SelectButton>
@@ -198,7 +208,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                       }}
                       loading={isConnecting && wallet === pendingWallet}
                       active={selectedWallet === wallet}
-                      muted={walletButtonMuted()}
+                      muted={isMuted(selectedNetwork!)}
                     >
                       {wallet.title}
                     </SelectButton>
@@ -208,7 +218,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                       href={wallet.installUrl}
                       logo={<Logo icon={wallet.logo.src} />}
                       iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
-                      muted={walletButtonMuted()}
+                      muted={isMuted(selectedNetwork!)}
                     >
                       {wallet.title}
                     </SelectAnchor>
@@ -246,7 +256,9 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                 )
               }
             >
-              <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
+              {connectedType === 'substrate' ? (
+                <SubstrateAccounts onClose={close} showAdvancedAccounts={showAdvancedAccounts} />
+              ) : null}
             </SelectionStep>
           </>
         )}

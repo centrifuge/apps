@@ -5,6 +5,7 @@ import {
   IconInvestments,
   IconNft,
   IconPieChart,
+  IconSwitch,
   Menu as Panel,
   MenuItemGroup,
   Shelf,
@@ -25,7 +26,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showPortfolio, showPrime } = useDebugFlags()
+  const { showSwaps, showPortfolio, showPrime } = useDebugFlags()
 
   return (
     <Shelf
@@ -102,6 +103,13 @@ export function Menu() {
             </Panel>
           )}
         </IssuerMenu>
+      )}
+
+      {showSwaps && (
+        <PageLink to="/swaps" stacked={!isLarge}>
+          <IconSwitch />
+          Swaps
+        </PageLink>
       )}
     </Shelf>
   )

@@ -6,6 +6,7 @@ import { PendingMultisigs } from '../../../components/PendingMultisigs'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { InvestorStatus } from './InvestorStatus'
+import { LiquidityPools } from './LiquidityPools'
 import { OnboardingSettings } from './OnboardingSettings'
 
 export function IssuerPoolInvestorsPage() {
@@ -28,6 +29,7 @@ function IssuerPoolInvestors() {
   return (
     <>
       {canEditInvestors && <InvestorStatus />}
+      {isPoolAdmin && <LiquidityPools />}
       {isPoolAdmin && <OnboardingSettings />}
     </>
   )

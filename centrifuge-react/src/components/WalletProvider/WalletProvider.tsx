@@ -1,4 +1,5 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
+import { JsonRpcProvider } from '@ethersproject/providers'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -61,6 +62,7 @@ export type WalletContextType = {
     chains: EvmChains
     selectedWallet: EvmConnectorMeta | null
     selectedAddress: string | null
+    getProvider(chainId: number): JsonRpcProvider
   }
 }
 
@@ -76,17 +78,17 @@ export function useWallet() {
 
 export function useAddress(type?: 'substrate' | 'evm') {
   const { connectedType, evm, substrate, isEvmOnSubstrate } = useWallet()
-  if (type === 'evm') {
-    return evm.accounts?.[0]
+  if (type === 'evm' || (!type && connectedType === 'evm' && !isEvmOnSubstrate)) {
+    return evm.accounts?.[0] ?? undefined
   }
   if (isEvmOnSubstrate) {
     return (
       substrate.selectedCombinedAccount?.actingAddress ||
-      (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts[0], substrate.evmChainId!) : undefined)
+      (evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts?.[0], substrate.evmChainId!) : undefined)
     )
   }
-  if (connectedType === 'evm') {
-    return evm.accounts?.[0]
+  if (type === 'substrate' && connectedType === 'evm') {
+    return evm.accounts?.[0] ? evmToSubstrateAddress(evm.accounts?.[0], evm.chainId!) : undefined
   }
   return substrate.selectedCombinedAccount?.actingAddress || substrate.selectedAccount?.address
 }
@@ -125,9 +127,12 @@ type WalletProviderProps = {
   subscanUrl?: string
   showAdvancedAccounts?: boolean
   showBase?: boolean
+  showArbitrum?: boolean
+  showTestNets?: boolean
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
+const cachedProviders: Record<number, JsonRpcProvider> = {}
 
 export function WalletProvider({
   children,
@@ -141,6 +146,8 @@ export function WalletProvider({
   subscanUrl,
   showAdvancedAccounts,
   showBase,
+  showArbitrum,
+  showTestNets,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
 
@@ -254,13 +261,6 @@ export function WalletProvider({
       },
     })
   }
-
-  const selectAccount = React.useCallback((address: string, proxies?: string[] | null, multisig?: string | null) => {
-    dispatch({
-      type: 'substrateSetState',
-      payload: { selectedAccountAddress: address, proxyAddresses: proxies ?? null, multisigAddress: multisig ?? null },
-    })
-  }, [])
 
   const {
     execute: setPendingConnect,
@@ -438,7 +438,16 @@ export function WalletProvider({
         selectedCombinedAccount:
           ((state.substrate.multisigAddress || state.substrate.proxyAddresses) && selectedCombinedAccount) || null,
         isWeb3Injected,
-        selectAccount,
+        selectAccount: (address: string, proxies?: string[] | null, multisig?: string | null) => {
+          dispatch({
+            type: 'substrateSetState',
+            payload: {
+              selectedAccountAddress: address,
+              proxyAddresses: proxies ?? null,
+              multisigAddress: multisig ?? null,
+            },
+          })
+        },
         addMultisig: (multisig) => {
           dispatch({
             type: 'substrateAddMultisig',
@@ -453,17 +462,30 @@ export function WalletProvider({
       },
       evm: {
         ...state.evm,
+        accounts: state.evm.accounts && [state.evm.accounts?.[0]],
         selectedAddress: state.evm.accounts?.[0] || null,
         connectors: evmConnectors,
         chains: evmChains,
+        getProvider: (chainId: number) => {
+          return (
+            cachedProviders[chainId] ||
+            (cachedProviders[chainId] = new JsonRpcProvider(evmChains[chainId].urls[0], chainId))
+          )
+        },
       },
     }
-  }, [connect, disconnect, selectAccount, proxies, state, isConnectError, isConnecting])
+  }, [connect, disconnect, proxies, state, isConnectError, isConnecting])
 
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showBase={showBase} />
+      <WalletDialog
+        evmChains={evmChains}
+        showAdvancedAccounts={showAdvancedAccounts}
+        showBase={showBase}
+        showArbitrum={showArbitrum}
+        showTestNets={showTestNets}
+      />
     </WalletContext.Provider>
   )
 }

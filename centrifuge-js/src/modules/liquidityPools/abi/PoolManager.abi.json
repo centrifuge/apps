@@ -1,0 +1,5 @@
+[
+  "function pools(uint64) view returns (uint64, uint256)",
+  "function deployTranche(uint64, bytes16) public",
+  "function deployLiquidityPool(uint64, bytes16, address) public"
+]

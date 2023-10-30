@@ -45,33 +45,36 @@ const Chevron = styled(IconChevronDown)`
   position: absolute;
   top: 0;
   right: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
   pointer-events: none;
 `
 
-export const Select: React.FC<SelectProps> = ({ options, label, placeholder, errorMessage, disabled, ...rest }) => {
+export function SelectInner({ options, placeholder, disabled, ...rest }: Omit<SelectProps, 'label' | 'errorMessage'>) {
+  return (
+    <Box position="relative">
+      <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
+      <StyledSelect disabled={disabled} {...rest}>
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((option, index) => (
+          <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </option>
+        ))}
+      </StyledSelect>
+    </Box>
+  )
+}
+
+export const Select: React.FC<SelectProps> = ({ label, errorMessage, ...rest }) => {
   return (
     <Stack gap={1} width="100%">
-      <InputBox
-        as="div"
-        label={label}
-        inputElement={
-          <>
-            <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
-            <StyledSelect disabled={disabled} {...rest}>
-              {placeholder && (
-                <option value="" disabled>
-                  {placeholder}
-                </option>
-              )}
-              {options.map((option, index) => (
-                <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
-                  {option.label}
-                </option>
-              ))}
-            </StyledSelect>
-          </>
-        }
-      />
+      <InputBox as="div" label={label} inputElement={<SelectInner {...rest} />} />
       {errorMessage && (
         <Box px={2}>
           <Text variant="label2" color="statusCritical">

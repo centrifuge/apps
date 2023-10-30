@@ -1862,6 +1862,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/centrifuge-js@workspace:centrifuge-js"
   dependencies:
+    "@ethersproject/abi": ^5.6.0
+    "@ethersproject/bignumber": ^5.7.0
     "@ethersproject/contracts": ^5.6.0
     "@ethersproject/providers": ^5.6.0
     "@polkadot/api": ~10.3.4
@@ -1870,6 +1872,7 @@ __metadata:
     "@stablelib/blake2b": ^1.0.1
     "@types/isomorphic-fetch": ^0.0.36
     "@types/jest": ^27.0.3
+    "@types/lodash": ^4
     "@types/node": ^16.11.12
     "@typescript-eslint/eslint-plugin": ^4.32.0
     "@typescript-eslint/parser": ^4.32.0
@@ -1878,9 +1881,11 @@ __metadata:
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^4.0.0
+    eth-permit: ^0.2.3
     isomorphic-fetch: ^3.0.0
     jest: ^27.4.3
     jw3t: ^1.0.8
+    lodash: ^4.17.21
     npm-run-all: 4.1.5
     ts-jest: ^27.1.1
     typescript: ~4.4.4
@@ -2583,7 +2588,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/abi@npm:5.7.0, @ethersproject/abi@npm:^5.7.0":
+"@ethersproject/abi@npm:5.7.0, @ethersproject/abi@npm:^5.6.0, @ethersproject/abi@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/abi@npm:5.7.0"
   dependencies:
@@ -8561,6 +8566,13 @@ __metadata:
   version: 3.0.2
   resolution: "@types/linkify-it@npm:3.0.2"
   checksum: 5a17cd75e30cd395de8cc3c91a6a7f49e0254a7aa57d8a6a740ba099016177ceceae72af8e81a66c10f6a455336de4e38f8c0d9408b60e6999c1836656e5a2ac
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4":
+  version: 4.14.197
+  resolution: "@types/lodash@npm:4.14.197"
+  checksum: 5368b3d8c3ec66d6611acc054f073e2296bfca75442f1c6df1572405efd4b677d2c8412d0b6ff8e87491aac17dd332798ee30757c2b468461ef1fabdd6c68f45
   languageName: node
   linkType: hard
 
@@ -15863,6 +15875,15 @@ __metadata:
     json-rpc-engine: ^6.1.0
     pify: ^5.0.0
   checksum: 0096d226628572bcdd9928e046f7d7221b665f590a0008d4c97b684c6095415e0eb745ebe8c050a5c6e61e7642782daf8c1b1d2d1cd63dd95180e4b79fae815d
+  languageName: node
+  linkType: hard
+
+"eth-permit@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "eth-permit@npm:0.2.3"
+  dependencies:
+    utf8: ^3.0.0
+  checksum: 101c7dfe69152c7349b4fcbf62aab6bb028c4029d50bcddbeced6be6316040945c0493604c85efbbfe4fb54fd3de23d5ba551545a8462465369a80e0f8052cb6
   languageName: node
   linkType: hard
 
@@ -27471,7 +27492,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"utf8@npm:3.0.0":
+"utf8@npm:3.0.0, utf8@npm:^3.0.0":
   version: 3.0.0
   resolution: "utf8@npm:3.0.0"
   checksum: 5a82761c09db35965210fcd10edc92b52a3ed2be7756858856341d5c4cf029a25b2d96b0c79fd1b8cd38a339913d0536e8918130f150e7fe2d9b8e3954bb9dac

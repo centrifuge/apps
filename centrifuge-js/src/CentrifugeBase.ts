@@ -197,6 +197,23 @@ const parachainRuntimeApi: DefinitionsCall = {
       version: 1,
     },
   ],
+  AccountConversionApi: [
+    {
+      methods: {
+        conversion_of: {
+          description: 'Get converted address',
+          params: [
+            {
+              name: 'location',
+              type: 'XcmV3MultiLocation',
+            },
+          ],
+          type: 'Option<AccountId32>',
+        },
+      },
+      version: 1,
+    },
+  ],
 }
 
 type Events = ISubmittableResult['events']
@@ -568,13 +585,18 @@ export class CentrifugeBase {
     }
   }
 
-  getSignerAddress(type?: 'substrate') {
+  getSignerAddress(type?: 'substrate' | 'evm') {
     const { signingAddress, evmSigningAddress } = this.config
 
+    if (type === 'evm') {
+      if (!evmSigningAddress) throw new Error('no signer set')
+      return evmSigningAddress
+    }
     if (!signingAddress) {
-      if (evmSigningAddress && this.config.substrateEvmChainId) {
+      if (evmSigningAddress) {
+        if (type === 'substrate' && !this.config.substrateEvmChainId) throw new Error('no signer set')
         return type === 'substrate'
-          ? evmToSubstrateAddress(evmSigningAddress, this.config.substrateEvmChainId)
+          ? evmToSubstrateAddress(evmSigningAddress, this.config.substrateEvmChainId!)
           : evmSigningAddress
       }
       throw new Error('no signer set')

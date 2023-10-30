@@ -7,6 +7,8 @@ import {
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
+import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
 import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
@@ -59,16 +61,12 @@ const centConfig: UserProvidedConfig = {
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
-const evmChains: EvmChains =
+const baseEvmChains: EvmChains =
   ethConfig.network === 'mainnet'
     ? {
         1: {
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
-        },
-        8453: {
-          urls: ['https://mainnet.base.org'],
-          iconUrl: 'https://docs.base.org/img/logo_dark.svg',
         },
       }
     : {
@@ -80,20 +78,49 @@ const evmChains: EvmChains =
           urls: [`https://goerli.infura.io/v3/${infuraKey}`],
           iconUrl: goerliLogo,
         },
-        8453: {
-          urls: ['https://mainnet.base.org'],
-          iconUrl: 'https://docs.base.org/img/logo.svg',
-        },
-        84531: {
-          urls: ['https://goerli.base.org'],
-          iconUrl: 'https://docs.base.org/img/logo.svg',
-        },
       }
-
+const evmChains = {
+  ...baseEvmChains,
+  8453: {
+    name: 'Base',
+    nativeCurrency: { name: 'Base', symbol: 'bETH', decimals: 18 },
+    blockExplorerUrl: 'https://basescan.org/',
+    urls: ['https://mainnet.base.org'],
+    iconUrl: baseLogo,
+  },
+  84531: {
+    name: 'Base Goerli',
+    nativeCurrency: { name: 'Base Goerli', symbol: 'gbETH', decimals: 18 },
+    blockExplorerUrl: 'https://goerli.basescan.org/',
+    urls: ['https://goerli.base.org'],
+    iconUrl: baseLogo,
+  },
+  42161: {
+    name: 'Arbitrum One',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://arbiscan.io/',
+    urls: ['https://arb1.arbitrum.io/rpc'],
+    iconUrl: arbitrumLogo,
+  },
+  421613: {
+    name: 'Arbitrum Goerli',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://goerli.arbiscan.io/',
+    urls: ['https://goerli-rollup.arbitrum.io/rpc'],
+    iconUrl: arbitrumLogo,
+  },
+}
 export function Root() {
-  const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
-  const [showAdvancedAccounts, setShowAdvancedAccounts] = React.useState(!!initialFlagsState.showAdvancedAccounts)
-  const [showBase, setShowBase] = React.useState(!!initialFlagsState.showBase)
+  const [debugState, setDebugState] = React.useState(initialFlagsState)
+  const isThemeToggled = debugState.alternativeTheme
 
   return (
     <>
@@ -113,36 +140,32 @@ export function Root() {
           <GlobalStyle />
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
-            <DemoBanner />
-            <SupportedBrowserBanner />
-            <WalletProvider
-              evmChains={evmChains}
-              subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
-              walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
-              showAdvancedAccounts={showAdvancedAccounts}
-              showBase={showBase}
-            >
-              <OnboardingAuthProvider>
-                <OnboardingProvider>
-                  <DebugFlags
-                    onChange={(state) => {
-                      setIsThemeToggled(!!state.alternativeTheme)
-                      setShowAdvancedAccounts(!!state.showAdvancedAccounts)
-                      setShowBase(!!state.showBase)
-                    }}
-                  >
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <Router>
+            <Router>
+              <DemoBanner />
+              <SupportedBrowserBanner />
+              <WalletProvider
+                evmChains={evmChains}
+                subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+                walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+                showAdvancedAccounts={debugState.showAdvancedAccounts as any}
+                showBase={debugState.showBase as any}
+                showArbitrum={debugState.showArbitrum as any}
+                showTestNets={debugState.showTestNets as any}
+              >
+                <OnboardingAuthProvider>
+                  <OnboardingProvider>
+                    <DebugFlags onChange={(state) => setDebugState(state)}>
+                      <TransactionProvider>
+                        <TransactionToasts />
                         <LoadBoundary>
                           <Routes />
                         </LoadBoundary>
-                      </Router>
-                    </TransactionProvider>
-                  </DebugFlags>
-                </OnboardingProvider>
-              </OnboardingAuthProvider>
-            </WalletProvider>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </OnboardingProvider>
+                </OnboardingAuthProvider>
+              </WalletProvider>
+            </Router>
           </CentrifugeProvider>
         </FabricProvider>
       </QueryClientProvider>
@@ -166,6 +189,7 @@ const OnboardingPage = React.lazy(() => import('../pages/Onboarding'))
 const EmailVerified = React.lazy(() => import('../pages/Onboarding/EmailVerified'))
 const UpdateInvestorStatus = React.lazy(() => import('../pages/Onboarding/UpdateInvestorStatus'))
 const PoolDetailPage = React.lazy(() => import('../pages/Pool'))
+const SwapsPage = React.lazy(() => import('../pages/Swaps'))
 const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
 const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/TransactionHistory'))
 const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
@@ -240,6 +264,9 @@ function Routes() {
       </Route>
       <Route exact path="/multisig-approval">
         <MultisigApprovalPage />
+      </Route>
+      <Route path="/swaps">
+        <SwapsPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/pools" />
