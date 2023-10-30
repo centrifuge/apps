@@ -29,7 +29,7 @@ export type InvestRedeemState = {
   minInitialInvestment: Decimal
   nativeBalance: Decimal
   poolCurrencyBalance: Decimal
-  poolCUrrencyBalanceWithPending: Decimal
+  poolCurrencyBalanceWithPending: Decimal
   trancheBalance: Decimal
   trancheBalanceWithPending: Decimal
   investmentValue: Decimal
@@ -45,10 +45,13 @@ export type InvestRedeemState = {
   collectAmount: Decimal
   collectType: 'invest' | 'redeem' | null
   needsToCollectBeforeOrder: boolean
-  needsPoolCurrencyApproval: boolean
-  needsTrancheTokenApproval: boolean
+  needsPoolCurrencyApproval: (amount: number) => boolean
+  needsTrancheTokenApproval: (amount: number) => boolean
+  canChangeOrder: boolean
+  canCancelOrder: boolean
   pendingAction?: InvestRedeemAction | null
   pendingTransaction?: Transaction | null
+  statusMessage?: string
 }
 
 export type ActionOptions = {

@@ -6,8 +6,15 @@ import {
   isSameAddress,
   PoolRoles,
 } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
-import { useMemo } from 'react'
+import {
+  CombinedSubstrateAccount,
+  truncateAddress,
+  useCentrifugeQuery,
+  useCentrifugeUtils,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
+import { Select } from '@centrifuge/fabric'
+import * as React from 'react'
 import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
 import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'
 import { useCollections } from './useCollections'
@@ -104,6 +111,28 @@ type SuitableConfig = {
   poolId?: string
   poolRole?: (PoolRoles['roles'][0] | { trancheInvestor: string })[]
   proxyType?: string[] | ((accountProxyTypes: string[]) => boolean)
+}
+
+export function useSuitableAccountPicker(config: SuitableConfig) {
+  const accounts = useSuitableAccounts(config)
+  const [account, setAccount] = React.useState<CombinedSubstrateAccount | undefined>(accounts[0])
+  const utils = useCentrifugeUtils()
+
+  const pickerElement =
+    accounts?.length > 1 ? (
+      <Select
+        label="Select acting account"
+        options={accounts.map((acc, i) => ({
+          label: `${truncateAddress(utils.formatAddress(acc.actingAddress))}`,
+          value: i.toString(),
+        }))}
+        onChange={(e) => {
+          setAccount(accounts[Number(e.target.value)])
+        }}
+      />
+    ) : null
+
+  return [account, pickerElement, accounts] as const
 }
 
 export function useSuitableAccounts(config: SuitableConfig) {
@@ -261,7 +290,7 @@ export function usePoolAccess(poolId: string) {
 
   return {
     admin,
-    multisig: useMemo(
+    multisig: React.useMemo(
       () => (metadata?.adminMultisig && computeMultisig(metadata.adminMultisig)) || null,
       [metadata?.adminMultisig]
     ),
@@ -269,7 +298,7 @@ export function usePoolAccess(poolId: string) {
     missingPermissions: [...missingAdminPermissions, ...missingManagerPermissions],
     missingAdminPermissions,
     missingManagerPermissions,
-    assetOriginators: useMemo(
+    assetOriginators: React.useMemo(
       () =>
         aoProxies.map((addr, i) => ({
           address: addr,

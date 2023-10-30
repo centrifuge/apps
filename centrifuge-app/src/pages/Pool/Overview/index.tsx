@@ -1,4 +1,4 @@
-import { Network, useWallet } from '@centrifuge/centrifuge-react'
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
@@ -13,7 +13,6 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
@@ -63,19 +62,8 @@ export function PoolDetailSideBar({
   investRef?: ActionsRef
 }) {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const isTinlakePool = poolId.startsWith('0x')
-  const tinlakeNetworks = [ethConfig.network === 'goerli' ? 5 : 1] as Network[]
-  // TODO: fetch supported networks from centrifuge chain
-  const centrifugeNetworks = ['centrifuge'] as Network[]
-
   return (
-    <InvestRedeem
-      poolId={poolId}
-      trancheId={selectedToken}
-      onSetTrancheId={setSelectedToken}
-      networks={isTinlakePool ? tinlakeNetworks : centrifugeNetworks}
-      actionsRef={investRef}
-    />
+    <InvestRedeem poolId={poolId} trancheId={selectedToken} onSetTrancheId={setSelectedToken} actionsRef={investRef} />
   )
 }
 

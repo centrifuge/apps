@@ -37,7 +37,6 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
         <Stack alignItems="end">
           <MenuSwitch />
         </Stack>
-
         {children}
       </Stack>
     </BasePadding>

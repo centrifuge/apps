@@ -6,7 +6,7 @@ import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
 export type AccordionProps = BoxProps & {
-  items: { title: string; body: string }[]
+  items: { title: React.ReactNode; body: React.ReactNode }[]
 }
 
 const Root = styled(Box)`
@@ -74,9 +74,7 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
       </Toggle>
       <Collapsible id={`content-${id}`} open={open}>
         <Box p={2} backgroundColor="backgroundSecondary">
-          <Text variant="body2" as="p">
-            {body}
-          </Text>
+          <Text variant="body2">{body}</Text>
         </Box>
       </Collapsible>
     </Box>

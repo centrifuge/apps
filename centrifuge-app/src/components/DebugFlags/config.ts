@@ -1,6 +1,6 @@
 import React from 'react'
-import { config } from '../../config'
-import { ConvertEvmAddress } from './components/ConvertEvmAddress'
+import { config, isTestEnv } from '../../config'
+import { ConvertAddress } from './components/ConvertAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
@@ -36,6 +36,7 @@ export type Key =
   | 'batchMintNFTs'
   | 'persistDebugFlags'
   | 'showBase'
+  | 'showArbitrum'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
@@ -45,8 +46,11 @@ export type Key =
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
   | 'showPodAccountCreation'
-  | 'convertEvmAddress'
+  | 'convertAddress'
   | 'showPortfolio'
+  | 'showTestNets'
+  | 'showSwaps'
+  | 'showLiquidityPoolsOptions'
   | 'showPrime'
   | 'poolCreationType'
 
@@ -77,11 +81,25 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     alwaysShow: true,
   },
+  showArbitrum: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  showTestNets: {
+    type: 'checkbox',
+    default: isTestEnv,
+    alwaysShow: true,
+  },
   editPoolConfig: {
     type: 'checkbox',
     default: false,
   },
   editAdminConfig: {
+    type: 'checkbox',
+    default: false,
+  },
+  showLiquidityPoolsOptions: {
     type: 'checkbox',
     default: false,
   },
@@ -111,16 +129,19 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     alwaysShow: true,
   },
-  convertEvmAddress: {
+  convertAddress: {
     type: 'component',
-    Component: ConvertEvmAddress,
+    Component: ConvertAddress,
     default: null,
     alwaysShow: true,
   },
   showPortfolio: {
     type: 'checkbox',
     default: false,
-    alwaysShow: true,
+  },
+  showSwaps: {
+    type: 'checkbox',
+    default: false,
   },
   showPrime: {
     type: 'checkbox',

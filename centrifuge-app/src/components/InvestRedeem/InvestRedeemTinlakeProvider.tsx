@@ -72,13 +72,18 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       setPendingAction(name)
     }
   }
+  React.useEffect(() => {
+    if (pendingAction && pendingTransaction?.status === 'succeeded') {
+      refetchInvestment()
+      refetchBalance()
+      refetchBalances()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTransaction?.status])
 
   function useActionSucceeded(cb: (action: InvestRedeemAction) => void) {
     React.useEffect(() => {
       if (pendingAction && pendingTransaction?.status === 'succeeded') {
-        refetchInvestment()
-        refetchBalance()
-        refetchBalances()
         cb(pendingAction)
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,7 +107,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     ).toDecimal(),
     nativeBalance: nativeBalance?.toDecimal() || Dec(0),
     poolCurrencyBalance: poolCurrencyBalance,
-    poolCUrrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
+    poolCurrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
     trancheBalance,
     trancheBalanceWithPending: combinedBalance,
     investmentValue,
@@ -118,10 +123,12 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     collectAmount,
     collectType: disburse?.payoutCurrencyAmount.isZero() ? 'invest' : 'redeem',
     needsToCollectBeforeOrder: !collectAmount.isZero(),
-    needsPoolCurrencyApproval: !!trancheInvestment?.poolCurrencyAllowance.isZero(),
-    needsTrancheTokenApproval: !!trancheInvestment?.tokenAllowance.isZero(),
+    needsPoolCurrencyApproval: () => !!trancheInvestment?.poolCurrencyAllowance.isZero(),
+    needsTrancheTokenApproval: () => !!trancheInvestment?.tokenAllowance.isZero(),
+    canChangeOrder: true,
+    canCancelOrder: true,
     pendingAction,
-    pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
+    pendingTransaction,
   }
 
   const actions: InvestRedeemActions = {

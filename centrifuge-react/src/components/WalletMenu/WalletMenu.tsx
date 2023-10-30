@@ -192,7 +192,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                   </Shelf>
                 </Box>
               )}
-              {connectedType === 'substrate' ? (
+              {connectedType === 'substrate' || (evm.accounts && evm.accounts.length > 1) ? (
                 <MenuItem
                   label="Switch account"
                   icon={<IconSwitch size="iconSmall" />}

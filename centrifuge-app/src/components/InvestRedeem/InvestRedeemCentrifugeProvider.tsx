@@ -23,7 +23,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
-  const { state: liquidityState } = useLiquidityRewards()
+  const liquidityState = useLiquidityRewards().state
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -95,7 +95,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     ).toDecimal(),
     nativeBalance: balances?.native.balance.toDecimal() ?? Dec(0),
     poolCurrencyBalance: poolCurBalance,
-    poolCUrrencyBalanceWithPending: poolCurBalanceCombined,
+    poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,
     trancheBalanceWithPending: combinedBalance,
     investmentValue,
@@ -113,10 +113,12 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     collectAmount: Dec(0),
     collectType: null,
     needsToCollectBeforeOrder: false,
-    needsPoolCurrencyApproval: false,
-    needsTrancheTokenApproval: false,
+    needsPoolCurrencyApproval: () => false,
+    needsTrancheTokenApproval: () => false,
+    canChangeOrder: true,
+    canCancelOrder: true,
     pendingAction,
-    pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
+    pendingTransaction,
   }
 
   const actions: InvestRedeemActions = {
