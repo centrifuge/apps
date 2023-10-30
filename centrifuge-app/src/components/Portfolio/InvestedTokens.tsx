@@ -38,10 +38,9 @@ const columns: Column[] = [
     cell: (token: Row) => {
       return <TokenWithIcon {...token} />
     },
-    width: '250px',
+    width: '2fr',
   },
   {
-    align: 'left',
     header: 'Token price',
     cell: ({ tokenPrice }: Row) => {
       return (
@@ -50,10 +49,8 @@ const columns: Column[] = [
         </Text>
       )
     },
-    width: '150px',
   },
   {
-    align: 'right',
     header: <SortableTableHeader label="Position" />,
     cell: ({ currency, position }: Row) => {
       return (
@@ -62,11 +59,9 @@ const columns: Column[] = [
         </Text>
       )
     },
-    width: '125px',
     sortKey: 'position',
   },
   {
-    align: 'right',
     header: <SortableTableHeader label="Market value" />,
     cell: ({ marketValue }: Row) => {
       return (
@@ -75,7 +70,6 @@ const columns: Column[] = [
         </Text>
       )
     },
-    width: '175px',
     sortKey: 'marketValue',
   },
   {
@@ -110,7 +104,6 @@ const columns: Column[] = [
         )
       )
     },
-    width: '325px',
   },
 ]
 
