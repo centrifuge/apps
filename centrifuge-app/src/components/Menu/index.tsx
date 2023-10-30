@@ -54,7 +54,7 @@ export function Menu() {
           Portfolio
         </PageLink>
       )}
-      {showPrime && address && (
+      {showPrime && (
         <PageLink to="/prime" stacked={!isLarge}>
           <IconGlobe />
           Prime
