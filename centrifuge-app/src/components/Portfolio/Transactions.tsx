@@ -1,19 +1,32 @@
 import { BorrowerTransactionType, InvestorTransactionType, Token, TokenBalance } from '@centrifuge/centrifuge-js'
 import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Box, IconExternalLink, IconEye, Stack, Text, VisualButton } from '@centrifuge/fabric'
+import {
+  AnchorButton,
+  Box,
+  IconExternalLink,
+  IconEye,
+  Pagination,
+  PaginationProvider,
+  Shelf,
+  Stack,
+  Text,
+  usePagination,
+  VisualButton,
+} from '@centrifuge/fabric'
 import { isAddress as isValidEVMAddress } from '@ethersproject/address'
 import * as React from 'react'
-import { Link, useRouteMatch } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { Spinner } from '../../components/Spinner'
 import { formatDate } from '../../utils/date'
 import { Dec } from '../../utils/Decimal'
+import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAddress } from '../../utils/useAddress'
 import { usePools, useTransactionsByAddress } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 
 type TransactionsProps = {
-  count?: number
+  onlyMostRecent?: boolean
   txTypes?: InvestorTransactionType[]
 }
 
@@ -35,7 +48,6 @@ const columns: Column[] = [
     align: 'left',
     header: 'Action',
     cell: ({ action }: Row) => <TransactionTypeChip type={action as InvestorTransactionType} />,
-    width: '175px',
   },
   {
     align: 'left',
@@ -49,7 +61,6 @@ const columns: Column[] = [
         })}
       </Text>
     ),
-    width: '150px',
     sortKey: 'date',
   },
   {
@@ -60,7 +71,6 @@ const columns: Column[] = [
         {tranche?.currency.symbol} - ({tranche?.currency.name})
       </Text>
     ),
-    width: '250px',
   },
   {
     align: 'right',
@@ -70,7 +80,6 @@ const columns: Column[] = [
         {formatBalance(tranche?.tokenPrice?.toDecimal() || Dec(1), tranche?.currency.symbol, 4)}
       </Text>
     ),
-    width: '125px',
   },
   {
     align: 'right',
@@ -80,11 +89,10 @@ const columns: Column[] = [
         {formatBalance(amount.toDecimal(), tranche?.currency.symbol || '')}
       </Text>
     ),
-    width: '125px',
     sortKey: 'amount',
   },
   {
-    align: 'left',
+    align: 'center',
     header: 'View transaction',
     cell: ({ hash }: Row) => {
       return (
@@ -99,22 +107,20 @@ const columns: Column[] = [
         </Stack>
       )
     },
-    width: '200px',
   },
 ]
 
-export default function Transactions({ count, txTypes }: TransactionsProps) {
+export function Transactions({ onlyMostRecent, txTypes }: TransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const address = useAddress()
   const formattedAddress = address && isValidEVMAddress(address) ? address : formatAddress(address || '')
   const transactions = useTransactionsByAddress(formatAddress(formattedAddress))
-  const match = useRouteMatch('/history')
   const pools = usePools()
 
   const investorTransactions: TransactionTableData = React.useMemo(() => {
     const txs =
       transactions?.investorTransactions
-        .slice(0, count || transactions?.investorTransactions.length)
+        .slice(0, onlyMostRecent ? 3 : transactions?.investorTransactions.length)
         .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
         .map((tx) => {
           const pool = pools?.find((pool) => pool.id === tx.poolId)
@@ -131,7 +137,7 @@ export default function Transactions({ count, txTypes }: TransactionsProps) {
           }
         }) || []
     return txs
-  }, [transactions, txTypes, count])
+  }, [transactions?.investorTransactions, onlyMostRecent, txTypes, pools])
 
   const csvData = React.useMemo(() => {
     if (!investorTransactions || !investorTransactions?.length) {
@@ -142,27 +148,30 @@ export default function Transactions({ count, txTypes }: TransactionsProps) {
       return {
         'Transaction date': `"${formatDate(entry.date)}"`,
         Action: entry.action,
-        Token: pool ? pool.tranches.find(({ id }) => id === entry.trancheId)?.currency.name : undefined,
-        Amount: pool ? `"${formatBalance(entry.amount.toDecimal(), pool.currency.symbol)}"` : undefined,
+        Token: (pool && pool.tranches.find(({ id }) => id === entry.trancheId)?.currency.name) ?? '',
+        Amount: (pool && `"${formatBalance(entry.amount.toDecimal(), pool.currency.symbol)}"`) ?? '',
       }
     })
-  }, [investorTransactions])
+  }, [investorTransactions, pools])
+
+  const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData), [csvData])
+
+  const pagination = usePagination({ data: investorTransactions, pageSize: onlyMostRecent ? 3 : 15 })
 
   return !!investorTransactions.length ? (
-    <Stack as="article" gap={match ? 5 : 2}>
+    <Stack as="article" gap={onlyMostRecent ? 2 : 5}>
       <Text as="h2" variant="heading2">
         Transaction history
       </Text>
-      <Stack gap={2}>
+      <PaginationProvider pagination={pagination}>
         <Stack gap={2}>
           <DataTable
             data={investorTransactions}
             columns={columns}
-            pageSize={match ? 15 : undefined}
-            csvExportData={match ? csvData : undefined}
-            csvExportFileName={match ? `transaction-history-${address}.csv` : undefined}
+            pageSize={pagination.pageSize}
+            page={pagination.page}
           />
-          {match ? null : (
+          {onlyMostRecent ? (
             <Link to="/history">
               <Box display="inline-block">
                 <VisualButton small variant="tertiary" icon={IconEye}>
@@ -170,9 +179,24 @@ export default function Transactions({ count, txTypes }: TransactionsProps) {
                 </VisualButton>
               </Box>
             </Link>
+          ) : (
+            <Shelf justifyContent="space-between">
+              {pagination.pageCount > 1 && (
+                <Shelf>
+                  <Pagination />
+                </Shelf>
+              )}
+              {csvUrl && (
+                <Box style={{ gridColumn: columns.length, justifySelf: 'end' }}>
+                  <AnchorButton small variant="secondary" href={csvUrl} download={`transaction-history-${address}.csv`}>
+                    Export as CSV
+                  </AnchorButton>
+                </Box>
+              )}
+            </Shelf>
           )}
         </Stack>
-      </Stack>
+      </PaginationProvider>
     </Stack>
   ) : (
     <Spinner />
