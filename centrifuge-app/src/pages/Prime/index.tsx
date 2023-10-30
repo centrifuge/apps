@@ -30,7 +30,7 @@ const DAOs: DAO[] = [
   },
 ]
 
-export function PrimePage() {
+export default function PrimePage() {
   return (
     <LayoutBase>
       <Prime />

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
 
-export function PrimeDetailPage() {
+export default function PrimeDetailPage() {
   return (
     <LayoutBase>
       <PrimeDetail />
