@@ -564,19 +564,22 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             renderInput(onCancel)
           )
         ) : hasPendingOrder ? (
-          <PendingOrder
-            type="invest"
-            pool={pool}
-            state={state}
-            amount={pendingInvest}
-            onCancelOrder={() => actions.cancelInvest()}
-            isCancelling={isCancelling}
-            onChangeOrder={() => {
-              form.resetForm()
-              form.setFieldValue('amount', pendingInvest, false)
-              setChangeOrderFormShown(true)
-            }}
-          />
+          <Stack gap={2}>
+            {state.statusMessage && <InlineFeedback>{state.statusMessage}</InlineFeedback>}
+            <PendingOrder
+              type="invest"
+              pool={pool}
+              state={state}
+              amount={pendingInvest}
+              onCancelOrder={() => actions.cancelInvest()}
+              isCancelling={isCancelling}
+              onChangeOrder={() => {
+                form.resetForm()
+                form.setFieldValue('amount', pendingInvest, false)
+                setChangeOrderFormShown(true)
+              }}
+            />
+          </Stack>
         ) : state.needsPoolCurrencyApproval(toNumber(form.values.amount)) ? (
           renderInput(onCancel, {
             onClick: actions.approvePoolCurrency,

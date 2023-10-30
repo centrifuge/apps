@@ -112,9 +112,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
     const [spender, currencyAddress, amount] = args
+    if (!inst.config.evmSigner) throw new Error('EVM signer not set')
+    const chainId = await inst.config.evmSigner.getChainId()
+    const domain = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
     const permit = await signERC2612Permit(
       inst.config.evmSigner,
-      currencyAddress,
+      domain,
       inst.getSignerAddress('evm'),
       spender,
       amount.toString()
@@ -122,7 +125,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return permit as Permit
   }
 
-  function updateInvestOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
+  function increaseInvestOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
@@ -130,7 +133,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function updateRedeemOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
+  function increaseRedeemOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
@@ -141,7 +144,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function updateInvestOrderWithPermit(
+  function increaseInvestOrderWithPermit(
     args: [lpAddress: string, order: BN, permit: Permit],
     options: TransactionRequest = {}
   ) {
@@ -152,6 +155,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         gasLimit: 300000,
       })
     )
+  }
+
+  function cancelRedeemOrder(args: [lpAddress: string], options: TransactionRequest = {}) {
+    const [lpAddress] = args
+    return pending(contract(lpAddress, ABI.LiquidityPool).cancelRedeemRequest(options))
+  }
+
+  function cancelInvestOrder(args: [lpAddress: string], options: TransactionRequest = {}) {
+    const [lpAddress] = args
+    return pending(contract(lpAddress, ABI.LiquidityPool).cancelDepositRequest(options))
   }
 
   function mint(args: [lpAddress: string, mint: BN, receiver?: string], options: TransactionRequest = {}) {
@@ -210,11 +223,15 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, user] = args
     const blockNumber = await getProvider(options)!.getBlockNumber()
     const cont = contract(lpAddress, ABI.LiquidityPool, options)
-    const depositFilter = cont.filters.DepositRequested(user)
-    const redeemFilter = cont.filters.RedeemRequested(user)
+    const depositFilter = cont.filters.DepositRequest(user)
+    const redeemFilter = cont.filters.RedeemRequest(user)
+    const cancelDepositFilter = cont.filters.CancelDepositRequest(user)
+    const cancelRedeemFilter = cont.filters.CancelRedeemRequest(user)
     const events = await Promise.all([
       cont.queryFilter(depositFilter, blockNumber - 300),
       cont.queryFilter(redeemFilter, blockNumber - 300),
+      cont.queryFilter(cancelDepositFilter, blockNumber - 300),
+      cont.queryFilter(cancelRedeemFilter, blockNumber - 300),
     ])
     return events.flat()
   }
@@ -524,9 +541,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     enablePoolOnDomain,
     deployTranche,
     deployLiquidityPool,
-    updateInvestOrder,
-    updateRedeemOrder,
-    updateInvestOrderWithPermit,
+    increaseInvestOrder,
+    increaseRedeemOrder,
+    increaseInvestOrderWithPermit,
+    cancelInvestOrder,
+    cancelRedeemOrder,
     mint,
     withdraw,
     approveForCurrency,
