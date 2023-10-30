@@ -4,7 +4,7 @@ import { LayoutBase } from '../../../components/LayoutBase'
 import { Transactions } from '../../../components/Portfolio/Transactions'
 import { useAddress } from '../../../utils/useAddress'
 
-export function TransactionsPage() {
+export default function TransactionsPage() {
   const address = useAddress()
   return (
     <LayoutBase>

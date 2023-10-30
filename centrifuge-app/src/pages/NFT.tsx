@@ -18,7 +18,7 @@ import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { isSameAddress } from '../utils/web3'
 
-export const NFTPage: React.FC = () => {
+export default function NFTPage() {
   return (
     <PageWithSideBar>
       <NFT />

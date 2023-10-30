@@ -4,7 +4,7 @@ import { useHistory } from 'react-router'
 import { InvestmentDisclaimerDialog } from '../components/Dialogs/InvestmentDisclaimerDialog'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 
-export const InvestmentDisclaimerPage: React.FC = () => {
+export default function InvestmentDisclaimerPage() {
   const [isOpen, setIsOpen] = React.useState(true)
   const history = useHistory()
   return (

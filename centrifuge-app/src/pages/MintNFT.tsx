@@ -44,7 +44,7 @@ const ALLOWED_TYPES = [
 ]
 const ACCEPT_STRING = ALLOWED_TYPES.join(',')
 
-export const MintNFTPage: React.FC = () => {
+export default function MintNFTPage() {
   return (
     <PageWithSideBar>
       <MintNFT />

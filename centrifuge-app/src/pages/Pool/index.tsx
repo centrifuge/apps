@@ -7,7 +7,7 @@ import { PoolDetailLiquidityTab } from './Liquidity'
 import { PoolDetailOverviewTab } from './Overview'
 import { PoolDetailReportingTab } from './Reporting'
 
-export const PoolDetailPage: React.FC = () => {
+export default function PoolDetailPage() {
   const { pid } = useParams<{ pid: string }>()
   const isTinlakePool = pid.startsWith('0x')
   const { setScopedNetworks } = useWallet()

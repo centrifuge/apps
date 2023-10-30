@@ -14,28 +14,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config, ethConfig } from '../config'
-import { AccountNFTsPage } from '../pages/AccountNFTs'
-import { CollectionPage } from '../pages/Collection'
-import { CollectionsPage } from '../pages/Collections'
-import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
-import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
-import { IssuerPoolPage } from '../pages/IssuerPool'
-import { IssuerCreateLoanPage } from '../pages/IssuerPool/Assets/CreateLoan'
-import { LoanPage } from '../pages/Loan'
-import { MintNFTPage } from '../pages/MintNFT'
-import { MultisigApprovalPage } from '../pages/MultisigApproval'
-import { NFTPage } from '../pages/NFT'
-import { NotFoundPage } from '../pages/NotFound'
-import { OnboardingPage } from '../pages/Onboarding'
-import { EmailVerified } from '../pages/Onboarding/EmailVerified'
-import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
-import { PoolDetailPage } from '../pages/Pool'
-import { PoolsPage } from '../pages/Pools'
-import { PortfolioPage } from '../pages/Portfolio'
-import { TransactionsPage } from '../pages/Portfolio/Transactions'
-import { PrimePage } from '../pages/Prime'
-import { PrimeDetailPage } from '../pages/Prime/Detail'
-import { TokenOverviewPage } from '../pages/Tokens'
+import PoolsPage from '../pages/Pools'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -170,6 +149,28 @@ export function Root() {
     </>
   )
 }
+
+const AccountNFTsPage = React.lazy(() => import('../pages/AccountNFTs'))
+const CollectionPage = React.lazy(() => import('../pages/Collection'))
+const CollectionsPage = React.lazy(() => import('../pages/Collections'))
+const InvestmentDisclaimerPage = React.lazy(() => import('../pages/InvestmentDisclaimer'))
+const IssuerCreatePoolPage = React.lazy(() => import('../pages/IssuerCreatePool'))
+const IssuerPoolPage = React.lazy(() => import('../pages/IssuerPool'))
+const IssuerCreateLoanPage = React.lazy(() => import('../pages/IssuerPool/Assets/CreateLoan'))
+const LoanPage = React.lazy(() => import('../pages/Loan'))
+const MintNFTPage = React.lazy(() => import('../pages/MintNFT'))
+const MultisigApprovalPage = React.lazy(() => import('../pages/MultisigApproval'))
+const NFTPage = React.lazy(() => import('../pages/NFT'))
+const NotFoundPage = React.lazy(() => import('../pages/NotFound'))
+const OnboardingPage = React.lazy(() => import('../pages/Onboarding'))
+const EmailVerified = React.lazy(() => import('../pages/Onboarding/EmailVerified'))
+const UpdateInvestorStatus = React.lazy(() => import('../pages/Onboarding/UpdateInvestorStatus'))
+const PoolDetailPage = React.lazy(() => import('../pages/Pool'))
+const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
+const TransactionsPage = React.lazy(() => import('../pages/Portfolio/Transactions'))
+const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
+const PrimePage = React.lazy(() => import('../pages/Prime'))
+const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
 
 function Routes() {
   return (

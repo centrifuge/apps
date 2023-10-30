@@ -60,7 +60,7 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
   value: key,
 }))
 
-export const IssuerCreatePoolPage: React.FC = () => {
+export default function IssuerCreatePoolPage() {
   return (
     <PageWithSideBar>
       <CreatePoolForm />
