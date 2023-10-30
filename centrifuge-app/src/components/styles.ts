@@ -7,8 +7,8 @@ export const buttonActionStyles = css`
   background-color: transparent;
   border-radius: ${({ theme }) => theme.radii.tooltip}px;
 
+  &:hover,
   &:focus-visible {
-    outline: ${({ theme }) => `2px solid ${theme.colors.textSelected}`};
-    outline-offset: 4px;
+    color: ${({ theme }) => theme.colors.textInteractiveHover};
   }
 `
