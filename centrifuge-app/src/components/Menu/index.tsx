@@ -1,6 +1,7 @@
 import {
   Box,
   IconClock,
+  IconGlobe,
   IconInvestments,
   IconNft,
   IconPieChart,
@@ -24,7 +25,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showPortfolio } = useDebugFlags()
+  const { showPortfolio, showPrime } = useDebugFlags()
 
   return (
     <Shelf
@@ -52,6 +53,12 @@ export function Menu() {
         <PageLink to="/portfolio" stacked={!isLarge}>
           <IconPieChart />
           Portfolio
+        </PageLink>
+      )}
+      {showPrime && (
+        <PageLink to="/prime" stacked={!isLarge}>
+          <IconGlobe />
+          Prime
         </PageLink>
       )}
 

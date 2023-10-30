@@ -47,6 +47,7 @@ export type Key =
   | 'showPodAccountCreation'
   | 'convertEvmAddress'
   | 'showPortfolio'
+  | 'showPrime'
   | 'poolCreationType'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
@@ -117,6 +118,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     alwaysShow: true,
   },
   showPortfolio: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  showPrime: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

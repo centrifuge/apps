@@ -169,6 +169,8 @@ const PoolDetailPage = React.lazy(() => import('../pages/Pool'))
 const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
 const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/TransactionHistory'))
 const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
+const PrimePage = React.lazy(() => import('../pages/Prime'))
+const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
 
 function Routes() {
   return (
@@ -217,6 +219,12 @@ function Routes() {
       </Route>
       <Route path="/portfolio">
         <PortfolioPage />
+      </Route>
+      <Route path="/prime/:dao">
+        <PrimeDetailPage />
+      </Route>
+      <Route path="/prime">
+        <PrimePage />
       </Route>
       <Route path="/disclaimer">
         <InvestmentDisclaimerPage />

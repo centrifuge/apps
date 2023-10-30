@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useRef } from 'react'
 
 type Calback = (...args: any[]) => any
 
-function useEventCallback<T extends Calback>(callback: T) {
+export function useEventCallback<T extends Calback>(callback: T) {
   const ref = useRef<T>((() => {
     throw new Error('Cannot call an event handler while rendering.')
   }) as any)
@@ -16,5 +16,3 @@ function useEventCallback<T extends Calback>(callback: T) {
     return fn(...args)
   }, [])
 }
-
-export default useEventCallback
