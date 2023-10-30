@@ -19,7 +19,7 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const theme = useTheme()
 
   if (!address) {
@@ -50,9 +50,9 @@ function Portfolio() {
             <Rewards />
           </Grid>
         </BasePadding>
-        <BasePadding>
+        <BasePadding gap={3}>
           <InvestedTokens />
-          <Transactions count={3} />
+          <Transactions onlyMostRecent />
           <AssetAllocation address={address} />
         </BasePadding>
         <BasePadding>

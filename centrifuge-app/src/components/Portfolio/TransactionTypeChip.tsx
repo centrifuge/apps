@@ -1,28 +1,23 @@
+import { BorrowerTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js'
 import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
 import * as React from 'react'
-import { TransactionCardProps } from './Transactions'
 
 type TransactionTypeProps = {
-  type: TransactionCardProps['action']
+  type: InvestorTransactionType | BorrowerTransactionType
 }
 
-// @ts-expect-error
 const states: {
-  [Key in TransactionCardProps['action']]: {
+  [Key in InvestorTransactionType | BorrowerTransactionType]: {
     label: string
     status: StatusChipProps['status']
   }
 } = {
-  PENDING_ORDER: {
-    label: 'Pending order',
-    status: 'default',
-  },
   INVEST_ORDER_UPDATE: {
-    label: 'Invest order update',
+    label: 'Invest order placed',
     status: 'default',
   },
   REDEEM_ORDER_UPDATE: {
-    label: 'Redeem order update',
+    label: 'Redeem order placed',
     status: 'default',
   },
   INVEST_ORDER_CANCEL: {
@@ -34,12 +29,12 @@ const states: {
     status: 'default',
   },
   INVEST_EXECUTION: {
-    label: 'Invest execution',
-    status: 'default',
+    label: 'Invest executed',
+    status: 'ok',
   },
   REDEEM_EXECUTION: {
-    label: 'Redeem execution',
-    status: 'default',
+    label: 'Redeem executed',
+    status: 'info',
   },
   TRANSFER_IN: {
     label: 'Transfer in',
@@ -71,6 +66,10 @@ const states: {
   },
   CLOSED: {
     label: 'Closed',
+    status: 'default',
+  },
+  PRICED: {
+    label: 'Priced',
     status: 'default',
   },
 }

@@ -1,5 +1,6 @@
 import {
   Box,
+  IconClock,
   IconGlobe,
   IconInvestments,
   IconNft,
@@ -58,6 +59,13 @@ export function Menu() {
         <PageLink to="/prime" stacked={!isLarge}>
           <IconGlobe />
           Prime
+        </PageLink>
+      )}
+
+      {showPortfolio && address && (
+        <PageLink to="/history" stacked={!isLarge}>
+          <IconClock />
+          History
         </PageLink>
       )}
 
