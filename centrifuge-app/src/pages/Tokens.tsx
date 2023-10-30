@@ -8,7 +8,7 @@ import { Dec } from '../utils/Decimal'
 import { useListedPools } from '../utils/useListedPools'
 import { usePools } from '../utils/usePools'
 
-export function TokenOverviewPage() {
+export default function TokenOverviewPage() {
   return (
     <LayoutBase>
       <PoolsTokensShared title="Tokens">
@@ -56,54 +56,48 @@ function TokenOverview() {
     <TokenList tokens={tokens} />
   ) : pools?.length ? (
     <DataTable
-      rounded={false}
       data={[{}]}
       columns={[
         {
           align: 'left',
           header: 'Token',
           cell: () => <TextWithPlaceholder isLoading />,
-          flex: '9',
+          width: 'minmax(200px, 3fr)',
         },
         {
           align: 'left',
           header: 'Asset class',
           cell: () => <TextWithPlaceholder isLoading />,
-          flex: '6',
+          width: 'minmax(100px, 2fr)',
         },
         {
           header: 'Yield',
           cell: () => <TextWithPlaceholder isLoading width={4} />,
-          flex: '4',
           sortKey: 'yield',
         },
         {
           header: 'Token Price',
           cell: () => <TextWithPlaceholder isLoading width={4} />,
-          flex: '4',
           sortKey: 'tokenPrice',
         },
         {
           header: 'Protection',
           cell: () => <TextWithPlaceholder isLoading width={4} />,
-          flex: '4',
         },
         {
           header: 'Value locked',
           cell: () => <TextWithPlaceholder isLoading width={6} />,
-          flex: '4',
           sortKey: 'valueLocked',
         },
         {
           header: 'Capacity',
           cell: () => <TextWithPlaceholder isLoading width={6} />,
-          flex: '4',
         },
 
         {
           header: '',
           cell: () => <IconChevronRight size={24} color="textPrimary" />,
-          flex: '0 1 52px',
+          width: '52px',
         },
       ]}
     />

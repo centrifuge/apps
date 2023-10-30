@@ -1,6 +1,6 @@
 import * as React from 'react'
-import useControlledState from '../../utils/useControlledState'
-import useEventCallback from '../../utils/useEventCallback'
+import { useControlledState } from '../../utils/useControlledState'
+import { useEventCallback } from '../../utils/useEventCallback'
 
 export type PaginationProps = {
   manual?: boolean

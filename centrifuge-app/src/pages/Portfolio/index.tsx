@@ -10,7 +10,7 @@ import { Rewards } from '../../components/Portfolio/Rewards'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
 
-export function PortfolioPage() {
+export default function PortfolioPage() {
   return (
     <LayoutBase>
       <Portfolio />
@@ -19,7 +19,7 @@ export function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const theme = useTheme()
 
   if (!address) {
@@ -50,9 +50,9 @@ function Portfolio() {
             <Rewards />
           </Grid>
         </BasePadding>
-        <BasePadding>
+        <BasePadding gap={3}>
           <InvestedTokens />
-          <Transactions count={3} />
+          <Transactions onlyMostRecent />
           <AssetAllocation address={address} />
         </BasePadding>
         <BasePadding>

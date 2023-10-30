@@ -60,7 +60,7 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
   value: key,
 }))
 
-export const IssuerCreatePoolPage: React.FC = () => {
+export default function IssuerCreatePoolPage() {
   return (
     <PageWithSideBar>
       <CreatePoolForm />
@@ -209,7 +209,6 @@ function CreatePoolForm() {
       ) => {
         const [transferToMultisig, aoProxy, adminProxy, , , , , , { adminMultisig }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
-        console.log('adminMultisig', multisigAddr)
         const poolArgs = args.slice(2) as any
         return combineLatest([
           cent.getApi(),

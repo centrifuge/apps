@@ -6,7 +6,7 @@ import { ethConfig } from '../../config'
 import { usePoolMetadata } from '../../utils/usePools'
 import { useUpdateInvestorStatus } from './queries/useUpdateInvestorStatus'
 
-export const UpdateInvestorStatus: React.FC = () => {
+export default function UpdateInvestorStatus() {
   const { search } = useLocation()
   const status = new URLSearchParams(search).get('status')
   const token = new URLSearchParams(search).get('token')

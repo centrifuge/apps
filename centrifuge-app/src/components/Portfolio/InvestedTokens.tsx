@@ -1,88 +1,168 @@
-import { AccountTokenBalance, Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances } from '@centrifuge/centrifuge-react'
-import { Box, Grid, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
-import { useAddress } from '../../utils/useAddress'
-import { usePool } from '../../utils/usePools'
+import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { formatBalance, useAddress, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
+import {
+  AnchorButton,
+  Box,
+  Button,
+  Grid,
+  IconExternalLink,
+  IconMinus,
+  IconPlus,
+  Shelf,
+  Stack,
+  Text,
+  Thumbnail,
+} from '@centrifuge/fabric'
+import { useMemo } from 'react'
+import { useTheme } from 'styled-components'
+import { Dec } from '../../utils/Decimal'
+import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
+import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
+import { Column, DataTable, SortableTableHeader } from '../DataTable'
+import { Eththumbnail } from '../EthThumbnail'
 
-const TOKEN_ITEM_COLUMNS = `250px 200px 100px 150px 1FR`
-const TOKEN_ITEM_GAP = 4
+type Row = {
+  currency: Token['currency']
+  poolId: string
+  trancheId: string
+  marketValue: TokenBalance
+  position: TokenBalance
+  tokenPrice: TokenBalance
+  canInvestRedeem: boolean
+}
 
-export function InvestedTokens() {
-  const address = useAddress()
-  const balances = useBalances(address)
-
-  return !!balances?.tranches && !!balances?.tranches.length ? (
-    <>
-      <Box as="article">
-        <Text as="h2" variant="heading2">
-          Portfolio Composition
+const columns: Column[] = [
+  {
+    align: 'left',
+    header: 'Token',
+    cell: (token: Row) => {
+      return <TokenWithIcon {...token} />
+    },
+    width: '2fr',
+  },
+  {
+    header: 'Token price',
+    cell: ({ tokenPrice }: Row) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {formatBalance(tokenPrice.toDecimal() || 1, 'USDT', 4)}
         </Text>
-      </Box>
-      <Stack gap={1}>
-        <Grid gridTemplateColumns={TOKEN_ITEM_COLUMNS} gap={TOKEN_ITEM_GAP} px={2}>
-          <Text as="span" variant="body3">
-            Token
-          </Text>
-          <Text as="button" variant="body3">
-            Position
-          </Text>
-          <Text as="span" variant="body3">
-            Token price
-          </Text>
-          <Text as="button" variant="body3">
-            Market value
-          </Text>
-        </Grid>
+      )
+    },
+  },
+  {
+    header: <SortableTableHeader label="Position" />,
+    cell: ({ currency, position }: Row) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {formatBalance(position, currency.symbol)}
+        </Text>
+      )
+    },
+    sortKey: 'position',
+  },
+  {
+    header: <SortableTableHeader label="Market value" />,
+    cell: ({ marketValue }: Row) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {formatBalance(marketValue, 'USDT', 4)}
+        </Text>
+      )
+    },
+    sortKey: 'marketValue',
+  },
+  {
+    align: 'left',
+    header: '', // invest redeem buttons
+    cell: ({ canInvestRedeem, poolId }: Row) => {
+      const isTinlakePool = poolId.startsWith('0x')
+      return (
+        canInvestRedeem && (
+          <Shelf gap={1} justifySelf="end">
+            {isTinlakePool ? (
+              <AnchorButton
+                variant="tertiary"
+                small
+                icon={IconExternalLink}
+                href="https://legacy.tinlake.centrifuge.io/portfolio"
+                target="_blank"
+              >
+                View on Tinlake
+              </AnchorButton>
+            ) : (
+              <>
+                <Button small variant="tertiary" icon={IconMinus}>
+                  Redeem
+                </Button>
+                <Button small variant="tertiary" icon={IconPlus}>
+                  Invest
+                </Button>
+              </>
+            )}
+          </Shelf>
+        )
+      )
+    },
+  },
+]
 
-        <Stack as="ul" role="list" gap={1}>
-          {balances.tranches.map((tranche, index) => (
-            <Box key={`${tranche.trancheId}${index}`} as="li">
-              <TokenListItem {...tranche} />
-            </Box>
-          ))}
-        </Stack>
-      </Stack>
-    </>
+// TODO: change canInvestRedeem to default to true once the drawer is implemented
+export const InvestedTokens = ({ canInvestRedeem = false }) => {
+  const address = useAddress()
+  const centBalances = useBalances(address)
+  const { data: tinlakeBalances } = useTinlakeBalances()
+  const pools = usePools()
+
+  const balances = useMemo(() => {
+    return [
+      ...(centBalances?.tranches || []),
+      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []),
+    ]
+  }, [centBalances, tinlakeBalances])
+
+  const tableData = balances.map((balance) => {
+    const pool = pools?.find((pool) => pool.id === balance.poolId)
+    const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
+    return {
+      currency: balance.currency,
+      poolId: balance.poolId,
+      trancheId: balance.trancheId,
+      position: balance.balance,
+      tokenPrice: tranche?.tokenPrice || Dec(1),
+      marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+      canInvestRedeem,
+    }
+  })
+
+  return tableData.length ? (
+    <Stack as="article" gap={2}>
+      <Text as="h2" variant="heading2">
+        Portfolio
+      </Text>
+      <DataTable columns={columns} data={tableData} />
+    </Stack>
   ) : null
 }
 
-type TokenCardProps = AccountTokenBalance
-export function TokenListItem({ balance, currency, poolId, trancheId }: TokenCardProps) {
-  const pool = usePool(poolId) as Pool
-  const isTinlakePool = poolId?.startsWith('0x')
-
-  if (isTinlakePool) {
-    return null
-  }
-
-  const tranche = pool.tranches.find(({ id }) => id === trancheId)
-
+const TokenWithIcon = ({ poolId, currency }: Row) => {
+  const pool = usePool(poolId, false)
+  const { data: metadata } = usePoolMetadata(pool)
+  const cent = useCentrifuge()
+  const { sizes } = useTheme()
+  const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
   return (
-    <Grid
-      gridTemplateColumns={TOKEN_ITEM_COLUMNS}
-      gap={TOKEN_ITEM_GAP}
-      padding={2}
-      borderStyle="solid"
-      borderWidth={1}
-      borderColor="borderSecondary"
-    >
-      <Text as="span" variant="body2">
+    <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
+      <Eththumbnail show={!!poolId.startsWith('0x')}>
+        {icon ? (
+          <Box as="img" src={icon} alt="" height="iconMedium" width="iconMedium" />
+        ) : (
+          <Thumbnail type="pool" label="LP" size="small" />
+        )}
+      </Eththumbnail>
+
+      <Text textOverflow="ellipsis" variant="body3">
         {currency.name}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {formatBalance(balance, tranche?.currency.symbol)}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {tranche?.tokenPrice ? formatBalance(tranche.tokenPrice.toDecimal(), tranche.currency.symbol, 4) : '-'}
-      </Text>
-
-      <Text as="span" variant="body2">
-        {tranche?.tokenPrice
-          ? formatBalance(balance.toDecimal().mul(tranche.tokenPrice.toDecimal()), tranche.currency.symbol, 4)
-          : '-'}
       </Text>
     </Grid>
   )

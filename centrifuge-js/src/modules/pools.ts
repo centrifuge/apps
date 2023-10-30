@@ -1,8 +1,8 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, forkJoin, from, Observable, of, startWith } from 'rxjs'
-import { combineLatestWith, filter, map, mergeMap, repeatWhen, switchMap, take, toArray } from 'rxjs/operators'
+import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
+import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -2027,51 +2027,17 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getAllTransactions(args: [address: string]) {
+  function getTransactionsByAddress(args: [address: string, count?: number, txTypes?: InvestorTransactionType[]]) {
     const [address] = args
 
     const $query = inst.getSubqueryObservable<{
-      investorTransactions: {
-        nodes: {
-          timestamp: string
-          type: InvestorTransactionType
-          poolId: string
-          trancheId: string
-          hash: string
-          tokenAmount: string
-          tokenPrice: string
-          currencyAmount: string
-        }[]
-      }
-      borrowerTransactions: {
-        nodes: {
-          timestamp: string
-          type: BorrowerTransactionType
-          poolId: string
-          amount: string
-          hash: string
-        }[]
-      }
-      outstandingOrders: {
-        nodes: {
-          timestamp: string
-          poolId: string
-          trancheId: string
-          hash: string
-          redeemAmount: string
-          investAmount: string
-          tranche: {
-            tokenPrice: string
-          }
-        }[]
-      }
+      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
     }>(
-      `query($address: String!) {
-        investorTransactions(filter: {
-          accountId: {
-            equalTo: $address
-          }
-        }) {
+      `query ($address: String) {
+        investorTransactions(
+          filter: {accountId: {equalTo: $address}}
+          orderBy: TIMESTAMP_DESC
+        ) {
           nodes {
             timestamp
             type
@@ -2083,38 +2049,6 @@ export function getPoolsModule(inst: Centrifuge) {
             currencyAmount
           }
         }
-
-        borrowerTransactions(filter: {
-          accountId: {
-            equalTo: $address
-          }
-        }) {
-          nodes {
-            timestamp
-            type
-            poolId
-            hash
-            amount
-          }
-        }
-
-        outstandingOrders(filter: {
-          accountId: {
-            equalTo: $address
-          }
-        }) {
-          nodes {
-            timestamp
-            redeemAmount
-            investAmount
-            poolId
-            trancheId
-            hash
-            tranche {
-              tokenPrice
-            }
-          }
-        }
       }
     `,
       {
@@ -2123,56 +2057,24 @@ export function getPoolsModule(inst: Centrifuge) {
     )
 
     return $query.pipe(
-      mergeMap((data) => {
-        const investorTransactions$ = from(data?.investorTransactions.nodes || []).pipe(
-          mergeMap((entry) => {
-            return getPoolCurrency([entry.poolId]).pipe(
-              map((poolCurrency) => ({
-                ...entry,
-                tokenAmount: new CurrencyBalance(entry.tokenAmount || 0, poolCurrency.decimals),
-                tokenPrice: new Price(entry.tokenPrice || 0),
-                currencyAmount: new CurrencyBalance(entry.currencyAmount || 0, poolCurrency.decimals),
-                trancheId: entry.trancheId.split('-')[1],
-              }))
-            )
-          }),
-          toArray()
-        )
-
-        const borrowerTransactions$ = from(data?.borrowerTransactions.nodes || []).pipe(
-          mergeMap((entry) => {
-            return getPoolCurrency([entry.poolId]).pipe(
-              map((poolCurrency) => ({
-                ...entry,
-                amount: new CurrencyBalance(entry.amount || 0, poolCurrency.decimals),
-              }))
-            )
-          }),
-          toArray()
-        )
-
-        const outstandingOrders$ = from(data?.outstandingOrders.nodes || []).pipe(
-          mergeMap((entry) => {
-            return getPoolCurrency([entry.poolId]).pipe(
-              map((poolCurrency) => {
-                return {
-                  ...entry,
-                  investAmount: new CurrencyBalance(entry.investAmount || 0, poolCurrency.decimals),
-                  redeemAmount: new CurrencyBalance(entry.redeemAmount || 0, poolCurrency.decimals),
-                  trancheId: entry.trancheId.split('-')[1],
-                }
-              })
-            )
-          }),
-          toArray()
-        )
-
-        return forkJoin([investorTransactions$, borrowerTransactions$, outstandingOrders$]).pipe(
-          map(([investorTransactions, borrowerTransactions, outstandingOrders]) => {
+      switchMap((data) => {
+        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId)) ?? []
+        const $poolCurrencies = Array.from(poolIds).map((poolId) => getPoolCurrency([poolId]))
+        return combineLatest($poolCurrencies).pipe(
+          map((currencies) => {
+            const txs = data?.investorTransactions.nodes.map((tx) => {
+              const currencyIndex = Array.from(poolIds).indexOf(tx.poolId)
+              const poolCurrency = currencies[currencyIndex]
+              return {
+                ...tx,
+                tokenAmount: new TokenBalance(tx.tokenAmount || 0, poolCurrency.decimals),
+                tokenPrice: new Price(tx.tokenPrice || 0),
+                currencyAmount: new CurrencyBalance(tx.currencyAmount || 0, poolCurrency.decimals),
+                trancheId: tx.trancheId.split('-')[1],
+              }
+            })
             return {
-              investorTransactions,
-              borrowerTransactions,
-              outstandingOrders,
+              investorTransactions: txs || [],
             }
           })
         )
@@ -2930,7 +2832,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const update = updateData.toPrimitive() as any
         if (!update?.changes) return null
         const { changes, submittedAt } = update
-        
+
         return {
           changes: {
             tranches: changes.tranches.noChange === null ? null : changes.tranches.newValue,
@@ -3046,7 +2948,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
-    getAllTransactions,
+    getTransactionsByAddress,
     getDailyTVL,
   }
 }

@@ -25,19 +25,16 @@ const columns: Column[] = [
     align: 'left',
     header: 'Days after expected repayment date',
     cell: (row: Row) => row.overdueDays,
-    flex: '3',
   },
   {
     align: 'right',
     header: 'Write-off',
     cell: (row: Row) => formatPercentage(row.percentage.toPercent()),
-    flex: '3',
   },
   {
     align: 'right',
     header: 'Penalty fee',
     cell: (row: Row) => formatPercentage(row.penaltyInterestRate.toPercent()),
-    flex: '3',
   },
 ]
 

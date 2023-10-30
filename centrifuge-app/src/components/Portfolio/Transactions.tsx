@@ -1,194 +1,204 @@
-import {
-  BorrowerTransactionType,
-  CurrencyBalance,
-  InvestorTransactionType,
-  Pool,
-  SubqueryInvestorTransaction,
-} from '@centrifuge/centrifuge-js'
+import { BorrowerTransactionType, InvestorTransactionType, Token, TokenBalance } from '@centrifuge/centrifuge-js'
 import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Box, Grid, IconExternalLink, Stack, Text } from '@centrifuge/fabric'
+import {
+  AnchorButton,
+  Box,
+  IconExternalLink,
+  IconEye,
+  Pagination,
+  PaginationProvider,
+  Shelf,
+  Stack,
+  Text,
+  usePagination,
+  VisualButton,
+} from '@centrifuge/fabric'
+import { isAddress as isValidEVMAddress } from '@ethersproject/address'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
+import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
+import { Spinner } from '../../components/Spinner'
 import { formatDate } from '../../utils/date'
+import { Dec } from '../../utils/Decimal'
+import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAddress } from '../../utils/useAddress'
-import { useAllTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
-import { TransactionTypeChip } from './TransactionTypeChip'
+import { usePools, useTransactionsByAddress } from '../../utils/usePools'
+import { Column, DataTable, SortableTableHeader } from '../DataTable'
 
-export const TRANSACTION_CARD_COLUMNS = `150px 100px 250px 150px 1fr`
-export const TRANSACTION_CARD_GAP = 4
-
-type AddressTransactionsProps = {
-  count?: number
+type TransactionsProps = {
+  onlyMostRecent?: boolean
+  txTypes?: InvestorTransactionType[]
 }
 
-type SubqueryBorrowerTransaction = any
-type SubqueryOutstandingOrder = any
+type TransactionTableData = Row[]
 
-const formatters = {
-  investorTransactions: ({
-    timestamp,
-    type,
-    poolId,
-    hash,
-    tokenAmount,
-    tokenPrice,
-    currencyAmount,
-    trancheId,
-  }: Omit<SubqueryInvestorTransaction, 'id' | 'accountId' | 'epochNumber'>) => {
-    return {
-      date: new Date(timestamp).getTime(),
-      action: type,
-      amount: tokenAmount,
-      poolId,
-      hash,
-      trancheId,
-    } as TransactionCardProps
-  },
-  borrowerTransactions: ({ timestamp, type, amount, poolId, hash }: SubqueryBorrowerTransaction) =>
-    ({
-      date: new Date(timestamp).getTime(),
-      action: type,
-      amount,
-      poolId,
-      hash,
-    } as TransactionCardProps),
-  outstandingOrders: ({ timestamp, investAmount, redeemAmount, poolId, hash, trancheId }: SubqueryOutstandingOrder) =>
-    ({
-      date: new Date(timestamp).getTime(),
-      action: 'PENDING_ORDER',
-      amount: investAmount.add(redeemAmount),
-      poolId,
-      hash,
-      trancheId,
-    } as TransactionCardProps),
-}
-
-export function Transactions({ count }: AddressTransactionsProps) {
-  const { formatAddress } = useCentrifugeUtils()
-  const address = useAddress()
-  const formattedAddress = formatAddress(address || '')
-  const allTransactions = useAllTransactions(formattedAddress)
-  const formattedTransactions: TransactionCardProps[] = []
-
-  if (allTransactions) {
-    const { borrowerTransactions, investorTransactions, outstandingOrders } = allTransactions
-
-    investorTransactions.forEach((transaction) =>
-      formattedTransactions.push(formatters.investorTransactions(transaction))
-    )
-    borrowerTransactions.forEach((transaction) =>
-      formattedTransactions.push(formatters.borrowerTransactions(transaction))
-    )
-    outstandingOrders.forEach((transaction) => formattedTransactions.push(formatters.outstandingOrders(transaction)))
-  }
-
-  const transactions = formattedTransactions.slice(0, count ?? formattedTransactions.length)
-
-  return !!transactions.length ? (
-    <Stack as="article" gap={2}>
-      <Text as="h2" variant="heading2">
-        Transaction history
-      </Text>
-      <Stack>
-        <Grid gridTemplateColumns={TRANSACTION_CARD_COLUMNS} gap={TRANSACTION_CARD_GAP}>
-          <Text variant="body3">Action</Text>
-
-          <Text as="button" variant="body3">
-            Transaction date
-          </Text>
-
-          <Text variant="body3">Token</Text>
-
-          <Box justifySelf="end">
-            <Text as="button" variant="body3">
-              Amount
-            </Text>
-          </Box>
-        </Grid>
-
-        <Stack as="ul" role="list">
-          {transactions.map((transaction, index) => (
-            <Box as="li" key={`${transaction.poolId}${index}`}>
-              <TransactionListItem {...transaction} />
-            </Box>
-          ))}
-        </Stack>
-      </Stack>
-      <Link to="portfolio/transactions">View all</Link>
-    </Stack>
-  ) : null
-}
-
-export type TransactionCardProps = {
+type Row = {
+  action: InvestorTransactionType | BorrowerTransactionType
   date: number
-  action: InvestorTransactionType | BorrowerTransactionType | 'PENDING_ORDER'
-  amount: CurrencyBalance
-  poolId: string
+  tranche: Token | undefined
+  tranchePrice: string
+  amount: TokenBalance
   hash: string
-  trancheId?: string
+  poolId: string
+  trancheId: string
 }
 
-export function TransactionListItem({ date, action, amount, poolId, hash, trancheId }: TransactionCardProps) {
-  const pool = usePool(poolId) as Pool
-  const { data } = usePoolMetadata(pool)
-  const token = trancheId ? pool.tranches.find(({ id }) => id === trancheId) : undefined
-  const subScanUrl = import.meta.env.REACT_APP_SUBSCAN_URL
-
-  if (!pool || !data) {
-    return null
-  }
-
-  return (
-    <Grid
-      gridTemplateColumns={TRANSACTION_CARD_COLUMNS}
-      gap={TRANSACTION_CARD_GAP}
-      alignItems="start"
-      py={1}
-      borderBottomWidth={1}
-      borderBottomColor="borderPrimary"
-      borderBottomStyle="solid"
-    >
-      <Box>
-        <TransactionTypeChip type={action} />
-      </Box>
-
-      <Text as="time" variant="interactive2" datetime={date}>
+const columns: Column[] = [
+  {
+    align: 'left',
+    header: 'Action',
+    cell: ({ action }: Row) => <TransactionTypeChip type={action as InvestorTransactionType} />,
+  },
+  {
+    align: 'left',
+    header: <SortableTableHeader label="Transaction date" />,
+    cell: ({ date }: Row) => (
+      <Text as="time" variant="body3" datetime={date}>
         {formatDate(date, {
           day: '2-digit',
           month: '2-digit',
           year: '2-digit',
         })}
       </Text>
-
-      <Stack gap={1}>
-        <Text as="span" variant="interactive2">
-          {!!token ? token.currency?.name : data.pool?.name}
-        </Text>
-        {!!token && (
-          <Text as="span" variant="interactive2" color="textSecondary">
-            {data?.pool?.name}
-          </Text>
-        )}
-      </Stack>
-
-      <Box justifySelf="end">
-        <Text as="span" variant="interactive2">
-          {formatBalance(amount, pool.currency.symbol)}
-        </Text>
-      </Box>
-
-      {!!subScanUrl && !!hash && (
-        <Box
+    ),
+    sortKey: 'date',
+  },
+  {
+    align: 'left',
+    header: 'Token',
+    cell: ({ tranche }: Row) => (
+      <Text as="span" variant="body3" textOverflow="ellipis">
+        {tranche?.currency.symbol} - ({tranche?.currency.name})
+      </Text>
+    ),
+  },
+  {
+    align: 'right',
+    header: 'Token price',
+    cell: ({ tranche }: Row) => (
+      <Text as="span" variant="body3">
+        {formatBalance(tranche?.tokenPrice?.toDecimal() || Dec(1), tranche?.currency.symbol, 4)}
+      </Text>
+    ),
+  },
+  {
+    align: 'right',
+    header: <SortableTableHeader label="Amount" />,
+    cell: ({ amount, tranche }: Row) => (
+      <Text as="span" variant="body3">
+        {formatBalance(amount.toDecimal(), tranche?.currency.symbol || '')}
+      </Text>
+    ),
+    sortKey: 'amount',
+  },
+  {
+    align: 'center',
+    header: 'View transaction',
+    cell: ({ hash }: Row) => {
+      return (
+        <Stack
           as="a"
           href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
           target="_blank"
           rel="noopener noreferrer"
-          justifySelf="end"
           aria-label="Transaction on Subscan.io"
         >
           <IconExternalLink size="iconSmall" color="textPrimary" />
-        </Box>
-      )}
-    </Grid>
+        </Stack>
+      )
+    },
+  },
+]
+
+export function Transactions({ onlyMostRecent, txTypes }: TransactionsProps) {
+  const { formatAddress } = useCentrifugeUtils()
+  const address = useAddress()
+  const formattedAddress = address && isValidEVMAddress(address) ? address : formatAddress(address || '')
+  const transactions = useTransactionsByAddress(formatAddress(formattedAddress))
+  const pools = usePools()
+
+  const investorTransactions: TransactionTableData = React.useMemo(() => {
+    const txs =
+      transactions?.investorTransactions
+        .slice(0, onlyMostRecent ? 3 : transactions?.investorTransactions.length)
+        .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
+        .map((tx) => {
+          const pool = pools?.find((pool) => pool.id === tx.poolId)
+          const tranche = pool?.tranches.find((tranche) => tranche.id === tx.trancheId)
+          return {
+            date: new Date(tx.timestamp).getTime(),
+            action: tx.type,
+            tranche,
+            tranchePrice: tranche?.tokenPrice?.toDecimal().toString() || '',
+            amount: tx.currencyAmount,
+            hash: tx.hash,
+            poolId: tx.poolId,
+            trancheId: tx.trancheId,
+          }
+        }) || []
+    return txs
+  }, [transactions?.investorTransactions, onlyMostRecent, txTypes, pools])
+
+  const csvData = React.useMemo(() => {
+    if (!investorTransactions || !investorTransactions?.length) {
+      return undefined
+    }
+    return investorTransactions.map((entry) => {
+      const pool = pools?.find((pool) => pool.id === entry.poolId)
+      return {
+        'Transaction date': `"${formatDate(entry.date)}"`,
+        Action: entry.action,
+        Token: (pool && pool.tranches.find(({ id }) => id === entry.trancheId)?.currency.name) ?? '',
+        Amount: (pool && `"${formatBalance(entry.amount.toDecimal(), pool.currency.symbol)}"`) ?? '',
+      }
+    })
+  }, [investorTransactions, pools])
+
+  const csvUrl = React.useMemo(() => csvData && getCSVDownloadUrl(csvData), [csvData])
+
+  const pagination = usePagination({ data: investorTransactions, pageSize: onlyMostRecent ? 3 : 15 })
+
+  return !!investorTransactions.length ? (
+    <Stack as="article" gap={onlyMostRecent ? 2 : 5}>
+      <Text as="h2" variant="heading2">
+        Transaction history
+      </Text>
+      <PaginationProvider pagination={pagination}>
+        <Stack gap={2}>
+          <DataTable
+            data={investorTransactions}
+            columns={columns}
+            pageSize={pagination.pageSize}
+            page={pagination.page}
+          />
+          {onlyMostRecent ? (
+            <Link to="/history">
+              <Box display="inline-block">
+                <VisualButton small variant="tertiary" icon={IconEye}>
+                  View all
+                </VisualButton>
+              </Box>
+            </Link>
+          ) : (
+            <Shelf justifyContent="space-between">
+              {pagination.pageCount > 1 && (
+                <Shelf>
+                  <Pagination />
+                </Shelf>
+              )}
+              {csvUrl && (
+                <Box style={{ gridColumn: columns.length, justifySelf: 'end' }}>
+                  <AnchorButton small variant="secondary" href={csvUrl} download={`transaction-history-${address}.csv`}>
+                    Export as CSV
+                  </AnchorButton>
+                </Box>
+              )}
+            </Shelf>
+          )}
+        </Stack>
+      </PaginationProvider>
+    </Stack>
+  ) : (
+    <Spinner />
   )
 }

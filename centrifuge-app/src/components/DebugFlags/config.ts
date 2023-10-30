@@ -51,6 +51,7 @@ export type Key =
   | 'showTestNets'
   | 'showSwaps'
   | 'showLiquidityPoolsOptions'
+  | 'showPrime'
   | 'poolCreationType'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
@@ -141,6 +142,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   showSwaps: {
     type: 'checkbox',
     default: false,
+  },
+  showPrime: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
   },
   poolCreationType: {
     type: 'select',

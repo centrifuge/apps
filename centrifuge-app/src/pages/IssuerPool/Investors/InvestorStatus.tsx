@@ -147,13 +147,11 @@ export function InvestorStatus() {
                     {row.currency.name}
                   </Text>
                 ),
-                flex: '1',
               },
               {
                 align: 'left',
                 header: 'Investment',
                 cell: (row: Token) => <InvestedCell address={centAddress} poolId={poolId} trancheId={row.id} />,
-                flex: '1',
               },
               {
                 header: '',
@@ -173,7 +171,6 @@ export function InvestorStatus() {
                     </Button>
                   )
                 },
-                flex: '1',
               },
             ]}
           />

@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useState } from 'react'
-import useEventCallback from './useEventCallback'
+import { useEventCallback } from './useEventCallback'
 
-function useControlledState<T, D = Dispatch<T> | Dispatch<SetStateAction<T>>>(
+export function useControlledState<T, D = Dispatch<T> | Dispatch<SetStateAction<T>>>(
   initialUncontrolledValue: T,
   externalValue?: T,
   setExternalValue?: D
@@ -17,5 +17,3 @@ function useControlledState<T, D = Dispatch<T> | Dispatch<SetStateAction<T>>>(
 
   return [value, setValue as any]
 }
-
-export default useControlledState
