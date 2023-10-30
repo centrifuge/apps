@@ -167,7 +167,7 @@ const EmailVerified = React.lazy(() => import('../pages/Onboarding/EmailVerified
 const UpdateInvestorStatus = React.lazy(() => import('../pages/Onboarding/UpdateInvestorStatus'))
 const PoolDetailPage = React.lazy(() => import('../pages/Pool'))
 const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
-const TransactionsPage = React.lazy(() => import('../pages/Portfolio/Transactions'))
+const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/TransactionHistory'))
 const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
@@ -214,8 +214,8 @@ function Routes() {
       <Route path="/pools">
         <PoolsPage />
       </Route>
-      <Route path="/portfolio/transactions">
-        <TransactionsPage />
+      <Route path="/history">
+        <TransactionHistoryPage />
       </Route>
       <Route path="/portfolio">
         <PortfolioPage />

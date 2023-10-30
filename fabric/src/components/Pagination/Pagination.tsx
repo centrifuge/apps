@@ -84,16 +84,13 @@ export function Pagination({ pagination }: { pagination?: PaginationState }) {
 
   return (
     <Shelf gap="4px">
-      <StyledButton
-        onClick={() => goToFirst()}
-        disabled={!canPreviousPage}
-        aria-label="first page"
-        style={{ visibility: firstShown > 1 ? 'visible' : 'hidden' }}
-      >
-        <Flex bleedX={1} bleedY={1}>
-          <IconChevronStart />
-        </Flex>
-      </StyledButton>
+      {firstShown > 1 && (
+        <StyledButton onClick={() => goToFirst()} disabled={!canPreviousPage} aria-label="first page">
+          <Flex bleedX={1} bleedY={1}>
+            <IconChevronStart />
+          </Flex>
+        </StyledButton>
+      )}
       <StyledButton onClick={() => goToPrevious()} disabled={!canPreviousPage} aria-label="previous page">
         <Flex bleedX={1} bleedY={1}>
           <IconChevronLeft />
@@ -105,7 +102,12 @@ export function Pagination({ pagination }: { pagination?: PaginationState }) {
         </Text>
       )}
       {pages.map((n) => (
-        <StyledButton onClick={() => goToPage(n)} $active={page === n} aria-label={`Go to page ${n}`}>
+        <StyledButton
+          key={`pagr-nr-${n}`}
+          onClick={() => goToPage(n)}
+          $active={page === n}
+          aria-label={`Go to page ${n}`}
+        >
           <Text variant="interactive1" color="inherit">
             {n}
           </Text>
@@ -121,16 +123,13 @@ export function Pagination({ pagination }: { pagination?: PaginationState }) {
           <IconChevronRight />
         </Flex>
       </StyledButton>
-      <StyledButton
-        onClick={() => goToLast()}
-        disabled={!canNextPage}
-        aria-label="last page"
-        style={{ visibility: lastShown < pageCount ? 'visible' : 'hidden' }}
-      >
-        <Flex bleedX={1} bleedY={1}>
-          <IconChevronEnd />
-        </Flex>
-      </StyledButton>
+      {lastShown < pageCount && (
+        <StyledButton onClick={() => goToLast()} disabled={!canNextPage} aria-label="last page">
+          <Flex bleedX={1} bleedY={1}>
+            <IconChevronEnd />
+          </Flex>
+        </StyledButton>
+      )}
     </Shelf>
   )
 }

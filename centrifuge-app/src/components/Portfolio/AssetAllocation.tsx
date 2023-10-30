@@ -57,7 +57,7 @@ export function AssetAllocation({ address }: { address: string }) {
         <AssetClassChart data={shares} currency="USD" total={total.toNumber()} />
         <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>
           {shares.map((cell, i) => (
-            <>
+            <Box key={`asset-allocation-${cell.name}-${i}`}>
               {i > 0 && <Box width="1px" backgroundColor="borderSecondary" />}
               <LabelValueStack
                 label={
@@ -84,7 +84,7 @@ export function AssetAllocation({ address }: { address: string }) {
                 }
                 key={i}
               />
-            </>
+            </Box>
           ))}
         </Shelf>
       </Shelf>
