@@ -196,9 +196,7 @@ const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
 
-const routes: (Omit<RouteProps, 'component' | 'render'> & {
-  component?: React.ComponentType<any>
-})[] = [
+const routes: RouteProps[] = [
   { path: '/nfts/collection/:cid/object/mint', component: MintNFTPage },
   { path: '/nfts/collection/:cid/object/:nftid', component: NFTPage },
   { path: '/nfts/collection/:cid', component: CollectionPage },
