@@ -2084,7 +2084,6 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function getInvestorTransactions(args: [poolId: string, trancheId?: string, from?: Date, to?: Date]) {
     const [poolId, trancheId, from, to] = args
-    const $api = inst.getApi()
 
     const $query = inst.getSubqueryObservable<{
       investorTransactions: { nodes: SubqueryInvestorTransaction[] }
