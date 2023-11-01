@@ -2121,35 +2121,27 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     )
 
-    return $api.pipe(
-      switchMap((api) =>
-        combineLatest([$query, api.query.poolSystem.pool(poolId).pipe(take(1)), getCurrencies()]).pipe(
-          switchMap(([queryData, poolValue, currencies]) => {
-            const pool = poolValue.toHuman() as unknown as PoolDetailsData
-            const currency = findCurrency(currencies, pool.currency)!
-            const currencyDecimals = currency.decimals
+    return combineLatest([$query, getPoolCurrency([poolId])]).pipe(
+      switchMap(([queryData, currency]) => {
+        const currencyDecimals = currency.decimals
 
-            return [
-              queryData?.investorTransactions.nodes.map((tx) => {
-                return {
-                  id: tx.id,
-                  timestamp: new Date(tx.timestamp),
-                  accountId: tx.accountId,
-                  trancheId: tx.trancheId,
-                  epochNumber: tx.epochNumber,
-                  type: tx.type as InvestorTransactionType,
-                  currencyAmount: tx.currencyAmount
-                    ? new CurrencyBalance(tx.currencyAmount, currencyDecimals)
-                    : undefined,
-                  tokenAmount: tx.tokenAmount ? new CurrencyBalance(tx.tokenAmount, currencyDecimals) : undefined,
-                  tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
-                  transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
-                }
-              }) as unknown as InvestorTransaction[],
-            ]
-          })
-        )
-      )
+        return [
+          queryData?.investorTransactions.nodes.map((tx) => {
+            return {
+              id: tx.id,
+              timestamp: new Date(tx.timestamp),
+              accountId: tx.accountId,
+              trancheId: tx.trancheId,
+              epochNumber: tx.epochNumber,
+              type: tx.type as InvestorTransactionType,
+              currencyAmount: tx.currencyAmount ? new CurrencyBalance(tx.currencyAmount, currencyDecimals) : undefined,
+              tokenAmount: tx.tokenAmount ? new CurrencyBalance(tx.tokenAmount, currencyDecimals) : undefined,
+              tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
+              transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
+            }
+          }) as unknown as InvestorTransaction[],
+        ]
+      })
     )
   }
 
