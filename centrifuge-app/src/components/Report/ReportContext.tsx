@@ -49,7 +49,7 @@ const defaultContext = {
   report: 'pool-balance' as Report,
   setReport() {},
 
-  groupBy: 'day' as GroupBy,
+  groupBy: 'month' as GroupBy,
   setGroupBy() {},
 
   activeTranche: 'all',
