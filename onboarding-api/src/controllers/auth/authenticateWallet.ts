@@ -33,13 +33,30 @@ const verifyWalletInput = object({
   chainId: number().required(),
 })
 
+const verifySafeInput = object({
+  messageHash: string().required(),
+  safeAddress: string()
+    .required()
+    .test({
+      name: 'is-address',
+      test(value, ctx) {
+        if (isAddress(value)) return true
+        return ctx.createError({ message: 'Invalid address', path: ctx.path })
+      },
+    }),
+  evmChainId: number().required(),
+  network: string().oneOf(['evmOnSafe']).required() as StringSchema<'evmOnSafe'>,
+  nonce: string().required(),
+})
+
 export const authenticateWalletController = async (
-  req: Request<{}, {}, InferType<typeof verifyWalletInput>>,
+  req: Request<{}, {}, InferType<typeof verifyWalletInput | typeof verifySafeInput>>,
   res: Response
 ) => {
   try {
-    await validateInput(req.body, verifyWalletInput)
-    const payload = await new NetworkSwitch(req.body.network).verifiyWallet(req, res)
+    await validateInput(req.body, req.body.network === 'evmOnSafe' ? verifySafeInput : verifyWalletInput)
+
+    const payload = await new NetworkSwitch(req.body.network).verifyWallet(req, res)
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '8h',
