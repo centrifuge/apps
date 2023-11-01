@@ -261,12 +261,16 @@ export function SortableTableHeader({
   onClick?: () => void
 }) {
   return (
-    <StyledHeader gap="4px" as="button" onClick={onClick}>
-      {label}
-      <Stack>
-        {(orderBy === 'asc' || !orderBy) && <IconChevronUp size={14} style={{ marginBottom: !orderBy ? -3.5 : 0 }} />}
-        {(orderBy === 'desc' || !orderBy) && <IconChevronDown size={14} style={{ marginTop: !orderBy ? -3.5 : 0 }} />}
-      </Stack>
+    <StyledHeader as="button" type="button" onClick={onClick}>
+      <Shelf gap="4px">
+        <Text variant="body3" color="currentColor">
+          {label}
+        </Text>
+        <Stack>
+          {(orderBy === 'asc' || !orderBy) && <IconChevronUp size={14} style={{ marginBottom: !orderBy ? -3.5 : 0 }} />}
+          {(orderBy === 'desc' || !orderBy) && <IconChevronDown size={14} style={{ marginTop: !orderBy ? -3.5 : 0 }} />}
+        </Stack>
+      </Shelf>
     </StyledHeader>
   )
 }
@@ -373,8 +377,7 @@ export function FilterableTableHeader({
   )
 }
 
-const StyledHeader = styled(Shelf)`
-  color: ${({ theme }) => theme.colors.textPrimary};
+const StyledHeader = styled(Text)`
   cursor: pointer;
   appearance: none;
   border: none;

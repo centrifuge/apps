@@ -3,6 +3,7 @@ import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
+import { prefetchRoute } from '../Root'
 import { baseButton, primaryButton } from './styles'
 
 const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
@@ -19,7 +20,14 @@ export function PageLink({ stacked = false, to, children }: PageLinkProps) {
   const match = useRouteMatch(to as string)
 
   return (
-    <Root forwardedAs={Link} to={to} variant="interactive1" isActive={Boolean(match)} stacked={stacked}>
+    <Root
+      forwardedAs={Link}
+      to={to}
+      variant="interactive1"
+      isActive={Boolean(match)}
+      stacked={stacked}
+      onMouseOver={() => prefetchRoute(to)}
+    >
       {children}
     </Root>
   )
