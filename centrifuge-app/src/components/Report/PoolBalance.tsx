@@ -31,20 +31,27 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body2'}>{row.name}</Text>,
         width: '200px',
       },
-    ].concat(
-      poolStates.map((state, index) => ({
-        align: 'right',
-        header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
-          month: 'short',
-        })} ${
-          groupBy === 'day'
-            ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
-            : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
-        }`,
-        cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-        width: '120px',
-      }))
-    )
+    ]
+      .concat(
+        poolStates.map((state, index) => ({
+          align: 'right',
+          header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
+            month: 'short',
+          })} ${
+            groupBy === 'day'
+              ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
+              : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
+          }`,
+          cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
+          width: '120px',
+        }))
+      )
+      .concat({
+        align: 'left',
+        header: '',
+        cell: () => <span />,
+        width: '1fr',
+      })
   }, [poolStates, groupBy])
 
   const overviewRecords: TableDataRow[] = React.useMemo(() => {
