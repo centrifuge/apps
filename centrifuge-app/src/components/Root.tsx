@@ -14,7 +14,7 @@ import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, LinkProps, matchPath, Redirect, Route, RouteProps, Switch } from 'react-router-dom'
 import { config, ethConfig } from '../config'
 import PoolsPage from '../pages/Pools'
 import { pinToApi } from '../utils/pinToApi'
@@ -196,84 +196,57 @@ const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
 
+const routes: RouteProps[] = [
+  { path: '/nfts/collection/:cid/object/mint', component: MintNFTPage },
+  { path: '/nfts/collection/:cid/object/:nftid', component: NFTPage },
+  { path: '/nfts/collection/:cid', component: CollectionPage },
+  { path: '/nfts/account', component: AccountNFTsPage },
+  { path: '/nfts', component: CollectionsPage },
+  { path: '/issuer/create-pool', component: IssuerCreatePoolPage },
+  { path: '/issuer/:pid/assets/create', component: IssuerCreateLoanPage },
+  { path: '/issuer/:pid/assets/:aid', component: LoanPage, exact: true },
+  { path: '/issuer/:pid', component: IssuerPoolPage },
+  { path: '/pools/:pid/assets/:aid', component: LoanPage },
+  { path: '/pools/tokens', component: TokenOverviewPage },
+  { path: '/pools/:pid', component: PoolDetailPage },
+  { path: '/pools', component: PoolsPage },
+  { path: '/history', component: TransactionHistoryPage },
+  { path: '/portfolio', component: PortfolioPage },
+  { path: '/prime/:dao', component: PrimeDetailPage },
+  { path: '/prime', component: PrimePage },
+  { path: '/disclaimer', component: InvestmentDisclaimerPage },
+  { path: '/onboarding', component: OnboardingPage, exact: true },
+  { path: '/onboarding/verifyEmail', component: EmailVerified, exact: true },
+  { path: '/onboarding/updateInvestorStatus', component: UpdateInvestorStatus, exact: true },
+  { path: '/multisig-approval', component: MultisigApprovalPage, exact: true },
+  { path: '/swaps', component: SwapsPage },
+  { path: '/', children: <Redirect to="/pools" /> },
+  {
+    children: <NotFoundPage />,
+  },
+]
+
+export function findRoute(pathname: string) {
+  return routes.find((r) => {
+    return r.path ? matchPath(pathname, r) : true
+  })
+}
+
+export function prefetchRoute(to: string | LinkProps['to']) {
+  const pathname = typeof to === 'string' ? to : 'pathname' in to ? to.pathname : null
+  const route = pathname ? findRoute(pathname) : null
+  const Comp = route?.component as any
+  try {
+    if (Comp && '_init' in Comp && '_payload' in Comp) Comp._init(Comp._payload)
+  } catch {}
+}
+
 function Routes() {
   return (
     <Switch>
-      <Route path="/nfts/collection/:cid/object/mint">
-        <MintNFTPage />
-      </Route>
-      <Route path="/nfts/collection/:cid/object/:nftid">
-        <NFTPage />
-      </Route>
-      <Route path="/nfts/collection/:cid">
-        <CollectionPage />
-      </Route>
-      <Route path="/nfts/account">
-        <AccountNFTsPage />
-      </Route>
-      <Route path="/nfts">
-        <CollectionsPage />
-      </Route>
-      <Route path="/issuer/create-pool">
-        <IssuerCreatePoolPage />
-      </Route>
-      <Route path="/issuer/:pid/assets/create">
-        <IssuerCreateLoanPage />
-      </Route>
-      <Route exact path="/issuer/:pid/assets/:aid">
-        <LoanPage />
-      </Route>
-      <Route path="/issuer/:pid">
-        <IssuerPoolPage />
-      </Route>
-      <Route path="/pools/:pid/assets/:aid">
-        <LoanPage />
-      </Route>
-      <Route path="/pools/tokens">
-        <TokenOverviewPage />
-      </Route>
-      <Route path="/pools/:pid">
-        <PoolDetailPage />
-      </Route>
-      <Route path="/pools">
-        <PoolsPage />
-      </Route>
-      <Route path="/history">
-        <TransactionHistoryPage />
-      </Route>
-      <Route path="/portfolio">
-        <PortfolioPage />
-      </Route>
-      <Route path="/prime/:dao">
-        <PrimeDetailPage />
-      </Route>
-      <Route path="/prime">
-        <PrimePage />
-      </Route>
-      <Route path="/disclaimer">
-        <InvestmentDisclaimerPage />
-      </Route>
-      <Route exact path="/onboarding">
-        <OnboardingPage />
-      </Route>
-      <Route exact path="/onboarding/verifyEmail">
-        <EmailVerified />
-      </Route>
-      <Route exact path="/onboarding/updateInvestorStatus">
-        <UpdateInvestorStatus />
-      </Route>
-      <Route exact path="/multisig-approval">
-        <MultisigApprovalPage />
-      </Route>
-      <Route path="/swaps">
-        <SwapsPage />
-      </Route>
-      <Route exact path="/">
-        <Redirect to="/pools" />
-      </Route>
-      <Route>
-        <NotFoundPage />
-      </Route>
+      {routes.map((route) => (
+        <Route {...route} />
+      ))}
     </Switch>
   )
 }

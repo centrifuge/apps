@@ -3,6 +3,7 @@ import * as React from 'react'
 import { NavLink, NavLinkProps } from 'react-router-dom'
 import styled from 'styled-components'
 import { useLinkIsActive } from '../utils/useLinkIsActive'
+import { prefetchRoute } from './Root'
 
 export type RouterLinkButtonProps = VisualButtonProps & NavLinkProps & { showActive?: boolean }
 
@@ -30,7 +31,7 @@ export const RouterLinkButton: React.FC<RouterLinkButtonProps> = ({
   const isActive = useLinkIsActive(routeProps)
 
   return (
-    <StyledLink $disabled={loading || disabled} {...routeProps}>
+    <StyledLink $disabled={loading || disabled} {...routeProps} onMouseOver={() => prefetchRoute(routeProps.to)}>
       <VisualButton
         variant={variant}
         small={small}
