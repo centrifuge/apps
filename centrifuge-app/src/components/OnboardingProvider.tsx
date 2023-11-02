@@ -25,6 +25,8 @@ interface OnboardingContextType<User, Pool> {
   previousStep: () => void
   isLoadingStep: boolean
   setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
+  setIsExternal: React.Dispatch<React.SetStateAction<boolean>>
+  isExternal: boolean
 }
 
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser, OnboardingPool> | null>(null)
@@ -36,7 +38,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     evm: { selectedAddress: evmAddress },
     connectedType,
   } = useWallet()
-  const { isAuth, isAuthFetched, authToken } = useOnboardingAuth()
+  const { isAuth, isAuthFetched, authToken, setIsExternal, isExternal } = useOnboardingAuth()
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const [pool, setPool] = React.useState<OnboardingPool>()
 
@@ -76,14 +78,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     },
     {
       refetchOnWindowFocus: false,
-      enabled: connectedType === 'evm' ? !!evmAddress : !!substrateAccount,
+      enabled: (connectedType === 'evm' ? !!evmAddress : !!substrateAccount) || isExternal,
       retry: 1,
     }
   )
 
   React.useEffect(() => {
     // tried to connect but no wallet is connected
-    if (!isConnecting && !(substrateAccount || evmAddress)) {
+    if (!isConnecting && !(substrateAccount || evmAddress || isExternal)) {
       return setActiveStep(1)
     }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
@@ -91,8 +93,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       return setActiveStep(1)
     }
 
+    const isIframe = window.self !== window.top
+
     // wallet finished connection attempt, user was fetched
-    if (!isConnecting && isOnboardingUserFetched) {
+    if (
+      !isConnecting &&
+      isOnboardingUserFetched &&
+      (!isIframe || onboardingUser?.globalSteps?.verifyIdentity?.completed)
+    ) {
       const isPendingManualKybReview = onboardingUser?.manualKybStatus === 'review.pending'
 
       const activeOnboardingStep = getActiveOnboardingStep(
@@ -104,7 +112,17 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, substrateAccount, evmAddress, pool])
+  }, [
+    onboardingUser,
+    isConnecting,
+    isOnboardingUserFetched,
+    isAuth,
+    isAuthFetched,
+    substrateAccount,
+    evmAddress,
+    pool,
+    isExternal,
+  ])
 
   return (
     <OnboardingContext.Provider
@@ -118,6 +136,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         previousStep,
         setActiveStep,
         isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading,
+        setIsExternal,
+        isExternal,
       }}
     >
       {children}

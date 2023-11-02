@@ -6,7 +6,7 @@ import { useOnboarding } from '../../components/OnboardingProvider'
 
 export const GlobalStatus = () => {
   const history = useHistory()
-  const { onboardingUser, refetchOnboardingUser } = useOnboarding()
+  const { onboardingUser, refetchOnboardingUser, isExternal } = useOnboarding()
 
   const onFocus = () => {
     refetchOnboardingUser()
@@ -56,19 +56,25 @@ export const GlobalStatus = () => {
       <Content>
         <ContentHeader
           title="Thanks for verifying your identity"
-          body="Please click the button below to access the pools available for investment."
+          body={
+            isExternal
+              ? 'Please close this tab and return back to the Safe app.'
+              : 'Please click the button below to access the pools available for investment.'
+          }
         />
       </Content>
 
-      <ActionBar>
-        <Button
-          onClick={() => {
-            history.push('/pools')
-          }}
-        >
-          View Pools
-        </Button>
-      </ActionBar>
+      {!isExternal && (
+        <ActionBar>
+          <Button
+            onClick={() => {
+              history.push('/pools')
+            }}
+          >
+            View Pools
+          </Button>
+        </ActionBar>
+      )}
     </>
   )
 }
