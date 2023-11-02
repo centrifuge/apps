@@ -6,7 +6,6 @@ import { BigNumber, ethers } from 'ethers'
 import { hashMessage } from 'ethers/lib/utils'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { useLocation } from 'react-router-dom'
 
 export const OnboardingAuthContext = React.createContext<{
   session?: { signed: string; payload: any } | null
@@ -28,8 +27,6 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
   const cent = useCentrifuge()
   const utils = useCentrifugeUtils()
   const provider = useEvmProvider()
-  const { search } = useLocation()
-  const safeAddress = new URLSearchParams(search).get('safeAddress')
 
   // onboarding-api expects the wallet address in the native substrate format
   const address = selectedAccount?.address ? utils.formatAddress(selectedAccount?.address) : selectedAddress
@@ -39,9 +36,9 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
     ['session', selectedAccount?.address, proxy?.delegator, selectedAddress],
     () => {
       // if user comes from Safe
-      if (safeAddress) {
-        const safeSession = sessionStorage.getItem(`centrifuge-onboarding-auth-${safeAddress}`)
-        if (safeSession) return JSON.parse(safeSession)
+      if (isExternal) {
+        const safeSignatureSession = sessionStorage.getItem('external-centrifuge-onboarding-auth')
+        if (safeSignatureSession) return JSON.parse(safeSignatureSession)
       }
 
       if (address) {

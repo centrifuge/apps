@@ -25,14 +25,11 @@ export default function OnboardingPage() {
   const { search } = useLocation()
   const poolId = new URLSearchParams(search).get('poolId')
   const trancheId = new URLSearchParams(search).get('trancheId')
-  const safeAddress = new URLSearchParams(search).get('safeAddress')
+  const safeSignature = new URLSearchParams(search).get('safeSignature')
   const { disconnect } = useWallet()
   const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool, isExternal, setIsExternal } =
     useOnboarding()
-  const { isAuth } = useOnboardingAuth()
-  const {
-    evm: { selectedAddress },
-  } = useWallet()
+  const { isAuth, authToken } = useOnboardingAuth()
 
   const { data: globalOnboardingStatus, isFetching: isFetchingGlobalOnboardingStatus } = useGlobalOnboardingStatus()
 
@@ -41,10 +38,15 @@ export default function OnboardingPage() {
   const { data: metadata } = usePoolMetadata(poolDetails)
 
   React.useEffect(() => {
-    if (safeAddress) {
+    if (safeSignature) {
       disconnect()
 
-      return setIsExternal(true)
+      const decodedSafeSignature = decodeURIComponent(safeSignature)
+
+      sessionStorage.clear()
+      sessionStorage.setItem('external-centrifuge-onboarding-auth', JSON.stringify({ signed: decodedSafeSignature }))
+
+      setIsExternal(true)
     }
 
     const isTinlakePool = poolId?.startsWith('0x')
@@ -70,7 +72,7 @@ export default function OnboardingPage() {
 
     setPool(null)
     return history.push('/onboarding')
-  }, [poolId, setPool, trancheId, history, poolDetails, metadata, disconnect, setIsExternal, safeAddress])
+  }, [poolId, setPool, trancheId, history, poolDetails, metadata, disconnect, setIsExternal, safeSignature])
 
   const { data: signedAgreementData } = useSignedAgreement()
 
@@ -85,7 +87,9 @@ export default function OnboardingPage() {
   const openNewTab = () => {
     const origin = window.location.origin
 
-    window.open(`${origin}/onboarding?safeAddress=${selectedAddress}`, '_blank')
+    const encodedSignature = encodeURIComponent(authToken)
+
+    window.open(`${origin}/onboarding?safeSignature=${encodedSignature}`, '_blank')
   }
 
   if (isIframe && isAuth && !onboardingUser?.globalSteps?.verifyIdentity?.completed) {
