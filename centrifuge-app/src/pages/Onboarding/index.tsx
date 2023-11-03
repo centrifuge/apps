@@ -25,7 +25,7 @@ export default function OnboardingPage() {
   const { search } = useLocation()
   const poolId = new URLSearchParams(search).get('poolId')
   const trancheId = new URLSearchParams(search).get('trancheId')
-  const safeSignature = new URLSearchParams(search).get('safeSignature')
+  const externalSignature = new URLSearchParams(search).get('externalSignature')
   const { disconnect } = useWallet()
   const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool, isExternal, setIsExternal } =
     useOnboarding()
@@ -38,13 +38,16 @@ export default function OnboardingPage() {
   const { data: metadata } = usePoolMetadata(poolDetails)
 
   React.useEffect(() => {
-    if (safeSignature) {
+    if (externalSignature) {
       disconnect()
 
-      const decodedSafeSignature = decodeURIComponent(safeSignature)
+      const decodedExternalSignature = decodeURIComponent(externalSignature)
 
       sessionStorage.clear()
-      sessionStorage.setItem('external-centrifuge-onboarding-auth', JSON.stringify({ signed: decodedSafeSignature }))
+      sessionStorage.setItem(
+        'external-centrifuge-onboarding-auth',
+        JSON.stringify({ signed: decodedExternalSignature })
+      )
 
       setIsExternal(true)
     }
@@ -72,7 +75,7 @@ export default function OnboardingPage() {
 
     setPool(null)
     return history.push('/onboarding')
-  }, [poolId, setPool, trancheId, history, poolDetails, metadata, disconnect, setIsExternal, safeSignature])
+  }, [poolId, setPool, trancheId, history, poolDetails, metadata, disconnect, setIsExternal, externalSignature])
 
   const { data: signedAgreementData } = useSignedAgreement()
 
@@ -87,9 +90,9 @@ export default function OnboardingPage() {
   const openNewTab = () => {
     const origin = window.location.origin
 
-    const encodedSignature = encodeURIComponent(authToken)
+    const encodedExternalSignature = encodeURIComponent(authToken)
 
-    window.open(`${origin}/onboarding?safeSignature=${encodedSignature}`, '_blank')
+    window.open(`${origin}/onboarding?externalSignature=${encodedExternalSignature}`, '_blank')
   }
 
   if (isIframe && isAuth && !onboardingUser?.globalSteps?.verifyIdentity?.completed) {

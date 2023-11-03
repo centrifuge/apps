@@ -58,7 +58,7 @@ export const GlobalStatus = () => {
           title="Thanks for verifying your identity"
           body={
             isExternal
-              ? 'Please close this tab and return back to the Safe app.'
+              ? 'Please close this tab and return back to the previous tab.'
               : 'Please click the button below to access the pools available for investment.'
           }
         />

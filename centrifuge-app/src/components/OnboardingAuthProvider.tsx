@@ -35,10 +35,10 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
   const { data: session, refetch: refetchSession } = useQuery(
     ['session', selectedAccount?.address, proxy?.delegator, selectedAddress],
     () => {
-      // if user comes from Safe
+      // if user comes from external app
       if (isExternal) {
-        const safeSignatureSession = sessionStorage.getItem('external-centrifuge-onboarding-auth')
-        if (safeSignatureSession) return JSON.parse(safeSignatureSession)
+        const externalSignatureSession = sessionStorage.getItem('external-centrifuge-onboarding-auth')
+        if (externalSignatureSession) return JSON.parse(externalSignatureSession)
       }
 
       if (address) {
