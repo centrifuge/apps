@@ -11,11 +11,14 @@ export const OnboardingAuthContext = React.createContext<{
   session?: { signed: string; payload: any } | null
   login: () => void
   isLoggingIn: boolean
+  isOnboardingExternally: boolean
+  setIsOnboardingExternally: React.Dispatch<React.SetStateAction<boolean>>
 }>(null as any)
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export function OnboardingAuthProvider({ children }: { children: React.ReactNode }) {
+  const [isOnboardingExternally, setIsOnboardingExternally] = React.useState(false)
   const {
     substrate: { selectedWallet, selectedProxies, selectedAccount, evmChainId },
     evm: { selectedAddress, ...evm },
@@ -24,13 +27,20 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
   const cent = useCentrifuge()
   const utils = useCentrifugeUtils()
   const provider = useEvmProvider()
+
   // onboarding-api expects the wallet address in the native substrate format
   const address = selectedAccount?.address ? utils.formatAddress(selectedAccount?.address) : selectedAddress
   const proxy = selectedProxies?.[0]
 
   const { data: session, refetch: refetchSession } = useQuery(
-    ['session', selectedAccount?.address, proxy?.delegator, selectedAddress],
+    ['session', selectedAccount?.address, proxy?.delegator, selectedAddress, isOnboardingExternally],
     () => {
+      // if user comes from external app
+      if (isOnboardingExternally) {
+        const externalSignatureSession = sessionStorage.getItem('external-centrifuge-onboarding-auth')
+        if (externalSignatureSession) return JSON.parse(externalSignatureSession)
+      }
+
       if (address) {
         if (proxy) {
           const rawItem = sessionStorage.getItem(`centrifuge-onboarding-auth-${address}-${proxy.delegator}`)
@@ -45,7 +55,7 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
         }
       }
     },
-    { enabled: !!selectedAccount?.address || !!selectedAddress }
+    { enabled: !!selectedAccount?.address || !!selectedAddress || isOnboardingExternally }
   )
 
   const { mutate: login, isLoading: isLoggingIn } = useMutation(async () => {
@@ -69,8 +79,10 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
       session,
       login,
       isLoggingIn,
+      isOnboardingExternally,
+      setIsOnboardingExternally,
     }),
-    [session, login, isLoggingIn]
+    [session, login, isLoggingIn, isOnboardingExternally, setIsOnboardingExternally]
   )
 
   return <OnboardingAuthContext.Provider value={ctx}>{children}</OnboardingAuthContext.Provider>
@@ -83,7 +95,7 @@ export function useOnboardingAuth() {
   } = useWallet()
   const ctx = React.useContext(OnboardingAuthContext)
   if (!ctx) throw new Error('useOnboardingAuth must be used within OnboardingAuthProvider')
-  const { session } = ctx
+  const { session, isOnboardingExternally } = ctx
   const authToken = session?.signed ? session.signed : ''
 
   const {
@@ -116,7 +128,7 @@ export function useOnboardingAuth() {
       }
     },
     {
-      enabled: (!!selectedAccount?.address || !!selectedAddress) && !!authToken,
+      enabled: (!!selectedAccount?.address || !!selectedAddress || isOnboardingExternally) && !!authToken,
       retry: 1,
     }
   )
@@ -128,6 +140,8 @@ export function useOnboardingAuth() {
     refetchAuth,
     isAuthFetched: isFetched,
     isLoading: ctx.isLoggingIn,
+    isOnboardingExternally: ctx.isOnboardingExternally,
+    setIsOnboardingExternally: ctx.setIsOnboardingExternally,
   }
 }
 
