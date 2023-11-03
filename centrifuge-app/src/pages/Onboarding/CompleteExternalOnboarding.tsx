@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const CompleteExternalOnboarding = ({ openNewTab, poolId, poolSymbol }: Props) => {
-  const { refetchOnboardingUser, isExternal } = useOnboarding()
+  const { refetchOnboardingUser, isOnboardingExternally } = useOnboarding()
 
   const onFocus = () => {
     refetchOnboardingUser()
@@ -27,7 +27,9 @@ export const CompleteExternalOnboarding = ({ openNewTab, poolId, poolSymbol }: P
 
   return (
     <Layout>
-      <Header walletMenu={!isExternal}>{!!poolId && <PoolBranding poolId={poolId} symbol={poolSymbol} />}</Header>
+      <Header walletMenu={!isOnboardingExternally}>
+        {!!poolId && <PoolBranding poolId={poolId} symbol={poolSymbol} />}
+      </Header>
 
       <Container>
         <>

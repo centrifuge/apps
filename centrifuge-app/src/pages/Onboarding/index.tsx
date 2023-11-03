@@ -27,8 +27,16 @@ export default function OnboardingPage() {
   const trancheId = new URLSearchParams(search).get('trancheId')
   const externalSignature = new URLSearchParams(search).get('externalSignature')
   const { disconnect } = useWallet()
-  const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool, isExternal, setIsExternal } =
-    useOnboarding()
+  const {
+    onboardingUser,
+    activeStep,
+    setActiveStep,
+    isLoadingStep,
+    setPool,
+    pool,
+    isOnboardingExternally,
+    setIsOnboardingExternally,
+  } = useOnboarding()
   const { isAuth, authToken } = useOnboardingAuth()
 
   const { data: globalOnboardingStatus, isFetching: isFetchingGlobalOnboardingStatus } = useGlobalOnboardingStatus()
@@ -49,7 +57,7 @@ export default function OnboardingPage() {
         JSON.stringify({ signed: decodedExternalSignature })
       )
 
-      setIsExternal(true)
+      setIsOnboardingExternally(true)
     }
 
     const isTinlakePool = poolId?.startsWith('0x')
@@ -75,7 +83,17 @@ export default function OnboardingPage() {
 
     setPool(null)
     return history.push('/onboarding')
-  }, [poolId, setPool, trancheId, history, poolDetails, metadata, disconnect, setIsExternal, externalSignature])
+  }, [
+    poolId,
+    setPool,
+    trancheId,
+    history,
+    poolDetails,
+    metadata,
+    disconnect,
+    setIsOnboardingExternally,
+    externalSignature,
+  ])
 
   const { data: signedAgreementData } = useSignedAgreement()
 
@@ -101,10 +119,12 @@ export default function OnboardingPage() {
 
   return (
     <Layout>
-      <Header walletMenu={!isExternal}>{!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}</Header>
+      <Header walletMenu={!isOnboardingExternally}>
+        {!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}
+      </Header>
 
       <Container
-        closeable={!isExternal}
+        closeable={!isOnboardingExternally}
         isLoading={isLoadingStep || isFetchingGlobalOnboardingStatus}
         aside={
           <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>

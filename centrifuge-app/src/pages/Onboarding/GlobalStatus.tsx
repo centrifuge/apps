@@ -6,7 +6,7 @@ import { useOnboarding } from '../../components/OnboardingProvider'
 
 export const GlobalStatus = () => {
   const history = useHistory()
-  const { onboardingUser, refetchOnboardingUser, isExternal } = useOnboarding()
+  const { onboardingUser, refetchOnboardingUser, isOnboardingExternally } = useOnboarding()
 
   const onFocus = () => {
     refetchOnboardingUser()
@@ -57,14 +57,14 @@ export const GlobalStatus = () => {
         <ContentHeader
           title="Thanks for verifying your identity"
           body={
-            isExternal
+            isOnboardingExternally
               ? 'Please close this tab and return back to the previous tab.'
               : 'Please click the button below to access the pools available for investment.'
           }
         />
       </Content>
 
-      {!isExternal && (
+      {!isOnboardingExternally && (
         <ActionBar>
           <Button
             onClick={() => {

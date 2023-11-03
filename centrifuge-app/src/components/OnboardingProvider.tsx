@@ -25,8 +25,8 @@ interface OnboardingContextType<User, Pool> {
   previousStep: () => void
   isLoadingStep: boolean
   setPool: React.Dispatch<React.SetStateAction<OnboardingPool | undefined>>
-  setIsExternal: React.Dispatch<React.SetStateAction<boolean>>
-  isExternal: boolean
+  setIsOnboardingExternally: React.Dispatch<React.SetStateAction<boolean>>
+  isOnboardingExternally: boolean
 }
 
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser, OnboardingPool> | null>(null)
@@ -38,7 +38,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     evm: { selectedAddress: evmAddress },
     connectedType,
   } = useWallet()
-  const { isAuth, isAuthFetched, authToken, setIsExternal, isExternal } = useOnboardingAuth()
+  const { isAuth, isAuthFetched, authToken, setIsOnboardingExternally, isOnboardingExternally } = useOnboardingAuth()
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const [pool, setPool] = React.useState<OnboardingPool>()
 
@@ -78,14 +78,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     },
     {
       refetchOnWindowFocus: false,
-      enabled: (connectedType === 'evm' ? !!evmAddress : !!substrateAccount) || isExternal,
+      enabled: (connectedType === 'evm' ? !!evmAddress : !!substrateAccount) || isOnboardingExternally,
       retry: 1,
     }
   )
 
   React.useEffect(() => {
     // tried to connect but no wallet is connected
-    if (!isConnecting && !(substrateAccount || evmAddress || isExternal)) {
+    if (!isConnecting && !(substrateAccount || evmAddress || isOnboardingExternally)) {
       return setActiveStep(1)
     }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
@@ -121,7 +121,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     substrateAccount,
     evmAddress,
     pool,
-    isExternal,
+    isOnboardingExternally,
   ])
 
   return (
@@ -136,8 +136,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         previousStep,
         setActiveStep,
         isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading,
-        setIsExternal,
-        isExternal,
+        setIsOnboardingExternally,
+        isOnboardingExternally,
       }}
     >
       {children}
