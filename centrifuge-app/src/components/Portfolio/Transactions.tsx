@@ -11,10 +11,8 @@ import {
   Stack,
   Text,
   usePagination,
-  VisualButton,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { Spinner } from '../../components/Spinner'
 import { formatDate } from '../../utils/date'
@@ -22,6 +20,7 @@ import { Dec } from '../../utils/Decimal'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { usePools, useTransactionsByAddress } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
+import { RouterLinkButton } from '../RouterLinkButton'
 
 type TransactionsProps = {
   onlyMostRecent?: boolean
@@ -170,13 +169,11 @@ export function Transactions({ onlyMostRecent, txTypes, address }: TransactionsP
               page={pagination.page}
             />
             {onlyMostRecent ? (
-              <Link to="/history">
-                <Box display="inline-block">
-                  <VisualButton small variant="tertiary" icon={IconEye}>
-                    View all
-                  </VisualButton>
-                </Box>
-              </Link>
+              <Box display="inline-block">
+                <RouterLinkButton to="/history" small variant="tertiary" icon={IconEye}>
+                  View all
+                </RouterLinkButton>
+              </Box>
             ) : (
               <Shelf justifyContent="space-between">
                 {pagination.pageCount > 1 && (
