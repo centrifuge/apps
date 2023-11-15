@@ -4,7 +4,6 @@ import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
 import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
-import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { RouterTextLink } from '../../components/TextLink'
@@ -27,7 +26,6 @@ function PrimeDetail() {
     typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
   )
 
-  console.log('centAddress', centAddress)
   return (
     <>
       <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5}>
@@ -47,7 +45,6 @@ function PrimeDetail() {
       <BasePadding gap={3}>
         <InvestedTokens address={centAddress} />
         <Transactions onlyMostRecent address={centAddress} />
-        <AssetAllocation address={centAddress} />
       </BasePadding>
     </>
   )

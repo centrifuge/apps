@@ -112,7 +112,6 @@ const columns: Column[] = [
 export function Transactions({ onlyMostRecent, txTypes, address }: TransactionsProps) {
   const { formatAddress } = useCentrifugeUtils()
   const transactions = useTransactionsByAddress(formatAddress(address))
-  console.log('transactions', transactions)
   const pools = usePools()
 
   const investorTransactions: TransactionTableData = React.useMemo(() => {
