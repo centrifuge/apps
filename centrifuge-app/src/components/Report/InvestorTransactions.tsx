@@ -19,6 +19,9 @@ function truncate(string: string) {
   return `${first}...${last}`
 }
 
+const noop = (v: any) => v
+const cellFormatters = [noop, truncate, noop, noop, noop, noop, noop, noop]
+
 export function InvestorTransactions({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, startDate, endDate } = React.useContext(ReportContext)
 
@@ -43,7 +46,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   const columns = headers.map((col, index) => ({
     align: 'left',
     header: col,
-    cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
+    cell: (row: TableDataRow) => <Text variant="body2">{cellFormatters[index]((row.value as any)[index])}</Text>,
   }))
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -59,7 +62,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
         name: '',
         value: [
           token.currency.name,
-          truncate(tx.accountId),
+          tx.accountId,
           tx.epochNumber.toString(),
           formatDate(tx.timestamp.toString()),
           formatInvestorTransactionsType({
