@@ -23,8 +23,8 @@ export function PortfolioValue({ setHovered }: TotalValueLockedProps) {
     <ResponsiveContainer>
       <AreaChart
         margin={{
-          top: 50,
-          right: 30,
+          top: 35,
+          right: 0,
           left: 30,
           bottom: 0,
         }}

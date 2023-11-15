@@ -1,16 +1,31 @@
 import { Box, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useListedPools } from '../../utils/useListedPools'
 import { DataPoint, PortfolioValue } from './PortfolioValue'
 
+const RangeFilterButton = styled(Stack)`
+  &:hover {
+    cursor: pointer;
+  }
+`
+
+const rangeFilters = [
+  { value: '30d', label: '30 days' },
+  { value: '90d', label: '90 days' },
+  { value: 'ytd', label: 'Year to date' },
+  { value: 'all', label: 'All' },
+] as const
+
 export function CardPortfolioValue() {
   const { colors } = useTheme()
   const [hovered, setHovered] = React.useState<DataPoint | undefined>(undefined)
   const [, listedTokens] = useListedPools()
+
+  const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
 
   const chartHeight = 130
   const balanceProps = {
@@ -50,22 +65,45 @@ export function CardPortfolioValue() {
         }}
         background={colors.backgroundPage}
       >
-        <Stack>
+        <Stack gap={2}>
           <Text variant="heading2">Overview</Text>
 
-          <Shelf gap={4}>
-            <Stack>
-              <Text {...headingProps}>Current portfolio value</Text>
-              <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked}>
-                {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
-              </TextWithPlaceholder>
-            </Stack>
-            <Stack>
-              <Text {...headingProps}>Profit</Text>
-              <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked}>
-                {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
-              </TextWithPlaceholder>
-            </Stack>
+          <Shelf gap={1} alignContent="center" height="48px">
+            <Box width="3px" backgroundColor="#1253FF" height="48px" />
+            <Shelf gap={4}>
+              <Stack gap="4px">
+                <Text {...headingProps}>Current portfolio value</Text>
+                <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked}>
+                  {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
+                </TextWithPlaceholder>
+              </Stack>
+              <Stack gap="4px">
+                <Text {...headingProps}>Profit</Text>
+                <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked}>
+                  {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
+                </TextWithPlaceholder>
+              </Stack>
+            </Shelf>
+          </Shelf>
+        </Stack>
+
+        <Stack gap={1}>
+          <Shelf justifyContent="flex-end" pr="8px">
+            {rangeFilters.map((rangeFilter, index) => (
+              <>
+                <RangeFilterButton gap={1} onClick={() => setRange(rangeFilter)}>
+                  <Text variant="body3">{rangeFilter.label}</Text>
+                  <Box
+                    width="100%"
+                    backgroundColor={rangeFilter.value === range.value ? '#000000' : '#E0E0E0'}
+                    height="3px"
+                  />
+                </RangeFilterButton>
+                {index !== rangeFilters.length - 1 && (
+                  <Box width="24px" backgroundColor="#E0E0E0" height="3px" alignSelf="flex-end" />
+                )}
+              </>
+            ))}
           </Shelf>
         </Stack>
 
