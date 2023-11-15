@@ -17,7 +17,6 @@ export default defineConfig({
 
   env: {
     coverage: false,
-    walletAddress: '0x70fC4d9C87E9e9B0751A5680b1Dd654517f02309',
   },
   defaultCommandTimeout: 10000,
   pageLoadTimeout: 10000,
