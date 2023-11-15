@@ -11,6 +11,7 @@ import {
   Thumbnail,
   usePagination,
 } from '@centrifuge/fabric'
+import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { formatNftAttribute } from '../pages/Loan/utils'
 import { nftMetadataSchema } from '../schemas'
@@ -24,6 +25,7 @@ import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
 import LoanLabel from './LoanLabel'
+import { prefetchRoute } from './Root'
 
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
@@ -44,6 +46,10 @@ export function LoanList({ loans }: Props) {
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
+
+  React.useEffect(() => {
+    prefetchRoute('/pools/1/assets/1')
+  }, [])
 
   const additionalColumns: Column[] =
     templateMetadata?.keyAttributes?.map((key) => {
