@@ -1,0 +1,16 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "Centrifuge E2E tests",
+  "main": "index.js",
+  "scripts": {
+    "e2e:run": "synpress run -cf synpress.config.ts",
+    "e2e:run:ci": "CYPRESS_BASE_URL='https://app-dev.k-f.dev' synpress run -cf synpress.config.ts --headless",
+    "e2e:open": "synpress open -cf synpress.config.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@synthetixio/synpress": "^3.7.2-beta.9"
+  }
+}

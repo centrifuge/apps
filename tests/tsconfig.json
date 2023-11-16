@@ -6,6 +6,7 @@
       "cypress",
       "cypress-wait-until",
       "@testing-library/cypress",
+      "node"
     ],
     "outDir": "./output"
   },

@@ -8,7 +8,8 @@
     "simulation-tests",
     "onboarding-api",
     "faucet-api",
-    "pinning-api"
+    "pinning-api",
+    "tests"
   ],
   "devDependencies": {
     "@types/bn.js": "^5.1.1",

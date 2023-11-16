@@ -19,13 +19,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@adraffy/ens-normalize@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@adraffy/ens-normalize@npm:1.9.4"
-  checksum: 093cab60a3656ed4e2d164be55edf3ddce425f96437281352fb421e118b1114edbc9151997b854fa520d4584f65f4af7e0c5a1a6d0ef046b0ac40d25c7268502
-  languageName: node
-  linkType: hard
-
 "@ampproject/remapping@npm:^2.2.0":
   version: 2.2.1
   resolution: "@ampproject/remapping@npm:2.2.1"
@@ -1847,7 +1840,6 @@ __metadata:
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
     "@subwallet/wallet-connect": ^0.2.3
-    "@synthetixio/synpress": ^3.7.2-beta.9
     "@types/react": ^18.0.27
     "@types/react-dom": ^18.0.10
     "@types/react-helmet-async": ^1.0.3
@@ -2164,15 +2156,15 @@ __metadata:
   linkType: hard
 
 "@cypress/code-coverage@npm:^3.11.0":
-  version: 3.12.9
-  resolution: "@cypress/code-coverage@npm:3.12.9"
+  version: 3.12.10
+  resolution: "@cypress/code-coverage@npm:3.12.10"
   dependencies:
     "@cypress/webpack-preprocessor": ^6.0.0
     chalk: 4.1.2
     dayjs: 1.11.10
     debug: 4.3.4
     execa: 4.1.0
-    globby: 11.0.4
+    globby: 11.1.0
     istanbul-lib-coverage: 3.0.0
     js-yaml: 4.1.0
     nyc: 15.1.0
@@ -2182,7 +2174,7 @@ __metadata:
     babel-loader: ^8.3 || ^9
     cypress: "*"
     webpack: ^4 || ^5
-  checksum: 0d546044f72b6ed43b5f5d604256881a0671f6f8d201ec4e45289b0ee8f2663689f824d7d8e6e1a70f8383bdadca2bfe02be7c016e4fe8242eec49ef65b03af4
+  checksum: edd023f8bc0e2fe7bdc9be59b7c542fed018ea90d09be6f188641999b2f3217dbc119bc2c4ee4b84d1e744c1f90bcfa9ea24ba506849531a830f129c421c2b71
   languageName: node
   linkType: hard
 
@@ -11680,16 +11672,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^0.27.2":
-  version: 0.27.2
-  resolution: "axios@npm:0.27.2"
-  dependencies:
-    follow-redirects: ^1.14.9
-    form-data: ^4.0.0
-  checksum: 6eaa903e6990054d999376c0679ff2172c7f7874d9ae66b91456a56570cce29f4a81c98bfb112ef2ef774125ef6fa3d73fd507ac153b2d3df644a5e956f9bf07
-  languageName: node
-  linkType: hard
-
 "axios@npm:^1.3.2":
   version: 1.4.0
   resolution: "axios@npm:1.4.0"
@@ -11701,14 +11683,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.4.0":
-  version: 1.6.1
-  resolution: "axios@npm:1.6.1"
+"axios@npm:^1.4.0, axios@npm:^1.6.1":
+  version: 1.6.2
+  resolution: "axios@npm:1.6.2"
   dependencies:
     follow-redirects: ^1.15.0
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: c3dc937a37352ac83979d44c303965e6a7cace0cbe0313dd816f167a5c2dde34f3f7fe3a963c4f1677e240a4fbd02e1d00f3f13ec9995654c93e7918da3fb30c
+  checksum: 8eb7a0264d0223b40a07df8fd300de05b7d5851998c7adcf0de430607533008252909cf531d8c9d5007330c6d33767c6ac963ef95aa3623308136415e4525f1c
   languageName: node
   linkType: hard
 
@@ -14464,8 +14446,8 @@ __metadata:
   linkType: hard
 
 "cypress@npm:*":
-  version: 13.5.0
-  resolution: "cypress@npm:13.5.0"
+  version: 13.5.1
+  resolution: "cypress@npm:13.5.1"
   dependencies:
     "@cypress/request": ^3.0.0
     "@cypress/xvfb": ^1.2.4
@@ -14512,7 +14494,7 @@ __metadata:
     yauzl: ^2.10.0
   bin:
     cypress: bin/cypress
-  checksum: 2be7d4da170e8dcfa73628ab36bcad34b632ee5dcda3d7a0e3ee0eaa1d4288caf4483d77be8b4aaecf308cdfac229f480d35652f741b6121ad71d0f344eae0d4
+  checksum: d1f91d83c79d1176131c1b546cdf9a743257fa40b75a8bc51832b72ce587ccc9726f7667d68848e9079b7ff2e2b1178b29d517a660fa7962b28964c7447a498e
   languageName: node
   linkType: hard
 
@@ -17524,19 +17506,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.1.1":
-  version: 3.3.2
-  resolution: "fast-glob@npm:3.3.2"
-  dependencies:
-    "@nodelib/fs.stat": ^2.0.2
-    "@nodelib/fs.walk": ^1.2.3
-    glob-parent: ^5.1.2
-    merge2: ^1.3.0
-    micromatch: ^4.0.4
-  checksum: 76c8f75492855df2d361eb10ab6090fb4632823f006ab344b6af043301478825c162cc1b7cb2bb5a0f4a4109e6ec2e5c79919147db4c3e688c5578e1ada280da
-  languageName: node
-  linkType: hard
-
 "fast-glob@npm:^3.2.9":
   version: 3.2.12
   resolution: "fast-glob@npm:3.2.12"
@@ -17968,7 +17937,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.9":
+"follow-redirects@npm:^1.0.0":
   version: 1.15.3
   resolution: "follow-redirects@npm:1.15.3"
   peerDependenciesMeta:
@@ -18793,21 +18762,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"globby@npm:11.0.4":
-  version: 11.0.4
-  resolution: "globby@npm:11.0.4"
-  dependencies:
-    array-union: ^2.1.0
-    dir-glob: ^3.0.1
-    fast-glob: ^3.1.1
-    ignore: ^5.1.4
-    merge2: ^1.3.0
-    slash: ^3.0.0
-  checksum: 9f365b35b835c0235880e272fa2a2f5d9d78428e09af8dfc67536f1047953e7b0c66aab9bb6d41e6c0f4c3ec75a22840d9acb892f102daecaadd338b2c763219
-  languageName: node
-  linkType: hard
-
-"globby@npm:^11.0.1, globby@npm:^11.0.2, globby@npm:^11.0.3, globby@npm:^11.1.0":
+"globby@npm:11.1.0, globby@npm:^11.0.1, globby@npm:^11.0.2, globby@npm:^11.0.3, globby@npm:^11.1.0":
   version: 11.1.0
   resolution: "globby@npm:11.1.0"
   dependencies:
@@ -29052,6 +29007,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"tests@workspace:tests":
+  version: 0.0.0-use.local
+  resolution: "tests@workspace:tests"
+  dependencies:
+    "@synthetixio/synpress": ^3.7.2-beta.9
+  languageName: unknown
+  linkType: soft
+
 "text-encoding-utf-8@npm:^1.0.2":
   version: 1.0.2
   resolution: "text-encoding-utf-8@npm:1.0.2"
@@ -30486,10 +30449,10 @@ fsevents@^1.2.7:
   linkType: hard
 
 "viem@npm:^1.6.0":
-  version: 1.19.1
-  resolution: "viem@npm:1.19.1"
+  version: 1.19.3
+  resolution: "viem@npm:1.19.3"
   dependencies:
-    "@adraffy/ens-normalize": 1.9.4
+    "@adraffy/ens-normalize": 1.10.0
     "@noble/curves": 1.2.0
     "@noble/hashes": 1.3.2
     "@scure/bip32": 1.3.2
@@ -30502,7 +30465,7 @@ fsevents@^1.2.7:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 74f687a5860c0399842657c03967fb4560827b856ac377cc24ec76e7d017306c79751bc2042740e5ab1afdefe23585b6391ff852668ee88cc717266ebddea1f0
+  checksum: ed7cb380663c31d3118ab215ea6e223b3beef5057604a0a75bd30b80992f355183582cadba329b80b8a94cc9978c0ee207a021313b4df561651684bc41335455
   languageName: node
   linkType: hard
 
@@ -30597,17 +30560,17 @@ fsevents@^1.2.7:
   linkType: hard
 
 "wait-on@npm:^7.0.1":
-  version: 7.1.0
-  resolution: "wait-on@npm:7.1.0"
+  version: 7.2.0
+  resolution: "wait-on@npm:7.2.0"
   dependencies:
-    axios: ^0.27.2
+    axios: ^1.6.1
     joi: ^17.11.0
     lodash: ^4.17.21
     minimist: ^1.2.8
     rxjs: ^7.8.1
   bin:
     wait-on: bin/wait-on
-  checksum: addd0352b2c9a9fbb632964552936b9964159bf67af0a6dad16197f0164c2b8425a4f02883fbd250abd04cc0a109ccead61e21d9d9882ece2e15c5a50f3a8784
+  checksum: 71dab4caab188139c427d340a4904f5b50c9f977723e880a7a5f88ba0a913352fd7931291999ed6df4c3b63d57b314b33bf2486ffaf9790bc62db96e983be08a
   languageName: node
   linkType: hard
 
