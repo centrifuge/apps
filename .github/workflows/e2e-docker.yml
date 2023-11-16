@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: onboarding-api
+        working-directory: tests
     strategy:
       matrix:
         resolution: ['low', 'medium', 'high']
