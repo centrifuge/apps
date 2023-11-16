@@ -2058,7 +2058,12 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $query.pipe(
       switchMap((data) => {
-        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId)) ?? []
+        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId) ?? [])
+        if (!poolIds.size) {
+          return of({
+            investorTransactions: [],
+          })
+        }
         const $poolCurrencies = Array.from(poolIds).map((poolId) => getPoolCurrency([poolId]))
         return combineLatest($poolCurrencies).pipe(
           map((currencies) => {
