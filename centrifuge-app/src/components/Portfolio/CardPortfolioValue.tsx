@@ -5,7 +5,7 @@ import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useListedPools } from '../../utils/useListedPools'
-import { DataPoint, PortfolioValue } from './PortfolioValue'
+import { PortfolioValue } from './PortfolioValue'
 
 const RangeFilterButton = styled(Stack)`
   &:hover {
@@ -22,7 +22,6 @@ const rangeFilters = [
 
 export function CardPortfolioValue() {
   const { colors } = useTheme()
-  const [hovered, setHovered] = React.useState<DataPoint | undefined>(undefined)
   const [, listedTokens] = useListedPools()
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
@@ -79,8 +78,8 @@ export function CardPortfolioValue() {
               </Stack>
               <Stack gap="4px">
                 <Text {...headingProps}>Profit</Text>
-                <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked}>
-                  {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
+                <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked} color="#519B10">
+                  + {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
                 </TextWithPlaceholder>
               </Stack>
             </Shelf>
@@ -108,7 +107,7 @@ export function CardPortfolioValue() {
         </Stack>
 
         <Box width="100%" height="300px">
-          <PortfolioValue setHovered={setHovered} />
+          <PortfolioValue />
         </Box>
       </Box>
     </Box>
