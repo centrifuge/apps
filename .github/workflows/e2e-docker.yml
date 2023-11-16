@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label ||
-    github.head_ref || github.ref }}'
+    github.head_ref }}'
   cancel-in-progress: true
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Run e2e tests (${{ matrix.resolution }} res)
         run: |
-          docker-compose -f docker-compose.ci.yml --env-file ${{ matrix.resolution }}-res.env --profile synpress --build --exit-code-from synpress up
+          docker-compose -f docker-compose.ci.yml --env-file ${{ matrix.resolution }}-res.env --profile synpress up --build --exit-code-from synpress
         env:
           COMPOSE_DOCKER_CLI_BUILD: 1
           DOCKER_BUILDKIT: 1
