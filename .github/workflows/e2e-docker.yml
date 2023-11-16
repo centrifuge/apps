@@ -13,6 +13,9 @@ jobs:
   e2e:
     if: github.ref == 'refs/heads/cent-app/synpress-testing-setup' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: onboarding-api
     strategy:
       matrix:
         resolution: ['low', 'medium', 'high']
