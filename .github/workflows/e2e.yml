@@ -15,21 +15,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: List directory
-        uses: cypress-io/github-action@v6
-        with:
-          install-command: yarn
-          command: ls -la
-          project: ./tests
-
+        run: ls -la
+        working-directory: tests
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
+          working-directory: tests
           install-command: yarn
           command: ls -la && npm run e2e:run:ci
           browser: chrome
           config-file: synpress.config.js
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
-          project: ./tests
         env:
           CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY_WITH_FUNDS }}
           CYPRESS_BASE_URL: https://app-dev.k-f.dev
