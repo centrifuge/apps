@@ -12,9 +12,7 @@ services:
         - TARGETPLATFORM=linux/amd64/v8 
     environment:
       - DISPLAY=display:0.0
-      - CYPRESS_PRIVATE_KEY=${CYPRESS_PRIVATE_KEY}
       - CYPRESS_PRIVATE_KEY_WITH_FUNDS=${CYPRESS_PRIVATE_KEY}
-      - DEBUG=${DEBUG}
       - CYPRESS_DOCKER_RUN=true
       - GH_PAT=${GH_PAT}
       - GH_USERNAME=${GH_USERNAME}
