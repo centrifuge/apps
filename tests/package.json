@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "e2e:run": "synpress run -cf synpress.config.ts",
-    "e2e:run:ci": "synpress run -cf synpress.config.ts --headless",
-    "e2e:open": "synpress open -cf synpress.config.ts"
+    "e2e:run:ci": "synpress run -cf synpress.config.js --headless",
+    "e2e:open": "synpress open -cf synpress.config.js"
   },
   "author": "",
   "license": "ISC",
