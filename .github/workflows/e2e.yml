@@ -1,0 +1,21 @@
+name: Synpress tests
+
+on:
+  push:
+    branches: [cent-app/synpress-testing-setup, 'main']
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Synpress run
+        uses: cypress-io/github-action@v6
+        with:
+          start: yarn e2e:run:ci
+          browser: chrome
