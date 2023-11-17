@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Centrifuge E2E tests",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "e2e:run": "synpress run -cf synpress.config.js",
     "e2e:run:ci": "synpress run -cf synpress.config.js --headless",
