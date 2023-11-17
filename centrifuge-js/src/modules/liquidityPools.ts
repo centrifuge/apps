@@ -196,18 +196,20 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         return rawRouters
           .map(([rawKey, rawValue]) => {
             const key = (rawKey.toHuman() as ['Centrifuge' | { EVM: string }])[0]
-            if (typeof key === 'string') return null
+            if (typeof key === 'string') return null as never
             const value = rawValue.toPrimitive() as any
             const chainId = Number(key.EVM.replace(/\D/g, ''))
-            const router = 'axelarXCM' in value ? value.axelarXCM.axelarTargetContract : ''
-            if (!router) return null
+            const router = (value.axelarXCM?.axelarTargetContract ||
+              value.ethereumXCM?.axelarTargetContract ||
+              value.axelarEVM?.liquidityPoolsContractAddress) as string
+            if (!router) return null as never
 
             return {
               chainId,
               router,
             }
           })
-          .filter(Boolean) as { chainId: number; router: string }[]
+          .filter(Boolean)
       })
     )
   }
