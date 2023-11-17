@@ -17,5 +17,5 @@ jobs:
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
-          start: yarn e2e:run:ci
+          start: npm run e2e:run:ci
           browser: chrome
