@@ -19,12 +19,13 @@ jobs:
         with:
           install-command: yarn
           command: ls -la
+          project: ./tests
 
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
           install-command: yarn
-          command: npm run e2e:run:ci
+          command: ls -la && npm run e2e:run:ci
           browser: chrome
           config-file: synpress.config.js
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
