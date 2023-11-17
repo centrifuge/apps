@@ -28,6 +28,7 @@ jobs:
           browser: chrome
           config-file: synpress.config.js
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
+          project: ./tests
         env:
           CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY_WITH_FUNDS }}
           CYPRESS_BASE_URL: https://app-dev.k-f.dev
