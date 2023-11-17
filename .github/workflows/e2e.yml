@@ -18,14 +18,20 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           install-command: yarn
-          start: npm run e2e:run:ci
+          command: npm run e2e:run:ci
           browser: chrome
+          config-file: synpress.config.js
+          ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
         env:
           CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY_WITH_FUNDS }}
           CYPRESS_BASE_URL: https://app-dev.k-f.dev
-          NETWORK_NAME: centrifuge
-          RPC_URL: https://fullnode.development.cntrfg.com
-          CHAIN_ID: 2000
-          SYMBOL: DEVEL
-          IS_TESTNET: true
-          DEBUG: true
+          CYPRESS_NETWORK_NAME: centrifuge
+          CYPRESS_RPC_URL: https://fullnode.development.cntrfg.com
+          CYPRESS_CHAIN_ID: 2000
+          CYPRESS_SYMBOL: DEVEL
+          CYPRESS_IS_TESTNET: true
+          CYPRESS_DEBUG: true
+          # pass the Cypress Cloud record key as an environment variable
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
