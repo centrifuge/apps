@@ -15,7 +15,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Synpress run
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
+          install-command: yarn
           start: npm run e2e:run:ci
           browser: chrome
+        env:
+          CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY_WITH_FUNDS }}
+          CYPRESS_BASE_URL: https://app-dev.k-f.dev
+          NETWORK_NAME: centrifuge
+          RPC_URL: https://fullnode.development.cntrfg.com
+          CHAIN_ID: 2000
+          SYMBOL: DEVEL
+          IS_TESTNET: true
+          DEBUG: true
