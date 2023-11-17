@@ -14,11 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: pwd
+      - name: List directory
         uses: cypress-io/github-action@v6
         with:
           install-command: yarn
-          command: pwd
+          command: ls -la
 
       - name: Synpress run
         uses: cypress-io/github-action@v6
