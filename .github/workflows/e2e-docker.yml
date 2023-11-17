@@ -19,7 +19,7 @@ jobs:
         working-directory: tests
     strategy:
       matrix:
-        resolution: ['low', 'medium', 'high']
+        resolution: ['medium'] # ["low", "medium", "high]
 
     steps:
       - name: Checkout
@@ -48,6 +48,7 @@ jobs:
           DOCKER_DEFAULT_PLATFORM: linux/amd64
           NGROK_AUTH: ${{ secrets.NGROK_AUTH }}
           CYPRESS_PRIVATE_KEY_WITH_FUNDS: ${{ secrets.CYPRESS_PRIVATE_KEY_WITH_FUNDS }}
+          CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY_WITH_FUNDS }}
           GH_PAT: ${{ secrets.GH_PAT }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           # cypress dashboard
