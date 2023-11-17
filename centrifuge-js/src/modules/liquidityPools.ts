@@ -200,6 +200,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             const value = rawValue.toPrimitive() as any
             const chainId = Number(key.EVM.replace(/\D/g, ''))
             const router = (value.axelarXCM?.axelarTargetContract ||
+              value.ethereumXCM?.axelarTargetContract ||
               value.axelarEVM?.liquidityPoolsContractAddress) as string
             if (!router) return null as never
 
