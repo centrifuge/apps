@@ -22,7 +22,7 @@ jobs:
         with:
           working-directory: tests
           install-command: yarn
-          command: cross-env NETWORK_NAME=centrifuge RPC_URL=https://fullnode.development.cntrfg.com CHAIN_ID=2000 SYMBOL=DEVEL IS_TESTNET=true DEBUG=true CYPRESS_PRIVATE_KEY=${{secrets.CYPRESS_PRIVATE_KEY}} synpress run -cf synpress.config.js --headless
+          command: CYPRESS_PRIVATE_KEY=${{secrets.CYPRESS_PRIVATE_KEY}} yarn e2e:run:ci
           browser: chrome
           config-file: synpress.config.js
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'

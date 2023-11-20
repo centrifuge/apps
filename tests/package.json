@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "e2e:run": "synpress run -cf synpress.config.js",
-    "e2e:run:ci": "synpress run -cf synpress.config.js --headless",
+    "e2e:run:ci": "cross-env NETWORK_NAME=centrifuge RPC_URL=https://fullnode.development.cntrfg.com CHAIN_ID=2000 SYMBOL=DEVEL IS_TESTNET=true DEBUG=true synpress run -cf synpress.config.js --headless",
     "e2e:open": "synpress open -cf synpress.config.js"
   },
   "author": "",
