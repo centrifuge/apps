@@ -7,22 +7,22 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: tests
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: List directory
-        run: ls -la
-        working-directory: tests
+      - name: Start app
+        working-directory: centrifuge-app
+        run: |
+          yarn install
+          yarn start
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
           working-directory: tests
           install-command: yarn
           command: yarn e2e:run:ci
+          wait-on: 'http://localhost:3000'
           browser: chrome
           config-file: synpress.config.js
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
