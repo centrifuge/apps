@@ -4,8 +4,8 @@ import styled, { useTheme } from 'styled-components'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
-import { useListedPools } from '../../utils/useListedPools'
 import { PortfolioValue } from './PortfolioValue'
+import { usePortfolioValue } from './usePortfolioValue'
 
 const RangeFilterButton = styled(Stack)`
   &:hover {
@@ -17,12 +17,13 @@ const rangeFilters = [
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
   { value: 'ytd', label: 'Year to date' },
-  { value: 'all', label: 'All' },
+  // { value: 'all', label: 'All' },
 ] as const
 
 export function CardPortfolioValue() {
+  const portfolioValue = usePortfolioValue()
+
   const { colors } = useTheme()
-  const [, listedTokens] = useListedPools()
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
 
@@ -35,19 +36,6 @@ export function CardPortfolioValue() {
     as: 'p',
     variant: 'body3',
   }
-
-  const totalValueLocked = React.useMemo(() => {
-    return (
-      listedTokens
-        ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance
-            .toDecimal()
-            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
-            .toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
-    )
-  }, [listedTokens])
 
   return (
     <Box position="relative">
@@ -72,16 +60,16 @@ export function CardPortfolioValue() {
             <Shelf gap={4}>
               <Stack gap="4px">
                 <Text {...headingProps}>Current portfolio value</Text>
-                <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked}>
-                  {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
+                <TextWithPlaceholder {...balanceProps} isLoading={!portfolioValue}>
+                  {formatBalance(Dec(portfolioValue || 0), config.baseCurrency)}
                 </TextWithPlaceholder>
               </Stack>
-              <Stack gap="4px">
+              {/* <Stack gap="4px">
                 <Text {...headingProps}>Profit</Text>
-                <TextWithPlaceholder {...balanceProps} isLoading={!totalValueLocked} color="#519B10">
-                  + {formatBalance(Dec(totalValueLocked || 0), config.baseCurrency)}
+                <TextWithPlaceholder {...balanceProps} isLoading={!portfolioValue} color="#519B10">
+                  + {formatBalance(Dec(portfolioValue || 0), config.baseCurrency)}
                 </TextWithPlaceholder>
-              </Stack>
+              </Stack> */}
             </Shelf>
           </Shelf>
         </Stack>
