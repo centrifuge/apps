@@ -2,6 +2,7 @@ const synpress = require('@synthetixio/synpress/plugins/index.js')
 const { defineConfig } = require('cypress')
 
 export default defineConfig({
+  projectId: 'cwss36', // cypress cloud
   userAgent: 'synpress',
   retries: {
     runMode: 0,
