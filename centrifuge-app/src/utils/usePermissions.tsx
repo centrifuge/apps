@@ -5,17 +5,22 @@ import {
   evmToSubstrateAddress,
   isSameAddress,
   PoolRoles,
+  WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
   truncateAddress,
+  useCentrifugeApi,
   useCentrifugeQuery,
   useCentrifugeUtils,
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import { Select } from '@centrifuge/fabric'
+import { isAddress as isEvmAddress } from '@ethersproject/address'
+import { ApiRx } from '@polkadot/api'
+import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import * as React from 'react'
-import { combineLatest, filter, map, repeatWhen, switchMap } from 'rxjs'
+import { combineLatest, combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs'
 import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
@@ -99,7 +104,7 @@ export function useBorrower(poolId: string, assetId: string) {
     poolRole: ['Borrower'],
     actingAddress: [borrower],
     proxyType: ['Borrow'],
-  })[0]
+  }).at(0)
 }
 
 export function usePoolAdmin(poolId: string) {
@@ -190,6 +195,7 @@ export function usePoolAccess(poolId: string) {
     []
   const aoProxies = (admin && proxies?.[admin]?.filter((p) => p.types.includes('Any')).map((p) => p.delegator)) || []
   const collections = useCollections()
+  const api = useCentrifugeApi()
 
   const aoCollateralCollections: Record<string, Collection[]> = {}
   aoProxies.forEach((ao) => {
@@ -218,6 +224,74 @@ export function usePoolAccess(poolId: string) {
       enabled: !!aoProxies.length,
     }
   )
+  const [transferAllowlists] = useCentrifugeQuery(
+    ['aoTransferAllowlist', aoProxies],
+    (cent) => {
+      const $events = cent.getEvents().pipe(
+        filter(({ api, events }) => {
+          const event = events.find(
+            ({ event }) =>
+              api.events.transferAllowList.TransferAllowanceCreated.is(event) ||
+              api.events.transferAllowList.TransferAllowanceRemoved.is(event) ||
+              api.events.transferAllowList.TransferAllowancePurged.is(event)
+          )
+          return !!event
+        })
+      )
+      return cent.getApi().pipe(
+        switchMap((api) =>
+          combineLatest(
+            aoProxies.map((addr) =>
+              api.query.transferAllowList.accountCurrencyTransferAllowance.entries(addr, pool.currency.key)
+            )
+          )
+        ),
+        combineLatestWith(cent.getBlocks().pipe(take(1))),
+        map(([data, block]) => {
+          return data.map((entries) =>
+            entries
+              .map(([keyData, valueData]) => {
+                const key = (keyData.toHuman() as any)[2]
+                const value = valueData.toPrimitive() as { blockedAt: number }
+                const blockNumber = block.block.header.number.toNumber()
+                if (blockNumber > value.blockedAt) return null as never
+                if ('Local' in key) {
+                  return {
+                    Local: addressToHex(key.Local),
+                  }
+                } else if ('Address' in key) {
+                  if ('EVM' in key.Address)
+                    return {
+                      Address: {
+                        EVM: [Number(key.Address.EVM[0].replace(/\D/g, '')), key.Address.EVM[1].toLowerCase()],
+                      },
+                    }
+                }
+                return key
+              })
+              .filter(Boolean)
+          )
+        }),
+        repeatWhen(() => $events)
+      )
+    },
+    {
+      enabled: !!aoProxies.length,
+    }
+  )
+
+  const combinedAllowLists = React.useMemo(() => {
+    return transferAllowlists?.map((aoList, i) => {
+      const addr = aoProxies[i]
+      const receiversMeta = metadata?.pool?.assetOriginators?.[addr]?.withdrawAddresses
+      return aoList.map((key) => ({
+        key,
+        meta: receiversMeta?.find((receiver) => looksLike(key, getKeyForReceiver(api, receiver))),
+      }))
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transferAllowlists, metadata])
+
   const [delegates] = useCentrifugeQuery(
     ['proxyDelegates', [admin, ...aoProxies]],
     (cent) => {
@@ -255,7 +329,11 @@ export function usePoolAccess(poolId: string) {
       enabled: !!aoProxies.length && !!admin,
     }
   )
-  const [adminDelegates, ...aoDelegates] = delegates || []
+
+  const [adminDelegates, aoDelegates] = React.useMemo(() => {
+    const [adminDelegates, ...aoDelegates] = delegates ?? []
+    return [adminDelegates, aoDelegates]
+  }, [delegates])
 
   const storedAdminRoles = {
     address: admin || '',
@@ -306,9 +384,68 @@ export function usePoolAccess(poolId: string) {
           collateralCollections: aoCollateralCollections[addr],
           permissions: poolPermissions?.[addr] || { roles: [], tranches: {} },
           delegates: aoDelegates?.[i]?.filter((p) => !p.types.includes('PodOperation')) || [],
+          transferAllowlist: combinedAllowLists?.[i] || [],
         })),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [collections, aoDelegates, isAoSetUp, poolPermissions]
+      [collections, aoDelegates, isAoSetUp, poolPermissions, combinedAllowLists]
     ),
   }
+}
+export type WithdrawKey = ReturnType<typeof getKeyForReceiver>
+export function getKeyForReceiver(api: ApiRx, receiver: WithdrawAddress) {
+  if (typeof receiver.location === 'string') {
+    return {
+      Local: addressToHex(receiver.address),
+    }
+  } else if ('parachain' in receiver.location) {
+    const type = api.createType('MultiLocation', {
+      parents: 1,
+      interior: {
+        X2: [
+          {
+            Parachain: receiver.location.parachain,
+          },
+          isEvmAddress(receiver.address)
+            ? {
+                AccountKey20: {
+                  network: null,
+                  key: receiver.address.toLowerCase(),
+                },
+              }
+            : {
+                AccountId32: {
+                  id: addressToHex(receiver.address),
+                },
+              },
+        ],
+      },
+    })
+    const hash = blake2AsHex(type.toU8a(), 256)
+    return {
+      XCM: hash,
+    }
+  } else if ('evm' in receiver.location) {
+    return {
+      Address: {
+        EVM: [receiver.location.evm, receiver.address],
+      },
+    }
+  }
+}
+
+function looksLike(a: any, b: any): boolean {
+  return isPrimitive(b)
+    ? b === a
+    : Object.keys(b).every((bKey) => {
+        const bVal = b[bKey]
+        const aVal = a?.[bKey]
+        if (typeof bVal === 'function') {
+          return bVal(aVal)
+        }
+        return looksLike(aVal, bVal)
+      })
+}
+
+function isPrimitive(val: any): val is boolean | string | number | null | undefined {
+  return val == null || /^[sbn]/.test(typeof val)
 }

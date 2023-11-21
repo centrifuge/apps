@@ -244,8 +244,8 @@ export function prefetchRoute(to: string | LinkProps['to']) {
 function Routes() {
   return (
     <Switch>
-      {routes.map((route) => (
-        <Route {...route} />
+      {routes.map((route, i) => (
+        <Route {...route} key={i} />
       ))}
     </Switch>
   )
