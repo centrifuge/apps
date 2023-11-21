@@ -13,7 +13,7 @@ jobs:
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
-          working-directory: tests
+          working-directory: centrifuge-app
           install-command: yarn
           start: yarn start
           wait-on: 'http://localhost:3000'
