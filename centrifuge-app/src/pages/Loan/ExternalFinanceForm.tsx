@@ -207,6 +207,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
                   )
                 }}
               </Field>
+              <WithdrawSelect loan={loan} borrower={account} />
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Text variant="emphasized">Total amount</Text>
@@ -223,7 +224,6 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
                   </Text>
                 </Shelf>
               </Stack>
-              <WithdrawSelect loan={loan} borrower={account} />
               <Stack px={1}>
                 <Button type="submit" loading={isFinanceLoading}>
                   Finance asset

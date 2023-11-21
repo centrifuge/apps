@@ -14,7 +14,7 @@ import {
   useCentrifugeUtils,
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormikContext } from 'formik'
@@ -194,16 +194,13 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                   )
                 }}
               </Field>
-              {poolReserve.lessThan(availableFinancing) && (
-                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
-                  <IconInfo size="iconMedium" />
-                  <Text variant="body3">
-                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
-                    than the available financing
-                  </Text>
-                </Shelf>
-              )}
               <WithdrawSelect loan={loan} borrower={account} />
+              {poolReserve.lessThan(availableFinancing) && (
+                <InlineFeedback>
+                  The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
+                  than the available financing
+                </InlineFeedback>
+              )}
               <Stack px={1}>
                 <Button type="submit" loading={isFinanceLoading}>
                   Finance asset
