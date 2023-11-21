@@ -7,7 +7,11 @@
       "esnext"
     ],
     "types": [
-      "vite/client"
+      "vite/client",
+      "cypress",
+      "cypress-wait-until",
+      "@testing-library/cypress",
+      "node"
     ],
     "allowJs": false,
     "skipLibCheck": true,

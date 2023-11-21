@@ -9,8 +9,8 @@ export default defineConfig({
     openMode: 0,
   },
 
-  screenshotsFolder: 'e2e/screenshots',
-  videosFolder: 'e2e/videos',
+  screenshotsFolder: 'tests/e2e/screenshots',
+  videosFolder: 'tests/e2e/videos',
   video: true,
   chromeWebSecurity: true,
   viewportWidth: 1366,
@@ -28,7 +28,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       return synpress(on, config)
     },
-    supportFile: 'e2e/support/e2e.ts',
-    specPattern: 'e2e/specs/**/*.cy.ts',
+    supportFile: 'tests/e2e/support/e2e.ts',
+    specPattern: 'tests/e2e/specs/**/*.cy.ts',
   },
 })
