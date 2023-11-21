@@ -374,7 +374,11 @@ type ClosedLoanData = {
   info: LoanInfoData
   closedAt: number
   totalBorrowed: string
-  totalRepaid: string
+  totalRepaid: {
+    interest: string
+    principal: string
+    unscheduled: string
+  }
 }
 
 export type PricingInfo = InternalPricingInfo | ExternalPricingInfo
@@ -492,6 +496,11 @@ export type ClosedLoan = {
   }
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
+  repaid: {
+    interest: CurrencyBalance
+    principal: CurrencyBalance
+    unscheduled: CurrencyBalance
+  }
 }
 
 export type Loan = CreatedLoan | ClosedLoan | ActiveLoan
@@ -2058,7 +2067,12 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $query.pipe(
       switchMap((data) => {
-        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId)) ?? []
+        const poolIds = new Set(data?.investorTransactions.nodes.map((e) => e.poolId) ?? [])
+        if (!poolIds.size) {
+          return of({
+            investorTransactions: [],
+          })
+        }
         const $poolCurrencies = Array.from(poolIds).map((poolId) => getPoolCurrency([poolId]))
         return combineLatest($poolCurrencies).pipe(
           map((currencies) => {
@@ -2613,13 +2627,26 @@ export function getPoolsModule(inst: Centrifuge) {
 
         const closedLoans: ClosedLoan[] = (closedLoanValues as any[]).map(([key, value]) => {
           const loan = value.toPrimitive() as unknown as ClosedLoanData
+
+          const repaidPrincipal = new CurrencyBalance(loan.totalRepaid.principal, currency.decimals)
+          const repaidInterest = new CurrencyBalance(loan.totalRepaid.interest, currency.decimals)
+          const repaidUnscheduled = new CurrencyBalance(loan.totalRepaid.unscheduled, currency.decimals)
+
           return {
             ...getSharedLoanInfo(loan),
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
             status: 'Closed',
             totalBorrowed: new CurrencyBalance(loan.totalBorrowed, currency.decimals),
-            totalRepaid: new CurrencyBalance(loan.totalRepaid, currency.decimals),
+            totalRepaid: new CurrencyBalance(
+              repaidPrincipal.add(repaidInterest).add(repaidUnscheduled),
+              currency.decimals
+            ),
+            repaid: {
+              principal: repaidPrincipal,
+              interest: repaidInterest,
+              unscheduled: repaidUnscheduled,
+            },
           }
         })
 
