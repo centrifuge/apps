@@ -163,3 +163,7 @@ export const DAOs: DAO[] = [
     icon: aaveLogo,
   },
 ]
+
+export const parachainNames: Record<number, string> = {
+  1000: 'Asset Hub',
+}

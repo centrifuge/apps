@@ -1,5 +1,6 @@
 import Centrifuge, { Account, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { UserProvidedConfig } from '@centrifuge/centrifuge-js/dist/CentrifugeBase'
+import { getAddress, isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
@@ -96,6 +97,9 @@ export function useCentrifugeConsts() {
       basicDeposit: new CurrencyBalance(consts.identity.basicDeposit, chainDecimals),
       fieldDeposit: new CurrencyBalance(consts.identity.fieldDeposit, chainDecimals),
     },
+    transferAllowlist: {
+      receiverDeposit: CurrencyBalance.fromFloat(1, chainDecimals),
+    },
   }
 }
 
@@ -106,7 +110,9 @@ export function useCentrifugeUtils() {
   return {
     ...cent.utils,
     formatAddress(address: Account) {
-      return encodeAddress(address, consts.ss58Prefix)
+      return typeof address === 'string' && isEvmAddress(address)
+        ? getAddress(address)
+        : encodeAddress(address, consts.ss58Prefix)
     },
   }
 }
