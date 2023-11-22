@@ -49,7 +49,6 @@ import { combine, evmAddress, max, min, required } from '../../utils/validation'
 import { ButtonGroup } from '../ButtonGroup'
 import { Column, DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
-import { Swap } from './Swap'
 
 export type OrdersProps = {
   buyOrSell?: CurrencyKey
