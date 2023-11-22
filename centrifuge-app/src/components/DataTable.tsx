@@ -112,7 +112,7 @@ export const DataTable = <T extends Record<string, any>>({
       minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}
     >
       {showHeader && (
-        <HeaderRow templateColumns={templateColumns}>
+        <HeaderRow>
           {columns.map((col, i) => (
             <HeaderCol key={i} align={col?.align}>
               <Text variant="body3">
@@ -134,7 +134,6 @@ export const DataTable = <T extends Record<string, any>>({
           to={onRowClicked && (() => onRowClicked(row))}
           key={keyField ? row[keyField] : i}
           tabIndex={onRowClicked ? 0 : undefined}
-          templateColumns={templateColumns}
         >
           {columns.map((col, index) => (
             <DataCol variant="body2" align={col?.align} key={index}>
@@ -145,7 +144,7 @@ export const DataTable = <T extends Record<string, any>>({
       ))}
       {/* summary row is not included in sorting */}
       {summary && (
-        <DataRow templateColumns={templateColumns}>
+        <DataRow>
           {columns.map((col, i) => (
             <DataCol variant="body2" key={`${col.sortKey}-${i}`} align={col?.align}>
               {col.cell(summary, i)}
@@ -164,12 +163,8 @@ export const DataTable = <T extends Record<string, any>>({
 
 const TableGrid = styled(Grid)``
 
-const Row = styled('div')<any>`
+const Row = styled('div')`
   display: grid;
-  // Fallback for browsers that don't support subgrid
-  // Tables will look a bit wonky in those browsers
-  // TODO: Remove when browser support is sufficient
-  grid-template-columns: ${(props) => props.templateColumns};
   grid-template-columns: subgrid;
   grid-column: start / end;
   box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderSecondary}, 1px 0 0 0 ${theme.colors.borderSecondary}`};

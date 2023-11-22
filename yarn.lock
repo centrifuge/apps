@@ -1863,6 +1863,7 @@ __metadata:
   resolution: "@centrifuge/centrifuge-js@workspace:centrifuge-js"
   dependencies:
     "@ethersproject/abi": ^5.6.0
+    "@ethersproject/address": ^5.6.0
     "@ethersproject/bignumber": ^5.7.0
     "@ethersproject/contracts": ^5.6.0
     "@ethersproject/providers": ^5.6.0
