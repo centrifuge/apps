@@ -312,7 +312,7 @@ export function WithdrawSelect({ loan, borrower }: { loan: LoanType; borrower: C
     if (!ao.transferAllowlist.length) return
     helpers.setValue(ao.transferAllowlist[0].meta, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [ao.transferAllowlist.length])
 
   if (!ao.transferAllowlist.length) return null
 
