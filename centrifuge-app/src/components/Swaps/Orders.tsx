@@ -5,10 +5,11 @@ import {
   CurrencyMetadata,
   findBalance,
   findCurrency,
-  getCurrencyChainId,
+  getCurrencyLocation,
   isSameCurrency,
   parseCurrencyKey,
   Price,
+  WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import {
   truncateAddress,
@@ -35,17 +36,18 @@ import {
   Text,
   TextInput,
 } from '@centrifuge/fabric'
-import { isAddress as isEvmAddress } from '@ethersproject/address'
+import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { filter, map, repeatWhen, switchMap } from 'rxjs'
+import { parachainNames } from '../../config'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useCurrencies } from '../../utils/useCurrencies'
 import { useSuitableAccounts } from '../../utils/usePermissions'
-import { combine, evmAddress, max, min, required } from '../../utils/validation'
+import { address, combine, max, min, required } from '../../utils/validation'
 import { ButtonGroup } from '../ButtonGroup'
 import { Column, DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
@@ -195,33 +197,51 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     (balances && findBalance(balances.currencies, order.buyCurrency.key))?.balance.toDecimal() || Dec(0)
   const orderBuyDec = order.buyAmount.toDecimal()
   const minFulfillDec = order.minFulfillmentAmount.toDecimal()
-  let orderBuyCurrencyEVMChain = getCurrencyChainId(order.buyCurrency)
-  let orderSellCurrencyEVMChain = getCurrencyChainId(order.sellCurrency)
+  let orderBuyCurrencyLocation = getCurrencyLocation(order.buyCurrency)
+  let orderSellCurrencyLocation = getCurrencyLocation(order.sellCurrency)
+
+  function getLocationName(location: WithdrawAddress['location']) {
+    return typeof location === 'string'
+      ? getNetworkName(location as any)
+      : 'parachain' in location
+      ? parachainNames[location.parachain]
+      : getNetworkName(location.evm)
+  }
 
   const { execute, reset, isLoading, lastCreatedTransaction } = useCentrifugeTransaction(
     'Fulfill order',
     (cent) => (args: [transferTo: string | null, amount: CurrencyBalance | null], options) => {
       const [transferTo, amount] = args
-      let swapTx
+      let swapTx = api.tx.orderBook.fillOrderFull(order.id)
       if (amount) {
         swapTx = api.tx.orderBook.fillOrderPartial(order.id, amount.toString())
-      } else {
-        swapTx = api.tx.orderBook.fillOrderFull(order.id)
       }
 
-      let tx = swapTx
       if (transferTo) {
-        tx = api.tx.utility.batchAll([
-          swapTx,
-          api.tx.liquidityPools.transfer(
-            order.sellCurrency.key,
-            { EVM: [orderSellCurrencyEVMChain, transferTo] },
-            order.sellAmount
-          ),
-        ])
+        return cent.pools
+          .withdraw(
+            [
+              amount
+                ? CurrencyBalance.fromFloat(
+                    amount.toDecimal().mul(order.price.toDecimal()),
+                    order.sellCurrency.decimals
+                  )
+                : order.sellAmount,
+              order.sellCurrency.key,
+              transferTo,
+              orderSellCurrencyLocation,
+            ],
+            { batch: true }
+          )
+          .pipe(
+            switchMap((withdrawTx) => {
+              const tx = api.tx.utility.batchAll([swapTx, withdrawTx])
+              return cent.wrapSignAndSend(api, tx, options)
+            })
+          )
       }
 
-      return cent.wrapSignAndSend(api, tx, options)
+      return cent.wrapSignAndSend(api, swapTx, options)
     }
   )
 
@@ -237,7 +257,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     onSubmit: (values, actions) => {
       actions.setSubmitting(false)
 
-      if (values.isTransferEnabled && !isEvmAddress(values.tranferReceiverAddress)) return
+      if (values.isTransferEnabled && !isAddress(values.tranferReceiverAddress)) return
 
       execute(
         [
@@ -298,9 +318,9 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
               {balanceLow && (
                 <TextInput
                   label={
-                    orderBuyCurrencyEVMChain
-                      ? `Send ${order.buyCurrency.symbol} from ${getNetworkName(
-                          Number(orderBuyCurrencyEVMChain)
+                    orderBuyCurrencyLocation
+                      ? `Send ${order.buyCurrency.symbol} from ${getLocationName(
+                          orderBuyCurrencyLocation
                         )} to this address on Centrifuge Chain`
                       : `Send ${order.buyCurrency.symbol} to this address on Centrifuge Chain`
                   }
@@ -357,23 +377,22 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
               </Card>
             )}
 
-            {orderSellCurrencyEVMChain && (
+            {orderSellCurrencyLocation && (
               <Card p={2}>
                 <Stack gap={2}>
                   <Field
                     type="checkbox"
                     name="isTransferEnabled"
                     as={Checkbox}
-                    label={`Transfer swapped funds to ${getNetworkName(Number(orderSellCurrencyEVMChain))}`}
+                    label={`Transfer swapped funds to ${getLocationName(orderSellCurrencyLocation)}`}
                   />
                   <Stack as="fieldset" disabled={!isTransferEnabled} gap={2} minWidth={0} m={0} p={0} border={0}>
                     <Field
                       name="tranferReceiverAddress"
                       as={TextInput}
-                      label="Receiver EVM address"
-                      placeholder="0x..."
+                      label="Receiver address"
                       disabled={!isTransferEnabled}
-                      validate={isTransferEnabled ? combine(evmAddress(), required()) : undefined}
+                      validate={isTransferEnabled ? combine(address(), required()) : undefined}
                     />
                   </Stack>
                 </Stack>
