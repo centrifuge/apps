@@ -129,17 +129,23 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: PR comment with preview URL
+        id: prcomment
         uses: thollander/actions-comment-pull-request@v2
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
         with:
           comment_tag: pr_preview_url
+          mode: recreate
           message: |
             PR deployed in Google Cloud
             URL: https://${{ needs.deploy-app.outputs.bucket_url }}
             Commit #: ${{ env.pull_sha }}   
             To access the functions directly check the corresponding deploy Action
-      
+      - name: Check notify outputs
+        run: |
+          echo "id : ${{ steps.prcomment.outputs.id }}"
+          echo "body : ${{ steps.prcomment.outputs.body }}"
+          echo "html_url : ${{ steps.prcomment.outputs.html_url }}"
   # owasp_scan:
   #   needs: deploy-app
   #   runs-on: ubuntu-latest
