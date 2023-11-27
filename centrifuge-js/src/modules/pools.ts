@@ -1,6 +1,7 @@
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
+import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
@@ -1491,8 +1492,8 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       poolId: string,
       loanId: string,
-      quantity: BN,
-      price: BN,
+      quantity: Price,
+      price: CurrencyBalance,
       withdraw?: WithdrawAddress & { currency: CurrencyKey }
     ],
     options?: TransactionOptions
@@ -1506,9 +1507,14 @@ export function getPoolsModule(inst: Centrifuge) {
         })
         if (withdrawTo) {
           const { address, location, currency } = withdrawTo
-          return withdraw([quantity.mul(price), currency, address, location], { batch: true }).pipe(
+          return withdraw(
+            [quantity.mul(price).div(new BN(10).pow(new BN(price.decimals))), currency, address, location],
+            {
+              batch: true,
+            }
+          ).pipe(
             switchMap((withdrawTx) => {
-              const batchTx = api.tx.utility.batchAll([borrowSubmittable, withdrawTx])
+              const batchTx = api.tx.utility.batch([borrowSubmittable, withdrawTx])
               return inst.wrapSignAndSend(api, batchTx, options)
             })
           )
@@ -1595,6 +1601,46 @@ export function getPoolsModule(inst: Centrifuge) {
           api.tx.loans.close(poolId, loanId),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function transferLoanDebt(
+    args: [
+      poolId: string,
+      fromLoanId: string,
+      toLoanId: string,
+      repay: { principal: BN; interest: BN },
+      borrow: { quantity: BN; price: BN } | { amount: BN }
+    ],
+    options?: TransactionOptions
+  ) {
+    const [poolId, fromLoanId, toLoanId, repay, borrow] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const changeArgs = [
+          fromLoanId,
+          toLoanId,
+          {
+            principal: { internal: repay.principal.toString() },
+            interest: repay.interest.toString(),
+            unscheduled: '0',
+          },
+          'amount' in borrow
+            ? { internal: borrow.amount.toString() }
+            : {
+                external: { quantity: borrow.quantity.toString(), settlementPrice: borrow.price.toString() },
+              },
+        ]
+        const change = api.createType('RuntimeCommonChangesRuntimeChange', { Loan: { TransferDebt: changeArgs } })
+
+        const tx = api.tx.utility.batch([
+          api.tx.loans.proposeTransferDebt(poolId, ...changeArgs),
+          api.tx.loans.applyTransferDebt(poolId, blake2AsHex(change.toU8a(), 256)),
+        ])
+        return inst.wrapSignAndSend(api, tx, options)
       })
     )
   }
@@ -3040,6 +3086,7 @@ export function getPoolsModule(inst: Centrifuge) {
     repayExternalLoanPartially,
     repayAndCloseLoan,
     closeLoan,
+    transferLoanDebt,
     getPool,
     getPools,
     getBalances,

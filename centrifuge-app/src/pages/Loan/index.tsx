@@ -40,7 +40,9 @@ import { FinancingRepayment } from './FinancingRepayment'
 import { HoldingsValues } from './HoldingsValues'
 import { OraclePriceForm } from './OraclePriceForm'
 import { PricingValues } from './PricingValues'
+import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
+import { TransferDebtForm } from './TransferDebtForm'
 import { formatNftAttribute } from './utils'
 
 export default function LoanPage() {
@@ -72,6 +74,8 @@ const LoanSidebar: React.FC<{
     <Stack gap={2}>
       {showOraclePricing && <OraclePriceForm loan={loan} setShowOraclePricing={setShowOraclePricing} />}
       <FinanceForm loan={loan} />
+      <RepayForm loan={loan} />
+      <TransferDebtForm loan={loan} />
     </Stack>
   )
 }

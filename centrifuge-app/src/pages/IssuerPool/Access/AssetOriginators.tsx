@@ -257,7 +257,7 @@ function AOForm({
                         api.tx.transferAllowList.addTransferAllowance(pool.currency.key, w)
                       ),
                       removedWithdrawAddresses.map((w) =>
-                        api.tx.transferAllowList.purgeTransferAllowance(pool.currency.key, w)
+                        api.tx.transferAllowList.removeTransferAllowance(pool.currency.key, w)
                       ),
                     ]
                       .filter(Boolean)
