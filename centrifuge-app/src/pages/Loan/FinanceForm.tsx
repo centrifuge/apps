@@ -181,7 +181,7 @@ export function WithdrawSelect({ loan, borrower }: { loan: LoanType; borrower: C
   return (
     <Select
       name="withdraw"
-      label="Withdraw address"
+      label="Withdrawal address"
       onChange={(event) => helpers.setValue(JSON.parse(event.target.value))}
       onBlur={field.onBlur}
       errorMessage={(meta.touched || form.submitCount > 0) && meta.error ? meta.error : undefined}

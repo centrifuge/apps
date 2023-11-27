@@ -12,7 +12,6 @@ import {
   useCentrifugeConsts,
   useCentrifugeTransaction,
   useCentrifugeUtils,
-  useGetNetworkIcon,
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconMinusCircle, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
@@ -102,7 +101,6 @@ type Row = {
   index: number
 }
 
-// TODO: Edit withdraw address for restricted transfers
 function AOForm({
   access,
   assetOriginator: ao,
@@ -122,7 +120,6 @@ function AOForm({
   const { data: metadata } = usePoolMetadata(pool)
   const chainIds = routers?.map((r) => r.chainId) || []
   const getName = useGetNetworkName()
-  const getIcon = useGetNetworkIcon()
 
   const destinations = [
     'centrifuge',

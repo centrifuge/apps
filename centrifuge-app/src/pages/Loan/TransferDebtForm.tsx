@@ -40,8 +40,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       !isExternalLoan(l as any)
   )
 
-  console.log('loans', loans)
-
   const { execute, isLoading } = useCentrifugeTransaction('Finance asset', (cent) => cent.pools.transferLoanDebt, {
     onSuccess: () => {
       form.resetForm()
