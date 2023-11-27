@@ -1636,7 +1636,7 @@ export function getPoolsModule(inst: Centrifuge) {
         ]
         const change = api.createType('RuntimeCommonChangesRuntimeChange', { Loan: { TransferDebt: changeArgs } })
 
-        const tx = api.tx.utility.batch([
+        const tx = api.tx.utility.batchAll([
           api.tx.loans.proposeTransferDebt(poolId, ...changeArgs),
           api.tx.loans.applyTransferDebt(poolId, blake2AsHex(change.toU8a(), 256)),
         ])
