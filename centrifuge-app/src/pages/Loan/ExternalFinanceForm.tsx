@@ -1,4 +1,11 @@
-import { CurrencyBalance, ExternalPricingInfo, findBalance, Loan as LoanType, Price } from '@centrifuge/centrifuge-js'
+import {
+  CurrencyBalance,
+  ExternalPricingInfo,
+  findBalance,
+  Loan as LoanType,
+  Price,
+  WithdrawAddress,
+} from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -12,10 +19,12 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
+import { WithdrawSelect } from './FinanceForm'
 
 type FinanceValues = {
   price: number | '' | Decimal
   faceValue: number | ''
+  withdraw: undefined | WithdrawAddress
 }
 
 type RepayValues = {
@@ -30,6 +39,7 @@ type ExternalLoan = LoanType & {
 export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
+  if (!account) throw new Error('No borrower')
   const balances = useBalances(account.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
@@ -62,14 +72,24 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
     initialValues: {
       price: '',
       faceValue: '',
+      withdraw: undefined,
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
       const quantity = Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal()))
 
-      doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
-        account,
-      })
+      doFinanceTransaction(
+        [
+          loan.poolId,
+          loan.id,
+          quantity,
+          price,
+          values.withdraw ? { ...values.withdraw, currency: pool.currency.key } : undefined,
+        ],
+        {
+          account,
+        }
+      )
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -187,6 +207,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
                   )
                 }}
               </Field>
+              <WithdrawSelect loan={loan} borrower={account} />
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Text variant="emphasized">Total amount</Text>

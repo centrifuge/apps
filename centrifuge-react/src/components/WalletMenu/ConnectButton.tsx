@@ -7,7 +7,9 @@ type Props = WalletButtonProps & {
 }
 
 export function ConnectButton({ label = 'Connect', ...rest }: Props) {
-  const { showNetworks } = useWallet()
+  const { showNetworks, pendingConnect } = useWallet()
 
-  return <WalletButton connectLabel={label} onClick={() => showNetworks()} {...rest} />
+  return (
+    <WalletButton connectLabel={label} loading={pendingConnect.isConnecting} onClick={() => showNetworks()} {...rest} />
+  )
 }

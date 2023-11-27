@@ -1,34 +1,16 @@
 import { Price } from '@centrifuge/centrifuge-js'
-import { Network, useCentrifuge, useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
+import { useCentrifuge, useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
-import aaveLogo from '../../assets/images/aave-token-logo.svg'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
+import { DAO, DAOs } from '../../config'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useFilters } from '../../utils/useFilters'
 import { useSubquery } from '../../utils/useSubquery'
-
-type DAO = {
-  slug: string
-  name: string
-  network: Network
-  address: string
-  icon: string
-}
-
-const DAOs: DAO[] = [
-  {
-    slug: 'aave',
-    name: 'Aave',
-    network: 'centrifuge',
-    address: 'kALNreUp6oBmtfG87fe7MakWR8BnmQ4SmKjjfG27iVd3nuTue',
-    icon: aaveLogo,
-  },
-]
 
 export default function PrimePage() {
   return (
