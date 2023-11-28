@@ -54,7 +54,7 @@ export type ThemeBreakpoints = BreakpointValue[] & {
   [k in BreakpointName]: BreakpointValue
 }
 
-type SizeName = 'dialog' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge'
+type SizeName = 'dialog' | 'drawer' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge'
 type SizeValue = string | number
 
 type ThemeSizes = {
