@@ -63,7 +63,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
           price: CurrencyBalance.fromFloat(values.price, pool.currency.decimals),
           quantity: Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal())),
         }
-        borrowAmount = borrow.quantity.mul(borrow.price).div(new BN(10).pow(new BN(borrow.price.decimals)))
+        borrowAmount = borrow.quantity.mul(borrow.price).div(Price.fromFloat(1))
       } else {
         borrow = { amount: CurrencyBalance.fromFloat(values.amount, pool.currency.decimals) }
         borrowAmount = borrow.amount
@@ -101,8 +101,8 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
     return financeAmount.gt(availableFinancing)
       ? `Amount exceeds max borrow (${formatBalance(availableFinancing, pool.currency.symbol, 2)})`
       : financeAmount.gt(selectedLoan?.outstandingDebt.toDecimal() ?? Dec(0))
-      ? `Amount exceeds settlement asset outstanding debt (${formatBalance(
-          selectedLoan?.outstandingDebt.toNumber() ?? 0,
+      ? `Amount ${financeAmount.toNumber()} exceeds settlement asset outstanding debt (${formatBalance(
+          selectedLoan?.outstandingDebt.toFloat() ?? 0,
           pool?.currency.symbol,
           2
         )})`
@@ -143,17 +143,33 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
             )}
           </Field>
           {isExternalLoan(loan) ? (
-            <ExternalFinanceFields
-              loan={loan}
-              pool={pool}
-              validate={(val) =>
-                validate(
-                  Dec(val)
-                    .mul(form.values.faceValue || 1)
-                    .div(loan.pricing.notional.toDecimal())
-                )
-              }
-            />
+            <>
+              <ExternalFinanceFields
+                loan={loan}
+                pool={pool}
+                validate={(val) =>
+                  validate(
+                    Dec(val)
+                      .mul(form.values.faceValue || 1)
+                      .div(loan.pricing.notional.toDecimal())
+                  )
+                }
+              />
+              <Shelf justifyContent="space-between">
+                <Text variant="emphasized">Total amount</Text>
+                <Text variant="emphasized">
+                  {form.values.price && !Number.isNaN(form.values.price as number)
+                    ? formatBalance(
+                        Dec(form.values.price || 0)
+                          .mul(Dec(form.values.faceValue || 0))
+                          .div(loan.pricing.notional.toDecimal()),
+                        pool?.currency.symbol,
+                        2
+                      )
+                    : `0.00 ${pool.currency.symbol}`}
+                </Text>
+              </Shelf>
+            </>
           ) : (
             <Field name="amount" validate={(val: any) => validate(Dec(val))}>
               {({ field, meta, form }: FieldProps) => {

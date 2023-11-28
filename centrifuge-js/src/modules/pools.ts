@@ -1507,14 +1507,11 @@ export function getPoolsModule(inst: Centrifuge) {
         })
         if (withdrawTo) {
           const { address, location, currency } = withdrawTo
-          return withdraw(
-            [quantity.mul(price).div(new BN(10).pow(new BN(price.decimals))), currency, address, location],
-            {
-              batch: true,
-            }
-          ).pipe(
+          return withdraw([quantity.mul(price).div(Price.fromFloat(1)), currency, address, location], {
+            batch: true,
+          }).pipe(
             switchMap((withdrawTx) => {
-              const batchTx = api.tx.utility.batch([borrowSubmittable, withdrawTx])
+              const batchTx = api.tx.utility.batchAll([borrowSubmittable, withdrawTx])
               return inst.wrapSignAndSend(api, batchTx, options)
             })
           )
