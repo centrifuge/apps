@@ -1,4 +1,4 @@
-import { ActiveLoan, CurrencyBalance, findBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -19,11 +19,11 @@ type RepayValues = {
   amount: number | '' | Decimal
 }
 
-export function RepayForm({ loan }: { loan: LoanType }) {
+export function RepayForm({ loan }: { loan: ActiveLoan }) {
   return isExternalLoan(loan) ? <ExternalRepayForm loan={loan} /> : <InternalRepayForm loan={loan} />
 }
 
-function InternalRepayForm({ loan }: { loan: LoanType }) {
+function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   if (!account) throw new Error('No borrower')
@@ -52,8 +52,7 @@ function InternalRepayForm({ loan }: { loan: LoanType }) {
   )
 
   function repayAll() {
-    const l = loan as ActiveLoan
-    doRepayAllTransaction([loan.poolId, loan.id, l.totalBorrowed.sub(l.repaid.principal)], {
+    doRepayAllTransaction([loan.poolId, loan.id, loan.totalBorrowed.sub(loan.repaid.principal)], {
       account,
       forceProxyType: 'Borrow',
     })
@@ -64,15 +63,14 @@ function InternalRepayForm({ loan }: { loan: LoanType }) {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const l = loan as ActiveLoan
-      const outstandingPrincipal = l.totalBorrowed.sub(l.repaid.principal)
+      const outstandingPrincipal = loan.totalBorrowed.sub(loan.repaid.principal)
       let amount: BN = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
       let interest = new BN(0)
       if (amount.gt(outstandingPrincipal)) {
         interest = amount.sub(outstandingPrincipal)
         amount = outstandingPrincipal
       }
-      doRepayTransaction([l.poolId, l.id, amount, interest, new BN(0)], { account, forceProxyType: 'Borrow' })
+      doRepayTransaction([loan.poolId, loan.id, amount, interest, new BN(0)], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -80,10 +78,6 @@ function InternalRepayForm({ loan }: { loan: LoanType }) {
 
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
-
-  if (loan.status === 'Closed') {
-    return null
-  }
 
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
   const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
@@ -103,64 +97,63 @@ function InternalRepayForm({ loan }: { loan: LoanType }) {
         </Shelf>
       </Stack>
 
-      {loan.status !== 'Created' &&
-        (debt.gt(0) ? (
-          <FormikProvider value={repayForm}>
-            <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-              <Field
-                validate={combine(
-                  positiveNumber(),
-                  max(balance.toNumber(), 'Amount exceeds balance'),
-                  max(debt.toNumber(), 'Amount exceeds outstanding')
-                )}
-                name="amount"
-              >
-                {({ field, meta, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                      label="Amount"
-                      errorMessage={meta.touched ? meta.error : undefined}
-                      secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency.symbol, 2)} available`}
-                      disabled={isRepayLoading || isRepayAllLoading}
-                      currency={pool?.currency.symbol}
-                      onChange={(value) => form.setFieldValue('amount', value)}
-                      onSetMax={() => form.setFieldValue('amount', maxRepay)}
-                    />
-                  )
-                }}
-              </Field>
-              {balance.lessThan(debt) && (
-                <InlineFeedback>
-                  Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than
-                  the outstanding balance.
-                </InlineFeedback>
+      {debt.gt(0) ? (
+        <FormikProvider value={repayForm}>
+          <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
+            <Field
+              validate={combine(
+                positiveNumber(),
+                max(balance.toNumber(), 'Amount exceeds balance'),
+                max(debt.toNumber(), 'Amount exceeds outstanding')
               )}
-              <Stack gap={1} px={1}>
-                <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
-                  Repay asset
-                </Button>
-                <Button
-                  variant="secondary"
-                  loading={isRepayAllLoading}
-                  disabled={!canRepayAll || isRepayLoading}
-                  onClick={() => repayAll()}
-                >
-                  Repay all and close
-                </Button>
-              </Stack>
+              name="amount"
+            >
+              {({ field, meta, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                    label="Amount"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency.symbol, 2)} available`}
+                    disabled={isRepayLoading || isRepayAllLoading}
+                    currency={pool?.currency.symbol}
+                    onChange={(value) => form.setFieldValue('amount', value)}
+                    onSetMax={() => form.setFieldValue('amount', maxRepay)}
+                  />
+                )
+              }}
+            </Field>
+            {balance.lessThan(debt) && (
+              <InlineFeedback>
+                Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than the
+                outstanding balance.
+              </InlineFeedback>
+            )}
+            <Stack gap={1} px={1}>
+              <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
+                Repay asset
+              </Button>
+              <Button
+                variant="secondary"
+                loading={isRepayAllLoading}
+                disabled={!canRepayAll || isRepayLoading}
+                onClick={() => repayAll()}
+              >
+                Repay all and close
+              </Button>
             </Stack>
-          </FormikProvider>
-        ) : (
-          <Button
-            variant="secondary"
-            loading={isCloseLoading}
-            onClick={() => doCloseTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })}
-          >
-            Close
-          </Button>
-        ))}
+          </Stack>
+        </FormikProvider>
+      ) : (
+        <Button
+          variant="secondary"
+          loading={isCloseLoading}
+          onClick={() => doCloseTransaction([loan.poolId, loan.id], { account, forceProxyType: 'Borrow' })}
+        >
+          Close
+        </Button>
+      )}
     </Stack>
   )
 }

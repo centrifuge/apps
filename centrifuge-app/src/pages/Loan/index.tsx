@@ -74,7 +74,7 @@ const LoanSidebar: React.FC<{
     <Stack gap={2}>
       {showOraclePricing && <OraclePriceForm loan={loan} setShowOraclePricing={setShowOraclePricing} />}
       <FinanceForm loan={loan} />
-      <RepayForm loan={loan} />
+      {loan.status === 'Active' && <RepayForm loan={loan} />}
       <TransferDebtForm loan={loan} />
     </Stack>
   )
