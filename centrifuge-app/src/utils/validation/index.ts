@@ -1,5 +1,6 @@
 import { CurrencyBalance, ExternalPricingInfo } from '@centrifuge/centrifuge-js'
-import { isAddress } from '@polkadot/util-crypto'
+import { isAddress as isEvmAddress } from '@ethersproject/address'
+import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { daysBetween } from '../date'
 import { Dec } from '../Decimal'
@@ -124,7 +125,13 @@ export const maxLength = (maxValue: number, err?: CustomError) => (val?: string)
     : getError(`Needs to be at most ${maxValue} characters`, err, val || '')
 
 export const address = (err?: CustomError) => (val?: string) =>
-  val && !isAddress(val) ? getError('Invalid address', err, val || '') : ''
+  val && !isSubstrateAddress(val) ? getError('Invalid address', err, val || '') : ''
+
+export const substrateAddress = (err?: CustomError) => (val?: string) =>
+  val && (!isSubstrateAddress(val) || isEvmAddress(val)) ? getError('Invalid address', err, val || '') : ''
+
+export const evmAddress = (err?: CustomError) => (val?: string) =>
+  val && !isEvmAddress(val) ? getError('Invalid address', err, val || '') : ''
 
 export const oneOf = (valuesArray: unknown[], err?: CustomError) => (val?: string) =>
   valuesArray.indexOf(val) !== -1 ? '' : getError(`Value must be one of: ${valuesArray.join(', ')}`, err, val || '')

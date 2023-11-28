@@ -6,7 +6,6 @@ import { LoadBoundary } from '../LoadBoundary'
 import { LogoLink } from '../LogoLink'
 import { Menu } from '../Menu'
 import { OnboardingStatus } from '../OnboardingStatus'
-import { SideDrawerProps } from '../SideDrawer'
 import { BasePadding } from './BasePadding'
 import {
   FooterContainer,
@@ -23,10 +22,9 @@ import {
 
 type LayoutBaseProps = {
   children?: React.ReactNode
-  sideDrawer?: React.ReactElement<SideDrawerProps>
 }
 
-export function LayoutBase({ children, sideDrawer }: LayoutBaseProps) {
+export function LayoutBase({ children }: LayoutBaseProps) {
   return (
     <Root>
       <Inner>
@@ -58,7 +56,6 @@ export function LayoutBase({ children, sideDrawer }: LayoutBaseProps) {
           <Footer />
         </FooterContainer>
       </Inner>
-      <LoadBoundary>{sideDrawer}</LoadBoundary>
     </Root>
   )
 }

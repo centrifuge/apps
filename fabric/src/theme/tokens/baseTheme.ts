@@ -9,6 +9,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
   space,
   sizes: {
     dialog: 564,
+    drawer: 461,
     container: 1152,
     iconSmall: 16,
     iconMedium: 24,

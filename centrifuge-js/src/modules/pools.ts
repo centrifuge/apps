@@ -1,5 +1,7 @@
+import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
+import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
@@ -598,7 +600,11 @@ export interface PoolMetadataInput {
     threshold: number
   }
 }
-
+export type WithdrawAddress = {
+  name?: string
+  address: string
+  location: 'centrifuge' | { parachain: number } | { evm: number }
+}
 export type PoolStatus = 'open' | 'upcoming' | 'hidden'
 export type PoolCountry = 'us' | 'non-us'
 export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
@@ -627,6 +633,7 @@ export type PoolMetadata = {
     details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
+    assetOriginators?: Record<string, { name?: string; withdrawAddresses: WithdrawAddress[] }>
   }
   pod?: {
     node: string | null
@@ -1420,28 +1427,119 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function financeExternalLoan(
-    args: [poolId: string, loanId: string, quantity: BN, price: BN],
+  function withdraw(
+    args: [amount: BN, currency: CurrencyKey, address: string, location: WithdrawAddress['location']],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, price] = args
-    const $api = inst.getApi()
-    return $api.pipe(
+    const [amount, currencyId, address, location] = args
+
+    return inst.getApi().pipe(
+      combineLatestWith(getCurrencies()),
+      switchMap(([api, currencies]) => {
+        const currency = findCurrency(currencies, currencyId)
+        if (!currency || (typeof location !== 'string' && 'parachain' in location && !currency.location?.v3)) {
+          throw new Error('Currency not found')
+        }
+        const submittable =
+          typeof location === 'string'
+            ? api.tx.tokens.transfer(address, currencyId, amount)
+            : 'evm' in location
+            ? api.tx.liquidityPools.transfer(currencyId, { EVM: [location.evm, address] }, amount)
+            : api.tx.xTokens.transferMultiasset(
+                {
+                  V3: [
+                    {
+                      Concrete: currency.location.v3,
+                    },
+                    {
+                      Fungible: amount,
+                    },
+                  ],
+                },
+                {
+                  V3: {
+                    parents: 1,
+                    interior: {
+                      X2: [
+                        {
+                          Parachain: location.parachain,
+                        },
+                        isEvmAddress(address)
+                          ? {
+                              AccountKey20: {
+                                network: null,
+                                key: address,
+                              },
+                            }
+                          : {
+                              AccountId32: {
+                                id: addressToHex(address),
+                              },
+                            },
+                      ],
+                    },
+                  },
+                },
+                'Unlimited'
+              )
+
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function financeExternalLoan(
+    args: [
+      poolId: string,
+      loanId: string,
+      quantity: Price,
+      price: CurrencyBalance,
+      withdraw?: WithdrawAddress & { currency: CurrencyKey }
+    ],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, quantity, price, withdrawTo] = args
+
+    return inst.getApi().pipe(
       switchMap((api) => {
         const borrowSubmittable = api.tx.loans.borrow(poolId, loanId, {
           external: { quantity: quantity.toString(), settlementPrice: price.toString() },
         })
+        if (withdrawTo) {
+          const { address, location, currency } = withdrawTo
+          return withdraw([quantity.mul(price).div(Price.fromFloat(1)), currency, address, location], {
+            batch: true,
+          }).pipe(
+            switchMap((withdrawTx) => {
+              const batchTx = api.tx.utility.batchAll([borrowSubmittable, withdrawTx])
+              return inst.wrapSignAndSend(api, batchTx, options)
+            })
+          )
+        }
         return inst.wrapSignAndSend(api, borrowSubmittable, options)
       })
     )
   }
 
-  function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
-    const [poolId, loanId, amount] = args
-    const $api = inst.getApi()
-    return $api.pipe(
+  function financeLoan(
+    args: [poolId: string, loanId: string, amount: BN, withdraw?: WithdrawAddress & { currency: CurrencyKey }],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, amountBN, withdrawTo] = args
+    const amount = amountBN.toString()
+    return inst.getApi().pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.borrow(poolId, loanId, { internal: amount.toString() })
+        const submittable = api.tx.loans.borrow(poolId, loanId, { internal: amount })
+
+        if (withdrawTo) {
+          const { address, location, currency } = withdrawTo
+          return withdraw([amountBN, currency, address, location], { batch: true }).pipe(
+            switchMap((withdrawTx) => {
+              const batchTx = api.tx.utility.batchAll([submittable, withdrawTx])
+              return inst.wrapSignAndSend(api, batchTx, options)
+            })
+          )
+        }
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -1500,6 +1598,46 @@ export function getPoolsModule(inst: Centrifuge) {
           api.tx.loans.close(poolId, loanId),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function transferLoanDebt(
+    args: [
+      poolId: string,
+      fromLoanId: string,
+      toLoanId: string,
+      repay: { principal: BN; interest: BN },
+      borrow: { quantity: BN; price: BN } | { amount: BN }
+    ],
+    options?: TransactionOptions
+  ) {
+    const [poolId, fromLoanId, toLoanId, repay, borrow] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const changeArgs = [
+          fromLoanId,
+          toLoanId,
+          {
+            principal: { internal: repay.principal.toString() },
+            interest: repay.interest.toString(),
+            unscheduled: '0',
+          },
+          'amount' in borrow
+            ? { internal: borrow.amount.toString() }
+            : {
+                external: { quantity: borrow.quantity.toString(), settlementPrice: borrow.price.toString() },
+              },
+        ]
+        const change = api.createType('RuntimeCommonChangesRuntimeChange', { Loan: { TransferDebt: changeArgs } })
+
+        const tx = api.tx.utility.batchAll([
+          api.tx.loans.proposeTransferDebt(poolId, ...changeArgs),
+          api.tx.loans.applyTransferDebt(poolId, blake2AsHex(change.toU8a(), 256)),
+        ])
+        return inst.wrapSignAndSend(api, tx, options)
       })
     )
   }
@@ -2938,12 +3076,14 @@ export function getPoolsModule(inst: Centrifuge) {
     updatePoolRoles,
     getNextLoanId,
     createLoan,
+    withdraw,
     financeLoan,
     financeExternalLoan,
     repayLoanPartially,
     repayExternalLoanPartially,
     repayAndCloseLoan,
     closeLoan,
+    transferLoanDebt,
     getPool,
     getPools,
     getBalances,
@@ -3039,4 +3179,20 @@ function looksLike(a: any, b: any): boolean {
 
 function isPrimitive(val: any): val is boolean | string | number | null | undefined {
   return val == null || /^[sbn]/.test(typeof val)
+}
+
+export function getCurrencyLocation(currency: CurrencyMetadata) {
+  const chainId = currency.location?.v3?.interior?.x3?.[1]?.globalConsensus?.ethereum?.chainId
+  if (chainId) {
+    return { evm: Number(chainId) }
+  }
+  const parachain = currency.location?.v3?.interior?.x3?.[0]?.parachain
+  if (parachain) {
+    return { parachain: Number(parachain) }
+  }
+  return 'centrifuge'
+}
+
+export function getCurrencyEvmAddress(currency: CurrencyMetadata) {
+  return currency.location?.v3?.interior?.x3?.[2]?.accountKey20?.key as string | undefined
 }
