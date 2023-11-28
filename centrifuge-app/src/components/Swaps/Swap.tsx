@@ -1,4 +1,4 @@
-import { CurrencyBalance, CurrencyKey, findBalance, findCurrency, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, CurrencyKey, findBalance, findCurrency, Price } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { CentrifugeTransactionOptions } from '@centrifuge/centrifuge-react/dist/hooks/useCentrifugeTransaction'
 import { Button, Card, CurrencyInput, SelectInner, Stack } from '@centrifuge/fabric'
@@ -36,10 +36,10 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
     (cent) => (_: [], options?: CentrifugeTransactionOptions) => {
       const buyDec = lastChanged === 'buy' ? buy : Dec(sell).div(price)
       const buyAmount = CurrencyBalance.fromFloat(buyDec, buyCurrency!.decimals)
-      const buyPrice = Rate.fromFloat(price)
+      const buyPrice = Price.fromFloat(price)
       return cent.wrapSignAndSend(
         api,
-        api.tx.orderBook.createOrderV1(buyCurrencyKey, sellCurrencyKey, buyAmount, buyPrice),
+        api.tx.orderBook.createOrder(buyCurrencyKey, sellCurrencyKey, buyAmount, buyPrice),
         options
       )
     }
