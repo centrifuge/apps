@@ -5,6 +5,7 @@ import { Keyring } from '@polkadot/api'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { useEffect } from 'react'
 import { useMutation, useQuery } from 'react-query'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { usePodUrl } from '../../../utils/usePools'
 
 type Props = {
@@ -13,10 +14,10 @@ type Props = {
   onSuccess?: (res: ReturnType<Centrifuge['pod']['createAccount']> extends Promise<infer T> ? T : never) => void
 }
 
-async function getAdminToken(cent: Centrifuge) {
+async function getAdminToken(cent: Centrifuge, adminSeed?: string) {
   await cryptoWaitReady()
   const keyring = new Keyring({ type: 'sr25519' })
-  const EveKeyRing = keyring.addFromUri('//Eve')
+  const EveKeyRing = keyring.addFromUri(adminSeed ?? '//Eve')
 
   const token = await cent.auth.generateJw3t(EveKeyRing, undefined, {
     onBehalfOf: EveKeyRing.address,
@@ -31,6 +32,7 @@ async function getAdminToken(cent: Centrifuge) {
 export function CreatePodAccount({ poolId, address, onSuccess }: Props) {
   const cent = useCentrifuge()
   const podUrl = usePodUrl(poolId)
+  const { podAdminSeed } = useDebugFlags()
 
   const { data: existing, isLoading: isFetching } = useQuery(
     ['podAccount', podUrl, address],
@@ -49,7 +51,7 @@ export function CreatePodAccount({ poolId, address, onSuccess }: Props) {
 
   const { mutate: create, isLoading } = useMutation(async () => {
     if (!podUrl) throw new Error('No Pod Url')
-    const { token } = await getAdminToken(cent)
+    const { token } = await getAdminToken(cent, podAdminSeed as any)
     const res = await cent.pod.createAccount([podUrl, token, addressToHex(address)])
     onSuccess?.(res)
   })

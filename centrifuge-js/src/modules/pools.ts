@@ -1498,6 +1498,7 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [poolId, loanId, quantity, price, withdrawTo] = args
+
     return inst.getApi().pipe(
       switchMap((api) => {
         const borrowSubmittable = api.tx.loans.borrow(poolId, loanId, {
@@ -1526,7 +1527,7 @@ export function getPoolsModule(inst: Centrifuge) {
     return inst.getApi().pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.borrow(poolId, loanId, { internal: amount })
-        console.log('withdrawTo', withdrawTo)
+
         if (withdrawTo) {
           const { address, location, currency } = withdrawTo
           return withdraw([amountBN, currency, address, location], { batch: true }).pipe(
