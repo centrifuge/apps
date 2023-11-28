@@ -51,8 +51,8 @@ function Portfolio() {
           </Grid>
         </BasePadding>
         <BasePadding gap={3}>
-          <InvestedTokens />
-          <Transactions onlyMostRecent />
+          <InvestedTokens address={address} />
+          <Transactions onlyMostRecent address={address} />
           <AssetAllocation address={address} />
         </BasePadding>
         <BasePadding>

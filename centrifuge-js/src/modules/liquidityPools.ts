@@ -9,7 +9,7 @@ import { TransactionOptions } from '../types'
 import { CurrencyBalance, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
-import { CurrencyKey, CurrencyMetadata } from './pools'
+import { CurrencyKey, getCurrencyEvmAddress, getCurrencyLocation } from './pools'
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
@@ -196,18 +196,20 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         return rawRouters
           .map(([rawKey, rawValue]) => {
             const key = (rawKey.toHuman() as ['Centrifuge' | { EVM: string }])[0]
-            if (typeof key === 'string') return null
+            if (typeof key === 'string') return null as never
             const value = rawValue.toPrimitive() as any
             const chainId = Number(key.EVM.replace(/\D/g, ''))
-            const router = 'axelarXCM' in value ? value.axelarXCM.axelarTargetContract : ''
-            if (!router) return null
+            const router = (value.axelarXCM?.axelarTargetContract ||
+              value.ethereumXCM?.axelarTargetContract ||
+              value.axelarEVM?.liquidityPoolsContractAddress) as string
+            if (!router) return null as never
 
             return {
               chainId,
               router,
             }
           })
-          .filter(Boolean) as { chainId: number; router: string }[]
+          .filter(Boolean)
       })
     )
   }
@@ -322,13 +324,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return inst.pools.getCurrencies().pipe(
       map((currencies) => {
         return currencies
-          .filter(
-            (cur) =>
-              getCurrencyChainId(cur) === chainId &&
+          .filter((cur) => {
+            const location = getCurrencyLocation(cur)
+            return (
+              typeof location === 'object' &&
+              location.evm === chainId &&
               !!getCurrencyEvmAddress(cur) &&
               typeof cur.key === 'object' &&
               'ForeignAsset' in cur.key
-          )
+            )
+          })
           .map((cur) => ({ ...cur, address: getCurrencyEvmAddress(cur)! }))
       })
     )
@@ -557,13 +562,4 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     getLiquidityPoolInvestment,
     getRecentLPEvents,
   }
-}
-
-export function getCurrencyChainId(currency: CurrencyMetadata) {
-  const chainId = currency.location?.v3?.interior?.x3?.[1]?.globalConsensus?.ethereum?.chainId
-  return chainId != null ? Number(chainId) : undefined
-}
-
-export function getCurrencyEvmAddress(currency: CurrencyMetadata) {
-  return currency.location?.v3?.interior?.x3?.[2]?.accountKey20?.key as string | undefined
 }

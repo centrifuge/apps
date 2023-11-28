@@ -1,5 +1,5 @@
 import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
-import { formatBalance, useAddress, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
+import { formatBalance, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -29,6 +29,7 @@ type Row = {
   position: TokenBalance
   tokenPrice: TokenBalance
   canInvestRedeem: boolean
+  address: string
 }
 
 const columns: Column[] = [
@@ -38,7 +39,6 @@ const columns: Column[] = [
     cell: (token: Row) => {
       return <TokenWithIcon {...token} />
     },
-    width: '2fr',
   },
   {
     header: 'Token price',
@@ -49,6 +49,7 @@ const columns: Column[] = [
         </Text>
       )
     },
+    align: 'left',
   },
   {
     header: <SortableTableHeader label="Position" />,
@@ -60,6 +61,7 @@ const columns: Column[] = [
       )
     },
     sortKey: 'position',
+    align: 'left',
   },
   {
     header: <SortableTableHeader label="Market value" />,
@@ -71,6 +73,7 @@ const columns: Column[] = [
       )
     },
     sortKey: 'marketValue',
+    align: 'left',
   },
   {
     align: 'left',
@@ -108,8 +111,7 @@ const columns: Column[] = [
 ]
 
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
-export const InvestedTokens = ({ canInvestRedeem = false }) => {
-  const address = useAddress()
+export function InvestedTokens({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()

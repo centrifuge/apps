@@ -259,7 +259,7 @@ export const OnboardingSettings = () => {
             <Text variant="heading4">Onboarding status</Text>
             <Stack gap={1}>
               {Object.entries(formik.values.openForOnboarding).map(([tId, open]) => (
-                <Shelf width="100%" justifyContent="space-between" gap={2}>
+                <Shelf width="100%" justifyContent="space-between" gap={2} key={tId}>
                   <Text variant="body1">{(pool.tranches as Token[]).find((t) => t.id === tId)?.currency.name}</Text>
                   <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px" width="fit-content">
                     <ToggleButton

@@ -53,6 +53,7 @@ export type Key =
   | 'showLiquidityPoolsOptions'
   | 'showPrime'
   | 'poolCreationType'
+  | 'podAdminSeed'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -156,5 +157,9 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
       propose: 'propose',
       notePreimage: 'notePreimage',
     },
+  },
+  podAdminSeed: {
+    type: 'text',
+    default: '//Eve',
   },
 }
