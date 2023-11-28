@@ -1,4 +1,4 @@
-import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { Price, Token, TokenBalance } from '@centrifuge/centrifuge-js'
 import { formatBalance, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
@@ -113,6 +113,7 @@ const columns: Column[] = [
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function InvestedTokens({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
+  console.log('🚀 ~ centBalances:', centBalances)
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
 
@@ -137,10 +138,28 @@ export function InvestedTokens({ canInvestRedeem = false, address }: { canInvest
     }
   })
 
+  // TODO: make row clickable
+  centBalances &&
+    tableData.push({
+      currency: {
+        ...centBalances?.native.currency,
+        name: 'Centrifuge',
+        key: 'centrifuge',
+        isPoolCurrency: false,
+        isPermissioned: false,
+      },
+      poolId: '',
+      trancheId: '',
+      position: centBalances?.native.balance,
+      tokenPrice: new Price(1), // TODO: get token price
+      marketValue: Dec(0), // TODO: calculate market value with token price
+      canInvestRedeem: false,
+    })
+
   return tableData.length ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
-        Portfolio
+        Holdings
       </Text>
       <DataTable columns={columns} data={tableData} />
     </Stack>
@@ -152,7 +171,11 @@ const TokenWithIcon = ({ poolId, currency }: Row) => {
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
   const { sizes } = useTheme()
-  const icon = metadata?.pool?.icon?.uri ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri) : null
+  const icon = metadata?.pool?.icon?.uri
+    ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri)
+    : !poolId
+    ? cent.metadata.parseMetadataUrl('ipfs://Qmbo43MdtokiRQ5fTLT8FoYZo6kJrW56vUqXjqYQY6Fg9f')
+    : null
   return (
     <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
       <Eththumbnail show={!!poolId.startsWith('0x')}>
