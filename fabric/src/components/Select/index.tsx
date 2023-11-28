@@ -7,7 +7,7 @@ import { Stack } from '../Stack'
 import { Text } from '../Text'
 
 export type SelectOptionItem = {
-  label: string
+  label: React.ReactNode
   value: string
   disabled?: boolean
 }
