@@ -26,10 +26,6 @@ type FinanceValues = {
   withdraw: undefined | WithdrawAddress
 }
 
-type RepayValues = {
-  amount: number | '' | Decimal
-}
-
 export function FinanceForm({ loan }: { loan: LoanType }) {
   return isExternalLoan(loan) ? (
     <ExternalFinanceForm loan={loan as ExternalLoan} />
