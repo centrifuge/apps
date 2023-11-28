@@ -1436,7 +1436,7 @@ export function getPoolsModule(inst: Centrifuge) {
       combineLatestWith(getCurrencies()),
       switchMap(([api, currencies]) => {
         const currency = findCurrency(currencies, currencyId)
-        if (!currency || (typeof location !== 'string' && 'parachain' in location && !currency.location?.V3)) {
+        if (!currency || (typeof location !== 'string' && 'parachain' in location && !currency.location?.v3)) {
           throw new Error('Currency not found')
         }
         const submittable =
@@ -1448,7 +1448,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 {
                   V3: [
                     {
-                      Concrete: currency.location.V3,
+                      Concrete: currency.location.v3,
                     },
                     {
                       Fungible: amount,
@@ -1472,7 +1472,7 @@ export function getPoolsModule(inst: Centrifuge) {
                             }
                           : {
                               AccountId32: {
-                                id: address,
+                                id: addressToHex(address),
                               },
                             },
                       ],
@@ -3135,4 +3135,20 @@ function looksLike(a: any, b: any): boolean {
 
 function isPrimitive(val: any): val is boolean | string | number | null | undefined {
   return val == null || /^[sbn]/.test(typeof val)
+}
+
+export function getCurrencyLocation(currency: CurrencyMetadata) {
+  const chainId = currency.location?.v3?.interior?.x3?.[1]?.globalConsensus?.ethereum?.chainId
+  if (chainId) {
+    return { evm: Number(chainId) }
+  }
+  const parachain = currency.location?.v3?.interior?.x3?.[0]?.parachain
+  if (parachain) {
+    return { parachain: Number(parachain) }
+  }
+  return 'centrifuge'
+}
+
+export function getCurrencyEvmAddress(currency: CurrencyMetadata) {
+  return currency.location?.v3?.interior?.x3?.[2]?.accountKey20?.key as string | undefined
 }

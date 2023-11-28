@@ -7,7 +7,7 @@ import { Transaction, useTransaction, useTransactions } from '../components/Tran
 import { CombinedSubstrateAccount, SubstrateAccount, useEvmProvider, useWallet } from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
-export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
+export type CentrifugeTransactionOptions = Partial<Pick<TransactionOptions, 'createType'>> & {
   account?: CombinedSubstrateAccount
   // If a transaction can be done via a proxy other than Any, pass the allowed types here,
   // to make sure the transaction selects the right one.
