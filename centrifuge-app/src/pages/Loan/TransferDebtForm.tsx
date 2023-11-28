@@ -40,7 +40,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       !isExternalLoan(l as any)
   )
 
-  const { execute, isLoading } = useCentrifugeTransaction('Finance asset', (cent) => cent.pools.transferLoanDebt, {
+  const { execute, isLoading } = useCentrifugeTransaction('Transfer debt', (cent) => cent.pools.transferLoanDebt, {
     onSuccess: () => {
       form.resetForm()
     },
@@ -69,8 +69,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
         borrowAmount = borrow.amount
       }
 
-      const l = selectedLoan
-      const outstandingPrincipal = l.totalBorrowed.sub(l.repaid.principal)
+      const outstandingPrincipal = selectedLoan.totalBorrowed.sub(selectedLoan.repaid.principal)
       let principal: BN = new BN(borrowAmount)
       let interest = new BN(0)
       if (principal.gt(outstandingPrincipal)) {
