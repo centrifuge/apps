@@ -8,7 +8,7 @@ export default {
   title: 'Components/Drawer',
 }
 
-export const Default: React.FC = () => {
+export const Default = () => {
   const [open, setOpen] = React.useState(false)
   return (
     <>
