@@ -1,4 +1,4 @@
-import { Card, Grid, Stack, Text } from '@centrifuge/fabric'
+import { Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { LayoutBase } from '../../components/LayoutBase'
@@ -6,7 +6,6 @@ import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { PoolList } from '../../components/PoolList'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
-import { Rewards } from '../../components/Portfolio/Rewards'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
 
@@ -42,13 +41,11 @@ function Portfolio() {
             </Text>
           </Stack>
 
-          <Grid gridTemplateColumns={['1.5fr 1fr']} gap={4}>
+          <Shelf>
             <Card as="article" p={1}>
               <Text as="h2">Portfolio overview</Text>
             </Card>
-
-            <Rewards />
-          </Grid>
+          </Shelf>
         </BasePadding>
         <BasePadding gap={3}>
           <InvestedTokens address={address} />
