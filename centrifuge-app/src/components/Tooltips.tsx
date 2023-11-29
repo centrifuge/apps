@@ -254,6 +254,10 @@ export const tooltipText = {
     label: 'Notional value',
     body: 'The notional value is the total value of the underlying asset.',
   },
+  cfgPrice: {
+    label: 'CFG Price',
+    body: 'Price sourced externally from Coinmarketcap.',
+  },
 }
 
 export type TooltipsProps = {
