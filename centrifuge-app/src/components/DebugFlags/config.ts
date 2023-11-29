@@ -41,7 +41,6 @@ export type Key =
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
   | 'editPoolConfig'
-  | 'poolReporting'
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
@@ -96,10 +95,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editAdminConfig: {
-    type: 'checkbox',
-    default: false,
-  },
-  poolReporting: {
     type: 'checkbox',
     default: false,
   },
