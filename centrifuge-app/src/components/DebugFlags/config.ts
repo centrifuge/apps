@@ -50,7 +50,6 @@ export type Key =
   | 'showPortfolio'
   | 'showTestNets'
   | 'showSwaps'
-  | 'showLiquidityPoolsOptions'
   | 'showPrime'
   | 'poolCreationType'
   | 'podAdminSeed'
@@ -97,10 +96,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editAdminConfig: {
-    type: 'checkbox',
-    default: false,
-  },
-  showLiquidityPoolsOptions: {
     type: 'checkbox',
     default: false,
   },
