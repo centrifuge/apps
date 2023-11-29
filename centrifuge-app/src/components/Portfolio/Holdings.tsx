@@ -1,4 +1,4 @@
-import { Price, Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
 import { formatBalance, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
@@ -18,10 +18,12 @@ import { useMemo } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
+import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
+import { CFGTransfer } from './CFGTransfer'
 
 type Row = {
   currency: Token['currency']
@@ -47,7 +49,7 @@ const columns: Column[] = [
     cell: ({ tokenPrice }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalance(tokenPrice.toDecimal() || 1, 'USDT', 4)}
+          {formatBalance(tokenPrice || 1, 'USDT', 4)}
         </Text>
       )
     },
@@ -58,7 +60,7 @@ const columns: Column[] = [
     cell: ({ currency, position }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalance(position, currency.symbol)}
+          {formatBalanceAbbreviated(position, currency.symbol, 2)}
         </Text>
       )
     },
@@ -70,7 +72,7 @@ const columns: Column[] = [
     cell: ({ marketValue }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalance(marketValue, 'USDT', 4)}
+          {formatBalanceAbbreviated(marketValue, 'USDT', 2)}
         </Text>
       )
     },
@@ -137,7 +139,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
       poolId: balance.poolId,
       trancheId: balance.trancheId,
       position: balance.balance,
-      tokenPrice: tranche?.tokenPrice || Dec(1),
+      tokenPrice: tranche?.tokenPrice?.toDecimal() || Dec(1),
       marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
       canInvestRedeem,
     }
@@ -155,14 +157,16 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
       poolId: '',
       trancheId: '',
       position: centBalances?.native.balance,
-      tokenPrice: new Price(1), // TODO: get token price
-      marketValue: Dec(0), // TODO: calculate market value with token price
+      tokenPrice: Dec(0.45), // TODO: get token price
+      marketValue: centBalances?.native.balance.toDecimal().mul(0.45), // TODO: calculate market value with token price
       canInvestRedeem: false,
     })
 
   return tableData.length ? (
     <Stack as="article" gap={2}>
-      <Drawer isOpen={openDrawer} onClose={() => history.replace('portfolio')} />
+      <Drawer isOpen={openDrawer} onClose={() => history.replace('portfolio')}>
+        <CFGTransfer address={address} />
+      </Drawer>
       <Text as="h2" variant="heading2">
         Holdings
       </Text>
