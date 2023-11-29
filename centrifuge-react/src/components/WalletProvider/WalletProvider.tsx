@@ -171,7 +171,7 @@ export function WalletProvider({
           symbol: consts.chainSymbol,
           decimals: consts.chainDecimals,
         },
-        blockExplorerUrl: 'https://etherscan.io/',
+        blockExplorerUrl: 'https://centrifuge.subscan.io/',
       }
     }
     return chains
