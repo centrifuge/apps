@@ -41,7 +41,6 @@ export type Key =
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
   | 'editPoolConfig'
-  | 'poolReporting'
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
@@ -50,7 +49,6 @@ export type Key =
   | 'showPortfolio'
   | 'showTestNets'
   | 'showSwaps'
-  | 'showLiquidityPoolsOptions'
   | 'showPrime'
   | 'poolCreationType'
   | 'podAdminSeed'
@@ -97,14 +95,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   editAdminConfig: {
-    type: 'checkbox',
-    default: false,
-  },
-  showLiquidityPoolsOptions: {
-    type: 'checkbox',
-    default: false,
-  },
-  poolReporting: {
     type: 'checkbox',
     default: false,
   },
