@@ -5,7 +5,7 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { PoolList } from '../../components/PoolList'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
-import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
+import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
 
@@ -48,7 +48,7 @@ function Portfolio() {
           </Shelf>
         </BasePadding>
         <BasePadding gap={3}>
-          <InvestedTokens address={address} />
+          <Holdings address={address} />
           <Transactions onlyMostRecent address={address} />
           <AssetAllocation address={address} />
         </BasePadding>
