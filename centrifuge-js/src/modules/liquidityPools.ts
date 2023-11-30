@@ -308,7 +308,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         ...(currencies.flatMap((currency) => ({
           target: poolManager,
           call: ['function currencyAddressToId(address) view returns (uint128)', currency.address],
-          returns: [[`currencyNeedsAdding[${currency.address}]`, (id) => !id]],
+          returns: [[`currencyNeedsAdding[${currency.address}]`, (id: BigNumber) => id.isZero()]],
         })) as Call[]),
       ],
       {
