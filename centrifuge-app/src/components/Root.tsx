@@ -114,7 +114,7 @@ const evmChains = {
       decimals: 18,
     },
     blockExplorerUrl: 'https://goerli.arbiscan.io/',
-    urls: ['https://goerli-rollup.arbitrum.io/rpc'],
+    urls: ['https://arbitrum-goerli.infura.io/v3/${infuraKey}'],
     iconUrl: arbitrumLogo,
   },
 }
