@@ -20,6 +20,7 @@ import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
+import { Area, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
 import ethereumLogo from '../../assets/images/ethereum.svg'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
@@ -27,6 +28,7 @@ import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
+import { CustomizedTooltip, CustomizedXAxisTick } from '../Charts/CustomChartElements'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
 
@@ -50,7 +52,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
     [address]
   )
   return (
-    <Stack gap={2}>
+    <Stack gap={3}>
       <Text textAlign="center" variant="heading2">
         CFG Holdings
       </Text>
@@ -63,7 +65,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
           label="Value"
           value={formatBalanceAbbreviated(centBalances?.native.balance.toDecimal().mul(CFGPrice || 0) || 0, 'USD', 2)}
         />
-        <LabelValueStack label={<Tooltips type="cfgPrice" />} value={formatBalance(CFGPrice || 0, 'USD', 2)} />
+        <LabelValueStack label={<Tooltips type="cfgPrice" />} value={formatBalance(CFGPrice || 0, 'USD', 4)} />
       </Shelf>
       <Stack>
         <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
@@ -75,6 +77,12 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
         ) : (
           <ReceiveCFG centAddress={centAddress} evmAddress={evmAddress} />
         )}
+      </Stack>
+      <Stack gap={3}>
+        <Text textAlign="center" variant="heading6">
+          Price
+        </Text>
+        <CFGPriceChart />
       </Stack>
     </Stack>
   )
@@ -234,3 +242,55 @@ const Container = styled(Shelf)`
   height: 16px;
   width: 16px;
 `
+
+const CFGPriceChart = () => {
+  const theme = useTheme()
+  const data = [{ day: Date.now(), tokenPrice: 0.998 }]
+  return (
+    <Stack gap={1}>
+      <Shelf gap={1}>
+        <Text variant="body3">CFG - {0.98} USD</Text>
+        <Text variant="body3" color="statusOk">
+          +20%
+        </Text>
+      </Shelf>
+      <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+        <ComposedChart data={data} margin={{ left: -30, top: 20, right: 40 }}>
+          <defs>
+            <linearGradient id="colorCFGPrice" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={'#626262'} stopOpacity={0.4} />
+              <stop offset="95%" stopColor={'#908f8f'} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis
+            dataKey="day"
+            tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
+            tickLine={false}
+            interval={data.length < 14 || data.length > 33 ? 0 : 1}
+          />
+          <YAxis
+            tickCount={10}
+            tickLine={false}
+            style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+            tickFormatter={(tick: number) => {
+              return tick.toFixed(2)
+            }}
+            domain={['dataMin - 0.2', 'dataMax + 0.2']}
+          />
+          <CartesianGrid stroke={theme.colors.borderSecondary} />
+          <Tooltip content={<CustomizedTooltip currency={'USD'} precision={4} />} />
+          <Area
+            type="monotone"
+            dataKey="tokenPrice"
+            strokeWidth={1}
+            fillOpacity={1}
+            fill="url(#colorCFGPrice)"
+            name="Price"
+            activeDot={{ fill: '#908f8f' }}
+            stroke="#908f8f"
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </Stack>
+  )
+}
