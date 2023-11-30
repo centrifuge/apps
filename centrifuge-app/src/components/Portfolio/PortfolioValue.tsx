@@ -1,72 +1,11 @@
+import { useAddress, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Card, Stack, Text } from '@centrifuge/fabric'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
+import { useDailyPortfolioValue } from '../../utils/usePools'
 
-const chartColor = '#006EF5'
-
-const data = [
-  {
-    portfolioValue: 123809,
-    dateInMilliseconds: Date.now(),
-    month: 'Jan',
-  },
-  {
-    portfolioValue: 123809,
-    dateInMilliseconds: Date.now() - 86400000, // 1 day ago
-    month: 'Feb',
-  },
-  {
-    portfolioValue: 123809,
-    dateInMilliseconds: Date.now() - 86400000 * 2, // 2 days ago
-    month: 'Mar',
-  },
-  {
-    portfolioValue: 2023480,
-    dateInMilliseconds: Date.now() - 86400000 * 3, // 3 days ago
-    month: 'Apr',
-  },
-  {
-    portfolioValue: 3023480,
-    dateInMilliseconds: Date.now() - 86400000 * 4, // 4 days ago
-    month: 'May',
-  },
-  {
-    portfolioValue: 4023480,
-    dateInMilliseconds: Date.now() - 86400000 * 5, // 5 days ago
-    month: 'Jun',
-  },
-  {
-    portfolioValue: 7023480,
-    dateInMilliseconds: Date.now() - 86400000 * 6, // 6 days ago
-    month: 'Jul',
-  },
-  {
-    portfolioValue: 8023480,
-    dateInMilliseconds: Date.now() - 86400000 * 7, // 7 days ago
-    month: 'Aug',
-  },
-  {
-    portfolioValue: 9023480,
-    dateInMilliseconds: Date.now() - 86400000 * 8, // 8 days ago
-    month: 'Sep',
-  },
-  {
-    portfolioValue: 10023480,
-    dateInMilliseconds: Date.now() - 86400000 * 9, // 9 days ago
-    month: 'Oct',
-  },
-  {
-    portfolioValue: 11023480,
-    dateInMilliseconds: Date.now() - 86400000 * 10, // 10 days ago
-    month: 'Nov',
-  },
-  {
-    portfolioValue: 12023480,
-    dateInMilliseconds: Date.now() - 86400000 * 11, // 11 days ago
-    month: 'Dec',
-  },
-]
+const chartColor = '#006ef5'
 
 const TooltipInfo = ({ payload }: any) => {
   const portfolioValue = payload[0]?.payload.portfolioValue
@@ -84,7 +23,11 @@ const TooltipInfo = ({ payload }: any) => {
   )
 }
 
-export function PortfolioValue() {
+export function PortfolioValue({ rangeValue }: { rangeValue: string }) {
+  const address = useAddress()
+  const { formatAddress } = useCentrifugeUtils()
+  const dailyPortfolioValue = useDailyPortfolioValue(formatAddress(address || ''), getRangeNumber(rangeValue))
+
   return (
     <ResponsiveContainer>
       <AreaChart
@@ -94,7 +37,7 @@ export function PortfolioValue() {
           left: 30,
           bottom: 0,
         }}
-        data={data}
+        data={dailyPortfolioValue?.reverse()}
       >
         <defs>
           <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
@@ -105,7 +48,7 @@ export function PortfolioValue() {
         <CartesianGrid vertical={false} />
 
         <XAxis
-          dataKey="month"
+          dataKey={({ dateInMilliseconds }) => `${dateInMilliseconds?.getMonth() + 1}/${dateInMilliseconds?.getDate()}`}
           tickLine={false}
           axisLine={false}
           style={{
@@ -114,7 +57,7 @@ export function PortfolioValue() {
           dy={4}
         />
         <YAxis
-          dataKey="portfolioValue"
+          dataKey={({ portfolioValue }) => portfolioValue.toString()}
           tickCount={10}
           tickLine={false}
           axisLine={false}
@@ -137,4 +80,20 @@ export function PortfolioValue() {
       </AreaChart>
     </ResponsiveContainer>
   )
+}
+
+const getRangeNumber = (rangeValue: string) => {
+  if (rangeValue === '30d') {
+    return 30
+  }
+  if (rangeValue === '90d') {
+    return 90
+  }
+
+  const today = new Date()
+  const januaryFirst = new Date(today.getFullYear(), 0, 1)
+  const timeDifference = new Date(today).getTime() - new Date(januaryFirst).getTime()
+  const daysSinceJanuary1 = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
+
+  return daysSinceJanuary1
 }

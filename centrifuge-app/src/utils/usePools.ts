@@ -1,6 +1,15 @@
-import Centrifuge, { BorrowerTransaction, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, {
+  BorrowerTransaction,
+  CurrencyBalance,
+  InvestorTransactionType,
+  Loan,
+  Pool,
+  PoolMetadata,
+  Price,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { useEffect, useMemo } from 'react'
 import { useQueries, useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
@@ -62,6 +71,70 @@ export function useTransactionsByAddress(address?: string) {
   )
 
   return result
+}
+
+type InvestorTransaction = {
+  currencyAmount: CurrencyBalance
+  hash: string
+  poolId: string
+  timestamp: string
+  tokenAmount: CurrencyBalance
+  tokenPrice: Price
+  trancheId: string
+  type: InvestorTransactionType
+}
+
+export function useDailyPortfolioValue(address: string, rangeValue: number) {
+  const today = new Date()
+
+  const transactions = useTransactionsByAddress(address)
+
+  const transactionsByTrancheId = useMemo(() => {
+    if (transactions?.investorTransactions) {
+      return transactions?.investorTransactions.reduce((acc, cur) => {
+        const trancheId = cur.trancheId
+        if (!acc[trancheId]) acc[trancheId] = []
+        acc[trancheId].push(cur)
+        return acc
+      }, {} as Record<string, InvestorTransaction[]>)
+    }
+  }, [transactions?.investorTransactions])
+
+  if (!transactionsByTrancheId) return
+
+  return Array(rangeValue + 1)
+    .fill(null)
+    .map((_, i) => i)
+    .map((day) => {
+      const valueOfTranche = Object.keys(transactionsByTrancheId).map((trancheId) => {
+        const transactions = transactionsByTrancheId[trancheId]
+
+        const transactionsInDateRange = transactions.filter((transaction) => {
+          const transactionDate = new Date(transaction.timestamp)
+
+          return transactionDate <= new Date(today.getTime() - day * 1000 * 60 * 60 * 24)
+        })
+
+        return transactionsInDateRange.reduce((acc: Decimal, cur) => {
+          if (cur.type === 'INVEST_EXECUTION') {
+            const amount = cur.tokenAmount.toDecimal().mul(cur.tokenPrice.toDecimal())
+
+            return acc.add(amount)
+          }
+          return acc
+        }, Dec(0))
+      })
+
+      return valueOfTranche.reduce(
+        (acc, cur) => ({
+          portfolioValue: acc.portfolioValue.add(cur),
+          dateInMilliseconds: new Date(today.getTime() - day * 1000 * 60 * 60 * 24),
+        }),
+        {
+          portfolioValue: Dec(0),
+        }
+      )
+    })
 }
 
 export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {

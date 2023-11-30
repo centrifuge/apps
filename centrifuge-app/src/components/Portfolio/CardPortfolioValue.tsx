@@ -95,7 +95,7 @@ export function CardPortfolioValue() {
         </Stack>
 
         <Box width="100%" height="300px">
-          <PortfolioValue />
+          <PortfolioValue rangeValue={range.value} />
         </Box>
       </Box>
     </Box>
