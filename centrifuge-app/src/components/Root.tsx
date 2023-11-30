@@ -92,7 +92,7 @@ const evmChains = {
     name: 'Base Goerli',
     nativeCurrency: { name: 'Base Goerli', symbol: 'gbETH', decimals: 18 },
     blockExplorerUrl: 'https://goerli.basescan.org/',
-    urls: [`https://base-goerli.infura.io/v3/${infuraKey}`],
+    urls: [`https://goerli.base.org`],
     iconUrl: baseLogo,
   },
   42161: {
