@@ -104,6 +104,18 @@ const parachainTypes = {
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
+  portfolio: {
+    accountPortfolio: {
+      description: 'Get investor portfolio',
+      params: [
+        {
+          name: 'account_id',
+          type: 'AccountId',
+        },
+      ],
+      type: 'Vec<(InvestmentId, InvestmentPortfolio)>',
+    },
+  },
   pools: {
     trancheTokenPrices: {
       description: 'Retrieve prices for all tranches',
@@ -154,6 +166,16 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
 }
 
 const parachainRuntimeApi: DefinitionsCall = {
+  PorfolioApi: [
+    {
+      // Runtime API calls must be in snake case (as defined in rust)
+      // However, RPCs are usually in camel case
+      methods: {
+        account_portfolio: parachainRpcMethods.portfolio.accountPortfolio,
+      },
+      version: 1,
+    },
+  ],
   PoolsApi: [
     {
       // Runtime API calls must be in snake case (as defined in rust)

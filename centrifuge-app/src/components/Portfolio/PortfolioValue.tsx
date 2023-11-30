@@ -3,7 +3,7 @@ import { Card, Stack, Text } from '@centrifuge/fabric'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
-import { useDailyPortfolioValue } from '../../utils/usePools'
+import { useDailyPortfolioValue } from './usePortfolio'
 
 const chartColor = '#006ef5'
 

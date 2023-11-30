@@ -20,6 +20,7 @@ import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
+import { useInvestorPortfolio } from './usePortfolio'
 
 type Row = {
   currency: Token['currency']
@@ -113,6 +114,10 @@ const columns: Column[] = [
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function InvestedTokens({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
+  const portfolioData = useInvestorPortfolio(address)
+
+  console.log({ portfolioData })
+
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
 

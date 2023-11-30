@@ -5,7 +5,7 @@ import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { PortfolioValue } from './PortfolioValue'
-import { usePortfolioValue } from './usePortfolioValue'
+import { usePortfolioValue } from './usePortfolio'
 
 const RangeFilterButton = styled(Stack)`
   &:hover {
