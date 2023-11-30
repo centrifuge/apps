@@ -15,7 +15,7 @@ import {
   Thumbnail,
 } from '@centrifuge/fabric'
 import { useMemo } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
@@ -119,7 +119,9 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   const centBalances = useBalances(address)
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
-  const { search } = useLocation()
+  const { search, pathname } = useLocation()
+  const route = useRouteMatch(['/portfolio', '/prime'])
+  const basePath = route?.path || ''
   const history = useHistory()
   const params = new URLSearchParams(search)
   const openDrawer = params.get('transfer') === 'cfg'
@@ -164,7 +166,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
 
   return tableData.length ? (
     <Stack as="article" gap={2}>
-      <Drawer isOpen={openDrawer} onClose={() => history.replace('portfolio')}>
+      <Drawer isOpen={openDrawer} onClose={() => history.replace(basePath)}>
         <CFGTransfer address={address} />
       </Drawer>
       <Text as="h2" variant="heading2">
@@ -173,9 +175,10 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
       <DataTable
         columns={columns}
         data={tableData}
-        hoverable
         onRowClicked={(row) =>
-          row.currency.symbol === centBalances?.native.currency.symbol ? `portfolio?transfer=cfg` : 'portfolio'
+          basePath === '/portfolio' && row.currency.symbol === centBalances?.native.currency.symbol
+            ? `portfolio?transfer=cfg`
+            : pathname
         }
       />
     </Stack>

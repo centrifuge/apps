@@ -1,14 +1,31 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, Shelf, Stack, Tabs, TabsItem, Text, TextInput } from '@centrifuge/fabric'
+import { useBalances, useCentrifugeTransaction, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  IconButton,
+  IconCopy,
+  IconInfo,
+  Shelf,
+  Stack,
+  Tabs,
+  TabsItem,
+  Text,
+  TextInput,
+  truncate,
+} from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import React from 'react'
-import { useTheme } from 'styled-components'
+import React, { useMemo } from 'react'
+import styled, { useTheme } from 'styled-components'
+import ethereumLogo from '../../assets/images/ethereum.svg'
+import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
+import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
 
@@ -18,7 +35,18 @@ type CFGHoldingsProps = {
 
 export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
   const centBalances = useBalances(address)
-  const [activeTab, setActiveTab] = React.useState(0)
+  const [activeTab, setActiveTab] = React.useState(1)
+  const utils = useCentrifugeUtils()
+
+  const centAddress = useMemo(
+    () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
+    [address]
+  )
+
+  const evmAddress = useMemo(
+    () => (address && address.startsWith('0x') ? address : utils.addressToHex(address)),
+    [address]
+  )
   return (
     <Stack gap={2}>
       <Text textAlign="center" variant="heading2">
@@ -27,12 +55,12 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
       <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
         <LabelValueStack
           label="Position"
-          value={formatBalance(centBalances?.native.balance || 0, centBalances?.native.currency.symbol, 2)}
+          value={formatBalanceAbbreviated(centBalances?.native.balance || 0, centBalances?.native.currency.symbol, 2)}
         />
         <LabelValueStack
           label="Value"
           // TODO: multiply value with toke price
-          value={formatBalance(centBalances?.native.balance.toDecimal().mul(0.45) || 0, 'USD', 2)}
+          value={formatBalanceAbbreviated(centBalances?.native.balance.toDecimal().mul(0.45) || 0, 'USD', 2)}
         />
         <LabelValueStack label={<Tooltips type="cfgPrice" />} value={formatBalance(0.45 || 0, 'USD', 2)} />
       </Shelf>
@@ -41,15 +69,21 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
           <TabsItem>Send</TabsItem>
           <TabsItem>Receive</TabsItem>
         </Tabs>
-        {activeTab === 0 ? <SendCFG address={address} /> : <ReceiveCFG />}
+        {activeTab === 0 ? (
+          <SendCFG centAddress={centAddress} evmAddress={evmAddress} />
+        ) : (
+          <ReceiveCFG centAddress={centAddress} evmAddress={evmAddress} />
+        )}
       </Stack>
     </Stack>
   )
 }
 
-const SendCFG = ({ address }: { address: string }) => {
+type SendReceiveProps = { evmAddress: string; centAddress: string }
+
+const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
   const theme = useTheme()
-  const centBalances = useBalances(address)
+  const centBalances = useBalances(centAddress)
 
   const { execute: transferCFG, isLoading } = useCentrifugeTransaction('Send CFG', (cent) => cent.tokens.transfer, {
     onSuccess: () => form.resetForm(),
@@ -58,7 +92,7 @@ const SendCFG = ({ address }: { address: string }) => {
   const form = useFormik<{ amount: Decimal | undefined; recipientAddress: string }>({
     initialValues: {
       amount: undefined,
-      recipientAddress: '',
+      recipientAddress: evmAddress || '',
     },
     enableReinitialize: true,
     validate(values) {
@@ -142,7 +176,60 @@ const SendCFG = ({ address }: { address: string }) => {
   )
 }
 
-const ReceiveCFG = () => {
+const ReceiveCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
   const theme = useTheme()
-  return <Stack backgroundColor={theme.colors.backgroundSecondary}>Receiving</Stack>
+  return (
+    <Stack gap={2} px={1} py={2} backgroundColor={theme.colors.backgroundSecondary}>
+      <Stack gap={3}>
+        <Text variant="interactive2" color={theme.colors.grayScale[800]}>
+          Your addresses on Centrifuge Chain
+        </Text>
+        <Shelf gap={1}>
+          <Container>
+            <Box as="img" src={ethereumLogo} width="100%" height="100%" alt="" />
+          </Container>
+          <Text variant="label2" color={theme.colors.grayScale[800]}>
+            Ethereum Address:{' '}
+          </Text>
+          <Text variant="label1" fontSize="12px" textDecoration="underline" color={theme.colors.grayScale[900]}>
+            {truncate(evmAddress)}
+          </Text>
+          <IconButton onClick={() => copyToClipboard(evmAddress)} title="Copy address to clipboard">
+            <IconCopy />
+          </IconButton>
+        </Shelf>
+        <Shelf gap={1}>
+          <Container>
+            <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
+          </Container>
+          <Text variant="label2" color={theme.colors.grayScale[800]}>
+            Centrifuge Native Address:{' '}
+          </Text>
+          <Text variant="label1" fontSize="12px" textDecoration="underline" color={theme.colors.grayScale[900]}>
+            {truncate(centAddress)}
+          </Text>
+          <IconButton onClick={() => copyToClipboard(centAddress)} title="Copy address to clipboard">
+            <IconCopy />
+          </IconButton>
+        </Shelf>
+      </Stack>
+      <Shelf borderRadius="3px" alignItems="flex-start" backgroundColor="backgroundPrimary" p={1} gap={1}>
+        <IconInfo size={16} />
+        <Text variant="body3" color={theme.colors.grayScale[800]}>
+          Use this Ethereum address only on Centrifuge Chain. Receiving CFG on another network on this address will
+          result in loss of funds. Be sure to select the right network.
+        </Text>
+      </Shelf>
+    </Stack>
+  )
 }
+
+const Container = styled(Shelf)`
+  position: relative;
+  filter: ${({ theme }) => (theme.scheme === 'dark' ? 'invert()' : undefined)};
+  img {
+    object-fit: contain;
+  }
+  height: 16px;
+  width: 16px;
+`

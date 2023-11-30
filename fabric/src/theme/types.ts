@@ -43,6 +43,7 @@ type ThemeColors = {
   accentScale: Record<number, string>
   yellowScale: Record<number, string>
   blueScale: Record<number, string>
+  grayScale: Record<number, string>
 }
 
 // Lengths
