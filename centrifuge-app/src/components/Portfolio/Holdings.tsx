@@ -20,6 +20,7 @@ import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
+import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
@@ -126,6 +127,8 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   const params = new URLSearchParams(search)
   const openDrawer = params.get('transfer') === 'cfg'
 
+  const CFGPrice = useCFGTokenPrice()
+
   const balances = useMemo(() => {
     return [
       ...(centBalances?.tranches || []),
@@ -159,8 +162,8 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
       poolId: '',
       trancheId: '',
       position: centBalances?.native.balance,
-      tokenPrice: Dec(0.45), // TODO: get token price
-      marketValue: centBalances?.native.balance.toDecimal().mul(0.45), // TODO: calculate market value with token price
+      tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
+      marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) : Dec(0),
       canInvestRedeem: false,
     })
 

@@ -26,6 +26,7 @@ import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
 
@@ -37,6 +38,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
   const centBalances = useBalances(address)
   const [activeTab, setActiveTab] = React.useState(1)
   const utils = useCentrifugeUtils()
+  const CFGPrice = useCFGTokenPrice()
 
   const centAddress = useMemo(
     () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
@@ -59,10 +61,9 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
         />
         <LabelValueStack
           label="Value"
-          // TODO: multiply value with toke price
-          value={formatBalanceAbbreviated(centBalances?.native.balance.toDecimal().mul(0.45) || 0, 'USD', 2)}
+          value={formatBalanceAbbreviated(centBalances?.native.balance.toDecimal().mul(CFGPrice || 0) || 0, 'USD', 2)}
         />
-        <LabelValueStack label={<Tooltips type="cfgPrice" />} value={formatBalance(0.45 || 0, 'USD', 2)} />
+        <LabelValueStack label={<Tooltips type="cfgPrice" />} value={formatBalance(CFGPrice || 0, 'USD', 2)} />
       </Shelf>
       <Stack>
         <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
