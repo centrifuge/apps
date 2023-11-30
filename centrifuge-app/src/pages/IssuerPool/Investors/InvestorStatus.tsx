@@ -26,7 +26,6 @@ import { isAddress } from '@polkadot/util-crypto'
 import React from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
-import { useDebugFlags } from '../../../components/DebugFlags'
 import { PageSection } from '../../../components/PageSection'
 import { usePermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useOrder, usePool } from '../../../utils/usePools'
@@ -47,7 +46,6 @@ export function InvestorStatus() {
   const permissions = usePermissions(centAddress)
 
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
-  const { showLiquidityPoolsOptions } = useDebugFlags()
 
   const [account] = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'] })
 
@@ -94,21 +92,19 @@ export function InvestorStatus() {
             placeholder="Enter address..."
             clear={() => setAddress('')}
           />
-          {showLiquidityPoolsOptions && (
-            <Select
-              value={chain}
-              options={[
-                { value: '', label: 'Centrifuge' },
-                ...Object.keys(chains).map((chainId) => ({
-                  value: chainId,
-                  label: `${chainId} - ${getChainInfo(chains, Number(chainId)).name}`,
-                })),
-              ]}
-              onChange={(e) => {
-                setChain(e.target.value as any)
-              }}
-            />
-          )}
+          <Select
+            value={chain}
+            options={[
+              { value: '', label: 'Centrifuge' },
+              ...Object.keys(chains).map((chainId) => ({
+                value: chainId,
+                label: `${chainId} - ${getChainInfo(chains, Number(chainId)).name}`,
+              })),
+            ]}
+            onChange={(e) => {
+              setChain(e.target.value as any)
+            }}
+          />
           {address && !validAddress ? (
             <Text variant="label2" color="statusCritical">
               <Shelf gap={1}>
