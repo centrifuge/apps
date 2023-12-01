@@ -1,5 +1,5 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -93,6 +93,7 @@ type SendReceiveProps = { evmAddress: string; centAddress: string }
 const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
   const theme = useTheme()
   const centBalances = useBalances(centAddress)
+  const utils = useCentrifugeUtils()
 
   const { execute: transferCFG, isLoading } = useCentrifugeTransaction('Send CFG', (cent) => cent.tokens.transfer, {
     onSuccess: () => form.resetForm(),
@@ -101,7 +102,7 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
   const form = useFormik<{ amount: Decimal | undefined; recipientAddress: string }>({
     initialValues: {
       amount: undefined,
-      recipientAddress: evmAddress || '',
+      recipientAddress: '',
     },
     enableReinitialize: true,
     validate(values) {
@@ -120,6 +121,9 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
     },
     onSubmit: (values, actions) => {
       if (typeof values.amount !== 'undefined') {
+        if (isEvmAddress(values.recipientAddress)) {
+          values.recipientAddress = utils.evmToSubstrateAddress(values.recipientAddress, 2000)
+        }
         transferCFG([
           values.recipientAddress,
           'Native',
@@ -138,13 +142,13 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
         <Form>
           <Stack gap="2">
             <Field name="recipientAddress">
-              {({ field, meta, form }: FieldProps) => (
+              {({ field, meta }: FieldProps) => (
                 <TextInput
                   {...field}
                   label="Recipient address"
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
-                  placeholder="0x"
+                  placeholder="0x0abc...xyz (EVM or Substrate address)"
                   required
                 />
               )}
@@ -186,27 +190,30 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
 }
 
 const ReceiveCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
+  const { isEvmOnSubstrate } = useWallet()
   const theme = useTheme()
   return (
     <Stack gap={2} px={1} py={2} backgroundColor={theme.colors.backgroundSecondary}>
       <Stack gap={3}>
         <Text variant="interactive2" color={theme.colors.grayScale[800]}>
-          Your addresses on Centrifuge Chain
+          Your address{isEvmOnSubstrate ? 'es' : ''} on Centrifuge Chain
         </Text>
-        <Shelf gap={1}>
-          <Container>
-            <Box as="img" src={ethereumLogo} width="100%" height="100%" alt="" />
-          </Container>
-          <Text variant="label2" color={theme.colors.grayScale[800]}>
-            Ethereum Address:{' '}
-          </Text>
-          <Text variant="label1" fontSize="12px" textDecoration="underline" color={theme.colors.grayScale[900]}>
-            {truncate(evmAddress)}
-          </Text>
-          <IconButton onClick={() => copyToClipboard(evmAddress)} title="Copy address to clipboard">
-            <IconCopy />
-          </IconButton>
-        </Shelf>
+        {isEvmOnSubstrate && (
+          <Shelf gap={1}>
+            <Container>
+              <Box as="img" src={ethereumLogo} width="100%" height="100%" alt="" />
+            </Container>
+            <Text variant="label2" color={theme.colors.grayScale[800]}>
+              Ethereum Address:{' '}
+            </Text>
+            <Text variant="label1" fontSize="12px" textDecoration="underline" color={theme.colors.grayScale[900]}>
+              {truncate(evmAddress)}
+            </Text>
+            <IconButton onClick={() => copyToClipboard(evmAddress)} title="Copy address to clipboard">
+              <IconCopy />
+            </IconButton>
+          </Shelf>
+        )}
         <Shelf gap={1}>
           <Container>
             <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
@@ -222,13 +229,15 @@ const ReceiveCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
           </IconButton>
         </Shelf>
       </Stack>
-      <Shelf borderRadius="3px" alignItems="flex-start" backgroundColor="backgroundPrimary" p={1} gap={1}>
-        <IconInfo size={16} />
-        <Text variant="body3" color={theme.colors.grayScale[800]}>
-          Use this Ethereum address only on Centrifuge Chain. Receiving CFG on another network on this address will
-          result in loss of funds. Be sure to select the right network.
-        </Text>
-      </Shelf>
+      {isEvmOnSubstrate && (
+        <Shelf borderRadius="3px" alignItems="flex-start" backgroundColor="backgroundPrimary" p={1} gap={1}>
+          <IconInfo size={16} />
+          <Text variant="body3" color={theme.colors.grayScale[800]}>
+            Use this Ethereum address only on Centrifuge Chain. Receiving CFG on another network on this address will
+            result in loss of funds. Be sure to select the right network.
+          </Text>
+        </Shelf>
+      )}
     </Stack>
   )
 }
@@ -259,12 +268,11 @@ const CFGPriceChart = () => {
       <Shelf gap={1}>
         <Text variant="body3">CFG - {data.at(-1)?.priceUSD.toFixed(2)} USD</Text>
         <Text variant="body3" color="statusOk">
-          +20%
+          TODO: +20%
         </Text>
       </Shelf>
       <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-        {/* <ComposedChart data={data || []} margin={{ left: -30, top: 20, right: 40 }}> */}
-        <AreaChart data={data || []} margin={{ top: 5, left: -30 }}>
+        <AreaChart data={data || []} margin={{ top: 10, left: -30 }}>
           <defs>
             <linearGradient id="colorCFGPrice" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={'#626262'} stopOpacity={0.4} />
