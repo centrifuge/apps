@@ -20,6 +20,7 @@ import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
+import { useRouteMatch } from 'react-router'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
 import ethereumLogo from '../../assets/images/ethereum.svg'
@@ -41,6 +42,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
   const [activeTab, setActiveTab] = React.useState(0)
   const utils = useCentrifugeUtils()
   const CFGPrice = useCFGTokenPrice()
+  const isPortfolioPage = useRouteMatch('/portfolio')
 
   const centAddress = useMemo(
     () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
@@ -67,7 +69,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
         />
         <LabelValueStack label={<Tooltips type="cfgPrice" />} value={formatBalance(CFGPrice || 0, 'USD', 4)} />
       </Shelf>
-      {!address && (
+      {isPortfolioPage && (
         <Stack>
           <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
             <TabsItem>Send</TabsItem>
@@ -256,6 +258,7 @@ const Container = styled(Shelf)`
 const CFGPriceChart = () => {
   const theme = useTheme()
   const { data: tokenDayData } = useDailyCFGPrice()
+  const currentCFGPrice = useCFGTokenPrice()
   const data =
     (tokenDayData?.data?.tokenDayDatas as { date: number; priceUSD: string }[])?.map((entry) => {
       return {
@@ -267,7 +270,7 @@ const CFGPriceChart = () => {
   return (
     <Stack gap={0}>
       <Shelf gap={1}>
-        <Text variant="body3">CFG - {data.at(-1)?.priceUSD.toFixed(2)} USD</Text>
+        {currentCFGPrice && <Text variant="body3">CFG - {currentCFGPrice.toFixed(2)} USD</Text>}
         {/* <Text variant="body3" color="statusOk">
           TODO: +20%
         </Text> */}
