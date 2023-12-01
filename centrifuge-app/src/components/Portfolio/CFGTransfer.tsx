@@ -20,15 +20,15 @@ import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
-import { Area, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
 import ethereumLogo from '../../assets/images/ethereum.svg'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
-import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
-import { CustomizedTooltip, CustomizedXAxisTick } from '../Charts/CustomChartElements'
+import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
+import { CustomizedTooltip } from '../Charts/CustomChartElements'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
 
@@ -38,7 +38,7 @@ type CFGHoldingsProps = {
 
 export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
   const centBalances = useBalances(address)
-  const [activeTab, setActiveTab] = React.useState(1)
+  const [activeTab, setActiveTab] = React.useState(0)
   const utils = useCentrifugeUtils()
   const CFGPrice = useCFGTokenPrice()
 
@@ -112,7 +112,7 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
       if (!values.amount || values.amount.lte(0)) {
         errors.amount = 'Amount must be greater than 0'
       }
-      if (!isAddress(values.recipientAddress) || !isEvmAddress(values.recipientAddress)) {
+      if (!(isAddress(values.recipientAddress) || isEvmAddress(values.recipientAddress))) {
         errors.recipientAddress = 'Invalid address format'
       }
 
@@ -123,7 +123,7 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
         transferCFG([
           values.recipientAddress,
           'Native',
-          new CurrencyBalance(values.amount.toString(), centBalances?.native.currency.decimals || 18),
+          CurrencyBalance.fromFloat(values.amount.toString(), centBalances?.native.currency.decimals || 18),
         ])
       } else {
         actions.setErrors({ amount: 'Amount must be greater than 0' })
@@ -245,17 +245,26 @@ const Container = styled(Shelf)`
 
 const CFGPriceChart = () => {
   const theme = useTheme()
-  const data = [{ day: Date.now(), tokenPrice: 0.998 }]
+  const { data: tokenDayData } = useDailyCFGPrice()
+  const data =
+    (tokenDayData?.data?.tokenDayDatas as { date: number; priceUSD: string }[])?.map((entry) => {
+      return {
+        day: new Date(entry.date * 1000),
+        priceUSD: parseFloat(entry.priceUSD),
+      }
+    }) || []
+
   return (
-    <Stack gap={1}>
+    <Stack gap={0}>
       <Shelf gap={1}>
-        <Text variant="body3">CFG - {0.98} USD</Text>
+        <Text variant="body3">CFG - {data.at(-1)?.priceUSD.toFixed(2)} USD</Text>
         <Text variant="body3" color="statusOk">
           +20%
         </Text>
       </Shelf>
       <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-        <ComposedChart data={data} margin={{ left: -30, top: 20, right: 40 }}>
+        {/* <ComposedChart data={data || []} margin={{ left: -30, top: 20, right: 40 }}> */}
+        <AreaChart data={data || []} margin={{ top: 5, left: -30 }}>
           <defs>
             <linearGradient id="colorCFGPrice" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={'#626262'} stopOpacity={0.4} />
@@ -264,24 +273,29 @@ const CFGPriceChart = () => {
           </defs>
           <XAxis
             dataKey="day"
-            tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
+            type="category"
+            tickFormatter={(tick: number) => {
+              return new Date(tick).toLocaleString('en-US', { month: 'short' })
+            }}
+            style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
             tickLine={false}
-            interval={data.length < 14 || data.length > 33 ? 0 : 1}
+            allowDuplicatedCategory={false}
           />
           <YAxis
-            tickCount={10}
+            tickCount={6}
+            dataKey="priceUSD"
             tickLine={false}
             style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
             tickFormatter={(tick: number) => {
               return tick.toFixed(2)
             }}
-            domain={['dataMin - 0.2', 'dataMax + 0.2']}
+            interval={'preserveStartEnd'}
           />
           <CartesianGrid stroke={theme.colors.borderSecondary} />
           <Tooltip content={<CustomizedTooltip currency={'USD'} precision={4} />} />
           <Area
             type="monotone"
-            dataKey="tokenPrice"
+            dataKey="priceUSD"
             strokeWidth={1}
             fillOpacity={1}
             fill="url(#colorCFGPrice)"
@@ -289,7 +303,7 @@ const CFGPriceChart = () => {
             activeDot={{ fill: '#908f8f' }}
             stroke="#908f8f"
           />
-        </ComposedChart>
+        </AreaChart>
       </ResponsiveContainer>
     </Stack>
   )
