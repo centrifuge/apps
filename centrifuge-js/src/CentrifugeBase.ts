@@ -92,6 +92,15 @@ const parachainTypes = {
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
   },
+  InvestmentPortfolio: {
+    poolCurrencyId: 'CfgTypesTokensCurrencyId',
+    pendingInvestCurrency: 'Balance',
+    claimableTrancheTokens: 'Balance',
+    freeTrancheTokens: 'Balance',
+    reservedTrancheTokens: 'Balance',
+    pendingRedeemTrancheTokens: 'Balance',
+    claimableCurrency: 'Balance',
+  },
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
@@ -162,6 +171,23 @@ const parachainRuntimeApi: DefinitionsCall = {
       methods: {
         compute_reward: parachainRpcMethods.rewards.computeReward,
         list_currencies: parachainRpcMethods.rewards.listCurrencies,
+      },
+      version: 1,
+    },
+  ],
+  InvestmentsApi: [
+    {
+      methods: {
+        investment_portfolio: {
+          description: 'Get account portfolio',
+          params: [
+            {
+              name: 'account_id',
+              type: 'AccountId',
+            },
+          ],
+          type: 'Vec<(CfgTypesTokensTrancheCurrency, InvestmentPortfolio)>',
+        },
       },
       version: 1,
     },
