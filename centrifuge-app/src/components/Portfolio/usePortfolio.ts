@@ -105,16 +105,7 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
 
         return transactionsInDateRange.reduce((acc: Decimal, cur) => {
           if (cur.type === 'INVEST_EXECUTION' || cur.type === 'TRANSFER_IN') {
-            const priceAtDate = dailyTrancheStatesByTrancheId[trancheId].slice(0 - rangeValue)?.find((state) => {
-              return (
-                `${new Date(state.timestamp).getMonth()}/${new Date(state.timestamp).getDate()}/${new Date(
-                  state.timestamp
-                ).getFullYear()}` ===
-                `${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getMonth()}/${new Date(
-                  today.getTime() - day * 1000 * 60 * 60 * 24
-                ).getDate()}/${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getFullYear()}`
-              )
-            })?.tokenPrice
+            const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
 
             if (!priceAtDate) return acc
 
@@ -129,16 +120,8 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
           }
 
           if (cur.type === 'REDEEM_EXECUTION' || cur.type === 'TRANSFER_OUT') {
-            const priceAtDate = dailyTrancheStatesByTrancheId[trancheId].slice(0 - rangeValue)?.find((state) => {
-              return (
-                `${new Date(state.timestamp).getMonth()}/${new Date(state.timestamp).getDate()}/${new Date(
-                  state.timestamp
-                ).getFullYear()}` ===
-                `${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getMonth()}/${new Date(
-                  today.getTime() - day * 1000 * 60 * 60 * 24
-                ).getDate()}/${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getFullYear()}`
-              )
-            })?.tokenPrice
+            const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
+
             if (!priceAtDate) return acc
 
             const price =
@@ -165,6 +148,25 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
         }
       )
     })
+}
+
+const getPriceAtDate = (
+  dailyTrancheStatesByTrancheId: Record<string, TrancheSnapshot[]>,
+  trancheId: string,
+  rangeValue: number,
+  day: number,
+  today: Date
+) => {
+  return dailyTrancheStatesByTrancheId[trancheId].slice(0 - rangeValue)?.find((state) => {
+    return (
+      `${new Date(state.timestamp).getMonth()}/${new Date(state.timestamp).getDate()}/${new Date(
+        state.timestamp
+      ).getFullYear()}` ===
+      `${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getMonth()}/${new Date(
+        today.getTime() - day * 1000 * 60 * 60 * 24
+      ).getDate()}/${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getFullYear()}`
+    )
+  })?.tokenPrice
 }
 
 export function useInvestorPortfolio(address: string) {
