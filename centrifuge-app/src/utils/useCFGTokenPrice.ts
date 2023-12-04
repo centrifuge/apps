@@ -19,11 +19,27 @@ export const useCFGTokenPrice = () => {
   return CFGPrice
 }
 
-export const useDailyCFGPrice = () => {
-  return useQuery('dailyCFGPrice', async () => {
+export const useDailyCFGPrice = (filter: 'YTD' | '30days' | '90days') => {
+  return useQuery(['dailyCFGPrice', filter], async () => {
+    let dateGt: number = 0
     const currentYear = new Date().getFullYear()
-    const januaryFirst = new Date(currentYear, 0, 1)
-    const unixTimestampJanuaryFirst = Math.floor(januaryFirst.getTime() / 1000)
+    if (filter === 'YTD') {
+      const januaryFirst = new Date(currentYear, 0, 1)
+      const unixTimestampJanuaryFirst = Math.floor(januaryFirst.getTime() / 1000)
+      dateGt = unixTimestampJanuaryFirst
+    }
+    if (filter === '30days') {
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const unixTimestampThirtyDaysAgo = Math.floor(thirtyDaysAgo.getTime() / 1000)
+      dateGt = unixTimestampThirtyDaysAgo
+    }
+    if (filter === '90days') {
+      const ninetyDaysAgo = new Date()
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+      const unixTimestampNinetyDaysAgo = Math.floor(ninetyDaysAgo.getTime() / 1000)
+      dateGt = unixTimestampNinetyDaysAgo
+    }
 
     const options = {
       method: 'POST',
@@ -40,7 +56,7 @@ export const useDailyCFGPrice = () => {
           }
         `,
         variables: {
-          dateGt: unixTimestampJanuaryFirst,
+          dateGt,
         },
       }),
     }

@@ -7,6 +7,7 @@ import {
   IconButton,
   IconCopy,
   IconInfo,
+  Select,
   Shelf,
   Stack,
   Tabs,
@@ -152,7 +153,7 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
                   label="Recipient address"
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
-                  placeholder="0x0abc... EVM or Substrate address)"
+                  placeholder="0x0A4..."
                   required
                 />
               )}
@@ -255,25 +256,53 @@ const Container = styled(Shelf)`
   width: 16px;
 `
 
+type FilterOptions = 'YTD' | '30days' | '90days'
+
 const CFGPriceChart = () => {
   const theme = useTheme()
-  const { data: tokenDayData } = useDailyCFGPrice()
+  const [filter, setFilter] = React.useState<FilterOptions>('YTD')
+  const { data: tokenDayData } = useDailyCFGPrice(filter)
   const currentCFGPrice = useCFGTokenPrice()
-  const data =
-    (tokenDayData?.data?.tokenDayDatas as { date: number; priceUSD: string }[])?.map((entry) => {
-      return {
-        day: new Date(entry.date * 1000),
-        priceUSD: parseFloat(entry.priceUSD),
-      }
-    }) || []
+
+  const data = React.useMemo(() => {
+    const tokenData =
+      (tokenDayData?.data?.tokenDayDatas as { date: number; priceUSD: string }[])?.map((entry) => {
+        return {
+          day: new Date(entry.date * 1000),
+          priceUSD: parseFloat(entry.priceUSD),
+        }
+      }) || []
+    tokenData.push({
+      day: new Date(),
+      priceUSD: currentCFGPrice || 0,
+    })
+    return tokenData
+  }, [tokenDayData, filter])
+
+  const priceDifference = React.useMemo(() => {
+    return currentCFGPrice && data && data.length ? Dec(data[0]?.priceUSD!).div(Dec(currentCFGPrice)) : Dec(0)
+  }, [data, filter])
 
   return (
     <Stack gap={0}>
-      <Shelf gap={1}>
-        {currentCFGPrice && <Text variant="body3">CFG - {currentCFGPrice.toFixed(2)} USD</Text>}
-        {/* <Text variant="body3" color="statusOk">
-          TODO: +20%
-        </Text> */}
+      <Shelf gap={1} justifyContent="space-between">
+        <Shelf gap={1}>
+          {currentCFGPrice && <Text variant="body3">CFG - {currentCFGPrice.toFixed(4)} USD</Text>}
+          <Text variant="body3" color={priceDifference.gte(0) ? 'statusOk' : 'statusError'}>
+            {' '}
+            {priceDifference.gte(0) ? '+' : '-'} {priceDifference.mul(100).toFixed(2)}%
+          </Text>
+        </Shelf>
+        <Box alignSelf="flex-end" justifySelf="flex-end">
+          <Select
+            options={[
+              { label: 'YTD', value: 'YTD' },
+              { label: '30 days', value: '30days' },
+              { label: '90 days', value: '90days' },
+            ]}
+            onChange={(option) => setFilter(option.target.value as FilterOptions)}
+          />
+        </Box>
       </Shelf>
       <ResponsiveContainer width="100%" height="100%" minHeight="200px">
         <AreaChart data={data || []} margin={{ top: 18, left: -30 }}>
@@ -287,7 +316,10 @@ const CFGPriceChart = () => {
             dataKey="day"
             type="category"
             tickFormatter={(tick: number) => {
-              return new Date(tick).toLocaleString('en-US', { month: 'short' })
+              if (data.length > 180) {
+                return new Date(tick).toLocaleString('en-US', { month: 'short' })
+              }
+              return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
             }}
             style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
             tickLine={false}

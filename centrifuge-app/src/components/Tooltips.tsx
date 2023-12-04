@@ -256,7 +256,7 @@ export const tooltipText = {
   },
   cfgPrice: {
     label: 'CFG Price',
-    body: 'Price sourced externally from Coinmarketcap.',
+    body: 'Price sourced externally from Uniswap.',
   },
 }
 
