@@ -47,15 +47,13 @@ export function CardPortfolioValue() {
 
         const trancheTokenPrice = trancheTokenPrices[trancheId] || new Price(0)
 
-        const unclaimedTrancheTokensValue = tranche.claimableTrancheTokens
+        const trancheTokensBalance = tranche.claimableTrancheTokens
           .toDecimal()
-          .mul(trancheTokenPrice.toDecimal())
+          .add(tranche.freeTrancheTokens.toDecimal())
+          .add(tranche.reservedTrancheTokens.toDecimal())
+          .add(tranche.pendingRedeemTrancheTokens.toDecimal())
 
-        const freeTrancheTokensValue = tranche.freeTrancheTokens.toDecimal().mul(trancheTokenPrice?.toDecimal())
-
-        const reservedTrancheTokensValue = tranche.reservedTrancheTokens.toDecimal().mul(trancheTokenPrice?.toDecimal())
-
-        return sum.add(unclaimedTrancheTokensValue).add(freeTrancheTokensValue).add(reservedTrancheTokensValue)
+        return sum.add(trancheTokensBalance.mul(trancheTokenPrice.toDecimal()))
       }, Dec(0))
     }
   }, [portfolioData, trancheTokenPrices])

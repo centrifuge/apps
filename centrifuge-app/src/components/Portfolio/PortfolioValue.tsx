@@ -8,19 +8,23 @@ import { useDailyPortfolioValue } from './usePortfolio'
 const chartColor = '#006ef5'
 
 const TooltipInfo = ({ payload }: any) => {
-  const portfolioValue = payload[0]?.payload.portfolioValue
-  const date = payload[0]?.payload.dateInMilliseconds
+  if (payload) {
+    const portfolioValue = payload[0]?.payload.portfolioValue
+    const date = payload[0]?.payload.dateInMilliseconds
 
-  return (
-    <Card p={1} minHeight="53px" minWidth="163px" style={{ borderRadius: '4px' }}>
-      <Stack gap={1}>
-        <Text variant="body3">
-          <Text variant="emphasized">{formatDate(date)}</Text>
-        </Text>
-        <Text variant="body3">{portfolioValue && formatBalance(portfolioValue, 'USD', 2, 2)}</Text>
-      </Stack>
-    </Card>
-  )
+    return (
+      <Card p={1} minHeight="53px" minWidth="163px" style={{ borderRadius: '4px' }}>
+        <Stack gap={1}>
+          <Text variant="body3">
+            <Text variant="emphasized">{formatDate(date)}</Text>
+          </Text>
+          <Text variant="body3">{portfolioValue && formatBalance(portfolioValue, 'USD', 2, 2)}</Text>
+        </Stack>
+      </Card>
+    )
+  }
+
+  return null
 }
 
 export function PortfolioValue({ rangeValue }: { rangeValue: string }) {
@@ -28,12 +32,22 @@ export function PortfolioValue({ rangeValue }: { rangeValue: string }) {
   const { formatAddress } = useCentrifugeUtils()
   const dailyPortfolioValue = useDailyPortfolioValue(formatAddress(address || ''), getRangeNumber(rangeValue))
 
+  const getXAxisInterval = () => {
+    if (rangeValue === '30d') {
+      return 5
+    }
+    if (rangeValue === '90d') {
+      return 14
+    }
+    return 30
+  }
+
   return (
     <ResponsiveContainer>
       <AreaChart
         margin={{
           top: 35,
-          right: 0,
+          right: 20,
           left: 30,
           bottom: 0,
         }}
@@ -48,24 +62,35 @@ export function PortfolioValue({ rangeValue }: { rangeValue: string }) {
         <CartesianGrid vertical={false} />
 
         <XAxis
-          dataKey={({ dateInMilliseconds }) => `${dateInMilliseconds?.getMonth() + 1}/${dateInMilliseconds?.getDate()}`}
+          dataKey={({ dateInMilliseconds }) =>
+            `${dateInMilliseconds?.toLocaleString('default', { month: 'short' })} ${dateInMilliseconds?.getDate()}`
+          }
           tickLine={false}
           axisLine={false}
           style={{
             fontSize: '10px',
           }}
           dy={4}
+          interval={getXAxisInterval()}
         />
         <YAxis
-          dataKey={({ portfolioValue }) => portfolioValue.toString()}
+          dataKey={({ portfolioValue }) => portfolioValue}
           tickCount={10}
           tickLine={false}
           axisLine={false}
+          tickFormatter={(value) => value.toLocaleString()}
           style={{
             fontSize: '10px',
           }}
-          dx={-4}
+          label={{
+            value: 'USD',
+            angle: -90,
+            position: 'insideLeft',
+            offset: -10,
+            fontSize: '12px',
+          }}
         />
+
         <Tooltip content={<TooltipInfo />} />
         <Area
           type="monotone"

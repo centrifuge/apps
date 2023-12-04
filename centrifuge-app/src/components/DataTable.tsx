@@ -55,11 +55,13 @@ const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, s
   if (order === 'asc') {
     return data.sort((a, b) => {
       if (sortKey === 'nftIdSortKey') return new BN(a[sortKey]).gt(new BN(b[sortKey])) ? 1 : -1
+      if (sortKey === 'position') return a[sortKey].gt(b[sortKey]) ? 1 : -1
       return a[sortKey] > b[sortKey] ? 1 : -1
     })
   }
   return data.sort((a, b) => {
     if (sortKey === 'nftIdSortKey') return new BN(b[sortKey]).gt(new BN(a[sortKey])) ? 1 : -1
+    if (sortKey === 'position') return b[sortKey].gt(a[sortKey]) ? 1 : -1
     return b[sortKey] > a[sortKey] ? 1 : -1
   })
 }

@@ -75,17 +75,19 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
         const transactionsInDateRange = transactions.filter((transaction) => {
           const transactionDate = new Date(transaction.timestamp)
 
-          return transactionDate <= new Date(today.getTime() - day * 1000 * 60 * 60 * 24)
+          return (
+            transactionDate <= new Date(new Date(today.getTime() - day * 1000 * 60 * 60 * 24).setHours(23, 59, 59, 999))
+          )
         })
 
         return transactionsInDateRange.reduce((acc: Decimal, cur) => {
-          if (cur.type === 'INVEST_EXECUTION' || cur.type === 'TRANSFER_IN') {
+          if (cur.type === 'INVEST_EXECUTION') {
             const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
 
             if (!priceAtDate) return acc
 
             const price =
-              priceAtDate.toString().length === 10
+              priceAtDate.toString().length === 10 || priceAtDate.toString().length === 9
                 ? new Price(priceAtDate.mul(new BN(10 ** 9))).toDecimal()
                 : new Price(priceAtDate).toDecimal()
 
@@ -94,13 +96,13 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
             return acc.add(amount)
           }
 
-          if (cur.type === 'REDEEM_EXECUTION' || cur.type === 'TRANSFER_OUT') {
+          if (cur.type === 'REDEEM_EXECUTION') {
             const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
 
             if (!priceAtDate) return acc
 
             const price =
-              priceAtDate.toString().length === 10
+              priceAtDate.toString().length === 10 || priceAtDate.toString().length === 9
                 ? new Price(priceAtDate.mul(new BN(10 ** 9))).toDecimal()
                 : new Price(priceAtDate).toDecimal()
 

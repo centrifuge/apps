@@ -1,5 +1,5 @@
-import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
+import { CurrencyMetadata, Price, Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -13,6 +13,7 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
@@ -20,6 +21,7 @@ import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
+import { usePortfolio } from './usePortfolio'
 
 type Row = {
   currency: Token['currency']
@@ -112,38 +114,87 @@ const columns: Column[] = [
 
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function InvestedTokens({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
-  const centBalances = useBalances(address)
-
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
+  const portfolioData = usePortfolio(address)
+
+  const trancheTokenPrices = useMemo(() => {
+    if (pools) {
+      return pools.reduce((acc, pool) => {
+        return pool.tranches.reduce((innerAcc, tranche) => {
+          innerAcc[tranche.id] = {
+            currency: tranche.currency,
+            tokenPrice: tranche.tokenPrice,
+            poolId: tranche.poolId,
+          }
+          return innerAcc
+        }, acc)
+      }, {} as Record<string, { tokenPrice: Price | null; poolId: string; currency: CurrencyMetadata }>)
+    }
+  }, [pools])
+
+  const portfolioValues = useMemo(() => {
+    if (portfolioData && trancheTokenPrices) {
+      return Object.keys(portfolioData)?.reduce((sum, trancheId) => {
+        const tranche = portfolioData[trancheId]
+
+        const trancheTokenPrice = trancheTokenPrices[trancheId].tokenPrice || new Price(0)
+
+        const trancheTokensBalance = tranche.claimableTrancheTokens
+          .toDecimal()
+          .add(tranche.freeTrancheTokens.toDecimal())
+          .add(tranche.reservedTrancheTokens.toDecimal())
+          .add(tranche.pendingRedeemTrancheTokens.toDecimal())
+
+        return [
+          ...sum,
+          {
+            balance: trancheTokensBalance,
+            marketValue: trancheTokensBalance.mul(trancheTokenPrice.toDecimal()),
+            tokenPrice: trancheTokenPrice,
+            trancheId: trancheId,
+            poolId: trancheTokenPrices[trancheId].poolId,
+            currency: trancheTokenPrices[trancheId].currency,
+          },
+        ]
+      }, [] as { balance: Decimal; marketValue: Decimal; tokenPrice: Price; trancheId: string; poolId: string; currency: Token['currency'] }[])
+    }
+  }, [portfolioData, trancheTokenPrices])
 
   const balances = useMemo(() => {
     return [
-      ...(centBalances?.tranches || []),
-      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []),
+      ...(portfolioValues || []),
+      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []).map((balance) => {
+        const pool = pools?.find((pool) => pool.id === balance.poolId)
+        const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
+        return {
+          balance: balance.balance,
+          marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+          tokenPrice: tranche?.tokenPrice || new Price(0),
+          trancheId: balance.trancheId,
+          poolId: balance.poolId,
+          currency: tranche?.currency,
+        }
+      }),
     ]
-  }, [centBalances, tinlakeBalances])
+  }, [portfolioValues, tinlakeBalances, pools])
 
-  const tableData = balances.map((balance) => {
-    const pool = pools?.find((pool) => pool.id === balance.poolId)
-    const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
-    return {
-      currency: balance.currency,
-      poolId: balance.poolId,
-      trancheId: balance.trancheId,
-      position: balance.balance,
-      tokenPrice: tranche?.tokenPrice || Dec(1),
-      marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
-      canInvestRedeem,
-    }
-  })
+  const tableData = balances.map((balance) => ({
+    currency: balance.currency,
+    poolId: balance.poolId,
+    trancheId: balance.trancheId,
+    position: balance.balance,
+    tokenPrice: balance.tokenPrice,
+    marketValue: balance.marketValue,
+    canInvestRedeem,
+  }))
 
   return tableData.length ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
         Portfolio
       </Text>
-      <DataTable columns={columns} data={tableData} />
+      <DataTable columns={columns} data={tableData} defaultSortKey="position" />
     </Stack>
   ) : null
 }
