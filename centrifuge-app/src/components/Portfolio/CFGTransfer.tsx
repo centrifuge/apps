@@ -66,7 +66,10 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
           label="Value"
           value={formatBalanceAbbreviated(centBalances?.native.balance.toDecimal().mul(CFGPrice || 0) || 0, 'USD', 2)}
         />
-        <LabelValueStack label={<Tooltips type="cfgPrice" />} value={formatBalance(CFGPrice || 0, 'USD', 4)} />
+        <LabelValueStack
+          label={<Tooltips type="cfgPrice" label={`${centBalances?.native.currency.symbol || 'CFG'} Price`} />}
+          value={formatBalance(CFGPrice || 0, 'USD', 4)}
+        />
       </Shelf>
       {isPortfolioPage && (
         <Stack>
