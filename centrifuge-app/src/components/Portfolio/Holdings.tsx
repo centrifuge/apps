@@ -50,7 +50,7 @@ const columns: Column[] = [
     cell: ({ tokenPrice }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalance(tokenPrice || 1, 'USDT', 4)}
+          {formatBalance(tokenPrice || 1, 'USD', 4)}
         </Text>
       )
     },
