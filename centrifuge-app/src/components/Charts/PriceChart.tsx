@@ -3,7 +3,7 @@ import React from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
-import { CustomizedTooltip } from './CustomChartElements'
+import { CustomizedTooltip } from './Tooltip'
 
 export type FilterOptions = 'YTD' | '30days' | '90days'
 
