@@ -1,6 +1,8 @@
 import { isAddress as isEvmAddress } from '@ethersproject/address'
+import { ApiRx } from '@polkadot/api'
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
+import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
@@ -1436,7 +1438,7 @@ export function getPoolsModule(inst: Centrifuge) {
       combineLatestWith(getCurrencies()),
       switchMap(([api, currencies]) => {
         const currency = findCurrency(currencies, currencyId)
-        if (!currency || (typeof location !== 'string' && 'parachain' in location && !currency.location?.V3)) {
+        if (!currency || (typeof location !== 'string' && 'parachain' in location && !currency.location?.v3)) {
           throw new Error('Currency not found')
         }
         const submittable =
@@ -1448,7 +1450,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 {
                   V3: [
                     {
-                      Concrete: currency.location.V3,
+                      Concrete: currency.location.v3,
                     },
                     {
                       Fungible: amount,
@@ -1472,7 +1474,7 @@ export function getPoolsModule(inst: Centrifuge) {
                             }
                           : {
                               AccountId32: {
-                                id: address,
+                                id: addressToHex(address),
                               },
                             },
                       ],
@@ -1491,8 +1493,8 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       poolId: string,
       loanId: string,
-      quantity: BN,
-      price: BN,
+      quantity: Price,
+      price: CurrencyBalance,
       withdraw?: WithdrawAddress & { currency: CurrencyKey }
     ],
     options?: TransactionOptions
@@ -1506,7 +1508,9 @@ export function getPoolsModule(inst: Centrifuge) {
         })
         if (withdrawTo) {
           const { address, location, currency } = withdrawTo
-          return withdraw([quantity.mul(price), currency, address, location], { batch: true }).pipe(
+          return withdraw([quantity.mul(price).div(Price.fromFloat(1)), currency, address, location], {
+            batch: true,
+          }).pipe(
             switchMap((withdrawTx) => {
               const batchTx = api.tx.utility.batchAll([borrowSubmittable, withdrawTx])
               return inst.wrapSignAndSend(api, batchTx, options)
@@ -1595,6 +1599,46 @@ export function getPoolsModule(inst: Centrifuge) {
           api.tx.loans.close(poolId, loanId),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function transferLoanDebt(
+    args: [
+      poolId: string,
+      fromLoanId: string,
+      toLoanId: string,
+      repay: { principal: BN; interest: BN },
+      borrow: { quantity: BN; price: BN } | { amount: BN }
+    ],
+    options?: TransactionOptions
+  ) {
+    const [poolId, fromLoanId, toLoanId, repay, borrow] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const changeArgs = [
+          fromLoanId,
+          toLoanId,
+          {
+            principal: { internal: repay.principal.toString() },
+            interest: repay.interest.toString(),
+            unscheduled: '0',
+          },
+          'amount' in borrow
+            ? { internal: borrow.amount.toString() }
+            : {
+                external: { quantity: borrow.quantity.toString(), settlementPrice: borrow.price.toString() },
+              },
+        ]
+        const change = api.createType('RuntimeCommonChangesRuntimeChange', { Loan: { TransferDebt: changeArgs } })
+
+        const tx = api.tx.utility.batchAll([
+          api.tx.loans.proposeTransferDebt(poolId, ...changeArgs),
+          api.tx.loans.applyTransferDebt(poolId, blake2AsHex(change.toU8a(), 256)),
+        ])
+        return inst.wrapSignAndSend(api, tx, options)
       })
     )
   }
@@ -1880,23 +1924,7 @@ export function getPoolsModule(inst: Centrifuge) {
         api.query.poolSystem.pool(poolId).pipe(
           switchMap((rawPool) => {
             const pool = rawPool.toPrimitive() as any
-            const curKey = parseCurrencyKey(pool.currency)
-            return api.query.ormlAssetRegistry.metadata(curKey).pipe(
-              map((rawCurrencyMeta) => {
-                const value = rawCurrencyMeta.toPrimitive() as AssetCurrencyData
-                const currency: CurrencyMetadata = {
-                  key: curKey,
-                  decimals: value.decimals,
-                  name: value.name,
-                  symbol: value.symbol,
-                  isPoolCurrency: value.additional.poolCurrency,
-                  isPermissioned: value.additional.permissioned,
-                  additional: value.additional,
-                  location: value.location,
-                }
-                return currency
-              })
-            )
+            return getCurrency(api, pool.currency)
           }),
           take(1)
         )
@@ -2407,6 +2435,47 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getPortfolio(args: [address: Account]) {
+    const [address] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => api.call.investmentsApi.investmentPortfolio(address)),
+      combineLatestWith(getCurrencies()),
+      map(([data, currencies]) => {
+        const results = data?.toPrimitive() as [
+          { poolId: string; trancheId: string },
+          {
+            poolCurrencyId: RawCurrencyKey
+            claimableCurrency: string | number
+            claimableTrancheTokens: string | number
+            pendingInvestCurrency: string | number
+            pendingRedeemTrancheTokens: string | number
+            freeTrancheTokens: string | number
+            reservedTrancheTokens: string | number
+          }
+        ][]
+
+        return Object.fromEntries(
+          results.map(([key, value]) => {
+            const currency = findCurrency(currencies, parseCurrencyKey(value.poolCurrencyId))!
+            return [
+              key.trancheId,
+              {
+                poolCurrency: currency,
+                claimableCurrency: new CurrencyBalance(value.claimableCurrency, currency.decimals),
+                claimableTrancheTokens: new TokenBalance(value.claimableTrancheTokens, currency.decimals),
+                pendingInvestCurrency: new CurrencyBalance(value.pendingInvestCurrency, currency.decimals),
+                pendingRedeemTrancheTokens: new TokenBalance(value.pendingRedeemTrancheTokens, currency.decimals),
+                freeTrancheTokens: new TokenBalance(value.freeTrancheTokens, currency.decimals),
+                reservedTrancheTokens: new TokenBalance(value.reservedTrancheTokens, currency.decimals),
+              },
+            ]
+          })
+        )
+      })
+    )
+  }
+
   function getOrder(args: [address: Account, poolId: string, trancheId: string]) {
     const [address, poolId, trancheId] = args
 
@@ -2779,6 +2848,9 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  /**
+   * @deprecated
+   */
   function getPendingCollect(args: [address: Account, poolId: string, trancheId: string, executedEpoch: number]) {
     const [address, poolId, trancheId, executedEpoch] = args
     const $api = inst.getApi()
@@ -3040,11 +3112,13 @@ export function getPoolsModule(inst: Centrifuge) {
     repayExternalLoanPartially,
     repayAndCloseLoan,
     closeLoan,
+    transferLoanDebt,
     getPool,
     getPools,
     getBalances,
     getOrder,
     getPoolOrders,
+    getPortfolio,
     getLoans,
     getPendingCollect,
     getWriteOffPolicy,
@@ -3097,7 +3171,8 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
   return balances.find((balance) => looksLike(balance.currency.key, key))
 }
 
-export function parseCurrencyKey(key: CurrencyKey | { foreignAsset: number | string }): CurrencyKey {
+type RawCurrencyKey = CurrencyKey | { foreignAsset: number | string }
+export function parseCurrencyKey(key: RawCurrencyKey): CurrencyKey {
   if (typeof key === 'object') {
     if ('Tranche' in key) {
       return {
@@ -3135,4 +3210,41 @@ function looksLike(a: any, b: any): boolean {
 
 function isPrimitive(val: any): val is boolean | string | number | null | undefined {
   return val == null || /^[sbn]/.test(typeof val)
+}
+
+export function getCurrencyLocation(currency: CurrencyMetadata) {
+  const chainId = currency.location?.v3?.interior?.x3?.[1]?.globalConsensus?.ethereum?.chainId
+  if (chainId) {
+    return { evm: Number(chainId) }
+  }
+  const parachain = currency.location?.v3?.interior?.x3?.[0]?.parachain
+  if (parachain) {
+    return { parachain: Number(parachain) }
+  }
+  return 'centrifuge'
+}
+
+export function getCurrencyEvmAddress(currency: CurrencyMetadata) {
+  return currency.location?.v3?.interior?.x3?.[2]?.accountKey20?.key as string | undefined
+}
+
+function getCurrency(api: ApiRx, currencyKey: RawCurrencyKey) {
+  const curKey = parseCurrencyKey(currencyKey)
+  return api.query.ormlAssetRegistry.metadata(curKey).pipe(
+    map((rawCurrencyMeta) => {
+      const value = rawCurrencyMeta.toPrimitive() as AssetCurrencyData
+      const currency: CurrencyMetadata = {
+        key: curKey,
+        decimals: value.decimals,
+        name: value.name,
+        symbol: value.symbol,
+        isPoolCurrency: value.additional.poolCurrency,
+        isPermissioned: value.additional.permissioned,
+        additional: value.additional,
+        location: value.location,
+      }
+      return currency
+    }),
+    take(1)
+  )
 }
