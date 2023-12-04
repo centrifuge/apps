@@ -102,9 +102,13 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
   const centBalances = useBalances(centAddress || evmAddress)
   const utils = useCentrifugeUtils()
 
-  const { execute: transferCFG, isLoading } = useCentrifugeTransaction('Send CFG', (cent) => cent.tokens.transfer, {
-    onSuccess: () => form.resetForm(),
-  })
+  const { execute: transferCFG, isLoading } = useCentrifugeTransaction(
+    `Send ${centBalances?.native.currency.symbol || 'CFG'}`,
+    (cent) => cent.tokens.transfer,
+    {
+      onSuccess: () => form.resetForm(),
+    }
+  )
 
   const form = useFormik<{ amount: Decimal | undefined; recipientAddress: string }>({
     initialValues: {
