@@ -1,35 +1,10 @@
 import { CurrencyBalance, InvestorTransactionType, Price } from '@centrifuge/centrifuge-js'
-import { useAddress, useBalances, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
-import { map, switchMap } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
-import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
-import { useDailyTranchesStates, usePools, useTransactionsByAddress } from '../../utils/usePools'
-
-export const usePortfolioValue = () => {
-  const address = useAddress()
-  const centBalances = useBalances(address)
-  const { data: tinlakeBalances } = useTinlakeBalances()
-
-  const balances = useMemo(() => {
-    return [
-      ...(centBalances?.tranches || []),
-      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []),
-    ]
-  }, [centBalances, tinlakeBalances])
-  const pools = usePools()
-
-  const portfolioValue = balances.reduce((sum, balance) => {
-    const pool = pools?.find((pool) => pool.id === balance.poolId)
-    const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
-
-    return sum.add(tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0))
-  }, Dec(0))
-
-  return portfolioValue
-}
+import { useDailyTranchesStates, useTransactionsByAddress } from '../../utils/usePools'
 
 type InvestorTransaction = {
   currencyAmount: CurrencyBalance
@@ -169,13 +144,9 @@ const getPriceAtDate = (
   })?.tokenPrice
 }
 
-export function useInvestorPortfolio(address: string) {
-  const portfolio = useCentrifugeQuery(['investorPortfolio', address], (cent) =>
-    cent.getApi().pipe(
-      switchMap((api) => api.call.portfolio.accountPortfolio(address)),
-      map((response) => response.toJSON())
-    )
-  )
-
-  return portfolio
+export function usePortfolio(address?: string) {
+  const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
+    enabled: !!address,
+  })
+  return result
 }

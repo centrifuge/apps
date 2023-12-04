@@ -198,13 +198,6 @@ export function usePendingCollect(poolId: string, trancheId?: string, address?: 
   return result
 }
 
-export function usePortfolio(address?: string) {
-  const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
-    enabled: !!address,
-  })
-  return result
-}
-
 export function usePendingCollectMulti(poolId: string, trancheIds?: string[], address?: string) {
   const pool = usePool(poolId)
   const [result] = useCentrifugeQuery(

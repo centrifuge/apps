@@ -1,11 +1,14 @@
+import { Price } from '@centrifuge/centrifuge-js'
+import { useAddress } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
+import { usePools } from '../../utils/usePools'
 import { PortfolioValue } from './PortfolioValue'
-import { usePortfolioValue } from './usePortfolio'
+import { usePortfolio } from './usePortfolio'
 
 const RangeFilterButton = styled(Stack)`
   &:hover {
@@ -21,11 +24,41 @@ const rangeFilters = [
 ] as const
 
 export function CardPortfolioValue() {
-  const portfolioValue = usePortfolioValue()
+  const address = useAddress()
+  const portfolioData = usePortfolio(address)
+  const pools = usePools()
 
   const { colors } = useTheme()
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
+
+  const trancheTokenPrices = React.useMemo(() => {
+    if (pools) {
+      return Object.fromEntries(
+        pools.flatMap((pool) => pool.tranches.map((tranche) => [tranche.id, tranche.tokenPrice]))
+      )
+    }
+  }, [pools])
+
+  const portfolioValue = React.useMemo(() => {
+    if (portfolioData && trancheTokenPrices) {
+      return Object.keys(portfolioData)?.reduce((sum, trancheId) => {
+        const tranche = portfolioData[trancheId]
+
+        const trancheTokenPrice = trancheTokenPrices[trancheId] || new Price(0)
+
+        const unclaimedTrancheTokensValue = tranche.claimableTrancheTokens
+          .toDecimal()
+          .mul(trancheTokenPrice.toDecimal())
+
+        const freeTrancheTokensValue = tranche.freeTrancheTokens.toDecimal().mul(trancheTokenPrice?.toDecimal())
+
+        const reservedTrancheTokensValue = tranche.reservedTrancheTokens.toDecimal().mul(trancheTokenPrice?.toDecimal())
+
+        return sum.add(unclaimedTrancheTokensValue).add(freeTrancheTokensValue).add(reservedTrancheTokensValue)
+      }, Dec(0))
+    }
+  }, [portfolioData, trancheTokenPrices])
 
   const chartHeight = 130
   const balanceProps = {
@@ -61,7 +94,7 @@ export function CardPortfolioValue() {
               <Stack gap="4px">
                 <Text {...headingProps}>Current portfolio value</Text>
                 <TextWithPlaceholder {...balanceProps} isLoading={!portfolioValue}>
-                  {formatBalance(Dec(portfolioValue || 0), config.baseCurrency)}
+                  {formatBalance(portfolioValue || 0, config.baseCurrency)}
                 </TextWithPlaceholder>
               </Stack>
               {/* <Stack gap="4px">
