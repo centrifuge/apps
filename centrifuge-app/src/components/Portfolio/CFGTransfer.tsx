@@ -7,7 +7,6 @@ import {
   IconButton,
   IconCopy,
   IconInfo,
-  Select,
   Shelf,
   Stack,
   Tabs,
@@ -22,15 +21,14 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
 import { useRouteMatch } from 'react-router'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import ethereumLogo from '../../assets/images/ethereum.svg'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
-import { CustomizedTooltip } from '../Charts/CustomChartElements'
+import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
 
@@ -57,7 +55,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
   return (
     <Stack gap={3}>
       <Text textAlign="center" variant="heading2">
-        CFG Holdings
+        {centBalances?.native.currency.symbol || 'CFG'} Holdings
       </Text>
       <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
         <LabelValueStack
@@ -98,7 +96,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
 type SendReceiveProps = { evmAddress: string; centAddress: string }
 
 const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
-  const centBalances = useBalances(centAddress)
+  const centBalances = useBalances(centAddress || evmAddress)
   const utils = useCentrifugeUtils()
 
   const { execute: transferCFG, isLoading } = useCentrifugeTransaction('Send CFG', (cent) => cent.tokens.transfer, {
@@ -112,10 +110,10 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
     },
     validate(values) {
       const errors: Partial<{ amount: string; recipientAddress: string }> = {}
-      if (values.amount && values.amount.gt(centBalances?.native.balance.toDecimal() || Dec(0))) {
+      if (values.amount && Dec(values.amount).gt(centBalances?.native.balance.toDecimal() || Dec(0))) {
         errors.amount = 'Amount exceeds wallet balance'
       }
-      if (!values.amount || values.amount.lte(0)) {
+      if (!values.amount || Dec(values.amount).lte(0)) {
         errors.amount = 'Amount must be greater than 0'
       }
       if (!(isAddress(values.recipientAddress) || isEvmAddress(values.recipientAddress))) {
@@ -171,7 +169,7 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={centBalances?.native?.currency.symbol}
-                  onChange={(value) => form.setFieldValue('amount', Dec(value))}
+                  onChange={(value) => form.setFieldValue('amount', value)}
                   required
                 />
               )}
@@ -256,10 +254,7 @@ const Container = styled(Shelf)`
   width: 16px;
 `
 
-type FilterOptions = 'YTD' | '30days' | '90days'
-
 const CFGPriceChart = () => {
-  const theme = useTheme()
   const [filter, setFilter] = React.useState<FilterOptions>('YTD')
   const { data: tokenDayData } = useDailyCFGPrice(filter)
   const currentCFGPrice = useCFGTokenPrice()
@@ -269,86 +264,15 @@ const CFGPriceChart = () => {
       (tokenDayData?.data?.tokenDayDatas as { date: number; priceUSD: string }[])?.map((entry) => {
         return {
           day: new Date(entry.date * 1000),
-          priceUSD: parseFloat(entry.priceUSD),
+          price: parseFloat(entry.priceUSD),
         }
       }) || []
     tokenData.push({
       day: new Date(),
-      priceUSD: currentCFGPrice || 0,
+      price: currentCFGPrice || 0,
     })
     return tokenData
   }, [tokenDayData, filter])
 
-  const priceDifference = React.useMemo(() => {
-    return currentCFGPrice && data && data.length ? Dec(data[0]?.priceUSD!).div(Dec(currentCFGPrice)) : Dec(0)
-  }, [data, filter])
-
-  return (
-    <Stack gap={0}>
-      <Shelf gap={1} justifyContent="space-between">
-        <Shelf gap={1}>
-          {currentCFGPrice && <Text variant="body3">CFG - {currentCFGPrice.toFixed(4)} USD</Text>}
-          <Text variant="body3" color={priceDifference.gte(0) ? 'statusOk' : 'statusError'}>
-            {' '}
-            {priceDifference.gte(0) ? '+' : '-'} {priceDifference.mul(100).toFixed(2)}%
-          </Text>
-        </Shelf>
-        <Box alignSelf="flex-end" justifySelf="flex-end">
-          <Select
-            options={[
-              { label: 'YTD', value: 'YTD' },
-              { label: '30 days', value: '30days' },
-              { label: '90 days', value: '90days' },
-            ]}
-            onChange={(option) => setFilter(option.target.value as FilterOptions)}
-          />
-        </Box>
-      </Shelf>
-      <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-        <AreaChart data={data || []} margin={{ top: 18, left: -30 }}>
-          <defs>
-            <linearGradient id="colorCFGPrice" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={'#626262'} stopOpacity={0.4} />
-              <stop offset="95%" stopColor={'#908f8f'} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <XAxis
-            dataKey="day"
-            type="category"
-            tickFormatter={(tick: number) => {
-              if (data.length > 180) {
-                return new Date(tick).toLocaleString('en-US', { month: 'short' })
-              }
-              return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
-            }}
-            style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-            tickLine={false}
-            allowDuplicatedCategory={false}
-          />
-          <YAxis
-            tickCount={6}
-            dataKey="priceUSD"
-            tickLine={false}
-            style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-            tickFormatter={(tick: number) => {
-              return tick.toFixed(2)
-            }}
-            interval={'preserveStartEnd'}
-          />
-          <CartesianGrid stroke={theme.colors.borderSecondary} />
-          <Tooltip content={<CustomizedTooltip currency={'USD'} precision={4} />} />
-          <Area
-            type="monotone"
-            dataKey="priceUSD"
-            strokeWidth={1}
-            fillOpacity={1}
-            fill="url(#colorCFGPrice)"
-            name="Price"
-            activeDot={{ fill: '#908f8f' }}
-            stroke="#908f8f"
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </Stack>
-  )
+  return <PriceChart data={data} currency="USD" filter={filter} setFilter={setFilter} />
 }
