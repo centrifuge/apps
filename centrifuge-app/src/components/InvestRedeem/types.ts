@@ -52,6 +52,7 @@ export type InvestRedeemState = {
   pendingAction?: InvestRedeemAction | null
   pendingTransaction?: Transaction | null
   statusMessage?: string
+  actingAddress?: string
 }
 
 export type ActionOptions = {

@@ -9,9 +9,16 @@ type Props = {
   children: React.ReactNode
   body?: string
   variant?: 'card' | 'plain'
+  showConnect?: boolean
 }
 
-export function ConnectionGuard({ networks, children, variant = 'card', body = 'Unsupported network.' }: Props) {
+export function ConnectionGuard({
+  networks,
+  children,
+  variant = 'plain',
+  showConnect,
+  body = 'Unsupported network.',
+}: Props) {
   const {
     isEvmOnSubstrate,
     connectedType,
@@ -19,11 +26,23 @@ export function ConnectionGuard({ networks, children, variant = 'card', body = '
     evm: { selectedWallet },
     substrate: { evmChainId },
     showWallets,
+    showNetworks,
     connect,
   } = useWallet()
   const getName = useGetNetworkName()
 
   if (!connectedNetwork) {
+    if (showConnect) {
+      const element = (
+        <Stack gap={2} pb={3}>
+          <Text variant="body3">{body}</Text>
+          <Button onClick={() => showNetworks()}>Connect</Button>
+        </Stack>
+      )
+
+      if (variant === 'card') return <Card p={2}>{element}</Card>
+      return element
+    }
     return <>{children}</>
   }
 
@@ -53,7 +72,7 @@ export function ConnectionGuard({ networks, children, variant = 'card', body = '
           renderTrigger={(props, ref, state) => (
             <Stack ref={ref} width="100%" alignItems="stretch">
               <Button iconRight={IconChevronDown} active={state.isOpen} {...props}>
-                Switch Network
+                Switch network
               </Button>
             </Stack>
           )}

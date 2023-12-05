@@ -129,6 +129,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     canCancelOrder: true,
     pendingAction,
     pendingTransaction,
+    actingAddress: address,
   }
 
   const actions: InvestRedeemActions = {

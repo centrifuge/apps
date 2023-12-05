@@ -15,7 +15,7 @@ import {
   IconMinus,
   IconPlus,
   SearchInput,
-  Select,
+  Select_DEPRECATED,
   Shelf,
   Stack,
   Text,
@@ -92,7 +92,7 @@ export function InvestorStatus() {
             placeholder="Enter address..."
             clear={() => setAddress('')}
           />
-          <Select
+          <Select_DEPRECATED
             value={chain}
             options={[
               { value: '', label: 'Centrifuge' },

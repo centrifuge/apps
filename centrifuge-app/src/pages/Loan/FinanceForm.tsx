@@ -6,7 +6,16 @@ import {
   useCentrifugeUtils,
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Button,
+  Card,
+  CurrencyInput_DEPRECATED,
+  InlineFeedback,
+  Select_DEPRECATED,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
@@ -113,14 +122,14 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
             >
               {({ field, meta, form }: FieldProps) => {
                 return (
-                  <CurrencyInput
+                  <CurrencyInput_DEPRECATED
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Amount"
                     errorMessage={meta.touched ? meta.error : undefined}
                     secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
                     currency={pool?.currency.symbol}
-                    onChange={(value: number) => form.setFieldValue('amount', value)}
+                    onChange={(value) => form.setFieldValue('amount', value)}
                     onSetMax={() => form.setFieldValue('amount', maxBorrow)}
                   />
                 )
@@ -175,7 +184,7 @@ export function WithdrawSelect({ loan, borrower }: { loan: LoanType; borrower: C
   if (!ao?.transferAllowlist.length) return null
 
   return (
-    <Select
+    <Select_DEPRECATED
       name="withdraw"
       label="Withdrawal address"
       onChange={(event) => helpers.setValue(JSON.parse(event.target.value))}

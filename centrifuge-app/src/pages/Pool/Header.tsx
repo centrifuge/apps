@@ -4,9 +4,9 @@ import * as React from 'react'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { Eththumbnail } from '../../components/EthThumbnail'
+import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
-import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -56,7 +56,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       actions={actions}
     >
       <Shelf
-        px={PAGE_GUTTER}
+        px={BASE_PADDING}
         bg="backgroundPage"
         style={{
           boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,

@@ -153,7 +153,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         : null,
     collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
     collectType,
-    needsToCollectBeforeOrder: false,
+    needsToCollectBeforeOrder: true,
     needsPoolCurrencyApproval: (amount) =>
       lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !lpInvest.currencySupportsPermit : false,
     needsTrancheTokenApproval: () => false,
@@ -162,6 +162,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     pendingAction,
     pendingTransaction,
     statusMessage,
+    actingAddress: centAddress,
   }
 
   const actions: InvestRedeemActions = {

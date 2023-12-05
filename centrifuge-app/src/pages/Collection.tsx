@@ -3,11 +3,11 @@ import { Box, Grid, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Identity } from '../components/Identity'
+import { LayoutBase } from '../components/LayoutBase'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { VisibilityChecker } from '../components/VisibilityChecker'
@@ -19,9 +19,9 @@ import { useSuitableAccounts } from '../utils/usePermissions'
 
 export default function CollectionPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <Collection />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 

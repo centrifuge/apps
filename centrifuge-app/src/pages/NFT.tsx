@@ -7,9 +7,9 @@ import { RemoveListingDialog } from '../components/Dialogs/RemoveListingDialog'
 import { SellDialog } from '../components/Dialogs/SellDialog'
 import { TransferDialog } from '../components/Dialogs/TransferDialog'
 import { Identity } from '../components/Identity'
+import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
@@ -20,9 +20,9 @@ import { isSameAddress } from '../utils/web3'
 
 export default function NFTPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <NFT />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 

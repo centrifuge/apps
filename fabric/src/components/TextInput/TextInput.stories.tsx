@@ -1,6 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import * as React from 'react'
-import { DateInput, NumberInput, SearchInput, TextAreaInput, TextInput } from '.'
+import { DateInput, InputAction, NumberInput, SearchInput, TextAreaInput, TextInput } from '.'
+import { SelectInner } from '../Select'
 import { Stack } from '../Stack'
 
 export default {
@@ -11,8 +12,21 @@ export default {
 type TextInputStory = ComponentStory<typeof TextInput>
 const Template: TextInputStory = (args) => (
   <Stack gap={3}>
-    <TextInput {...args} />
-    <TextInput {...args} label="" />
+    <TextInput {...args} label="" secondaryLabel="" />
+    <TextInput {...args} symbol="USDC" />
+    <TextInput {...args} symbol="USDC" action={<InputAction disabled={args.disabled}>Max</InputAction>} />
+    <TextInput
+      {...args}
+      symbol={
+        <SelectInner
+          value="USDC"
+          options={[
+            { label: 'USDC', value: 'USDC' },
+            { label: 'USDT', value: 'USDT' },
+          ]}
+        />
+      }
+    />
   </Stack>
 )
 
@@ -20,6 +34,7 @@ export const Default = Template.bind({})
 Default.args = {
   placeholder: 'Placeholder',
   label: 'Label',
+  secondaryLabel: 'Secondary label',
   errorMessage: '',
   disabled: false,
 }

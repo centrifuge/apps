@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
+import { AnchorButton, Box, DateRange, Select_DEPRECATED, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 
@@ -42,7 +42,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       borderColor="borderSecondary"
     >
       <Box minWidth={200} maxWidth={200}>
-        <Select
+        <Select_DEPRECATED
           name="report"
           label="Report"
           placeholder="Select a report"
@@ -67,7 +67,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
 
       {report === 'pool-balance' && (
         <Box minWidth={150} maxWidth={150}>
-          <Select
+          <Select_DEPRECATED
             name="groupBy"
             label="Group by"
             placeholder="Select a time period to group by"
@@ -97,7 +97,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
 
       {report === 'investor-tx' && (
         <Box minWidth={150} maxWidth={150}>
-          <Select
+          <Select_DEPRECATED
             name="activeTranche"
             label="Token"
             placeholder="Select a token"

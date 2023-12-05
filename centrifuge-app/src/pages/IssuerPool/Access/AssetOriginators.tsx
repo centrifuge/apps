@@ -14,7 +14,16 @@ import {
   useCentrifugeUtils,
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconMinusCircle, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  IconMinusCircle,
+  Select_DEPRECATED,
+  Shelf,
+  Stack,
+  Text,
+  TextInput_DEPRECATED,
+} from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress, sortAddresses } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
@@ -451,7 +460,7 @@ function AOForm({
                 <FieldWithErrorMessage
                   validate={required()}
                   name="documentKey"
-                  as={TextInput}
+                  as={TextInput_DEPRECATED}
                   label="Document Signing Key"
                   placeholder="0x..."
                   maxLength={66}
@@ -459,7 +468,7 @@ function AOForm({
                 <FieldWithErrorMessage
                   validate={required()}
                   name="p2pKey"
-                  as={TextInput}
+                  as={TextInput_DEPRECATED}
                   label="P2P Discovery Key"
                   placeholder="0x..."
                   maxLength={66}
@@ -467,7 +476,7 @@ function AOForm({
                 <FieldWithErrorMessage
                   validate={required()}
                   name="podOperator"
-                  as={TextInput}
+                  as={TextInput_DEPRECATED}
                   label="Pod Operator Account ID"
                   placeholder="0x..."
                   maxLength={66}
@@ -541,7 +550,7 @@ function AOForm({
                       validate={address()}
                       label="Address"
                       disabled={!isEditing}
-                      as={TextInput}
+                      as={TextInput_DEPRECATED}
                       onChange={(event: any) => {
                         form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
                         form.setFieldValue(`withdrawAddresses.${index}.meta.address`, event.target.value)
@@ -551,7 +560,7 @@ function AOForm({
                     <Box width={250}>
                       <Field name={`withdrawAddresses.${index}.meta.location`}>
                         {({ field, meta, form }: FieldProps) => (
-                          <Select
+                          <Select_DEPRECATED
                             name={`withdrawAddresses.${index}.meta.location`}
                             label="Destination"
                             onChange={(event) =>

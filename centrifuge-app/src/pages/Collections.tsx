@@ -4,9 +4,9 @@ import * as React from 'react'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/Dialogs/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
+import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
@@ -17,9 +17,9 @@ import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
 export default function CollectionsPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <Collections />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 

@@ -1,76 +1,65 @@
 import { CurrencyBalance, Pool, TokenBalance } from '@centrifuge/centrifuge-js'
-import { ConnectionGuard, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
+import { ConnectionGuard, formatBalanceAbbreviated, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
 import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
 import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
 import {
   AnchorButton,
   Box,
   Button,
-  Card,
   CurrencyInput,
-  Divider,
+  Flex,
   Grid,
   IconArrowUpRight,
   IconCheckInCircle,
   IconClock,
   InlineFeedback,
-  Select,
+  InputLabel,
   Shelf,
   Stack,
+  Tabs,
+  TabsItem,
   Text,
   TextWithPlaceholder,
-  Thumbnail,
-  useControlledState,
 } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 import { ethConfig } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
-import { useTinlakePermissions } from '../../utils/tinlake/useTinlakePermissions'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
-import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { positiveNumber } from '../../utils/validation'
+import { ButtonGroup } from '../ButtonGroup'
 import { useDebugFlags } from '../DebugFlags'
 import { LiquidityRewardsContainer } from '../LiquidityRewards/LiquidityRewardsContainer'
 import { LiquidityRewardsProvider } from '../LiquidityRewards/LiquidityRewardsProvider'
 import { LoadBoundary } from '../LoadBoundary'
+import { Transactions } from '../Portfolio/Transactions'
 import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { InvestRedeemProvider, useInvestRedeem } from './InvestRedeemProvider'
-import { LightButton } from './LightButton'
-import { InvestRedeemState as InvestRedeemContextState } from './types'
 
-export type ActionsRef = React.MutableRefObject<
-  | {
-      setView(view: 'invest' | 'redeem'): void
-    }
-  | undefined
->
-
-type Props = {
+export type InvestRedeemProps = {
   poolId: string
-  trancheId?: string
-  onSetTrancheId?: React.Dispatch<string>
-  actionsRef?: ActionsRef
-  networks?: Network[]
-}
+  trancheId: string
+} & InputProps
 
 // @ts-ignore
 const listFormatter = new Intl.ListFormat('en')
 
-export function InvestRedeem({ poolId, ...rest }: Props) {
+export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) {
   const getNetworkName = useGetNetworkName()
-  const { setScopedNetworks, connectedType, isEvmOnSubstrate } = useWallet()
+  const { connectedType, isEvmOnSubstrate } = useWallet()
 
   const isLiquidityPools = !poolId.startsWith('0x') && connectedType === 'evm' && !isEvmOnSubstrate
+  const isTinlakePool = poolId.startsWith('0x')
 
   const { data: domains } = useActiveDomains(poolId, isLiquidityPools)
 
@@ -79,21 +68,27 @@ export function InvestRedeem({ poolId, ...rest }: Props) {
     networks.push(...domains.map((d) => d.chainId))
   }
 
-  React.useEffect(() => {
-    setScopedNetworks(networks)
-    return () => setScopedNetworks(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [networks])
-
   return (
     <LoadBoundary>
       <ConnectionGuard
         networks={networks}
-        body={`This pool is deployed on the ${listFormatter.format(networks.map(getNetworkName))} ${
-          networks.length > 1 ? 'networks' : 'network'
-        }. To be able to invest and redeem you need to switch the network.`}
+        body={
+          connectedType
+            ? `This pool is deployed on the ${listFormatter.format(networks.map(getNetworkName))} ${
+                networks.length > 1 ? 'networks' : 'network'
+              }. To be able to invest and redeem you need to switch the network.`
+            : 'Connect to get started'
+        }
+        showConnect
       >
-        <InvestRedeemState networks={networks} poolId={poolId} {...rest} />
+        <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
+          <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
+            <Header />
+            <InvestRedeemInput {...rest} />
+            {!isTinlakePool && (connectedType === 'substrate' || isEvmOnSubstrate) && <LiquidityRewardsContainer />}
+            <Footer />
+          </InvestRedeemProvider>
+        </LiquidityRewardsProvider>
       </ConnectionGuard>
     </LoadBoundary>
   )
@@ -132,178 +127,47 @@ function EpochBusy({ busy }: { busy?: boolean }) {
   ) : null
 }
 
-function useAllowedTranches(poolId: string) {
-  const address = useAddress()
-  const { connectedType, isEvmOnSubstrate } = useWallet()
-  const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
-  const isTinlakePool = poolId.startsWith('0x')
-  const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
-  const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
-
-  const allowedTrancheIds = isTinlakePool
-    ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
-        (tranche) => {
-          if (tranche && metadata?.pool?.newInvestmentsStatus) {
-            const trancheName = tranche.split('-')[1] === '0' ? 'junior' : 'senior'
-
-            const isMember = tinlakePermissions?.[trancheName].inMemberlist
-
-            return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
-          }
-
-          return false
-        }
-      )
-    : [Object.keys(permissions?.pools[poolId]?.tranches ?? {})].flat()
-
-  if (connectedType === 'evm' && !isEvmOnSubstrate) return pool.tranches
-
-  return allowedTrancheIds.map((id) => [...pool.tranches].find((tranche) => tranche.id === id)!)
+type InputProps = {
+  defaultView?: 'invest' | 'redeem'
 }
 
-function InvestRedeemState(props: Props) {
-  const { poolId, trancheId: trancheIdProp, onSetTrancheId, actionsRef } = props
-  const allowedTranches = useAllowedTranches(poolId)
-  const pool = usePool(poolId)
-  const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
-  const [trancheId, setTrancheId] = useControlledState<string>(pool.tranches.at(-1)!.id, trancheIdProp, onSetTrancheId)
-
-  React.useEffect(() => {
-    if (allowedTranches.at(-1)?.id) {
-      setTrancheId(allowedTranches.at(-1)!.id)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allowedTranches[0]])
-
-  React.useImperativeHandle(actionsRef, () => ({
-    setView: (view) => {
-      setView(view)
-    },
-  }))
-
-  function handleSetTrancheId(id: string) {
-    setView('start')
-    setTrancheId(id)
-  }
-
-  return (
-    <LiquidityRewardsProvider poolId={poolId} trancheId={trancheId}>
-      <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
-        <InvestRedeemInner
-          {...props}
-          trancheId={trancheId}
-          view={view}
-          setView={setView}
-          setTrancheId={handleSetTrancheId}
-        />
-      </InvestRedeemProvider>
-    </LiquidityRewardsProvider>
-  )
-}
-
-type InnerProps = Props & {
-  poolId: string
-  trancheId: string
-  view: 'invest' | 'redeem' | 'start'
-  setView: React.Dispatch<'invest' | 'redeem' | 'start'>
-  setTrancheId: React.Dispatch<string>
-}
-
-function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps) {
+function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
-  const isTinlakePool = state.poolId.startsWith('0x')
+  let defaultView = defaultViewProp
+  if (state.order && !defaultView) {
+    if (!state.order.remainingInvestCurrency.isZero()) defaultView = 'invest'
+    if (!state.order.remainingRedeemToken.isZero()) defaultView = 'redeem'
+  }
+  const [view, setView] = React.useState<'invest' | 'redeem'>(defaultView ?? 'invest')
+  const theme = useTheme()
 
   const { data: metadata } = usePoolMetadata(pool)
-  const { connectedType, isEvmOnSubstrate } = useWallet()
-
-  let actualView = view
-  if (state.order) {
-    if (!state.order.remainingInvestCurrency.isZero()) actualView = 'invest'
-    if (!state.order.remainingRedeemToken.isZero()) actualView = 'redeem'
-  }
-
-  const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
-  const canOnlyInvest =
-    state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
   return (
-    <>
-      <Stack as={Card} gap={2} p={2}>
-        <Stack alignItems="center">
-          <Box pb={1}>
-            <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
-          </Box>
-          {connectedType && (
-            <>
-              <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-                {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
-              </TextWithPlaceholder>
-              <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
-                {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)}
-              </TextWithPlaceholder>
-            </>
-          )}
-          <Box bleedX={2} mt={1} alignSelf="stretch">
-            <Divider borderColor="borderSecondary" />
-          </Box>
-        </Stack>
-        {pool.tranches.length > 1 && (
-          <Select
-            name="token"
-            placeholder="Select a token"
-            options={pool.tranches
-              .map((tranche) => ({
-                label: tranche.currency.symbol ?? '',
-                value: tranche.id,
-              }))
-              .reverse()}
-            value={state.trancheId}
-            onChange={(event) => setTrancheId(event.target.value as any)}
-          />
-        )}
-        {connectedType && state.isDataLoading ? (
+    <Stack>
+      <Flex
+        style={{
+          boxShadow: `inset 0 -2px 0 ${theme.colors.borderSecondary}`,
+        }}
+      >
+        <Tabs
+          selectedIndex={view === 'invest' ? 0 : 1}
+          onChange={(index) => setView(index === 0 ? 'invest' : 'redeem')}
+        >
+          <TabsItem>Invest</TabsItem>
+          <TabsItem>Redeem</TabsItem>
+        </Tabs>
+      </Flex>
+      <Box p={2} backgroundColor="backgroundTertiary">
+        {state.isDataLoading ? (
           <Spinner />
         ) : state.isAllowedToInvest ? (
-          <>
-            {canOnlyInvest ? (
-              <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
-            ) : actualView === 'start' ? (
-              <>
-                {state.order &&
-                  (!state.order.payoutTokenAmount.isZero() ? (
-                    <SuccessBanner
-                      title="Investment successful"
-                      body={`${formatBalance(
-                        state.order.investCurrency,
-                        state.poolCurrency?.symbol
-                      )} was successfully invested`}
-                    />
-                  ) : !state.order.payoutCurrencyAmount.isZero() ? (
-                    <SuccessBanner title="Redemption successful" />
-                  ) : null)}
-                <EpochBusy busy={state.isPoolBusy} />
-                <Stack p={1} gap={1}>
-                  <Grid gap={1} columns={2} equalColumns>
-                    <Button variant="secondary" small onClick={() => setView('redeem')} disabled={state.isPoolBusy}>
-                      Redeem
-                    </Button>
-                    <Button variant="primary" small onClick={() => setView('invest')} disabled={state.isPoolBusy}>
-                      Invest more
-                    </Button>
-                  </Grid>
-                  <Box alignSelf="center">
-                    <TransactionsLink />
-                  </Box>
-                </Stack>
-              </>
-            ) : actualView === 'invest' ? (
-              <InvestForm onCancel={() => setView('start')} autoFocus />
-            ) : (
-              <RedeemForm onCancel={() => setView('start')} autoFocus />
-            )}
-          </>
+          view === 'invest' ? (
+            <InvestForm autoFocus />
+          ) : (
+            <RedeemForm autoFocus />
+          )
         ) : (
           // TODO: Show whether onboarding is in progress
           <Stack gap={2}>
@@ -315,19 +179,80 @@ function InvestRedeemInner({ view, setView, setTrancheId, networks }: InnerProps
               </AnchorTextLink>
             </Text>
             <Stack px={1}>
-              <OnboardingButton networks={networks} />
+              <OnboardingButton />
             </Stack>
           </Stack>
         )}
-      </Stack>
+      </Box>
+    </Stack>
+  )
+}
 
-      {!isTinlakePool && (connectedType === 'substrate' || isEvmOnSubstrate) && <LiquidityRewardsContainer />}
+function Header() {
+  const { state } = useInvestRedeem()
+  const { connectedType } = useWallet()
+
+  return (
+    <Stack gap={2}>
+      <Text variant="heading2" textAlign="center">
+        {state.trancheCurrency?.symbol} investment overview
+      </Text>
+      {connectedType && (
+        <Shelf
+          justifyContent="space-between"
+          borderWidth="1px 0"
+          borderColor="borderSecondary"
+          borderStyle="solid"
+          py={1}
+        >
+          <Stack>
+            <TextWithPlaceholder variant="body3" color="textSecondary">
+              Position
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
+              {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
+              {/* {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)} */}
+            </TextWithPlaceholder>
+          </Stack>
+
+          <Stack>
+            <TextWithPlaceholder variant="body3" color="textSecondary">
+              Cost basis
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
+              -
+            </TextWithPlaceholder>
+          </Stack>
+
+          <Stack>
+            <TextWithPlaceholder variant="body3" color="textSecondary">
+              Profit
+            </TextWithPlaceholder>
+            <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
+              -
+            </TextWithPlaceholder>
+          </Stack>
+        </Shelf>
+      )}
+    </Stack>
+  )
+}
+
+function Footer() {
+  const { state } = useInvestRedeem()
+  const { connectedType } = useWallet()
+
+  return (
+    <>
+      {state.actingAddress && connectedType === 'substrate' && (
+        <Transactions onlyMostRecent narrow address={state.actingAddress} />
+      )}
     </>
   )
 }
 
-const OnboardingButton = ({ networks }: { networks: Network[] | undefined; trancheId?: string }) => {
-  const { showWallets, showNetworks, connectedType } = useWallet()
+function OnboardingButton() {
+  const { showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
@@ -340,12 +265,13 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined; tranc
   const investStatus = isTinlakePool ? metadata?.pool?.newInvestmentsStatus?.[trancheName] : centPoolInvestStatus
 
   const getOnboardingButtonText = () => {
+    if (investStatus === 'closed') {
+      return `${state.trancheCurrency?.symbol ?? 'token'} onboarding closed`
+    }
+
     if (connectedType) {
       if (investStatus === 'request') {
         return 'Contact issuer'
-      }
-      if (investStatus === 'closed') {
-        return `${state.trancheCurrency?.symbol ?? 'token'} onboarding closed`
       }
 
       if (investStatus === 'open' || !isTinlakePool) {
@@ -358,11 +284,7 @@ const OnboardingButton = ({ networks }: { networks: Network[] | undefined; tranc
 
   const handleClick = () => {
     if (!connectedType) {
-      if (networks && networks.length >= 1) {
-        showWallets(networks[0])
-      } else {
-        showNetworks()
-      }
+      showNetworks()
     } else if (investStatus === 'request') {
       window.open(`mailto:${metadata?.pool?.issuer.email}?subject=New%20Investment%20Inquiry`)
     } else if (metadata?.onboarding?.externalOnboardingUrl) {
@@ -384,19 +306,14 @@ type InvestValues = {
 }
 
 type InvestFormProps = {
-  onCancel?: () => void
-  hasInvestment?: boolean
   autoFocus?: boolean
   investLabel?: string
 }
 
-function toNumber(n: '' | number | Decimal) {
-  return n instanceof Decimal ? n.toNumber() : Number(n)
-}
-
-function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest' }: InvestFormProps) {
+function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
   const { state, actions, hooks } = useInvestRedeem()
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
+  const [claimDismissed, setClaimDismissed] = React.useState(false)
   const { allowInvestBelowMin } = useDebugFlags()
   const pool = usePool(state.poolId)
 
@@ -427,9 +344,13 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
       const errors: FormikErrors<InvestValues> = {}
       if (validateNumberInput(values.amount, 0, state.poolCurrencyBalanceWithPending)) {
         errors.amount = validateNumberInput(values.amount, 0, state.poolCurrencyBalanceWithPending)
-      } else if (hasPendingOrder && Dec(values.amount).eq(pendingInvest)) {
+      } else if (hasPendingOrder && Dec(values.amount || 0).eq(pendingInvest)) {
         errors.amount = 'Equals current order'
-      } else if (!allowInvestBelowMin && state.isFirstInvestment && Dec(values.amount).lt(state.minInitialInvestment)) {
+      } else if (
+        !allowInvestBelowMin &&
+        state.isFirstInvestment &&
+        Dec(values.amount || 0).lt(state.minInitialInvestment)
+      ) {
         errors.amount = 'Investment amount too low'
       }
 
@@ -449,12 +370,10 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
   const isInvesting = state.pendingAction === 'invest' && isPending
   const isCancelling = state.pendingAction === 'cancelInvest' && isPending
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
-  const isCollecting = state.pendingAction === 'collect' && isPending
 
-  function renderInput(
-    cancelCb?: () => void,
-    preSubmitAction?: { onClick: () => void; loading?: boolean; label?: string }
-  ) {
+  console.log('state', state)
+
+  function renderInput(preSubmitAction?: { onClick: () => void; loading?: boolean; label?: string }) {
     return (
       <Stack gap={2}>
         <EpochBusy busy={state.isPoolBusy} />
@@ -464,104 +383,85 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             {state.nativeCurrency && `${state.nativeCurrency.symbol} balance is too low.`}
           </InlineFeedback>
         )}
-        <Field name="amount" validate={positiveNumber()}>
-          {({ field, meta }: FieldProps) => {
-            return (
-              <CurrencyInput
-                {...field}
-                onChange={(value) => form.setFieldValue('amount', value)}
-                errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
-                label={`Amount ${
-                  state.isFirstInvestment
-                    ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.symbol)})`
-                    : ''
-                }`}
-                disabled={isInvesting}
-                currency={state.poolCurrency?.symbol}
-                secondaryLabel={
-                  state.poolCurrencyBalance &&
-                  state.poolCurrency &&
-                  `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
-                }
-                onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
-                autoFocus={autoFocus}
-              />
-            )
-          }}
-        </Field>
+        <Grid gridTemplateColumns={['1fr', '2fr minmax(min-content, 1fr)']} gap={1} alignItems="start">
+          <Field name="amount" validate={positiveNumber()}>
+            {({ field, meta }: FieldProps) => {
+              return (
+                <CurrencyInput
+                  {...field}
+                  onChange={(value) => form.setFieldValue('amount', value)}
+                  errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
+                  label={`Amount ${
+                    state.isFirstInvestment
+                      ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.symbol)})`
+                      : ''
+                  }`}
+                  disabled={isInvesting}
+                  currency={state.poolCurrency?.symbol}
+                  secondaryLabel={
+                    state.poolCurrencyBalance &&
+                    state.poolCurrency &&
+                    `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
+                  }
+                  onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
+                  autoFocus={autoFocus}
+                />
+              )
+            }}
+          </Field>
+          <Stack gap={1}>
+            <Box display={['none', 'flex']}>
+              <InputLabel>&nbsp;</InputLabel>
+            </Box>
+            {preSubmitAction ? (
+              <Button {...preSubmitAction}>{preSubmitAction.label ?? investLabel}</Button>
+            ) : (
+              <Button
+                type="submit"
+                loading={isInvesting}
+                loadingMessage={loadingMessage}
+                disabled={state.isPoolBusy || nativeBalanceTooLow}
+              >
+                {changeOrderFormShown ? 'Change order' : investLabel}
+              </Button>
+            )}
+          </Stack>
+        </Grid>
         {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
           <Text variant="label2" color="statusOk">
             Full amount covered by investment capacity ✓
           </Text>
         )}
-        {inputToNumber(form.values.amount) > 0 ? (
-          <Stack px={2} gap="4px">
-            <Shelf justifyContent="space-between">
-              <Text variant="body3">Token amount</Text>
-              <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
+
+        {inputToNumber(form.values.amount) > 0 && (
+          <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="input">
+            <Text variant="body3">
+              Token amount{' '}
+              <TextWithPlaceholder isLoading={state.isDataLoading} fontWeight={600} width={12} variance={0}>
                 {!state.tokenPrice.isZero() &&
                   `~${formatBalance(Dec(form.values.amount).div(state.tokenPrice), state.trancheCurrency?.symbol)}`}
               </TextWithPlaceholder>
-            </Shelf>
-
-            {!hasInvestment && (
-              <Text variant="body3" color="textSecondary">
-                The investment amount will be locked and executed at the end of the current epoch.
-              </Text>
-            )}
-          </Stack>
-        ) : null}
-        <Stack px={1} gap={1}>
-          {preSubmitAction ? (
-            <Button {...preSubmitAction}>{preSubmitAction.label ?? investLabel}</Button>
-          ) : (
-            <Button
-              type="submit"
-              loading={isInvesting}
-              loadingMessage={loadingMessage}
-              disabled={state.isPoolBusy || nativeBalanceTooLow}
-            >
-              {changeOrderFormShown ? 'Change order' : investLabel}
-            </Button>
-          )}
-          {cancelCb && (
-            <Button variant="secondary" onClick={cancelCb} disabled={state.isPoolBusy || nativeBalanceTooLow}>
-              Cancel
-            </Button>
-          )}
-        </Stack>
+            </Text>
+          </Box>
+        )}
+        {state.isFirstInvestment && (
+          <InlineFeedback>
+            The invested amount will be locked and executed at the end of the current epoch
+          </InlineFeedback>
+        )}
       </Stack>
     )
   }
-
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
-        {state.needsToCollectBeforeOrder ? (
-          <Stack gap={2}>
-            <InlineFeedback>Need to collect before placing another order</InlineFeedback>
-            <Stack px={1} gap={1}>
-              <Button onClick={actions.collect} loading={isCollecting}>
-                Collect{' '}
-                {formatBalance(
-                  state.collectAmount,
-                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol,
-                  2,
-                  0
-                )}
-              </Button>
-              {onCancel && (
-                <Button variant="secondary" onClick={onCancel}>
-                  Cancel
-                </Button>
-              )}
-            </Stack>
-          </Stack>
+        {state.collectType && !claimDismissed ? (
+          <Claim type="invest" onDismiss={() => setClaimDismissed(true)} />
         ) : changeOrderFormShown ? (
           state.needsPoolCurrencyApproval(inputToNumber(form.values.amount)) ? (
-            renderInput(onCancel, { onClick: actions.approvePoolCurrency, loading: isApproving })
+            renderInput({ onClick: actions.approvePoolCurrency, loading: isApproving })
           ) : (
-            renderInput(onCancel)
+            renderInput()
           )
         ) : hasPendingOrder ? (
           <Stack gap={2}>
@@ -569,7 +469,6 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
             <PendingOrder
               type="invest"
               pool={pool}
-              state={state}
               amount={pendingInvest}
               onCancelOrder={() => actions.cancelInvest()}
               isCancelling={isCancelling}
@@ -580,13 +479,13 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
               }}
             />
           </Stack>
-        ) : state.needsPoolCurrencyApproval(toNumber(form.values.amount)) ? (
-          renderInput(onCancel, {
+        ) : state.needsPoolCurrencyApproval(inputToNumber(form.values.amount)) ? (
+          renderInput({
             onClick: actions.approvePoolCurrency,
             loading: isApproving,
           })
         ) : (
-          renderInput(onCancel)
+          renderInput()
         )}
       </Form>
     </FormikProvider>
@@ -594,7 +493,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
 }
 
 type RedeemFormProps = {
-  onCancel: () => void
+  onCancel?: () => void
   autoFocus?: boolean
 }
 
@@ -602,6 +501,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   const { state, actions, hooks } = useInvestRedeem()
   const pool = usePool(state.poolId) as Pool
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
+  const [claimDismissed, setClaimDismissed] = React.useState(false)
 
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
 
@@ -636,13 +536,15 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
       amount: '',
     },
     onSubmit: (values, formActions) => {
-      const amountTokens = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(state.tokenPrice)
+      const amountTokens =
+        values.amount instanceof Decimal ? values.amount : Dec(values.amount || 0).div(state.tokenPrice)
       actions.redeem(TokenBalance.fromFloat(amountTokens, state.poolCurrency?.decimals ?? 18))
       formActions.setSubmitting(false)
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-      const amountTokens = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(state.tokenPrice)
+      const amountTokens =
+        values.amount instanceof Decimal ? values.amount : Dec(values.amount || 0).div(state.tokenPrice)
       if (validateNumberInput(amountTokens, 0, maxRedeemTokens)) {
         errors.amount = validateNumberInput(amountTokens, 0, maxRedeemTokens)
       } else if (hasPendingOrder && amountTokens.eq(pendingRedeem)) {
@@ -668,30 +570,64 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   function renderInput(cancelCb?: () => void, preSubmitAction?: { onClick: () => void; loading?: boolean }) {
     return (
       <Stack gap={2}>
+        {state.order && !state.order.payoutCurrencyAmount.isZero() && (
+          <SuccessBanner
+            title="Redemption successful"
+            body={
+              <Stack gap={1}>
+                <div>
+                  Redeemed {state.poolCurrency?.symbol}:{' '}
+                  <Text fontWeight="bold">
+                    {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
+                  </Text>
+                </div>
+              </Stack>
+            }
+          />
+        )}
         <EpochBusy busy={calculatingOrders} />
-        <Field name="amount" validate={positiveNumber()}>
-          {({ field, meta }: FieldProps) => (
-            <CurrencyInput
-              {...field}
-              // when the value is a decimal we assume the user clicked the max button
-              // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
-              value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
-              errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
-              label="Amount"
-              disabled={isRedeeming}
-              onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
-              onChange={(value) => form.setFieldValue('amount', value)}
-              currency={state.poolCurrency?.symbol}
-              secondaryLabel={`${formatBalance(roundDown(maxRedeemCurrency), state.poolCurrency?.symbol, 2)} available`}
-              autoFocus={autoFocus}
-            />
-          )}
-        </Field>
-        {inputToNumber(form.values.amount) > 0 ? (
-          <Stack px={2} gap="4px">
-            <Shelf justifyContent="space-between">
-              <Text variant="body3">Token amount</Text>
-              <Text variant="body3" width={12} variance={0}>
+
+        <Grid gridTemplateColumns={['1fr', '2fr minmax(min-content, 1fr)']} gap={1} alignItems="start">
+          <Field name="amount" validate={positiveNumber()}>
+            {({ field, meta }: FieldProps) => (
+              <CurrencyInput
+                {...field}
+                // when the value is a decimal we assume the user clicked the max button
+                // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
+                value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
+                errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
+                label="Amount"
+                disabled={isRedeeming}
+                onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
+                onChange={(value) => form.setFieldValue('amount', value)}
+                currency={state.poolCurrency?.symbol}
+                secondaryLabel={`${formatBalance(
+                  roundDown(maxRedeemCurrency),
+                  state.poolCurrency?.symbol,
+                  2
+                )} available`}
+                autoFocus={autoFocus}
+              />
+            )}
+          </Field>
+          <Stack gap={1}>
+            <Box display={['none', 'flex']}>
+              <InputLabel>&nbsp;</InputLabel>
+            </Box>
+            {preSubmitAction ? (
+              <Button {...preSubmitAction}>Redeem</Button>
+            ) : (
+              <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
+                Redeem
+              </Button>
+            )}
+          </Stack>
+        </Grid>
+        {inputToNumber(form.values.amount) > 0 && (
+          <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="card">
+            <Text variant="body3">
+              Token amount{' '}
+              <Text variant="body3" fontWeight="bold" width={12} variance={0}>
                 {!state.tokenPrice.isZero() &&
                   `~${formatBalance(
                     form.values.amount instanceof Decimal
@@ -700,18 +636,10 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
                     tokenSymbol
                   )}`}
               </Text>
-            </Shelf>
-          </Stack>
-        ) : null}
+            </Text>
+          </Box>
+        )}
         <Stack px={1} gap={1}>
-          {preSubmitAction ? (
-            <Button {...preSubmitAction}>Redeem</Button>
-          ) : (
-            <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
-              Redeem
-            </Button>
-          )}
-
           {cancelCb && (
             <Button variant="secondary" onClick={cancelCb} disabled={calculatingOrders}>
               Cancel
@@ -725,26 +653,8 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
-        {state.needsToCollectBeforeOrder ? (
-          <Stack gap={2}>
-            <InlineFeedback>Need to collect before placing another order</InlineFeedback>
-            <Stack px={1} gap={1}>
-              <Button onClick={actions.collect} loading={isCollecting}>
-                Collect{' '}
-                {formatBalance(
-                  state.collectAmount,
-                  state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol,
-                  2,
-                  0
-                )}
-              </Button>
-              {onCancel && (
-                <Button variant="secondary" onClick={onCancel}>
-                  Cancel
-                </Button>
-              )}
-            </Stack>
-          </Stack>
+        {state.collectType && !claimDismissed ? (
+          <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
         ) : changeOrderFormShown ? (
           state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
             renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
@@ -755,7 +665,6 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
           <PendingOrder
             type="redeem"
             pool={pool}
-            state={state}
             amount={pendingRedeem.mul(state.tokenPrice)}
             onCancelOrder={() => actions.cancelRedeem()}
             isCancelling={isCancelling}
@@ -765,7 +674,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
               setChangeOrderFormShown(true)
             }}
           />
-        ) : state.needsTrancheTokenApproval(toNumber(form.values.amount)) ? (
+        ) : state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
           renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
         ) : (
           renderInput(onCancel)
@@ -775,7 +684,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   )
 }
 
-const TransactionsLink: React.FC = () => {
+export function TransactionsLink() {
   const address = useAddress()
   const explorer = useGetExplorerUrl(useWallet().connectedNetwork!)
   const url = explorer.address(address!)
@@ -793,76 +702,164 @@ const TransactionsLink: React.FC = () => {
     </Box>
   ) : null
 }
-const SuccessBanner: React.FC<{ title: string; body?: string }> = ({ title, body }) => {
+
+function SuccessBanner({ title, body }: { title: string; body?: React.ReactNode }) {
   return (
-    <Stack p={2} gap={1} backgroundColor="secondarySelectedBackground" borderRadius="card">
-      <Shelf gap={1}>
+    <Stack gap={1}>
+      <Shelf gap={1} color="statusOk">
         <IconCheckInCircle size="iconSmall" />
-        <Text variant="body2" fontWeight={600}>
+        <Text variant="body2" fontWeight={600} color="inherit">
           {title}
         </Text>
       </Shelf>
-      {body && <Text variant="body3">{body}</Text>}
+      {body && (
+        <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="card">
+          <Text variant="body3">{body}</Text>
+        </Box>
+      )}
     </Stack>
   )
 }
 
-const PendingOrder: React.FC<{
+function PendingOrder({
+  type,
+  amount,
+  pool,
+  onCancelOrder,
+  isCancelling,
+  onChangeOrder,
+}: {
   type: 'invest' | 'redeem'
   amount: Decimal
   pool: Pool | TinlakePool
-  state: InvestRedeemContextState
   onCancelOrder: () => void
   isCancelling: boolean
   onChangeOrder: () => void
-}> = ({ type, amount, pool, state, onCancelOrder, isCancelling, onChangeOrder }) => {
+}) {
+  const { state } = useInvestRedeem()
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id!)
   const calculatingOrders = pool.epoch.status !== 'ongoing'
   return (
     <Stack gap={2}>
       <EpochBusy busy={calculatingOrders} />
-      <Stack gap="1px">
+      <Stack gap={1}>
+        <Shelf gap={1}>
+          <IconClock size="iconSmall" />
+          <Text variant="heading4">Open order</Text>
+        </Shelf>
         <Stack
           p={2}
           gap={1}
           backgroundColor="secondarySelectedBackground"
-          borderTopLeftRadius="card"
-          borderTopRightRadius="card"
+          borderTopLeftRadius="input"
+          borderTopRightRadius="input"
         >
-          <Shelf gap={1}>
-            <IconClock size="iconSmall" />
-            <Text variant="body2" fontWeight={500}>
-              {formatBalance(amount, state.poolCurrency?.symbol)} locked
-            </Text>
-          </Shelf>
+          {type === 'invest' ? (
+            <>
+              <Text variant="body3">
+                Invested USDC value <Text fontWeight={600}>{formatBalance(amount, state.poolCurrency?.symbol)}</Text>
+              </Text>
+              <Text variant="body3">
+                Token amount ~
+                <Text fontWeight={600}>
+                  {formatBalance(amount.div(state.tokenPrice), state.trancheCurrency?.symbol)}
+                </Text>
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text variant="body3">
+                Token amount <Text fontWeight={600}>{formatBalance(amount, state.trancheCurrency?.symbol)}</Text>
+              </Text>
+              <Text variant="body3">
+                USDC value ~
+                <Text fontWeight={600}>{formatBalance(amount.mul(state.tokenPrice), state.poolCurrency?.symbol)}</Text>
+              </Text>
+            </>
+          )}
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
             {(pool.epoch.status === 'ongoing' && epochTimeRemaining) || `0 min remaining`}).{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>
-        <Grid gap="1px" columns={state.canChangeOrder && state.canCancelOrder ? 2 : 1} equalColumns>
-          {state.canCancelOrder && (
-            <LightButton type="button" onClick={onCancelOrder} disabled={isCancelling || calculatingOrders}>
-              {isCancelling ? (
-                <Spinner size="iconSmall" />
-              ) : (
-                <Text variant="body2" color="inherit">
-                  Cancel
-                </Text>
-              )}
-            </LightButton>
-          )}
-          {state.canChangeOrder && (
-            <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling || calculatingOrders}>
-              <Text variant="body2" color="inherit">
-                Change order
-              </Text>
-            </LightButton>
-          )}
-        </Grid>
       </Stack>
-      <TransactionsLink />
+      <ButtonGroup>
+        {state.canChangeOrder && (
+          <Button onClick={onChangeOrder} disabled={isCancelling || calculatingOrders}>
+            Change order
+          </Button>
+        )}
+        {state.canCancelOrder && (
+          <Button onClick={onCancelOrder} loading={isCancelling} disabled={calculatingOrders} variant="secondary">
+            Cancel
+          </Button>
+        )}
+      </ButtonGroup>
+    </Stack>
+  )
+}
+
+function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismiss?: () => void }) {
+  const { state, actions } = useInvestRedeem()
+  console.log('state.order', state.order, state.collectType)
+  if (!state.order || !state.collectType) return null
+
+  const isPending =
+    !!state.pendingTransaction && ['creating', 'unconfirmed', 'pending'].includes(state.pendingTransaction?.status)
+  const isCollecting = state.pendingAction === 'collect' && isPending
+  return (
+    <Stack gap={2}>
+      {state.collectType === 'invest' ? (
+        <SuccessBanner
+          title="Investment successful"
+          body={
+            <Stack gap={1}>
+              <div>
+                Invested {state.poolCurrency?.symbol} value{' '}
+                <Text fontWeight="bold">
+                  {formatBalance(state.order.payoutTokenAmount.mul(state.tokenPrice), state.poolCurrency?.symbol)}
+                </Text>
+              </div>
+              <div>
+                Token amount{' '}
+                <Text fontWeight="bold">
+                  {formatBalance(state.order.payoutTokenAmount, state.trancheCurrency?.symbol)}
+                </Text>
+              </div>
+            </Stack>
+          }
+        />
+      ) : (
+        <SuccessBanner
+          title="Redemption successful"
+          body={
+            <Stack gap={1}>
+              <div>
+                Redeemed {state.poolCurrency?.symbol} amount{' '}
+                <Text fontWeight="bold">
+                  {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
+                </Text>
+              </div>
+            </Stack>
+          }
+        />
+      )}
+      {state.needsToCollectBeforeOrder && <InlineFeedback>Claim tokens before placing another order</InlineFeedback>}
+      <ButtonGroup>
+        <Button onClick={actions.collect} loading={isCollecting}>
+          Claim{' '}
+          {formatBalanceAbbreviated(
+            state.collectAmount,
+            state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol
+          )}
+        </Button>
+        {!state.needsToCollectBeforeOrder && (
+          <Button variant="secondary" onClick={onDismiss}>
+            {type === 'invest' ? 'Invest more' : 'Redeem'}
+          </Button>
+        )}
+      </ButtonGroup>
     </Stack>
   )
 }

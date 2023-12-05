@@ -1,4 +1,4 @@
-import { altairYellow, blueScale, centrifugeBlue, grayScale } from './colors'
+import { blueScale, centrifugeBlue, grayScale } from './colors'
 
 const statusDefault = grayScale[600]
 const statusInfo = '#006ef5'
@@ -8,12 +8,13 @@ const statusCritical = '#d43f2b'
 
 const lightColors = {
   textPrimary: 'black',
-  textSecondary: grayScale[700],
-  textDisabled: grayScale[500],
+  textSecondary: grayScale[800],
+  textDisabled: grayScale[400],
   textInverted: 'white',
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
+  backgroundTertiary: grayScale[50],
   backgroundPage: 'white',
   backgroundInput: grayScale[50],
   backgroundThumbnail: grayScale[600],
@@ -28,27 +29,27 @@ const lightColors = {
   statusWarning,
   statusCritical,
 
-  backgroundButtonPrimary: altairYellow,
-  backgroundButtonPrimaryFocus: altairYellow,
+  backgroundButtonPrimary: centrifugeBlue,
+  backgroundButtonPrimaryFocus: centrifugeBlue,
   backgroundButtonPrimaryHover: 'black',
   backgroundButtonPrimaryPressed: 'black',
   backgroundButtonPrimaryDisabled: grayScale[600],
-  textButtonPrimary: 'black',
-  textButtonPrimaryFocus: 'black',
+  textButtonPrimary: 'white',
+  textButtonPrimaryFocus: 'white',
   textButtonPrimaryHover: 'white',
   textButtonPrimaryPressed: 'white',
   textButtonPrimaryDisabled: 'white',
-  borderButtonPrimary: altairYellow,
+  borderButtonPrimary: centrifugeBlue,
   borderButtonPrimaryFocus: 'black',
   borderButtonPrimaryHover: 'black',
   borderButtonPrimaryPressed: 'black',
   borderButtonPrimaryDisabled: grayScale[600],
-  shadowButtonPrimaryPressed: altairYellow,
+  shadowButtonPrimaryPressed: centrifugeBlue,
 
   backgroundButtonSecondary: 'transparent',
   backgroundButtonSecondaryFocus: 'transparent',
-  backgroundButtonSecondaryHover: 'white',
-  backgroundButtonSecondaryPressed: 'white',
+  backgroundButtonSecondaryHover: 'transparent',
+  backgroundButtonSecondaryPressed: 'transparent',
   backgroundButtonSecondaryDisabled: 'transparent',
   textButtonSecondary: 'black',
   textButtonSecondaryFocus: 'black',

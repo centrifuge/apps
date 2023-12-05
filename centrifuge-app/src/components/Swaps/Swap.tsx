@@ -1,7 +1,7 @@
 import { CurrencyBalance, CurrencyKey, findBalance, findCurrency, Price } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { CentrifugeTransactionOptions } from '@centrifuge/centrifuge-react/dist/hooks/useCentrifugeTransaction'
-import { Button, Card, CurrencyInput, SelectInner, Stack } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, SelectInner_DEPRECATED, Stack } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
@@ -18,9 +18,9 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
   const [account, accountPicker] = useSuitableAccountPicker({})
   const [buyCurrencyKey, setBuyCurrency] = React.useState(defaultBuy)
   const [sellCurrencyKey, setSellCurrency] = React.useState(defaultSell)
-  const [buy, setBuy] = React.useState(0)
-  const [sell, setSell] = React.useState<number | Decimal>(0)
-  const [price, setPrice] = React.useState(1)
+  const [buy, setBuy] = React.useState<number | ''>(0)
+  const [sell, setSell] = React.useState<number | Decimal | ''>(0)
+  const [price, setPrice] = React.useState<number | ''>(1)
   const [lastChanged, setLastChanged] = React.useState<'buy' | 'sell'>('buy')
   const api = useCentrifugeApi()
   const balances = useBalances(account?.actingAddress)
@@ -48,8 +48,8 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
   const buyCurrency = buyCurrencyKey ? findCurrency(currencies ?? [], buyCurrencyKey) : undefined
   const sellCurrency = sellCurrencyKey ? findCurrency(currencies ?? [], sellCurrencyKey) : undefined
 
-  const buyAmount = lastChanged === 'buy' ? buy : toNumber(sell) / price
-  const sellAmount = lastChanged === 'sell' ? toNumber(sell) : buy * price
+  const buyAmount = lastChanged === 'buy' ? buy : toNumber(sell) / toNumber(price)
+  const sellAmount = lastChanged === 'sell' ? toNumber(sell) : toNumber(buy) * toNumber(price)
 
   return (
     <Card p={2}>
@@ -60,11 +60,11 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
           value={buyAmount}
           onChange={(val) => {
             setBuy(val)
-            setSell(val * price)
+            setSell(toNumber(val) * toNumber(price))
             setLastChanged('buy')
           }}
           currency={
-            <SelectInner
+            <SelectInner_DEPRECATED
               value={buyCurrency?.symbol ?? ''}
               options={[
                 { label: 'Select', value: '', disabled: true },
@@ -99,7 +99,7 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
             setLastChanged('sell')
           }}
           currency={
-            <SelectInner
+            <SelectInner_DEPRECATED
               value={sellCurrency?.symbol ?? ''}
               options={[
                 { label: 'Select', value: '' },

@@ -1,4 +1,4 @@
-import { Button, Dialog, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text, TextInput_DEPRECATED } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useMutation } from 'react-query'
 import { string } from 'yup'
@@ -52,8 +52,12 @@ export const EditOnboardingEmailAddressDialog = ({ isDialogOpen, setIsDialogOpen
       title={<Text variant="heading2">Edit Email Address</Text>}
     >
       <Stack gap={3}>
-        <TextInput value={currentEmail} label="Current Email Address" disabled />
-        <TextInput value={newEmail} label="New Email Address" onChange={(event) => setNewEmail(event.target.value)} />
+        <TextInput_DEPRECATED value={currentEmail} label="Current Email Address" disabled />
+        <TextInput_DEPRECATED
+          value={newEmail}
+          label="New Email Address"
+          onChange={(event) => setNewEmail(event.target.value)}
+        />
         <Shelf justifyContent="flex-end" gap={2}>
           <Button onClick={() => setIsDialogOpen(false)} variant="secondary" disabled={isLoading}>
             Cancel

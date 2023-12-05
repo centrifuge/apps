@@ -1,4 +1,11 @@
-import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
+import {
+  CurrencyInput_DEPRECATED,
+  DateInput,
+  Grid,
+  NumberInput,
+  Select_DEPRECATED,
+  TextInput_DEPRECATED,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
@@ -14,7 +21,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
     <Grid columns={[1, 2, 2, 3]} gap={2} rowGap={3}>
       <Field name="pricing.valuationMethod">
         {({ field, meta, form }: FieldProps) => (
-          <Select
+          <Select_DEPRECATED
             {...field}
             label="Valuation method"
             onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
@@ -31,7 +38,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
       {values.pricing.valuationMethod === 'oracle' && (
         <>
           <FieldWithErrorMessage
-            as={TextInput}
+            as={TextInput_DEPRECATED}
             label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
             placeholder="010101010000"
             name="pricing.Isin"
@@ -39,7 +46,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
           />
           <Field name="pricing.notional" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput
+              <CurrencyInput_DEPRECATED
                 {...field}
                 label={<Tooltips type="notionalValue" variant="secondary" label="Notional value*" />}
                 placeholder="0.00"
@@ -66,7 +73,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
         <>
           <Field name="pricing.maxBorrowAmount">
             {({ field, meta, form }: FieldProps) => (
-              <Select
+              <Select_DEPRECATED
                 {...field}
                 label="Borrow restriction"
                 onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
@@ -82,7 +89,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
 
           <Field name="pricing.value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput
+              <CurrencyInput_DEPRECATED
                 {...field}
                 label="Collateral value*"
                 placeholder="0.00"

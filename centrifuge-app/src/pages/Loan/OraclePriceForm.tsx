@@ -1,6 +1,6 @@
 import { CurrencyBalance, Loan as LoanType, Price } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Card, CurrencyInput, Flex, IconArrowDown, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, CurrencyInput_DEPRECATED, Flex, IconArrowDown, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -86,7 +86,7 @@ export function OraclePriceForm({
             <Field name="currentPrice">
               {({ field }: FieldProps) => {
                 return (
-                  <CurrencyInput
+                  <CurrencyInput_DEPRECATED
                     {...field}
                     variant="small"
                     label="Current price"
@@ -103,7 +103,7 @@ export function OraclePriceForm({
             <Field validate={combine(positiveNumber())} name="newPrice">
               {({ field, meta, form }: FieldProps) => {
                 return (
-                  <CurrencyInput
+                  <CurrencyInput_DEPRECATED
                     {...field}
                     variant="small"
                     label="New price"

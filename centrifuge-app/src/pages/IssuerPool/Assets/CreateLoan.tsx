@@ -11,25 +11,25 @@ import {
 import {
   Box,
   Button,
-  CurrencyInput,
+  CurrencyInput_DEPRECATED,
   DateInput,
   Grid,
   ImageUpload,
   NumberInput,
-  Select,
+  Select_DEPRECATED,
   Stack,
   Text,
   TextAreaInput,
-  TextInput,
+  TextInput_DEPRECATED,
 } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
@@ -45,9 +45,9 @@ import { PricingInput } from './PricingInput'
 
 export default function IssuerCreateLoanPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <IssuerCreateLoan />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -82,7 +82,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
       return (
         <Field name={name} validate={required()} key={label}>
           {({ field, form }: any) => (
-            <Select
+            <Select_DEPRECATED
               placeholder="Select one"
               label={`${label}*`}
               options={input.options.map((o) => (typeof o === 'string' ? { label: o, value: o } : o))}
@@ -103,7 +103,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
         >
           {({ field, meta, form }: FieldProps) => {
             return (
-              <CurrencyInput
+              <CurrencyInput_DEPRECATED
                 {...field}
                 variant="small"
                 label={`${label}*`}
@@ -149,7 +149,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
       return (
         <FieldWithErrorMessage
           name={name}
-          as={type === 'textarea' ? TextAreaInput : TextInput}
+          as={type === 'textarea' ? TextAreaInput : TextInput_DEPRECATED}
           label={`${label}*`}
           validate={required()}
           {...rest}
@@ -396,7 +396,7 @@ function IssuerCreateLoan() {
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
                     name="assetName"
-                    as={TextInput}
+                    as={TextInput_DEPRECATED}
                     label="Asset name*"
                     placeholder=""
                     maxLength={100}

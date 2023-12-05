@@ -10,15 +10,15 @@ import {
   Stack,
   Text,
   TextAreaInput,
-  TextInput,
+  TextInput_DEPRECATED,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { useDebugFlags } from '../components/DebugFlags'
+import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { nftMetadataSchema } from '../schemas'
 import { Dec } from '../utils/Decimal'
@@ -46,9 +46,9 @@ const ACCEPT_STRING = ALLOWED_TYPES.join(',')
 
 export default function MintNFTPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <MintNFT />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -183,7 +183,7 @@ const MintNFT: React.FC = () => {
             </Flex>
             <Box flex="1 1 30%" minWidth={250}>
               <Box mb={3}>
-                <TextInput
+                <TextInput_DEPRECATED
                   label="Name"
                   placeholder={DEFAULT_NFT_NAME}
                   value={nftName}

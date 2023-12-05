@@ -1,21 +1,23 @@
 import * as React from 'react'
 import styled, { css } from 'styled-components'
 import { Box } from '../Box'
-import { InputBox, InputBoxProps } from '../InputBox'
+import { InputBox, InputBoxProps, InputUnit } from '../InputBox'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
+import { InputAction, TextInputBox } from '../TextInput'
 
 export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> &
   Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
     currency?: React.ReactNode
     onSetMax?: () => void
+    onChange?: (value: number | '') => void
+    // TODO: Remove when deprecated inputs are removed
     variant?: 'small' | 'large'
-    onChange?: (value: number) => void
     initialValue?: number
     precision?: number
   }
 
-const StyledTextInput = styled.input<{ $variant: 'small' | 'large' }>`
+const StyledTextInput = styled.input<{ $variant?: 'small' | 'large' }>`
   width: 100%;
   border: 0;
   background: transparent;
@@ -84,7 +86,7 @@ function formatThousandSeparator(input: number | string): string {
   return removeNonNumeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
-export const CurrencyInput: React.FC<CurrencyInputProps> = ({
+export const CurrencyInput_DEPRECATED: React.FC<CurrencyInputProps> = ({
   label,
   secondaryLabel,
   disabled,
@@ -92,7 +94,6 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   currency,
   onSetMax,
   placeholder = '0.0',
-  variant = 'large',
   initialValue,
   precision = 6,
   ...inputProps
@@ -103,7 +104,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     const inputFormatted = formatThousandSeparator(value)
     const inputAsNumber = parseFloat(value.replaceAll(',', ''))
     if (inputProps?.onChange) {
-      inputProps?.onChange(inputAsNumber)
+      inputProps?.onChange(Number.isNaN(inputAsNumber) ? '' : inputAsNumber)
       setValue(inputFormatted)
     }
   }
@@ -143,17 +144,76 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           type="text"
           onChange={(e) => onChange(e.target.value)}
           value={value}
-          $variant={variant}
         />
       }
       rightElement={
-        <Text
-          variant="body1"
-          color={disabled ? 'textDisabled' : 'textPrimary'}
-          fontSize={variant === 'small' ? '16px' : '24px'}
-        >
+        <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'} fontSize={'24px'}>
           {currency}
         </Text>
+      }
+    />
+  )
+}
+
+export function CurrencyInput({
+  id,
+  label,
+  secondaryLabel,
+  disabled,
+  errorMessage,
+  currency,
+  onSetMax,
+  placeholder = '0.0',
+  initialValue,
+  precision = 6,
+  ...inputProps
+}: CurrencyInputProps) {
+  id ??= React.useId()
+  const [value, setValue] = React.useState(initialValue ? formatThousandSeparator(initialValue) : '')
+
+  const onChange = (value: string) => {
+    const inputFormatted = formatThousandSeparator(value)
+    const inputAsNumber = parseFloat(value.replaceAll(',', ''))
+    if (inputProps?.onChange) {
+      inputProps?.onChange(Number.isNaN(inputAsNumber) ? '' : inputAsNumber)
+      setValue(inputFormatted)
+    }
+  }
+
+  // TODO: fix jank when typing more decimals than precision allows
+  React.useLayoutEffect(() => {
+    if (inputProps.value) {
+      const inputFormatted = formatThousandSeparator(
+        Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
+      )
+      setValue(inputFormatted)
+    }
+  }, [inputProps.value])
+
+  return (
+    <InputUnit
+      id={id}
+      label={label}
+      secondaryLabel={secondaryLabel}
+      disabled={disabled}
+      errorMessage={errorMessage}
+      inputElement={
+        <TextInputBox
+          {...inputProps}
+          disabled={disabled}
+          placeholder={placeholder}
+          error={!!errorMessage}
+          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          symbol={currency}
+          action={
+            onSetMax && (
+              <InputAction onClick={onSetMax} disabled={disabled}>
+                Max
+              </InputAction>
+            )
+          }
+        />
       }
     />
   )
