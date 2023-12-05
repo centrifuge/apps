@@ -34,9 +34,9 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: centrifuge-app
-          install-command: ''
+          install-command: yarn
           command: yarn e2e:run:ci
-          browser: chrome
+          browser: firefox
           config-file: synpress.config.ts
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
         env:
