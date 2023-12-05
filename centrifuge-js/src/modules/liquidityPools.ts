@@ -149,8 +149,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     options: TransactionRequest = {}
   ) {
     const [lpAddress, order, { deadline, r, s, v }] = args
+    const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), deadline, v, r, s, {
+      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, deadline, v, r, s, {
         ...options,
         gasLimit: 300000,
       })
