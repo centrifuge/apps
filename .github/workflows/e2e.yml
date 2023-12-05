@@ -17,6 +17,7 @@ jobs:
           cache: yarn
       - name: Build app
         run: |
+          yarn
           yarn build:fabric 
           yarn build:centjs 
           yarn build:centReact
