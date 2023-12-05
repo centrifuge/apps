@@ -57,7 +57,7 @@ export type CreateLoanFormValues = {
   assetName: string
   attributes: Record<string, string | number>
   pricing: {
-    valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle'
+    valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle' | 'cash'
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
     value: number | ''
     maturityDate: string

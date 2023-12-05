@@ -97,6 +97,15 @@ type LoanInfoInput =
       interestRate: BN
     }
   | {
+      valuationMethod: 'cash'
+      maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+      value: BN
+      maturityDate: Date
+      maturityExtensionDays: number
+      advanceRate: BN
+      interestRate: BN
+    }
+  | {
       valuationMethod: 'oracle'
       maxBorrowAmount: BN | null
       maxPriceVariation: BN
@@ -148,6 +157,7 @@ export type LoanInfoData = {
           /// Valuation method of this loan
           valuationMethod:
             | { outstandingDebt: null }
+            | { cash: null }
             | {
                 discountedCashFlow: {
                   probabilityOfDefault: string
@@ -206,6 +216,7 @@ export type ActiveLoanInfoData = {
             /// Valuation method of this loan
             valuationMethod:
               | { outstandingDebt: null }
+              | { cash: null }
               | {
                   discountedCashFlow: {
                     probabilityOfDefault: string
@@ -387,7 +398,7 @@ type ClosedLoanData = {
 export type PricingInfo = InternalPricingInfo | ExternalPricingInfo
 
 export type InternalPricingInfo = {
-  valuationMethod: 'discountedCashFlow' | 'outstandingDebt'
+  valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'cash'
   maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
   value: CurrencyBalance
   maturityDate: string
@@ -1392,9 +1403,8 @@ export function getPoolsModule(inst: Centrifuge) {
           : {
               internal: {
                 valuationMethod:
-                  infoInput.valuationMethod === 'outstandingDebt'
-                    ? { outstandingDebt: null }
-                    : {
+                  infoInput.valuationMethod === 'discountedCashFlow'
+                    ? {
                         discountedCashFlow: {
                           probabilityOfDefault: infoInput.probabilityOfDefault.toString(),
                           lossGivenDefault: infoInput.lossGivenDefault.toString(),
@@ -1402,7 +1412,10 @@ export function getPoolsModule(inst: Centrifuge) {
                             fixed: { ratePerYear: infoInput.discountRate.toString(), compounding: 'Secondly' },
                           },
                         },
-                      },
+                      }
+                    : infoInput.valuationMethod === 'outstandingDebt'
+                    ? { outstandingDebt: null }
+                    : { cash: null },
                 /// Value of the collateral used for this loan
                 collateralValue: infoInput.value.toString(),
                 maxBorrowAmount: {
@@ -2701,9 +2714,10 @@ export function getPoolsModule(inst: Centrifuge) {
                     maxPriceVariation: new Rate(pricingInfo.maxPriceVariation),
                   }
                 : {
-                    valuationMethod: ('outstandingDebt' in pricingInfo.valuationMethod
-                      ? 'outstandingDebt'
-                      : 'discountedCashFlow') as any,
+                    valuationMethod:
+                      'outstandingDebt' in pricingInfo.valuationMethod || 'cash' in pricingInfo.valuationMethod
+                        ? pricingInfo.valuationMethod
+                        : ('discountedCashFlow' as any),
                     maxBorrowAmount: Object.keys(pricingInfo.maxBorrowAmount)[0] as any,
                     value: new CurrencyBalance(pricingInfo.collateralValue, currency.decimals),
                     advanceRate: new Rate(Object.values(pricingInfo.maxBorrowAmount)[0].advanceRate),

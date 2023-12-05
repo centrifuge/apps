@@ -30,6 +30,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
               { value: 'discountedCashFlow', label: 'Discounted cashflow' },
               { value: 'outstandingDebt', label: 'Outstanding debt' },
               { value: 'oracle', label: 'Oracle' },
+              { value: 'cash', label: 'Cash' },
             ]}
             placeholder="Choose valuation method"
           />
@@ -69,7 +70,8 @@ export function PricingInput({ poolId }: { poolId: string }) {
       )}
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
-        values.pricing.valuationMethod === 'outstandingDebt') && (
+        values.pricing.valuationMethod === 'outstandingDebt' ||
+        values.pricing.valuationMethod === 'cash') && (
         <>
           <Field name="pricing.maxBorrowAmount">
             {({ field, meta, form }: FieldProps) => (
@@ -123,7 +125,8 @@ export function PricingInput({ poolId }: { poolId: string }) {
       />
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
-        values.pricing.valuationMethod === 'outstandingDebt') && (
+        values.pricing.valuationMethod === 'outstandingDebt' ||
+        values.pricing.valuationMethod === 'cash') && (
         <>
           <FieldWithErrorMessage
             as={NumberInput}
