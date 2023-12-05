@@ -74,6 +74,7 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
               const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
               if (!priceAtDate) return trancheValues
 
+              // TODO: remove this once we have the correct price -- https://github.com/centrifuge/pools-subql/issues/76
               const price =
                 priceAtDate.toString().length === 10 || priceAtDate.toString().length === 9
                   ? new Price(priceAtDate.mul(new BN(10 ** 9))).toDecimal()
@@ -92,8 +93,6 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
               return trancheValues
             }, Dec(0))
           })
-
-          console.log(valueOfTranche)
 
           return valueOfTranche.reduce(
             (acc, cur) => ({
