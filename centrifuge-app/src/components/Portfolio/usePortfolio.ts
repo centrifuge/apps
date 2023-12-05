@@ -31,20 +31,26 @@ type TrancheSnapshot = {
 export function useDailyPortfolioValue(address: string, rangeValue: number) {
   const transactions = useTransactionsByAddress(address)
 
-  const transactionsByTrancheId = transactions?.investorTransactions.reduce((acc, cur) => {
-    const trancheId = cur.trancheId
-    if (!acc[trancheId]) acc[trancheId] = []
-    acc[trancheId].push(cur)
-    return acc
-  }, {} as Record<string, InvestorTransaction[]>)
+  const transactionsByTrancheId = transactions?.investorTransactions.reduce(
+    (tranches, tranche) => ({
+      ...tranches,
+      [tranche.trancheId]: [...(tranches[tranche.trancheId] || []), tranche],
+    }),
+    {} as Record<string, InvestorTransaction[]>
+  )
 
   const dailyTrancheStates = useDailyTranchesStates(Object.keys(transactionsByTrancheId || {}))
 
-  const dailyTrancheStatesByTrancheId = dailyTrancheStates?.reduce((acc, cur) => {
-    if (cur.length === 0) return acc
-    const trancheId = cur[0].tranche.trancheId
-    acc[trancheId] = cur
-    return acc
+  const dailyTrancheStatesByTrancheId = dailyTrancheStates?.reduce((tranches, trancheSnapshots) => {
+    if (trancheSnapshots.length) {
+      const trancheId = trancheSnapshots[0].tranche.trancheId
+      return {
+        ...tranches,
+        [trancheId]: trancheSnapshots,
+      }
+    }
+
+    return tranches
   }, {} as Record<string, TrancheSnapshot[]>)
 
   return useMemo(() => {
@@ -59,52 +65,35 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
         .fill(null)
         .map((_, i) => i)
         .map((day) => {
-          const valueOfTranche = Object.keys(transactionsByTrancheId).map((trancheId) => {
-            const transactions = transactionsByTrancheId[trancheId]
+          const valueOfTranche = Object.entries(transactionsByTrancheId).map(([trancheId, transactions]) => {
+            const transactionsInDateRange = transactions.filter(
+              (transaction) => new Date(transaction.timestamp) <= new Date(today.getTime() - day * 1000 * 60 * 60 * 24)
+            )
 
-            const transactionsInDateRange = transactions.filter((transaction) => {
-              const transactionDate = new Date(transaction.timestamp)
+            return transactionsInDateRange.reduce((trancheValues: Decimal, transaction) => {
+              const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
+              if (!priceAtDate) return trancheValues
 
-              return (
-                transactionDate <=
-                new Date(new Date(today.getTime() - day * 1000 * 60 * 60 * 24).setHours(23, 59, 59, 999))
-              )
-            })
+              const price =
+                priceAtDate.toString().length === 10 || priceAtDate.toString().length === 9
+                  ? new Price(priceAtDate.mul(new BN(10 ** 9))).toDecimal()
+                  : new Price(priceAtDate).toDecimal()
 
-            return transactionsInDateRange.reduce((acc: Decimal, cur) => {
-              if (cur.type === 'INVEST_EXECUTION') {
-                const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
+              const amount = transaction.tokenAmount.toDecimal().mul(price)
 
-                if (!priceAtDate) return acc
-
-                const price =
-                  priceAtDate.toString().length === 10 || priceAtDate.toString().length === 9
-                    ? new Price(priceAtDate.mul(new BN(10 ** 9))).toDecimal()
-                    : new Price(priceAtDate).toDecimal()
-
-                const amount = cur.tokenAmount.toDecimal().mul(price)
-
-                return acc.add(amount)
+              if (transaction.type === 'INVEST_EXECUTION') {
+                return trancheValues.add(amount)
               }
 
-              if (cur.type === 'REDEEM_EXECUTION') {
-                const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
-
-                if (!priceAtDate) return acc
-
-                const price =
-                  priceAtDate.toString().length === 10 || priceAtDate.toString().length === 9
-                    ? new Price(priceAtDate.mul(new BN(10 ** 9))).toDecimal()
-                    : new Price(priceAtDate).toDecimal()
-
-                const amount = cur.tokenAmount.toDecimal().mul(price)
-
-                return acc.sub(amount)
+              if (transaction.type === 'REDEEM_EXECUTION') {
+                return trancheValues.sub(amount)
               }
 
-              return acc
+              return trancheValues
             }, Dec(0))
           })
+
+          console.log(valueOfTranche)
 
           return valueOfTranche.reduce(
             (acc, cur) => ({
@@ -159,16 +148,18 @@ export function usePortfolioTokens(address?: string) {
   const pools = usePools()
   const portfolioData = usePortfolio(address)
 
-  const trancheTokenPrices = pools?.reduce((acc, pool) => {
-    return pool.tranches.reduce((innerAcc, tranche) => {
-      innerAcc[tranche.id] = {
-        currency: tranche.currency,
-        tokenPrice: tranche.tokenPrice,
-        poolId: tranche.poolId,
-      }
-      return innerAcc
-    }, acc)
-  }, {} as Record<string, { tokenPrice: Price | null; poolId: string; currency: CurrencyMetadata }>)
+  const trancheTokenPrices = pools?.reduce(
+    (tranches, pool) =>
+      pool.tranches.reduce((tranches, tranche) => {
+        tranches[tranche.id] = {
+          currency: tranche.currency,
+          tokenPrice: tranche.tokenPrice,
+          poolId: tranche.poolId,
+        }
+        return tranches
+      }, tranches),
+    {} as Record<string, { tokenPrice: Price | null; poolId: string; currency: CurrencyMetadata }>
+  )
 
   if (portfolioData && trancheTokenPrices) {
     return Object.keys(portfolioData)?.reduce((sum, trancheId) => {
