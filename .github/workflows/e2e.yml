@@ -10,31 +10,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Download artifact
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          workflow: centrifuge-app.yml
-          workflow_conclusion: 'success' # This will fail if the staging deployment isn't finished yet
-          branch: main
-          # check_artifacts: true # This will search for the last available artifact, useful for testing
-          path: centrifuge-app/build
-      - name: Install dependencies
-        working-directory: centrifuge-app
-        shell: bash
-        run: yarn
-      - name: Run preview
-        working-directory: centrifuge-app
-        shell: bash
-        run: yarn preview &
-        env:
-          # https://github.com/actions/runner-images/issues/70#issuecomment-1191708172
-          NODE_OPTIONS: '--max_old_space_size=4096'
+      # - name: Download artifact
+      #   id: download-artifact
+      #   uses: dawidd6/action-download-artifact@v2
+      #   with:
+      #     workflow: centrifuge-app.yml
+      #     workflow_conclusion: 'success' # This will fail if the staging deployment isn't finished yet
+      #     branch: main
+      #     # check_artifacts: true # This will search for the last available artifact, useful for testing
+      #     path: centrifuge-app/build
+      # - name: Install dependencies
+      #   working-directory: centrifuge-app
+      #   shell: bash
+      #   run: yarn
+      # - name: Run preview
+      #   working-directory: centrifuge-app
+      #   shell: bash
+      #   run: yarn preview &
+      #   env:
+      #     # https://github.com/actions/runner-images/issues/70#issuecomment-1191708172
+      #     NODE_OPTIONS: '--max_old_space_size=4096'
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
           working-directory: centrifuge-app
-          install-command: yarn
+          install-command: ''
           command: yarn e2e:run:ci
           browser: chrome
           config-file: synpress.config.ts
