@@ -50,7 +50,7 @@ export function PortfolioValue({ rangeValue }: { rangeValue: string }) {
         margin={{
           top: 35,
           right: 20,
-          left: 30,
+          left: 20,
           bottom: 0,
         }}
         data={dailyPortfolioValue?.reverse()}

@@ -51,7 +51,7 @@ export function CardPortfolioValue() {
         borderStyle="solid"
         borderWidth={1}
         borderColor="borderSecondary"
-        p={3}
+        p={2}
         style={{
           boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
         }}
