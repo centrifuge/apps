@@ -24,7 +24,7 @@ jobs:
           cat .env-config/.env.development
           yarn build:app --mode development
       - name: Start preview
-        run: yarn preview
+        run: yarn preview &
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
