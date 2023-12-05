@@ -139,7 +139,7 @@ export function InvestedTokens({ canInvestRedeem = false, address }: { canInvest
   return tokens.length ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
-        Portfolio
+        Holdings
       </Text>
       <DataTable columns={columns} data={tokens} defaultSortKey="position" />
     </Stack>

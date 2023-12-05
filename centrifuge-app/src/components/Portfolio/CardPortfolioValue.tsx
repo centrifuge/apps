@@ -80,11 +80,13 @@ export function CardPortfolioValue() {
         </Stack>
 
         <Stack gap={1}>
-          <Shelf justifyContent="flex-end" pr="8px">
+          <Shelf justifyContent="flex-end" pr="20px">
             {rangeFilters.map((rangeFilter, index) => (
               <>
                 <RangeFilterButton gap={1} onClick={() => setRange(rangeFilter)}>
-                  <Text variant="body3">{rangeFilter.label}</Text>
+                  <Text variant="body3">
+                    <Text variant={rangeFilter.value === range.value && 'emphasized'}>{rangeFilter.label}</Text>
+                  </Text>
                   <Box
                     width="100%"
                     backgroundColor={rangeFilter.value === range.value ? '#000000' : '#E0E0E0'}

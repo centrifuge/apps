@@ -1,8 +1,8 @@
-import { Stack, Text } from '@centrifuge/fabric'
+import { Box, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { LayoutBase } from '../../components/LayoutBase'
-import { BasePadding } from '../../components/LayoutBase/BasePadding'
+import { BasePadding, BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { PoolList } from '../../components/PoolList'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
@@ -32,7 +32,7 @@ function Portfolio() {
   return (
     <>
       <Stack gap={2}>
-        <BasePadding backgroundColor={theme.colors.backgroundSecondary} gap={4} pb={10}>
+        <BasePadding backgroundColor={theme.colors.backgroundSecondary} gap={4} pb={3}>
           <Stack as="header" gap={1}>
             <Text as="h1" variant="heading1">
               Your portfolio
@@ -41,11 +41,12 @@ function Portfolio() {
               Track and manage your portfolio
             </Text>
           </Stack>
-
           <CardPortfolioValue />
         </BasePadding>
-        <BasePadding gap={3}>
+        <Box pt={1} px={BASE_PADDING}>
           <InvestedTokens address={address} />
+        </Box>
+        <BasePadding gap={3}>
           <Transactions onlyMostRecent address={address} />
           <AssetAllocation address={address} />
         </BasePadding>
