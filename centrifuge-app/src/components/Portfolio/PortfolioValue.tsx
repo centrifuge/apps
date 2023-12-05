@@ -30,16 +30,18 @@ const TooltipInfo = ({ payload }: any) => {
 export function PortfolioValue({ rangeValue }: { rangeValue: string }) {
   const address = useAddress()
   const { formatAddress } = useCentrifugeUtils()
-  const dailyPortfolioValue = useDailyPortfolioValue(formatAddress(address || ''), getRangeNumber(rangeValue))
+  const rangeNumber = getRangeNumber(rangeValue)
+  const dailyPortfolioValue = useDailyPortfolioValue(formatAddress(address || ''), rangeNumber)
 
   const getXAxisInterval = () => {
-    if (rangeValue === '30d') {
-      return 5
-    }
-    if (rangeValue === '90d') {
+    if (rangeNumber <= 30) return 5
+    if (rangeNumber > 30 && rangeNumber <= 90) {
       return 14
     }
-    return 30
+    if (rangeNumber > 90 && rangeNumber <= 180) {
+      return 30
+    }
+    return 45
   }
 
   return (
