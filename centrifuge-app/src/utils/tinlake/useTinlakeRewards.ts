@@ -10,7 +10,7 @@ async function getTinlakeUserRewards(ethAddr: string) {
   let rewardBalances: RewardBalance[] = []
 
   const response = await fetch(
-    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/1.0.2/gn',
+    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/prod/gn',
     {
       method: 'POST',
       headers: {
@@ -77,7 +77,7 @@ async function getTinlakeRewards(): Promise<RewardsData | null> {
   let rewardDayTotals: RewardDayTotals[] = []
 
   const response = await fetch(
-    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/1.0.2/gn',
+    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/prod/gn',
     {
       method: 'POST',
       headers: {
