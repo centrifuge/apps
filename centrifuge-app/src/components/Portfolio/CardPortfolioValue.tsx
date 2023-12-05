@@ -77,7 +77,6 @@ export function CardPortfolioValue() {
         borderWidth={1}
         borderColor="borderSecondary"
         p={3}
-        pb={chartHeight * 0.6}
         style={{
           boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
         }}
