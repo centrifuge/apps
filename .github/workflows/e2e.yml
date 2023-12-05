@@ -10,22 +10,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
-          node-version: '18'
-          cache: yarn
-      - name: Build app
+          workflow: centrifuge-app.yml
+          workflow_conclusion: '' # This will fail if the staging deployment isn't finished yet
+          # check_artifacts: true # This will search for the last available artifact, useful for testing
+          path: centrifuge-app/build
+      - name: Install dependencies
         working-directory: centrifuge-app
-        run: |
-          yarn
-          yarn build:fabric 
-          yarn build:centjs 
-          yarn build:centReact
-          cat .env-config/.env.development
-          yarn build:app --mode development
-      - name: Start preview
-        run: yarn preview
+        shell: bash
+        run: yarn
+      - name: Run preview
+        working-directory: centrifuge-app
+        shell: bash
+        run: yarn preview &
+        env:
+          # https://github.com/actions/runner-images/issues/70#issuecomment-1191708172
+          NODE_OPTIONS: '--max_old_space_size=4096'
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
