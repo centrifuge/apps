@@ -1,14 +1,5 @@
 name: Centrifuge App
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'centrifuge-app/**'
-      - 'centrifuge-js/**'
-      - 'centrifuge-react/**'
-      - '.github/workflows/centrifuge-app.yml'
-      - '.github/actions/deploy-gcs'
   pull_request:
     paths:
       - 'centrifuge-app/**'
@@ -23,7 +14,7 @@ on:
         required: false
 # Fancy concurrency group string to allow for multi-staging deployments
 concurrency:
-  group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }}@${{ github.event.name }}${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true      
 env:
   artifact_name: "webpack${{ inputs.deploy_env && format('-{0}', inputs.deploy_env) }}"
@@ -103,7 +94,7 @@ jobs:
   deploy-app:
     concurrency:
        # Do not sync the same bucket in parallel
-      group: deploy-${{ needs.build-app.outputs.front_url }}
+      group: deploy-${{ needs.build-app.outputs.front_url }}-${{ github.event.name }}
       cancel-in-progress: true    
     permissions:
       contents: 'read'
@@ -138,17 +129,23 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: PR comment with preview URL
+        id: prcomment
         uses: thollander/actions-comment-pull-request@v2
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
         with:
           comment_tag: pr_preview_url
+          mode: recreate
           message: |
             PR deployed in Google Cloud
             URL: https://${{ needs.deploy-app.outputs.bucket_url }}
             Commit #: ${{ env.pull_sha }}   
             To access the functions directly check the corresponding deploy Action
-      
+      - name: Check notify outputs
+        run: |
+          echo "id : ${{ steps.prcomment.outputs.id }}"
+          echo "body : ${{ steps.prcomment.outputs.body }}"
+          echo "html_url : ${{ steps.prcomment.outputs.html_url }}"
   # owasp_scan:
   #   needs: deploy-app
   #   runs-on: ubuntu-latest
