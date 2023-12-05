@@ -2,30 +2,29 @@ import { ActiveLoan } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Tooltips } from '../../../components/Tooltips'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
 import { useAverageAmount, usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
-import { PoolDetailSideBar } from '../Overview'
 
-export const PoolDetailAssetsTab: React.FC = () => {
+export function PoolDetailAssetsTab() {
   return (
-    <PageWithSideBar sidebar={<PoolDetailSideBar />}>
+    <LayoutBase>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailAssets />
       </LoadBoundary>
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
-export const PoolDetailAssets: React.FC = () => {
+export function PoolDetailAssets() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const loans = useLoans(poolId)

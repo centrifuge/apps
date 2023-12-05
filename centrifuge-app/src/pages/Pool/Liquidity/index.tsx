@@ -13,7 +13,6 @@ import { Tooltips } from '../../../components/Tooltips'
 import { formatBalance } from '../../../utils/formatting'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
-import { PoolDetailSideBar } from '../Overview'
 
 const ReserveCashDragChart = React.lazy(() => import('../../../components/Charts/ReserveCashDragChart'))
 const LiquidityTransactionsSection = React.lazy(() => import('../../../components/LiquidityTransactionsSection'))
@@ -25,7 +24,6 @@ export const PoolDetailLiquidityTab: React.FC = () => {
       sidebar={
         <Stack gap={2}>
           <MaxReserveForm poolId={poolId} />
-          <PoolDetailSideBar />
         </Stack>
       }
     >
