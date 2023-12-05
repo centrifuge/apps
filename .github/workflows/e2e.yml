@@ -15,11 +15,18 @@ jobs:
         with:
           working-directory: centrifuge-app
           install-command: yarn
-          start: yarn start
-          wait-on: 'http://localhost:3000'
+          build: |
+            yarn
+            yarn build:fabric 
+            yarn build:centjs 
+            yarn build:centReact
+            cat .env-config/.env.development
+            yarn build:app --mode development
+          start: yarn preview
+          wait-on: 'http://localhost:4173'
           command: yarn e2e:run:ci
           browser: chrome
-          config-file: synpress.config.js
+          config-file: synpress.config.ts
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
         env:
           # pass the Cypress Cloud record key as an environment variable
