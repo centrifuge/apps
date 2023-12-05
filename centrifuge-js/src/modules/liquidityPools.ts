@@ -113,11 +113,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
     const [spender, currencyAddress, amount] = args
     if (!inst.config.evmSigner) throw new Error('EVM signer not set')
-    const chainId = await inst.config.evmSigner.getChainId()
-    const domain = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
     const permit = await signERC2612Permit(
       inst.config.evmSigner,
-      domain,
+      currencyAddress,
       inst.getSignerAddress('evm'),
       spender,
       amount.toString()
