@@ -15,7 +15,8 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: centrifuge-app.yml
-          workflow_conclusion: '' # This will fail if the staging deployment isn't finished yet
+          workflow_conclusion: 'success' # This will fail if the staging deployment isn't finished yet
+          branch: main
           # check_artifacts: true # This will search for the last available artifact, useful for testing
           path: centrifuge-app/build
       - name: Install dependencies
