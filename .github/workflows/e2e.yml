@@ -21,7 +21,6 @@ jobs:
           working-directory: centrifuge-app
           install-command: yarn
           build: |
-            yarn
             yarn build:fabric 
             yarn build:centjs 
             yarn build:centReact
