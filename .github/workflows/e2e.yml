@@ -27,7 +27,7 @@ jobs:
             cat .env-config/.env.development
             yarn build:app --mode development
           start: yarn preview
-          wait-on: 'http://127.0.0.1:4173'
+          wait-on: 'http://[::1]:4173'
           command: yarn e2e:run:ci
           browser: chrome
           config-file: synpress.config.ts
