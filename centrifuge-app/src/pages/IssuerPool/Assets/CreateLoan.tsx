@@ -380,7 +380,7 @@ function IssuerCreateLoan() {
           {isAuthed ? (
             <>
               <PageSection>
-                {!templateId && (
+                {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
                   <Box
                     mb={3}
                     py={2}
@@ -402,7 +402,7 @@ function IssuerCreateLoan() {
                     maxLength={100}
                     disabled={!templateId}
                   />
-                  {!templateId && (
+                  {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
                     <Box alignSelf="center" justifySelf="end">
                       <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
                         Create template
@@ -414,56 +414,60 @@ function IssuerCreateLoan() {
               <PageSection title="Pricing">
                 <PricingInput poolId={pid} />
               </PageSection>
-              {templateMetadata?.sections?.map((section) => (
-                <PageSection
-                  title={section.name}
-                  titleAddition={
-                    section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public) ? 'Public' : 'Private'
-                  }
-                  key={section.name}
-                >
-                  <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-                    {section.attributes?.map((key) => {
-                      const attr = templateMetadata?.attributes?.[key]
-                      if (!attr) return null
-                      const name = `attributes.${key}`
-                      return <TemplateField {...attr} name={name} key={key} />
-                    })}
-                  </Grid>
-                </PageSection>
-              ))}
+              {form.values.pricing.valuationMethod !== 'cash' &&
+                templateMetadata?.sections?.map((section) => (
+                  <PageSection
+                    title={section.name}
+                    titleAddition={
+                      section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public)
+                        ? 'Public'
+                        : 'Private'
+                    }
+                    key={section.name}
+                  >
+                    <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+                      {section.attributes?.map((key) => {
+                        const attr = templateMetadata?.attributes?.[key]
+                        if (!attr) return null
+                        const name = `attributes.${key}`
+                        return <TemplateField {...attr} name={name} key={key} />
+                      })}
+                    </Grid>
+                  </PageSection>
+                ))}
 
-              {(templateMetadata?.options?.image || templateMetadata?.options?.description) && (
-                <PageSection title="Description" titleAddition="Optional">
-                  <Stack gap={3}>
-                    {templateMetadata.options.image && (
-                      <Field name="image" validate={validate.nftImage}>
-                        {({ field, meta, form }: FieldProps) => (
-                          <ImageUpload
-                            file={field.value}
-                            onFileChange={(file) => {
-                              form.setFieldTouched('image', true, false)
-                              form.setFieldValue('image', file)
-                            }}
-                            requirements="JPG/PNG/SVG, max 1MB"
-                            label="Asset image"
-                            errorMessage={meta.touched ? meta.error : undefined}
-                          />
-                        )}
-                      </Field>
-                    )}
-                    {templateMetadata.options.description && (
-                      <FieldWithErrorMessage
-                        name="description"
-                        as={TextAreaInput}
-                        label="Description"
-                        placeholder="Add asset description paragraph..."
-                        maxLength={100}
-                      />
-                    )}
-                  </Stack>
-                </PageSection>
-              )}
+              {form.values.pricing.valuationMethod !== 'cash' &&
+                (templateMetadata?.options?.image || templateMetadata?.options?.description) && (
+                  <PageSection title="Description" titleAddition="Optional">
+                    <Stack gap={3}>
+                      {templateMetadata.options.image && (
+                        <Field name="image" validate={validate.nftImage}>
+                          {({ field, meta, form }: FieldProps) => (
+                            <ImageUpload
+                              file={field.value}
+                              onFileChange={(file) => {
+                                form.setFieldTouched('image', true, false)
+                                form.setFieldValue('image', file)
+                              }}
+                              requirements="JPG/PNG/SVG, max 1MB"
+                              label="Asset image"
+                              errorMessage={meta.touched ? meta.error : undefined}
+                            />
+                          )}
+                        </Field>
+                      )}
+                      {templateMetadata.options.description && (
+                        <FieldWithErrorMessage
+                          name="description"
+                          as={TextAreaInput}
+                          label="Description"
+                          placeholder="Add asset description paragraph..."
+                          maxLength={100}
+                        />
+                      )}
+                    </Stack>
+                  </PageSection>
+                )}
             </>
           ) : podUrl ? (
             <Box py={8}>
