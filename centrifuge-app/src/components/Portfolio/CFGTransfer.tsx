@@ -209,9 +209,9 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
               Ethereum Address:{' '}
             </Text>
             <Text variant="label1" fontSize="12px" textDecoration="underline" color="grayScale.900">
-              {truncate(utils.addressToHex(address))}
+              {truncate(address)}
             </Text>
-            <IconButton onClick={() => copyToClipboard(utils.addressToHex(address))} title="Copy address to clipboard">
+            <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
               <IconCopy />
             </IconButton>
           </Shelf>
