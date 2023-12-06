@@ -326,7 +326,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                   }
                   value={utils.formatAddress(account.actingAddress)}
                   readOnly
-                  rightElement={
+                  symbol={
                     <IconButton
                       onClick={() => copyToClipboard(utils.formatAddress(account.actingAddress))}
                       title="Copy address to clipboard"
