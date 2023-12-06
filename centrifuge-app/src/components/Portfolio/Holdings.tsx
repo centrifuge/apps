@@ -74,7 +74,7 @@ const columns: Column[] = [
     cell: ({ marketValue }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalanceAbbreviated(marketValue, 'USDT', 2)}
+          {formatBalanceAbbreviated(marketValue || 0, 'USDT', 2)}
         </Text>
       )
     },

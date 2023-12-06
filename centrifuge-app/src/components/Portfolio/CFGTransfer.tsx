@@ -43,15 +43,6 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
   const CFGPrice = useCFGTokenPrice()
   const isPortfolioPage = useRouteMatch('/portfolio')
 
-  const centAddress = useMemo(
-    () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
-    [address]
-  )
-
-  const evmAddress = useMemo(
-    () => (address && address.startsWith('0x') ? address : utils.addressToHex(address)),
-    [address]
-  )
   return (
     <Stack gap={3}>
       <Text textAlign="center" variant="heading2">
@@ -77,11 +68,7 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
             <TabsItem>Send</TabsItem>
             <TabsItem>Receive</TabsItem>
           </Tabs>
-          {activeTab === 0 ? (
-            <SendCFG centAddress={centAddress} evmAddress={evmAddress} />
-          ) : (
-            <ReceiveCFG centAddress={centAddress} evmAddress={evmAddress} />
-          )}
+          {activeTab === 0 ? <SendCFG address={address} /> : <ReceiveCFG address={address} />}
         </Stack>
       )}
       <Stack gap={12}>
@@ -96,10 +83,10 @@ export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
   )
 }
 
-type SendReceiveProps = { evmAddress: string; centAddress: string }
+type SendReceiveProps = { address: string }
 
-const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
-  const centBalances = useBalances(centAddress || evmAddress)
+const SendCFG = ({ address }: SendReceiveProps) => {
+  const centBalances = useBalances(address)
   const utils = useCentrifugeUtils()
 
   const { execute: transferCFG, isLoading } = useCentrifugeTransaction(
@@ -199,8 +186,14 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
   )
 }
 
-const ReceiveCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
+const ReceiveCFG = ({ address }: SendReceiveProps) => {
+  const utils = useCentrifugeUtils()
+  const centAddress = useMemo(
+    () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
+    [address]
+  )
   const { isEvmOnSubstrate } = useWallet()
+
   return (
     <Stack gap={2} px={1} py={2} backgroundColor="grayScale.50">
       <Stack gap={3}>
@@ -216,9 +209,9 @@ const ReceiveCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
               Ethereum Address:{' '}
             </Text>
             <Text variant="label1" fontSize="12px" textDecoration="underline" color="grayScale.900">
-              {truncate(evmAddress)}
+              {truncate(utils.addressToHex(address))}
             </Text>
-            <IconButton onClick={() => copyToClipboard(evmAddress)} title="Copy address to clipboard">
+            <IconButton onClick={() => copyToClipboard(utils.addressToHex(address))} title="Copy address to clipboard">
               <IconCopy />
             </IconButton>
           </Shelf>
