@@ -15,6 +15,7 @@ import {
 } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
@@ -54,14 +55,34 @@ const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, s
   if (!sortKey) return data
   if (order === 'asc') {
     return data.sort((a, b) => {
-      if (sortKey === 'nftIdSortKey') return new BN(a[sortKey]).gt(new BN(b[sortKey])) ? 1 : -1
-      if (sortKey === 'position') return a[sortKey].gt(b[sortKey]) ? 1 : -1
+      try {
+        if (
+          (a[sortKey] instanceof Decimal && b[sortKey] instanceof Decimal) ||
+          (BN.isBN(a[sortKey]) && BN.isBN(b[sortKey]))
+        )
+          return a[sortKey].gt(b[sortKey]) ? 1 : -1
+
+        if (typeof a[sortKey] === 'string' && typeof b[sortKey] === 'string') {
+          return new BN(a[sortKey]).gt(new BN(b[sortKey])) ? 1 : -1
+        }
+      } catch {}
+
       return a[sortKey] > b[sortKey] ? 1 : -1
     })
   }
   return data.sort((a, b) => {
-    if (sortKey === 'nftIdSortKey') return new BN(b[sortKey]).gt(new BN(a[sortKey])) ? 1 : -1
-    if (sortKey === 'position') return b[sortKey].gt(a[sortKey]) ? 1 : -1
+    try {
+      if (
+        (a[sortKey] instanceof Decimal && b[sortKey] instanceof Decimal) ||
+        (BN.isBN(a[sortKey]) && BN.isBN(b[sortKey]))
+      )
+        return b[sortKey].gt(a[sortKey]) ? 1 : -1
+
+      if (typeof a[sortKey] === 'string' && typeof b[sortKey] === 'string') {
+        return new BN(b[sortKey]).gt(new BN(a[sortKey])) ? 1 : -1
+      }
+    } catch {}
+
     return b[sortKey] > a[sortKey] ? 1 : -1
   })
 }
