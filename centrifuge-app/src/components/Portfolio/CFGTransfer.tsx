@@ -20,6 +20,7 @@ import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
+import { useQuery } from 'react-query'
 import { useRouteMatch } from 'react-router'
 import styled from 'styled-components'
 import ethereumLogo from '../../assets/images/ethereum.svg'
@@ -28,6 +29,7 @@ import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
+import { useTransactionFeeEstimate } from '../../utils/useTransactionFeeEstimate'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
@@ -97,6 +99,21 @@ const SendCFG = ({ address }: SendReceiveProps) => {
     }
   )
 
+  const { txFee, execute: estimatedTxFee } = useTransactionFeeEstimate((cent) => cent.tokens.transfer)
+  useQuery(
+    ['paymentInfo', address],
+    async () => {
+      await estimatedTxFee([
+        address,
+        'Native',
+        CurrencyBalance.fromFloat(centBalances?.native.balance.toDecimal() || 1, 18),
+      ])
+    },
+    {
+      enabled: !!address,
+    }
+  )
+
   const form = useFormik<{ amount: Decimal | undefined; recipientAddress: string }>({
     initialValues: {
       amount: undefined,
@@ -158,7 +175,9 @@ const SendCFG = ({ address }: SendReceiveProps) => {
                   size={0}
                   placeholder="0.00"
                   label="Amount"
-                  onSetMax={() => form.setFieldValue('amount', centBalances?.native.balance.toDecimal())}
+                  onSetMax={async () =>
+                    form.setFieldValue('amount', centBalances?.native.balance.toDecimal().sub(txFee || 0))
+                  }
                   initialValue={form.values.amount || undefined}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
@@ -208,7 +227,7 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
             <Text variant="label2" color="textSecondary">
               Ethereum address:{' '}
             </Text>
-            <Text variant="label1" fontSize="12px" textDecoration="underline" color="grayScale.900">
+            <Text variant="label1" fontSize="12px" textDecoration="underline" color="textPrimary">
               {truncate(address)}
             </Text>
             <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
