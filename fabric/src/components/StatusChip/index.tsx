@@ -28,7 +28,7 @@ const Chip = styled(Text)<{ $borderColor: string; $bg: string }>((props) =>
   })
 )
 
-export const StatusChip: React.FC<StatusChipProps> = ({ status, children }) => {
+export function StatusChip({ status, children }: StatusChipProps) {
   const colorName = colors[status]
   const bgColorName = `${colorName}Bg`
 
