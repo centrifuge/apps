@@ -61,7 +61,7 @@ type ThemeSizes = {
   [k in SizeName]: SizeValue
 }
 
-type RadiusName = 'card' | 'input' | 'tooltip' | 'button'
+type RadiusName = 'card' | 'input' | 'tooltip' | 'button' | 'chip'
 type RadiusValue = number
 
 type ThemeRadii = {

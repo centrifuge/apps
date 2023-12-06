@@ -2185,7 +2185,8 @@ export function getPoolsModule(inst: Centrifuge) {
     `,
       {
         address,
-      }
+      },
+      false
     )
 
     return $query.pipe(
@@ -2254,7 +2255,8 @@ export function getPoolsModule(inst: Centrifuge) {
         trancheId,
         from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
         to: to ? to.toISOString() : new Date().toISOString(),
-      }
+      },
+      false
     )
 
     return combineLatest([$query, getPoolCurrency([poolId])]).pipe(

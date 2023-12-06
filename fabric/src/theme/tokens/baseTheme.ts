@@ -22,6 +22,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     card: 8,
     input: 2,
     button: 4,
+    chip: 4,
   },
   fonts: {
     standard: 'Inter, sans-serif',
