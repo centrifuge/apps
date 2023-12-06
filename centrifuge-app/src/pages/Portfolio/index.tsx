@@ -19,7 +19,7 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress('substrate')
+  const address = useAddress()
   const theme = useTheme()
 
   if (!address) {
