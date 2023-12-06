@@ -116,7 +116,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     let domainOrCurrency: any = currencyAddress
     const chainId = await inst.config.evmSigner.getChainId()
-    if (currencyAddress == '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48') {
+    if (currencyAddress.toLowerCase() == '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') {
       // USDC has custom version
       domainOrCurrency = { name: 'USD Coin', version: '2', chainId, verifyingContract: currencyAddress }
     } else if (chainId == 5 || chainId == 84531 || chainId == 421613) {
