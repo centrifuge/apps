@@ -113,9 +113,20 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
     const [spender, currencyAddress, amount] = args
     if (!inst.config.evmSigner) throw new Error('EVM signer not set')
+
+    let domainOrCurrency: any = currencyAddress
+    const chainId = await inst.config.evmSigner.getChainId()
+    if (currencyAddress.toLowerCase() == '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') {
+      // USDC has custom version
+      domainOrCurrency = { name: 'USD Coin', version: '2', chainId, verifyingContract: currencyAddress }
+    } else if (chainId == 5 || chainId == 84531 || chainId == 421613) {
+      // Assume on testnets the LP currencies are used which have custom domains
+      domainOrCurrency = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
+    }
+
     const permit = await signERC2612Permit(
       inst.config.evmSigner,
-      currencyAddress,
+      domainOrCurrency,
       inst.getSignerAddress('evm'),
       spender,
       amount.toString()
