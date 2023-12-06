@@ -1,4 +1,4 @@
-import { BorrowerTransactionType, InvestorTransactionType, Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { BorrowerTransactionType, InvestorTransactionType, Pool, Token, TokenBalance } from '@centrifuge/centrifuge-js'
 import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
@@ -34,10 +34,11 @@ type TransactionTableData = Row[]
 type Row = {
   action: InvestorTransactionType | BorrowerTransactionType
   date: number
-  tranche: Token | undefined
+  tranche?: Token
   tranchePrice: string
   amount: TokenBalance
   hash: string
+  pool?: Pool
   poolId: string
   trancheId: string
 }
@@ -47,7 +48,14 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
     {
       align: 'left',
       header: 'Action',
-      cell: ({ action }: Row) => <TransactionTypeChip type={action as InvestorTransactionType} />,
+      cell: ({ action, tranche, pool, amount }: Row) => (
+        <TransactionTypeChip
+          type={action as InvestorTransactionType}
+          trancheTokenSymbol={tranche?.currency.symbol ?? ''}
+          poolCurrencySymbol={pool?.currency.symbol ?? ''}
+          currencyAmount={amount.toFloat()}
+        />
+      ),
     },
     {
       align: 'left',
@@ -130,6 +138,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
             amount: tx.currencyAmount,
             hash: tx.hash,
             poolId: tx.poolId,
+            pool,
             trancheId: tx.trancheId,
           }
         }) || []

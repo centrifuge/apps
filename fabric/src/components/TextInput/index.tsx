@@ -59,7 +59,6 @@ export const StyledInputBox = styled(Shelf)`
   position: relative;
   background: ${({ theme }) => theme.colors.backgroundPage};
   border: 1px solid ${({ theme }) => theme.colors.borderSecondary};
-  /* border: 1px solid transparent; */
   border-radius: ${({ theme }) => theme.radii.input}px;
 
   &::before {

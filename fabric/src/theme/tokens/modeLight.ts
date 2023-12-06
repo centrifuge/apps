@@ -1,10 +1,16 @@
 import { blueScale, centrifugeBlue, grayScale } from './colors'
 
-const statusDefault = grayScale[600]
-const statusInfo = '#006ef5'
-const statusOk = '#5da01d'
-const statusWarning = '#a86500'
+const statusDefault = grayScale[800]
+const statusInfo = '#1253ff'
+const statusOk = '#519b10'
+const statusWarning = '#ffc012'
 const statusCritical = '#d43f2b'
+
+const statusDefaultBg = `${grayScale[800]}14`
+const statusInfoBg = '#1253ff14'
+const statusOkBg = '#519b1014'
+const statusWarningBg = '#ffc01214'
+const statusCriticalBg = '#d43f2b14'
 
 const lightColors = {
   textPrimary: 'black',
@@ -28,6 +34,11 @@ const lightColors = {
   statusOk,
   statusWarning,
   statusCritical,
+  statusDefaultBg,
+  statusInfoBg,
+  statusOkBg,
+  statusWarningBg,
+  statusCriticalBg,
 
   backgroundButtonPrimary: centrifugeBlue,
   backgroundButtonPrimaryFocus: centrifugeBlue,

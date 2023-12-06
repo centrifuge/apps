@@ -4,7 +4,7 @@ type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
 
 // Colors
 
-type StatusColorName = `status${Status}`
+type StatusColorName = `status${Status}` | `status${Status}Bg`
 
 type AccentColorName =
   | `accent${'Primary' | 'Secondary'}`

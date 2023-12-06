@@ -28,6 +28,11 @@ const darkColors = {
   statusOk,
   statusWarning,
   statusCritical,
+  statusDefaultBg: 'transparent',
+  statusInfoBg: 'transparent',
+  statusOkBg: 'transparent',
+  statusWarningBg: 'transparent',
+  statusCriticalBg: 'transparent',
 
   backgroundButtonPrimary: altairYellow,
   backgroundButtonPrimaryFocus: altairYellow,

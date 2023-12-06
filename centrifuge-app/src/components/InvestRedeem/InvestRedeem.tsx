@@ -211,7 +211,6 @@ function Header() {
             </TextWithPlaceholder>
             <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
               {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
-              {/* {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol, 2, 0)} */}
             </TextWithPlaceholder>
           </Stack>
 
@@ -370,8 +369,6 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
   const isInvesting = state.pendingAction === 'invest' && isPending
   const isCancelling = state.pendingAction === 'cancelInvest' && isPending
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
-
-  console.log('state', state)
 
   function renderInput(preSubmitAction?: { onClick: () => void; loading?: boolean; label?: string }) {
     return (
@@ -563,7 +560,6 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   const isRedeeming = state.pendingAction === 'redeem' && isPending
   const isCancelling = state.pendingAction === 'cancelRedeem' && isPending
   const isApproving = state.pendingAction === 'approveTrancheToken' && isPending
-  const isCollecting = state.pendingAction === 'collect' && isPending
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'
 
@@ -802,7 +798,6 @@ function PendingOrder({
 
 function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismiss?: () => void }) {
   const { state, actions } = useInvestRedeem()
-  console.log('state.order', state.order, state.collectType)
   if (!state.order || !state.collectType) return null
 
   const isPending =

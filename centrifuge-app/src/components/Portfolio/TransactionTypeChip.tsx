@@ -1,83 +1,35 @@
 import { BorrowerTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js'
-import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
+import { StatusChip } from '@centrifuge/fabric'
 import * as React from 'react'
+import { formatTransactionsType } from '../Report/utils'
 
 type TransactionTypeProps = {
   type: InvestorTransactionType | BorrowerTransactionType
+  trancheTokenSymbol: string
+  poolCurrencySymbol: string
+  currencyAmount: number | null
 }
 
-const states: {
-  [Key in InvestorTransactionType | BorrowerTransactionType]: {
-    label: string
-    status: StatusChipProps['status']
-  }
-} = {
-  INVEST_ORDER_UPDATE: {
-    label: 'Invest order placed',
-    status: 'default',
-  },
-  REDEEM_ORDER_UPDATE: {
-    label: 'Redeem order placed',
-    status: 'default',
-  },
-  INVEST_ORDER_CANCEL: {
-    label: 'Invest order cancel',
-    status: 'default',
-  },
-  REDEEM_ORDER_CANCEL: {
-    label: 'Redeem order cancel',
-    status: 'default',
-  },
-  INVEST_EXECUTION: {
-    label: 'Invest executed',
-    status: 'ok',
-  },
-  REDEEM_EXECUTION: {
-    label: 'Redeem executed',
-    status: 'info',
-  },
-  TRANSFER_IN: {
-    label: 'Transfer in',
-    status: 'default',
-  },
-  TRANSFER_OUT: {
-    label: 'Transfer out',
-    status: 'default',
-  },
-  INVEST_COLLECT: {
-    label: 'Invest collect',
-    status: 'default',
-  },
-  REDEEM_COLLECT: {
-    label: 'Redeem collect',
-    status: 'default',
-  },
-  CREATED: {
-    label: 'Created',
-    status: 'default',
-  },
-  BORROWED: {
-    label: 'Borrowed',
-    status: 'default',
-  },
-  REPAID: {
-    label: 'Repaid',
-    status: 'default',
-  },
-  CLOSED: {
-    label: 'Closed',
-    status: 'default',
-  },
-  PRICED: {
-    label: 'Priced',
-    status: 'default',
-  },
-}
+const status = {
+  INVEST_ORDER_UPDATE: 'default',
+  REDEEM_ORDER_UPDATE: 'default',
+  INVEST_ORDER_CANCEL: 'default',
+  REDEEM_ORDER_CANCEL: 'default',
+  INVEST_EXECUTION: 'ok',
+  REDEEM_EXECUTION: 'info',
+  TRANSFER_IN: 'default',
+  TRANSFER_OUT: 'default',
+  INVEST_COLLECT: 'default',
+  REDEEM_COLLECT: 'default',
+  CREATED: 'default',
+  BORROWED: 'default',
+  REPAID: 'default',
+  CLOSED: 'default',
+  PRICED: 'default',
+} as const
 
-export function TransactionTypeChip({ type }: TransactionTypeProps) {
-  if (!states[type]) {
-    return null
-  }
+export function TransactionTypeChip(props: TransactionTypeProps) {
+  const label = formatTransactionsType(props)
 
-  return <StatusChip status={states[type].status}>{states[type].label}</StatusChip>
+  return <StatusChip status={status[props.type]}>{label}</StatusChip>
 }
