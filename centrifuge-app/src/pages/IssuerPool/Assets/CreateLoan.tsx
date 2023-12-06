@@ -22,6 +22,7 @@ import {
   TextAreaInput,
   TextInput_DEPRECATED,
 } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
@@ -231,31 +232,45 @@ function IssuerCreateLoan() {
     onSubmit: async (values, { setSubmitting }) => {
       if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
       const { decimals } = pool.currency
-      const pricingInfo =
-        values.pricing.valuationMethod === 'oracle'
-          ? {
-              valuationMethod: values.pricing.valuationMethod,
-              maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
-              maxBorrowAmount: values.pricing.maxBorrowQuantity
-                ? Price.fromFloat(values.pricing.maxBorrowQuantity)
-                : null,
-              Isin: values.pricing.Isin || '',
-              maturityDate: new Date(values.pricing.maturityDate),
-              interestRate: Rate.fromPercent(values.pricing.interestRate),
-              notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
-            }
-          : {
-              valuationMethod: values.pricing.valuationMethod,
-              maxBorrowAmount: values.pricing.maxBorrowAmount,
-              value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
-              maturityDate: new Date(values.pricing.maturityDate),
-              maturityExtensionDays: values.pricing.maturityExtensionDays,
-              advanceRate: Rate.fromPercent(values.pricing.advanceRate),
-              interestRate: Rate.fromPercent(values.pricing.interestRate),
-              probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
-              lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
-              discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
-            }
+      const getPricingInfo = () => {
+        if (values.pricing.valuationMethod === 'cash') {
+          return {
+            valuationMethod: values.pricing.valuationMethod,
+            advanceRate: Rate.fromPercent(100),
+            interestRate: Rate.fromPercent(0),
+            value: new BN('ffffffffffffffffffffffffffffffff', 16),
+            maxBorrowAmount: 'upToOutstandingDebt' as const,
+            maturityDate: new Date(values.pricing.maturityDate),
+          }
+        }
+
+        if (values.pricing.valuationMethod === 'oracle') {
+          return {
+            valuationMethod: values.pricing.valuationMethod,
+            maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
+            maxBorrowAmount: values.pricing.maxBorrowQuantity
+              ? Price.fromFloat(values.pricing.maxBorrowQuantity)
+              : null,
+            Isin: values.pricing.Isin || '',
+            maturityDate: new Date(values.pricing.maturityDate),
+            interestRate: Rate.fromPercent(values.pricing.interestRate),
+            notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
+          }
+        }
+
+        return {
+          valuationMethod: values.pricing.valuationMethod,
+          maxBorrowAmount: values.pricing.maxBorrowAmount,
+          value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+          maturityDate: new Date(values.pricing.maturityDate),
+          maturityExtensionDays: values.pricing.maturityExtensionDays,
+          advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+          interestRate: Rate.fromPercent(values.pricing.interestRate),
+          probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
+          lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
+          discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
+        }
+      }
 
       const txId = Math.random().toString(36).substring(2)
 
@@ -267,8 +282,12 @@ function IssuerCreateLoan() {
       }
       addTransaction(tx)
 
-      const attributes = valuesToPodAttributes(values.attributes, templateMetadata as any) as any
-      attributes._template = { type: 'string', value: templateId }
+      const attributes =
+        values.pricing.valuationMethod === 'cash'
+          ? {}
+          : (valuesToPodAttributes(values.attributes, templateMetadata as any) as any)
+      attributes._template =
+        values.pricing.valuationMethod === 'cash' ? undefined : { type: 'string', value: templateId }
 
       let imageMetadataHash
       if (values.image) {
@@ -298,10 +317,10 @@ function IssuerCreateLoan() {
             documentId,
             collectionId: collateralCollectionId,
             owner: account.actingAddress,
-            publicAttributes,
+            publicAttributes: values.pricing.valuationMethod === 'cash' ? undefined : publicAttributes,
             name: values.assetName,
-            description: values.description,
-            image: imageMetadataHash?.uri,
+            description: values.pricing.valuationMethod === 'cash' ? undefined : values.description,
+            image: values.pricing.valuationMethod === 'cash' ? undefined : imageMetadataHash?.uri,
           },
         ])
 
@@ -311,7 +330,7 @@ function IssuerCreateLoan() {
 
         // Sign createLoan transaction
         const submittable = await lastValueFrom(
-          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
+          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, getPricingInfo()], {
             signOnly: true,
             era: 100,
             proxies: account.proxies?.map((p) => [p.delegator, p.types.includes('Borrow') ? 'Borrow' : undefined]),

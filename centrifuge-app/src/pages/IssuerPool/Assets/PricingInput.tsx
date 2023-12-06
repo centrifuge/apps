@@ -70,8 +70,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
       )}
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
-        values.pricing.valuationMethod === 'outstandingDebt' ||
-        values.pricing.valuationMethod === 'cash') && (
+        values.pricing.valuationMethod === 'outstandingDebt') && (
         <>
           <Field name="pricing.maxBorrowAmount">
             {({ field, meta, form }: FieldProps) => (
@@ -104,14 +103,16 @@ export function PricingInput({ poolId }: { poolId: string }) {
           </Field>
         </>
       )}
-      <FieldWithErrorMessage
-        as={NumberInput}
-        label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
-        placeholder="0.00"
-        rightElement="%"
-        name="pricing.interestRate"
-        validate={combine(required(), nonNegativeNumber(), max(100))}
-      />
+      {values.pricing.valuationMethod !== 'cash' && (
+        <FieldWithErrorMessage
+          as={NumberInput}
+          label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
+          placeholder="0.00"
+          rightElement="%"
+          name="pricing.interestRate"
+          validate={combine(required(), nonNegativeNumber(), max(100))}
+        />
+      )}
       <FieldWithErrorMessage
         as={DateInput}
         validate={validate.maturityDate}
@@ -125,8 +126,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
       />
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
-        values.pricing.valuationMethod === 'outstandingDebt' ||
-        values.pricing.valuationMethod === 'cash') && (
+        values.pricing.valuationMethod === 'outstandingDebt') && (
         <>
           <FieldWithErrorMessage
             as={NumberInput}

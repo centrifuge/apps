@@ -16,11 +16,9 @@ export function PricingValues({ loan, pool }: Props) {
 
   const borrowerTransactions = useBorrowerTransactions(loan.poolId)
 
-  const isCashOrOutstandingDebtOrDiscountedCashFlow =
+  const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
-    (pricing.valuationMethod === 'outstandingDebt' ||
-      pricing.valuationMethod === 'discountedCashFlow' ||
-      pricing.valuationMethod === 'cash')
+    (pricing.valuationMethod === 'outstandingDebt' || pricing.valuationMethod === 'discountedCashFlow')
 
   if ('valuationMethod' in pricing && pricing.valuationMethod === 'oracle') {
     const today = new Date()
@@ -48,19 +46,21 @@ export function PricingValues({ loan, pool }: Props) {
   return (
     <>
       {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
-      {'maturityExtensionDays' in pricing && (
+      {'maturityExtensionDays' in pricing && pricing.valuationMethod !== 'cash' && (
         <LabelValueStack label="Extension period" value={`${pricing.maturityExtensionDays} days`} />
       )}
-      {isCashOrOutstandingDebtOrDiscountedCashFlow && (
+      {isOutstandingDebtOrDiscountedCashFlow && (
         <LabelValueStack
           label="Advance rate"
           value={pricing.advanceRate && formatPercentage(pricing.advanceRate.toPercent())}
         />
       )}
-      <LabelValueStack
-        label="Interest rate"
-        value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
-      />
+      {'valuationMethod' in pricing && pricing.valuationMethod !== 'cash' && (
+        <LabelValueStack
+          label="Interest rate"
+          value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
+        />
+      )}
       {'valuationMethod' in pricing && pricing.valuationMethod === 'discountedCashFlow' && (
         <>
           <LabelValueStack

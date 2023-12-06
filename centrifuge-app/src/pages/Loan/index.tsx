@@ -208,6 +208,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
                   ) : (
                     <FinancingRepayment
+                      isCashValuationMethod={loan.pricing.valuationMethod === 'cash'}
                       drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
                       closingDate={null}
                       outstandingPrincipal={formatBalance(

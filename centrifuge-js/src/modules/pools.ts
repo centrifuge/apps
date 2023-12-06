@@ -86,6 +86,7 @@ export type PoolRoles = {
   roles: AdminRole[]
   tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
+
 type LoanInfoInput =
   | {
       valuationMethod: 'outstandingDebt'
@@ -98,10 +99,9 @@ type LoanInfoInput =
     }
   | {
       valuationMethod: 'cash'
-      maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+      maxBorrowAmount: 'upToOutstandingDebt'
       value: BN
       maturityDate: Date
-      maturityExtensionDays: number
       advanceRate: BN
       interestRate: BN
     }
@@ -2716,7 +2716,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 : {
                     valuationMethod:
                       'outstandingDebt' in pricingInfo.valuationMethod || 'cash' in pricingInfo.valuationMethod
-                        ? pricingInfo.valuationMethod
+                        ? Object.keys(pricingInfo.valuationMethod)[0]
                         : ('discountedCashFlow' as any),
                     maxBorrowAmount: Object.keys(pricingInfo.maxBorrowAmount)[0] as any,
                     value: new CurrencyBalance(pricingInfo.collateralValue, currency.decimals),
