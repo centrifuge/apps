@@ -6,6 +6,7 @@ import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
 import { Transactions } from '../../components/Portfolio/Transactions'
+import { Resolutions } from '../../components/Resolutions'
 import { RouterTextLink } from '../../components/TextLink'
 import { DAOs } from '../../config'
 
@@ -45,6 +46,7 @@ function PrimeDetail() {
       <BasePadding gap={3}>
         <InvestedTokens address={centAddress} />
         <Transactions onlyMostRecent address={centAddress} />
+        <Resolutions />
       </BasePadding>
     </>
   )
