@@ -14,7 +14,6 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
-import { useMemo } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
@@ -25,6 +24,7 @@ import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { CFGTransfer } from './CFGTransfer'
+import { usePortfolioTokens } from './usePortfolio'
 
 type Row = {
   currency: Token['currency']
@@ -120,6 +120,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   const centBalances = useBalances(address)
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
+  const portfolioTokens = usePortfolioTokens(address)
   const { search, pathname } = useLocation()
   const history = useHistory()
   const params = new URLSearchParams(search)
@@ -127,29 +128,26 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
 
   const CFGPrice = useCFGTokenPrice()
 
-  const balances = useMemo(() => {
-    return [
-      ...(centBalances?.tranches || []),
-      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []),
-    ]
-  }, [centBalances, tinlakeBalances])
-
-  const tableData = balances.map((balance) => {
-    const pool = pools?.find((pool) => pool.id === balance.poolId)
-    const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
-    return {
-      currency: balance.currency,
-      poolId: balance.poolId,
-      trancheId: balance.trancheId,
-      position: balance.balance,
-      tokenPrice: tranche?.tokenPrice?.toDecimal() || Dec(1),
-      marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+  const tokens = [
+    ...portfolioTokens.map((token) => ({
+      ...token,
+      tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
       canInvestRedeem,
-    }
-  })
-
-  centBalances &&
-    tableData.push({
+    })),
+    ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []).map((balance) => {
+      const pool = pools?.find((pool) => pool.id === balance.poolId)
+      const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
+      return {
+        position: balance.balance,
+        marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+        tokenPrice: tranche?.tokenPrice?.toDecimal() || Dec(0),
+        trancheId: balance.trancheId,
+        poolId: balance.poolId,
+        currency: tranche?.currency,
+        canInvestRedeem,
+      }
+    }),
+    {
       currency: {
         ...centBalances?.native.currency,
         name: 'Centrifuge',
@@ -163,9 +161,10 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
       tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
       marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) : Dec(0),
       canInvestRedeem: false,
-    })
+    },
+  ]
 
-  return tableData.length ? (
+  return tokens.length ? (
     <Stack as="article" gap={2}>
       <Drawer isOpen={openDrawer} onClose={() => history.replace(pathname)}>
         <CFGTransfer address={address} />
@@ -175,9 +174,10 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
       </Text>
       <DataTable
         columns={columns}
-        data={tableData}
+        data={tokens}
+        defaultSortKey="position"
         onRowClicked={(row) =>
-          row.currency.symbol === centBalances?.native.currency.symbol ? `${pathname}?transfer=cfg` : pathname
+          row.currency?.symbol === centBalances?.native.currency.symbol ? `${pathname}?transfer=cfg` : pathname
         }
       />
     </Stack>
