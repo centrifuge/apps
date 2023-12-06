@@ -130,7 +130,9 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
       return errors
     },
     onSubmit: (values, actions) => {
-      if (typeof values.amount !== 'undefined') {
+      if (typeof values.amount === 'undefined') {
+        actions.setErrors({ amount: 'Amount must be greater than 0' })
+      } else {
         if (isEvmAddress(values.recipientAddress)) {
           values.recipientAddress = utils.evmToSubstrateAddress(values.recipientAddress, 2000)
         }
@@ -139,8 +141,6 @@ const SendCFG = ({ evmAddress, centAddress }: SendReceiveProps) => {
           'Native',
           CurrencyBalance.fromFloat(values.amount.toString(), centBalances?.native.currency.decimals || 18),
         ])
-      } else {
-        actions.setErrors({ amount: 'Amount must be greater than 0' })
       }
       actions.setSubmitting(false)
     },

@@ -23,6 +23,7 @@ import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
+import { Tooltips } from '../Tooltips'
 import { CFGTransfer } from './CFGTransfer'
 import { usePortfolioTokens } from './usePortfolio'
 
@@ -46,7 +47,7 @@ const columns: Column[] = [
     },
   },
   {
-    header: 'Token price',
+    header: <Tooltips type="cfgPrice" label="Token price" />,
     cell: ({ tokenPrice }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
@@ -61,7 +62,7 @@ const columns: Column[] = [
     cell: ({ currency, position }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalanceAbbreviated(position, currency.symbol, 2)}
+          {formatBalanceAbbreviated(position || 0, currency.symbol, 2)}
         </Text>
       )
     },
@@ -150,7 +151,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
     {
       currency: {
         ...centBalances?.native.currency,
-        name: 'Centrifuge',
+        name: centBalances?.native.currency.symbol,
         key: 'centrifuge',
         isPoolCurrency: false,
         isPermissioned: false,
