@@ -238,7 +238,7 @@ function IssuerCreateLoan() {
             valuationMethod: values.pricing.valuationMethod,
             advanceRate: Rate.fromPercent(100),
             interestRate: Rate.fromPercent(0),
-            value: new BN('ffffffffffffffffffffffffffffffff', 16),
+            value: new BN(2).pow(new BN(128)).subn(1), // max uint128
             maxBorrowAmount: 'upToOutstandingDebt' as const,
             maturityDate: new Date(values.pricing.maturityDate),
           }
