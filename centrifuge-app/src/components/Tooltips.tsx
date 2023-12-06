@@ -255,8 +255,8 @@ export const tooltipText = {
     body: 'The notional value is the total value of the underlying asset.',
   },
   cfgPrice: {
-    label: 'CFG Price',
-    body: 'CFG Price sourced externally from Uniswap.',
+    label: 'CFG price',
+    body: 'CFG price sourced externally from Uniswap.',
   },
 }
 

@@ -8,12 +8,13 @@ const statusCritical = '#d43f2b'
 
 const lightColors = {
   textPrimary: 'black',
-  textSecondary: grayScale[700],
+  textSecondary: grayScale[800],
   textDisabled: grayScale[500],
   textInverted: 'white',
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
+  backgroundTertiary: grayScale[50],
   backgroundPage: 'white',
   backgroundInput: 'white',
   backgroundThumbnail: grayScale[600],

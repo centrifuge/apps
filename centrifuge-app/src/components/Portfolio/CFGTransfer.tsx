@@ -134,7 +134,7 @@ const SendCFG = ({ address }: SendReceiveProps) => {
   })
 
   return (
-    <Stack px={2} py={4} backgroundColor="grayScale.50">
+    <Stack px={2} py={4} backgroundColor="backgroundTertiary">
       <FormikProvider value={form}>
         <Form>
           <Stack gap="2">
@@ -195,9 +195,9 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
   const { isEvmOnSubstrate } = useWallet()
 
   return (
-    <Stack gap={2} px={1} py={2} backgroundColor="grayScale.50">
+    <Stack gap={2} px={1} py={2} backgroundColor="backgroundTertiary">
       <Stack gap={3}>
-        <Text variant="interactive2" color="grayScale.800">
+        <Text variant="interactive2" color="textSecondary">
           Your address{isEvmOnSubstrate ? 'es' : ''} on Centrifuge Chain
         </Text>
         {isEvmOnSubstrate && (
@@ -205,8 +205,8 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
             <Container>
               <Box as="img" src={ethereumLogo} width="100%" height="100%" alt="" />
             </Container>
-            <Text variant="label2" color="grayScale.800">
-              Ethereum Address:{' '}
+            <Text variant="label2" color="textSecondary">
+              Ethereum address:{' '}
             </Text>
             <Text variant="label1" fontSize="12px" textDecoration="underline" color="grayScale.900">
               {truncate(address)}
@@ -220,8 +220,8 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
           <Container>
             <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
           </Container>
-          <Text variant="label2" color="grayScale.800">
-            Centrifuge Native Address:{' '}
+          <Text variant="label2" color="textSecondary">
+            Centrifuge native address:{' '}
           </Text>
           <Text variant="label1" fontSize="12px" textDecoration="underline" color="grayScale.900">
             {truncate(centAddress)}
@@ -234,7 +234,7 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
       {isEvmOnSubstrate && (
         <Shelf borderRadius="3px" alignItems="flex-start" backgroundColor="backgroundPrimary" p={1} gap={1}>
           <IconInfo size={16} />
-          <Text variant="body3" color="grayScale.800">
+          <Text variant="body3" color="textSecondary">
             Use this Ethereum address only on Centrifuge Chain. Receiving CFG on another network on this address will
             result in loss of funds. Be sure to select the right network.
           </Text>
