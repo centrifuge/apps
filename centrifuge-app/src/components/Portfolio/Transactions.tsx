@@ -83,9 +83,9 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
     {
       align: 'right',
       header: 'Token price',
-      cell: ({ tranche }: Row) => (
+      cell: ({ tranche, pool }: Row) => (
         <Text as="span" variant="body3">
-          {formatBalance(tranche?.tokenPrice?.toDecimal() || Dec(1), tranche?.currency.symbol, 4)}
+          {formatBalance(tranche?.tokenPrice?.toDecimal() || Dec(1), pool?.currency.symbol, 4)}
         </Text>
       ),
     },
@@ -121,27 +121,25 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
   const { formatAddress } = useCentrifugeUtils()
   const transactions = useTransactionsByAddress(formatAddress(address))
   const pools = usePools()
-
-  const investorTransactions: TransactionTableData = React.useMemo(() => {
-    const txs =
-      transactions?.investorTransactions
-        .slice(0, onlyMostRecent ? 3 : transactions?.investorTransactions.length)
-        .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
-        .map((tx) => {
-          const pool = pools?.find((pool) => pool.id === tx.poolId)
-          const tranche = pool?.tranches.find((tranche) => tranche.id === tx.trancheId)
-          return {
-            date: new Date(tx.timestamp).getTime(),
-            action: tx.type,
-            tranche,
-            tranchePrice: tranche?.tokenPrice?.toDecimal().toString() || '',
-            amount: tx.currencyAmount,
-            hash: tx.hash,
-            poolId: tx.poolId,
-            pool,
-            trancheId: tx.trancheId,
-          }
-        }) || []
+  const investorTransactions = React.useMemo(() => {
+    const txs = transactions?.investorTransactions
+      .slice(0, onlyMostRecent ? 3 : transactions?.investorTransactions.length)
+      .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
+      .map((tx) => {
+        const pool = pools?.find((pool) => pool.id === tx.poolId)
+        const tranche = pool?.tranches.find((tranche) => tranche.id === tx.trancheId)
+        return {
+          date: new Date(tx.timestamp).getTime(),
+          action: tx.type,
+          tranche,
+          tranchePrice: tranche?.tokenPrice?.toDecimal().toString() || '',
+          amount: tx.currencyAmount,
+          hash: tx.hash,
+          poolId: tx.poolId,
+          pool,
+          trancheId: tx.trancheId,
+        } as Row
+      })
     return txs
   }, [transactions?.investorTransactions, onlyMostRecent, txTypes, pools])
 
@@ -164,12 +162,12 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
 
   const pagination = usePagination({ data: investorTransactions, pageSize: onlyMostRecent ? 3 : 15 })
 
-  return investorTransactions ? (
+  return (
     <Stack as="article" gap={onlyMostRecent ? 2 : 5}>
       <Text as="h2" variant={narrow ? 'heading4' : 'heading2'}>
         Transaction history
       </Text>
-      {investorTransactions.length ? (
+      {investorTransactions?.length ? (
         <PaginationProvider pagination={pagination}>
           <Stack gap={2}>
             <Box overflow="auto" width="100%">
@@ -209,11 +207,11 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
             )}
           </Stack>
         </PaginationProvider>
-      ) : (
+      ) : investorTransactions ? (
         <Text>No transactions</Text>
+      ) : (
+        <Spinner />
       )}
     </Stack>
-  ) : (
-    <Spinner />
   )
 }
