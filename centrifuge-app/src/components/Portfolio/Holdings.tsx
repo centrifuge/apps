@@ -1,5 +1,5 @@
 import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
+import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -119,6 +119,7 @@ const columns: Column[] = [
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
+  const wallet = useWallet()
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
   const portfolioTokens = usePortfolioTokens(address)
@@ -148,21 +149,25 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         canInvestRedeem,
       }
     }),
-    {
-      currency: {
-        ...centBalances?.native.currency,
-        name: centBalances?.native.currency.symbol,
-        key: 'centrifuge',
-        isPoolCurrency: false,
-        isPermissioned: false,
-      },
-      poolId: '',
-      trancheId: '',
-      position: centBalances?.native.balance,
-      tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
-      marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) : Dec(0),
-      canInvestRedeem: false,
-    },
+    ...(wallet.connectedNetworkName === 'Centrifuge'
+      ? [
+          {
+            currency: {
+              ...centBalances?.native.currency,
+              name: centBalances?.native.currency.symbol,
+              key: 'centrifuge',
+              isPoolCurrency: false,
+              isPermissioned: false,
+            },
+            poolId: '',
+            trancheId: '',
+            position: centBalances?.native.balance,
+            tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
+            marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) : Dec(0),
+            canInvestRedeem: false,
+          },
+        ]
+      : []),
   ]
 
   return tokens.length ? (
