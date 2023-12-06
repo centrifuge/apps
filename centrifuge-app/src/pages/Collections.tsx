@@ -64,14 +64,7 @@ const Collections: React.FC = () => {
 
   return (
     <Stack>
-      <PageHeader
-        title="NFTs"
-        actions={
-          <Button onClick={() => setCreateOpen(true)} variant="secondary" small icon={IconPlus} disabled={!address}>
-            Create Collection
-          </Button>
-        }
-      />
+      <PageHeader title="NFTs" />
       {featuredCollections?.length ? (
         <PageSection title="Featured collections">
           <LayoutGrid>
@@ -85,7 +78,14 @@ const Collections: React.FC = () => {
       ) : null}
 
       {address && (
-        <PageSection title="My collections">
+        <PageSection
+          title="My collections"
+          headerRight={
+            <Button onClick={() => setCreateOpen(true)} variant="secondary" small icon={IconPlus} disabled={!address}>
+              Create Collection
+            </Button>
+          }
+        >
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
               {accountNfts?.length ? (

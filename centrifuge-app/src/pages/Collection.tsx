@@ -55,13 +55,6 @@ const Collection: React.FC = () => {
             </>
           )
         }
-        actions={
-          canMint && (
-            <RouterLinkButton to={`/nfts/collection/${collectionId}/object/mint`} variant="secondary" small>
-              Mint NFT
-            </RouterLinkButton>
-          )
-        }
       />
       <Stack alignItems="center" gap={2} my={5}>
         {metadata?.image ? (
@@ -134,7 +127,16 @@ const Collection: React.FC = () => {
       </Stack>
       {nfts?.length ? (
         <>
-          <PageSection title={`${collection?.items ?? 0} NFTs`}>
+          <PageSection
+            title={`${collection?.items ?? 0} NFTs`}
+            headerRight={
+              canMint && (
+                <RouterLinkButton to={`/nfts/collection/${collectionId}/object/mint`} variant="secondary" small>
+                  Mint NFT
+                </RouterLinkButton>
+              )
+            }
+          >
             <Grid gap={[2, 3]} columns={[1, 2, 2, 3, 4]} equalColumns>
               {nfts.slice(0, shownCount).map((nft) => (
                 <NFTCard nft={nft} key={nft.id} />

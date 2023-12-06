@@ -1,5 +1,5 @@
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Dialog, Shelf, Stack, Text, TextInput_DEPRECATED } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
@@ -79,7 +79,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
           </Text>
           <Text variant="body2">Transfer the NFT ownership</Text>
           <Stack gap={1}>
-            <TextInput_DEPRECATED
+            <TextInput
               label="Recipient address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}

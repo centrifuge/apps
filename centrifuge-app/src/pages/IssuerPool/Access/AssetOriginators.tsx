@@ -14,20 +14,21 @@ import {
   useCentrifugeUtils,
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  IconMinusCircle,
-  Select_DEPRECATED,
-  Shelf,
-  Stack,
-  Text,
-  TextInput_DEPRECATED,
-} from '@centrifuge/fabric'
+import { Button, IconMinusCircle, InputErrorMessage, SelectInner, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress, sortAddresses } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
-import { Field, FieldArray, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
+import {
+  ErrorMessage,
+  Field,
+  FieldArray,
+  FieldProps,
+  Form,
+  FormikErrors,
+  FormikProvider,
+  setIn,
+  useFormik,
+} from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
@@ -365,7 +366,7 @@ function AOForm({
       values.withdrawAddresses.forEach((value, index) => {
         if (value.meta?.address) {
           if (!value.meta.location) {
-            errors = setIn(errors, `withdrawAddresses.${index}.meta.location`, 'Required')
+            errors = setIn(errors, `withdrawAddresses.${index}.meta.location`, 'Select a destination')
           } else {
             if (
               typeof value.meta.location !== 'string' &&
@@ -460,7 +461,7 @@ function AOForm({
                 <FieldWithErrorMessage
                   validate={required()}
                   name="documentKey"
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label="Document Signing Key"
                   placeholder="0x..."
                   maxLength={66}
@@ -468,7 +469,7 @@ function AOForm({
                 <FieldWithErrorMessage
                   validate={required()}
                   name="p2pKey"
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label="P2P Discovery Key"
                   placeholder="0x..."
                   maxLength={66}
@@ -476,7 +477,7 @@ function AOForm({
                 <FieldWithErrorMessage
                   validate={required()}
                   name="podOperator"
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label="Pod Operator Account ID"
                   placeholder="0x..."
                   maxLength={66}
@@ -542,27 +543,30 @@ function AOForm({
                 Paste the address to receive your funds after financing an asset. Be sure to select the right address
                 and network. Receiving your funds on another address or network will result in loss of funds.
               </Text>
-              <Stack gap="4px">
+              <Stack gap={1}>
                 {form.values.withdrawAddresses.map((value, index) => (
-                  <Shelf key={index} alignItems="flex-start">
-                    <FieldWithErrorMessage
-                      name={`withdrawAddresses.${index}.meta.address`}
-                      validate={address()}
-                      label="Address"
-                      disabled={!isEditing}
-                      as={TextInput_DEPRECATED}
-                      onChange={(event: any) => {
-                        form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
-                        form.setFieldValue(`withdrawAddresses.${index}.meta.address`, event.target.value)
-                      }}
-                      placeholder={value.key && !value.meta?.address ? '[Unknown address]' : ''}
-                    />
-                    <Box width={250}>
+                  <FieldWithErrorMessage
+                    name={`withdrawAddresses.${index}.meta.address`}
+                    validate={address()}
+                    label="Address"
+                    disabled={!isEditing}
+                    as={TextInput}
+                    onChange={(event: any) => {
+                      form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
+                      form.setFieldValue(`withdrawAddresses.${index}.meta.address`, event.target.value)
+                    }}
+                    placeholder={value.key && !value.meta?.address ? '[Unknown address]' : ''}
+                    secondaryLabel={
+                      <ErrorMessage
+                        name={`withdrawAddresses.${index}.meta.location`}
+                        render={(error) => error && <InputErrorMessage>{error}</InputErrorMessage>}
+                      />
+                    }
+                    symbol={
                       <Field name={`withdrawAddresses.${index}.meta.location`}>
                         {({ field, meta, form }: FieldProps) => (
-                          <Select_DEPRECATED
+                          <SelectInner
                             name={`withdrawAddresses.${index}.meta.location`}
-                            label="Destination"
                             onChange={(event) =>
                               form.setFieldValue(
                                 `withdrawAddresses.${index}.meta.location`,
@@ -570,7 +574,6 @@ function AOForm({
                               )
                             }
                             onBlur={field.onBlur}
-                            errorMessage={(meta.touched || form.submitCount > 0) && meta.error ? meta.error : undefined}
                             value={field.value ? JSON.stringify(field.value) : ''}
                             options={destinations.map((dest) => ({
                               value: JSON.stringify(dest),
@@ -586,8 +589,8 @@ function AOForm({
                           />
                         )}
                       </Field>
-                    </Box>
-                  </Shelf>
+                    }
+                  />
                 ))}
               </Stack>
             </Stack>

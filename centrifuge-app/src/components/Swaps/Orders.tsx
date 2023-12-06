@@ -26,7 +26,7 @@ import {
   Button,
   Card,
   Checkbox,
-  CurrencyInput_DEPRECATED,
+  CurrencyInput,
   Dialog,
   IconArrowRight,
   IconButton,
@@ -34,7 +34,7 @@ import {
   Shelf,
   Stack,
   Text,
-  TextInput_DEPRECATED,
+  TextInput,
 } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
@@ -316,7 +316,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                 </Text>
               </Shelf>
               {balanceLow && (
-                <TextInput_DEPRECATED
+                <TextInput
                   label={
                     orderBuyCurrencyLocation
                       ? `Send ${order.buyCurrency.symbol} from ${getLocationName(
@@ -360,7 +360,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                       }
                     >
                       {({ field, meta, form }: FieldProps) => (
-                        <CurrencyInput_DEPRECATED
+                        <CurrencyInput
                           {...field}
                           initialValue={form.values.maxReserve || undefined}
                           errorMessage={meta.touched ? meta.error : undefined}
@@ -389,7 +389,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                   <Stack as="fieldset" disabled={!isTransferEnabled} gap={2} minWidth={0} m={0} p={0} border={0}>
                     <Field
                       name="tranferReceiverAddress"
-                      as={TextInput_DEPRECATED}
+                      as={TextInput}
                       label="Receiver address"
                       disabled={!isTransferEnabled}
                       validate={isTransferEnabled ? combine(address(), required()) : undefined}

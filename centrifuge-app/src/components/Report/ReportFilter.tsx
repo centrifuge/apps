@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Box, DateRange, Select_DEPRECATED, Shelf } from '@centrifuge/fabric'
+import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 
@@ -41,20 +41,18 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       borderStyle="solid"
       borderColor="borderSecondary"
     >
-      <Box minWidth={200} maxWidth={200}>
-        <Select_DEPRECATED
-          name="report"
-          label="Report"
-          placeholder="Select a report"
-          options={reportOptions}
-          value={report}
-          onChange={(event) => {
-            if (event.target.value) {
-              setReport(event.target.value as Report)
-            }
-          }}
-        />
-      </Box>
+      <Select
+        name="report"
+        label="Report"
+        placeholder="Select a report"
+        options={reportOptions}
+        value={report}
+        onChange={(event) => {
+          if (event.target.value) {
+            setReport(event.target.value as Report)
+          }
+        }}
+      />
 
       <DateRange
         end={endDate}
@@ -66,61 +64,57 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       />
 
       {report === 'pool-balance' && (
-        <Box minWidth={150} maxWidth={150}>
-          <Select_DEPRECATED
-            name="groupBy"
-            label="Group by"
-            placeholder="Select a time period to group by"
-            options={[
-              {
-                label: 'Day',
-                value: 'day',
-              },
-              ...(range !== 'last-week'
-                ? [
-                    {
-                      label: 'Month',
-                      value: 'month',
-                    },
-                  ]
-                : []),
-            ]}
-            value={groupBy}
-            onChange={(event) => {
-              if (event.target.value) {
-                setGroupBy(event.target.value as GroupBy)
-              }
-            }}
-          />
-        </Box>
+        <Select
+          name="groupBy"
+          label="Group by"
+          placeholder="Select a time period to group by"
+          options={[
+            {
+              label: 'Day',
+              value: 'day',
+            },
+            ...(range !== 'last-week'
+              ? [
+                  {
+                    label: 'Month',
+                    value: 'month',
+                  },
+                ]
+              : []),
+          ]}
+          value={groupBy}
+          onChange={(event) => {
+            if (event.target.value) {
+              setGroupBy(event.target.value as GroupBy)
+            }
+          }}
+        />
       )}
 
       {report === 'investor-tx' && (
-        <Box minWidth={150} maxWidth={150}>
-          <Select_DEPRECATED
-            name="activeTranche"
-            label="Token"
-            placeholder="Select a token"
-            options={[
-              {
-                label: 'All tokens',
-                value: 'all',
-              },
-              ...pool.tranches.map((token) => {
-                return {
-                  label: token.currency.name,
-                  value: token.id,
-                }
-              }),
-            ]}
-            value={activeTranche}
-            onChange={(event) => {
-              if (event.target.value) {
-                setActiveTranche(event.target.value)
+        <Select
+          name="activeTranche"
+          label="Token"
+          placeholder="Select a token"
+          options={[
+            {
+              label: 'All tokens',
+              value: 'all',
+            },
+            ...pool.tranches.map((token) => {
+              return {
+                label: token.currency.name,
+                value: token.id,
               }
-            }}
-          />
-        </Box>
+            }),
+          ]}
+          value={activeTranche}
+          onChange={(event) => {
+            if (event.target.value) {
+              setActiveTranche(event.target.value)
+            }
+          }}
+        />
       )}
       <Box ml="auto">
         <AnchorButton

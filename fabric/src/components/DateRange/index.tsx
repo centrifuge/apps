@@ -1,6 +1,5 @@
 import * as React from 'react'
-import { Box } from '../Box'
-import { SelectOptionItem, Select_DEPRECATED } from '../Select'
+import { Select, SelectOptionItem } from '../Select'
 
 export type DateRangeProps = {
   onSelection: (start: Date, end: Date, range: RangeOptionValue) => void
@@ -53,19 +52,15 @@ export function DateRange({ onSelection, defaultOption = rangeOptions[1], end }:
   }, [startDate, end, value])
 
   return (
-    <Box>
-      <Box position="relative">
-        <Select_DEPRECATED
-          name="date-range"
-          label="Date range"
-          options={rangeOptions}
-          value={value}
-          onChange={({ target }) => {
-            setValue(target.value as RangeOptionValue)
-            setStartDate(getDate[target.value](end))
-          }}
-        />
-      </Box>
-    </Box>
+    <Select
+      name="date-range"
+      label="Date range"
+      options={rangeOptions}
+      value={value}
+      onChange={({ target }) => {
+        setValue(target.value as RangeOptionValue)
+        setStartDate(getDate[target.value](end))
+      }}
+    />
   )
 }

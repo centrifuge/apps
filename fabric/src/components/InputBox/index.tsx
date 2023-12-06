@@ -111,7 +111,7 @@ export function InputUnit({
   id ??= React.useId()
   return (
     <IdContext.Provider value={id}>
-      <Stack gap={1} width="100%">
+      <Stack gap={1}>
         {label && <InputLabel disabled={disabled}>{label}</InputLabel>}
         <Text
           variant="body2"

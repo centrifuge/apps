@@ -27,9 +27,9 @@ import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
-import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
+import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
@@ -45,9 +45,9 @@ import { PricingInput } from './PricingInput'
 
 export default function IssuerCreateLoanPage() {
   return (
-    <LayoutBase>
+    <PageWithSideBar>
       <IssuerCreateLoan />
-    </LayoutBase>
+    </PageWithSideBar>
   )
 }
 

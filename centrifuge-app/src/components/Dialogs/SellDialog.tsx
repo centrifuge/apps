@@ -1,5 +1,5 @@
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput_DEPRECATED, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
@@ -78,7 +78,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
             Sell NFT
           </Text>
           <Text variant="body2">Enter item price</Text>
-          <CurrencyInput_DEPRECATED
+          <CurrencyInput
             label="Price"
             value={price}
             onChange={(value) => setPrice(value)}
