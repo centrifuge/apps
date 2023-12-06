@@ -283,13 +283,11 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     onClose()
   }
 
-  const balanceLow = balanceDec.lt(orderBuyDec)
-
-  const disabled = balanceLow
-
   if (!account) return null
 
+  const balanceLow = balanceDec.lt(orderBuyDec)
   const { isTransferEnabled, isPartialEnabled } = form.values
+  const disabled = isPartialEnabled ? false : balanceLow
 
   return (
     <Dialog isOpen={open} onClose={close} title="Fulfill order">
