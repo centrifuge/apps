@@ -1021,27 +1021,23 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(({ api, rawOrderId, order, accountStakes }) => {
         const orderId = Number(rawOrderId.toHex())
         const { stake } = accountStakes
-
-        let submittable
         const redeemTx = api.tx.investments.updateRedeemOrder([poolId, trancheId], newOrder.toString())
-
-        let unstakeTx
-        if (!stake.isZero()) {
-          const unstakeAmount = newOrder.gte(stake) ? stake : newOrder
-          unstakeTx = api.tx.liquidityRewards.unstake({ Tranche: [poolId, trancheId] }, unstakeAmount)
-        }
+        const batch = [redeemTx]
 
         if ((!order.invest.isZero() || !order.redeem.isZero()) && order.submittedAt !== orderId) {
-          const collectTx = !order.invest.isZero()
-            ? api.tx.investments.collectInvestments([poolId, trancheId])
-            : api.tx.investments.collectRedemptions([poolId, trancheId])
-
-          submittable = api.tx.utility.batchAll([unstakeTx, collectTx, redeemTx].filter(Boolean))
-        } else {
-          submittable = unstakeTx ? api.tx.utility.batchAll([unstakeTx, redeemTx]) : redeemTx
+          batch.unshift(
+            api.tx.investments.collectInvestments([poolId, trancheId]),
+            api.tx.investments.collectRedemptions([poolId, trancheId])
+          )
+        }
+        if (!stake.isZero()) {
+          const unstakeAmount = newOrder.gte(stake) ? stake : newOrder
+          batch.unshift(api.tx.liquidityRewards.unstake({ Tranche: [poolId, trancheId] }, unstakeAmount))
         }
 
-        return inst.wrapSignAndSend(api, submittable, options)
+        const tx = batch.length > 1 ? api.tx.utility.batchAll(batch) : redeemTx
+
+        return inst.wrapSignAndSend(api, tx, options)
       })
     )
   }
