@@ -1,12 +1,11 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction, useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
   CurrencyInput,
   IconButton,
   IconCopy,
-  IconInfo,
   Shelf,
   Stack,
   Tabs,
@@ -210,7 +209,6 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
     () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
     [address]
   )
-  const { isEvmOnSubstrate } = useWallet()
 
   return (
     <Stack gap={2} px={1} py={2} backgroundColor="backgroundTertiary">
@@ -225,7 +223,7 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
           <Text variant="label2" color="textSecondary">
             Centrifuge native address:{' '}
           </Text>
-          <Text variant="label1" fontSize="12px" textDecoration="underline" color="grayScale.900">
+          <Text variant="label1" fontSize="12px" textDecoration="underline" color="textPrimary">
             {truncate(centAddress)}
           </Text>
           <IconButton onClick={() => copyToClipboard(centAddress)} title="Copy address to clipboard">
@@ -233,15 +231,6 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
           </IconButton>
         </Shelf>
       </Stack>
-      {isEvmOnSubstrate && (
-        <Shelf borderRadius="3px" alignItems="flex-start" backgroundColor="backgroundPrimary" p={1} gap={1}>
-          <IconInfo size={16} />
-          <Text variant="body3" color="textSecondary">
-            Use this Ethereum address only on Centrifuge Chain. Receiving CFG on another network on this address will
-            result in loss of funds. Be sure to select the right network.
-          </Text>
-        </Shelf>
-      )}
     </Stack>
   )
 }
@@ -256,7 +245,7 @@ const Container = styled(Shelf)`
   width: 16px;
 `
 
-const CFGPriceChart = () => {
+const CFGPriceChart = React.memo(function CFGPriceChart() {
   const [filter, setFilter] = React.useState<FilterOptions>('YTD')
   const { data: tokenDayData } = useDailyCFGPrice(filter)
   const currentCFGPrice = useCFGTokenPrice()
@@ -277,4 +266,4 @@ const CFGPriceChart = () => {
   }, [tokenDayData, filter])
 
   return <PriceChart data={data} currency="USD" filter={filter} setFilter={setFilter} />
-}
+})
