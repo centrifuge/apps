@@ -45,7 +45,12 @@ const columns: Column[] = [
   {
     align: 'left',
     header: 'Action',
-    cell: ({ action }: Row) => <TransactionTypeChip type={action as InvestorTransactionType} />,
+    cell: ({ action, tranche }: Row) => (
+      <TransactionTypeChip
+        labelArgs={{ poolCurrencySymbol: tranche?.poolCurrency.symbol, trancheTokenSymbol: tranche?.currency.symbol }}
+        type={action as InvestorTransactionType}
+      />
+    ),
   },
   {
     align: 'left',
