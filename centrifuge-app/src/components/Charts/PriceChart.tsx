@@ -66,6 +66,12 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
               }
               return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
             }}
+            interval={(function interval() {
+              if (filter === '30days') return 5
+              if (filter === '90days') return 14
+              if (filter === 'YTD' && data.length < 180) return 30
+              return 45
+            })()}
             style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
             tickLine={false}
             allowDuplicatedCategory={false}
