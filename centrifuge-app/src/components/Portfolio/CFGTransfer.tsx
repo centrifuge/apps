@@ -23,7 +23,6 @@ import React, { useMemo } from 'react'
 import { useQuery } from 'react-query'
 import { useRouteMatch } from 'react-router'
 import styled from 'styled-components'
-import ethereumLogo from '../../assets/images/ethereum.svg'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
@@ -217,24 +216,8 @@ const ReceiveCFG = ({ address }: SendReceiveProps) => {
     <Stack gap={2} px={1} py={2} backgroundColor="backgroundTertiary">
       <Stack gap={3}>
         <Text variant="interactive2" color="textSecondary">
-          Your address{isEvmOnSubstrate ? 'es' : ''} on Centrifuge Chain
+          Your address on Centrifuge Chain
         </Text>
-        {isEvmOnSubstrate && (
-          <Shelf gap={1}>
-            <Container>
-              <Box as="img" src={ethereumLogo} width="100%" height="100%" alt="" />
-            </Container>
-            <Text variant="label2" color="textSecondary">
-              Ethereum address:{' '}
-            </Text>
-            <Text variant="label1" fontSize="12px" textDecoration="underline" color="textPrimary">
-              {truncate(address)}
-            </Text>
-            <IconButton onClick={() => copyToClipboard(address)} title="Copy address to clipboard">
-              <IconCopy />
-            </IconButton>
-          </Shelf>
-        )}
         <Shelf gap={1}>
           <Container>
             <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
