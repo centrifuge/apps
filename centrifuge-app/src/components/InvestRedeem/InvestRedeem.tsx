@@ -8,12 +8,10 @@ import {
   Button,
   CurrencyInput,
   Flex,
-  Grid,
   IconArrowUpRight,
   IconCheckInCircle,
   IconClock,
   InlineFeedback,
-  InputLabel,
   Shelf,
   Stack,
   Tabs,
@@ -370,7 +368,10 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
   const isCancelling = state.pendingAction === 'cancelInvest' && isPending
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
 
-  function renderInput(preSubmitAction?: { onClick: () => void; loading?: boolean; label?: string }) {
+  function renderInput(
+    cancelCb?: () => void,
+    preSubmitAction?: { onClick: () => void; loading?: boolean; label?: string }
+  ) {
     return (
       <Stack gap={2}>
         <EpochBusy busy={state.isPoolBusy} />
@@ -380,52 +381,31 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
             {state.nativeCurrency && `${state.nativeCurrency.symbol} balance is too low.`}
           </InlineFeedback>
         )}
-        <Grid gridTemplateColumns={['1fr', '2fr minmax(min-content, 1fr)']} gap={1} alignItems="start">
-          <Field name="amount" validate={positiveNumber()}>
-            {({ field, meta }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  onChange={(value) => form.setFieldValue('amount', value)}
-                  errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
-                  label={`Amount ${
-                    state.isFirstInvestment
-                      ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.symbol)})`
-                      : ''
-                  }`}
-                  disabled={isInvesting}
-                  currency={state.poolCurrency?.symbol}
-                  secondaryLabel={
-                    state.poolCurrencyBalance &&
-                    state.poolCurrency &&
-                    `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
-                  }
-                  onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
-                  autoFocus={autoFocus}
-                />
-              )
-            }}
-          </Field>
-          <Stack gap={1}>
-            <Box display={['none', 'flex']}>
-              <InputLabel>&nbsp;</InputLabel>
-            </Box>
-            <Box width="max-content">
-              {preSubmitAction ? (
-                <Button {...preSubmitAction}>{preSubmitAction.label ?? investLabel}</Button>
-              ) : (
-                <Button
-                  type="submit"
-                  loading={isInvesting}
-                  loadingMessage={loadingMessage}
-                  disabled={state.isPoolBusy || nativeBalanceTooLow}
-                >
-                  {changeOrderFormShown ? 'Change order' : investLabel}
-                </Button>
-              )}
-            </Box>
-          </Stack>
-        </Grid>
+        <Field name="amount" validate={positiveNumber()}>
+          {({ field, meta }: FieldProps) => {
+            return (
+              <CurrencyInput
+                {...field}
+                onChange={(value) => form.setFieldValue('amount', value)}
+                errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
+                label={`Amount ${
+                  state.isFirstInvestment
+                    ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.symbol)})`
+                    : ''
+                }`}
+                disabled={isInvesting}
+                currency={state.poolCurrency?.symbol}
+                secondaryLabel={
+                  state.poolCurrencyBalance &&
+                  state.poolCurrency &&
+                  `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
+                }
+                onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
+                autoFocus={autoFocus}
+              />
+            )
+          }}
+        </Field>
         {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
           <Text variant="label2" color="statusOk">
             Full amount covered by investment capacity ✓
@@ -448,6 +428,25 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
             The invested amount will be locked and executed at the end of the current epoch
           </InlineFeedback>
         )}
+        <ButtonGroup>
+          {preSubmitAction ? (
+            <Button {...preSubmitAction}>{preSubmitAction.label ?? investLabel}</Button>
+          ) : (
+            <Button
+              type="submit"
+              loading={isInvesting}
+              loadingMessage={loadingMessage}
+              disabled={state.isPoolBusy || nativeBalanceTooLow}
+            >
+              {changeOrderFormShown ? 'Change order' : investLabel}
+            </Button>
+          )}
+          {cancelCb && (
+            <Button variant="secondary" onClick={cancelCb}>
+              Cancel
+            </Button>
+          )}
+        </ButtonGroup>
       </Stack>
     )
   }
@@ -458,9 +457,12 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
           <Claim type="invest" onDismiss={() => setClaimDismissed(true)} />
         ) : changeOrderFormShown ? (
           state.needsPoolCurrencyApproval(inputToNumber(form.values.amount)) ? (
-            renderInput({ onClick: actions.approvePoolCurrency, loading: isApproving })
+            renderInput(() => setChangeOrderFormShown(false), {
+              onClick: actions.approvePoolCurrency,
+              loading: isApproving,
+            })
           ) : (
-            renderInput()
+            renderInput(() => setChangeOrderFormShown(false))
           )
         ) : hasPendingOrder ? (
           <Stack gap={2}>
@@ -479,12 +481,12 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
             />
           </Stack>
         ) : state.needsPoolCurrencyApproval(inputToNumber(form.values.amount)) ? (
-          renderInput({
+          renderInput(undefined, {
             onClick: actions.approvePoolCurrency,
             loading: isApproving,
           })
         ) : (
-          renderInput()
+          renderInput(undefined)
         )}
       </Form>
     </FormikProvider>
@@ -492,11 +494,10 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
 }
 
 type RedeemFormProps = {
-  onCancel?: () => void
   autoFocus?: boolean
 }
 
-function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
+function RedeemForm({ autoFocus }: RedeemFormProps) {
   const { state, actions, hooks } = useInvestRedeem()
   const pool = usePool(state.poolId) as Pool
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
@@ -585,42 +586,24 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
         )}
         <EpochBusy busy={calculatingOrders} />
 
-        <Grid gridTemplateColumns={['1fr', '2fr minmax(min-content, 1fr)']} gap={1} alignItems="start">
-          <Field name="amount" validate={positiveNumber()}>
-            {({ field, meta }: FieldProps) => (
-              <CurrencyInput
-                {...field}
-                // when the value is a decimal we assume the user clicked the max button
-                // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
-                value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
-                errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
-                label="Amount"
-                disabled={isRedeeming}
-                onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
-                onChange={(value) => form.setFieldValue('amount', value)}
-                currency={state.poolCurrency?.symbol}
-                secondaryLabel={`${formatBalance(
-                  roundDown(maxRedeemCurrency),
-                  state.poolCurrency?.symbol,
-                  2
-                )} available`}
-                autoFocus={autoFocus}
-              />
-            )}
-          </Field>
-          <Stack gap={1}>
-            <Box display={['none', 'flex']}>
-              <InputLabel>&nbsp;</InputLabel>
-            </Box>
-            {preSubmitAction ? (
-              <Button {...preSubmitAction}>Redeem</Button>
-            ) : (
-              <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
-                Redeem
-              </Button>
-            )}
-          </Stack>
-        </Grid>
+        <Field name="amount" validate={positiveNumber()}>
+          {({ field, meta }: FieldProps) => (
+            <CurrencyInput
+              {...field}
+              // when the value is a decimal we assume the user clicked the max button
+              // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
+              value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
+              errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
+              label="Amount"
+              disabled={isRedeeming}
+              onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
+              onChange={(value) => form.setFieldValue('amount', value)}
+              currency={state.poolCurrency?.symbol}
+              secondaryLabel={`${formatBalance(roundDown(maxRedeemCurrency), state.poolCurrency?.symbol, 2)} available`}
+              autoFocus={autoFocus}
+            />
+          )}
+        </Field>
         {inputToNumber(form.values.amount) > 0 && (
           <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="card">
             <Text variant="body3">
@@ -637,13 +620,20 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             </Text>
           </Box>
         )}
-        <Stack px={1} gap={1}>
+        <ButtonGroup>
+          {preSubmitAction ? (
+            <Button {...preSubmitAction}>Redeem</Button>
+          ) : (
+            <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
+              Redeem
+            </Button>
+          )}
           {cancelCb && (
             <Button variant="secondary" onClick={cancelCb} disabled={calculatingOrders}>
               Cancel
             </Button>
           )}
-        </Stack>
+        </ButtonGroup>
       </Stack>
     )
   }
@@ -655,9 +645,12 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
           <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
         ) : changeOrderFormShown ? (
           state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
-            renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
+            renderInput(() => setChangeOrderFormShown(false), {
+              onClick: actions.approveTrancheToken,
+              loading: isApproving,
+            })
           ) : (
-            renderInput(onCancel)
+            renderInput(() => setChangeOrderFormShown(false))
           )
         ) : hasPendingOrder ? (
           <PendingOrder
@@ -673,9 +666,9 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
             }}
           />
         ) : state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
-          renderInput(onCancel, { onClick: actions.approveTrancheToken, loading: isApproving })
+          renderInput(undefined, { onClick: actions.approveTrancheToken, loading: isApproving })
         ) : (
-          renderInput(onCancel)
+          renderInput(undefined)
         )}
       </Form>
     </FormikProvider>
