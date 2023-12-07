@@ -16,7 +16,7 @@ export function formatNftAttribute(value: any, attr: LoanTemplateAttribute) {
         attr.input.symbol
       )
     case 'date':
-      return formatDate(value)
+      return value ? formatDate(value) : ''
     default:
       return value
   }
