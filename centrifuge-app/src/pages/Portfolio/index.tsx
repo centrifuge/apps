@@ -3,7 +3,6 @@ import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { LayoutBase } from '../../components/LayoutBase'
 import { BasePadding, BASE_PADDING } from '../../components/LayoutBase/BasePadding'
-import { PoolList } from '../../components/PoolList'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings } from '../../components/Portfolio/Holdings'
@@ -49,14 +48,6 @@ function Portfolio() {
         <BasePadding gap={3}>
           <Transactions onlyMostRecent address={address} />
           <AssetAllocation address={address} />
-        </BasePadding>
-        <BasePadding>
-          <Stack as="article" gap={2}>
-            <Text as="h2" variant="heading2">
-              Explore opportunities
-            </Text>
-            <PoolList />
-          </Stack>
         </BasePadding>
       </Stack>
     </>
