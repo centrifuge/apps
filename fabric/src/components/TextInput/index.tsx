@@ -114,12 +114,15 @@ export function InputAction({ children, ...props }: React.ButtonHTMLAttributes<H
 }
 
 export function TextInputBox(
-  props: Omit<TextInputProps, 'label' | 'secondaryLabel' | 'inputElement'> & { error?: boolean }
+  props: Omit<TextInputProps, 'label' | 'secondaryLabel' | 'inputElement'> & {
+    error?: boolean
+    inputRef?: React.Ref<HTMLInputElement>
+  }
 ) {
-  const { error, disabled, action, symbol, ...inputProps } = props
+  const { error, disabled, action, symbol, inputRef, ...inputProps } = props
   return (
     <StyledInputBox alignItems="stretch" height="input">
-      <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} />
+      <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />
       {symbol && (
         <Box alignSelf="center" pr={1}>
           {symbol}

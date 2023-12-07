@@ -48,7 +48,6 @@ export function MaxReserveForm({ poolId }: Props) {
               {({ field, meta, form }: FieldProps) => (
                 <CurrencyInput_DEPRECATED
                   {...field}
-                  initialValue={form.values.maxReserve || undefined}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={pool?.currency.symbol}

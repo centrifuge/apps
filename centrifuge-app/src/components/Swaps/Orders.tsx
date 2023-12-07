@@ -360,7 +360,6 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                       {({ field, meta, form }: FieldProps) => (
                         <CurrencyInput
                           {...field}
-                          initialValue={form.values.maxReserve || undefined}
                           errorMessage={meta.touched ? meta.error : undefined}
                           disabled={!isPartialEnabled}
                           currency={order.buyCurrency.symbol}
