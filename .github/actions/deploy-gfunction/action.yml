@@ -13,10 +13,6 @@ inputs:
   deploy_env:
     description: env to deploy function to
     required: false
-  
-  checkout_path:
-    description: Folder with repository code
-    required: true
 
   GWIP:
     description: Google Workflow Identity provider
