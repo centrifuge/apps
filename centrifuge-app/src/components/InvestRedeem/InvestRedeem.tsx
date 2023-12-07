@@ -410,18 +410,20 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
             <Box display={['none', 'flex']}>
               <InputLabel>&nbsp;</InputLabel>
             </Box>
-            {preSubmitAction ? (
-              <Button {...preSubmitAction}>{preSubmitAction.label ?? investLabel}</Button>
-            ) : (
-              <Button
-                type="submit"
-                loading={isInvesting}
-                loadingMessage={loadingMessage}
-                disabled={state.isPoolBusy || nativeBalanceTooLow}
-              >
-                {changeOrderFormShown ? 'Change order' : investLabel}
-              </Button>
-            )}
+            <Box width="max-content">
+              {preSubmitAction ? (
+                <Button {...preSubmitAction}>{preSubmitAction.label ?? investLabel}</Button>
+              ) : (
+                <Button
+                  type="submit"
+                  loading={isInvesting}
+                  loadingMessage={loadingMessage}
+                  disabled={state.isPoolBusy || nativeBalanceTooLow}
+                >
+                  {changeOrderFormShown ? 'Change order' : investLabel}
+                </Button>
+              )}
+            </Box>
           </Stack>
         </Grid>
         {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
@@ -753,7 +755,8 @@ function PendingOrder({
           {type === 'invest' ? (
             <>
               <Text variant="body3">
-                Invested USDC value <Text fontWeight={600}>{formatBalance(amount, state.poolCurrency?.symbol)}</Text>
+                Invested {state.poolCurrency?.symbol} value{' '}
+                <Text fontWeight={600}>{formatBalance(amount, state.poolCurrency?.symbol)}</Text>
               </Text>
               <Text variant="body3">
                 Token amount ~
@@ -768,7 +771,7 @@ function PendingOrder({
                 Token amount <Text fontWeight={600}>{formatBalance(amount, state.trancheCurrency?.symbol)}</Text>
               </Text>
               <Text variant="body3">
-                USDC value ~
+                {state.poolCurrency?.symbol} value ~
                 <Text fontWeight={600}>{formatBalance(amount.mul(state.tokenPrice), state.poolCurrency?.symbol)}</Text>
               </Text>
             </>
