@@ -656,7 +656,7 @@ function RedeemForm({ autoFocus }: RedeemFormProps) {
           <PendingOrder
             type="redeem"
             pool={pool}
-            amount={pendingRedeem.mul(state.tokenPrice)}
+            amount={pendingRedeem}
             onCancelOrder={() => actions.cancelRedeem()}
             isCancelling={isCancelling}
             onChangeOrder={() => {

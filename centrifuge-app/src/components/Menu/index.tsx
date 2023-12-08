@@ -41,25 +41,17 @@ export function Menu() {
         Pools
       </PageLink>
 
-      {config.network !== 'centrifuge' && (
-        <PageLink to="/nfts" stacked={!isLarge}>
-          <IconNft />
-          NFTs
+      {showPrime && (
+        <PageLink to="/prime" stacked={!isLarge}>
+          <IconGlobe />
+          Prime
         </PageLink>
       )}
-
-      <GovernanceMenu />
 
       {showPortfolio && address && (
         <PageLink to="/portfolio" stacked={!isLarge}>
           <IconPieChart />
           Portfolio
-        </PageLink>
-      )}
-      {showPrime && (
-        <PageLink to="/prime" stacked={!isLarge}>
-          <IconGlobe />
-          Prime
         </PageLink>
       )}
 
@@ -69,6 +61,15 @@ export function Menu() {
           History
         </PageLink>
       )}
+
+      {config.network !== 'centrifuge' && (
+        <PageLink to="/nfts" stacked={!isLarge}>
+          <IconNft />
+          NFTs
+        </PageLink>
+      )}
+
+      <GovernanceMenu />
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>

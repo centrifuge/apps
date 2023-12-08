@@ -127,8 +127,6 @@ type WalletProviderProps = {
   walletConnectId?: string
   subscanUrl?: string
   showAdvancedAccounts?: boolean
-  showBase?: boolean
-  showArbitrum?: boolean
   showTestNets?: boolean
 }
 
@@ -146,8 +144,6 @@ export function WalletProvider({
   walletConnectId,
   subscanUrl,
   showAdvancedAccounts,
-  showBase,
-  showArbitrum,
   showTestNets,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
@@ -172,7 +168,7 @@ export function WalletProvider({
           symbol: consts.chainSymbol,
           decimals: consts.chainDecimals,
         },
-        blockExplorerUrl: 'https://etherscan.io/',
+        blockExplorerUrl: 'https://centrifuge.subscan.io/',
       }
     }
     return chains
@@ -492,13 +488,7 @@ export function WalletProvider({
   return (
     <WalletContext.Provider value={ctx}>
       {children}
-      <WalletDialog
-        evmChains={evmChains}
-        showAdvancedAccounts={showAdvancedAccounts}
-        showBase={showBase}
-        showArbitrum={showArbitrum}
-        showTestNets={showTestNets}
-      />
+      <WalletDialog evmChains={evmChains} showAdvancedAccounts={showAdvancedAccounts} showTestNets={showTestNets} />
     </WalletContext.Provider>
   )
 }

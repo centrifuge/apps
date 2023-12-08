@@ -1,6 +1,6 @@
 import { ResponsiveValue } from 'styled-system'
 
-type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
+type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical' | 'Promote'
 
 // Colors
 
@@ -43,6 +43,7 @@ type ThemeColors = {
   accentScale: Record<number, string>
   yellowScale: Record<number, string>
   blueScale: Record<number, string>
+  grayScale: Record<number, string>
 }
 
 // Lengths
