@@ -152,7 +152,7 @@ export function CurrencyInput({
   currency,
   onSetMax,
   placeholder = '0.0',
-  decimals = 6,
+  decimals = 8,
   onChange,
   onBlur,
   ...inputProps
@@ -212,6 +212,7 @@ export function CurrencyInput({
       inputElement={
         <TextInputBox
           {...inputProps}
+          inputMode="decimal"
           disabled={disabled}
           placeholder={placeholder}
           error={!!errorMessage}
@@ -219,7 +220,8 @@ export function CurrencyInput({
           onBlur={(e) => {
             // only enforce the number of decimals on blur, so as not to cause jank during typing
             formatDecimals(e.target.value)
-            onBlur?.(e)
+            // In promise otherwise validation may run too soon
+            Promise.resolve().then(() => onBlur?.(e))
           }}
           value={internalValue}
           symbol={currency}

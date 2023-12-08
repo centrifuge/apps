@@ -1,6 +1,6 @@
 import { ResponsiveValue } from 'styled-system'
 
-type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
+type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical' | 'Promote'
 
 // Colors
 

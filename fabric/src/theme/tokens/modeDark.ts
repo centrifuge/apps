@@ -5,6 +5,7 @@ const statusInfo = '#006ef5'
 const statusOk = '#74B634'
 const statusWarning = '#a86500'
 const statusCritical = '#d43F2b'
+const statusPromote = '#f81071'
 
 const darkColors = {
   textPrimary: 'white',
@@ -28,11 +29,13 @@ const darkColors = {
   statusOk,
   statusWarning,
   statusCritical,
+  statusPromote,
   statusDefaultBg: 'transparent',
   statusInfoBg: 'transparent',
   statusOkBg: 'transparent',
   statusWarningBg: 'transparent',
   statusCriticalBg: 'transparent',
+  statusPromoteBg: 'transparent',
 
   backgroundButtonPrimary: altairYellow,
   backgroundButtonPrimaryFocus: altairYellow,
