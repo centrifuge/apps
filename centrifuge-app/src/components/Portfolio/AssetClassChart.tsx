@@ -1,7 +1,7 @@
 import React from 'react'
 import { Cell, Pie, PieChart as RechartsPieChart, Tooltip, TooltipProps } from 'recharts'
 import { formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
-import { TooltipContainer, TooltipEntry, TooltipTitle } from '../Charts/CustomChartElements'
+import { TooltipContainer, TooltipEntry, TooltipTitle } from '../Charts/Tooltip'
 
 type PieChartProps = {
   data: { name: string; value: number; color?: string }[]

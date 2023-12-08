@@ -6,7 +6,7 @@ import { useTheme } from 'styled-components'
 import { formatBalance } from '../../utils/formatting'
 import { useDailyTrancheStates, usePool } from '../../utils/usePools'
 import { Spinner } from '../Spinner'
-import { CustomizedTooltip, CustomizedXAxisTick } from './CustomChartElements'
+import { CustomizedTooltip } from './Tooltip'
 
 type ChartData = {
   day: Date
@@ -48,9 +48,16 @@ const PriceYieldChart: React.FC<{
           <ComposedChart data={data} margin={{ left: -30, top: 2 }} reverseStackOrder>
             <XAxis
               dataKey="day"
-              tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
+              type="category"
+              tickFormatter={(tick: number) => {
+                if (data.length > 180) {
+                  return new Date(tick).toLocaleString('en-US', { month: 'short' })
+                }
+                return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
+              }}
+              style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
               tickLine={false}
-              interval={data.length < 18 || data.length > 30 ? 0 : 1}
+              allowDuplicatedCategory={false}
             />
             <YAxis
               tickLine={false}
