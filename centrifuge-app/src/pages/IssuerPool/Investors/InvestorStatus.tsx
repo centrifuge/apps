@@ -15,7 +15,7 @@ import {
   IconMinus,
   IconPlus,
   SearchInput,
-  Select_DEPRECATED,
+  Select,
   Shelf,
   Stack,
   Text,
@@ -27,6 +27,7 @@ import React from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
+import { useActiveDomains } from '../../../utils/useLiquidityPools'
 import { usePermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useOrder, usePool } from '../../../utils/usePools'
 
@@ -35,6 +36,7 @@ const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
 export function InvestorStatus() {
   const {
     evm: { chains },
+    substrate: { evmChainId: substrateEvmChainId },
   } = useWallet()
   const { pid: poolId } = useParams<{ pid: string }>()
   const [address, setAddress] = React.useState('')
@@ -42,8 +44,16 @@ export function InvestorStatus() {
   const validator = chain ? isEvmAddress : isAddress
   const validAddress = validator(address) ? address : undefined
   const utils = useCentrifugeUtils()
-  const centAddress = chain && validAddress ? utils.evmToSubstrateAddress(address, chain) : validAddress
+  const centAddress =
+    chain && validAddress
+      ? utils.evmToSubstrateAddress(address, chain)
+      : chain === '' && substrateEvmChainId && isEvmAddress(address)
+      ? utils.evmToSubstrateAddress(address, substrateEvmChainId)
+      : validAddress
   const permissions = usePermissions(centAddress)
+
+  const { data: domains } = useActiveDomains(poolId)
+  const deployedLpChains = domains?.map((d) => d.chainId) ?? []
 
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
 
@@ -85,25 +95,21 @@ export function InvestorStatus() {
       subtitle="Display investor status, and add or remove from investor memberlist."
     >
       <Stack gap={2}>
-        <Grid columns={2} equalColumns gap={4} alignItems="center">
-          <SearchInput
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter address..."
-            clear={() => setAddress('')}
-          />
-          <Select_DEPRECATED
+        <Grid columns={2} gap={2} alignItems="center">
+          <SearchInput value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address..." />
+          <Select
             value={chain}
             options={[
               { value: '', label: 'Centrifuge' },
-              ...Object.keys(chains).map((chainId) => ({
-                value: chainId,
-                label: `${chainId} - ${getChainInfo(chains, Number(chainId)).name}`,
+              ...deployedLpChains.map((chainId) => ({
+                value: String(chainId),
+                label: getChainInfo(chains, chainId).name,
               })),
             ]}
             onChange={(e) => {
               setChain(e.target.value as any)
             }}
+            disabled={!deployedLpChains.length}
           />
           {address && !validAddress ? (
             <Text variant="label2" color="statusCritical">

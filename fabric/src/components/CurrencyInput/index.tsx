@@ -212,6 +212,7 @@ export function CurrencyInput({
       inputElement={
         <TextInputBox
           {...inputProps}
+          inputMode="decimal"
           disabled={disabled}
           placeholder={placeholder}
           error={!!errorMessage}
