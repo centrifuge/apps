@@ -27,6 +27,7 @@ import React from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
+import { useActiveDomains } from '../../../utils/useLiquidityPools'
 import { usePermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useOrder, usePool } from '../../../utils/usePools'
 
@@ -50,6 +51,9 @@ export function InvestorStatus() {
       ? utils.evmToSubstrateAddress(address, substrateEvmChainId)
       : validAddress
   const permissions = usePermissions(centAddress)
+
+  const { data: domains } = useActiveDomains(poolId)
+  const deployedLpChains = domains?.map((d) => d.chainId) ?? []
 
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
 
@@ -97,16 +101,15 @@ export function InvestorStatus() {
             value={chain}
             options={[
               { value: '', label: 'Centrifuge' },
-              ...Object.keys(chains)
-                .filter((cid) => Number(cid) !== substrateEvmChainId)
-                .map((chainId) => ({
-                  value: chainId,
-                  label: getChainInfo(chains, Number(chainId)).name,
-                })),
+              ...deployedLpChains.map((chainId) => ({
+                value: String(chainId),
+                label: getChainInfo(chains, chainId).name,
+              })),
             ]}
             onChange={(e) => {
               setChain(e.target.value as any)
             }}
+            disabled={!deployedLpChains.length}
           />
           {address && !validAddress ? (
             <Text variant="label2" color="statusCritical">
