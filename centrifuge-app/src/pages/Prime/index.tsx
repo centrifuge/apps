@@ -8,7 +8,7 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
-import { DAO, useGetDAOConfig } from '../../utils/useDAOConfig'
+import { DAO, useDAOConfig } from '../../utils/useDAOConfig'
 import { useFilters } from '../../utils/useFilters'
 import { useSubquery } from '../../utils/useSubquery'
 
@@ -55,7 +55,7 @@ function DaoPortfoliosTable() {
   const utils = useCentrifugeUtils()
   const cent = useCentrifuge()
   const getNetworkName = useGetNetworkName()
-  const { data: daoData } = useGetDAOConfig()
+  const { data: daoData } = useDAOConfig()
 
   const daos =
     daoData?.map((dao) => ({

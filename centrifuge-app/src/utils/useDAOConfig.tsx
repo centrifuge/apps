@@ -15,12 +15,11 @@ export type Resolution = {
   title: string
   image: string
   timestamp: number
-  author: string
   excerpt: string
   link: string
 }
 
-export const useGetDAOConfig = () => {
+export const useDAOConfig = () => {
   const query = useQuery(
     'daoData',
     async () => {

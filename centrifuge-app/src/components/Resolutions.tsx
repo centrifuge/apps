@@ -1,4 +1,4 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import styled from 'styled-components'
 import { DAO } from '../utils/useDAOConfig'
 
@@ -12,7 +12,7 @@ export const Resolutions = ({ dao }: { dao: DAO }) => {
         {dao.resolutions.map((blog) => (
           <HoverableCard
             width="282px"
-            height="426px"
+            height="400px"
             as="a"
             href={blog.link}
             key={blog.title}
@@ -37,12 +37,6 @@ export const Resolutions = ({ dao }: { dao: DAO }) => {
             <Text variant="body3" color="textSecondary">
               {blog.excerpt}
             </Text>
-            <Shelf gap="10px">
-              <Box height="19px" width="19px" borderRadius="100%" backgroundColor="yellowScale.100" />
-              <Text variant="body2" color="textSecondary">
-                {blog.author}
-              </Text>
-            </Shelf>
           </HoverableCard>
         ))}
       </Shelf>

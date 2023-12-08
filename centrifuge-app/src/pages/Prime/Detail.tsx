@@ -8,7 +8,7 @@ import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { Resolutions } from '../../components/Resolutions'
 import { RouterTextLink } from '../../components/TextLink'
-import { useGetDAOConfig } from '../../utils/useDAOConfig'
+import { useDAOConfig } from '../../utils/useDAOConfig'
 
 export default function PrimeDetailPage() {
   return (
@@ -20,7 +20,7 @@ export default function PrimeDetailPage() {
 
 function PrimeDetail() {
   const { dao: daoSlug } = useParams<{ dao: string }>()
-  const { data: DAOs, isLoading } = useGetDAOConfig()
+  const { data: DAOs, isLoading } = useDAOConfig()
   const dao = DAOs?.find((d) => d.slug === daoSlug)
   const utils = useCentrifugeUtils()
   const centAddress =
