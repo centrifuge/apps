@@ -211,7 +211,7 @@ function AOForm({
           cent.pools.setMetadata([poolId, newMetadata], { batch: true }),
         ]).pipe(
           switchMap(([api, permissionTx, setMetadataTx]) => {
-            const numProxyTypesPerHotWallet = 3
+            const numProxyTypesPerHotWallet = 4
             const deposit = proxyDepositFactor
               .mul(new BN(Math.max(addedAddresses.length - removedAddresses.length, 0) * numProxyTypesPerHotWallet))
               .add(podOperator ? proxyDepositFactor : new BN(0))
@@ -244,6 +244,7 @@ function AOForm({
                               api.tx.proxy.removeProxy(addr, 'Borrow', 0),
                               api.tx.proxy.removeProxy(addr, 'Invest', 0),
                               api.tx.proxy.removeProxy(addr, 'PodAuth', 0),
+                              api.tx.proxy.removeProxy(addr, 'Transfer', 0),
                             ])
                             .flat()
                         ),
@@ -251,7 +252,7 @@ function AOForm({
                         api.tx.proxy.addProxy(addr, 'Borrow', 0),
                         api.tx.proxy.addProxy(addr, 'Invest', 0),
                         api.tx.proxy.addProxy(addr, 'PodAuth', 0),
-                        // TODO: Restricted Transfer
+                        api.tx.proxy.addProxy(addr, 'Transfer', 0),
                       ]),
                       podOperator && api.tx.proxy.addProxy(podOperator, 'PodOperation', 0),
                       keys &&

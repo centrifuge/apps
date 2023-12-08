@@ -146,6 +146,19 @@ export function useDailyTrancheStates(trancheId: string) {
   return result
 }
 
+export function useDailyTranchesStates(trancheIds: string[]) {
+  const [result] = useCentrifugeQuery(
+    ['dailyTrancheStates', { trancheIds }],
+    (cent) => combineLatest(trancheIds.map((tid) => cent.pools.getDailyTrancheStates([tid]))),
+    {
+      suspense: true,
+      enabled: !!trancheIds?.length,
+    }
+  )
+
+  return result
+}
+
 export function useDailyTVL() {
   const [result] = useCentrifugeQuery(['daily TVL'], (cent) => cent.pools.getDailyTVL(), {
     suspense: true,
@@ -182,13 +195,6 @@ export function usePendingCollect(poolId: string, trancheId?: string, address?: 
     }
   )
 
-  return result
-}
-
-export function usePortfolio(address?: string) {
-  const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
-    enabled: !!address,
-  })
   return result
 }
 

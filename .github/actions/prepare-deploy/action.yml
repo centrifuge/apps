@@ -6,21 +6,21 @@ inputs:
     description: "app name you're deploying"
     required: true
   deploy_to:
-    description: "(Optional) Manual trigger to deploy"
+    description: '(Optional) Manual trigger to deploy'
     required: false
 outputs:
-  function_name: 
-    description: "App name with environment appended"
+  function_name:
+    description: 'App name with environment appended'
     value: ${{ steps.naming.outputs.function_name}}
-  front_url: 
-    description: "Full URL for your front-end piece"
+  front_url:
+    description: 'Full URL for your front-end piece'
     value: ${{ steps.naming.outputs.front_url }}
-  gh_env:  
-    description: "Github actions environment to use for deployment"
-    value: ${{ steps.setenv.outputs.gh_env }} 
-  env_name:  
-    description: "Name of environment to deploy to"
-    value: ${{ steps.naming.outputs.env_name }} 
+  gh_env:
+    description: 'Github actions environment to use for deployment'
+    value: ${{ steps.setenv.outputs.gh_env }}
+  env_name:
+    description: 'Name of environment to deploy to'
+    value: ${{ steps.naming.outputs.env_name }}
 
 runs:
   using: composite
@@ -35,13 +35,13 @@ runs:
               contains(inputs.deploy_to, 'staging') ||
               contains(inputs.deploy_to, 'production') }}; then
           echo "gh_env=production" >> $GITHUB_OUTPUT
-        fi 
+        fi
 
     - name: Set artifact names based on environment
       id: naming
       shell: bash
-      # Follow deployment strategy from 
-      # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments    
+      # Follow deployment strategy from
+      # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments
       run: |
         echo "Set app name based on env strategy"
         if ${{ inputs.deploy_to == 'production' }}; then
@@ -70,17 +70,17 @@ runs:
           echo "function_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
           echo "front_url=app-demo.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=demo" >> $GITHUB_OUTPUT
-        elif  ${{ github.ref == 'refs/heads/main' }}; then
-          # DEV
-          echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
-          echo "front_url=app-dev.k-f.dev" >> $GITHUB_OUTPUT
-          echo "env_name=development" >> $GITHUB_OUTPUT
         elif ${{ inputs.deploy_to == 'ff-prod' }}; then
           # FF-PRODUCTION
           # A build from the DEV env that points to prod
           echo "function_name=${{ inputs.app_base_name }}-ff-production" >> $GITHUB_OUTPUT
           echo "front_url=app-ff-production.k-f.dev" >> $GITHUB_OUTPUT
-          echo "env_name=production" >> $GITHUB_OUTPUT                   
+          echo "env_name=production" >> $GITHUB_OUTPUT 
+        elif  ${{ github.ref == 'refs/heads/main' }}; then
+          # DEV
+          echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
+          echo "front_url=app-dev.k-f.dev" >> $GITHUB_OUTPUT
+          echo "env_name=development" >> $GITHUB_OUTPUT                  
         elif ${{ github.event_name == 'pull_request' }}; then
           # PR
           echo "function_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
@@ -89,7 +89,7 @@ runs:
         else
           echo "::error title=No env to deploy::Workflow called from non-deployable branch/tag"
         fi
-    
+
     - name: debug outputs
       shell: bash
       run: |
@@ -97,4 +97,3 @@ runs:
         echo "App name: ${{ steps.naming.outputs.function_name }}"
         echo "Env name: ${{ steps.naming.outputs.env_name }}"
         echo "GH env: ${{ steps.setenv.outputs.gh_env }}"
-        

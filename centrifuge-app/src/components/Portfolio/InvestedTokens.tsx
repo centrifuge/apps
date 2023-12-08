@@ -1,5 +1,5 @@
-import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
-import { formatBalance, useBalances, useCentrifuge } from '@centrifuge/centrifuge-react'
+import { Price, Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -13,13 +13,13 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
-import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
+import { usePortfolioTokens } from './usePortfolio'
 
 type Row = {
   currency: Token['currency']
@@ -112,37 +112,36 @@ const columns: Column[] = [
 
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function InvestedTokens({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
-  const centBalances = useBalances(address)
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
+  const portfolioTokens = usePortfolioTokens(address)
 
-  const balances = useMemo(() => {
-    return [
-      ...(centBalances?.tranches || []),
-      ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []),
-    ]
-  }, [centBalances, tinlakeBalances])
-
-  const tableData = balances.map((balance) => {
-    const pool = pools?.find((pool) => pool.id === balance.poolId)
-    const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
-    return {
-      currency: balance.currency,
-      poolId: balance.poolId,
-      trancheId: balance.trancheId,
-      position: balance.balance,
-      tokenPrice: tranche?.tokenPrice || Dec(1),
-      marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+  const tokens = [
+    ...portfolioTokens.map((token) => ({
+      ...token,
       canInvestRedeem,
-    }
-  })
+    })),
+    ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []).map((balance) => {
+      const pool = pools?.find((pool) => pool.id === balance.poolId)
+      const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
+      return {
+        position: balance.balance,
+        marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+        tokenPrice: tranche?.tokenPrice || new Price(0),
+        trancheId: balance.trancheId,
+        poolId: balance.poolId,
+        currency: tranche?.currency,
+        canInvestRedeem,
+      }
+    }),
+  ]
 
-  return tableData.length ? (
+  return tokens.length ? (
     <Stack as="article" gap={2}>
       <Text as="h2" variant="heading2">
-        Portfolio
+        Holdings
       </Text>
-      <DataTable columns={columns} data={tableData} />
+      <DataTable columns={columns} data={tokens} defaultSortKey="position" />
     </Stack>
   ) : null
 }
