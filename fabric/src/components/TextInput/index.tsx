@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Flex, IconInfoFailed, IconSearch } from '../..'
+import { Flex, IconSearch } from '../..'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps, InputUnit, InputUnitProps, useContextId } from '../InputBox'
 import { Shelf } from '../Shelf'
@@ -124,9 +124,9 @@ export function TextInputBox(
     <StyledInputBox alignItems="stretch" height="input">
       <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />
       {symbol && (
-        <Box alignSelf="center" pr={1}>
+        <Flex alignSelf="center" pr={1}>
           {symbol}
-        </Box>
+        </Flex>
       )}
       <Flex>{action}</Flex>
     </StyledInputBox>
@@ -147,6 +147,28 @@ export function TextInput({ label, secondaryLabel, disabled, errorMessage, id, .
   )
 }
 
+export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
+  id ??= React.useId()
+  return (
+    <InputUnit
+      id={id}
+      label={label}
+      secondaryLabel={secondaryLabel}
+      disabled={disabled}
+      errorMessage={errorMessage}
+      inputElement={
+        <TextInputBox
+          type="search"
+          disabled={disabled}
+          error={!!errorMessage}
+          symbol={<IconSearch size="iconMedium" color="textPrimary" />}
+          {...inputProps}
+        />
+      }
+    />
+  )
+}
+
 export const TextInput_DEPRECATED: React.FC<TextInputProps_DEPRECATED> = ({
   label,
   secondaryLabel,
@@ -163,49 +185,6 @@ export const TextInput_DEPRECATED: React.FC<TextInputProps_DEPRECATED> = ({
       errorMessage={errorMessage}
       inputElement={<StyledTextInput_DEPRECATED disabled={disabled} {...inputProps} />}
       rightElement={rightElement}
-    />
-  )
-}
-
-const StyledClearButtom = styled.button`
-  background: none;
-  padding: 0;
-  border: none;
-  height: 24px;
-  width: 24px;
-`
-
-export const SearchInput: React.FC<Omit<TextInputProps_DEPRECATED, 'rightElement'> & { clear?: () => void }> = ({
-  label,
-  secondaryLabel,
-  disabled,
-  errorMessage,
-  clear,
-  ...inputProps
-}) => {
-  const ref = React.useRef<HTMLInputElement>(null)
-  return (
-    <InputBox
-      ref={ref}
-      label={label}
-      secondaryLabel={secondaryLabel}
-      disabled={disabled}
-      errorMessage={errorMessage}
-      inputElement={<StyledTextInput type="search" disabled={disabled} {...inputProps} />}
-      rightElement={
-        inputProps.value && clear ? (
-          <StyledClearButtom
-            onClick={() => {
-              clear()
-              ref.current?.focus()
-            }}
-          >
-            <IconInfoFailed color="textPrimary" />
-          </StyledClearButtom>
-        ) : (
-          <IconSearch size="iconMedium" color="textPrimary" />
-        )
-      }
     />
   )
 }
