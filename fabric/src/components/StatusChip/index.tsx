@@ -17,6 +17,7 @@ const colors = {
 
 const Chip = styled(Text)((props) =>
   css({
+    display: 'inline-block',
     px: 1,
     bg: `${props.color}Bg`,
     borderRadius: 'chip',
