@@ -505,8 +505,6 @@ function RedeemForm({ autoFocus }: RedeemFormProps) {
 
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
 
-  console.log('pendingRedeem', pendingRedeem)
-
   const maxRedeemTokens = state.trancheBalanceWithPending
   const maxRedeemCurrency = maxRedeemTokens.mul(state.tokenPrice)
   const tokenSymbol = state.trancheCurrency?.symbol
