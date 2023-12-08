@@ -5,7 +5,7 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { BasePadding, BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
-import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
+import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
 
@@ -18,7 +18,7 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress('substrate')
+  const address = useAddress()
   const theme = useTheme()
 
   if (!address) {
@@ -43,7 +43,7 @@ function Portfolio() {
           <CardPortfolioValue />
         </BasePadding>
         <Box pt={1} px={BASE_PADDING}>
-          <InvestedTokens address={address} />
+          <Holdings address={address} />
         </Box>
         <BasePadding gap={3}>
           <Transactions onlyMostRecent address={address} />

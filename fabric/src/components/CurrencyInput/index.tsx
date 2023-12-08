@@ -152,7 +152,7 @@ export function CurrencyInput({
   currency,
   onSetMax,
   placeholder = '0.0',
-  decimals = 6,
+  decimals = 8,
   onChange,
   onBlur,
   ...inputProps

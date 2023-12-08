@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, Loan, Loan as LoanType, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput_DEPRECATED, Select_DEPRECATED, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -128,7 +128,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
           ) : null}
           <Field name="targetLoan">
             {({ field, meta, form }: FieldProps) => (
-              <Select_DEPRECATED
+              <Select
                 name="targetLoan"
                 label="Settlement asset"
                 onChange={(event) => {
@@ -171,10 +171,10 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
               </Shelf>
             </>
           ) : (
-            <Field name="amount" validate={(val: any) => validate(Dec(val))}>
+            <Field name="amount" validate={(val: any) => validate(Dec(val || 0))}>
               {({ field, meta, form }: FieldProps) => {
                 return (
-                  <CurrencyInput_DEPRECATED
+                  <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Amount"
