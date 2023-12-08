@@ -1,40 +1,12 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { AreaProps, TooltipProps } from 'recharts'
-import { useTheme } from 'styled-components'
+import { TooltipProps } from 'recharts'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 
-type CustomizedXAxisTickProps = {
-  payload?: { value: Date }
-  variant: 'months' | 'days'
-} & Pick<AreaProps, 'x'> &
-  Pick<AreaProps, 'y'>
-
-export const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ payload, x, y, variant }) => {
-  const theme = useTheme()
-  let tick
-  if (variant === 'months') {
-    const formatter = new Intl.DateTimeFormat('en', { month: 'short' })
-    // show month tick only on the first of every month
-    tick = payload?.value && new Date(payload.value).getDate() === 1 ? formatter.format(payload?.value) : null
-  } else {
-    const formatter = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' })
-    tick = formatter.format(payload?.value)
-  }
-
-  return (
-    <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={16} fontSize="10px" fill={theme.colors.textSecondary} textAnchor="center">
-        {tick}
-      </text>
-    </g>
-  )
-}
-
 type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string; precision?: number }
 
-export const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, currency, precision }) => {
+export const CustomizedTooltip: React.FC<CustomizedTooltipProps> = ({ payload, currency, precision }) => {
   if (payload && payload?.length > 0) {
     return (
       <TooltipContainer>

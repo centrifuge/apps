@@ -15,7 +15,7 @@ import { useTheme } from 'styled-components'
 import { PropsOf } from '../../../helpers'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
-import { TooltipContainer, TooltipEntry, TooltipTitle } from './CustomChartElements'
+import { TooltipContainer, TooltipEntry, TooltipTitle } from './Tooltip'
 
 export type StackedBarChartProps = {
   data: {
@@ -49,10 +49,16 @@ export function StackedBarChart({ data, names, colors, currency }: StackedBarCha
             style={axisStyle}
             tickLine={false}
             axisLine={false}
-            interval={0}
             tickMargin={10}
             angle={45}
-            tickFormatter={(tick: number) => formatDate(tick, { year: undefined })}
+            type="category"
+            tickFormatter={(tick: number) => {
+              if (data.length > 180) {
+                return new Date(tick).toLocaleString('en-US', { month: 'short' })
+              }
+              return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
+            }}
+            allowDuplicatedCategory={false}
           />
 
           <YAxis

@@ -1628,7 +1628,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 external: { quantity: borrow.quantity.toString(), settlementPrice: borrow.price.toString() },
               },
         ]
-        const change = api.createType('RuntimeCommonChangesRuntimeChange', { Loan: { TransferDebt: changeArgs } })
+        const change = api.createType('RuntimeCommonChangesRuntimeChange', {
+          Loans: { TransferDebt: changeArgs },
+        })
 
         const tx = api.tx.utility.batchAll([
           api.tx.loans.proposeTransferDebt(poolId, ...changeArgs),

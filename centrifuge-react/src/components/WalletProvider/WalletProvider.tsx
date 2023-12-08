@@ -61,6 +61,7 @@ export type WalletContextType = {
     connectors: EvmConnectorMeta[]
     chains: EvmChains
     selectedWallet: EvmConnectorMeta | null
+    isSmartContractWallet: boolean
     selectedAddress: string | null
     getProvider(chainId: number): JsonRpcProvider
   }
@@ -167,7 +168,7 @@ export function WalletProvider({
           symbol: consts.chainSymbol,
           decimals: consts.chainDecimals,
         },
-        blockExplorerUrl: 'https://etherscan.io/',
+        blockExplorerUrl: 'https://centrifuge.subscan.io/',
       }
     }
     return chains
@@ -235,6 +236,12 @@ export function WalletProvider({
   // )
 
   const [proxies] = useCentrifugeQuery(['allProxies'], (cent) => cent.proxies.getAllProxies())
+
+  function getProvider(chainId: number) {
+    return (
+      cachedProviders[chainId] || (cachedProviders[chainId] = new JsonRpcProvider(evmChains[chainId].urls[0], chainId))
+    )
+  }
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {
     const mappedAccounts = accounts
@@ -355,6 +362,16 @@ export function WalletProvider({
 
   const [scopedNetworks, setScopedNetworks] = React.useState<WalletContextType['scopedNetworks']>(null)
 
+  const { data: isSmartContractWallet } = useQuery(
+    ['isSmartContractWallet', state.evm.accounts?.[0], state.evm.chainId],
+    async () => {
+      const provider = getProvider(state.evm.chainId!)
+      const bytecode = await provider.getCode(state.evm.accounts![0])
+      return !!(bytecode && bytecode.replaceAll('0', '') !== 'x')
+    },
+    { enabled: !!state.evm.accounts?.[0] && !!state.evm.chainId, staleTime: Infinity }
+  )
+
   const ctx: WalletContextType = React.useMemo(() => {
     const combinedProxies = {
       ...proxies,
@@ -462,12 +479,8 @@ export function WalletProvider({
         selectedAddress: state.evm.accounts?.[0] || null,
         connectors: evmConnectors,
         chains: evmChains,
-        getProvider: (chainId: number) => {
-          return (
-            cachedProviders[chainId] ||
-            (cachedProviders[chainId] = new JsonRpcProvider(evmChains[chainId].urls[0], chainId))
-          )
-        },
+        isSmartContractWallet: isSmartContractWallet ?? false,
+        getProvider,
       },
     }
   }, [connect, disconnect, proxies, state, isConnectError, isConnecting])

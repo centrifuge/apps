@@ -1,6 +1,6 @@
 import { CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Card, CurrencyInput_DEPRECATED, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -92,14 +92,12 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
               <Field validate={combine(positiveNumber())} name="faceValue">
                 {({ field, meta, form }: FieldProps) => {
                   return (
-                    <CurrencyInput_DEPRECATED
+                    <CurrencyInput
                       {...field}
                       label="Face value"
                       disabled={isRepayLoading}
                       errorMessage={meta.touched ? meta.error : undefined}
-                      placeholder="0.0"
-                      precision={6}
-                      variant="small"
+                      decimals={8}
                       onChange={(value) => form.setFieldValue('faceValue', value)}
                       currency={pool.currency.symbol}
                     />
@@ -130,16 +128,14 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
               >
                 {({ field, meta, form }: FieldProps) => {
                   return (
-                    <CurrencyInput_DEPRECATED
+                    <CurrencyInput
                       {...field}
-                      variant="small"
                       label="Settlement price"
                       disabled={isRepayLoading}
                       errorMessage={meta.touched ? meta.error : undefined}
                       currency={pool.currency.symbol}
                       onChange={(value) => form.setFieldValue('price', value)}
-                      placeholder="0.0"
-                      precision={6}
+                      decimals={8}
                     />
                   )
                 }}

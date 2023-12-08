@@ -24,7 +24,7 @@ const lightColors = {
   backgroundSecondary: grayScale[100],
   backgroundTertiary: grayScale[50],
   backgroundPage: 'white',
-  backgroundInput: grayScale[50],
+  backgroundInput: 'white',
   backgroundThumbnail: grayScale[600],
   backgroundInverted: grayScale[900],
 

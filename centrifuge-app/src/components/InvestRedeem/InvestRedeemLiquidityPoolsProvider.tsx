@@ -1,5 +1,11 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useEvmNativeBalance, useEvmNativeCurrency, useEvmProvider } from '@centrifuge/centrifuge-react'
+import {
+  useCentrifuge,
+  useEvmNativeBalance,
+  useEvmNativeCurrency,
+  useEvmProvider,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -14,6 +20,9 @@ import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as P
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
+  const {
+    evm: { isSmartContractWallet },
+  } = useWallet()
 
   const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
   const evmNativeCurrency = useEvmNativeCurrency()
@@ -115,6 +124,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     }, [pendingTransaction?.status])
   }
 
+  const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet
+
   const state: InvestRedeemState = {
     poolId,
     trancheId,
@@ -155,7 +166,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     collectType,
     needsToCollectBeforeOrder: true,
     needsPoolCurrencyApproval: (amount) =>
-      lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !lpInvest.currencySupportsPermit : false,
+      lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
     needsTrancheTokenApproval: () => false,
     canChangeOrder: false,
     canCancelOrder: true,
@@ -170,11 +181,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       if (!lpInvest) return
       // If the last tx was an approve, we may not have refetched the allowance yet,
       // so assume the allowance is enough to do a normal invest
-      if (
-        lpInvest.lpCurrencyAllowance.lt(newOrder) &&
-        lpInvest.currencySupportsPermit &&
-        pendingAction !== 'approvePoolCurrency'
-      ) {
+      if (lpInvest.lpCurrencyAllowance.lt(newOrder) && supportsPermits && pendingAction !== 'approvePoolCurrency') {
         const signer = provider!.getSigner()
         const connectedCent = cent.connectEvm(evmAddress!, signer)
         const permit = await connectedCent.liquidityPools.signPermit([
