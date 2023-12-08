@@ -6,9 +6,9 @@ import { firstValueFrom } from 'rxjs'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
-import { DAO, DAOs } from '../../config'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { DAO, useDAOConfig } from '../../utils/useDAOConfig'
 import { useFilters } from '../../utils/useFilters'
 import { useSubquery } from '../../utils/useSubquery'
 
@@ -55,13 +55,15 @@ function DaoPortfoliosTable() {
   const utils = useCentrifugeUtils()
   const cent = useCentrifuge()
   const getNetworkName = useGetNetworkName()
+  const { data: daoData } = useDAOConfig()
 
-  const daos = DAOs.map((dao) => ({
-    ...dao,
-    address: utils.formatAddress(
-      typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
-    ),
-  }))
+  const daos =
+    daoData?.map((dao) => ({
+      ...dao,
+      address: utils.formatAddress(
+        typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
+      ),
+    })) || []
 
   // TODO: Update to use new portfolio Runtime API
   const { data, isLoading: isPortfoliosLoading } = useQuery(['daoPortfolios', daos.map((dao) => dao.address)], () =>
@@ -130,7 +132,7 @@ function DaoPortfoliosTable() {
       header: 'DAO',
       cell: (row: Row) => (
         <Shelf gap={1}>
-          <Box as="img" src={row.icon} alt={row.name} width="iconSmall" height="iconSmall" borderRadius="50%" />
+          <Box as="img" src={row.logo} alt={row.name} width="iconSmall" height="iconSmall" borderRadius="50%" />
           <Text>{row.name}</Text>
         </Shelf>
       ),

@@ -26,7 +26,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps, showPortfolio, showPrime } = useDebugFlags()
+  const { showSwaps, showPrime } = useDebugFlags()
 
   return (
     <Shelf
@@ -48,14 +48,14 @@ export function Menu() {
         </PageLink>
       )}
 
-      {showPortfolio && address && (
+      {address && (
         <PageLink to="/portfolio" stacked={!isLarge}>
           <IconPieChart />
           Portfolio
         </PageLink>
       )}
 
-      {showPortfolio && address && (
+      {address && (
         <PageLink to="/history" stacked={!isLarge}>
           <IconClock />
           History

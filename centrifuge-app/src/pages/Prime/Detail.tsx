@@ -8,7 +8,7 @@ import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { Resolutions } from '../../components/Resolutions'
 import { RouterTextLink } from '../../components/TextLink'
-import { DAOs } from '../../config'
+import { useDAOConfig } from '../../utils/useDAOConfig'
 
 export default function PrimeDetailPage() {
   return (
@@ -20,14 +20,16 @@ export default function PrimeDetailPage() {
 
 function PrimeDetail() {
   const { dao: daoSlug } = useParams<{ dao: string }>()
-  const dao = DAOs.find((d) => d.slug === daoSlug)
+  const { data: DAOs, isLoading } = useDAOConfig()
+  const dao = DAOs?.find((d) => d.slug === daoSlug)
   const utils = useCentrifugeUtils()
-  if (!dao) throw new Error('DAO not found')
-  const centAddress = utils.formatAddress(
-    typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
-  )
+  const centAddress =
+    dao &&
+    utils.formatAddress(
+      typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
+    )
 
-  return (
+  return !isLoading && dao && centAddress ? (
     <>
       <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5}>
         <Text variant="body3">
@@ -36,18 +38,18 @@ function PrimeDetail() {
               Prime
             </RouterTextLink>
           </Text>{' '}
-          / {dao.name} DAO Investments
+          / {dao.name} Investments
         </Text>
         <Shelf gap={2}>
-          <Box as="img" src={dao.icon} alt={dao.name} width="iconRegular" height="iconRegular" borderRadius="50%" />
-          <Text variant="heading1">{dao.name} DAO Investments</Text>
+          <Box as="img" src={dao.logo} alt={dao.name} width="iconRegular" height="iconRegular" borderRadius="50%" />
+          <Text variant="heading1">{dao.name} Investments</Text>
         </Shelf>
       </LayoutSection>
       <BasePadding gap={3}>
         <Holdings address={centAddress} />
         <Transactions onlyMostRecent address={centAddress} />
-        <Resolutions />
+        <Resolutions dao={dao} />
       </BasePadding>
     </>
-  )
+  ) : null
 }

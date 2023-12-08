@@ -44,7 +44,6 @@ export type Key =
   | 'editAdminConfig'
   | 'showPodAccountCreation'
   | 'convertAddress'
-  | 'showPortfolio'
   | 'showTestNets'
   | 'showSwaps'
   | 'showPrime'
@@ -113,10 +112,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     Component: ConvertAddress,
     default: null,
     alwaysShow: true,
-  },
-  showPortfolio: {
-    type: 'checkbox',
-    default: false,
   },
   showSwaps: {
     type: 'checkbox',
