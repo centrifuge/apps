@@ -1,19 +1,26 @@
-import { altairYellow, blueScale, centrifugeBlue, grayScale } from './colors'
+import { blueScale, centrifugeBlue, grayScale } from './colors'
 
-const statusDefault = grayScale[600]
-const statusInfo = '#006ef5'
-const statusOk = '#5da01d'
-const statusWarning = '#a86500'
+const statusDefault = grayScale[800]
+const statusInfo = '#1253ff'
+const statusOk = '#519b10'
+const statusWarning = '#ffc012'
 const statusCritical = '#d43f2b'
+
+const statusDefaultBg = `${grayScale[800]}14`
+const statusInfoBg = '#1253ff14'
+const statusOkBg = '#519b1014'
+const statusWarningBg = '#ffc01214'
+const statusCriticalBg = '#d43f2b14'
 
 const lightColors = {
   textPrimary: 'black',
-  textSecondary: grayScale[700],
-  textDisabled: grayScale[500],
+  textSecondary: grayScale[800],
+  textDisabled: grayScale[400],
   textInverted: 'white',
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
+  backgroundTertiary: grayScale[50],
   backgroundPage: 'white',
   backgroundInput: grayScale[50],
   backgroundThumbnail: grayScale[600],
@@ -27,28 +34,33 @@ const lightColors = {
   statusOk,
   statusWarning,
   statusCritical,
+  statusDefaultBg,
+  statusInfoBg,
+  statusOkBg,
+  statusWarningBg,
+  statusCriticalBg,
 
-  backgroundButtonPrimary: altairYellow,
-  backgroundButtonPrimaryFocus: altairYellow,
+  backgroundButtonPrimary: centrifugeBlue,
+  backgroundButtonPrimaryFocus: centrifugeBlue,
   backgroundButtonPrimaryHover: 'black',
   backgroundButtonPrimaryPressed: 'black',
   backgroundButtonPrimaryDisabled: grayScale[600],
-  textButtonPrimary: 'black',
-  textButtonPrimaryFocus: 'black',
+  textButtonPrimary: 'white',
+  textButtonPrimaryFocus: 'white',
   textButtonPrimaryHover: 'white',
   textButtonPrimaryPressed: 'white',
   textButtonPrimaryDisabled: 'white',
-  borderButtonPrimary: altairYellow,
+  borderButtonPrimary: centrifugeBlue,
   borderButtonPrimaryFocus: 'black',
   borderButtonPrimaryHover: 'black',
   borderButtonPrimaryPressed: 'black',
   borderButtonPrimaryDisabled: grayScale[600],
-  shadowButtonPrimaryPressed: altairYellow,
+  shadowButtonPrimaryPressed: centrifugeBlue,
 
   backgroundButtonSecondary: 'transparent',
   backgroundButtonSecondaryFocus: 'transparent',
-  backgroundButtonSecondaryHover: 'white',
-  backgroundButtonSecondaryPressed: 'white',
+  backgroundButtonSecondaryHover: 'transparent',
+  backgroundButtonSecondaryPressed: 'transparent',
   backgroundButtonSecondaryDisabled: 'transparent',
   textButtonSecondary: 'black',
   textButtonSecondaryFocus: 'black',

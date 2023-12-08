@@ -1,6 +1,6 @@
 import { CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, CurrencyInput_DEPRECATED, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -92,7 +92,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
               <Field validate={combine(positiveNumber())} name="faceValue">
                 {({ field, meta, form }: FieldProps) => {
                   return (
-                    <CurrencyInput
+                    <CurrencyInput_DEPRECATED
                       {...field}
                       label="Face value"
                       disabled={isRepayLoading}
@@ -130,7 +130,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
               >
                 {({ field, meta, form }: FieldProps) => {
                   return (
-                    <CurrencyInput
+                    <CurrencyInput_DEPRECATED
                       {...field}
                       variant="small"
                       label="Settlement price"

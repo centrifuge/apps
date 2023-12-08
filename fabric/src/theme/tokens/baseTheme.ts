@@ -15,11 +15,14 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     iconMedium: 24,
     iconRegular: 32,
     iconLarge: 40,
+    input: 40,
   },
   radii: {
     tooltip: 4,
     card: 8,
-    input: 10,
+    input: 2,
+    button: 4,
+    chip: 4,
   },
   fonts: {
     standard: 'Inter, sans-serif',

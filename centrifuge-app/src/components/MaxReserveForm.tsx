@@ -1,6 +1,6 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput_DEPRECATED, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import { useSuitableAccounts } from '../utils/usePermissions'
 import { usePool } from '../utils/usePools'
@@ -46,9 +46,8 @@ export function MaxReserveForm({ poolId }: Props) {
           <Stack gap="2">
             <Field name="maxReserve">
               {({ field, meta, form }: FieldProps) => (
-                <CurrencyInput
+                <CurrencyInput_DEPRECATED
                   {...field}
-                  initialValue={form.values.maxReserve || undefined}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={pool?.currency.symbol}

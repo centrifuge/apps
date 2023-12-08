@@ -19,7 +19,6 @@ import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
-import { useElementScrollSize } from '../utils/useElementScrollSize'
 import { FiltersState } from '../utils/useFilters'
 import { FilterButton } from './FilterButton'
 import { QuickAction } from './QuickAction'
@@ -106,8 +105,6 @@ export const DataTable = <T extends Record<string, any>>({
   )
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
-  const ref = React.useRef(null)
-  const { scrollWidth } = useElementScrollSize(ref)
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
@@ -126,14 +123,7 @@ export const DataTable = <T extends Record<string, any>>({
   const templateColumns = `[start] ${columns.map((col) => col.width ?? 'minmax(min-content, 1fr)').join(' ')} [end]`
 
   return (
-    <TableGrid
-      gridTemplateColumns={templateColumns}
-      gridAutoRows="auto"
-      gap={0}
-      rowGap={0}
-      ref={ref}
-      minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}
-    >
+    <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0}>
       {showHeader && (
         <HeaderRow>
           {columns.map((col, i) => (

@@ -21,7 +21,6 @@ const lightTheme: DefaultTheme = {
   ...centrifugeLight,
   sizes: {
     ...centrifugeLight.sizes,
-    container: '100%',
   },
   colors: {
     ...centrifugeLight.colors,
@@ -41,7 +40,6 @@ const darkTheme: DefaultTheme = {
   ...altairDark,
   sizes: {
     ...altairDark.sizes,
-    container: '100%',
   },
   colors: {
     ...altairDark.colors,

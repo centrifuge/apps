@@ -1,4 +1,4 @@
-import { Box, Button, Select, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Select_DEPRECATED, TextInput_DEPRECATED } from '@centrifuge/fabric'
 import { FormikProps } from 'formik'
 import * as React from 'react'
 import {
@@ -38,7 +38,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
   const renderRegionCodeSelect = () => {
     if (formik.values.jurisdictionCode === 'us') {
       return (
-        <Select
+        <Select_DEPRECATED
           {...formik.getFieldProps('regionCode')}
           label="State of incorporation"
           placeholder="Select a state"
@@ -51,7 +51,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
 
     if (formik.values.jurisdictionCode === 'ca') {
       return (
-        <Select
+        <Select_DEPRECATED
           {...formik.getFieldProps('regionCode')}
           label="Province of incorporation"
           placeholder="Select a province"
@@ -81,7 +81,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
 
         <Fieldset>
           <Box position="relative">
-            <TextInput
+            <TextInput_DEPRECATED
               {...formik.getFieldProps('email')}
               label="Email address"
               placeholder="Enter email address"
@@ -91,7 +91,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
             {!isCompleted && !isPendingManualKybReview && <ValidEmailTooltip />}
           </Box>
 
-          <TextInput
+          <TextInput_DEPRECATED
             {...formik.getFieldProps('businessName')}
             label="Legal entity name"
             placeholder="Enter entity name"
@@ -99,7 +99,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
             errorMessage={formik.touched.businessName ? formik.errors.businessName : undefined}
           />
 
-          <Select
+          <Select_DEPRECATED
             {...formik.getFieldProps('jurisdictionCode')}
             label="Country of incorporation"
             placeholder="Select a country"
@@ -118,7 +118,7 @@ export const BusinessInformation = ({ formik, isLoading, isError }: Props) => {
           />
           {renderRegionCodeSelect()}
 
-          <TextInput
+          <TextInput_DEPRECATED
             {...formik.getFieldProps('registrationNumber')}
             label="Registration number"
             placeholder="0000"

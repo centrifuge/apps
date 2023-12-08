@@ -9,8 +9,8 @@ export const ButtonGroup = styled(Shelf)<{ variant?: 'large' | 'small' | 'toolba
 )
 
 ButtonGroup.defaultProps = {
-  justifyContent: ['center', 'flex-end'],
-  variant: 'large',
+  justifyContent: ['center', 'flex-start'],
+  variant: 'small',
   rowGap: 1,
   flexWrap: 'wrap',
 }

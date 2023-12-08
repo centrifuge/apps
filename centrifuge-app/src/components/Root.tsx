@@ -114,7 +114,7 @@ const evmChains = {
       decimals: 18,
     },
     blockExplorerUrl: 'https://goerli.arbiscan.io/',
-    urls: ['https://arbitrum-goerli.infura.io/v3/${infuraKey}'],
+    urls: [`https://arbitrum-goerli.infura.io/v3/${infuraKey}`],
     iconUrl: arbitrumLogo,
   },
 }
@@ -210,6 +210,7 @@ const routes: RouteProps[] = [
   { path: '/pools/tokens', component: TokenOverviewPage },
   { path: '/pools/:pid', component: PoolDetailPage },
   { path: '/pools', component: PoolsPage },
+  { path: '/history/:address', component: TransactionHistoryPage },
   { path: '/history', component: TransactionHistoryPage },
   { path: '/portfolio', component: PortfolioPage },
   { path: '/prime/:dao', component: PrimeDetailPage },

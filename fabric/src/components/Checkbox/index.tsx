@@ -96,6 +96,7 @@ const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
     content: '.';
     width: 0;
     visibility: hidden;
+    align-self: center;
   }
 `
 

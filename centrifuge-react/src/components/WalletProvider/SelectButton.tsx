@@ -1,4 +1,4 @@
-import { Box, FabricTheme, Shelf, Spinner, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Spinner, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import type { State } from './types'
@@ -157,7 +157,7 @@ function FallbackLogo() {
 
 export type NetworkIconProps = {
   network: Exclude<State['walletDialog']['network'], null>
-  size?: FabricTheme['sizes']['iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge']
+  size?: string | number
   disabled?: boolean
 }
 

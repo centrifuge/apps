@@ -14,6 +14,7 @@ const darkColors = {
 
   backgroundPrimary: 'black',
   backgroundSecondary: grayScale[900],
+  backgroundTertiary: grayScale[950],
   backgroundPage: 'black',
   backgroundInput: grayScale[950],
   backgroundThumbnail: grayScale[400],
@@ -27,6 +28,11 @@ const darkColors = {
   statusOk,
   statusWarning,
   statusCritical,
+  statusDefaultBg: 'transparent',
+  statusInfoBg: 'transparent',
+  statusOkBg: 'transparent',
+  statusWarningBg: 'transparent',
+  statusCriticalBg: 'transparent',
 
   backgroundButtonPrimary: altairYellow,
   backgroundButtonPrimaryFocus: altairYellow,
