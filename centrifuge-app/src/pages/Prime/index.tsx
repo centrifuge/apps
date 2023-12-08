@@ -147,7 +147,7 @@ function DaoPortfoliosTable() {
           options={Object.fromEntries(uniqueNetworks.map((chain) => [chain, getNetworkName(chain)]))}
         />
       ),
-      cell: (row: Row) => <Text>{row.networkName}</Text>,
+      cell: (row: Row) => <Text>{row.network}</Text>,
     },
     {
       header: <SortableTableHeader label="Portfolio value" />,
