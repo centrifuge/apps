@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
 import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
-import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
+import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { Resolutions } from '../../components/Resolutions'
 import { RouterTextLink } from '../../components/TextLink'
@@ -44,7 +44,7 @@ function PrimeDetail() {
         </Shelf>
       </LayoutSection>
       <BasePadding gap={3}>
-        <InvestedTokens address={centAddress} />
+        <Holdings address={centAddress} />
         <Transactions onlyMostRecent address={centAddress} />
         <Resolutions />
       </BasePadding>
