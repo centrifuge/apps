@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput_DEPRECATED, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -110,7 +110,7 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
             >
               {({ field, meta, form }: FieldProps) => {
                 return (
-                  <CurrencyInput
+                  <CurrencyInput_DEPRECATED
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Amount"

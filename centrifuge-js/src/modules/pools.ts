@@ -1628,7 +1628,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 external: { quantity: borrow.quantity.toString(), settlementPrice: borrow.price.toString() },
               },
         ]
-        const change = api.createType('RuntimeCommonChangesRuntimeChange', { Loan: { TransferDebt: changeArgs } })
+        const change = api.createType('RuntimeCommonChangesRuntimeChange', {
+          Loans: { TransferDebt: changeArgs },
+        })
 
         const tx = api.tx.utility.batchAll([
           api.tx.loans.proposeTransferDebt(poolId, ...changeArgs),
@@ -2181,7 +2183,8 @@ export function getPoolsModule(inst: Centrifuge) {
     `,
       {
         address,
-      }
+      },
+      false
     )
 
     return $query.pipe(
@@ -2250,7 +2253,8 @@ export function getPoolsModule(inst: Centrifuge) {
         trancheId,
         from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
         to: to ? to.toISOString() : new Date().toISOString(),
-      }
+      },
+      false
     )
 
     return combineLatest([$query, getPoolCurrency([poolId])]).pipe(

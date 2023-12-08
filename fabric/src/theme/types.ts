@@ -4,7 +4,7 @@ type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
 
 // Colors
 
-type StatusColorName = `status${Status}`
+type StatusColorName = `status${Status}` | `status${Status}Bg`
 
 type AccentColorName =
   | `accent${'Primary' | 'Secondary'}`
@@ -17,7 +17,7 @@ type AccentColorName =
   | 'textInteractiveHover'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled' | 'Inverted'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
-type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input' | 'Thumbnail'}`
+type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Tertiary' | 'Page' | 'Input' | 'Thumbnail'}`
 type ButtonColorName =
   | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary'}${
       | ''
@@ -55,14 +55,14 @@ export type ThemeBreakpoints = BreakpointValue[] & {
   [k in BreakpointName]: BreakpointValue
 }
 
-type SizeName = 'dialog' | 'drawer' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge'
-type SizeValue = string | number
+type SizeName = 'dialog' | 'drawer' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge' | 'input'
+type SizeValue = number
 
 type ThemeSizes = {
   [k in SizeName]: SizeValue
 }
 
-type RadiusName = 'card' | 'input' | 'tooltip'
+type RadiusName = 'card' | 'input' | 'tooltip' | 'button' | 'chip'
 type RadiusValue = number
 
 type ThemeRadii = {

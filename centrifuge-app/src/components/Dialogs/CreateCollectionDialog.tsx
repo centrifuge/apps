@@ -16,7 +16,7 @@ import {
   Stack,
   Text,
   TextAreaInput,
-  TextInput,
+  TextInput_DEPRECATED,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Redirect } from 'react-router'
@@ -127,7 +127,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
         <ConnectionGuard networks={['centrifuge']}>
           <form onSubmit={execute}>
             <Stack gap={3}>
-              <TextInput
+              <TextInput_DEPRECATED
                 label="Name"
                 value={name}
                 maxLength={collectionMetadataSchema.name.maxLength}

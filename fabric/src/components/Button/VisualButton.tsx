@@ -57,7 +57,6 @@ export const StyledButton = styled.span<StyledProps>(
     gridTemplateRows: 'auto',
     gridTemplateAreas: "'unit'",
     cursor: 'pointer',
-    borderRadius: 40,
     transitionProperty: 'color, background-color, border-color, box-shadow',
     transitionDuration: '150ms',
     transitionTimingFunction: 'ease-in-out',
@@ -99,6 +98,7 @@ export const StyledButton = styled.span<StyledProps>(
         ? borderHover
         : border,
       borderWidth: 1,
+      borderRadius: $variant === 'wallet' ? 40 : 4,
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
       '--fabric-color-focus': theme.colors[shadow],

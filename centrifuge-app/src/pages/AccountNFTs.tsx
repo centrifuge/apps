@@ -1,11 +1,11 @@
 import { useCentrifuge, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { LayoutBase } from '../components/LayoutBase'
 import { NFTCard } from '../components/NFTCard'
 import { OnboardingStatus } from '../components/OnboardingStatus'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useAddress } from '../utils/useAddress'
 import { useCollections } from '../utils/useCollections'
@@ -13,9 +13,9 @@ import { useAccountNfts } from '../utils/useNFTs'
 
 export default function AccountNFTsPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <AccountNFTs />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 

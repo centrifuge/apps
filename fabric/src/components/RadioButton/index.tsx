@@ -53,6 +53,7 @@ const StyledWrapper = styled(Flex)`
     content: '.';
     width: 0;
     visibility: hidden;
+    align-self: center;
   }
 `
 

@@ -1,5 +1,5 @@
 import { addressToHex } from '@centrifuge/centrifuge-js'
-import { Box, Button, IconMinusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconMinusCircle, Select_DEPRECATED, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { ErrorMessage, Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import { DataTable } from '../../../components/DataTable'
@@ -85,7 +85,7 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
                 <Box maxWidth={150}>
                   <Field name="adminMultisig.threshold" validate={min(2, 'Multisig needs at least two signers')}>
                     {({ field, form }: FieldProps) => (
-                      <Select
+                      <Select_DEPRECATED
                         name="adminMultisig.threshold"
                         onChange={(event) => form.setFieldValue('adminMultisig.threshold', Number(event.target.value))}
                         onBlur={field.onBlur}
