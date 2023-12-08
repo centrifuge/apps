@@ -169,14 +169,16 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
             <AssetSummary
               loan={loan}
               data={[
-                ...(templateMetadata?.keyAttributes
-                  ?.filter((key) => templateMetadata?.attributes?.[key].public)
-                  .map((key) => ({
-                    label: templateMetadata?.attributes?.[key].label,
-                    value: isValidDate(nftMetadata?.properties[key])
-                      ? formatDate(nftMetadata?.properties[key])
-                      : nftMetadata?.properties[key],
-                  })) || []),
+                ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
+                  ? templateMetadata?.keyAttributes
+                      ?.filter((key) => templateMetadata?.attributes?.[key].public)
+                      .map((key) => ({
+                        label: templateMetadata?.attributes?.[key].label,
+                        value: isValidDate(nftMetadata?.properties[key])
+                          ? formatDate(nftMetadata?.properties[key])
+                          : nftMetadata?.properties[key],
+                      })) || []
+                  : []),
                 ...(loan.pricing.maturityDate
                   ? [
                       {
@@ -208,6 +210,7 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                     <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
                   ) : (
                     <FinancingRepayment
+                      isCashValuationMethod={loan.pricing.valuationMethod === 'cash'}
                       drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
                       closingDate={null}
                       outstandingPrincipal={formatBalance(

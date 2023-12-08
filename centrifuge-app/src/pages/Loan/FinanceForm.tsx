@@ -85,7 +85,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   return (
     <Stack as={Card} gap={2} p={2}>
       <Stack>
-        {'valuationMethod' in loan.pricing && (
+        {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
             {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}

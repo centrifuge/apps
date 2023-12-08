@@ -30,6 +30,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
               { value: 'discountedCashFlow', label: 'Discounted cashflow' },
               { value: 'outstandingDebt', label: 'Outstanding debt' },
               { value: 'oracle', label: 'Oracle' },
+              { value: 'cash', label: 'Cash' },
             ]}
             placeholder="Choose valuation method"
           />
@@ -102,14 +103,16 @@ export function PricingInput({ poolId }: { poolId: string }) {
           </Field>
         </>
       )}
-      <FieldWithErrorMessage
-        as={NumberInput}
-        label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
-        placeholder="0.00"
-        rightElement="%"
-        name="pricing.interestRate"
-        validate={combine(required(), nonNegativeNumber(), max(100))}
-      />
+      {values.pricing.valuationMethod !== 'cash' && (
+        <FieldWithErrorMessage
+          as={NumberInput}
+          label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
+          placeholder="0.00"
+          rightElement="%"
+          name="pricing.interestRate"
+          validate={combine(required(), nonNegativeNumber(), max(100))}
+        />
+      )}
       <FieldWithErrorMessage
         as={DateInput}
         validate={validate.maturityDate}

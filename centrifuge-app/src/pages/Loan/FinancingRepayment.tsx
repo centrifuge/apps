@@ -9,6 +9,7 @@ export const FinancingRepayment: React.FC<{
   repaidPrincipal: string
   repaidInterest: string
   repaidUnscheduled: string | null
+  isCashValuationMethod: boolean
 }> = ({
   drawDownDate,
   closingDate,
@@ -17,15 +18,16 @@ export const FinancingRepayment: React.FC<{
   repaidPrincipal,
   repaidInterest,
   repaidUnscheduled,
+  isCashValuationMethod,
 }) => {
   return (
     <>
       {!!drawDownDate && <LabelValueStack label="1st drawdown date" value={drawDownDate} />}
       {!!closingDate && <LabelValueStack label="Date closed" value={closingDate} />}
       <LabelValueStack label="Principal outstanding" value={outstandingPrincipal} />
-      <LabelValueStack label="Interest outstanding" value={outstandingInterest} />
+      {!isCashValuationMethod && <LabelValueStack label="Interest outstanding" value={outstandingInterest} />}
       <LabelValueStack label="Principal paid" value={repaidPrincipal} />
-      <LabelValueStack label="Interest paid" value={repaidInterest} />
+      {!isCashValuationMethod && <LabelValueStack label="Interest paid" value={repaidInterest} />}
       {!!repaidUnscheduled && <LabelValueStack label="Unscheduled repayments" value={repaidUnscheduled} />}
     </>
   )
