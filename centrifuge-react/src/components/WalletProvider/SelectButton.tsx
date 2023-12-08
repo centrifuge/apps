@@ -1,4 +1,4 @@
-import { Box, Shelf, Spinner, Text } from '@centrifuge/fabric'
+import { BetaChip, Box, Shelf, Spinner, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import type { State } from './types'
@@ -10,6 +10,7 @@ type SelectButtonProps = {
   href?: string
   disabled?: boolean
   muted?: boolean
+  beta?: boolean
   loading?: boolean
   logo?: React.ReactNode
   children: React.ReactNode
@@ -53,10 +54,11 @@ export function SelectButton({
       disabled={disabled}
       p={2}
       border={0}
-      borderRadius="input"
+      borderRadius="10px"
       textAlign="center"
       backgroundColor={active ? 'backgroundSecondary' : 'backgroundPrimary'}
       muted={muted}
+      position="relative"
     >
       <Content {...restProps} />
     </Root>
@@ -76,10 +78,11 @@ export function SelectAnchor({
       href={href}
       target="_blank"
       p={2}
-      borderRadius="input"
+      borderRadius="10px"
       disabled={disabled}
       backgroundColor={active ? 'backgroundSecondary' : 'backgroundPrimary'}
       muted={muted}
+      position="relative"
     >
       <Content {...restProps} />
     </Root>
@@ -122,13 +125,12 @@ export function Logo({
   return <Icon size={size} />
 }
 
-function Content({ loading = false, logo, children, iconRight }: SelectButtonProps) {
+function Content({ loading, beta, logo, children, iconRight }: SelectButtonProps) {
   const { sizes } = useTheme()
 
   return (
     <>
       {loading ? <Spinner size={sizes.iconRegular} /> : logo ? logo : <FallbackLogo />}
-
       {!iconRight ? (
         <Label>{children}</Label>
       ) : (
@@ -136,6 +138,11 @@ function Content({ loading = false, logo, children, iconRight }: SelectButtonPro
           <Label>{children}</Label>
           {iconRight}
         </Shelf>
+      )}
+      {beta && (
+        <Box position="absolute" right={1} top={1}>
+          <BetaChip />
+        </Box>
       )}
     </>
   )

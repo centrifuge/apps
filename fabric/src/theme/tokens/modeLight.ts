@@ -5,12 +5,14 @@ const statusInfo = '#1253ff'
 const statusOk = '#519b10'
 const statusWarning = '#ffc012'
 const statusCritical = '#d43f2b'
+const statusPromote = '#f81071'
 
 const statusDefaultBg = `${grayScale[800]}14`
 const statusInfoBg = '#1253ff14'
 const statusOkBg = '#519b1014'
 const statusWarningBg = '#ffc01214'
 const statusCriticalBg = '#d43f2b14'
+const statusPromoteBg = '#f8107114'
 
 const lightColors = {
   textPrimary: 'black',
@@ -34,11 +36,13 @@ const lightColors = {
   statusOk,
   statusWarning,
   statusCritical,
+  statusPromote,
   statusDefaultBg,
   statusInfoBg,
   statusOkBg,
   statusWarningBg,
   statusCriticalBg,
+  statusPromoteBg,
 
   backgroundButtonPrimary: centrifugeBlue,
   backgroundButtonPrimaryFocus: centrifugeBlue,
