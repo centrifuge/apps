@@ -61,7 +61,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
     substrate: { evmChainId },
   } = ctx
 
-  const betaChains = [8453, 84531, 42161, 421613] // Base and Arbitrum
+  const betaChains = [8453, 84531, 42161, 421613, 42220, 44787] // Base, Arbitrum and Celo
 
   const getNetworkName = useGetNetworkName()
 
