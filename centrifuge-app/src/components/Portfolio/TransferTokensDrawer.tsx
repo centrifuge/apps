@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   CurrencyInput,
+  Drawer,
   IconButton,
   IconCopy,
   Shelf,
@@ -32,13 +33,16 @@ import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
 
-type CFGHoldingsProps = {
+type TransferTokensProps = {
   address: string
+  onClose: () => void
+  isOpen: boolean
+  defaultView?: 'send' | 'receive'
 }
 
-export const TransferTokens = ({ address }: CFGHoldingsProps) => {
+export const TransferTokensDrawer = ({ address, onClose, isOpen, defaultView }: TransferTokensProps) => {
   const centBalances = useBalances(address)
-  const [activeTab, setActiveTab] = React.useState(0)
+  const [activeTab, setActiveTab] = React.useState(defaultView === 'send' ? 0 : 1)
   const CFGPrice = useCFGTokenPrice()
   const isPortfolioPage = useRouteMatch('/portfolio')
   const { search } = useLocation()
@@ -55,54 +59,56 @@ export const TransferTokens = ({ address }: CFGHoldingsProps) => {
   const tokenPrice = isNativeTransfer ? CFGPrice : 1
 
   return (
-    <Stack gap={3}>
-      <Text textAlign="center" variant="heading2">
-        {transferCurrencySymbol || 'CFG'} Holdings
-      </Text>
-      <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
-        <LabelValueStack
-          label="Position"
-          value={formatBalanceAbbreviated(currency?.balance || 0, currency?.currency.symbol, 2)}
-        />
-        <LabelValueStack
-          label="Value"
-          value={formatBalanceAbbreviated(currency?.balance.toDecimal().mul(tokenPrice || 0) || 0, 'USD', 2)}
-        />
-        <LabelValueStack
-          label={
-            isNativeTransfer ? (
-              <Tooltips type="cfgPrice" label={`${currency?.currency.symbol || 'CFG'} Price`} />
+    <Drawer isOpen={isOpen} onClose={onClose}>
+      <Stack gap={3}>
+        <Text textAlign="center" variant="heading2">
+          {transferCurrencySymbol || 'CFG'} Holdings
+        </Text>
+        <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
+          <LabelValueStack
+            label="Position"
+            value={formatBalanceAbbreviated(currency?.balance || 0, currency?.currency.symbol, 2)}
+          />
+          <LabelValueStack
+            label="Value"
+            value={formatBalanceAbbreviated(currency?.balance.toDecimal().mul(tokenPrice || 0) || 0, 'USD', 2)}
+          />
+          <LabelValueStack
+            label={
+              isNativeTransfer ? (
+                <Tooltips type="cfgPrice" label={`${currency?.currency.symbol || 'CFG'} Price`} />
+              ) : (
+                'Price'
+              )
+            }
+            value={formatBalance(tokenPrice || 0, 'USD', 4)}
+          />
+        </Shelf>
+        {isPortfolioPage && (
+          <Stack>
+            <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
+              <TabsItem>Send</TabsItem>
+              <TabsItem>Receive</TabsItem>
+            </Tabs>
+            {activeTab === 0 ? (
+              <SendToken address={address} currency={currency as SendReceiveProps['currency']} />
             ) : (
-              'Price'
-            )
-          }
-          value={formatBalance(tokenPrice || 0, 'USD', 4)}
-        />
-      </Shelf>
-      {isPortfolioPage && (
-        <Stack>
-          <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
-            <TabsItem>Send</TabsItem>
-            <TabsItem>Receive</TabsItem>
-          </Tabs>
-          {activeTab === 0 ? (
-            <SendToken address={address} currency={currency as SendReceiveProps['currency']} />
-          ) : (
-            <ReceiveToken address={address} currency={currency as SendReceiveProps['currency']} />
-          )}
-        </Stack>
-      )}
-      {isNativeTransfer && (
-        <Stack gap={12}>
-          <Text variant="heading6" color="textPrimary" fontWeight={600}>
-            Price
-          </Text>
-          <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
-            <CFGPriceChart />
-          </Box>
-        </Stack>
-      )}
-    </Stack>
+              <ReceiveToken address={address} currency={currency as SendReceiveProps['currency']} />
+            )}
+          </Stack>
+        )}
+        {isNativeTransfer && (
+          <Stack gap={12}>
+            <Text variant="heading6" color="textPrimary" fontWeight={600}>
+              Price
+            </Text>
+            <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
+              <CFGPriceChart />
+            </Box>
+          </Stack>
+        )}
+      </Stack>
+    </Drawer>
   )
 }
 
