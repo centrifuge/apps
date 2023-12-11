@@ -3,7 +3,7 @@ import * as React from 'react'
 
 export type GroupBy = 'day' | 'month'
 
-export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'borrower-tx'
+export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'borrower-tx' | 'holders'
 
 export type ReportContextType = {
   csvData?: CsvDataProps

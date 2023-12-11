@@ -1,6 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 
 type ReportFilterProps = {
@@ -23,9 +24,12 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     setActiveTranche,
   } = React.useContext(ReportContext)
 
+  const { holdersReport } = useDebugFlags()
+
   const reportOptions: { label: string; value: Report }[] = [
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Asset list', value: 'asset-list' },
+    ...(holdersReport == true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Borrower transactions', value: 'borrower-tx' },
   ]
@@ -54,14 +58,16 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         }}
       />
 
-      <DateRange
-        end={endDate}
-        onSelection={(start, end, range) => {
-          setRange(range)
-          setStartDate(start)
-          setEndDate(end)
-        }}
-      />
+      {report !== 'holders' && (
+        <DateRange
+          end={endDate}
+          onSelection={(start, end, range) => {
+            setRange(range)
+            setStartDate(start)
+            setEndDate(end)
+          }}
+        />
+      )}
 
       {report === 'pool-balance' && (
         <Select
@@ -91,7 +97,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
 
-      {report === 'investor-tx' && (
+      {(report === 'holders' || report === 'investor-tx') && (
         <Select
           name="activeTranche"
           label="Token"
