@@ -483,7 +483,7 @@ export function WalletProvider({
         getProvider,
       },
     }
-  }, [connect, disconnect, proxies, state, isConnectError, isConnecting])
+  }, [connect, disconnect, proxies, state, isConnectError, isConnecting, isSmartContractWallet])
 
   return (
     <WalletContext.Provider value={ctx}>
