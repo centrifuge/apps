@@ -14,6 +14,7 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
+import React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
@@ -61,10 +62,9 @@ const columns: Column[] = [
   {
     header: <SortableTableHeader label="Position" />,
     cell: ({ currency, position }: Row) => {
-      console.log('🚀 ~ currency:', currency)
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalanceAbbreviated(position || 0, currency.symbol, 2)}
+          {formatBalanceAbbreviated(position || 0, currency?.symbol, 2)}
         </Text>
       )
     },
@@ -128,7 +128,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   const { search, pathname } = useLocation()
   const history = useHistory()
   const params = new URLSearchParams(search)
-  const openDrawer = params.get('transfer') === 'cfg'
+  const openDrawer = !!params.get('transfer')
   const currencies = usePoolCurrencies()
 
   const CFGPrice = useCFGTokenPrice()
@@ -199,12 +199,12 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         columns={columns}
         data={tokens}
         defaultSortKey="position"
-        onRowClicked={(row) =>
-          row.currency?.symbol === centBalances?.native.currency.symbol ||
-          centBalances?.currencies.find((curr) => curr.currency.symbol === row.currency?.symbol)
-            ? `${pathname}?transfer=cfg`
+        onRowClicked={(row) => {
+          return row.currency?.symbol === centBalances?.native.currency.symbol ||
+            centBalances?.currencies.find((curr) => curr.currency.symbol === row.currency?.symbol)
+            ? `${pathname}?transfer=${row.currency?.symbol}`
             : pathname
-        }
+        }}
       />
     </Stack>
   ) : null
@@ -231,7 +231,7 @@ const TokenWithIcon = ({ poolId, currency }: Row) => {
       </Eththumbnail>
 
       <Text textOverflow="ellipsis" variant="body3">
-        {currency.name}
+        {currency?.name}
       </Text>
     </Grid>
   )
