@@ -17,6 +17,11 @@ import {
 import React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import daiLogo from '../../assets/images/dai-logo.svg'
+import ethLogo from '../../assets/images/ethereum.svg'
+import centLogo from '../../assets/images/logoCentrifuge.svg'
+import usdcLogo from '../../assets/images/usdc-logo.svg'
+import usdtLogo from '../../assets/images/usdt-logo.svg'
 import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
@@ -152,6 +157,17 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         canInvestRedeem,
       }
     }),
+    ...(tinlakeBalances?.currencies.filter((currency) => currency.balance.gtn(0)) || []).map((currency) => {
+      return {
+        position: currency.balance,
+        marketValue: currency.balance.toDecimal().mul(Dec(1)),
+        tokenPrice: Dec(1),
+        trancheId: '',
+        poolId: '',
+        currency: currency.currency,
+        canInvestRedeem,
+      }
+    }),
     ...(centBalances?.currencies
       ?.filter((currency) => currency.balance.gtn(0))
       .map((currency) => {
@@ -215,11 +231,24 @@ const TokenWithIcon = ({ poolId, currency }: Row) => {
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
   const { sizes } = useTheme()
-  const icon = metadata?.pool?.icon?.uri
-    ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri)
-    : !poolId
-    ? cent.metadata.parseMetadataUrl('ipfs://Qmbo43MdtokiRQ5fTLT8FoYZo6kJrW56vUqXjqYQY6Fg9f')
-    : null
+
+  const getIcon = () => {
+    if (metadata?.pool?.icon?.uri) {
+      return cent.metadata.parseMetadataUrl(metadata.pool.icon.uri)
+    } else if (currency?.name.toLowerCase().includes('eth')) {
+      return ethLogo
+    } else if (currency?.symbol.toLowerCase() === 'dai') {
+      return daiLogo
+    } else if (currency?.symbol.toLowerCase() === 'usdc') {
+      return usdcLogo
+    } else if (currency?.symbol.toLowerCase() === 'usdt') {
+      return usdtLogo
+    } else {
+      return centLogo
+    }
+  }
+  const icon = getIcon()
+
   return (
     <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
       <Eththumbnail show={!!poolId.startsWith('0x')}>
