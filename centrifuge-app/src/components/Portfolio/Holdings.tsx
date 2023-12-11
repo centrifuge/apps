@@ -20,6 +20,7 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
+import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
@@ -60,6 +61,7 @@ const columns: Column[] = [
   {
     header: <SortableTableHeader label="Position" />,
     cell: ({ currency, position }: Row) => {
+      console.log('🚀 ~ currency:', currency)
       return (
         <Text textOverflow="ellipsis" variant="body3">
           {formatBalanceAbbreviated(position || 0, currency.symbol, 2)}
@@ -127,6 +129,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   const history = useHistory()
   const params = new URLSearchParams(search)
   const openDrawer = params.get('transfer') === 'cfg'
+  const currencies = usePoolCurrencies()
 
   const CFGPrice = useCFGTokenPrice()
 
@@ -149,6 +152,20 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         canInvestRedeem,
       }
     }),
+    ...(centBalances?.currencies
+      ?.filter((currency) => currency.balance.gtn(0))
+      .map((currency) => {
+        const token = currencies?.find((curr) => curr.symbol === currency.currency.symbol)
+        return {
+          currency: token,
+          poolId: '',
+          trancheId: '',
+          position: currency.balance.toDecimal() || Dec(0),
+          tokenPrice: Dec(1),
+          marketValue: currency.balance.toDecimal() || Dec(0),
+          canInvestRedeem: false,
+        }
+      }) || []),
     ...(wallet.connectedNetworkName === 'Centrifuge'
       ? [
           {
