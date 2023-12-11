@@ -82,7 +82,9 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
                   orders?.length
                     ? api.tx.utility.batch(
                         orders.map((order) =>
-                          api.tx.investments.collectInvestmentsFor(order.accountId, [pool.id, order.trancheId])
+                          api.tx.investments[
+                            order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'
+                          ](order.accountId, [pool.id, order.trancheId])
                         )
                       )
                     : null,
@@ -253,7 +255,9 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
                   orders?.length
                     ? api.tx.utility.batch(
                         orders.map((order) =>
-                          api.tx.investments.collectInvestmentsFor(order.accountId, [pool.id, order.trancheId])
+                          api.tx.investments[
+                            order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'
+                          ](order.accountId, [pool.id, order.trancheId])
                         )
                       )
                     : null,
