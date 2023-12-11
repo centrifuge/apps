@@ -2390,7 +2390,6 @@ export function getPoolsModule(inst: Centrifuge) {
           sumInvestOrderedAmount: new CurrencyBalance(balance.sumInvestOrderedAmount, currency.decimals),
           sumInvestUncollectedAmount: new CurrencyBalance(balance.sumInvestUncollectedAmount, currency.decimals),
           sumInvestCollectedAmount: new CurrencyBalance(balance.sumInvestCollectedAmount, currency.decimals),
-          // TODO: next 3 are probably tranche token decimals, not pool currency decimals?
           sumRedeemOrderedAmount: new CurrencyBalance(balance.sumRedeemOrderedAmount, currency.decimals),
           sumRedeemUncollectedAmount: new CurrencyBalance(balance.sumRedeemUncollectedAmount, currency.decimals),
           sumRedeemCollectedAmount: new CurrencyBalance(balance.sumRedeemCollectedAmount, currency.decimals),
