@@ -84,6 +84,20 @@ export type SubqueryBorrowerTransaction = {
   quantity: string | null
 }
 
+export type SubqueryTrancheBalances = {
+  __typename?: 'TrancheBalances'
+  id: string
+  accountId: string
+  poolId: string
+  trancheId: string
+  sumInvestOrderedAmount: string
+  sumInvestUncollectedAmount: string
+  sumInvestCollectedAmount: string
+  sumRedeemOrderedAmount: string
+  sumRedeemUncollectedAmount: string
+  sumRedeemCollectedAmount: string
+}
+
 export type SubqueryOutstandingOrder = {
   timestamp: string
   poolId: string

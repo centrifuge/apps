@@ -64,6 +64,14 @@ export function useTransactionsByAddress(address?: string) {
   return result
 }
 
+export function useHolders(poolId: string, trancheId?: string) {
+  const [result] = useCentrifugeQuery(['holders', poolId, trancheId], (cent) =>
+    cent.pools.getHolders([poolId, trancheId])
+  )
+
+  return result
+}
+
 export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(['investorTransactions', poolId, trancheId, from, to], (cent) =>
     cent.pools.getInvestorTransactions([poolId, trancheId, from, to])

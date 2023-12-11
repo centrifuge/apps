@@ -4,6 +4,7 @@ import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
 import { BorrowerTransactions } from './BorrowerTransactions'
+import { Holders } from './Holders'
 import { InvestorTransactions } from './InvestorTransactions'
 import { PoolBalance } from './PoolBalance'
 import { ReportContext } from './ReportContext'
@@ -34,6 +35,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
       <Box overflow="auto" width="100%">
         {report === 'pool-balance' && <PoolBalance pool={pool} />}
         {report === 'asset-list' && <AssetList pool={pool} />}
+        {report === 'holders' && <Holders pool={pool} />}
         {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
         {report === 'borrower-tx' && <BorrowerTransactions pool={pool} />}
       </Box>
