@@ -36,10 +36,9 @@ type CFGHoldingsProps = {
   address: string
 }
 
-export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
+export const TransferTokens = ({ address }: CFGHoldingsProps) => {
   const centBalances = useBalances(address)
   const [activeTab, setActiveTab] = React.useState(0)
-  const utils = useCentrifugeUtils()
   const CFGPrice = useCFGTokenPrice()
   const isPortfolioPage = useRouteMatch('/portfolio')
 
@@ -176,7 +175,6 @@ const SendCFG = ({ address }: SendReceiveProps) => {
                   onSetMax={async () =>
                     form.setFieldValue('amount', centBalances?.native.balance.toDecimal().sub(txFee || 0))
                   }
-                  initialValue={form.values.amount || undefined}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={centBalances?.native?.currency.symbol}

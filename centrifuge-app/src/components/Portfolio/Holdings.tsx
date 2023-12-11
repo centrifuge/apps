@@ -25,7 +25,7 @@ import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { Tooltips } from '../Tooltips'
-import { CFGTransfer } from './CFGTransfer'
+import { TransferTokens } from './TransferTokens'
 import { usePortfolioTokens } from './usePortfolio'
 
 type Row = {
@@ -190,7 +190,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   return tokens.length ? (
     <Stack as="article" gap={2}>
       <Drawer isOpen={openDrawer} onClose={() => history.replace(pathname)}>
-        <CFGTransfer address={address} />
+        <TransferTokens address={address} />
       </Drawer>
       <Text as="h2" variant="heading2">
         Holdings
@@ -200,7 +200,10 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         data={tokens}
         defaultSortKey="position"
         onRowClicked={(row) =>
-          row.currency?.symbol === centBalances?.native.currency.symbol ? `${pathname}?transfer=cfg` : pathname
+          row.currency?.symbol === centBalances?.native.currency.symbol ||
+          centBalances?.currencies.find((curr) => curr.currency.symbol === row.currency?.symbol)
+            ? `${pathname}?transfer=cfg`
+            : pathname
         }
       />
     </Stack>
