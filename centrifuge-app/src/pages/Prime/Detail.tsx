@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
 import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
+import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { Resolutions } from '../../components/Resolutions'
@@ -46,6 +47,7 @@ function PrimeDetail() {
         </Shelf>
       </LayoutSection>
       <BasePadding gap={3}>
+        <CardPortfolioValue />
         <Holdings address={centAddress} />
         <Transactions onlyMostRecent address={centAddress} />
         <Resolutions dao={dao} />
