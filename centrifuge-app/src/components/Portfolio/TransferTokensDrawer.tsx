@@ -47,8 +47,8 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen, defaultView }: 
   const isPortfolioPage = useRouteMatch('/portfolio')
   const { search } = useLocation()
   const params = new URLSearchParams(search)
-  const transferCurrencySymbol = params.get('transfer')
-  const isNativeTransfer = transferCurrencySymbol === centBalances?.native.currency.symbol
+  const transferCurrencySymbol = params.get('receive') || params.get('send')
+  const isNativeTransfer = transferCurrencySymbol?.toLowerCase() === centBalances?.native.currency.symbol.toLowerCase()
   const currency = useMemo(() => {
     if (isNativeTransfer) {
       return centBalances?.native

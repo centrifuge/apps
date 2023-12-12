@@ -12,10 +12,9 @@ import {
   Stack,
   Text,
   Thumbnail,
-  VisualButton,
 } from '@centrifuge/fabric'
 import React from 'react'
-import { Link, useHistory, useLocation } from 'react-router-dom'
+import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
@@ -31,6 +30,7 @@ import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
+import { RouterLinkButton } from '../RouterLinkButton'
 import { Tooltips } from '../Tooltips'
 import { TransferTokensDrawer } from './TransferTokensDrawer'
 import { usePortfolioTokens } from './usePortfolio'
@@ -110,29 +110,21 @@ const columns: Column[] = [
             </AnchorButton>
           ) : canInvestRedeem ? (
             <>
-              <Link to={`?redeem=${poolId}-${trancheId}`}>
-                <VisualButton small variant="tertiary" icon={IconMinus}>
-                  Redeem
-                </VisualButton>
-              </Link>
-              <Link to={`?invest=${poolId}-${trancheId}`}>
-                <VisualButton small variant="tertiary" icon={IconPlus}>
-                  Invest
-                </VisualButton>
-              </Link>
+              <RouterLinkButton to={`?redeem=${poolId}-${trancheId}`} small variant="tertiary" icon={IconMinus}>
+                Redeem
+              </RouterLinkButton>
+              <RouterLinkButton to={`?invest=${poolId}-${trancheId}`} small variant="tertiary" icon={IconPlus}>
+                Invest
+              </RouterLinkButton>
             </>
           ) : (
             <>
-              <Link to={`?receive=${currency?.symbol}`}>
-                <VisualButton small variant="tertiary" icon={IconDownload}>
-                  Deposit
-                </VisualButton>
-              </Link>
-              <Link to={`?send=${currency?.symbol}`}>
-                <VisualButton small variant="tertiary" icon={IconSend}>
-                  Send
-                </VisualButton>
-              </Link>
+              <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
+                Receive
+              </RouterLinkButton>
+              <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="tertiary" icon={IconSend}>
+                Send
+              </RouterLinkButton>
             </>
           )}
         </Grid>
