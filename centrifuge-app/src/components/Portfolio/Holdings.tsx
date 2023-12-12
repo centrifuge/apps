@@ -123,12 +123,12 @@ const columns: Column[] = [
             </>
           ) : (
             <>
-              <Link to={`?receive=${currency.symbol}`}>
+              <Link to={`?receive=${currency?.symbol}`}>
                 <VisualButton small variant="tertiary" icon={IconDownload}>
                   Deposit
                 </VisualButton>
               </Link>
-              <Link to={`?send=${currency.symbol}`}>
+              <Link to={`?send=${currency?.symbol}`}>
                 <VisualButton small variant="tertiary" icon={IconSend}>
                   Send
                 </VisualButton>
