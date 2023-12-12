@@ -2,10 +2,9 @@ import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
-import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
-import { Holdings } from '../../components/Portfolio/Holdings'
+import { HoldingsSection } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { Resolutions } from '../../components/Resolutions'
 import { RouterTextLink } from '../../components/TextLink'
@@ -13,7 +12,7 @@ import { useDAOConfig } from '../../utils/useDAOConfig'
 
 export default function PrimeDetailPage() {
   return (
-    <LayoutBase>
+    <LayoutBase gap={5}>
       <PrimeDetail />
     </LayoutBase>
   )
@@ -32,7 +31,7 @@ function PrimeDetail() {
 
   return !isLoading && dao && centAddress ? (
     <>
-      <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5}>
+      <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
         <Text variant="body3">
           <Text color="textSecondary">
             <RouterTextLink to="/prime" style={{ textDecoration: 'none' }}>
@@ -45,13 +44,13 @@ function PrimeDetail() {
           <Box as="img" src={dao.logo} alt={dao.name} width="iconRegular" height="iconRegular" borderRadius="50%" />
           <Text variant="heading1">{dao.name} Investments</Text>
         </Shelf>
-      </LayoutSection>
-      <BasePadding gap={3}>
         <CardPortfolioValue />
-        <Holdings address={centAddress} />
+      </LayoutSection>
+      <HoldingsSection address={centAddress} />
+      <LayoutSection title="Transaction history">
         <Transactions onlyMostRecent address={centAddress} />
-        <Resolutions dao={dao} />
-      </BasePadding>
+      </LayoutSection>
+      <Resolutions dao={dao} />
     </>
   ) : null
 }

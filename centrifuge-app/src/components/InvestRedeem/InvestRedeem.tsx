@@ -242,7 +242,10 @@ function Footer() {
   return (
     <>
       {state.actingAddress && connectedType === 'substrate' && (
-        <Transactions onlyMostRecent narrow address={state.actingAddress} />
+        <Stack gap={2}>
+          <Text variant="heading4">Transaction history</Text>
+          <Transactions onlyMostRecent narrow address={state.actingAddress} />
+        </Stack>
       )}
     </>
   )

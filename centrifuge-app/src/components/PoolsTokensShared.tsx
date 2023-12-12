@@ -2,7 +2,7 @@ import { Grid, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { config } from '../config'
 import { CardTotalValueLocked } from './CardTotalValueLocked'
-import { BasePadding } from './LayoutBase/BasePadding'
+import { LayoutSection } from './LayoutBase/LayoutSection'
 import { LoadBoundary } from './LoadBoundary'
 import { MenuSwitch } from './MenuSwitch'
 import { PortfolioCta } from './PortfolioCta'
@@ -14,7 +14,7 @@ type PoolsTokensSharedProps = {
 
 export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
   return (
-    <BasePadding>
+    <LayoutSection pt={5}>
       <Stack gap={4}>
         <Stack>
           <Text as="h1" variant="heading1">
@@ -39,6 +39,6 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
         </Stack>
         {children}
       </Stack>
-    </BasePadding>
+    </LayoutSection>
   )
 }

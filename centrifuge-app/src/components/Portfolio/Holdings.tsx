@@ -10,7 +10,6 @@ import {
   IconMinus,
   IconPlus,
   Shelf,
-  Stack,
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
@@ -23,6 +22,7 @@ import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
+import { LayoutSection } from '../LayoutBase/LayoutSection'
 import { Tooltips } from '../Tooltips'
 import { CFGTransfer } from './CFGTransfer'
 import { usePortfolioTokens } from './usePortfolio'
@@ -116,6 +116,14 @@ const columns: Column[] = [
   },
 ]
 
+export function HoldingsSection({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
+  return (
+    <LayoutSection title="Holdings">
+      <Holdings canInvestRedeem={canInvestRedeem} address={address} />
+    </LayoutSection>
+  )
+}
+
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
@@ -171,13 +179,10 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   ]
 
   return tokens.length ? (
-    <Stack as="article" gap={2}>
+    <>
       <Drawer isOpen={openDrawer} onClose={() => history.replace(pathname)}>
         <CFGTransfer address={address} />
       </Drawer>
-      <Text as="h2" variant="heading2">
-        Holdings
-      </Text>
       <DataTable
         columns={columns}
         data={tokens}
@@ -186,7 +191,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
           row.currency?.symbol === centBalances?.native.currency.symbol ? `${pathname}?transfer=cfg` : pathname
         }
       />
-    </Stack>
+    </>
   ) : null
 }
 
