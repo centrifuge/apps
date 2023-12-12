@@ -1,5 +1,6 @@
 import { Drawer } from '@centrifuge/fabric'
 import * as React from 'react'
+import { LoadBoundary } from '../LoadBoundary'
 import { InvestRedeem } from './InvestRedeem'
 
 export function InvestRedeemDrawer({
@@ -17,7 +18,9 @@ export function InvestRedeemDrawer({
 }) {
   return (
     <Drawer isOpen={open} onClose={onClose}>
-      <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} />
+      <LoadBoundary>
+        <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} />
+      </LoadBoundary>
     </Drawer>
   )
 }

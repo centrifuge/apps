@@ -15,6 +15,7 @@ import {
   SubqueryBorrowerTransaction,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
+  SubqueryTrancheBalances,
   SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
@@ -722,6 +723,16 @@ export type BorrowerTransaction = {
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+}
+
+type Holder = {
+  accountId: string
+  sumInvestOrderedAmount: CurrencyBalance
+  sumInvestUncollectedAmount: CurrencyBalance
+  sumInvestCollectedAmount: CurrencyBalance
+  sumRedeemOrderedAmount: CurrencyBalance
+  sumRedeemUncollectedAmount: CurrencyBalance
+  sumRedeemCollectedAmount: CurrencyBalance
 }
 
 export type ExternalLoan = Loan & {
@@ -2339,6 +2350,54 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getHolders(args: [poolId: string, trancheId?: string]) {
+    const [poolId, trancheId] = args
+
+    const $query = inst.getSubqueryObservable<{
+      trancheBalances: { nodes: SubqueryTrancheBalances[] }
+    }>(
+      `query($poolId: String!, $trancheId: String) {
+        trancheBalances(
+          filter: {
+            poolId: { equalTo: $poolId },
+            trancheId: { isNull: false, endsWith: $trancheId }
+          }) {
+          nodes {
+            accountId
+            sumInvestOrderedAmount
+            sumInvestUncollectedAmount
+            sumInvestCollectedAmount
+            sumRedeemOrderedAmount
+            sumRedeemUncollectedAmount
+            sumRedeemCollectedAmount
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        trancheId,
+      },
+      false
+    )
+
+    return $query.pipe(
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
+        console.log(data)
+        return data!.trancheBalances.nodes.map((balance) => ({
+          accountId: balance.accountId,
+          sumInvestOrderedAmount: new CurrencyBalance(balance.sumInvestOrderedAmount, currency.decimals),
+          sumInvestUncollectedAmount: new CurrencyBalance(balance.sumInvestUncollectedAmount, currency.decimals),
+          sumInvestCollectedAmount: new CurrencyBalance(balance.sumInvestCollectedAmount, currency.decimals),
+          sumRedeemOrderedAmount: new CurrencyBalance(balance.sumRedeemOrderedAmount, currency.decimals),
+          sumRedeemUncollectedAmount: new CurrencyBalance(balance.sumRedeemUncollectedAmount, currency.decimals),
+          sumRedeemCollectedAmount: new CurrencyBalance(balance.sumRedeemCollectedAmount, currency.decimals),
+        })) as unknown as Holder[]
+      })
+    )
+  }
+
   function getNativeCurrency() {
     return inst.getApi().pipe(
       map((api) => ({
@@ -3152,6 +3211,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyTrancheStates,
     getTransactionsByAddress,
     getDailyTVL,
+    getHolders,
   }
 }
 

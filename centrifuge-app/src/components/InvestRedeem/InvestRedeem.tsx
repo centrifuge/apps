@@ -211,7 +211,7 @@ function Header() {
               {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
             </TextWithPlaceholder>
           </Stack>
-
+          {/* 
           <Stack>
             <TextWithPlaceholder variant="body3" color="textSecondary">
               Cost basis
@@ -228,7 +228,7 @@ function Header() {
             <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
               -
             </TextWithPlaceholder>
-          </Stack>
+          </Stack> */}
         </Shelf>
       )}
     </Stack>
@@ -425,7 +425,7 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
         )}
         {state.isFirstInvestment && (
           <InlineFeedback>
-            The invested amount will be locked and executed at the end of the current epoch
+            All orders are being collected and will be executed by the issuer of the pool.
           </InlineFeedback>
         )}
         <ButtonGroup>
@@ -770,8 +770,7 @@ function PendingOrder({
             </>
           )}
           <Text variant="body3">
-            Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {(pool.epoch.status === 'ongoing' && epochTimeRemaining) || `0 min remaining`}).{' '}
+            All orders are being collected and will be executed by the issuer of the pool.{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>

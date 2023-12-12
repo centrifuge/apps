@@ -13,12 +13,13 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { formatDate, getAge } from '../../../utils/date'
+import { formatDate } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
+import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -61,9 +62,6 @@ export function PoolDetailOverview() {
       label: <Tooltips type="averageAssetMaturity" />,
       value: <AverageMaturity poolId={poolId} />,
     })
-  }
-  if (pool?.createdAt) {
-    pageSummaryData.splice(2, 0, { label: <Tooltips type="age" />, value: getAge(pool.createdAt) })
   }
 
   const tokens = pool?.tranches
@@ -178,10 +176,12 @@ export function PoolDetailOverview() {
 
 function InvestButton(props: InvestRedeemProps) {
   const [open, setOpen] = React.useState(false)
+  const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
+
   return (
     <>
       <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
-      <Button variant="secondary" onClick={() => setOpen(true)} style={{ marginLeft: 'auto' }}>
+      <Button onClick={() => connectAndOpen()} style={{ marginLeft: 'auto' }}>
         Invest
       </Button>
     </>
