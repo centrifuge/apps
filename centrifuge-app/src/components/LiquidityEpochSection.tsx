@@ -61,6 +61,8 @@ export function LiquidityEpochSection({ pool }: LiquidityEpochSectionProps) {
   )
 }
 
+const MAX_COLLECT = 100
+
 function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
     useLiquidity(pool.id)
@@ -81,11 +83,13 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
                   ...closeTx.method.args[0],
                   orders?.length
                     ? api.tx.utility.batch(
-                        orders.map((order) =>
-                          api.tx.investments[
-                            order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'
-                          ](order.accountId, [pool.id, order.trancheId])
-                        )
+                        orders
+                          .slice(0, MAX_COLLECT)
+                          .map((order) =>
+                            api.tx.investments[
+                              order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'
+                            ](order.accountId, [pool.id, order.trancheId])
+                          )
                       )
                     : null,
                 ].filter(Boolean)
@@ -254,11 +258,13 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
                   ...execTx.method.args[0],
                   orders?.length
                     ? api.tx.utility.batch(
-                        orders.map((order) =>
-                          api.tx.investments[
-                            order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'
-                          ](order.accountId, [pool.id, order.trancheId])
-                        )
+                        orders
+                          .slice(0, MAX_COLLECT)
+                          .map((order) =>
+                            api.tx.investments[
+                              order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'
+                            ](order.accountId, [pool.id, order.trancheId])
+                          )
                       )
                     : null,
                 ].filter(Boolean)
