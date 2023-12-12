@@ -42,7 +42,7 @@ type TransferTokensProps = {
 
 export const TransferTokensDrawer = ({ address, onClose, isOpen, defaultView }: TransferTokensProps) => {
   const centBalances = useBalances(address)
-  const [activeTab, setActiveTab] = React.useState(defaultView === 'send' ? 0 : 1)
+  const [activeTab, setActiveTab] = React.useState(0)
   const CFGPrice = useCFGTokenPrice()
   const isPortfolioPage = useRouteMatch('/portfolio')
   const { search } = useLocation()
@@ -55,6 +55,15 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen, defaultView }: 
     }
     return centBalances?.currencies.find((token) => token.currency.symbol === transferCurrencySymbol)
   }, [centBalances, transferCurrencySymbol])
+
+  React.useEffect(() => {
+    if (params.get('receive')) {
+      setActiveTab(1)
+    }
+    if (params.get('send')) {
+      setActiveTab(0)
+    }
+  }, [params])
 
   const tokenPrice = isNativeTransfer ? CFGPrice : 1
 
