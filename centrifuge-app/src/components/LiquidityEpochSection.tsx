@@ -106,7 +106,7 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
 
   const closeEpoch = async () => {
     if (!pool) return // const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
-    // also collect the first 10 open order when orders are fully executable
+    // also collect the first MAX_COLLECT open orders when orders are fully executable
     closeEpochTx([pool.id, false, ordersFullyExecutable], {
       account,
       forceProxyType: ['Borrow', 'Invest'],
