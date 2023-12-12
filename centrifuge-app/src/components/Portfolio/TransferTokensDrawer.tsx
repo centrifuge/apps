@@ -21,7 +21,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
 import { useQuery } from 'react-query'
-import { useLocation, useRouteMatch } from 'react-router'
+import { useHistory, useLocation, useRouteMatch } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { copyToClipboard } from '../../utils/copyToClipboard'
@@ -37,15 +37,14 @@ type TransferTokensProps = {
   address: string
   onClose: () => void
   isOpen: boolean
-  defaultView?: 'send' | 'receive'
 }
 
-export const TransferTokensDrawer = ({ address, onClose, isOpen, defaultView }: TransferTokensProps) => {
+export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferTokensProps) => {
   const centBalances = useBalances(address)
-  const [activeTab, setActiveTab] = React.useState(0)
   const CFGPrice = useCFGTokenPrice()
   const isPortfolioPage = useRouteMatch('/portfolio')
   const { search } = useLocation()
+  const history = useHistory()
   const params = new URLSearchParams(search)
   const transferCurrencySymbol = params.get('receive') || params.get('send')
   const isNativeTransfer = transferCurrencySymbol?.toLowerCase() === centBalances?.native.currency.symbol.toLowerCase()
@@ -55,15 +54,6 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen, defaultView }: 
     }
     return centBalances?.currencies.find((token) => token.currency.symbol === transferCurrencySymbol)
   }, [centBalances, transferCurrencySymbol])
-
-  React.useEffect(() => {
-    if (params.get('receive')) {
-      setActiveTab(1)
-    }
-    if (params.get('send')) {
-      setActiveTab(0)
-    }
-  }, [params])
 
   const tokenPrice = isNativeTransfer ? CFGPrice : 1
 
@@ -95,11 +85,14 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen, defaultView }: 
         </Shelf>
         {isPortfolioPage && (
           <Stack>
-            <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
+            <Tabs
+              selectedIndex={params.get('send') ? 0 : 1}
+              onChange={(index) => history.push({ search: index === 0 ? 'send' : 'receive' })}
+            >
               <TabsItem>Send</TabsItem>
               <TabsItem>Receive</TabsItem>
             </Tabs>
-            {activeTab === 0 ? (
+            {params.get('send') ? (
               <SendToken address={address} currency={currency as SendReceiveProps['currency']} />
             ) : (
               <ReceiveToken address={address} currency={currency as SendReceiveProps['currency']} />
