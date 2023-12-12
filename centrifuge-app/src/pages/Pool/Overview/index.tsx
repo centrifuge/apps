@@ -13,7 +13,7 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { formatDate, getAge } from '../../../utils/date'
+import { formatDate } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
@@ -61,9 +61,6 @@ export function PoolDetailOverview() {
       label: <Tooltips type="averageAssetMaturity" />,
       value: <AverageMaturity poolId={poolId} />,
     })
-  }
-  if (pool?.createdAt) {
-    pageSummaryData.splice(2, 0, { label: <Tooltips type="age" />, value: getAge(pool.createdAt) })
   }
 
   const tokens = pool?.tranches
