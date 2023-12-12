@@ -1,6 +1,7 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import {
+  AddressInput,
   Box,
   Button,
   CurrencyInput,
@@ -12,11 +13,10 @@ import {
   Tabs,
   TabsItem,
   Text,
-  TextInput,
   truncate,
 } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
-import { isAddress } from '@polkadot/util-crypto'
+import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
@@ -87,7 +87,11 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
           <Stack>
             <Tabs
               selectedIndex={params.get('send') ? 0 : 1}
-              onChange={(index) => history.push({ search: index === 0 ? 'send' : 'receive' })}
+              onChange={(index) =>
+                history.push({
+                  search: index === 0 ? `send=${currency?.currency.symbol}` : `receive=${currency?.currency.symbol}`,
+                })
+              }
             >
               <TabsItem>Send</TabsItem>
               <TabsItem>Receive</TabsItem>
@@ -162,7 +166,7 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
       if (!values.amount || Dec(values.amount).lte(0)) {
         errors.amount = 'Amount must be greater than 0'
       }
-      if (!(isAddress(values.recipientAddress) || isEvmAddress(values.recipientAddress))) {
+      if (!(isSubstrateAddress(values.recipientAddress) || isEvmAddress(values.recipientAddress))) {
         errors.recipientAddress = 'Invalid address format'
       }
 
@@ -193,16 +197,18 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
         <Form>
           <Stack gap="2">
             <Field name="recipientAddress">
-              {({ field, meta }: FieldProps) => (
-                <TextInput
-                  {...field}
-                  label="Recipient address"
-                  errorMessage={meta.touched ? meta.error : undefined}
-                  disabled={isLoading}
-                  placeholder="0x0A4..."
-                  required
-                />
-              )}
+              {({ field, meta }: FieldProps) => {
+                return (
+                  <AddressInput
+                    {...field}
+                    label="Recipient address"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    disabled={isLoading}
+                    placeholder="0x0A4..."
+                    required
+                  />
+                )
+              }}
             </Field>
             <Field name="amount">
               {({ field, meta, form }: FieldProps) => (
