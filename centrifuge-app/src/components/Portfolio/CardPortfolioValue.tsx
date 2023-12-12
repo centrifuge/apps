@@ -22,7 +22,7 @@ const rangeFilters = [
 ] as const
 
 export function CardPortfolioValue() {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const portfolioTokens = usePortfolioTokens(address)
 
   const { colors } = useTheme()
