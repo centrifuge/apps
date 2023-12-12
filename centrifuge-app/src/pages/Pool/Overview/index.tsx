@@ -19,6 +19,7 @@ import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../..
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
+import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -175,10 +176,12 @@ export function PoolDetailOverview() {
 
 function InvestButton(props: InvestRedeemProps) {
   const [open, setOpen] = React.useState(false)
+  const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
+
   return (
     <>
       <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
-      <Button variant="secondary" onClick={() => setOpen(true)} style={{ marginLeft: 'auto' }}>
+      <Button onClick={() => connectAndOpen()} style={{ marginLeft: 'auto' }}>
         Invest
       </Button>
     </>
