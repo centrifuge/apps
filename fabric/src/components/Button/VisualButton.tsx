@@ -94,7 +94,7 @@ export const StyledButton = styled.span<StyledProps>(
       backgroundColor: $disabled ? bgDisabled : $active ? bgHover : bg,
       borderColor: $disabled ? borderDisabled : $active ? borderHover : border,
       borderWidth: 1,
-      borderRadius: $variant === 'wallet' ? 40 : 4,
+      borderRadius: 'button',
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
       boxShadow: variant !== 'tertiary' && !$disabled ? shadow : 'none',
