@@ -1,8 +1,8 @@
 import { CurrencyBalance, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
-  AnchorButton,
   Box,
   Button,
+  Drawer,
   Flex,
   IconChevronLeft,
   IconExternalLink,
@@ -14,12 +14,13 @@ import {
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { useParams, useRouteMatch } from 'react-router'
 import { AssetSummary } from '../../components/AssetSummary'
 import { LabelValueStack } from '../../components/LabelValueStack'
+import { LayoutBase } from '../../components/LayoutBase'
+import { LoadBoundary } from '../../components/LoadBoundary'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
-import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
@@ -46,13 +47,10 @@ import { TransferDebtForm } from './TransferDebtForm'
 import { formatNftAttribute } from './utils'
 
 export default function LoanPage() {
-  const [showOraclePricing, setShowOraclePricing] = React.useState(false)
   return (
-    <PageWithSideBar
-      sidebar={<LoanSidebar showOraclePricing={showOraclePricing} setShowOraclePricing={setShowOraclePricing} />}
-    >
-      <Loan setShowOraclePricing={() => setShowOraclePricing(true)} />
-    </PageWithSideBar>
+    <LayoutBase>
+      <Loan />
+    </LayoutBase>
   )
 }
 
@@ -60,19 +58,13 @@ function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
   return loan.poolId.startsWith('0x')
 }
 
-const LoanSidebar: React.FC<{
-  showOraclePricing?: boolean
-  setShowOraclePricing: (showOraclePricing: boolean) => void
-}> = ({ showOraclePricing, setShowOraclePricing }) => {
-  const { pid, aid } = useParams<{ pid: string; aid: string }>()
-  const loan = useLoan(pid, aid)
-  const canBorrow = useCanBorrowAsset(pid, aid)
+function LoanDrawerContent({ loan }: { loan: LoanType }) {
+  const canBorrow = useCanBorrowAsset(loan.poolId, loan.id)
 
   if (!loan || loan.status === 'Closed' || !canBorrow || isTinlakeLoan(loan)) return null
 
   return (
     <Stack gap={2}>
-      {showOraclePricing && <OraclePriceForm loan={loan} setShowOraclePricing={setShowOraclePricing} />}
       <FinanceForm loan={loan} />
       {loan.status === 'Active' && <RepayForm loan={loan} />}
       <TransferDebtForm loan={loan} />
@@ -80,7 +72,26 @@ const LoanSidebar: React.FC<{
   )
 }
 
-const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePricing }) => {
+function FinanceButton({ loan }: { loan: LoanType }) {
+  const canBorrow = useCanBorrowAsset(loan.poolId, loan.id)
+  const [financeShown, setFinanceShown] = React.useState(false)
+  if (!canBorrow || loan.status === 'Closed') return null
+  return (
+    <>
+      <Drawer isOpen={financeShown} onClose={() => setFinanceShown(false)}>
+        <LoadBoundary>
+          <LoanDrawerContent loan={loan} />
+        </LoadBoundary>
+      </Drawer>
+
+      <Button onClick={() => setFinanceShown(true)} small>
+        Finance
+      </Button>
+    </>
+  )
+}
+
+function Loan() {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
@@ -89,11 +100,11 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  const history = useHistory()
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const address = useAddress()
   const canOraclePrice = useCanSetOraclePrice(address)
   const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, assetId)
+  const [oraclePriceShown, setOraclePriceShown] = React.useState(false)
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -136,6 +147,15 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
 
   return (
     <Stack>
+      {loan && !isTinlakeLoan(loan) && (
+        <>
+          <Drawer isOpen={oraclePriceShown} onClose={() => setOraclePriceShown(false)}>
+            <LoadBoundary>
+              <OraclePriceForm loan={loan} />
+            </LoadBoundary>
+          </Drawer>
+        </>
+      )}
       <Box mt={2} ml={2}>
         <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
           {poolMetadata?.pool?.name ?? 'Pool assets'}
@@ -150,16 +170,17 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         subtitle={
-          <Flex>
-            <AnchorButton
-              onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
+          <Shelf gap={1}>
+            {loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
+            <RouterLinkButton
+              to={`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`}
               icon={IconExternalLink}
               small
               variant="tertiary"
             >
               View NFT
-            </AnchorButton>
-          </Flex>
+            </RouterLinkButton>
+          </Shelf>
         }
       />
       {loan &&
@@ -253,12 +274,11 @@ const Loan: React.FC<{ setShowOraclePricing?: () => void }> = ({ setShowOraclePr
                   <PricingValues loan={loan} pool={pool} />
                 </Shelf>
                 {canOraclePrice &&
-                  setShowOraclePricing &&
                   loan.status !== 'Closed' &&
                   'valuationMethod' in loan.pricing &&
                   loan.pricing.valuationMethod === 'oracle' && (
                     <Box marginTop="3">
-                      <Button variant="primary" onClick={() => setShowOraclePricing()} small>
+                      <Button onClick={() => setOraclePriceShown(true)} small>
                         Update price
                       </Button>
                     </Box>

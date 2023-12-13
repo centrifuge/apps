@@ -6,10 +6,13 @@ import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
+import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { Tooltips } from '../../../components/Tooltips'
+import { config } from '../../../config'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
+import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { useAverageAmount, usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -34,8 +37,9 @@ export function PoolDetailAssets() {
 
   if (!loans?.length) {
     return (
-      <Shelf p="4">
+      <Shelf p={4} gap={2}>
         <Text>No assets have been originated yet</Text>
+        <CreateAssetButton poolId={poolId} />
       </Shelf>
     )
   }
@@ -78,10 +82,25 @@ export function PoolDetailAssets() {
 
   return (
     <>
-      <PageSummary data={pageSummaryData} />
+      <PageSummary data={pageSummaryData}>
+        <CreateAssetButton poolId={poolId} />
+      </PageSummary>
       <Box px="5" py="2">
         <LoanList loans={loans} />
       </Box>
     </>
+  )
+}
+
+function CreateAssetButton({ poolId }: { poolId: string }) {
+  const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] }).length > 0
+
+  return (
+    canCreateAssets &&
+    config.useDocumentNfts && (
+      <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small>
+        Create asset
+      </RouterLinkButton>
+    )
   )
 }
