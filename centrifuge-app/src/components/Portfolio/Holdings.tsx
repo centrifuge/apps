@@ -9,7 +9,6 @@ import {
   IconMinus,
   IconPlus,
   IconSend,
-  Stack,
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
@@ -30,6 +29,7 @@ import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
+import { LayoutSection } from '../LayoutBase/LayoutSection'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { Tooltips } from '../Tooltips'
 import { TransferTokensDrawer } from './TransferTokensDrawer'
@@ -133,6 +133,15 @@ const columns: Column[] = [
   },
 ]
 
+export function HoldingsSection({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
+  return (
+    <LayoutSection title="Holdings">
+      <Holdings canInvestRedeem={canInvestRedeem} address={address} />
+    </LayoutSection>
+  )
+}
+
+// TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
   const wallet = useWallet()
@@ -219,7 +228,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   ]
 
   return tokens.length ? (
-    <Stack as="article" gap={2}>
+    <>
       <InvestRedeemDrawer
         poolId={investPoolId || redeemPoolId || ''}
         trancheId={investTrancheId || redeemTrancheId || ''}
@@ -232,11 +241,8 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
         onClose={() => history.replace(pathname)}
       />
-      <Text as="h2" variant="heading2">
-        Holdings
-      </Text>
       <DataTable columns={columns} data={tokens} defaultSortKey="position" />
-    </Stack>
+    </>
   ) : null
 }
 

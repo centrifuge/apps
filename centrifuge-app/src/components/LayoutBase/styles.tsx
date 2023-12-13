@@ -10,7 +10,6 @@ const HEADER_HEIGHT = 60
 const TOOLBAR_HEIGHT = 50
 const SIDEBAR_WIDTH = 80
 const SIDEBAR_WIDTH_EXTENDED = 220
-const LAYOUT_MAX_WIDTH = 1800
 
 export const Root = styled(Box)`
   position: relative;
@@ -118,7 +117,7 @@ export const LogoContainer = styled(Stack)`
 
 export const WalletContainer = styled(Stack)`
   z-index: ${({ theme }) => theme.zIndices.header};
-  /* position: sticky; */
+  position: sticky;
   top: 0;
   grid-area: wallet;
   // WalletContainer & WalletPositioner are positioned above the main content and would block user interaction (click).
@@ -127,7 +126,7 @@ export const WalletContainer = styled(Stack)`
 `
 
 export const WalletPositioner = styled(Shelf)`
-  max-width: ${LAYOUT_MAX_WIDTH}px;
+  max-width: ${({ theme }) => theme.sizes.mainContent}px;
   justify-content: flex-end;
   align-items: flex-start;
 `
@@ -142,7 +141,7 @@ export const WalletInner = styled(Stack)`
   }
 `
 
-export const MainContainer = styled(Box)`
+export const MainContainer = styled(Stack)`
   grid-area: main;
   align-self: stretch;
 

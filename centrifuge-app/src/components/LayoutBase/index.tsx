@@ -1,5 +1,5 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
-import { Box, Stack, Text } from '@centrifuge/fabric'
+import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Footer } from '../Footer'
 import { LoadBoundary } from '../LoadBoundary'
@@ -22,9 +22,10 @@ import {
 
 type LayoutBaseProps = {
   children?: React.ReactNode
+  gap?: number | number[]
 }
 
-export function LayoutBase({ children }: LayoutBaseProps) {
+export function LayoutBase({ children, gap }: LayoutBaseProps) {
   return (
     <Root>
       <Inner>
@@ -47,8 +48,8 @@ export function LayoutBase({ children }: LayoutBaseProps) {
         </ToolbarContainer>
 
         <LoadBoundary>
-          <MainContainer as="main">
-            <Box maxWidth={1800}>{children}</Box>
+          <MainContainer as="main" gap={gap}>
+            {children}
           </MainContainer>
         </LoadBoundary>
 

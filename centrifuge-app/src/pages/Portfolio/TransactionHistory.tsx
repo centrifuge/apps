@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
-import { BasePadding } from '../../components/LayoutBase/BasePadding'
+import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
 
@@ -11,7 +11,9 @@ export default function TransactionHistoryPage() {
   const address = addressParam || connectedAddress
   return (
     <LayoutBase>
-      <BasePadding>{address ? <Transactions address={address} /> : null}</BasePadding>
+      <LayoutSection title="Transaction history" pt={5}>
+        {address && <Transactions address={address} />}
+      </LayoutSection>
     </LayoutBase>
   )
 }

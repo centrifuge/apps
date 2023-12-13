@@ -17,6 +17,7 @@ import {
   ImageUpload,
   NumberInput,
   Select_DEPRECATED,
+  Shelf,
   Stack,
   Text,
   TextAreaInput,
@@ -28,9 +29,9 @@ import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
@@ -46,9 +47,9 @@ import { PricingInput } from './PricingInput'
 
 export default function IssuerCreateLoanPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <IssuerCreateLoan />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -106,7 +107,6 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
             return (
               <CurrencyInput_DEPRECATED
                 {...field}
-                variant="small"
                 label={`${label}*`}
                 errorMessage={meta.touched ? meta.error : undefined}
                 currency={input.symbol}
@@ -375,27 +375,7 @@ function IssuerCreateLoan() {
     <FormikProvider value={form}>
       <Form ref={formRef} noValidate>
         <Stack>
-          <PageHeader
-            title="Create asset"
-            subtitle={poolMetadata?.pool?.name}
-            actions={
-              isAuthed && (
-                <>
-                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
-                  <Button variant="secondary" onClick={() => history.goBack()}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    loading={isPending}
-                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
-                  >
-                    Create
-                  </Button>
-                </>
-              )
-            }
-          />
+          <PageHeader title="Create asset" subtitle={poolMetadata?.pool?.name} />
           {isAuthed ? (
             <>
               <PageSection>
@@ -500,6 +480,27 @@ function IssuerCreateLoan() {
             )
           )}
         </Stack>
+        <Box position="sticky" bottom={0} backgroundColor="backgroundPage">
+          <PageSection>
+            <Shelf gap={1} justifyContent="end">
+              {isAuthed && (
+                <>
+                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
+                  <Button variant="secondary" onClick={() => history.goBack()}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    loading={isPending}
+                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
+                  >
+                    Create
+                  </Button>
+                </>
+              )}
+            </Shelf>
+          </PageSection>
+        </Box>
       </Form>
     </FormikProvider>
   )

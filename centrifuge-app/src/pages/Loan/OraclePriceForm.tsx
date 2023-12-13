@@ -15,13 +15,7 @@ type PriceValues = {
   newPrice: number | ''
 }
 
-export function OraclePriceForm({
-  loan,
-  setShowOraclePricing,
-}: {
-  loan: LoanType
-  setShowOraclePricing: (showOraclePricing: boolean) => void
-}) {
+export function OraclePriceForm({ loan }: { loan: LoanType }) {
   const address = useAddress()
   const canPrice = useCanSetOraclePrice(address)
   const pool = usePool(loan.poolId)
@@ -44,7 +38,6 @@ export function OraclePriceForm({
     {
       onSuccess: () => {
         oraclePriceForm.resetForm()
-        setShowOraclePricing(false)
       },
     }
   )
