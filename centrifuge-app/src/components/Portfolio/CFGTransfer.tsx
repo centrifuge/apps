@@ -175,7 +175,6 @@ const SendCFG = ({ address }: SendReceiveProps) => {
                   onSetMax={async () =>
                     form.setFieldValue('amount', centBalances?.native.balance.toDecimal().sub(txFee || 0))
                   }
-                  initialValue={form.values.amount || undefined}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={centBalances?.native?.currency.symbol}

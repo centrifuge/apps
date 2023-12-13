@@ -95,12 +95,9 @@ export function PoolDetailAssets() {
 function CreateAssetButton({ poolId }: { poolId: string }) {
   const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] }).length > 0
 
-  return (
-    canCreateAssets &&
-    config.useDocumentNfts && (
-      <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small>
-        Create asset
-      </RouterLinkButton>
-    )
-  )
+  return canCreateAssets && config.useDocumentNfts ? (
+    <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small>
+      Create asset
+    </RouterLinkButton>
+  ) : null
 }

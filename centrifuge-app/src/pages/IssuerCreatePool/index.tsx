@@ -163,6 +163,7 @@ function CreatePoolForm() {
   const [createdPoolId, setCreatedPoolId] = React.useState('')
   const [multisigData, setMultisigData] = React.useState<{ hash: string; callData: string }>()
   const { poolCreationType } = useDebugFlags()
+  const consts = useCentrifugeConsts()
   const createType = (poolCreationType as TransactionOptions['createType']) || config.poolCreationType || 'immediate'
 
   React.useEffect(() => {
@@ -222,15 +223,10 @@ function CreatePoolForm() {
             const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
             const submittable = api.tx.utility.batchAll(
               [
-                api.tx.balances.transfer(
-                  adminProxy,
-                  new CurrencyBalance(api.consts.proxy.proxyDepositFactor, chainDecimals).add(transferToMultisig)
-                ),
+                api.tx.balances.transfer(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
                 api.tx.balances.transfer(
                   aoProxy,
-                  new CurrencyBalance(api.consts.proxy.proxyDepositFactor, chainDecimals).add(
-                    new CurrencyBalance(api.consts.uniques.collectionDeposit, chainDecimals)
-                  )
+                  consts.proxy.proxyDepositFactor.add(consts.uniques.collectionDeposit)
                 ),
                 adminProxyDelegate !== address &&
                   api.tx.proxy.proxy(
