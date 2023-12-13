@@ -43,7 +43,7 @@ function Portfolio() {
           <CardPortfolioValue />
         </BasePadding>
         <Box pt={1} px={BASE_PADDING}>
-          <Holdings address={address} />
+          <Holdings address={address} canInvestRedeem={true} />
         </Box>
         <BasePadding gap={3}>
           <Transactions onlyMostRecent address={address} />
