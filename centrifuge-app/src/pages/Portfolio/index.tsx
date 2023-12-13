@@ -40,7 +40,7 @@ function Portfolio() {
         </Stack>
         <CardPortfolioValue />
       </LayoutSection>
-      <HoldingsSection address={address} />
+      <HoldingsSection address={address} canInvestRedeem />
       <LayoutSection title="Transaction history">
         <Transactions onlyMostRecent address={address} />
       </LayoutSection>

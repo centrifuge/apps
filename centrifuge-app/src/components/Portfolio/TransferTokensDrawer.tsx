@@ -1,9 +1,16 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import {
+  useBalances,
+  useCentEvmChainId,
+  useCentrifugeTransaction,
+  useCentrifugeUtils,
+} from '@centrifuge/centrifuge-react'
+import {
+  AddressInput,
   Box,
   Button,
   CurrencyInput,
+  Drawer,
   IconButton,
   IconCopy,
   Shelf,
@@ -11,16 +18,15 @@ import {
   Tabs,
   TabsItem,
   Text,
-  TextInput,
   truncate,
 } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
-import { isAddress } from '@polkadot/util-crypto'
+import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React, { useMemo } from 'react'
 import { useQuery } from 'react-query'
-import { useRouteMatch } from 'react-router'
+import { useHistory, useLocation, useRouteMatch } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
 import { copyToClipboard } from '../../utils/copyToClipboard'
@@ -32,65 +38,105 @@ import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
 
-type CFGHoldingsProps = {
+type TransferTokensProps = {
   address: string
+  onClose: () => void
+  isOpen: boolean
 }
 
-export const CFGTransfer = ({ address }: CFGHoldingsProps) => {
+export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferTokensProps) => {
   const centBalances = useBalances(address)
-  const [activeTab, setActiveTab] = React.useState(0)
-  const utils = useCentrifugeUtils()
   const CFGPrice = useCFGTokenPrice()
   const isPortfolioPage = useRouteMatch('/portfolio')
+  const { search } = useLocation()
+  const history = useHistory()
+  const params = new URLSearchParams(search)
+  const transferCurrencySymbol = params.get('receive') || params.get('send')
+  const isNativeTransfer = transferCurrencySymbol?.toLowerCase() === centBalances?.native.currency.symbol.toLowerCase()
+  const currency = useMemo(() => {
+    if (isNativeTransfer) {
+      return centBalances?.native
+    }
+    return centBalances?.currencies.find((token) => token.currency.symbol === transferCurrencySymbol)
+  }, [centBalances, transferCurrencySymbol])
+
+  const tokenPrice = isNativeTransfer ? CFGPrice : 1
 
   return (
-    <Stack gap={3}>
-      <Text textAlign="center" variant="heading2">
-        {centBalances?.native.currency.symbol || 'CFG'} Holdings
-      </Text>
-      <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
-        <LabelValueStack
-          label="Position"
-          value={formatBalanceAbbreviated(centBalances?.native.balance || 0, centBalances?.native.currency.symbol, 2)}
-        />
-        <LabelValueStack
-          label="Value"
-          value={formatBalanceAbbreviated(centBalances?.native.balance.toDecimal().mul(CFGPrice || 0) || 0, 'USD', 2)}
-        />
-        <LabelValueStack
-          label={<Tooltips type="cfgPrice" label={`${centBalances?.native.currency.symbol || 'CFG'} Price`} />}
-          value={formatBalance(CFGPrice || 0, 'USD', 4)}
-        />
-      </Shelf>
-      {isPortfolioPage && (
-        <Stack>
-          <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
-            <TabsItem>Send</TabsItem>
-            <TabsItem>Receive</TabsItem>
-          </Tabs>
-          {activeTab === 0 ? <SendCFG address={address} /> : <ReceiveCFG address={address} />}
-        </Stack>
-      )}
-      <Stack gap={12}>
-        <Text variant="heading6" color="textPrimary" fontWeight={600}>
-          Price
+    <Drawer isOpen={isOpen} onClose={onClose}>
+      <Stack gap={3}>
+        <Text textAlign="center" variant="heading2">
+          {transferCurrencySymbol || 'CFG'} Holdings
         </Text>
-        <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
-          <CFGPriceChart />
-        </Box>
+        <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
+          <LabelValueStack
+            label="Position"
+            value={formatBalanceAbbreviated(currency?.balance || 0, currency?.currency.symbol, 2)}
+          />
+          <LabelValueStack
+            label="Value"
+            value={formatBalanceAbbreviated(currency?.balance.toDecimal().mul(tokenPrice || 0) || 0, 'USD', 2)}
+          />
+          <LabelValueStack
+            label={
+              isNativeTransfer ? (
+                <Tooltips type="cfgPrice" label={`${currency?.currency.symbol || 'CFG'} Price`} />
+              ) : (
+                'Price'
+              )
+            }
+            value={formatBalance(tokenPrice || 0, 'USD', 4)}
+          />
+        </Shelf>
+        {isPortfolioPage && (
+          <Stack>
+            <Tabs
+              selectedIndex={params.get('send') ? 0 : 1}
+              onChange={(index) =>
+                history.push({
+                  search: index === 0 ? `send=${transferCurrencySymbol}` : `receive=${transferCurrencySymbol}`,
+                })
+              }
+            >
+              <TabsItem>Send</TabsItem>
+              <TabsItem>Receive</TabsItem>
+            </Tabs>
+            {params.get('send') ? (
+              <SendToken address={address} currency={currency as SendReceiveProps['currency']} />
+            ) : (
+              <ReceiveToken address={address} currency={currency as SendReceiveProps['currency']} />
+            )}
+          </Stack>
+        )}
+        {isNativeTransfer && (
+          <Stack gap={12}>
+            <Text variant="heading6" color="textPrimary" fontWeight={600}>
+              Price
+            </Text>
+            <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
+              <CFGPriceChart />
+            </Box>
+          </Stack>
+        )}
       </Stack>
-    </Stack>
+    </Drawer>
   )
 }
 
-type SendReceiveProps = { address: string }
+type SendReceiveProps = {
+  address: string
+  currency?: {
+    balance: CurrencyBalance
+    currency: { symbol: string; decimals: number; key: string | { ForeignAsset: number } }
+  }
+}
 
-const SendCFG = ({ address }: SendReceiveProps) => {
-  const centBalances = useBalances(address)
+const SendToken = ({ address, currency }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
+  const chainId = useCentEvmChainId()
 
-  const { execute: transferCFG, isLoading } = useCentrifugeTransaction(
-    `Send ${centBalances?.native.currency.symbol || 'CFG'}`,
+  const { execute: transfer, isLoading } = useCentrifugeTransaction(
+    `Send ${currency?.currency.symbol || 'CFG'}`,
     (cent) => cent.tokens.transfer,
     {
       onSuccess: () => form.resetForm(),
@@ -101,10 +147,11 @@ const SendCFG = ({ address }: SendReceiveProps) => {
   useQuery(
     ['paymentInfo', address],
     async () => {
+      if (!currency) return
       await estimatedTxFee([
         address,
-        'Native',
-        CurrencyBalance.fromFloat(centBalances?.native.balance.toDecimal() || 1, 18),
+        currency?.currency.key,
+        CurrencyBalance.fromFloat(currency.balance.toDecimal(), currency?.currency.decimals),
       ])
     },
     {
@@ -119,13 +166,13 @@ const SendCFG = ({ address }: SendReceiveProps) => {
     },
     validate(values) {
       const errors: Partial<{ amount: string; recipientAddress: string }> = {}
-      if (values.amount && Dec(values.amount).gt(centBalances?.native.balance.toDecimal() || Dec(0))) {
+      if (values.amount && Dec(values.amount).gt(currency?.balance.toDecimal() || Dec(0))) {
         errors.amount = 'Amount exceeds wallet balance'
       }
       if (!values.amount || Dec(values.amount).lte(0)) {
         errors.amount = 'Amount must be greater than 0'
       }
-      if (!(isAddress(values.recipientAddress) || isEvmAddress(values.recipientAddress))) {
+      if (!(isSubstrateAddress(values.recipientAddress) || isEvmAddress(values.recipientAddress))) {
         errors.recipientAddress = 'Invalid address format'
       }
 
@@ -134,14 +181,16 @@ const SendCFG = ({ address }: SendReceiveProps) => {
     onSubmit: (values, actions) => {
       if (typeof values.amount === 'undefined') {
         actions.setErrors({ amount: 'Amount must be greater than 0' })
+      } else if (!currency) {
+        actions.setErrors({ amount: 'Invalid currency' })
       } else {
         if (isEvmAddress(values.recipientAddress)) {
-          values.recipientAddress = utils.evmToSubstrateAddress(values.recipientAddress, 2000)
+          values.recipientAddress = utils.evmToSubstrateAddress(values.recipientAddress, chainId || 2031)
         }
-        transferCFG([
+        transfer([
           values.recipientAddress,
-          'Native',
-          CurrencyBalance.fromFloat(values.amount.toString(), centBalances?.native.currency.decimals || 18),
+          currency?.currency.key,
+          CurrencyBalance.fromFloat(values.amount.toString(), currency?.currency.decimals),
         ])
       }
       actions.setSubmitting(false)
@@ -154,16 +203,18 @@ const SendCFG = ({ address }: SendReceiveProps) => {
         <Form>
           <Stack gap="2">
             <Field name="recipientAddress">
-              {({ field, meta }: FieldProps) => (
-                <TextInput
-                  {...field}
-                  label="Recipient address"
-                  errorMessage={meta.touched ? meta.error : undefined}
-                  disabled={isLoading}
-                  placeholder="0x0A4..."
-                  required
-                />
-              )}
+              {({ field, meta }: FieldProps) => {
+                return (
+                  <AddressInput
+                    {...field}
+                    label="Recipient address"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    disabled={isLoading}
+                    placeholder="0x0A4..."
+                    required
+                  />
+                )
+              }}
             </Field>
             <Field name="amount">
               {({ field, meta, form }: FieldProps) => (
@@ -172,12 +223,10 @@ const SendCFG = ({ address }: SendReceiveProps) => {
                   size={0}
                   placeholder="0.00"
                   label="Amount"
-                  onSetMax={async () =>
-                    form.setFieldValue('amount', centBalances?.native.balance.toDecimal().sub(txFee || 0))
-                  }
+                  onSetMax={async () => form.setFieldValue('amount', currency?.balance.toDecimal().sub(txFee || 0))}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
-                  currency={centBalances?.native?.currency.symbol}
+                  currency={currency?.currency.symbol || 'CFG'}
                   onChange={(value) => form.setFieldValue('amount', value)}
                   required
                 />
@@ -185,8 +234,7 @@ const SendCFG = ({ address }: SendReceiveProps) => {
             </Field>
             <Shelf pl={1}>
               <Text variant="label2">
-                Wallet balance:{' '}
-                {formatBalance(centBalances?.native.balance || 0, centBalances?.native.currency.symbol, 2)}
+                Wallet balance: {formatBalance(currency?.balance || 0, currency?.currency.symbol, 2)}
               </Text>
             </Shelf>
             <Shelf>
@@ -201,7 +249,7 @@ const SendCFG = ({ address }: SendReceiveProps) => {
   )
 }
 
-const ReceiveCFG = ({ address }: SendReceiveProps) => {
+const ReceiveToken = ({ address }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
   const centAddress = useMemo(
     () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),

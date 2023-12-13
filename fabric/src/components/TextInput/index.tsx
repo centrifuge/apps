@@ -1,6 +1,8 @@
+import { isAddress as isEvmAddress } from '@ethersproject/address'
+import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
-import styled from 'styled-components'
-import { Flex, IconSearch } from '../..'
+import styled, { keyframes } from 'styled-components'
+import { Flex, IconCentrifuge, IconEthereum, IconLoader, IconSearch } from '../..'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps, InputUnit, InputUnitProps, useContextId } from '../InputBox'
 import { Shelf } from '../Shelf'
@@ -292,3 +294,99 @@ export const TextAreaInput: React.FC<TextAreaInputProps> = ({
     />
   )
 }
+
+type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
+  Omit<InputBoxProps, 'inputElement' | 'rightElement'>
+
+export const AddressInput = ({
+  id,
+  label,
+  secondaryLabel,
+  disabled,
+  errorMessage,
+  onBlur,
+  onChange,
+  ...inputProps
+}: CurrencyInputProps) => {
+  id ??= React.useId()
+
+  const [network, setNetwork] = React.useState<'ethereum' | 'centrifuge' | 'loading' | null>(null)
+
+  function handleChange(e: React.FocusEvent<HTMLInputElement>) {
+    const address = e.target.value
+    if (isEvmAddress(address) && address.length > 3) {
+      setNetwork('ethereum')
+    } else if (isSubstrateAddress(address) && address.length > 3) {
+      setNetwork('centrifuge')
+    } else if (address !== '') {
+      setNetwork('loading')
+    } else {
+      setNetwork(null)
+    }
+
+    if (onChange) {
+      onChange(e)
+    }
+  }
+
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const address = e.target.value
+    if (!(isSubstrateAddress(address) || isEvmAddress(address))) {
+      setNetwork(null)
+    }
+
+    if (onBlur) {
+      onBlur(e)
+    }
+  }
+  return (
+    <InputUnit
+      label={label}
+      disabled={disabled}
+      errorMessage={errorMessage}
+      inputElement={
+        <TextInputBox
+          {...inputProps}
+          disabled={disabled}
+          type="text"
+          onChange={handleChange}
+          onBlur={handleBlur}
+          action={
+            network && (
+              <Shelf
+                gap={1}
+                p="8px"
+                border="1px solid"
+                borderColor="borderSecondary"
+                backgroundColor="backgroundPage"
+                borderRadius="input"
+              >
+                {network === 'ethereum' ? (
+                  <IconEthereum size="20px" />
+                ) : network === 'centrifuge' ? (
+                  <IconCentrifuge size="20px" />
+                ) : network === 'loading' ? (
+                  <SpinningIconLoader size="20px" />
+                ) : null}
+              </Shelf>
+            )
+          }
+        />
+      }
+    />
+  )
+}
+
+const rotate = keyframes`
+	0% {
+		transform: rotate(0);
+	}
+
+	100% {
+		transform: rotate(1turn);
+	}
+`
+
+const SpinningIconLoader = styled(IconLoader)`
+  animation: ${rotate} 3s linear infinite;
+`
