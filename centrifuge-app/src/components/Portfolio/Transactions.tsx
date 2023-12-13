@@ -1,5 +1,5 @@
 import { BorrowerTransactionType, InvestorTransactionType, Pool, Token, TokenBalance } from '@centrifuge/centrifuge-js'
-import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import { formatBalance } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -116,8 +116,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
     },
   ].filter(Boolean) as Column[]
 
-  const { formatAddress } = useCentrifugeUtils()
-  const transactions = useTransactionsByAddress(formatAddress(address))
+  const transactions = useTransactionsByAddress(address)
   const pools = usePools()
   const investorTransactions = React.useMemo(() => {
     const txs = transactions?.investorTransactions

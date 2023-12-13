@@ -18,7 +18,7 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress()
+  const address = useAddress('substrate')
 
   if (!address) {
     return (
@@ -38,7 +38,7 @@ function Portfolio() {
             Track and manage your portfolio
           </Text>
         </Stack>
-        <CardPortfolioValue />
+        <CardPortfolioValue address={address} />
       </LayoutSection>
       <HoldingsSection address={address} canInvestRedeem />
       <LayoutSection title="Transaction history">
