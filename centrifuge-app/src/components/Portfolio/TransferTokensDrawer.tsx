@@ -1,5 +1,10 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import {
+  useBalances,
+  useCentEvmChainId,
+  useCentrifugeTransaction,
+  useCentrifugeUtils,
+} from '@centrifuge/centrifuge-react'
 import {
   AddressInput,
   Box,
@@ -89,7 +94,7 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
               selectedIndex={params.get('send') ? 0 : 1}
               onChange={(index) =>
                 history.push({
-                  search: index === 0 ? `send=${currency?.currency.symbol}` : `receive=${currency?.currency.symbol}`,
+                  search: index === 0 ? `send=${transferCurrencySymbol}` : `receive=${transferCurrencySymbol}`,
                 })
               }
             >
@@ -128,6 +133,7 @@ type SendReceiveProps = {
 
 const SendToken = ({ address, currency }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
+  const chainId = useCentEvmChainId()
 
   const { execute: transfer, isLoading } = useCentrifugeTransaction(
     `Send ${currency?.currency.symbol || 'CFG'}`,
@@ -179,7 +185,7 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
         actions.setErrors({ amount: 'Invalid currency' })
       } else {
         if (isEvmAddress(values.recipientAddress)) {
-          values.recipientAddress = utils.evmToSubstrateAddress(values.recipientAddress, 2000)
+          values.recipientAddress = utils.evmToSubstrateAddress(values.recipientAddress, chainId || 2031)
         }
         transfer([
           values.recipientAddress,
