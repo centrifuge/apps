@@ -144,7 +144,6 @@ export function HoldingsSection({ canInvestRedeem = false, address }: { canInves
 export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
   const wallet = useWallet()
-  console.log('🚀 ~ wallet:', wallet)
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
   const portfolioTokens = usePortfolioTokens(address)
