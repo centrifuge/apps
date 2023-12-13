@@ -18,7 +18,7 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const [price, setPrice] = React.useState<number | ''>()
+  const [price, setPrice] = React.useState<number | ''>('')
   const [touched, setTouched] = React.useState(false)
   const address = useAddress('substrate')
   const balances = useBalances(address)

@@ -1,13 +1,11 @@
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import styled from 'styled-components'
 import { DAO } from '../utils/useDAOConfig'
+import { LayoutSection } from './LayoutBase/LayoutSection'
 
 export const Resolutions = ({ dao }: { dao: DAO }) => {
   return (
-    <Stack as="article" gap={2}>
-      <Text as="h2" variant="heading2">
-        Resolutions
-      </Text>
+    <LayoutSection title="Resolutions">
       <Shelf alignItems="flex-start" gap={3}>
         {dao.resolutions.map((blog) => (
           <HoverableCard
@@ -40,7 +38,7 @@ export const Resolutions = ({ dao }: { dao: DAO }) => {
           </HoverableCard>
         ))}
       </Shelf>
-    </Stack>
+    </LayoutSection>
   )
 }
 

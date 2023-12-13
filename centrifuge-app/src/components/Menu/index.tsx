@@ -15,6 +15,7 @@ import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
+import { useTransactionsByAddress } from '../../utils/usePools'
 import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
@@ -27,6 +28,7 @@ export function Menu() {
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
   const { showSwaps, showPrime } = useDebugFlags()
+  const transactions = useTransactionsByAddress(address)
 
   return (
     <Shelf
@@ -48,7 +50,7 @@ export function Menu() {
         </PageLink>
       )}
 
-      {address && (
+      {address && (transactions ?? null) && (
         <PageLink to="/history" stacked={!isLarge}>
           <IconClock />
           History

@@ -1,8 +1,8 @@
 import { Stack } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { useDebugFlags } from '../../../components/DebugFlags'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PendingMultisigs } from '../../../components/PendingMultisigs'
 import { usePoolAdmin } from '../../../utils/usePermissions'
 import { Admins } from '../Configuration/Admins'
@@ -11,14 +11,13 @@ import { AssetOriginators } from './AssetOriginators'
 import { PoolManagers } from './PoolManagers'
 
 export function IssuerPoolAccessPage() {
-  const { pid: poolId } = useParams<{ pid: string }>()
   return (
-    <PageWithSideBar sidebar={<PendingMultisigs poolId={poolId} />}>
+    <LayoutBase>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolAccess />
       </LoadBoundary>
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -28,6 +27,7 @@ function IssuerPoolAccess() {
 
   return (
     <Stack>
+      <PendingMultisigs poolId={poolId} />
       {!!usePoolAdmin(poolId) && (
         <>
           <PoolManagers poolId={poolId} />

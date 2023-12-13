@@ -14,7 +14,7 @@ import { useSubquery } from '../../utils/useSubquery'
 
 export default function PrimePage() {
   return (
-    <LayoutBase>
+    <LayoutBase gap={5}>
       <Prime />
     </LayoutBase>
   )
@@ -23,7 +23,7 @@ export default function PrimePage() {
 function Prime() {
   return (
     <>
-      <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5}>
+      <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5} pb={3}>
         <Text variant="heading1">Centrifuge Prime</Text>
         <Box maxWidth={800}>
           <Text variant="body1">
