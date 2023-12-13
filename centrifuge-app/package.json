@@ -33,7 +33,7 @@
     "@polkadot/react-identicon": "~3.1.4",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
-    "@subwallet/wallet-connect": "^0.2.3",
+    "@subwallet/wallet-connect": "^0.2.6",
     "@web3modal/standalone": "^2.4.2",
     "bn.js": "^5.2.1",
     "formik": "^2.2.9",
