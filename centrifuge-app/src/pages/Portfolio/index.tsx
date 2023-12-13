@@ -18,7 +18,7 @@ export default function PortfolioPage() {
 }
 
 function Portfolio() {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const theme = useTheme()
 
   if (!address) {
@@ -40,7 +40,7 @@ function Portfolio() {
               Track and manage your portfolio
             </Text>
           </Stack>
-          <CardPortfolioValue />
+          <CardPortfolioValue address={address} />
         </BasePadding>
         <Box pt={1} px={BASE_PADDING}>
           <Holdings address={address} canInvestRedeem={true} />

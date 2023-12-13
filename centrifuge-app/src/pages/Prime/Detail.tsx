@@ -1,3 +1,4 @@
+import { addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
@@ -26,9 +27,9 @@ function PrimeDetail() {
   const utils = useCentrifugeUtils()
   const centAddress =
     dao &&
-    utils.formatAddress(
-      typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
-    )
+    (typeof dao.network === 'number'
+      ? utils.evmToSubstrateAddress(dao.address, dao.network)
+      : addressToHex(dao.address))
 
   return !isLoading && dao && centAddress ? (
     <>
@@ -47,7 +48,7 @@ function PrimeDetail() {
         </Shelf>
       </LayoutSection>
       <BasePadding gap={3}>
-        <CardPortfolioValue />
+        <CardPortfolioValue address={centAddress} />
         <Holdings address={centAddress} />
         <Transactions onlyMostRecent address={centAddress} />
         <Resolutions dao={dao} />
