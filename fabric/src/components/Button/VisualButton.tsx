@@ -68,7 +68,7 @@ export const StyledButton = styled.span<StyledProps>(
       justifySelf: 'center',
     },
   },
-  ({ $variant, $disabled, $small, $active, $iconOnly, $loading, theme }) => {
+  ({ $variant, $disabled, $small, $active, $iconOnly, $loading }) => {
     const isTertiaryIcon = $variant === 'tertiary' && $iconOnly
     const variant = $variant === 'wallet' ? 'secondary' : $variant
     const variantToken = variant[0].toUpperCase().concat(variant.slice(1))
