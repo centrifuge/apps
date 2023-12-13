@@ -14,6 +14,7 @@ import {
   FileUpload,
   Grid,
   Select_DEPRECATED,
+  Shelf,
   Text,
   TextInput_DEPRECATED,
   TextWithPlaceholder,
@@ -29,9 +30,9 @@ import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
+import { LayoutBase } from '../../components/LayoutBase'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
-import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
@@ -62,9 +63,9 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
 
 export default function IssuerCreatePoolPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <CreatePoolForm />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -490,25 +491,6 @@ function CreatePoolForm() {
                 by {form.values.issuerName || (address && truncate(address))}
               </TextWithPlaceholder>
             }
-            actions={
-              <>
-                <Text variant="body3">
-                  Deposit required: {formatBalance(deposit, balances?.native.currency.symbol, 1)}
-                </Text>
-
-                <Button variant="secondary" onClick={() => history.goBack()}>
-                  Cancel
-                </Button>
-
-                <Button
-                  loading={form.isSubmitting || createProxiesIsPending || transactionIsPending}
-                  type="submit"
-                  loadingMessage={`Creating pool ${form.isSubmitting || createProxiesIsPending ? '1/2' : '2/2'}`}
-                >
-                  Create
-                </Button>
-              </>
-            }
           />
           <PageSection title="Details">
             <Grid columns={[4]} equalColumns gap={2} rowGap={3}>
@@ -599,7 +581,6 @@ function CreatePoolForm() {
                       label="Initial maximum reserve*"
                       placeholder="0"
                       currency={form.values.currency}
-                      variant="small"
                       onChange={(value) => form.setFieldValue('maxReserve', value)}
                     />
                   )}
@@ -623,6 +604,25 @@ function CreatePoolForm() {
           <TrancheSection />
 
           <AdminMultisigSection />
+          <Box position="sticky" bottom={0} backgroundColor="backgroundPage">
+            <PageSection>
+              <Shelf gap={1} justifyContent="end">
+                <Text variant="body3">
+                  Deposit required: {formatBalance(deposit, balances?.native.currency.symbol, 1)}
+                </Text>
+                <Button variant="secondary" onClick={() => history.goBack()}>
+                  Cancel
+                </Button>
+                <Button
+                  loading={form.isSubmitting || createProxiesIsPending || transactionIsPending}
+                  type="submit"
+                  loadingMessage={`Creating pool ${form.isSubmitting || createProxiesIsPending ? '1/2' : '2/2'}`}
+                >
+                  Create
+                </Button>
+              </Shelf>
+            </PageSection>
+          </Box>
         </Form>
       </FormikProvider>
     </>

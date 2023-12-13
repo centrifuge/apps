@@ -169,7 +169,6 @@ const SendCFG = ({ address }: SendReceiveProps) => {
               {({ field, meta, form }: FieldProps) => (
                 <CurrencyInput
                   {...field}
-                  variant="small"
                   size={0}
                   placeholder="0.00"
                   label="Amount"
