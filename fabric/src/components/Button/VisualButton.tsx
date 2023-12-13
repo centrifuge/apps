@@ -68,9 +68,9 @@ export const StyledButton = styled.span<StyledProps>(
       justifySelf: 'center',
     },
   },
-  ({ $variant, $disabled, $small, $active, $iconOnly, $loading, theme }) => {
+  ({ $variant, $disabled, $small, $active, $iconOnly, $loading }) => {
     const isTertiaryIcon = $variant === 'tertiary' && $iconOnly
-    const variant = $variant //=== 'wallet' ? 'secondary' : $variant
+    const variant = $variant === 'wallet' ? 'secondary' : $variant
     const variantToken = variant[0].toUpperCase().concat(variant.slice(1))
     const bg = `backgroundButton${variantToken}`
     const bgFocus = `backgroundButton${variantToken}Focus`
@@ -87,35 +87,27 @@ export const StyledButton = styled.span<StyledProps>(
     const borderHover = `borderButton${variantToken}Hover`
     const borderPressed = `borderButton${variantToken}Pressed`
     const borderDisabled = `borderButton${variantToken}Disabled`
-    const shadow = `shadowButton${variantToken}Pressed`
+    const shadow = `button${variantToken}`
 
     return css({
       color: $disabled ? fgDisabled : $active ? fgHover : fg,
-      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon && variant !== 'wallet' ? bgHover : bg,
-      borderColor: $disabled
-        ? borderDisabled
-        : $active && !isTertiaryIcon && variant !== 'wallet'
-        ? borderHover
-        : border,
+      backgroundColor: $disabled ? bgDisabled : $active ? bgHover : bg,
+      borderColor: $disabled ? borderDisabled : $active ? borderHover : border,
       borderWidth: 1,
-      borderRadius: $variant === 'wallet' ? 40 : 4,
+      borderRadius: 'button',
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
-      '--fabric-color-focus': theme.colors[shadow],
-      boxShadow:
-        $active && variant === 'secondary' ? 'buttonActive' : $variant === 'wallet' ? 'cardInteractive' : 'none',
+      boxShadow: variant !== 'tertiary' && !$disabled ? shadow : 'none',
 
       '&:hover': {
         color: fgHover,
         backgroundColor: isTertiaryIcon ? undefined : bgHover,
         borderColor: isTertiaryIcon ? undefined : borderHover,
-        boxShadow: variant === 'secondary' ? 'buttonActive' : variant === 'wallet' ? 'cardInteractive' : 'none',
       },
       '&:active': {
         color: fgPressed,
         backgroundColor: isTertiaryIcon ? undefined : bgPressed,
         borderColor: isTertiaryIcon ? undefined : borderPressed,
-        boxShadow: variant === 'wallet' ? 'cardInteractive' : variant !== 'tertiary' ? 'buttonActive' : 'none',
       },
 
       'a:focus-visible &, button:focus-visible &': {
@@ -138,7 +130,7 @@ const Spinner = styled(IconSpinner)`
   animation: ${rotate} 600ms linear infinite;
 `
 
-export const VisualButton: React.FC<VisualButtonProps> = ({
+export function VisualButton({
   variant = 'primary',
   small,
   icon: IconComp,
@@ -148,11 +140,10 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
   loadingMessage,
   children,
   active,
-}) => {
+}: VisualButtonProps) {
   const isTertiaryIcon = variant === 'tertiary' && !children
   const isWallet = variant === 'wallet'
-  const px = isWallet ? '12px' : isTertiaryIcon ? 1 : variant === 'tertiary' || small ? 2 : 3
-  const iconSize = isTertiaryIcon && !small ? 'iconMedium' : 'iconSmall'
+  const iconSize = isTertiaryIcon && !small ? 'iconMedium' : '20px'
 
   return (
     <StyledButton
@@ -165,7 +156,7 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
     >
       <DefaultContent
         gap={1}
-        px={px}
+        px={2}
         py={small ? '5px' : '7px'}
         position="relative"
         justifyContent={isWallet ? 'start' : 'center'}
@@ -180,7 +171,7 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
         ) : (
           <>
             {children && (
-              <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
+              <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={400}>
                 {children}
               </Text>
             )}
@@ -188,10 +179,10 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
         )}
         {IconRightComp && (isComponent(IconRightComp) ? <IconRightComp size="iconSmall" /> : IconRightComp)}
       </DefaultContent>
-      <LoadingContent px={px} gap={1} justifyContent="center">
+      <LoadingContent px={2} gap={1} justifyContent="center">
         <Spinner size={small ? 'iconSmall' : 'iconMedium'} />
         {loadingMessage && (
-          <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
+          <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={400}>
             {loadingMessage}
           </Text>
         )}

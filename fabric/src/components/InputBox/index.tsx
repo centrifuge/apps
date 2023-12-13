@@ -25,7 +25,7 @@ const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean }>`
     $disabled ? theme.colors.backgroundSecondary : $active ? theme.colors.textSelected : theme.colors.grayScale[300]};
   &:focus,
   &:focus-within {
-    border-color: var(--fabric-color-focus);
+    border-color: var(--fabric-focus);
   }
 `
 

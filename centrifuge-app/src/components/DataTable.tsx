@@ -213,7 +213,7 @@ const DataRow = styled(Row)<any>`
             }
           : undefined,
       '&:focus-visible': {
-        boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
+        boxShadow: 'inset 0 0 0 3px var(--fabric-focus)',
       },
     })}
 `
@@ -255,7 +255,7 @@ const HeaderCol = styled(DataCol)`
   align-items: center;
 
   &:has(:focus-visible) {
-    box-shadow: inset 0 0 0 3px var(--fabric-color-focus);
+    box-shadow: inset 0 0 0 3px var(--fabric-focus);
   }
 `
 
