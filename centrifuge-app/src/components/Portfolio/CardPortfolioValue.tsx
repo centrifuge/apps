@@ -1,4 +1,3 @@
-import { useAddress } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -21,8 +20,7 @@ const rangeFilters = [
   // { value: 'all', label: 'All' },
 ] as const
 
-export function CardPortfolioValue() {
-  const address = useAddress('substrate')
+export function CardPortfolioValue({ address }: { address: string }) {
   const portfolioTokens = usePortfolioTokens(address)
 
   const { colors } = useTheme()
@@ -102,7 +100,7 @@ export function CardPortfolioValue() {
         </Stack>
 
         <Box width="100%" height="300px">
-          <PortfolioValue rangeValue={range.value} />
+          <PortfolioValue rangeValue={range.value} address={address} />
         </Box>
       </Box>
     </Box>

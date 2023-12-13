@@ -2,6 +2,7 @@ import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
+import { encodeAddress } from '@polkadot/util-crypto'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
@@ -2184,31 +2185,35 @@ export function getPoolsModule(inst: Centrifuge) {
   function getTransactionsByAddress(args: [address: string, count?: number, txTypes?: InvestorTransactionType[]]) {
     const [address] = args
 
-    const $query = inst.getSubqueryObservable<{
-      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
-    }>(
-      `query ($address: String) {
-        investorTransactions(
-          filter: {accountId: {equalTo: $address}}
-          orderBy: TIMESTAMP_DESC
-        ) {
-          nodes {
-            timestamp
-            type
-            poolId
-            trancheId
-            hash
-            tokenAmount
-            tokenPrice
-            currencyAmount
+    const $query = inst.getApi().pipe(
+      switchMap((api) =>
+        inst.getSubqueryObservable<{
+          investorTransactions: { nodes: SubqueryInvestorTransaction[] }
+        }>(
+          `query ($address: String) {
+          investorTransactions(
+            filter: {accountId: {equalTo: $address}}
+            orderBy: TIMESTAMP_DESC
+          ) {
+            nodes {
+              timestamp
+              type
+              poolId
+              trancheId
+              hash
+              tokenAmount
+              tokenPrice
+              currencyAmount
+            }
           }
         }
-      }
-    `,
-      {
-        address,
-      },
-      false
+      `,
+          {
+            address: encodeAddress(address, api.registry.chainSS58),
+          },
+          false
+        )
+      )
     )
 
     return $query.pipe(

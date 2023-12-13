@@ -1,4 +1,3 @@
-import { useAddress, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Card, Stack, Text } from '@centrifuge/fabric'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatDate } from '../../utils/date'
@@ -27,11 +26,9 @@ const TooltipInfo = ({ payload }: any) => {
   return null
 }
 
-export function PortfolioValue({ rangeValue }: { rangeValue: string }) {
-  const address = useAddress()
-  const { formatAddress } = useCentrifugeUtils()
+export function PortfolioValue({ rangeValue, address }: { rangeValue: string; address: string }) {
   const rangeNumber = getRangeNumber(rangeValue)
-  const dailyPortfolioValue = useDailyPortfolioValue(formatAddress(address || ''), rangeNumber)
+  const dailyPortfolioValue = useDailyPortfolioValue(address, rangeNumber)
 
   const getXAxisInterval = () => {
     if (rangeNumber <= 30) return 5

@@ -40,7 +40,7 @@ function Portfolio() {
               Track and manage your portfolio
             </Text>
           </Stack>
-          <CardPortfolioValue />
+          <CardPortfolioValue address={address} />
         </BasePadding>
         <Box pt={1} px={BASE_PADDING}>
           <Holdings address={address} />
