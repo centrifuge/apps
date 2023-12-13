@@ -57,7 +57,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
     },
     {
       align: 'left',
-      header: <SortableTableHeader label="date" />,
+      header: <SortableTableHeader label="Date" />,
       cell: ({ date }: Row) => (
         <Text as="time" variant="body3" datetime={date}>
           {formatDate(date, {

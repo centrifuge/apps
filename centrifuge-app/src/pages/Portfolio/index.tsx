@@ -8,6 +8,7 @@ import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValu
 import { HoldingsSection } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
+import { useTransactionsByAddress } from '../../utils/usePools'
 
 export default function PortfolioPage() {
   return (
@@ -19,6 +20,7 @@ export default function PortfolioPage() {
 
 function Portfolio() {
   const address = useAddress('substrate')
+  const transactions = useTransactionsByAddress(address)
 
   if (!address) {
     return (
@@ -41,9 +43,12 @@ function Portfolio() {
         <CardPortfolioValue address={address} />
       </LayoutSection>
       <HoldingsSection address={address} canInvestRedeem />
-      <LayoutSection title="Transaction history">
-        <Transactions onlyMostRecent address={address} />
-      </LayoutSection>
+
+      {transactions !== null && (
+        <LayoutSection title="Transaction history">
+          <Transactions onlyMostRecent address={address} />
+        </LayoutSection>
+      )}
       <LayoutSection title="Allocation">
         <AssetAllocation address={address} />
       </LayoutSection>
