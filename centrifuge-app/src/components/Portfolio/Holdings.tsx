@@ -44,8 +44,7 @@ type Row = {
   tokenPrice: TokenBalance
   canInvestRedeem: boolean
   address: string
-  onClickInvest?: () => void
-  onClickRedeem?: () => void
+  connectedNetwork: string
 }
 
 const columns: Column[] = [
@@ -94,7 +93,7 @@ const columns: Column[] = [
   {
     align: 'left',
     header: '', // invest redeem buttons
-    cell: ({ canInvestRedeem, poolId, trancheId, currency }: Row) => {
+    cell: ({ canInvestRedeem, poolId, trancheId, currency, connectedNetwork }: Row) => {
       const isTinlakePool = poolId.startsWith('0x')
       return (
         <Grid gap={1} justifySelf="end">
@@ -117,7 +116,7 @@ const columns: Column[] = [
                 Invest
               </RouterLinkButton>
             </>
-          ) : (
+          ) : connectedNetwork === 'Centrifuge' ? (
             <>
               <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
                 Receive
@@ -126,7 +125,7 @@ const columns: Column[] = [
                 Send
               </RouterLinkButton>
             </>
-          )}
+          ) : null}
         </Grid>
       )
     },
@@ -136,6 +135,7 @@ const columns: Column[] = [
 export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
   const wallet = useWallet()
+  console.log('🚀 ~ wallet:', wallet)
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
   const portfolioTokens = usePortfolioTokens(address)
@@ -170,6 +170,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         poolId: balance.poolId,
         currency: tranche?.currency,
         canInvestRedeem,
+        connectedNetwork: wallet.connectedNetworkName,
       }
     }),
     ...(tinlakeBalances?.currencies.filter((currency) => currency.balance.gtn(0)) || []).map((currency) => {
@@ -181,6 +182,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         poolId: '',
         currency: currency.currency,
         canInvestRedeem: false,
+        connectedNetwork: wallet.connectedNetworkName,
       }
     }),
     ...(centBalances?.currencies
@@ -195,6 +197,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
           tokenPrice: Dec(1),
           marketValue: currency.balance.toDecimal() || Dec(0),
           canInvestRedeem: false,
+          connectedNetwork: wallet.connectedNetworkName,
         }
       }) || []),
     ...(wallet.connectedNetworkName === 'Centrifuge'
@@ -213,6 +216,7 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
             tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
             marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) : Dec(0),
             canInvestRedeem: false,
+            connectedNetwork: wallet.connectedNetworkName,
           },
         ]
       : []),
