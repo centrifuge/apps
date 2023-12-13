@@ -148,13 +148,11 @@ function Loan() {
   return (
     <Stack>
       {loan && !isTinlakeLoan(loan) && (
-        <>
-          <Drawer isOpen={oraclePriceShown} onClose={() => setOraclePriceShown(false)}>
-            <LoadBoundary>
-              <OraclePriceForm loan={loan} />
-            </LoadBoundary>
-          </Drawer>
-        </>
+        <Drawer isOpen={oraclePriceShown} onClose={() => setOraclePriceShown(false)}>
+          <LoadBoundary>
+            <OraclePriceForm loan={loan} />
+          </LoadBoundary>
+        </Drawer>
       )}
       <Box mt={2} ml={2}>
         <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
