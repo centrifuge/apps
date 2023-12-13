@@ -3,28 +3,36 @@ import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifug
 import {
   AnchorButton,
   Box,
-  Button,
-  Drawer,
   Grid,
+  IconDownload,
   IconExternalLink,
   IconMinus,
   IconPlus,
-  Shelf,
-  Stack,
+  IconSend,
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
+import React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import daiLogo from '../../assets/images/dai-logo.svg'
+import ethLogo from '../../assets/images/ethereum.svg'
+import centLogo from '../../assets/images/logoCentrifuge.svg'
+import usdcLogo from '../../assets/images/usdc-logo.svg'
+import usdtLogo from '../../assets/images/usdt-logo.svg'
 import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
+import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
+import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
+import { LayoutSection } from '../LayoutBase/LayoutSection'
+import { RouterLinkButton } from '../RouterLinkButton'
 import { Tooltips } from '../Tooltips'
-import { CFGTransfer } from './CFGTransfer'
+import { TransferTokensDrawer } from './TransferTokensDrawer'
 import { usePortfolioTokens } from './usePortfolio'
 
 type Row = {
@@ -36,6 +44,8 @@ type Row = {
   tokenPrice: TokenBalance
   canInvestRedeem: boolean
   address: string
+  onClickInvest?: () => void
+  onClickRedeem?: () => void
 }
 
 const columns: Column[] = [
@@ -62,7 +72,7 @@ const columns: Column[] = [
     cell: ({ currency, position }: Row) => {
       return (
         <Text textOverflow="ellipsis" variant="body3">
-          {formatBalanceAbbreviated(position || 0, currency.symbol, 2)}
+          {formatBalanceAbbreviated(position || 0, currency?.symbol, 2)}
         </Text>
       )
     },
@@ -84,37 +94,52 @@ const columns: Column[] = [
   {
     align: 'left',
     header: '', // invest redeem buttons
-    cell: ({ canInvestRedeem, poolId }: Row) => {
+    cell: ({ canInvestRedeem, poolId, trancheId, currency }: Row) => {
       const isTinlakePool = poolId.startsWith('0x')
       return (
-        canInvestRedeem && (
-          <Shelf gap={1} justifySelf="end">
-            {isTinlakePool ? (
-              <AnchorButton
-                variant="tertiary"
-                small
-                icon={IconExternalLink}
-                href="https://legacy.tinlake.centrifuge.io/portfolio"
-                target="_blank"
-              >
-                View on Tinlake
-              </AnchorButton>
-            ) : (
-              <>
-                <Button small variant="tertiary" icon={IconMinus}>
-                  Redeem
-                </Button>
-                <Button small variant="tertiary" icon={IconPlus}>
-                  Invest
-                </Button>
-              </>
-            )}
-          </Shelf>
-        )
+        <Grid gap={1} justifySelf="end">
+          {isTinlakePool ? (
+            <AnchorButton
+              variant="tertiary"
+              small
+              icon={IconExternalLink}
+              href="https://legacy.tinlake.centrifuge.io/portfolio"
+              target="_blank"
+            >
+              View on Tinlake
+            </AnchorButton>
+          ) : canInvestRedeem ? (
+            <>
+              <RouterLinkButton to={`?redeem=${poolId}-${trancheId}`} small variant="tertiary" icon={IconMinus}>
+                Redeem
+              </RouterLinkButton>
+              <RouterLinkButton to={`?invest=${poolId}-${trancheId}`} small variant="tertiary" icon={IconPlus}>
+                Invest
+              </RouterLinkButton>
+            </>
+          ) : (
+            <>
+              <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
+                Receive
+              </RouterLinkButton>
+              <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="tertiary" icon={IconSend}>
+                Send
+              </RouterLinkButton>
+            </>
+          )}
+        </Grid>
       )
     },
   },
 ]
+
+export function HoldingsSection({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
+  return (
+    <LayoutSection title="Holdings">
+      <Holdings canInvestRedeem={canInvestRedeem} address={address} />
+    </LayoutSection>
+  )
+}
 
 // TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
@@ -123,10 +148,17 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   const { data: tinlakeBalances } = useTinlakeBalances()
   const pools = usePools()
   const portfolioTokens = usePortfolioTokens(address)
+  const currencies = usePoolCurrencies()
   const { search, pathname } = useLocation()
   const history = useHistory()
   const params = new URLSearchParams(search)
-  const openDrawer = params.get('transfer') === 'cfg'
+  const openSendDrawer = params.get('send')
+  const openReceiveDrawer = params.get('receive')
+  const openInvestDrawer = params.get('invest')
+  const openRedeemDrawer = params.get('redeem')
+
+  const [investPoolId, investTrancheId] = openInvestDrawer?.split('-') || []
+  const [redeemPoolId, redeemTrancheId] = openRedeemDrawer?.split('-') || []
 
   const CFGPrice = useCFGTokenPrice()
 
@@ -149,6 +181,31 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
         canInvestRedeem,
       }
     }),
+    ...(tinlakeBalances?.currencies.filter((currency) => currency.balance.gtn(0)) || []).map((currency) => {
+      return {
+        position: currency.balance,
+        marketValue: currency.balance.toDecimal().mul(Dec(1)),
+        tokenPrice: Dec(1),
+        trancheId: '',
+        poolId: '',
+        currency: currency.currency,
+        canInvestRedeem: false,
+      }
+    }),
+    ...(centBalances?.currencies
+      ?.filter((currency) => currency.balance.gtn(0))
+      .map((currency) => {
+        const token = currencies?.find((curr) => curr.symbol === currency.currency.symbol)
+        return {
+          currency: token,
+          poolId: '',
+          trancheId: '',
+          position: currency.balance.toDecimal() || Dec(0),
+          tokenPrice: Dec(1),
+          marketValue: currency.balance.toDecimal() || Dec(0),
+          canInvestRedeem: false,
+        }
+      }) || []),
     ...(wallet.connectedNetworkName === 'Centrifuge'
       ? [
           {
@@ -171,22 +228,21 @@ export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem
   ]
 
   return tokens.length ? (
-    <Stack as="article" gap={2}>
-      <Drawer isOpen={openDrawer} onClose={() => history.replace(pathname)}>
-        <CFGTransfer address={address} />
-      </Drawer>
-      <Text as="h2" variant="heading2">
-        Holdings
-      </Text>
-      <DataTable
-        columns={columns}
-        data={tokens}
-        defaultSortKey="position"
-        onRowClicked={(row) =>
-          row.currency?.symbol === centBalances?.native.currency.symbol ? `${pathname}?transfer=cfg` : pathname
-        }
+    <>
+      <InvestRedeemDrawer
+        poolId={investPoolId || redeemPoolId || ''}
+        trancheId={investTrancheId || redeemTrancheId || ''}
+        open={!!(openRedeemDrawer || openInvestDrawer)}
+        onClose={() => history.replace(pathname)}
+        defaultView={openRedeemDrawer ? 'redeem' : 'invest'}
       />
-    </Stack>
+      <TransferTokensDrawer
+        address={address}
+        isOpen={!!(openSendDrawer || openReceiveDrawer)}
+        onClose={() => history.replace(pathname)}
+      />
+      <DataTable columns={columns} data={tokens} defaultSortKey="position" />
+    </>
   ) : null
 }
 
@@ -195,11 +251,24 @@ const TokenWithIcon = ({ poolId, currency }: Row) => {
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
   const { sizes } = useTheme()
-  const icon = metadata?.pool?.icon?.uri
-    ? cent.metadata.parseMetadataUrl(metadata.pool.icon.uri)
-    : !poolId
-    ? cent.metadata.parseMetadataUrl('ipfs://Qmbo43MdtokiRQ5fTLT8FoYZo6kJrW56vUqXjqYQY6Fg9f')
-    : null
+
+  const getIcon = () => {
+    if (metadata?.pool?.icon?.uri) {
+      return cent.metadata.parseMetadataUrl(metadata.pool.icon.uri)
+    } else if (currency?.name?.toLowerCase()?.includes('eth')) {
+      return ethLogo
+    } else if (currency?.symbol?.toLowerCase() === 'dai') {
+      return daiLogo
+    } else if (currency?.symbol?.toLowerCase() === 'usdc') {
+      return usdcLogo
+    } else if (currency?.symbol?.toLowerCase() === 'usdt') {
+      return usdtLogo
+    } else {
+      return centLogo
+    }
+  }
+  const icon = getIcon()
+
   return (
     <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
       <Eththumbnail show={!!poolId.startsWith('0x')}>
@@ -211,7 +280,7 @@ const TokenWithIcon = ({ poolId, currency }: Row) => {
       </Eththumbnail>
 
       <Text textOverflow="ellipsis" variant="body3">
-        {currency.name}
+        {currency?.name}
       </Text>
     </Grid>
   )

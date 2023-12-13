@@ -1,5 +1,5 @@
 import { BorrowerTransactionType, InvestorTransactionType, Pool, Token, TokenBalance } from '@centrifuge/centrifuge-js'
-import { formatBalance, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import { formatBalance } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -29,8 +29,6 @@ type TransactionsProps = {
   address: string
 }
 
-type TransactionTableData = Row[]
-
 type Row = {
   action: InvestorTransactionType | BorrowerTransactionType
   date: number
@@ -59,7 +57,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
     },
     {
       align: 'left',
-      header: <SortableTableHeader label="date" />,
+      header: <SortableTableHeader label="Date" />,
       cell: ({ date }: Row) => (
         <Text as="time" variant="body3" datetime={date}>
           {formatDate(date, {
@@ -118,8 +116,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
     },
   ].filter(Boolean) as Column[]
 
-  const { formatAddress } = useCentrifugeUtils()
-  const transactions = useTransactionsByAddress(formatAddress(address))
+  const transactions = useTransactionsByAddress(address)
   const pools = usePools()
   const investorTransactions = React.useMemo(() => {
     const txs = transactions?.investorTransactions
@@ -162,56 +159,44 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
 
   const pagination = usePagination({ data: investorTransactions, pageSize: onlyMostRecent ? 3 : 15 })
 
-  return (
-    <Stack as="article" gap={onlyMostRecent ? 2 : 5}>
-      <Text as="h2" variant={narrow ? 'heading4' : 'heading2'}>
-        Transaction history
-      </Text>
-      {investorTransactions?.length ? (
-        <PaginationProvider pagination={pagination}>
-          <Stack gap={2}>
-            <Box overflow="auto" width="100%">
-              <DataTable
-                data={investorTransactions}
-                columns={columns}
-                pageSize={pagination.pageSize}
-                page={pagination.page}
-              />
-            </Box>
-            {onlyMostRecent ? (
-              <Box display="inline-block">
-                <RouterLinkButton to={`/history/${address}`} small variant="tertiary" icon={IconEye}>
-                  View all
-                </RouterLinkButton>
-              </Box>
-            ) : (
-              <Shelf justifyContent="space-between">
-                {pagination.pageCount > 1 && (
-                  <Shelf>
-                    <Pagination />
-                  </Shelf>
-                )}
-                {csvUrl && (
-                  <Box style={{ gridColumn: columns.length, justifySelf: 'end' }}>
-                    <AnchorButton
-                      small
-                      variant="secondary"
-                      href={csvUrl}
-                      download={`transaction-history-${address}.csv`}
-                    >
-                      Export as CSV
-                    </AnchorButton>
-                  </Box>
-                )}
+  return investorTransactions?.length ? (
+    <PaginationProvider pagination={pagination}>
+      <Stack gap={2}>
+        <Box overflow="auto" width="100%">
+          <DataTable
+            data={investorTransactions}
+            columns={columns}
+            pageSize={pagination.pageSize}
+            page={pagination.page}
+          />
+        </Box>
+        {onlyMostRecent ? (
+          <Box display="inline-block">
+            <RouterLinkButton to={`/history/${address}`} small variant="tertiary" icon={IconEye}>
+              View all
+            </RouterLinkButton>
+          </Box>
+        ) : (
+          <Shelf justifyContent="space-between">
+            {pagination.pageCount > 1 && (
+              <Shelf>
+                <Pagination />
               </Shelf>
             )}
-          </Stack>
-        </PaginationProvider>
-      ) : investorTransactions ? (
-        <Text>No transactions</Text>
-      ) : (
-        <Spinner />
-      )}
-    </Stack>
+            {csvUrl && (
+              <Box style={{ gridColumn: columns.length, justifySelf: 'end' }}>
+                <AnchorButton small variant="secondary" href={csvUrl} download={`transaction-history-${address}.csv`}>
+                  Export as CSV
+                </AnchorButton>
+              </Box>
+            )}
+          </Shelf>
+        )}
+      </Stack>
+    </PaginationProvider>
+  ) : investorTransactions ? (
+    <Text>No transactions</Text>
+  ) : (
+    <Spinner />
   )
 }

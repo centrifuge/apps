@@ -242,7 +242,10 @@ function Footer() {
   return (
     <>
       {state.actingAddress && connectedType === 'substrate' && (
-        <Transactions onlyMostRecent narrow address={state.actingAddress} />
+        <Stack gap={2}>
+          <Text variant="heading4">Transaction history</Text>
+          <Transactions onlyMostRecent narrow address={state.actingAddress} />
+        </Stack>
       )}
     </>
   )
@@ -770,8 +773,7 @@ function PendingOrder({
             </>
           )}
           <Text variant="body3">
-            Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {(pool.epoch.status === 'ongoing' && epochTimeRemaining) || `0 min remaining`}).{' '}
+            All orders are being collected and will be executed by the issuer of the pool.{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>

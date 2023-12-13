@@ -6,8 +6,8 @@ import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { LoanTemplate } from '../../../types'
 import { useMetadata, usePrefetchMetadata } from '../../../utils/useMetadata'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
@@ -112,9 +112,9 @@ const initialSchemaJSON = `{
 
 export function IssuerPoolCreateLoanTemplatePage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <CreateLoanTemplate />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 

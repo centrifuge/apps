@@ -369,12 +369,10 @@ function AOForm({
           if (!value.meta.location) {
             errors = setIn(errors, `withdrawAddresses.${index}.meta.location`, 'Select a destination')
           } else {
-            if (
-              typeof value.meta.location !== 'string' &&
-              'evm' in value.meta.location &&
-              !isEvmAddress(value.meta.address)
-            ) {
-              errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid EVM address')
+            if (typeof value.meta.location !== 'string' && 'evm' in value.meta.location) {
+              if (!isEvmAddress(value.meta.address)) {
+                errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid EVM address')
+              }
             } else if (!isSubstrateAddress(value.meta.address) || isEvmAddress(value.meta.address)) {
               errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid Substrate address')
             }

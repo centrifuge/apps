@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps, InputUnit } from '../InputBox'
 import { Shelf } from '../Shelf'
@@ -12,19 +12,17 @@ export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement
     currency?: React.ReactNode
     onSetMax?: () => void
     onChange?: (value: number | '') => void
-    // TODO: Remove when deprecated inputs are removed
-    variant?: 'small' | 'large'
     decimals?: number
   }
 
 type CurrencyInputProps_DEPRECATED = Omit<CurrencyInputProps, 'decimals'> & { precision?: number }
 
-const StyledTextInput = styled.input<{ $variant?: 'small' | 'large' }>`
+const StyledTextInput = styled.input`
   width: 100%;
   border: 0;
   background: transparent;
-  height: 36px;
-  font-size: 24px;
+  font-size: 16px;
+  height: 20px;
   font-weight: inherit;
   font-family: inherit;
   line-height: inherit;
@@ -44,13 +42,6 @@ const StyledTextInput = styled.input<{ $variant?: 'small' | 'large' }>`
     -webkit-appearance: none;
     margin: 0;
   }
-
-  ${({ $variant }) =>
-    $variant === 'small' &&
-    css({
-      fontSize: '16px',
-      height: '20px',
-    })}
 `
 
 const StyledMaxButton = styled(Box)`
@@ -135,7 +126,7 @@ export const CurrencyInput_DEPRECATED: React.FC<CurrencyInputProps_DEPRECATED> =
         />
       }
       rightElement={
-        <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'} fontSize={'24px'}>
+        <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'} fontSize="18px">
           {currency}
         </Text>
       }

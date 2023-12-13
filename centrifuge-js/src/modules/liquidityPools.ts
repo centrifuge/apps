@@ -512,7 +512,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       },
       {
         target: currencyAddress,
-        call: ['function allowance(address, address) view returns (uint)', user, manager],
+        call: ['function allowance(address, address) view returns (uint)', user, lp],
         returns: [['lpCurrencyAllowance', toCurrencyBalance(currency.currencyDecimals)]],
       },
       {
