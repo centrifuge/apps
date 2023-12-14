@@ -1539,7 +1539,7 @@ export function getPoolsModule(inst: Centrifuge) {
               if (proxies) {
                 // The borrow and withdraw txs need different proxy types
                 // If a proxy type was passed, replace it with the right one
-                // Otherwise pass none, as it means the signer has the Any proxy type
+                // Otherwise pass none, as it means the delegatee has the Any proxy type
                 borrowTx = proxies.reduceRight(
                   (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
                   borrowTx
@@ -1583,7 +1583,7 @@ export function getPoolsModule(inst: Centrifuge) {
               if (proxies) {
                 // The borrow and withdraw txs need different proxy types
                 // If a proxy type was passed, replace it with the right one
-                // Otherwise pass none, as it means the signer has the Any proxy type
+                // Otherwise pass none, as it means the delegatee has the Any proxy type
                 borrowTx = proxies.reduceRight(
                   (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
                   borrowTx
