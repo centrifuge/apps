@@ -83,7 +83,7 @@ export function PoolCard({
                 minimumFractionDigits: 1,
                 maximumFractionDigits: 1,
               })
-            ) : name === 'Anemoy' ? (
+            ) : name?.toLowerCase().includes('anemoy') ? (
               <Tooltips
                 type="tbillApr"
                 label={
