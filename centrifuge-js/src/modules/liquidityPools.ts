@@ -105,9 +105,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function approveForCurrency(args: [address: string, currencyAddress: string], options: TransactionRequest = {}) {
-    const [address, currencyAddress] = args
-    return pending(contract(currencyAddress, ABI.Currency).approve(address, maxUint256, options))
+  function approveForCurrency(
+    args: [address: string, currencyAddress: string, amount: BN],
+    options: TransactionRequest = {}
+  ) {
+    const [address, currencyAddress, amount] = args
+    return pending(contract(currencyAddress, ABI.Currency).approve(address, amount, options))
   }
 
   async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
