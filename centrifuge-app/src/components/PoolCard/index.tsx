@@ -89,7 +89,7 @@ export function PoolCard({
                 label={
                   <>
                     <Text fontWeight={500} variant="body1">
-                      5%
+                      5.0%
                     </Text>
                     <Text variant="body3"> target</Text>{' '}
                   </>
