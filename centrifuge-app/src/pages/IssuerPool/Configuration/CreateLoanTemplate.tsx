@@ -1,6 +1,6 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, TextAreaInput } from '@centrifuge/fabric'
+import { Box, Button, Shelf, TextAreaInput } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
@@ -8,6 +8,7 @@ import { lastValueFrom } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
+import { PageSection } from '../../../components/PageSection'
 import { LoanTemplate } from '../../../types'
 import { useMetadata, usePrefetchMetadata } from '../../../utils/useMetadata'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
@@ -203,8 +204,13 @@ export function CreateLoanTemplate() {
         <PageHeader
           title={`Version ${(poolMetadata.loanTemplates?.length ?? 0) + 1}`}
           subtitle={poolMetadata?.pool?.name}
-          actions={
-            <>
+        />
+        <Box p={3}>
+          <FieldWithErrorMessage name="metadata" as={TextAreaInput} placeholder="{}" rows={20} />
+        </Box>
+        <Box position="sticky" bottom={0} backgroundColor="backgroundPage">
+          <PageSection>
+            <Shelf gap={1} justifyContent="end">
               <Button variant="secondary" small onClick={() => history.goBack()}>
                 Cancel
               </Button>
@@ -217,11 +223,8 @@ export function CreateLoanTemplate() {
               >
                 {isUpdating ? 'Update' : 'Create'}
               </Button>
-            </>
-          }
-        />
-        <Box p={3}>
-          <FieldWithErrorMessage name="metadata" as={TextAreaInput} placeholder="{}" rows={20} />
+            </Shelf>
+          </PageSection>
         </Box>
       </Form>
     </FormikProvider>

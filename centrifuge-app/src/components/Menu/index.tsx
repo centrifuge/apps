@@ -43,13 +43,6 @@ export function Menu() {
         Pools
       </PageLink>
 
-      {showPrime && (
-        <PageLink to="/prime" stacked={!isLarge}>
-          <IconGlobe />
-          Prime
-        </PageLink>
-      )}
-
       {address && (
         <PageLink to="/portfolio" stacked={!isLarge}>
           <IconPieChart />
@@ -64,10 +57,10 @@ export function Menu() {
         </PageLink>
       )}
 
-      {config.network !== 'centrifuge' && (
-        <PageLink to="/nfts" stacked={!isLarge}>
-          <IconNft />
-          NFTs
+      {showPrime && (
+        <PageLink to="/prime" stacked={!isLarge}>
+          <IconGlobe />
+          Prime
         </PageLink>
       )}
 
@@ -112,6 +105,13 @@ export function Menu() {
         <PageLink to="/swaps" stacked={!isLarge}>
           <IconSwitch />
           Swaps
+        </PageLink>
+      )}
+
+      {config.network !== 'centrifuge' && (
+        <PageLink to="/nfts" stacked={!isLarge}>
+          <IconNft />
+          NFTs
         </PageLink>
       )}
     </Shelf>

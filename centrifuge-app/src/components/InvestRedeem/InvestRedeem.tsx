@@ -461,7 +461,10 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
         ) : changeOrderFormShown ? (
           state.needsPoolCurrencyApproval(inputToNumber(form.values.amount)) ? (
             renderInput(() => setChangeOrderFormShown(false), {
-              onClick: actions.approvePoolCurrency,
+              onClick: () =>
+                actions.approvePoolCurrency(
+                  CurrencyBalance.fromFloat(form.values.amount, state.poolCurrency!.decimals)
+                ),
               loading: isApproving,
             })
           ) : (
@@ -485,7 +488,8 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
           </Stack>
         ) : state.needsPoolCurrencyApproval(inputToNumber(form.values.amount)) ? (
           renderInput(undefined, {
-            onClick: actions.approvePoolCurrency,
+            onClick: () =>
+              actions.approvePoolCurrency(CurrencyBalance.fromFloat(form.values.amount, state.poolCurrency!.decimals)),
             loading: isApproving,
           })
         ) : (
@@ -649,7 +653,10 @@ function RedeemForm({ autoFocus }: RedeemFormProps) {
         ) : changeOrderFormShown ? (
           state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
             renderInput(() => setChangeOrderFormShown(false), {
-              onClick: actions.approveTrancheToken,
+              onClick: () =>
+                actions.approveTrancheToken(
+                  TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)
+                ),
               loading: isApproving,
             })
           ) : (
@@ -669,7 +676,11 @@ function RedeemForm({ autoFocus }: RedeemFormProps) {
             }}
           />
         ) : state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
-          renderInput(undefined, { onClick: actions.approveTrancheToken, loading: isApproving })
+          renderInput(undefined, {
+            onClick: () =>
+              actions.approveTrancheToken(TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)),
+            loading: isApproving,
+          })
         ) : (
           renderInput(undefined)
         )}
