@@ -11,7 +11,6 @@ import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
 import { CurrencyKey, getCurrencyEvmAddress, getCurrencyLocation } from './pools'
 
-const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
