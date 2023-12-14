@@ -258,12 +258,16 @@ export const tooltipText = {
     label: 'CFG price',
     body: 'CFG price sourced externally from Uniswap.',
   },
+  tbillApr: {
+    label: 'T-Bill APR',
+    body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
+  },
 }
 
 export type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
-  label?: string
+  label?: string | React.ReactNode
   props?: any
 }
 
@@ -272,9 +276,13 @@ export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride,
   const isPrimary = variant === 'primary'
   return (
     <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body}>
-      <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
-        {labelOverride || label}
-      </Text>
+      {typeof label === 'string' ? (
+        <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
+          {labelOverride || label}
+        </Text>
+      ) : (
+        label
+      )}
     </FabricTooltip>
   )
 }
