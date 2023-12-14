@@ -151,17 +151,16 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     trancheBalanceWithPending: combinedTrancheBalance,
     investmentValue,
     tokenPrice: price,
-    order:
-      lpInvest && (!lpInvest?.pendingInvest.isZero() || !lpInvest?.pendingRedeem.isZero())
-        ? {
-            investCurrency: lpInvest.pendingInvest.toDecimal(),
-            redeemToken: lpInvest.pendingRedeem.toDecimal(),
-            payoutCurrencyAmount: lpInvest.maxWithdraw.toDecimal(),
-            payoutTokenAmount: lpInvest.maxMint.toDecimal(),
-            remainingInvestCurrency: lpInvest.pendingInvest.toDecimal(),
-            remainingRedeemToken: lpInvest.pendingRedeem.toDecimal(),
-          }
-        : null,
+    order: lpInvest
+      ? {
+          investCurrency: lpInvest.pendingInvest.toDecimal(),
+          redeemToken: lpInvest.pendingRedeem.toDecimal(),
+          payoutCurrencyAmount: lpInvest.maxWithdraw.toDecimal(),
+          payoutTokenAmount: lpInvest.maxMint.toDecimal(),
+          remainingInvestCurrency: lpInvest.pendingInvest.toDecimal(),
+          remainingRedeemToken: lpInvest.pendingRedeem.toDecimal(),
+        }
+      : null,
     collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
     collectType,
     needsToCollectBeforeOrder: true,
