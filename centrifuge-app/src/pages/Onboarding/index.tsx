@@ -69,7 +69,7 @@ export default function OnboardingPage() {
       return history.push('/onboarding')
     }
 
-    // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
+    // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
     const trancheDetails = poolDetails?.tranches.find((tranche) => tranche.id === trancheId)
 
     if (trancheDetails) {

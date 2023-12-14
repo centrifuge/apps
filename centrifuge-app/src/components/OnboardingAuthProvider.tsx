@@ -1,7 +1,7 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeUtils, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
+import { Signer } from '@polkadot/types/types'
 import { encodeAddress } from '@polkadot/util-crypto'
-import { Wallet } from '@subwallet/wallet-connect/types'
 import { BigNumber, ethers } from 'ethers'
 import { hashMessage } from 'ethers/lib/utils'
 import * as React from 'react'
@@ -61,7 +61,7 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
   const { mutate: login, isLoading: isLoggingIn } = useMutation(async () => {
     try {
       if (selectedAccount?.address && selectedWallet?.signer) {
-        await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer, cent, proxy)
+        await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer as Signer, cent, proxy)
       } else if (isEvmOnSubstrate && selectedAddress && provider?.getSigner()) {
         await loginWithEvm(selectedAddress, provider.getSigner(), evmChainId, isEvmOnSubstrate)
       } else if (selectedAddress && provider?.getSigner()) {
@@ -145,7 +145,7 @@ export function useOnboardingAuth() {
   }
 }
 
-const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], cent: Centrifuge, proxy?: any) => {
+const loginWithSubstrate = async (hexAddress: string, signer: Signer, cent: Centrifuge, proxy?: any) => {
   // onboarding-api expects the wallet address in the native substrate format
   const address = encodeAddress(hexAddress, await cent.getChainId())
   const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
@@ -158,7 +158,6 @@ const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], 
   })
   const { nonce } = await nonceRes.json()
   if (proxy) {
-    // @ts-expect-error Signer type version mismatch
     const { token, payload } = await cent.auth.generateJw3t(address, signer, {
       onBehalfOf: proxy.delegator,
     })
@@ -187,7 +186,6 @@ const loginWithSubstrate = async (hexAddress: string, signer: Wallet['signer'], 
       }
     }
   } else {
-    // @ts-expect-error Signer type version mismatch
     const { token, payload } = await cent.auth.generateJw3t(address, signer)
 
     if (token) {

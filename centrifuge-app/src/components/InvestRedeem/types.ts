@@ -64,8 +64,8 @@ export type InvestRedeemActions = {
   invest(newOrder: BN): void
   redeem(newOrder: BN): void
   collect(): void
-  approvePoolCurrency(): void
-  approveTrancheToken(): void
+  approvePoolCurrency(amount: BN): void
+  approveTrancheToken(amount: BN): void
   cancelInvest(): void
   cancelRedeem(): void
 }
