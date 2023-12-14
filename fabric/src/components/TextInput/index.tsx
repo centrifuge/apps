@@ -77,7 +77,7 @@ export const StyledInputBox = styled(Shelf)`
 
   &:has(input:focus)::before,
   &:has(select:focus)::before {
-    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.accentPrimary};
+    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.focus};
   }
 `
 
@@ -85,7 +85,7 @@ export const StyledInputAction = styled.button`
   cursor: pointer;
   appearance: none;
   border: none;
-  background: ${(props) => props.theme.colors.backgroundInput};
+  background: ${(props) => props.theme.colors.backgroundButtonSecondary};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -99,7 +99,7 @@ export const StyledInputAction = styled.button`
   }) => `0 ${input}px ${input}px 0`};
 
   &:focus-visible {
-    box-shadow: 0 0 0 1px ${(props) => props.theme.colors.accentPrimary};
+    box-shadow: 0 0 0 1px ${(props) => props.theme.colors.focus};
   }
   &:disabled {
     opacity: 0.4;
