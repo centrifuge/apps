@@ -27,6 +27,7 @@ type TransactionsProps = {
   narrow?: boolean
   txTypes?: InvestorTransactionType[]
   address: string
+  trancheId?: string
 }
 
 type Row = {
@@ -41,7 +42,7 @@ type Row = {
   trancheId: string
 }
 
-export function Transactions({ onlyMostRecent, narrow, txTypes, address }: TransactionsProps) {
+export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId }: TransactionsProps) {
   const columns = [
     {
       align: 'left',
@@ -120,8 +121,9 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
   const pools = usePools()
   const investorTransactions = React.useMemo(() => {
     const txs = transactions?.investorTransactions
-      .slice(0, onlyMostRecent ? 3 : transactions?.investorTransactions.length)
       .filter((tx) => (txTypes ? txTypes?.includes(tx.type) : tx))
+      .filter((tx) => (trancheId ? tx.trancheId === trancheId : tx))
+      .slice(0, onlyMostRecent ? 3 : transactions?.investorTransactions.length)
       .map((tx) => {
         const pool = pools?.find((pool) => pool.id === tx.poolId)
         const tranche = pool?.tranches.find((tranche) => tranche.id === tx.trancheId)
@@ -138,7 +140,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address }: Trans
         } as Row
       })
     return txs
-  }, [transactions?.investorTransactions, onlyMostRecent, txTypes, pools])
+  }, [transactions?.investorTransactions, onlyMostRecent, txTypes, pools, trancheId])
 
   const csvData = React.useMemo(() => {
     if (!investorTransactions || !investorTransactions?.length) {
