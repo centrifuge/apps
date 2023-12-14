@@ -127,7 +127,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
               }}
             </Field>
             <WithdrawSelect loan={loan} borrower={account} />
-            {poolReserve.lessThan(availableFinancing) && (
+            {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
               <InlineFeedback>
                 The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
                 the available financing
