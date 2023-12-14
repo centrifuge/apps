@@ -2,7 +2,6 @@ import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
-import { encodeAddress } from '@polkadot/util-crypto'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, Observable, of, startWith } from 'rxjs'
@@ -2185,12 +2184,10 @@ export function getPoolsModule(inst: Centrifuge) {
   function getTransactionsByAddress(args: [address: string, count?: number, txTypes?: InvestorTransactionType[]]) {
     const [address] = args
 
-    const $query = inst.getApi().pipe(
-      switchMap((api) =>
-        inst.getSubqueryObservable<{
-          investorTransactions: { nodes: SubqueryInvestorTransaction[] }
-        }>(
-          `query ($address: String) {
+    const $query = inst.getSubqueryObservable<{
+      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
+    }>(
+      `query ($address: String) {
           investorTransactions(
             filter: {accountId: {equalTo: $address}}
             orderBy: TIMESTAMP_DESC
@@ -2208,12 +2205,10 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         }
       `,
-          {
-            address: encodeAddress(address, api.registry.chainSS58),
-          },
-          false
-        )
-      )
+      {
+        address: addressToHex(address),
+      },
+      false
     )
 
     return $query.pipe(
