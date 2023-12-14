@@ -74,7 +74,9 @@ type EnvironmentConfig = {
 
 const poolCreationType = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
 const defaultPodUrl = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
-export const isTestEnv = window.location.hostname.endsWith('k-f.dev') || window.location.hostname === 'localhost'
+export const isTestEnv =
+  (window.location.hostname.endsWith('k-f.dev') && !window.location.hostname.includes('production')) ||
+  window.location.hostname === 'localhost'
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',

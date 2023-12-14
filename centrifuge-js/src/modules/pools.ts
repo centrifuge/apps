@@ -1523,7 +1523,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return inst.getApi().pipe(
       switchMap((api) => {
-        const borrowSubmittable = api.tx.loans.borrow(poolId, loanId, {
+        let borrowTx = api.tx.loans.borrow(poolId, loanId, {
           external: { quantity: quantity.toString(), settlementPrice: price.toString() },
         })
         if (withdrawTo) {
@@ -1531,13 +1531,33 @@ export function getPoolsModule(inst: Centrifuge) {
           return withdraw([quantity.mul(price).div(Price.fromFloat(1)), currency, address, location], {
             batch: true,
           }).pipe(
-            switchMap((withdrawTx) => {
-              const batchTx = api.tx.utility.batchAll([borrowSubmittable, withdrawTx])
-              return inst.wrapSignAndSend(api, batchTx, options)
+            switchMap((_withdrawTx) => {
+              let withdrawTx = _withdrawTx
+              const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
+                Array.isArray(p) ? p : ([p, undefined] as const)
+              )
+              if (proxies) {
+                // The borrow and withdraw txs need different proxy types
+                // If a proxy type was passed, replace it with the right one
+                // Otherwise pass none, as it means the delegatee has the Any proxy type
+                borrowTx = proxies.reduceRight(
+                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
+                  borrowTx
+                )
+                withdrawTx = proxies.reduceRight(
+                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
+                  withdrawTx
+                )
+              }
+              const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
+
+              const opt = { ...options }
+              delete opt.proxies
+              return inst.wrapSignAndSend(api, batchTx, opt)
             })
           )
         }
-        return inst.wrapSignAndSend(api, borrowSubmittable, options)
+        return inst.wrapSignAndSend(api, borrowTx, options)
       })
     )
   }
@@ -1550,18 +1570,38 @@ export function getPoolsModule(inst: Centrifuge) {
     const amount = amountBN.toString()
     return inst.getApi().pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.borrow(poolId, loanId, { internal: amount })
+        let borrowTx = api.tx.loans.borrow(poolId, loanId, { internal: amount })
 
         if (withdrawTo) {
           const { address, location, currency } = withdrawTo
           return withdraw([amountBN, currency, address, location], { batch: true }).pipe(
-            switchMap((withdrawTx) => {
-              const batchTx = api.tx.utility.batchAll([submittable, withdrawTx])
-              return inst.wrapSignAndSend(api, batchTx, options)
+            switchMap((_withdrawTx) => {
+              let withdrawTx = _withdrawTx
+              const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
+                Array.isArray(p) ? p : ([p, undefined] as const)
+              )
+              if (proxies) {
+                // The borrow and withdraw txs need different proxy types
+                // If a proxy type was passed, replace it with the right one
+                // Otherwise pass none, as it means the delegatee has the Any proxy type
+                borrowTx = proxies.reduceRight(
+                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
+                  borrowTx
+                )
+                withdrawTx = proxies.reduceRight(
+                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
+                  withdrawTx
+                )
+              }
+              const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
+
+              const opt = { ...options }
+              delete opt.proxies
+              return inst.wrapSignAndSend(api, batchTx, opt)
             })
           )
         }
-        return inst.wrapSignAndSend(api, submittable, options)
+        return inst.wrapSignAndSend(api, borrowTx, options)
       })
     )
   }

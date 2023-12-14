@@ -125,6 +125,18 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
           }
         >
           <Grid minColumnWidth={120} mt={3} gap={1}>
+            {/* ethereum mainnet */}
+            <SelectButton
+              key={1}
+              logo={evmChains['1']?.iconUrl ? <Logo icon={evmChains['1'].iconUrl} /> : undefined}
+              onClick={() => showWallets(1)}
+              active={selectedNetwork === 1}
+              muted={isMuted(1)}
+              beta={betaChains.includes(1)}
+            >
+              {getChainInfo(evmChains, 1).name}
+            </SelectButton>
+
             <SelectButton
               logo={<Logo icon={centrifugeLogo} />}
               onClick={() => showWallets('centrifuge')}
@@ -134,25 +146,27 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
               {getNetworkName('centrifuge')}
             </SelectButton>
 
-            {Object.entries(evmChains).map(([chainIdString, chain]) => {
-              const chainId = Number(chainIdString)
-              const info = getChainInfo(evmChains, chainId)
+            {Object.entries(evmChains)
+              .filter((evmChain) => evmChain[0] !== '1')
+              .map(([chainIdString, chain]) => {
+                const chainId = Number(chainIdString)
+                const info = getChainInfo(evmChains, chainId)
 
-              if (chainId === evmChainId) return null
+                if (chainId === evmChainId) return null
 
-              return (
-                <SelectButton
-                  key={chainId}
-                  logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
-                  onClick={() => showWallets(chainId)}
-                  active={selectedNetwork === chainId}
-                  muted={isMuted(chainId)}
-                  beta={betaChains.includes(chainId)}
-                >
-                  {info.name}
-                </SelectButton>
-              )
-            })}
+                return (
+                  <SelectButton
+                    key={chainId}
+                    logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
+                    onClick={() => showWallets(chainId)}
+                    active={selectedNetwork === chainId}
+                    muted={isMuted(chainId)}
+                    beta={betaChains.includes(chainId)}
+                  >
+                    {info.name}
+                  </SelectButton>
+                )
+              })}
           </Grid>
         </SelectionStep>
 

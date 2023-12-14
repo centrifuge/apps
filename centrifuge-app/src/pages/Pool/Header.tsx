@@ -23,6 +23,10 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const theme = useTheme()
   const cent = useCentrifuge()
 
+  const iconUri = metadata?.pool?.icon?.uri && cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)
+
+  const iconSrc = iconUri?.includes('ipfs') ? `https://ipfs.io/ipfs/${iconUri.split('ipfs/')[1]}` : iconUri
+
   return (
     <PageHeader
       title={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>}
@@ -33,12 +37,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       icon={
         <Eththumbnail show={isTinlakePool}>
           {metadata?.pool?.icon ? (
-            <Box
-              as="img"
-              width="iconLarge"
-              height="iconLarge"
-              src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)}
-            />
+            <Box as="img" width="iconLarge" height="iconLarge" src={iconSrc} />
           ) : (
             <Shelf
               width="iconLarge"
