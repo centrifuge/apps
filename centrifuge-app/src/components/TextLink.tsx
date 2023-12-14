@@ -26,7 +26,7 @@ export const TextLink = styled.span`
       bottom: -1px;
       width: 100%;
       height: 2px;
-      background-color: var(--fabric-color-focus);
+      background-color: var(--fabric-focus);
       pointer-events: none;
     }
   }

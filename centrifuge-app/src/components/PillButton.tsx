@@ -23,7 +23,7 @@ const Pill = styled.button<{ variant?: 'small' | 'regular' }>(
   }),
   {
     '&:focus-visible': {
-      boxShadow: '3px 3px 0 var(--fabric-color-focus)',
+      boxShadow: '3px 3px 0 var(--fabric-focus)',
     },
   },
   ({ variant }) =>

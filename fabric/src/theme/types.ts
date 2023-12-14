@@ -10,6 +10,7 @@ type AccentColorName =
   | `accent${'Primary' | 'Secondary'}`
   | 'primarySelectedBackground'
   | 'secondarySelectedBackground'
+  | 'focus'
   | 'borderFocus'
   | 'borderSelected'
   | 'textSelected'
@@ -25,8 +26,8 @@ type ButtonColorName =
       | 'Hover'
       | 'Pressed'
       | 'Disabled'}`
-  | 'shadowButtonPrimaryPressed'
-  | 'shadowButtonSecondaryPressed'
+  | 'shadowButtonPrimary'
+  | 'shadowButtonSecondary'
 
 type ColorName =
   | StatusColorName
@@ -117,7 +118,7 @@ type ThemeFonts = {
 
 // Shadows
 
-type ShadowName = 'buttonActive' | 'cardInteractive' | 'cardOverlay' | 'cardActive'
+type ShadowName = 'buttonPrimary' | 'buttonSecondary' | 'cardInteractive' | 'cardOverlay' | 'cardActive'
 type ShadowValue = string
 
 type ThemeShadows = {

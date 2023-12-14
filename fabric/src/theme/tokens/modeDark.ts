@@ -52,7 +52,7 @@ const darkColors = {
   borderButtonPrimaryHover: 'white',
   borderButtonPrimaryPressed: 'white',
   borderButtonPrimaryDisabled: grayScale[600],
-  shadowButtonPrimaryPressed: altairYellow,
+  shadowButtonPrimary: altairYellow,
 
   backgroundButtonSecondary: 'transparent',
   backgroundButtonSecondaryFocus: 'transparent',
@@ -70,7 +70,7 @@ const darkColors = {
   borderButtonSecondaryHover: grayScale[600],
   borderButtonSecondaryPressed: 'white',
   borderButtonSecondaryDisabled: grayScale[600],
-  shadowButtonSecondaryPressed: 'white',
+  shadowButtonSecondary: 'white',
 
   backgroundButtonTertiary: 'transparent',
   backgroundButtonTertiaryFocus: 'transparent',
@@ -87,23 +87,6 @@ const darkColors = {
   borderButtonTertiaryHover: 'transparent',
   borderButtonTertiaryPressed: yellowScale[500],
   borderButtonTertiaryDisabled: 'transparent',
-
-  backgroundButtonWallet: 'black',
-  backgroundButtonWalletFocus: grayScale[900],
-  backgroundButtonWalletHover: grayScale[900],
-  backgroundButtonWalletPressed: 'black',
-  backgroundButtonWalletDisabled: 'transparent',
-  textButtonWallet: 'white',
-  textButtonWalletFocus: 'white',
-  textButtonWalletHover: 'white',
-  textButtonWalletPressed: 'white',
-  textButtonWalletDisabled: grayScale[600],
-  borderButtonWallet: grayScale[600],
-  borderButtonWalletFocus: 'white',
-  borderButtonWalletHover: grayScale[400],
-  borderButtonWalletPressed: 'white',
-  borderButtonWalletDisabled: grayScale[600],
-  shadowButtonWalletPressed: 'white',
 }
 
 export const modeDark = {
