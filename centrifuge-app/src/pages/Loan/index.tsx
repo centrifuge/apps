@@ -5,7 +5,6 @@ import {
   Drawer,
   Flex,
   IconChevronLeft,
-  IconExternalLink,
   Shelf,
   Stack,
   Text,
@@ -167,19 +166,7 @@ function Loan() {
       <PageHeader
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
-        subtitle={
-          <Shelf gap={1}>
-            {loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
-            <RouterLinkButton
-              to={`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`}
-              icon={IconExternalLink}
-              small
-              variant="tertiary"
-            >
-              View NFT
-            </RouterLinkButton>
-          </Shelf>
-        }
+        subtitle={<Shelf gap={1}>{loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}</Shelf>}
       />
       {loan &&
         pool &&
@@ -284,26 +271,6 @@ function Loan() {
               </Stack>
             </PageSection>
 
-            {loan.status === 'Active' && loan.pricing.maturityDate && (
-              <PageSection title={<Box>Remaining maturity</Box>}>
-                <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
-                  <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
-                  <Box width="60%" backgroundColor="borderSecondary" position="relative">
-                    <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
-                    <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
-                      <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />
-                    </Box>
-                    {maturityPercentage !== 1 && (
-                      <Box position="absolute" left={`${maturityPercentage * 100 - 9}%`} bottom="36px" width="100px">
-                        <LabelValueStack label="Today" value={formatDate(new Date())} />
-                      </Box>
-                    )}
-                  </Box>
-                  <LabelValueStack label="Maturity date" value={formatDate(loan.pricing.maturityDate)} />
-                </Shelf>
-              </PageSection>
-            )}
-
             {borrowerAssetTransactions?.length ? (
               <PageSection
                 title={
@@ -325,6 +292,29 @@ function Loan() {
                 />
               </PageSection>
             ) : null}
+
+            {loan.status === 'Active' &&
+              loan.pricing.maturityDate &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod !== 'oracle' && (
+                <PageSection title={<Box>Remaining maturity</Box>}>
+                  <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
+                    <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
+                    <Box width="60%" backgroundColor="borderSecondary" position="relative">
+                      <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
+                      <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
+                        <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />
+                      </Box>
+                      {maturityPercentage !== 1 && (
+                        <Box position="absolute" left={`${maturityPercentage * 100 - 9}%`} bottom="36px" width="100px">
+                          <LabelValueStack label="Today" value={formatDate(new Date())} />
+                        </Box>
+                      )}
+                    </Box>
+                    <LabelValueStack label="Maturity date" value={formatDate(loan.pricing.maturityDate)} />
+                  </Shelf>
+                </PageSection>
+              )}
           </>
         )}
       {(loan && nft) || isTinlakePool ? (
