@@ -140,7 +140,6 @@ export function HoldingsSection({ canInvestRedeem = false, address }: { canInves
   )
 }
 
-// TODO: change canInvestRedeem to default to true once the drawer is implemented
 export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
   const wallet = useWallet()
