@@ -35,7 +35,7 @@ async function getBalances(pools: TinlakePool[], address: string) {
       }
     )
 
-    if (!seenCurrencies.has(pool.addresses.TINLAKE_CURRENCY)) {
+    if (!seenCurrencies.has(pool.addresses.TINLAKE_CURRENCY.toLowerCase())) {
       calls.push({
         target: pool.addresses.TINLAKE_CURRENCY,
         call: ['balanceOf(address)(uint256)', address],

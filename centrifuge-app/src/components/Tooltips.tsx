@@ -1,4 +1,4 @@
-import { Text, Tooltip as FabricTooltip } from '@centrifuge/fabric'
+import { Text, TextProps, Tooltip as FabricTooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
@@ -269,13 +269,19 @@ export type TooltipsProps = {
   variant?: 'primary' | 'secondary'
   label?: string | React.ReactNode
   props?: any
-}
+} & TextProps
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary', props }) => {
+export const Tooltips: React.FC<TooltipsProps> = ({
+  type,
+  label: labelOverride,
+  variant = 'primary',
+  props,
+  ...textProps
+}) => {
   const { label, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
-    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body}>
+    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
       {typeof label === 'string' ? (
         <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
           {labelOverride || label}

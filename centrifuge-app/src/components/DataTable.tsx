@@ -92,7 +92,7 @@ export const DataTable = <T extends Record<string, any>>({
   keyField,
   onRowClicked,
   defaultSortKey,
-  hoverable = false,
+  hoverable = undefined,
   summary,
   groupIndex,
   lastGroupIndex,

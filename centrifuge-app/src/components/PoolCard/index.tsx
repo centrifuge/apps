@@ -39,7 +39,7 @@ export function PoolCard({
   isLoading,
 }: PoolCardProps) {
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
-  const { sizes } = useTheme()
+  const { sizes, zIndices } = useTheme()
 
   const iconSrc = iconUri?.includes('ipfs') ? `https://ipfs.io/ipfs/${iconUri.split('ipfs/')[1]}` : iconUri
 
@@ -85,6 +85,7 @@ export function PoolCard({
               })
             ) : name?.toLowerCase().includes('anemoy') ? (
               <Tooltips
+                style={{ zIndex: zIndices.overlay }}
                 type="tbillApr"
                 label={
                   <>
