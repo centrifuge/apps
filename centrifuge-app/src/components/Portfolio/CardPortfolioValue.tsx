@@ -80,7 +80,7 @@ export function CardPortfolioValue({ address }: { address: string }) {
         <Stack gap={1}>
           <Shelf justifyContent="flex-end" pr="20px">
             {rangeFilters.map((rangeFilter, index) => (
-              <>
+              <React.Fragment key={rangeFilter.label}>
                 <RangeFilterButton gap={1} onClick={() => setRange(rangeFilter)}>
                   <Text variant="body3">
                     <Text variant={rangeFilter.value === range.value && 'emphasized'}>{rangeFilter.label}</Text>
@@ -94,7 +94,7 @@ export function CardPortfolioValue({ address }: { address: string }) {
                 {index !== rangeFilters.length - 1 && (
                   <Box width="24px" backgroundColor="#E0E0E0" height="3px" alignSelf="flex-end" />
                 )}
-              </>
+              </React.Fragment>
             ))}
           </Shelf>
         </Stack>
