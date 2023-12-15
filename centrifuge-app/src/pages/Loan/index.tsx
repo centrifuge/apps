@@ -166,7 +166,7 @@ function Loan() {
       <PageHeader
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
-        subtitle={<Shelf gap={1}>{loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}</Shelf>}
+        subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
       />
       {loan &&
         pool &&
