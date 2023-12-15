@@ -132,15 +132,15 @@ const columns: Column[] = [
   },
 ]
 
-export function HoldingsSection({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
+export function HoldingsSection({ address }: { address: string }) {
   return (
     <LayoutSection title="Holdings">
-      <Holdings canInvestRedeem={canInvestRedeem} address={address} />
+      <Holdings address={address} />
     </LayoutSection>
   )
 }
 
-export function Holdings({ canInvestRedeem = false, address }: { canInvestRedeem?: boolean; address: string }) {
+export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address: string }) {
   const centBalances = useBalances(address)
   const wallet = useWallet()
   const { data: tinlakeBalances } = useTinlakeBalances()
