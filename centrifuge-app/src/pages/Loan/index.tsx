@@ -5,7 +5,6 @@ import {
   Drawer,
   Flex,
   IconChevronLeft,
-  IconExternalLink,
   Shelf,
   Stack,
   Text,
@@ -167,19 +166,7 @@ function Loan() {
       <PageHeader
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
-        subtitle={
-          <Shelf gap={1}>
-            {loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
-            <RouterLinkButton
-              to={`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`}
-              icon={IconExternalLink}
-              small
-              variant="tertiary"
-            >
-              View NFT
-            </RouterLinkButton>
-          </Shelf>
-        }
+        subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
       />
       {loan &&
         pool &&
@@ -222,14 +209,14 @@ function Loan() {
 
             {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&
             'valuationMethod' in loan.pricing &&
-            loan.pricing.valuationMethod !== 'oracle' ? (
+            loan.pricing.valuationMethod !== 'oracle' &&
+            loan.pricing.valuationMethod !== 'cash' ? (
               <PageSection title={<Box>Financing & repayment cash flow</Box>}>
                 <Shelf gap={3} flexWrap="wrap">
                   {isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan ? (
                     <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
                   ) : (
                     <FinancingRepayment
-                      isCashValuationMethod={loan.pricing.valuationMethod === 'cash'}
                       drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
                       closingDate={null}
                       outstandingPrincipal={formatBalance(
@@ -266,41 +253,20 @@ function Loan() {
               </PageSection>
             )}
 
-            <PageSection title={<Box>Pricing</Box>}>
-              <Stack>
-                <Shelf gap={6} flexWrap="wrap">
-                  <PricingValues loan={loan} pool={pool} />
-                </Shelf>
-                {canOraclePrice &&
-                  loan.status !== 'Closed' &&
-                  'valuationMethod' in loan.pricing &&
-                  loan.pricing.valuationMethod === 'oracle' && (
+            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+              <PageSection title={<Box>Pricing</Box>}>
+                <Stack>
+                  <Shelf gap={6} flexWrap="wrap">
+                    <PricingValues loan={loan} pool={pool} />
+                  </Shelf>
+                  {canOraclePrice && loan.status !== 'Closed' && loan.pricing.valuationMethod === 'oracle' && (
                     <Box marginTop="3">
                       <Button onClick={() => setOraclePriceShown(true)} small>
                         Update price
                       </Button>
                     </Box>
                   )}
-              </Stack>
-            </PageSection>
-
-            {loan.status === 'Active' && loan.pricing.maturityDate && (
-              <PageSection title={<Box>Remaining maturity</Box>}>
-                <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
-                  <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
-                  <Box width="60%" backgroundColor="borderSecondary" position="relative">
-                    <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
-                    <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
-                      <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />
-                    </Box>
-                    {maturityPercentage !== 1 && (
-                      <Box position="absolute" left={`${maturityPercentage * 100 - 9}%`} bottom="36px" width="100px">
-                        <LabelValueStack label="Today" value={formatDate(new Date())} />
-                      </Box>
-                    )}
-                  </Box>
-                  <LabelValueStack label="Maturity date" value={formatDate(loan.pricing.maturityDate)} />
-                </Shelf>
+                </Stack>
               </PageSection>
             )}
 
@@ -325,6 +291,30 @@ function Loan() {
                 />
               </PageSection>
             ) : null}
+
+            {loan.status === 'Active' &&
+              loan.pricing.maturityDate &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod !== 'oracle' &&
+              loan.pricing.valuationMethod !== 'cash' && (
+                <PageSection title={<Box>Remaining maturity</Box>}>
+                  <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
+                    <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
+                    <Box width="60%" backgroundColor="borderSecondary" position="relative">
+                      <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
+                      <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
+                        <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />
+                      </Box>
+                      {maturityPercentage !== 1 && (
+                        <Box position="absolute" left={`${maturityPercentage * 100 - 9}%`} bottom="36px" width="100px">
+                          <LabelValueStack label="Today" value={formatDate(new Date())} />
+                        </Box>
+                      )}
+                    </Box>
+                    <LabelValueStack label="Maturity date" value={formatDate(loan.pricing.maturityDate)} />
+                  </Shelf>
+                </PageSection>
+              )}
           </>
         )}
       {(loan && nft) || isTinlakePool ? (
