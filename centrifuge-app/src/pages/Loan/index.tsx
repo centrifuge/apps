@@ -209,14 +209,14 @@ function Loan() {
 
             {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&
             'valuationMethod' in loan.pricing &&
-            loan.pricing.valuationMethod !== 'oracle' ? (
+            loan.pricing.valuationMethod !== 'oracle' &&
+            loan.pricing.valuationMethod !== 'cash' ? (
               <PageSection title={<Box>Financing & repayment cash flow</Box>}>
                 <Shelf gap={3} flexWrap="wrap">
                   {isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan ? (
                     <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
                   ) : (
                     <FinancingRepayment
-                      isCashValuationMethod={loan.pricing.valuationMethod === 'cash'}
                       drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
                       closingDate={null}
                       outstandingPrincipal={formatBalance(
@@ -253,23 +253,22 @@ function Loan() {
               </PageSection>
             )}
 
-            <PageSection title={<Box>Pricing</Box>}>
-              <Stack>
-                <Shelf gap={6} flexWrap="wrap">
-                  <PricingValues loan={loan} pool={pool} />
-                </Shelf>
-                {canOraclePrice &&
-                  loan.status !== 'Closed' &&
-                  'valuationMethod' in loan.pricing &&
-                  loan.pricing.valuationMethod === 'oracle' && (
+            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+              <PageSection title={<Box>Pricing</Box>}>
+                <Stack>
+                  <Shelf gap={6} flexWrap="wrap">
+                    <PricingValues loan={loan} pool={pool} />
+                  </Shelf>
+                  {canOraclePrice && loan.status !== 'Closed' && loan.pricing.valuationMethod === 'oracle' && (
                     <Box marginTop="3">
                       <Button onClick={() => setOraclePriceShown(true)} small>
                         Update price
                       </Button>
                     </Box>
                   )}
-              </Stack>
-            </PageSection>
+                </Stack>
+              </PageSection>
+            )}
 
             {borrowerAssetTransactions?.length ? (
               <PageSection
@@ -296,7 +295,8 @@ function Loan() {
             {loan.status === 'Active' &&
               loan.pricing.maturityDate &&
               'valuationMethod' in loan.pricing &&
-              loan.pricing.valuationMethod !== 'oracle' && (
+              loan.pricing.valuationMethod !== 'oracle' &&
+              loan.pricing.valuationMethod !== 'cash' && (
                 <PageSection title={<Box>Remaining maturity</Box>}>
                   <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
                     <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
