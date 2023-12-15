@@ -18,13 +18,14 @@ import { nftMetadataSchema } from '../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
+import { useFilters } from '../utils/useFilters'
 import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
-import LoanLabel from './LoanLabel'
+import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 import { prefetchRoute } from './Root'
 
 type Row = (Loan | TinlakeLoan) & {
@@ -46,6 +47,7 @@ export function LoanList({ loans }: Props) {
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
+  const filters = useFilters({ data: loans as (Loan | TinlakeLoan)[] })
 
   React.useEffect(() => {
     prefetchRoute('/pools/1/assets/1')
@@ -60,6 +62,18 @@ export function LoanList({ loans }: Props) {
         cell: (l: Row) => <AssetMetadataField name={key} attribute={attr} loan={l} />,
       }
     }) || []
+
+  const getLoanStatus = (loan: Loan | TinlakeLoan) => {
+    const currentFace =
+      loan.pricing && 'outstandingQuantity' in loan.pricing
+        ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
+        : null
+
+    const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
+
+    const [, label] = getLoanLabelStatus(loan, isExternalAssetRepaid)
+    return label
+  }
 
   const columns = [
     {
@@ -107,9 +121,20 @@ export function LoanList({ loans }: Props) {
     },
     {
       align: 'left',
-      header: <SortableTableHeader label="Status" />,
+      header: (
+        <FilterableTableHeader
+          label="Status"
+          filterKey="status"
+          filters={filters}
+          // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
+          options={loans.reduce((labels, loan) => {
+            const loanStatus = getLoanStatus(loan)
+            labels[loan.status] = loanStatus
+            return labels
+          }, {})}
+        />
+      ),
       cell: (l: Row) => <LoanLabel loan={l} />,
-      sortKey: 'statusLabel',
     },
     {
       header: '',
@@ -118,7 +143,7 @@ export function LoanList({ loans }: Props) {
     },
   ].filter(Boolean) as Column[]
 
-  const rows: Row[] = loans.map((loan) => {
+  const rows: Row[] = filters.data.map((loan) => {
     return {
       nftIdSortKey: loan.asset.nftId,
       idSortKey: parseInt(loan.id, 10),
