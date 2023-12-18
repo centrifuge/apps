@@ -37,6 +37,23 @@ type Props = {
   loans: Loan[] | TinlakeLoan[]
 }
 
+const getLoanStatus = (loan: Loan | TinlakeLoan) => {
+  const currentFace =
+    loan.pricing && 'outstandingQuantity' in loan.pricing
+      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
+      : null
+
+  const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
+
+  const [labelType, label] = getLoanLabelStatus(loan, isExternalAssetRepaid)
+
+  if (label.includes('Due')) {
+    return labelType === 'critical' ? 'Overdue' : 'Ongoing'
+  }
+
+  return label
+}
+
 export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
@@ -47,7 +64,13 @@ export function LoanList({ loans }: Props) {
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
-  const filters = useFilters({ data: loans as (Loan | TinlakeLoan)[] })
+  const loansWithLabelStatus = loans.map((loan) => ({
+    ...loan,
+    labelStatus: getLoanStatus(loan),
+  }))
+  const filters = useFilters({
+    data: loansWithLabelStatus,
+  })
 
   React.useEffect(() => {
     prefetchRoute('/pools/1/assets/1')
@@ -62,18 +85,6 @@ export function LoanList({ loans }: Props) {
         cell: (l: Row) => <AssetMetadataField name={key} attribute={attr} loan={l} />,
       }
     }) || []
-
-  const getLoanStatus = (loan: Loan | TinlakeLoan) => {
-    const currentFace =
-      loan.pricing && 'outstandingQuantity' in loan.pricing
-        ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
-        : null
-
-    const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
-
-    const [, label] = getLoanLabelStatus(loan, isExternalAssetRepaid)
-    return label
-  }
 
   const columns = [
     {
@@ -124,14 +135,9 @@ export function LoanList({ loans }: Props) {
       header: (
         <FilterableTableHeader
           label="Status"
-          filterKey="status"
+          filterKey="labelStatus"
           filters={filters}
-          // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
-          options={loans.reduce((labels, loan) => {
-            const loanStatus = getLoanStatus(loan)
-            labels[loan.status] = loanStatus
-            return labels
-          }, {})}
+          options={[...new Set(loansWithLabelStatus.map(({ labelStatus }) => labelStatus))]}
         />
       ),
       cell: (l: Row) => <LoanLabel loan={l} />,
@@ -143,23 +149,21 @@ export function LoanList({ loans }: Props) {
     },
   ].filter(Boolean) as Column[]
 
-  const rows: Row[] = filters.data.map((loan) => {
-    return {
-      nftIdSortKey: loan.asset.nftId,
-      idSortKey: parseInt(loan.id, 10),
-      outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
-      originationDateSortKey:
-        loan.status === 'Active' &&
-        loan?.originationDate &&
-        'interestRate' in loan.pricing &&
-        !loan?.pricing.interestRate?.isZero() &&
-        !loan?.totalBorrowed?.isZero()
-          ? loan.originationDate
-          : '',
-      maturityDate: loan.pricing.maturityDate,
-      ...loan,
-    }
-  })
+  const rows: Row[] = filters.data.map((loan) => ({
+    nftIdSortKey: loan.asset.nftId,
+    idSortKey: parseInt(loan.id, 10),
+    outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
+    originationDateSortKey:
+      loan.status === 'Active' &&
+      loan?.originationDate &&
+      'interestRate' in loan.pricing &&
+      !loan?.pricing.interestRate?.isZero() &&
+      !loan?.totalBorrowed?.isZero()
+        ? loan.originationDate
+        : '',
+    maturityDate: loan.pricing.maturityDate,
+    ...loan,
+  }))
 
   const pagination = usePagination({ data: rows, pageSize: 20 })
 
