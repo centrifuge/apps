@@ -47,7 +47,7 @@ export const validate = {
   issuerDetailBody: combine(required(), maxLength(3000)),
 
   // tranches
-  tokenName: combine(required(), maxLength(30)),
+  tokenName: combine(required(), maxLength(100)),
   symbolName: combine(required(), maxLength(12)),
   minInvestment: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   interestRate: combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER)),

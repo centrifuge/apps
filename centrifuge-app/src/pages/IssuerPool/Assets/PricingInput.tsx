@@ -19,23 +19,6 @@ export function PricingInput({ poolId }: { poolId: string }) {
   const pool = usePool(poolId)
   return (
     <Grid columns={[1, 2, 2, 3]} gap={2} rowGap={3}>
-      <Field name="pricing.valuationMethod">
-        {({ field, meta, form }: FieldProps) => (
-          <Select_DEPRECATED
-            {...field}
-            label="Valuation method"
-            onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
-            errorMessage={meta.touched && meta.error ? meta.error : undefined}
-            options={[
-              { value: 'discountedCashFlow', label: 'Discounted cashflow' },
-              { value: 'outstandingDebt', label: 'Outstanding debt' },
-              { value: 'oracle', label: 'Oracle' },
-              { value: 'cash', label: 'Cash' },
-            ]}
-            placeholder="Choose valuation method"
-          />
-        )}
-      </Field>
       {values.pricing.valuationMethod === 'oracle' && (
         <>
           <FieldWithErrorMessage
@@ -75,7 +58,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             {({ field, meta, form }: FieldProps) => (
               <Select_DEPRECATED
                 {...field}
-                label="Borrow restriction"
+                label="How much can I borrow?"
                 onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 options={[
