@@ -401,6 +401,23 @@ function IssuerCreateLoan() {
                     maxLength={100}
                     disabled={!templateId}
                   />
+                  <Field name="pricing.valuationMethod">
+                    {({ field, meta, form }: FieldProps) => (
+                      <Select_DEPRECATED
+                        {...field}
+                        label="Valuation method"
+                        onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        options={[
+                          { value: 'discountedCashFlow', label: 'Non-fungible asset - DCF' },
+                          { value: 'outstandingDebt', label: 'Non-fungible asset - at par' },
+                          { value: 'oracle', label: 'Fungible asset - external pricing' },
+                          { value: 'cash', label: 'Cash' },
+                        ]}
+                        placeholder="Choose valuation method"
+                      />
+                    )}
+                  </Field>
                   {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
                     <Box alignSelf="center" justifySelf="end">
                       <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
