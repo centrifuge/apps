@@ -41,7 +41,7 @@ const title = {
 
 export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets }: Props) {
   const evmChains = Object.keys(allEvmChains)
-    .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113'].includes(chain) : true))
+    .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113', '44787'].includes(chain) : true))
     .reduce((obj, key) => {
       obj[key] = allEvmChains[key]
       return obj
@@ -60,8 +60,6 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
     scopedNetworks,
     substrate: { evmChainId },
   } = ctx
-
-  const betaChains = [8453, 84531, 42161, 421613, 42220, 44787] // Base, Arbitrum and Celo
 
   const getNetworkName = useGetNetworkName()
 
@@ -132,7 +130,6 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
               onClick={() => showWallets(1)}
               active={selectedNetwork === 1}
               muted={isMuted(1)}
-              beta={betaChains.includes(1)}
             >
               {getChainInfo(evmChains, 1).name}
             </SelectButton>
@@ -161,7 +158,6 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                     onClick={() => showWallets(chainId)}
                     active={selectedNetwork === chainId}
                     muted={isMuted(chainId)}
-                    beta={betaChains.includes(chainId)}
                   >
                     {info.name}
                   </SelectButton>

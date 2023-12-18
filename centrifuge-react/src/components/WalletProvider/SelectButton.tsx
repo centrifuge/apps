@@ -1,4 +1,4 @@
-import { BetaChip, Box, Shelf, Spinner, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Spinner, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import type { State } from './types'
@@ -10,7 +10,6 @@ type SelectButtonProps = {
   href?: string
   disabled?: boolean
   muted?: boolean
-  beta?: boolean
   loading?: boolean
   logo?: React.ReactNode
   children: React.ReactNode
@@ -125,7 +124,7 @@ export function Logo({
   return <Icon size={size} />
 }
 
-function Content({ loading, beta, logo, children, iconRight }: SelectButtonProps) {
+function Content({ loading, logo, children, iconRight }: SelectButtonProps) {
   const { sizes } = useTheme()
 
   return (
@@ -138,11 +137,6 @@ function Content({ loading, beta, logo, children, iconRight }: SelectButtonProps
           <Label>{children}</Label>
           {iconRight}
         </Shelf>
-      )}
-      {beta && (
-        <Box position="absolute" right={1} top={1}>
-          <BetaChip />
-        </Box>
       )}
     </>
   )
