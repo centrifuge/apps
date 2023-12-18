@@ -82,10 +82,6 @@ export const tooltipText = {
     label: 'Ongoing assets',
     body: 'Number of assets currently being financed in the pool and awaiting repayment.',
   },
-  averageInterestRate: {
-    label: 'Average interest rate',
-    body: 'The average interest rate of the active assets in the pool.',
-  },
   averageAmount: {
     label: 'Average amount',
     body: 'The average outstanding amount of the assets in the pool.',

@@ -18,13 +18,14 @@ import { nftMetadataSchema } from '../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
+import { useFilters } from '../utils/useFilters'
 import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
-import LoanLabel from './LoanLabel'
+import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 import { prefetchRoute } from './Root'
 
 type Row = (Loan | TinlakeLoan) & {
@@ -34,6 +35,23 @@ type Row = (Loan | TinlakeLoan) & {
 
 type Props = {
   loans: Loan[] | TinlakeLoan[]
+}
+
+const getLoanStatus = (loan: Loan | TinlakeLoan) => {
+  const currentFace =
+    loan.pricing && 'outstandingQuantity' in loan.pricing
+      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
+      : null
+
+  const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
+
+  const [labelType, label] = getLoanLabelStatus(loan, isExternalAssetRepaid)
+
+  if (label.includes('Due')) {
+    return labelType === 'critical' ? 'Overdue' : 'Ongoing'
+  }
+
+  return label
 }
 
 export function LoanList({ loans }: Props) {
@@ -46,6 +64,13 @@ export function LoanList({ loans }: Props) {
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
+  const loansWithLabelStatus = loans.map((loan) => ({
+    ...loan,
+    labelStatus: getLoanStatus(loan),
+  }))
+  const filters = useFilters({
+    data: loansWithLabelStatus,
+  })
 
   React.useEffect(() => {
     prefetchRoute('/pools/1/assets/1')
@@ -107,9 +132,15 @@ export function LoanList({ loans }: Props) {
     },
     {
       align: 'left',
-      header: <SortableTableHeader label="Status" />,
+      header: (
+        <FilterableTableHeader
+          label="Status"
+          filterKey="labelStatus"
+          filters={filters}
+          options={[...new Set(loansWithLabelStatus.map(({ labelStatus }) => labelStatus))]}
+        />
+      ),
       cell: (l: Row) => <LoanLabel loan={l} />,
-      sortKey: 'statusLabel',
     },
     {
       header: '',
@@ -118,23 +149,21 @@ export function LoanList({ loans }: Props) {
     },
   ].filter(Boolean) as Column[]
 
-  const rows: Row[] = loans.map((loan) => {
-    return {
-      nftIdSortKey: loan.asset.nftId,
-      idSortKey: parseInt(loan.id, 10),
-      outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
-      originationDateSortKey:
-        loan.status === 'Active' &&
-        loan?.originationDate &&
-        'interestRate' in loan.pricing &&
-        !loan?.pricing.interestRate?.isZero() &&
-        !loan?.totalBorrowed?.isZero()
-          ? loan.originationDate
-          : '',
-      maturityDate: loan.pricing.maturityDate,
-      ...loan,
-    }
-  })
+  const rows: Row[] = filters.data.map((loan) => ({
+    nftIdSortKey: loan.asset.nftId,
+    idSortKey: parseInt(loan.id, 10),
+    outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
+    originationDateSortKey:
+      loan.status === 'Active' &&
+      loan?.originationDate &&
+      'interestRate' in loan.pricing &&
+      !loan?.pricing.interestRate?.isZero() &&
+      !loan?.totalBorrowed?.isZero()
+        ? loan.originationDate
+        : '',
+    maturityDate: loan.pricing.maturityDate,
+    ...loan,
+  }))
 
   const pagination = usePagination({ data: rows, pageSize: 20 })
 
