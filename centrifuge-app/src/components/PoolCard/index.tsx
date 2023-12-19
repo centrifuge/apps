@@ -7,6 +7,7 @@ import { useTheme } from 'styled-components'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { Eththumbnail } from '../EthThumbnail'
 import { Anchor, Ellipsis, Root } from '../ListItemCardStyles'
+import { Tooltips } from '../Tooltips'
 import { PoolStatus, PoolStatusKey } from './PoolStatus'
 
 const columns_base = 'minmax(150px, 2fr) minmax(100px, 1fr) 140px 70px 150px'
@@ -38,7 +39,9 @@ export function PoolCard({
   isLoading,
 }: PoolCardProps) {
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
-  const { sizes } = useTheme()
+  const { sizes, zIndices } = useTheme()
+
+  const iconSrc = iconUri?.includes('ipfs') ? `https://ipfs.io/ipfs/${iconUri.split('ipfs/')[1]}` : iconUri
 
   return (
     <Root as="article">
@@ -46,7 +49,7 @@ export function PoolCard({
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={poolId?.startsWith('0x')}>
             {iconUri ? (
-              <Box as="img" src={iconUri} alt="" height="iconMedium" width="iconMedium" />
+              <Box as="img" src={iconSrc} alt="" height="iconMedium" width="iconMedium" />
             ) : (
               <Thumbnail type="pool" label="LP" size="small" />
             )}
@@ -75,12 +78,27 @@ export function PoolCard({
           maxLines={1}
         >
           <Ellipsis>
-            {apr
-              ? formatPercentage(apr.toAprPercent(), true, {
-                  minimumFractionDigits: 1,
-                  maximumFractionDigits: 1,
-                })
-              : '—'}
+            {apr ? (
+              formatPercentage(apr.toAprPercent(), true, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })
+            ) : name?.toLowerCase().includes('anemoy') ? (
+              <Tooltips
+                style={{ zIndex: zIndices.overlay }}
+                type="tbillApr"
+                label={
+                  <>
+                    <Text fontWeight={500} variant="body1">
+                      5.0%
+                    </Text>
+                    <Text variant="body3"> target</Text>{' '}
+                  </>
+                }
+              />
+            ) : (
+              '—'
+            )}
           </Ellipsis>
           {status === 'Upcoming' && apr ? <Text variant="body3"> target</Text> : ''}
         </TextWithPlaceholder>

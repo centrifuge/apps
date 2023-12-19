@@ -11,7 +11,6 @@ import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
 import { CurrencyKey, getCurrencyEvmAddress, getCurrencyLocation } from './pools'
 
-const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -105,19 +104,31 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function approveForCurrency(args: [address: string, currencyAddress: string], options: TransactionRequest = {}) {
-    const [address, currencyAddress] = args
-    return pending(contract(currencyAddress, ABI.Currency).approve(address, maxUint256, options))
+  function approveForCurrency(
+    args: [address: string, currencyAddress: string, amount: BN],
+    options: TransactionRequest = {}
+  ) {
+    const [address, currencyAddress, amount] = args
+    return pending(contract(currencyAddress, ABI.Currency).approve(address, amount, options))
   }
 
   async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
     const [spender, currencyAddress, amount] = args
     if (!inst.config.evmSigner) throw new Error('EVM signer not set')
+
+    let domainOrCurrency: any = currencyAddress
     const chainId = await inst.config.evmSigner.getChainId()
-    const domain = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
+    if (currencyAddress.toLowerCase() === '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') {
+      // USDC has custom version
+      domainOrCurrency = { name: 'USD Coin', version: '2', chainId, verifyingContract: currencyAddress }
+    } else if (chainId === 5 || chainId === 84531 || chainId === 421613) {
+      // Assume on testnets the LP currencies are used which have custom domains
+      domainOrCurrency = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
+    }
+
     const permit = await signERC2612Permit(
       inst.config.evmSigner,
-      domain,
+      domainOrCurrency,
       inst.getSignerAddress('evm'),
       spender,
       amount.toString()
@@ -149,8 +160,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     options: TransactionRequest = {}
   ) {
     const [lpAddress, order, { deadline, r, s, v }] = args
+    const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), deadline, v, r, s, {
+      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, deadline, v, r, s, {
         ...options,
         gasLimit: 300000,
       })
@@ -491,7 +503,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         returns: [['isAllowedToInvest']],
       },
       {
-        target: lp,
+        target: currency.tokenAddress,
         call: ['function balanceOf(address) view returns (uint256)', user],
         returns: [['tokenBalance', toTokenBalance(currency.trancheDecimals)]],
       },
@@ -502,7 +514,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       },
       {
         target: currencyAddress,
-        call: ['function allowance(address, address) view returns (uint)', user, manager],
+        call: ['function allowance(address, address) view returns (uint)', user, lp],
         returns: [['lpCurrencyAllowance', toCurrencyBalance(currency.currencyDecimals)]],
       },
       {

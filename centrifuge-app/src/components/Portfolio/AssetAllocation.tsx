@@ -1,5 +1,5 @@
 import { useBalances } from '@centrifuge/centrifuge-react'
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
@@ -49,45 +49,40 @@ export function AssetAllocation({ address }: { address: string }) {
     .sort((a, b) => (b.value > a.value ? 1 : a === b ? 0 : -1))
 
   return !!balances?.tranches && !!balances?.tranches.length ? (
-    <Stack gap={2}>
-      <Text as="h2" variant="heading2">
-        Allocation
-      </Text>
-      <Shelf gap={8}>
-        <AssetClassChart data={shares} currency="USD" total={total.toNumber()} />
-        <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>
-          {shares.map((cell, i) => (
-            <Box key={`asset-allocation-${cell.name}-${i}`}>
-              {i > 0 && <Box width="1px" backgroundColor="borderSecondary" />}
-              <LabelValueStack
-                label={
-                  <Box position="relative" ml={22}>
-                    {cell.name}
-                    <div
-                      style={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: '50%',
-                        backgroundColor: cell.color,
-                        position: 'absolute',
-                        top: '50%',
-                        right: 'calc(100% + 10px)',
-                        transform: 'translateY(-50%)',
-                      }}
-                    />
-                  </Box>
-                }
-                value={
-                  <Box ml={22}>
-                    <Text variant="heading2">{formatBalanceAbbreviated(cell.value, 'USD')}</Text>
-                  </Box>
-                }
-                key={i}
-              />
-            </Box>
-          ))}
-        </Shelf>
+    <Shelf gap={8}>
+      <AssetClassChart data={shares} currency="USD" total={total.toNumber()} />
+      <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>
+        {shares.map((cell, i) => (
+          <Box key={`asset-allocation-${cell.name}-${i}`}>
+            {i > 0 && <Box width="1px" backgroundColor="borderSecondary" />}
+            <LabelValueStack
+              label={
+                <Box position="relative" ml={22}>
+                  {cell.name}
+                  <div
+                    style={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      backgroundColor: cell.color,
+                      position: 'absolute',
+                      top: '50%',
+                      right: 'calc(100% + 10px)',
+                      transform: 'translateY(-50%)',
+                    }}
+                  />
+                </Box>
+              }
+              value={
+                <Box ml={22}>
+                  <Text variant="heading2">{formatBalanceAbbreviated(cell.value, 'USD')}</Text>
+                </Box>
+              }
+              key={i}
+            />
+          </Box>
+        ))}
       </Shelf>
-    </Stack>
+    </Shelf>
   ) : null
 }

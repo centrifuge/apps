@@ -60,3 +60,30 @@ export function formatBorrowerTransactionsType(type: BorrowerTransactionType) {
 
   return borrowerTransactionTypes[type]
 }
+
+export function formatTransactionsType({
+  type,
+  trancheTokenSymbol,
+  poolCurrencySymbol,
+  currencyAmount,
+}: {
+  type: InvestorTransactionType | BorrowerTransactionType
+  trancheTokenSymbol: string
+  poolCurrencySymbol: string
+  currencyAmount: number | null
+}) {
+  if (isBorrowerType(type)) {
+    return formatBorrowerTransactionsType(type)
+  }
+
+  return formatInvestorTransactionsType({
+    type,
+    trancheTokenSymbol,
+    poolCurrencySymbol,
+    currencyAmount,
+  })
+}
+
+function isBorrowerType(type: InvestorTransactionType | BorrowerTransactionType): type is BorrowerTransactionType {
+  return ['CREATED', 'PRICED', 'BORROWED', 'REPAID', 'CLOSED'].includes(type)
+}

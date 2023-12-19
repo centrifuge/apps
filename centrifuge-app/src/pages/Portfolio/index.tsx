@@ -1,17 +1,18 @@
-import { Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
 import { LayoutBase } from '../../components/LayoutBase'
 import { BasePadding } from '../../components/LayoutBase/BasePadding'
-import { PoolList } from '../../components/PoolList'
+import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
-import { InvestedTokens } from '../../components/Portfolio/InvestedTokens'
+import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
+import { HoldingsSection } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
+import { useTransactionsByAddress } from '../../utils/usePools'
 
 export default function PortfolioPage() {
   return (
-    <LayoutBase>
+    <LayoutBase gap={5}>
       <Portfolio />
     </LayoutBase>
   )
@@ -19,7 +20,7 @@ export default function PortfolioPage() {
 
 function Portfolio() {
   const address = useAddress('substrate')
-  const theme = useTheme()
+  const transactions = useTransactionsByAddress(address)
 
   if (!address) {
     return (
@@ -30,37 +31,27 @@ function Portfolio() {
   }
   return (
     <>
-      <Stack gap={2}>
-        <BasePadding backgroundColor={theme.colors.backgroundSecondary} gap={4} pb={10}>
-          <Stack as="header" gap={1}>
-            <Text as="h1" variant="heading1">
-              Your portfolio
-            </Text>
-            <Text as="p" variant="label1">
-              Track and manage your portfolio
-            </Text>
-          </Stack>
+      <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
+        <Stack as="header" gap={1}>
+          <Text as="h1" variant="heading1">
+            Your portfolio
+          </Text>
+          <Text as="p" variant="label1">
+            Track and manage your portfolio
+          </Text>
+        </Stack>
+        <CardPortfolioValue address={address} />
+      </LayoutSection>
+      <HoldingsSection address={address} />
 
-          <Shelf>
-            <Card as="article" p={1}>
-              <Text as="h2">Portfolio overview</Text>
-            </Card>
-          </Shelf>
-        </BasePadding>
-        <BasePadding gap={3}>
-          <InvestedTokens address={address} />
+      {transactions !== null && (
+        <LayoutSection title="Transaction history">
           <Transactions onlyMostRecent address={address} />
-          <AssetAllocation address={address} />
-        </BasePadding>
-        <BasePadding>
-          <Stack as="article" gap={2}>
-            <Text as="h2" variant="heading2">
-              Explore opportunities
-            </Text>
-            <PoolList />
-          </Stack>
-        </BasePadding>
-      </Stack>
+        </LayoutSection>
+      )}
+      <LayoutSection title="Allocation">
+        <AssetAllocation address={address} />
+      </LayoutSection>
     </>
   )
 }

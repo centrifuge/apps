@@ -22,6 +22,18 @@ const PoolCardBox = styled<typeof Box & { status?: PoolStatusKey }>(Box)`
   }
 `
 
+const upcomingPools: PoolCardProps[] = [
+  {
+    apr: Rate.fromApr(0.08),
+    assetClass: 'Real Estate Bridge Loans',
+    iconUri: 'https://storage.googleapis.com/tinlake/pool-media/new-silver-2/icon.svg',
+    name: 'New Silver Series 3',
+    status: 'Upcoming' as PoolStatusKey,
+    valueLocked: undefined,
+    poolId: '',
+  },
+]
+
 export function PoolList() {
   const cent = useCentrifuge()
   const { search } = useLocation()
@@ -33,35 +45,18 @@ export function PoolList() {
   ).map((q) => q.data)
   const centPoolsMetaDataById = getMetasById(centPools, centPoolsMetaData)
 
-  const upcomingPools = [
-    {
-      apr: Rate.fromApr(0.08),
-      assetClass: 'Real Estate Bridge Loans',
-      iconUri: 'https://storage.googleapis.com/tinlake/pool-media/new-silver-2/icon.svg',
-      name: 'New Silver Series 3',
-      status: 'Upcoming' as PoolStatusKey,
-    },
-    {
-      apr: Rate.fromApr(0.15),
-      assetClass: 'Voluntary Carbon Offsets',
-      iconUri: 'https://storage.googleapis.com/tinlake/pool-media/flowcarbon-1/FlowcarbonBadge.svg',
-      name: 'Flowcarbon Nature Offsets Series 2',
-      status: 'Upcoming' as PoolStatusKey,
-    },
-  ]
+  const filteredPools = React.useMemo(() => {
+    const pools = !!listedPools?.length ? poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent) : []
+    const openInvestmentPools = pools
+      .filter((pool) => pool.status === 'Open for investments' && !pool?.poolId?.startsWith('0x') && pool?.valueLocked)
+      .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b?.valueLocked?.sub(a?.valueLocked).toNumber() : 0))
+    const tinlakePools = pools
+      .filter((pool) => pool?.poolId?.startsWith('0x'))
+      .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b.valueLocked.sub(a.valueLocked).toNumber() : 0))
 
-  const pools = !!listedPools?.length
-    ? [...upcomingPools, ...poolsToPoolCardProps(listedPools, centPoolsMetaDataById, cent)].sort((a, b) => {
-        if (a.status === 'Upcoming') {
-          return -1
-        }
-        if (b.status === 'Upcoming') {
-          return 1
-        }
-        return 0
-      })
-    : [...upcomingPools]
-  const filteredPools = !!pools?.length ? filterPools(pools, new URLSearchParams(search)) : []
+    const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
+    return search ? filterPools(pools, new URLSearchParams(search)) : sortedPools
+  }, [listedPools, search])
 
   if (!listedPools.length) {
     return (
@@ -76,7 +71,7 @@ export function PoolList() {
   return (
     <Stack gap={1}>
       <Box overflow="auto">
-        <PoolFilter pools={pools} />
+        <PoolFilter pools={filteredPools} />
 
         {!filteredPools.length ? (
           <Shelf px={2} mt={2} justifyContent="center">

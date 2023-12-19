@@ -1,4 +1,11 @@
-import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
+import {
+  CurrencyInput_DEPRECATED,
+  DateInput,
+  Grid,
+  NumberInput,
+  Select_DEPRECATED,
+  TextInput_DEPRECATED,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
@@ -12,26 +19,10 @@ export function PricingInput({ poolId }: { poolId: string }) {
   const pool = usePool(poolId)
   return (
     <Grid columns={[1, 2, 2, 3]} gap={2} rowGap={3}>
-      <Field name="pricing.valuationMethod">
-        {({ field, meta, form }: FieldProps) => (
-          <Select
-            {...field}
-            label="Valuation method"
-            onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
-            errorMessage={meta.touched && meta.error ? meta.error : undefined}
-            options={[
-              { value: 'discountedCashFlow', label: 'Discounted cashflow' },
-              { value: 'outstandingDebt', label: 'Outstanding debt' },
-              { value: 'oracle', label: 'Oracle' },
-            ]}
-            placeholder="Choose valuation method"
-          />
-        )}
-      </Field>
       {values.pricing.valuationMethod === 'oracle' && (
         <>
           <FieldWithErrorMessage
-            as={TextInput}
+            as={TextInput_DEPRECATED}
             label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
             placeholder="010101010000"
             name="pricing.Isin"
@@ -39,13 +30,12 @@ export function PricingInput({ poolId }: { poolId: string }) {
           />
           <Field name="pricing.notional" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput
+              <CurrencyInput_DEPRECATED
                 {...field}
                 label={<Tooltips type="notionalValue" variant="secondary" label="Notional value*" />}
                 placeholder="0.00"
                 errorMessage={meta.touched ? meta.error : undefined}
                 onChange={(value) => form.setFieldValue('pricing.notional', value)}
-                variant="small"
                 currency={pool.currency.symbol}
               />
             )}
@@ -66,9 +56,9 @@ export function PricingInput({ poolId }: { poolId: string }) {
         <>
           <Field name="pricing.maxBorrowAmount">
             {({ field, meta, form }: FieldProps) => (
-              <Select
+              <Select_DEPRECATED
                 {...field}
-                label="Borrow restriction"
+                label="How much can I borrow?"
                 onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
                 errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 options={[
@@ -82,27 +72,28 @@ export function PricingInput({ poolId }: { poolId: string }) {
 
           <Field name="pricing.value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput
+              <CurrencyInput_DEPRECATED
                 {...field}
                 label="Collateral value*"
                 placeholder="0.00"
                 errorMessage={meta.touched ? meta.error : undefined}
                 currency={pool?.currency.symbol}
                 onChange={(value) => form.setFieldValue('pricing.value', value)}
-                variant="small"
               />
             )}
           </Field>
         </>
       )}
-      <FieldWithErrorMessage
-        as={NumberInput}
-        label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
-        placeholder="0.00"
-        rightElement="%"
-        name="pricing.interestRate"
-        validate={combine(required(), nonNegativeNumber(), max(100))}
-      />
+      {values.pricing.valuationMethod !== 'cash' && (
+        <FieldWithErrorMessage
+          as={NumberInput}
+          label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
+          placeholder="0.00"
+          rightElement="%"
+          name="pricing.interestRate"
+          validate={combine(required(), nonNegativeNumber(), max(100))}
+        />
+      )}
       <FieldWithErrorMessage
         as={DateInput}
         validate={validate.maturityDate}

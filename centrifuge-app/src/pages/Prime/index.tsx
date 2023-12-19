@@ -6,15 +6,15 @@ import { firstValueFrom } from 'rxjs'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
-import { DAO, DAOs } from '../../config'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { DAO, useDAOConfig } from '../../utils/useDAOConfig'
 import { useFilters } from '../../utils/useFilters'
 import { useSubquery } from '../../utils/useSubquery'
 
 export default function PrimePage() {
   return (
-    <LayoutBase>
+    <LayoutBase gap={5}>
       <Prime />
     </LayoutBase>
   )
@@ -23,7 +23,7 @@ export default function PrimePage() {
 function Prime() {
   return (
     <>
-      <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5}>
+      <LayoutSection backgroundColor="backgroundSecondary" alignItems="flex-start" pt={5} pb={3}>
         <Text variant="heading1">Centrifuge Prime</Text>
         <Box maxWidth={800}>
           <Text variant="body1">
@@ -55,13 +55,15 @@ function DaoPortfoliosTable() {
   const utils = useCentrifugeUtils()
   const cent = useCentrifuge()
   const getNetworkName = useGetNetworkName()
+  const { data: daoData } = useDAOConfig()
 
-  const daos = DAOs.map((dao) => ({
-    ...dao,
-    address: utils.formatAddress(
-      typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
-    ),
-  }))
+  const daos =
+    daoData?.map((dao) => ({
+      ...dao,
+      address: utils.formatAddress(
+        typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
+      ),
+    })) || []
 
   // TODO: Update to use new portfolio Runtime API
   const { data, isLoading: isPortfoliosLoading } = useQuery(['daoPortfolios', daos.map((dao) => dao.address)], () =>
@@ -130,7 +132,7 @@ function DaoPortfoliosTable() {
       header: 'DAO',
       cell: (row: Row) => (
         <Shelf gap={1}>
-          <Box as="img" src={row.icon} alt={row.name} width="iconSmall" height="iconSmall" borderRadius="50%" />
+          <Box as="img" src={row.logo} alt={row.name} width="iconSmall" height="iconSmall" borderRadius="50%" />
           <Text>{row.name}</Text>
         </Shelf>
       ),
@@ -145,7 +147,7 @@ function DaoPortfoliosTable() {
           options={Object.fromEntries(uniqueNetworks.map((chain) => [chain, getNetworkName(chain)]))}
         />
       ),
-      cell: (row: Row) => <Text>{row.networkName}</Text>,
+      cell: (row: Row) => <Text>{row.network}</Text>,
     },
     {
       header: <SortableTableHeader label="Portfolio value" />,

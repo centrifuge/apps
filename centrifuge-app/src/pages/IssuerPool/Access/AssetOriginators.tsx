@@ -14,11 +14,21 @@ import {
   useCentrifugeUtils,
   useGetNetworkName,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconMinusCircle, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Button, IconMinusCircle, InputErrorMessage, SelectInner, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress, sortAddresses } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
-import { Field, FieldArray, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
+import {
+  ErrorMessage,
+  Field,
+  FieldArray,
+  FieldProps,
+  Form,
+  FormikErrors,
+  FormikProvider,
+  setIn,
+  useFormik,
+} from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
@@ -201,7 +211,7 @@ function AOForm({
           cent.pools.setMetadata([poolId, newMetadata], { batch: true }),
         ]).pipe(
           switchMap(([api, permissionTx, setMetadataTx]) => {
-            const numProxyTypesPerHotWallet = 3
+            const numProxyTypesPerHotWallet = 4
             const deposit = proxyDepositFactor
               .mul(new BN(Math.max(addedAddresses.length - removedAddresses.length, 0) * numProxyTypesPerHotWallet))
               .add(podOperator ? proxyDepositFactor : new BN(0))
@@ -234,6 +244,7 @@ function AOForm({
                               api.tx.proxy.removeProxy(addr, 'Borrow', 0),
                               api.tx.proxy.removeProxy(addr, 'Invest', 0),
                               api.tx.proxy.removeProxy(addr, 'PodAuth', 0),
+                              api.tx.proxy.removeProxy(addr, 'Transfer', 0),
                             ])
                             .flat()
                         ),
@@ -241,7 +252,7 @@ function AOForm({
                         api.tx.proxy.addProxy(addr, 'Borrow', 0),
                         api.tx.proxy.addProxy(addr, 'Invest', 0),
                         api.tx.proxy.addProxy(addr, 'PodAuth', 0),
-                        // TODO: Restricted Transfer
+                        api.tx.proxy.addProxy(addr, 'Transfer', 0),
                       ]),
                       podOperator && api.tx.proxy.addProxy(podOperator, 'PodOperation', 0),
                       keys &&
@@ -356,14 +367,12 @@ function AOForm({
       values.withdrawAddresses.forEach((value, index) => {
         if (value.meta?.address) {
           if (!value.meta.location) {
-            errors = setIn(errors, `withdrawAddresses.${index}.meta.location`, 'Required')
+            errors = setIn(errors, `withdrawAddresses.${index}.meta.location`, 'Select a destination')
           } else {
-            if (
-              typeof value.meta.location !== 'string' &&
-              'evm' in value.meta.location &&
-              !isEvmAddress(value.meta.address)
-            ) {
-              errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid EVM address')
+            if (typeof value.meta.location !== 'string' && 'evm' in value.meta.location) {
+              if (!isEvmAddress(value.meta.address)) {
+                errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid EVM address')
+              }
             } else if (!isSubstrateAddress(value.meta.address) || isEvmAddress(value.meta.address)) {
               errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid Substrate address')
             }
@@ -533,27 +542,30 @@ function AOForm({
                 Paste the address to receive your funds after financing an asset. Be sure to select the right address
                 and network. Receiving your funds on another address or network will result in loss of funds.
               </Text>
-              <Stack gap="4px">
+              <Stack gap={1}>
                 {form.values.withdrawAddresses.map((value, index) => (
-                  <Shelf key={index} alignItems="flex-start">
-                    <FieldWithErrorMessage
-                      name={`withdrawAddresses.${index}.meta.address`}
-                      validate={address()}
-                      label="Address"
-                      disabled={!isEditing}
-                      as={TextInput}
-                      onChange={(event: any) => {
-                        form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
-                        form.setFieldValue(`withdrawAddresses.${index}.meta.address`, event.target.value)
-                      }}
-                      placeholder={value.key && !value.meta?.address ? '[Unknown address]' : ''}
-                    />
-                    <Box width={250}>
+                  <FieldWithErrorMessage
+                    name={`withdrawAddresses.${index}.meta.address`}
+                    validate={address()}
+                    label="Address"
+                    disabled={!isEditing}
+                    as={TextInput}
+                    onChange={(event: any) => {
+                      form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
+                      form.setFieldValue(`withdrawAddresses.${index}.meta.address`, event.target.value)
+                    }}
+                    placeholder={value.key && !value.meta?.address ? '[Unknown address]' : ''}
+                    secondaryLabel={
+                      <ErrorMessage
+                        name={`withdrawAddresses.${index}.meta.location`}
+                        render={(error) => error && <InputErrorMessage>{error}</InputErrorMessage>}
+                      />
+                    }
+                    symbol={
                       <Field name={`withdrawAddresses.${index}.meta.location`}>
                         {({ field, meta, form }: FieldProps) => (
-                          <Select
+                          <SelectInner
                             name={`withdrawAddresses.${index}.meta.location`}
-                            label="Destination"
                             onChange={(event) =>
                               form.setFieldValue(
                                 `withdrawAddresses.${index}.meta.location`,
@@ -561,7 +573,6 @@ function AOForm({
                               )
                             }
                             onBlur={field.onBlur}
-                            errorMessage={(meta.touched || form.submitCount > 0) && meta.error ? meta.error : undefined}
                             value={field.value ? JSON.stringify(field.value) : ''}
                             options={destinations.map((dest) => ({
                               value: JSON.stringify(dest),
@@ -577,8 +588,8 @@ function AOForm({
                           />
                         )}
                       </Field>
-                    </Box>
-                  </Shelf>
+                    }
+                  />
                 ))}
               </Stack>
             </Stack>

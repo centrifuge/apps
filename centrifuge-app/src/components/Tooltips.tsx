@@ -1,4 +1,4 @@
-import { Text, Tooltip as FabricTooltip } from '@centrifuge/fabric'
+import { Text, TextProps, Tooltip as FabricTooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
@@ -81,10 +81,6 @@ export const tooltipText = {
   ongoingAssets: {
     label: 'Ongoing assets',
     body: 'Number of assets currently being financed in the pool and awaiting repayment.',
-  },
-  averageInterestRate: {
-    label: 'Average interest rate',
-    body: 'The average interest rate of the active assets in the pool.',
   },
   averageAmount: {
     label: 'Average amount',
@@ -254,23 +250,41 @@ export const tooltipText = {
     label: 'Notional value',
     body: 'The notional value is the total value of the underlying asset.',
   },
+  cfgPrice: {
+    label: 'CFG price',
+    body: 'CFG price sourced externally from Uniswap.',
+  },
+  tbillApr: {
+    label: 'T-Bill APR',
+    body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
+  },
 }
 
 export type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
-  label?: string
+  label?: string | React.ReactNode
   props?: any
-}
+} & TextProps
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary', props }) => {
+export const Tooltips: React.FC<TooltipsProps> = ({
+  type,
+  label: labelOverride,
+  variant = 'primary',
+  props,
+  ...textProps
+}) => {
   const { label, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
-    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body}>
-      <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
-        {labelOverride || label}
-      </Text>
+    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
+      {typeof label === 'string' ? (
+        <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
+          {labelOverride || label}
+        </Text>
+      ) : (
+        label
+      )}
     </FabricTooltip>
   )
 }

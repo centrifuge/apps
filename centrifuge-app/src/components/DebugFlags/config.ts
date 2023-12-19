@@ -35,8 +35,6 @@ export type Key =
   | 'evmAddress'
   | 'batchMintNFTs'
   | 'persistDebugFlags'
-  | 'showBase'
-  | 'showArbitrum'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
@@ -46,12 +44,12 @@ export type Key =
   | 'editAdminConfig'
   | 'showPodAccountCreation'
   | 'convertAddress'
-  | 'showPortfolio'
   | 'showTestNets'
   | 'showSwaps'
   | 'showPrime'
   | 'poolCreationType'
   | 'podAdminSeed'
+  | 'holdersReport'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -71,16 +69,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   alternativeTheme: {
-    type: 'checkbox',
-    default: false,
-    alwaysShow: true,
-  },
-  showBase: {
-    type: 'checkbox',
-    default: false,
-    alwaysShow: true,
-  },
-  showArbitrum: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
@@ -126,10 +114,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: null,
     alwaysShow: true,
   },
-  showPortfolio: {
-    type: 'checkbox',
-    default: false,
-  },
   showSwaps: {
     type: 'checkbox',
     default: false,
@@ -151,5 +135,9 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   podAdminSeed: {
     type: 'text',
     default: '//Eve',
+  },
+  holdersReport: {
+    type: 'checkbox',
+    default: false,
   },
 }

@@ -85,7 +85,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   return (
     <Stack as={Card} gap={2} p={2}>
       <Stack>
-        {'valuationMethod' in loan.pricing && (
+        {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
             {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
@@ -120,14 +120,14 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                     errorMessage={meta.touched ? meta.error : undefined}
                     secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
                     currency={pool?.currency.symbol}
-                    onChange={(value: number) => form.setFieldValue('amount', value)}
+                    onChange={(value) => form.setFieldValue('amount', value)}
                     onSetMax={() => form.setFieldValue('amount', maxBorrow)}
                   />
                 )
               }}
             </Field>
             <WithdrawSelect loan={loan} borrower={account} />
-            {poolReserve.lessThan(availableFinancing) && (
+            {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
               <InlineFeedback>
                 The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
                 the available financing

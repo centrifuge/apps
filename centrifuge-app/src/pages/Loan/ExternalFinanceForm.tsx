@@ -132,9 +132,7 @@ export function ExternalFinanceFields({
               {...field}
               label="Face value"
               errorMessage={meta.touched ? meta.error : undefined}
-              placeholder="0.0"
-              precision={6}
-              variant="small"
+              decimals={8}
               onChange={(value) => form.setFieldValue('faceValue', value)}
               currency={pool.currency.symbol}
             />
@@ -163,12 +161,10 @@ export function ExternalFinanceFields({
             <CurrencyInput
               {...field}
               label="Settlement price"
-              variant="small"
               errorMessage={meta.touched ? meta.error : undefined}
               currency={pool.currency.symbol}
               onChange={(value) => form.setFieldValue('price', value)}
-              placeholder="0.0"
-              precision={6}
+              decimals={8}
             />
           )
         }}

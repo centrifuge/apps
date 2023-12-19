@@ -46,7 +46,7 @@ export function PricingValues({ loan, pool }: Props) {
   return (
     <>
       {pricing.maturityDate && <LabelValueStack label="Maturity date" value={formatDate(pricing.maturityDate)} />}
-      {'maturityExtensionDays' in pricing && (
+      {'maturityExtensionDays' in pricing && pricing.valuationMethod !== 'cash' && (
         <LabelValueStack label="Extension period" value={`${pricing.maturityExtensionDays} days`} />
       )}
       {isOutstandingDebtOrDiscountedCashFlow && (
@@ -55,11 +55,13 @@ export function PricingValues({ loan, pool }: Props) {
           value={pricing.advanceRate && formatPercentage(pricing.advanceRate.toPercent())}
         />
       )}
-      <LabelValueStack
-        label="Interest rate"
-        value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
-      />
-      {isOutstandingDebtOrDiscountedCashFlow && pricing.valuationMethod === 'discountedCashFlow' && (
+      {'valuationMethod' in pricing && pricing.valuationMethod !== 'cash' && (
+        <LabelValueStack
+          label="Interest rate"
+          value={pricing.interestRate && formatPercentage(pricing.interestRate.toPercent())}
+        />
+      )}
+      {'valuationMethod' in pricing && pricing.valuationMethod === 'discountedCashFlow' && (
         <>
           <LabelValueStack
             label="Probability of default"

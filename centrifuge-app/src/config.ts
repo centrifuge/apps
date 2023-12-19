@@ -1,9 +1,7 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
-import { Network } from '@centrifuge/centrifuge-react'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
-import aaveLogo from './assets/images/aave-token-logo.svg'
 import { LogoAltair, LogoAltairText } from './components/LogoAltair'
 import { LogoCentrifuge, LogoCentrifugeText } from './components/LogoCentrifuge'
 
@@ -21,7 +19,7 @@ const lightTheme: DefaultTheme = {
   ...centrifugeLight,
   sizes: {
     ...centrifugeLight.sizes,
-    container: '100%',
+    mainContent: 1800,
   },
   colors: {
     ...centrifugeLight.colors,
@@ -41,7 +39,7 @@ const darkTheme: DefaultTheme = {
   ...altairDark,
   sizes: {
     ...altairDark.sizes,
-    container: '100%',
+    mainContent: 1800,
   },
   colors: {
     ...altairDark.colors,
@@ -76,7 +74,9 @@ type EnvironmentConfig = {
 
 const poolCreationType = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
 const defaultPodUrl = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
-export const isTestEnv = window.location.hostname.endsWith('k-f.dev') || window.location.hostname === 'localhost'
+export const isTestEnv =
+  (window.location.hostname.endsWith('k-f.dev') && !window.location.hostname.includes('production')) ||
+  window.location.hostname === 'localhost'
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
@@ -145,24 +145,6 @@ export const ethConfig = {
 }
 
 export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : CENTRIFUGE
-
-export type DAO = {
-  slug: string
-  name: string
-  network: Network
-  address: string
-  icon: string
-}
-
-export const DAOs: DAO[] = [
-  {
-    slug: 'aave',
-    name: 'Aave',
-    network: 'centrifuge',
-    address: 'kALNreUp6oBmtfG87fe7MakWR8BnmQ4SmKjjfG27iVd3nuTue',
-    icon: aaveLogo,
-  },
-]
 
 export const parachainNames: Record<number, string> = {
   1000: 'Asset Hub',

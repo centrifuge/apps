@@ -15,10 +15,10 @@ import {
 } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
-import { useElementScrollSize } from '../utils/useElementScrollSize'
 import { FiltersState } from '../utils/useFilters'
 import { FilterButton } from './FilterButton'
 import { QuickAction } from './QuickAction'
@@ -54,12 +54,34 @@ const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, s
   if (!sortKey) return data
   if (order === 'asc') {
     return data.sort((a, b) => {
-      if (sortKey === 'nftIdSortKey') return new BN(a[sortKey]).gt(new BN(b[sortKey])) ? 1 : -1
+      try {
+        if (
+          (a[sortKey] instanceof Decimal && b[sortKey] instanceof Decimal) ||
+          (BN.isBN(a[sortKey]) && BN.isBN(b[sortKey]))
+        )
+          return a[sortKey].gt(b[sortKey]) ? 1 : -1
+
+        if (typeof a[sortKey] === 'string' && typeof b[sortKey] === 'string') {
+          return new BN(a[sortKey]).gt(new BN(b[sortKey])) ? 1 : -1
+        }
+      } catch {}
+
       return a[sortKey] > b[sortKey] ? 1 : -1
     })
   }
   return data.sort((a, b) => {
-    if (sortKey === 'nftIdSortKey') return new BN(b[sortKey]).gt(new BN(a[sortKey])) ? 1 : -1
+    try {
+      if (
+        (a[sortKey] instanceof Decimal && b[sortKey] instanceof Decimal) ||
+        (BN.isBN(a[sortKey]) && BN.isBN(b[sortKey]))
+      )
+        return b[sortKey].gt(a[sortKey]) ? 1 : -1
+
+      if (typeof a[sortKey] === 'string' && typeof b[sortKey] === 'string') {
+        return new BN(b[sortKey]).gt(new BN(a[sortKey])) ? 1 : -1
+      }
+    } catch {}
+
     return b[sortKey] > a[sortKey] ? 1 : -1
   })
 }
@@ -70,7 +92,7 @@ export const DataTable = <T extends Record<string, any>>({
   keyField,
   onRowClicked,
   defaultSortKey,
-  hoverable = false,
+  hoverable = undefined,
   summary,
   groupIndex,
   lastGroupIndex,
@@ -83,8 +105,6 @@ export const DataTable = <T extends Record<string, any>>({
   )
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
-  const ref = React.useRef(null)
-  const { scrollWidth } = useElementScrollSize(ref)
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
@@ -103,14 +123,7 @@ export const DataTable = <T extends Record<string, any>>({
   const templateColumns = `[start] ${columns.map((col) => col.width ?? 'minmax(min-content, 1fr)').join(' ')} [end]`
 
   return (
-    <TableGrid
-      gridTemplateColumns={templateColumns}
-      gridAutoRows="auto"
-      gap={0}
-      rowGap={0}
-      ref={ref}
-      minWidth={scrollWidth > 0 ? scrollWidth : 'auto'}
-    >
+    <TableGrid gridTemplateColumns={templateColumns} gridAutoRows="auto" gap={0} rowGap={0}>
       {showHeader && (
         <HeaderRow>
           {columns.map((col, i) => (
@@ -200,7 +213,7 @@ const DataRow = styled(Row)<any>`
             }
           : undefined,
       '&:focus-visible': {
-        boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
+        boxShadow: 'inset 0 0 0 3px var(--fabric-focus)',
       },
     })}
 `
@@ -242,7 +255,7 @@ const HeaderCol = styled(DataCol)`
   align-items: center;
 
   &:has(:focus-visible) {
-    box-shadow: inset 0 0 0 3px var(--fabric-color-focus);
+    box-shadow: inset 0 0 0 3px var(--fabric-focus);
   }
 `
 

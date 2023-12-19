@@ -30,8 +30,6 @@ import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
-  showBase?: boolean
-  showArbitrum?: boolean
   showTestNets?: boolean
 }
 
@@ -41,17 +39,9 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({
-  evmChains: allEvmChains,
-  showAdvancedAccounts,
-  showBase,
-  showArbitrum,
-  showTestNets,
-}: Props) {
+export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets }: Props) {
   const evmChains = Object.keys(allEvmChains)
-    .filter((chain) => (!showBase ? !['8453', '84531'].includes(chain) : true))
-    .filter((chain) => (!showArbitrum ? !['42161', '421613'].includes(chain) : true))
-    .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113'].includes(chain) : true))
+    .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113', '44787'].includes(chain) : true))
     .reduce((obj, key) => {
       obj[key] = allEvmChains[key]
       return obj
@@ -133,6 +123,17 @@ export function WalletDialog({
           }
         >
           <Grid minColumnWidth={120} mt={3} gap={1}>
+            {/* ethereum mainnet */}
+            <SelectButton
+              key={1}
+              logo={evmChains['1']?.iconUrl ? <Logo icon={evmChains['1'].iconUrl} /> : undefined}
+              onClick={() => showWallets(1)}
+              active={selectedNetwork === 1}
+              muted={isMuted(1)}
+            >
+              {getChainInfo(evmChains, 1).name}
+            </SelectButton>
+
             <SelectButton
               logo={<Logo icon={centrifugeLogo} />}
               onClick={() => showWallets('centrifuge')}
@@ -142,24 +143,26 @@ export function WalletDialog({
               {getNetworkName('centrifuge')}
             </SelectButton>
 
-            {Object.entries(evmChains).map(([chainIdString, chain]) => {
-              const chainId = Number(chainIdString)
-              const info = getChainInfo(evmChains, chainId)
+            {Object.entries(evmChains)
+              .filter((evmChain) => evmChain[0] !== '1')
+              .map(([chainIdString, chain]) => {
+                const chainId = Number(chainIdString)
+                const info = getChainInfo(evmChains, chainId)
 
-              if (chainId === evmChainId) return null
+                if (chainId === evmChainId) return null
 
-              return (
-                <SelectButton
-                  key={chainId}
-                  logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
-                  onClick={() => showWallets(chainId)}
-                  active={selectedNetwork === chainId}
-                  muted={isMuted(chainId)}
-                >
-                  {info.name}
-                </SelectButton>
-              )
-            })}
+                return (
+                  <SelectButton
+                    key={chainId}
+                    logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
+                    onClick={() => showWallets(chainId)}
+                    active={selectedNetwork === chainId}
+                    muted={isMuted(chainId)}
+                  >
+                    {info.name}
+                  </SelectButton>
+                )
+              })}
           </Grid>
         </SelectionStep>
 

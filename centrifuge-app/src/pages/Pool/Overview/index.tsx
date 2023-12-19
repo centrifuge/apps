@@ -2,68 +2,37 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
-import { Faucet } from '../../../components/Faucet'
-import { ActionsRef, InvestRedeem } from '../../../components/InvestRedeem/InvestRedeem'
+import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
+import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LabelValueStack } from '../../../components/LabelValueStack'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { formatDate, getAge } from '../../../utils/date'
+import { formatDate } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
+import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export function PoolDetailOverviewTab() {
-  const { state } = useLocation<{ token: string }>()
-  const [selectedToken, setSelectedToken] = React.useState(state?.token)
-
-  const investRef = React.useRef<{ setView(view: 'invest' | 'redeem'): void }>()
-
-  function setToken(token: string) {
-    setSelectedToken(token)
-    investRef.current?.setView('invest')
-  }
-
   return (
-    <PageWithSideBar
-      sidebar={
-        <>
-          <Faucet />
-          <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} investRef={investRef} />
-        </>
-      }
-    >
+    <LayoutBase>
       <PoolDetailHeader />
       <LoadBoundary>
-        <PoolDetailOverview selectedToken={selectedToken} setSelectedToken={setToken} />
+        <PoolDetailOverview />
       </LoadBoundary>
-    </PageWithSideBar>
-  )
-}
-
-export function PoolDetailSideBar({
-  selectedToken,
-  setSelectedToken,
-  investRef,
-}: {
-  selectedToken?: string
-  setSelectedToken?: (token: string) => void
-  investRef?: ActionsRef
-}) {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  return (
-    <InvestRedeem poolId={poolId} trancheId={selectedToken} onSetTrancheId={setSelectedToken} actionsRef={investRef} />
+    </LayoutBase>
   )
 }
 
@@ -71,18 +40,13 @@ function AverageMaturity({ poolId }: { poolId: string }) {
   return <>{useAverageMaturity(poolId)}</>
 }
 
-export function PoolDetailOverview({
-  setSelectedToken,
-}: {
-  selectedToken?: string | null
-  setSelectedToken?: (token: string) => void
-}) {
+export function PoolDetailOverview() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { showNetworks, connectedType, evm } = useWallet()
+  const { evm } = useWallet()
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
 
   const pageSummaryData = [
@@ -98,9 +62,6 @@ export function PoolDetailOverview({
       label: <Tooltips type="averageAssetMaturity" />,
       value: <AverageMaturity poolId={poolId} />,
     })
-  }
-  if (pool?.createdAt) {
-    pageSummaryData.splice(2, 0, { label: <Tooltips type="age" />, value: getAge(pool.createdAt) })
   }
 
   const tokens = pool?.tranches
@@ -199,20 +160,7 @@ export function PoolDetailOverview({
                       </TextWithPlaceholder>
                     }
                   />
-                  {setSelectedToken && getTrancheAvailability(token.id) && (
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        if (!connectedType) {
-                          showNetworks()
-                        }
-                        setSelectedToken(token.id)
-                      }}
-                      style={{ marginLeft: 'auto' }}
-                    >
-                      Invest
-                    </Button>
-                  )}
+                  {getTrancheAvailability(token.id) && <InvestButton poolId={poolId} trancheId={token.id} />}
                 </Shelf>
               </PoolToken>
             </div>
@@ -222,6 +170,20 @@ export function PoolDetailOverview({
       <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />
       </PageSection>
+    </>
+  )
+}
+
+function InvestButton(props: InvestRedeemProps) {
+  const [open, setOpen] = React.useState(false)
+  const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
+
+  return (
+    <>
+      <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
+      <Button onClick={() => connectAndOpen()} style={{ marginLeft: 'auto' }}>
+        Invest
+      </Button>
     </>
   )
 }

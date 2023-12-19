@@ -19,13 +19,13 @@ export type InputBoxProps = {
 const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean }>`
   border: 1px solid;
   text-align: left;
-  border-radius: ${({ theme }) => theme.radii.input}px;
+  border-radius: 10px;
   background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
   border-color: ${({ theme, $disabled, $active }) =>
-    $disabled ? theme.colors.backgroundSecondary : $active ? theme.colors.textSelected : 'transparent'};
+    $disabled ? theme.colors.backgroundSecondary : $active ? theme.colors.textSelected : theme.colors.grayScale[300]};
   &:focus,
   &:focus-within {
-    border-color: var(--fabric-color-focus);
+    border-color: var(--fabric-focus);
   }
 `
 
@@ -84,3 +84,69 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = React.forwardRef(
     )
   }
 )
+
+const IdContext = React.createContext('')
+export const IdProvider = IdContext.Provider
+export function useContextId() {
+  return React.useContext(IdContext)
+}
+
+export type InputUnitProps = {
+  id?: string
+  label?: React.ReactNode
+  secondaryLabel?: React.ReactNode
+  errorMessage?: string
+  inputElement?: React.ReactNode
+  disabled?: boolean
+}
+
+export function InputUnit({
+  label,
+  secondaryLabel,
+  errorMessage,
+  inputElement,
+  disabled,
+  id,
+}: StackProps & InputUnitProps) {
+  id ??= React.useId()
+  return (
+    <IdContext.Provider value={id}>
+      <Stack gap={1}>
+        {label && <InputLabel disabled={disabled}>{label}</InputLabel>}
+        <Text
+          variant="body2"
+          color={disabled ? 'textDisabled' : 'textPrimary'}
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {inputElement}
+        </Text>
+        {secondaryLabel && (
+          <Text variant="body3" color={disabled ? 'textDisabled' : 'textSecondary'}>
+            {secondaryLabel}
+          </Text>
+        )}
+        {errorMessage && <InputErrorMessage>{errorMessage}</InputErrorMessage>}
+      </Stack>
+    </IdContext.Provider>
+  )
+}
+
+export function InputLabel({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) {
+  return (
+    <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'} as="label" htmlFor={useContextId()}>
+      {children}
+    </Text>
+  )
+}
+
+export function InputErrorMessage({ children }: { children: React.ReactNode }) {
+  return (
+    <Text variant="label2" color="statusCritical">
+      {children}
+    </Text>
+  )
+}

@@ -1,5 +1,11 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useEvmNativeBalance, useEvmNativeCurrency, useEvmProvider } from '@centrifuge/centrifuge-react'
+import {
+  useCentrifuge,
+  useEvmNativeBalance,
+  useEvmNativeCurrency,
+  useEvmProvider,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -14,6 +20,9 @@ import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as P
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
+  const {
+    evm: { isSmartContractWallet },
+  } = useWallet()
 
   const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
   const evmNativeCurrency = useEvmNativeCurrency()
@@ -115,6 +124,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     }, [pendingTransaction?.status])
   }
 
+  const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet
+
   const state: InvestRedeemState = {
     poolId,
     trancheId,
@@ -140,28 +151,28 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     trancheBalanceWithPending: combinedTrancheBalance,
     investmentValue,
     tokenPrice: price,
-    order:
-      lpInvest && (!lpInvest?.pendingInvest.isZero() || !lpInvest?.pendingRedeem.isZero())
-        ? {
-            investCurrency: lpInvest.pendingInvest.toDecimal(),
-            redeemToken: lpInvest.pendingRedeem.toDecimal(),
-            payoutCurrencyAmount: lpInvest.maxWithdraw.toDecimal(),
-            payoutTokenAmount: lpInvest.maxMint.toDecimal(),
-            remainingInvestCurrency: lpInvest.pendingInvest.toDecimal(),
-            remainingRedeemToken: lpInvest.pendingRedeem.toDecimal(),
-          }
-        : null,
+    order: lpInvest
+      ? {
+          investCurrency: lpInvest.pendingInvest.toDecimal(),
+          redeemToken: lpInvest.pendingRedeem.toDecimal(),
+          payoutCurrencyAmount: lpInvest.maxWithdraw.toDecimal(),
+          payoutTokenAmount: lpInvest.maxMint.toDecimal(),
+          remainingInvestCurrency: lpInvest.pendingInvest.toDecimal(),
+          remainingRedeemToken: lpInvest.pendingRedeem.toDecimal(),
+        }
+      : null,
     collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
     collectType,
-    needsToCollectBeforeOrder: false,
+    needsToCollectBeforeOrder: true,
     needsPoolCurrencyApproval: (amount) =>
-      lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !lpInvest.currencySupportsPermit : false,
+      lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
     needsTrancheTokenApproval: () => false,
     canChangeOrder: false,
     canCancelOrder: true,
     pendingAction,
     pendingTransaction,
     statusMessage,
+    actingAddress: centAddress,
   }
 
   const actions: InvestRedeemActions = {
@@ -169,11 +180,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       if (!lpInvest) return
       // If the last tx was an approve, we may not have refetched the allowance yet,
       // so assume the allowance is enough to do a normal invest
-      if (
-        lpInvest.lpCurrencyAllowance.lt(newOrder) &&
-        lpInvest.currencySupportsPermit &&
-        pendingAction !== 'approvePoolCurrency'
-      ) {
+      if (lpInvest.lpCurrencyAllowance.lt(newOrder) && supportsPermits && pendingAction !== 'approvePoolCurrency') {
         const signer = provider!.getSigner()
         const connectedCent = cent.connectEvm(evmAddress!, signer)
         const permit = await connectedCent.liquidityPools.signPermit([
@@ -197,8 +204,12 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     collect: doAction('collect', () =>
       collectType === 'invest' ? [lpInvest?.lpAddress, lpInvest?.maxMint] : [lpInvest?.lpAddress, lpInvest?.maxWithdraw]
     ),
-    approvePoolCurrency: doAction('approvePoolCurrency', () => [lpInvest?.managerAddress, lpInvest?.currencyAddress]),
-    approveTrancheToken: doAction('approveTrancheToken', () => [lpInvest?.managerAddress, lpInvest?.lpAddress]),
+    approvePoolCurrency: doAction('approvePoolCurrency', (amount) => [
+      lpInvest?.lpAddress,
+      lpInvest?.currencyAddress,
+      amount.toString(),
+    ]),
+    approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress]),
     cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress]),
   }

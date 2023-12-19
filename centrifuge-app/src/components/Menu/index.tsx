@@ -15,6 +15,7 @@ import { config } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { usePoolsThatAnyConnectedAddressHasPermissionsFor } from '../../utils/usePermissions'
+import { useTransactionsByAddress } from '../../utils/usePools'
 import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
@@ -26,7 +27,8 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps, showPortfolio, showPrime } = useDebugFlags()
+  const { showSwaps, showPrime } = useDebugFlags()
+  const transactions = useTransactionsByAddress(address)
 
   return (
     <Shelf
@@ -41,21 +43,20 @@ export function Menu() {
         Pools
       </PageLink>
 
-      {config.network !== 'centrifuge' && (
-        <PageLink to="/nfts" stacked={!isLarge}>
-          <IconNft />
-          NFTs
-        </PageLink>
-      )}
-
-      <GovernanceMenu />
-
-      {showPortfolio && address && (
+      {address && (
         <PageLink to="/portfolio" stacked={!isLarge}>
           <IconPieChart />
           Portfolio
         </PageLink>
       )}
+
+      {address && (transactions ?? null) && (
+        <PageLink to="/history" stacked={!isLarge}>
+          <IconClock />
+          History
+        </PageLink>
+      )}
+
       {showPrime && (
         <PageLink to="/prime" stacked={!isLarge}>
           <IconGlobe />
@@ -63,12 +64,7 @@ export function Menu() {
         </PageLink>
       )}
 
-      {showPortfolio && address && (
-        <PageLink to="/history" stacked={!isLarge}>
-          <IconClock />
-          History
-        </PageLink>
-      )}
+      <GovernanceMenu />
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>
@@ -109,6 +105,13 @@ export function Menu() {
         <PageLink to="/swaps" stacked={!isLarge}>
           <IconSwitch />
           Swaps
+        </PageLink>
+      )}
+
+      {config.network !== 'centrifuge' && (
+        <PageLink to="/nfts" stacked={!isLarge}>
+          <IconNft />
+          NFTs
         </PageLink>
       )}
     </Shelf>

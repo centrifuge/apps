@@ -7,7 +7,7 @@ import { daysBetween } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { Tooltips } from '../Tooltips'
-import { CustomizedTooltip, CustomizedXAxisTick } from './CustomChartElements'
+import { CustomizedTooltip } from './Tooltip'
 
 type ChartData = {
   day: Date
@@ -56,9 +56,15 @@ const PoolAssetReserveChart: React.VFC = () => {
             <ComposedChart data={chartData} margin={{ left: -16 }} reverseStackOrder>
               <XAxis
                 dataKey="day"
-                tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
                 tickLine={false}
-                interval={chartData.length < 18 || chartData.length > 30 ? 0 : 1}
+                type="category"
+                tickFormatter={(tick: number) => {
+                  if (data.length > 180) {
+                    return new Date(tick).toLocaleString('en-US', { month: 'short' })
+                  }
+                  return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
+                }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
               />
               <YAxis
                 tickLine={false}

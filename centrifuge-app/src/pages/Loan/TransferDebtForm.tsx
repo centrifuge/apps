@@ -1,4 +1,12 @@
-import { ActiveLoan, CurrencyBalance, Loan, Loan as LoanType, Pool, Price } from '@centrifuge/centrifuge-js'
+import {
+  ActiveLoan,
+  CurrencyBalance,
+  Loan,
+  Loan as LoanType,
+  Pool,
+  Price,
+  TinlakeLoan,
+} from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -32,13 +40,14 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const unfilteredLoans = useLoans(loan.poolId)
 
+  // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
   const loans = unfilteredLoans?.filter(
-    (l) =>
+    (l: Loan | TinlakeLoan) =>
       l.id !== loan.id &&
       l.status === 'Active' &&
       (l as ActiveLoan).borrower === account?.actingAddress &&
       !isExternalLoan(l as any)
-  )
+  ) as Loan[] | TinlakeLoan[] | undefined
 
   const { execute, isLoading } = useCentrifugeTransaction('Transfer debt', (cent) => cent.pools.transferLoanDebt, {
     onSuccess: () => {
@@ -94,6 +103,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
 
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+  // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
   const selectedLoan = loans?.find((l) => l.id === form.values.targetLoan) as ActiveLoan | undefined
 
   function validate(financeAmount: Decimal) {
@@ -171,7 +181,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
               </Shelf>
             </>
           ) : (
-            <Field name="amount" validate={(val: any) => validate(Dec(val))}>
+            <Field name="amount" validate={(val: any) => validate(Dec(val || 0))}>
               {({ field, meta, form }: FieldProps) => {
                 return (
                   <CurrencyInput
@@ -180,7 +190,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
                     label="Amount"
                     errorMessage={meta.touched ? meta.error : undefined}
                     currency={pool?.currency.symbol}
-                    onChange={(value: number) => form.setFieldValue('amount', value)}
+                    onChange={(value) => form.setFieldValue('amount', value)}
                   />
                 )
               }}

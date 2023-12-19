@@ -272,7 +272,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               justifySelf="stretch"
               alignItems="center"
               justifyContent="center"
-              borderRadius="input"
+              borderRadius="10px"
               position="relative"
             >
               <IconUpload size="iconSmall" style={{ opacity: visible ? 0 : 1 }} />
@@ -301,7 +301,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               <Box
                 gridArea="unit"
                 justifySelf="stretch"
-                borderRadius="input"
+                borderRadius="10px"
                 backgroundImage={`url(${fileUrl})`}
                 backgroundRepeat="no-repeat"
                 backgroundPosition="center"

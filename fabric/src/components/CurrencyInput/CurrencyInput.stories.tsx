@@ -8,7 +8,10 @@ export default {
 } as ComponentMeta<typeof CurrencyInput>
 
 type CurrencyInputStory = ComponentStory<typeof CurrencyInput>
-const Template: CurrencyInputStory = (args) => <CurrencyInput {...args} />
+const Template: CurrencyInputStory = (args) => {
+  const [value, setValue] = React.useState<number | ''>(123456.789)
+  return <CurrencyInput {...args} value={value} onChange={setValue} />
+}
 
 export const Default = Template.bind({})
 Default.args = {
@@ -18,7 +21,6 @@ Default.args = {
   errorMessage: '',
   disabled: false,
   currency: 'kUSD',
-  value: 123456.0,
   onChange: () => {},
   onSetMax: () => {},
 }

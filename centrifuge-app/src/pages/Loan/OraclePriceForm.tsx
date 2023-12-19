@@ -15,13 +15,7 @@ type PriceValues = {
   newPrice: number | ''
 }
 
-export function OraclePriceForm({
-  loan,
-  setShowOraclePricing,
-}: {
-  loan: LoanType
-  setShowOraclePricing: (showOraclePricing: boolean) => void
-}) {
+export function OraclePriceForm({ loan }: { loan: LoanType }) {
   const address = useAddress()
   const canPrice = useCanSetOraclePrice(address)
   const pool = usePool(loan.poolId)
@@ -44,7 +38,6 @@ export function OraclePriceForm({
     {
       onSuccess: () => {
         oraclePriceForm.resetForm()
-        setShowOraclePricing(false)
       },
     }
   )
@@ -88,10 +81,9 @@ export function OraclePriceForm({
                 return (
                   <CurrencyInput
                     {...field}
-                    variant="small"
                     label="Current price"
                     disabled
-                    precision={6}
+                    decimals={8}
                     currency={pool.currency.symbol}
                   />
                 )
@@ -105,13 +97,12 @@ export function OraclePriceForm({
                 return (
                   <CurrencyInput
                     {...field}
-                    variant="small"
                     label="New price"
                     errorMessage={meta.touched ? meta.error : undefined}
                     disabled={isOraclePriceLoading}
                     currency={pool.currency.symbol}
                     onChange={(value) => form.setFieldValue('newPrice', value)}
-                    precision={6}
+                    decimals={8}
                   />
                 )
               }}

@@ -1,4 +1,3 @@
-import { encodeAddress } from '@polkadot/util-crypto'
 import { filter, map, repeatWhen, switchMap } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
@@ -56,12 +55,11 @@ export function getProxiesModule(inst: CentrifugeBase) {
   function getUserProxies(args: [address: Account]) {
     const [address] = args
 
-    return inst.getApi().pipe(
-      switchMap((api) => {
-        return inst.getSubqueryObservable<{
-          proxies: { nodes: { delegator: string; delegatee: string; proxyType: string }[] }
-        }>(
-          `query($address: String!) {
+    return inst
+      .getSubqueryObservable<{
+        proxies: { nodes: { delegator: string; delegatee: string; proxyType: string }[] }
+      }>(
+        `query($address: String!) {
           proxies(filter: { delegatee: { equalTo: $address }}) {
             nodes {
               delegator
@@ -70,40 +68,39 @@ export function getProxiesModule(inst: CentrifugeBase) {
             }
           }
         }`,
-          {
-            address: encodeAddress(address, api.registry.chainSS58),
-          },
-          false
-        )
-      }),
-      map((data) => {
-        const proxies: Record<string, { delegator: string; delegatee: string; types: string[] }> = {}
-        data?.proxies.nodes.forEach((node) => {
-          const delegator = addressToHex(node.delegator)
-          if (proxies[delegator]) {
-            proxies[delegator].types.push(node.proxyType)
-          } else {
-            proxies[delegator] = {
-              delegator,
-              delegatee: addressToHex(node.delegatee),
-              types: [node.proxyType],
+        {
+          address: addressToHex(address),
+        },
+        false
+      )
+      .pipe(
+        map((data) => {
+          const proxies: Record<string, { delegator: string; delegatee: string; types: string[] }> = {}
+          data?.proxies.nodes.forEach((node) => {
+            const delegator = addressToHex(node.delegator)
+            if (proxies[delegator]) {
+              proxies[delegator].types.push(node.proxyType)
+            } else {
+              proxies[delegator] = {
+                delegator,
+                delegatee: addressToHex(node.delegatee),
+                types: [node.proxyType],
+              }
             }
-          }
+          })
+          return Object.values(proxies)
         })
-        return Object.values(proxies)
-      })
-    )
+      )
   }
 
   function getMultiUserProxies(args: [addresses: Account[]]) {
     const [addresses] = args
 
-    return inst.getApi().pipe(
-      switchMap((api) => {
-        return inst.getSubqueryObservable<{
-          proxies: { nodes: { id: string; delegator: string; delegatee: string; proxyType: string }[] }
-        }>(
-          `query($addresses: [String!]) {
+    return inst
+      .getSubqueryObservable<{
+        proxies: { nodes: { id: string; delegator: string; delegatee: string; proxyType: string }[] }
+      }>(
+        `query($addresses: [String!]) {
             proxies(filter: { delegatee: { in: $addresses }}) {
               nodes {
                 id
@@ -113,31 +110,31 @@ export function getProxiesModule(inst: CentrifugeBase) {
               }
             }
           }`,
-          {
-            addresses: addresses.map((addr) => encodeAddress(addr, api.registry.chainSS58)),
-          },
-          false
-        )
-      }),
-      map((data) => {
-        const proxiesByUser: Record<string, { delegator: string; delegatee: string; types: string[] }[]> = {}
-        data?.proxies.nodes.forEach((node) => {
-          const delegatee = addressToHex(node.delegatee)
-          const delegator = addressToHex(node.delegator)
-          const index = proxiesByUser[delegatee]?.findIndex((p) => p.delegator === delegator)
-          if (index > -1) {
-            proxiesByUser[delegatee][index].types.push(node.proxyType)
-          } else {
-            ;(proxiesByUser[delegatee] || (proxiesByUser[delegatee] = [])).push({
-              delegator,
-              delegatee,
-              types: [node.proxyType],
-            })
-          }
+        {
+          addresses: addresses.map((addr) => addressToHex(addr)),
+        },
+        false
+      )
+      .pipe(
+        map((data) => {
+          const proxiesByUser: Record<string, { delegator: string; delegatee: string; types: string[] }[]> = {}
+          data?.proxies.nodes.forEach((node) => {
+            const delegatee = addressToHex(node.delegatee)
+            const delegator = addressToHex(node.delegator)
+            const index = proxiesByUser[delegatee]?.findIndex((p) => p.delegator === delegator)
+            if (index > -1) {
+              proxiesByUser[delegatee][index].types.push(node.proxyType)
+            } else {
+              ;(proxiesByUser[delegatee] || (proxiesByUser[delegatee] = [])).push({
+                delegator,
+                delegatee,
+                types: [node.proxyType],
+              })
+            }
+          })
+          return proxiesByUser
         })
-        return proxiesByUser
-      })
-    )
+      )
   }
   function createPure(_args: [], options?: TransactionOptions) {
     const $api = inst.getApi()

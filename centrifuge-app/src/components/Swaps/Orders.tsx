@@ -283,13 +283,11 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     onClose()
   }
 
-  const balanceLow = balanceDec.lt(orderBuyDec)
-
-  const disabled = balanceLow
-
   if (!account) return null
 
+  const balanceLow = balanceDec.lt(orderBuyDec)
   const { isTransferEnabled, isPartialEnabled } = form.values
+  const disabled = isPartialEnabled ? false : balanceLow
 
   return (
     <Dialog isOpen={open} onClose={close} title="Fulfill order">
@@ -326,7 +324,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                   }
                   value={utils.formatAddress(account.actingAddress)}
                   readOnly
-                  rightElement={
+                  symbol={
                     <IconButton
                       onClick={() => copyToClipboard(utils.formatAddress(account.actingAddress))}
                       title="Copy address to clipboard"
@@ -362,7 +360,6 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                       {({ field, meta, form }: FieldProps) => (
                         <CurrencyInput
                           {...field}
-                          initialValue={form.values.maxReserve || undefined}
                           errorMessage={meta.touched ? meta.error : undefined}
                           disabled={!isPartialEnabled}
                           currency={order.buyCurrency.symbol}

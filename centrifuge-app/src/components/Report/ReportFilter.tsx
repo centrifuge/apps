@@ -1,6 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 
 type ReportFilterProps = {
@@ -23,9 +24,12 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     setActiveTranche,
   } = React.useContext(ReportContext)
 
+  const { holdersReport } = useDebugFlags()
+
   const reportOptions: { label: string; value: Report }[] = [
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Asset list', value: 'asset-list' },
+    ...(holdersReport == true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Borrower transactions', value: 'borrower-tx' },
   ]
@@ -41,86 +45,82 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       borderStyle="solid"
       borderColor="borderSecondary"
     >
-      <Box minWidth={200} maxWidth={200}>
-        <Select
-          name="report"
-          label="Report"
-          placeholder="Select a report"
-          options={reportOptions}
-          value={report}
-          onChange={(event) => {
-            if (event.target.value) {
-              setReport(event.target.value as Report)
-            }
-          }}
-        />
-      </Box>
-
-      <DateRange
-        end={endDate}
-        onSelection={(start, end, range) => {
-          setRange(range)
-          setStartDate(start)
-          setEndDate(end)
+      <Select
+        name="report"
+        label="Report"
+        placeholder="Select a report"
+        options={reportOptions}
+        value={report}
+        onChange={(event) => {
+          if (event.target.value) {
+            setReport(event.target.value as Report)
+          }
         }}
       />
 
-      {report === 'pool-balance' && (
-        <Box minWidth={150} maxWidth={150}>
-          <Select
-            name="groupBy"
-            label="Group by"
-            placeholder="Select a time period to group by"
-            options={[
-              {
-                label: 'Day',
-                value: 'day',
-              },
-              ...(range !== 'last-week'
-                ? [
-                    {
-                      label: 'Month',
-                      value: 'month',
-                    },
-                  ]
-                : []),
-            ]}
-            value={groupBy}
-            onChange={(event) => {
-              if (event.target.value) {
-                setGroupBy(event.target.value as GroupBy)
-              }
-            }}
-          />
-        </Box>
+      {report !== 'holders' && (
+        <DateRange
+          end={endDate}
+          onSelection={(start, end, range) => {
+            setRange(range)
+            setStartDate(start)
+            setEndDate(end)
+          }}
+        />
       )}
 
-      {report === 'investor-tx' && (
-        <Box minWidth={150} maxWidth={150}>
-          <Select
-            name="activeTranche"
-            label="Token"
-            placeholder="Select a token"
-            options={[
-              {
-                label: 'All tokens',
-                value: 'all',
-              },
-              ...pool.tranches.map((token) => {
-                return {
-                  label: token.currency.name,
-                  value: token.id,
-                }
-              }),
-            ]}
-            value={activeTranche}
-            onChange={(event) => {
-              if (event.target.value) {
-                setActiveTranche(event.target.value)
+      {report === 'pool-balance' && (
+        <Select
+          name="groupBy"
+          label="Group by"
+          placeholder="Select a time period to group by"
+          options={[
+            {
+              label: 'Day',
+              value: 'day',
+            },
+            ...(range !== 'last-week'
+              ? [
+                  {
+                    label: 'Month',
+                    value: 'month',
+                  },
+                ]
+              : []),
+          ]}
+          value={groupBy}
+          onChange={(event) => {
+            if (event.target.value) {
+              setGroupBy(event.target.value as GroupBy)
+            }
+          }}
+        />
+      )}
+
+      {(report === 'holders' || report === 'investor-tx') && (
+        <Select
+          name="activeTranche"
+          label="Token"
+          placeholder="Select a token"
+          options={[
+            {
+              label: 'All tokens',
+              value: 'all',
+            },
+            ...pool.tranches.map((token) => {
+              return {
+                label: token.currency.name,
+                value: token.id,
               }
-            }}
-          />
-        </Box>
+            }),
+          ]}
+          value={activeTranche}
+          onChange={(event) => {
+            if (event.target.value) {
+              setActiveTranche(event.target.value)
+            }
+          }}
+        />
       )}
       <Box ml="auto">
         <AnchorButton

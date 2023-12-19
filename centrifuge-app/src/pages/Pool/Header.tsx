@@ -4,9 +4,9 @@ import * as React from 'react'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { Eththumbnail } from '../../components/EthThumbnail'
+import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
-import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -23,6 +23,10 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const theme = useTheme()
   const cent = useCentrifuge()
 
+  const iconUri = metadata?.pool?.icon?.uri && cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)
+
+  const iconSrc = iconUri?.includes('ipfs') ? `https://ipfs.io/ipfs/${iconUri.split('ipfs/')[1]}` : iconUri
+
   return (
     <PageHeader
       title={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>}
@@ -33,12 +37,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       icon={
         <Eththumbnail show={isTinlakePool}>
           {metadata?.pool?.icon ? (
-            <Box
-              as="img"
-              width="iconLarge"
-              height="iconLarge"
-              src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)}
-            />
+            <Box as="img" width="iconLarge" height="iconLarge" src={iconSrc} />
           ) : (
             <Shelf
               width="iconLarge"
@@ -56,7 +55,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       actions={actions}
     >
       <Shelf
-        px={PAGE_GUTTER}
+        px={BASE_PADDING}
         bg="backgroundPage"
         style={{
           boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
