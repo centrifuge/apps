@@ -22,7 +22,7 @@
     "test:ci": "vitest run",
     "preview": "vite preview --host 0.0.0.0",
     "e2e:run": "synpress run -cf synpress.config.ts",
-    "e2e:run:ci": "NETWORK_NAME=centrifuge RPC_URL=https://fullnode.development.cntrfg.com CHAIN_ID=2000 SYMBOL=DEVEL IS_TESTNET=true DEBUG=true synpress run --record -cf synpress.config.ts",
+    "e2e:run:ci": "synpress run --record -cf synpress.config.ts",
     "e2e:open": "synpress open -cf synpress.config.ts"
   },
   "dependencies": {
