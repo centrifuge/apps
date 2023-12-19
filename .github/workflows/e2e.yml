@@ -30,7 +30,7 @@ jobs:
         with:
           working-directory: centrifuge-app
           install-command: yarn
-          command: env && yarn e2e:run:ci
+          command: PRIVATE_KEY=${{secrets.CYPRESS_PRIVATE_KEY}} NETWORK_NAME=centrifuge RPC_URL=https://fullnode.development.cntrfg.com CHAIN_ID=2000 SYMBOL=DEVEL IS_TESTNET=true DEBUG=true synpress run --record -cf synpress.config.ts
           browser: chrome
           config-file: synpress.config.ts
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
