@@ -503,7 +503,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         returns: [['isAllowedToInvest']],
       },
       {
-        target: lp,
+        target: currency.tokenAddress,
         call: ['function balanceOf(address) view returns (uint256)', user],
         returns: [['tokenBalance', toTokenBalance(currency.trancheDecimals)]],
       },

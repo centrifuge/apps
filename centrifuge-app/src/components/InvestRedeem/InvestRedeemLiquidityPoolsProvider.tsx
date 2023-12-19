@@ -207,7 +207,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     approvePoolCurrency: doAction('approvePoolCurrency', (amount) => [
       lpInvest?.lpAddress,
       lpInvest?.currencyAddress,
-      amount,
+      amount.toString(),
     ]),
     approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress]),
