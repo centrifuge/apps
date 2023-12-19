@@ -30,9 +30,7 @@ jobs:
         with:
           working-directory: centrifuge-app
           install-command: yarn
-          command: |
-            env
-            yarn e2e:run:ci
+          command: env && yarn e2e:run:ci
           browser: chrome
           config-file: synpress.config.ts
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
