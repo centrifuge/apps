@@ -10,41 +10,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install linux deps
-        run: |
-          sudo apt-get install --no-install-recommends -y \
-          fluxbox \
-          xvfb
+      # - name: Install linux deps
+      #   run: |
+      #     sudo apt-get install --no-install-recommends -y \
+      #     fluxbox \
+      #     xvfb
 
-      - name: Run xvfb and fluxbox
-        run: |
-          Xvfb :0 -screen 0 1024x768x24 -listen tcp -ac &
-          fluxbox &
-        env:
-          DISPLAY: :0.0
-      # - name: Download artifact
-      #   id: download-artifact
-      #   uses: dawidd6/action-download-artifact@v2
-      #   with:
-      #     workflow: centrifuge-app.yml
-      #     workflow_conclusion: 'success' # This will fail if the staging deployment isn't finished yet
-      #     branch: main
-      #     # check_artifacts: true # This will search for the last available artifact, useful for testing
-      #     path: centrifuge-app/build
-      # - name: Install dependencies
-      #   working-directory: centrifuge-app
-      #   shell: bash
-      #   run: yarn
-      # - name: Run preview
-      #   working-directory: centrifuge-app
-      #   shell: bash
-      #   run: yarn preview &
+      # - name: Run xvfb and fluxbox
+      #   run: |
+      #     Xvfb :0 -screen 0 1024x768x24 -listen tcp -ac &
+      #     fluxbox &
       #   env:
-      #     # https://github.com/actions/runner-images/issues/70#issuecomment-1191708172
-      #     NODE_OPTIONS: '--max_old_space_size=4096'
-      # - name: Make sure preview is reachable
-      #   run: curl -sSf https://127.0.0.1:4173/pools
-      #   timeout-minutes: 1
+      #     DISPLAY: :0.0
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
