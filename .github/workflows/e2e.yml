@@ -7,6 +7,9 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,14 +30,16 @@ jobs:
         with:
           working-directory: centrifuge-app
           install-command: yarn
-          command: yarn e2e:run:ci
+          command: |
+            env
+            yarn e2e:run:ci
           browser: chrome
           config-file: synpress.config.ts
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
         env:
           # pass the Cypress Cloud record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          # pass GitHub token to allow accurately detecting a build vs a re-run build
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY }}
           CYPRESS_BASE_URL: https://app-dev.k-f.dev
           DISPLAY: :0.0
