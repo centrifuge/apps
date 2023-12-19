@@ -1,8 +1,8 @@
 name: Synpress tests
 
 on:
-  push:
-    branches: [cent-app/synpress-testing-setup, 'main']
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   cypress-run:
