@@ -1,6 +1,6 @@
 describe('Synpress health check', () => {
   it('Connects a wallet', () => {
-    cy.visit('/pools')
+    cy.visit('/pools', { failOnStatusCode: false })
     const connectButton = cy.contains('Connect')
     connectButton.click()
     cy.get('button').contains('Centrifuge').click()

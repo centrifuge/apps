@@ -10,6 +10,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install linux deps
+        run: |
+          sudo apt-get install --no-install-recommends -y \
+          fluxbox \
+          xvfb
+
+      - name: Run xvfb and fluxbox
+        run: |
+          Xvfb :0 -screen 0 1024x768x24 -listen tcp -ac &
+          fluxbox &
+        env:
+          DISPLAY: :0.0
       # - name: Download artifact
       #   id: download-artifact
       #   uses: dawidd6/action-download-artifact@v2
@@ -30,13 +42,16 @@ jobs:
       #   env:
       #     # https://github.com/actions/runner-images/issues/70#issuecomment-1191708172
       #     NODE_OPTIONS: '--max_old_space_size=4096'
+      # - name: Make sure preview is reachable
+      #   run: curl -sSf https://127.0.0.1:4173/pools
+      #   timeout-minutes: 1
       - name: Synpress run
         uses: cypress-io/github-action@v6
         with:
           working-directory: centrifuge-app
           install-command: yarn
           command: yarn e2e:run:ci
-          browser: firefox
+          browser: chrome
           config-file: synpress.config.ts
           ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
         env:
@@ -44,3 +59,4 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           # pass GitHub token to allow accurately detecting a build vs a re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISPLAY: :0.0
