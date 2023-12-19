@@ -18,7 +18,7 @@ import { useTinlakeTransaction } from '../utils/tinlake/useTinlakeTransaction'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'
-import { useSuitableAccounts } from '../utils/usePermissions'
+import { usePoolPermissions, useSuitableAccounts } from '../utils/usePermissions'
 import { usePoolAccountOrders } from '../utils/usePools'
 import { DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
@@ -70,6 +70,15 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
+  const poolPermissions = usePoolPermissions(pool.id)
+
+  const isIssuer = Object.keys(poolPermissions || {})
+    .filter(
+      (address) =>
+        poolPermissions?.[address].roles.includes('InvestorAdmin') ||
+        poolPermissions?.[address].roles.includes('LoanAdmin')
+    )
+    .includes(account.actingAddress)
 
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Start order execution',
@@ -153,16 +162,18 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
             </Text>
           )} */}
 
-          <Button
-            small
-            variant="secondary"
-            onClick={closeEpoch}
-            disabled={!pool || loadingClose || !!epochTimeRemaining}
-            loading={loadingClose}
-            loadingMessage={loadingClose ? 'Executing order…' : ''}
-          >
-            Start order execution
-          </Button>
+          {isIssuer && (
+            <Button
+              small
+              variant="secondary"
+              onClick={closeEpoch}
+              disabled={!pool || loadingClose || !!epochTimeRemaining}
+              loading={loadingClose}
+              loadingMessage={loadingClose ? 'Executing order…' : ''}
+            >
+              Start order execution
+            </Button>
+          )}
         </Shelf>
       }
     >
@@ -245,6 +256,15 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
   const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
+  const poolPermissions = usePoolPermissions(pool.id)
+
+  const isIssuer = Object.keys(poolPermissions || {})
+    .filter(
+      (address) =>
+        poolPermissions?.[address].roles.includes('InvestorAdmin') ||
+        poolPermissions?.[address].roles.includes('LoanAdmin')
+    )
+    .includes(account.actingAddress)
 
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute order',
@@ -284,22 +304,24 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
       title="Order overview"
       titleAddition={<Text variant="body2">{loadingExecution && 'Order executing'}</Text>}
       headerRight={
-        <Button
-          small
-          variant={minutesRemaining > 0 ? 'secondary' : 'primary'}
-          onClick={executeEpoch}
-          disabled={!pool || minutesRemaining > 0 || loadingExecution}
-          loading={minutesRemaining > 0 || loadingExecution}
-          loadingMessage={
-            minutesRemaining > 0
-              ? `${minutesRemaining} minutes until execution…`
-              : loadingExecution
-              ? 'Executing order…'
-              : ''
-          }
-        >
-          Start order execution
-        </Button>
+        isIssuer && (
+          <Button
+            small
+            variant={minutesRemaining > 0 ? 'secondary' : 'primary'}
+            onClick={executeEpoch}
+            disabled={!pool || minutesRemaining > 0 || loadingExecution}
+            loading={minutesRemaining > 0 || loadingExecution}
+            loadingMessage={
+              minutesRemaining > 0
+                ? `${minutesRemaining} minutes until execution…`
+                : loadingExecution
+                ? 'Executing order…'
+                : ''
+            }
+          >
+            Start order execution
+          </Button>
+        )
       }
     >
       {minutesRemaining > 0 && (
