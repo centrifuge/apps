@@ -22,6 +22,7 @@ import { usePoolPermissions, useSuitableAccounts } from '../utils/usePermissions
 import { usePoolAccountOrders } from '../utils/usePools'
 import { DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
+import { useDebugFlags } from './DebugFlags'
 import { columns, EpochList, LiquidityTableRow } from './EpochList'
 import { PageSection } from './PageSection'
 import { AnchorTextLink } from './TextLink'
@@ -71,6 +72,7 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
   const poolPermissions = usePoolPermissions(pool.id)
+  const { showOrderExecution } = useDebugFlags()
 
   const isIssuer = Object.keys(poolPermissions || {})
     .filter(
@@ -162,7 +164,7 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
             </Text>
           )} */}
 
-          {isIssuer && (
+          {(isIssuer || showOrderExecution) && (
             <Button
               small
               variant="secondary"
@@ -257,6 +259,7 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
   const poolPermissions = usePoolPermissions(pool.id)
+  const { showOrderExecution } = useDebugFlags()
 
   const isIssuer = Object.keys(poolPermissions || {})
     .filter(
@@ -304,7 +307,7 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
       title="Order overview"
       titleAddition={<Text variant="body2">{loadingExecution && 'Order executing'}</Text>}
       headerRight={
-        isIssuer && (
+        (isIssuer || showOrderExecution) && (
           <Button
             small
             variant={minutesRemaining > 0 ? 'secondary' : 'primary'}
