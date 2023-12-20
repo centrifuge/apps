@@ -3,6 +3,7 @@ import type { AddEthereumChainParameter } from '@web3-react/types'
 type BasicChainInformation = {
   urls: string[]
   iconUrl?: string
+  isTestnet: boolean
 }
 
 type ExtendedChainInformation = BasicChainInformation & {
@@ -47,7 +48,7 @@ const chainExtendedInfo = {
     blockExplorerUrl: 'https://etherscan.io/',
   },
   5: {
-    name: 'Görli',
+    name: 'Ethereum Görli',
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     blockExplorerUrl: 'https://goerli.etherscan.io/',
   },
