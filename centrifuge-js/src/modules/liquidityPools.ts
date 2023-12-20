@@ -1,4 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber'
+import { HashZero } from '@ethersproject/constants'
 import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
@@ -140,7 +141,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, 0x00, {
+      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, HashZero, {
         ...options,
         gasLimit: 300000,
       })
@@ -151,7 +152,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, 0x00, {
+      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, HashZero, {
         ...options,
         gasLimit: 300000,
       })
@@ -165,10 +166,19 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order, { deadline, r, s, v }] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, '', deadline, v, r, s, {
-        ...options,
-        gasLimit: 300000,
-      })
+      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(
+        order.toString(),
+        user,
+        HashZero,
+        deadline,
+        v,
+        r,
+        s,
+        {
+          ...options,
+          gasLimit: 300000,
+        }
+      )
     )
   }
 
