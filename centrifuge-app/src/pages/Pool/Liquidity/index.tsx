@@ -14,7 +14,7 @@ import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
-const ReserveCashDragChart = React.lazy(() => import('../../../components/Charts/ReserveCashDragChart'))
+const CashDragChart = React.lazy(() => import('../../../components/Charts/CashDragChart'))
 const LiquidityTransactionsSection = React.lazy(() => import('../../../components/LiquidityTransactionsSection'))
 
 export function PoolDetailLiquidityTab() {
@@ -84,10 +84,10 @@ export function PoolDetailLiquidity() {
             />
           </LoadBoundary>
 
-          <PageSection title="Reserve vs. cash drag">
+          <PageSection title="Cash drag">
             <Stack height="290px">
               <LoadBoundary>
-                <ReserveCashDragChart />
+                <CashDragChart />
               </LoadBoundary>
             </Stack>
           </PageSection>
