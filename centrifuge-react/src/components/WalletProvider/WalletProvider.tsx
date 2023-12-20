@@ -138,6 +138,7 @@ export function WalletProvider({
   evmChains: evmChainsProp = {
     1: {
       urls: ['https://cloudflare-eth.com'],
+      isTestnet: false,
     },
   },
   evmAdditionalConnectors,
