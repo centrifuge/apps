@@ -140,7 +140,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, '', {
+      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, 0x00, {
         ...options,
         gasLimit: 300000,
       })
@@ -151,7 +151,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, '', {
+      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, 0x00, {
         ...options,
         gasLimit: 300000,
       })
