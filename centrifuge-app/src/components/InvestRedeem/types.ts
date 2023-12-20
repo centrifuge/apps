@@ -4,7 +4,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 
-type CurrencyMeta = Pick<CurrencyMetadata, 'decimals' | 'symbol'>
+type CurrencyMeta = Pick<CurrencyMetadata, 'decimals' | 'symbol' | 'name'>
 
 export type InvestRedeemAction =
   | 'invest'
