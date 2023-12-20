@@ -1,7 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
-import { formatBytes32String } from '@ethersproject/strings'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
@@ -141,7 +140,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, formatBytes32String(''), {
+      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, [], {
         ...options,
         gasLimit: 300000,
       })
@@ -152,7 +151,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, formatBytes32String(''), {
+      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, [], {
         ...options,
         gasLimit: 300000,
       })
@@ -166,19 +165,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order, { deadline, r, s, v }] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(
-        order.toString(),
-        user,
-        formatBytes32String(''),
-        deadline,
-        v,
-        r,
-        s,
-        {
-          ...options,
-          gasLimit: 300000,
-        }
-      )
+      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, [], deadline, v, r, s, {
+        ...options,
+        gasLimit: 300000,
+      })
     )
   }
 
