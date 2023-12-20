@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import { HashZero } from '@ethersproject/constants'
 import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
+import { formatBytes32String } from '@ethersproject/strings'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
@@ -141,7 +141,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, HashZero, {
+      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, formatBytes32String(''), {
         ...options,
         gasLimit: 300000,
       })
@@ -152,7 +152,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, HashZero, {
+      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, formatBytes32String(''), {
         ...options,
         gasLimit: 300000,
       })
@@ -169,7 +169,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(
         order.toString(),
         user,
-        HashZero,
+        formatBytes32String(''),
         deadline,
         v,
         r,
