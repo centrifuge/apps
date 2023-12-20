@@ -1,9 +1,9 @@
-import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
-import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
+import { formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { Tooltips } from '../Tooltips'
 import { CustomizedTooltip } from './Tooltip'
@@ -11,10 +11,9 @@ import { CustomizedTooltip } from './Tooltip'
 type ChartData = {
   day: Date
   cashDrag: number
-  reserve: number
 }
 
-export default function ReserveCashDragChart() {
+export default function CashDragChart() {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolStates = useDailyPoolStates(poolId)
@@ -27,7 +26,7 @@ export default function ReserveCashDragChart() {
       const assetValue = day.poolState.portfolioValuation.toDecimal().toNumber()
       const reserve = day.poolState.totalReserve.toDecimal().toNumber()
       const cashDrag = (reserve / (reserve + assetValue)) * 100
-      return { day: new Date(day.timestamp), cashDrag: cashDrag || 0, reserve }
+      return { day: new Date(day.timestamp), cashDrag: cashDrag || 0 }
     }) || []
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
@@ -37,7 +36,6 @@ export default function ReserveCashDragChart() {
   const today: ChartData = {
     day: new Date(),
     cashDrag: cashDrag || 0,
-    reserve: todayReserve,
   }
 
   const chartData = [...data.slice(0, data.length - 1), today]
@@ -77,7 +75,6 @@ export default function ReserveCashDragChart() {
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
               <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} />} />
-              <Line dot={false} dataKey="reserve" yAxisId="left" stroke={theme.colors.accentPrimary} name="Reserve" />
               <Line
                 dot={false}
                 dataKey="cashDrag"
@@ -100,17 +97,11 @@ function CustomLegend({ data, currency }: { currency: string; data: ChartData })
   const theme = useTheme()
 
   return (
-    <Shelf bg="backgroundPage" width="100%" gap="2">
-      <Grid pl="5" pb="4" columns={6} gap="3" width="100%">
-        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
-          <Tooltips variant="secondary" type="poolReserve" />
-          <Text variant="body2">{formatBalance(data.reserve, currency)}</Text>
-        </Stack>
-        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentSecondary}>
-          <Tooltips variant="secondary" type="cashDrag" />
-          <Text variant="body2">{formatPercentage(data.cashDrag)}</Text>
-        </Stack>
-      </Grid>
-    </Shelf>
+    <Box bg="backgroundPage" pl="5" pb="4">
+      <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentSecondary}>
+        <Tooltips variant="secondary" type="cashDrag" />
+        <Text variant="body2">{formatPercentage(data.cashDrag)}</Text>
+      </Stack>
+    </Box>
   )
 }

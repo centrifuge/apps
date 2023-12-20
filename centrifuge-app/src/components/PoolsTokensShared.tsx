@@ -5,6 +5,7 @@ import { CardTotalValueLocked } from './CardTotalValueLocked'
 import { LayoutSection } from './LayoutBase/LayoutSection'
 import { LoadBoundary } from './LoadBoundary'
 import { MenuSwitch } from './MenuSwitch'
+import { PortfolioCta } from './PortfolioCta'
 
 type PoolsTokensSharedProps = {
   title: string
@@ -27,6 +28,9 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
         <Grid gridTemplateColumns={['1fr', '1fr', '1fr', 'repeat(2, minmax(0, 1fr))']} gap={[2, 2, 2, 4]}>
           <LoadBoundary>
             <CardTotalValueLocked />
+          </LoadBoundary>
+          <LoadBoundary>
+            <PortfolioCta />
           </LoadBoundary>
         </Grid>
 

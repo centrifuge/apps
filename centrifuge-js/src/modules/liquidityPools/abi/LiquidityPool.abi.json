@@ -1,13 +1,13 @@
 [
-  "event DepositRequest(address indexed, address, uint256)",
-  "event RedeemRequest(address indexed, address, address, uint256)",
+  "event DepositRequest(address indexed, address indexed, uint256 indexed, address, uint256)",
+  "event RedeemRequest(address indexed, address indexed, uint256 indexed, address, uint256)",
   "event CancelDepositRequest(address indexed)",
   "event CancelRedeemRequest(address indexed)",
   "function mint(uint256, address) public returns (uint256)",
   "function withdraw(uint256, address, address) public returns (uint256)",
-  "function requestDeposit(uint256, address) public",
-  "function requestRedeem(uint256, address, address) public",
-  "function requestDepositWithPermit(uint256, address, uint256, uint8, bytes32, bytes32) public",
+  "function requestDeposit(uint256, address, address, bytes) public",
+  "function requestRedeem(uint256, address, address, bytes) public",
+  "function requestDepositWithPermit(uint256, address, bytes, uint256, uint8, bytes32, bytes32) public",
   "function cancelDepositRequest() public",
   "function cancelRedeemRequest() public"
 ]
