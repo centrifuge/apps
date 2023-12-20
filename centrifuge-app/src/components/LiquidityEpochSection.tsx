@@ -74,13 +74,15 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const poolPermissions = usePoolPermissions(pool.id)
   const { showOrderExecution } = useDebugFlags()
 
-  const isIssuer = Object.keys(poolPermissions || {})
-    .filter(
-      (address) =>
-        poolPermissions?.[address].roles.includes('InvestorAdmin') ||
-        poolPermissions?.[address].roles.includes('LoanAdmin')
-    )
-    .includes(account.actingAddress)
+  const isIssuer = account
+    ? Object.keys(poolPermissions || {})
+        .filter(
+          (address) =>
+            poolPermissions?.[address].roles.includes('InvestorAdmin') ||
+            poolPermissions?.[address].roles.includes('LoanAdmin')
+        )
+        .includes(account.actingAddress)
+    : false
 
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Start order execution',
