@@ -57,6 +57,10 @@ export type SubqueryInvestorTransaction = {
   id: string
   timestamp: string
   accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
   poolId: string
   trancheId: string
   epochNumber: number

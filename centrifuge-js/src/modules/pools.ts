@@ -2302,6 +2302,10 @@ export function getPoolsModule(inst: Centrifuge) {
             id
             timestamp
             accountId
+            account {
+              chainId
+              evmAddress
+            }
             poolId
             trancheId
             epochNumber
@@ -2333,6 +2337,8 @@ export function getPoolsModule(inst: Centrifuge) {
               id: tx.id,
               timestamp: new Date(tx.timestamp),
               accountId: tx.accountId,
+              chainId: Number(tx.account.chainId),
+              evmAddress: tx.account.evmAddress,
               trancheId: tx.trancheId,
               epochNumber: tx.epochNumber,
               type: tx.type as InvestorTransactionType,

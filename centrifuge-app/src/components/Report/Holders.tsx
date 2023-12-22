@@ -51,10 +51,10 @@ export function Holders({ pool }: { pool: Pool }) {
             .sub(holder.sumRedeemOrderedAmount.toDecimal())
             .sub(holder.sumRedeemUncollectedAmount.toDecimal())
             .sub(holder.sumRedeemCollectedAmount.toDecimal()),
-          pool.currency
+          pool.tranches[0].currency // TODO: not hardcode to 0
         ),
         formatBalance(holder.sumInvestOrderedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumRedeemOrderedAmount.toDecimal(), pool.currency),
+        formatBalance(holder.sumRedeemOrderedAmount.toDecimal(), pool.tranches[0].currency), // TODO: not hardcode to 0
       ],
       heading: false,
     }))
