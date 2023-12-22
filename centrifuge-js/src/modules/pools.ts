@@ -2403,11 +2403,14 @@ export function getPoolsModule(inst: Centrifuge) {
   function getHolders(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
 
-    const $query = inst.getSubqueryObservable<{
-      trancheBalances: { nodes: SubqueryTrancheBalances[] }
-      currencyBalances: { nodes: SubqueryTrancheBalances[] }
-    }>(
-      `query($poolId: String!, $trancheId: String, $currencyId: String) {
+    const $query = inst.getApi().pipe(
+      combineLatestWith(inst.getChainId()),
+      map((chainId) => {
+        inst.getSubqueryObservable<{
+          trancheBalances: { nodes: SubqueryTrancheBalances[] }
+          currencyBalances: { nodes: SubqueryTrancheBalances[] }
+        }>(
+          `query($poolId: String!, $trancheId: String, $currencyId: String) {
         trancheBalances(
           filter: {
             poolId: { equalTo: $poolId },
@@ -2439,12 +2442,14 @@ export function getPoolsModule(inst: Centrifuge) {
         }
       }
       `,
-      {
-        poolId,
-        trancheId,
-        currencyId: `${CENTRIFUGE_CHAIN_ID}-Tranche-${poolId}`,
-      },
-      false
+          {
+            poolId,
+            trancheId,
+            currencyId: `${chainId}-Tranche-${poolId}`,
+          },
+          false
+        )
+      })
     )
 
     return $query.pipe(
