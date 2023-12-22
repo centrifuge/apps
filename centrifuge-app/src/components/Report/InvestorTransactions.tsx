@@ -3,7 +3,6 @@ import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { evmChains } from '../../config'
-import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -13,29 +12,7 @@ import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
-import { formatInvestorTransactionsType } from './utils'
-
-function truncate(text: string) {
-  const first = text.slice(0, 5)
-  const last = text.slice(-5)
-
-  return `${first}...${last}`
-}
-
-function copyable(text: string) {
-  return (
-    <Text
-      style={{
-        cursor: 'copy',
-        wordBreak: 'break-word',
-        whiteSpace: 'normal',
-      }}
-      onClick={() => copyToClipboard(text)}
-    >
-      {truncate(text)}
-    </Text>
-  )
-}
+import { copyable, formatInvestorTransactionsType } from './utils'
 
 const noop = (v: any) => v
 const cellFormatters = [noop, copyable, noop, noop, noop, noop, noop, noop, noop]

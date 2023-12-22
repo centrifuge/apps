@@ -2449,6 +2449,7 @@ export function getPoolsModule(inst: Centrifuge) {
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
       map(([data, currency]) => {
+        // TODO: this should be a map by account ID + tranche ID
         const currencyBalancesByAccountId = data!.currencyBalances.nodes.reduce((obj, balance) => {
           obj[balance.accountId] = balance
           return obj

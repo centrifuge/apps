@@ -10,18 +10,12 @@ import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import { copyable } from './utils'
 
 const headers = ['Account', 'Network', 'Position', 'Pending invest order', 'Pending redeem order']
 
-function truncate(string: string) {
-  const first = string.slice(0, 5)
-  const last = string.slice(-5)
-
-  return `${first}...${last}`
-}
-
 const noop = (v: any) => v
-const cellFormatters = [truncate, noop, noop, noop, noop]
+const cellFormatters = [copyable, noop, noop, noop, noop]
 
 const columns = headers.map((col, index) => ({
   align: 'left',
