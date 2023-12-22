@@ -727,6 +727,8 @@ export type BorrowerTransaction = {
 
 type Holder = {
   accountId: string
+  chainId: number
+  evmAddress?: string
   sumInvestOrderedAmount: CurrencyBalance
   sumInvestUncollectedAmount: CurrencyBalance
   sumInvestCollectedAmount: CurrencyBalance
@@ -2404,6 +2406,10 @@ export function getPoolsModule(inst: Centrifuge) {
           }) {
           nodes {
             accountId
+            account {
+              chainId
+              evmAddress
+            }
             sumInvestOrderedAmount
             sumInvestUncollectedAmount
             sumInvestCollectedAmount
@@ -2427,6 +2433,8 @@ export function getPoolsModule(inst: Centrifuge) {
         console.log(data)
         return data!.trancheBalances.nodes.map((balance) => ({
           accountId: balance.accountId,
+          chainId: Number(balance.account.chainId),
+          evmAddress: balance.account.evmAddress,
           sumInvestOrderedAmount: new CurrencyBalance(balance.sumInvestOrderedAmount, currency.decimals),
           sumInvestUncollectedAmount: new CurrencyBalance(balance.sumInvestUncollectedAmount, currency.decimals),
           sumInvestCollectedAmount: new CurrencyBalance(balance.sumInvestCollectedAmount, currency.decimals),

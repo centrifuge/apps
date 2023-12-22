@@ -88,6 +88,10 @@ export type SubqueryTrancheBalances = {
   __typename?: 'TrancheBalances'
   id: string
   accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
   poolId: string
   trancheId: string
   sumInvestOrderedAmount: string

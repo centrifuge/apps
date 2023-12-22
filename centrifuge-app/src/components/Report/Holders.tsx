@@ -5,20 +5,13 @@ import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useHolders } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
+import { evmChains } from '../Root'
 import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 
-const headers = [
-  'Account',
-  'Network',
-  'Position',
-  'Pending invest order',
-  'Unclaimed investment',
-  'Pending redeem order',
-  'Unclaimed redemption',
-]
+const headers = ['Account', 'Network', 'Position', 'Pending invest order', 'Pending redeem order']
 
 function truncate(string: string) {
   const first = string.slice(0, 5)
@@ -28,7 +21,7 @@ function truncate(string: string) {
 }
 
 const noop = (v: any) => v
-const cellFormatters = [truncate, noop, noop, noop, noop, noop, noop]
+const cellFormatters = [truncate, noop, noop, noop, noop]
 
 const columns = headers.map((col, index) => ({
   align: 'left',
@@ -49,13 +42,19 @@ export function Holders({ pool }: { pool: Pool }) {
     return holders.map((holder) => ({
       name: '',
       value: [
-        holder.accountId,
-        'Centrifuge',
+        holder.evmAddress || holder.accountId,
+        (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
+        formatBalance(
+          holder.sumInvestUncollectedAmount
+            .toDecimal()
+            .add(holder.sumInvestCollectedAmount.toDecimal())
+            .sub(holder.sumRedeemOrderedAmount.toDecimal())
+            .sub(holder.sumRedeemUncollectedAmount.toDecimal())
+            .sub(holder.sumRedeemCollectedAmount.toDecimal()),
+          pool.currency
+        ),
         formatBalance(holder.sumInvestOrderedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumInvestUncollectedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumInvestCollectedAmount.toDecimal(), pool.currency),
         formatBalance(holder.sumRedeemOrderedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumRedeemUncollectedAmount.toDecimal(), pool.currency),
       ],
       heading: false,
     }))

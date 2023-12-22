@@ -67,6 +67,7 @@ const baseEvmChains: EvmChains =
   ethConfig.network === 'mainnet'
     ? {
         1: {
+          name: 'Ethereum',
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
           isTestnet: false,
@@ -74,17 +75,19 @@ const baseEvmChains: EvmChains =
       }
     : {
         1: {
+          name: 'Ethereum',
           urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
           iconUrl: ethereumLogo,
           isTestnet: false,
         },
         5: {
+          name: 'Ethereum Goerli',
           urls: [`https://goerli.infura.io/v3/${infuraKey}`],
           iconUrl: goerliLogo,
           isTestnet: true,
         },
       }
-const evmChains = {
+export const evmChains: EvmChains = {
   ...baseEvmChains,
   11155111: {
     name: 'Ethereum Sepolia',
