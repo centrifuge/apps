@@ -38,13 +38,12 @@ export function Holders({ pool }: { pool: Pool }) {
       value: [
         holder.evmAddress || holder.accountId,
         (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
-        // TODO: should use CurrencyBalance.amount + TrancheBalance.sumInvestUncollectedAmount
         formatBalance(
           holder.balance.toDecimal().add(holder.sumInvestUncollectedAmount.toDecimal()),
-          pool.tranches[0].currency // TODO: not hardcode to 0
+          pool.tranches[0].currency // TODO: not hardcode to tranche index 0
         ),
         formatBalance(holder.sumInvestOrderedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumRedeemOrderedAmount.toDecimal(), pool.tranches[0].currency), // TODO: not hardcode to 0
+        formatBalance(holder.sumRedeemOrderedAmount.toDecimal(), pool.tranches[0].currency), // TODO: not hardcode to tranche index 0
       ],
       heading: false,
     }))
