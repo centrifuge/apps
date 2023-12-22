@@ -2402,46 +2402,46 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function getHolders(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
-
-    const $query = inst.getApi().pipe(
-      combineLatestWith(inst.getChainId()),
-      map((chainId) => {
-        inst.getSubqueryObservable<{
+    const $api = inst.getApi()
+    const $query = $api.pipe(
+      switchMap((api) => api.query.evmChainId.chainId()),
+      switchMap((chainId) => {
+        return inst.getSubqueryObservable<{
           trancheBalances: { nodes: SubqueryTrancheBalances[] }
           currencyBalances: { nodes: SubqueryTrancheBalances[] }
         }>(
           `query($poolId: String!, $trancheId: String, $currencyId: String) {
-        trancheBalances(
-          filter: {
-            poolId: { equalTo: $poolId },
-            trancheId: { isNull: false, endsWith: $trancheId }
-          }) {
-          nodes {
-            accountId
-            account {
-              chainId
-              evmAddress
+          trancheBalances(
+            filter: {
+              poolId: { equalTo: $poolId },
+              trancheId: { isNull: false, endsWith: $trancheId }
+            }) {
+            nodes {
+              accountId
+              account {
+                chainId
+                evmAddress
+              }
+              sumInvestOrderedAmount
+              sumInvestUncollectedAmount
+              sumInvestCollectedAmount
+              sumRedeemOrderedAmount
+              sumRedeemUncollectedAmount
+              sumRedeemCollectedAmount
             }
-            sumInvestOrderedAmount
-            sumInvestUncollectedAmount
-            sumInvestCollectedAmount
-            sumRedeemOrderedAmount
-            sumRedeemUncollectedAmount
-            sumRedeemCollectedAmount
+          }
+  
+          currencyBalances(
+            filter: {
+              currencyId: { startsWithInsensitive: $currencyId },
+            }) {
+            nodes {
+              accountId
+              amount
+            }
           }
         }
-
-        currencyBalances(
-          filter: {
-            currencyId: { startsWithInsensitive: $currencyId },
-          }) {
-          nodes {
-            accountId
-            amount
-          }
-        }
-      }
-      `,
+        `,
           {
             poolId,
             trancheId,
