@@ -1,0 +1,16 @@
+{
+  "name": "E2E Pool",
+  "poolId": "3031862977",
+  "tranches": [
+    {
+      "name": "Junior",
+      "symbol": "E2EJUN",
+      "id": "0xfb5409dcf2da330996d0fb22b8010d1d"
+    },
+    {
+      "name": "Senior",
+      "symbol": "E2ESEN",
+      "id": "0x49b67700a80a863469da9dbfe688c30d"
+    }
+  ]
+}

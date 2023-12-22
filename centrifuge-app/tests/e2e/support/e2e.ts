@@ -26,13 +26,31 @@ import '@synthetixio/synpress/support'
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 //
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+Cypress.Commands.add('connectWallet', (config) => {
+  const connectButton = cy.contains('Connect').click()
+  cy.get('button').contains('Centrifuge').click()
+  cy.get('button').contains('MetaMask').click()
+  if (config?.init) {
+    cy.acceptMetamaskAccess({ allAccounts: true })
+  }
+  connectButton.should('not.exist')
+})
+
+Cypress.Commands.add('confirmTransaction', () => {
+  cy.confirmMetamaskTransaction()
+  cy.contains('Transaction successful', { timeout: 100000 }).should('exist')
+})
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      connectWallet(config?: { init: true }): Chainable<void>
+      confirmTransaction(): Chainable<void>
+      //   login(email: string, password: string): Chainable<void>
+      //   drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+      //   dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
+      //   visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
+    }
+  }
+}

@@ -96,7 +96,12 @@ export function InvestorStatus() {
     >
       <Stack gap={2}>
         <Grid columns={2} gap={2} alignItems="center">
-          <SearchInput value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address..." />
+          <SearchInput
+            name="investorStatus"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Enter address..."
+          />
           <Select
             value={chain}
             options={[
@@ -168,6 +173,7 @@ export function InvestorStatus() {
                       onClick={() => toggleAllowed(row.id)}
                       loading={isTransactionPending && pendingTrancheId === row.id}
                       small
+                      aria-label={isAllowed ? `Remove ${row.id} to memberlist` : `Add ${row.id} to memberlist`}
                     >
                       {isAllowed ? 'Remove from memberlist' : 'Add to memberlist'}
                     </Button>

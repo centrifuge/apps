@@ -8,7 +8,9 @@
         "types": [
             "cypress",
             "node"
-        ]
+        ],
+        "resolveJsonModule": true,
+        "esModuleInterop": true
     },
     "include": [
         "**/*.ts"

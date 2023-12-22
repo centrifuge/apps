@@ -181,7 +181,11 @@ function InvestButton(props: InvestRedeemProps) {
   return (
     <>
       <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
-      <Button onClick={() => connectAndOpen()} style={{ marginLeft: 'auto' }}>
+      <Button
+        aria-label={`Invest in ${props.trancheId}`}
+        onClick={() => connectAndOpen()}
+        style={{ marginLeft: 'auto' }}
+      >
         Invest
       </Button>
     </>
