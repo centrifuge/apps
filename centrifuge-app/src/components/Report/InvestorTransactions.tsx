@@ -2,27 +2,43 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { evmChains } from '../../config'
+import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useInvestorTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
-import { evmChains } from '../Root'
 import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import { formatInvestorTransactionsType } from './utils'
 
-function truncate(string: string) {
-  const first = string.slice(0, 5)
-  const last = string.slice(-5)
+function truncate(text: string) {
+  const first = text.slice(0, 5)
+  const last = text.slice(-5)
 
   return `${first}...${last}`
 }
 
+function copyable(text: string) {
+  return (
+    <Text
+      style={{
+        cursor: 'copy',
+        wordBreak: 'break-word',
+        whiteSpace: 'normal',
+      }}
+      onClick={() => copyToClipboard(text)}
+    >
+      {truncate(text)}
+    </Text>
+  )
+}
+
 const noop = (v: any) => v
-const cellFormatters = [noop, truncate, noop, noop, noop, noop, noop, noop, noop]
+const cellFormatters = [noop, copyable, noop, noop, noop, noop, noop, noop, noop]
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, startDate, endDate } = React.useContext(ReportContext)

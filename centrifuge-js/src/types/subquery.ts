@@ -106,6 +106,17 @@ export type SubqueryTrancheBalances = {
   sumRedeemCollectedAmount: string
 }
 
+export type SubqueryCurrencyBalances = {
+  __typename?: 'CurrencyBalances'
+  id: string
+  accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
+  amount: string
+}
+
 export type SubqueryOutstandingOrder = {
   timestamp: string
   poolId: string

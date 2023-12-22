@@ -27,11 +27,11 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const { holdersReport } = useDebugFlags()
 
   const reportOptions: { label: string; value: Report }[] = [
-    { label: 'Pool balance', value: 'pool-balance' },
-    { label: 'Asset list', value: 'asset-list' },
     ...(holdersReport == true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Borrower transactions', value: 'borrower-tx' },
+    { label: 'Pool balance', value: 'pool-balance' },
+    { label: 'Asset list', value: 'asset-list' },
   ]
 
   return (
@@ -123,13 +123,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
       <Box ml="auto">
-        <AnchorButton
-          href={csvData?.dataUrl}
-          download={csvData?.fileName}
-          variant="secondary"
-          small
-          disabled={!csvData}
-        >
+        <AnchorButton href={csvData?.dataUrl} download={csvData?.fileName} variant="primary" small disabled={!csvData}>
           Export CSV
         </AnchorButton>
       </Box>

@@ -729,6 +729,7 @@ type Holder = {
   accountId: string
   chainId: number
   evmAddress?: string
+  balance: CurrencyBalance
   sumInvestOrderedAmount: CurrencyBalance
   sumInvestUncollectedAmount: CurrencyBalance
   sumInvestCollectedAmount: CurrencyBalance
@@ -2403,8 +2404,9 @@ export function getPoolsModule(inst: Centrifuge) {
 
     const $query = inst.getSubqueryObservable<{
       trancheBalances: { nodes: SubqueryTrancheBalances[] }
+      currencyBalances: { nodes: SubqueryTrancheBalances[] }
     }>(
-      `query($poolId: String!, $trancheId: String) {
+      `query($poolId: String!, $trancheId: String, $currencyId: String) {
         trancheBalances(
           filter: {
             poolId: { equalTo: $poolId },
@@ -2424,11 +2426,22 @@ export function getPoolsModule(inst: Centrifuge) {
             sumRedeemCollectedAmount
           }
         }
+
+        currencyBalances(
+          filter: {
+            currencyId: { startsWithInsensitive: $currencyId },
+          }) {
+          nodes {
+            accountId
+            amount
+          }
+        }
       }
       `,
       {
         poolId,
         trancheId,
+        currencyId: `2031-Tranche-${poolId}`,
       },
       false
     )
@@ -2436,11 +2449,16 @@ export function getPoolsModule(inst: Centrifuge) {
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
       map(([data, currency]) => {
-        console.log(data)
+        const currencyBalancesByAccountId = data!.currencyBalances.nodes.reduce((obj, balance) => {
+          obj[balance.accountId] = balance
+          return obj
+        }, {} as any)
+
         return data!.trancheBalances.nodes.map((balance) => ({
           accountId: balance.accountId,
           chainId: Number(balance.account.chainId),
           evmAddress: balance.account.evmAddress,
+          balance: new CurrencyBalance(currencyBalancesByAccountId[balance.accountId].amount, currency.decimals),
           sumInvestOrderedAmount: new CurrencyBalance(balance.sumInvestOrderedAmount, currency.decimals),
           sumInvestUncollectedAmount: new CurrencyBalance(balance.sumInvestUncollectedAmount, currency.decimals),
           sumInvestCollectedAmount: new CurrencyBalance(balance.sumInvestCollectedAmount, currency.decimals),

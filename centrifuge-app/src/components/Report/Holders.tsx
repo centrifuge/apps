@@ -46,12 +46,7 @@ export function Holders({ pool }: { pool: Pool }) {
         (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
         // TODO: should use CurrencyBalance.amount + TrancheBalance.sumInvestUncollectedAmount
         formatBalance(
-          holder.sumInvestUncollectedAmount
-            .toDecimal()
-            .add(holder.sumInvestCollectedAmount.toDecimal())
-            .sub(holder.sumRedeemOrderedAmount.toDecimal())
-            .sub(holder.sumRedeemUncollectedAmount.toDecimal())
-            .sub(holder.sumRedeemCollectedAmount.toDecimal()),
+          holder.balance.toDecimal().add(holder.sumInvestUncollectedAmount.toDecimal()),
           pool.tranches[0].currency // TODO: not hardcode to 0
         ),
         formatBalance(holder.sumInvestOrderedAmount.toDecimal(), pool.currency),
