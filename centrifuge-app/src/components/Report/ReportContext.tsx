@@ -46,7 +46,7 @@ const defaultContext = {
   range: 'last-month' as RangeOptionValue,
   setRange() {},
 
-  report: 'pool-balance' as Report,
+  report: 'holders' as Report,
   setReport() {},
 
   groupBy: 'month' as GroupBy,

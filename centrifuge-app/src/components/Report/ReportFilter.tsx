@@ -1,7 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 
 type ReportFilterProps = {
@@ -24,14 +23,12 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     setActiveTranche,
   } = React.useContext(ReportContext)
 
-  const { holdersReport } = useDebugFlags()
-
   const reportOptions: { label: string; value: Report }[] = [
-    { label: 'Pool balance', value: 'pool-balance' },
-    { label: 'Asset list', value: 'asset-list' },
-    ...(holdersReport == true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
+    { label: 'Holders', value: 'holders' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Borrower transactions', value: 'borrower-tx' },
+    { label: 'Pool balance', value: 'pool-balance' },
+    { label: 'Asset list', value: 'asset-list' },
   ]
 
   return (
@@ -123,13 +120,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
       <Box ml="auto">
-        <AnchorButton
-          href={csvData?.dataUrl}
-          download={csvData?.fileName}
-          variant="secondary"
-          small
-          disabled={!csvData}
-        >
+        <AnchorButton href={csvData?.dataUrl} download={csvData?.fileName} variant="primary" small disabled={!csvData}>
           Export CSV
         </AnchorButton>
       </Box>

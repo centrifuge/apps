@@ -50,7 +50,6 @@ export type Key =
   | 'showPrime'
   | 'poolCreationType'
   | 'podAdminSeed'
-  | 'holdersReport'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -91,10 +90,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   evmAddress: {
     default: '',
     type: 'text',
-  },
-  holdersReport: {
-    default: false,
-    type: 'checkbox',
   },
   persistDebugFlags: {
     alwaysShow: true,
