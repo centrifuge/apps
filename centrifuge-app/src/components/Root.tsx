@@ -1,23 +1,16 @@
 import { UserProvidedConfig } from '@centrifuge/centrifuge-js'
 import {
   CentrifugeProvider,
-  EvmChains,
   TransactionProvider,
   TransactionToasts,
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
-import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
-import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
-import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
-import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
-import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
-import sepoliaLogo from '@centrifuge/fabric/assets/logos/sepolia.png'
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, LinkProps, matchPath, Redirect, Route, RouteProps, Switch } from 'react-router-dom'
-import { config, ethConfig } from '../config'
+import { config, evmChains } from '../config'
 import PoolsPage from '../pages/Pools'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -61,107 +54,6 @@ const centConfig: UserProvidedConfig = {
     }),
 }
 
-const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
-
-const baseEvmChains: EvmChains =
-  ethConfig.network === 'mainnet'
-    ? {
-        1: {
-          name: 'Ethereum',
-          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
-          iconUrl: ethereumLogo,
-          isTestnet: false,
-        },
-      }
-    : {
-        1: {
-          name: 'Ethereum',
-          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
-          iconUrl: ethereumLogo,
-          isTestnet: false,
-        },
-        5: {
-          name: 'Ethereum Goerli',
-          urls: [`https://goerli.infura.io/v3/${infuraKey}`],
-          iconUrl: goerliLogo,
-          isTestnet: true,
-        },
-      }
-export const evmChains: EvmChains = {
-  ...baseEvmChains,
-  11155111: {
-    name: 'Ethereum Sepolia',
-    nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
-    blockExplorerUrl: 'https://sepolia.etherscan.io/',
-    urls: [`https://sepolia.infura.io/v3/${infuraKey}`],
-    iconUrl: sepoliaLogo,
-    isTestnet: true,
-  },
-  8453: {
-    name: 'Base',
-    nativeCurrency: { name: 'Base Ether', symbol: 'bETH', decimals: 18 },
-    blockExplorerUrl: 'https://basescan.org/',
-    urls: ['https://mainnet.base.org'],
-    iconUrl: baseLogo,
-    isTestnet: false,
-  },
-  84531: {
-    name: 'Base Goerli',
-    nativeCurrency: { name: 'Base Goerli Ether', symbol: 'gbETH', decimals: 18 },
-    blockExplorerUrl: 'https://goerli.basescan.org/',
-    urls: [`https://goerli.base.org`],
-    iconUrl: baseLogo,
-    isTestnet: true,
-  },
-  42161: {
-    name: 'Arbitrum One',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://arbiscan.io/',
-    urls: ['https://arb1.arbitrum.io/rpc'],
-    iconUrl: arbitrumLogo,
-    isTestnet: false,
-  },
-  421613: {
-    name: 'Arbitrum Goerli',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.arbiscan.io/',
-    urls: [`https://arbitrum-goerli.infura.io/v3/${infuraKey}`],
-    iconUrl: arbitrumLogo,
-    isTestnet: true,
-  },
-  42220: {
-    name: 'Celo',
-    nativeCurrency: {
-      name: 'Celo',
-      symbol: 'CELO',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://celoscan.io/',
-    urls: ['https://forno.celo.org'],
-    iconUrl: celoLogo,
-    isTestnet: false,
-  },
-  44787: {
-    name: 'Celo Alfajores',
-    nativeCurrency: {
-      name: 'Celo',
-      symbol: 'CELO',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://alfajores.celoscan.io/',
-    urls: ['https://alfajores-forno.celo-testnet.org'],
-    iconUrl: celoLogo,
-    isTestnet: true,
-  },
-}
 export function Root() {
   const [debugState, setDebugState] = React.useState(initialFlagsState)
   const isThemeToggled = debugState.alternativeTheme

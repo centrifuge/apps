@@ -1,11 +1,11 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { evmChains } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useHolders } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
-import { evmChains } from '../Root'
 import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
@@ -44,6 +44,7 @@ export function Holders({ pool }: { pool: Pool }) {
       value: [
         holder.evmAddress || holder.accountId,
         (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
+        // TODO: should use CurrencyBalance.amount + TrancheBalance.sumInvestUncollectedAmount
         formatBalance(
           holder.sumInvestUncollectedAmount
             .toDecimal()
