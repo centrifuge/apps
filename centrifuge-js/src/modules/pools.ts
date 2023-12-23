@@ -730,12 +730,12 @@ type Holder = {
   chainId: number
   evmAddress?: string
   balance: CurrencyBalance
-  sumInvestOrderedAmount: CurrencyBalance
-  sumInvestUncollectedAmount: CurrencyBalance
-  sumInvestCollectedAmount: CurrencyBalance
-  sumRedeemOrderedAmount: CurrencyBalance
-  sumRedeemUncollectedAmount: CurrencyBalance
-  sumRedeemCollectedAmount: CurrencyBalance
+  pendingInvestCurrency: CurrencyBalance
+  claimableTrancheTokens: CurrencyBalance
+  sumClaimedTrancheTokens: CurrencyBalance
+  pendingRedeemTrancheTokens: CurrencyBalance
+  claimableCurrency: CurrencyBalance
+  sumClaimedCurrency: CurrencyBalance
 }
 
 export type ExternalLoan = Loan & {
@@ -2417,16 +2417,12 @@ export function getPoolsModule(inst: Centrifuge) {
             }) {
             nodes {
               accountId
-              account {
-                chainId
-                evmAddress
-              }
-              sumInvestOrderedAmount
-              sumInvestUncollectedAmount
-              sumInvestCollectedAmount
-              sumRedeemOrderedAmount
-              sumRedeemUncollectedAmount
-              sumRedeemCollectedAmount
+              pendingInvestCurrency
+              claimableTrancheTokens
+              sumClaimedTrancheTokens
+              pendingRedeemTrancheTokens
+              claimableCurrency
+              sumClaimedCurrency
             }
           }
   
@@ -2451,6 +2447,11 @@ export function getPoolsModule(inst: Centrifuge) {
       })
     )
 
+    // account {
+    //   chainId
+    //   evmAddress
+    // }
+
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
       map(([data, currency]) => {
@@ -2462,15 +2463,15 @@ export function getPoolsModule(inst: Centrifuge) {
 
         return data!.trancheBalances.nodes.map((balance) => ({
           accountId: balance.accountId,
-          chainId: Number(balance.account.chainId),
-          evmAddress: balance.account.evmAddress,
+          chainId: Number(balance.account?.chainId || 2031),
+          evmAddress: balance.account?.evmAddress,
           balance: new CurrencyBalance(currencyBalancesByAccountId[balance.accountId].amount, currency.decimals),
-          sumInvestOrderedAmount: new CurrencyBalance(balance.sumInvestOrderedAmount, currency.decimals),
-          sumInvestUncollectedAmount: new CurrencyBalance(balance.sumInvestUncollectedAmount, currency.decimals),
-          sumInvestCollectedAmount: new CurrencyBalance(balance.sumInvestCollectedAmount, currency.decimals),
-          sumRedeemOrderedAmount: new CurrencyBalance(balance.sumRedeemOrderedAmount, currency.decimals),
-          sumRedeemUncollectedAmount: new CurrencyBalance(balance.sumRedeemUncollectedAmount, currency.decimals),
-          sumRedeemCollectedAmount: new CurrencyBalance(balance.sumRedeemCollectedAmount, currency.decimals),
+          pendingInvestCurrency: new CurrencyBalance(balance.pendingInvestCurrency, currency.decimals),
+          claimableTrancheTokens: new CurrencyBalance(balance.claimableTrancheTokens, currency.decimals),
+          sumClaimedTrancheTokens: new CurrencyBalance(balance.sumClaimedTrancheTokens, currency.decimals),
+          pendingRedeemTrancheTokens: new CurrencyBalance(balance.pendingRedeemTrancheTokens, currency.decimals),
+          claimableCurrency: new CurrencyBalance(balance.claimableCurrency, currency.decimals),
+          sumClaimedCurrency: new CurrencyBalance(balance.sumClaimedCurrency, currency.decimals),
         })) as unknown as Holder[]
       })
     )
