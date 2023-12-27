@@ -1,6 +1,6 @@
 const tsconfigJson = require('./tsconfig.json')
 const path = require('path')
-const synpressPath = path.join(process.cwd(), '/node_modules/@synthetixio/synpress')
+const synpressPath = path.join(process.cwd(), '/node_modules/@synthetixio')
 
 module.exports = {
   ignorePatterns: ['node_modules', 'build', '.env', ...(tsconfigJson.exclude || [])],

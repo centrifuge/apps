@@ -15,7 +15,7 @@ describe('Invest flows', () => {
       cy.get('input[name="recipientAddress"]').type(address)
     })
     cy.switchMetamaskAccount('Pool Admin')
-    cy.get('input[name="amount"]').type('3')
+    cy.get('input[name="amount"]').type('1')
     cy.get('button[type="submit"').click()
     cy.confirmTransaction()
   })

@@ -117,6 +117,7 @@ export type FileUploadProps = {
   placeholder: string
   loading?: boolean
   label?: React.ReactNode
+  name?: string
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
@@ -130,6 +131,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   loading,
   placeholder,
   label,
+  name,
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useControlledState<File | string | null>(null, fileProp, onFileChange)
@@ -209,6 +211,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         onDrop={handleDrop}
       >
         <FormField
+          name={name}
           type="file"
           accept={accept}
           onChange={handleFileChange}
