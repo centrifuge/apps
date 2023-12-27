@@ -20,7 +20,7 @@ const rangeFilters = [
   // { value: 'all', label: 'All' },
 ] as const
 
-export function CardPortfolioValue({ address }: { address: string }) {
+export function CardPortfolioValue({ address }: { address?: string }) {
   const portfolioTokens = usePortfolioTokens(address)
 
   const { colors } = useTheme()
@@ -76,32 +76,35 @@ export function CardPortfolioValue({ address }: { address: string }) {
             </Shelf>
           </Shelf>
         </Stack>
+        {address && (
+          <>
+            <Stack gap={1}>
+              <Shelf justifyContent="flex-end" pr="20px">
+                {rangeFilters.map((rangeFilter, index) => (
+                  <React.Fragment key={rangeFilter.label}>
+                    <RangeFilterButton gap={1} onClick={() => setRange(rangeFilter)}>
+                      <Text variant="body3">
+                        <Text variant={rangeFilter.value === range.value && 'emphasized'}>{rangeFilter.label}</Text>
+                      </Text>
+                      <Box
+                        width="100%"
+                        backgroundColor={rangeFilter.value === range.value ? '#000000' : '#E0E0E0'}
+                        height="3px"
+                      />
+                    </RangeFilterButton>
+                    {index !== rangeFilters.length - 1 && (
+                      <Box width="24px" backgroundColor="#E0E0E0" height="3px" alignSelf="flex-end" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </Shelf>
+            </Stack>
 
-        <Stack gap={1}>
-          <Shelf justifyContent="flex-end" pr="20px">
-            {rangeFilters.map((rangeFilter, index) => (
-              <React.Fragment key={rangeFilter.label}>
-                <RangeFilterButton gap={1} onClick={() => setRange(rangeFilter)}>
-                  <Text variant="body3">
-                    <Text variant={rangeFilter.value === range.value && 'emphasized'}>{rangeFilter.label}</Text>
-                  </Text>
-                  <Box
-                    width="100%"
-                    backgroundColor={rangeFilter.value === range.value ? '#000000' : '#E0E0E0'}
-                    height="3px"
-                  />
-                </RangeFilterButton>
-                {index !== rangeFilters.length - 1 && (
-                  <Box width="24px" backgroundColor="#E0E0E0" height="3px" alignSelf="flex-end" />
-                )}
-              </React.Fragment>
-            ))}
-          </Shelf>
-        </Stack>
-
-        <Box width="100%" height="300px">
-          <PortfolioValue rangeValue={range.value} address={address} />
-        </Box>
+            <Box width="100%" height="300px">
+              <PortfolioValue rangeValue={range.value} address={address} />
+            </Box>
+          </>
+        )}
       </Box>
     </Box>
   )

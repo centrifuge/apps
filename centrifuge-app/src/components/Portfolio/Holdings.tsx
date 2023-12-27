@@ -9,6 +9,7 @@ import {
   IconMinus,
   IconPlus,
   IconSend,
+  Shelf,
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
@@ -132,7 +133,7 @@ const columns: Column[] = [
   },
 ]
 
-export function HoldingsSection({ address }: { address: string }) {
+export function HoldingsSection({ address }: { address?: string }) {
   return (
     <LayoutSection title="Holdings">
       <Holdings address={address} />
@@ -140,7 +141,7 @@ export function HoldingsSection({ address }: { address: string }) {
   )
 }
 
-export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address: string }) {
+export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address?: string }) {
   const centBalances = useBalances(address)
   const wallet = useWallet()
   const { data: tinlakeBalances } = useTinlakeBalances()
@@ -229,7 +230,7 @@ export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?
       : []),
   ]
 
-  return tokens.length ? (
+  return address && tokens.length ? (
     <>
       <InvestRedeemDrawer
         poolId={investPoolId || redeemPoolId || ''}
@@ -245,7 +246,13 @@ export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?
       />
       <DataTable columns={columns} data={tokens} defaultSortKey="position" />
     </>
-  ) : null
+  ) : (
+    <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
+      <Text color="textSecondary" variant="body2">
+        No holdings displayed yet
+      </Text>
+    </Shelf>
+  )
 }
 
 const TokenWithIcon = ({ poolId, currency }: Row) => {

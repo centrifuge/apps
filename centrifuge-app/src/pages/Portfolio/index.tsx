@@ -1,14 +1,12 @@
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { LayoutBase } from '../../components/LayoutBase'
-import { BasePadding } from '../../components/LayoutBase/BasePadding'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
 import { HoldingsSection } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { useAddress } from '../../utils/useAddress'
-import { useTransactionsByAddress } from '../../utils/usePools'
 
 export default function PortfolioPage() {
   return (
@@ -20,15 +18,7 @@ export default function PortfolioPage() {
 
 function Portfolio() {
   const address = useAddress('substrate')
-  const transactions = useTransactionsByAddress(address)
 
-  if (!address) {
-    return (
-      <BasePadding>
-        <Text as="strong">You need to connect your wallet to see your portfolio</Text>
-      </BasePadding>
-    )
-  }
   return (
     <>
       <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
@@ -44,11 +34,10 @@ function Portfolio() {
       </LayoutSection>
       <HoldingsSection address={address} />
 
-      {transactions !== null && (
-        <LayoutSection title="Transaction history">
-          <Transactions onlyMostRecent address={address} />
-        </LayoutSection>
-      )}
+      <LayoutSection title="Transaction history">
+        <Transactions onlyMostRecent address={address} />
+      </LayoutSection>
+
       <LayoutSection title="Allocation">
         <AssetAllocation address={address} />
       </LayoutSection>

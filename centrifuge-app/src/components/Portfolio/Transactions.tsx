@@ -14,7 +14,6 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
-import { Spinner } from '../../components/Spinner'
 import { formatDate } from '../../utils/date'
 import { Dec } from '../../utils/Decimal'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -26,7 +25,7 @@ type TransactionsProps = {
   onlyMostRecent?: boolean
   narrow?: boolean
   txTypes?: InvestorTransactionType[]
-  address: string
+  address?: string
   trancheId?: string
 }
 
@@ -161,7 +160,7 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
 
   const pagination = usePagination({ data: investorTransactions, pageSize: onlyMostRecent ? 3 : 15 })
 
-  return investorTransactions?.length ? (
+  return address && investorTransactions?.length ? (
     <PaginationProvider pagination={pagination}>
       <Stack gap={2}>
         <Box overflow="auto" width="100%">
@@ -196,9 +195,11 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
         )}
       </Stack>
     </PaginationProvider>
-  ) : investorTransactions ? (
-    <Text>No transactions</Text>
   ) : (
-    <Spinner />
+    <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
+      <Text color="textSecondary" variant="body2">
+        No transactions displayed yet
+      </Text>
+    </Shelf>
   )
 }
