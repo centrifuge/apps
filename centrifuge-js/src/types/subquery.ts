@@ -57,6 +57,10 @@ export type SubqueryInvestorTransaction = {
   id: string
   timestamp: string
   accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
   poolId: string
   trancheId: string
   epochNumber: number
@@ -88,6 +92,10 @@ export type SubqueryTrancheBalances = {
   __typename?: 'TrancheBalances'
   id: string
   accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
   poolId: string
   trancheId: string
   sumInvestOrderedAmount: string
@@ -96,6 +104,17 @@ export type SubqueryTrancheBalances = {
   sumRedeemOrderedAmount: string
   sumRedeemUncollectedAmount: string
   sumRedeemCollectedAmount: string
+}
+
+export type SubqueryCurrencyBalances = {
+  __typename?: 'CurrencyBalances'
+  id: string
+  accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
+  amount: string
 }
 
 export type SubqueryOutstandingOrder = {

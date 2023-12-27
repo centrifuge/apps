@@ -12,11 +12,11 @@ import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import { formatBorrowerTransactionsType } from './utils'
 
-const headers = ['Asset ID', 'Epoch', 'Date', 'Type', 'Token amount']
-
 export function BorrowerTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData } = React.useContext(ReportContext)
   const transactions = useBorrowerTransactions(pool.id, startDate, endDate)
+
+  const headers = ['Asset ID', 'Epoch', 'Date', 'Type', `${pool ? `${pool.currency.symbol} amount` : '—'}`]
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!transactions) {

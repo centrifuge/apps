@@ -1,5 +1,12 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
+import { EvmChains } from '@centrifuge/centrifuge-react'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
+import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
+import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
+import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
+import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
+import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
+import sepoliaLogo from '@centrifuge/fabric/assets/logos/sepolia.png'
 import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
 import { LogoAltair, LogoAltairText } from './components/LogoAltair'
@@ -148,4 +155,103 @@ export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : 
 
 export const parachainNames: Record<number, string> = {
   1000: 'Asset Hub',
+}
+
+const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
+
+export const evmChains: EvmChains = {
+  1: {
+    name: 'Ethereum',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+    iconUrl: ethereumLogo,
+    isTestnet: false,
+  },
+  5: {
+    name: 'Ethereum Goerli',
+    nativeCurrency: {
+      name: 'Görli Ether',
+      symbol: 'görETH',
+      decimals: 18,
+    },
+    urls: [`https://goerli.infura.io/v3/${infuraKey}`],
+    iconUrl: goerliLogo,
+    isTestnet: true,
+  },
+  11155111: {
+    name: 'Ethereum Sepolia',
+    nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
+    blockExplorerUrl: 'https://sepolia.etherscan.io/',
+    urls: [`https://sepolia.infura.io/v3/${infuraKey}`],
+    iconUrl: sepoliaLogo,
+    isTestnet: true,
+  },
+  8453: {
+    name: 'Base',
+    nativeCurrency: { name: 'Base Ether', symbol: 'bETH', decimals: 18 },
+    blockExplorerUrl: 'https://basescan.org/',
+    urls: ['https://mainnet.base.org'],
+    iconUrl: baseLogo,
+    isTestnet: false,
+  },
+  84531: {
+    name: 'Base Goerli',
+    nativeCurrency: { name: 'Base Goerli Ether', symbol: 'gbETH', decimals: 18 },
+    blockExplorerUrl: 'https://goerli.basescan.org/',
+    urls: [`https://goerli.base.org`],
+    iconUrl: baseLogo,
+    isTestnet: true,
+  },
+  42161: {
+    name: 'Arbitrum One',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://arbiscan.io/',
+    urls: ['https://arb1.arbitrum.io/rpc'],
+    iconUrl: arbitrumLogo,
+    isTestnet: false,
+  },
+  421613: {
+    name: 'Arbitrum Goerli',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://goerli.arbiscan.io/',
+    urls: [`https://arbitrum-goerli.infura.io/v3/${infuraKey}`],
+    iconUrl: arbitrumLogo,
+    isTestnet: true,
+  },
+  42220: {
+    name: 'Celo',
+    nativeCurrency: {
+      name: 'Celo',
+      symbol: 'CELO',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://celoscan.io/',
+    urls: ['https://forno.celo.org'],
+    iconUrl: celoLogo,
+    isTestnet: false,
+  },
+  44787: {
+    name: 'Celo Alfajores',
+    nativeCurrency: {
+      name: 'Celo',
+      symbol: 'CELO',
+      decimals: 18,
+    },
+    blockExplorerUrl: 'https://alfajores.celoscan.io/',
+    urls: ['https://alfajores-forno.celo-testnet.org'],
+    iconUrl: celoLogo,
+    isTestnet: true,
+  },
 }

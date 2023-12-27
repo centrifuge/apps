@@ -1,6 +1,8 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { evmChains } from '../../config'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -10,20 +12,14 @@ import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
-import { formatInvestorTransactionsType } from './utils'
-
-function truncate(string: string) {
-  const first = string.slice(0, 5)
-  const last = string.slice(-5)
-
-  return `${first}...${last}`
-}
+import { copyable, formatInvestorTransactionsType } from './utils'
 
 const noop = (v: any) => v
-const cellFormatters = [noop, truncate, noop, noop, noop, noop, noop, noop]
+const cellFormatters = [noop, copyable, noop, noop, noop, noop, noop, noop, noop]
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, startDate, endDate } = React.useContext(ReportContext)
+  const utils = useCentrifugeUtils()
 
   const transactions = useInvestorTransactions(
     pool.id,
@@ -35,6 +31,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   const headers = [
     'Token',
     'Account',
+    'Network',
     'Epoch',
     'Date',
     'Type',
@@ -62,7 +59,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
         name: '',
         value: [
           token.currency.name,
-          tx.accountId,
+          tx.evmAddress || utils.formatAddress(tx.accountId),
+          (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
           tx.epochNumber.toString(),
           formatDate(tx.timestamp.toString()),
           formatInvestorTransactionsType({
@@ -72,8 +70,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
             currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toNumber() : null,
           }),
           tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal(), pool.currency) : '-',
-          tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.currency) : '-',
-          tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 4) : '-',
+          tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.tranches[0].currency) : '-', // TODO: not hardcode to 0
+          tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 6) : '-',
         ],
         heading: false,
       }
