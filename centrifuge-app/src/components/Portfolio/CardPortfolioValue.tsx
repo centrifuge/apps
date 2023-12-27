@@ -4,6 +4,7 @@ import styled, { useTheme } from 'styled-components'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
+import { useTransactionsByAddress } from '../../utils/usePools'
 import { PortfolioValue } from './PortfolioValue'
 import { usePortfolioTokens } from './usePortfolio'
 
@@ -22,6 +23,7 @@ const rangeFilters = [
 
 export function CardPortfolioValue({ address }: { address?: string }) {
   const portfolioTokens = usePortfolioTokens(address)
+  const transactions = useTransactionsByAddress(address)
 
   const { colors } = useTheme()
 
@@ -76,7 +78,7 @@ export function CardPortfolioValue({ address }: { address?: string }) {
             </Shelf>
           </Shelf>
         </Stack>
-        {address && (
+        {transactions?.investorTransactions.length === 0 || !address ? null : (
           <>
             <Stack gap={1}>
               <Shelf justifyContent="flex-end" pr="20px">
