@@ -59,7 +59,6 @@ function Portfolio() {
             <Button style={{ display: 'inline-flex' }} variant="primary" onClick={() => showNetworks()}>
               Connect wallet
             </Button>
-            {/* <WalletButton /> */}
           </Stack>
         </LayoutSection>
       )}
