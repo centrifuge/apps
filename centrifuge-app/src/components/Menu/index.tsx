@@ -4,8 +4,8 @@ import {
   IconGlobe,
   IconInvestments,
   IconNft,
-  IconPieChart,
   IconSwitch,
+  IconWallet,
   Menu as Panel,
   MenuItemGroup,
   Shelf,
@@ -44,7 +44,7 @@ export function Menu() {
       </PageLink>
 
       <PageLink to="/portfolio" stacked={!isLarge}>
-        <IconPieChart />
+        <IconWallet />
         Portfolio
       </PageLink>
 
