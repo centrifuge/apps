@@ -21,7 +21,7 @@
     "coverage": "vitest run --coverage",
     "test:ci": "vitest run",
     "preview": "vite preview --host 0.0.0.0",
-    "e2e:run": "synpress run -cf synpress.config.ts",
+    "e2e:run": "synpress run -cf synpress.config.ts -s tests/e2e/specs/invest.cy.ts",
     "e2e:run:ci": "synpress run --record -cf synpress.config.ts",
     "e2e:open": "synpress open -cf synpress.config.ts"
   },
