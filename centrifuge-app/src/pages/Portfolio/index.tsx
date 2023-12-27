@@ -1,4 +1,5 @@
-import { Stack, Text } from '@centrifuge/fabric'
+import { useWallet } from '@centrifuge/centrifuge-react'
+import { Button, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
@@ -20,9 +21,8 @@ export default function PortfolioPage() {
 
 function Portfolio() {
   const address = useAddress()
-  console.log('🚀 ~ address:', address)
   const transactions = useTransactionsByAddress(address)
-  console.log('🚀 ~ transactions:', transactions?.investorTransactions)
+  const { showNetworks } = useWallet()
 
   return (
     <>
@@ -38,7 +38,7 @@ function Portfolio() {
         <CardPortfolioValue address={address} />
       </LayoutSection>
 
-      {transactions?.investorTransactions.length === 0 || !address ? (
+      {transactions?.investorTransactions.length === 0 ? (
         <LayoutSection>
           <Stack maxWidth="700px" gap={2}>
             <Text variant="body2">
@@ -51,6 +51,18 @@ function Portfolio() {
           </Stack>
         </LayoutSection>
       ) : null}
+
+      {!address && (
+        <LayoutSection>
+          <Stack maxWidth="700px" gap={2}>
+            <Text variant="body2">To view your investments, you need to connect your wallet.</Text>
+            <Button style={{ display: 'inline-flex' }} variant="primary" onClick={() => showNetworks()}>
+              Connect wallet
+            </Button>
+            {/* <WalletButton /> */}
+          </Stack>
+        </LayoutSection>
+      )}
 
       <LayoutSection title="Holdings">
         <Holdings address={address} />
