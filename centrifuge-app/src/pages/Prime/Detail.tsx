@@ -5,7 +5,7 @@ import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValue'
-import { HoldingsSection } from '../../components/Portfolio/Holdings'
+import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { Resolutions } from '../../components/Resolutions'
 import { RouterTextLink } from '../../components/TextLink'
@@ -47,7 +47,9 @@ function PrimeDetail() {
         </Shelf>
         <CardPortfolioValue address={centAddress} />
       </LayoutSection>
-      <HoldingsSection address={centAddress} />
+      <LayoutSection title="Holdings">
+        <Holdings address={centAddress} />
+      </LayoutSection>
       <LayoutSection title="Transaction history">
         <Transactions onlyMostRecent address={centAddress} />
       </LayoutSection>

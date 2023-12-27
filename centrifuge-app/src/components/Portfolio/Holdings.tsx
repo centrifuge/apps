@@ -9,6 +9,7 @@ import {
   IconMinus,
   IconPlus,
   IconSend,
+  Shelf,
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
@@ -29,7 +30,6 @@ import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
-import { LayoutSection } from '../LayoutBase/LayoutSection'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { Tooltips } from '../Tooltips'
 import { TransferTokensDrawer } from './TransferTokensDrawer'
@@ -132,15 +132,7 @@ const columns: Column[] = [
   },
 ]
 
-export function HoldingsSection({ address }: { address: string }) {
-  return (
-    <LayoutSection title="Holdings">
-      <Holdings address={address} />
-    </LayoutSection>
-  )
-}
-
-export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address: string }) {
+export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address?: string }) {
   const centBalances = useBalances(address)
   const wallet = useWallet()
   const { data: tinlakeBalances } = useTinlakeBalances()
@@ -229,7 +221,7 @@ export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?
       : []),
   ]
 
-  return tokens.length ? (
+  return address && tokens.length ? (
     <>
       <InvestRedeemDrawer
         poolId={investPoolId || redeemPoolId || ''}
@@ -245,7 +237,13 @@ export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?
       />
       <DataTable columns={columns} data={tokens} defaultSortKey="position" />
     </>
-  ) : null
+  ) : (
+    <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
+      <Text color="textSecondary" variant="body2">
+        No holdings displayed yet
+      </Text>
+    </Shelf>
+  )
 }
 
 const TokenWithIcon = ({ poolId, currency }: Row) => {
