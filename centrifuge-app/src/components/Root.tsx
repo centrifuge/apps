@@ -1,22 +1,16 @@
 import { UserProvidedConfig } from '@centrifuge/centrifuge-js'
 import {
   CentrifugeProvider,
-  EvmChains,
   TransactionProvider,
   TransactionToasts,
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
-import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
-import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
-import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
-import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
-import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, LinkProps, matchPath, Redirect, Route, RouteProps, Switch } from 'react-router-dom'
-import { config, ethConfig } from '../config'
+import { config, evmChains } from '../config'
 import PoolsPage from '../pages/Pools'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -60,87 +54,6 @@ const centConfig: UserProvidedConfig = {
     }),
 }
 
-const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
-
-const baseEvmChains: EvmChains =
-  ethConfig.network === 'mainnet'
-    ? {
-        1: {
-          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
-          iconUrl: ethereumLogo,
-        },
-      }
-    : {
-        1: {
-          urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
-          iconUrl: ethereumLogo,
-        },
-        5: {
-          urls: [`https://goerli.infura.io/v3/${infuraKey}`],
-          iconUrl: goerliLogo,
-        },
-      }
-const evmChains = {
-  ...baseEvmChains,
-  8453: {
-    name: 'Base',
-    nativeCurrency: { name: 'Base Ether', symbol: 'bETH', decimals: 18 },
-    blockExplorerUrl: 'https://basescan.org/',
-    urls: ['https://mainnet.base.org'],
-    iconUrl: baseLogo,
-  },
-  84531: {
-    name: 'Base Goerli',
-    nativeCurrency: { name: 'Base Goerli Ether', symbol: 'gbETH', decimals: 18 },
-    blockExplorerUrl: 'https://goerli.basescan.org/',
-    urls: [`https://goerli.base.org`],
-    iconUrl: baseLogo,
-  },
-  42161: {
-    name: 'Arbitrum One',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://arbiscan.io/',
-    urls: ['https://arb1.arbitrum.io/rpc'],
-    iconUrl: arbitrumLogo,
-  },
-  421613: {
-    name: 'Arbitrum Goerli',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.arbiscan.io/',
-    urls: [`https://arbitrum-goerli.infura.io/v3/${infuraKey}`],
-    iconUrl: arbitrumLogo,
-  },
-  42220: {
-    name: 'Celo',
-    nativeCurrency: {
-      name: 'Celo',
-      symbol: 'CELO',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://celoscan.io/',
-    urls: ['https://forno.celo.org'],
-    iconUrl: celoLogo,
-  },
-  44787: {
-    name: 'Celo Alfajores',
-    nativeCurrency: {
-      name: 'Celo',
-      symbol: 'CELO',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://alfajores.celoscan.io/',
-    urls: ['https://alfajores-forno.celo-testnet.org'],
-    iconUrl: celoLogo,
-  },
-}
 export function Root() {
   const [debugState, setDebugState] = React.useState(initialFlagsState)
   const isThemeToggled = debugState.alternativeTheme

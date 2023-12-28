@@ -727,6 +727,9 @@ export type BorrowerTransaction = {
 
 type Holder = {
   accountId: string
+  chainId: number
+  evmAddress?: string
+  balance: CurrencyBalance
   sumInvestOrderedAmount: CurrencyBalance
   sumInvestUncollectedAmount: CurrencyBalance
   sumInvestCollectedAmount: CurrencyBalance
@@ -2300,6 +2303,10 @@ export function getPoolsModule(inst: Centrifuge) {
             id
             timestamp
             accountId
+            account {
+              chainId
+              evmAddress
+            }
             poolId
             trancheId
             epochNumber
@@ -2331,6 +2338,8 @@ export function getPoolsModule(inst: Centrifuge) {
               id: tx.id,
               timestamp: new Date(tx.timestamp),
               accountId: tx.accountId,
+              chainId: Number(tx.account.chainId),
+              evmAddress: tx.account.evmAddress,
               trancheId: tx.trancheId,
               epochNumber: tx.epochNumber,
               type: tx.type as InvestorTransactionType,
@@ -2392,41 +2401,70 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function getHolders(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
-
-    const $query = inst.getSubqueryObservable<{
-      trancheBalances: { nodes: SubqueryTrancheBalances[] }
-    }>(
-      `query($poolId: String!, $trancheId: String) {
-        trancheBalances(
-          filter: {
-            poolId: { equalTo: $poolId },
-            trancheId: { isNull: false, endsWith: $trancheId }
-          }) {
-          nodes {
-            accountId
-            sumInvestOrderedAmount
-            sumInvestUncollectedAmount
-            sumInvestCollectedAmount
-            sumRedeemOrderedAmount
-            sumRedeemUncollectedAmount
-            sumRedeemCollectedAmount
+    const $api = inst.getApi()
+    const $query = $api.pipe(
+      switchMap((api) => api.query.evmChainId.chainId()),
+      switchMap((chainId) => {
+        return inst.getSubqueryObservable<{
+          trancheBalances: { nodes: SubqueryTrancheBalances[] }
+          currencyBalances: { nodes: SubqueryTrancheBalances[] }
+        }>(
+          `query($poolId: String!, $trancheId: String, $currencyId: String) {
+          trancheBalances(
+            filter: {
+              poolId: { equalTo: $poolId },
+              trancheId: { isNull: false, endsWith: $trancheId }
+            }) {
+            nodes {
+              accountId
+              account {
+                chainId
+                evmAddress
+              }
+              sumInvestOrderedAmount
+              sumInvestUncollectedAmount
+              sumInvestCollectedAmount
+              sumRedeemOrderedAmount
+              sumRedeemUncollectedAmount
+              sumRedeemCollectedAmount
+            }
+          }
+  
+          currencyBalances(
+            filter: {
+              currencyId: { startsWithInsensitive: $currencyId },
+            }) {
+            nodes {
+              accountId
+              amount
+            }
           }
         }
-      }
-      `,
-      {
-        poolId,
-        trancheId,
-      },
-      false
+        `,
+          {
+            poolId,
+            trancheId,
+            currencyId: `${chainId}-Tranche-${poolId}`,
+          },
+          false
+        )
+      })
     )
 
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
       map(([data, currency]) => {
-        console.log(data)
+        // TODO: this should be a map by account ID + tranche ID
+        const currencyBalancesByAccountId = data!.currencyBalances.nodes.reduce((obj, balance) => {
+          obj[balance.accountId] = balance
+          return obj
+        }, {} as any)
+
         return data!.trancheBalances.nodes.map((balance) => ({
           accountId: balance.accountId,
+          chainId: Number(balance.account.chainId),
+          evmAddress: balance.account.evmAddress,
+          balance: new CurrencyBalance(currencyBalancesByAccountId[balance.accountId].amount, currency.decimals),
           sumInvestOrderedAmount: new CurrencyBalance(balance.sumInvestOrderedAmount, currency.decimals),
           sumInvestUncollectedAmount: new CurrencyBalance(balance.sumInvestUncollectedAmount, currency.decimals),
           sumInvestCollectedAmount: new CurrencyBalance(balance.sumInvestCollectedAmount, currency.decimals),

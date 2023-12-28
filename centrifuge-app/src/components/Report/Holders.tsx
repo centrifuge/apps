@@ -1,6 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { evmChains } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useHolders } from '../../utils/usePools'
@@ -9,26 +10,12 @@ import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import { copyable } from './utils'
 
-const headers = [
-  'Account',
-  'Network',
-  'Position',
-  'Pending invest order',
-  'Unclaimed investment',
-  'Pending redeem order',
-  'Unclaimed redemption',
-]
-
-function truncate(string: string) {
-  const first = string.slice(0, 5)
-  const last = string.slice(-5)
-
-  return `${first}...${last}`
-}
+const headers = ['Account', 'Network', 'Position', 'Pending invest order', 'Pending redeem order']
 
 const noop = (v: any) => v
-const cellFormatters = [truncate, noop, noop, noop, noop, noop, noop]
+const cellFormatters = [copyable, noop, noop, noop, noop]
 
 const columns = headers.map((col, index) => ({
   align: 'left',
@@ -49,13 +36,14 @@ export function Holders({ pool }: { pool: Pool }) {
     return holders.map((holder) => ({
       name: '',
       value: [
-        holder.accountId,
-        'Centrifuge',
+        holder.evmAddress || holder.accountId,
+        (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
+        formatBalance(
+          holder.balance.toDecimal().add(holder.sumInvestUncollectedAmount.toDecimal()),
+          pool.tranches[0].currency // TODO: not hardcode to tranche index 0
+        ),
         formatBalance(holder.sumInvestOrderedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumInvestUncollectedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumInvestCollectedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumRedeemOrderedAmount.toDecimal(), pool.currency),
-        formatBalance(holder.sumRedeemUncollectedAmount.toDecimal(), pool.currency),
+        formatBalance(holder.sumRedeemOrderedAmount.toDecimal(), pool.tranches[0].currency), // TODO: not hardcode to tranche index 0
       ],
       heading: false,
     }))

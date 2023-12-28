@@ -31,6 +31,7 @@ export type DebugFlagConfig =
     }
 
 export type Key =
+  | 'showOrderExecution'
   | 'address'
   | 'evmAddress'
   | 'batchMintNFTs'
@@ -49,95 +50,94 @@ export type Key =
   | 'showPrime'
   | 'poolCreationType'
   | 'podAdminSeed'
-  | 'holdersReport'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
-    type: 'text',
     default: '',
-  },
-  evmAddress: {
     type: 'text',
-    default: '',
-  },
-  batchMintNFTs: {
-    type: 'checkbox',
-    default: false,
   },
   allowInvestBelowMin: {
-    type: 'checkbox',
     default: false,
+    type: 'checkbox',
   },
   alternativeTheme: {
-    type: 'checkbox',
-    default: false,
     alwaysShow: true,
-  },
-  showTestNets: {
-    type: 'checkbox',
-    default: isTestEnv,
-    alwaysShow: true,
-  },
-  editPoolConfig: {
-    type: 'checkbox',
     default: false,
-  },
-  editAdminConfig: {
     type: 'checkbox',
+  },
+  batchMintNFTs: {
     default: false,
-  },
-  persistDebugFlags: {
     type: 'checkbox',
-    default: !!localStorage.getItem('debugFlags'),
-    alwaysShow: true,
-  },
-  showUnusedFlags: {
-    type: 'checkbox',
-    default: false,
-  },
-  editPoolVisibility: {
-    type: 'checkbox',
-    default: false,
-  },
-  showPodAccountCreation: {
-    type: 'checkbox',
-    default: false,
-  },
-  showAdvancedAccounts: {
-    type: 'checkbox',
-    default: false,
-    alwaysShow: true,
   },
   convertAddress: {
-    type: 'component',
     Component: ConvertAddress,
+    alwaysShow: true,
     default: null,
-    alwaysShow: true,
+    type: 'component',
   },
-  showSwaps: {
-    type: 'checkbox',
+  editAdminConfig: {
     default: false,
+    type: 'checkbox',
   },
-  showPrime: {
-    type: 'checkbox',
+  editPoolConfig: {
     default: false,
+    type: 'checkbox',
+  },
+  editPoolVisibility: {
+    default: false,
+    type: 'checkbox',
+  },
+  evmAddress: {
+    default: '',
+    type: 'text',
+  },
+  persistDebugFlags: {
     alwaysShow: true,
+    default: !!localStorage.getItem('debugFlags'),
+    type: 'checkbox',
+  },
+  podAdminSeed: {
+    default: '//Eve',
+    type: 'text',
   },
   poolCreationType: {
-    type: 'select',
     default: config.poolCreationType || 'immediate',
     options: {
       immediate: 'immediate',
-      propose: 'propose',
       notePreimage: 'notePreimage',
+      propose: 'propose',
     },
+    type: 'select',
   },
-  podAdminSeed: {
-    type: 'text',
-    default: '//Eve',
-  },
-  holdersReport: {
-    type: 'checkbox',
+  showAdvancedAccounts: {
+    alwaysShow: true,
     default: false,
+    type: 'checkbox',
+  },
+  showOrderExecution: {
+    default: false,
+    type: 'checkbox',
+  },
+  showPodAccountCreation: {
+    default: false,
+    type: 'checkbox',
+  },
+  showPrime: {
+    alwaysShow: true,
+    default: false,
+    type: 'checkbox',
+  },
+  showSwaps: {
+    default: false,
+    type: 'checkbox',
+  },
+  showTestNets: {
+    alwaysShow: true,
+    default: isTestEnv,
+    type: 'checkbox',
+  },
+  showUnusedFlags: {
+    default: false,
+    type: 'checkbox',
   },
 }

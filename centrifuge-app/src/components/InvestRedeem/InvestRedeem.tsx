@@ -170,11 +170,18 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
           // TODO: Show whether onboarding is in progress
           <Stack gap={2}>
             <Text variant="body3">
-              {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
-              verified “accredited investors”.{' '}
-              <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
-                Learn more
-              </AnchorTextLink>
+              {metadata?.onboarding?.kybRestrictedCountries?.includes('us') ||
+              metadata?.onboarding?.kybRestrictedCountries?.includes('us') ? (
+                `${state.trancheCurrency?.name} is only available to Non-U.S. persons.`
+              ) : (
+                <>
+                  ({metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must
+                  be verified “accredited investors”.{' '}
+                  <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
+                    Learn more
+                  </AnchorTextLink>
+                </>
+              )}
             </Text>
             <Stack px={1}>
               <OnboardingButton />

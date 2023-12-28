@@ -41,9 +41,9 @@ const title = {
 
 export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets }: Props) {
   const evmChains = Object.keys(allEvmChains)
-    .filter((chain) => (!showTestNets ? !['5', '84531', '421613', '43113', '44787'].includes(chain) : true))
-    .reduce((obj, key) => {
-      obj[key] = allEvmChains[key]
+    .filter((chainId) => (!showTestNets ? !allEvmChains[chainId].isTestnet : true))
+    .reduce((obj, chainId) => {
+      obj[chainId] = allEvmChains[chainId]
       return obj
     }, {}) as EvmChains
   const ctx = useWallet()

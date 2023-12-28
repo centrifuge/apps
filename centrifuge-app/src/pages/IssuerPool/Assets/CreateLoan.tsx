@@ -405,7 +405,7 @@ function IssuerCreateLoan() {
                     {({ field, meta, form }: FieldProps) => (
                       <Select_DEPRECATED
                         {...field}
-                        label="Valuation method"
+                        label="Asset type"
                         onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
                         errorMessage={meta.touched && meta.error ? meta.error : undefined}
                         options={[
@@ -414,7 +414,7 @@ function IssuerCreateLoan() {
                           { value: 'oracle', label: 'Fungible asset - external pricing' },
                           { value: 'cash', label: 'Cash' },
                         ]}
-                        placeholder="Choose valuation method"
+                        placeholder="Choose asset type"
                       />
                     )}
                   </Field>

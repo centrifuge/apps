@@ -15,7 +15,7 @@ const assetClassLabels = {
 }
 type AssetClass = 'publicCredit' | 'privateCredit'
 
-export function AssetAllocation({ address }: { address: string }) {
+export function AssetAllocation({ address }: { address?: string }) {
   const balances = useBalances(address)
   const pools = usePools()
   const theme = useTheme()
@@ -48,7 +48,7 @@ export function AssetAllocation({ address }: { address: string }) {
     })
     .sort((a, b) => (b.value > a.value ? 1 : a === b ? 0 : -1))
 
-  return !!balances?.tranches && !!balances?.tranches.length ? (
+  return address && !!balances?.tranches && !!balances?.tranches.length ? (
     <Shelf gap={8}>
       <AssetClassChart data={shares} currency="USD" total={total.toNumber()} />
       <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>
@@ -84,5 +84,11 @@ export function AssetAllocation({ address }: { address: string }) {
         ))}
       </Shelf>
     </Shelf>
-  ) : null
+  ) : (
+    <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
+      <Text color="textSecondary" variant="body2">
+        No allocation displayed yet
+      </Text>
+    </Shelf>
+  )
 }
