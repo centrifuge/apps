@@ -77,7 +77,7 @@ const lightColors = {
   borderButtonSecondaryHover: centrifugeBlue,
   borderButtonSecondaryPressed: centrifugeBlue,
   borderButtonSecondaryDisabled: 'transparent',
-  shadowButtonSecondary: '#d8d8d866',
+  shadowButtonSecondary: '#A8BFFD35',
 
   backgroundButtonTertiary: 'transparent',
   backgroundButtonTertiaryFocus: 'transparent',
