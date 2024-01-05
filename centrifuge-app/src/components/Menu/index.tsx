@@ -43,12 +43,10 @@ export function Menu() {
         Pools
       </PageLink>
 
-      {address && (
-        <PageLink to="/portfolio" stacked={!isLarge}>
-          <IconPieChart />
-          Portfolio
-        </PageLink>
-      )}
+      <PageLink to="/portfolio" stacked={!isLarge}>
+        <IconPieChart />
+        Portfolio
+      </PageLink>
 
       {address && (transactions ?? null) && (
         <PageLink to="/history" stacked={!isLarge}>
