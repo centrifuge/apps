@@ -6,7 +6,7 @@ describe('Invest flows', () => {
     cy.switchMetamaskAccount('Account 1')
     cy.renameMetamaskAccount('Investor')
   })
-  it('Transfer DEVEL', () => {
+  it('Transfer DEVEL (fund investor)', () => {
     cy.visit('/portfolio', { failOnStatusCode: false })
     cy.connectWallet({ init: true })
     cy.switchMetamaskAccount('Investor')
@@ -19,7 +19,7 @@ describe('Invest flows', () => {
     cy.get('button[type="submit"').click()
     cy.confirmTransaction()
   })
-  it('Transfer USDT', () => {
+  it('Transfer USDT (fund investor)', () => {
     cy.visit('/portfolio', { failOnStatusCode: false })
     cy.connectWallet()
     cy.switchMetamaskAccount('Investor')
@@ -59,6 +59,15 @@ describe('Invest flows', () => {
     cy.get(`button[aria-label="Invest in ${pool.tranches[0].id}"]`).click() // should be whitelisted
     cy.get('input[name="amount"]').type('1')
     cy.get('button[type="submit"').click()
+    cy.confirmTransaction()
+  })
+  it('Close epoch', () => {
+    cy.switchMetamaskAccount('Pool Admin')
+    cy.visit('/pools', { failOnStatusCode: false })
+    cy.connectWallet()
+    cy.contains(pool.name).click()
+    cy.contains('Liquidity').click()
+    cy.contains('Start order execution').click()
     cy.confirmTransaction()
   })
   // TODO:
