@@ -497,7 +497,7 @@ function IssuerCreateLoan() {
             )
           )}
         </Stack>
-        <Box position="sticky" bottom={0} backgroundColor="backgroundPage">
+        <Box position="sticky" bottom={0} backgroundColor="backgroundPage" zIndex={3}>
           <PageSection>
             <Shelf gap={1} justifyContent="end">
               {isAuthed && (
