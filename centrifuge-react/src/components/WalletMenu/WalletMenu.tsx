@@ -17,6 +17,8 @@ import {
 } from '@centrifuge/fabric'
 import { getAddress } from '@ethersproject/address'
 import * as React from 'react'
+import { Link } from 'react-router-dom'
+import styled from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
@@ -160,9 +162,11 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                 <Text variant="label2" textAlign="center" color="textPrimary">
                   Balance
                 </Text>
-                <Text fontSize={22} fontWeight={500} textAlign="center">
-                  {balance && formatBalanceAbbreviated(balance, symbol)}
-                </Text>
+                <Link to={`/portfolio?send=${balances?.native.currency.symbol}`} onClick={() => state.close()}>
+                  <BalanceLink fontSize={22} fontWeight={500} textAlign="center">
+                    {balance && formatBalanceAbbreviated(balance, symbol)}
+                  </BalanceLink>
+                </Link>
               </Stack>
             </MenuItemGroup>
 
@@ -232,3 +236,9 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
     />
   )
 }
+
+const BalanceLink = styled(Text)`
+  &:hover {
+    color: ${({ theme }) => theme.colors.textInteractive};
+  }
+`

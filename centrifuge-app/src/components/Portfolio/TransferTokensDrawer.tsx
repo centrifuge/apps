@@ -18,7 +18,6 @@ import {
   Tabs,
   TabsItem,
   Text,
-  truncate,
 } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
@@ -34,6 +33,7 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
 import { useTransactionFeeEstimate } from '../../utils/useTransactionFeeEstimate'
+import { truncate } from '../../utils/web3'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
@@ -266,14 +266,11 @@ const ReceiveToken = ({ address }: SendReceiveProps) => {
           <Container>
             <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
           </Container>
-          <Text variant="label2" color="textSecondary">
-            Centrifuge native address:{' '}
-          </Text>
-          <Text variant="label1" fontSize="12px" textDecoration="underline" color="textPrimary">
-            {truncate(centAddress)}
-          </Text>
           <IconButton onClick={() => copyToClipboard(centAddress)} title="Copy address to clipboard">
-            <IconCopy />
+            <Shelf gap={1}>
+              {truncate(centAddress, 10, 10)}
+              <IconCopy />
+            </Shelf>
           </IconButton>
         </Shelf>
       </Stack>

@@ -18,10 +18,9 @@ export function isWhitelistedAccount(address: string) {
   return whitelistedAccounts.includes(addr)
 }
 
-export function truncate(string: string) {
-  const first = string.slice(0, 5)
-  const last = string.slice(-5)
-
+export function truncate(string: string, frontCount?: number, endCount?: number) {
+  const first = string.slice(0, frontCount ?? 5)
+  const last = string.slice(endCount ? -endCount : -5)
   return `${first}...${last}`
 }
 

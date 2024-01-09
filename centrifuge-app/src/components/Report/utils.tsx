@@ -1,6 +1,7 @@
 import { BorrowerTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { Text } from '@centrifuge/fabric'
 import { copyToClipboard } from '../../utils/copyToClipboard'
+import { truncate } from '../../utils/web3'
 
 const investorTransactionTypes: {
   [key in InvestorTransactionType]: (args: { trancheTokenSymbol: string; poolCurrencySymbol: string }) => string
@@ -88,13 +89,6 @@ export function formatTransactionsType({
 
 function isBorrowerType(type: InvestorTransactionType | BorrowerTransactionType): type is BorrowerTransactionType {
   return ['CREATED', 'PRICED', 'BORROWED', 'REPAID', 'CLOSED'].includes(type)
-}
-
-export function truncate(text: string) {
-  const first = text.slice(0, 5)
-  const last = text.slice(-5)
-
-  return `${first}...${last}`
 }
 
 export function copyable(text: string) {
