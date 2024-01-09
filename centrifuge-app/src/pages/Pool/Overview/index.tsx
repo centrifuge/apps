@@ -1,5 +1,7 @@
+import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
@@ -13,6 +15,7 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
+import { TrancheTokenCards } from '../../../components/TrancheTokenCards'
 import { formatDate } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
@@ -24,6 +27,19 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
+
+export type Token = {
+  apr: Decimal
+  protection: Decimal
+  ratio: number
+  name: string
+  symbol: string
+  seniority: number
+  valueLocked: Decimal
+  id: string
+  capacity: CurrencyBalance
+  tokenPrice: Price | null
+}
 
 export function PoolDetailOverviewTab() {
   return (
@@ -64,7 +80,7 @@ export function PoolDetailOverview() {
     })
   }
 
-  const tokens = pool?.tranches
+  const tokens: Token[] = pool?.tranches
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
@@ -106,6 +122,13 @@ export function PoolDetailOverview() {
   return (
     <>
       <PageSummary data={pageSummaryData} />
+      {!isTinlakePool && tokens.length > 0 && (
+        <PageSection>
+          <React.Suspense fallback={<Spinner />}>
+            <TrancheTokenCards trancheTokens={tokens} />
+          </React.Suspense>
+        </PageSection>
+      )}
       {!isTinlakePool && (
         <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
           <Stack height="290px">
