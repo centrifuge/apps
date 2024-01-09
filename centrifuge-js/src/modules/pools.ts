@@ -1671,7 +1671,7 @@ export function getPoolsModule(inst: Centrifuge) {
       poolId: string,
       fromLoanId: string,
       toLoanId: string,
-      repay: { principal: BN; interest: BN },
+      repay: { principal: BN; interest: BN } | { quantity: BN; price: BN; interest: BN },
       borrow: { quantity: BN; price: BN } | { amount: BN }
     ],
     options?: TransactionOptions
@@ -1685,7 +1685,10 @@ export function getPoolsModule(inst: Centrifuge) {
           fromLoanId,
           toLoanId,
           {
-            principal: { internal: repay.principal.toString() },
+            principal:
+              'quantity' in repay
+                ? { external: { quantity: repay.quantity.toString(), settlementPrice: repay.price.toString() } }
+                : { internal: repay.principal.toString() },
             interest: repay.interest.toString(),
             unscheduled: '0',
           },
