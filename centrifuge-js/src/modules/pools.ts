@@ -2197,11 +2197,7 @@ export function getPoolsModule(inst: Centrifuge) {
           portfolioValuation: string
           totalReserve: string
           periodStart: string
-          pool: {
-            currency: {
-              decimals: number
-            }
-          }
+          poolId: string
         }[]
       }
     }>(
@@ -2211,11 +2207,7 @@ export function getPoolsModule(inst: Centrifuge) {
             portfolioValuation
             totalReserve
             periodStart
-            pool {
-              currency {
-                decimals
-              }
-            }
+            id
           }
         }
       }`
@@ -2228,25 +2220,34 @@ export function getPoolsModule(inst: Centrifuge) {
         }
 
         const mergedMap = new Map()
-        const formatted = data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
-          dateInMilliseconds: new Date(periodStart).getTime(),
-          tvl: new CurrencyBalance(
-            new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
-            pool.currency.decimals
-          ).toDecimal(),
-        }))
+        const poolIds = data.poolSnapshots.nodes.map(({ poolId }) => poolId)
+        const poolCurrencies = poolIds.map((poolId) => getPoolCurrency([poolId]))
+        return combineLatest(poolCurrencies).pipe(
+          map((currencies) => {
+            const formatted = data.poolSnapshots.nodes.map(
+              ({ portfolioValuation, totalReserve, periodStart }, index) => {
+                return {
+                  dateInMilliseconds: new Date(periodStart).getTime(),
+                  tvl: new CurrencyBalance(
+                    new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
+                    currencies[index].decimals
+                  ).toDecimal(),
+                }
+              }
+            )
+            formatted.forEach((entry) => {
+              const { dateInMilliseconds, tvl } = entry
 
-        formatted.forEach((entry) => {
-          const { dateInMilliseconds, tvl } = entry
+              if (mergedMap.has(dateInMilliseconds)) {
+                mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
+              } else {
+                mergedMap.set(dateInMilliseconds, tvl)
+              }
+            })
 
-          if (mergedMap.has(dateInMilliseconds)) {
-            mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
-          } else {
-            mergedMap.set(dateInMilliseconds, tvl)
-          }
-        })
-
-        return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+            return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+          })
+        )
       })
     )
   }
