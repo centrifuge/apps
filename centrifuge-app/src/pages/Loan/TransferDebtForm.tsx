@@ -11,7 +11,7 @@ import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
-import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { nftMetadataSchema } from '../../schemas'
 import { Dec } from '../../utils/Decimal'
@@ -22,6 +22,7 @@ import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
+import { combine, maxPriceVariance, settlementPrice } from '../../utils/validation'
 import { ExternalFinanceFields } from './ExternalFinanceForm'
 import { isExternalLoan } from './utils'
 
@@ -30,6 +31,7 @@ type FormValues = {
   amount: number | '' | Decimal
   price: number | '' | Decimal
   faceValue: number | ''
+  targetLoanPrice: number | '' | Decimal
 }
 
 export function TransferDebtForm({ loan }: { loan: LoanType }) {
@@ -43,10 +45,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
   const loans = unfilteredLoans?.filter(
     (l: Loan | TinlakeLoan) =>
-      l.id !== loan.id &&
-      l.status === 'Active' &&
-      (l as ActiveLoan).borrower === account?.actingAddress &&
-      !isExternalLoan(l as any)
+      l.id !== loan.id && l.status === 'Active' && (l as ActiveLoan).borrower === account?.actingAddress
   ) as Loan[] | TinlakeLoan[] | undefined
 
   const { execute, isLoading } = useCentrifugeTransaction('Transfer debt', (cent) => cent.pools.transferLoanDebt, {
@@ -61,6 +60,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       amount: '',
       price: '',
       faceValue: '',
+      targetLoanPrice: '',
     },
     onSubmit: (values, actions) => {
       if (!selectedLoan) return
@@ -85,12 +85,39 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
         interest = principal.sub(outstandingPrincipal)
         principal = outstandingPrincipal
       }
+      let repay: any = { principal, interest }
+      if (isExternalLoan(selectedLoan)) {
+        const repayPriceBN = CurrencyBalance.fromFloat(form.values.targetLoanPrice || 1, pool.currency.decimals)
+        const repayQuantityBN = Price.fromFloat(financeAmount.div(repayPriceBN.toDecimal()))
+        repay = { quantity: repayQuantityBN, price: repayPriceBN, interest }
+      }
 
-      execute([loan.poolId, form.values.targetLoan, loan.id, { principal, interest }, borrow], {
+      execute([loan.poolId, form.values.targetLoan, loan.id, repay, borrow], {
         account,
         forceProxyType: 'Borrow',
       })
       actions.setSubmitting(false)
+    },
+    validate(values) {
+      let errors: any = {}
+      if (selectedLoan && isExternalLoan(selectedLoan)) {
+        const financeAmount = isExternalLoan(loan)
+          ? Dec(form.values.price || 0)
+              .mul(Dec(form.values.faceValue || 0))
+              .div(loan.pricing.notional.toDecimal())
+          : Dec(form.values.amount || 0)
+        const financeAmountBN = CurrencyBalance.fromFloat(financeAmount, pool.currency.decimals)
+        const repayPrice = Dec(form.values.targetLoanPrice || 1)
+        const repayQuantity = financeAmount.div(repayPrice)
+        const repayAmountBN = CurrencyBalance.fromFloat(
+          CurrencyBalance.fromFloat(repayQuantity, pool.currency.decimals).toDecimal().mul(repayPrice),
+          pool.currency.decimals
+        )
+        if (!repayAmountBN.eq(financeAmountBN)) {
+          errors = setIn(errors, 'targetLoanPrice', "Finance amount doesn't equal borrow amount")
+        }
+      }
+      return errors
     },
   })
 
@@ -120,6 +147,12 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   }
 
   if (availableFinancing.lte(0) || maturityDatePassed || !loans?.length) return null
+
+  const financeAmount = isExternalLoan(loan)
+    ? Dec(form.values.price || 0)
+        .mul(Dec(form.values.faceValue || 0))
+        .div(loan.pricing.notional.toDecimal())
+    : Dec(form.values.amount || 0)
 
   return (
     <Stack as={Card} gap={2} p={2}>
@@ -169,13 +202,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
                 <Text variant="emphasized">Total amount</Text>
                 <Text variant="emphasized">
                   {form.values.price && !Number.isNaN(form.values.price as number)
-                    ? formatBalance(
-                        Dec(form.values.price || 0)
-                          .mul(Dec(form.values.faceValue || 0))
-                          .div(loan.pricing.notional.toDecimal()),
-                        pool?.currency.symbol,
-                        2
-                      )
+                    ? formatBalance(financeAmount, pool?.currency.symbol, 2)
                     : `0.00 ${pool.currency.symbol}`}
                 </Text>
               </Shelf>
@@ -191,6 +218,22 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
                     errorMessage={meta.touched ? meta.error : undefined}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('amount', value)}
+                  />
+                )
+              }}
+            </Field>
+          )}
+          {selectedLoan && isExternalLoan(selectedLoan) && (
+            <Field name="targetLoanPrice" validate={combine(settlementPrice(), maxPriceVariance(selectedLoan.pricing))}>
+              {({ field, meta, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Settlement price (settlement asset)"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    currency={pool.currency.symbol}
+                    onChange={(value) => form.setFieldValue('targetLoanPrice', value)}
+                    decimals={8}
                   />
                 )
               }}
