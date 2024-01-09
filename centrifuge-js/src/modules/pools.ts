@@ -2769,7 +2769,7 @@ export function getPoolsModule(inst: Centrifuge) {
             value: CurrencyBalance
           }
         > = {}
-        oracles.forEach((oracle) => {
+        oracles.forEach(() => {
           // TODO: Fix oracles
           // const { timestamp, value } = oracle[1].toPrimitive() as any
           // oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
