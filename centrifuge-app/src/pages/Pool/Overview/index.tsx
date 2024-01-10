@@ -1,4 +1,4 @@
-import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Perquintill, Price } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -39,6 +39,7 @@ export type Token = {
   id: string
   capacity: CurrencyBalance
   tokenPrice: Price | null
+  subordination: Perquintill | null
 }
 
 export function PoolDetailOverviewTab() {
@@ -96,6 +97,7 @@ export function PoolDetailOverview() {
         id: tranche.id,
         capacity: tranche.capacity,
         tokenPrice: tranche.tokenPrice,
+        subordination: tranche.minRiskBuffer,
       }
     })
     .reverse()
@@ -125,7 +127,7 @@ export function PoolDetailOverview() {
       {!isTinlakePool && tokens.length > 0 && (
         <PageSection>
           <React.Suspense fallback={<Spinner />}>
-            <TrancheTokenCards trancheTokens={tokens} />
+            <TrancheTokenCards trancheTokens={tokens} poolId={poolId} createdAt={pool.createdAt} />
           </React.Suspense>
         </PageSection>
       )}
@@ -197,7 +199,7 @@ export function PoolDetailOverview() {
   )
 }
 
-function InvestButton(props: InvestRedeemProps) {
+export function InvestButton(props: InvestRedeemProps) {
   const [open, setOpen] = React.useState(false)
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
 
