@@ -29,11 +29,24 @@ const TrancheTokenCard = ({
   poolId: string
   createdAt: string | null
 }) => {
+  const isTinlakePool = poolId.startsWith('0x')
   const daysSinceCreation = createdAt ? daysBetween(new Date(createdAt), new Date()) : 0
   const trancheSeniority = trancheToken.seniority === 0 ? 'juniorTrancheYields' : 'seniorTokenAPR'
   const aprTooltipBody = `${
     trancheToken.seniority === 0 ? tooltipText.juniorTrancheYields.body : tooltipText.seniorTokenAPR.body
-  }${daysSinceCreation < 30 ? ' APR displayed after 30 days following token launch.' : ''}`
+  }${daysSinceCreation < 30 && !isTinlakePool ? ' APR displayed after 30 days following token launch.' : ''}`
+
+  const calculateApr = () => {
+    if (isTinlakePool) {
+      return trancheToken.seniority === 0 ? 'N/A' : formatPercentage(trancheToken.apr)
+    }
+
+    if (daysSinceCreation < 30) {
+      return 'N/A'
+    }
+
+    return formatPercentage(trancheToken.apr)
+  }
 
   return (
     <Box p={2} backgroundColor="backgroundButtonSecondary" borderRadius="card" width="540px">
@@ -46,14 +59,12 @@ const TrancheTokenCard = ({
             <Stack gap={1}>
               <Tooltips type={trancheSeniority} body={aprTooltipBody} />
               <Text fontSize="30px" variant="body3">
-                {daysSinceCreation >= 30 ? formatPercentage(trancheToken.apr) : 'N/A'}
+                {calculateApr()}
               </Text>
             </Stack>
             <Stack gap={1}>
               <Tooltips variant="secondary" type="subordination" />
-              <Text variant="body2">
-                {trancheToken.subordination ? formatPercentage(trancheToken.subordination) : 'N/A'}
-              </Text>
+              <Text variant="body2">{formatPercentage(trancheToken.protection)}</Text>
             </Stack>
           </Shelf>
           <InvestButton poolId={poolId} trancheId={trancheToken.id} />

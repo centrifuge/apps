@@ -1,4 +1,4 @@
-import { CurrencyBalance, Perquintill, Price } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -39,7 +39,6 @@ export type Token = {
   id: string
   capacity: CurrencyBalance
   tokenPrice: Price | null
-  subordination: Perquintill | null
 }
 
 export function PoolDetailOverviewTab() {
@@ -97,7 +96,6 @@ export function PoolDetailOverview() {
         id: tranche.id,
         capacity: tranche.capacity,
         tokenPrice: tranche.tokenPrice,
-        subordination: tranche.minRiskBuffer,
       }
     })
     .reverse()
@@ -124,7 +122,7 @@ export function PoolDetailOverview() {
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      {!isTinlakePool && tokens.length > 0 && (
+      {tokens.length > 0 && (
         <PageSection>
           <React.Suspense fallback={<Spinner />}>
             <TrancheTokenCards trancheTokens={tokens} poolId={poolId} createdAt={pool.createdAt} />
