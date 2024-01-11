@@ -133,8 +133,14 @@ function AOForm({
 
   const destinations = [
     'centrifuge',
-    ...chainIds.map((cid) => ({ evm: cid })),
-    ...Object.keys(parachainNames).map((pid) => ({ parachain: Number(pid) })),
+    ...chainIds
+      .map((cid) => ({ evm: cid }))
+      .filter(
+        () => pool.currency.additional?.transferability && 'liquidityPools' in pool.currency.additional.transferability
+      ),
+    ...Object.keys(parachainNames)
+      .map((pid) => ({ parachain: Number(pid) }))
+      .filter(() => pool.currency.additional?.transferability && 'xcm' in pool.currency.additional.transferability),
   ]
 
   const { showPodAccountCreation } = useDebugFlags()
@@ -563,7 +569,7 @@ function AOForm({
                     }
                     symbol={
                       <Field name={`withdrawAddresses.${index}.meta.location`}>
-                        {({ field, meta, form }: FieldProps) => (
+                        {({ field, form }: FieldProps) => (
                           <SelectInner
                             name={`withdrawAddresses.${index}.meta.location`}
                             onChange={(event) =>

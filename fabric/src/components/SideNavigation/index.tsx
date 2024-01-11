@@ -24,7 +24,7 @@ export function SideNavigation({ items }: SideNavigationProps) {
 
 export function SideNavigationContainer({ children }: { children: React.ReactNode }) {
   return (
-    <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px">
+    <Shelf as="nav" bg="backgroundTertiary" borderRadius="4px" p="5px">
       {children}
     </Shelf>
   )
@@ -33,13 +33,13 @@ export function SideNavigationContainer({ children }: { children: React.ReactNod
 export const SideNavigationItem = styled.a<{ $isActive: boolean }>`
   display: block;
   padding: 7px 16px 8px 16px;
-  border-radius: 20px;
+  border-radius: 4px;
 
-  color: ${({ theme, $isActive }) => ($isActive ? theme.colors.textInverted : theme.colors.textPrimary)};
+  color: ${({ theme, $isActive }) => ($isActive ? theme.colors.textInteractive : theme.colors.textPrimary)};
   font-size: ${({ theme }) => theme.typography.interactive2.fontSize}px;
   line-height: ${({ theme }) => theme.typography.interactive2.lineHeight};
   font-weight: ${({ theme }) => theme.typography.interactive2.fontWeight};
 
-  box-shadow: ${({ theme, $isActive }) => ($isActive ? theme.shadows.cardInteractive : 'none')};
-  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.textSelected : 'transparent')};
+  box-shadow: ${({ theme, $isActive }) => ($isActive ? theme.shadows.buttonSecondary : 'none')};
+  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.backgroundPage : theme.colors.backgroundTertiary)};
 `
