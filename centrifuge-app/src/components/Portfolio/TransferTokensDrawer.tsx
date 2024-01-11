@@ -311,10 +311,12 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
           price: parseFloat(entry.priceUSD),
         }
       }) || []
-    tokenData.push({
-      day: new Date(),
-      price: currentCFGPrice || 0,
-    })
+    if (tokenData.length > 0) {
+      tokenData.push({
+        day: new Date(),
+        price: currentCFGPrice || 0,
+      })
+    }
     return tokenData
   }, [tokenDayData, filter])
 
