@@ -107,7 +107,7 @@ export function InvestorStatus() {
               })),
             ]}
             onChange={(e) => {
-              setChain(e.target.value as any)
+              setChain(Number(e.target.value))
             }}
             disabled={!deployedLpChains.length}
           />
