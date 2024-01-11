@@ -318,5 +318,5 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
     return tokenData
   }, [tokenDayData, filter])
 
-  return <PriceChart data={data} currency="USD" filter={filter} setFilter={setFilter} />
+  return <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
 })
