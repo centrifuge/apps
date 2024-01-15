@@ -19,7 +19,9 @@ import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as P
 
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
+
   const evmAddress = useAddress('evm')
+  console.log('evmAddress', evmAddress, centAddress)
   const {
     evm: { isSmartContractWallet },
   } = useWallet()
@@ -37,6 +39,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     isLoading: isInvestmentLoading,
   } = useLiquidityPoolInvestment(poolId, trancheId)
   const provider = useEvmProvider()
+
+  console.log('lpInvest', lpInvest)
 
   const { data: lpEvents } = useLPEvents(poolId, trancheId, lpInvest?.lpAddress)
   const isAllowedToInvest = lpInvest?.isAllowedToInvest
@@ -217,6 +221,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const hooks = {
     useActionSucceeded,
   }
+  console.log('state', state)
 
   return <InvestRedeemContext.Provider value={{ state, actions, hooks }}>{children}</InvestRedeemContext.Provider>
 }
