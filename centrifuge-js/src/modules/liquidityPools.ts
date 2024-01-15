@@ -147,6 +147,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function decreaseInvestOrder(args: [lpAddress: string, assets: BN], options: TransactionRequest = {}) {
+    const [lpAddress, assets] = args
+    return pending(
+      contract(lpAddress, ABI.LiquidityPool).decreaseDepositRequest(assets.toString(), {
+        ...options,
+        gasLimit: 300000,
+      })
+    )
+  }
+
   function increaseRedeemOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
@@ -562,6 +572,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     deployTranche,
     deployLiquidityPool,
     increaseInvestOrder,
+    decreaseInvestOrder,
     increaseRedeemOrder,
     increaseInvestOrderWithPermit,
     cancelInvestOrder,
