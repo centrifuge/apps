@@ -26,8 +26,8 @@ function IssuerPoolInvestors() {
 
   return (
     <>
-      {canEditInvestors && <InvestorStatus />}
-      {isPoolAdmin && <LiquidityPools />}
+      {<InvestorStatus />}
+      {<LiquidityPools />}
       {isPoolAdmin && <OnboardingSettings />}
     </>
   )
