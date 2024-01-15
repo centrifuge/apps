@@ -66,8 +66,6 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
     networks.push(...domains.map((d) => d.chainId))
   }
 
-  console.log('networks', networks)
-
   return (
     <LoadBoundary>
       <ConnectionGuard
