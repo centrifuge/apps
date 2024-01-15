@@ -15,7 +15,7 @@ import {
   DateInput,
   Grid,
   ImageUpload,
-  NumberInput,
+  NumberInput_DEPRECATED,
   Select_DEPRECATED,
   Shelf,
   Stack,
@@ -124,7 +124,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
       return (
         <FieldWithErrorMessage
           name={name}
-          as={NumberInput}
+          as={NumberInput_DEPRECATED}
           label={`${label}*`}
           placeholder={input.placeholder}
           validate={combine(required(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
@@ -380,7 +380,8 @@ function IssuerCreateLoan() {
             <>
               <PageSection>
                 {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
-                  <Box
+                  <Shelf
+                    gap={2}
                     mb={3}
                     py={2}
                     borderWidth={0}
@@ -389,8 +390,12 @@ function IssuerCreateLoan() {
                     borderStyle="solid"
                   >
                     <Text>Asset template is missing. Please create one first.</Text>
-                  </Box>
+                    <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`} small>
+                      Create template
+                    </RouterLinkButton>
+                  </Shelf>
                 )}
+
                 <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
@@ -418,13 +423,6 @@ function IssuerCreateLoan() {
                       />
                     )}
                   </Field>
-                  {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
-                    <Box alignSelf="center" justifySelf="end">
-                      <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
-                        Create template
-                      </RouterLinkButton>
-                    </Box>
-                  )}
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">

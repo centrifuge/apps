@@ -46,6 +46,7 @@ const StyledTextInput = styled.input`
   font-family: inherit;
   line-height: inherit;
   color: inherit;
+  -moz-appearance: textfield;
 
   ::placeholder {
     color: ${({ theme }) => theme.colors.textDisabled};
@@ -53,6 +54,13 @@ const StyledTextInput = styled.input`
 
   &:focus {
     color: ${({ theme }) => theme.colors.textSelected};
+  }
+
+  // For number input
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 `
 
@@ -136,7 +144,8 @@ export function TextInputBox(
 }
 
 export function TextInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <InputUnit
       id={id}
@@ -150,7 +159,8 @@ export function TextInput({ label, secondaryLabel, disabled, errorMessage, id, .
 }
 
 export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <InputUnit
       id={id}
@@ -167,6 +177,20 @@ export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id,
           {...inputProps}
         />
       }
+    />
+  )
+}
+export function NumberInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
+  const defaultId = React.useId()
+  id ??= defaultId
+  return (
+    <InputUnit
+      id={id}
+      label={label}
+      secondaryLabel={secondaryLabel}
+      disabled={disabled}
+      errorMessage={errorMessage}
+      inputElement={<TextInputBox type="number" disabled={disabled} error={!!errorMessage} {...inputProps} />}
     />
   )
 }
@@ -226,7 +250,7 @@ const StyledNumberInput = styled(StyledTextInput)`
   }
 `
 
-export const NumberInput: React.FC<TextInputProps_DEPRECATED> = ({
+export const NumberInput_DEPRECATED: React.FC<TextInputProps_DEPRECATED> = ({
   label,
   secondaryLabel,
   disabled,
@@ -308,7 +332,8 @@ export const AddressInput = ({
   onChange,
   ...inputProps
 }: CurrencyInputProps) => {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
 
   const [network, setNetwork] = React.useState<'ethereum' | 'centrifuge' | 'loading' | null>(null)
 

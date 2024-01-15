@@ -1,5 +1,14 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput_DEPRECATED } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  Grid,
+  IconMinusCircle,
+  NumberInput_DEPRECATED,
+  Stack,
+  Text,
+  TextInput_DEPRECATED,
+} from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import { createEmptyTranche } from '.'
@@ -88,7 +97,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                   )}
                 </Field>
                 <FieldWithErrorMessage
-                  as={NumberInput}
+                  as={NumberInput_DEPRECATED}
                   label={<Tooltips type="minimumInvestment" variant="secondary" label="Min. investment*" />}
                   placeholder="0.00"
                   name={`tranches.${index}.minInvestment`}
@@ -113,7 +122,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                 ) : (
                   <>
                     <FieldWithErrorMessage
-                      as={NumberInput}
+                      as={NumberInput_DEPRECATED}
                       label={<Tooltips type="tranchProtection" variant="secondary" />}
                       placeholder="0.00"
                       rightElement="%"
@@ -121,7 +130,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                       validate={validate.minRiskBuffer}
                     />
                     <FieldWithErrorMessage
-                      as={NumberInput}
+                      as={NumberInput_DEPRECATED}
                       label={<Tooltips type="fixedTranchInterest" variant="secondary" />}
                       placeholder="0.00"
                       rightElement="%"

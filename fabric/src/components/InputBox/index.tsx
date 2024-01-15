@@ -108,7 +108,8 @@ export function InputUnit({
   disabled,
   id,
 }: StackProps & InputUnitProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <IdContext.Provider value={id}>
       <Stack gap={1}>

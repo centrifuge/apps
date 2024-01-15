@@ -1,6 +1,6 @@
 import { CurrencyBalance, Perquintill, PoolMetadata, PoolMetadataInput, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifugeConsts, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Grid, NumberInput, Shelf, Stack, StatusChip, Text, Thumbnail } from '@centrifuge/fabric'
+import { Button, Grid, NumberInput_DEPRECATED, Shelf, Stack, StatusChip, Text, Thumbnail } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -266,7 +266,7 @@ export function EpochAndTranches() {
                   <FieldWithErrorMessage
                     validate={validate.epochHours}
                     name="epochHours"
-                    as={NumberInput}
+                    as={NumberInput_DEPRECATED}
                     label="Epoch hours*"
                     maxLength={2}
                     rightElement="hrs"
@@ -274,7 +274,7 @@ export function EpochAndTranches() {
                   <FieldWithErrorMessage
                     validate={validate.epochMinutes}
                     name="epochMinutes"
-                    as={NumberInput}
+                    as={NumberInput_DEPRECATED}
                     label="Epoch minutes*"
                     maxLength={2}
                     rightElement="min"

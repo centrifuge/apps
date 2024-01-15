@@ -148,7 +148,8 @@ export function CurrencyInput({
   onBlur,
   ...inputProps
 }: CurrencyInputProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   const ref = React.useRef<HTMLInputElement>(null)
   const [internalValue, setInternalValue] = React.useState(() =>
     typeof inputProps.value !== 'number' || Number.isNaN(inputProps.value)

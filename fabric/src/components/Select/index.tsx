@@ -114,7 +114,8 @@ export const Select_DEPRECATED: React.FC<SelectProps> = ({ label, errorMessage, 
 }
 
 export function Select({ label, errorMessage, id, ...rest }: SelectProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <InputUnit
       id={id}

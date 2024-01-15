@@ -2,7 +2,7 @@ import {
   CurrencyInput_DEPRECATED,
   DateInput,
   Grid,
-  NumberInput,
+  NumberInput_DEPRECATED,
   Select_DEPRECATED,
   TextInput_DEPRECATED,
 } from '@centrifuge/fabric'
@@ -41,7 +41,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             )}
           </Field>
           <FieldWithErrorMessage
-            as={NumberInput}
+            as={NumberInput_DEPRECATED}
             label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
             placeholder={0}
             rightElement="%"
@@ -86,7 +86,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
       )}
       {values.pricing.valuationMethod !== 'cash' && (
         <FieldWithErrorMessage
-          as={NumberInput}
+          as={NumberInput_DEPRECATED}
           label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
           placeholder="0.00"
           rightElement="%"
@@ -110,7 +110,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
         values.pricing.valuationMethod === 'outstandingDebt') && (
         <>
           <FieldWithErrorMessage
-            as={NumberInput}
+            as={NumberInput_DEPRECATED}
             label={<Tooltips type="advanceRate" variant="secondary" label="Advance rate*" />}
             placeholder="0.00"
             rightElement="%"
@@ -122,7 +122,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
       {values.pricing.valuationMethod === 'discountedCashFlow' && (
         <>
           <FieldWithErrorMessage
-            as={NumberInput}
+            as={NumberInput_DEPRECATED}
             label={<Tooltips type="probabilityOfDefault" variant="secondary" label="Probability of default*" />}
             placeholder="0.00"
             rightElement="%"
@@ -130,7 +130,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             validate={validate.probabilityOfDefault}
           />
           <FieldWithErrorMessage
-            as={NumberInput}
+            as={NumberInput_DEPRECATED}
             label={<Tooltips type="lossGivenDefault" variant="secondary" label="Loss given default*" />}
             placeholder="0.00"
             rightElement="%"
@@ -138,7 +138,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             validate={validate.lossGivenDefault}
           />
           <FieldWithErrorMessage
-            as={NumberInput}
+            as={NumberInput_DEPRECATED}
             label={<Tooltips type="discountRate" variant="secondary" label="Discount rate*" />}
             placeholder="0.00"
             rightElement="%"

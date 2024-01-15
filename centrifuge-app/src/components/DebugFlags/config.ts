@@ -48,6 +48,7 @@ export type Key =
   | 'showTestNets'
   | 'showSwaps'
   | 'showPrime'
+  | 'showOracle'
   | 'poolCreationType'
   | 'podAdminSeed'
 
@@ -128,6 +129,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   showSwaps: {
+    default: false,
+    type: 'checkbox',
+  },
+  showOracle: {
     default: false,
     type: 'checkbox',
   },
