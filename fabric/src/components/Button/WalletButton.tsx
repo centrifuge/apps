@@ -74,7 +74,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
             <Shelf position="absolute" top="0" bottom="0" left="0" width="100%" m="auto" height="30px">
               <Text
                 fontSize={small ? 14 : 16}
-                color="textPrimary"
+                color="textInteractive"
                 fontWeight={500}
                 style={{
                   overflow: 'hidden',
@@ -88,7 +88,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
         ) : (
           <Text
             fontSize={small ? 14 : 16}
-            color="textPrimary"
+            color="textInteractive"
             fontWeight={500}
             style={{ margin: address ? 0 : 'auto' }}
           >
@@ -96,7 +96,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
           </Text>
         )}
         {address && balance && (
-          <Text variant="body3" color="textPrimary" style={{ marginLeft: 'auto' }}>
+          <Text variant="body3" color="textInteractive" style={{ marginLeft: 'auto' }}>
             {balance}
           </Text>
         )}

@@ -1,5 +1,6 @@
 import { Grid, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useRouteMatch } from 'react-router'
 import { config } from '../config'
 import { CardTotalValueLocked } from './CardTotalValueLocked'
 import { LayoutSection } from './LayoutBase/LayoutSection'
@@ -13,6 +14,18 @@ type PoolsTokensSharedProps = {
 }
 
 export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const links = [
+    {
+      to: `${basePath}`,
+      label: 'Pools',
+    },
+    {
+      to: `${basePath}/tokens`,
+      label: 'Tokens',
+    },
+  ]
+
   return (
     <LayoutSection pt={5}>
       <Stack gap={4}>
@@ -35,7 +48,7 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
         </Grid>
 
         <Stack alignItems="end">
-          <MenuSwitch />
+          <MenuSwitch links={links} />
         </Stack>
         {children}
       </Stack>

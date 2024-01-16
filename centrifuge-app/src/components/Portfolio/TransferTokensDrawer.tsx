@@ -11,14 +11,13 @@ import {
   Button,
   CurrencyInput,
   Drawer,
-  IconButton,
+  IconCheckCircle,
   IconCopy,
   Shelf,
   Stack,
   Tabs,
   TabsItem,
   Text,
-  truncate,
 } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
@@ -34,6 +33,7 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
 import { useTransactionFeeEstimate } from '../../utils/useTransactionFeeEstimate'
+import { truncate } from '../../utils/web3'
 import { FilterOptions, PriceChart } from '../Charts/PriceChart'
 import { LabelValueStack } from '../LabelValueStack'
 import { Tooltips } from '../Tooltips'
@@ -251,6 +251,7 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
 
 const ReceiveToken = ({ address }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
+  const [copied, setCopied] = React.useState(false)
   const centAddress = useMemo(
     () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
     [address]
@@ -263,18 +264,24 @@ const ReceiveToken = ({ address }: SendReceiveProps) => {
           Your address on Centrifuge Chain
         </Text>
         <Shelf gap={1}>
-          <Container>
-            <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
-          </Container>
-          <Text variant="label2" color="textSecondary">
-            Centrifuge native address:{' '}
-          </Text>
-          <Text variant="label1" fontSize="12px" textDecoration="underline" color="textPrimary">
-            {truncate(centAddress)}
-          </Text>
-          <IconButton onClick={() => copyToClipboard(centAddress)} title="Copy address to clipboard">
-            <IconCopy />
-          </IconButton>
+          <Button
+            variant="tertiary"
+            small
+            onClick={() => {
+              setTimeout(() => setCopied(true), 100)
+              setTimeout(() => setCopied(false), 1100)
+              copyToClipboard(centAddress)
+            }}
+            title="Copy to clipboard"
+          >
+            <Shelf gap={1} style={{ cursor: 'copy' }}>
+              <Container>
+                <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
+              </Container>
+              {truncate(centAddress, 10, 10)}
+              {copied ? <IconCheckCircle size="16px" /> : <IconCopy size="16px" />}
+            </Shelf>
+          </Button>
         </Shelf>
       </Stack>
     </Stack>
@@ -304,12 +311,14 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
           price: parseFloat(entry.priceUSD),
         }
       }) || []
-    tokenData.push({
-      day: new Date(),
-      price: currentCFGPrice || 0,
-    })
+    if (tokenData.length > 0) {
+      tokenData.push({
+        day: new Date(),
+        price: currentCFGPrice || 0,
+      })
+    }
     return tokenData
   }, [tokenDayData, filter])
 
-  return <PriceChart data={data} currency="USD" filter={filter} setFilter={setFilter} />
+  return <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
 })
