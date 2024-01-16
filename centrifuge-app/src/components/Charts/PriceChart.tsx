@@ -19,8 +19,10 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
   const currentPrice = data.at(-1)?.price
 
   const priceDifference = React.useMemo(() => {
-    return Dec(data.at(0)?.price || 1).div(currentPrice || 1)
-  }, [data, filter])
+    const dayZeroPrice = data.at(0)?.price
+    if (!currentPrice || !dayZeroPrice) return null
+    return Dec(currentPrice).sub(dayZeroPrice).div(dayZeroPrice)
+  }, [data, currentPrice])
 
   return (
     <Stack gap={0}>
@@ -31,18 +33,20 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
               {currency} - {currentPrice.toFixed(4)} USD
             </Text>
           )}
-          <Text variant="body3" color={priceDifference.gte(0) ? 'statusOk' : 'statusError'}>
-            {' '}
-            {priceDifference.gte(0) ? '+' : '-'} {priceDifference.mul(100).toFixed(2)}%
-          </Text>
+          {priceDifference && (
+            <Text variant="body3" color={priceDifference.gte(0) ? 'statusOk' : 'statusCritical'}>
+              {' '}
+              {priceDifference.gte(0) ? '+' : ''} {priceDifference.mul(100).toFixed(2)}%
+            </Text>
+          )}
         </Shelf>
         {filter && setFilter && (
           <Box alignSelf="flex-end" justifySelf="flex-end">
             <Select
               options={[
-                { label: 'YTD', value: 'YTD' },
                 { label: '30 days', value: '30days' },
                 { label: '90 days', value: '90days' },
+                { label: 'YTD', value: 'YTD' },
               ]}
               onChange={(option) => setFilter(option.target.value as FilterOptions)}
             />

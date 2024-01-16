@@ -261,11 +261,10 @@ export const OnboardingSettings = () => {
               {Object.entries(formik.values.openForOnboarding).map(([tId, open]) => (
                 <Shelf width="100%" justifyContent="space-between" gap={2} key={tId}>
                   <Text variant="body1">{(pool.tranches as Token[]).find((t) => t.id === tId)?.currency.name}</Text>
-                  <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px" width="fit-content">
+                  <Shelf as="nav" bg="backgroundTertiary" borderRadius="4px" p="5px" width="fit-content">
                     <ToggleButton
                       forwardedAs="button"
-                      variant="interactive2"
-                      isActive={open}
+                      $isActive={open}
                       disabled={!isEditing || formik.isSubmitting || isLoading}
                       type="button"
                       label={(pool.tranches as Token[]).find((t) => t.id === tId)?.currency.name}
@@ -280,9 +279,8 @@ export const OnboardingSettings = () => {
                     </ToggleButton>
                     <ToggleButton
                       forwardedAs="button"
-                      variant="interactive2"
                       type="button"
-                      isActive={!open}
+                      $isActive={!open}
                       disabled={!isEditing || formik.isSubmitting || isLoading}
                       onClick={() => {
                         formik.setFieldValue('openForOnboarding', {
@@ -482,12 +480,16 @@ const ToggleButton = styled(Text)<{ isActive: boolean }>`
   border: 0;
   cursor: pointer;
   display: block;
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 7px 16px 8px 16px;
+  border-radius: 4px;
 
-  color: ${({ theme, isActive }) => (isActive ? theme.colors.textInteractive : theme.colors.textPrimary)};
-  box-shadow: ${({ theme, isActive }) => (isActive ? theme.shadows.cardInteractive : 'none')};
-  background: ${({ theme, isActive }) => (isActive ? theme.colors.backgroundPage : 'transparent')};
+  color: ${({ theme, $isActive }) => ($isActive ? theme.colors.textInteractive : theme.colors.textPrimary)};
+  font-size: ${({ theme }) => theme.typography.interactive2.fontSize}px;
+  line-height: ${({ theme }) => theme.typography.interactive2.lineHeight};
+  font-weight: ${({ theme }) => theme.typography.interactive2.fontWeight};
+
+  box-shadow: ${({ theme, $isActive }) => ($isActive ? theme.shadows.buttonSecondary : 'none')};
+  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.backgroundPage : theme.colors.backgroundTertiary)};
 
   ${({ disabled, theme }) =>
     disabled &&

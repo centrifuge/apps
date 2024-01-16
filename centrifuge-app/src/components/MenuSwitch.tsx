@@ -1,22 +1,9 @@
 import { SideNavigationContainer, SideNavigationItem } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link, useLocation, useRouteMatch } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
-export function MenuSwitch() {
+export function MenuSwitch({ links }: { links: { to: string; label: string }[] }) {
   const { pathname } = useLocation()
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
-
-  const links = [
-    {
-      to: `${basePath}`,
-      label: 'Pools',
-    },
-    {
-      to: `${basePath}/tokens`,
-      label: 'Tokens',
-    },
-  ]
-
   return (
     <SideNavigationContainer>
       {links.map(({ to, label }) => (

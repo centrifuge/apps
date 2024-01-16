@@ -7,7 +7,15 @@ export type StatusChipProps = React.PropsWithChildren<{
   status: 'default' | 'info' | 'ok' | 'warning' | 'critical'
 }>
 
-const colors = {
+const backgroundColor = {
+  default: 'statusDefault',
+  info: 'statusDefault',
+  ok: 'statusOk',
+  warning: 'statusWarning',
+  critical: 'statusCritical',
+}
+
+const textColor = {
   default: 'statusDefault',
   info: 'statusInfo',
   ok: 'statusOk',
@@ -19,18 +27,19 @@ const Chip = styled(Text)((props) =>
   css({
     display: 'inline-block',
     px: 1,
-    bg: `${props.color}Bg`,
+    bg: `${props.backgroundColor}Bg`,
     borderRadius: 'chip',
     whiteSpace: 'nowrap',
+    color: `${props.color}`,
   })
 )
 
 export function StatusChip({ status, children }: StatusChipProps) {
-  const color = colors[status]
-
   return (
-    <Chip forwardedAs="span" variant="label2" lineHeight="20px" color={color}>
-      {children}
+    <Chip forwardedAs="span" variant="label2" lineHeight="20px" backgroundColor={backgroundColor[status]}>
+      <Text fontWeight={500} variant="label2" color={textColor[status]}>
+        {children}
+      </Text>
     </Chip>
   )
 }
