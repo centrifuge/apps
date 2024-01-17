@@ -1,18 +1,19 @@
 import { AccountCurrencyBalance, AccountTokenBalance, CurrencyBalance, TokenBalance } from '@centrifuge/centrifuge-js'
 import { BigNumber } from '@ethersproject/bignumber'
 import { useQuery } from 'react-query'
-import { useAddress } from '../useAddress'
 import { currencies } from './currencies'
 import { Call, multicall } from './multicall'
 import { TinlakePool, useTinlakePools } from './useTinlakePools'
 
 export function useTinlakeBalances(address?: string) {
-  const addr = useAddress('evm') || address
   const { data } = useTinlakePools()
-  return useQuery(['tinlakeBalances', addr, !!data?.pools], () => getBalances(data?.pools!, addr!), {
-    enabled: !!addr && !!data?.pools,
+  return useQuery(['tinlakeBalances', address, !!data?.pools], () => getBalances(data?.pools!, address!), {
+    enabled: !!address && !!data?.pools,
+    retry: false,
   })
 }
+
+const WCFG_ADDRESS = '0xc221b7e65ffc80de234bbb6667abdd46593d34f0'
 
 async function getBalances(pools: TinlakePool[], address: string) {
   const calls: Call[] = []
@@ -45,6 +46,12 @@ async function getBalances(pools: TinlakePool[], address: string) {
     }
   })
 
+  calls.push({
+    target: WCFG_ADDRESS,
+    call: ['balanceOf(address)(uint256)', address],
+    returns: [[`currencies.${WCFG_ADDRESS}`, toCurrencyBalance]],
+  })
+
   const multicallData = await multicall<State>(calls)
 
   const balances = {
@@ -64,10 +71,10 @@ async function getBalances(pools: TinlakePool[], address: string) {
     })
   })
 
-  Object.values(multicallData.currencies).forEach((balance) => {
+  Object.entries(multicallData.currencies).forEach(([currencyAddress, balance]) => {
     balances.currencies.push({
       balance,
-      currency: currencies.DAI,
+      currency: currencyAddress === WCFG_ADDRESS ? currencies.wCFG : currencies.DAI,
     })
   })
 
