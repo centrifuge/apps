@@ -15,6 +15,7 @@ import PoolsPage from '../pages/Pools'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
+import { ExpiringCFGRewardsBanner } from './ExpiringCFGRewardsBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
@@ -86,6 +87,7 @@ export function Root() {
                 showAdvancedAccounts={debugState.showAdvancedAccounts as any}
                 showTestNets={debugState.showTestNets as any}
               >
+                <ExpiringCFGRewardsBanner />
                 <OnboardingAuthProvider>
                   <OnboardingProvider>
                     <DebugFlags onChange={(state) => setDebugState(state)}>
