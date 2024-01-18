@@ -27,7 +27,7 @@ export const required = (err?: CustomError) => (val?: any) =>
 
 export const nonNegativeNumber = (err?: CustomError) => (val?: any) => {
   const num = val instanceof Decimal ? val.toNumber() : val
-  return Number.isFinite(num) && num >= 0 ? '' : getError(`Value must be positive`, err, num)
+  return Number.isFinite(num) && num >= 0 ? '' : getError(`Value must be positive or zero`, err, num)
 }
 
 export const positiveNumber = (err?: CustomError) => (val?: any) => {

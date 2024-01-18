@@ -11,7 +11,7 @@ import {
   Button,
   CurrencyInput,
   Drawer,
-  IconButton,
+  IconCheckCircle,
   IconCopy,
   Shelf,
   Stack,
@@ -251,6 +251,7 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
 
 const ReceiveToken = ({ address }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
+  const [copied, setCopied] = React.useState(false)
   const centAddress = useMemo(
     () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
     [address]
@@ -263,15 +264,24 @@ const ReceiveToken = ({ address }: SendReceiveProps) => {
           Your address on Centrifuge Chain
         </Text>
         <Shelf gap={1}>
-          <Container>
-            <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
-          </Container>
-          <IconButton onClick={() => copyToClipboard(centAddress)} title="Copy address to clipboard">
-            <Shelf gap={1}>
+          <Button
+            variant="tertiary"
+            small
+            onClick={() => {
+              setTimeout(() => setCopied(true), 100)
+              setTimeout(() => setCopied(false), 1100)
+              copyToClipboard(centAddress)
+            }}
+            title="Copy to clipboard"
+          >
+            <Shelf gap={1} style={{ cursor: 'copy' }}>
+              <Container>
+                <Box as="img" src={centrifugeLogo} width="100%" height="100%" alt="" />
+              </Container>
               {truncate(centAddress, 10, 10)}
-              <IconCopy />
+              {copied ? <IconCheckCircle size="16px" /> : <IconCopy size="16px" />}
             </Shelf>
-          </IconButton>
+          </Button>
         </Shelf>
       </Stack>
     </Stack>
@@ -301,12 +311,14 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
           price: parseFloat(entry.priceUSD),
         }
       }) || []
-    tokenData.push({
-      day: new Date(),
-      price: currentCFGPrice || 0,
-    })
+    if (tokenData.length > 0) {
+      tokenData.push({
+        day: new Date(),
+        price: currentCFGPrice || 0,
+      })
+    }
     return tokenData
   }, [tokenDayData, filter])
 
-  return <PriceChart data={data} currency="USD" filter={filter} setFilter={setFilter} />
+  return <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
 })

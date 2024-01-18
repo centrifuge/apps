@@ -10,7 +10,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, nonNegativeNumber, settlementPrice } from '../../utils/validation'
 import { WithdrawSelect } from './FinanceForm'
 
 type FinanceValues = {
@@ -124,7 +124,7 @@ export function ExternalFinanceFields({
   const maxBorrow = min(poolReserve, availableFinancing)
   return (
     <>
-      <Field name="faceValue" validate={combine(positiveNumber())}>
+      <Field name="faceValue" validate={combine(nonNegativeNumber())}>
         {({ field, meta, form }: FieldProps) => {
           return (
             <CurrencyInput
