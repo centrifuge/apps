@@ -142,6 +142,7 @@ export const DataTable = <T extends Record<string, any>>({
       )}
       {sortedAndPaginatedData?.map((row, i) => (
         <DataRow
+          data-testId={`data-table-row-${i}-${groupIndex ?? 0}`}
           hoverable={hoverable}
           as={onRowClicked ? Link : 'div'}
           to={onRowClicked && (() => onRowClicked(row))}
@@ -149,7 +150,12 @@ export const DataTable = <T extends Record<string, any>>({
           tabIndex={onRowClicked ? 0 : undefined}
         >
           {columns.map((col, index) => (
-            <DataCol variant="body2" align={col?.align} key={index}>
+            <DataCol
+              data-testId={`data-table-col-${i}-${groupIndex ?? 0}-${col.header}`}
+              variant="body2"
+              align={col?.align}
+              key={index}
+            >
               {col.cell(row, i)}
             </DataCol>
           ))}
@@ -157,7 +163,7 @@ export const DataTable = <T extends Record<string, any>>({
       ))}
       {/* summary row is not included in sorting */}
       {summary && (
-        <DataRow>
+        <DataRow data-testId={`row-summary-${groupIndex ?? 0}`}>
           {columns.map((col, i) => (
             <DataCol variant="body2" key={`${col.sortKey}-${i}`} align={col?.align}>
               {col.cell(summary, i)}

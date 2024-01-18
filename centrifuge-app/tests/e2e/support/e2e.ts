@@ -39,7 +39,10 @@ Cypress.Commands.add('connectWallet', (config) => {
 
 Cypress.Commands.add('confirmTransaction', () => {
   cy.confirmMetamaskTransaction()
-  cy.contains('Transaction successful', { timeout: 100000 }).should('exist')
+  cy.contains('Transaction pending').should('exist')
+  cy.contains('Transaction pending', { timeout: 100000 }).should('not.exist')
+  cy.contains('Transaction failed').should('not.exist')
+  cy.contains('Transaction successful').should('exist')
 })
 
 declare global {

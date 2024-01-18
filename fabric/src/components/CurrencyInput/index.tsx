@@ -105,7 +105,7 @@ export const CurrencyInput_DEPRECATED: React.FC<CurrencyInputProps_DEPRECATED> =
         <Shelf justifyContent="space-between">
           <span>{secondaryLabel}</span>
           {onSetMax && (
-            <StyledMaxButton onClick={onSetMax} disabled={disabled}>
+            <StyledMaxButton onClick={onSetMax} disabled={disabled} aria-label="Set max amount">
               <Text variant="label3" lineHeight={1.5} color="inherit">
                 MAX
               </Text>
@@ -218,7 +218,7 @@ export function CurrencyInput({
           symbol={currency}
           action={
             onSetMax && (
-              <InputAction onClick={onSetMax} disabled={disabled}>
+              <InputAction aria-label="Set max amount" onClick={onSetMax} disabled={disabled}>
                 Max
               </InputAction>
             )

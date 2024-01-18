@@ -28,6 +28,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       return synpress(on, config)
     },
+    pageLoadTimeout: 30000,
     supportFile: 'tests/e2e/support/e2e.ts',
     specPattern: 'tests/e2e/specs/**/*.cy.ts',
   },
