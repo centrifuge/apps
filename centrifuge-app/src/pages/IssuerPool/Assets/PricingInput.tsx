@@ -40,14 +40,6 @@ export function PricingInput({ poolId }: { poolId: string }) {
               />
             )}
           </Field>
-          <FieldWithErrorMessage
-            as={NumberInput_DEPRECATED}
-            label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
-            placeholder={0}
-            rightElement="%"
-            name="pricing.maxPriceVariation"
-            validate={validate.maxPriceVariation}
-          />
         </>
       )}
 

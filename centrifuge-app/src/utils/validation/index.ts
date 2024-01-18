@@ -1,4 +1,4 @@
-import { CurrencyBalance, ExternalPricingInfo } from '@centrifuge/centrifuge-js'
+import { ExternalPricingInfo } from '@centrifuge/centrifuge-js'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
@@ -44,17 +44,20 @@ export const settlementPrice = (err?: CustomError) => (val?: any) => {
   return regex.test(val) ? '' : getError('Value must be in the format of (1-3).(0-8) digits', err, val)
 }
 
+const maxVariationFraction = Dec(99.99) // 9999%
+
 export const maxPriceVariance = (pricing: ExternalPricingInfo, err?: CustomError) => (val?: any) => {
-  if (pricing.oracle.value.isZero()) return ''
+  let latestOraclePrice = pricing.oracle[0]
+  pricing.oracle.forEach((price) => {
+    if (price.timestamp > latestOraclePrice.timestamp) {
+      latestOraclePrice = price
+    }
+  })
+  if (latestOraclePrice.value.isZero()) return ''
+  const oracleValue = latestOraclePrice.value.toDecimal()
+  const maxVariation = oracleValue.mul(maxVariationFraction)
 
-  const maxVariation = new CurrencyBalance(pricing.oracle.value, 18)
-    .toDecimal()
-    .mul(pricing.maxPriceVariation.toDecimal())
-
-  if (
-    Dec(val).gt(new CurrencyBalance(pricing.oracle.value, 18).toDecimal().add(maxVariation)) ||
-    Dec(val).lt(new CurrencyBalance(pricing.oracle.value, 18).toDecimal().sub(maxVariation))
-  ) {
+  if (Dec(val).gt(oracleValue.add(maxVariation)) || Dec(val).lt(oracleValue.sub(maxVariation))) {
     return `Settlement price exceeds max price variation of ${formatPercentage(pricing.maxPriceVariation.toPercent())}`
   }
 

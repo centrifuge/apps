@@ -422,7 +422,8 @@ export type ExternalPricingInfo = {
   oracle: {
     value: CurrencyBalance
     timestamp: number
-  }
+    account: string
+  }[]
   notional: CurrencyBalance
   interestRate: Rate
 }
@@ -2862,15 +2863,25 @@ export function getPoolsModule(inst: Centrifuge) {
           {
             timestamp: number
             value: CurrencyBalance
-          }
+            account: string
+          }[]
         > = {}
-        oracles.forEach(() => {
-          // TODO: Fix oracles
-          // const { timestamp, value } = oracle[1].toPrimitive() as any
-          // oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
-          //   timestamp,
-          //   value: new CurrencyBalance(value, currency.decimals),
-          // }
+        oracles.forEach((oracle) => {
+          const [value, timestamp] = oracle[1].toPrimitive() as any
+          const keys = oracle[0].toHuman() as any
+          const isin = keys[1].Isin
+          const account = keys[0].system?.Signed
+          if (!isin || !account) return
+          const entry = {
+            timestamp,
+            value: new CurrencyBalance(value, 18),
+            account: addressToHex(account),
+          }
+          if (oraclePrices[isin]) {
+            oraclePrices[isin].push(entry)
+          } else {
+            oraclePrices[isin] = [entry]
+          }
         })
 
         const activeLoansPortfolio: Record<
@@ -2934,10 +2945,13 @@ export function getPoolsModule(inst: Centrifuge) {
                     Isin: pricingInfo.priceId.isin,
                     maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
                     maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
-                    oracle: oraclePrices[pricingInfo.priceId.isin] || {
-                      value: new CurrencyBalance(0, currency.decimals),
-                      timestamp: 0,
-                    },
+                    oracle: oraclePrices[pricingInfo.priceId.isin] || [
+                      {
+                        value: new CurrencyBalance(0, 18),
+                        timestamp: 0,
+                        account: '',
+                      },
+                    ],
                     outstandingQuantity:
                       'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
                         ? new CurrencyBalance(info.pricing.external.outstandingQuantity, 18)

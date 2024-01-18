@@ -1,4 +1,4 @@
-import { CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
+import { addressToHex, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
 import {
   useAddress,
   useCentrifugeApi,
@@ -8,11 +8,13 @@ import {
 import { Box, Button, Checkbox, CurrencyInput, Select, Shelf } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { map } from 'rxjs'
 import { DataTable } from '../components/DataTable'
 import { LayoutBase } from '../components/LayoutBase'
 import { LayoutSection } from '../components/LayoutBase/LayoutSection'
 import { PageSection } from '../components/PageSection'
 import { usePool, usePoolMetadata, usePools } from '../utils/usePools'
+import { settlementPrice } from '../utils/validation'
 import { isExternalLoan } from './Loan/utils'
 
 export default function OracleUpdatePage() {
@@ -32,10 +34,9 @@ type FeedItem = FormValues['feed'][0]
 function OracleUpdate() {
   const address = useAddress('substrate')
   const [poolId, setPoolId] = React.useState('')
-  console.log('poolId', poolId)
+  const { poolsByFeeder } = usePoolFeeders()
   const pools = usePools()
   const pool = usePool(poolId, false)
-  console.log('pool', pool)
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     enabled: !!poolId && !!pool,
   })
@@ -50,13 +51,10 @@ function OracleUpdate() {
     'Set oracle prices',
     (cent) => (args: [values: FormValues], options) => {
       const [values] = args
-      console.log('execute', values)
       const batch = [
         ...values.feed
           .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
-          .map((f) =>
-            api.tx.oraclePriceFeed.feed({ Isin: f.Isin }, CurrencyBalance.fromFloat(f.value, pool!.currency.decimals))
-          ),
+          .map((f) => api.tx.oraclePriceFeed.feed({ Isin: f.Isin }, CurrencyBalance.fromFloat(f.value, 18))),
         api.tx.loans.updatePortfolioValuation(poolId),
       ]
       if (values.closeEpoch) {
@@ -67,11 +65,18 @@ function OracleUpdate() {
     }
   )
 
-  console.log('allLoans', allLoans, loans)
-
   const initialValues = React.useMemo(
     () => ({
-      feed: loans?.map((l) => ({ id: l.id, value: '' as any, Isin: l.pricing.Isin })) ?? [],
+      feed:
+        loans?.map((l) => {
+          let latestOraclePrice = l.pricing.oracle[0]
+          l.pricing.oracle.forEach((price) => {
+            if (price.timestamp > latestOraclePrice.timestamp) {
+              latestOraclePrice = price
+            }
+          })
+          return { id: l.id, value: latestOraclePrice.value.toFloat(), Isin: l.pricing.Isin }
+        }) ?? [],
       closeEpoch: false,
     }),
     [loans]
@@ -80,7 +85,6 @@ function OracleUpdate() {
   const form = useFormik<FormValues>({
     initialValues,
     onSubmit(values, actions) {
-      console.log('submit')
       execute([values])
       actions.setSubmitting(false)
     },
@@ -102,14 +106,18 @@ function OracleUpdate() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [poolId])
 
-  console.log('form.values.feed', form.values.feed[1])
+  const allowedPoolIds = address ? poolsByFeeder[address] : undefined
 
   return (
     <FormikProvider value={form}>
       <Form>
         <LayoutSection title="Update oracle values" pt={5}>
           <Select
-            options={pools?.map((p) => ({ label: <PoolName poolId={p.id} />, value: p.id })) ?? []}
+            options={
+              pools
+                ?.filter((p) => allowedPoolIds?.includes(p.id))
+                ?.map((p) => ({ label: <PoolName poolId={p.id} />, value: p.id })) ?? []
+            }
             value={poolId}
             placeholder="Select pool"
             onChange={(e) => setPoolId(e.target.value)}
@@ -132,17 +140,14 @@ function OracleUpdate() {
                 align: 'left',
                 header: 'Price',
                 cell: (row: FeedItem, index) => (
-                  <Field name={`feed.${index}.value`}>
+                  <Field name={`feed.${index}.value`} validate={settlementPrice()}>
                     {({ field, meta, form }: FieldProps) => (
-                      console.log('field.value', field.value),
-                      (
-                        <CurrencyInput
-                          {...field}
-                          errorMessage={meta.touched ? meta.error : undefined}
-                          currency={pool?.currency.symbol}
-                          onChange={(value) => form.setFieldValue(`feed.${index}.value`, value)}
-                        />
-                      )
+                      <CurrencyInput
+                        {...field}
+                        errorMessage={meta.touched ? meta.error : undefined}
+                        currency={pool?.currency.symbol}
+                        onChange={(value) => form.setFieldValue(`feed.${index}.value`, value)}
+                      />
                     )}
                   </Field>
                 ),
@@ -169,4 +174,47 @@ function PoolName({ poolId }: { poolId: string }) {
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   return metadata?.pool?.name || poolId
+}
+
+function usePoolFeeders() {
+  const api = useCentrifugeApi()
+  const [storedInfo] = useCentrifugeQuery(['oracleCollectionInfos'], () =>
+    api.query.oraclePriceCollection.collectionInfo.entries().pipe(
+      map((data) => {
+        const poolsByFeeder: Record<string, string[]> = {}
+        const feedersByPool: Record<string, { minFeeders: number; valueLifetime: number; feeders: string[] }> = {}
+        data.forEach(([keys, value]) => {
+          const poolId = (keys.toHuman() as string[])[0].replace(/\D/g, '')
+          const info = value.toPrimitive() as any
+          const feeders = info.feeders
+            .filter((f: any) => !!f.system.signed)
+            .map((f: any) => addressToHex(f.system.signed)) as string[]
+
+          feeders.forEach((feeder) => {
+            if (poolsByFeeder[feeder]) {
+              poolsByFeeder[feeder].push(poolId)
+            } else {
+              poolsByFeeder[feeder] = [poolId]
+            }
+          })
+
+          feedersByPool[poolId] = {
+            valueLifetime: info.valueLifetime as number,
+            minFeeders: info.minFeeders as number,
+            feeders,
+          }
+        })
+
+        return {
+          poolsByFeeder,
+          feedersByPool,
+        }
+      })
+    )
+  )
+
+  return {
+    poolsByFeeder: storedInfo?.poolsByFeeder ?? {},
+    feedersByPool: storedInfo?.feedersByPool ?? {},
+  }
 }

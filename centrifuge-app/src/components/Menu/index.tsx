@@ -4,6 +4,7 @@ import {
   IconGlobe,
   IconInvestments,
   IconNft,
+  IconPools,
   IconSwitch,
   IconWallet,
   Menu as Panel,
@@ -108,7 +109,7 @@ export function Menu() {
 
       {showOracle && (
         <PageLink to="/oracle-update" stacked={!isLarge}>
-          <IconSwitch />
+          <IconPools />
           Oracle update
         </PageLink>
       )}
