@@ -2825,6 +2825,7 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
+            api.events.loans.DebtTransferred.is(event) ||
             api.events.loans.WrittenOff.is(event) ||
             api.events.loans.Closed.is(event) ||
             api.events.loans.PortfolioValuationUpdated.is(event)
