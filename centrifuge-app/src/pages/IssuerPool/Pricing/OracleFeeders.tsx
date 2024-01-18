@@ -77,12 +77,6 @@ export function OracleFeeders({ poolId }: { poolId: string }) {
       execute([values], { account: admin })
       actions.setSubmitting(false)
     },
-    validate(values) {
-      const errors: any = {}
-      if (values.feeders.length < values.minFeeders) {
-        errors.feeders = 'Not enough feeders'
-      }
-    },
   })
 
   React.useEffect(() => {
