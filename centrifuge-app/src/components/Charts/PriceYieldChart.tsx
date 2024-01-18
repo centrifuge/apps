@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
 import { formatBalance } from '../../utils/formatting'
-import { useDailyTrancheStates, usePool } from '../../utils/usePools'
+import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { Spinner } from '../Spinner'
 import { CustomizedTooltip } from './Tooltip'
 
@@ -13,14 +13,20 @@ type ChartData = {
   tokenPrice: number
 }
 
-const PriceYieldChart: React.FC<{
+function PriceYieldChart({
+  trancheId,
+  onDataLoaded = () => {},
+  renderFallback = true,
+}: {
   trancheId: string
+  poolId: string
   onDataLoaded?: (b: boolean) => void
   renderFallback?: boolean
-}> = ({ trancheId, onDataLoaded = () => {}, renderFallback = true }) => {
+}) {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
-  const trancheStates = useDailyTrancheStates(trancheId)
+  const { trancheStates: tranches } = useDailyPoolStates(poolId, undefined, undefined, false) || {}
+  const trancheStates = tranches?.[trancheId]
   const pool = usePool(poolId)
 
   const data: ChartData[] = React.useMemo(() => {

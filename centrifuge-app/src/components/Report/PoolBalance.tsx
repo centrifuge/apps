@@ -15,7 +15,7 @@ import { UserFeedback } from './UserFeedback'
 export function PoolBalance({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
 
-  const dailyPoolStates = useDailyPoolStates(pool.id, startDate, endDate)
+  const { poolStates: dailyPoolStates } = useDailyPoolStates(pool.id, startDate, endDate) || {}
   const monthlyPoolStates = useMonthlyPoolStates(pool.id, startDate, endDate)
   const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
 

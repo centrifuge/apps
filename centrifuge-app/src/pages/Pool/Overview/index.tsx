@@ -68,6 +68,7 @@ export function PoolDetailOverview() {
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
+        poolId: tranche.poolId,
         apr: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
