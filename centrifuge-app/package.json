@@ -20,7 +20,7 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "test:ci": "vitest run",
-    "preview": "vite preview --host 0.0.0.0",
+    "preview": "vite preview",
     "e2e:run": "synpress run -cf synpress.config.ts -s tests/e2e/specs/invest.cy.ts",
     "e2e:run:ci": "synpress run --record -cf synpress.config.ts",
     "e2e:open": "synpress open -cf synpress.config.ts"
@@ -70,7 +70,6 @@
     "@typescript-eslint/parser": "5.30.5",
     "@vitejs/plugin-react": "^2",
     "babel-plugin-styled-components": "^2.0.7",
-    "cross-env": "^7.0.3",
     "esbuild-darwin-64": "^0.14.49",
     "esbuild-darwin-arm64": "^0.14.49",
     "eslint": "7.32.0",

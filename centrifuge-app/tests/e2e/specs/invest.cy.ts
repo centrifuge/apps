@@ -1,7 +1,5 @@
 import pool from '../data/pool.json'
 
-// stub all network requests that are not needed
-
 describe('Invest flows', () => {
   before(() => {
     cy.renameMetamaskAccount('Pool Admin') // rename account to Pool Admin

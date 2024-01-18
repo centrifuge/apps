@@ -1,10 +1,8 @@
 const tsconfigJson = require('./tsconfig.json')
-const path = require('path')
-const synpressPath = path.join(process.cwd(), '/node_modules/@synthetixio')
 
 module.exports = {
   ignorePatterns: ['node_modules', 'build', '.env', ...(tsconfigJson.exclude || [])],
-  extends: ['react-app', 'react-app/jest', `${synpressPath}/.eslintrc.js`],
+  extends: ['react-app', 'react-app/jest'],
   parserOptions: {
     sourceType: 'module',
   },
