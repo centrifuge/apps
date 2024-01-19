@@ -87,10 +87,10 @@ export function Root() {
                 showAdvancedAccounts={debugState.showAdvancedAccounts as any}
                 showTestNets={debugState.showTestNets as any}
               >
-                <ExpiringCFGRewardsBanner />
                 <OnboardingAuthProvider>
                   <OnboardingProvider>
                     <DebugFlags onChange={(state) => setDebugState(state)}>
+                      <ExpiringCFGRewardsBanner />
                       <TransactionProvider>
                         <TransactionToasts />
                         <LoadBoundary>
