@@ -1,11 +1,14 @@
 name: Synpress tests
 
 on:
-  pull_request_review:
-    types: [submitted]
+  workflow_run:
+    workflows: ['Deploy all apps'] # Name of the workflow in deploy_all.yml
+    types:
+      - completed
 
 jobs:
   cypress-run:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'cent-app/synpress-testing-setup' }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
