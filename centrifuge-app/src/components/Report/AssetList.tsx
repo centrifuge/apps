@@ -14,14 +14,14 @@ import { UserFeedback } from './UserFeedback'
 const headers = [
   'ID',
   'Status',
-  'Collateral value',
+  // 'Collateral value',
   'Outstanding',
   'Total financed',
   'Total repaid',
   'Financing date',
   'Maturity date',
   'Interest rate',
-  'Advance rate',
+  // 'Advance rate',
   // 'PD',
   // 'LGD',
   // 'Discount rate',
@@ -49,9 +49,9 @@ export function AssetList({ pool }: { pool: Pool }) {
         value: [
           loan.id,
           loan.status === 'Created' ? 'New' : loan.status,
-          'value' in loan.pricing
-            ? formatBalanceAbbreviated(loan.pricing.value.toDecimal(), pool.currency.symbol)
-            : '-',
+          // 'value' in loan.pricing
+          //   ? formatBalanceAbbreviated(loan.pricing.value.toDecimal(), pool.currency.symbol)
+          //   : '-',
           'outstandingDebt' in loan
             ? formatBalanceAbbreviated(loan.outstandingDebt.toDecimal(), pool.currency.symbol)
             : '-',
@@ -62,7 +62,7 @@ export function AssetList({ pool }: { pool: Pool }) {
           'originationDate' in loan ? formatDate(loan.originationDate) : '-',
           formatDate(loan.pricing.maturityDate),
           'interestRate' in loan.pricing ? formatPercentage(loan.pricing.interestRate.toPercent()) : '-',
-          'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
+          // 'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
           // 'probabilityOfDefault' in loan.pricing
           //   ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
           //   : '-',
