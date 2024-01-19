@@ -140,7 +140,7 @@ export function useTinlakePools(suspense = false) {
   })
 }
 export function useTinlakeLoans(poolId: string) {
-  const tinlakePools = useTinlakePools(true)
+  const tinlakePools = useTinlakePools(poolId.startsWith('0x'))
 
   const pool = tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
@@ -177,7 +177,7 @@ export function useTinlakeLoans(poolId: string) {
       })) as TinlakeLoan[]
     },
     {
-      enabled: !!pool && !!poolId && !!poolId.startsWith('0x'),
+      enabled: !!pool && !!poolId && poolId.startsWith('0x'),
       staleTime: Infinity,
       suspense: true,
     }
