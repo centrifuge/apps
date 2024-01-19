@@ -32,7 +32,8 @@ export const primaryButton = css<{ isActive?: boolean; stacked?: boolean }>`
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
-    border-radius: 16px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
   }
 
   svg {

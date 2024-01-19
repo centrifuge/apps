@@ -7,4 +7,12 @@ export const currencies = {
     isPoolCurrency: false,
     isPermissioned: false,
   },
+  wCFG: {
+    decimals: 18,
+    name: 'Wrapped CFG',
+    symbol: 'wCFG',
+    key: 'wCFG',
+    isPoolCurrency: false,
+    isPermissioned: false,
+  },
 }

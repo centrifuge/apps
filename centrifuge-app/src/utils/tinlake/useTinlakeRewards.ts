@@ -4,20 +4,19 @@ import Decimal from 'decimal.js-light'
 import { useQuery } from 'react-query'
 import { combineLatest, map } from 'rxjs'
 import { useAddress } from '../../utils/useAddress'
+import { isEvmAddress } from '../address'
 import { RewardBalance, RewardClaim, RewardDayTotals, RewardsData, UserRewardsData } from './types'
 
 async function getTinlakeUserRewards(ethAddr: string) {
   let rewardBalances: RewardBalance[] = []
 
-  const response = await fetch(
-    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/prod/gn',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: `
+  const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
         query GetRewardBalances($address: String!) {
           rewardBalances(where: {id: $address}) {
             links {
@@ -30,12 +29,11 @@ async function getTinlakeUserRewards(ethAddr: string) {
           }
         }
         `,
-        variables: {
-          address: ethAddr.toLowerCase(),
-        },
-      }),
-    }
-  )
+      variables: {
+        address: ethAddr.toLowerCase(),
+      },
+    }),
+  })
 
   if (response?.ok) {
     const { data } = await response.json()
@@ -69,22 +67,20 @@ async function getTinlakeUserRewards(ethAddr: string) {
 
 export function useTinlakeUserRewards(ethAddr?: string | null) {
   return useQuery(['getTinlakeUserRewards', ethAddr], () => getTinlakeUserRewards(ethAddr!), {
-    enabled: !!ethAddr,
+    enabled: !!ethAddr && isEvmAddress(ethAddr),
   })
 }
 
 async function getTinlakeRewards(): Promise<RewardsData | null> {
   let rewardDayTotals: RewardDayTotals[] = []
 
-  const response = await fetch(
-    'https://api.goldsky.com/api/public/project_clhi43ef5g4rw49zwftsvd2ks/subgraphs/main/prod/gn',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: `
+  const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
         query GetRewardDayTotals {
           rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
             dropRewardRate
@@ -95,9 +91,8 @@ async function getTinlakeRewards(): Promise<RewardsData | null> {
           }
         }
         `,
-      }),
-    }
-  )
+    }),
+  })
 
   if (response?.ok) {
     const { data } = await response.json()
