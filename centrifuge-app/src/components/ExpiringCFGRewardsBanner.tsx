@@ -27,8 +27,8 @@ export const ExpiringCFGRewardsBanner = () => {
       onClose={() => setIsOpen(false)}
       title={
         <Text as="h3" color="textInverted" variant="heading5">
-          Claim your rewards until {formattedExpirationDate} CET. After this day, users will not be able to claim their
-          CFG rewards. Check{' '}
+          Claim your Tinlake Rewards before it is too late. Rewards will expire on {formattedExpirationDate} CET. After
+          the deadline, users will not be able to claim their CFG rewards. Check{' '}
           <Text
             target="_blank"
             as="a"
@@ -40,7 +40,7 @@ export const ExpiringCFGRewardsBanner = () => {
           >
             here
           </Text>{' '}
-          if there are still unclaimed rewards. Read more{' '}
+          if you have unclaimed rewards. Read more about the community vote{' '}
           <Text
             target="_blank"
             as="a"
