@@ -1,4 +1,4 @@
-import { Loan, Pool, Rate } from '@centrifuge/centrifuge-js'
+import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
@@ -14,17 +14,17 @@ import { UserFeedback } from './UserFeedback'
 const headers = [
   'ID',
   'Status',
-  'Collateral value',
+  // 'Collateral value',
   'Outstanding',
   'Total financed',
   'Total repaid',
   'Financing date',
   'Maturity date',
   'Interest rate',
-  'Advance rate',
-  'PD',
-  'LGD',
-  'Discount rate',
+  // 'Advance rate',
+  // 'PD',
+  // 'LGD',
+  // 'Discount rate',
 ]
 
 const columns = headers.map((col, index) => ({
@@ -49,9 +49,9 @@ export function AssetList({ pool }: { pool: Pool }) {
         value: [
           loan.id,
           loan.status === 'Created' ? 'New' : loan.status,
-          'value' in loan.pricing
-            ? formatBalanceAbbreviated(loan.pricing.value.toDecimal(), pool.currency.symbol)
-            : '-',
+          // 'value' in loan.pricing
+          //   ? formatBalanceAbbreviated(loan.pricing.value.toDecimal(), pool.currency.symbol)
+          //   : '-',
           'outstandingDebt' in loan
             ? formatBalanceAbbreviated(loan.outstandingDebt.toDecimal(), pool.currency.symbol)
             : '-',
@@ -62,14 +62,14 @@ export function AssetList({ pool }: { pool: Pool }) {
           'originationDate' in loan ? formatDate(loan.originationDate) : '-',
           formatDate(loan.pricing.maturityDate),
           'interestRate' in loan.pricing ? formatPercentage(loan.pricing.interestRate.toPercent()) : '-',
-          'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
-          'probabilityOfDefault' in loan.pricing
-            ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
-            : '-',
-          'lossGivenDefault' in loan.pricing
-            ? formatPercentage((loan.pricing.lossGivenDefault as Rate).toPercent())
-            : '-',
-          'discountRate' in loan.pricing ? formatPercentage((loan.pricing.discountRate as Rate).toPercent()) : '-',
+          // 'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
+          // 'probabilityOfDefault' in loan.pricing
+          //   ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
+          //   : '-',
+          // 'lossGivenDefault' in loan.pricing
+          //   ? formatPercentage((loan.pricing.lossGivenDefault as Rate).toPercent())
+          //   : '-',
+          // 'discountRate' in loan.pricing ? formatPercentage((loan.pricing.discountRate as Rate).toPercent()) : '-',
         ],
         heading: false,
       }))
