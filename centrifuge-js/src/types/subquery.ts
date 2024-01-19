@@ -98,12 +98,12 @@ export type SubqueryTrancheBalances = {
   }
   poolId: string
   trancheId: string
-  sumInvestOrderedAmount: string
-  sumInvestUncollectedAmount: string
-  sumInvestCollectedAmount: string
-  sumRedeemOrderedAmount: string
-  sumRedeemUncollectedAmount: string
-  sumRedeemCollectedAmount: string
+  pendingInvestCurrency: string
+  claimableTrancheTokens: string
+  sumClaimedTrancheTokens: string
+  pendingRedeemTrancheTokens: string
+  claimableCurrency: string
+  sumClaimedCurrency: string
 }
 
 export type SubqueryCurrencyBalances = {
