@@ -1,4 +1,4 @@
-import { Loan, Pool, Rate } from '@centrifuge/centrifuge-js'
+import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
@@ -22,9 +22,9 @@ const headers = [
   'Maturity date',
   'Interest rate',
   'Advance rate',
-  'PD',
-  'LGD',
-  'Discount rate',
+  // 'PD',
+  // 'LGD',
+  // 'Discount rate',
 ]
 
 const columns = headers.map((col, index) => ({
@@ -63,13 +63,13 @@ export function AssetList({ pool }: { pool: Pool }) {
           formatDate(loan.pricing.maturityDate),
           'interestRate' in loan.pricing ? formatPercentage(loan.pricing.interestRate.toPercent()) : '-',
           'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
-          'probabilityOfDefault' in loan.pricing
-            ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
-            : '-',
-          'lossGivenDefault' in loan.pricing
-            ? formatPercentage((loan.pricing.lossGivenDefault as Rate).toPercent())
-            : '-',
-          'discountRate' in loan.pricing ? formatPercentage((loan.pricing.discountRate as Rate).toPercent()) : '-',
+          // 'probabilityOfDefault' in loan.pricing
+          //   ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
+          //   : '-',
+          // 'lossGivenDefault' in loan.pricing
+          //   ? formatPercentage((loan.pricing.lossGivenDefault as Rate).toPercent())
+          //   : '-',
+          // 'discountRate' in loan.pricing ? formatPercentage((loan.pricing.discountRate as Rate).toPercent()) : '-',
         ],
         heading: false,
       }))
