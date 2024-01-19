@@ -280,7 +280,7 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
             switchMap((execTx) => {
               const tx = api.tx.utility.batchAll(
                 [
-                  ...execTx.method.args[0],
+                  execTx,
                   orders?.length
                     ? api.tx.utility.batch(
                         orders
