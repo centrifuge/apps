@@ -1,6 +1,7 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
+import { useAddress } from './useAddress'
 
 export function useDomainRouters(suspense?: boolean) {
   const [data] = useCentrifugeQuery(['domainRouters'], (cent) => cent.liquidityPools.getDomainRouters(), { suspense })
@@ -106,8 +107,9 @@ export function useLPEvents(poolId: string, trancheId: string, lpAddress?: strin
 
 export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lpIndex?: number) {
   const {
-    evm: { chainId, getProvider, selectedAddress },
+    evm: { chainId, getProvider },
   } = useWallet()
+  const address = useAddress('evm')
   const cent = useCentrifuge()
   const { data: domains } = useActiveDomains(poolId)
   const managerAddress = domains?.find((d) => d.chainId === chainId)?.managerAddress
@@ -116,10 +118,10 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   const lp = lps?.[lpIndex ?? 0]
 
   const query = useQuery(
-    ['lpInvestment', chainId, lp?.lpAddress, selectedAddress],
+    ['lpInvestment', chainId, lp?.lpAddress, address],
     async () => ({
       ...(await cent.liquidityPools.getLiquidityPoolInvestment(
-        [selectedAddress!, managerAddress!, lp!.lpAddress, lp!.currencyAddress],
+        [address!, managerAddress!, lp!.lpAddress, lp!.currencyAddress],
         {
           rpcProvider: getProvider(chainId!),
         }
@@ -128,7 +130,7 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
     }),
 
     {
-      enabled: !!lp && !!selectedAddress,
+      enabled: !!lp && !!address,
     }
   )
 
