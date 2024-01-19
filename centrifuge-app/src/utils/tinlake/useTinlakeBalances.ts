@@ -1,21 +1,38 @@
-import { AccountCurrencyBalance, AccountTokenBalance, CurrencyBalance, TokenBalance } from '@centrifuge/centrifuge-js'
+import {
+  AccountCurrencyBalance,
+  AccountTokenBalance,
+  CurrencyBalance,
+  evmMulticall,
+  EvmMulticallCall,
+  TokenBalance,
+} from '@centrifuge/centrifuge-js'
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
+import { JsonRpcProvider } from '@ethersproject/providers'
 import { useQuery } from 'react-query'
-import { useAddress } from '../useAddress'
+import { ethConfig } from '../../config'
 import { currencies } from './currencies'
-import { Call, multicall } from './multicall'
 import { TinlakePool, useTinlakePools } from './useTinlakePools'
 
 export function useTinlakeBalances(address?: string) {
-  const addr = useAddress('evm') || address
+  const {
+    evm: { getProvider },
+  } = useWallet()
   const { data } = useTinlakePools()
-  return useQuery(['tinlakeBalances', addr, !!data?.pools], () => getBalances(data?.pools!, addr!), {
-    enabled: !!addr && !!data?.pools,
-  })
+  return useQuery(
+    ['tinlakeBalances', address, !!data?.pools],
+    () => getBalances(data?.pools!, address!, getProvider(ethConfig.chainId)),
+    {
+      enabled: !!address && !!data?.pools,
+      retry: false,
+    }
+  )
 }
 
-async function getBalances(pools: TinlakePool[], address: string) {
-  const calls: Call[] = []
+const WCFG_ADDRESS = '0xc221b7e65ffc80de234bbb6667abdd46593d34f0'
+
+async function getBalances(pools: TinlakePool[], address: string, provider: JsonRpcProvider) {
+  const calls: EvmMulticallCall[] = []
   const toTokenBalance = (val: BigNumber) => new TokenBalance(val.toString(), 18)
   const toCurrencyBalance = (val: BigNumber) => new CurrencyBalance(val.toString(), 18)
 
@@ -25,12 +42,12 @@ async function getBalances(pools: TinlakePool[], address: string) {
     calls.push(
       {
         target: pool.addresses.JUNIOR_TOKEN,
-        call: ['balanceOf(address)(uint256)', address],
+        call: ['function balanceOf(address) view returns (uint256)', address],
         returns: [[`tokens.${pool.id}.junior`, toTokenBalance]],
       },
       {
         target: pool.addresses.SENIOR_TOKEN,
-        call: ['balanceOf(address)(uint256)', address],
+        call: ['function balanceOf(address) view returns (uint256)', address],
         returns: [[`tokens.${pool.id}.senior`, toTokenBalance]],
       }
     )
@@ -38,14 +55,21 @@ async function getBalances(pools: TinlakePool[], address: string) {
     if (!seenCurrencies.has(pool.addresses.TINLAKE_CURRENCY.toLowerCase())) {
       calls.push({
         target: pool.addresses.TINLAKE_CURRENCY,
-        call: ['balanceOf(address)(uint256)', address],
+        call: ['function balanceOf(address) view returns (uint256)', address],
         returns: [[`currencies.${pool.addresses.TINLAKE_CURRENCY}`, toCurrencyBalance]],
       })
       seenCurrencies.add(pool.addresses.TINLAKE_CURRENCY)
     }
   })
 
-  const multicallData = await multicall<State>(calls)
+  calls.push({
+    target: WCFG_ADDRESS,
+    call: ['function balanceOf(address) view returns (uint256)', address],
+    returns: [[`currencies.${WCFG_ADDRESS}`, toCurrencyBalance]],
+    allowFailure: true,
+  })
+
+  const multicallData = await evmMulticall<State>(calls, { rpcProvider: provider })
 
   const balances = {
     tranches: [] as AccountTokenBalance[],
@@ -64,10 +88,10 @@ async function getBalances(pools: TinlakePool[], address: string) {
     })
   })
 
-  Object.values(multicallData.currencies).forEach((balance) => {
+  Object.entries(multicallData.currencies).forEach(([currencyAddress, balance]) => {
     balances.currencies.push({
       balance,
-      currency: currencies.DAI,
+      currency: currencyAddress === WCFG_ADDRESS ? currencies.wCFG : currencies.DAI,
     })
   })
 

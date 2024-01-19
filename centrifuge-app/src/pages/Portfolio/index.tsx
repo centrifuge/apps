@@ -22,7 +22,7 @@ export default function PortfolioPage() {
 function Portfolio() {
   const address = useAddress()
   const transactions = useTransactionsByAddress(address)
-  const { showNetworks } = useWallet()
+  const { showNetworks, connectedNetwork } = useWallet()
 
   return (
     <>
@@ -38,7 +38,7 @@ function Portfolio() {
         <CardPortfolioValue address={address} />
       </LayoutSection>
 
-      {transactions?.investorTransactions.length === 0 ? (
+      {transactions?.investorTransactions.length === 0 && connectedNetwork === 'centrifuge' ? (
         <LayoutSection>
           <Stack maxWidth="700px" gap={2}>
             <Text variant="body2">

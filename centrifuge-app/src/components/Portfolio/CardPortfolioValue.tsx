@@ -5,8 +5,8 @@ import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useTransactionsByAddress } from '../../utils/usePools'
+import { useHoldings } from './Holdings'
 import { PortfolioValue } from './PortfolioValue'
-import { usePortfolioTokens } from './usePortfolio'
 
 const RangeFilterButton = styled(Stack)`
   &:hover {
@@ -22,17 +22,14 @@ const rangeFilters = [
 ] as const
 
 export function CardPortfolioValue({ address }: { address?: string }) {
-  const portfolioTokens = usePortfolioTokens(address)
+  const tokens = useHoldings(address)
   const transactions = useTransactionsByAddress(address)
 
   const { colors } = useTheme()
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
 
-  const currentPortfolioValue = portfolioTokens.reduce(
-    (sum, token) => sum.add(token.position.mul(token.tokenPrice.toDecimal())),
-    Dec(0)
-  )
+  const currentPortfolioValue = tokens.reduce((sum, token) => sum.add(token.position.mul(token.tokenPrice)), Dec(0))
 
   const balanceProps = {
     as: 'strong',
@@ -78,7 +75,7 @@ export function CardPortfolioValue({ address }: { address?: string }) {
             </Shelf>
           </Shelf>
         </Stack>
-        {transactions?.investorTransactions.length === 0 || !address ? null : (
+        {address && transactions?.investorTransactions.length ? (
           <>
             <Stack gap={1}>
               <Shelf justifyContent="flex-end" pr="20px">
@@ -106,7 +103,7 @@ export function CardPortfolioValue({ address }: { address?: string }) {
               <PortfolioValue rangeValue={range.value} address={address} />
             </Box>
           </>
-        )}
+        ) : null}
       </Box>
     </Box>
   )
