@@ -128,18 +128,19 @@ const CENTRIFUGE: EnvironmentConfig = {
 }
 
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
+const onfinalityKey = import.meta.env.REACT_APP_ONFINALITY_KEY
 
 const goerliConfig = {
+  rpcUrl: `https://eth-goerli.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
   chainId: 5,
-  rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
   poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://goerli.etherscan.io',
 }
 const mainnetConfig = {
+  rpcUrl: `https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
   chainId: 1,
-  rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
   poolsHash: 'QmNvauf8E6TkUiyF1ZgtYtntHz335tCswKp2uhBH1fiui1', // TODO: add registry to config and fetch poolHash
