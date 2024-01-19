@@ -2511,6 +2511,10 @@ export function getPoolsModule(inst: Centrifuge) {
             }) {
             nodes {
               accountId
+              account {
+                chainId
+                evmAddress
+              }
               pendingInvestCurrency
               claimableTrancheTokens
               sumClaimedTrancheTokens
@@ -2540,11 +2544,6 @@ export function getPoolsModule(inst: Centrifuge) {
         )
       })
     )
-
-    // account {
-    //   chainId
-    //   evmAddress
-    // }
 
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
