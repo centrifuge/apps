@@ -28,7 +28,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
   const { data: investment, refetch: refetchInvestment } = useTinlakeInvestments(poolId, address)
-  const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances()
+  const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances(address)
   const { data: nativeBalance, refetch: refetchBalance, isLoading: isBalanceLoading } = useNativeBalance()
   const { data: permissions, isLoading: isPermissionsLoading } = useTinlakePermissions(poolId, address)
   const trancheInvestment = investment?.[seniority]
