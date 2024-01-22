@@ -108,7 +108,7 @@ const data = [
     pendingFees: Dec(0),
     receivingAddress: '0x1234...5678',
     action: (
-      <StyledLink to={`?charge=priorityFee`}>
+      <StyledLink to={`?charge=priority`}>
         <Text variant="body3">Charge</Text>
       </StyledLink>
     ),
@@ -121,7 +121,7 @@ const data = [
     pendingFees: Dec(0),
     receivingAddress: '0x1234...5678',
     action: (
-      <StyledLink to={`?charge=priorityFee`}>
+      <StyledLink to={`?charge=standard`}>
         <Text variant="body3">Charge</Text>
       </StyledLink>
     ),
@@ -143,7 +143,7 @@ export function PoolDetailOverview() {
   React.useEffect(() => {
     if (drawer === 'edit') {
       setIsEditDrawerOpen(true)
-    } else if (drawer === 'priorityFee' || drawer === 'standardFee') {
+    } else if (drawer === 'priority' || drawer === 'standard') {
       setIsChargeDrawerOpen(true)
     }
   }, [drawer])
