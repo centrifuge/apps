@@ -220,6 +220,7 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
               {({ field, meta, form }: FieldProps) => (
                 <CurrencyInput
                   {...field}
+                  id="amount"
                   size={0}
                   placeholder="0.00"
                   label="Amount"
