@@ -1,6 +1,9 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, CurrencyMetadata, Pool } from '@centrifuge/centrifuge-js'
 import {
   useCentrifuge,
+  useCentrifugeApi,
+  useCentrifugeConsts,
+  useCentrifugeQuery,
   useEvmNativeBalance,
   useEvmNativeCurrency,
   useEvmProvider,
@@ -8,7 +11,9 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
+import { map } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
@@ -25,7 +30,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const {
     evm: { isSmartContractWallet },
   } = useWallet()
-
+  const consts = useCentrifugeConsts()
   const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
   const evmNativeCurrency = useEvmNativeCurrency()
   const centOrder = usePendingCollect(poolId, trancheId, centAddress)
@@ -64,6 +69,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const isCalculatingOrders = pool.epoch.status !== 'ongoing'
 
   const collectType = currencyToCollect.gt(0) ? 'redeem' : investToCollect.gt(0) ? 'invest' : null
+
+  const assetPairMinOrder = useAssetPair(pool.currency, lpInvest?.currency)
+  const minOrder = max(assetPairMinOrder?.toDecimal() ?? Dec(0), consts.orderBook.minFulfillment.toDecimal())
 
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrder)
   const decreaseInvest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.decreaseInvestOrder)
@@ -143,15 +151,13 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     isFirstInvestment: centOrder?.submittedAt === 0 && centOrder.investCurrency.isZero(),
     nativeCurrency: evmNativeCurrency,
     trancheCurrency: tranche.currency,
-    poolCurrency: lpInvest && {
-      decimals: lpInvest.currencyDecimals,
-      symbol: lpInvest.currencySymbol,
-    },
+    poolCurrency: lpInvest?.currency,
     capacity: tranche.capacity.toDecimal(),
     minInitialInvestment: new CurrencyBalance(
       trancheMeta?.minInitialInvestment ?? 0,
       pool.currency.decimals
     ).toDecimal(),
+    minOrder,
     nativeBalance: evmNativeBalance?.toDecimal() ?? Dec(0),
     poolCurrencyBalance: poolCurBalance,
     poolCurrencyBalanceWithPending: poolCurBalanceCombined,
@@ -201,7 +207,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         const connectedCent = cent.connectEvm(evmAddress!, signer)
         const permit = await connectedCent.liquidityPools.signPermit([
           lpInvest.lpAddress,
-          lpInvest.currencyAddress,
+          lpInvest.currency.address,
           assets,
         ])
         console.log('permit', permit)
@@ -222,7 +228,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     ),
     approvePoolCurrency: doAction('approvePoolCurrency', (amount) => [
       lpInvest?.lpAddress,
-      lpInvest?.currencyAddress,
+      lpInvest?.currency.address,
       amount.toString(),
     ]),
     approveTrancheToken: () => {},
@@ -235,4 +241,23 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   }
 
   return <InvestRedeemContext.Provider value={{ state, actions, hooks }}>{children}</InvestRedeemContext.Provider>
+}
+
+function useAssetPair(currency: CurrencyMetadata, otherCurrency?: CurrencyMetadata) {
+  const api = useCentrifugeApi()
+  const [data] = useCentrifugeQuery(
+    ['assetPair', currency.key, otherCurrency?.key],
+    () =>
+      api.query.orderBook.tradingPair(currency.key, otherCurrency!.key).pipe(
+        map((minOrderData) => {
+          return new CurrencyBalance(minOrderData.toPrimitive() as string, otherCurrency!.decimals)
+        })
+      ),
+    { enabled: !!otherCurrency }
+  )
+  return data
+}
+
+function max(...nums: Decimal[]) {
+  return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
 }

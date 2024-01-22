@@ -121,7 +121,7 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
     ['lpInvestment', chainId, lp?.lpAddress, address],
     async () => ({
       ...(await cent.liquidityPools.getLiquidityPoolInvestment(
-        [address!, managerAddress!, lp!.lpAddress, lp!.currencyAddress],
+        [address!, managerAddress!, lp!.lpAddress, lp!.currency.address],
         {
           rpcProvider: getProvider(chainId!),
         }

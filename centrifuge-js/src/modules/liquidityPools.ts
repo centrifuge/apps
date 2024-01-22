@@ -9,7 +9,7 @@ import { TransactionOptions } from '../types'
 import { CurrencyBalance, TokenBalance } from '../utils/BN'
 import { Call, multicall } from '../utils/evmMulticall'
 import * as ABI from './liquidityPools/abi'
-import { CurrencyKey, getCurrencyEvmAddress, getCurrencyLocation } from './pools'
+import { CurrencyKey, CurrencyMetadata, getCurrencyEvmAddress, getCurrencyLocation } from './pools'
 
 const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9'
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -397,19 +397,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
+    const currenciesByLpAddress: Record<string, CurrencyMetadata & { address: string }> = {}
+    lpData.lps?.forEach((lp, i) => {
+      currenciesByLpAddress[lp] = currencies[i]
+    })
+
     const lps = lpData.lps?.filter((lp) => lp !== NULL_ADDRESS)
     if (!lps?.length) return []
 
-    const assetData = await multicall<{ assets?: string[]; share: string }>(
+    const assetData = await multicall<{ share: string }>(
       [
-        ...lps.map(
-          (lpAddress, i) =>
-            ({
-              target: lpAddress,
-              call: ['function asset() view returns (address)'],
-              returns: [[`assets[${i}]`]],
-            } as Call)
-        ),
         {
           target: lps[0],
           call: ['function share() view returns (address)'],
@@ -421,30 +418,18 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    if (!assetData.assets?.length) return []
 
     const currencyData = await multicall<{
-      currencies: { currencySymbol: string; currencyDecimals: number; currencySupportsPermit?: boolean }[]
+      currencies: { currencySupportsPermit?: boolean }[]
       trancheTokenSymbol: string
       trancheTokenDecimals: number
     }>(
       [
-        ...assetData.assets.flatMap(
-          (assetAddress, i) =>
+        ...Object.values(currenciesByLpAddress).flatMap(
+          (asset, i) =>
             [
               {
-                target: assetAddress,
-                call: ['function symbol() view returns (string)'],
-                returns: [[`currencies[${i}].currencySymbol`]],
-              },
-              {
-                target: assetAddress,
-                call: ['function decimals() view returns (uint8)'],
-                returns: [[`currencies[${i}].currencyDecimals`]],
-              },
-              // TODO: Enable again after testing that it works
-              {
-                target: assetAddress,
+                target: asset.address,
                 call: ['function PERMIT_TYPEHASH() view returns (bytes32)'],
                 returns: [
                   [`currencies[${i}].currencySupportsPermit`, (typeHash: string) => typeHash === PERMIT_TYPEHASH],
@@ -471,11 +456,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     const result = lps.map((addr, i) => ({
       lpAddress: addr,
-      currencyAddress: assetData.assets![i],
+      currency: currenciesByLpAddress[addr],
       managerAddress,
       trancheTokenSymbol: currencyData.trancheTokenSymbol,
       trancheTokenDecimals: currencyData.trancheTokenDecimals,
-      ...currencyData.currencies[i],
+      currencySupportsPermit: currencyData.currencies[i].currencySupportsPermit,
     }))
     return result
   }
