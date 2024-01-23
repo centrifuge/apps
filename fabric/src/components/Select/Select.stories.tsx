@@ -1,13 +1,13 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { Select } from '.'
 
 export default {
   title: 'Components/Select',
   component: Select,
-} as ComponentMeta<typeof Select>
+} as Meta<typeof Select>
 
-type SelectStory = ComponentStory<typeof Select>
+type SelectStory = StoryFn<typeof Select>
 const Template: SelectStory = (args) => (
   <Select
     {...args}

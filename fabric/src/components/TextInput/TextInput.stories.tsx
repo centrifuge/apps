@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { DateInput, InputAction, NumberInput, SearchInput, TextAreaInput, TextInput } from '.'
 import { SelectInner } from '../Select'
@@ -7,9 +7,9 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/TextInput',
   component: TextInput,
-} as ComponentMeta<typeof TextInput>
+} as Meta<typeof TextInput>
 
-type TextInputStory = ComponentStory<typeof TextInput>
+type TextInputStory = StoryFn<typeof TextInput>
 const Template: TextInputStory = (args) => (
   <Stack gap={3}>
     <TextInput {...args} label="" secondaryLabel="" />
@@ -80,7 +80,7 @@ Number.args = {
   disabled: false,
 }
 
-type TextAreaStory = ComponentStory<typeof TextAreaInput>
+type TextAreaStory = StoryFn<typeof TextAreaInput>
 const TextAreaTemplate: TextAreaStory = (args) => (
   <Stack gap={3}>
     <TextAreaInput {...args} />
