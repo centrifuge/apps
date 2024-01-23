@@ -80,7 +80,9 @@ const TrancheTokenCard = ({
               <Text variant="body2">{formatPercentage(trancheToken.protection)}</Text>
             </Stack>
             <Stack gap={1}>
-              <Tooltips variant="secondary" type="tokenPrice" />
+              <Text textAlign="left" variant="label2" color="textSecondary">
+                Token price
+              </Text>
               <Text variant="body2">{formatBalance(trancheToken.tokenPrice || 0, trancheToken.symbol, 2, 2)}</Text>
             </Stack>
             <Stack gap={1}>

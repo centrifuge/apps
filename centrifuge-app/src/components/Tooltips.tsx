@@ -258,10 +258,6 @@ export const tooltipText = {
     label: 'T-Bill APR',
     body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
   },
-  tokenPrice: {
-    label: 'Token price',
-    body: '', // TODO: update
-  },
 }
 
 export type TooltipsProps = {
