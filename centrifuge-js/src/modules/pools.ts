@@ -329,6 +329,7 @@ export type Pool = {
   value: CurrencyBalance
   createdAt: string | null
   tranches: Token[]
+  poolFees: ActivePoolFees[] | null
   reserve: {
     max: CurrencyBalance
     available: CurrencyBalance
@@ -630,6 +631,10 @@ export type PoolMetadata = {
       class: 'publicCredit' | 'privateCredit'
       subClass: string
     }
+    poolFees?: {
+      id: number
+      name: string
+    }[]
     newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
       repName: string
@@ -752,6 +757,38 @@ export type Permissions = {
       holder: boolean
     }
   }
+}
+
+export type ActivePoolFees = {
+  type: 'fixed'
+  amounts: {
+    percentOfNav: Rate
+    pending: CurrencyBalance
+  }
+  destination: string
+  id: number
+}
+
+export type ActivePoolFeesData = {
+  amounts: {
+    disbursement: CurrencyBalance
+    feeType: {
+      fixed: {
+        limit: {
+          shareOfPortfolioValuation: string
+        }
+      }
+    }
+    payable: {
+      allPending: null
+    }
+    pending: CurrencyBalance
+  }
+  destination: string
+  editor: {
+    root: null
+  }
+  id: number
 }
 
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
@@ -1765,18 +1802,26 @@ export function getPoolsModule(inst: Centrifuge) {
             api.query.loans.portfolioValuation.entries(),
             api.query.poolSystem.epochExecution.entries(),
             getCurrencies(),
+            api.query.poolFees.activeFees.entries(),
           ]),
-        (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies]) => ({
+        (api, [rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies, activePoolFees]) => ({
           api,
           rawPools,
           rawMetadatas,
           rawNavs,
           rawEpochExecutions,
           currencies,
+          activePoolFees,
         })
       ),
-      switchMap(({ api, rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies }) => {
+      switchMap(({ api, rawPools, rawMetadatas, rawNavs, rawEpochExecutions, currencies, activePoolFees }) => {
         if (!rawPools.length) return of([])
+
+        const poolFeesMap = activePoolFees.reduce((acc, [key, fees]) => {
+          const poolId = formatPoolKey(key as StorageKey<[u32]>)
+          acc[poolId] = fees.toJSON() as unknown as ActivePoolFeesData[]
+          return acc
+        }, {} as Record<string, ActivePoolFeesData[]>)
 
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
@@ -1844,6 +1889,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
             const mappedPools = pools.map((poolObj, poolIndex) => {
               const { data: pool, id: poolId } = poolObj
+              const poolFees = poolFeesMap[poolId]
               const metadata = metadataMap[poolId]
               const navData = navMap[poolId]
               const epochExecution = epochExecutionMap[poolId]
@@ -1870,6 +1916,17 @@ export function getPoolsModule(inst: Centrifuge) {
                 createdAt: null,
                 metadata,
                 currency,
+                poolFees: poolFees?.map((fee) => {
+                  const type = Object.keys(fee.amounts.feeType)[0] as keyof typeof fee.amounts.feeType
+                  return {
+                    ...fee,
+                    type,
+                    amounts: {
+                      percentOfNav: new Rate(hexToBN(fee.amounts.feeType[type].limit.shareOfPortfolioValuation)),
+                      pending: new CurrencyBalance(fee.amounts.pending, currency.decimals),
+                    },
+                  }
+                }),
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
                   const trancheKeyIndex = trancheIdToIndex[trancheId]

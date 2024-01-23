@@ -2,11 +2,12 @@ import { Box, Button, CurrencyInput, Drawer, IconInfo, Shelf, Stack, Text } from
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React from 'react'
-import { useLocation } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { CopyToClipboard } from '../../../utils/copyToClipboard'
-import { formatBalance, formatBalanceAbbreviated } from '../../../utils/formatting'
+import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { usePool, usePoolMetadata } from '../../../utils/usePools'
 
 type ChargeFeesProps = {
   onClose: () => void
@@ -14,11 +15,16 @@ type ChargeFeesProps = {
 }
 
 export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
   const { search } = useLocation()
-  // TODO: set pendingFees if there are pending fees
-  const [pendingFees, setPendingFees] = React.useState(false)
   const params = new URLSearchParams(search)
-  const chargeType = params.get('charge')
+  const feeIndex = params.get('charge')
+  const feeMetadata = feeIndex ? poolMetadata?.pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
+  const feeChainData = feeIndex ? pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
+  // TODO: set pendingFees if there are pending fees
+  const [pendingFees, setPendingFees] = React.useState(feeChainData?.amounts.pending.gtn(0) || false)
 
   const form = useFormik<{ amount?: Decimal }>({
     initialValues: {
@@ -43,13 +49,22 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
     <Drawer isOpen={isOpen} onClose={onClose}>
       <Stack gap={3}>
         <Text textAlign="center" variant="heading2">
-          Charge {chargeType} fee
+          Charge {feeMetadata?.name}
         </Text>
         <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
           <LabelValueStack label="Type" value="Direct charge" />
-          <LabelValueStack label="Pending fees" value={formatBalanceAbbreviated(0, 'USD', 2)} />
-          <LabelValueStack label="Limit" value={'1% of NAV'} />
-          <LabelValueStack label="Receiving address" value={<CopyToClipboard address="0x123...wdsd" />} />
+          <LabelValueStack
+            label="Pending fees"
+            value={formatBalanceAbbreviated(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
+          />
+          <LabelValueStack
+            label="Limit"
+            value={`${formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} of NAV`}
+          />
+          <LabelValueStack
+            label="Receiving address"
+            value={<CopyToClipboard address={feeChainData?.destination || ''} />}
+          />
         </Shelf>
         <Stack bg="backgroundTertiary" p={2}>
           {pendingFees ? (
@@ -90,7 +105,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                         <CurrencyInput
                           {...field}
                           label="Amount to charge"
-                          currency="USDT"
+                          currency={pool.currency.symbol}
                           disabled={form.isSubmitting || form.isValidating}
                           secondaryLabel="Maximum charge 6,000 USDC (1% NAV)"
                           onChange={(value) => form.setFieldValue('amount', value)}

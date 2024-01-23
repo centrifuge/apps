@@ -1,5 +1,5 @@
 import { TokenBalance } from '@centrifuge/centrifuge-js'
-import { Text } from '@centrifuge/fabric'
+import { Text, truncate } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
@@ -9,9 +9,9 @@ import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { Dec } from '../../../utils/Decimal'
-import { formatBalance } from '../../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { usePoolAdmin } from '../../../utils/usePermissions'
-import { usePool } from '../../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { ChargeFeesDrawer } from '../../IssuerPool/PoolFees/ChargeFeesDrawer'
 import { EditFeesDrawer } from '../../IssuerPool/PoolFees/EditFeesDrawer'
 
@@ -56,7 +56,8 @@ const columns = [
     align: 'right',
     header: 'Percentage',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.percentOfNav.toString()}% of NAV</Text>
+      console.log('🚀 ~ row:', row)
+      return <Text variant="body3">{formatPercentage(row.percentOfNav)} of NAV</Text>
     },
   },
   {
@@ -70,7 +71,7 @@ const columns = [
     align: 'left',
     header: 'Receiving address',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.receivingAddress}</Text>
+      return <Text variant="body3">{truncate(row.receivingAddress)}</Text>
     },
   },
   {
@@ -132,6 +133,7 @@ const data = [
 export function PoolDetailOverview() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
   const idAdmin = usePoolAdmin(poolId)
   const { search, pathname } = useLocation()
   const { push } = useHistory()
@@ -140,10 +142,30 @@ export function PoolDetailOverview() {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false)
   const drawer = params.get('charge')
 
+  const data = React.useMemo(() => {
+    return poolMetadata?.pool?.poolFees?.map((feeMatadata) => {
+      const feeChainData = pool.poolFees?.find((f) => f.id === feeMatadata.id)
+      const fixedFee = feeChainData?.type === 'fixed'
+      return {
+        name: feeMatadata.name,
+        type: fixedFee ? 'Fixed % of NAV' : 'Direct charge',
+        percentOfNav: feeChainData?.amounts?.percentOfNav.toDecimal(),
+        pendingFees: feeChainData?.amounts.pending,
+        receivingAddress: feeChainData?.destination,
+        action: fixedFee ? null : (
+          <StyledLink to={`?charge=${feeChainData?.id}`}>
+            <Text variant="body3">Charge</Text>
+          </StyledLink>
+        ),
+        poolCurrency: pool.currency.symbol,
+      }
+    })
+  }, [poolMetadata])
+
   React.useEffect(() => {
     if (drawer === 'edit') {
       setIsEditDrawerOpen(true)
-    } else if (drawer === 'priority' || drawer === 'standard') {
+    } else if (drawer) {
       setIsChargeDrawerOpen(true)
     }
   }, [drawer])
@@ -172,7 +194,7 @@ export function PoolDetailOverview() {
           </RouterLinkButton>
         }
       >
-        <DataTable data={data} columns={columns} />
+        <DataTable data={data || []} columns={columns} />
       </PageSection>
     </>
   ) : null
