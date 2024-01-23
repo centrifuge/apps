@@ -24,7 +24,7 @@ export type InvestRedeemState = {
   isFirstInvestment: boolean
   nativeCurrency?: CurrencyMeta
   poolCurrency?: CurrencyMeta
-  trancheCurrency?: CurrencyMeta
+  trancheCurrency?: CurrencyMetadata
   capacity: Decimal
   minInitialInvestment: Decimal
   nativeBalance: Decimal
