@@ -125,7 +125,12 @@ export function PoolDetailOverview() {
       {tokens.length > 0 && (
         <PageSection>
           <React.Suspense fallback={<Spinner />}>
-            <TrancheTokenCards trancheTokens={tokens} poolId={poolId} createdAt={pool.createdAt} />
+            <TrancheTokenCards
+              trancheTokens={tokens}
+              poolId={poolId}
+              createdAt={pool.createdAt}
+              poolCurrencySymbol={pool.currency.symbol}
+            />
           </React.Suspense>
         </PageSection>
       )}
