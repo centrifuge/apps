@@ -1,4 +1,3 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Drawer, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useLocation } from 'react-router'
@@ -31,12 +30,4 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       </Stack>
     </Drawer>
   )
-}
-
-type SendReceiveProps = {
-  address: string
-  currency?: {
-    balance: CurrencyBalance
-    currency: { symbol: string; decimals: number; key: string | { ForeignAsset: number } }
-  }
 }
