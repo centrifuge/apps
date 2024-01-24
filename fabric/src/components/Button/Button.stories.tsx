@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { AnchorButton as AnchorButtonComp, Button as ButtonComp } from '.'
 import { IconChevronDown, IconClock } from '../../icon'
@@ -9,11 +9,11 @@ import { WalletButton as WalletButtonComp } from './WalletButton'
 export default {
   title: 'Components/Button',
   component: ButtonComp,
-} as ComponentMeta<typeof ButtonComp>
+} as Meta<typeof ButtonComp>
 
-type ButtonStory = ComponentStory<typeof ButtonComp>
-type AnchorButtonStory = ComponentStory<typeof AnchorButtonComp>
-type WalletButtonStory = ComponentStory<typeof WalletButtonComp>
+type ButtonStory = StoryFn<typeof ButtonComp>
+type AnchorButtonStory = StoryFn<typeof AnchorButtonComp>
+type WalletButtonStory = StoryFn<typeof WalletButtonComp>
 
 const Template: ButtonStory = (args): React.ReactElement => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>

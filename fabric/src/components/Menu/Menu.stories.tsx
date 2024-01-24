@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { Menu, MenuItem } from '.'
 import { IconCheck, IconCircle, MenuItemGroup } from '../..'
@@ -7,9 +7,9 @@ import { Shelf } from '../Shelf'
 export default {
   title: 'Components/Menu',
   component: Menu,
-} as ComponentMeta<typeof Menu>
+} as Meta<typeof Menu>
 
-type MenuStory = ComponentStory<typeof Menu>
+type MenuStory = StoryFn<typeof Menu>
 const Template: MenuStory = (args) => (
   <Shelf gap={8} flexWrap="wrap">
     <Menu {...args} width={300} maxWidth="100%">

@@ -1,4 +1,4 @@
-import { ComponentMeta } from '@storybook/react'
+import { Meta } from '@storybook/react'
 import * as React from 'react'
 import { Popover } from '.'
 import { Box } from '../Box'
@@ -8,7 +8,7 @@ import { Text } from '../Text'
 export default {
   title: 'Components/Popover',
   component: Popover,
-} as ComponentMeta<typeof Popover>
+} as Meta<typeof Popover>
 
 export const Default = () => (
   <Popover

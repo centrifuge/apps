@@ -1,11 +1,11 @@
-import { ComponentMeta } from '@storybook/react'
+import { Meta } from '@storybook/react'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Text } from '../components/Text'
 
 export default {
   title: 'Theme',
-} as ComponentMeta<React.FC>
+} as Meta<React.FC>
 
 export const Breakpoints: React.FC = () => {
   const theme = useTheme()

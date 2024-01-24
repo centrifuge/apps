@@ -6,10 +6,10 @@ import {
   Divider,
   IconPlus,
   IconTrash,
-  Select_DEPRECATED,
+  Select,
   Shelf,
   Text,
-  TextInput_DEPRECATED,
+  TextInput,
 } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, Form, Formik, useFormikContext } from 'formik'
 import * as React from 'react'
@@ -192,7 +192,7 @@ export const UltimateBeneficialOwners = () => {
                         </Shelf>
                         <Field name={`ultimateBeneficialOwners.${index}.name`}>
                           {({ field, meta }: FieldProps) => (
-                            <TextInput_DEPRECATED
+                            <TextInput
                               {...field}
                               label="Full Name"
                               disabled={isLoading || isCompleted}
@@ -212,7 +212,7 @@ export const UltimateBeneficialOwners = () => {
                         </Field>
                         <Field name={`ultimateBeneficialOwners.${index}.countryOfCitizenship`}>
                           {({ field, meta }: FieldProps) => (
-                            <Select_DEPRECATED
+                            <Select
                               {...field}
                               label="Country of Citizenship"
                               placeholder="Select a country"
@@ -224,7 +224,7 @@ export const UltimateBeneficialOwners = () => {
                         </Field>
                         <Field name={`ultimateBeneficialOwners.${index}.countryOfResidency`}>
                           {({ field, meta }: FieldProps) => (
-                            <Select_DEPRECATED
+                            <Select
                               {...field}
                               label="Country of Residency"
                               placeholder="Select a country"

@@ -11,17 +11,17 @@ import {
 import {
   Box,
   Button,
-  CurrencyInput_DEPRECATED,
+  CurrencyInput,
   DateInput,
   Grid,
   ImageUpload,
   NumberInput,
-  Select_DEPRECATED,
+  Select,
   Shelf,
   Stack,
   Text,
   TextAreaInput,
-  TextInput_DEPRECATED,
+  TextInput,
 } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -84,7 +84,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
       return (
         <Field name={name} validate={required()} key={label}>
           {({ field, form }: any) => (
-            <Select_DEPRECATED
+            <Select
               placeholder="Select one"
               label={`${label}*`}
               options={input.options.map((o) => (typeof o === 'string' ? { label: o, value: o } : o))}
@@ -105,7 +105,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
         >
           {({ field, meta, form }: FieldProps) => {
             return (
-              <CurrencyInput_DEPRECATED
+              <CurrencyInput
                 {...field}
                 label={`${label}*`}
                 errorMessage={meta.touched ? meta.error : undefined}
@@ -150,7 +150,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
       return (
         <FieldWithErrorMessage
           name={name}
-          as={type === 'textarea' ? TextAreaInput : TextInput_DEPRECATED}
+          as={type === 'textarea' ? TextAreaInput : TextInput}
           label={`${label}*`}
           validate={required()}
           {...rest}
@@ -395,7 +395,7 @@ function IssuerCreateLoan() {
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
                     name="assetName"
-                    as={TextInput_DEPRECATED}
+                    as={TextInput}
                     label="Asset name*"
                     placeholder=""
                     maxLength={100}
@@ -403,7 +403,7 @@ function IssuerCreateLoan() {
                   />
                   <Field name="pricing.valuationMethod">
                     {({ field, meta, form }: FieldProps) => (
-                      <Select_DEPRECATED
+                      <Select
                         {...field}
                         label="Asset type"
                         onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
