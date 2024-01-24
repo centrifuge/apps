@@ -1,13 +1,13 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { FileUpload } from '.'
 
 export default {
   title: 'Components/FileUpload',
   component: FileUpload,
-} as ComponentMeta<typeof FileUpload>
+} as Meta<typeof FileUpload>
 
-type FileUploadStory = ComponentStory<typeof FileUpload>
+type FileUploadStory = StoryFn<typeof FileUpload>
 const Template: FileUploadStory = (args) => <FileUpload {...args} />
 
 export const Default = Template.bind({})

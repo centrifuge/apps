@@ -42,33 +42,33 @@ export function PortfolioCta() {
     },
   ]
 
-  return (
-    !address && (
-      <Box
-        as="article"
-        position="relative"
-        p={3}
-        pb={5}
-        overflow="hidden"
-        borderRadius="card"
-        borderStyle="solid"
-        borderWidth={1}
-        borderColor={'borderSecondary'}
-        style={{
-          boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
-        }}
-      >
-        {!address && <Cubes />}
+  if (address) return null
 
-        <Stack gap={2} alignItems="start">
-          <>
-            <Text as="h2" variant="body1" style={{ maxWidth: '35ch' }}>
-              Pools on Centrifuge let investors earn yield from real-world assets.
-            </Text>
-            <Button onClick={() => showNetworks()}>Get started</Button>
-          </>
-        </Stack>
-      </Box>
-    )
+  return (
+    <Box
+      as="article"
+      position="relative"
+      p={3}
+      pb={5}
+      overflow="hidden"
+      borderRadius="card"
+      borderStyle="solid"
+      borderWidth={1}
+      borderColor={'borderSecondary'}
+      style={{
+        boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
+      }}
+    >
+      {!address && <Cubes />}
+
+      <Stack gap={2} alignItems="start">
+        <>
+          <Text as="h2" variant="body1" style={{ maxWidth: '35ch' }}>
+            Pools on Centrifuge let investors earn yield from real-world assets.
+          </Text>
+          <Button onClick={() => showNetworks()}>Get started</Button>
+        </>
+      </Stack>
+    </Box>
   )
 }

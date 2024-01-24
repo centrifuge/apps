@@ -75,25 +75,6 @@ $ yarn build --watch
 
 Will build locally and listen for changes, allowing to see the changes directly when working on `tinlake-ui`, for example
 
-### Visual regression testing
-
-This package uses [Loki](https://loki.js.org/) for visual regression testing.
-
-To execute visual regression tests locally:
-
-```sh
-yarn storybook # starts storybook, needed for Loki locally to be able to operate on stories
-
-yarn test
-```
-
-If the test fails (differences were spotted between the `reference` and `current` snapshots), the diff images will be
-created in `.loki/difference`. If all the changes were expected, the reference snapshots can be approved:
-
-```sh
-yarn approve
-```
-
 ### Publishing a new version
 
 Create a new branch and run `yarn bump`, which bumps the package version, updates the changelog, creates a commit and tags it. Push the branch/tag, which should publish the version to NPM. Open a PR to merge the changes to `main`. For generating the changelog, make sure to use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) spec in your commits, with `fabric` as the scope, e.g.: `feat(fabric): Add button component`

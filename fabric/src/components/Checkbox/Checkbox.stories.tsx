@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { Checkbox } from '.'
 import { Stack } from '../Stack'
@@ -7,9 +7,9 @@ import { Text } from '../Text'
 export default {
   title: 'Components/Checkbox',
   component: Checkbox,
-} as ComponentMeta<typeof Checkbox>
+} as Meta<typeof Checkbox>
 
-type CheckboxStory = ComponentStory<typeof Checkbox>
+type CheckboxStory = StoryFn<typeof Checkbox>
 const Template: CheckboxStory = (args) => (
   <Stack gap={3}>
     <Checkbox {...args} />

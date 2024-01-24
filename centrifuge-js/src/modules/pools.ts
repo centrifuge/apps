@@ -715,6 +715,8 @@ type InvestorTransaction = {
   tokenAmount: CurrencyBalance | undefined
   tokenPrice: Price | undefined
   transactionFee: CurrencyBalance | null
+  chainId: number
+  evmAddress?: string
 }
 
 export type BorrowerTransaction = {

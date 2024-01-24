@@ -1,11 +1,4 @@
-import {
-  CurrencyInput_DEPRECATED,
-  DateInput,
-  Grid,
-  NumberInput,
-  Select_DEPRECATED,
-  TextInput_DEPRECATED,
-} from '@centrifuge/fabric'
+import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
@@ -22,7 +15,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
       {values.pricing.valuationMethod === 'oracle' && (
         <>
           <FieldWithErrorMessage
-            as={TextInput_DEPRECATED}
+            as={TextInput}
             label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
             placeholder="010101010000"
             name="pricing.Isin"
@@ -30,7 +23,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
           />
           <Field name="pricing.notional" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput_DEPRECATED
+              <CurrencyInput
                 {...field}
                 label={<Tooltips type="notionalValue" variant="secondary" label="Notional value*" />}
                 placeholder="0.00"
@@ -56,7 +49,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
         <>
           <Field name="pricing.maxBorrowAmount">
             {({ field, meta, form }: FieldProps) => (
-              <Select_DEPRECATED
+              <Select
                 {...field}
                 label="How much can I borrow?"
                 onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
@@ -72,7 +65,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
 
           <Field name="pricing.value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput_DEPRECATED
+              <CurrencyInput
                 {...field}
                 label="Collateral value*"
                 placeholder="0.00"

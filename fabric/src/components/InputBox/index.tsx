@@ -101,14 +101,15 @@ export type InputUnitProps = {
 }
 
 export function InputUnit({
+  id,
   label,
   secondaryLabel,
   errorMessage,
   inputElement,
   disabled,
-  id,
 }: StackProps & InputUnitProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <IdContext.Provider value={id}>
       <Stack gap={1}>

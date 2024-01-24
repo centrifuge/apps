@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
   TextAreaInput,
-  TextInput_DEPRECATED,
+  TextInput,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
@@ -163,7 +163,7 @@ const MintNFT: React.FC = () => {
             </Flex>
             <Box flex="1 1 30%" minWidth={250}>
               <Box mb={3}>
-                <TextInput_DEPRECATED
+                <TextInput
                   label="Name"
                   placeholder={DEFAULT_NFT_NAME}
                   value={nftName}

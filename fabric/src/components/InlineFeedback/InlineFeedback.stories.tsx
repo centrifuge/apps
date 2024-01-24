@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { InlineFeedback } from '.'
 import { Stack } from '../Stack'
@@ -6,9 +6,9 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/InlineFeedback',
   component: InlineFeedback,
-} as ComponentMeta<typeof InlineFeedback>
+} as Meta<typeof InlineFeedback>
 
-type InlineFeedbackStory = ComponentStory<typeof InlineFeedback>
+type InlineFeedbackStory = StoryFn<typeof InlineFeedback>
 const Template: InlineFeedbackStory = (args) => (
   <Stack gap={3}>
     <InlineFeedback {...args}>Short inline feedback message</InlineFeedback>
