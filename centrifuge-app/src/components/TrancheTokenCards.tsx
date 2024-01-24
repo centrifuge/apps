@@ -2,7 +2,7 @@ import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { InvestButton, Token } from '../pages/Pool/Overview'
 import { daysBetween } from '../utils/date'
 import { formatBalance, formatPercentage } from '../utils/formatting'
-import { Tooltips, tooltipText } from './Tooltips'
+import { Tooltips } from './Tooltips'
 
 export const TrancheTokenCards = ({
   trancheTokens,
@@ -14,20 +14,30 @@ export const TrancheTokenCards = ({
   poolId: string
   createdAt: string | null
   poolCurrencySymbol: string
-}) => (
-  <Shelf gap={3}>
-    {trancheTokens?.map((trancheToken) => (
-      <TrancheTokenCard
-        trancheToken={trancheToken}
-        key={trancheToken.id}
-        poolId={poolId}
-        createdAt={createdAt}
-        numOfTrancheTokens={trancheTokens?.length}
-        poolCurrencySymbol={poolCurrencySymbol}
-      />
-    ))}
-  </Shelf>
-)
+}) => {
+  const seniorTranche = Math.max(...trancheTokens.map((trancheToken) => trancheToken.seniority))
+  const getTrancheText = (trancheToken: Token) => {
+    if (seniorTranche === trancheToken.seniority) return 'senior'
+    if (trancheToken.seniority === 0) return 'junior'
+    return 'mezzanine'
+  }
+
+  return (
+    <Shelf gap={3}>
+      {trancheTokens?.map((trancheToken) => (
+        <TrancheTokenCard
+          trancheToken={trancheToken}
+          key={trancheToken.id}
+          poolId={poolId}
+          createdAt={createdAt}
+          numOfTrancheTokens={trancheTokens?.length}
+          poolCurrencySymbol={poolCurrencySymbol}
+          trancheText={getTrancheText(trancheToken)}
+        />
+      ))}
+    </Shelf>
+  )
+}
 
 const TrancheTokenCard = ({
   trancheToken,
@@ -35,28 +45,27 @@ const TrancheTokenCard = ({
   createdAt,
   numOfTrancheTokens,
   poolCurrencySymbol,
+  trancheText,
 }: {
   trancheToken: Token
   poolId: string
   createdAt: string | null
   numOfTrancheTokens: number
   poolCurrencySymbol: string
+  trancheText: 'senior' | 'junior' | 'mezzanine'
 }) => {
   const isTinlakePool = poolId.startsWith('0x')
   const daysSinceCreation = createdAt ? daysBetween(new Date(createdAt), new Date()) : 0
-  const trancheSeniority = trancheToken.seniority === 0 ? 'juniorTrancheYields' : 'seniorTokenAPR'
-  const aprTooltipBody = `${
-    trancheToken.seniority === 0 ? tooltipText.juniorTrancheYields.body : tooltipText.seniorTokenAPR.body
-  }${daysSinceCreation < 30 && !isTinlakePool ? ' APR displayed after 30 days following token launch.' : ''}`
+  const aprTooltipBody = `The 30d ${trancheText} yield is the effective annualized return of the pool's ${trancheText} token over the last 30 days.${
+    daysSinceCreation < 30 && !isTinlakePool ? ' APR displayed after 30 days following token launch.' : ''
+  }`
 
   const calculateApr = () => {
-    if (isTinlakePool) {
-      return trancheToken.seniority === 0 ? 'N/A' : formatPercentage(trancheToken.apr)
-    }
-
     if (daysSinceCreation < 30) {
       return 'N/A'
     }
+
+    console.log('trancheToken', trancheToken.apr.toString())
 
     return formatPercentage(trancheToken.apr)
   }
@@ -70,7 +79,7 @@ const TrancheTokenCard = ({
         <Shelf justifyContent="space-between" alignItems="flex-end" gap={1}>
           <Shelf gap={numOfTrancheTokens === 1 ? 5 : 2} alignItems="flex-end">
             <Stack gap={1} paddingRight={numOfTrancheTokens === 1 ? 3 : 0}>
-              <Tooltips type={trancheSeniority} body={aprTooltipBody} />
+              <Tooltips label="APR" body={aprTooltipBody} />
               <Text fontSize="30px" variant="body3">
                 {calculateApr()}
               </Text>
@@ -83,7 +92,7 @@ const TrancheTokenCard = ({
               <Text textAlign="left" variant="label2" color="textSecondary">
                 Token price
               </Text>
-              <Text variant="body2">{formatBalance(trancheToken.tokenPrice || 0, trancheToken.symbol, 2, 2)}</Text>
+              <Text variant="body2">{formatBalance(trancheToken.tokenPrice || 0, poolCurrencySymbol, 2, 2)}</Text>
             </Stack>
             <Stack gap={1}>
               <Tooltips variant="secondary" type="valueLocked" />
