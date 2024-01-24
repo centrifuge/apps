@@ -52,7 +52,11 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
     onSubmit: (values, actions) => {
       if (!feeIndex) throw new Error('feeIndex not found')
       if (!values.amount) throw new Error('amount not found')
-      chargeFeeTx([feeIndex, CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)])
+      chargeFeeTx([
+        feeIndex,
+        CurrencyBalance.fromFloat(values.amount, pool.currency.decimals),
+        feeChainData?.amounts.pending,
+      ])
     },
   })
 
@@ -155,7 +159,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                       type="submit"
                       disabled={!!form.errors.amount || !form.values.amount || !isAllowedToCharge || isChargeFeeLoading}
                     >
-                      {updateCharge && 'Update'} Charge
+                      {updateCharge ? 'Update c' : 'C'}harge
                     </Button>
                     <Button variant="secondary" onClick={onClose}>
                       Cancel
