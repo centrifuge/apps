@@ -1,9 +1,9 @@
+import { formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
 import { Drawer, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useLocation } from 'react-router'
-import { LabelValueStack } from '../../../components/LabelValueStack'
-import { CopyToClipboard } from '../../../utils/copyToClipboard'
-import { formatBalanceAbbreviated } from '../../../utils/formatting'
+import { CopyToClipboard } from '../../utils/copyToClipboard'
+import { LabelValueStack } from '../LabelValueStack'
 
 type ChargeFeesProps = {
   onClose: () => void

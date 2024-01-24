@@ -1776,7 +1776,8 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.poolSystem.EpochExecuted.is(event) ||
             api.events.poolSystem.SolutionSubmitted.is(event) ||
             api.events.investments.InvestOrderUpdated.is(event) ||
-            api.events.investments.RedeemOrderUpdated.is(event)
+            api.events.investments.RedeemOrderUpdated.is(event) ||
+            api.events.poolFees.Charged.is(event)
         )
         return !!event
       })
@@ -3347,6 +3348,28 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function chargePoolFee(
+    args: [feeId: string, amount: CurrencyBalance, pendingFee?: CurrencyBalance],
+    options?: TransactionOptions
+  ) {
+    const [feeId, amount, pendingFee] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        if (pendingFee?.gtn(0)) {
+          const submittable = api.tx.utility.batchAll([
+            api.tx.poolFees.unchargeFee(feeId, pendingFee.toString()),
+            api.tx.poolFees.chargeFee(feeId, amount.toString()),
+          ])
+          return inst.wrapSignAndSend(api, submittable, options)
+        }
+        const submittable = api.tx.poolFees.chargeFee(feeId, amount.toString())
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
   function adminWriteOff(
     args: [poolId: string, loanId: string, writeOffGroupId: number],
     options?: TransactionOptions
@@ -3394,6 +3417,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
   return {
     getPoolCurrency,
+    chargePoolFee,
     createPool,
     updatePool,
     setMaxReserve,

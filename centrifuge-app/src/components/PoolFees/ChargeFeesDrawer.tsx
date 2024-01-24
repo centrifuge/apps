@@ -1,13 +1,15 @@
+import { addressToHex, CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { useAddress, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, Drawer, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React from 'react'
 import { useLocation, useParams } from 'react-router'
-import { ButtonGroup } from '../../../components/ButtonGroup'
-import { CopyToClipboard } from '../../../utils/copyToClipboard'
-import { Dec } from '../../../utils/Decimal'
-import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { CopyToClipboard } from '../../utils/copyToClipboard'
+import { Dec } from '../../utils/Decimal'
+import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { ButtonGroup } from '../ButtonGroup'
 
 type ChargeFeesProps = {
   onClose: () => void
@@ -24,8 +26,13 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const feeMetadata = feeIndex ? poolMetadata?.pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
   const feeChainData = feeIndex ? pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
   const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.latest.toDecimal()).div(100)
-  // TODO: set pendingFees if there are pending fees
-  const [pendingFees, setPendingFees] = React.useState(feeChainData?.amounts.pending.gtn(0) || false)
+  const [updateCharge, setUpdateCharge] = React.useState(false)
+  const address = useAddress()
+  const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
+
+  const { execute: chargeFeeTx, isLoading: isChargeFeeLoading } = useCentrifugeTransaction('Charge fee', (cent) => {
+    return cent.pools.chargePoolFee
+  })
 
   const form = useFormik<{ amount?: Decimal }>({
     initialValues: {
@@ -37,16 +44,15 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       if (!valuesDec) {
         errors.amount = 'Required'
       }
-      if (valuesDec?.gt(maxCharge || 0)) {
-        errors.amount = 'Amount exceeds limit'
+      if (valuesDec?.lte(0)) {
+        errors.amount = 'Must be greater than 0'
       }
       return errors
     },
     onSubmit: (values, actions) => {
-      setTimeout(() => {
-        setPendingFees(true)
-        actions.setSubmitting(false)
-      }, 1000)
+      if (!feeIndex) throw new Error('feeIndex not found')
+      if (!values.amount) throw new Error('amount not found')
+      chargeFeeTx([feeIndex, CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)])
     },
   })
 
@@ -87,7 +93,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           </Stack>
         </Shelf>
         <Stack bg="backgroundTertiary" p={2}>
-          {pendingFees ? (
+          {feeChainData?.amounts.pending.gtn(0) && !updateCharge ? (
             <Stack gap={2}>
               <Stack gap={1} bg="backgroundButtonSecondary" p={1} borderRadius="2px">
                 <Shelf gap={1} alignItems="baseline">
@@ -95,7 +101,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     Pending fees
                   </Text>
                   <Text variant="body3" color="gray.800" fontWeight={600}>
-                    {formatBalance(form.values?.amount || 0, pool.currency.symbol)}
+                    {formatBalance(feeChainData?.amounts.pending || 0, pool.currency.symbol)}
                   </Text>
                 </Shelf>
                 <Shelf alignItems="flex-start" gap={1}>
@@ -107,7 +113,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                 </Shelf>
               </Stack>
               <ButtonGroup variant="small">
-                <Button variant="primary" onClick={() => setPendingFees(false)}>
+                <Button disabled={!isAllowedToCharge} variant="primary" onClick={() => setUpdateCharge(true)}>
                   Update fee charge
                 </Button>
                 <Button variant="secondary" onClick={onClose}>
@@ -127,7 +133,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                           errorMessage={(meta.touched && meta.error) || undefined}
                           label="Amount to charge"
                           currency={pool.currency.symbol}
-                          disabled={form.isSubmitting || form.isValidating}
+                          disabled={form.isSubmitting || form.isValidating || !isAllowedToCharge || isChargeFeeLoading}
                           secondaryLabel={`Maximum charge ${formatBalance(
                             maxCharge || 0,
                             pool.currency.symbol
@@ -143,8 +149,13 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     </Text>
                   </Box>
                   <ButtonGroup variant="small">
-                    <Button variant="primary" type="submit" disabled={!!form.errors.amount || !form.values.amount}>
-                      Charge
+                    <Button
+                      loading={isChargeFeeLoading}
+                      variant="primary"
+                      type="submit"
+                      disabled={!!form.errors.amount || !form.values.amount || !isAllowedToCharge || isChargeFeeLoading}
+                    >
+                      {updateCharge && 'Update'} Charge
                     </Button>
                     <Button variant="secondary" onClick={onClose}>
                       Cancel
