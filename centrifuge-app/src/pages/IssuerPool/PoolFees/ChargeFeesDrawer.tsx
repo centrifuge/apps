@@ -4,8 +4,8 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { LabelValueStack } from '../../../components/LabelValueStack'
 import { CopyToClipboard } from '../../../utils/copyToClipboard'
+import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 
@@ -23,6 +23,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const feeIndex = params.get('charge')
   const feeMetadata = feeIndex ? poolMetadata?.pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
   const feeChainData = feeIndex ? pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
+  const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.latest.toDecimal()).div(100)
   // TODO: set pendingFees if there are pending fees
   const [pendingFees, setPendingFees] = React.useState(feeChainData?.amounts.pending.gtn(0) || false)
 
@@ -31,9 +32,13 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       amount: undefined,
     },
     validate(values) {
+      const valuesDec = Dec(values.amount || 0)
       let errors: { amount?: string } = {}
-      if (!values.amount) {
+      if (!valuesDec) {
         errors.amount = 'Required'
+      }
+      if (valuesDec?.gt(maxCharge || 0)) {
+        errors.amount = 'Amount exceeds limit'
       }
       return errors
     },
@@ -51,20 +56,35 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
         <Text textAlign="center" variant="heading2">
           Charge {feeMetadata?.name}
         </Text>
-        <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
-          <LabelValueStack label="Type" value="Direct charge" />
-          <LabelValueStack
-            label="Pending fees"
-            value={formatBalanceAbbreviated(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
-          />
-          <LabelValueStack
-            label="Limit"
-            value={`${formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} of NAV`}
-          />
-          <LabelValueStack
-            label="Receiving address"
-            value={<CopyToClipboard address={feeChainData?.destination || ''} />}
-          />
+        <Shelf
+          borderTop="0.5px solid"
+          borderBottom="0.5px solid"
+          borderColor="#DDDBD9"
+          gap={2}
+          alignItems="flex-start"
+          justifyContent="flex-start"
+          py={1}
+        >
+          <Stack gap="4px">
+            <Text variant="label2">Type</Text>
+            <Text variant="body3">Direct charge</Text>
+          </Stack>
+          <Stack gap="4px">
+            <Text variant="label2">Pending fees</Text>
+            <Text variant="body3">
+              {formatBalanceAbbreviated(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
+            </Text>
+          </Stack>
+          <Stack gap="4px">
+            <Text variant="label2">Limit</Text>
+            <Text variant="body3">{`${formatPercentage(
+              feeChainData?.amounts.percentOfNav.toDecimal() || 0
+            )} of NAV`}</Text>
+          </Stack>
+          <Stack gap="4px">
+            <Text variant="label2">Receiving address</Text>
+            <CopyToClipboard variant="body3" address={feeChainData?.destination || ''} />
+          </Stack>
         </Shelf>
         <Stack bg="backgroundTertiary" p={2}>
           {pendingFees ? (
@@ -75,7 +95,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     Pending fees
                   </Text>
                   <Text variant="body3" color="gray.800" fontWeight={600}>
-                    {formatBalance(form.values?.amount || 0, 'USDT')}
+                    {formatBalance(form.values?.amount || 0, pool.currency.symbol)}
                   </Text>
                 </Shelf>
                 <Shelf alignItems="flex-start" gap={1}>
@@ -104,10 +124,14 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                       return (
                         <CurrencyInput
                           {...field}
+                          errorMessage={(meta.touched && meta.error) || undefined}
                           label="Amount to charge"
                           currency={pool.currency.symbol}
                           disabled={form.isSubmitting || form.isValidating}
-                          secondaryLabel="Maximum charge 6,000 USDC (1% NAV)"
+                          secondaryLabel={`Maximum charge ${formatBalance(
+                            maxCharge || 0,
+                            pool.currency.symbol
+                          )} (${formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} NAV)`}
                           onChange={(value) => form.setFieldValue('amount', value)}
                         />
                       )
@@ -119,7 +143,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     </Text>
                   </Box>
                   <ButtonGroup variant="small">
-                    <Button variant="primary" type="submit">
+                    <Button variant="primary" type="submit" disabled={!!form.errors.amount || !form.values.amount}>
                       Charge
                     </Button>
                     <Button variant="secondary" onClick={onClose}>

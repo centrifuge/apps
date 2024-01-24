@@ -8,7 +8,6 @@ import styled from 'styled-components'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
-import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { usePoolAdmin } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -56,7 +55,6 @@ const columns = [
     align: 'right',
     header: 'Percentage',
     cell: (row: Row) => {
-      console.log('🚀 ~ row:', row)
       return <Text variant="body3">{formatPercentage(row.percentOfNav)} of NAV</Text>
     },
   },
@@ -80,53 +78,6 @@ const columns = [
     cell: (row: Row) => {
       return <Text variant="body3">{row.action}</Text>
     },
-  },
-]
-
-const data = [
-  {
-    name: 'Protocol fee',
-    type: 'Fixed % of NAV',
-    percentOfNav: Dec(0.5),
-    pendingFees: Dec(0),
-    receivingAddress: '0x1234...5678',
-    action: null,
-    poolCurrency: 'USDT',
-  },
-  {
-    name: 'Managment fee',
-    type: 'Fixed % of NAV',
-    percentOfNav: Dec(0.5),
-    pendingFees: Dec(0),
-    receivingAddress: '0x1234...5678',
-    action: null,
-    poolCurrency: 'USDT',
-  },
-  {
-    name: 'Priority fee',
-    type: 'Direct charge',
-    percentOfNav: Dec(0.5),
-    pendingFees: Dec(0),
-    receivingAddress: '0x1234...5678',
-    action: (
-      <StyledLink to={`?charge=priority`}>
-        <Text variant="body3">Charge</Text>
-      </StyledLink>
-    ),
-    poolCurrency: 'USDT',
-  },
-  {
-    name: 'Standard fee',
-    type: 'Direct charge',
-    percentOfNav: Dec(0.5),
-    pendingFees: Dec(0),
-    receivingAddress: '0x1234...5678',
-    action: (
-      <StyledLink to={`?charge=standard`}>
-        <Text variant="body3">Charge</Text>
-      </StyledLink>
-    ),
-    poolCurrency: 'USDT',
   },
 ]
 

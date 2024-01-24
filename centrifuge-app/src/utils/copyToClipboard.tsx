@@ -1,5 +1,5 @@
 import { truncateAddress } from '@centrifuge/centrifuge-react'
-import { IconCheckCircle, IconCopy, Shelf, Text } from '@centrifuge/fabric'
+import { IconCheckCircle, IconCopy, Shelf, Text, TextVariantName } from '@centrifuge/fabric'
 import React from 'react'
 import styled from 'styled-components'
 
@@ -17,19 +17,19 @@ export function copyToClipboard(value: string) {
   textField.remove()
 }
 
-export const CopyToClipboard = ({ address }: { address: string }) => {
+export const CopyToClipboard = ({ address, variant }: { address: string; variant?: TextVariantName }) => {
   const [copied, setCopied] = React.useState(false)
   return (
     <CopyButton
       onClick={() => {
-        setTimeout(() => setCopied(true), 100)
+        setTimeout(() => setCopied(true), 200)
         setTimeout(() => setCopied(false), 1100)
         copyToClipboard(address)
       }}
       title="Copy to clipboard"
     >
       <Shelf gap={1} style={{ cursor: 'copy' }}>
-        <Text variant="body2">{truncateAddress(address)}</Text>
+        <Text variant={variant ?? 'body2'}>{truncateAddress(address)}</Text>
         {copied ? <IconCheckCircle size="16px" /> : <IconCopy size="16px" />}
       </Shelf>
     </CopyButton>
