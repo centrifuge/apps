@@ -3353,8 +3353,6 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [feeId, amount, pendingFee] = args
-    console.log('🚀 ~ amount:', amount.toDecimal().toString())
-    console.log('🚀 ~ pendingFee:', pendingFee?.toDecimal().toString())
     const $api = inst.getApi()
 
     return $api.pipe(
