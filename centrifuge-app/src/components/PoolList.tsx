@@ -52,6 +52,7 @@ export function PoolList() {
       .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b?.valueLocked?.sub(a?.valueLocked).toNumber() : 0))
     const tinlakePools = pools
       .filter((pool) => pool?.poolId?.startsWith('0x'))
+      .filter((pool) => !pool?.status?.includes('Archived'))
       .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b.valueLocked.sub(a.valueLocked).toNumber() : 0))
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
