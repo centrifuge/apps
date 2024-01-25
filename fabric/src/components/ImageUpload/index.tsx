@@ -226,7 +226,7 @@ export function ImageUpload({
               </Button>
             </Stack>
             <Stack p={2} gridArea="unit" justifySelf="stretch" style={{ visibility: fileUrl ? 'visible' : 'hidden' }}>
-              <Shelf px={2} pb={1} justifyContent="space-between">
+              <Shelf px={1} pb={1} justifyContent="space-between">
                 <Text
                   variant="body1"
                   color={disabled ? 'textDisabled' : 'textPrimary'}
