@@ -1,9 +1,30 @@
-import { formatBalanceAbbreviated } from '@centrifuge/centrifuge-react'
-import { Drawer, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AddFee, Rate } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  Box,
+  Button,
+  Drawer,
+  Grid,
+  IconButton,
+  IconCopy,
+  IconMinusCircle,
+  IconPlusCircle,
+  NumberInput,
+  Shelf,
+  Stack,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
+import { Field, FieldArray, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React from 'react'
-import { useLocation } from 'react-router'
-import { CopyToClipboard } from '../../utils/copyToClipboard'
-import { LabelValueStack } from '../LabelValueStack'
+import { useParams } from 'react-router'
+import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
+import { copyToClipboard } from '../../utils/copyToClipboard'
+import { Dec } from '../../utils/Decimal'
+import { formatPercentage } from '../../utils/formatting'
+import { usePoolAdmin } from '../../utils/usePermissions'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { ButtonGroup } from '../ButtonGroup'
 
 type ChargeFeesProps = {
   onClose: () => void
@@ -11,22 +32,259 @@ type ChargeFeesProps = {
 }
 
 export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
-  const { search } = useLocation()
-  const params = new URLSearchParams(search)
-  const chargeType = params.get('charge')
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
+  const { data: poolMetadata, isLoading } = usePoolMetadata(pool)
+  const poolAdmin = usePoolAdmin(poolId)
+
+  const initialFormData = React.useMemo(() => {
+    return pool.poolFees
+      ?.filter((poolFees) => poolFees.type !== 'fixed')
+      .map((feeChainData, index) => {
+        const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
+        return {
+          percentOfNav: feeChainData?.amounts.percentOfNav.toDecimal().toFixed(2).toString() || undefined,
+          feeName: feeMetadata?.name || '',
+          receivingAddress: feeChainData?.destination || '',
+          feeId: feeChainData?.id || 0,
+        }
+      })
+  }, [pool.poolFees, poolMetadata?.pool?.poolFees])
+
+  React.useEffect(() => {
+    if (!isLoading) {
+      form.setValues({ poolFees: initialFormData || [] })
+    }
+  }, [isLoading, initialFormData])
+
+  const { execute: updateFeesTx } = useCentrifugeTransaction('Update fees', (cent) => cent.pools.updateFees)
+
+  const form = useFormik<{
+    poolFees: { feeName: string; percentOfNav?: string; receivingAddress: string; feeId: number }[]
+  }>({
+    initialValues: {
+      poolFees: initialFormData || [],
+    },
+    validateOnChange: false,
+    validate(values) {
+      let errors: { poolFees?: { feeName?: string; percentOfNav?: string; receivingAddress?: string }[] } = {}
+      values.poolFees.forEach((fee, index) => {
+        if (!fee.feeName) {
+          errors.poolFees = errors.poolFees || []
+          errors.poolFees[index] = errors.poolFees[index] || {}
+          errors.poolFees[index].feeName = 'Required'
+        }
+        if (!fee.percentOfNav) {
+          errors.poolFees = errors.poolFees || []
+          errors.poolFees[index] = errors.poolFees[index] || {}
+          errors.poolFees[index].percentOfNav = 'Required'
+        }
+        if (fee.percentOfNav && parseFloat(fee.percentOfNav) <= 0) {
+          errors.poolFees = errors.poolFees || []
+          errors.poolFees[index] = errors.poolFees[index] || {}
+          errors.poolFees[index].percentOfNav = 'Must be greater than 0'
+        }
+        if (!fee.receivingAddress) {
+          errors.poolFees = errors.poolFees || []
+          errors.poolFees[index] = errors.poolFees[index] || {}
+          errors.poolFees[index].receivingAddress = 'Required'
+        }
+        if (fee.receivingAddress && !isEvmAddress(fee.receivingAddress) && !isSubstrateAddress(fee.receivingAddress)) {
+          errors.poolFees = errors.poolFees || []
+          errors.poolFees[index] = errors.poolFees[index] || {}
+          errors.poolFees[index].receivingAddress = 'Invalid address'
+        }
+      })
+      return errors
+    },
+    onSubmit: (values, actions) => {
+      // find fees that have been updated so they can be removed and re-added
+      const remove: [feeId: number][] =
+        initialFormData
+          ?.filter((initialFee) => {
+            const fee = values.poolFees?.find((f) => f.feeId === initialFee.feeId)
+            const newPercent = Dec(fee?.percentOfNav || 0)
+              .toFixed(2)
+              ?.toString()
+            return (
+              initialFee.feeName !== fee?.feeName ||
+              initialFee.percentOfNav?.toString() !== newPercent ||
+              initialFee.receivingAddress !== fee?.receivingAddress
+            )
+          })
+          .map((initialFee) => [initialFee.feeId]) || []
+
+      const add: AddFee[] = values.poolFees
+        .filter((fee) => {
+          // don't add fees if they are unchanged from initial data
+          const initialFee = initialFormData?.find((f) => f.feeId === fee.feeId)
+          const newPercent = Dec(fee.percentOfNav || 0)
+            .toFixed(2)
+            ?.toString()
+          return !(
+            initialFee?.feeName === fee.feeName &&
+            initialFee?.percentOfNav === newPercent &&
+            initialFee?.receivingAddress === fee.receivingAddress
+          )
+        })
+        .map((fee) => {
+          return {
+            poolId,
+            fee: {
+              name: fee.feeName,
+              destination: fee.receivingAddress,
+              amount: Rate.fromFloat(Dec(fee?.percentOfNav || 0).mul(100)),
+              feeId: fee.feeId,
+              type: 'ChargedUpTo',
+              limit: 'ShareOfPortfolioValuation',
+            },
+          }
+        })
+
+      updateFeesTx([add, remove])
+    },
+  })
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
-      <Stack gap={3}>
-        <Text textAlign="center" variant="heading2">
-          Fee structure
-        </Text>
-        <Shelf gap={3} alignItems="flex-start" justifyContent="flex-start">
-          <LabelValueStack label="Type" value={chargeType} />
-          <LabelValueStack label="Pending fees" value={formatBalanceAbbreviated(0, 'USD', 2)} />
-          <LabelValueStack label={'Limit'} value={'1% of NAV'} />
-          <LabelValueStack label={'Receiving address'} value={<CopyToClipboard address="0x12332...wedsd" />} />
+    <Drawer isOpen={isOpen} onClose={onClose} px={0}>
+      <Stack gap={0}>
+        <Stack px={3} pb={3}>
+          <Text variant="heading2">Fee structure</Text>
+        </Stack>
+        <Shelf px={3} gap={3} alignItems="flex-start" justifyContent="flex-start">
+          <Stack width="100%" borderTop={pool.poolFees ? '0.5px solid' : undefined} borderColor="#DDDBD9">
+            {pool.poolFees
+              ?.filter((poolFees) => poolFees.type === 'fixed')
+              .map((feeChainData, index) => {
+                const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
+                return (
+                  <Grid
+                    key={`poolFees.${index}.${feeMetadata?.name}`}
+                    gridTemplateColumns="repeat(2, 1fr)"
+                    gap={2}
+                    py="11px"
+                    borderBottom="0.5px solid"
+                    borderTop={!poolMetadata?.pool?.poolFees?.at(-1) ? '0.5px solid' : undefined}
+                    borderColor="#DDDBD9"
+                  >
+                    <Text variant="body2" color="gray.800">
+                      {feeMetadata?.name}
+                    </Text>
+                    <Text variant="body2" color="gray.800">
+                      {formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} of NAV
+                    </Text>
+                  </Grid>
+                )
+              })}
+          </Stack>
         </Shelf>
+        <Stack width="100%" backgroundColor="backgroundTertiary">
+          <Stack p={3}>
+            <FormikProvider value={form}>
+              <Form>
+                <Stack gap={3}>
+                  <FieldArray name="poolFees">
+                    {({ push, remove }) => (
+                      <Stack gap={1} justifyContent="flex-start">
+                        <Stack gap={3} justifyContent="flex-start">
+                          <Text variant="body2" minWidth="250px">
+                            Direct charge
+                          </Text>
+                          {form.values.poolFees.map((values, index) => {
+                            return (
+                              <Shelf key={`poolFees.${index}`} alignItems="center" gap={4}>
+                                <Stack gap={2} borderBottom="0.5px solid #DDDBD9" pb={3} maxWidth="350px">
+                                  <Shelf gap={2}>
+                                    <Field name={`poolFees.${index}.feeName`}>
+                                      {({ field, meta, form }: FieldProps) => {
+                                        return (
+                                          <TextInput
+                                            {...field}
+                                            label="Name"
+                                            disabled={!poolAdmin}
+                                            errorMessage={(meta.touched && meta.error) || ''}
+                                          />
+                                        )
+                                      }}
+                                    </Field>
+                                    <Field name={`poolFees.${index}.percentOfNav`}>
+                                      {({ field, meta, form }: FieldProps) => {
+                                        return (
+                                          <Box>
+                                            <NumberInput
+                                              {...field}
+                                              label="Current percentage"
+                                              symbol="%"
+                                              disabled={!poolAdmin}
+                                              errorMessage={(meta.touched && meta.error) || ''}
+                                            />
+                                          </Box>
+                                        )
+                                      }}
+                                    </Field>
+                                  </Shelf>
+                                  <Field name={`poolFees.${index}.receivingAddress`}>
+                                    {({ field, meta, form }: FieldProps) => {
+                                      return (
+                                        <TextInput
+                                          {...field}
+                                          disabled={!poolAdmin}
+                                          label="Receiving address"
+                                          symbol={
+                                            <IconButton
+                                              onClick={() => copyToClipboard(values.receivingAddress)}
+                                              title="Copy address to clipboard"
+                                            >
+                                              <IconCopy />
+                                            </IconButton>
+                                          }
+                                          errorMessage={(meta.touched && meta.error) || ''}
+                                        />
+                                      )
+                                    }}
+                                  </Field>
+                                </Stack>
+                                <Button
+                                  onClick={() => {
+                                    remove(index)
+                                  }}
+                                  variant="tertiary"
+                                  disabled={!poolAdmin}
+                                >
+                                  <IconMinusCircle size="20px" />
+                                </Button>
+                              </Shelf>
+                            )
+                          })}
+                        </Stack>
+                        <Box>
+                          <Button
+                            icon={<IconPlusCircle />}
+                            variant="tertiary"
+                            disabled={!poolAdmin}
+                            onClick={() =>
+                              push({ feeName: '', amount: undefined, recipientAddress: '', feeId: undefined })
+                            }
+                          >
+                            Add new fee
+                          </Button>
+                        </Box>
+                      </Stack>
+                    )}
+                  </FieldArray>
+                  <ButtonGroup>
+                    <Button disabled={!poolAdmin} type="submit">
+                      Save
+                    </Button>
+                    <Button variant="secondary" onClick={onClose}>
+                      Cancel
+                    </Button>
+                  </ButtonGroup>
+                </Stack>
+              </Form>
+            </FormikProvider>
+          </Stack>
+        </Stack>
       </Stack>
     </Drawer>
   )

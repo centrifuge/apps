@@ -793,6 +793,18 @@ export type ActivePoolFeesData = {
   id: number
 }
 
+export type AddFee = {
+  fee: {
+    destination: string
+    type: 'Fixed' | 'ChargedUpTo'
+    limit: 'ShareOfPortfolioValuation' | 'AmountPerSecond'
+    name: string
+    feeId: number
+    amount: Rate
+  }
+  poolId: string
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -3370,6 +3382,38 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function updateFees(args: [add: AddFee[], remove: [feeId: number][]], options?: TransactionOptions) {
+    const [add, remove] = args
+    const $api = inst.getApi()
+
+    // TODO: update pool metadata with pool fees
+    // TODO: when run the first time it added the fee with the incorrect type
+    return $api.pipe(
+      switchMap((api) => {
+        const removeSubmittables = remove.map((feeId) => api.tx.poolFees.removeFee(feeId))
+        const addSubmittables = add.map(({ poolId, fee }) => {
+          return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
+            fee: [fee.destination, 'Root', { [fee.type]: { [fee.limit]: fee.amount.toString() } }],
+          })
+        })
+        const submittables = api.tx.utility.batchAll([...removeSubmittables, ...addSubmittables])
+        return inst.wrapSignAndSend(api, submittables, options)
+      })
+    )
+  }
+
+  function applyNewFee(args: [poolId: string, changeId: string]) {
+    const [poolId, changeId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.poolFees.applyNewFee(poolId, changeId)
+        return inst.wrapSignAndSend(api, submittable)
+      })
+    )
+  }
+
   function adminWriteOff(
     args: [poolId: string, loanId: string, writeOffGroupId: number],
     options?: TransactionOptions
@@ -3416,8 +3460,10 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   return {
-    getPoolCurrency,
     chargePoolFee,
+    updateFees,
+    applyNewFee,
+    getPoolCurrency,
     createPool,
     updatePool,
     setMaxReserve,

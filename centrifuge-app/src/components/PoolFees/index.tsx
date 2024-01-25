@@ -1,5 +1,5 @@
 import { TokenBalance } from '@centrifuge/centrifuge-js'
-import { Text, truncate } from '@centrifuge/fabric'
+import { Shelf, Text, truncate } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
@@ -61,7 +61,7 @@ const columns = [
     align: 'right',
     header: 'Pending fees',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.pendingFees ? formatBalance(row.pendingFees, row.poolCurrency) : ''}</Text>
+      return <Text variant="body3">{row.pendingFees ? formatBalance(row.pendingFees, row.poolCurrency, 2) : ''}</Text>
     },
   },
   {
@@ -143,7 +143,15 @@ export function PoolFees() {
           </RouterLinkButton>
         }
       >
-        <DataTable data={data || []} columns={columns} />
+        {data?.length ? (
+          <DataTable data={data || []} columns={columns} />
+        ) : (
+          <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
+            <Text color="textSecondary" variant="body2">
+              No fees set yet
+            </Text>
+          </Shelf>
+        )}
       </PageSection>
     </>
   )

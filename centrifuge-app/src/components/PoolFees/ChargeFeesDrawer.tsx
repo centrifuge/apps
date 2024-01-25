@@ -105,7 +105,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     Pending fees
                   </Text>
                   <Text variant="body3" color="gray.800" fontWeight={600}>
-                    {formatBalance(feeChainData?.amounts.pending || 0, pool.currency.symbol)}
+                    {formatBalance(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
                   </Text>
                 </Shelf>
                 <Shelf alignItems="flex-start" gap={1}>
