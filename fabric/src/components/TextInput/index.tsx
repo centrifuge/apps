@@ -3,7 +3,7 @@ import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import styled, { keyframes } from 'styled-components'
 import { Flex, IconCentrifuge, IconEthereum, IconLoader, IconSearch } from '../..'
-import { InputBoxProps, InputUnit, InputUnitProps, useContextId } from '../InputBox'
+import { InputUnit, InputUnitProps, useContextId } from '../InputUnit'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
@@ -244,8 +244,8 @@ export function TextAreaInput({
   )
 }
 
-type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
-  Omit<InputBoxProps, 'inputElement' | 'rightElement'>
+export type AddressInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
+  Omit<InputUnitProps, 'inputElement' | 'rightElement'>
 
 export const AddressInput = ({
   id,
@@ -256,7 +256,7 @@ export const AddressInput = ({
   onBlur,
   onChange,
   ...inputProps
-}: CurrencyInputProps) => {
+}: AddressInputProps) => {
   const defaultId = React.useId()
   id ??= defaultId
 
