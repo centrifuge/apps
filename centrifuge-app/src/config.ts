@@ -143,7 +143,7 @@ const mainnetConfig = {
   chainId: 1,
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmNvauf8E6TkUiyF1ZgtYtntHz335tCswKp2uhBH1fiui1', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmVL3N8A1LB6EoWbnH1qDn4XBCWHcL74gfRMJprzstPK8Z', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
 }
 
