@@ -56,7 +56,7 @@ export function PoolList() {
       .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b.valueLocked.sub(a.valueLocked).toNumber() : 0))
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
-    return search ? filterPools(pools, new URLSearchParams(search)) : sortedPools
+    return search ? filterPools([...pools, ...upcomingPools], new URLSearchParams(search)) : sortedPools
   }, [listedPools, search])
 
   if (!listedPools.length) {
