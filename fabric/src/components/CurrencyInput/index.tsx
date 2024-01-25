@@ -5,7 +5,7 @@ import { InputUnit, InputUnitProps } from '../InputUnit'
 import { InputAction, TextInputBox } from '../TextInput'
 
 export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> &
-  Omit<InputUnitProps, 'inputElement' | 'rightElement'> & {
+  Omit<InputUnitProps, 'inputElement'> & {
     value: number | ''
     currency?: React.ReactNode
     onSetMax?: () => void

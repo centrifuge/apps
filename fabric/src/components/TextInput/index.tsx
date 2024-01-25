@@ -245,7 +245,7 @@ export function TextAreaInput({
 }
 
 export type AddressInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
-  Omit<InputUnitProps, 'inputElement' | 'rightElement'>
+  Omit<InputUnitProps, 'inputElement'>
 
 export const AddressInput = ({
   id,

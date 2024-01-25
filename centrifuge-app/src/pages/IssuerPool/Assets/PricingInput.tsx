@@ -37,7 +37,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
             placeholder={0}
-            rightElement="%"
+            symbol="%"
             name="pricing.maxPriceVariation"
             validate={validate.maxPriceVariation}
           />
@@ -82,7 +82,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
           as={NumberInput}
           label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
           placeholder="0.00"
-          rightElement="%"
+          symbol="%"
           name="pricing.interestRate"
           validate={combine(required(), nonNegativeNumber(), max(100))}
         />
@@ -106,7 +106,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="advanceRate" variant="secondary" label="Advance rate*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.advanceRate"
             validate={validate.advanceRate}
           />
@@ -118,7 +118,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="probabilityOfDefault" variant="secondary" label="Probability of default*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.probabilityOfDefault"
             validate={validate.probabilityOfDefault}
           />
@@ -126,7 +126,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="lossGivenDefault" variant="secondary" label="Loss given default*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.lossGivenDefault"
             validate={validate.lossGivenDefault}
           />
@@ -134,7 +134,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="discountRate" variant="secondary" label="Discount rate*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.discountRate"
             validate={validate.discountRate}
           />
