@@ -25,6 +25,5 @@ Default.args = {
   errorMessage: '',
   disabled: false,
   loading: false,
-  aspectRatio: '1 / 1',
   height: '',
 }
