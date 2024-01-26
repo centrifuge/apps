@@ -15,7 +15,7 @@ type ExtendedChainInformation = BasicChainInformation & {
 export type EvmChains = { [chainId in 1 | 5]?: BasicChainInformation } | { [chainId: number]: ExtendedChainInformation }
 
 export function getAddChainParameters(chains: EvmChains, chainId: number): AddEthereumChainParameter | number {
-  const chainInfo = chains[chainId]
+  const chainInfo = (chains as any)[chainId]
   if (chainInfo && 'nativeCurrency' in chainInfo) {
     return {
       chainId,
@@ -31,7 +31,7 @@ export function getAddChainParameters(chains: EvmChains, chainId: number): AddEt
 
 export function getEvmUrls(chains: EvmChains) {
   return Object.keys(chains).reduce<{ [chainId: number]: string[] }>((accumulator, chainId) => {
-    const validURLs: string[] = chains[Number(chainId)].urls
+    const validURLs: string[] = (chains as any)[Number(chainId)].urls
 
     if (validURLs.length) {
       accumulator[Number(chainId)] = validURLs
@@ -55,8 +55,8 @@ const chainExtendedInfo = {
 }
 
 export function getChainInfo(chains: EvmChains, chainId: number): ExtendedChainInformation {
-  const chainInfo = chains[chainId]
-  const chainInfoExtended = chainExtendedInfo[chainId]
+  const chainInfo = (chains as any)[chainId]
+  const chainInfoExtended = (chainExtendedInfo as any)[chainId]
   return {
     ...chainInfoExtended,
     ...chainInfo,
