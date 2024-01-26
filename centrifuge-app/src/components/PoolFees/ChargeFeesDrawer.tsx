@@ -137,7 +137,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                           errorMessage={(meta.touched && meta.error) || undefined}
                           label="Amount to charge"
                           currency={pool.currency.symbol}
-                          disabled={form.isSubmitting || form.isValidating || !isAllowedToCharge || isChargeFeeLoading}
+                          disabled={form.isValidating || !isAllowedToCharge || isChargeFeeLoading}
                           secondaryLabel={`Maximum charge ${formatBalance(
                             maxCharge || 0,
                             pool.currency.symbol

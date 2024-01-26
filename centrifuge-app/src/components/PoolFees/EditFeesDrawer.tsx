@@ -41,7 +41,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const initialFormData = React.useMemo(() => {
     return pool.poolFees
       ?.filter((poolFees) => poolFees.type !== 'fixed')
-      .map((feeChainData, index) => {
+      .map((feeChainData) => {
         const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
         return {
           percentOfNav: parseFloat(feeChainData?.amounts.percentOfNav.toDecimal().toFixed(2)) ?? undefined,
@@ -103,7 +103,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
     },
     onSubmit: (values) => {
       if (!poolMetadata) throw new Error('poolMetadata not found')
-      // find fees that have been updated so they can be removed and re-added
+      // find fees that have been updated so they can be removed (and re-added)
       const remove: [feeId: number][] =
         initialFormData
           ?.filter((initialFee) => {
@@ -121,7 +121,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
 
       const add: AddFee[] = values.poolFees
         .filter((fee) => {
-          // don't add fees if they are unchanged from initial data
+          // skip fees if they are unchanged from initial data
           const initialFee = initialFormData?.find((f) => f.feeId === fee.feeId)
           const newPercent = Dec(fee.percentOfNav || 0)
             .toFixed(2)
@@ -139,7 +139,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             fee: {
               name: fee.feeName,
               destination: fee.receivingAddress,
-              amount: Rate.fromFloat(Dec(fee?.percentOfNav || 0)),
+              amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0).mul(100)),
               feeId: fee.feeId,
               type: 'ChargedUpTo',
               limit: 'ShareOfPortfolioValuation',

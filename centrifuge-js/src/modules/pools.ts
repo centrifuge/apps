@@ -1804,7 +1804,8 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.poolSystem.SolutionSubmitted.is(event) ||
             api.events.investments.InvestOrderUpdated.is(event) ||
             api.events.investments.RedeemOrderUpdated.is(event) ||
-            api.events.poolFees.Charged.is(event)
+            api.events.poolFees.Charged.is(event) ||
+            api.events.poolFees.Added.is(event)
         )
         return !!event
       })
@@ -1924,11 +1925,6 @@ export function getPoolsModule(inst: Centrifuge) {
               const navData = navMap[poolId]
               const epochExecution = epochExecutionMap[poolId]
               const currency = findCurrency(currencies, pool.currency)!
-
-              // TODO: remove, temporary UI fix
-              if (currency.symbol === 'LpEthUSDC') {
-                currency.symbol = 'USDC'
-              }
 
               const poolValue = new CurrencyBalance(
                 pool.tranches.tranches.reduce((prev: BN, tranche: TrancheDetailsData) => {
@@ -3271,7 +3267,7 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getProposedLoanChanges(args: [poolId: string]) {
+  function getProposedPoolSystemChanges(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
 
@@ -3560,7 +3556,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getLoans,
     getPendingCollect,
     getWriteOffPolicy,
-    getProposedLoanChanges,
+    getProposedPoolSystemChanges,
     getProposedPoolChanges,
     updateWriteOffPolicy,
     applyWriteOffPolicyUpdate,
