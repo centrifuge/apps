@@ -613,6 +613,8 @@ export interface PoolMetadataInput {
     signers: string[]
     threshold: number
   }
+
+  poolFees: { id: number; name: string }[]
 }
 export type WithdrawAddress = {
   name?: string
@@ -762,7 +764,7 @@ export type Permissions = {
 }
 
 export type ActivePoolFees = {
-  type: 'fixed'
+  type: 'fixed' | 'shareOfPortfolioValuation'
   amounts: {
     percentOfNav: Rate
     pending: CurrencyBalance
@@ -855,7 +857,19 @@ export function getPoolsModule(inst: Centrifuge) {
               currency,
               maxReserve.toString(),
               pinnedMetadata.ipfsHash,
-              []
+              [],
+              // temp fix for pool creation, sets a fixed poolFee is %1 with Dave as the recipient
+              // metadata is added in createPool form
+              [
+                [
+                  'Top',
+                  {
+                    destination: 'kAJFEnqV7LCiCaxNoSu7esnt96V7diRvYBZ9xeUHZg5k6Dqo4', // Dave
+                    editor: 'Root',
+                    feeType: { Fixed: { limit: { ShareOfPortfolioValuation: Rate.fromFloat(1) } } },
+                  },
+                ],
+              ]
             )
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
@@ -914,6 +928,7 @@ export function getPoolsModule(inst: Centrifuge) {
         details: metadata.details,
         status: 'open',
         listed: metadata.listed ?? true,
+        poolFees: metadata.poolFees,
       },
       pod: {
         node: metadata.podEndpoint ?? null,
@@ -3382,22 +3397,57 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function updateFees(args: [add: AddFee[], remove: [feeId: number][]], options?: TransactionOptions) {
-    const [add, remove] = args
+  function updateFees(
+    args: [add: AddFee[], remove: [feeId: number][], poolId: string, metadata: PoolMetadata],
+    options?: TransactionOptions
+  ) {
+    const [add, remove, poolId, metadata] = args
     const $api = inst.getApi()
 
-    // TODO: update pool metadata with pool fees
-    // TODO: when run the first time it added the fee with the incorrect type
     return $api.pipe(
-      switchMap((api) => {
+      switchMap((api) => api.query.poolFees.lastFeeId()),
+      combineLatestWith($api),
+      switchMap(([lastFeeId, api]) => {
         const removeSubmittables = remove.map((feeId) => api.tx.poolFees.removeFee(feeId))
+        let updatedMetadata: PoolMetadata = {
+          ...metadata,
+          pool: {
+            ...metadata.pool,
+            poolFees: metadata?.pool?.poolFees?.filter((fee) => remove.find((f) => f[0] === fee.id)),
+          },
+        }
         const addSubmittables = add.map(({ poolId, fee }) => {
           return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
-            fee: [fee.destination, 'Root', { [fee.type]: { [fee.limit]: fee.amount.toString() } }],
+            destination: fee.destination,
+            editor: 'Root',
+            feeType: { [fee.type]: { [fee.limit]: fee.amount.toString() } },
           })
         })
-        const submittables = api.tx.utility.batchAll([...removeSubmittables, ...addSubmittables])
-        return inst.wrapSignAndSend(api, submittables, options)
+        updatedMetadata = {
+          ...metadata,
+          pool: {
+            ...metadata.pool,
+            poolFees: metadata?.pool?.poolFees?.concat(
+              add.map((metadata, index) => {
+                return {
+                  id: parseInt(lastFeeId.toHuman() as string) + index + 1,
+                  name: metadata.fee.name,
+                }
+              })
+            ),
+          },
+        }
+        const $pinnedMetadata = inst.metadata.pinJson(updatedMetadata)
+        return combineLatest([$api, $pinnedMetadata]).pipe(
+          switchMap(([api, pinnedMetadata]) => {
+            const submittables = api.tx.utility.batchAll([
+              ...removeSubmittables,
+              ...addSubmittables,
+              api.tx.poolRegistry.setMetadata(poolId, pinnedMetadata.ipfsHash),
+            ])
+            return inst.wrapSignAndSend(api, submittables, options)
+          })
+        )
       })
     )
   }
@@ -3410,6 +3460,19 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => {
         const submittable = api.tx.poolFees.applyNewFee(poolId, changeId)
         return inst.wrapSignAndSend(api, submittable)
+      })
+    )
+  }
+
+  function getNextPoolFeeId() {
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        return combineLatest([api.tx.poolFees.lastFeeId()])
+      }),
+      map((feeId) => {
+        return parseInt(feeId[0].toHuman() as string) + 1
       })
     )
   }
@@ -3463,6 +3526,7 @@ export function getPoolsModule(inst: Centrifuge) {
     chargePoolFee,
     updateFees,
     applyNewFee,
+    getNextPoolFeeId,
     getPoolCurrency,
     createPool,
     updatePool,

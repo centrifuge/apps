@@ -1,6 +1,6 @@
-import { TokenBalance } from '@centrifuge/centrifuge-js'
+import { Rate, TokenBalance } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Shelf, Text, truncate } from '@centrifuge/fabric'
-import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
 import { NavLink } from 'react-router-dom'
@@ -15,12 +15,12 @@ import { EditFeesDrawer } from './EditFeesDrawer'
 
 type Row = {
   name: string
-  type: string
-  percentOfNav: Decimal
-  pendingFees: TokenBalance
-  receivingAddress: string
+  type?: string
+  percentOfNav?: Rate
+  pendingFees?: TokenBalance
+  receivingAddress?: string
   action: null | React.ReactNode
-  poolCurrency: string
+  poolCurrency?: string
 }
 
 const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
@@ -54,7 +54,11 @@ const columns = [
     align: 'right',
     header: 'Percentage',
     cell: (row: Row) => {
-      return <Text variant="body3">{formatPercentage(row.percentOfNav)} of NAV</Text>
+      return (
+        <Text variant="body3">
+          {row.percentOfNav ? `${formatPercentage(row.percentOfNav.toDecimal())} of NAV` : ''}
+        </Text>
+      )
     },
   },
   {
@@ -68,7 +72,7 @@ const columns = [
     align: 'left',
     header: 'Receiving address',
     cell: (row: Row) => {
-      return <Text variant="body3">{truncate(row.receivingAddress)}</Text>
+      return <Text variant="body3">{row.receivingAddress ? truncate(row.receivingAddress) : ''}</Text>
     },
   },
   {
@@ -91,24 +95,53 @@ export function PoolFees() {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false)
   const drawer = params.get('charge')
 
+  const { execute: applyNewFee } = useCentrifugeTransaction('Apply new fee', (cent) => cent.pools.applyNewFee)
+
   const data = React.useMemo(() => {
-    return poolMetadata?.pool?.poolFees?.map((feeMatadata) => {
-      const feeChainData = pool.poolFees?.find((f) => f.id === feeMatadata.id)
-      const fixedFee = feeChainData?.type === 'fixed'
-      return {
-        name: feeMatadata.name,
-        type: fixedFee ? 'Fixed % of NAV' : 'Direct charge',
-        percentOfNav: feeChainData?.amounts?.percentOfNav.toDecimal(),
-        pendingFees: fixedFee ? null : feeChainData?.amounts.pending,
-        receivingAddress: feeChainData?.destination,
-        action: fixedFee ? null : (
-          <StyledLink to={`?charge=${feeChainData?.id}`}>
-            <Text variant="body3">Charge</Text>
-          </StyledLink>
-        ),
-        poolCurrency: pool.currency.symbol,
-      }
-    })
+    return poolMetadata?.pool?.poolFees
+      ?.map((feeMatadata) => {
+        const feeChainData = pool.poolFees?.find((f) => f.id === feeMatadata.id)
+        if (!feeChainData)
+          return {
+            name: feeMatadata.name,
+            type: '',
+            percentOfNav: undefined,
+            pendingFees: null,
+            receivingAddress: '',
+            action: (
+              <StyledLink
+                style={{ outline: 'none', border: 'none', background: 'none' }}
+                as="button"
+                onClick={() => {
+                  // TODO: figure out how to get changeId
+                  applyNewFee([poolId, '0x'])
+                }}
+              >
+                <Text variant="body3">Apply changes</Text>
+              </StyledLink>
+            ),
+            poolCurrency: pool.currency.symbol,
+          }
+        const fixedFee = feeChainData?.type === 'fixed'
+        return {
+          name: feeMatadata.name,
+          type: fixedFee ? 'Fixed % of NAV' : 'Direct charge',
+          percentOfNav: feeChainData?.amounts?.percentOfNav,
+          pendingFees: fixedFee ? null : feeChainData?.amounts.pending,
+          receivingAddress: feeChainData?.destination,
+          action: fixedFee ? null : (
+            <StyledLink to={`?charge=${feeChainData?.id}`}>
+              <Text variant="body3">Charge</Text>
+            </StyledLink>
+          ),
+          poolCurrency: pool.currency.symbol,
+        }
+      })
+      .sort((a, b) => {
+        if (a.type === 'Fixed % of NAV' && b.type !== 'Fixed % of NAV') return -1
+        if (a.type !== 'Fixed % of NAV' && b.type === 'Fixed % of NAV') return 1
+        return 0
+      })
   }, [poolMetadata])
 
   React.useEffect(() => {

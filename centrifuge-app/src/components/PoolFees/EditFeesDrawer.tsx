@@ -22,7 +22,7 @@ import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatPercentage } from '../../utils/formatting'
-import { usePoolAdmin } from '../../utils/usePermissions'
+import { usePoolAdmin, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { ButtonGroup } from '../ButtonGroup'
 
@@ -36,6 +36,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const pool = usePool(poolId)
   const { data: poolMetadata, isLoading } = usePoolMetadata(pool)
   const poolAdmin = usePoolAdmin(poolId)
+  const account = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })[0]
 
   const initialFormData = React.useMemo(() => {
     return pool.poolFees
@@ -43,7 +44,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       .map((feeChainData, index) => {
         const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
         return {
-          percentOfNav: feeChainData?.amounts.percentOfNav.toDecimal().toFixed(2).toString() || undefined,
+          percentOfNav: parseFloat(feeChainData?.amounts.percentOfNav.toDecimal().toFixed(2)) ?? undefined,
           feeName: feeMetadata?.name || '',
           receivingAddress: feeChainData?.destination || '',
           feeId: feeChainData?.id || 0,
@@ -57,10 +58,13 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
     }
   }, [isLoading, initialFormData])
 
-  const { execute: updateFeesTx } = useCentrifugeTransaction('Update fees', (cent) => cent.pools.updateFees)
+  const { execute: updateFeesTx, isLoading: updateFeeTxLoading } = useCentrifugeTransaction(
+    'Update fees',
+    (cent) => cent.pools.updateFees
+  )
 
   const form = useFormik<{
-    poolFees: { feeName: string; percentOfNav?: string; receivingAddress: string; feeId: number }[]
+    poolFees: { feeName: string; percentOfNav?: number; receivingAddress: string; feeId: number }[]
   }>({
     initialValues: {
       poolFees: initialFormData || [],
@@ -79,7 +83,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           errors.poolFees[index] = errors.poolFees[index] || {}
           errors.poolFees[index].percentOfNav = 'Required'
         }
-        if (fee.percentOfNav && parseFloat(fee.percentOfNav) <= 0) {
+        if (fee.percentOfNav && fee.percentOfNav <= 0) {
           errors.poolFees = errors.poolFees || []
           errors.poolFees[index] = errors.poolFees[index] || {}
           errors.poolFees[index].percentOfNav = 'Must be greater than 0'
@@ -97,7 +101,8 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       })
       return errors
     },
-    onSubmit: (values, actions) => {
+    onSubmit: (values) => {
+      if (!poolMetadata) throw new Error('poolMetadata not found')
       // find fees that have been updated so they can be removed and re-added
       const remove: [feeId: number][] =
         initialFormData
@@ -108,7 +113,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
               ?.toString()
             return (
               initialFee.feeName !== fee?.feeName ||
-              initialFee.percentOfNav?.toString() !== newPercent ||
+              parseFloat(initialFee?.percentOfNav?.toString() || '0') !== parseFloat(newPercent) ||
               initialFee.receivingAddress !== fee?.receivingAddress
             )
           })
@@ -121,9 +126,10 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           const newPercent = Dec(fee.percentOfNav || 0)
             .toFixed(2)
             ?.toString()
+
           return !(
             initialFee?.feeName === fee.feeName &&
-            initialFee?.percentOfNav === newPercent &&
+            parseFloat(initialFee?.percentOfNav?.toString() || '0') === parseFloat(newPercent) &&
             initialFee?.receivingAddress === fee.receivingAddress
           )
         })
@@ -133,7 +139,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             fee: {
               name: fee.feeName,
               destination: fee.receivingAddress,
-              amount: Rate.fromFloat(Dec(fee?.percentOfNav || 0).mul(100)),
+              amount: Rate.fromFloat(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
               type: 'ChargedUpTo',
               limit: 'ShareOfPortfolioValuation',
@@ -141,7 +147,8 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           }
         })
 
-      updateFeesTx([add, remove])
+      // @ts-expect-error
+      updateFeesTx([add, remove, poolId, poolMetadata], { account })
     },
   })
 
@@ -201,7 +208,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                           <TextInput
                                             {...field}
                                             label="Name"
-                                            disabled={!poolAdmin}
+                                            disabled={!poolAdmin || updateFeeTxLoading}
                                             errorMessage={(meta.touched && meta.error) || ''}
                                           />
                                         )
@@ -215,7 +222,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                               {...field}
                                               label="Current percentage"
                                               symbol="%"
-                                              disabled={!poolAdmin}
+                                              disabled={!poolAdmin || updateFeeTxLoading}
                                               errorMessage={(meta.touched && meta.error) || ''}
                                             />
                                           </Box>
@@ -228,7 +235,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                       return (
                                         <TextInput
                                           {...field}
-                                          disabled={!poolAdmin}
+                                          disabled={!poolAdmin || updateFeeTxLoading}
                                           label="Receiving address"
                                           symbol={
                                             <IconButton
@@ -249,7 +256,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                     remove(index)
                                   }}
                                   variant="tertiary"
-                                  disabled={!poolAdmin}
+                                  disabled={!poolAdmin || updateFeeTxLoading}
                                 >
                                   <IconMinusCircle size="20px" />
                                 </Button>
@@ -261,9 +268,9 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                           <Button
                             icon={<IconPlusCircle />}
                             variant="tertiary"
-                            disabled={!poolAdmin}
+                            disabled={!poolAdmin || updateFeeTxLoading}
                             onClick={() =>
-                              push({ feeName: '', amount: undefined, recipientAddress: '', feeId: undefined })
+                              push({ feeName: '', percentOfNav: undefined, receivingAddress: '', feeId: undefined })
                             }
                           >
                             Add new fee
@@ -273,7 +280,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     )}
                   </FieldArray>
                   <ButtonGroup>
-                    <Button disabled={!poolAdmin} type="submit">
+                    <Button disabled={!poolAdmin || updateFeeTxLoading} loading={updateFeeTxLoading} type="submit">
                       Save
                     </Button>
                     <Button variant="secondary" onClick={onClose}>
