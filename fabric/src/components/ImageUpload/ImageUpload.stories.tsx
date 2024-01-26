@@ -13,7 +13,7 @@ const Template: ImageUploadStory = (args) => (
   <Stack gap={4}>
     <ImageUpload {...args} />
     <ImageUpload {...args} height="300px" label="Bigger preview" />
-    <ImageUpload {...args} height="150px" aspectRatio="16/9" label="Different aspect ratio" />
+    <ImageUpload {...args} height="150px" label="Different aspect ratio" />
   </Stack>
 )
 
