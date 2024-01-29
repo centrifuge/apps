@@ -2505,7 +2505,7 @@ export function getPoolsModule(inst: Centrifuge) {
           trancheBalances: { nodes: SubqueryTrancheBalances[] }
           currencyBalances: { nodes: SubqueryTrancheBalances[] }
         }>(
-          `query($poolId: String!, $trancheId: String, $currencyId: String) {
+          `query($poolId: String!, $trancheId: String) {
           trancheBalances(
             filter: {
               poolId: { equalTo: $poolId },
@@ -2526,11 +2526,9 @@ export function getPoolsModule(inst: Centrifuge) {
             }
           }
 
-          currencyBalances(
-            filter: {
-              currencyId: { startsWithInsensitive: $currencyId },
-            }) {
+          currencyBalances {
             nodes {
+              currencyId
               accountId
               amount
             }
@@ -2540,12 +2538,12 @@ export function getPoolsModule(inst: Centrifuge) {
           {
             poolId,
             trancheId,
-            currencyId: `${chainId}-Tranche-${poolId}`,
           },
           false
         )
       })
     )
+    // currencyId: `${chainId}-Tranche-${poolId}`,
 
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),

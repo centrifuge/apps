@@ -21,6 +21,8 @@ const status = {
   TRANSFER_OUT: 'default',
   INVEST_COLLECT: 'default',
   REDEEM_COLLECT: 'default',
+  INVEST_LP_COLLECT: 'default',
+  REDEEM_LP_COLLECT: 'default',
   CREATED: 'default',
   BORROWED: 'default',
   REPAID: 'default',

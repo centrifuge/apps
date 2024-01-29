@@ -61,7 +61,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
           token.currency.name,
           tx.evmAddress || utils.formatAddress(tx.accountId),
           (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
-          tx.epochNumber.toString(),
+          tx.epochNumber ? tx.epochNumber.toString() : '-',
           formatDate(tx.timestamp.toString()),
           formatInvestorTransactionsType({
             type: tx.type,
