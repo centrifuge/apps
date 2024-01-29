@@ -207,7 +207,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                 <Stack gap={2} borderBottom="0.5px solid #DDDBD9" pb={3} maxWidth="350px">
                                   <Shelf gap={2}>
                                     <Field name={`poolFees.${index}.feeName`}>
-                                      {({ field, meta, form }: FieldProps) => {
+                                      {({ field, meta }: FieldProps) => {
                                         return (
                                           <TextInput
                                             {...field}
