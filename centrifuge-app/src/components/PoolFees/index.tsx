@@ -44,7 +44,7 @@ const columns = [
     cell: (row: Row) => {
       return (
         <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav.toDecimal())} of NAV` : ''}
+          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal())} of NAV` : ''}
         </Text>
       )
     },
@@ -116,6 +116,7 @@ export function PoolFees() {
       return [
         ...activeFees,
         ...changes.map(({ change, hash }) => {
+          console.log('🚀 ~ change:', change.amounts.percentOfNav)
           return {
             name: '',
             type: change.type,
@@ -214,7 +215,7 @@ export function useProposedFeeChanges(poolId: string) {
             destination: change.poolFee.appendFee[1].destination,
             type: Object.keys(change.poolFee.appendFee[1].feeType)[0],
             amounts: {
-              percentOfNav: change.poolFee.appendFee[1].feeType.chargedUpTo.limit.shareOfPortfolioValuation,
+              percentOfNav: new Rate(change.poolFee.appendFee[1].feeType.chargedUpTo.limit.shareOfPortfolioValuation),
             },
           },
           hash,

@@ -1,4 +1,4 @@
-import { AddFee, Rate } from '@centrifuge/centrifuge-js'
+import { AddFee, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -86,7 +86,12 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
         if (fee.percentOfNav && fee.percentOfNav <= 0) {
           errors.poolFees = errors.poolFees || []
           errors.poolFees[index] = errors.poolFees[index] || {}
-          errors.poolFees[index].percentOfNav = 'Must be greater than 0'
+          errors.poolFees[index].percentOfNav = 'Must be greater than 0%'
+        }
+        if (fee.percentOfNav && fee.percentOfNav >= 100) {
+          errors.poolFees = errors.poolFees || []
+          errors.poolFees[index] = errors.poolFees[index] || {}
+          errors.poolFees[index].percentOfNav = 'Must be less than 100%'
         }
         if (!fee.receivingAddress) {
           errors.poolFees = errors.poolFees || []
@@ -104,7 +109,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
     onSubmit: (values) => {
       if (!poolMetadata) throw new Error('poolMetadata not found')
       // find fees that have been updated so they can be removed (and re-added)
-      const remove: [feeId: number][] =
+      const remove: number[] =
         initialFormData
           ?.filter((initialFee) => {
             const fee = values.poolFees?.find((f) => f.feeId === initialFee.feeId)
@@ -117,8 +122,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
               initialFee.receivingAddress !== fee?.receivingAddress
             )
           })
-          .map((initialFee) => [initialFee.feeId]) || []
-
+          .map((initialFee) => initialFee.feeId) || []
       const add: AddFee[] = values.poolFees
         .filter((fee) => {
           // skip fees if they are unchanged from initial data
@@ -139,16 +143,16 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             fee: {
               name: fee.feeName,
               destination: fee.receivingAddress,
-              amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0).mul(100)),
+              amount: Rate.fromFloat(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
               type: 'ChargedUpTo',
               limit: 'ShareOfPortfolioValuation',
+              account: account.actingAddress,
             },
           }
         })
 
-      // @ts-expect-error
-      updateFeesTx([add, remove, poolId, poolMetadata], { account })
+      updateFeesTx([add, remove, poolId, poolMetadata as PoolMetadata], { account })
     },
   })
 
@@ -215,23 +219,21 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                       }}
                                     </Field>
                                     <Field name={`poolFees.${index}.percentOfNav`}>
-                                      {({ field, meta, form }: FieldProps) => {
+                                      {({ field, meta }: FieldProps) => {
                                         return (
-                                          <Box>
-                                            <NumberInput
-                                              {...field}
-                                              label="Current percentage"
-                                              symbol="%"
-                                              disabled={!poolAdmin || updateFeeTxLoading}
-                                              errorMessage={(meta.touched && meta.error) || ''}
-                                            />
-                                          </Box>
+                                          <NumberInput
+                                            {...field}
+                                            label="Current percentage"
+                                            symbol="%"
+                                            disabled={!poolAdmin || updateFeeTxLoading}
+                                            errorMessage={(meta.touched && meta.error) || ''}
+                                          />
                                         )
                                       }}
                                     </Field>
                                   </Shelf>
                                   <Field name={`poolFees.${index}.receivingAddress`}>
-                                    {({ field, meta, form }: FieldProps) => {
+                                    {({ field, meta }: FieldProps) => {
                                       return (
                                         <TextInput
                                           {...field}

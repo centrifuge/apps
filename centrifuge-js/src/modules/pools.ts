@@ -803,6 +803,7 @@ export type AddFee = {
     name: string
     feeId: number
     amount: Rate
+    account: string
   }
   poolId: string
 }
@@ -3273,7 +3274,9 @@ export function getPoolsModule(inst: Centrifuge) {
 
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        const event = events.find(({ event }) => api.events.poolSystem.ProposedChange.is(event))
+        const event = events.find(
+          ({ event }) => api.events.poolSystem.ProposedChange.is(event) || api.events.poolFees.Added.is(event)
+        )
 
         if (!event) return false
 
@@ -3394,7 +3397,7 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function updateFees(
-    args: [add: AddFee[], remove: [feeId: number][], poolId: string, metadata: PoolMetadata],
+    args: [add: AddFee[], remove: number[], poolId: string, metadata: PoolMetadata],
     options?: TransactionOptions
   ) {
     const [add, remove, poolId, metadata] = args
@@ -3404,33 +3407,32 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) => api.query.poolFees.lastFeeId()),
       combineLatestWith($api),
       switchMap(([lastFeeId, api]) => {
-        const removeSubmittables = remove.map((feeId) => api.tx.poolFees.removeFee(feeId))
-        let updatedMetadata: PoolMetadata = {
-          ...metadata,
-          pool: {
-            ...metadata.pool,
-            poolFees: metadata?.pool?.poolFees?.filter((fee) => remove.find((f) => f[0] === fee.id)),
-          },
-        }
+        const removeSubmittables = remove.map((feeId) => api.tx.poolFees.removeFee([feeId]))
         const addSubmittables = add.map(({ poolId, fee }) => {
           return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
             destination: fee.destination,
-            editor: 'Root',
-            feeType: { [fee.type]: { [fee.limit]: fee.amount.toString() } },
+            editor: { account: fee.account },
+            feeType: { [fee.type]: { limit: { [fee.limit]: fee.amount } } },
           })
         })
-        updatedMetadata = {
+        const updatedMetadata = {
           ...metadata,
           pool: {
             ...metadata.pool,
-            poolFees: metadata?.pool?.poolFees?.concat(
-              add.map((metadata, index) => {
+            poolFees: [
+              ...(metadata?.pool?.poolFees?.filter((fee) => {
+                if (remove.length) return remove.find((f) => f !== fee.id)
+                return true
+              }) || []),
+              ...add.map((metadata, index) => {
                 return {
+                  // chain refactor required: feeId needs to be assigned to fee when it's proposed
+                  // until then multiple fees have to be added at once or all pending fees have to be applied before adding more
                   id: parseInt(lastFeeId.toHuman() as string) + index + 1,
                   name: metadata.fee.name,
                 }
-              })
-            ),
+              }),
+            ],
           },
         }
         const $pinnedMetadata = inst.metadata.pinJson(updatedMetadata)
@@ -3448,14 +3450,14 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function applyNewFee(args: [poolId: string, changeId: string]) {
+  function applyNewFee(args: [poolId: string, changeId: string], options?: TransactionOptions) {
     const [poolId, changeId] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.poolFees.applyNewFee(poolId, changeId)
-        return inst.wrapSignAndSend(api, submittable)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -3465,7 +3467,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
-        return combineLatest([api.tx.poolFees.lastFeeId()])
+        return combineLatest([api.query.poolFees.lastFeeId()])
       }),
       map((feeId) => {
         return parseInt(feeId[0].toHuman() as string) + 1
