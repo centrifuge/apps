@@ -5,7 +5,7 @@ import {
   useCentrifugeQuery,
   useCentrifugeTransaction,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, Checkbox, CurrencyInput, Select, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, CurrencyInput, Select, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { map } from 'rxjs'
@@ -47,7 +47,8 @@ function NavManagement() {
     () => (allLoans?.filter((l) => isExternalLoan(l) && l.status !== 'Closed') as ExternalLoan[]) ?? [],
     [allLoans]
   )
-  const cashLoans = allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') ?? []
+  const cashLoans =
+    (allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') as (CreatedLoan | ActiveLoan)[]) ?? []
   const shouldReset = React.useRef(false)
   const api = useCentrifugeApi()
 
@@ -124,6 +125,10 @@ function NavManagement() {
 
   console.log('form.values.feed', form.values.feed)
 
+  const newNavExternal = form.values.feed.reduce((acc, cur) => acc + cur.quantity * (cur.value || cur.oldValue), 0)
+  const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
+  const newNav = newNavExternal + newNavCash
+
   return (
     <FormikProvider value={form}>
       <Form>
@@ -157,7 +162,7 @@ function NavManagement() {
                   ),
               },
               {
-                align: 'left',
+                align: 'right',
                 header: 'Quantity',
                 cell: (row: Row) =>
                   'oldValue' in row
@@ -165,12 +170,12 @@ function NavManagement() {
                     : formatBalance(row.outstandingDebt, pool?.currency.symbol),
               },
               {
-                align: 'left',
+                align: 'right',
                 header: 'Old price',
                 cell: (row: Row) => ('oldValue' in row ? formatBalance(row.oldValue, pool?.currency.symbol) : ''),
               },
               {
-                align: 'left',
+                align: 'right',
                 header: 'New price',
                 cell: (row: Row, index) =>
                   'oldValue' in row ? (
@@ -190,7 +195,7 @@ function NavManagement() {
                   ),
               },
               {
-                align: 'left',
+                align: 'right',
                 header: 'Value',
                 cell: (row: Row) =>
                   'oldValue' in row
@@ -199,6 +204,12 @@ function NavManagement() {
               },
             ]}
           />
+          <Shelf justifyContent="end" px={2}>
+            <Stack alignItems="center">
+              <Text>=</Text>
+              <Text>{formatBalance(newNav, pool?.currency.symbol)}</Text>
+            </Stack>
+          </Shelf>
         </LayoutSection>
         <Box position="sticky" bottom={0} backgroundColor="backgroundPage" pt={5}>
           <PageSection>
