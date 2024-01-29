@@ -108,9 +108,9 @@ export function Menu() {
       )}
 
       {showOracle && (
-        <PageLink to="/oracle-update" stacked={!isLarge}>
+        <PageLink to="/nav-management" stacked={!isLarge}>
           <IconPools />
-          Oracle update
+          NAV management
         </PageLink>
       )}
 

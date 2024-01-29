@@ -1,37 +1,39 @@
-import { addressToHex, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, addressToHex, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
 import {
   useAddress,
   useCentrifugeApi,
   useCentrifugeQuery,
   useCentrifugeTransaction,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, Checkbox, CurrencyInput, Select, Shelf } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, CurrencyInput, Select, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { map } from 'rxjs'
 import { DataTable } from '../components/DataTable'
 import { LayoutBase } from '../components/LayoutBase'
 import { LayoutSection } from '../components/LayoutBase/LayoutSection'
+import { AssetName } from '../components/LoanList'
 import { PageSection } from '../components/PageSection'
+import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata, usePools } from '../utils/usePools'
 import { settlementPrice } from '../utils/validation'
-import { isExternalLoan } from './Loan/utils'
+import { isCashLoan, isExternalLoan } from './Loan/utils'
 
-export default function OracleUpdatePage() {
+export default function NavManagementPage() {
   return (
     <LayoutBase>
-      <OracleUpdate />
+      <NavManagement />
     </LayoutBase>
   )
 }
 
 type FormValues = {
-  feed: { id: string; value: number | ''; Isin: string }[]
+  feed: { id: string; oldValue: number; value: number | ''; Isin: string; quantity: number }[]
   closeEpoch: boolean
 }
-type FeedItem = FormValues['feed'][0]
+type Row = FormValues['feed'][0] | ActiveLoan | CreatedLoan
 
-function OracleUpdate() {
+function NavManagement() {
   const address = useAddress('substrate')
   const [poolId, setPoolId] = React.useState('')
   const { poolsByFeeder } = usePoolFeeders()
@@ -40,10 +42,12 @@ function OracleUpdate() {
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     enabled: !!poolId && !!pool,
   })
-  const loans = React.useMemo(
-    () => (allLoans?.filter((l) => isExternalLoan(l) && l.status !== 'Closed') as ExternalLoan[]) || undefined,
+
+  const externalLoans = React.useMemo(
+    () => (allLoans?.filter((l) => isExternalLoan(l) && l.status !== 'Closed') as ExternalLoan[]) ?? [],
     [allLoans]
   )
+  const cashLoans = allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') ?? []
   const shouldReset = React.useRef(false)
   const api = useCentrifugeApi()
 
@@ -68,18 +72,24 @@ function OracleUpdate() {
   const initialValues = React.useMemo(
     () => ({
       feed:
-        loans?.map((l) => {
+        externalLoans?.map((l) => {
           let latestOraclePrice = l.pricing.oracle[0]
           l.pricing.oracle.forEach((price) => {
             if (price.timestamp > latestOraclePrice.timestamp) {
               latestOraclePrice = price
             }
           })
-          return { id: l.id, value: latestOraclePrice.value.toFloat(), Isin: l.pricing.Isin }
+          return {
+            id: l.id,
+            oldValue: latestOraclePrice.value.toFloat(),
+            value: '' as const,
+            Isin: l.pricing.Isin,
+            quantity: l.pricing.outstandingQuantity.toFloat(),
+          }
         }) ?? [],
       closeEpoch: false,
     }),
-    [loans]
+    [externalLoans]
   )
 
   const form = useFormik<FormValues>({
@@ -89,6 +99,12 @@ function OracleUpdate() {
       actions.setSubmitting(false)
     },
   })
+
+  const allowedPoolIds = address ? poolsByFeeder[address] : undefined
+
+  React.useEffect(() => {
+    if (allowedPoolIds?.length === 1) setPoolId(allowedPoolIds[0])
+  }, [allowedPoolIds])
 
   React.useEffect(() => {
     if (shouldReset.current) {
@@ -106,12 +122,12 @@ function OracleUpdate() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [poolId])
 
-  const allowedPoolIds = address ? poolsByFeeder[address] : undefined
+  console.log('form.values.feed', form.values.feed)
 
   return (
     <FormikProvider value={form}>
       <Form>
-        <LayoutSection title="Update oracle values" pt={5}>
+        <LayoutSection title="NAV management" pt={5}>
           <Select
             options={
               pools
@@ -123,44 +139,73 @@ function OracleUpdate() {
             onChange={(e) => setPoolId(e.target.value)}
           />
           <DataTable
-            data={form.values.feed}
+            data={[...form.values.feed, ...cashLoans]}
             columns={[
               {
                 align: 'left',
-                header: 'Loan id',
-                width: '80px',
-                cell: (row: FeedItem) => row.id,
+                header: 'Asset',
+                cell: (row: Row) =>
+                  'oldValue' in row ? (
+                    <Shelf gap={1}>
+                      <Thumbnail type="asset" label={row.id} />
+                      <Text variant="body2" fontWeight={600}>
+                        {row.Isin}
+                      </Text>
+                    </Shelf>
+                  ) : (
+                    <AssetName loan={row} />
+                  ),
               },
               {
                 align: 'left',
-                header: 'Isin',
-                cell: (row: FeedItem) => row.Isin,
+                header: 'Quantity',
+                cell: (row: Row) =>
+                  'oldValue' in row
+                    ? formatBalance(row.quantity)
+                    : formatBalance(row.outstandingDebt, pool?.currency.symbol),
               },
               {
                 align: 'left',
-                header: 'Price',
-                cell: (row: FeedItem, index) => (
-                  <Field name={`feed.${index}.value`} validate={settlementPrice()}>
-                    {({ field, meta, form }: FieldProps) => (
-                      <CurrencyInput
-                        {...field}
-                        errorMessage={meta.touched ? meta.error : undefined}
-                        currency={pool?.currency.symbol}
-                        onChange={(value) => form.setFieldValue(`feed.${index}.value`, value)}
-                      />
-                    )}
-                  </Field>
-                ),
+                header: 'Old price',
+                cell: (row: Row) => ('oldValue' in row ? formatBalance(row.oldValue, pool?.currency.symbol) : ''),
+              },
+              {
+                align: 'left',
+                header: 'New price',
+                cell: (row: Row, index) =>
+                  'oldValue' in row ? (
+                    <Field name={`feed.${index}.value`} validate={settlementPrice()}>
+                      {({ field, meta, form }: FieldProps) => (
+                        <CurrencyInput
+                          {...field}
+                          placeholder={row.oldValue.toString()}
+                          errorMessage={meta.touched ? meta.error : undefined}
+                          currency={pool?.currency.symbol}
+                          onChange={(value) => form.setFieldValue(`feed.${index}.value`, value)}
+                        />
+                      )}
+                    </Field>
+                  ) : (
+                    ''
+                  ),
+              },
+              {
+                align: 'left',
+                header: 'Value',
+                cell: (row: Row) =>
+                  'oldValue' in row
+                    ? formatBalance(row.quantity * (row.value || row.oldValue), pool?.currency.symbol)
+                    : formatBalance(row.outstandingDebt, pool?.currency.symbol),
               },
             ]}
           />
-          <Field type="checkbox" name="closeEpoch" as={Checkbox} label="Close epoch" />
         </LayoutSection>
         <Box position="sticky" bottom={0} backgroundColor="backgroundPage" pt={5}>
           <PageSection>
-            <Shelf gap={1} justifyContent="end">
+            <Shelf gap={2} justifyContent="end">
+              <Field type="checkbox" name="closeEpoch" as={Checkbox} label="Execute orders" />
               <Button type="submit" small loading={isLoading || form.isSubmitting}>
-                Update
+                Confirm NAV
               </Button>
             </Shelf>
           </PageSection>
