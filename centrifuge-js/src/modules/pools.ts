@@ -3464,14 +3464,9 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function getNextPoolFeeId() {
     const $api = inst.getApi()
-
     return $api.pipe(
-      switchMap((api) => {
-        return combineLatest([api.query.poolFees.lastFeeId()])
-      }),
-      map((feeId) => {
-        return parseInt(feeId[0].toHuman() as string) + 1
-      })
+      switchMap((api) => combineLatest([api.query.poolFees.lastFeeId()])),
+      map((feeId) => parseInt(feeId[0].toHuman() as string) + 1)
     )
   }
 

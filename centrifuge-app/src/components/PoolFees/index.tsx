@@ -116,7 +116,6 @@ export function PoolFees() {
       return [
         ...activeFees,
         ...changes.map(({ change, hash }) => {
-          console.log('🚀 ~ change:', change.amounts.percentOfNav)
           return {
             name: '',
             type: change.type,
