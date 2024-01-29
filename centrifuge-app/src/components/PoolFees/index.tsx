@@ -6,6 +6,7 @@ import { useHistory, useLocation, useParams } from 'react-router'
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { usePoolAdmin } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
@@ -83,6 +84,7 @@ export function PoolFees() {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false)
   const drawer = params.get('charge')
   const changes = useProposedFeeChanges(poolId)
+  const poolAdmin = usePoolAdmin(poolId)
   const { execute: applyNewFee } = useCentrifugeTransaction('Apply new fee', (cent) => cent.pools.applyNewFee)
 
   const data = React.useMemo(() => {
@@ -169,9 +171,11 @@ export function PoolFees() {
       <PageSection
         title="Fee structure"
         headerRight={
-          <RouterLinkButton variant="secondary" to={`?charge=edit`}>
-            Edit fee structure
-          </RouterLinkButton>
+          poolAdmin ? (
+            <RouterLinkButton variant="secondary" to={`?charge=edit`}>
+              Edit fee structure
+            </RouterLinkButton>
+          ) : null
         }
       >
         {data?.length ? (
