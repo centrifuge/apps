@@ -1,12 +1,4 @@
-import {
-  ActiveLoan,
-  CurrencyBalance,
-  Loan,
-  Loan as LoanType,
-  Pool,
-  Price,
-  TinlakeLoan,
-} from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, Loan, Loan as LoanType, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -42,11 +34,13 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const unfilteredLoans = useLoans(loan.poolId)
 
-  // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
   const loans = unfilteredLoans?.filter(
-    (l: Loan | TinlakeLoan) =>
-      l.id !== loan.id && l.status === 'Active' && (l as ActiveLoan).borrower === account?.actingAddress
-  ) as Loan[] | TinlakeLoan[] | undefined
+    (l) =>
+      l.id !== loan.id &&
+      l.status === 'Active' &&
+      (l as ActiveLoan).borrower === account?.actingAddress &&
+      (isExternalLoan(loan) ? !isExternalLoan(l as Loan) : true)
+  ) as Loan[] | undefined
 
   const { execute, isLoading } = useCentrifugeTransaction('Transfer debt', (cent) => cent.pools.transferLoanDebt, {
     onSuccess: () => {
@@ -130,7 +124,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
 
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
-  // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
   const selectedLoan = loans?.find((l) => l.id === form.values.targetLoan) as ActiveLoan | undefined
 
   function validate(financeAmount: Decimal) {

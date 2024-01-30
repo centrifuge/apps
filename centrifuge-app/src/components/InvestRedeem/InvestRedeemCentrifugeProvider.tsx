@@ -96,6 +96,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
       trancheMeta?.minInitialInvestment ?? 0,
       pool.currency.decimals
     ).toDecimal(),
+    minOrder: Dec(0),
     nativeBalance: balances?.native.balance.toDecimal() ?? Dec(0),
     poolCurrencies: [pool.currency],
     poolCurrencyBalance: poolCurBalance,

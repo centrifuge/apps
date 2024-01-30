@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { IconChevronDown } from '../../icon'
 import { Flex } from '../Flex'
-import { InputUnit } from '../InputBox'
+import { InputUnit } from '../InputUnit'
 import { StyledInputBox } from '../TextInput'
 
 export type SelectOptionItem = {

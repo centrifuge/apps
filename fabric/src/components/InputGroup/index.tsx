@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { InputUnit, InputUnitProps } from '../InputBox'
+import { InputUnit, InputUnitProps } from '../InputUnit'
 import { Shelf } from '../Shelf'
 
 export type InputGroupProps = Omit<InputUnitProps, 'inputElement'> & { children: React.ReactNode }

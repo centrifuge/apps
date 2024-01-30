@@ -128,7 +128,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
           label={`${label}*`}
           placeholder={input.placeholder}
           validate={combine(required(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
-          rightElement={input.unit}
+          symbol={input.unit}
           min={input.min}
           max={input.max}
         />

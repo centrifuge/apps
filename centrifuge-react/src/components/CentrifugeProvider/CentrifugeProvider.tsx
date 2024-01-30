@@ -41,7 +41,6 @@ export function useCentrifugeApi(): ApiRx {
     staleTime: Infinity,
   })
 
-  // @ts-ignore type mismatch
   return api!
 }
 
@@ -99,6 +98,9 @@ export function useCentrifugeConsts() {
     },
     transferAllowlist: {
       receiverDeposit: CurrencyBalance.fromFloat(1, chainDecimals),
+    },
+    orderBook: {
+      minFulfillment: new CurrencyBalance(consts.orderBook.minFulfillmentAmountNative, chainDecimals),
     },
   }
 }
