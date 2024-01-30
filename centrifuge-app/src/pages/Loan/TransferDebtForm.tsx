@@ -1,12 +1,4 @@
-import {
-  ActiveLoan,
-  CurrencyBalance,
-  Loan,
-  Loan as LoanType,
-  Pool,
-  Price,
-  TinlakeLoan,
-} from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, Loan, Loan as LoanType, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -41,11 +33,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   if (!account) throw new Error('No borrower')
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const unfilteredLoans = useLoans(loan.poolId)
-
-  const loans = unfilteredLoans?.filter(
-    (l: Loan | TinlakeLoan) =>
-      l.id !== loan.id && l.status === 'Active' && (l as ActiveLoan).borrower === account?.actingAddress
-  ) as Loan[] | TinlakeLoan[] | undefined
 
   const { execute, isLoading } = useCentrifugeTransaction('Transfer debt', (cent) => cent.pools.transferLoanDebt, {
     onSuccess: () => {
@@ -126,6 +113,14 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   if (loan.status === 'Closed') {
     return null
   }
+
+  const loans = unfilteredLoans?.filter(
+    (l) =>
+      l.id !== loan.id &&
+      l.status === 'Active' &&
+      (l as ActiveLoan).borrower === account?.actingAddress &&
+      (isExternalLoan(loan) ? !isExternalLoan(l as Loan) : true)
+  ) as Loan[] | undefined
 
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
