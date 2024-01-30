@@ -24,10 +24,11 @@ export type InvestRedeemState = {
   isFirstInvestment: boolean
   nativeCurrency?: CurrencyMeta
   poolCurrency?: CurrencyMeta
-  trancheCurrency?: CurrencyMeta
+  trancheCurrency?: CurrencyMetadata
   capacity: Decimal
   minInitialInvestment: Decimal
   nativeBalance: Decimal
+  poolCurrencies: { symbol: string }[]
   poolCurrencyBalance: Decimal
   poolCurrencyBalanceWithPending: Decimal
   trancheBalance: Decimal
@@ -68,6 +69,7 @@ export type InvestRedeemActions = {
   approveTrancheToken(amount: BN): void
   cancelInvest(): void
   cancelRedeem(): void
+  selectPoolCurrency(symbol: string): void
 }
 
 export type InvestRedeemHooks = {

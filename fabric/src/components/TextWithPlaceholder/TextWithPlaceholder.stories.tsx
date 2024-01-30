@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { TextWithPlaceholder } from '.'
@@ -9,9 +9,9 @@ import { Text } from '../Text'
 export default {
   title: 'Components/TextWithPlaceholder',
   component: TextWithPlaceholder,
-} as ComponentMeta<typeof TextWithPlaceholder>
+} as Meta<typeof TextWithPlaceholder>
 
-type TextWithPlaceholderStory = ComponentStory<typeof TextWithPlaceholder>
+type TextWithPlaceholderStory = StoryFn<typeof TextWithPlaceholder>
 
 const ParagraphTemplate: TextWithPlaceholderStory = (args) => (
   <Stack gap={3}>

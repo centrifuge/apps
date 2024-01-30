@@ -19,6 +19,7 @@ export function mapResponsive<ResponsiveInput extends ResponsiveValue<any>, Outp
 
   if (isObject(prop)) {
     return Object.entries(prop).reduce((result, [key, value]) => {
+      // @ts-expect-error
       result[key] = mapper(value)
       return result
     }, {} as Output)

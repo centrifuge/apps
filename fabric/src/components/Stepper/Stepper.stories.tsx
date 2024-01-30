@@ -1,4 +1,4 @@
-import { ComponentMeta } from '@storybook/react'
+import { Meta } from '@storybook/react'
 import * as React from 'react'
 import { Step, Stepper } from '.'
 import { Button } from '../Button'
@@ -8,7 +8,7 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/Stepper',
   component: Stepper,
-} as ComponentMeta<typeof Stepper>
+} as Meta<typeof Stepper>
 
 export const Default = () => {
   const totalSteps = 3

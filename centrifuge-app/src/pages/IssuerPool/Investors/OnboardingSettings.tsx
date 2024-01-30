@@ -11,7 +11,7 @@ import {
   Shelf,
   Stack,
   Text,
-  TextInput_DEPRECATED,
+  TextInput,
 } from '@centrifuge/fabric'
 import { FieldArray, Form, FormikProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -316,7 +316,7 @@ export const OnboardingSettings = () => {
                 />
               </Shelf>
               {useExternalUrl && (
-                <TextInput_DEPRECATED
+                <TextInput
                   value={formik.values.externalOnboardingUrl}
                   onChange={(e) => formik.setFieldValue('externalOnboardingUrl', e.target.value)}
                   placeholder="https://"

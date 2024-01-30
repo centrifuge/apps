@@ -1,11 +1,4 @@
-import {
-  CurrencyInput_DEPRECATED,
-  DateInput,
-  Grid,
-  NumberInput,
-  Select_DEPRECATED,
-  TextInput_DEPRECATED,
-} from '@centrifuge/fabric'
+import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
@@ -22,7 +15,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
       {values.pricing.valuationMethod === 'oracle' && (
         <>
           <FieldWithErrorMessage
-            as={TextInput_DEPRECATED}
+            as={TextInput}
             label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
             placeholder="010101010000"
             name="pricing.Isin"
@@ -30,7 +23,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
           />
           <Field name="pricing.notional" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput_DEPRECATED
+              <CurrencyInput
                 {...field}
                 label={<Tooltips type="notionalValue" variant="secondary" label="Notional value*" />}
                 placeholder="0.00"
@@ -44,7 +37,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
             placeholder={0}
-            rightElement="%"
+            symbol="%"
             name="pricing.maxPriceVariation"
             validate={validate.maxPriceVariation}
           />
@@ -56,7 +49,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
         <>
           <Field name="pricing.maxBorrowAmount">
             {({ field, meta, form }: FieldProps) => (
-              <Select_DEPRECATED
+              <Select
                 {...field}
                 label="How much can I borrow?"
                 onChange={(event) => form.setFieldValue('pricing.maxBorrowAmount', event.target.value, false)}
@@ -72,7 +65,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
 
           <Field name="pricing.value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
             {({ field, meta, form }: FieldProps) => (
-              <CurrencyInput_DEPRECATED
+              <CurrencyInput
                 {...field}
                 label="Collateral value*"
                 placeholder="0.00"
@@ -89,7 +82,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
           as={NumberInput}
           label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
           placeholder="0.00"
-          rightElement="%"
+          symbol="%"
           name="pricing.interestRate"
           validate={combine(required(), nonNegativeNumber(), max(100))}
         />
@@ -113,7 +106,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="advanceRate" variant="secondary" label="Advance rate*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.advanceRate"
             validate={validate.advanceRate}
           />
@@ -125,7 +118,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="probabilityOfDefault" variant="secondary" label="Probability of default*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.probabilityOfDefault"
             validate={validate.probabilityOfDefault}
           />
@@ -133,7 +126,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="lossGivenDefault" variant="secondary" label="Loss given default*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.lossGivenDefault"
             validate={validate.lossGivenDefault}
           />
@@ -141,7 +134,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
             as={NumberInput}
             label={<Tooltips type="discountRate" variant="secondary" label="Discount rate*" />}
             placeholder="0.00"
-            rightElement="%"
+            symbol="%"
             name="pricing.discountRate"
             validate={validate.discountRate}
           />
