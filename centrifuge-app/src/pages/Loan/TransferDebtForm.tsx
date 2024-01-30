@@ -34,6 +34,14 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const unfilteredLoans = useLoans(loan.poolId)
 
+  const loans = unfilteredLoans?.filter(
+    (l) =>
+      l.id !== loan.id &&
+      l.status === 'Active' &&
+      (l as ActiveLoan).borrower === account?.actingAddress &&
+      (isExternalLoan(loan) ? !isExternalLoan(l as Loan) : true)
+  ) as Loan[] | undefined
+
   const { execute, isLoading } = useCentrifugeTransaction('Transfer debt', (cent) => cent.pools.transferLoanDebt, {
     onSuccess: () => {
       form.resetForm()
@@ -113,14 +121,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   if (loan.status === 'Closed') {
     return null
   }
-
-  const loans = unfilteredLoans?.filter(
-    (l) =>
-      l.id !== loan.id &&
-      l.status === 'Active' &&
-      (l as ActiveLoan).borrower === account?.actingAddress &&
-      (isExternalLoan(loan) ? !isExternalLoan(l as Loan) : true)
-  ) as Loan[] | undefined
 
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
