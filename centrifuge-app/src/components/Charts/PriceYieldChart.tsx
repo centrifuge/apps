@@ -44,7 +44,7 @@ function PriceYieldChart({
     onDataLoaded(data.length > 0)
   }, [data, onDataLoaded])
 
-  if (!trancheStates || trancheStates?.length === 1) return <Spinner />
+  if (!tranches && !poolId.startsWith('0x')) return <Spinner />
 
   return data && data.length > 0 ? (
     <Stack>

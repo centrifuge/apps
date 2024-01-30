@@ -130,12 +130,12 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
 }
 
 export function useDailyPoolStates(poolId: string, from?: Date, to?: Date, suspense = true) {
-  if (poolId.startsWith('0x')) throw new Error('Only works with Centrifuge Pools')
   const [result] = useCentrifugeQuery(
     ['dailyPoolStates', poolId, from, to],
     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
     {
       suspense,
+      enabled: !poolId.startsWith('0x'),
     }
   )
 
