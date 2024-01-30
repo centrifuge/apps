@@ -39,6 +39,7 @@ export type Token = {
   id: string
   capacity: CurrencyBalance
   tokenPrice: Price | null
+  yield30DaysAnnualized: string | null
 }
 
 export function PoolDetailOverviewTab() {
@@ -96,6 +97,7 @@ export function PoolDetailOverview() {
         id: tranche.id,
         capacity: tranche.capacity,
         tokenPrice: tranche.tokenPrice,
+        yield30DaysAnnualized: tranche?.yield30DaysAnnualized,
       }
     })
     .reverse()

@@ -1,3 +1,4 @@
+import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { InvestButton, Token } from '../pages/Pool/Overview'
 import { daysBetween } from '../utils/date'
@@ -61,11 +62,15 @@ const TrancheTokenCard = ({
   }`
 
   const calculateApy = () => {
-    // if (daysSinceCreation < 30) {
-    //   return 'N/A'
-    // }
+    if (isTinlakePool && trancheText === 'senior') {
+      return formatPercentage(trancheToken.apy)
+    }
 
-    return formatPercentage(trancheToken.apy)
+    if (daysSinceCreation < 30 || !trancheToken.yield30DaysAnnualized) {
+      return 'N/A'
+    }
+
+    return formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
   }
 
   return (
