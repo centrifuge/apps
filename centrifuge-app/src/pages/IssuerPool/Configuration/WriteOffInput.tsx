@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconMinusCircle, NumberInput_DEPRECATED } from '@centrifuge/fabric'
+import { Box, Button, Grid, IconMinusCircle, NumberInput } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
@@ -16,7 +16,7 @@ export const WriteOffInput: React.FC = () => {
           {values.writeOffGroups.map((s, index) => (
             <React.Fragment key={index}>
               <FieldWithErrorMessage
-                as={NumberInput_DEPRECATED}
+                as={NumberInput}
                 label="Days after expected repayment date*"
                 placeholder="0"
                 symbol="d"
@@ -24,7 +24,7 @@ export const WriteOffInput: React.FC = () => {
                 validate={validate.days}
               />
               <FieldWithErrorMessage
-                as={NumberInput_DEPRECATED}
+                as={NumberInput}
                 label="Write-off*"
                 placeholder="0.00"
                 symbol="%"
@@ -32,7 +32,7 @@ export const WriteOffInput: React.FC = () => {
                 validate={validate.writeOff}
               />
               <FieldWithErrorMessage
-                as={NumberInput_DEPRECATED}
+                as={NumberInput}
                 label="Penalty fee*"
                 placeholder="0.00"
                 symbol="%"

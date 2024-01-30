@@ -5,7 +5,7 @@ import {
   Button,
   Grid,
   ImageUpload,
-  NumberInput_DEPRECATED,
+  NumberInput,
   Shelf,
   Stack,
   Text,
@@ -186,7 +186,7 @@ const MintNFT: React.FC = () => {
               />
               {batchMintNFTs && (
                 <Box mt={3}>
-                  <NumberInput_DEPRECATED
+                  <NumberInput
                     value={nftAmount}
                     label="Amount"
                     type="number"
