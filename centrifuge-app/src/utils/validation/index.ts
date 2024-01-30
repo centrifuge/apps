@@ -36,6 +36,7 @@ export const positiveNumber = (err?: CustomError) => (val?: any) => {
 }
 
 export const settlementPrice = (err?: CustomError) => (val?: any) => {
+  if (!val) return ''
   if (val < 1) {
     return getError('Value must be equal to or larger than 1', err, val)
   }

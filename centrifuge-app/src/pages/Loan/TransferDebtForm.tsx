@@ -22,7 +22,7 @@ import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, required, settlementPrice } from '../../utils/validation'
 import { ExternalFinanceFields } from './ExternalFinanceForm'
 import { isExternalLoan } from './utils'
 
@@ -224,7 +224,10 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
             </Field>
           )}
           {selectedLoan && isExternalLoan(selectedLoan) && (
-            <Field name="targetLoanPrice" validate={combine(settlementPrice(), maxPriceVariance(selectedLoan.pricing))}>
+            <Field
+              name="targetLoanPrice"
+              validate={combine(required(), settlementPrice(), maxPriceVariance(selectedLoan.pricing))}
+            >
               {({ field, meta, form }: FieldProps) => {
                 return (
                   <CurrencyInput

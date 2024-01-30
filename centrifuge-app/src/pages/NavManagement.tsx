@@ -123,8 +123,6 @@ function NavManagement() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [poolId])
 
-  console.log('form.values.feed', form.values.feed)
-
   const newNavExternal = form.values.feed.reduce((acc, cur) => acc + cur.quantity * (cur.value || cur.oldValue), 0)
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
   const newNav = newNavExternal + newNavCash
