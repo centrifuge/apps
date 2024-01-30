@@ -107,6 +107,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     ).toDecimal(),
     minOrder: Dec(0),
     nativeBalance: nativeBalance?.toDecimal() || Dec(0),
+    poolCurrencies: [pool.currency],
     poolCurrencyBalance: poolCurrencyBalance,
     poolCurrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
     trancheBalance,
@@ -141,6 +142,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     approveTrancheToken: doAction('approveTrancheToken', () => [seniority]),
     cancelInvest: doAction('cancelInvest', () => [seniority, new BN(0)]),
     cancelRedeem: doAction('cancelRedeem', () => [seniority, new BN(0)]),
+    selectPoolCurrency() {},
   }
 
   const hooks = {

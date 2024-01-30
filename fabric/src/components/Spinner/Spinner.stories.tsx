@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { Spinner } from '.'
 import { baseTheme } from '../../theme/tokens/baseTheme'
@@ -8,9 +8,9 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/Spinner',
   component: Spinner,
-} as ComponentMeta<typeof Spinner>
+} as Meta<typeof Spinner>
 
-type SpinnerStory = ComponentStory<typeof Spinner>
+type SpinnerStory = StoryFn<typeof Spinner>
 const Template: SpinnerStory = () => {
   const sizes = [
     baseTheme.sizes.iconSmall,

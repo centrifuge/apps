@@ -42,7 +42,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const unfilteredLoans = useLoans(loan.poolId)
 
-  // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
   const loans = unfilteredLoans?.filter(
     (l: Loan | TinlakeLoan) =>
       l.id !== loan.id && l.status === 'Active' && (l as ActiveLoan).borrower === account?.actingAddress
@@ -130,7 +129,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
 
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
-  // @ts-expect-error known typescript issue in v4.4.4: https://github.com/microsoft/TypeScript/issues/44373
   const selectedLoan = loans?.find((l) => l.id === form.values.targetLoan) as ActiveLoan | undefined
 
   function validate(financeAmount: Decimal) {

@@ -1,4 +1,4 @@
-import { ComponentMeta } from '@storybook/react'
+import { Meta } from '@storybook/react'
 import * as React from 'react'
 import { Placeholder } from '.'
 import { Stack } from '../Stack'
@@ -6,7 +6,7 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/Placeholder',
   component: Placeholder,
-} as ComponentMeta<typeof Placeholder>
+} as Meta<typeof Placeholder>
 
 export const Default = () => (
   <Stack gap={2} width={500} maxWidth="100%">

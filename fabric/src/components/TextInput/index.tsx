@@ -3,39 +3,22 @@ import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import styled, { keyframes } from 'styled-components'
 import { Flex, IconCentrifuge, IconEthereum, IconLoader, IconSearch } from '../..'
-import { Box } from '../Box'
-import { InputBox, InputBoxProps, InputUnit, InputUnitProps, useContextId } from '../InputBox'
+import { InputUnit, InputUnitProps, useContextId } from '../InputUnit'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
-export type TextInputProps_DEPRECATED = React.InputHTMLAttributes<HTMLInputElement> & InputBoxProps
 export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> &
   InputUnitProps & {
     action?: React.ReactNode
     symbol?: React.ReactNode
   }
-
-const StyledTextInput_DEPRECATED = styled.input`
-  width: 100%;
-  border: 0;
-  background: transparent;
-  height: 22px;
-  font-size: inherit;
-  font-weight: inherit;
-  font-family: inherit;
-  line-height: inherit;
-  color: inherit;
-
-  ::placeholder {
-    color: ${({ theme }) => theme.colors.textDisabled};
+export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> &
+  InputUnitProps & {
+    action?: React.ReactNode
+    symbol?: React.ReactNode
   }
 
-  &:focus {
-    color: ${({ theme }) => theme.colors.textSelected};
-  }
-`
-
-const StyledTextInput = styled.input`
+export const StyledTextInput = styled.input`
   width: 100%;
   flex: 1;
   border: 0;
@@ -46,13 +29,17 @@ const StyledTextInput = styled.input`
   font-family: inherit;
   line-height: inherit;
   color: inherit;
+  -moz-appearance: textfield;
 
   ::placeholder {
     color: ${({ theme }) => theme.colors.textDisabled};
   }
 
-  &:focus {
-    color: ${({ theme }) => theme.colors.textSelected};
+  // For number input
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 `
 
@@ -76,7 +63,8 @@ export const StyledInputBox = styled(Shelf)`
   }
 
   &:has(input:focus)::before,
-  &:has(select:focus)::before {
+  &:has(select:focus)::before,
+  &:has(textarea:focus)::before {
     box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.focus};
   }
 `
@@ -116,15 +104,15 @@ export function InputAction({ children, ...props }: React.ButtonHTMLAttributes<H
 }
 
 export function TextInputBox(
-  props: Omit<TextInputProps, 'label' | 'secondaryLabel' | 'inputElement'> & {
+  props: Omit<TextInputProps, 'label' | 'secondaryLabel'> & {
     error?: boolean
     inputRef?: React.Ref<HTMLInputElement>
   }
 ) {
-  const { error, disabled, action, symbol, inputRef, ...inputProps } = props
+  const { error, disabled, action, symbol, inputRef, inputElement, ...inputProps } = props
   return (
     <StyledInputBox alignItems="stretch" height="input">
-      <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />
+      {inputElement ?? <StyledTextInput disabled={disabled} {...inputProps} id={useContextId()} ref={inputRef} />}
       {symbol && (
         <Flex alignSelf="center" pr={1}>
           {symbol}
@@ -136,7 +124,8 @@ export function TextInputBox(
 }
 
 export function TextInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <InputUnit
       id={id}
@@ -150,7 +139,8 @@ export function TextInput({ label, secondaryLabel, disabled, errorMessage, id, .
 }
 
 export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <InputUnit
       id={id}
@@ -171,43 +161,21 @@ export function SearchInput({ label, secondaryLabel, disabled, errorMessage, id,
   )
 }
 
-export const TextInput_DEPRECATED: React.FC<TextInputProps_DEPRECATED> = ({
-  label,
-  secondaryLabel,
-  disabled,
-  errorMessage,
-  rightElement,
-  ...inputProps
-}) => {
+export function DateInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
-    <InputBox
-      label={label}
-      secondaryLabel={secondaryLabel}
-      disabled={disabled}
-      errorMessage={errorMessage}
-      inputElement={<StyledTextInput_DEPRECATED disabled={disabled} {...inputProps} />}
-      rightElement={rightElement}
-    />
-  )
-}
-
-export const DateInput: React.FC<Omit<TextInputProps_DEPRECATED, 'rightElement'>> = ({
-  label,
-  secondaryLabel,
-  disabled,
-  errorMessage,
-  ...inputProps
-}) => {
-  return (
-    <InputBox
+    <InputUnit
+      id={id}
       label={label}
       secondaryLabel={secondaryLabel}
       disabled={disabled}
       errorMessage={errorMessage}
       inputElement={
-        <StyledTextInput
+        <TextInputBox
           type="date"
           disabled={disabled}
+          error={!!errorMessage}
           required // hides the reset button in Firefox
           {...inputProps}
         />
@@ -216,39 +184,22 @@ export const DateInput: React.FC<Omit<TextInputProps_DEPRECATED, 'rightElement'>
   )
 }
 
-const StyledNumberInput = styled(StyledTextInput)`
-  -moz-appearance: textfield;
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-`
-
-export const NumberInput: React.FC<TextInputProps_DEPRECATED> = ({
-  label,
-  secondaryLabel,
-  disabled,
-  errorMessage,
-  rightElement,
-  ...inputProps
-}) => {
+export function NumberInput({ label, secondaryLabel, disabled, errorMessage, id, ...inputProps }: TextInputProps) {
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
-    <InputBox
+    <InputUnit
+      id={id}
       label={label}
       secondaryLabel={secondaryLabel}
       disabled={disabled}
       errorMessage={errorMessage}
-      inputElement={<StyledNumberInput type="number" disabled={disabled} {...inputProps} />}
-      rightElement={rightElement}
+      inputElement={<TextInputBox type="number" disabled={disabled} error={!!errorMessage} {...inputProps} />}
     />
   )
 }
 
-export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> & InputBoxProps
-
-const StyledTextArea = styled(Box)`
+const StyledTextArea = styled.textarea`
   display: block;
   width: 100%;
   border: none;
@@ -260,43 +211,41 @@ const StyledTextArea = styled(Box)`
   line-height: inherit;
   color: inherit;
   resize: vertical;
+  padding: ${({ theme }) => theme.space[1]}px;
 
   ::placeholder {
     color: ${({ theme }) => theme.colors.textDisabled};
   }
-
-  &:focus {
-    color: ${({ theme }) => theme.colors.textSelected};
-  }
 `
 
-export const TextAreaInput: React.FC<TextAreaInputProps> = ({
+export function TextAreaInput({
   label,
   secondaryLabel,
   disabled,
   errorMessage,
-  rightElement,
+  id,
   ...inputProps
-}) => {
+}: TextAreaInputProps) {
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
-    <InputBox
+    <InputUnit
+      id={id}
       label={label}
       secondaryLabel={secondaryLabel}
       disabled={disabled}
       errorMessage={errorMessage}
-      pr={1}
       inputElement={
-        <Text variant="body2">
-          <StyledTextArea as="textarea" mt="4px" pr={1} disabled={disabled} {...inputProps} />
-        </Text>
+        <StyledInputBox>
+          <StyledTextArea id={id} disabled={disabled} {...inputProps} />
+        </StyledInputBox>
       }
-      rightElement={rightElement}
     />
   )
 }
 
-type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
-  Omit<InputBoxProps, 'inputElement' | 'rightElement'>
+export type AddressInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
+  Omit<InputUnitProps, 'inputElement'>
 
 export const AddressInput = ({
   id,
@@ -307,8 +256,9 @@ export const AddressInput = ({
   onBlur,
   onChange,
   ...inputProps
-}: CurrencyInputProps) => {
-  id ??= React.useId()
+}: AddressInputProps) => {
+  const defaultId = React.useId()
+  id ??= defaultId
 
   const [network, setNetwork] = React.useState<'ethereum' | 'centrifuge' | 'loading' | null>(null)
 

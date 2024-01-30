@@ -1,12 +1,9 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Accordion, Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { PaddingProps } from 'styled-system'
-import { TinlakePool } from '../utils/tinlake/useTinlakePools'
-import { usePool } from '../utils/usePools'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
 import { AnchorPillButton, PillButton } from './PillButton'
@@ -18,11 +15,6 @@ type IssuerSectionProps = {
 export function IssuerSection({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const isTinlakePool = poolId.startsWith('0x')
-  const pool = usePool(poolId)
-  const network = isTinlakePool ? ((pool as TinlakePool).network === 'goerli' ? 5 : 1) : 'centrifuge'
-  const explorer = useGetExplorerUrl(network)
 
   return (
     <>

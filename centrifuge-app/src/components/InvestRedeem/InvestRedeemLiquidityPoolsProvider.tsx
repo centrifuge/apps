@@ -31,6 +31,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     evm: { isSmartContractWallet },
   } = useWallet()
   const consts = useCentrifugeConsts()
+  const [lpIndex, setLpIndex] = React.useState(0)
+
   const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
   const evmNativeCurrency = useEvmNativeCurrency()
   const centOrder = usePendingCollect(poolId, trancheId, centAddress)
@@ -39,12 +41,12 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const [pendingActionState, setPendingAction] = React.useState<
     InvestRedeemAction | 'investWithPermit' | 'decreaseInvest'
   >()
-  const { isLoading: isLpsLoading } = useLiquidityPools(poolId, trancheId)
+  const { isLoading: isLpsLoading, data: lps } = useLiquidityPools(poolId, trancheId)
   const {
     data: lpInvest,
     refetch: refetchInvest,
     isLoading: isInvestmentLoading,
-  } = useLiquidityPoolInvestment(poolId, trancheId)
+  } = useLiquidityPoolInvestment(poolId, trancheId, lpIndex)
   const provider = useEvmProvider()
 
   const { data: lpEvents } = useLPEvents(poolId, trancheId, lpInvest?.lpAddress)
@@ -140,6 +142,15 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     }, [pendingTransaction?.status])
   }
 
+  React.useEffect(() => {
+    if (lps && lps.length > 1) {
+      const index = lps?.findIndex((lp) => lp.currency.symbol === 'USDC')
+      if (index && index > -1) {
+        setLpIndex(index)
+      }
+    }
+  }, [lps])
+
   const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet
 
   const state: InvestRedeemState = {
@@ -159,6 +170,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     ).toDecimal(),
     minOrder,
     nativeBalance: evmNativeBalance?.toDecimal() ?? Dec(0),
+    poolCurrencies: lps?.map((lp) => ({ symbol: lp.currency.symbol })) ?? [],
     poolCurrencyBalance: poolCurBalance,
     poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,
@@ -234,6 +246,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress]),
     cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress]),
+    selectPoolCurrency(symbol) {
+      setLpIndex(lps!.findIndex((lp) => lp.currency.symbol === symbol))
+    },
   }
 
   const hooks = {

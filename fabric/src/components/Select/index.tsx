@@ -1,11 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { IconChevronDown } from '../../icon'
-import { Box } from '../Box'
 import { Flex } from '../Flex'
-import { InputBox, InputUnit } from '../InputBox'
-import { Stack } from '../Stack'
-import { Text } from '../Text'
+import { InputUnit } from '../InputUnit'
 import { StyledInputBox } from '../TextInput'
 
 export type SelectOptionItem = {
@@ -53,31 +50,6 @@ const Chevron = styled(IconChevronDown)`
   pointer-events: none;
 `
 
-export function SelectInner_DEPRECATED({
-  options,
-  placeholder,
-  disabled,
-  ...rest
-}: Omit<SelectProps, 'label' | 'errorMessage'>) {
-  return (
-    <Box position="relative" width="100%">
-      <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
-      <StyledSelect disabled={disabled} {...rest}>
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {options.map((option, index) => (
-          <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
-            {option.label}
-          </option>
-        ))}
-      </StyledSelect>
-    </Box>
-  )
-}
-
 export function SelectInner({ options, placeholder, disabled, ...rest }: Omit<SelectProps, 'label' | 'errorMessage'>) {
   return (
     <Flex position="relative" width="100%">
@@ -98,23 +70,9 @@ export function SelectInner({ options, placeholder, disabled, ...rest }: Omit<Se
   )
 }
 
-export const Select_DEPRECATED: React.FC<SelectProps> = ({ label, errorMessage, ...rest }) => {
-  return (
-    <Stack gap={1} width="100%">
-      <InputBox as="div" label={label} inputElement={<SelectInner {...rest} />} />
-      {errorMessage && (
-        <Box px={2}>
-          <Text variant="label2" color="statusCritical">
-            {errorMessage}
-          </Text>
-        </Box>
-      )}
-    </Stack>
-  )
-}
-
 export function Select({ label, errorMessage, id, ...rest }: SelectProps) {
-  id ??= React.useId()
+  const defaultId = React.useId()
+  id ??= defaultId
   return (
     <InputUnit
       id={id}

@@ -41,7 +41,6 @@ export function useCentrifugeApi(): ApiRx {
     staleTime: Infinity,
   })
 
-  // @ts-ignore type mismatch
   return api!
 }
 

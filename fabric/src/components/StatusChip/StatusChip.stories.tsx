@@ -1,4 +1,4 @@
-import { ComponentMeta } from '@storybook/react'
+import { Meta } from '@storybook/react'
 import * as React from 'react'
 import { StatusChip } from '.'
 import { Shelf } from '../Shelf'
@@ -6,7 +6,7 @@ import { Shelf } from '../Shelf'
 export default {
   title: 'Components/StatusChip',
   component: StatusChip,
-} as ComponentMeta<typeof StatusChip>
+} as Meta<typeof StatusChip>
 
 export const Default = () => (
   <Shelf gap={3}>

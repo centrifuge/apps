@@ -41,11 +41,11 @@ const title = {
 
 export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets }: Props) {
   const evmChains = Object.keys(allEvmChains)
-    .filter((chainId) => (!showTestNets ? !allEvmChains[chainId].isTestnet : true))
+    .filter((chainId) => (!showTestNets ? !(allEvmChains as any)[chainId].isTestnet : true))
     .reduce((obj, chainId) => {
-      obj[chainId] = allEvmChains[chainId]
+      obj[chainId] = (allEvmChains as any)[chainId]
       return obj
-    }, {}) as EvmChains
+    }, {} as any) as EvmChains
   const ctx = useWallet()
   const centEvmChainId = useCentEvmChainId()
   const {
