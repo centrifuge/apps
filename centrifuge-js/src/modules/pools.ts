@@ -2824,7 +2824,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            // api.events.priceOracle.NewFeedData.is(event) ||
+            api.events.priceOracle.NewFeedData.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
