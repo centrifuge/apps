@@ -56,18 +56,16 @@ const TrancheTokenCard = ({
 }) => {
   const isTinlakePool = poolId.startsWith('0x')
   const daysSinceCreation = createdAt ? daysBetween(new Date(createdAt), new Date()) : 0
-  const aprTooltipBody = `The 30d ${trancheText} yield is the effective annualized return of the pool's ${trancheText} token over the last 30 days.${
-    daysSinceCreation < 30 && !isTinlakePool ? ' APR displayed after 30 days following token launch.' : ''
+  const apyTooltipBody = `The 30d ${trancheText} yield is the effective annualized return of the pool's ${trancheText} token over the last 30 days.${
+    daysSinceCreation < 30 && !isTinlakePool ? ' APY displayed after 30 days following token launch.' : ''
   }`
 
-  const calculateApr = () => {
-    if (daysSinceCreation < 30) {
-      return 'N/A'
-    }
+  const calculateApy = () => {
+    // if (daysSinceCreation < 30) {
+    //   return 'N/A'
+    // }
 
-    console.log('trancheToken', trancheToken.apr.toString())
-
-    return formatPercentage(trancheToken.apr)
+    return formatPercentage(trancheToken.apy)
   }
 
   return (
@@ -79,9 +77,9 @@ const TrancheTokenCard = ({
         <Shelf justifyContent="space-between" alignItems="flex-end" gap={1}>
           <Shelf gap={numOfTrancheTokens === 1 ? 5 : 2} alignItems="flex-end">
             <Stack gap={1} paddingRight={numOfTrancheTokens === 1 ? 3 : 0}>
-              <Tooltips label="APR" body={aprTooltipBody} />
+              <Tooltips label="APY" body={apyTooltipBody} />
               <Text fontSize="30px" variant="body3">
-                {calculateApr()}
+                {calculateApy()}
               </Text>
             </Stack>
             <Stack gap={1}>

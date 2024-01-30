@@ -29,7 +29,7 @@ import { PoolDetailHeader } from '../Header'
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export type Token = {
-  apr: Decimal
+  apy: Decimal
   protection: Decimal
   ratio: number
   name: string
@@ -84,7 +84,7 @@ export function PoolDetailOverview() {
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
-        apr: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
+        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
         name: tranche.currency.name,
@@ -165,7 +165,7 @@ export function PoolDetailOverview() {
                   ) : (
                     <LabelValueStack
                       label={<Tooltips variant="secondary" type="seniorTokenAPR" />}
-                      value={formatPercentage(token.apr)}
+                      value={formatPercentage(token.apy)}
                     />
                   )}
                   <LabelValueStack

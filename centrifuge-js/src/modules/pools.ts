@@ -1909,6 +1909,8 @@ export function getPoolsModule(inst: Centrifuge) {
                     ? capacityGivenProtection
                     : capacityGivenMaxReserve
 
+                  // const yield30DaysAnnualized = getLatestTrancheSnapshot(pool.tranches)
+
                   return {
                     id: trancheId,
                     index,
@@ -2000,6 +2002,22 @@ export function getPoolsModule(inst: Centrifuge) {
           take(1)
         )
       )
+    )
+  }
+
+  function getLatestTrancheSnapshot(trancheId: string) {
+    return inst.getSubqueryObservable<{ trancheSnapshot: { nodes: { yield30DaysAnnualized: string | null }[] } }>(
+      `query ($trancheId: String!) {
+        trancheSnapshots(filter: { trancheId: { equalTo: $trancheId } }, last: 1) {
+          nodes {
+            trancheId
+            yield30DaysAnnualized
+          }
+        }
+      }`,
+      {
+        trancheId,
+      }
     )
   }
 
