@@ -69,7 +69,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
         <Shelf
           borderTop="0.5px solid"
           borderBottom="0.5px solid"
-          borderColor="#DDDBD9"
+          borderColor="borderPrimary"
           gap={2}
           alignItems="flex-start"
           justifyContent="flex-start"
@@ -101,10 +101,10 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             <Stack gap={2}>
               <Stack gap={1} bg="backgroundButtonSecondary" p={1} borderRadius="2px">
                 <Shelf gap={1} alignItems="baseline">
-                  <Text variant="body3" color="gray.800">
+                  <Text variant="body3" color="textSecondary">
                     Pending fees
                   </Text>
-                  <Text variant="body3" color="gray.800" fontWeight={600}>
+                  <Text variant="body3" color="textSecondary" fontWeight={600}>
                     {formatBalance(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
                   </Text>
                 </Shelf>

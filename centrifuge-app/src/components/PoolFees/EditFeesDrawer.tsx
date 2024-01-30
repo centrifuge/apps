@@ -163,7 +163,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           <Text variant="heading2">Fee structure</Text>
         </Stack>
         <Shelf px={3} gap={3} alignItems="flex-start" justifyContent="flex-start">
-          <Stack width="100%" borderTop={pool.poolFees ? '0.5px solid' : undefined} borderColor="#DDDBD9">
+          <Stack width="100%" borderTop={pool.poolFees ? '0.5px solid' : undefined} borderColor="borderPrimary">
             {pool.poolFees
               ?.filter((poolFees) => poolFees.type === 'fixed')
               .map((feeChainData, index) => {
@@ -176,12 +176,12 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     py="11px"
                     borderBottom="0.5px solid"
                     borderTop={!poolMetadata?.pool?.poolFees?.at(-1) ? '0.5px solid' : undefined}
-                    borderColor="#DDDBD9"
+                    borderColor="borderPrimary"
                   >
-                    <Text variant="body2" color="gray.800">
+                    <Text variant="body2" color="textSecondary">
                       {feeMetadata?.name}
                     </Text>
-                    <Text variant="body2" color="gray.800">
+                    <Text variant="body2" color="textSecondary">
                       {formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} of NAV
                     </Text>
                   </Grid>
@@ -204,7 +204,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                           {form.values.poolFees.map((values, index) => {
                             return (
                               <Shelf key={`poolFees.${index}`} alignItems="center" gap={4}>
-                                <Stack gap={2} borderBottom="0.5px solid #DDDBD9" pb={3} maxWidth="350px">
+                                <Stack gap={2} borderBottom="0.5px solid borderPrimary" pb={3} maxWidth="350px">
                                   <Shelf gap={2}>
                                     <Field name={`poolFees.${index}.feeName`}>
                                       {({ field, meta }: FieldProps) => {
