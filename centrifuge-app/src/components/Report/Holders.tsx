@@ -12,10 +12,10 @@ import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import { copyable } from './utils'
 
-const headers = ['Account', 'Network', 'Position', 'Pending invest order', 'Pending redeem order']
+const headers = ['Account', 'Network', 'Position', 'Unclaimed', 'Pending invest order', 'Pending redeem order']
 
 const noop = (v: any) => v
-const cellFormatters = [copyable, noop, noop, noop, noop]
+const cellFormatters = [copyable, noop, noop, noop, noop, noop]
 
 const columns = headers.map((col, index) => ({
   align: 'left',
@@ -39,7 +39,12 @@ export function Holders({ pool }: { pool: Pool }) {
         holder.evmAddress || holder.accountId,
         (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
         formatBalance(
-          holder.balance.toDecimal().add(holder.claimableTrancheTokens.toDecimal()),
+          holder.balance.toDecimal(),
+          pool.tranches[0].currency // TODO: not hardcode to tranche index 0
+        ),
+
+        formatBalance(
+          holder.claimableTrancheTokens.toDecimal(),
           pool.tranches[0].currency // TODO: not hardcode to tranche index 0
         ),
         formatBalance(holder.pendingInvestCurrency.toDecimal(), pool.currency),

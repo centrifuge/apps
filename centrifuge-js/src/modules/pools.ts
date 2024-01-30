@@ -13,6 +13,7 @@ import {
   BorrowerTransactionType,
   InvestorTransactionType,
   SubqueryBorrowerTransaction,
+  SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
@@ -2500,17 +2501,16 @@ export function getPoolsModule(inst: Centrifuge) {
     const $api = inst.getApi()
     const $query = $api.pipe(
       switchMap((api) => api.query.evmChainId.chainId()),
-      switchMap((chainId) => {
+      switchMap(() => {
         return inst.getSubqueryObservable<{
           trancheBalances: { nodes: SubqueryTrancheBalances[] }
-          currencyBalances: { nodes: SubqueryTrancheBalances[] }
+          currencyBalances: { nodes: SubqueryCurrencyBalances[] }
         }>(
-          `query($poolId: String!, $trancheId: String, $currencyId: String) {
-          trancheBalances(
-            filter: {
-              poolId: { equalTo: $poolId },
-              trancheId: { isNull: false, endsWith: $trancheId }
-            }) {
+          `query($trancheId: String) {
+            trancheBalances(
+              filter: {
+                trancheId: { startsWith: $trancheId }
+              }) {
             nodes {
               accountId
               account {
@@ -2528,19 +2528,22 @@ export function getPoolsModule(inst: Centrifuge) {
 
           currencyBalances(
             filter: {
-              currencyId: { startsWithInsensitive: $currencyId },
+              currency: { trancheId: { startsWith: $trancheId } }
             }) {
             nodes {
               accountId
+              account {
+                chainId
+                evmAddress
+              }
+              currencyId
               amount
             }
           }
         }
         `,
           {
-            poolId,
-            trancheId,
-            currencyId: `${chainId}-Tranche-${poolId}`,
+            trancheId: `${poolId}-${trancheId || ''}`,
           },
           false
         )
@@ -2552,15 +2555,26 @@ export function getPoolsModule(inst: Centrifuge) {
       map(([data, currency]) => {
         // TODO: this should be a map by account ID + tranche ID
         const currencyBalancesByAccountId = data!.currencyBalances.nodes.reduce((obj, balance) => {
-          obj[balance.accountId] = balance
+          if (balance.accountId in obj) obj[balance.accountId].push(balance)
+          else obj[balance.accountId] = [balance]
           return obj
         }, {} as any)
+
+        console.log(currencyBalancesByAccountId)
 
         return data!.trancheBalances.nodes.map((balance) => ({
           accountId: balance.accountId,
           chainId: Number(balance.account?.chainId || 2031),
           evmAddress: balance.account?.evmAddress,
-          balance: new CurrencyBalance(currencyBalancesByAccountId[balance.accountId].amount, currency.decimals),
+          balance: new CurrencyBalance(
+            balance.accountId in currencyBalancesByAccountId
+              ? currencyBalancesByAccountId[balance.accountId].reduce(
+                  (sum: BN, balance: SubqueryCurrencyBalances) => sum.add(new BN(balance.amount)),
+                  new BN(0)
+                )
+              : '0',
+            currency.decimals
+          ),
           pendingInvestCurrency: new CurrencyBalance(balance.pendingInvestCurrency, currency.decimals),
           claimableTrancheTokens: new CurrencyBalance(balance.claimableTrancheTokens, currency.decimals),
           sumClaimedTrancheTokens: new CurrencyBalance(balance.sumClaimedTrancheTokens, currency.decimals),
