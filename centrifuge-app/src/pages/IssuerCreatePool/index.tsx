@@ -10,13 +10,13 @@ import {
 import {
   Box,
   Button,
-  CurrencyInput_DEPRECATED,
+  CurrencyInput,
   FileUpload,
   Grid,
-  Select_DEPRECATED,
+  Select,
   Shelf,
   Text,
-  TextInput_DEPRECATED,
+  TextInput,
   TextWithPlaceholder,
   Thumbnail,
 } from '@centrifuge/fabric'
@@ -494,7 +494,7 @@ function CreatePoolForm() {
                 <FieldWithErrorMessage
                   validate={validate.poolName}
                   name="poolName"
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label="Pool name*"
                   placeholder="New pool"
                   maxLength={100}
@@ -520,7 +520,7 @@ function CreatePoolForm() {
               <Box gridColumn="span 2">
                 <Field name="assetClass" validate={validate.assetClass}>
                   {({ field, meta, form }: FieldProps) => (
-                    <Select_DEPRECATED
+                    <Select
                       name="assetClass"
                       label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
                       onChange={(event) => {
@@ -539,7 +539,7 @@ function CreatePoolForm() {
               <Box gridColumn="span 2">
                 <Field name="subAssetClass" validate={validate.subAssetClass}>
                   {({ field, meta, form }: FieldProps) => (
-                    <Select_DEPRECATED
+                    <Select
                       name="subAssetClass"
                       label="Secondary asset class"
                       onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
@@ -555,7 +555,7 @@ function CreatePoolForm() {
               <Box gridColumn="span 2">
                 <Field name="currency" validate={validate.currency}>
                   {({ field, form, meta }: FieldProps) => (
-                    <Select_DEPRECATED
+                    <Select
                       name="currency"
                       label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
                       onChange={(event) => form.setFieldValue('currency', event.target.value)}
@@ -571,7 +571,7 @@ function CreatePoolForm() {
               <Box gridColumn="span 2">
                 <Field name="maxReserve" validate={validate.maxReserve}>
                   {({ field, form }: FieldProps) => (
-                    <CurrencyInput_DEPRECATED
+                    <CurrencyInput
                       {...field}
                       name="maxReserve"
                       label="Initial maximum reserve*"
@@ -586,7 +586,7 @@ function CreatePoolForm() {
                 <FieldWithErrorMessage
                   validate={validate.podEndpoint}
                   name="podEndpoint"
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label={`POD endpoint`}
                   placeholder="https://"
                 />

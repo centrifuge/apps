@@ -52,10 +52,11 @@ export function PoolList() {
       .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b?.valueLocked?.sub(a?.valueLocked).toNumber() : 0))
     const tinlakePools = pools
       .filter((pool) => pool?.poolId?.startsWith('0x'))
+      .filter((pool) => !pool?.status?.includes('Archived'))
       .sort((a, b) => (b?.valueLocked && a?.valueLocked ? b.valueLocked.sub(a.valueLocked).toNumber() : 0))
 
     const sortedPools = [...openInvestmentPools, ...upcomingPools, ...tinlakePools]
-    return search ? filterPools(pools, new URLSearchParams(search)) : sortedPools
+    return search ? filterPools([...pools, ...upcomingPools], new URLSearchParams(search)) : sortedPools
   }, [listedPools, search])
 
   if (!listedPools.length) {
@@ -119,7 +120,9 @@ export function poolsToPoolCardProps(
       currencySymbol: pool.currency.symbol,
       apr: mostSeniorTranche?.interestRatePerSec,
       status:
-        tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
+        tinlakePool && tinlakePool.tinlakeMetadata.isArchived
+          ? 'Archived'
+          : tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
           ? 'Maker Pool'
           : pool.tranches.at(0)?.capacity.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
           ? 'Open for investments'

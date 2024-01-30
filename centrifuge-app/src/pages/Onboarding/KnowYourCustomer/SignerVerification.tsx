@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, DateInput, Select_DEPRECATED, Text, TextInput_DEPRECATED } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, DateInput, Select, Text, TextInput } from '@centrifuge/fabric'
 import { FormikProps } from 'formik'
 import { ActionBar, Content, ContentHeader, Fieldset, ValidEmailTooltip } from '../../../components/Onboarding'
 import { useOnboarding } from '../../../components/OnboardingProvider'
@@ -43,7 +43,7 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
         <ContentHeader title={copy[investorType].title} body={copy[investorType].description} />
 
         <Fieldset>
-          <TextInput_DEPRECATED
+          <TextInput
             {...formik.getFieldProps('name')}
             label="Full Name"
             disabled={isLoading || isCompleted}
@@ -51,7 +51,7 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
           />
           {investorType === 'individual' && (
             <Box position="relative">
-              <TextInput_DEPRECATED
+              <TextInput
                 {...formik.getFieldProps('email')}
                 label="Email address"
                 placeholder="Enter email address"
@@ -67,7 +67,7 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
             disabled={isLoading || isCompleted}
             errorMessage={formik.touched.dateOfBirth ? formik.errors.dateOfBirth : undefined}
           />
-          <Select_DEPRECATED
+          <Select
             {...formik.getFieldProps('countryOfCitizenship')}
             label="Country of Citizenship"
             placeholder="Select a country"
@@ -77,7 +77,7 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
             disabled={isLoading || isCompleted}
             errorMessage={formik.touched.countryOfCitizenship ? formik.errors.countryOfCitizenship : undefined}
           />
-          <Select_DEPRECATED
+          <Select
             {...formik.getFieldProps('countryOfResidency')}
             label="Country of Residence"
             placeholder="Select a country"

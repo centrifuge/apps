@@ -28,7 +28,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
   const { data: investment, refetch: refetchInvestment } = useTinlakeInvestments(poolId, address)
-  const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances()
+  const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances(address)
   const { data: nativeBalance, refetch: refetchBalance, isLoading: isBalanceLoading } = useNativeBalance()
   const { data: permissions, isLoading: isPermissionsLoading } = useTinlakePermissions(poolId, address)
   const trancheInvestment = investment?.[seniority]
@@ -106,6 +106,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       pool.currency.decimals
     ).toDecimal(),
     nativeBalance: nativeBalance?.toDecimal() || Dec(0),
+    poolCurrencies: [pool.currency],
     poolCurrencyBalance: poolCurrencyBalance,
     poolCurrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
     trancheBalance,
@@ -140,6 +141,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     approveTrancheToken: doAction('approveTrancheToken', () => [seniority]),
     cancelInvest: doAction('cancelInvest', () => [seniority, new BN(0)]),
     cancelRedeem: doAction('cancelRedeem', () => [seniority, new BN(0)]),
+    selectPoolCurrency() {},
   }
 
   const hooks = {

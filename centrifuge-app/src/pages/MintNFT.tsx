@@ -3,14 +3,14 @@ import { useAsyncCallback, useBalances, useCentrifuge, useCentrifugeTransaction 
 import {
   Box,
   Button,
-  Flex,
+  Grid,
   ImageUpload,
   NumberInput_DEPRECATED,
   Shelf,
   Stack,
   Text,
   TextAreaInput,
-  TextInput_DEPRECATED,
+  TextInput,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
@@ -141,7 +141,7 @@ const MintNFT: React.FC = () => {
         <PageHeader title={nftName || DEFAULT_NFT_NAME} subtitle={collectionMetadata?.name} />
         <PageSection>
           <Shelf alignItems="stretch" flexWrap="wrap" gap={4}>
-            <Flex alignItems="stretch" justifyContent="center" flex="1 1 60%" aspectRatio="3 / 2">
+            <Grid flex="1 1 60%" aspectRatio="3 / 2">
               <ImageUpload
                 key={version}
                 file={file}
@@ -159,11 +159,12 @@ const MintNFT: React.FC = () => {
                   }
                 }}
                 accept={ACCEPT_STRING}
+                height="50vh"
               />
-            </Flex>
+            </Grid>
             <Box flex="1 1 30%" minWidth={250}>
               <Box mb={3}>
-                <TextInput_DEPRECATED
+                <TextInput
                   label="Name"
                   placeholder={DEFAULT_NFT_NAME}
                   value={nftName}

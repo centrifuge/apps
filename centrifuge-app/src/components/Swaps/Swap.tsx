@@ -1,7 +1,7 @@
 import { CurrencyBalance, CurrencyKey, findBalance, findCurrency, Price } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { CentrifugeTransactionOptions } from '@centrifuge/centrifuge-react/dist/hooks/useCentrifugeTransaction'
-import { Button, Card, CurrencyInput, SelectInner_DEPRECATED, Stack } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, SelectInner, Stack } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
@@ -64,7 +64,7 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
             setLastChanged('buy')
           }}
           currency={
-            <SelectInner_DEPRECATED
+            <SelectInner
               value={buyCurrency?.symbol ?? ''}
               options={[
                 { label: 'Select', value: '', disabled: true },
@@ -99,7 +99,7 @@ export function Swap({ defaultBuy, defaultSell }: SwapProps) {
             setLastChanged('sell')
           }}
           currency={
-            <SelectInner_DEPRECATED
+            <SelectInner
               value={sellCurrency?.symbol ?? ''}
               options={[
                 { label: 'Select', value: '' },

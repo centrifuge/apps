@@ -1,14 +1,5 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import {
-  Box,
-  Button,
-  Grid,
-  IconMinusCircle,
-  NumberInput_DEPRECATED,
-  Stack,
-  Text,
-  TextInput_DEPRECATED,
-} from '@centrifuge/fabric'
+import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import { createEmptyTranche } from '.'
@@ -74,7 +65,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                   <Text variant="body1">{index + 1}</Text>
                 </Stack>
                 <FieldWithErrorMessage
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label="Token name*"
                   placeholder={index === juniorTrancheIndex ? 'Junior' : ''}
                   maxLength={30}
@@ -84,7 +75,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                 />
                 <Field name={`tranches.${index}.symbolName`} validate={validate.symbolName}>
                   {({ field, form, meta }: FieldProps) => (
-                    <TextInput_DEPRECATED
+                    <TextInput
                       {...field}
                       onChange={(e) => form.setFieldValue(field.name, e.target.value)}
                       errorMessage={meta.touched ? meta.error : undefined}
@@ -97,43 +88,43 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                   )}
                 </Field>
                 <FieldWithErrorMessage
-                  as={NumberInput_DEPRECATED}
+                  as={NumberInput}
                   label={<Tooltips type="minimumInvestment" variant="secondary" label="Min. investment*" />}
                   placeholder="0.00"
                   name={`tranches.${index}.minInvestment`}
                   validate={validate.minInvestment}
-                  rightElement={values.currency}
+                  symbol={values.currency}
                 />
                 {index === juniorTrancheIndex ? (
                   <>
-                    <TextInput_DEPRECATED
+                    <TextInput
                       label={<Tooltips type="noTranchProtection" variant="secondary" />}
                       value="-"
-                      rightElement="%"
+                      symbol="%"
                       disabled
                     />
-                    <TextInput_DEPRECATED
+                    <TextInput
                       label={<Tooltips type="variableTranchInterest" variant="secondary" />}
                       value="-"
-                      rightElement="%"
+                      symbol="%"
                       disabled
                     />
                   </>
                 ) : (
                   <>
                     <FieldWithErrorMessage
-                      as={NumberInput_DEPRECATED}
+                      as={NumberInput}
                       label={<Tooltips type="tranchProtection" variant="secondary" />}
                       placeholder="0.00"
-                      rightElement="%"
+                      symbol="%"
                       name={`tranches.${index}.minRiskBuffer`}
                       validate={validate.minRiskBuffer}
                     />
                     <FieldWithErrorMessage
-                      as={NumberInput_DEPRECATED}
+                      as={NumberInput}
                       label={<Tooltips type="fixedTranchInterest" variant="secondary" />}
                       placeholder="0.00"
-                      rightElement="%"
+                      symbol="%"
                       name={`tranches.${index}.interestRate`}
                       validate={validate.interestRate}
                     />

@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { InteractiveCard } from '.'
 import { Text } from '../Text'
@@ -7,9 +7,9 @@ import { Thumbnail } from '../Thumbnail'
 export default {
   title: 'Components/InteractiveCard',
   component: InteractiveCard,
-} as ComponentMeta<typeof InteractiveCard>
+} as Meta<typeof InteractiveCard>
 
-type InteractiveCardStory = ComponentStory<typeof InteractiveCard>
+type InteractiveCardStory = StoryFn<typeof InteractiveCard>
 const Template: InteractiveCardStory = (args) => (
   <InteractiveCard
     {...args}

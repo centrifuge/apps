@@ -8,6 +8,7 @@ export type { TinlakeContractAddresses, TinlakeContractNames, TinlakeContractVer
 export * from './types'
 export * from './utils'
 export * from './utils/BN'
+export { Call as EvmMulticallCall, multicall as evmMulticall } from './utils/evmMulticall'
 export * from './utils/solver'
 
 export default Centrifuge

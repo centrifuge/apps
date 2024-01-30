@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { DateRange } from '.'
 import { Text } from '../Text'
@@ -6,9 +6,9 @@ import { Text } from '../Text'
 export default {
   title: 'Components/DateRange',
   component: DateRange,
-} as ComponentMeta<typeof DateRange>
+} as Meta<typeof DateRange>
 
-type DateRangeStory = ComponentStory<typeof DateRange>
+type DateRangeStory = StoryFn<typeof DateRange>
 const Template: DateRangeStory = () => {
   const [start, setStart] = React.useState(new Date(new Date().setDate(new Date().getDate() - 7)))
   const [end, setEnd] = React.useState(new Date())

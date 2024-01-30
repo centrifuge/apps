@@ -51,6 +51,7 @@ export type Key =
   | 'showOracle'
   | 'poolCreationType'
   | 'podAdminSeed'
+  | 'holdersReport'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -91,6 +92,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   evmAddress: {
     default: '',
     type: 'text',
+  },
+  holdersReport: {
+    type: 'checkbox',
+    default: false,
   },
   persistDebugFlags: {
     alwaysShow: true,

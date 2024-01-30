@@ -1,4 +1,4 @@
-import { Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { Token } from '@centrifuge/centrifuge-js'
 import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
@@ -13,6 +13,7 @@ import {
   Text,
   Thumbnail,
 } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -21,12 +22,14 @@ import ethLogo from '../../assets/images/ethereum.svg'
 import centLogo from '../../assets/images/logoCentrifuge.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import usdtLogo from '../../assets/images/usdt-logo.svg'
+import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
 import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
+import { useTinlakePools } from '../../utils/tinlake/useTinlakePools'
 import { useCFGTokenPrice } from '../../utils/useCFGTokenPrice'
 import { usePoolCurrencies } from '../../utils/useCurrencies'
-import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
 import { Eththumbnail } from '../EthThumbnail'
 import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
@@ -39,12 +42,12 @@ type Row = {
   currency: Token['currency']
   poolId: string
   trancheId: string
-  marketValue: TokenBalance
-  position: TokenBalance
-  tokenPrice: TokenBalance
+  marketValue: Decimal
+  position: Decimal
+  tokenPrice: Decimal
   canInvestRedeem: boolean
-  address: string
-  connectedNetwork: string
+  address?: string
+  connectedNetwork?: string
 }
 
 const columns: Column[] = [
@@ -132,51 +135,42 @@ const columns: Column[] = [
   },
 ]
 
-export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address?: string }) {
-  const centBalances = useBalances(address)
+export function useHoldings(address?: string, canInvestRedeem = true) {
+  const { data: tinlakeBalances } = useTinlakeBalances(address && isEvmAddress(address) ? address : undefined)
+  const centBalances = useBalances(address && isSubstrateAddress(address) ? address : undefined)
   const wallet = useWallet()
-  const { data: tinlakeBalances } = useTinlakeBalances()
-  const pools = usePools()
+  const tinlakePools = useTinlakePools()
   const portfolioTokens = usePortfolioTokens(address)
   const currencies = usePoolCurrencies()
-  const { search, pathname } = useLocation()
-  const history = useHistory()
-  const params = new URLSearchParams(search)
-  const openSendDrawer = params.get('send')
-  const openReceiveDrawer = params.get('receive')
-  const openInvestDrawer = params.get('invest')
-  const openRedeemDrawer = params.get('redeem')
-
-  const [investPoolId, investTrancheId] = openInvestDrawer?.split('-') || []
-  const [redeemPoolId, redeemTrancheId] = openRedeemDrawer?.split('-') || []
-
   const CFGPrice = useCFGTokenPrice()
 
-  const tokens = [
+  const tokens: Row[] = [
     ...portfolioTokens.map((token) => ({
       ...token,
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
       canInvestRedeem,
     })),
-    ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero) || []).map((balance) => {
-      const pool = pools?.find((pool) => pool.id === balance.poolId)
+    ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero()) || []).map((balance) => {
+      const pool = tinlakePools.data?.pools?.find((pool) => pool.id === balance.poolId)
       const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
+      if (!tranche) return null as never
       return {
-        position: balance.balance,
-        marketValue: tranche?.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
-        tokenPrice: tranche?.tokenPrice?.toDecimal() || Dec(0),
+        position: balance.balance.toDecimal(),
+        marketValue: tranche.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+        tokenPrice: tranche.tokenPrice?.toDecimal() || Dec(0),
         trancheId: balance.trancheId,
         poolId: balance.poolId,
-        currency: tranche?.currency,
+        currency: tranche.currency,
         canInvestRedeem,
         connectedNetwork: wallet.connectedNetworkName,
       }
     }),
     ...(tinlakeBalances?.currencies.filter((currency) => currency.balance.gtn(0)) || []).map((currency) => {
+      const tokenPrice = currency.currency.symbol === 'wCFG' ? CFGPrice ?? 0 : 1
       return {
-        position: currency.balance,
-        marketValue: currency.balance.toDecimal().mul(Dec(1)),
-        tokenPrice: Dec(1),
+        position: currency.balance.toDecimal(),
+        marketValue: currency.balance.toDecimal().mul(Dec(tokenPrice)),
+        tokenPrice: Dec(tokenPrice),
         trancheId: '',
         poolId: '',
         currency: currency.currency,
@@ -188,13 +182,14 @@ export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?
       ?.filter((currency) => currency.balance.gtn(0))
       .map((currency) => {
         const token = currencies?.find((curr) => curr.symbol === currency.currency.symbol)
+        if (!token) return null as never
         return {
           currency: token,
           poolId: '',
           trancheId: '',
-          position: currency.balance.toDecimal() || Dec(0),
+          position: currency.balance.toDecimal(),
           tokenPrice: Dec(1),
-          marketValue: currency.balance.toDecimal() || Dec(0),
+          marketValue: currency.balance.toDecimal(),
           canInvestRedeem: false,
           connectedNetwork: wallet.connectedNetworkName,
         }
@@ -204,22 +199,41 @@ export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?
           {
             currency: {
               ...centBalances?.native.currency,
-              name: centBalances?.native.currency.symbol,
+              symbol: centBalances?.native.currency.symbol ?? 'CFG',
+              name: centBalances?.native.currency.symbol ?? 'CFG',
+              decimals: centBalances?.native.currency.decimals ?? 18,
               key: 'centrifuge',
               isPoolCurrency: false,
               isPermissioned: false,
             },
             poolId: '',
             trancheId: '',
-            position: centBalances?.native.balance,
+            position: centBalances?.native.balance.toDecimal() || Dec(0),
             tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
-            marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) : Dec(0),
+            marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) ?? Dec(0) : Dec(0),
             canInvestRedeem: false,
             connectedNetwork: wallet.connectedNetworkName,
           },
         ]
       : []),
-  ]
+  ].filter(Boolean)
+
+  return tokens
+}
+
+export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address?: string }) {
+  const { search, pathname } = useLocation()
+  const history = useHistory()
+  const params = new URLSearchParams(search)
+  const openSendDrawer = params.get('send')
+  const openReceiveDrawer = params.get('receive')
+  const openInvestDrawer = params.get('invest')
+  const openRedeemDrawer = params.get('redeem')
+
+  const [investPoolId, investTrancheId] = openInvestDrawer?.split('-') || []
+  const [redeemPoolId, redeemTrancheId] = openRedeemDrawer?.split('-') || []
+
+  const tokens = useHoldings(address, canInvestRedeem)
 
   return address && tokens.length ? (
     <>

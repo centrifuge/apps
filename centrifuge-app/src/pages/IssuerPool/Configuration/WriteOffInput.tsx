@@ -19,7 +19,7 @@ export const WriteOffInput: React.FC = () => {
                 as={NumberInput_DEPRECATED}
                 label="Days after expected repayment date*"
                 placeholder="0"
-                rightElement="d"
+                symbol="d"
                 name={`writeOffGroups.${index}.days`}
                 validate={validate.days}
               />
@@ -27,7 +27,7 @@ export const WriteOffInput: React.FC = () => {
                 as={NumberInput_DEPRECATED}
                 label="Write-off*"
                 placeholder="0.00"
-                rightElement="%"
+                symbol="%"
                 name={`writeOffGroups.${index}.writeOff`}
                 validate={validate.writeOff}
               />
@@ -35,7 +35,7 @@ export const WriteOffInput: React.FC = () => {
                 as={NumberInput_DEPRECATED}
                 label="Penalty fee*"
                 placeholder="0.00"
-                rightElement="%"
+                symbol="%"
                 name={`writeOffGroups.${index}.penaltyInterest`}
                 validate={validate.penaltyInterest}
               />

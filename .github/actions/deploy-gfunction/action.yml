@@ -110,7 +110,7 @@ runs:
       uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
       with:
         name: '${{ steps.prepare.outputs.function_name }}'
-        runtime: 'nodejs16'
+        runtime: 'nodejs18'
         region: '${{ inputs.gcloud_region }}'
         source_dir: '${{ steps.download.outputs.download-path }}'
         entry_point: '${{ inputs.target }}'

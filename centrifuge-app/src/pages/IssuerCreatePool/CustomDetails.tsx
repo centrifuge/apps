@@ -1,7 +1,6 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Button, Card, Shelf, Stack, Text, TextAreaInput, TextInput_DEPRECATED } from '@centrifuge/fabric'
+import { Box, Button, Card, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
-import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { validate } from './validate'
 
@@ -49,7 +48,7 @@ export function CustomDetails() {
                 <FieldWithErrorMessage
                   name={`details.${index}.title`}
                   validate={validate.issuerDetailTitle}
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label="Title (max 50 characters)*"
                   maxLength={50}
                 />

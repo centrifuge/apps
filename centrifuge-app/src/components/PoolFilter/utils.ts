@@ -14,7 +14,11 @@ export function filterPools(pools: PoolCardProps[], searchParams: URLSearchParam
   const sortBy = searchParams.get('sort-by') as SortBy
 
   filtered = filtered.filter(
-    (pool) => pool.status && (poolStatuses.size ? poolStatuses.has(toKebabCase(pool.status)) : pool.status !== 'Closed')
+    (pool) =>
+      pool.status &&
+      (poolStatuses.size
+        ? poolStatuses.has(toKebabCase(pool.status))
+        : pool.status !== 'Closed' && pool.status !== 'Archived')
   )
 
   if (assetClasses.size) {

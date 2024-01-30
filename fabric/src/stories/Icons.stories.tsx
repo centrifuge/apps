@@ -1,4 +1,4 @@
-import { ComponentMeta } from '@storybook/react'
+import { Meta } from '@storybook/react'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Text } from '..'
@@ -6,7 +6,7 @@ import * as icons from '../icon'
 
 export default {
   title: 'Icons',
-} as ComponentMeta<React.FC>
+} as Meta<React.FC>
 
 export const Icons: React.FC = () => (
   <Table>

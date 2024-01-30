@@ -1,16 +1,6 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  Checkbox,
-  Grid,
-  ImageUpload,
-  Select_DEPRECATED,
-  Shelf,
-  Stack,
-  TextInput_DEPRECATED,
-} from '@centrifuge/fabric'
+import { Box, Button, Checkbox, Grid, ImageUpload, Select, Shelf, Stack, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -191,14 +181,14 @@ export function Details() {
               <FieldWithErrorMessage
                 validate={validate.poolName}
                 name="poolName"
-                as={TextInput_DEPRECATED}
+                as={TextInput}
                 label="Pool name*"
                 placeholder="New pool"
                 maxLength={100}
               />
               <Field name="assetClass" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
-                  <Select_DEPRECATED
+                  <Select
                     name="assetClass"
                     label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
                     onChange={(event) => {
@@ -215,7 +205,7 @@ export function Details() {
               </Field>
               <Field name="subAssetClass" validate={validate.subAssetClass}>
                 {({ field, meta, form }: FieldProps) => (
-                  <Select_DEPRECATED
+                  <Select
                     name="subAssetClass"
                     label="Secondary asset class"
                     onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
@@ -227,7 +217,7 @@ export function Details() {
                   />
                 )}
               </Field>
-              <Select_DEPRECATED
+              <Select
                 name="currency"
                 label="Currency"
                 value={currency}
@@ -238,7 +228,7 @@ export function Details() {
               <FieldWithErrorMessage
                 validate={validate.podEndpoint}
                 name="podEndpoint"
-                as={TextInput_DEPRECATED}
+                as={TextInput}
                 label={`POD endpoint`}
                 placeholder="https://..."
               />

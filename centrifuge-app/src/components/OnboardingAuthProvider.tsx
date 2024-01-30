@@ -1,9 +1,9 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeUtils, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
+import { BigNumber } from '@ethersproject/bignumber'
 import { Signer } from '@polkadot/types/types'
 import { encodeAddress } from '@polkadot/util-crypto'
-import { BigNumber, ethers } from 'ethers'
-import { hashMessage } from 'ethers/lib/utils'
+import { ethers, utils } from 'ethers'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 
@@ -240,7 +240,7 @@ Issued At: ${new Date().toISOString()}`
   let body
 
   if (signedMessage === '0x') {
-    const messageHash = hashMessage(message)
+    const messageHash = utils.hashMessage(message)
 
     const isValid = await isValidSignature(signer, address, messageHash, evmChainId || 1)
 

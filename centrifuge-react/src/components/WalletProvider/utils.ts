@@ -37,7 +37,7 @@ export function useGetNetworkIcon() {
     substrate: { evmChainId },
   } = useWallet()
   return (network: Network) =>
-    network === 'centrifuge' || network === evmChainId ? centrifugeLogo : evm.chains[network]?.iconUrl ?? ''
+    network === 'centrifuge' || network === evmChainId ? centrifugeLogo : (evm.chains as any)[network]?.iconUrl ?? ''
 }
 
 export function useNetworkIcon(network: Network) {
@@ -82,7 +82,7 @@ export function useGetExplorerUrl(network?: Network) {
 }
 
 export function sortCentrifugeWallets(wallets: Wallet[]) {
-  const order = {
+  const order: Record<string, number> = {
     talisman: 1,
     'subwallet-js': 2,
     'polkadot-js': 3,
@@ -95,7 +95,7 @@ export function sortCentrifugeWallets(wallets: Wallet[]) {
 }
 
 export function sortEvmWallets(wallets: EvmConnectorMeta[]) {
-  const order = {
+  const order: Record<string, number> = {
     metamask: 1,
     walletconnect: 2,
     coinbase: 3,

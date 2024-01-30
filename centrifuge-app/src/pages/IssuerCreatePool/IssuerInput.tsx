@@ -1,4 +1,4 @@
-import { Box, FileUpload, Grid, ImageUpload, Text, TextAreaInput, TextInput_DEPRECATED } from '@centrifuge/fabric'
+import { Box, FileUpload, Grid, ImageUpload, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
@@ -17,7 +17,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
         <FieldWithErrorMessage
           validate={validate.issuerName}
           name="issuerName"
-          as={TextInput_DEPRECATED}
+          as={TextInput}
           label={<Tooltips type="issuerName" label="Legal name of issuer*" variant="secondary" />}
           placeholder="Name..."
           maxLength={100}
@@ -28,7 +28,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
         <FieldWithErrorMessage
           validate={validate.issuerRepName}
           name="issuerRepName"
-          as={TextInput_DEPRECATED}
+          as={TextInput}
           label={<Tooltips type="issuerRepName" label="Legal name of issuer representative*" variant="secondary" />}
           placeholder="Full name..."
           maxLength={100}
@@ -57,11 +57,9 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
               }}
               label="Issuer logo"
               requirements="JPG/PNG/SVG, max 1MB, max 480x480px"
-              placeholder="Choose issuer logo"
+              buttonLabel="Choose issuer logo"
               errorMessage={meta.touched && meta.error ? meta.error : undefined}
               accept="image/*"
-              aspectRatio={['1 / 1', '4 / 3']}
-              height={[null, 200, 200, 250]}
             />
           )}
         </Field>
@@ -86,25 +84,19 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Field>
       <FieldWithErrorMessage
         name="website"
-        as={TextInput_DEPRECATED}
+        as={TextInput}
         label="Website*"
         placeholder="https://..."
         validate={validate.website}
       />
       <FieldWithErrorMessage
         name="forum"
-        as={TextInput_DEPRECATED}
+        as={TextInput}
         label="Governance forum"
         placeholder="https://..."
         validate={validate.forum}
       />
-      <FieldWithErrorMessage
-        name="email"
-        as={TextInput_DEPRECATED}
-        label="Email*"
-        placeholder=""
-        validate={validate.email}
-      />
+      <FieldWithErrorMessage name="email" as={TextInput} label="Email*" placeholder="" validate={validate.email} />
 
       <Box gridColumn={['span 1', 'span 2']}>
         <CustomDetails />

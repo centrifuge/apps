@@ -1,48 +1,17 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Box } from '../Box'
-import { InputBox, InputBoxProps, InputUnit } from '../InputBox'
-import { Shelf } from '../Shelf'
-import { Text } from '../Text'
+import { InputUnit, InputUnitProps } from '../InputUnit'
 import { InputAction, TextInputBox } from '../TextInput'
 
 export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> &
-  Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
+  Omit<InputUnitProps, 'inputElement'> & {
     value: number | ''
     currency?: React.ReactNode
     onSetMax?: () => void
     onChange?: (value: number | '') => void
     decimals?: number
   }
-
-type CurrencyInputProps_DEPRECATED = Omit<CurrencyInputProps, 'decimals'> & { precision?: number }
-
-const StyledTextInput = styled.input`
-  width: 100%;
-  border: 0;
-  background: transparent;
-  font-size: 16px;
-  height: 20px;
-  font-weight: inherit;
-  font-family: inherit;
-  line-height: inherit;
-  color: inherit;
-  -moz-appearance: textfield;
-
-  ::placeholder {
-    color: ${({ theme }) => theme.colors.textDisabled};
-  }
-
-  &:focus {
-    color: ${({ theme }) => theme.colors.accentPrimary};
-  }
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-`
 
 const StyledMaxButton = styled(Box)`
   padding: 0 8px;
@@ -64,74 +33,6 @@ const StyledMaxButton = styled(Box)`
 
 StyledMaxButton.defaultProps = {
   type: 'button',
-}
-
-export const CurrencyInput_DEPRECATED: React.FC<CurrencyInputProps_DEPRECATED> = ({
-  label,
-  secondaryLabel,
-  disabled,
-  errorMessage,
-  currency,
-  onSetMax,
-  placeholder = '0.0',
-  precision = 6,
-  ...inputProps
-}) => {
-  const [value, setValue] = React.useState('')
-
-  const onChange = (value: string) => {
-    const inputFormatted = formatThousandSeparator(value)
-    const inputAsNumber = parseFloat(value.replaceAll(',', ''))
-    if (inputProps?.onChange) {
-      inputProps?.onChange(Number.isNaN(inputAsNumber) ? '' : inputAsNumber)
-      setValue(inputFormatted)
-    }
-  }
-
-  // TODO: fix jank when typing more decimals than precision allows
-  React.useLayoutEffect(() => {
-    if (inputProps.value) {
-      const inputFormatted = formatThousandSeparator(
-        Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
-      )
-      setValue(inputFormatted)
-    }
-  }, [inputProps.value])
-
-  return (
-    <InputBox
-      label={label}
-      secondaryLabel={
-        <Shelf justifyContent="space-between">
-          <span>{secondaryLabel}</span>
-          {onSetMax && (
-            <StyledMaxButton onClick={onSetMax} disabled={disabled}>
-              <Text variant="label3" lineHeight={1.5} color="inherit">
-                MAX
-              </Text>
-            </StyledMaxButton>
-          )}
-        </Shelf>
-      }
-      disabled={disabled}
-      errorMessage={errorMessage}
-      inputElement={
-        <StyledTextInput
-          {...inputProps}
-          disabled={disabled}
-          placeholder={placeholder}
-          type="text"
-          onChange={(e) => onChange(e.target.value)}
-          value={value}
-        />
-      }
-      rightElement={
-        <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'} fontSize="18px">
-          {currency}
-        </Text>
-      }
-    />
-  )
 }
 
 export function CurrencyInput({

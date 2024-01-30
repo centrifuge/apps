@@ -1,5 +1,5 @@
 import { Multisig } from '@centrifuge/centrifuge-js'
-import { Button, Dialog, IconCopy, IconSend, Shelf, Stack, Text, TextInput_DEPRECATED } from '@centrifuge/fabric'
+import { Button, Dialog, IconCopy, IconSend, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { ButtonGroup } from '../ButtonGroup'
 
@@ -25,7 +25,7 @@ export function ShareMultisigDialog({ multisig, hash, callData, open, onClose }:
       <Stack gap={2}>
         <Text variant="body2">Share the link below with the other multisig signers to finalize the transaction</Text>
         <Shelf gap={1}>
-          <TextInput_DEPRECATED
+          <TextInput
             style={{
               cursor: 'copy',
             }}

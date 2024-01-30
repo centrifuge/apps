@@ -76,7 +76,7 @@ export const initProxiesController = async (req: Request, res: Response) => {
               Id: pureProxyController.address,
             },
             { ForeignAsset: 1 },
-            CurrencyBalance.fromFloat(100000, 12)
+            CurrencyBalance.fromFloat(100000, 6)
           )
 
           const proxiedControllerSubmittable = api.tx.proxy.proxy(

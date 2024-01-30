@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { RadioButton } from '.'
 import { Stack } from '../Stack'
@@ -6,9 +6,9 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/RadioButton',
   component: RadioButton,
-} as ComponentMeta<typeof RadioButton>
+} as Meta<typeof RadioButton>
 
-type RadioButtonStory = ComponentStory<typeof RadioButton>
+type RadioButtonStory = StoryFn<typeof RadioButton>
 const Template: RadioButtonStory = (args) => (
   <Stack gap={3}>
     <RadioButton {...args} name="group1" />

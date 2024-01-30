@@ -265,7 +265,7 @@ export type TooltipsProps = {
   variant?: 'primary' | 'secondary'
   label?: string | React.ReactNode
   props?: any
-} & TextProps
+} & Partial<Pick<TextProps, 'style' | 'body'>>
 
 export const Tooltips: React.FC<TooltipsProps> = ({
   type,
