@@ -2876,6 +2876,8 @@ export function getPoolsModule(inst: Centrifuge) {
           if (!isin || !account) return
           const entry = {
             timestamp,
+            // Oracle prices always have 18 decimals on chain because they are used across pools
+            // When financing they are converted to the right number of decimals
             value: new CurrencyBalance(value, 18),
             account: addressToHex(account),
           }
