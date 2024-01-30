@@ -160,7 +160,7 @@ export function WalletProvider({
       ...evmChainsProp,
     }
     if (centEvmChainId) {
-      chains[centEvmChainId] = {
+      ;(chains as any)[centEvmChainId] = {
         urls: [centUrl.toString()],
         iconUrl: '',
         name: 'Centrifuge',
@@ -240,7 +240,8 @@ export function WalletProvider({
 
   function getProvider(chainId: number) {
     return (
-      cachedProviders[chainId] || (cachedProviders[chainId] = new JsonRpcProvider(evmChains[chainId].urls[0], chainId))
+      cachedProviders[chainId] ||
+      (cachedProviders[chainId] = new JsonRpcProvider((evmChains as any)[chainId].urls[0], chainId))
     )
   }
 
@@ -410,7 +411,7 @@ export function WalletProvider({
     const selectedCombinedAccount = combinedSubstrateAccounts?.find(
       (acc) =>
         state.substrate.selectedAccountAddress === acc.signingAccount.address &&
-        state.substrate.multisigAddress == acc.multisig?.address &&
+        state.substrate.multisigAddress === acc.multisig?.address &&
         ((!acc.proxies && !state.substrate.proxyAddresses) ||
           (acc.proxies?.length === state.substrate.proxyAddresses?.length &&
             acc.proxies!.every((p, i) => p.delegator === state.substrate.proxyAddresses?.[i])))
