@@ -93,20 +93,20 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                   placeholder="0.00"
                   name={`tranches.${index}.minInvestment`}
                   validate={validate.minInvestment}
-                  rightElement={values.currency}
+                  symbol={values.currency}
                 />
                 {index === juniorTrancheIndex ? (
                   <>
                     <TextInput
                       label={<Tooltips type="noTranchProtection" variant="secondary" />}
                       value="-"
-                      rightElement="%"
+                      symbol="%"
                       disabled
                     />
                     <TextInput
                       label={<Tooltips type="variableTranchInterest" variant="secondary" />}
                       value="-"
-                      rightElement="%"
+                      symbol="%"
                       disabled
                     />
                   </>
@@ -116,7 +116,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                       as={NumberInput}
                       label={<Tooltips type="tranchProtection" variant="secondary" />}
                       placeholder="0.00"
-                      rightElement="%"
+                      symbol="%"
                       name={`tranches.${index}.minRiskBuffer`}
                       validate={validate.minRiskBuffer}
                     />
@@ -124,7 +124,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                       as={NumberInput}
                       label={<Tooltips type="fixedTranchInterest" variant="secondary" />}
                       placeholder="0.00"
-                      rightElement="%"
+                      symbol="%"
                       name={`tranches.${index}.interestRate`}
                       validate={validate.interestRate}
                     />
