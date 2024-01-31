@@ -212,7 +212,7 @@ function AssetMetadataField({ loan, name, attribute }: { loan: Row; name: string
   )
 }
 
-function AssetName({ loan }: { loan: Row }) {
+export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset'> }) {
   const isTinlakePool = loan.poolId.startsWith('0x')
   const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)

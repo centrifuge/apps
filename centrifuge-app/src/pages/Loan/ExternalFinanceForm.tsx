@@ -10,7 +10,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, nonNegativeNumber, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, nonNegativeNumber, required, settlementPrice } from '../../utils/validation'
 import { WithdrawSelect } from './FinanceForm'
 
 type FinanceValues = {
@@ -141,6 +141,7 @@ export function ExternalFinanceFields({
       <Field
         name="price"
         validate={combine(
+          required(),
           settlementPrice(),
           validate ??
             ((val) => {

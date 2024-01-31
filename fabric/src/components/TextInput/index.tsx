@@ -41,6 +41,13 @@ export const StyledTextInput = styled.input`
     -webkit-appearance: none;
     margin: 0;
   }
+
+  // For number input
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 `
 
 export const StyledInputBox = styled(Shelf)`
@@ -247,7 +254,7 @@ export function TextAreaInput({
 export type AddressInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
   Omit<InputUnitProps, 'inputElement'>
 
-export const AddressInput = ({
+export function AddressInput({
   id,
   label,
   secondaryLabel,
@@ -256,7 +263,7 @@ export const AddressInput = ({
   onBlur,
   onChange,
   ...inputProps
-}: AddressInputProps) => {
+}: AddressInputProps) {
   const defaultId = React.useId()
   id ??= defaultId
 

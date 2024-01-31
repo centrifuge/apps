@@ -422,7 +422,8 @@ export type ExternalPricingInfo = {
   oracle: {
     value: CurrencyBalance
     timestamp: number
-  }
+    account: string
+  }[]
   notional: CurrencyBalance
   interestRate: Rate
 }
@@ -2827,6 +2828,7 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
+            api.events.loans.DebtTransferred.is(event) ||
             api.events.loans.WrittenOff.is(event) ||
             api.events.loans.Closed.is(event) ||
             api.events.loans.PortfolioValuationUpdated.is(event)
@@ -2850,7 +2852,7 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.loans.createdLoan.entries(poolId),
           api.query.loans.activeLoans(poolId),
           api.query.loans.closedLoan.entries(poolId),
-          api.query.priceOracle.values.entries(),
+          api.query.oraclePriceFeed.fedValues.entries(),
           api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
           api.call.loansApi.portfolio(poolId), // TODO: remove loans.activeLoans and use values from this runtime call
         ]).pipe(take(1))
@@ -2863,13 +2865,26 @@ export function getPoolsModule(inst: Centrifuge) {
           {
             timestamp: number
             value: CurrencyBalance
-          }
+            account: string
+          }[]
         > = {}
         oracles.forEach((oracle) => {
-          const { timestamp, value } = oracle[1].toPrimitive() as any
-          oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
+          const [value, timestamp] = oracle[1].toPrimitive() as any
+          const keys = oracle[0].toHuman() as any
+          const isin = keys[1].Isin
+          const account = keys[0].system?.Signed
+          if (!isin || !account) return
+          const entry = {
             timestamp,
-            value: new CurrencyBalance(value, currency.decimals),
+            // Oracle prices always have 18 decimals on chain because they are used across pools
+            // When financing they are converted to the right number of decimals
+            value: new CurrencyBalance(value, 18),
+            account: addressToHex(account),
+          }
+          if (oraclePrices[isin]) {
+            oraclePrices[isin].push(entry)
+          } else {
+            oraclePrices[isin] = [entry]
           }
         })
 
@@ -2934,10 +2949,13 @@ export function getPoolsModule(inst: Centrifuge) {
                     Isin: pricingInfo.priceId.isin,
                     maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
                     maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
-                    oracle: oraclePrices[pricingInfo.priceId.isin] || {
-                      value: new CurrencyBalance(0, currency.decimals),
-                      timestamp: 0,
-                    },
+                    oracle: oraclePrices[pricingInfo.priceId.isin] || [
+                      {
+                        value: new CurrencyBalance(0, 18),
+                        timestamp: 0,
+                        account: '',
+                      },
+                    ],
                     outstandingQuantity:
                       'external' in info.pricing && 'outstandingQuantity' in info.pricing.external
                         ? new CurrencyBalance(info.pricing.external.outstandingQuantity, 18)
