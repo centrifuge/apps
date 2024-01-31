@@ -30,7 +30,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
 
   const reportOptions: { label: string; value: Report }[] = [
     { label: 'Investor transactions', value: 'investor-tx' },
-    { label: 'Borrower transactions', value: 'borrower-tx' },
+    { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Asset list', value: 'asset-list' },
     ...(holdersReport == true ? [{ label: 'Holders', value: 'holders' as Report }] : []),

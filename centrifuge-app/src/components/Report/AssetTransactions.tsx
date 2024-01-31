@@ -4,17 +4,17 @@ import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useBorrowerTransactions } from '../../utils/usePools'
+import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
-import { formatBorrowerTransactionsType } from './utils'
+import { formatAssetTransactionType } from './utils'
 
-export function BorrowerTransactions({ pool }: { pool: Pool }) {
+export function AssetTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData } = React.useContext(ReportContext)
-  const transactions = useBorrowerTransactions(pool.id, startDate, endDate)
+  const transactions = useAssetTransactions(pool.id, startDate, endDate)
 
   const headers = ['Asset ID', 'Epoch', 'Date', 'Type', `${pool ? `${pool.currency.symbol} amount` : '—'}`]
 
@@ -29,7 +29,7 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
         tx.loanId.split('-').at(-1)!,
         tx.epochId.split('-').at(-1)!,
         formatDate(tx.timestamp.toString()),
-        formatBorrowerTransactionsType(tx.type),
+        formatAssetTransactionType(tx.type),
         tx.amount ? formatBalanceAbbreviated(tx.amount, pool.currency.symbol) : '-',
       ],
       heading: false,
