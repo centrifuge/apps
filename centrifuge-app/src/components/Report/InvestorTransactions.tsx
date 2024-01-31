@@ -15,10 +15,10 @@ import { UserFeedback } from './UserFeedback'
 import { copyable, formatInvestorTransactionsType } from './utils'
 
 const noop = (v: any) => v
-const cellFormatters = [noop, copyable, noop, noop, noop, noop, noop, noop, noop]
+const cellFormatters = [noop, noop, copyable, noop, noop, noop, noop, noop, noop]
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
-  const { activeTranche, setCsvData, startDate, endDate } = React.useContext(ReportContext)
+  const { activeTranche, setCsvData, startDate, endDate, investorTxType } = React.useContext(ReportContext)
   const utils = useCentrifugeUtils()
 
   const transactions = useInvestorTransactions(
@@ -30,8 +30,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
 
   const headers = [
     'Token',
-    'Account',
     'Network',
+    'Account',
     'Epoch',
     'Date',
     'Type',
@@ -51,32 +51,66 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       return []
     }
 
-    return transactions?.map((tx) => {
-      const tokenId = tx.trancheId.split('-')[1]
-      const token = pool.tranches.find((t) => t.id === tokenId)!
+    return transactions
+      ?.filter((tx) => {
+        if (investorTxType == 'all') {
+          return true
+        }
 
-      return {
-        name: '',
-        value: [
-          token.currency.name,
-          tx.evmAddress || utils.formatAddress(tx.accountId),
-          (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
-          tx.epochNumber.toString(),
-          formatDate(tx.timestamp.toString()),
-          formatInvestorTransactionsType({
-            type: tx.type,
-            trancheTokenSymbol: token.currency.symbol,
-            poolCurrencySymbol: pool.currency.symbol,
-            currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toNumber() : null,
-          }),
-          tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal(), pool.currency) : '-',
-          tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.tranches[0].currency) : '-', // TODO: not hardcode to 0
-          tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 6) : '-',
-        ],
-        heading: false,
-      }
-    })
-  }, [transactions, pool.currency, pool.tranches])
+        if (
+          investorTxType == 'orders' &&
+          (tx.type == 'INVEST_ORDER_UPDATE' ||
+            tx.type == 'REDEEM_ORDER_UPDATE' ||
+            tx.type == 'INVEST_ORDER_CANCEL' ||
+            tx.type == 'REDEEM_ORDER_CANCEL')
+        ) {
+          return true
+        }
+
+        if (investorTxType == 'executions' && (tx.type == 'INVEST_EXECUTION' || tx.type == 'REDEEM_EXECUTION')) {
+          return true
+        }
+
+        if (
+          investorTxType == 'transfers' &&
+          (tx.type == 'INVEST_COLLECT' ||
+            tx.type == 'REDEEM_COLLECT' ||
+            tx.type == 'INVEST_LP_COLLECT' ||
+            tx.type == 'REDEEM_LP_COLLECT' ||
+            tx.type == 'TRANSFER_IN' ||
+            tx.type == 'TRANSFER_OUT')
+        ) {
+          return true
+        }
+
+        return false
+      })
+      .map((tx) => {
+        const tokenId = tx.trancheId.split('-')[1]
+        const token = pool.tranches.find((t) => t.id === tokenId)!
+
+        return {
+          name: '',
+          value: [
+            token.currency.name,
+            (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
+            tx.evmAddress || utils.formatAddress(tx.accountId),
+            tx.epochNumber ? tx.epochNumber.toString() : '-',
+            formatDate(tx.timestamp.toString()),
+            formatInvestorTransactionsType({
+              type: tx.type,
+              trancheTokenSymbol: token.currency.symbol,
+              poolCurrencySymbol: pool.currency.symbol,
+              currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toNumber() : null,
+            }),
+            tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal(), pool.currency) : '-',
+            tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.tranches[0].currency) : '-', // TODO: not hardcode to 0
+            tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 6) : '-',
+          ],
+          heading: false,
+        }
+      })
+  }, [transactions, pool.currency, pool.tranches, investorTxType])
 
   const dataUrl = React.useMemo(() => {
     if (!data.length) {
