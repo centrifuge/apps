@@ -25,3 +25,7 @@ export function formatNftAttribute(value: any, attr: LoanTemplateAttribute) {
 export function isExternalLoan(loan: Loan): loan is ExternalLoan {
   return 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
 }
+
+export function isCashLoan(loan: Loan) {
+  return 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash'
+}

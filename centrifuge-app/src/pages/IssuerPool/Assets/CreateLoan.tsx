@@ -72,7 +72,6 @@ export type CreateLoanFormValues = {
     maxBorrowQuantity: number | ''
     Isin: string
     notional: number | ''
-    maxPriceVariation: number | ''
   }
 }
 
@@ -225,8 +224,7 @@ function IssuerCreateLoan() {
         discountRate: '',
         maxBorrowQuantity: '',
         Isin: '',
-        notional: '',
-        maxPriceVariation: '',
+        notional: 100,
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -247,7 +245,7 @@ function IssuerCreateLoan() {
         if (values.pricing.valuationMethod === 'oracle') {
           return {
             valuationMethod: values.pricing.valuationMethod,
-            maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
+            maxPriceVariation: Rate.fromPercent(9999),
             maxBorrowAmount: values.pricing.maxBorrowQuantity
               ? Price.fromFloat(values.pricing.maxBorrowQuantity)
               : null,
@@ -380,7 +378,8 @@ function IssuerCreateLoan() {
             <>
               <PageSection>
                 {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
-                  <Box
+                  <Shelf
+                    gap={2}
                     mb={3}
                     py={2}
                     borderWidth={0}
@@ -389,8 +388,12 @@ function IssuerCreateLoan() {
                     borderStyle="solid"
                   >
                     <Text>Asset template is missing. Please create one first.</Text>
-                  </Box>
+                    <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`} small>
+                      Create template
+                    </RouterLinkButton>
+                  </Shelf>
                 )}
+
                 <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
                   <FieldWithErrorMessage
                     validate={combine(required(), maxLength(100))}
@@ -418,13 +421,6 @@ function IssuerCreateLoan() {
                       />
                     )}
                   </Field>
-                  {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
-                    <Box alignSelf="center" justifySelf="end">
-                      <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
-                        Create template
-                      </RouterLinkButton>
-                    </Box>
-                  )}
                 </Grid>
               </PageSection>
               <PageSection title="Pricing">
