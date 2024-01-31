@@ -13,10 +13,10 @@ import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import { copyable } from './utils'
 
-const headers = ['Account', 'Network', 'Position', 'Unclaimed', 'Pending invest order', 'Pending redeem order']
+const headers = ['Network', 'Account', 'Position', 'Pending invest order', 'Pending redeem order']
 
 const noop = (v: any) => v
-const cellFormatters = [copyable, noop, noop, noop, noop, noop]
+const cellFormatters = [noop, copyable, noop, noop, noop]
 
 const columns = headers.map((col, index) => ({
   align: 'left',
@@ -35,25 +35,22 @@ export function Holders({ pool }: { pool: Pool }) {
       return []
     }
 
-    return holders.map((holder) => ({
-      name: '',
-      value: [
-        holder.evmAddress || utils.formatAddress(holder.accountId),
-        (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
-        formatBalance(
-          holder.balance.toDecimal(),
-          pool.tranches[0].currency // TODO: not hardcode to tranche index 0
-        ),
-
-        formatBalance(
-          holder.claimableTrancheTokens.toDecimal(),
-          pool.tranches[0].currency // TODO: not hardcode to tranche index 0
-        ),
-        formatBalance(holder.pendingInvestCurrency.toDecimal(), pool.currency),
-        formatBalance(holder.pendingRedeemTrancheTokens.toDecimal(), pool.tranches[0].currency), // TODO: not hardcode to tranche index 0
-      ],
-      heading: false,
-    }))
+    return holders
+      .filter((holder) => !holder.balance.isZero() || !holder.claimableTrancheTokens.isZero())
+      .map((holder) => ({
+        name: '',
+        value: [
+          (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
+          holder.evmAddress || utils.formatAddress(holder.accountId),
+          formatBalance(
+            holder.balance.toDecimal().add(holder.claimableTrancheTokens.toDecimal()),
+            pool.tranches[0].currency // TODO: not hardcode to tranche index 0
+          ),
+          formatBalance(holder.pendingInvestCurrency.toDecimal(), pool.currency),
+          formatBalance(holder.pendingRedeemTrancheTokens.toDecimal(), pool.tranches[0].currency), // TODO: not hardcode to tranche index 0
+        ],
+        heading: false,
+      }))
   }, [holders])
 
   const dataUrl = React.useMemo(() => {
