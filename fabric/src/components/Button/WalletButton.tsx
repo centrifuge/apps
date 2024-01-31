@@ -60,7 +60,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
         icon={
           address ? (
             <IdenticonWrapper>
-              {React.isValidElement(icon) ? icon : <Identicon value={address} size={24} theme={icon} />}
+              {typeof icon === 'string' ? <Identicon value={address} size={24} theme={icon} /> : icon}
             </IdenticonWrapper>
           ) : undefined
         }

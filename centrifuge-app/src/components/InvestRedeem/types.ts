@@ -27,6 +27,7 @@ export type InvestRedeemState = {
   trancheCurrency?: CurrencyMetadata
   capacity: Decimal
   minInitialInvestment: Decimal
+  minOrder: Decimal
   nativeBalance: Decimal
   poolCurrencies: { symbol: string }[]
   poolCurrencyBalance: Decimal

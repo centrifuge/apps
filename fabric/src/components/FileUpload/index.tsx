@@ -147,7 +147,6 @@ export function FileUpload({
       secondaryLabel={secondaryLabel}
       disabled={disabled}
       errorMessage={errorMessage}
-      active={dragOver}
       inputElement={
         <FileDragOverContainer
           onDragOver={handleDrag}

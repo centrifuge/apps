@@ -57,11 +57,9 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
               }}
               label="Issuer logo"
               requirements="JPG/PNG/SVG, max 1MB, max 480x480px"
-              placeholder="Choose issuer logo"
+              buttonLabel="Choose issuer logo"
               errorMessage={meta.touched && meta.error ? meta.error : undefined}
               accept="image/*"
-              aspectRatio={['1 / 1', '4 / 3']}
-              height={[null, 200, 200, 250]}
             />
           )}
         </Field>

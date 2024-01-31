@@ -23,7 +23,7 @@ const StyledGrid = styled(Box)`
 `
 
 export const Grid = React.forwardRef<any, GridProps>(
-  ({ gap, rowGap = gap, equalRows, equalColumns = false, minColumnWidth, columns = 2, ...rest }, ref) => {
+  ({ gap, rowGap = gap, equalRows, equalColumns = false, minColumnWidth, columns = 1, ...rest }, ref) => {
     const templateColumns = minColumnWidth
       ? widthToColumns(minColumnWidth, equalColumns)
       : countToColumns(columns, equalColumns)

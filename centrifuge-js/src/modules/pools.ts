@@ -2837,7 +2837,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            // api.events.priceOracle.NewFeedData.is(event) ||
+            api.events.priceOracle.NewFeedData.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
@@ -2864,11 +2864,12 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.loans.createdLoan.entries(poolId),
           api.query.loans.activeLoans(poolId),
           api.query.loans.closedLoan.entries(poolId),
+          api.query.priceOracle.values.entries(),
           api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
           api.call.loansApi.portfolio(poolId), // TODO: remove loans.activeLoans and use values from this runtime call
         ]).pipe(take(1))
       }),
-      map(([createdLoanValues, activeLoanValues, closedLoanValues, rawCurrency, rawPortfolio]) => {
+      map(([createdLoanValues, activeLoanValues, closedLoanValues, oracles, rawCurrency, rawPortfolio]) => {
         const currency = rawCurrency.toPrimitive() as AssetCurrencyData
 
         const oraclePrices: Record<
@@ -2878,14 +2879,13 @@ export function getPoolsModule(inst: Centrifuge) {
             value: CurrencyBalance
           }
         > = {}
-        // oracles.forEach(() => {
-        // TODO: Fix oracles
-        // const { timestamp, value } = oracle[1].toPrimitive() as any
-        // oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
-        //   timestamp,
-        //   value: new CurrencyBalance(value, currency.decimals),
-        // }
-        // })
+        oracles.forEach((oracle) => {
+          const { timestamp, value } = oracle[1].toPrimitive() as any
+          oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
+            timestamp,
+            value: new CurrencyBalance(value, currency.decimals),
+          }
+        })
 
         const activeLoansPortfolio: Record<
           string,
