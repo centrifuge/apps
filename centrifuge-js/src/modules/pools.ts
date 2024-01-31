@@ -2498,9 +2498,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function getHolders(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
-    const $api = inst.getApi()
-    const $query = $api.pipe(
-      switchMap((api) => api.query.evmChainId.chainId()),
+    const $query = inst.getApi().pipe(
       switchMap(() => {
         return inst.getSubqueryObservable<{
           trancheBalances: { nodes: SubqueryTrancheBalances[] }
@@ -2559,8 +2557,6 @@ export function getPoolsModule(inst: Centrifuge) {
           else obj[balance.accountId] = [balance]
           return obj
         }, {} as any)
-
-        console.log(currencyBalancesByAccountId)
 
         return data!.trancheBalances.nodes.map((balance) => ({
           accountId: balance.accountId,
