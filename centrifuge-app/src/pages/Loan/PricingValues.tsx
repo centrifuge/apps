@@ -4,7 +4,7 @@ import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getLatestPrice } from '../../utils/getLatestPrice'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
-import { useBorrowerTransactions } from '../../utils/usePools'
+import { useAssetTransactions } from '../../utils/usePools'
 
 type Props = {
   loan: Loan | TinlakeLoan
@@ -14,7 +14,7 @@ type Props = {
 export function PricingValues({ loan, pool }: Props) {
   const { pricing } = loan
 
-  const borrowerTransactions = useBorrowerTransactions(loan.poolId)
+  const assetTransactions = useAssetTransactions(loan.poolId)
 
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
@@ -26,7 +26,7 @@ export function PricingValues({ loan, pool }: Props) {
 
     const days = getAge(new Date(pricing.oracle.timestamp).toISOString())
 
-    const borrowerAssetTransactions = borrowerTransactions?.filter(
+    const borrowerAssetTransactions = assetTransactions?.filter(
       (borrowerTransaction) => borrowerTransaction.loanId === `${loan.poolId}-${loan.id}`
     )
     const latestPrice = getLatestPrice(pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals)
