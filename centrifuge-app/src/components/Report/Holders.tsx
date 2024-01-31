@@ -1,4 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { evmChains } from '../../config'
@@ -26,6 +27,7 @@ const columns = headers.map((col, index) => ({
 export function Holders({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData } = React.useContext(ReportContext)
 
+  const utils = useCentrifugeUtils()
   const holders = useHolders(pool.id, activeTranche === 'all' ? undefined : activeTranche)
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -36,7 +38,7 @@ export function Holders({ pool }: { pool: Pool }) {
     return holders.map((holder) => ({
       name: '',
       value: [
-        holder.evmAddress || holder.accountId,
+        holder.evmAddress || utils.formatAddress(holder.accountId),
         (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
         formatBalance(
           holder.balance.toDecimal(),
