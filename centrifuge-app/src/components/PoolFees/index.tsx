@@ -45,7 +45,7 @@ const columns = [
     cell: (row: Row) => {
       return (
         <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal())} of NAV` : ''}
+          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal(), true, {}, 3)} of NAV` : ''}
         </Text>
       )
     },

@@ -44,7 +44,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       if (!valuesDec) {
         errors.amount = 'Required'
       }
-      if (valuesDec?.lte(0)) {
+      if (valuesDec?.lt(0)) {
         errors.amount = 'Must be greater than 0'
       }
       return errors
@@ -157,7 +157,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                       loading={isChargeFeeLoading}
                       variant="primary"
                       type="submit"
-                      disabled={!!form.errors.amount || !form.values.amount || !isAllowedToCharge || isChargeFeeLoading}
+                      disabled={!isAllowedToCharge || isChargeFeeLoading}
                     >
                       {updateCharge ? 'Update c' : 'C'}harge
                     </Button>
