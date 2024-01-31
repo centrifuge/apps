@@ -67,6 +67,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
           <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
           {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>}
+          <NavigationTabsItem to={`${basePath}/${pid}/fees`}>Fees</NavigationTabsItem>
         </NavigationTabs>
       </Shelf>
     </PageHeader>

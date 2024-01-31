@@ -51,6 +51,8 @@ export type InvestorTransactionType =
   | 'TRANSFER_OUT'
   | 'INVEST_COLLECT'
   | 'REDEEM_COLLECT'
+  | 'INVEST_LP_COLLECT'
+  | 'REDEEM_LP_COLLECT'
 
 export type SubqueryInvestorTransaction = {
   __typename?: 'InvestorTransaction'

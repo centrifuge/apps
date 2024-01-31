@@ -25,7 +25,7 @@ import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs'
+import { combineLatest, firstValueFrom, lastValueFrom, switchMap, tap } from 'rxjs'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
@@ -130,6 +130,7 @@ const initialValues: CreatePoolValues = {
     threshold: 1,
   },
   adminMultisigEnabled: false,
+  poolFees: [],
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
@@ -388,6 +389,9 @@ function CreatePoolForm() {
       if (metadataValues.adminMultisig) {
         addMultisig(metadataValues.adminMultisig)
       }
+
+      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
+      metadataValues.poolFees = [{ id: feeId, name: 'Protocol fee' }]
 
       createProxies([
         (aoProxy, adminProxy) => {

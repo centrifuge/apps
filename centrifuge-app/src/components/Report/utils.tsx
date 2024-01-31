@@ -16,6 +16,8 @@ const investorTransactionTypes: {
   TRANSFER_OUT: ({ trancheTokenSymbol }) => `Withdrawn ${trancheTokenSymbol}`,
   INVEST_COLLECT: ({ trancheTokenSymbol }) => `${trancheTokenSymbol} received in wallet`,
   REDEEM_COLLECT: ({ poolCurrencySymbol }) => `${poolCurrencySymbol} received in wallet`,
+  INVEST_LP_COLLECT: ({ trancheTokenSymbol }) => `${trancheTokenSymbol} received in wallet`,
+  REDEEM_LP_COLLECT: ({ poolCurrencySymbol }) => `${poolCurrencySymbol} received in wallet`,
 }
 
 export function formatInvestorTransactionsType({
