@@ -1,4 +1,4 @@
-import { BorrowerTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
+import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { Text } from '@centrifuge/fabric'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { truncate } from '../../utils/web3'
@@ -47,8 +47,8 @@ export function formatInvestorTransactionsType({
   return investorTransactionTypes[type]({ poolCurrencySymbol, trancheTokenSymbol })
 }
 
-const borrowerTransactionTypes: {
-  [key in BorrowerTransactionType]: string
+const assetTransactionTypes: {
+  [key in AssetTransactionType]: string
 } = {
   CREATED: 'Created',
   PRICED: 'Priced',
@@ -57,13 +57,13 @@ const borrowerTransactionTypes: {
   CLOSED: 'Closed',
 }
 
-export function formatBorrowerTransactionsType(type: BorrowerTransactionType) {
-  if (!borrowerTransactionTypes[type]) {
-    console.warn(`Type '${type}' is not assignable to type 'BorrowerTransactionType'`)
+export function formatAssetTransactionType(type: AssetTransactionType) {
+  if (!assetTransactionTypes[type]) {
+    console.warn(`Type '${type}' is not assignable to type 'AssetTransactionType'`)
     return type
   }
 
-  return borrowerTransactionTypes[type]
+  return assetTransactionTypes[type]
 }
 
 export function formatTransactionsType({
@@ -72,13 +72,13 @@ export function formatTransactionsType({
   poolCurrencySymbol,
   currencyAmount,
 }: {
-  type: InvestorTransactionType | BorrowerTransactionType
+  type: InvestorTransactionType | AssetTransactionType
   trancheTokenSymbol: string
   poolCurrencySymbol: string
   currencyAmount: number | null
 }) {
-  if (isBorrowerType(type)) {
-    return formatBorrowerTransactionsType(type)
+  if (isAssetType(type)) {
+    return formatAssetTransactionType(type)
   }
 
   return formatInvestorTransactionsType({
@@ -89,7 +89,7 @@ export function formatTransactionsType({
   })
 }
 
-function isBorrowerType(type: InvestorTransactionType | BorrowerTransactionType): type is BorrowerTransactionType {
+function isAssetType(type: InvestorTransactionType | AssetTransactionType): type is AssetTransactionType {
   return ['CREATED', 'PRICED', 'BORROWED', 'REPAID', 'CLOSED'].includes(type)
 }
 
