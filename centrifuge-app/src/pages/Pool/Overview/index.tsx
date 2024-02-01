@@ -29,6 +29,7 @@ import { PoolDetailHeader } from '../Header'
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export type Token = {
+  poolId: string
   apy: Decimal
   protection: Decimal
   ratio: number
