@@ -306,6 +306,7 @@ export type Tranche = {
   minRiskBuffer: Perquintill | null
   currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
+  yield30DaysAnnualized: string | null
   lastUpdatedInterest: string
   ratio: Perquintill
 }
@@ -1839,10 +1840,25 @@ export function getPoolsModule(inst: Centrifuge) {
           pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         )
 
+        const $yield30DaysAnnualized = combineLatest(
+          keys.map((key) => {
+            const poolIdTrancheId = `${key[0]}-${key[1].toLowerCase()}`
+            return getLatestTrancheSnapshot(poolIdTrancheId).pipe(map((snapshot) => snapshot?.trancheSnapshots.nodes))
+          })
+        ) as Observable<{ yield30DaysAnnualized: string | null; trancheId: string }[][]>
+
         const $block = inst.getBlocks().pipe(take(1))
 
-        return combineLatest([$issuance, $block, $prices]).pipe(
-          map(([rawIssuances, { block }, rawPrices]) => {
+        return combineLatest([$issuance, $block, $prices, $yield30DaysAnnualized]).pipe(
+          map(([rawIssuances, { block }, rawPrices, [rawYield30DaysAnnualized]]) => {
+            const yield30DaysAnnualizedByPoolIdTrancheId = rawYield30DaysAnnualized?.reduce(
+              (acc, { yield30DaysAnnualized, trancheId }) => {
+                acc[trancheId] = yield30DaysAnnualized
+                return acc
+              },
+              {} as Record<string, string | null>
+            )
+
             const blockNumber = block.header.number.toNumber()
 
             const mappedPools = pools.map((poolObj, poolIndex) => {
@@ -1920,6 +1936,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
+                    yield30DaysAnnualized: yield30DaysAnnualizedByPoolIdTrancheId[`${poolId}-${trancheId}`],
                     minRiskBuffer,
                     currentRiskBuffer,
                     capacity: CurrencyBalance.fromFloat(capacity, currency.decimals),
@@ -2000,6 +2017,24 @@ export function getPoolsModule(inst: Centrifuge) {
           take(1)
         )
       )
+    )
+  }
+
+  function getLatestTrancheSnapshot(poolIdTrancheId: string) {
+    return inst.getSubqueryObservable<{
+      trancheSnapshots: { nodes: { yield30DaysAnnualized: string | null; trancheId: string }[] }
+    }>(
+      `query ($poolIdTrancheId: String!) {
+        trancheSnapshots(filter: { trancheId: { equalTo: $poolIdTrancheId } }, last: 1) {
+          nodes {
+            trancheId
+            yield30DaysAnnualized
+          }
+        }
+      }`,
+      {
+        poolIdTrancheId,
+      }
     )
   }
 
