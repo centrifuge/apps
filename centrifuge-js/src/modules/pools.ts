@@ -306,7 +306,7 @@ export type Tranche = {
   minRiskBuffer: Perquintill | null
   currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
-  yield30DaysAnnualized: string | null
+  yield30DaysAnnualized?: string | null
   lastUpdatedInterest: string
   ratio: Perquintill
 }
@@ -1935,7 +1935,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
-                    yield30DaysAnnualized: yield30DaysAnnualizedByPoolIdTrancheId[`${poolId}-${trancheId}`],
+                    yield30DaysAnnualized: yield30DaysAnnualizedByPoolIdTrancheId?.[`${poolId}-${trancheId}`],
                     minRiskBuffer,
                     currentRiskBuffer,
                     capacity: CurrencyBalance.fromFloat(capacity, currency.decimals),
@@ -2907,12 +2907,12 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.loans.activeLoans(poolId),
           api.query.loans.closedLoan.entries(poolId),
           // api.query.priceOracle.values.entries(),
-          api.query.oraclePriceFeed.fedValues.entries(),
+          // api.query.oraclePriceFeed.fedValues.entries(),
           api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
           api.call.loansApi.portfolio(poolId), // TODO: remove loans.activeLoans and use values from this runtime call
         ]).pipe(take(1))
       }),
-      map(([createdLoanValues, activeLoanValues, closedLoanValues, oracles, rawCurrency, rawPortfolio]) => {
+      map(([createdLoanValues, activeLoanValues, closedLoanValues, rawCurrency, rawPortfolio]) => {
         const currency = rawCurrency.toPrimitive() as AssetCurrencyData
 
         const oraclePrices: Record<
@@ -2922,13 +2922,13 @@ export function getPoolsModule(inst: Centrifuge) {
             value: CurrencyBalance
           }
         > = {}
-        oracles.forEach(() => {
+        // oracles.forEach(() => {
           //   const { timestamp, value } = oracle[1].toPrimitive() as any
           //   oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
           //     timestamp,
           //     value: new CurrencyBalance(value, currency.decimals),
           //   }
-        })
+        // })
 
         const activeLoansPortfolio: Record<
           string,
