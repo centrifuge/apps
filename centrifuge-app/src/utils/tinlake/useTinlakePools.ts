@@ -187,7 +187,7 @@ export function useTinlakeLoans(poolId: string) {
 export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches'> & {
   metadata: PoolMetadata
   tinlakeMetadata: PoolMetadataDetails
-  tranches: (Omit<Pool['tranches'][0], 'poolMetadata'> & {
+  tranches: (Omit<Pool['tranches'][0], 'poolMetadata' | 'yield30DaysAnnualized'> & {
     poolMetadata: PoolMetadata
     pendingInvestments: CurrencyBalance
     pendingRedemptions: TokenBalance
@@ -787,6 +787,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         : null,
     }
   })
+
 
   return { pools: combined }
 }

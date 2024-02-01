@@ -358,6 +358,8 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
         Dec(values.amount || 0).lt(state.minInitialInvestment)
       ) {
         errors.amount = 'Investment amount too low'
+      } else if (Dec(values.amount || 0).lt(state.minOrder)) {
+        errors.amount = 'Order amount too low'
       }
 
       return errors
@@ -562,6 +564,8 @@ function RedeemForm({ autoFocus }: RedeemFormProps) {
         errors.amount = validateNumberInput(amountTokens, 0, maxRedeemTokens)
       } else if (hasPendingOrder && amountTokens.eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
+      } else if (Dec(values.amount || 0).lt(state.minOrder)) {
+        errors.amount = 'Order amount too low'
       }
 
       return errors

@@ -16,6 +16,8 @@ const investorTransactionTypes: {
   TRANSFER_OUT: ({ trancheTokenSymbol }) => `Withdrawn ${trancheTokenSymbol}`,
   INVEST_COLLECT: ({ trancheTokenSymbol }) => `${trancheTokenSymbol} received in wallet`,
   REDEEM_COLLECT: ({ poolCurrencySymbol }) => `${poolCurrencySymbol} received in wallet`,
+  INVEST_LP_COLLECT: ({ trancheTokenSymbol }) => `${trancheTokenSymbol} received in wallet`,
+  REDEEM_LP_COLLECT: ({ poolCurrencySymbol }) => `${poolCurrencySymbol} received in wallet`,
 }
 
 export function formatInvestorTransactionsType({
@@ -45,7 +47,7 @@ export function formatInvestorTransactionsType({
   return investorTransactionTypes[type]({ poolCurrencySymbol, trancheTokenSymbol })
 }
 
-const borrowerTransactionTypes: {
+const assetTransactionTypes: {
   [key in BorrowerTransactionType]: string
 } = {
   CREATED: 'Created',
@@ -55,13 +57,13 @@ const borrowerTransactionTypes: {
   CLOSED: 'Closed',
 }
 
-export function formatBorrowerTransactionsType(type: BorrowerTransactionType) {
-  if (!borrowerTransactionTypes[type]) {
+export function formatAssetTransactionType(type: BorrowerTransactionType) {
+  if (!assetTransactionTypes[type]) {
     console.warn(`Type '${type}' is not assignable to type 'BorrowerTransactionType'`)
     return type
   }
 
-  return borrowerTransactionTypes[type]
+  return assetTransactionTypes[type]
 }
 
 export function formatTransactionsType({
@@ -75,8 +77,8 @@ export function formatTransactionsType({
   poolCurrencySymbol: string
   currencyAmount: number | null
 }) {
-  if (isBorrowerType(type)) {
-    return formatBorrowerTransactionsType(type)
+  if (isAssetType(type)) {
+    return formatAssetTransactionType(type)
   }
 
   return formatInvestorTransactionsType({
@@ -87,7 +89,7 @@ export function formatTransactionsType({
   })
 }
 
-function isBorrowerType(type: InvestorTransactionType | BorrowerTransactionType): type is BorrowerTransactionType {
+function isAssetType(type: InvestorTransactionType | BorrowerTransactionType): type is BorrowerTransactionType {
   return ['CREATED', 'PRICED', 'BORROWED', 'REPAID', 'CLOSED'].includes(type)
 }
 

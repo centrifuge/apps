@@ -2,7 +2,7 @@ import { Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useDebugFlags } from '../DebugFlags'
-import { GroupBy, Report, ReportContext } from './ReportContext'
+import { GroupBy, InvestorTxType, Report, ReportContext } from './ReportContext'
 
 type ReportFilterProps = {
   pool: Pool
@@ -24,11 +24,13 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     setGroupBy,
     activeTranche,
     setActiveTranche,
+    investorTxType,
+    setInvestorTxType,
   } = React.useContext(ReportContext)
 
   const reportOptions: { label: string; value: Report }[] = [
     { label: 'Investor transactions', value: 'investor-tx' },
-    { label: 'Borrower transactions', value: 'borrower-tx' },
+    { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Asset list', value: 'asset-list' },
     ...(holdersReport == true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
@@ -118,6 +120,38 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           onChange={(event) => {
             if (event.target.value) {
               setActiveTranche(event.target.value)
+            }
+          }}
+        />
+      )}
+
+      {report === 'investor-tx' && (
+        <Select
+          name="investorTxType"
+          label="Transaction type"
+          placeholder="Select types of transactions to show"
+          options={[
+            {
+              label: 'All',
+              value: 'all',
+            },
+            {
+              label: 'Submitted orders',
+              value: 'orders',
+            },
+            {
+              label: 'Executed orders',
+              value: 'executions',
+            },
+            {
+              label: 'Transfers',
+              value: 'transfers',
+            },
+          ]}
+          value={investorTxType}
+          onChange={(event) => {
+            if (event.target.value) {
+              setInvestorTxType(event.target.value as InvestorTxType)
             }
           }}
         />

@@ -13,6 +13,7 @@ import {
   BorrowerTransactionType,
   InvestorTransactionType,
   SubqueryBorrowerTransaction,
+  SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
@@ -305,6 +306,7 @@ export type Tranche = {
   minRiskBuffer: Perquintill | null
   currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
+  yield30DaysAnnualized: string | null
   lastUpdatedInterest: string
   ratio: Perquintill
 }
@@ -1837,10 +1839,25 @@ export function getPoolsModule(inst: Centrifuge) {
           pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         )
 
+        const $yield30DaysAnnualized = combineLatest(
+          keys.map((key) => {
+            const poolIdTrancheId = `${key[0]}-${key[1].toLowerCase()}`
+            return getLatestTrancheSnapshot(poolIdTrancheId).pipe(map((snapshot) => snapshot?.trancheSnapshots.nodes))
+          })
+        ) as Observable<{ yield30DaysAnnualized: string | null; trancheId: string }[][]>
+
         const $block = inst.getBlocks().pipe(take(1))
 
-        return combineLatest([$issuance, $block, $prices]).pipe(
-          map(([rawIssuances, { block }, rawPrices]) => {
+        return combineLatest([$issuance, $block, $prices, $yield30DaysAnnualized]).pipe(
+          map(([rawIssuances, { block }, rawPrices, [rawYield30DaysAnnualized]]) => {
+            const yield30DaysAnnualizedByPoolIdTrancheId = rawYield30DaysAnnualized?.reduce(
+              (acc, { yield30DaysAnnualized, trancheId }) => {
+                acc[trancheId] = yield30DaysAnnualized
+                return acc
+              },
+              {} as Record<string, string | null>
+            )
+
             const blockNumber = block.header.number.toNumber()
 
             const mappedPools = pools.map((poolObj, poolIndex) => {
@@ -1918,6 +1935,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
+                    yield30DaysAnnualized: yield30DaysAnnualizedByPoolIdTrancheId[`${poolId}-${trancheId}`],
                     minRiskBuffer,
                     currentRiskBuffer,
                     capacity: CurrencyBalance.fromFloat(capacity, currency.decimals),
@@ -1998,6 +2016,24 @@ export function getPoolsModule(inst: Centrifuge) {
           take(1)
         )
       )
+    )
+  }
+
+  function getLatestTrancheSnapshot(poolIdTrancheId: string) {
+    return inst.getSubqueryObservable<{
+      trancheSnapshots: { nodes: { yield30DaysAnnualized: string | null; trancheId: string }[] }
+    }>(
+      `query ($poolIdTrancheId: String!) {
+        trancheSnapshots(filter: { trancheId: { equalTo: $poolIdTrancheId } }, last: 1) {
+          nodes {
+            trancheId
+            yield30DaysAnnualized
+          }
+        }
+      }`,
+      {
+        poolIdTrancheId,
+      }
     )
   }
 
@@ -2508,20 +2544,17 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function getHolders(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
-    const $api = inst.getApi()
-    const $query = $api.pipe(
-      switchMap((api) => api.query.evmChainId.chainId()),
-      switchMap((chainId) => {
+    const $query = inst.getApi().pipe(
+      switchMap(() => {
         return inst.getSubqueryObservable<{
           trancheBalances: { nodes: SubqueryTrancheBalances[] }
-          currencyBalances: { nodes: SubqueryTrancheBalances[] }
+          currencyBalances: { nodes: SubqueryCurrencyBalances[] }
         }>(
-          `query($poolId: String!, $trancheId: String, $currencyId: String) {
-          trancheBalances(
-            filter: {
-              poolId: { equalTo: $poolId },
-              trancheId: { isNull: false, endsWith: $trancheId }
-            }) {
+          `query($trancheId: String) {
+            trancheBalances(
+              filter: {
+                trancheId: { startsWith: $trancheId }
+              }) {
             nodes {
               accountId
               account {
@@ -2539,19 +2572,22 @@ export function getPoolsModule(inst: Centrifuge) {
 
           currencyBalances(
             filter: {
-              currencyId: { startsWithInsensitive: $currencyId },
+              currency: { trancheId: { startsWith: $trancheId } }
             }) {
             nodes {
               accountId
+              account {
+                chainId
+                evmAddress
+              }
+              currencyId
               amount
             }
           }
         }
         `,
           {
-            poolId,
-            trancheId,
-            currencyId: `${chainId}-Tranche-${poolId}`,
+            trancheId: `${poolId}-${trancheId || ''}`,
           },
           false
         )
@@ -2563,7 +2599,8 @@ export function getPoolsModule(inst: Centrifuge) {
       map(([data, currency]) => {
         // TODO: this should be a map by account ID + tranche ID
         const currencyBalancesByAccountId = data!.currencyBalances.nodes.reduce((obj, balance) => {
-          obj[balance.accountId] = balance
+          if (balance.accountId in obj) obj[balance.accountId].push(balance)
+          else obj[balance.accountId] = [balance]
           return obj
         }, {} as any)
 
@@ -2571,7 +2608,15 @@ export function getPoolsModule(inst: Centrifuge) {
           accountId: balance.accountId,
           chainId: Number(balance.account?.chainId || 2031),
           evmAddress: balance.account?.evmAddress,
-          balance: new CurrencyBalance(currencyBalancesByAccountId[balance.accountId].amount, currency.decimals),
+          balance: new CurrencyBalance(
+            balance.accountId in currencyBalancesByAccountId
+              ? currencyBalancesByAccountId[balance.accountId].reduce(
+                  (sum: BN, balance: SubqueryCurrencyBalances) => sum.add(new BN(balance.amount)),
+                  new BN(0)
+                )
+              : '0',
+            currency.decimals
+          ),
           pendingInvestCurrency: new CurrencyBalance(balance.pendingInvestCurrency, currency.decimals),
           claimableTrancheTokens: new CurrencyBalance(balance.claimableTrancheTokens, currency.decimals),
           sumClaimedTrancheTokens: new CurrencyBalance(balance.sumClaimedTrancheTokens, currency.decimals),
@@ -2834,7 +2879,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            // api.events.priceOracle.NewFeedData.is(event) ||
+            api.events.priceOracle.NewFeedData.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
@@ -2861,11 +2906,13 @@ export function getPoolsModule(inst: Centrifuge) {
           api.query.loans.createdLoan.entries(poolId),
           api.query.loans.activeLoans(poolId),
           api.query.loans.closedLoan.entries(poolId),
+          // api.query.priceOracle.values.entries(),
+          api.query.oraclePriceFeed.fedValues.entries(),
           api.query.ormlAssetRegistry.metadata((poolValue.toPrimitive() as any).currency),
           api.call.loansApi.portfolio(poolId), // TODO: remove loans.activeLoans and use values from this runtime call
         ]).pipe(take(1))
       }),
-      map(([createdLoanValues, activeLoanValues, closedLoanValues, rawCurrency, rawPortfolio]) => {
+      map(([createdLoanValues, activeLoanValues, closedLoanValues, oracles, rawCurrency, rawPortfolio]) => {
         const currency = rawCurrency.toPrimitive() as AssetCurrencyData
 
         const oraclePrices: Record<
@@ -2875,14 +2922,13 @@ export function getPoolsModule(inst: Centrifuge) {
             value: CurrencyBalance
           }
         > = {}
-        // oracles.forEach(() => {
-        // TODO: Fix oracles
-        // const { timestamp, value } = oracle[1].toPrimitive() as any
-        // oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
-        //   timestamp,
-        //   value: new CurrencyBalance(value, currency.decimals),
-        // }
-        // })
+        oracles.forEach(() => {
+          //   const { timestamp, value } = oracle[1].toPrimitive() as any
+          //   oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
+          //     timestamp,
+          //     value: new CurrencyBalance(value, currency.decimals),
+          //   }
+        })
 
         const activeLoansPortfolio: Record<
           string,
