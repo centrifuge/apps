@@ -80,9 +80,9 @@ export function useInvestorTransactions(poolId: string, trancheId?: string, from
   return result
 }
 
-export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) {
+export function useAssetTransactions(poolId: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
-    ['borrowerTransactions', poolId, from, to],
+    ['assetTransactions', poolId, from, to],
     (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
     {
       enabled: !poolId.startsWith('0x'),

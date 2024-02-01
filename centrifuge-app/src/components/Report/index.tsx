@@ -3,7 +3,7 @@ import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
-import { BorrowerTransactions } from './BorrowerTransactions'
+import { AssetTransactions } from './AssetTransactions'
 import { Holders } from './Holders'
 import { InvestorTransactions } from './InvestorTransactions'
 import { PoolBalance } from './PoolBalance'
@@ -37,7 +37,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'asset-list' && <AssetList pool={pool} />}
         {report === 'holders' && <Holders pool={pool} />}
         {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
-        {report === 'borrower-tx' && <BorrowerTransactions pool={pool} />}
+        {report === 'asset-tx' && <AssetTransactions pool={pool} />}
       </Box>
     </Box>
   )
