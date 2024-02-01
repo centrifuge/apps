@@ -788,7 +788,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     }
   })
 
-  console.log(combined)
 
   return { pools: combined }
 }
