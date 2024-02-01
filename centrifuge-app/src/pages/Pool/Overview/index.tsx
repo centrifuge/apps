@@ -16,8 +16,8 @@ import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { TrancheTokenCards } from '../../../components/TrancheTokenCards'
-import { formatDate } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
+import { formatDate } from '../../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
@@ -29,6 +29,7 @@ import { PoolDetailHeader } from '../Header'
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export type Token = {
+  poolId: string
   apy: Decimal
   protection: Decimal
   ratio: number
@@ -85,6 +86,7 @@ export function PoolDetailOverview() {
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
+        poolId: tranche.poolId,
         apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),

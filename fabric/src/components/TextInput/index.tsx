@@ -11,7 +11,6 @@ export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> &
   InputUnitProps & {
     action?: React.ReactNode
     symbol?: React.ReactNode
-    rightElement?: React.ReactNode
   }
 export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> &
   InputUnitProps & {
