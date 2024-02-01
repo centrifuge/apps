@@ -7,8 +7,6 @@ export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'asset-tx' 
 
 export type InvestorTxType = 'all' | 'orders' | 'executions' | 'transfers'
 
-export type InvestorTxType = 'all' | 'orders' | 'executions' | 'transfers'
-
 export type ReportContextType = {
   csvData?: CsvDataProps
   setCsvData: (data?: CsvDataProps) => void
