@@ -581,6 +581,15 @@ export type IssuerDetail = {
 
 type FileType = { uri: string; mime: string }
 
+export type PoolReport = {
+  author: {
+    name: string
+    title: string
+    avatar: FileType | null
+  }
+  uri: string
+}
+
 export interface PoolMetadataInput {
   // details
   poolIcon: FileType | null
@@ -648,6 +657,7 @@ export type PoolMetadata = {
     status: PoolStatus
     listed: boolean
     assetOriginators?: Record<string, { name?: string; withdrawAddresses: WithdrawAddress[] }>
+    reports?: PoolReport[]
   }
   pod?: {
     node: string | null

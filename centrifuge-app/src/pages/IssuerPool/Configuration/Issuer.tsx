@@ -1,12 +1,12 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button } from '@centrifuge/fabric'
+import { Button, Stack } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { IssuerSection } from '../../../components/IssuerSection'
+import { IssuerDetails } from '../../../components/IssuerSection'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
@@ -156,7 +156,13 @@ export function Issuer() {
             )
           }
         >
-          {isEditing ? <IssuerInput /> : <IssuerSection metadata={metadata} />}
+          {isEditing ? (
+            <IssuerInput />
+          ) : (
+            <Stack gap={2}>
+              <IssuerDetails metadata={metadata} />
+            </Stack>
+          )}
         </PageSection>
       </Form>
     </FormikProvider>
