@@ -18,7 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:*",
-    "@google-cloud/firestore": "^6.5.0",
+    "@google-cloud/firestore": "^6.8.0",
     "@google-cloud/functions-framework": "^3.1.2",
     "bn.js": "^5.2.1"
   },
