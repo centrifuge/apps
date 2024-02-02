@@ -21,7 +21,7 @@ export function CustomDetails() {
   return (
     <FieldArray name="details">
       {(fldArr) => (
-        <Box>
+        <Stack gap={2}>
           <Shelf justifyContent="space-between">
             <Box>
               <Text as="h3">Issuer profile</Text>
@@ -44,7 +44,7 @@ export function CustomDetails() {
 
           {!!values?.details?.length &&
             values.details.map((_, index) => (
-              <Stack key={index} as={Card} p={1} gap={2} mt={2} alignItems="end">
+              <Stack key={index} as={Card} p={1} gap={2}>
                 <FieldWithErrorMessage
                   name={`details.${index}.title`}
                   validate={validate.issuerDetailTitle}
@@ -61,19 +61,21 @@ export function CustomDetails() {
                   maxLength={3000}
                 />
 
-                <Button
-                  type="button"
-                  variant="secondary"
-                  small
-                  onClick={() => {
-                    fldArr.remove(index)
-                  }}
-                >
-                  Remove
-                </Button>
+                <Box alignSelf="end">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    small
+                    onClick={() => {
+                      fldArr.remove(index)
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Box>
               </Stack>
             ))}
-        </Box>
+        </Stack>
       )}
     </FieldArray>
   )

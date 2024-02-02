@@ -16,6 +16,8 @@ const darkColors = {
   backgroundPrimary: 'black',
   backgroundSecondary: grayScale[900],
   backgroundTertiary: grayScale[950],
+  backgroundAccentPrimary: grayScale[900],
+  backgroundAccentSecondary: grayScale[900],
   backgroundPage: 'black',
   backgroundInput: grayScale[950],
   backgroundThumbnail: grayScale[400],
@@ -64,7 +66,6 @@ const darkColors = {
   textButtonSecondaryHover: 'white',
   textButtonSecondaryPressed: 'white',
   textButtonSecondaryDisabled: grayScale[600],
-
   borderButtonSecondary: grayScale[600],
   borderButtonSecondaryFocus: 'white',
   borderButtonSecondaryHover: grayScale[600],
@@ -87,6 +88,23 @@ const darkColors = {
   borderButtonTertiaryHover: 'transparent',
   borderButtonTertiaryPressed: yellowScale[500],
   borderButtonTertiaryDisabled: 'transparent',
+
+  backgroundButtonInverted: 'transparent',
+  backgroundButtonInvertedFocus: 'transparent',
+  backgroundButtonInvertedHover: 'black',
+  backgroundButtonInvertedPressed: 'black',
+  backgroundButtonInvertedDisabled: 'transparent',
+  textButtonInverted: 'white',
+  textButtonInvertedFocus: 'white',
+  textButtonInvertedHover: 'white',
+  textButtonInvertedPressed: 'white',
+  textButtonInvertedDisabled: grayScale[600],
+  borderButtonInverted: grayScale[600],
+  borderButtonInvertedFocus: 'white',
+  borderButtonInvertedHover: grayScale[600],
+  borderButtonInvertedPressed: 'white',
+  borderButtonInvertedDisabled: grayScale[600],
+  shadowButtonInverted: 'white',
 }
 
 export const modeDark = {
