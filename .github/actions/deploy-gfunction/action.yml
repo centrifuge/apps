@@ -34,6 +34,13 @@ inputs:
     description: "Google Cloud region to use"
     required: false
     default: europe-central2    
+  memory:
+    description: "RAM settings for function (without unit suffix)"
+    # https://cloud.google.com/sdk/gcloud/reference/functions/deploy#--memory
+    # https://github.com/google-github-actions/deploy-cloud-functions?tab=readme-ov-file#inputs
+    default: 256
+    required: false
+
 
 runs:
   using: composite
@@ -119,6 +126,7 @@ runs:
         service_account_email: ${{ inputs.service_account }}
         max_instances: ${{ contains(steps.prepare.outputs.function_name, 'production') && '200' || '10' }}
         https_trigger_security_level: "secure_always"
+        memory_mb: ${{ intputs.memory }}
 
     - name: Print Gcloud functions URL
       shell: sh
