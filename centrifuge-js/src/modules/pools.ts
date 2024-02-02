@@ -792,7 +792,7 @@ export type ActivePoolFeesData = {
   }
   destination: string
   editor: {
-    root: null
+    root: { account: string } | null
   }
   id: number
 }
@@ -805,7 +805,7 @@ export type AddFee = {
     name: string
     feeId: number
     amount: Rate
-    account: string
+    account?: string
   }
   poolId: string
 }
@@ -824,11 +824,12 @@ export function getPoolsModule(inst: Centrifuge) {
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
-      metadata: PoolMetadataInput
+      metadata: PoolMetadataInput,
+      fees: AddFee['fee'][]
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, metadata] = args
+    const [admin, poolId, , tranches, currency, maxReserve, metadata, fees] = args
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
@@ -843,6 +844,17 @@ export function getPoolsModule(inst: Centrifuge) {
         tokenSymbol: metadata.tranches[i].symbolName,
       },
     }))
+
+    const feeInput = fees.map((fee) => {
+      return [
+        'Top',
+        {
+          destination: fee.destination,
+          editor: fee?.account ? { account: fee.account } : 'Root',
+          feeType: { [fee.type]: { limit: { [fee.limit]: fee?.amount } } },
+        },
+      ]
+    })
 
     return inst.getApi().pipe(
       switchMap((api) =>
@@ -861,18 +873,7 @@ export function getPoolsModule(inst: Centrifuge) {
               maxReserve.toString(),
               pinnedMetadata.ipfsHash,
               [],
-              // temp fix for pool creation, sets a fixed poolFee is %1 with Dave as the recipient
-              // metadata is added in createPool form
-              [
-                [
-                  'Top',
-                  {
-                    destination: 'kAJFEnqV7LCiCaxNoSu7esnt96V7diRvYBZ9xeUHZg5k6Dqo4', // Dave
-                    editor: 'Root',
-                    feeType: { Fixed: { limit: { ShareOfPortfolioValuation: Rate.fromFloat(1) } } },
-                  },
-                ],
-              ]
+              feeInput
             )
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
@@ -3439,7 +3440,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const addSubmittables = add.map(({ poolId, fee }) => {
           return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
             destination: fee.destination,
-            editor: { account: fee.account },
+            editor: { account: fee?.account },
             feeType: { [fee.type]: { limit: { [fee.limit]: fee.amount } } },
           })
         })
