@@ -26,26 +26,25 @@ inputs:
     required: false
 
   target:
-    description: "Gfunction target handler"
+    description: 'Gfunction target handler'
     required: true
     default: handler
-    
+
   gcloud_region:
-    description: "Google Cloud region to use"
+    description: 'Google Cloud region to use'
     required: false
-    default: europe-central2    
+    default: europe-central2
   memory:
-    description: "RAM settings for function (without unit suffix)"
+    description: 'RAM settings for function (without unit suffix)'
     # https://cloud.google.com/sdk/gcloud/reference/functions/deploy#--memory
     # https://github.com/google-github-actions/deploy-cloud-functions?tab=readme-ov-file#inputs
     default: 256
     required: false
 
-
 runs:
   using: composite
   steps:
-    # This is probably redundant but in case this action 
+    # This is probably redundant but in case this action
     # needs to be used in isolation, it won't work
     # unless the repo is checked out somewhere first
     - name: Checkout
@@ -55,7 +54,7 @@ runs:
 
     - name: prepare env logic
       id: prepare
-      uses: "./apps/.github/actions/prepare-deploy"
+      uses: './apps/.github/actions/prepare-deploy'
       with:
         app_base_name: ${{ inputs.app_name }}
         deploy_to: ${{ inputs.deploy_env }}
@@ -64,7 +63,7 @@ runs:
       shell: bash
       id: set_env
       env:
-        vars_file: ./apps/${{ inputs.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
+        vars_file: ./apps/${{ inputs.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env
       run: |
         if [ -f ${{ env.vars_file }} ]; then
           VARS_COMMA=$(cat ${{ env.vars_file }} | paste -s -d, -)
@@ -77,7 +76,7 @@ runs:
       shell: bash
       id: set_secrets
       env:
-        secrets_file: ./apps/${{ inputs.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.secrets  
+        secrets_file: ./apps/${{ inputs.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.secrets
       run: |
         if [ -f ${{ env.secrets_file }} ]; then
           FILE=${{ env.secrets_file }}
@@ -90,12 +89,12 @@ runs:
         else
           echo "No secrets file in ${{ env.secrets_file }}, continuing..."
         fi
-            
+
     - name: retrieve artifacts
       id: download
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
       with:
-        name: ${{ inputs.artifact_name || inputs.app_name }} 
+        name: ${{ inputs.artifact_name || inputs.app_name }}
         # This will work only if we're matching the same string as
         # the upload step, which happens outside of this action file
         # by convention I use the app_name everywhere
@@ -110,8 +109,8 @@ runs:
       uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
       with:
         workload_identity_provider: ${{ inputs.GWIP }}
-        service_account: ${{ inputs.GSA }}      
-    
+        service_account: ${{ inputs.GSA }}
+
     - name: Deploy to google functions
       id: gclouddeploy
       uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
@@ -125,8 +124,8 @@ runs:
         env_vars: ${{ steps.set_env.outputs.function_vars }}
         service_account_email: ${{ inputs.service_account }}
         max_instances: ${{ contains(steps.prepare.outputs.function_name, 'production') && '200' || '10' }}
-        https_trigger_security_level: "secure_always"
-        memory_mb: ${{ intputs.memory }}
+        https_trigger_security_level: 'secure_always'
+        memory_mb: ${{ inputs.memory }}
 
     - name: Print Gcloud functions URL
       shell: sh
@@ -134,9 +133,9 @@ runs:
       run: echo "::notice title=Function_URL::${{ steps.gclouddeploy.outputs.url }}"
 
     - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1 
+      uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1
 
-    - name: Change function to allow_unathorized calls 
+    - name: Change function to allow_unathorized calls
       shell: sh
       run: |
         gcloud functions add-iam-policy-binding ${{ steps.prepare.outputs.function_name }} \
