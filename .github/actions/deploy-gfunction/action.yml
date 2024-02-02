@@ -119,6 +119,7 @@ runs:
         service_account_email: ${{ inputs.service_account }}
         max_instances: ${{ contains(steps.prepare.outputs.function_name, 'production') && '200' || '10' }}
         https_trigger_security_level: "secure_always"
+        memory_mb: 512MB
 
     - name: Print Gcloud functions URL
       shell: sh
