@@ -5,7 +5,7 @@ import { Spinner } from './Spinner'
 const PriceYieldChart = React.lazy(() => import('./Charts/PriceYieldChart'))
 
 type PoolTokenProps = {
-  token: any
+  token: { id: string; poolId: string; name: string; symbol: string }
   defaultOpen: boolean
   children: React.ReactNode
 }
@@ -29,7 +29,12 @@ export function PoolToken({ token, defaultOpen, children }: PoolTokenProps) {
     >
       <Stack maxHeight="300px">
         <React.Suspense fallback={<Spinner />}>
-          <PriceYieldChart trancheId={token.id} onDataLoaded={setShowChart} renderFallback={false} />
+          <PriceYieldChart
+            trancheId={token.id}
+            poolId={token.poolId}
+            onDataLoaded={setShowChart}
+            renderFallback={false}
+          />
         </React.Suspense>
       </Stack>
     </InteractiveCard>

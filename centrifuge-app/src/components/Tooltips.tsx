@@ -261,7 +261,7 @@ export const tooltipText = {
 }
 
 export type TooltipsProps = {
-  type: keyof typeof tooltipText
+  type?: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string | React.ReactNode
   props?: any
@@ -274,7 +274,7 @@ export const Tooltips: React.FC<TooltipsProps> = ({
   props,
   ...textProps
 }) => {
-  const { label, body } = tooltipText[type]
+  const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   const isPrimary = variant === 'primary'
   return (
     <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
