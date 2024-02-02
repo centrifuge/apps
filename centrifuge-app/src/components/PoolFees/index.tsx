@@ -40,7 +40,7 @@ const columns = [
     },
   },
   {
-    align: 'right',
+    align: 'left',
     header: 'Percentage',
     cell: (row: Row) => {
       return (
@@ -51,7 +51,7 @@ const columns = [
     },
   },
   {
-    align: 'right',
+    align: 'left',
     header: 'Pending fees',
     cell: (row: Row) => {
       return <Text variant="body3">{row.pendingFees ? formatBalance(row.pendingFees, row.poolCurrency, 2) : ''}</Text>
