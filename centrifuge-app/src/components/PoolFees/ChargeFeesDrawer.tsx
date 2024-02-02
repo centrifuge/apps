@@ -61,42 +61,44 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   })
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
-      <Stack gap={3}>
-        <Text textAlign="center" variant="heading2">
-          Charge {feeMetadata?.name}
-        </Text>
-        <Shelf
-          borderTop="0.5px solid"
-          borderBottom="0.5px solid"
-          borderColor="borderPrimary"
-          gap={2}
-          alignItems="flex-start"
-          justifyContent="flex-start"
-          py={1}
-        >
-          <Stack gap="4px">
-            <Text variant="label2">Type</Text>
-            <Text variant="body3">Direct charge</Text>
-          </Stack>
-          <Stack gap="4px">
-            <Text variant="label2">Pending fees</Text>
-            <Text variant="body3">
-              {formatBalanceAbbreviated(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
-            </Text>
-          </Stack>
-          <Stack gap="4px">
-            <Text variant="label2">Limit</Text>
-            <Text variant="body3">{`${formatPercentage(
-              feeChainData?.amounts.percentOfNav.toDecimal() || 0
-            )} of NAV`}</Text>
-          </Stack>
-          <Stack gap="4px">
-            <Text variant="label2">Receiving address</Text>
-            <CopyToClipboard variant="body3" address={feeChainData?.destination || ''} />
-          </Stack>
-        </Shelf>
-        <Stack bg="backgroundTertiary" p={2}>
+    <Drawer isOpen={isOpen} onClose={onClose} px={0}>
+      <Stack>
+        <Stack gap={3} px={3}>
+          <Text textAlign="center" variant="heading2">
+            Charge {feeMetadata?.name}
+          </Text>
+          <Shelf
+            borderTop="0.5px solid"
+            borderBottom="0.5px solid"
+            borderColor="borderPrimary"
+            gap={2}
+            alignItems="flex-start"
+            justifyContent="flex-start"
+            py={1}
+          >
+            <Stack gap="4px">
+              <Text variant="label2">Type</Text>
+              <Text variant="body3">Direct charge</Text>
+            </Stack>
+            <Stack gap="4px">
+              <Text variant="label2">Pending fees</Text>
+              <Text variant="body3">
+                {formatBalanceAbbreviated(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
+              </Text>
+            </Stack>
+            <Stack gap="4px">
+              <Text variant="label2">Limit</Text>
+              <Text variant="body3">{`${formatPercentage(
+                feeChainData?.amounts.percentOfNav.toDecimal() || 0
+              )} of NAV`}</Text>
+            </Stack>
+            <Stack gap="4px">
+              <Text variant="label2">Receiving address</Text>
+              <CopyToClipboard variant="body3" address={feeChainData?.destination || ''} />
+            </Stack>
+          </Shelf>
+        </Stack>
+        <Stack bg="backgroundTertiary" py={2} px={3} width="100%">
           {feeChainData?.amounts.pending.gtn(0) && !updateCharge ? (
             <Stack gap={2}>
               <Stack gap={1} bg="backgroundButtonSecondary" p={1} borderRadius="2px">
