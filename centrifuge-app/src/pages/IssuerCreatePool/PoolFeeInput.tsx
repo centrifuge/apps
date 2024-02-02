@@ -1,5 +1,4 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Select, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
@@ -16,7 +15,6 @@ const FEE_TYPES = [
 
 export const PoolFeeSection: React.FC = () => {
   const fmk = useFormikContext<PoolMetadataInput>()
-  const utils = useCentrifugeUtils()
   const { values } = fmk
   const address = useAddress()
 
@@ -27,13 +25,13 @@ export const PoolFeeSection: React.FC = () => {
       {
         name: 'Private Credit & Securities fees',
         feeType: 'Fixed',
-        walletAddress: utils.formatAddress(address!),
+        walletAddress: import.meta.env.REACT_APP_TREASURY,
         percentOfNav: isPrivateCredit ? 0.15 : 0.4,
       },
       {
         name: 'Public Securities & Equities fees',
         feeType: 'Fixed',
-        walletAddress: utils.formatAddress(address!),
+        walletAddress: import.meta.env.REACT_APP_TREASURY,
         percentOfNav: isPrivateCredit ? 0.02 : 0.075,
       },
     ]
