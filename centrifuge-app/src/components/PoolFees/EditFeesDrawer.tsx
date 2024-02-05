@@ -223,7 +223,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                         return (
                                           <NumberInput
                                             {...field}
-                                            label="Current percentage"
+                                            label="Max fees in % of NAV"
                                             symbol="%"
                                             disabled={!poolAdmin || updateFeeTxLoading}
                                             errorMessage={(meta.touched && meta.error) || ''}
