@@ -13,36 +13,40 @@ const FEE_TYPES = [
   { label: 'Fixed', value: 'Fixed' },
 ]
 
+const DEFAULT_FEE = {
+  open: {
+    publicCredit: {
+      fee: 0.075,
+      name: 'Public Securities & Equities fees',
+    },
+    privateCredit: {
+      fee: 0.4,
+      name: 'Private Credit & Securities fees',
+    },
+  },
+  closed: {
+    publicCredit: {
+      fee: 0.02,
+      name: 'Public Securities & Equities fees',
+    },
+    privateCredit: {
+      fee: 0.15,
+      name: 'Private Credit & Securities fees',
+    },
+  },
+}
+
 export const PoolFeeSection: React.FC = () => {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
   const address = useAddress()
 
   React.useEffect(() => {
-    const isPrivateCredit = values.assetClass === 'privateCredit'
-
-    const defaultFees = [
-      {
-        name: 'Private Credit & Securities fees',
-        feeType: 'Fixed',
-        walletAddress: import.meta.env.REACT_APP_TREASURY,
-        percentOfNav: isPrivateCredit ? 0.15 : 0.4,
-      },
-      {
-        name: 'Public Securities & Equities fees',
-        feeType: 'Fixed',
-        walletAddress: import.meta.env.REACT_APP_TREASURY,
-        percentOfNav: isPrivateCredit ? 0.02 : 0.075,
-      },
-    ]
-
-    defaultFees.forEach((fee, index) => {
-      fmk.setFieldValue(`poolFees.${index}.name`, fee.name)
-      fmk.setFieldValue(`poolFees.${index}.feeType`, fee.feeType)
-      fmk.setFieldValue(`poolFees.${index}.walletAddress`, fee.walletAddress)
-      fmk.setFieldValue(`poolFees.${index}.percentOfNav`, fee.percentOfNav)
-    })
-  }, [values.assetClass, address])
+    fmk.setFieldValue(`poolFees.0.name`, DEFAULT_FEE[values.poolType][values.assetClass].name)
+    fmk.setFieldValue(`poolFees.0.feeType`, 'Fixed')
+    fmk.setFieldValue(`poolFees.0.walletAddress`, import.meta.env.REACT_APP_TREASURY)
+    fmk.setFieldValue(`poolFees.0.percentOfNav`, DEFAULT_FEE[values.poolType][values.assetClass].fee)
+  }, [values.assetClass, values.poolType, address])
 
   return (
     <FieldArray name="poolFees">
@@ -84,7 +88,7 @@ export const PoolFeeInput: React.FC = () => {
                 label="Name"
                 maxLength={30}
                 name={`poolFees.${index}.name`}
-                disabled={index < 2}
+                disabled={index < 1}
               />
 
               <Field name={`poolFees.${index}.feeType`}>
@@ -100,7 +104,7 @@ export const PoolFeeInput: React.FC = () => {
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
                       options={FEE_TYPES}
-                      disabled={index < 2}
+                      disabled={index < 1}
                     />
                   )
                 }}
@@ -108,24 +112,24 @@ export const PoolFeeInput: React.FC = () => {
 
               <FieldWithErrorMessage
                 as={NumberInput}
-                label="Fees in % of NAV"
+                label="Max fees in % of NAV"
                 min={0}
                 max={100}
                 symbol="%"
                 name={`poolFees.${index}.percentOfNav`}
-                disabled={index < 2}
+                disabled={index < 1}
               />
 
               <FieldWithErrorMessage
                 as={TextInput}
                 label="Wallet address"
                 name={`poolFees.${index}.walletAddress`}
-                disabled={index < 2}
+                disabled={index < 1}
               />
 
               <Box pt={1}>
                 <Button
-                  disabled={index < 2}
+                  disabled={index < 1}
                   variant="tertiary"
                   icon={IconMinusCircle}
                   onClick={() => fldArr.remove(index)}

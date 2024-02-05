@@ -140,6 +140,7 @@ const initialValues: CreatePoolValues = {
   },
   adminMultisigEnabled: false,
   poolFees: [],
+  poolType: 'open',
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
