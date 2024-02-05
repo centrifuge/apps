@@ -1,10 +1,8 @@
 import { Rate, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Shelf, Text, truncate } from '@centrifuge/fabric'
+import { Button, IconCheckInCircle, IconSwitch, Shelf, Text, truncate } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
-import { NavLink } from 'react-router-dom'
-import styled from 'styled-components'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -40,21 +38,23 @@ const columns = [
     },
   },
   {
-    align: 'right',
+    align: 'left',
     header: 'Percentage',
     cell: (row: Row) => {
       return (
         <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal())} of NAV` : ''}
+          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal(), true, {}, 3)} of NAV` : ''}
         </Text>
       )
     },
   },
   {
-    align: 'right',
+    align: 'left',
     header: 'Pending fees',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.pendingFees ? formatBalance(row.pendingFees, row.poolCurrency, 2) : ''}</Text>
+      return (
+        <Text variant="body3">{row.pendingFees ? `~${formatBalance(row.pendingFees, row.poolCurrency, 2)}` : ''}</Text>
+      )
     },
   },
   {
@@ -68,7 +68,7 @@ const columns = [
     align: 'left',
     header: 'Action',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.action}</Text>
+      return row.action
     },
   },
 ]
@@ -101,9 +101,14 @@ export function PoolFees() {
             pendingFees: fixedFee ? null : feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
             action: fixedFee ? null : (
-              <StyledLink to={`?charge=${feeChainData?.id}`}>
-                <Text variant="body3">Charge</Text>
-              </StyledLink>
+              <RouterLinkButton
+                small
+                variant="tertiary"
+                icon={<IconSwitch size="20px" />}
+                to={`?charge=${feeChainData?.id}`}
+              >
+                Charge
+              </RouterLinkButton>
             ),
             poolCurrency: pool.currency.symbol,
           }
@@ -125,15 +130,16 @@ export function PoolFees() {
             pendingFees: undefined,
             receivingAddress: change.destination,
             action: (
-              <StyledLink
-                style={{ outline: 'none', border: 'none', background: 'none' }}
-                as="button"
+              <Button
+                variant="tertiary"
+                icon={<IconCheckInCircle size="20px" />}
                 onClick={() => {
                   applyNewFee([poolId, hash])
                 }}
+                small
               >
-                <Text variant="body3">Apply changes</Text>
-              </StyledLink>
+                Apply changes
+              </Button>
             ),
             poolCurrency: pool.currency.symbol,
           }
@@ -191,18 +197,6 @@ export function PoolFees() {
     </>
   )
 }
-
-const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
-  {
-    display: 'inline-block',
-    outline: '0',
-    textDecoration: 'none',
-    ':hover': {
-      textDecoration: 'underline',
-    },
-  },
-  (props) => props.$disabled && { pointerEvents: 'none' }
-)
 
 export function useProposedFeeChanges(poolId: string) {
   const [result] = useCentrifugeQuery(['feeChanges', poolId], (cent) =>
