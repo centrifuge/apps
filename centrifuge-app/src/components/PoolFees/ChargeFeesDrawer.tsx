@@ -83,7 +83,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             <Stack gap="4px">
               <Text variant="label2">Pending fees</Text>
               <Text variant="body3">
-                {formatBalanceAbbreviated(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
+                ~{formatBalanceAbbreviated(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
               </Text>
             </Stack>
             <Stack gap="4px">
@@ -107,7 +107,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     Pending fees
                   </Text>
                   <Text variant="body3" color="textSecondary" fontWeight={600}>
-                    {formatBalance(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
+                    ~{formatBalance(feeChainData?.amounts.pending || 0, pool.currency.symbol, 2)}
                   </Text>
                 </Shelf>
                 <Shelf alignItems="flex-start" gap={1}>
