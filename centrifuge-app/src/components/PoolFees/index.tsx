@@ -1,6 +1,6 @@
-import { Rate, TokenBalance } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, IconCheckInCircle, IconSwitch, Shelf, Text, truncate } from '@centrifuge/fabric'
+import { addressToHex, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
+import { useAddress, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text, truncate } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -85,6 +85,7 @@ export function PoolFees() {
   const drawer = params.get('charge')
   const changes = useProposedFeeChanges(poolId)
   const poolAdmin = usePoolAdmin(poolId)
+  const address = useAddress()
   const { execute: applyNewFee } = useCentrifugeTransaction('Apply new fee', (cent) => cent.pools.applyNewFee)
 
   const data = React.useMemo(() => {
@@ -94,13 +95,14 @@ export function PoolFees() {
         ?.map((feeChainData) => {
           const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
           const fixedFee = feeChainData?.type === 'fixed'
+          const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
           return {
             name: feeMetadata!.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
             pendingFees: fixedFee ? null : feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
-            action: fixedFee ? null : (
+            action: fixedFee ? null : isAllowedToCharge || poolAdmin ? (
               <RouterLinkButton
                 small
                 variant="tertiary"
@@ -109,6 +111,8 @@ export function PoolFees() {
               >
                 Charge
               </RouterLinkButton>
+            ) : (
+              <Box height="32px"></Box>
             ),
             poolCurrency: pool.currency.symbol,
           }
@@ -129,7 +133,7 @@ export function PoolFees() {
             percentOfNav: change.amounts.percentOfNav,
             pendingFees: undefined,
             receivingAddress: change.destination,
-            action: (
+            action: poolAdmin ? (
               <Button
                 variant="tertiary"
                 icon={<IconCheckInCircle size="20px" />}
@@ -140,6 +144,8 @@ export function PoolFees() {
               >
                 Apply changes
               </Button>
+            ) : (
+              <Box height="32px"></Box>
             ),
             poolCurrency: pool.currency.symbol,
           }
