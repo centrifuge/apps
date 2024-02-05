@@ -1958,24 +1958,23 @@ export function getPoolsModule(inst: Centrifuge) {
                 metadata,
                 currency,
                 poolFees: poolFees?.map((fee) => {
-                  const timeSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
+                  // const timeSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
                   const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                   const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
                   const percentOfNav = new Rate(hexToBN(fee.amounts.feeType[type].limit[limit]))
-                  const pending =
-                    type === 'chargedUpTo'
-                      ? fee.amounts.pending
-                      : percentOfNav
-                          .mul(new BN(timeSinceLastEpoch))
-                          .mul(latestNav)
-                          .div(new BN(10).pow(new BN(Rate.decimals + currency.decimals)))
                   return {
                     ...fee,
                     type,
                     limit,
                     amounts: {
                       percentOfNav,
-                      pending: new CurrencyBalance(pending, currency.decimals),
+                      pending:
+                        type === 'chargedUpTo'
+                          ? new CurrencyBalance(fee.amounts.pending, currency.decimals)
+                          : CurrencyBalance.fromFloat(
+                              percentOfNav.toDecimal().div(100).mul(latestNav.toDecimal()),
+                              currency.decimals
+                            ),
                     },
                   }
                 }),

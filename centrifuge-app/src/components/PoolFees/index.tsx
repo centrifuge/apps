@@ -16,7 +16,7 @@ type Row = {
   name: string
   type?: string
   percentOfNav?: Rate
-  pendingFees: TokenBalance
+  pendingFees?: TokenBalance
   receivingAddress?: string
   action: null | React.ReactNode
   poolCurrency?: string
@@ -52,11 +52,11 @@ const columns = [
     align: 'left',
     header: 'Pending fees',
     cell: (row: Row) => {
-      return (
+      return row?.pendingFees ? (
         <Text variant="body3">
           {`${row?.type === 'fixed' ? '~' : ''}${formatBalance(row.pendingFees, row.poolCurrency, 2)}`}
         </Text>
-      )
+      ) : null
     },
   },
   {
