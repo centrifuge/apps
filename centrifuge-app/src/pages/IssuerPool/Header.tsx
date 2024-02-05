@@ -71,6 +71,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
             <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/access`}>Access</NavigationTabsItem>
             {showOracle && <NavigationTabsItem to={`${basePath}/${pid}/pricing`}>Pricing</NavigationTabsItem>}
+            <NavigationTabsItem to={`${basePath}/${pid}/fees`}>Fees</NavigationTabsItem>
           </NavigationTabs>
         </Shelf>
       </PageHeader>

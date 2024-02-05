@@ -1,5 +1,5 @@
 import { CurrencyBalance, isSameAddress, Perquintill, Rate, TransactionOptions } from '@centrifuge/centrifuge-js'
-import { CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { AddFee, CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   useBalances,
   useCentrifuge,
@@ -35,6 +35,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
+import { isSubstrateAddress } from '../../utils/address'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
@@ -46,6 +47,7 @@ import { usePools } from '../../utils/usePools'
 import { truncate } from '../../utils/web3'
 import { AdminMultisigSection } from './AdminMultisig'
 import { IssuerInput } from './IssuerInput'
+import { PoolFeeSection } from './PoolFeeInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -92,13 +94,20 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
 
 export type CreatePoolValues = Omit<
   PoolMetadataInput,
-  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig'
+  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees'
 > & {
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
+  poolFees: {
+    id?: number
+    name: string
+    feeType: 'Fixed' | 'ChargedUpTo'
+    percentOfNav: number | ''
+    walletAddress: string
+  }[]
 }
 
 const initialValues: CreatePoolValues = {
@@ -206,7 +215,8 @@ function CreatePoolForm() {
           tranches: TrancheInput[],
           currency: CurrencyKey,
           maxReserve: BN,
-          metadata: PoolMetadataInput
+          metadata: PoolMetadataInput,
+          poolFees: AddFee['fee'][]
         ],
         options
       ) => {
@@ -305,6 +315,21 @@ function CreatePoolForm() {
       let prevInterest = Infinity
       let prevRiskBuffer = 0
 
+      values.poolFees.forEach((fee, i) => {
+        if (fee.name === '') {
+          errors = setIn(errors, `poolFees.${i}.name`, 'Name is required')
+        }
+        if (fee.percentOfNav === '' || fee.percentOfNav <= 0 || fee.percentOfNav >= 100) {
+          errors = setIn(errors, `poolFees.${i}.percentOfNav`, 'Percentage between 1 and 99 is required')
+        }
+        if (fee.walletAddress === '') {
+          errors = setIn(errors, `poolFees.${i}.walletAddress`, 'Wallet address is required')
+        }
+        if (!isSubstrateAddress(fee?.walletAddress)) {
+          errors = setIn(errors, `poolFees.${i}.walletAddress`, 'Invalid address')
+        }
+      })
+
       values.tranches.forEach((t, i) => {
         if (tokenNames.has(t.tokenName)) {
           errors = setIn(errors, `tranches.${i}.tokenName`, 'Tranche names must be unique')
@@ -384,14 +409,25 @@ function CreatePoolForm() {
         })),
       ]
 
+      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
+      const poolFees: AddFee['fee'][] = values.poolFees.map((fee, i) => {
+        return {
+          name: fee.name,
+          destination: fee.walletAddress,
+          amount: Rate.fromFloat(fee.percentOfNav),
+          type: fee.feeType,
+          limit: 'ShareOfPortfolioValuation',
+          feeId: feeId + i,
+          account: fee.feeType === 'ChargedUpTo' ? fee.walletAddress : undefined,
+        }
+      })
+      metadataValues.poolFees = poolFees.map((fee) => ({ name: fee.name, id: fee.feeId }))
+
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
       if (metadataValues.adminMultisig) {
         addMultisig(metadataValues.adminMultisig)
       }
-
-      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
-      metadataValues.poolFees = [{ id: feeId, name: 'Protocol fee' }]
 
       createProxies([
         (aoProxy, adminProxy) => {
@@ -406,6 +442,7 @@ function CreatePoolForm() {
               currency.key,
               CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
               metadataValues,
+              poolFees,
             ],
             { createType }
           )
@@ -621,6 +658,7 @@ function CreatePoolForm() {
           </PageSection>
 
           <TrancheSection />
+          <PoolFeeSection />
 
           <AdminMultisigSection />
           <Box position="sticky" bottom={0} backgroundColor="backgroundPage" zIndex={3}>

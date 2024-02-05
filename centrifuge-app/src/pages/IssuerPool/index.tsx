@@ -9,6 +9,7 @@ import { IssuerPoolViewLoanTemplatePage } from './Configuration/ViewLoanTemplate
 import { IssuerPoolInvestorsPage } from './Investors'
 import { IssuerPoolLiquidityPage } from './Liquidity'
 import { IssuerPoolOverviewPage } from './Overview'
+import { IssuerPoolFeesPage } from './PoolFees'
 import { IssuerPoolPricingPage } from './Pricing'
 import { IssuerPoolReportingPage } from './Reporting'
 
@@ -28,6 +29,7 @@ export default function IssuerPoolPage() {
         <Route path={`${path}/liquidity`} component={IssuerPoolLiquidityPage} />
         <Route path={`${path}/reporting`} component={IssuerPoolReportingPage} />
         <Route path={`${path}/pricing`} component={IssuerPoolPricingPage} />
+        <Route path={`${path}/fees`} component={IssuerPoolFeesPage} />
         <Route path={path} component={IssuerPoolOverviewPage} />
       </Switch>
       <PoolChangesBanner poolId={poolId} />
