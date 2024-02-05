@@ -171,7 +171,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                 return (
                   <Grid
                     key={`poolFees.${index}.${feeMetadata?.name}`}
-                    gridTemplateColumns="repeat(2, 1fr)"
+                    gridTemplateColumns="2fr 1fr"
                     gap={2}
                     py="11px"
                     borderBottom="0.5px solid"
@@ -182,7 +182,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                       {feeMetadata?.name}
                     </Text>
                     <Text variant="body2" color="textSecondary">
-                      {formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} of NAV
+                      {formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0, true, {}, 3)} of NAV
                     </Text>
                   </Grid>
                 )

@@ -40,18 +40,18 @@ const columns = [
     },
   },
   {
-    align: 'right',
+    align: 'left',
     header: 'Percentage',
     cell: (row: Row) => {
       return (
         <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal())} of NAV` : ''}
+          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal(), true, {}, 3)} of NAV` : ''}
         </Text>
       )
     },
   },
   {
-    align: 'right',
+    align: 'left',
     header: 'Pending fees',
     cell: (row: Row) => {
       return <Text variant="body3">{row.pendingFees ? formatBalance(row.pendingFees, row.poolCurrency, 2) : ''}</Text>
