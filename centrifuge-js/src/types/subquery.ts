@@ -20,6 +20,12 @@ export type SubqueryPoolSnapshot = {
   sumInvestedAmountByPeriod?: number | null
   sumRedeemedAmountByPeriod?: number | null
   blockNumber: number
+  periodStart: string
+  pool: {
+    currency: {
+      decimals: number
+    }
+  }
 }
 
 export type SubqueryTrancheSnapshot = {
