@@ -111,8 +111,8 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                 <Shelf alignItems="flex-start" gap={1}>
                   <IconInfo size="16px" />
                   <Text variant="body3" color="textSecondary">
-                    Fee charges have been placed. Charging of fees will be finalized by the issuer of the pool when
-                    executing orders.
+                    Fee charges have been placed. Fees will be paid when orders are executed and sufficient liquidity is
+                    available.
                   </Text>
                 </Shelf>
               </Stack>
@@ -161,7 +161,16 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                     >
                       {updateCharge ? 'Update c' : 'C'}harge
                     </Button>
-                    <Button variant="secondary" onClick={onClose}>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        if (updateCharge) {
+                          setUpdateCharge(false)
+                        } else {
+                          onClose()
+                        }
+                      }}
+                    >
                       Cancel
                     </Button>
                   </ButtonGroup>
