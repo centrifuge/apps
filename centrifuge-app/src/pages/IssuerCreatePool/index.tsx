@@ -108,6 +108,7 @@ export type CreatePoolValues = Omit<
     percentOfNav: number | ''
     walletAddress: string
   }[]
+  poolType: 'open' | 'closed'
 }
 
 const initialValues: CreatePoolValues = {

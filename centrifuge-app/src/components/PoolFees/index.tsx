@@ -96,24 +96,26 @@ export function PoolFees() {
           const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
           const fixedFee = feeChainData?.type === 'fixed'
           const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
+
           return {
             name: feeMetadata!.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
-            pendingFees: fixedFee ? null : feeChainData?.amounts.pending,
+            pendingFees: feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
-            action: fixedFee ? null : isAllowedToCharge || poolAdmin ? (
-              <RouterLinkButton
-                small
-                variant="tertiary"
-                icon={<IconSwitch size="20px" />}
-                to={`?charge=${feeChainData?.id}`}
-              >
-                Charge
-              </RouterLinkButton>
-            ) : (
-              <Box height="32px"></Box>
-            ),
+            action:
+              (isAllowedToCharge || poolAdmin) && !fixedFee ? (
+                <RouterLinkButton
+                  small
+                  variant="tertiary"
+                  icon={<IconSwitch size="20px" />}
+                  to={`?charge=${feeChainData?.id}`}
+                >
+                  Charge
+                </RouterLinkButton>
+              ) : (
+                <Box height="32px"></Box>
+              ),
             poolCurrency: pool.currency.symbol,
           }
         })

@@ -617,6 +617,8 @@ export interface PoolMetadataInput {
   }
 
   poolFees: { id: number; name: string }[]
+
+  poolType: 'open' | 'closed'
 }
 export type WithdrawAddress = {
   name?: string
@@ -765,12 +767,16 @@ export type Permissions = {
   }
 }
 
+export type FeeTypes = 'fixed' | 'chargedUpTo'
+export type FeeLimits = 'shareOfPortfolioValuation' | 'amountPerSecond'
+
 export type ActivePoolFees = {
-  type: 'fixed' | 'shareOfPortfolioValuation'
+  type: FeeTypes
   amounts: {
     percentOfNav: Rate
     pending: CurrencyBalance
   }
+  limit: FeeLimits
   destination: string
   id: number
 }
@@ -779,9 +785,9 @@ export type ActivePoolFeesData = {
   amounts: {
     disbursement: CurrencyBalance
     feeType: {
-      fixed: {
+      [K in FeeTypes]: {
         limit: {
-          shareOfPortfolioValuation: string
+          [L in FeeLimits]: string
         }
       }
     }
@@ -1941,19 +1947,35 @@ export function getPoolsModule(inst: Centrifuge) {
               const availableReserve = new CurrencyBalance(hexToBN(pool.reserve.available), currency.decimals)
               const totalReserve = new CurrencyBalance(hexToBN(pool.reserve.total), currency.decimals)
 
+              const latestNav = navData?.latest
+                ? new CurrencyBalance(hexToBN(navData.latest), currency.decimals)
+                : new CurrencyBalance(0, currency.decimals)
+              const lastUpdatedNav = new Date((navData?.lastUpdated ?? 0) * 1000).toISOString()
+
               const mappedPool: Pool = {
                 id: poolId,
                 createdAt: null,
                 metadata,
                 currency,
                 poolFees: poolFees?.map((fee) => {
-                  const type = Object.keys(fee.amounts.feeType)[0] as keyof typeof fee.amounts.feeType
+                  const timeSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
+                  const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
+                  const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
+                  const percentOfNav = new Rate(hexToBN(fee.amounts.feeType[type].limit[limit]))
+                  const pending =
+                    type === 'chargedUpTo'
+                      ? fee.amounts.pending
+                      : percentOfNav
+                          .mul(new BN(timeSinceLastEpoch))
+                          .mul(latestNav)
+                          .div(new BN(10).pow(new BN(Rate.decimals + currency.decimals)))
                   return {
                     ...fee,
                     type,
+                    limit,
                     amounts: {
-                      percentOfNav: new Rate(hexToBN(fee.amounts.feeType[type].limit.shareOfPortfolioValuation)),
-                      pending: new CurrencyBalance(fee.amounts.pending, currency.decimals),
+                      percentOfNav,
+                      pending: new CurrencyBalance(pending, currency.decimals),
                     },
                   }
                 }),
@@ -2028,10 +2050,8 @@ export function getPoolsModule(inst: Centrifuge) {
                   challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                 },
                 nav: {
-                  latest: navData?.latest
-                    ? new CurrencyBalance(hexToBN(navData.latest), currency.decimals)
-                    : new CurrencyBalance(0, currency.decimals),
-                  lastUpdated: new Date((navData?.lastUpdated ?? 0) * 1000).toISOString(),
+                  latest: latestNav,
+                  lastUpdated: lastUpdatedNav,
                 },
                 value: new CurrencyBalance(
                   hexToBN(pool.reserve.total).add(new BN(navData?.latest ? hexToBN(navData.latest) : 0)),
