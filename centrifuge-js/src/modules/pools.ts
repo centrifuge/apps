@@ -2159,13 +2159,17 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getPoolSnapshotsWithCursor(poolId: string, endCursor: string | null, from?: Date, to?: Date) {
+  function getPoolSnapshotsWithCursor(
+    poolId: string,
+    endCursor: string | null,
+    options?: { from?: Date; to?: Date; orderBy?: 'BLOCK_NUMBER_ASC' | 'PERIOD_START_ASC' }
+  ) {
     return inst.getSubqueryObservable<{
       poolSnapshots: { nodes: SubqueryPoolSnapshot[]; pageInfo: { hasNextPage: boolean; endCursor: string } }
     }>(
-      `query($poolId: String!, $from: Datetime!, $to: Datetime!, $poolCursor: Cursor) {
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!, $poolCursor: Cursor, $orderBy: [PoolSnapshotsOrderBy!]) {
       poolSnapshots(
-        orderBy: BLOCK_NUMBER_ASC,
+        orderBy: $orderBy,
         filter: {
           id: { startsWith: $poolId },
           timestamp: { greaterThan: $from, lessThan: $to }
@@ -2183,6 +2187,12 @@ export function getPoolsModule(inst: Centrifuge) {
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
           sumInterestRepaidAmountByPeriod
+          periodStart
+          pool {
+            currency {
+              decimals
+            }
+          }
         }
         pageInfo {
           hasNextPage
@@ -2193,9 +2203,10 @@ export function getPoolsModule(inst: Centrifuge) {
     `,
       {
         poolId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        from: options?.from ? options.from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+        to: options?.to ? options.to.toISOString() : getDateYearsFromNow(10).toISOString(),
         poolCursor: endCursor,
+        orderBy: options?.orderBy || null,
       }
     )
   }
@@ -2314,7 +2325,7 @@ export function getPoolsModule(inst: Centrifuge) {
       of({ poolSnapshots: [], endCursor: null, hasNextPage: true }).pipe(
         expand(({ poolSnapshots, endCursor, hasNextPage }) => {
           if (!hasNextPage) return EMPTY
-          return getPoolSnapshotsWithCursor(poolId, endCursor, from, to).pipe(
+          return getPoolSnapshotsWithCursor(poolId, endCursor, { from, to, orderBy: 'BLOCK_NUMBER_ASC' }).pipe(
             map(
               (
                 response: {
@@ -2427,64 +2438,61 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function getDailyTVL() {
-    const $query = inst.getSubqueryObservable<{
-      poolSnapshots: {
-        nodes: {
-          portfolioValuation: string
-          totalReserve: string
-          periodStart: string
-          pool: {
-            currency: {
-              decimals: number
-            }
-          }
-        }[]
-      }
-    }>(
-      `query {
-        poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
-          nodes {
-            portfolioValuation
-            totalReserve
-            periodStart
-            pool {
-              currency {
-                decimals
+    return of({ poolSnapshots: [], endCursor: null, hasNextPage: true })
+      .pipe(
+        expand(({ poolSnapshots, endCursor, hasNextPage }) => {
+          if (!hasNextPage) return EMPTY
+          return getPoolSnapshotsWithCursor('', endCursor, { orderBy: 'PERIOD_START_ASC' }).pipe(
+            map(
+              (
+                response: {
+                  poolSnapshots: {
+                    nodes: SubqueryPoolSnapshot[]
+                    pageInfo: { hasNextPage: boolean; endCursor: string }
+                  }
+                } | null
+              ) => {
+                if (response?.poolSnapshots) {
+                  const { endCursor, hasNextPage } = response.poolSnapshots.pageInfo
+
+                  return {
+                    endCursor,
+                    hasNextPage,
+                    poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.nodes],
+                  }
+                }
+                return {}
               }
-            }
-          }
-        }
-      }`
-    )
-
-    return $query.pipe(
-      map((data) => {
-        if (!data) {
-          return []
-        }
-
-        const mergedMap = new Map()
-        const formatted = data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
-          dateInMilliseconds: new Date(periodStart).getTime(),
-          tvl: new CurrencyBalance(
-            new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
-            pool.currency.decimals
-          ).toDecimal(),
-        }))
-
-        formatted.forEach((entry) => {
-          const { dateInMilliseconds, tvl } = entry
-
-          if (mergedMap.has(dateInMilliseconds)) {
-            mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
-          } else {
-            mergedMap.set(dateInMilliseconds, tvl)
-          }
+            )
+          )
         })
+      )
+      .pipe(
+        map(({ poolSnapshots }) => {
+          if (!poolSnapshots) {
+            return []
+          }
 
-        return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
-      })
-    )
+          const mergedMap = new Map()
+          const formatted = poolSnapshots.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
+            dateInMilliseconds: new Date(periodStart).getTime(),
+            tvl: new CurrencyBalance(
+              new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
+              pool.currency.decimals
+            ).toDecimal(),
+          }))
+          formatted.forEach((entry) => {
+            const { dateInMilliseconds, tvl } = entry
+
+            if (mergedMap.has(dateInMilliseconds)) {
+              mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
+            } else {
+              mergedMap.set(dateInMilliseconds, tvl)
+            }
+          })
+          return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+        })
+      )
   }
 
   function getMonthlyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
