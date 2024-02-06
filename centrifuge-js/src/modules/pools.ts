@@ -1985,18 +1985,13 @@ export function getPoolsModule(inst: Centrifuge) {
                           type === 'chargedUpTo'
                             ? new CurrencyBalance(fee.amounts.pending, currency.decimals)
                             : CurrencyBalance.fromFloat(
-                                limit === 'amountPerSecond'
-                                  ? percentOfNav
-                                      .toDecimal()
-                                      .div(100)
-                                      .mul(previousNav.toDecimal())
-                                      .mul(secondsSinceLastEpoch)
-                                  : percentOfNav
-                                      .toDecimal()
-                                      .div(100)
-                                      .mul(previousNav.toDecimal())
-                                      .mul(secondsSinceLastEpoch)
-                                      .div(SEC_PER_YEAR),
+                                percentOfNav
+                                  .toDecimal()
+                                  .div(100)
+                                  .mul(previousNav.toDecimal())
+                                  .mul(secondsSinceLastEpoch)
+                                  .div(limit === 'amountPerSecond' ? 1 : SEC_PER_YEAR)
+                                  .add(new CurrencyBalance(fee.amounts.pending, currency.decimals).toDecimal()),
                                 currency.decimals
                               ),
                       },

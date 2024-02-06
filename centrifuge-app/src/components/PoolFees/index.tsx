@@ -53,9 +53,7 @@ const columns = [
     header: 'Pending fees',
     cell: (row: Row) => {
       return row?.pendingFees ? (
-        <Text variant="body3">
-          {`${row?.type === 'fixed' ? '~' : ''}${formatBalance(row.pendingFees, row.poolCurrency, 2)}`}
-        </Text>
+        <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 2)}`</Text>
       ) : null
     },
   },
