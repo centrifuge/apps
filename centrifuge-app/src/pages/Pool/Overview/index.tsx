@@ -15,7 +15,6 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { TrancheTokenCards } from '../../../components/TrancheTokenCards'
 import { Dec } from '../../../utils/Decimal'
 import { formatDate } from '../../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
@@ -126,18 +125,6 @@ export function PoolDetailOverview() {
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      {tokens.length > 0 && (
-        <PageSection>
-          <React.Suspense fallback={<Spinner />}>
-            <TrancheTokenCards
-              trancheTokens={tokens}
-              poolId={poolId}
-              createdAt={pool.createdAt}
-              poolCurrencySymbol={pool.currency.symbol}
-            />
-          </React.Suspense>
-        </PageSection>
-      )}
       {!isTinlakePool && (
         <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
           <Stack height="290px">
