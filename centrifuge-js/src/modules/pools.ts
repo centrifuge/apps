@@ -1972,9 +1972,11 @@ export function getPoolsModule(inst: Centrifuge) {
                   currency,
                   poolFees: poolFees?.map((fee) => {
                     const secondsSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
+                    console.log('🚀 ~ secondsSinceLastEpoch:', poolId, secondsSinceLastEpoch)
                     const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                     const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
                     const percentOfNav = new Rate(hexToBN(fee.amounts.feeType[type].limit[limit]))
+                    console.log('🚀 ~ percentOfNav:', percentOfNav.toDecimal().toString())
                     return {
                       ...fee,
                       type,
@@ -1988,7 +1990,7 @@ export function getPoolsModule(inst: Centrifuge) {
                                 percentOfNav
                                   .toDecimal()
                                   .div(100)
-                                  .mul(previousNav.toDecimal())
+                                  .mul(previousNav.gtn(0) ? previousNav.toDecimal() : 1)
                                   .mul(secondsSinceLastEpoch)
                                   .div(limit === 'amountPerSecond' ? 1 : SEC_PER_YEAR)
                                   .add(new CurrencyBalance(fee.amounts.pending, currency.decimals).toDecimal()),
