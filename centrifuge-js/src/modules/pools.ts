@@ -34,6 +34,7 @@ const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(18))
 const MaxU128 = '340282366920938463463374607431768211455'
 const SEC_PER_DAY = 24 * 60 * 60
+const SEC_PER_YEAR = SEC_PER_DAY * 365
 
 type AdminRole =
   | 'PoolAdmin'
@@ -1958,10 +1959,18 @@ export function getPoolsModule(inst: Centrifuge) {
                 metadata,
                 currency,
                 poolFees: poolFees?.map((fee) => {
-                  const timeSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
+                  const secondsSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
                   const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                   const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
                   const percentOfNav = new Rate(hexToBN(fee.amounts.feeType[type].limit[limit]))
+                  if (type !== 'chargedUpTo') {
+                    console.log('limit', limit);
+
+                    console.log('percentOfNav', percentOfNav.toDecimal().toString());
+                    console.log('latestNav', latestNav.toDecimal().toString());
+                    // console.log('latestNav', latestNav.toDecimal().toString());
+                  }
+
                   return {
                     ...fee,
                     type,
@@ -1972,11 +1981,18 @@ export function getPoolsModule(inst: Centrifuge) {
                         type === 'chargedUpTo'
                           ? new CurrencyBalance(fee.amounts.pending, currency.decimals)
                           : CurrencyBalance.fromFloat(
-                              percentOfNav
-                                .toDecimal()
-                                .div(100)
-                                .mul(latestNav.toDecimal())
-                                .mul(limit === 'amountPerSecond' ? timeSinceLastEpoch : 1),
+                              limit === 'amountPerSecond' ?
+                                percentOfNav
+                                  .toDecimal()
+                                  .div(100)
+                                  .mul(latestNav.toDecimal())
+                                  .mul(secondsSinceLastEpoch)
+                                : percentOfNav
+                                  .toDecimal()
+                                  .div(100)
+                                  .mul(latestNav.toDecimal())
+                                  .mul(secondsSinceLastEpoch)
+                                  .div(SEC_PER_YEAR),
                               currency.decimals
                             ),
                     },
