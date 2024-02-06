@@ -1,24 +1,26 @@
 import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
-import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Button, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
+import { useTheme } from 'styled-components'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
-import { IssuerSection } from '../../../components/IssuerSection'
-import { LabelValueStack } from '../../../components/LabelValueStack'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { PageSection } from '../../../components/PageSection'
-import { PageSummary } from '../../../components/PageSummary'
-import { PoolToken } from '../../../components/PoolToken'
+import { AssetsByMaturity } from '../../../components/PoolOverview/AssetsByMaturity'
+import { Cashflows } from '../../../components/PoolOverview/Cashflows'
+import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
+import { PoolAnalysis } from '../../../components/PoolOverview/PoolAnalysis'
+import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
+import { PoolStructure } from '../../../components/PoolOverview/PoolStructure'
+import { TrancheTokenCards } from '../../../components/PoolOverview/TrancheTokenCards'
+import { TransactionHistory } from '../../../components/PoolOverview/TransactionHistory'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { TrancheTokenCards } from '../../../components/TrancheTokenCards'
 import { Dec } from '../../../utils/Decimal'
-import { formatDate } from '../../../utils/date'
-import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { formatBalance } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
@@ -59,6 +61,7 @@ function AverageMaturity({ poolId }: { poolId: string }) {
 }
 
 export function PoolDetailOverview() {
+  const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const { state } = useLocation<{ token: string }>()
@@ -124,10 +127,19 @@ export function PoolDetailOverview() {
   }
 
   return (
-    <>
-      <PageSummary data={pageSummaryData} />
+    <Box bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
+      <PoolOverviewSection>
+        <Grid height={352} gridTemplateColumns={'66fr 33fr'} gap={3}>
+          <React.Suspense fallback={<Spinner />}>
+            <PoolPerformance />
+          </React.Suspense>
+          <React.Suspense fallback={<Spinner />}>
+            <KeyMetrics />
+          </React.Suspense>
+        </Grid>
+      </PoolOverviewSection>
       {tokens.length > 0 && (
-        <PageSection>
+        <PoolOverviewSection>
           <React.Suspense fallback={<Spinner />}>
             <TrancheTokenCards
               trancheTokens={tokens}
@@ -136,9 +148,38 @@ export function PoolDetailOverview() {
               poolCurrencySymbol={pool.currency.symbol}
             />
           </React.Suspense>
-        </PageSection>
+        </PoolOverviewSection>
       )}
-      {!isTinlakePool && (
+      <PoolOverviewSection>
+        <React.Suspense fallback={<Spinner />}>
+          <PoolAnalysis />
+        </React.Suspense>
+      </PoolOverviewSection>
+      <PoolOverviewSection>
+        <Grid height={289} gridTemplateColumns={'1fr 1fr'} gap={3}>
+          <React.Suspense fallback={<Spinner />}>
+            <PoolStructure />
+          </React.Suspense>
+          <React.Suspense fallback={<Spinner />}>
+            <AssetsByMaturity />
+          </React.Suspense>
+        </Grid>
+      </PoolOverviewSection>
+      <PoolOverviewSection>
+        <React.Suspense fallback={<Spinner />}>
+          <Box height={373}>
+            <Cashflows />
+          </Box>
+        </React.Suspense>
+      </PoolOverviewSection>
+      <PoolOverviewSection>
+        <React.Suspense fallback={<Spinner />}>
+          <Box height={447}>
+            <TransactionHistory />
+          </Box>
+        </React.Suspense>
+      </PoolOverviewSection>
+      {/* {!isTinlakePool && (
         <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
           <Stack height="290px">
             <React.Suspense fallback={<Spinner />}>
@@ -201,8 +242,8 @@ export function PoolDetailOverview() {
       </PageSection>
       <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />
-      </PageSection>
-    </>
+      </PageSection> */}
+    </Box>
   )
 }
 
@@ -217,5 +258,13 @@ export function InvestButton(props: InvestRedeemProps) {
         Invest
       </Button>
     </>
+  )
+}
+
+const PoolOverviewSection = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <Box px={3} py={1}>
+      {children}
+    </Box>
   )
 }
