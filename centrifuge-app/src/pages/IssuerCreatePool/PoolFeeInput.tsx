@@ -80,7 +80,7 @@ export const PoolFeeInput: React.FC = () => {
   return (
     <FieldArray name="poolFees">
       {(fldArr) => (
-        <Grid gridTemplateColumns={'1fr 1fr 1fr 1fr 40px'} gap={2} rowGap={3} alignItems="center">
+        <Grid gridTemplateColumns={'1fr 1fr 1fr 1fr 40px'} gap={2} rowGap={3}>
           {values.poolFees.map((s, index) => (
             <React.Fragment key={index}>
               <FieldWithErrorMessage
