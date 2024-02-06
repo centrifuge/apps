@@ -1972,11 +1972,9 @@ export function getPoolsModule(inst: Centrifuge) {
                   currency,
                   poolFees: poolFees?.map((fee) => {
                     const secondsSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
-                    console.log('🚀 ~ secondsSinceLastEpoch:', poolId, secondsSinceLastEpoch)
                     const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                     const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
                     const percentOfNav = new Rate(hexToBN(fee.amounts.feeType[type].limit[limit]))
-                    console.log('🚀 ~ percentOfNav:', percentOfNav.toDecimal().toString())
                     return {
                       ...fee,
                       type,
