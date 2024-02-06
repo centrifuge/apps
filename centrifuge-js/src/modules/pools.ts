@@ -1868,7 +1868,7 @@ export function getPoolsModule(inst: Centrifuge) {
             return acc
           }, {} as Record<string, ActivePoolFeesData[]>)
 
-          const previousEpochNavMap = previousNav.reduce((acc, [key, navValue]) => {
+          const previousNavMap = previousNav.reduce((acc, [key, navValue]) => {
             const poolId = formatPoolKey(key as StorageKey<[u32]>)
             acc[poolId] = navValue.toJSON() as unknown as any
             return acc
@@ -1947,7 +1947,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 const navData = navMap[poolId]
                 const epochExecution = epochExecutionMap[poolId]
                 const currency = findCurrency(currencies, pool.currency)!
-                const previousNav = new CurrencyBalance(previousEpochNavMap[poolId], currency.decimals)
+                const previousNav = new CurrencyBalance(previousNavMap[poolId], currency.decimals)
 
                 const poolValue = new CurrencyBalance(
                   pool.tranches.tranches.reduce((prev: BN, tranche: TrancheDetailsData) => {
