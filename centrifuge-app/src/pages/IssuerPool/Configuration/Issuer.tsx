@@ -1,12 +1,12 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Stack } from '@centrifuge/fabric'
-import { Form, FormikProvider, useFormik } from 'formik'
+import { Button, Stack, Text } from '@centrifuge/fabric'
+import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { IssuerDetails } from '../../../components/IssuerSection'
+import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
 import { PageSection } from '../../../components/PageSection'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFile } from '../../../utils/useFile'
@@ -15,6 +15,7 @@ import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
+import { PoolReportsInput } from '../../IssuerCreatePool/PoolReportsInput'
 
 type Values = Pick<
   CreatePoolValues,
@@ -27,7 +28,12 @@ type Values = Pick<
   | 'forum'
   | 'email'
   | 'details'
->
+  | 'reportUrl'
+  | 'reportAuthorName'
+  | 'reportAuthorTitle'
+> & {
+  'reportAuthorAvatar': string | null | File
+}
 
 export function Issuer() {
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -50,6 +56,10 @@ export function Issuer() {
       forum: metadata?.pool?.links?.forum ?? '',
       email: metadata?.pool?.issuer?.email ?? '',
       details: metadata?.pool?.details,
+      reportUrl: metadata?.pool?.reports?.[0]?.uri ?? '',
+      reportAuthorName: metadata?.pool?.reports?.[0]?.author?.name ?? '',
+      reportAuthorTitle: metadata?.pool?.reports?.[0]?.author?.title ?? '',
+      reportAuthorAvatar: metadata?.pool?.reports?.[0]?.author?.avatar ? `avatar.${metadata.pool.reports[0].author.avatar.mime?.split('/')[1]}` : null,
     }),
     [metadata, logoFile]
   )
@@ -62,6 +72,20 @@ export function Issuer() {
 
   const form = useFormik({
     initialValues,
+    validate: (values) => {
+      let errors: FormikErrors<any> = {}
+
+      if (values.reportUrl) {
+        if (!values.reportAuthorName) {
+          errors = setIn(errors, 'reportAuthorName', 'Required')
+        }
+        if (!values.reportAuthorTitle) {
+          errors = setIn(errors, 'reportAuthorTitle', 'Required')
+        }
+      }
+
+      return errors
+    },
     onSubmit: async (values, actions) => {
       const oldMetadata = metadata as PoolMetadata
       const execSummaryChanged = values.executiveSummary !== initialValues.executiveSummary
@@ -105,6 +129,23 @@ export function Issuer() {
           },
           details: values.details,
         },
+      }
+
+      if (values.reportUrl) {
+        let avatar = null
+        const avatarChanged = values.reportAuthorAvatar !== initialValues.reportAuthorAvatar
+        if (avatarChanged && values.reportAuthorAvatar) {
+          const pinned = await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar as File)))
+          avatar = { uri: pinned.uri, mime: (values.reportAuthorAvatar as File).type }
+        }
+        newPoolMetadata.pool.reports = [{
+          author: {
+            avatar: avatar,
+            name: values.reportAuthorName,
+            title: values.reportAuthorTitle,
+          },
+          uri: values.reportUrl
+        }]
       }
 
       execute([poolId, newPoolMetadata], { account })
@@ -157,10 +198,20 @@ export function Issuer() {
           }
         >
           {isEditing ? (
-            <IssuerInput />
+            <Stack gap={3}>
+              <IssuerInput />
+              <Text>Pool analysis</Text>
+              <PoolReportsInput />
+            </Stack>
           ) : (
             <Stack gap={2}>
               <IssuerDetails metadata={metadata} />
+              {metadata?.pool?.reports?.[0] && (
+                <Stack gap={2} mt={3}>
+                  <Text>Pool analysis</Text>
+                  <ReportDetails metadata={metadata} />
+                </Stack>
+              )}
             </Stack>
           )}
         </PageSection>

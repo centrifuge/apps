@@ -48,6 +48,7 @@ import { truncate } from '../../utils/web3'
 import { AdminMultisigSection } from './AdminMultisig'
 import { IssuerInput } from './IssuerInput'
 import { PoolFeeSection } from './PoolFeeInput'
+import { PoolReportsInput } from './PoolReportsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -94,11 +95,15 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
 
 export type CreatePoolValues = Omit<
   PoolMetadataInput,
-  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees'
+  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport'
 > & {
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
+  reportAuthorName:string
+  reportAuthorTitle:string
+  reportAuthorAvatar: File | null
+  reportUrl:string
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
   poolFees: {
@@ -132,6 +137,10 @@ const initialValues: CreatePoolValues = {
   forum: '',
   email: '',
   details: [],
+  reportAuthorName: '',
+  reportAuthorTitle: '',
+  reportAuthorAvatar: null,
+  reportUrl: '',
 
   tranches: [createEmptyTranche(true)],
   adminMultisig: {
@@ -364,6 +373,14 @@ function CreatePoolForm() {
           prevRiskBuffer = t.minRiskBuffer
         }
       })
+      if (values.reportUrl) {
+        if (!values.reportAuthorName) {
+          errors = setIn(errors, 'reportAuthorName', 'Required')
+        }
+        if (!values.reportAuthorTitle) {
+          errors = setIn(errors, 'reportAuthorTitle', 'Required')
+        }
+      }
 
       return errors
     },
@@ -398,6 +415,20 @@ function CreatePoolForm() {
         : null
       metadataValues.executiveSummary = { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
       metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
+
+      if (values.reportUrl) {
+        let avatar = null
+        if (values.reportAuthorAvatar) {
+          const pinned = await lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar)))
+          avatar = { uri: pinned.uri, mime: values.reportAuthorAvatar.type }
+        }
+        metadataValues.poolReport = {
+          authorAvatar: avatar,
+          authorName: values.reportAuthorName,
+          authorTitle: values.reportAuthorTitle,
+          url: values.reportUrl
+        }
+      }
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const nonJuniorTranches = metadataValues.tranches.slice(1)
@@ -636,6 +667,9 @@ function CreatePoolForm() {
           </PageSection>
           <PageSection title="Issuer">
             <IssuerInput waitingForStoredIssuer={waitingForStoredIssuer} />
+          </PageSection>
+          <PageSection title="Pool analysis">
+            <PoolReportsInput />
           </PageSection>
 
           <TrancheSection />
