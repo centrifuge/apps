@@ -101,6 +101,12 @@ const parachainTypes = {
     pendingRedeemTrancheTokens: 'Balance',
     claimableCurrency: 'Balance',
   },
+  PoolNav: {
+    navAum: 'Balance',
+    navFees: 'Balance',
+    reserve: 'Balance',
+    total: 'Balance',
+  },
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
@@ -123,7 +129,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
           type: 'u64',
         },
       ],
-      type: 'Vec<u128>',
+      type: 'PoolNav',
     },
   },
   rewards: {
