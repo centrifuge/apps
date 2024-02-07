@@ -416,7 +416,7 @@ function CreatePoolForm() {
         return {
           name: fee.name,
           destination: fee.walletAddress,
-          amount: Rate.fromFloat(fee.percentOfNav),
+          amount: Rate.fromPercent(fee.percentOfNav),
           type: fee.feeType,
           limit: 'ShareOfPortfolioValuation',
           feeId: feeId + i,

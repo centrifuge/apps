@@ -89,7 +89,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             <Stack gap="4px">
               <Text variant="label2">Limit</Text>
               <Text variant="body3">{`${formatPercentage(
-                feeChainData?.amounts.percentOfNav.toDecimal() || 0
+                feeChainData?.amounts.percentOfNav.toPercent() || 0
               )} of NAV`}</Text>
             </Stack>
             <Stack gap="4px">

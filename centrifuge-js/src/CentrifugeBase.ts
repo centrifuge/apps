@@ -129,7 +129,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
           type: 'u64',
         },
       ],
-      type: 'PoolNav',
+      type: 'Option<PoolNav>',
     },
   },
   rewards: {

@@ -143,7 +143,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             fee: {
               name: fee.feeName,
               destination: fee.receivingAddress,
-              amount: Rate.fromFloat(Dec(fee?.percentOfNav || 0)),
+              amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
               type: 'ChargedUpTo',
               limit: 'ShareOfPortfolioValuation',
@@ -182,7 +182,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                       {feeMetadata?.name}
                     </Text>
                     <Text variant="body2" color="textSecondary">
-                      {formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0, true, {}, 3)} of NAV
+                      {formatPercentage(feeChainData?.amounts.percentOfNav.toPercent() || 0, true, {}, 3)} of NAV
                     </Text>
                   </Grid>
                 )

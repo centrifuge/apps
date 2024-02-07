@@ -43,7 +43,7 @@ const columns = [
     cell: (row: Row) => {
       return (
         <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal(), true, {}, 3)} of NAV` : ''}
+          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toPercent(), true, {}, 3)} of NAV` : ''}
         </Text>
       )
     },
@@ -130,7 +130,7 @@ export function PoolFees() {
         ...activeFees,
         ...changes.map(({ change, hash }) => {
           return {
-            name: '',
+            name: poolMetadata?.pool?.poolFees?.find((f) => f.id === change.feeId)?.name,
             type: change.type,
             percentOfNav: change.amounts.percentOfNav,
             pendingFees: undefined,
@@ -217,11 +217,12 @@ export function useProposedFeeChanges(poolId: string) {
       .map(({ change, hash }) => {
         return {
           change: {
-            destination: change.poolFee.appendFee[1].destination,
-            type: Object.keys(change.poolFee.appendFee[1].feeType)[0],
+            destination: change.poolFee.appendFee[2].destination,
+            type: Object.keys(change.poolFee.appendFee[2].feeType)[0],
             amounts: {
-              percentOfNav: new Rate(change.poolFee.appendFee[1].feeType.chargedUpTo.limit.shareOfPortfolioValuation),
+              percentOfNav: new Rate(change.poolFee.appendFee[2].feeType.chargedUpTo.limit.shareOfPortfolioValuation),
             },
+            feeId: change.poolFee.appendFee[0],
           },
           hash,
         }
