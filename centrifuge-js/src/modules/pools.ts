@@ -307,6 +307,7 @@ export type Tranche = {
   minRiskBuffer: Perquintill | null
   currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
+  yield30DaysAnnualized?: string | null
   lastUpdatedInterest: string
   ratio: Perquintill
 }
@@ -558,14 +559,13 @@ export type DailyPoolState = {
     totalReserve: CurrencyBalance
   }
   poolValue: CurrencyBalance
-  currency: string
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
 
-  sumBorrowedAmountByPeriod: number | null
-  sumRepaidAmountByPeriod: number | null
-  sumInvestedAmountByPeriod: number | null
-  sumRedeemedAmountByPeriod: number | null
+  sumBorrowedAmountByPeriod?: number | null
+  sumRepaidAmountByPeriod?: number | null
+  sumInvestedAmountByPeriod?: number | null
+  sumRedeemedAmountByPeriod?: number | null
   blockNumber: number
 }
 
@@ -583,6 +583,15 @@ export type IssuerDetail = {
 }
 
 type FileType = { uri: string; mime: string }
+
+export type PoolReport = {
+  author: {
+    name: string
+    title: string
+    avatar: FileType | null
+  }
+  uri: string
+}
 
 export interface PoolMetadataInput {
   // details
@@ -659,6 +668,7 @@ export type PoolMetadata = {
     status: PoolStatus
     listed: boolean
     assetOriginators?: Record<string, { name?: string; withdrawAddresses: WithdrawAddress[] }>
+    reports?: PoolReport[]
   }
   pod?: {
     node: string | null
@@ -1929,6 +1939,13 @@ export function getPoolsModule(inst: Centrifuge) {
             })
             .flat()
 
+          const $yield30DaysAnnualized = combineLatest(
+            keys.map((key) => {
+              const poolIdTrancheId = `${key[0]}-${key[1].toLowerCase()}`
+              return getLatestTrancheSnapshot(poolIdTrancheId).pipe(map((snapshot) => snapshot?.trancheSnapshots.nodes))
+            })
+          ) as Observable<{ yield30DaysAnnualized: string | null; trancheId: string }[][]>
+
           const trancheIdToIndex: Record<string, number> = {}
           keys.forEach(([, tid], i) => {
             trancheIdToIndex[tid] = i
@@ -1949,9 +1966,17 @@ export function getPoolsModule(inst: Centrifuge) {
 
           const $block = inst.getBlocks().pipe(take(1))
 
-          return combineLatest([$issuance, $block, $prices, $navs]).pipe(
-            map(([rawIssuances, { block }, rawPrices, rawNavs]) => {
+          return combineLatest([$issuance, $block, $prices, $navs, $yield30DaysAnnualized]).pipe(
+            map(([rawIssuances, { block }, rawPrices, rawNavs, [rawYield30DaysAnnualized]]) => {
               const blockNumber = block.header.number.toNumber()
+
+              const yield30DaysAnnualizedByPoolIdTrancheId = rawYield30DaysAnnualized?.reduce(
+                (acc, { yield30DaysAnnualized, trancheId }) => {
+                  acc[trancheId] = yield30DaysAnnualized
+                  return acc
+                },
+                {} as Record<string, string | null>
+              )
 
               const mappedPools = pools.map((poolObj, poolIndex) => {
                 const { data: pool, id: poolId } = poolObj
@@ -2058,6 +2083,7 @@ export function getPoolsModule(inst: Centrifuge) {
                       poolId,
                       poolMetadata: (metadata ?? undefined) as string | undefined,
                       interestRatePerSec,
+                      yield30DaysAnnualized: yield30DaysAnnualizedByPoolIdTrancheId?.[`${poolId}-${trancheId}`],
                       minRiskBuffer,
                       currentRiskBuffer,
                       capacity: CurrencyBalance.fromFloat(capacity, currency.decimals),
@@ -2137,6 +2163,24 @@ export function getPoolsModule(inst: Centrifuge) {
           take(1)
         )
       )
+    )
+  }
+
+  function getLatestTrancheSnapshot(poolIdTrancheId: string) {
+    return inst.getSubqueryObservable<{
+      trancheSnapshots: { nodes: { yield30DaysAnnualized: string | null; trancheId: string }[] }
+    }>(
+      `query ($poolIdTrancheId: String!) {
+        trancheSnapshots(filter: { trancheId: { equalTo: $poolIdTrancheId } }, last: 1) {
+          nodes {
+            trancheId
+            yield30DaysAnnualized
+          }
+        }
+      }`,
+      {
+        poolIdTrancheId,
+      }
     )
   }
 
@@ -2282,50 +2326,62 @@ export function getPoolsModule(inst: Centrifuge) {
       ),
       getPoolCurrency([poolId]),
     ]).pipe(
-      switchMap(([{ poolSnapshots }, { trancheSnapshots }, poolCurrency]) => {
-        return [
-          poolSnapshots?.map((state) => {
-            const poolState = {
-              id: state.id,
-              portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
-              totalReserve: new CurrencyBalance(state.totalReserve, poolCurrency.decimals),
-            }
-            const poolValue = new CurrencyBalance(
-              new BN(state?.portfolioValuation || '0').add(new BN(state?.totalReserve || '0')),
-              poolCurrency.decimals
-            )
-
-            // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
-            const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp === state.timestamp)
-
-            const tranches: { [trancheId: string]: DailyTrancheState } = {}
-            trancheSnapshotsToday?.forEach((tranche) => {
-              const tid = tranche.trancheId.split('-')[1]
-              tranches[tid] = {
-                id: tranche.trancheId,
-                price: tranche.tokenPrice ? new Price(tranche.tokenPrice) : null,
-                fulfilledInvestOrders: new CurrencyBalance(
-                  tranche.sumFulfilledInvestOrdersByPeriod,
-                  poolCurrency.decimals
-                ),
-                fulfilledRedeemOrders: new CurrencyBalance(
-                  tranche.sumFulfilledRedeemOrdersByPeriod,
-                  poolCurrency.decimals
-                ),
-                outstandingInvestOrders: new CurrencyBalance(
-                  tranche.sumOutstandingInvestOrdersByPeriod,
-                  poolCurrency.decimals
-                ),
-                outstandingRedeemOrders: new CurrencyBalance(
-                  tranche.sumOutstandingRedeemOrdersByPeriod,
-                  poolCurrency.decimals
-                ),
+      map(([{ poolSnapshots }, { trancheSnapshots }, poolCurrency]) => {
+        const trancheStates: Record<string, { timestamp: string; tokenPrice: Price }[]> = {}
+        trancheSnapshots?.forEach((state) => {
+          const tid = state.trancheId.split('-')[1]
+          const entry = { timestamp: state.timestamp, tokenPrice: new Price(state.tokenPrice) }
+          if (trancheStates[tid]) {
+            trancheStates[tid].push(entry)
+          } else {
+            trancheStates[tid] = [entry]
+          }
+        })
+        return {
+          poolStates:
+            poolSnapshots?.map((state) => {
+              const poolState = {
+                id: state.id,
+                portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
+                totalReserve: new CurrencyBalance(state.totalReserve, poolCurrency.decimals),
               }
-            })
+              const poolValue = new CurrencyBalance(
+                new BN(state?.portfolioValuation || '0').add(new BN(state?.totalReserve || '0')),
+                poolCurrency.decimals
+              )
 
-            return { ...state, poolState, poolValue, tranches }
-          }) as unknown as DailyPoolState[],
-        ]
+              // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
+              const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp === state.timestamp)
+
+              const tranches: { [trancheId: string]: DailyTrancheState } = {}
+              trancheSnapshotsToday?.forEach((tranche) => {
+                const tid = tranche.trancheId.split('-')[1]
+                tranches[tid] = {
+                  id: tranche.trancheId,
+                  price: tranche.tokenPrice ? new Price(tranche.tokenPrice) : null,
+                  fulfilledInvestOrders: new CurrencyBalance(
+                    tranche.sumFulfilledInvestOrdersByPeriod,
+                    poolCurrency.decimals
+                  ),
+                  fulfilledRedeemOrders: new CurrencyBalance(
+                    tranche.sumFulfilledRedeemOrdersByPeriod,
+                    poolCurrency.decimals
+                  ),
+                  outstandingInvestOrders: new CurrencyBalance(
+                    tranche.sumOutstandingInvestOrdersByPeriod,
+                    poolCurrency.decimals
+                  ),
+                  outstandingRedeemOrders: new CurrencyBalance(
+                    tranche.sumOutstandingRedeemOrdersByPeriod,
+                    poolCurrency.decimals
+                  ),
+                }
+              })
+
+              return { ...state, poolState, poolValue, tranches }
+            }) || [],
+          trancheStates,
+        }
       })
     )
   }
@@ -2396,7 +2452,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
       `query($trancheId: String!) {
         trancheSnapshots(
-          orderBy: BLOCK_NUMBER_ASC,
+          orderBy: BLOCK_NUMBER_DESC,
           filter: {
             trancheId: { includes: $trancheId },
           }) {
@@ -2422,7 +2478,7 @@ export function getPoolsModule(inst: Centrifuge) {
         if (!data) {
           return []
         }
-        return data.trancheSnapshots.nodes.map((state) => {
+        return data.trancheSnapshots.nodes.reverse().map((state) => {
           return {
             ...state,
             tokenPrice: new Price(state.tokenPrice),
@@ -2434,15 +2490,15 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function getMonthlyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
     return getDailyPoolStates(args).pipe(
-      map((poolStates) => {
-        if (!poolStates) return []
+      map(({ poolStates }) => {
+        if (!poolStates.length) return []
         // group by month
         // todo: find last of each month
         const poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
         poolStates.forEach((poolState) => {
           const monthYear = `${new Date(poolState.timestamp).getMonth()}-${new Date(poolState.timestamp).getFullYear()}`
           if (monthYear in poolStatesByMonth) {
-            poolStatesByMonth[monthYear] = [...poolStatesByMonth[monthYear], poolState]
+            poolStatesByMonth[monthYear].push(poolState)
           } else {
             poolStatesByMonth[monthYear] = [poolState]
           }

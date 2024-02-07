@@ -18,9 +18,17 @@ type AccentColorName =
   | 'textInteractiveHover'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled' | 'Inverted'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
-type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Tertiary' | 'Page' | 'Input' | 'Thumbnail'}`
+type BackgroundColorName = `background${
+  | 'Primary'
+  | 'Secondary'
+  | 'Tertiary'
+  | 'Page'
+  | 'Input'
+  | 'Thumbnail'
+  | 'AccentPrimary'
+  | 'AccentSecondary'}`
 type ButtonColorName =
-  | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary'}${
+  | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary' | 'Inverted'}${
       | ''
       | 'Focus'
       | 'Hover'
@@ -28,6 +36,7 @@ type ButtonColorName =
       | 'Disabled'}`
   | 'shadowButtonPrimary'
   | 'shadowButtonSecondary'
+  | 'shadowButtonInverted'
 
 type ColorName =
   | StatusColorName
@@ -118,7 +127,13 @@ type ThemeFonts = {
 
 // Shadows
 
-type ShadowName = 'buttonPrimary' | 'buttonSecondary' | 'cardInteractive' | 'cardOverlay' | 'cardActive'
+type ShadowName =
+  | 'buttonPrimary'
+  | 'buttonSecondary'
+  | 'buttonInverted'
+  | 'cardInteractive'
+  | 'cardOverlay'
+  | 'cardActive'
 type ShadowValue = string
 
 type ThemeShadows = {

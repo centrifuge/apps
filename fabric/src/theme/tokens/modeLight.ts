@@ -23,6 +23,8 @@ const lightColors = {
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
   backgroundTertiary: grayScale[50],
+  backgroundAccentPrimary: blueScale[100],
+  backgroundAccentSecondary: '#e9eff2',
   backgroundPage: 'white',
   backgroundInput: 'white',
   backgroundThumbnail: grayScale[600],
@@ -71,7 +73,6 @@ const lightColors = {
   textButtonSecondaryHover: centrifugeBlue,
   textButtonSecondaryPressed: centrifugeBlue,
   textButtonSecondaryDisabled: blueScale[600],
-
   borderButtonSecondary: grayScale[200],
   borderButtonSecondaryFocus: centrifugeBlue,
   borderButtonSecondaryHover: centrifugeBlue,
@@ -94,6 +95,23 @@ const lightColors = {
   borderButtonTertiaryHover: 'transparent',
   borderButtonTertiaryPressed: 'transparent',
   borderButtonTertiaryDisabled: 'transparent',
+
+  backgroundButtonInverted: 'white',
+  backgroundButtonInvertedFocus: 'white',
+  backgroundButtonInvertedHover: 'white',
+  backgroundButtonInvertedPressed: blueScale[100],
+  backgroundButtonInvertedDisabled: grayScale[100],
+  textButtonInverted: centrifugeBlue,
+  textButtonInvertedFocus: centrifugeBlue,
+  textButtonInvertedHover: centrifugeBlue,
+  textButtonInvertedPressed: centrifugeBlue,
+  textButtonInvertedDisabled: blueScale[600],
+  borderButtonInverted: grayScale[200],
+  borderButtonInvertedFocus: centrifugeBlue,
+  borderButtonInvertedHover: centrifugeBlue,
+  borderButtonInvertedPressed: centrifugeBlue,
+  borderButtonInvertedDisabled: 'transparent',
+  shadowButtonInverted: '#E0E7FF',
 }
 
 export const modeLight = {
