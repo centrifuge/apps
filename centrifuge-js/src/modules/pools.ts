@@ -610,6 +610,13 @@ export interface PoolMetadataInput {
   issuerLogo?: FileType | null
   issuerDescription: string
 
+  poolReport?: {
+    authorName: string
+    authorTitle: string
+    authorAvatar: FileType | null
+    url: string
+  }
+
   executiveSummary: FileType | null
   website: string
   forum: string
@@ -883,6 +890,18 @@ export function getPoolsModule(inst: Centrifuge) {
         details: metadata.details,
         status: 'open',
         listed: metadata.listed ?? true,
+        reports: metadata.poolReport
+          ? [
+              {
+                author: {
+                  name: metadata.poolReport.authorName,
+                  title: metadata.poolReport.authorTitle,
+                  avatar: metadata.poolReport.authorAvatar,
+                },
+                uri: metadata.poolReport.url,
+              },
+            ]
+          : undefined,
       },
       pod: {
         node: metadata.podEndpoint ?? null,

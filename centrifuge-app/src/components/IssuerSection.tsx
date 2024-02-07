@@ -53,6 +53,38 @@ export function IssuerSection({ metadata }: IssuerSectionProps) {
   )
 }
 
+export function ReportDetails({ metadata }: IssuerSectionProps) {
+  const cent = useCentrifuge()
+  const report = metadata?.pool?.reports?.[0]
+  return (
+    report && (
+      <>
+        <Shelf gap={1}>
+          {report.author.avatar?.uri && (
+            <Box
+              as="img"
+              height={40}
+              borderRadius={30}
+              src={cent.metadata.parseMetadataUrl(report.author.avatar.uri)}
+              alt=""
+            />
+          )}
+          <Text variant="body2">
+            Reviewer: {report.author.name}
+            <br />
+            {report.author.title}
+          </Text>
+        </Shelf>
+        <div>
+          <AnchorButton href={report.uri} target="_blank" variant="inverted" icon={IconExternalLink}>
+            View full report
+          </AnchorButton>
+        </div>
+      </>
+    )
+  )
+}
+
 export function IssuerDetails({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
@@ -62,7 +94,8 @@ export function IssuerDetails({ metadata }: IssuerSectionProps) {
         {metadata?.pool?.issuer.logo && (
           <Box
             as="img"
-            maxWidth={80} maxHeight={30}
+            maxWidth={80}
+            maxHeight={30}
             alt={metadata?.pool?.issuer.name}
             src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri)}
           />
