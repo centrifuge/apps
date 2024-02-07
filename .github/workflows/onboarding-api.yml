@@ -87,4 +87,5 @@ jobs:
             service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
             gcloud_region: ${{ vars.GCLOUD_REGION }}
             deploy_env: ${{ inputs.deploy_env }}
+            memory: 512
             

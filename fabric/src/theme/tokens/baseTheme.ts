@@ -33,6 +33,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     cardOverlay: '4px 8px 24px rgba(0, 0, 0, 0.2)',
     buttonPrimary: `1px 2px 7px var(--fabric-shadowButtonPrimary)`,
     buttonSecondary: `1px 2px 1px var(--fabric-shadowButtonSecondary)`,
+    buttonInverted: `1px 2px 7px var(--fabric-shadowButtonInverted)`,
   },
   zIndices: {
     sticky: 10,
