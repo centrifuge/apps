@@ -90,8 +90,6 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     }, [pendingTransaction?.status])
   }
 
-  console.log('collectAmount', collectAmount.toString())
-
   const state: InvestRedeemState = {
     poolId,
     trancheId,
