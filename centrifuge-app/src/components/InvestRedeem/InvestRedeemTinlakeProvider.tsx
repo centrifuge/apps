@@ -13,7 +13,7 @@ import { useTinlakeTransaction } from '../../utils/tinlake/useTinlakeTransaction
 import { useAddress } from '../../utils/useAddress'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { InvestRedeemContext } from './InvestRedeemProvider'
-import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
+import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
 export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Props) {
   const address = useAddress('evm')
@@ -90,6 +90,8 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     }, [pendingTransaction?.status])
   }
 
+  console.log('collectAmount', collectAmount.toString())
+
   const state: InvestRedeemState = {
     poolId,
     trancheId,
@@ -123,7 +125,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       remainingRedeemToken: disburse?.remainingRedeemToken || Dec(0),
     },
     collectAmount,
-    collectType: disburse?.payoutCurrencyAmount.isZero() ? 'invest' : 'redeem',
+    collectType: !disburse?.payoutCurrencyAmount.isZero() ? 'redeem' : !disburse?.payoutTokenAmount.isZero() ? 'invest' : null,
     needsToCollectBeforeOrder: !collectAmount.isZero(),
     needsPoolCurrencyApproval: () => !!trancheInvestment?.poolCurrencyAllowance.isZero(),
     needsTrancheTokenApproval: () => !!trancheInvestment?.tokenAllowance.isZero(),
