@@ -3,6 +3,7 @@ import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, InvestorTxType, Report, ReportContext } from './ReportContext'
+import { QueryDialog } from './QueryDialog'
 
 type ReportFilterProps = {
   pool: Pool
@@ -14,6 +15,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const {
     csvData,
     setStartDate,
+    queryDialogOpen,
+    setQueryDialogOpen,
     endDate,
     setEndDate,
     range,
@@ -157,10 +160,22 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
       <Box ml="auto">
+        <AnchorButton variant="secondary" small onClick={() => setQueryDialogOpen(true)}>
+          Query API
+        </AnchorButton>
+      </Box>
+      <Box>
         <AnchorButton href={csvData?.dataUrl} download={csvData?.fileName} variant="primary" small disabled={!csvData}>
           Export CSV
         </AnchorButton>
       </Box>
+
+      <QueryDialog
+        open={queryDialogOpen}
+        report={report}
+        pool={pool}
+        onClose={() => setQueryDialogOpen(false)}
+      />
     </Shelf>
   )
 }
