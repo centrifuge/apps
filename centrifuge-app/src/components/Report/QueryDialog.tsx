@@ -1,4 +1,4 @@
-import { AnchorButton, Box, Dialog, Shelf, TextInput, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Dialog, Shelf, TextInput, Text, Tabs, TabsItem } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Report } from './ReportContext'
 import { Pool } from '@centrifuge/centrifuge-js'
@@ -22,87 +22,89 @@ const reportNameMapping = {
   'holders': 'holders'
 }
 
-const reportCodeMapping = {
-  'investor-tx': `query($poolId: String!) {
-    investorTransactions(
-      orderBy: TIMESTAMP_ASC,
-      filter: {
-        poolId: { equalTo: $poolId }
-      }) {
-      nodes {
-        id
-        timestamp
-        accountId
-        account {
-          chainId
-          evmAddress
-        }
-        poolId
-        trancheId
-        epochNumber
-        type
-        tokenAmount
-        currencyAmount
-        tokenPrice
-        transactionFee
-      }
-    }
-  }`,
-  'asset-tx': `query($poolId: String!) {
-      borrowerTransactions(
+const reportCodeMapping = (poolId: string) => {
+  return {
+    'investor-tx': `query {
+      investorTransactions(
         orderBy: TIMESTAMP_ASC,
         filter: {
-          poolId: { equalTo: $poolId }
+          poolId: { equalTo: "${poolId}" }
         }) {
         nodes {
-          loanId
-          epochId
-          type
+          id
           timestamp
-          amount
-          settlementPrice
-          quantity
+          accountId
+          account {
+            chainId
+            evmAddress
+          }
+          poolId
+          trancheId
+          epochNumber
+          type
+          tokenAmount
+          currencyAmount
+          tokenPrice
+          transactionFee
         }
       }
-    }
-  `,
-  'pool-balance': `TODO`,
-  'asset-list': `TODO`,
-  'holders': `query($poolId: String) {
-        trancheBalances(
+    }`,
+    'asset-tx': `query {
+        borrowerTransactions(
+          orderBy: TIMESTAMP_ASC,
           filter: {
-            poolId: { equals: $poolId }
+            poolId: { equalTo: "${poolId}" }
           }) {
-        nodes {
-          accountId
-          account {
-            chainId
-            evmAddress
+          nodes {
+            loanId
+            epochId
+            type
+            timestamp
+            amount
+            settlementPrice
+            quantity
           }
-          pendingInvestCurrency
-          claimableTrancheTokens
-          sumClaimedTrancheTokens
-          pendingRedeemTrancheTokens
-          claimableCurrency
-          sumClaimedCurrency
         }
       }
+    `,
+    'pool-balance': `TODO`,
+    'asset-list': `TODO`,
+    'holders': `query {
+          trancheBalances(
+            filter: {
+              poolId: { equals: "${poolId}" }
+            }) {
+          nodes {
+            accountId
+            account {
+              chainId
+              evmAddress
+            }
+            pendingInvestCurrency
+            claimableTrancheTokens
+            sumClaimedTrancheTokens
+            pendingRedeemTrancheTokens
+            claimableCurrency
+            sumClaimedCurrency
+          }
+        }
 
-      currencyBalances(
-        filter: {
-          currency: { poolId: { equals: $poolId } }
-        }) {
-        nodes {
-          accountId
-          account {
-            chainId
-            evmAddress
+        currencyBalances(
+          filter: {
+            currency: { poolId: { equals: "${poolId}" } }
+          }) {
+          nodes {
+            accountId
+            account {
+              chainId
+              evmAddress
+            }
+            currencyId
+            amount
           }
-          currencyId
-          amount
         }
-      }
-    }`
+      }`
+  }
 }
 
 const GraphqlCode = styled(Box)`
@@ -114,6 +116,7 @@ const GraphqlCode = styled(Box)`
 
 export const QueryDialog: React.FC<Props> = ({ open, onClose, report, pool }) => {
   const { data: poolMetadata } = usePoolMetadata(pool)
+  const [tab, setTab] = React.useState<number>(0)
 
   function close() {
     onClose()
@@ -121,25 +124,41 @@ export const QueryDialog: React.FC<Props> = ({ open, onClose, report, pool }) =>
 
   return (
     <Dialog isOpen={open} onClose={close} title={`Query ${reportNameMapping[report]} using API`} subtitle={`Use GraphQL to get access to a live feed of the underlying data of ${poolMetadata?.pool?.name}`}>
+      <Tabs
+        selectedIndex={tab}
+        onChange={(index) => setTab(index)}
+      >
+        <TabsItem>Manually</TabsItem>
+        <TabsItem>cURL</TabsItem>
+      </Tabs>
 
-      You can run the following query:
-      <GraphqlCode>
-        <GraphQLCodeBlock src={reportCodeMapping[report]} />
-      </GraphqlCode>
+      {tab === 0 ? (<>
+        You can run the following query:
+        <GraphqlCode>
+          <GraphQLCodeBlock src={reportCodeMapping(pool.id)[report]} />
+        </GraphqlCode>
 
-      On this API endpoint:
-      <Shelf>
-        <Box flex={1}>
-          <TextInput
-            value={import.meta.env.REACT_APP_SUBQUERY_URL as string}
-          />
-        </Box>
-        <Box ml="12px">
-          <AnchorButton variant="secondary" small>
-            Copy
-        </AnchorButton>
-        </Box>
-      </Shelf>
+        On this API endpoint:
+        <Shelf>
+          <Box flex={1}>
+            <TextInput
+              value={import.meta.env.REACT_APP_SUBQUERY_URL as string}
+            />
+          </Box>
+          <Box ml="12px">
+            <AnchorButton variant="secondary" small>
+              Copy
+          </AnchorButton>
+          </Box>
+        </Shelf>
+      </>) : (<>
+        <GraphqlCode>
+          curl -g -X POST \<br/>
+            &nbsp; -H "Content-Type: application/json" \<br/>
+            &nbsp; -d '&#123;"query": "{reportCodeMapping(pool.id)[report].replace(/(\r\n|\n|\r)/gm, "").replace(/[\""]/g, '\\"') }" &#125;' \<br/>
+            &nbsp; {import.meta.env.REACT_APP_SUBQUERY_URL as string}
+        </GraphqlCode>
+        </>)}
 
       <Text as="p" variant="body3" textAlign="center">
         For more information, you can refer to the {' '}

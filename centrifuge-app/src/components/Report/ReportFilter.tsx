@@ -160,7 +160,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
       <Box ml="auto">
-        <AnchorButton variant="secondary" small onClick={() => setQueryDialogOpen(true)}>
+        <AnchorButton variant="secondary" small onClick={() => setQueryDialogOpen(true)} disabled={!csvData}>
           Query API
         </AnchorButton>
       </Box>
