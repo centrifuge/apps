@@ -101,6 +101,12 @@ const parachainTypes = {
     pendingRedeemTrancheTokens: 'Balance',
     claimableCurrency: 'Balance',
   },
+  PoolNav: {
+    navAum: 'Balance',
+    navFees: 'Balance',
+    reserve: 'Balance',
+    total: 'Balance',
+  },
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
@@ -114,6 +120,16 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
         },
       ],
       type: 'Vec<u128>',
+    },
+    nav: {
+      description: 'Retrieve the net asset value of a pool',
+      params: [
+        {
+          name: 'pool_id',
+          type: 'u64',
+        },
+      ],
+      type: 'Option<PoolNav>',
     },
   },
   rewards: {
@@ -160,6 +176,7 @@ const parachainRuntimeApi: DefinitionsCall = {
       // However, RPCs are usually in camel case
       methods: {
         tranche_token_prices: parachainRpcMethods.pools.trancheTokenPrices,
+        nav: parachainRpcMethods.pools.nav,
       },
       version: 1,
     },

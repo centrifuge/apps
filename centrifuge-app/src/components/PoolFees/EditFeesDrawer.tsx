@@ -143,7 +143,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             fee: {
               name: fee.feeName,
               destination: fee.receivingAddress,
-              amount: Rate.fromFloat(Dec(fee?.percentOfNav || 0)),
+              amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
               type: 'ChargedUpTo',
               limit: 'ShareOfPortfolioValuation',
@@ -182,7 +182,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                       {feeMetadata?.name}
                     </Text>
                     <Text variant="body2" color="textSecondary">
-                      {formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0, true, {}, 3)} of NAV
+                      {formatPercentage(feeChainData?.amounts.percentOfNav.toPercent() || 0, true, {}, 3)} of NAV
                     </Text>
                   </Grid>
                 )
@@ -203,9 +203,9 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                           </Text>
                           {form.values.poolFees.map((values, index) => {
                             return (
-                              <Shelf key={`poolFees.${index}`} alignItems="center" gap={4}>
+                              <Shelf key={`poolFees.${index}`} gap={4}>
                                 <Stack gap={2} borderBottom="0.5px solid borderPrimary" pb={3} maxWidth="350px">
-                                  <Shelf gap={2}>
+                                  <Shelf gap={2} alignItems="flex-start">
                                     <Field name={`poolFees.${index}.feeName`}>
                                       {({ field, meta }: FieldProps) => {
                                         return (
@@ -223,7 +223,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                         return (
                                           <NumberInput
                                             {...field}
-                                            label="Current percentage"
+                                            label="Max fees in % of NAV"
                                             symbol="%"
                                             disabled={!poolAdmin || updateFeeTxLoading}
                                             errorMessage={(meta.touched && meta.error) || ''}

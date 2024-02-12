@@ -28,7 +28,8 @@ const assetClassLabels = {
   privateCredit: 'Private Credit',
   publicCredit: 'Public Credit',
 }
-type AssetClass = 'publicCredit' | 'privateCredit'
+
+type AssetClass = keyof typeof assetClassLabels
 
 const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
   label: assetClassLabels[key as AssetClass],

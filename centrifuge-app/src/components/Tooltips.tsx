@@ -258,6 +258,10 @@ export const tooltipText = {
     label: 'T-Bill APR',
     body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
   },
+  poolType: {
+    label: 'Pool type',
+    body: 'An open pool allows can have multiple unrelated token holders and can onboard third party investors. A closed pool has very limited distributions and is not available for investment on the app.',
+  },
 }
 
 export type TooltipsProps = {
