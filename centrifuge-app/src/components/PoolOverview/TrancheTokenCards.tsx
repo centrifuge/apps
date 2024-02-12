@@ -1,9 +1,9 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { InvestButton, Token } from '../pages/Pool/Overview'
-import { daysBetween } from '../utils/date'
-import { formatBalance, formatPercentage } from '../utils/formatting'
-import { Tooltips } from './Tooltips'
+import { InvestButton, Token } from '../../pages/Pool/Overview'
+import { daysBetween } from '../../utils/date'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { Tooltips } from '../Tooltips'
 
 export const TrancheTokenCards = ({
   trancheTokens,
