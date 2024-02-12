@@ -1,10 +1,8 @@
-import { Rate, TokenBalance } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Shelf, Text, truncate } from '@centrifuge/fabric'
+import { addressToHex, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
+import { useAddress, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text, truncate } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
-import { NavLink } from 'react-router-dom'
-import styled from 'styled-components'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -45,7 +43,7 @@ const columns = [
     cell: (row: Row) => {
       return (
         <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toDecimal(), true, {}, 3)} of NAV` : ''}
+          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toPercent(), true, {}, 3)} of NAV` : ''}
         </Text>
       )
     },
@@ -54,7 +52,9 @@ const columns = [
     align: 'left',
     header: 'Pending fees',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.pendingFees ? formatBalance(row.pendingFees, row.poolCurrency, 2) : ''}</Text>
+      return row?.pendingFees ? (
+        <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 2)}</Text>
+      ) : null
     },
   },
   {
@@ -68,7 +68,7 @@ const columns = [
     align: 'left',
     header: 'Action',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.action}</Text>
+      return row.action
     },
   },
 ]
@@ -85,6 +85,7 @@ export function PoolFees() {
   const drawer = params.get('charge')
   const changes = useProposedFeeChanges(poolId)
   const poolAdmin = usePoolAdmin(poolId)
+  const address = useAddress()
   const { execute: applyNewFee } = useCentrifugeTransaction('Apply new fee', (cent) => cent.pools.applyNewFee)
 
   const data = React.useMemo(() => {
@@ -94,17 +95,27 @@ export function PoolFees() {
         ?.map((feeChainData) => {
           const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
           const fixedFee = feeChainData?.type === 'fixed'
+          const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
+
           return {
             name: feeMetadata!.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
-            pendingFees: fixedFee ? null : feeChainData?.amounts.pending,
+            pendingFees: feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
-            action: fixedFee ? null : (
-              <StyledLink to={`?charge=${feeChainData?.id}`}>
-                <Text variant="body3">Charge</Text>
-              </StyledLink>
-            ),
+            action:
+              (isAllowedToCharge || poolAdmin) && !fixedFee ? (
+                <RouterLinkButton
+                  small
+                  variant="tertiary"
+                  icon={<IconSwitch size="20px" />}
+                  to={`?charge=${feeChainData?.id}`}
+                >
+                  Charge
+                </RouterLinkButton>
+              ) : (
+                <Box height="32px"></Box>
+              ),
             poolCurrency: pool.currency.symbol,
           }
         })
@@ -119,21 +130,24 @@ export function PoolFees() {
         ...activeFees,
         ...changes.map(({ change, hash }) => {
           return {
-            name: '',
+            name: poolMetadata?.pool?.poolFees?.find((f) => f.id === change.feeId)?.name,
             type: change.type,
             percentOfNav: change.amounts.percentOfNav,
             pendingFees: undefined,
             receivingAddress: change.destination,
-            action: (
-              <StyledLink
-                style={{ outline: 'none', border: 'none', background: 'none' }}
-                as="button"
+            action: poolAdmin ? (
+              <Button
+                variant="tertiary"
+                icon={<IconCheckInCircle size="20px" />}
                 onClick={() => {
                   applyNewFee([poolId, hash])
                 }}
+                small
               >
-                <Text variant="body3">Apply changes</Text>
-              </StyledLink>
+                Apply changes
+              </Button>
+            ) : (
+              <Box height="32px"></Box>
             ),
             poolCurrency: pool.currency.symbol,
           }
@@ -192,18 +206,6 @@ export function PoolFees() {
   )
 }
 
-const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
-  {
-    display: 'inline-block',
-    outline: '0',
-    textDecoration: 'none',
-    ':hover': {
-      textDecoration: 'underline',
-    },
-  },
-  (props) => props.$disabled && { pointerEvents: 'none' }
-)
-
 export function useProposedFeeChanges(poolId: string) {
   const [result] = useCentrifugeQuery(['feeChanges', poolId], (cent) =>
     cent.pools.getProposedPoolSystemChanges([poolId])
@@ -215,11 +217,12 @@ export function useProposedFeeChanges(poolId: string) {
       .map(({ change, hash }) => {
         return {
           change: {
-            destination: change.poolFee.appendFee[1].destination,
-            type: Object.keys(change.poolFee.appendFee[1].feeType)[0],
+            destination: change.poolFee.appendFee[2].destination,
+            type: Object.keys(change.poolFee.appendFee[2].feeType)[0],
             amounts: {
-              percentOfNav: new Rate(change.poolFee.appendFee[1].feeType.chargedUpTo.limit.shareOfPortfolioValuation),
+              percentOfNav: new Rate(change.poolFee.appendFee[2].feeType.chargedUpTo.limit.shareOfPortfolioValuation),
             },
+            feeId: change.poolFee.appendFee[0],
           },
           hash,
         }

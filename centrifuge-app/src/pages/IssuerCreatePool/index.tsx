@@ -113,6 +113,7 @@ export type CreatePoolValues = Omit<
     percentOfNav: number | ''
     walletAddress: string
   }[]
+  poolType: 'open' | 'closed'
 }
 
 const initialValues: CreatePoolValues = {
@@ -149,6 +150,7 @@ const initialValues: CreatePoolValues = {
   },
   adminMultisigEnabled: false,
   poolFees: [],
+  poolType: 'open',
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
@@ -445,7 +447,7 @@ function CreatePoolForm() {
         return {
           name: fee.name,
           destination: fee.walletAddress,
-          amount: Rate.fromFloat(fee.percentOfNav),
+          amount: Rate.fromPercent(fee.percentOfNav),
           type: fee.feeType,
           limit: 'ShareOfPortfolioValuation',
           feeId: feeId + i,
@@ -662,6 +664,25 @@ function CreatePoolForm() {
                   label={`POD endpoint`}
                   placeholder="https://"
                 />
+              </Box>
+              <Box gridColumn="span 2">
+                <Field name="poolType" validate={validate.poolType}>
+                  {({ field, form, meta }: FieldProps) => (
+                    <Select
+                      name="poolType"
+                      label={<Tooltips type="poolType" variant="secondary" />}
+                      onChange={(event) => form.setFieldValue('poolType', event.target.value)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={[
+                        { label: 'Open', value: 'open' },
+                        { label: 'Closed', value: 'closed' },
+                      ]}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
               </Box>
             </Grid>
           </PageSection>

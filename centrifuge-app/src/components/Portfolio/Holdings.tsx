@@ -111,23 +111,23 @@ const columns: Column[] = [
               View on Tinlake
             </AnchorButton>
           ) : canInvestRedeem ? (
-            <>
+            <Shelf>
               <RouterLinkButton to={`?redeem=${poolId}-${trancheId}`} small variant="tertiary" icon={IconMinus}>
                 Redeem
               </RouterLinkButton>
               <RouterLinkButton to={`?invest=${poolId}-${trancheId}`} small variant="tertiary" icon={IconPlus}>
                 Invest
               </RouterLinkButton>
-            </>
+            </Shelf>
           ) : connectedNetwork === 'Centrifuge' ? (
-            <>
+            <Shelf>
               <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
                 Receive
               </RouterLinkButton>
               <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="tertiary" icon={IconSend}>
                 Send
               </RouterLinkButton>
-            </>
+            </Shelf>
           ) : null}
         </Grid>
       )
