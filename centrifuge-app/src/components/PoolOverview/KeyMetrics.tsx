@@ -1,9 +1,95 @@
-import { Card } from '@centrifuge/fabric'
+import { ActiveLoan, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import capitalize from 'lodash/capitalize'
+import startCase from 'lodash/startCase'
+import { daysBetween } from '../../utils/date'
 
-export const KeyMetrics = () => {
+type Props = {
+  assetType?: { class: string; subClass: string }
+  averageMaturity: string
+  loans: TinlakeLoan[] | Loan[] | null | undefined
+  poolStatus?: string
+}
+
+export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Props) => {
+  const ongoingAssetCount =
+    loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
+
+  const writtenOffAssetCount =
+    loans && [...loans].filter((loan) => loan.status === 'Active' && (loan as ActiveLoan).writeOffStatus).length
+
+  const overdueAssetCount =
+    loans &&
+    [...loans].filter((loan) => {
+      const today = new Date()
+      today.setUTCHours(0, 0, 0, 0)
+      const days = daysBetween(today, loan.pricing.maturityDate)
+      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0
+    }).length
+
+  const metrics = [
+    {
+      metric: 'Asset class',
+      value: `${capitalize(startCase(assetType?.class)).replace(/^Us /, 'US ')} - ${capitalize(
+        startCase(assetType?.subClass)
+      ).replace(/^Us /, 'US ')}`,
+    },
+    {
+      metric: 'Pool type',
+      value: capitalize(poolStatus),
+    },
+    {
+      metric: 'Average asset maturity',
+      value: averageMaturity,
+    },
+    {
+      metric: 'Total assets',
+      value: loans?.length || 0,
+    },
+    {
+      metric: 'Ongoing assets',
+      value: ongoingAssetCount,
+    },
+    {
+      metric: 'Written off assets',
+      value: writtenOffAssetCount,
+    },
+    {
+      metric: 'Overdue assets',
+      value: overdueAssetCount,
+    },
+  ]
+
   return (
-    <Card width="100%" height="100%">
-      Key Metrics
+    <Card width="100%" height="100%" pt={2} px={3}>
+      <Stack gap={2}>
+        <Text fontSize="18px" fontWeight="500">
+          Key metrics
+        </Text>
+        <Box borderStyle="solid" borderWidth="1px" borderColor="borderSecondary" maxWidth="fit-content">
+          {metrics.map(({ metric, value }, index) => (
+            <Shelf
+              borderBottomStyle={index === metrics.length - 1 ? 'none' : 'solid'}
+              borderBottomWidth={index === metrics.length - 1 ? '0' : '1px'}
+              borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderSecondary'}
+              height={32}
+              key={index}
+              px={1}
+            >
+              <Box minWidth="160px">
+                <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {metric}
+                </Text>
+              </Box>
+              <Box minWidth="50px">
+                <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {value}
+                </Text>
+              </Box>
+            </Shelf>
+          ))}
+        </Box>
+      </Stack>
     </Card>
   )
 }
