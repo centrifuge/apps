@@ -107,6 +107,11 @@ const parachainTypes = {
     reserve: 'Balance',
     total: 'Balance',
   },
+  PoolFeesList: 'Vec<PoolFeesOfBucket>',
+  PoolFeesOfBucket: {
+    bucket: 'PoolFeeBucket',
+    fees: 'Vec<PoolFee>',
+  },
 }
 
 const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
@@ -165,6 +170,18 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
         },
       ],
       type: 'Option<Balance>',
+    },
+  },
+  poolFees: {
+    listFees: {
+      description: 'Simulate pool fees update and get all fees for the given pool',
+      params: [
+        {
+          name: 'pool_id',
+          type: 'u64',
+        },
+      ],
+      type: 'PoolFeesList',
     },
   },
 }
@@ -253,6 +270,14 @@ const parachainRuntimeApi: DefinitionsCall = {
           ],
           type: 'Option<AccountId32>',
         },
+      },
+      version: 1,
+    },
+  ],
+  PoolFeesApi: [
+    {
+      methods: {
+        list_fees: parachainRpcMethods.pools.listFees,
       },
       version: 1,
     },
