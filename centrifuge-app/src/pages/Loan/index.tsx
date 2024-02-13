@@ -42,6 +42,7 @@ import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
 import { TransferDebtForm } from './TransferDebtForm'
 import { formatNftAttribute } from './utils'
+// import { useAddress } from '@centrifuge/centrifuge-react'
 
 export default function LoanPage() {
   return (
@@ -98,10 +99,10 @@ function Loan() {
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
-  const address = useAddress()
-  const canOraclePrice = useCanSetOraclePrice(address)
+  // const address = useAddress()
+  // const canOraclePrice = useCanSetOraclePrice(address)
   const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
-  const [oraclePriceShown, setOraclePriceShown] = React.useState(false)
+  // const [oraclePriceShown, setOraclePriceShown] = React.useState(false)
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
