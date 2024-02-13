@@ -25,6 +25,7 @@ import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
+import { useLoans } from '../../../utils/useLoans'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -69,6 +70,8 @@ export function PoolDetailOverview() {
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const { evm } = useWallet()
   const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
+  const averageMaturity = useAverageMaturity(poolId)
+  const loans = useLoans(poolId)
 
   const pageSummaryData = [
     {
@@ -129,12 +132,17 @@ export function PoolDetailOverview() {
   return (
     <Box bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
       <PoolOverviewSection>
-        <Grid height={352} gridTemplateColumns={'66fr 33fr'} gap={3}>
+        <Grid height={352} gridTemplateColumns={'66fr minmax(275px, 33fr)'} gap={3}>
           <React.Suspense fallback={<Spinner />}>
             <PoolPerformance />
           </React.Suspense>
           <React.Suspense fallback={<Spinner />}>
-            <KeyMetrics />
+            <KeyMetrics
+              assetType={metadata?.pool?.asset}
+              averageMaturity={averageMaturity}
+              loans={loans}
+              poolStatus={metadata?.pool?.status}
+            />
           </React.Suspense>
         </Grid>
       </PoolOverviewSection>
