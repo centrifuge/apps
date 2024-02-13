@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - 'runtime-upgrade-1038'      
     paths:
       - 'fabric/**' 
       - '.github/workflows/fabric.yml'
