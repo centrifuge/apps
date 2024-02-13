@@ -8,9 +8,10 @@ type Props = {
   assetType?: { class: string; subClass: string }
   averageMaturity: string
   loans: TinlakeLoan[] | Loan[] | null | undefined
+  poolStatus?: string
 }
 
-export const KeyMetrics = ({ assetType, averageMaturity, loans }: Props) => {
+export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Props) => {
   const ongoingAssetCount =
     loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
 
@@ -29,11 +30,13 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans }: Props) => {
   const metrics = [
     {
       metric: 'Asset class',
-      value: capitalize(startCase(assetType?.subClass)).replace(/^Us /, 'US '),
+      value: `${capitalize(startCase(assetType?.class)).replace(/^Us /, 'US ')} - ${capitalize(
+        startCase(assetType?.subClass)
+      ).replace(/^Us /, 'US ')}`,
     },
     {
       metric: 'Pool type',
-      value: capitalize(startCase(assetType?.class)).replace(/^Us /, 'US '),
+      value: capitalize(poolStatus),
     },
     {
       metric: 'Average asset maturity',
@@ -63,24 +66,26 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans }: Props) => {
         <Text fontSize="18px" fontWeight="500">
           Key metrics
         </Text>
-        <Box>
+        <Box borderStyle="solid" borderWidth="1px" borderColor="borderSecondary" maxWidth="fit-content">
           {metrics.map(({ metric, value }, index) => (
             <Shelf
-              borderStyle="solid"
-              borderWidth="1px"
-              borderColor="borderSecondary"
-              borderTopStyle={index === 0 ? 'solid' : 'none'}
-              borderTopWidth={index === 0 ? '1px' : '0'}
-              borderTopColor={index === 0 ? 'borderSecondary' : 'none'}
+              borderBottomStyle={index === metrics.length - 1 ? 'none' : 'solid'}
+              borderBottomWidth={index === metrics.length - 1 ? '0' : '1px'}
+              borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderSecondary'}
               height={32}
               key={index}
               px={1}
-              maxWidth="316px"
             >
-              <Box width="160px">
-                <Text variant="body3">{metric}</Text>
+              <Box minWidth="160px">
+                <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {metric}
+                </Text>
               </Box>
-              <Text variant="body3">{value}</Text>
+              <Box minWidth="50px">
+                <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
+                  {value}
+                </Text>
+              </Box>
             </Shelf>
           ))}
         </Box>

@@ -132,12 +132,17 @@ export function PoolDetailOverview() {
   return (
     <Box bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
       <PoolOverviewSection>
-        <Grid height={352} gridTemplateColumns={'66fr 33fr'} gap={3}>
+        <Grid height={352} gridTemplateColumns={'66fr minmax(275px, 33fr)'} gap={3}>
           <React.Suspense fallback={<Spinner />}>
             <PoolPerformance />
           </React.Suspense>
           <React.Suspense fallback={<Spinner />}>
-            <KeyMetrics assetType={metadata?.pool?.asset} averageMaturity={averageMaturity} loans={loans} />
+            <KeyMetrics
+              assetType={metadata?.pool?.asset}
+              averageMaturity={averageMaturity}
+              loans={loans}
+              poolStatus={metadata?.pool?.status}
+            />
           </React.Suspense>
         </Grid>
       </PoolOverviewSection>
