@@ -1,6 +1,8 @@
+import { getChainInfo, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Card, Grid, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import { formatDate } from '../../utils/date'
+import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useInvestorTransactions } from '../../utils/usePools'
 
 type Props = {
@@ -11,9 +13,18 @@ type Props = {
 
 export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
   const investorTransactions = useInvestorTransactions(poolId)
+  const { data: domains } = useActiveDomains(poolId)
+  const {
+    evm: { chains },
+  } = useWallet()
+
   const firstInvestment = investorTransactions?.find(
     (investorTransaction) => investorTransaction.type === 'INVEST_EXECUTION'
   )?.timestamp
+  const deployedLpChains =
+    domains?.map((domain) => {
+      return getChainInfo(chains, domain.chainId).name
+    }) ?? []
 
   const metrics = [
     {
@@ -34,19 +45,19 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
     },
     {
       metric: 'Available network',
-      value: 'Ethereum',
+      value: `Centrifuge${deployedLpChains.length ? `, ${deployedLpChains.join(', ')}` : ''}`,
     },
     {
       metric: 'Protocol fee',
-      value: '1% of NAV',
+      value: '1% of NAV', // TODO: get fees
     },
     {
       metric: 'Priority fee',
-      value: '1% of NAV',
+      value: '1% of NAV', // TODO: get fees
     },
     {
       metric: 'Manangement fee',
-      value: '1% of NAV',
+      value: '1% of NAV', // TODO: get fees
     },
   ]
 
