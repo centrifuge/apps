@@ -1,19 +1,12 @@
 import { useBalances } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { usePoolMetadataMulti, usePools } from '../../utils/usePools'
 import { LabelValueStack } from '../LabelValueStack'
 import { AssetClassChart } from './AssetClassChart'
-
-const assetClassLabels = {
-  privateCredit: 'Private Credit',
-  publicCredit: 'Public Credit',
-}
-type AssetClass = 'publicCredit' | 'privateCredit'
 
 export function AssetAllocation({ address }: { address?: string }) {
   const balances = useBalances(address)
@@ -40,7 +33,7 @@ export function AssetAllocation({ address }: { address?: string }) {
     .map((item, index) => {
       const nextShade = shades[index % shades.length]
       return {
-        name: assetClassLabels[item as AssetClass] ?? item,
+        name: item,
         value: valueByClass[item].toNumber(),
         color: theme.colors.accentScale[nextShade],
         labelColor: nextShade >= 500 ? 'white' : 'black',
