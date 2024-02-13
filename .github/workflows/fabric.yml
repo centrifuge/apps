@@ -3,16 +3,15 @@ on:
   push:
     branches:
       - main
-      - 'runtime-upgrade-1038'      
     paths:
-      - 'fabric/**' 
+      - 'fabric/**'
       - '.github/workflows/fabric.yml'
   pull_request:
     paths:
       - '.github/workflows/fabric.yml'
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
-  cancel-in-progress: true 
+  cancel-in-progress: true
 jobs:
   build-fabric:
     runs-on: ubuntu-latest
@@ -45,13 +44,12 @@ jobs:
           retention-days: 1
           path: ./fabric/storybook-static
 
-
   deploy-storybook: # to google storage
     # if: github.ref == 'refs/heads/main'
     needs: build-fabric
     permissions:
       contents: 'read'
-      id-token: 'write'  
+      id-token: 'write'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -67,5 +65,5 @@ jobs:
           bucket_url: 'fabric-storybook.k-f.dev'
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-  
+
   # ToDo: send notification when deployed?
