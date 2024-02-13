@@ -18,6 +18,7 @@ const centrifugeDomains = [
   /^(https:\/\/.*centrifuge\.io)/,
   /^(https:\/\/.*altair\.network)/,
   /^(https:\/\/.*k-f\.dev)/,
+  /https:\/\/app-pr\d{4}\.k-f\.dev/
 ]
 
 exports.pinningApi = async (req: Request, res: Response) => {
