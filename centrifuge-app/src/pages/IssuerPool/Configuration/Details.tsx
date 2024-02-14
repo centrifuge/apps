@@ -24,14 +24,8 @@ type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 's
   listed: boolean
 }
 
-const assetClassLabels = {
-  privateCredit: 'Private Credit',
-  publicCredit: 'Public Credit',
-}
-type AssetClass = 'publicCredit' | 'privateCredit'
-
 const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
-  label: assetClassLabels[key as AssetClass],
+  label: key,
   value: key,
 }))
 
@@ -54,7 +48,7 @@ export function Details() {
       assetClass:
         metadata?.pool?.asset?.class && Object.keys(config.assetClasses).includes(metadata.pool.asset.class)
           ? metadata.pool.asset.class
-          : 'privateCredit',
+          : 'Private credit',
       subAssetClass: metadata?.pool?.asset?.subClass ?? '',
       podEndpoint: metadata?.pod?.node ?? '',
       listed: metadata?.pool?.listed ?? false,
@@ -235,7 +229,7 @@ export function Details() {
 
               {((isDemo && editPoolVisibility) || !isDemo) && (
                 <Field name="listed" validate={validate.assetClass}>
-                  {({ field, meta, form }: FieldProps) => (
+                  {({ field }: FieldProps) => (
                     <Stack px={2}>
                       <LabelValueStack
                         label="Menu listing"
@@ -253,7 +247,7 @@ export function Details() {
 
               <LabelValueStack
                 label="Asset class"
-                value={assetClassLabels[metadata?.pool?.asset.class as AssetClass] ?? metadata?.pool?.asset.class}
+                value={metadata?.pool?.asset.class}
               />
               <LabelValueStack label="Secondary asset class" value={metadata?.pool?.asset.subClass} />
 
