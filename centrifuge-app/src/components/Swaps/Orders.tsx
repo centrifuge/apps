@@ -184,7 +184,7 @@ export function Orders({ buyOrSell }: OrdersProps) {
         order.buyAmount ||
         (price
           ? CurrencyBalance.fromFloat(order.sellAmount.toDecimal().mul(price.toDecimal()), order.buyCurrency!.decimals)
-          : CurrencyBalance.fromFloat(0, 1)),
+          : CurrencyBalance.fromFloat(0, 0)),
     }
   })
 
