@@ -1,5 +1,5 @@
 import { ActiveLoan, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, Grid, Stack, Text } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { daysBetween } from '../../utils/date'
@@ -61,32 +61,32 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Pr
   ]
 
   return (
-    <Card width="100%" height="100%" pt={2} px={3}>
+    <Card width="100%" height="100%" p={3}>
       <Stack gap={2}>
         <Text fontSize="18px" fontWeight="500">
           Key metrics
         </Text>
-        <Box borderStyle="solid" borderWidth="1px" borderColor="borderSecondary" maxWidth="fit-content">
+        <Box borderStyle="solid" borderWidth="1px" borderColor="borderSecondary">
           {metrics.map(({ metric, value }, index) => (
-            <Shelf
+            <Grid
               borderBottomStyle={index === metrics.length - 1 ? 'none' : 'solid'}
               borderBottomWidth={index === metrics.length - 1 ? '0' : '1px'}
               borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderSecondary'}
               height={32}
               key={index}
               px={1}
+              gridTemplateColumns="1fr 1fr"
+              width="100%"
+              alignItems="center"
+              gap={2}
             >
-              <Box minWidth="160px">
-                <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
-                  {metric}
-                </Text>
-              </Box>
-              <Box minWidth="50px">
-                <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
-                  {value}
-                </Text>
-              </Box>
-            </Shelf>
+              <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
+                {metric}
+              </Text>
+              <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
+                {value}
+              </Text>
+            </Grid>
           ))}
         </Box>
       </Stack>
