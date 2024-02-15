@@ -37,7 +37,7 @@ export function useAssetPairPrices() {
         map((oracleValues) => {
           console.log('oracleValues', oracleValues)
           return oracleValues.map(([keys, value]) => {
-            const key = (keys.toHuman() as any)[1] as {ConversionRatio?: [any, any]}
+            const key = (keys.toHuman() as any)[1] as { ConversionRatio?: [any, any] }
             if (!key.ConversionRatio) return null as never
             const pair = key.ConversionRatio
             const price = new Price((value.toPrimitive() as [string, number])[0])
