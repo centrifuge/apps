@@ -14,7 +14,7 @@ import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, required, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
 import { ExternalFinanceFields } from './ExternalFinanceForm'
 import { isExternalLoan } from './utils'
 
@@ -23,6 +23,7 @@ type FormValues = {
   amount: number | '' | Decimal
   price: number | '' | Decimal
   faceValue: number | ''
+  targetLoanFaceValue: number | '' | Decimal
   targetLoanPrice: number | '' | Decimal
 }
 
@@ -55,6 +56,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       price: '',
       faceValue: '',
       targetLoanPrice: '',
+      targetLoanFaceValue: '',
     },
     onSubmit: (values, actions) => {
       if (!selectedLoan) return
@@ -67,6 +69,9 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
           quantity: Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal())),
         }
         borrowAmount = borrow.quantity.mul(borrow.price).div(Price.fromFloat(1))
+      } else if (isExternalLoan(selectedLoan)) {
+        borrow = { amount: CurrencyBalance.fromFloat(financeAmount, pool.currency.decimals) }
+        borrowAmount = borrow.amount
       } else {
         borrow = { amount: CurrencyBalance.fromFloat(values.amount, pool.currency.decimals) }
         borrowAmount = borrow.amount
@@ -82,7 +87,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       let repay: any = { principal, interest }
       if (isExternalLoan(selectedLoan)) {
         const repayPriceBN = CurrencyBalance.fromFloat(form.values.targetLoanPrice || 1, pool.currency.decimals)
-        const repayQuantityBN = Price.fromFloat(financeAmount.div(repayPriceBN.toDecimal()))
+        const repayQuantityBN = Price.fromFloat(Dec(values.targetLoanFaceValue || 0).div(selectedLoan.pricing.notional.toDecimal()))
         repay = { quantity: repayQuantityBN, price: repayPriceBN, interest }
       }
 
@@ -92,25 +97,26 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       })
       actions.setSubmitting(false)
     },
-    validate(values) {
+    validate(values) { 
+      const financeAmount = isExternalLoan(loan)
+        ? Dec(values.price || 0)
+            .mul(Dec(values.faceValue || 0))
+            .div(loan.pricing.notional.toDecimal())
+        : selectedLoan && isExternalLoan(selectedLoan) ? Dec(values.targetLoanPrice || 0)
+        .mul(Dec(values.targetLoanFaceValue || 0))
+        .div(selectedLoan.pricing.notional.toDecimal()):  Dec(values.amount || 0) 
+
       let errors: any = {}
-      if (selectedLoan && isExternalLoan(selectedLoan)) {
-        const financeAmount = isExternalLoan(loan)
-          ? Dec(form.values.price || 0)
-              .mul(Dec(form.values.faceValue || 0))
-              .div(loan.pricing.notional.toDecimal())
-          : Dec(form.values.amount || 0)
-        const financeAmountBN = CurrencyBalance.fromFloat(financeAmount, pool.currency.decimals)
-        const repayPrice = Dec(form.values.targetLoanPrice || 1)
-        const repayQuantity = financeAmount.div(repayPrice)
-        const repayAmountBN = CurrencyBalance.fromFloat(
-          CurrencyBalance.fromFloat(repayQuantity, pool.currency.decimals).toDecimal().mul(repayPrice),
-          pool.currency.decimals
-        )
-        if (!repayAmountBN.eq(financeAmountBN)) {
-          errors = setIn(errors, 'targetLoanPrice', "Finance amount doesn't equal borrow amount")
+      
+      const error = validate(financeAmount) 
+      if (error) {
+        if (selectedLoan && isExternalLoan(selectedLoan)) {
+          errors = setIn(errors, 'targetLoanPrice', error)
+        } else {
+          errors = setIn(errors, 'amount', error)
         }
       }
+      
       return errors
     },
   })
@@ -145,7 +151,9 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
     ? Dec(form.values.price || 0)
         .mul(Dec(form.values.faceValue || 0))
         .div(loan.pricing.notional.toDecimal())
-    : Dec(form.values.amount || 0)
+    : selectedLoan && isExternalLoan(selectedLoan) ? Dec(form.values.targetLoanPrice || 0)
+    .mul(Dec(form.values.targetLoanFaceValue || 0))
+    .div(selectedLoan.pricing.notional.toDecimal()):  Dec(form.values.amount || 0) 
 
   return (
     <Stack as={Card} gap={2} p={2}>
@@ -171,7 +179,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
                   form.setFieldValue('targetLoan', event.target.value)
                 }}
                 onBlur={field.onBlur}
-                errorMessage={meta.touched && meta.error ? meta.error : undefined}
                 value={field.value}
                 options={loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []}
                 placeholder="Select..."
@@ -200,7 +207,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
                 </Text>
               </Shelf>
             </>
-          ) : (
+          ) : !selectedLoan || !isExternalLoan(selectedLoan) ? (
             <Field name="amount" validate={(val: any) => validate(Dec(val || 0))}>
               {({ field, meta, form }: FieldProps) => {
                 return (
@@ -215,25 +222,44 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
                 )
               }}
             </Field>
-          )}
+          ) : null}
           {selectedLoan && isExternalLoan(selectedLoan) && (
-            <Field
-              name="targetLoanPrice"
-              validate={combine(required(), settlementPrice(), maxPriceVariance(selectedLoan.pricing))}
-            >
-              {({ field, meta, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    label="Settlement price (settlement asset)"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    currency={pool.currency.symbol}
-                    onChange={(value) => form.setFieldValue('targetLoanPrice', value)}
-                    decimals={8}
-                  />
-                )
-              }}
-            </Field>
+            <>
+              <Field validate={combine(positiveNumber())} name="targetLoanFaceValue">
+                {({ field, meta, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Face value (settlement asset)"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      decimals={8}
+                      onChange={(value) => form.setFieldValue('targetLoanFaceValue', value)}
+                      currency={pool.currency.symbol}
+                    />
+                  )
+                }}
+              </Field>
+              <Field name="targetLoanPrice" validate={combine(settlementPrice(), maxPriceVariance(selectedLoan.pricing))}>
+                {({ field, meta, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Settlement price (settlement asset)"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      currency={pool.currency.symbol}
+                      onChange={(value) => form.setFieldValue('targetLoanPrice', value)}
+                      decimals={8}
+                    />
+                  )
+                }}
+              </Field>
+              <Shelf justifyContent="space-between">
+                <Text variant="emphasized">Total amount</Text>
+                <Text variant="emphasized">
+                    {formatBalance(financeAmount, pool?.currency.symbol, 2)}
+                </Text>
+              </Shelf>
+            </>
           )}
           <Stack px={1}>
             <Button type="submit" loading={isLoading}>

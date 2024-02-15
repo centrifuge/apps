@@ -4,28 +4,28 @@ import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, forkJoin, from, Observable, of, startWith } from 'rxjs'
+import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { calculateOptimalSolution, SolverResult } from '..'
+import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
-  BorrowerTransactionType,
-  InvestorTransactionType,
-  SubqueryBorrowerTransaction,
-  SubqueryCurrencyBalances,
-  SubqueryInvestorTransaction,
-  SubqueryPoolSnapshot,
-  SubqueryTrancheBalances,
-  SubqueryTrancheSnapshot,
+    BorrowerTransactionType,
+    InvestorTransactionType,
+    SubqueryBorrowerTransaction,
+    SubqueryCurrencyBalances,
+    SubqueryInvestorTransaction,
+    SubqueryPoolSnapshot,
+    SubqueryTrancheBalances,
+    SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
-  addressToHex,
-  computeTrancheId,
-  getDateMonthsFromNow,
-  getDateYearsFromNow,
-  getRandomUint,
-  isSameAddress,
+    addressToHex,
+    computeTrancheId,
+    getDateMonthsFromNow,
+    getDateYearsFromNow,
+    getRandomUint,
+    isSameAddress,
 } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -597,7 +597,7 @@ export interface PoolMetadataInput {
   // details
   poolIcon: FileType | null
   poolName: string
-  assetClass: 'publicCredit' | 'privateCredit'
+  assetClass: 'Public credit' | 'Private credit'
   subAssetClass: string
   currency: string
   maxReserve: number | ''
@@ -651,7 +651,7 @@ export type PoolMetadata = {
     name: string
     icon: FileType | null
     asset: {
-      class: 'publicCredit' | 'privateCredit'
+      class: 'Public credit' | 'Private credit'
       subClass: string
     }
     poolFees?: {

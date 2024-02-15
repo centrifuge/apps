@@ -53,14 +53,8 @@ import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
 
-const assetClassLabels = {
-  privateCredit: 'Private Credit',
-  publicCredit: 'Public Credit',
-}
-type AssetClass = 'publicCredit' | 'privateCredit'
-
 const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
-  label: assetClassLabels[key as AssetClass],
+  label: key,
   value: key,
 }))
 
@@ -119,7 +113,7 @@ export type CreatePoolValues = Omit<
 const initialValues: CreatePoolValues = {
   poolIcon: null,
   poolName: '',
-  assetClass: 'privateCredit',
+  assetClass: 'Private credit',
   subAssetClass: '',
   currency: '',
   maxReserve: '',
