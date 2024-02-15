@@ -1,27 +1,24 @@
-import { CurrencyBalance, CurrencyMetadata, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import {
   useCentrifuge,
-  useCentrifugeApi,
   useCentrifugeConsts,
-  useCentrifugeQuery,
   useEvmNativeBalance,
   useEvmNativeCurrency,
   useEvmProvider,
-  useWallet,
+  useWallet
 } from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
-import Decimal from 'decimal.js-light'
 import * as React from 'react'
-import { map } from 'rxjs'
-import { Dec } from '../../utils/Decimal'
+import { Dec, max } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
-import { useLiquidityPoolInvestment, useLiquidityPools, useLPEvents } from '../../utils/useLiquidityPools'
+import { useAssetPair } from '../../utils/useCurrencies'
+import { useLPEvents, useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
 import { useDebugFlags } from '../DebugFlags'
 import { InvestRedeemContext } from './InvestRedeemProvider'
-import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
+import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
@@ -256,23 +253,4 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   }
 
   return <InvestRedeemContext.Provider value={{ state, actions, hooks }}>{children}</InvestRedeemContext.Provider>
-}
-
-function useAssetPair(currency: CurrencyMetadata, otherCurrency?: CurrencyMetadata) {
-  const api = useCentrifugeApi()
-  const [data] = useCentrifugeQuery(
-    ['assetPair', currency.key, otherCurrency?.key],
-    () =>
-      api.query.orderBook.tradingPair(currency.key, otherCurrency!.key).pipe(
-        map((minOrderData) => {
-          return new CurrencyBalance(minOrderData.toPrimitive() as string, otherCurrency!.decimals)
-        })
-      ),
-    { enabled: !!otherCurrency }
-  )
-  return data
-}
-
-function max(...nums: Decimal[]) {
-  return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
 }
