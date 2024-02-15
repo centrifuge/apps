@@ -47,25 +47,25 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
       metric: 'Available network',
       value: `Centrifuge${deployedLpChains.length ? `, ${deployedLpChains.join(', ')}` : ''}`,
     },
-    {
-      metric: 'Protocol fee',
-      value: '1% of NAV', // TODO: get fees
-    },
-    {
-      metric: 'Priority fee',
-      value: '1% of NAV', // TODO: get fees
-    },
-    {
-      metric: 'Manangement fee',
-      value: '1% of NAV', // TODO: get fees
-    },
+    // {
+    //   metric: 'Protocol fee',
+    //   value: '1% of NAV', // TODO: get fees
+    // },
+    // {
+    //   metric: 'Priority fee',
+    //   value: '1% of NAV', // TODO: get fees
+    // },
+    // {
+    //   metric: 'Manangement fee',
+    //   value: '1% of NAV', // TODO: get fees
+    // },
   ]
 
   const getValue = (metric: string, value: string) => {
     if (metric === 'Pool structure')
       return (
         <Tooltip body="Investment and redemption orders can come in at any time, and assets can be financed and repaid continuously.">
-          <Text textAlign="left" variant="label2" color="textPrimary">
+          <Text variant="label2" color="textPrimary">
             {value}
           </Text>
         </Tooltip>
@@ -73,7 +73,7 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
     if (metric === 'Tranche structure')
       return (
         <Tooltip body="For each tranche, tokens are issued that investors receive, representing interests in the tranches of the pool.">
-          <Text textAlign="left" variant="label2" color="textPrimary">
+          <Text variant="label2" color="textPrimary">
             {value}
           </Text>
         </Tooltip>
