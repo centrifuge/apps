@@ -260,7 +260,7 @@ export const tooltipText = {
   },
   poolType: {
     label: 'Pool type',
-    body: 'An open pool allows can have multiple unrelated token holders and can onboard third party investors. A closed pool has very limited distributions and is not available for investment on the app.',
+    body: 'An open pool can have multiple unrelated token holders and can onboard third party investors. A closed pool has very limited distributions and is not available for investment on the app.',
   },
 }
 

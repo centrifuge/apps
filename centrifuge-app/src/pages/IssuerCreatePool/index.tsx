@@ -574,6 +574,25 @@ function CreatePoolForm() {
                   maxLength={100}
                 />
               </Box>
+              <Box gridColumn="span 2">
+                <Field name="poolType" validate={validate.poolType}>
+                  {({ field, form, meta }: FieldProps) => (
+                    <Select
+                      name="poolType"
+                      label={<Tooltips type="poolType" variant="secondary" />}
+                      onChange={(event) => form.setFieldValue('poolType', event.target.value)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={[
+                        { label: 'Open', value: 'open' },
+                        { label: 'Closed', value: 'closed' },
+                      ]}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
               <Box gridColumn="span 2" width="100%">
                 <Field name="poolIcon" validate={validate.poolIcon}>
                   {({ field, meta, form }: FieldProps) => (
@@ -664,25 +683,6 @@ function CreatePoolForm() {
                   label={`POD endpoint`}
                   placeholder="https://"
                 />
-              </Box>
-              <Box gridColumn="span 2">
-                <Field name="poolType" validate={validate.poolType}>
-                  {({ field, form, meta }: FieldProps) => (
-                    <Select
-                      name="poolType"
-                      label={<Tooltips type="poolType" variant="secondary" />}
-                      onChange={(event) => form.setFieldValue('poolType', event.target.value)}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={[
-                        { label: 'Open', value: 'open' },
-                        { label: 'Closed', value: 'closed' },
-                      ]}
-                      placeholder="Select..."
-                    />
-                  )}
-                </Field>
               </Box>
             </Grid>
           </PageSection>
