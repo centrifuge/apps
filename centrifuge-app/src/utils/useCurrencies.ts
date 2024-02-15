@@ -35,7 +35,6 @@ export function useAssetPairPrices() {
       api.query.orderBook.marketFeederId().pipe(
         switchMap(feeder => api.query.oraclePriceFeed.fedValues.entries(feeder.toPrimitive())),
         map((oracleValues) => {
-          console.log('oracleValues', oracleValues)
           return oracleValues.map(([keys, value]) => {
             const key = (keys.toHuman() as any)[1] as { ConversionRatio?: [any, any] }
             if (!key.ConversionRatio) return null as never
