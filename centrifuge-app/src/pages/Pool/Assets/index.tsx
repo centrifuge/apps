@@ -1,4 +1,4 @@
-import { ActiveLoan } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, Loan } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -31,6 +31,8 @@ export function PoolDetailAssets() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
+  console.log('🚀 ~ loans:', loans)
+  const isTinlakePool = poolId.startsWith('0x')
   const averageAmount = useAverageAmount(poolId)
 
   if (!pool) return null
@@ -49,24 +51,39 @@ export function PoolDetailAssets() {
 
   const isExternal = 'valuationMethod' in loans[0].pricing && loans[0].pricing.valuationMethod === 'oracle'
 
-  const avgAmount = isExternal
-    ? averageAmount
-    : ongoingAssets
-        .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal() || Dec(0)), Dec(0))
-        .dividedBy(ongoingAssets.length)
-        .toDecimalPlaces(2)
+  const offchainAssets = !isTinlakePool
+    ? loans.filter((loan) => (loan as Loan).pricing.valuationMethod === 'cash')
+    : null
+  const offchainReserve = offchainAssets?.reduce<any>(
+    (curr, prev) => curr.add(prev.totalBorrowed.toDecimal() || Dec(0)),
+    Dec(0)
+  )
 
-  const assetValue = formatBalance(pool.nav.latest.toDecimal().toNumber(), pool.currency.symbol)
+  const overdueAssets = loans.filter(
+    (loan) =>
+      loan.status === 'Active' &&
+      loan.outstandingDebt.gtn(0) &&
+      new Date(loan.pricing.maturityDate).getTime() < Date.now()
+  )
 
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
     {
-      label: <Tooltips type="assetValue" />,
-      value: assetValue,
+      label: <Tooltips type="totalNav" />,
+      value: formatBalance(pool.nav.latest.toDecimal(), pool.currency.symbol),
+    },
+    { label: <Tooltips type="onchainReserve" />, value: formatBalance(pool.reserve.total || 0, pool.currency.symbol) },
+    {
+      label: <Tooltips type="offchainCash" />,
+      value: formatBalance(offchainReserve, 'USD'),
+    },
+    {
+      label: 'Total assets',
+      value: loans.length,
     },
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
     {
-      label: <Tooltips type="averageAmount" />,
-      value: formatBalance(avgAmount, pool.currency.symbol),
+      label: 'Overdue assets',
+      value: <Text color={overdueAssets.length > 0 ? 'statusAlert' : 'inherit'}>{overdueAssets.length}</Text>,
     },
   ]
 
