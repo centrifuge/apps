@@ -2018,9 +2018,10 @@ export function getPoolsModule(inst: Centrifuge) {
                 const lastUpdatedNav = new Date((portfolioValuationData?.lastUpdated ?? 0) * 1000).toISOString()
                 // @ts-expect-error
                 const rawNav = rawNavs && rawNavs[poolIndex]?.toJSON()
-                const latestNav = rawNav?.total
-                  ? new CurrencyBalance(rawNav.total, currency.decimals)
+                  const totalNavAum = rawNav?.navAum
+                  ? new CurrencyBalance(rawNav.navAum, currency.decimals)
                   : new CurrencyBalance(0, currency.decimals)
+
                 const mappedPool: Pool = {
                   id: poolId,
                   createdAt: null,
@@ -2125,13 +2126,12 @@ export function getPoolsModule(inst: Centrifuge) {
                     challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                   },
                   nav: {
-                    latest: latestNav,
+                    latest: totalNavAum,
                     lastUpdated: lastUpdatedNav,
                   },
-                  value: new CurrencyBalance(
-                    hexToBN(pool.reserve.total).add(new BN(latestNav ? latestNav : 0)),
-                    currency.decimals
-                  ),
+                  value: rawNav?.total
+                    ? new CurrencyBalance(rawNav.total, currency.decimals)
+                    : new CurrencyBalance(0, currency.decimals),
                 }
 
                 return mappedPool
