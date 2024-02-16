@@ -6,12 +6,12 @@ import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
+import { IssuerSection } from '../../../components/IssuerSection'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { AssetsByMaturity } from '../../../components/PoolOverview/AssetsByMaturity'
 import { Cashflows } from '../../../components/PoolOverview/Cashflows'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
-import { PoolAnalysis } from '../../../components/PoolOverview/PoolAnalysis'
 import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
 import { PoolStructure } from '../../../components/PoolOverview/PoolStructure'
 import { TrancheTokenCards } from '../../../components/PoolOverview/TrancheTokenCards'
@@ -134,7 +134,7 @@ export function PoolDetailOverview() {
       )}
       <PoolOverviewSection>
         <React.Suspense fallback={<Spinner />}>
-          <PoolAnalysis />
+          <IssuerSection metadata={metadata} />
         </React.Suspense>
       </PoolOverviewSection>
       <PoolOverviewSection>
