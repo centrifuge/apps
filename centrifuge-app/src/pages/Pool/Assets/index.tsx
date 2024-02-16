@@ -2,6 +2,8 @@ import { ActiveLoan, Loan } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import currencyDollar from '../../../assets/images/currency-dollar.svg'
+import usdcLogo from '../../../assets/images/usdc-logo.svg'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
@@ -71,9 +73,22 @@ export function PoolDetailAssets() {
       label: <Tooltips type="totalNav" />,
       value: formatBalance(pool.nav.latest.toDecimal(), pool.currency.symbol),
     },
-    { label: <Tooltips type="onchainReserve" />, value: formatBalance(pool.reserve.total || 0, pool.currency.symbol) },
     {
-      label: <Tooltips type="offchainCash" />,
+      label: (
+        <Shelf alignItems="center" gap="2px">
+          <Box as="img" src={usdcLogo} alt="" height={13} width={13} />
+          <Tooltips type="onchainReserve" />{' '}
+        </Shelf>
+      ),
+      value: formatBalance(pool.reserve.total || 0, pool.currency.symbol),
+    },
+    {
+      label: (
+        <Shelf alignItems="center" gap="2px">
+          <Box as="img" src={currencyDollar} alt="" height={13} width={13} />
+          <Tooltips type="offchainCash" />{' '}
+        </Shelf>
+      ),
       value: formatBalance(offchainReserve, 'USD'),
     },
     {
