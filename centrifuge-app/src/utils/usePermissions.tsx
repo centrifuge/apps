@@ -3,9 +3,8 @@ import {
   Collection,
   computeMultisig,
   evmToSubstrateAddress,
-  isSameAddress,
   PoolRoles,
-  WithdrawAddress,
+  WithdrawAddress
 } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
@@ -436,16 +435,4 @@ function looksLike(a: any, b: any): boolean {
 
 function isPrimitive(val: any): val is boolean | string | number | null | undefined {
   return val == null || /^[sbn]/.test(typeof val)
-}
-
-export function useCanSetOraclePrice(address?: string) {
-  const [members] = useCentrifugeQuery(['oracleMembers'], (cent) =>
-    cent.getApi().pipe(
-      switchMap((api) => api.query.priceOracleMembership.members()),
-      map((memberData) => {
-        return memberData.toJSON() as string[]
-      })
-    )
-  )
-  return address && !!members?.find((addr) => isSameAddress(addr, address))
 }
