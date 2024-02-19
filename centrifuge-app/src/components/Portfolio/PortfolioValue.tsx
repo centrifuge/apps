@@ -104,7 +104,7 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
   )
 }
 
-const getRangeNumber = (rangeValue: string) => {
+export const getRangeNumber = (rangeValue: string) => {
   if (rangeValue === '30d') {
     return 30
   }
