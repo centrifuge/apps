@@ -1,5 +1,5 @@
-import { BorrowerTransaction, CurrencyBalance, ExternalPricingInfo, PricingInfo } from '@centrifuge/centrifuge-js'
-import { BorrowerTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
+import { AssetTransaction, CurrencyBalance, ExternalPricingInfo, PricingInfo } from '@centrifuge/centrifuge-js'
+import { AssetTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { StatusChip, Tooltip } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { useMemo } from 'react'
@@ -9,7 +9,7 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 
 type Props = {
-  transactions: BorrowerTransaction[]
+  transactions: AssetTransaction[]
   currency: string
   decimals: number
   loanType: 'external' | 'internal'
@@ -76,13 +76,13 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
     }))
   }, [transactions, decimals, pricing])
 
-  const getStatusChipType = (type: BorrowerTransactionType) => {
+  const getStatusChipType = (type: AssetTransactionType) => {
     if (type === 'BORROWED' || type === 'CREATED' || type === 'PRICED') return 'info'
     if (type === 'REPAID') return 'ok'
     return 'default'
   }
 
-  const getStatusText = (type: BorrowerTransactionType) => {
+  const getStatusText = (type: AssetTransactionType) => {
     if (loanType === 'external' && type === 'BORROWED') return 'Purchase'
     if (loanType === 'external' && type === 'REPAID') return 'Sale'
 
@@ -99,7 +99,7 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
         {
           align: 'left',
           header: 'Type',
-          cell: (row: { type: BorrowerTransactionType }) => (
+          cell: (row: { type: AssetTransactionType }) => (
             <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>
           ),
         },

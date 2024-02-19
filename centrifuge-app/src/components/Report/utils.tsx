@@ -1,4 +1,4 @@
-import { BorrowerTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
+import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { Text } from '@centrifuge/fabric'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { truncate } from '../../utils/web3'
@@ -48,7 +48,7 @@ export function formatInvestorTransactionsType({
 }
 
 const assetTransactionTypes: {
-  [key in BorrowerTransactionType]: string
+  [key in AssetTransactionType]: string
 } = {
   CREATED: 'Created',
   PRICED: 'Priced',
@@ -57,9 +57,9 @@ const assetTransactionTypes: {
   CLOSED: 'Closed',
 }
 
-export function formatAssetTransactionType(type: BorrowerTransactionType) {
+export function formatAssetTransactionType(type: AssetTransactionType) {
   if (!assetTransactionTypes[type]) {
-    console.warn(`Type '${type}' is not assignable to type 'BorrowerTransactionType'`)
+    console.warn(`Type '${type}' is not assignable to type 'AssetTransactionType'`)
     return type
   }
 
@@ -72,7 +72,7 @@ export function formatTransactionsType({
   poolCurrencySymbol,
   currencyAmount,
 }: {
-  type: InvestorTransactionType | BorrowerTransactionType
+  type: InvestorTransactionType | AssetTransactionType
   trancheTokenSymbol: string
   poolCurrencySymbol: string
   currencyAmount: number | null
@@ -89,7 +89,7 @@ export function formatTransactionsType({
   })
 }
 
-function isAssetType(type: InvestorTransactionType | BorrowerTransactionType): type is BorrowerTransactionType {
+function isAssetType(type: InvestorTransactionType | AssetTransactionType): type is AssetTransactionType {
   return ['CREATED', 'PRICED', 'BORROWED', 'REPAID', 'CLOSED'].includes(type)
 }
 
