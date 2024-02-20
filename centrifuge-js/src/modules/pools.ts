@@ -10,22 +10,22 @@ import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
-    AssetTransactionType,
-    InvestorTransactionType,
-    SubqueryAssetTransaction,
-    SubqueryCurrencyBalances,
-    SubqueryInvestorTransaction,
-    SubqueryPoolSnapshot,
-    SubqueryTrancheBalances,
-    SubqueryTrancheSnapshot,
+  AssetTransactionType,
+  InvestorTransactionType,
+  SubqueryAssetTransaction,
+  SubqueryCurrencyBalances,
+  SubqueryInvestorTransaction,
+  SubqueryPoolSnapshot,
+  SubqueryTrancheBalances,
+  SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
-    addressToHex,
-    computeTrancheId,
-    getDateMonthsFromNow,
-    getDateYearsFromNow,
-    getRandomUint,
-    isSameAddress,
+  addressToHex,
+  computeTrancheId,
+  getDateMonthsFromNow,
+  getDateYearsFromNow,
+  getRandomUint,
+  isSameAddress,
 } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -731,11 +731,14 @@ export type AssetTransaction = {
   poolId: string
   accountId: string
   epochId: string
-  loanId: string
+  assetId: string
   type: AssetTransactionType
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  principalAmount: string | null
+  interestAmount: string | null
+  hash: string
 }
 
 type Holder = {
@@ -2522,12 +2525,15 @@ export function getPoolsModule(inst: Centrifuge) {
           }) {
           nodes {
             assetId
+            principalAmount
+            interestAmount
             epochId
             type
             timestamp
             amount
             settlementPrice
             quantity
+            hash
           }
         }
       }
@@ -2933,11 +2939,11 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         > = {}
         // oracles.forEach(() => {
-          //   const { timestamp, value } = oracle[1].toPrimitive() as any
-          //   oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
-          //     timestamp,
-          //     value: new CurrencyBalance(value, currency.decimals),
-          //   }
+        //   const { timestamp, value } = oracle[1].toPrimitive() as any
+        //   oraclePrices[(oracle[0].toHuman() as any)[0].Isin] = {
+        //     timestamp,
+        //     value: new CurrencyBalance(value, currency.decimals),
+        //   }
         // })
 
         const activeLoansPortfolio: Record<
