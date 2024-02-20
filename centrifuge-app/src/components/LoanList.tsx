@@ -1,4 +1,4 @@
-import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
   IconChevronRight,
@@ -11,8 +11,11 @@ import {
   Thumbnail,
   usePagination,
 } from '@centrifuge/fabric'
+import get from 'lodash/get'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
+import currencyDollar from '../assets/images/currency-dollar.svg'
+import usdcLogo from '../assets/images/usdc-logo.svg'
 import { formatNftAttribute } from '../pages/Loan/utils'
 import { nftMetadataSchema } from '../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../types'
@@ -27,10 +30,12 @@ import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '.
 import { LoadBoundary } from './LoadBoundary'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 import { prefetchRoute } from './Root'
+import { Tooltips } from './Tooltips'
 
 type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
   originationDateSortKey: string
+  maturityDate: string | null
 }
 
 type Props = {
@@ -64,10 +69,25 @@ export function LoanList({ loans }: Props) {
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
-  const loansWithLabelStatus = loans.map((loan) => ({
-    ...loan,
-    labelStatus: getLoanStatus(loan),
-  }))
+  const loansWithLabelStatus = React.useMemo(() => {
+    return loans
+      .map((loan) => ({
+        ...loan,
+        labelStatus: getLoanStatus(loan),
+      }))
+      .sort((a, b) => {
+        const aValuation = get(a, 'pricing.valuationMethod')
+        const bValuation = get(b, 'pricing.valuationMethod')
+        const aId = get(a, 'id') as string
+        const bId = get(b, 'id') as string
+
+        if (aValuation === 'cash' && bValuation !== 'cash') return -1
+        if (aValuation !== 'cash' && bValuation === 'cash') return 1
+        if (aValuation === 'cash' && bValuation === 'cash') return aId.localeCompare(bId)
+
+        return aId.localeCompare(bId)
+      })
+  }, [loans])
   const filters = useFilters({
     data: loansWithLabelStatus,
   })
@@ -113,7 +133,7 @@ export function LoanList({ loans }: Props) {
               return l.originationDate && (l.poolId.startsWith('0x') || l.status === 'Active')
                 ? // @ts-expect-error
                   formatDate(l.originationDate)
-                : ''
+                : '-'
             },
             sortKey: 'originationDateSortKey',
           },
@@ -121,7 +141,7 @@ export function LoanList({ loans }: Props) {
     {
       align: 'left',
       header: <SortableTableHeader label="Maturity date" />,
-      cell: (l: Row) => (l.pricing.maturityDate ? formatDate(l.pricing.maturityDate) : ''),
+      cell: (l: Row) => (l?.maturityDate ? formatDate(l.maturityDate) : '-'),
       sortKey: 'maturityDate',
     },
     {
@@ -144,14 +164,14 @@ export function LoanList({ loans }: Props) {
     },
     {
       header: '',
-      cell: () => <IconChevronRight size={24} color="textPrimary" />,
+      cell: (l: Row) => (l.status ? <IconChevronRight size={24} color="textPrimary" /> : ''),
       width: '52px',
     },
   ].filter(Boolean) as Column[]
 
   const rows: Row[] = filters.data.map((loan) => ({
     nftIdSortKey: loan.asset.nftId,
-    idSortKey: parseInt(loan.id, 10),
+    idSortKey: parseInt(loan.id, 10) + 1,
     outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
     originationDateSortKey:
       loan.status === 'Active' &&
@@ -161,9 +181,32 @@ export function LoanList({ loans }: Props) {
       !loan?.totalBorrowed?.isZero()
         ? loan.originationDate
         : '',
-    maturityDate: loan.pricing.maturityDate,
+    // @ts-expect-error
+    maturityDate: loan.pricing.valuationMethod === 'cash' ? null : loan.pricing.maturityDate,
     ...loan,
   }))
+
+  const pinnedData: Row[] = [
+    {
+      id: 'reserve',
+      // @ts-expect-error
+      status: '',
+      poolId: pool.id,
+      pricing: {
+        valuationMethod: 'discountedCashFlow',
+        maxBorrowAmount: 'upToTotalBorrowed',
+        value: CurrencyBalance.fromFloat(0, 18),
+        maturityDate: '',
+        maturityExtensionDays: 0,
+        advanceRate: Rate.fromFloat(0),
+        interestRate: Rate.fromFloat(0),
+      },
+      asset: { collectionId: '', nftId: '' },
+      totalBorrowed: CurrencyBalance.fromFloat(0, 18),
+      totalRepaid: CurrencyBalance.fromFloat(0, 18),
+      outstandingDebt: CurrencyBalance.fromFloat(0, 18),
+    },
+  ]
 
   const pagination = usePagination({ data: rows, pageSize: 20 })
 
@@ -175,9 +218,11 @@ export function LoanList({ loans }: Props) {
             <DataTable
               data={rows}
               columns={columns}
-              defaultSortKey="idSortKey"
+              pinnedData={pinnedData}
               defaultSortOrder="desc"
-              onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+              onRowClicked={(row) =>
+                row.status ? `${basePath}/${poolId}/assets/${row.id}` : `${basePath}/${poolId}/assets`
+              }
               pageSize={20}
               page={pagination.page}
             />
@@ -216,14 +261,50 @@ function AssetName({ loan }: { loan: Row }) {
   const isTinlakePool = loan.poolId.startsWith('0x')
   const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  if (loan.id === 'reserve') {
+    return (
+      <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
+        <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
+          <Box as="img" src={usdcLogo} alt="" height="13px" width="13px" />
+        </Shelf>
+        <TextWithPlaceholder
+          isLoading={isLoading}
+          width={12}
+          variant="body2"
+          style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
+        >
+          <Tooltips type="onchainReserve" label={<Text variant="body2">Onchain reserve</Text>} />
+        </TextWithPlaceholder>
+      </Shelf>
+    )
+  }
+
+  // @ts-expect-error
+  if (loan.status === 'Active' && loan.pricing.valuationMethod === 'cash') {
+    return (
+      <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
+        <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
+          <Box as="img" src={currencyDollar} alt="" height="13px" width="13px" />
+        </Shelf>
+        <TextWithPlaceholder
+          isLoading={isLoading}
+          width={12}
+          variant="body2"
+          style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
+        >
+          <Tooltips type="onchainReserve" label={<Text variant="body2">Bank account</Text>} />
+        </TextWithPlaceholder>
+      </Shelf>
+    )
+  }
+
   return (
-    <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
+    <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
       <Thumbnail type="asset" label={loan.id} />
       <TextWithPlaceholder
         isLoading={isLoading}
         width={12}
         variant="body2"
-        fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
         {metadata?.name}
@@ -260,6 +341,10 @@ function Amount({ loan }: { loan: Row }) {
         }
 
         return formatBalance(l.outstandingDebt, pool?.currency.symbol)
+
+      // @ts-expect-error
+      case '':
+        return formatBalance(pool.reserve.total, pool?.currency.symbol)
 
       default:
         return ''

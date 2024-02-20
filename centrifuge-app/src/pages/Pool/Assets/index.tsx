@@ -15,7 +15,7 @@ import { Dec } from '../../../utils/Decimal'
 import { formatBalance } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
-import { useAverageAmount, usePool } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export function PoolDetailAssetsTab() {
@@ -33,9 +33,7 @@ export function PoolDetailAssets() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
-  console.log('🚀 ~ loans:', loans)
   const isTinlakePool = poolId.startsWith('0x')
-  const averageAmount = useAverageAmount(poolId)
 
   if (!pool) return null
 
@@ -50,8 +48,6 @@ export function PoolDetailAssets() {
 
   const ongoingAssets = (loans &&
     [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero())) as ActiveLoan[]
-
-  const isExternal = 'valuationMethod' in loans[0].pricing && loans[0].pricing.valuationMethod === 'oracle'
 
   const offchainAssets = !isTinlakePool
     ? loans.filter((loan) => (loan as Loan).pricing.valuationMethod === 'cash')
@@ -77,7 +73,7 @@ export function PoolDetailAssets() {
       label: (
         <Shelf alignItems="center" gap="2px">
           <Box as="img" src={usdcLogo} alt="" height={13} width={13} />
-          <Tooltips type="onchainReserve" />{' '}
+          <Tooltips type="onchainReserve" />
         </Shelf>
       ),
       value: formatBalance(pool.reserve.total || 0, pool.currency.symbol),
@@ -86,7 +82,7 @@ export function PoolDetailAssets() {
       label: (
         <Shelf alignItems="center" gap="2px">
           <Box as="img" src={currencyDollar} alt="" height={13} width={13} />
-          <Tooltips type="offchainCash" />{' '}
+          <Tooltips type="offchainCash" />
         </Shelf>
       ),
       value: formatBalance(offchainReserve, 'USD'),
@@ -98,7 +94,7 @@ export function PoolDetailAssets() {
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
     {
       label: 'Overdue assets',
-      value: <Text color={overdueAssets.length > 0 ? 'statusAlert' : 'inherit'}>{overdueAssets.length}</Text>,
+      value: <Text color={overdueAssets.length > 0 ? 'statusCritical' : 'inherit'}>{overdueAssets.length}</Text>,
     },
   ]
 
