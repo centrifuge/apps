@@ -1,13 +1,13 @@
 import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
-import { daysBetween } from '../../utils/date'
+import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { getRangeNumber } from '../Portfolio/PortfolioValue'
-import { CustomizedTooltip } from './Tooltip'
+import { TooltipContainer, TooltipTitle } from './Tooltip'
 
 type ChartData = {
   day: Date
@@ -26,6 +26,8 @@ const rangeFilters = [
   { value: 'ytd', label: 'Year to date' },
   { value: 'all', label: 'All' },
 ] as const
+
+const chartColor = '#A4D5D8'
 
 function PoolPerformanceChart() {
   const theme = useTheme()
@@ -63,8 +65,8 @@ function PoolPerformanceChart() {
   }
 
   return (
-    <Stack>
-      <Shelf>
+    <Stack gap={2}>
+      <Stack>
         <CustomLegend data={today} currency={pool?.currency.symbol || ''} />
         <Shelf justifyContent="flex-end" pr="20px">
           {chartData.length > 0 &&
@@ -77,21 +79,27 @@ function PoolPerformanceChart() {
                   <Box
                     width="100%"
                     backgroundColor={rangeFilter.value === range.value ? '#000000' : '#E0E0E0'}
-                    height="3px"
+                    height="2px"
                   />
                 </RangeFilterButton>
                 {index !== rangeFilters.length - 1 && (
-                  <Box width="24px" backgroundColor="#E0E0E0" height="3px" alignSelf="flex-end" />
+                  <Box width="24px" backgroundColor="#E0E0E0" height="2px" alignSelf="flex-end" />
                 )}
               </React.Fragment>
             ))}
         </Shelf>
-      </Shelf>
+      </Stack>
 
       <Shelf gap={4} width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={chartData} margin={{ left: -16 }} reverseStackOrder>
+            <AreaChart data={chartData} margin={{ left: -36 }}>
+              <defs>
+                <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={chartColor} stopOpacity={0.4} />
+                  <stop offset="95%" stopColor={chartColor} stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
               <XAxis
                 dataKey="day"
                 tickLine={false}
@@ -105,14 +113,34 @@ function PoolPerformanceChart() {
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
               />
               <YAxis
+                stroke="none"
                 tickLine={false}
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
-              <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} />} />
-              <Line dot={false} dataKey="nav" stroke={theme.colors.accentSecondary} name="NAV" />
-            </ComposedChart>
+              <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
+              <Tooltip
+                content={({ payload }) => {
+                  if (payload && payload?.length > 0) {
+                    return (
+                      <TooltipContainer>
+                        <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
+                        {payload.map(({ value }, index) => (
+                          <Shelf justifyContent="space-between" pl="4px" key={index}>
+                            <Text variant="label2">NAV</Text>
+                            <Text variant="label2">
+                              {typeof value === 'number' ? formatBalance(value, 'USD' || '') : '-'}
+                            </Text>
+                          </Shelf>
+                        ))}
+                      </TooltipContainer>
+                    )
+                  }
+                  return null
+                }}
+              />
+              <Area type="monotone" dataKey="nav" strokeWidth={0} fillOpacity={1} fill="url(#colorPoolValue)" />
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           <Text variant="label1">No data yet</Text>
@@ -133,7 +161,7 @@ function CustomLegend({ data, currency }: { currency: string; data: any }) {
 
   return (
     <Shelf bg="backgroundPage" width="100%" gap={2}>
-      <Grid pl={2} pb={4} gridTemplateColumns="fit-content(100%) fit-content(100%)" width="100%" gap={8}>
+      <Grid pb={2} gridTemplateColumns="fit-content(100%) fit-content(100%)" width="100%" gap={8}>
         <Stack
           borderLeftWidth="3px"
           pl={1}
@@ -141,8 +169,10 @@ function CustomLegend({ data, currency }: { currency: string; data: any }) {
           borderLeftColor={theme.colors.accentPrimary}
           gap="4px"
         >
-          <Text variant="body3">NAV</Text>
-          <Text variant="body2">{formatBalance(data.nav, currency)}</Text>
+          <Text variant="body3" color="textSecondary">
+            NAV
+          </Text>
+          <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
         </Stack>
         <Stack
           borderLeftWidth="3px"
@@ -151,10 +181,12 @@ function CustomLegend({ data, currency }: { currency: string; data: any }) {
           borderLeftColor={theme.colors.textPrimary}
           gap="4px"
         >
-          <Text variant="body3">NAV change</Text>
-          <Text variant="body2" color={data.navChange > 0 && 'statusOk'}>
+          <Text variant="body3" color="textSecondary">
+            NAV change
+          </Text>
+          <Text variant="body1" color={data.navChange > 0 && 'statusOk'}>
             {data.navChange > 0 && '+'}
-            {formatBalance(data.navChange, currency)}
+            {formatBalance(data.navChange, 'USD')}
             {navChangePercentageChangeString}
           </Text>
         </Stack>
