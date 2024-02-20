@@ -36,6 +36,7 @@ type Row = (Loan | TinlakeLoan) & {
   idSortKey: number
   originationDateSortKey: string
   maturityDate: string | null
+  status: 'Created' | 'Active' | 'Closed' | ''
 }
 
 type Props = {
@@ -181,8 +182,8 @@ export function LoanList({ loans }: Props) {
       !loan?.totalBorrowed?.isZero()
         ? loan.originationDate
         : '',
-    // @ts-expect-error
-    maturityDate: loan.pricing.valuationMethod === 'cash' ? null : loan.pricing.maturityDate,
+    maturityDate:
+      'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? null : loan.pricing.maturityDate,
     ...loan,
   }))
 
@@ -279,8 +280,7 @@ function AssetName({ loan }: { loan: Row }) {
     )
   }
 
-  // @ts-expect-error
-  if (loan.status === 'Active' && loan.pricing.valuationMethod === 'cash') {
+  if (loan.status === 'Active' && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash') {
     return (
       <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
         <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
@@ -342,7 +342,7 @@ function Amount({ loan }: { loan: Row }) {
 
         return formatBalance(l.outstandingDebt, pool?.currency.symbol)
 
-      // @ts-expect-error
+      // @ts-expect-erro
       case '':
         return formatBalance(pool.reserve.total, pool?.currency.symbol)
 
