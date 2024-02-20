@@ -104,7 +104,7 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
   )
 }
 
-export const getRangeNumber = (rangeValue: string) => {
+export const getRangeNumber = (rangeValue: string, poolAge?: number) => {
   if (rangeValue === '30d') {
     return 30
   }
@@ -112,10 +112,18 @@ export const getRangeNumber = (rangeValue: string) => {
     return 90
   }
 
-  const today = new Date()
-  const januaryFirst = new Date(today.getFullYear(), 0, 1)
-  const timeDifference = new Date(today).getTime() - new Date(januaryFirst).getTime()
-  const daysSinceJanuary1 = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
+  if (rangeValue === 'ytd') {
+    const today = new Date()
+    const januaryFirst = new Date(today.getFullYear(), 0, 1)
+    const timeDifference = new Date(today).getTime() - new Date(januaryFirst).getTime()
+    const daysSinceJanuary1 = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
 
-  return daysSinceJanuary1
+    return daysSinceJanuary1
+  }
+
+  if (rangeValue === 'all' && poolAge) {
+    return poolAge
+  }
+
+  return 30
 }

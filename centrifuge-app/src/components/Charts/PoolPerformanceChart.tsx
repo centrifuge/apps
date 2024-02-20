@@ -37,7 +37,7 @@ function PoolPerformanceChart() {
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
-  const rangeNumber = getRangeNumber(range.value)
+  const rangeNumber = getRangeNumber(range.value, poolAge)
 
   const data: ChartData[] = React.useMemo(
     () =>
@@ -56,7 +56,7 @@ function PoolPerformanceChart() {
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
   const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
 
-  const chartData = range.value === 'all' ? data : data.slice(-rangeNumber)
+  const chartData = data.slice(-rangeNumber)
 
   const today = {
     day: new Date(),
@@ -64,10 +64,21 @@ function PoolPerformanceChart() {
     navChange: chartData.length > 0 ? todayReserve + todayAssetValue - chartData[0]?.nav : 0,
   }
 
+  const getXAxisInterval = () => {
+    if (rangeNumber <= 30) return 5
+    if (rangeNumber > 30 && rangeNumber <= 90) {
+      return 14
+    }
+    if (rangeNumber > 90 && rangeNumber <= 180) {
+      return 30
+    }
+    return 45
+  }
+
   return (
     <Stack gap={2}>
       <Stack>
-        <CustomLegend data={today} currency={pool?.currency.symbol || ''} />
+        <CustomLegend data={today} />
         <Shelf justifyContent="flex-end" pr="20px">
           {chartData.length > 0 &&
             rangeFilters.map((rangeFilter, index) => (
@@ -111,6 +122,8 @@ function PoolPerformanceChart() {
                   return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
                 }}
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+                dy={4}
+                interval={getXAxisInterval()}
               />
               <YAxis
                 stroke="none"
@@ -150,7 +163,7 @@ function PoolPerformanceChart() {
   )
 }
 
-function CustomLegend({ data, currency }: { currency: string; data: any }) {
+function CustomLegend({ data }: { data: any }) {
   const theme = useTheme()
 
   const navChangePercentageChange = (data.navChange / data.nav) * 100
