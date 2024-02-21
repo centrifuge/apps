@@ -342,7 +342,7 @@ function Amount({ loan }: { loan: Row }) {
 
         return formatBalance(l.outstandingDebt, pool?.currency.symbol)
 
-      // @ts-expect-erro
+      // @ts-expect-error
       case '':
         return formatBalance(pool.reserve.total, pool?.currency.symbol)
 
