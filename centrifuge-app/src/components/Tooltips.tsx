@@ -1,4 +1,4 @@
-import { Text, TextProps, Tooltip as FabricTooltip } from '@centrifuge/fabric'
+import { Tooltip as FabricTooltip, Text, TextProps } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
@@ -261,6 +261,10 @@ export const tooltipText = {
   poolType: {
     label: 'Pool type',
     body: 'An open pool can have multiple unrelated token holders and can onboard third party investors. A closed pool has very limited distributions and is not available for investment on the app.',
+  },
+  totalPendingFees: {
+    label: 'Total pending fees',
+    body: 'The total pending fees represent the sum of all added fees.',
   },
 }
 

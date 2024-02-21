@@ -1,6 +1,7 @@
-import { addressToHex, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
+import { addressToHex, CurrencyBalance, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
 import { CopyToClipboard } from '../../utils/copyToClipboard'
@@ -9,7 +10,9 @@ import { usePoolAdmin } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
+import { PageSummary } from '../PageSummary'
 import { RouterLinkButton } from '../RouterLinkButton'
+import { Tooltips } from '../Tooltips'
 import { ChargeFeesDrawer } from './ChargeFeesDrawer'
 import { EditFeesDrawer } from './EditFeesDrawer'
 
@@ -42,11 +45,13 @@ const columns = [
     align: 'left',
     header: 'Percentage',
     cell: (row: Row) => {
-      return (
+      return row.percentOfNav ? (
         <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toPercent(), true, {}, 3)} of NAV` : ''}
+          {row.type === 'fixed'
+            ? `${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of NAV`
+            : `<${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of non-cash NAV`}
         </Text>
-      )
+      ) : null
     },
   },
   {
@@ -171,6 +176,20 @@ export function PoolFees() {
     }
   }, [drawer])
 
+  const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
+    {
+      label: <Tooltips type="totalPendingFees" />,
+      value: formatBalance(
+        new CurrencyBalance(
+          pool.poolFees?.reduce((acc, fee) => acc.add(fee.amounts.pending), new BN(0)) || new BN(0),
+          pool.currency.decimals
+        ) || 0,
+        pool.currency.symbol,
+        2
+      ),
+    },
+  ]
+
   return (
     <>
       <ChargeFeesDrawer
@@ -187,6 +206,7 @@ export function PoolFees() {
           push(pathname)
         }}
       />
+      <PageSummary data={pageSummaryData} />
       <PageSection
         title="Fee structure"
         headerRight={
