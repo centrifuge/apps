@@ -1,9 +1,10 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Button, Grid, IconMinusCircle, NumberInput, Select, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Grid, IconMinusCircle, NumberInput, Select, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
+import { Tooltips } from '../../components/Tooltips'
 import { useAddress } from '../../utils/useAddress'
 
 const MAX_FEES = 5
@@ -95,7 +96,20 @@ export const PoolFeeInput: React.FC = () => {
                 {({ field, meta }: FieldProps) => {
                   return (
                     <Select
-                      label="Fee type"
+                      label={
+                        index === 0 ? (
+                          <Tooltips
+                            type="feeType"
+                            label={
+                              <Text variant="label2" color="textDisabled">
+                                Fee type
+                              </Text>
+                            }
+                          />
+                        ) : (
+                          'Fee type'
+                        )
+                      }
                       name={`poolFees.${index}.feeType`}
                       onChange={(event) => {
                         fmk.setFieldValue(`poolFees.${index}.feeType`, event.target.value)

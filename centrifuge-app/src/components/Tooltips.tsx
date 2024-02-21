@@ -266,6 +266,10 @@ export const tooltipText = {
     label: 'Total pending fees',
     body: 'The total pending fees represent the sum of all added fees.',
   },
+  feeType: {
+    label: 'Fee type',
+    body: 'The protocol fee is mandatory and will be charged every epoch automatically. The fee amount is dependent on the asset class.',
+  },
 }
 
 export type TooltipsProps = {
