@@ -187,7 +187,7 @@ function CustomLegend({ data }: { data: any }) {
           </Text>
           <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
         </Stack>
-        <Stack
+        {/* <Stack
           borderLeftWidth="3px"
           pl={1}
           borderLeftStyle="solid"
@@ -202,7 +202,7 @@ function CustomLegend({ data }: { data: any }) {
             {formatBalance(data.navChange, 'USD')}
             {navChangePercentageChangeString}
           </Text>
-        </Stack>
+        </Stack> */}
       </Grid>
     </Shelf>
   )
