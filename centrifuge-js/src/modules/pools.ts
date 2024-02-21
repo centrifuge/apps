@@ -10,22 +10,22 @@ import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
-    BorrowerTransactionType,
-    InvestorTransactionType,
-    SubqueryBorrowerTransaction,
-    SubqueryCurrencyBalances,
-    SubqueryInvestorTransaction,
-    SubqueryPoolSnapshot,
-    SubqueryTrancheBalances,
-    SubqueryTrancheSnapshot,
+  BorrowerTransactionType,
+  InvestorTransactionType,
+  SubqueryBorrowerTransaction,
+  SubqueryCurrencyBalances,
+  SubqueryInvestorTransaction,
+  SubqueryPoolSnapshot,
+  SubqueryTrancheBalances,
+  SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
-    addressToHex,
-    computeTrancheId,
-    getDateMonthsFromNow,
-    getDateYearsFromNow,
-    getRandomUint,
-    isSameAddress,
+  addressToHex,
+  computeTrancheId,
+  getDateMonthsFromNow,
+  getDateYearsFromNow,
+  getRandomUint,
+  isSameAddress,
 } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -793,6 +793,7 @@ export type ActivePoolFees = {
   amounts: {
     percentOfNav: Rate
     pending: CurrencyBalance
+    maxPayable: CurrencyBalance
   }
   limit: FeeLimits
   destination: string
@@ -810,7 +811,7 @@ export type ActivePoolFeesData = {
       }
     }
     payable: {
-      allPending: null
+      upTo: string
     }
     pending: CurrencyBalance
   }
@@ -957,16 +958,18 @@ export function getPoolsModule(inst: Centrifuge) {
         status: 'open',
         listed: metadata.listed ?? true,
         poolFees: metadata.poolFees,
-        reports: metadata.poolReport ? [
-          {
-            author: {
-              name: metadata.poolReport.authorName,
-              title: metadata.poolReport.authorTitle,
-              avatar: metadata.poolReport.authorAvatar
-            },
-            uri: metadata.poolReport.url
-          }
-        ] : undefined
+        reports: metadata.poolReport
+          ? [
+              {
+                author: {
+                  name: metadata.poolReport.authorName,
+                  title: metadata.poolReport.authorTitle,
+                  avatar: metadata.poolReport.authorAvatar,
+                },
+                uri: metadata.poolReport.url,
+              },
+            ]
+          : undefined,
       },
       pod: {
         node: metadata.podEndpoint ?? null,
@@ -2018,7 +2021,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 const lastUpdatedNav = new Date((portfolioValuationData?.lastUpdated ?? 0) * 1000).toISOString()
                 // @ts-expect-error
                 const rawNav = rawNavs && rawNavs[poolIndex]?.toJSON()
-                  const totalNavAum = rawNav?.navAum
+                const totalNavAum = rawNav?.navAum
                   ? new CurrencyBalance(rawNav.navAum, currency.decimals)
                   : new CurrencyBalance(0, currency.decimals)
 
@@ -2028,6 +2031,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   metadata,
                   currency,
                   poolFees: poolFees?.map((fee) => {
+                    console.log('🚀 ~ fee:', fee.amounts.payable)
                     const secondsSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
                     const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                     const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
@@ -2051,6 +2055,7 @@ export function getPoolsModule(inst: Centrifuge) {
                                   .add(new CurrencyBalance(fee.amounts.pending, currency.decimals).toDecimal()),
                                 currency.decimals
                               ),
+                        maxPayable: new CurrencyBalance(fee.amounts.payable.upTo, currency.decimals),
                       },
                     }
                   }),

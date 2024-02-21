@@ -113,7 +113,7 @@ export function PoolFees() {
             name: feeMetadata!.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
-            pendingFees: feeChainData?.amounts.pending,
+            pendingFees: fixedFee ? feeChainData?.amounts.pending : feeChainData.amounts.maxPayable,
             receivingAddress: feeChainData?.destination,
             action:
               (isAllowedToCharge || poolAdmin) && !fixedFee ? (
