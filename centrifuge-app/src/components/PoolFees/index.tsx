@@ -1,8 +1,9 @@
 import { addressToHex, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text, truncate } from '@centrifuge/fabric'
+import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
+import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -61,7 +62,11 @@ const columns = [
     align: 'left',
     header: 'Receiving address',
     cell: (row: Row) => {
-      return <Text variant="body3">{row.receivingAddress ? truncate(row.receivingAddress) : ''}</Text>
+      return (
+        <Text variant="body3">
+          <CopyToClipboard variant="body3" address={row.receivingAddress || ''} />
+        </Text>
+      )
     },
   },
   {
