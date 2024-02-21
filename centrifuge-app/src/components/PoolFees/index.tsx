@@ -24,6 +24,7 @@ type Row = {
   receivingAddress?: string
   action: null | React.ReactNode
   poolCurrency?: string
+  index: number
 }
 
 export function PoolFees() {
@@ -46,7 +47,22 @@ export function PoolFees() {
       align: 'left',
       header: 'Name',
       cell: (row: Row) => {
-        return <Text variant="body3">{row.name}</Text>
+        return (
+          <Shelf gap={1}>
+            <Box
+              borderRadius="50%"
+              height="16px"
+              width="16px"
+              backgroundColor="backgroundSecondary"
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Text variant="body3">{row.index + 1}</Text>
+            </Box>
+            <Text variant="body3">{row.name}</Text>
+          </Shelf>
+        )
       },
     },
     {
@@ -54,6 +70,13 @@ export function PoolFees() {
       header: 'Type',
       cell: (row: Row) => {
         return <Text variant="body3">{row.type === 'fixed' ? 'Fixed % of NAV' : 'Direct charge'}</Text>
+      },
+    },
+    {
+      align: 'left',
+      header: 'Fee position',
+      cell: () => {
+        return <Text variant="body3">Top of waterfall</Text>
       },
     },
     {
@@ -104,12 +127,13 @@ export function PoolFees() {
     const activeFees =
       pool.poolFees
         ?.filter((feeChainData) => poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id))
-        ?.map((feeChainData) => {
+        ?.map((feeChainData, index) => {
           const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
           const fixedFee = feeChainData?.type === 'fixed'
           const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
 
           return {
+            index,
             name: feeMetadata!.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
@@ -140,8 +164,9 @@ export function PoolFees() {
     if (changes?.length) {
       return [
         ...activeFees,
-        ...changes.map(({ change, hash }) => {
+        ...changes.map(({ change, hash }, index) => {
           return {
+            index: activeFees.length + index,
             name: poolMetadata?.pool?.poolFees?.find((f) => f.id === change.feeId)?.name,
             type: change.type,
             percentOfNav: change.amounts.percentOfNav,
@@ -218,6 +243,7 @@ export function PoolFees() {
             </RouterLinkButton>
           ) : null
         }
+        subtitle="Fees are settled using available liquidity before investments or redemptions, prioritizing and paying the highest fees first"
       >
         {data?.length ? (
           <DataTable data={data || []} columns={columns} />
