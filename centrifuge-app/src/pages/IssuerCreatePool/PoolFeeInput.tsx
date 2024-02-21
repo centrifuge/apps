@@ -17,21 +17,21 @@ const DEFAULT_FEE = {
   open: {
     'Public credit': {
       fee: 0.075,
-      name: 'Public Securities & Equities fees',
+      name: 'Protocol fee (Public Securities & Equities)',
     },
     'Private credit': {
       fee: 0.4,
-      name: 'Private Credit & Securities fees',
+      name: 'Protocol fee (Private Credit & Securities)',
     },
   },
   closed: {
     'Public credit': {
       fee: 0.02,
-      name: 'Public Securities & Equities fees',
+      name: 'Protocol fee (Public Securities & Equities)',
     },
     'Private credit': {
       fee: 0.15,
-      name: 'Private Credit & Securities fees',
+      name: 'Protocol fee (Private Credit & Securities)',
     },
   },
 }
