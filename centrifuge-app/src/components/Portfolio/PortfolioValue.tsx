@@ -2,6 +2,7 @@ import { Card, Stack, Text } from '@centrifuge/fabric'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
+import { getRangeNumber } from '../Charts/utils'
 import { useDailyPortfolioValue } from './usePortfolio'
 
 const chartColor = '#006ef5'
@@ -102,20 +103,4 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
       </AreaChart>
     </ResponsiveContainer>
   )
-}
-
-const getRangeNumber = (rangeValue: string) => {
-  if (rangeValue === '30d') {
-    return 30
-  }
-  if (rangeValue === '90d') {
-    return 90
-  }
-
-  const today = new Date()
-  const januaryFirst = new Date(today.getFullYear(), 0, 1)
-  const timeDifference = new Date(today).getTime() - new Date(januaryFirst).getTime()
-  const daysSinceJanuary1 = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
-
-  return daysSinceJanuary1
 }
