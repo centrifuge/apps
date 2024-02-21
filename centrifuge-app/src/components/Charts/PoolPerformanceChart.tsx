@@ -6,8 +6,8 @@ import styled, { useTheme } from 'styled-components'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
-import { getRangeNumber } from '../Portfolio/PortfolioValue'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
+import { getRangeNumber } from './utils'
 
 type ChartData = {
   day: Date
@@ -79,7 +79,7 @@ function PoolPerformanceChart() {
     <Stack gap={2}>
       <Stack>
         <CustomLegend data={today} />
-        <Shelf justifyContent="flex-end" pr="20px">
+        <Shelf justifyContent="flex-end">
           {chartData.length > 0 &&
             rangeFilters.map((rangeFilter, index) => (
               <React.Fragment key={rangeFilter.label}>
@@ -163,14 +163,22 @@ function PoolPerformanceChart() {
   )
 }
 
-function CustomLegend({ data }: { data: any }) {
+function CustomLegend({
+  data,
+}: {
+  data: {
+    day: Date
+    nav: number
+    navChange: number
+  }
+}) {
   const theme = useTheme()
 
-  const navChangePercentageChange = (data.navChange / data.nav) * 100
-  const navChangePercentageChangeString =
-    data.navChange === data.nav || navChangePercentageChange === 0
-      ? ''
-      : ` (${navChangePercentageChange > 0 ? '+' : ''}${navChangePercentageChange.toFixed(2)}%)`
+  // const navChangePercentageChange = (data.navChange / data.nav) * 100
+  // const navChangePercentageChangeString =
+  //   data.navChange === data.nav || navChangePercentageChange === 0
+  //     ? ''
+  //     : ` (${navChangePercentageChange > 0 ? '+' : ''}${navChangePercentageChange.toFixed(2)}%)`
 
   return (
     <Shelf bg="backgroundPage" width="100%" gap={2}>
