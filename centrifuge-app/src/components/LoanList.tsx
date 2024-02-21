@@ -172,7 +172,7 @@ export function LoanList({ loans }: Props) {
 
   const rows: Row[] = filters.data.map((loan) => ({
     nftIdSortKey: loan.asset.nftId,
-    idSortKey: parseInt(loan.id, 10) + 1,
+    idSortKey: parseInt(loan.id, 10),
     outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
     originationDateSortKey:
       loan.status === 'Active' &&

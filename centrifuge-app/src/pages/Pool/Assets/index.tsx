@@ -53,7 +53,7 @@ export function PoolDetailAssets() {
     ? loans.filter((loan) => (loan as Loan).pricing.valuationMethod === 'cash')
     : null
   const offchainReserve = offchainAssets?.reduce<any>(
-    (curr, prev) => curr.add(prev.totalBorrowed.toDecimal() || Dec(0)),
+    (curr, prev) => curr.add(prev.status === 'Active' ? prev.outstandingDebt.toDecimal() : Dec(0)),
     Dec(0)
   )
 
