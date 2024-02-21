@@ -15,21 +15,21 @@ const FEE_TYPES = [
 
 const DEFAULT_FEE = {
   open: {
-    publicCredit: {
+    'Public credit': {
       fee: 0.075,
       name: 'Public Securities & Equities fees',
     },
-    privateCredit: {
+    'Private credit': {
       fee: 0.4,
       name: 'Private Credit & Securities fees',
     },
   },
   closed: {
-    publicCredit: {
+    'Public credit': {
       fee: 0.02,
       name: 'Public Securities & Equities fees',
     },
-    privateCredit: {
+    'Private credit': {
       fee: 0.15,
       name: 'Private Credit & Securities fees',
     },
