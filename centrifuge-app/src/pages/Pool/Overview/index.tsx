@@ -137,30 +137,38 @@ export function PoolDetailOverview() {
           <IssuerSection metadata={metadata} />
         </React.Suspense>
       </PoolOverviewSection>
-      <PoolOverviewSection>
-        <Grid height="fit-content" gridTemplateColumns="1fr 1fr" gap={3}>
-          <React.Suspense fallback={<Spinner />}>
-            <PoolStructure numOfTranches={pool.tranches.length} poolId={poolId} poolStatus={metadata?.pool?.status} />
-          </React.Suspense>
-          <React.Suspense fallback={<Spinner />}>
-            <AssetsByMaturity />
-          </React.Suspense>
-        </Grid>
-      </PoolOverviewSection>
-      <PoolOverviewSection>
-        <React.Suspense fallback={<Spinner />}>
-          <Box height={373}>
-            <Cashflows />
-          </Box>
-        </React.Suspense>
-      </PoolOverviewSection>
-      <PoolOverviewSection>
-        <React.Suspense fallback={<Spinner />}>
-          <Box height={447}>
-            <TransactionHistory />
-          </Box>
-        </React.Suspense>
-      </PoolOverviewSection>
+      {!isTinlakePool && (
+        <>
+          <PoolOverviewSection>
+            <Grid height="fit-content" gridTemplateColumns="1fr 1fr" gap={3}>
+              <React.Suspense fallback={<Spinner />}>
+                <PoolStructure
+                  numOfTranches={pool.tranches.length}
+                  poolId={poolId}
+                  poolStatus={metadata?.pool?.status}
+                />
+              </React.Suspense>
+              <React.Suspense fallback={<Spinner />}>
+                <AssetsByMaturity />
+              </React.Suspense>
+            </Grid>
+          </PoolOverviewSection>
+          <PoolOverviewSection>
+            <React.Suspense fallback={<Spinner />}>
+              <Box height={373}>
+                <Cashflows />
+              </Box>
+            </React.Suspense>
+          </PoolOverviewSection>
+          <PoolOverviewSection>
+            <React.Suspense fallback={<Spinner />}>
+              <Box height={447}>
+                <TransactionHistory />
+              </Box>
+            </React.Suspense>
+          </PoolOverviewSection>
+        </>
+      )}
     </Box>
   )
 }
