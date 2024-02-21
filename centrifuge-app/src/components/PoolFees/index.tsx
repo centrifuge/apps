@@ -26,63 +26,6 @@ type Row = {
   poolCurrency?: string
 }
 
-const columns = [
-  {
-    align: 'left',
-    header: 'Name',
-    cell: (row: Row) => {
-      return <Text variant="body3">{row.name}</Text>
-    },
-  },
-  {
-    align: 'left',
-    header: 'Type',
-    cell: (row: Row) => {
-      return <Text variant="body3">{row.type === 'fixed' ? 'Fixed % of NAV' : 'Direct charge'}</Text>
-    },
-  },
-  {
-    align: 'left',
-    header: 'Percentage',
-    cell: (row: Row) => {
-      return row.percentOfNav ? (
-        <Text variant="body3">
-          {row.type === 'fixed'
-            ? `${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of NAV`
-            : `<${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of non-cash NAV`}
-        </Text>
-      ) : null
-    },
-  },
-  {
-    align: 'left',
-    header: 'Pending fees',
-    cell: (row: Row) => {
-      return row?.pendingFees ? (
-        <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 2)}</Text>
-      ) : null
-    },
-  },
-  {
-    align: 'left',
-    header: 'Receiving address',
-    cell: (row: Row) => {
-      return (
-        <Text variant="body3">
-          <CopyToClipboard variant="body3" address={row.receivingAddress || ''} />
-        </Text>
-      )
-    },
-  },
-  {
-    align: 'left',
-    header: 'Action',
-    cell: (row: Row) => {
-      return row.action
-    },
-  },
-]
-
 export function PoolFees() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
@@ -97,6 +40,65 @@ export function PoolFees() {
   const poolAdmin = usePoolAdmin(poolId)
   const address = useAddress()
   const { execute: applyNewFee } = useCentrifugeTransaction('Apply new fee', (cent) => cent.pools.applyNewFee)
+
+  const columns = [
+    {
+      align: 'left',
+      header: 'Name',
+      cell: (row: Row) => {
+        return <Text variant="body3">{row.name}</Text>
+      },
+    },
+    {
+      align: 'left',
+      header: 'Type',
+      cell: (row: Row) => {
+        return <Text variant="body3">{row.type === 'fixed' ? 'Fixed % of NAV' : 'Direct charge'}</Text>
+      },
+    },
+    {
+      align: 'left',
+      header: 'Percentage/limit',
+      cell: (row: Row) => {
+        return row.percentOfNav ? (
+          <Text variant="body3">
+            {row.type === 'fixed'
+              ? `${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of NAV`
+              : `<${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of non-cash NAV`}
+          </Text>
+        ) : null
+      },
+    },
+    {
+      align: 'left',
+      header: 'Pending fees',
+      cell: (row: Row) => {
+        return row?.pendingFees ? (
+          <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 2)}</Text>
+        ) : null
+      },
+    },
+    {
+      align: 'left',
+      header: 'Receiving address',
+      cell: (row: Row) => {
+        return (
+          <Text variant="body3">
+            <CopyToClipboard variant="body3" address={row.receivingAddress || ''} />
+          </Text>
+        )
+      },
+    },
+    ...(!!poolAdmin || pool?.poolFees?.map((fee) => addressToHex(fee.destination)).includes(address! as `0x${string}`)
+      ? [
+          {
+            align: 'left',
+            header: 'Action',
+            cell: (row: Row) => row.action,
+          },
+        ]
+      : []),
+  ]
 
   const data = React.useMemo(() => {
     const activeFees =
