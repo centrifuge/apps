@@ -1,8 +1,9 @@
-import { BorrowerTransaction } from '@centrifuge/centrifuge-js'
+import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
+import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { AnchorTextLink } from '../TextLink'
@@ -11,7 +12,7 @@ type Row = {
   type: string
   transactionDate: string
   assetId: string
-  amount: number
+  amount: string | CurrencyBalance | null
   hash: string
 }
 
@@ -19,6 +20,12 @@ const getTransactionTypeStatus = (type: string) => {
   if (type === 'Principal payment' || type === 'Repaid') return 'warning'
   if (type === 'Interest') return 'ok'
   return 'default'
+}
+
+const getAmount = (amount: string | CurrencyBalance | null) => {
+  if (typeof amount === 'string') return formatBalance(new CurrencyBalance(amount, 6), 'USD', 2, 2)
+  if (amount) return formatBalance(amount, 'USD', 2, 2)
+  return '-'
 }
 
 export const columns = [
@@ -51,7 +58,7 @@ export const columns = [
     header: <SortableTableHeader label="Amount" />,
     cell: ({ amount }: Row) => (
       <Text as="span" variant="body3">
-        {amount ? formatBalance(amount, 'USD', 2, 2) : '-'}
+        {getAmount(amount)}
       </Text>
     ),
     sortKey: 'amount',
@@ -78,17 +85,11 @@ export const columns = [
 export const TransactionHistory = ({ poolId, preview = true }: { poolId: string; preview?: boolean }) => {
   const transactions = useAssetTransactions(poolId, new Date(0))
 
-  const getLabelAndAmount = (transaction: BorrowerTransaction) => {
+  const getLabelAndAmount = (transaction: AssetTransaction) => {
     if (transaction.type === 'BORROWED') {
       return {
         label: 'Purchase',
         amount: transaction.amount,
-      }
-    }
-    if (transaction.type === 'REPAID' && !new BN(transaction.principalAmount || 0).isZero()) {
-      return {
-        label: 'Principal payment',
-        amount: transaction.principalAmount,
       }
     }
     if (transaction.type === 'REPAID' && !new BN(transaction.interestAmount || 0).isZero()) {
@@ -99,10 +100,35 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
     }
 
     return {
-      label: 'Repaid',
-      amount: transaction.amount,
+      label: 'Principal payment',
+      amount: transaction.principalAmount,
     }
   }
+
+  const csvData = transactions
+    ?.filter(
+      (transaction) => transaction.type !== 'CREATED' && transaction.type !== 'CLOSED' && transaction.type !== 'PRICED'
+    )
+    .map((transaction) => {
+      const { label, amount } = getLabelAndAmount(transaction)
+      return {
+        Type: label,
+        'Transaction Date': `"${formatDate(transaction.timestamp, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          timeZoneName: 'short',
+        })}"`,
+        'Asset ID': transaction.assetId,
+        Amount: amount ? `"${getAmount(amount)}"` : '-',
+        Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
+      }
+    })
+
+  const csvUrl = csvData?.length ? getCSVDownloadUrl(csvData) : ''
 
   const tableData =
     transactions
@@ -129,9 +155,18 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
         <Text fontSize="18px" fontWeight="500">
           Transaction history
         </Text>
-        <AnchorButton href={''} download={''} variant="secondary" icon={IconDownload} small target="_blank">
-          Download
-        </AnchorButton>
+        {transactions?.length && (
+          <AnchorButton
+            href={csvUrl}
+            download={`pool-transaction-history-${poolId}.csv`}
+            variant="secondary"
+            icon={IconDownload}
+            small
+            target="_blank"
+          >
+            Download
+          </AnchorButton>
+        )}
       </Shelf>
       <DataTable data={tableData} columns={columns} />
       {transactions?.length! > 8 && preview && (
