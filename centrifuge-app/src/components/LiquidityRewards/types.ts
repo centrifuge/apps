@@ -9,7 +9,6 @@ export type LiquidityRewardsProviderProps = {
 
 export type LiquidityRewardsState = {
   tranche: Token | undefined
-  countdown: ClaimCountDown | null
   rewards: Decimal | null | undefined
   stakeableAmount: Decimal | null
   combinedStakes: Decimal | null

@@ -17,6 +17,8 @@ import {
 } from '@centrifuge/fabric'
 import { getAddress } from '@ethersproject/address'
 import * as React from 'react'
+import { Link } from 'react-router-dom'
+import styled from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
@@ -34,7 +36,7 @@ type WalletMenuProps = {
 
 export function WalletMenu({ menuItems }: WalletMenuProps) {
   const ctx = useWallet()
-  const { connectedType, pendingConnect, isEvmOnSubstrate } = ctx
+  const { connectedType, isEvmOnSubstrate } = ctx
   const accounts = connectedType && ctx[isEvmOnSubstrate ? 'substrate' : 'evm'].accounts
   const address = useAddress()
   return address ? (
@@ -42,7 +44,7 @@ export function WalletMenu({ menuItems }: WalletMenuProps) {
   ) : accounts && !accounts.length ? (
     <ConnectButton label="No accounts available" />
   ) : (
-    <ConnectButton loading={pendingConnect.isConnecting} />
+    <ConnectButton />
   )
 }
 
@@ -160,9 +162,11 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                 <Text variant="label2" textAlign="center" color="textPrimary">
                   Balance
                 </Text>
-                <Text fontSize={22} fontWeight={500} textAlign="center">
-                  {balance && formatBalanceAbbreviated(balance, symbol)}
-                </Text>
+                <Link to={`/portfolio?send=${balances?.native.currency.symbol}`} onClick={() => state.close()}>
+                  <BalanceLink fontSize={22} fontWeight={500} textAlign="center">
+                    {balance && formatBalanceAbbreviated(balance, symbol)}
+                  </BalanceLink>
+                </Link>
               </Stack>
             </MenuItemGroup>
 
@@ -192,7 +196,7 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
                   </Shelf>
                 </Box>
               )}
-              {connectedType === 'substrate' ? (
+              {connectedType === 'substrate' || (evm.accounts && evm.accounts.length > 1) ? (
                 <MenuItem
                   label="Switch account"
                   icon={<IconSwitch size="iconSmall" />}
@@ -232,3 +236,9 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
     />
   )
 }
+
+const BalanceLink = styled(Text)`
+  &:hover {
+    color: ${({ theme }) => theme.colors.textInteractive};
+  }
+`

@@ -1,17 +1,12 @@
 import * as React from 'react'
-import styled, { css, keyframes } from 'styled-components'
-import { IconFileText } from '../..'
-import IconAlertCircle from '../../icon/IconAlertCircle'
+import styled, { keyframes } from 'styled-components'
+import { InputAction, InputUnit, InputUnitProps, StyledTextInput, TextInputBox } from '../..'
 import IconSpinner from '../../icon/IconSpinner'
-import IconUpload from '../../icon/IconUpload'
 import IconX from '../../icon/IconX'
-import useControlledState from '../../utils/useControlledState'
-import { Box } from '../Box'
+import { useControlledState } from '../../utils/useControlledState'
 import { Button } from '../Button'
 import { Flex } from '../Flex'
-import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
-import { Text } from '../Text'
 
 const rotate = keyframes`
   0% {
@@ -21,74 +16,6 @@ const rotate = keyframes`
     transform: rotate(1turn);
   }
 `
-
-const FileUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
-  position: relative;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
-  /* outline: 1px dashed
-    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
-  outline-offset: -1px; */
-  border-radius: ${({ theme }) => theme.radii.card}px;
-  cursor: pointer;
-  pointer-events: ${({ $disabled }) => ($disabled ? 'none' : 'initial')};
-`
-
-const AddButton = styled(Shelf)`
-  transition: color 100ms ease-in-out;
-`
-
-const UploadButton = styled.button<{ $active?: boolean }>`
-  // Absolutely positioned, to avoid nesting the clear button in this one
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: ${({ theme, disabled }) =>
-    disabled ? `1px solid ${theme.colors.borderSecondary}` : `1px dashed ${theme.colors.borderPrimary}`};
-  border-radius: ${({ theme }) => theme.radii.card}px;
-  background: transparent;
-  appearance: none;
-  transition: border-color 100ms ease-in-out, color 100ms ease-in-out;
-  cursor: pointer;
-
-  &:disabled,
-  &:hover {
-    & + ${AddButton} {
-      color: ${({ theme }) => theme.colors.textDisabled};
-    }
-  }
-
-  &:focus-visible,
-  &:hover {
-    color: ${({ theme }) => theme.colors.accentPrimary};
-    border-color: currentcolor;
-
-    & + ${AddButton} {
-      color: ${({ theme }) => theme.colors.accentPrimary};
-    }
-  }
-
-  ${({ $active, theme }) =>
-    $active &&
-    css`
-      color: ${theme.colors.accentPrimary};
-      border-color: currentcolor;
-      & + ${AddButton} {
-        color: ${theme.colors.accentPrimary};
-      }
-    `}
-`
-UploadButton.defaultProps = {
-  type: 'button',
-}
 
 const FormField = styled.input`
   // Visually hidden
@@ -106,34 +33,51 @@ const Spinner = styled(IconSpinner)`
   animation: ${rotate} 600ms linear infinite;
 `
 
-export type FileUploadProps = {
-  file?: File | string | null
-  onFileChange?: (file: File | null) => void
-  onClear?: () => void
-  validate?: (file: File) => string | undefined
-  errorMessage?: string
-  accept?: string
-  disabled?: boolean
-  placeholder: string
-  loading?: boolean
-  label?: React.ReactNode
-}
+const FileDragOverContainer = styled(Stack)<{ $disabled?: boolean; $active: boolean }>`
+  position: relative;
+  &::before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-shadow: ${({ theme, $disabled, $active }) =>
+      $active && !$disabled && `inset 0 0 0 1px ${theme.colors.accentPrimary}`};
+    border-radius: ${({ theme }) => theme.radii.input}px;
+    z-index: 1;
+    pointer-events: none;
+  }
+`
 
-export const FileUpload: React.FC<FileUploadProps> = ({
+export type FileUploadProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> &
+  InputUnitProps & {
+    file?: File | string | null
+    onFileChange?: (file: File | null) => void
+    onClear?: () => void
+    validate?: (file: File) => string | undefined
+    loading?: boolean
+  }
+
+export function FileUpload({
   file: fileProp,
   onFileChange,
   onClear,
   validate,
   errorMessage: errorMessageProp,
-  accept,
   disabled,
   loading,
   placeholder,
   label,
-}) => {
+  secondaryLabel,
+  id,
+  ...inputProps
+}: FileUploadProps) {
+  const defaultId = React.useId()
+  id ??= defaultId
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useControlledState<File | string | null>(null, fileProp, onFileChange)
-  const [error, setError] = React.useState<string | null>(null)
+  const [error, setError] = React.useState<string | undefined>(undefined)
   const [dragOver, setDragOver] = React.useState(false)
 
   const errorMessage = errorMessageProp || error
@@ -146,12 +90,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (onClear) {
       onClear()
     }
-    setError(null)
+    setError(undefined)
     setCurFile(null)
   }
 
   async function handleNewFile(newFile: File) {
-    setError(null)
+    setError(undefined)
 
     if (curFile) {
       handleClear()
@@ -197,90 +141,63 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   }
 
   return (
-    <Stack gap={1} width="100%">
-      <FileUploadContainer
-        $disabled={disabled}
-        px={2}
-        py={1}
-        onDragOver={handleDrag}
-        onDragEnter={handleDrag}
-        onDragEnd={handleDragEnd}
-        onDragLeave={handleDragEnd}
-        onDrop={handleDrop}
-      >
-        <FormField
-          type="file"
-          accept={accept}
-          onChange={handleFileChange}
-          value=""
-          disabled={disabled}
-          tabIndex={-1}
-          ref={inputRef}
-        />
-        <Stack gap="4px" height="100%">
-          {label && (
-            <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
-              {label}
-            </Text>
-          )}
-          {curFile ? (
-            <>
-              <Shelf gap={1} my="auto">
-                <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
-                <Flex minWidth="iconMedium">
-                  {loading ? (
-                    <Spinner color={disabled ? 'textDisabled' : 'textPrimary'} />
-                  ) : errorMessage ? (
-                    <IconAlertCircle color={disabled ? 'textDisabled' : 'textPrimary'} />
-                  ) : (
-                    <IconFileText color={disabled ? 'textDisabled' : 'textPrimary'} />
-                  )}
+    <InputUnit
+      id={id}
+      label={label}
+      secondaryLabel={secondaryLabel}
+      disabled={disabled}
+      errorMessage={errorMessage}
+      inputElement={
+        <FileDragOverContainer
+          onDragOver={handleDrag}
+          onDragEnter={handleDrag}
+          onDragEnd={handleDragEnd}
+          onDragLeave={handleDragEnd}
+          onDrop={handleDrop}
+          $active={dragOver}
+          $disabled={disabled}
+        >
+          <TextInputBox
+            disabled={disabled}
+            error={!!errorMessage}
+            inputElement={
+              <>
+                <FormField
+                  id={id}
+                  type="file"
+                  onChange={handleFileChange}
+                  value=""
+                  disabled={disabled}
+                  tabIndex={-1}
+                  ref={inputRef}
+                  {...inputProps}
+                />
+                <StyledTextInput
+                  readOnly
+                  onClick={handleUploadBtnClick}
+                  value={curFile ? (typeof curFile === 'string' ? curFile : curFile.name) : ''}
+                  placeholder={placeholder}
+                  style={{ cursor: 'pointer' }}
+                />
+              </>
+            }
+            symbol={
+              loading ? (
+                <Spinner size="iconSmall" color={disabled ? 'textDisabled' : 'textPrimary'} />
+              ) : curFile && !disabled ? (
+                <Flex bleedX="10px">
+                  <Button variant="tertiary" small onClick={handleClear} icon={IconX} disabled={disabled} />
                 </Flex>
-                <Text
-                  variant="body1"
-                  color={disabled ? 'textDisabled' : 'textPrimary'}
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {typeof curFile === 'string' ? curFile : curFile.name}
-                </Text>
-                <Box
-                  display="flex"
-                  position="relative"
-                  zIndex="1"
-                  ml="auto"
-                  my="-10px"
-                  mr="-10px"
-                  minWidth="iconMedium"
-                >
-                  {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
-                </Box>
-              </Shelf>
-            </>
-          ) : (
-            <>
-              <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}></UploadButton>
-              <AddButton gap={1} justifyContent="center" m="auto">
-                <IconUpload />
-                <Text variant="body1" color="currentcolor">
-                  {placeholder}
-                </Text>
-              </AddButton>
-            </>
-          )}
-        </Stack>
-      </FileUploadContainer>
-
-      {errorMessage && (
-        <Box px={2}>
-          <Text variant="label2" color="statusCritical">
-            {errorMessage}
-          </Text>
-        </Box>
-      )}
-    </Stack>
+              ) : null
+            }
+            action={
+              <InputAction onClick={handleUploadBtnClick} disabled={disabled}>
+                Choose file
+              </InputAction>
+            }
+          />
+        </FileDragOverContainer>
+      }
+    />
   )
 }

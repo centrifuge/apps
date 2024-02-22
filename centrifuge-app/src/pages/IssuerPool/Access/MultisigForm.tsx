@@ -38,7 +38,6 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
                       <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
                     </Text>
                   ),
-                  flex: '3',
                 },
                 {
                   header: '',
@@ -56,7 +55,7 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
                         disabled={isLoading || (i === 0 && !canRemoveFirst)}
                       />
                     ),
-                  flex: '0 0 72px',
+                  width: '72px',
                 },
               ]}
             />

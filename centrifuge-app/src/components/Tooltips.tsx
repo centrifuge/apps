@@ -1,4 +1,4 @@
-import { Text, Tooltip as FabricTooltip } from '@centrifuge/fabric'
+import { Text, TextProps, Tooltip as FabricTooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
@@ -9,7 +9,7 @@ const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
-const tooltipText = {
+export const tooltipText = {
   assetType: {
     label: 'Asset type',
     body: 'This refers to the asset type used to finance the asset. This can e.g. be bullet loans or interest bearing loans. The asset type determines in particular the cash flow profile of the financing.',
@@ -82,10 +82,6 @@ const tooltipText = {
     label: 'Ongoing assets',
     body: 'Number of assets currently being financed in the pool and awaiting repayment.',
   },
-  averageFinancingFee: {
-    label: 'Average financing fee',
-    body: 'The average financing fee of the active assets in the pool.',
-  },
   averageAmount: {
     label: 'Average amount',
     body: 'The average outstanding amount of the assets in the pool.',
@@ -134,9 +130,9 @@ const tooltipText = {
     label: 'Advance rate',
     body: 'The advance rate is the percentage amount of the value of the collateral that an issuer can borrow from the pool against the NFT representing the collateral.',
   },
-  financingFee: {
-    label: 'Financing fee',
-    body: 'The financing fee is the rate at which the outstanding amount of an individual financing accrues interest. It is expressed as an "APR" (Annual Percentage Rate) and compounds interest every second.',
+  interestRate: {
+    label: 'Interest Rate',
+    body: 'The interest rate is the rate at which the outstanding amount of an individual financing accrues interest. It is expressed as an “APR” (Annual Percentage Rate) and compounds every second.',
   },
   probabilityOfDefault: {
     label: 'Prob of default',
@@ -242,23 +238,65 @@ const tooltipText = {
     label: 'Extension period',
     body: 'Number of days the maturity can be extended without restrictions.',
   },
+  maxPriceVariation: {
+    label: 'Max price variation',
+    body: 'The maximum price variation defines the price difference between settlement and oracle price.',
+  },
+  isin: {
+    label: 'ISIN',
+    body: 'An International Securities Identification Number (ISIN) is a code that uniquely identifies a security globally for the purposes of facilitating clearing, reporting and settlement of trades.',
+  },
+  notionalValue: {
+    label: 'Notional value',
+    body: 'The notional value is the total value of the underlying asset.',
+  },
+  cfgPrice: {
+    label: 'CFG price',
+    body: 'CFG price sourced externally from Uniswap.',
+  },
+  tbillApr: {
+    label: 'T-Bill APR',
+    body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
+  },
+ totalNav: {
+  label: "Total NAV",
+  body: "The total Net Asset Value (NAV) reflects the combined present value of assets, cash held in the onchain reserve of the pool, and cash in the bank account designated as offchain cash."
+ } ,
+ onchainReserve: {
+  label: "Onchain reserve",
+  body: "The onchain reserve represents the amount of available liquidity in the pool available for asset originations and redemptions."
+ },
+ offchainCash: {
+  label: "Offchain cash",
+  body: "Offchain cash represents funds held in a traditional bank account or custody account."
+ }
 }
 
 export type TooltipsProps = {
-  type: keyof typeof tooltipText
+  type?: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
-  label?: string
+  label?: string | React.ReactNode
   props?: any
-}
+} & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary', props }) => {
-  const { label, body } = tooltipText[type]
+export const Tooltips: React.FC<TooltipsProps> = ({
+  type,
+  label: labelOverride,
+  variant = 'primary',
+  props,
+  ...textProps
+}) => {
+  const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   const isPrimary = variant === 'primary'
   return (
-    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body}>
-      <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
-        {labelOverride || label}
-      </Text>
+    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>
+      {typeof label === 'string' ? (
+        <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
+          {labelOverride || label}
+        </Text>
+      ) : (
+        label
+      )}
     </FabricTooltip>
   )
 }

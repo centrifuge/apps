@@ -1,3 +1,5 @@
+import { CurrencyBalance, Price } from '../utils/BN'
+
 export type SubqueryPoolSnapshot = {
   __typename?: 'PoolSnapshot'
   id: string
@@ -49,33 +51,84 @@ export type InvestorTransactionType =
   | 'TRANSFER_OUT'
   | 'INVEST_COLLECT'
   | 'REDEEM_COLLECT'
+  | 'INVEST_LP_COLLECT'
+  | 'REDEEM_LP_COLLECT'
 
 export type SubqueryInvestorTransaction = {
   __typename?: 'InvestorTransaction'
   id: string
   timestamp: string
   accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
+  poolId: string
   trancheId: string
   epochNumber: number
   type: InvestorTransactionType
-  currencyAmount?: number | null
-  tokenAmount?: number | null
-  tokenPrice?: number | null
+  hash: string
+  currencyAmount?: CurrencyBalance | number | null
+  tokenAmount?: CurrencyBalance | number | null
+  tokenPrice?: Price | number | null
   transactionFee?: number | null
 }
 
-export type BorrowerTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
+export type AssetTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
 
-export type SubqueryBorrowerTransaction = {
-  __typename?: 'BorrowerTransaction'
+export type SubqueryAssetTransaction = {
+  __typename?: 'AssetTransaction'
   id: string
   timestamp: string
   poolId: string
   accountId: string
   epochId: string
-  loanId: string
-  type: BorrowerTransactionType
+  assetId: string
+  type: AssetTransactionType
   amount?: number | null
+  settlementPrice: string | null
+  quantity: string | null
+}
+
+export type SubqueryTrancheBalances = {
+  __typename?: 'TrancheBalances'
+  id: string
+  accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
+  poolId: string
+  trancheId: string
+  pendingInvestCurrency: string
+  claimableTrancheTokens: string
+  sumClaimedTrancheTokens: string
+  pendingRedeemTrancheTokens: string
+  claimableCurrency: string
+  sumClaimedCurrency: string
+}
+
+export type SubqueryCurrencyBalances = {
+  __typename?: 'CurrencyBalances'
+  id: string
+  accountId: string
+  account: {
+    chainId: string
+    evmAddress?: string
+  }
+  amount: string
+}
+
+export type SubqueryOutstandingOrder = {
+  timestamp: string
+  poolId: string
+  trancheId: string // poolId-trancheId
+  hash: string
+  redeemAmount: string
+  investAmount: string
+  tranche: {
+    tokenPrice: string
+  }
 }
 
 export type SubqueryEpoch = {

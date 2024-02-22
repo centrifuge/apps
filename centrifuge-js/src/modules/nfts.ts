@@ -1,6 +1,6 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, firstValueFrom } from 'rxjs'
+import { combineLatest, EMPTY, firstValueFrom, of } from 'rxjs'
 import { expand, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
@@ -177,12 +177,12 @@ export function getNftsModule(inst: Centrifuge) {
         combineLatest([
           api.query.uniques.instanceMetadataOf(collectionId, nftId),
           api.query.uniques.asset(collectionId, nftId),
-          api.query.nftSales.sales(collectionId, nftId),
+          api.query.nftSales?.sales(collectionId, nftId) ?? of(null),
         ])
       ),
       map(([meta, nftData, sale]) => {
         const nftValue = nftData.toJSON() as Item
-        const saleValue = sale.toJSON() as any
+        const saleValue = sale?.toJSON() as any
         if (!nftValue) throw new Error(`NFT not found: collectionId: ${collectionId}, nftId: ${nftId}`)
         const nft: NFT = {
           id: nftId,

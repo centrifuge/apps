@@ -42,7 +42,7 @@ const StyledOutline = styled.span`
   right: -4px;
   bottom: -4px;
   left: -4px;
-  border: 2px solid var(--fabric-color-focus);
+  border: 2px solid var(--fabric-focus);
   border-radius: 20px;
 `
 
@@ -53,6 +53,7 @@ const StyledWrapper = styled(Flex)`
     content: '.';
     width: 0;
     visibility: hidden;
+    align-self: center;
   }
 `
 

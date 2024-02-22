@@ -4,12 +4,14 @@ import {
   imageFile,
   integer,
   isin,
+  maturityDate,
   max,
   maxDecimals,
   maxFileSize,
   maxImageSize,
   maxLength,
   mimeType,
+  min,
   minLength,
   nonNegativeNumber,
   pattern,
@@ -25,6 +27,7 @@ export const validate = {
   poolName: combine(required(), maxLength(100)),
   poolIcon: combine(required(), mimeType('image/svg+xml', 'Icon must be an SVG file')),
   assetClass: required(),
+  subAssetClass: required(),
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   podEndpoint: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
 
@@ -44,11 +47,13 @@ export const validate = {
   issuerDetailBody: combine(required(), maxLength(3000)),
 
   // tranches
-  tokenName: combine(required(), maxLength(30)),
+  tokenName: combine(required(), maxLength(100)),
   symbolName: combine(required(), maxLength(12)),
   minInvestment: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   interestRate: combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER)),
   minRiskBuffer: combine(required(), positiveNumber(), max(100)),
+  maxPriceVariation: combine(required(), min(0), max(10000)),
+  maturityDate: combine(required(), maturityDate()),
 
   // risk groups
   groupName: maxLength(30),

@@ -1,21 +1,32 @@
-import { altairYellow, blueScale, centrifugeBlue, grayScale } from './colors'
+import { blueScale, centrifugeBlue, grayScale } from './colors'
 
-const statusDefault = grayScale[600]
-const statusInfo = '#006ef5'
-const statusOk = '#5da01d'
-const statusWarning = '#a86500'
+const statusDefault = grayScale[800]
+const statusInfo = '#1253ff'
+const statusOk = '#519b10'
+const statusWarning = '#ffc012'
 const statusCritical = '#d43f2b'
+const statusPromote = '#f81071'
+
+const statusDefaultBg = `${grayScale[800]}14`
+const statusInfoBg = '#1253ff14'
+const statusOkBg = '#519b1014'
+const statusWarningBg = '#ffc01214'
+const statusCriticalBg = '#d43f2b14'
+const statusPromoteBg = '#f8107114'
 
 const lightColors = {
   textPrimary: 'black',
-  textSecondary: grayScale[700],
-  textDisabled: grayScale[500],
+  textSecondary: grayScale[800],
+  textDisabled: grayScale[400],
   textInverted: 'white',
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
+  backgroundTertiary: grayScale[50],
+  backgroundAccentPrimary: blueScale[100],
+  backgroundAccentSecondary: '#e9eff2',
   backgroundPage: 'white',
-  backgroundInput: grayScale[50],
+  backgroundInput: 'white',
   backgroundThumbnail: grayScale[600],
   backgroundInverted: grayScale[900],
 
@@ -27,48 +38,54 @@ const lightColors = {
   statusOk,
   statusWarning,
   statusCritical,
+  statusPromote,
+  statusDefaultBg,
+  statusInfoBg,
+  statusOkBg,
+  statusWarningBg,
+  statusCriticalBg,
+  statusPromoteBg,
 
-  backgroundButtonPrimary: altairYellow,
-  backgroundButtonPrimaryFocus: altairYellow,
-  backgroundButtonPrimaryHover: 'black',
-  backgroundButtonPrimaryPressed: 'black',
-  backgroundButtonPrimaryDisabled: grayScale[600],
-  textButtonPrimary: 'black',
-  textButtonPrimaryFocus: 'black',
+  backgroundButtonPrimary: centrifugeBlue,
+  backgroundButtonPrimaryFocus: centrifugeBlue,
+  backgroundButtonPrimaryHover: centrifugeBlue,
+  backgroundButtonPrimaryPressed: blueScale[600],
+  backgroundButtonPrimaryDisabled: grayScale[300],
+  textButtonPrimary: 'white',
+  textButtonPrimaryFocus: 'white',
   textButtonPrimaryHover: 'white',
   textButtonPrimaryPressed: 'white',
-  textButtonPrimaryDisabled: 'white',
-  borderButtonPrimary: altairYellow,
-  borderButtonPrimaryFocus: 'black',
-  borderButtonPrimaryHover: 'black',
-  borderButtonPrimaryPressed: 'black',
-  borderButtonPrimaryDisabled: grayScale[600],
-  shadowButtonPrimaryPressed: altairYellow,
+  textButtonPrimaryDisabled: grayScale[600],
+  borderButtonPrimary: centrifugeBlue,
+  borderButtonPrimaryFocus: blueScale[700],
+  borderButtonPrimaryHover: blueScale[700],
+  borderButtonPrimaryPressed: blueScale[700],
+  borderButtonPrimaryDisabled: 'transparent',
+  shadowButtonPrimary: '#0241E945',
 
-  backgroundButtonSecondary: 'transparent',
-  backgroundButtonSecondaryFocus: 'transparent',
-  backgroundButtonSecondaryHover: 'white',
-  backgroundButtonSecondaryPressed: 'white',
-  backgroundButtonSecondaryDisabled: 'transparent',
-  textButtonSecondary: 'black',
-  textButtonSecondaryFocus: 'black',
-  textButtonSecondaryHover: 'black',
-  textButtonSecondaryPressed: 'black',
-  textButtonSecondaryDisabled: grayScale[600],
-
-  borderButtonSecondary: grayScale[300],
-  borderButtonSecondaryFocus: 'black',
-  borderButtonSecondaryHover: grayScale[300],
-  borderButtonSecondaryPressed: 'black',
-  borderButtonSecondaryDisabled: grayScale[300],
-  shadowButtonSecondaryPressed: 'black',
+  backgroundButtonSecondary: blueScale[100],
+  backgroundButtonSecondaryFocus: blueScale[100],
+  backgroundButtonSecondaryHover: blueScale[100],
+  backgroundButtonSecondaryPressed: blueScale[200],
+  backgroundButtonSecondaryDisabled: blueScale[300],
+  textButtonSecondary: centrifugeBlue,
+  textButtonSecondaryFocus: centrifugeBlue,
+  textButtonSecondaryHover: centrifugeBlue,
+  textButtonSecondaryPressed: centrifugeBlue,
+  textButtonSecondaryDisabled: blueScale[600],
+  borderButtonSecondary: grayScale[200],
+  borderButtonSecondaryFocus: centrifugeBlue,
+  borderButtonSecondaryHover: centrifugeBlue,
+  borderButtonSecondaryPressed: centrifugeBlue,
+  borderButtonSecondaryDisabled: 'transparent',
+  shadowButtonSecondary: '#A8BFFD35',
 
   backgroundButtonTertiary: 'transparent',
   backgroundButtonTertiaryFocus: 'transparent',
-  backgroundButtonTertiaryHover: blueScale[50],
-  backgroundButtonTertiaryPressed: blueScale[50],
+  backgroundButtonTertiaryHover: 'tranparent',
+  backgroundButtonTertiaryPressed: 'transparent',
   backgroundButtonTertiaryDisabled: 'transparent',
-  textButtonTertiary: 'black',
+  textButtonTertiary: grayScale[900],
   textButtonTertiaryFocus: centrifugeBlue,
   textButtonTertiaryHover: centrifugeBlue,
   textButtonTertiaryPressed: centrifugeBlue,
@@ -76,25 +93,25 @@ const lightColors = {
   borderButtonTertiary: 'transparent',
   borderButtonTertiaryFocus: 'transparent',
   borderButtonTertiaryHover: 'transparent',
-  borderButtonTertiaryPressed: centrifugeBlue,
+  borderButtonTertiaryPressed: 'transparent',
   borderButtonTertiaryDisabled: 'transparent',
 
-  backgroundButtonWallet: 'white',
-  backgroundButtonWalletFocus: grayScale[80],
-  backgroundButtonWalletHover: grayScale[80],
-  backgroundButtonWalletPressed: 'white',
-  backgroundButtonWalletDisabled: 'transparent',
-  textButtonWallet: 'black',
-  textButtonWalletFocus: 'black',
-  textButtonWalletHover: 'black',
-  textButtonWalletPressed: 'black',
-  textButtonWalletDisabled: grayScale[600],
-  borderButtonWallet: grayScale[300],
-  borderButtonWalletFocus: 'black',
-  borderButtonWalletHover: 'transparent',
-  borderButtonWalletPressed: grayScale[80],
-  borderButtonWalletDisabled: grayScale[300],
-  shadowButtonWalletPressed: 'black',
+  backgroundButtonInverted: 'white',
+  backgroundButtonInvertedFocus: 'white',
+  backgroundButtonInvertedHover: 'white',
+  backgroundButtonInvertedPressed: blueScale[100],
+  backgroundButtonInvertedDisabled: grayScale[100],
+  textButtonInverted: centrifugeBlue,
+  textButtonInvertedFocus: centrifugeBlue,
+  textButtonInvertedHover: centrifugeBlue,
+  textButtonInvertedPressed: centrifugeBlue,
+  textButtonInvertedDisabled: blueScale[600],
+  borderButtonInverted: grayScale[200],
+  borderButtonInvertedFocus: centrifugeBlue,
+  borderButtonInvertedHover: centrifugeBlue,
+  borderButtonInvertedPressed: centrifugeBlue,
+  borderButtonInvertedDisabled: 'transparent',
+  shadowButtonInverted: '#E0E7FF',
 }
 
 export const modeLight = {

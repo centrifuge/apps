@@ -1,15 +1,16 @@
 import { ResponsiveValue } from 'styled-system'
 
-type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
+type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical' | 'Promote'
 
 // Colors
 
-type StatusColorName = `status${Status}`
+type StatusColorName = `status${Status}` | `status${Status}Bg`
 
 type AccentColorName =
   | `accent${'Primary' | 'Secondary'}`
   | 'primarySelectedBackground'
   | 'secondarySelectedBackground'
+  | 'focus'
   | 'borderFocus'
   | 'borderSelected'
   | 'textSelected'
@@ -17,16 +18,25 @@ type AccentColorName =
   | 'textInteractiveHover'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled' | 'Inverted'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
-type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input' | 'Thumbnail'}`
+type BackgroundColorName = `background${
+  | 'Primary'
+  | 'Secondary'
+  | 'Tertiary'
+  | 'Page'
+  | 'Input'
+  | 'Thumbnail'
+  | 'AccentPrimary'
+  | 'AccentSecondary'}`
 type ButtonColorName =
-  | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary'}${
+  | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary' | 'Inverted'}${
       | ''
       | 'Focus'
       | 'Hover'
       | 'Pressed'
       | 'Disabled'}`
-  | 'shadowButtonPrimaryPressed'
-  | 'shadowButtonSecondaryPressed'
+  | 'shadowButtonPrimary'
+  | 'shadowButtonSecondary'
+  | 'shadowButtonInverted'
 
 type ColorName =
   | StatusColorName
@@ -43,6 +53,7 @@ type ThemeColors = {
   accentScale: Record<number, string>
   yellowScale: Record<number, string>
   blueScale: Record<number, string>
+  grayScale: Record<number, string>
 }
 
 // Lengths
@@ -54,14 +65,14 @@ export type ThemeBreakpoints = BreakpointValue[] & {
   [k in BreakpointName]: BreakpointValue
 }
 
-type SizeName = 'dialog' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge'
-type SizeValue = string | number
+type SizeName = 'dialog' | 'drawer' | 'container' | 'iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge' | 'input'
+type SizeValue = number
 
 type ThemeSizes = {
   [k in SizeName]: SizeValue
 }
 
-type RadiusName = 'card' | 'input' | 'tooltip'
+type RadiusName = 'card' | 'input' | 'tooltip' | 'button' | 'chip'
 type RadiusValue = number
 
 type ThemeRadii = {
@@ -116,14 +127,20 @@ type ThemeFonts = {
 
 // Shadows
 
-type ShadowName = 'buttonActive' | 'cardInteractive' | 'cardOverlay' | 'cardActive'
+type ShadowName =
+  | 'buttonPrimary'
+  | 'buttonSecondary'
+  | 'buttonInverted'
+  | 'cardInteractive'
+  | 'cardOverlay'
+  | 'cardActive'
 type ShadowValue = string
 
 type ThemeShadows = {
   [k in ShadowName]: ShadowValue
 }
 
-type ZIndexName = 'sticky' | 'overlay' | 'onTopOfTheWorld'
+type ZIndexName = 'sticky' | 'header' | 'overlay' | 'onTopOfTheWorld'
 type ZIndexValue = number
 type ThemeZIndices = {
   [k in ZIndexName]: ZIndexValue

@@ -28,7 +28,7 @@ import {
   throwError,
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
-import { TransactionOptions } from './types'
+import { TransactionErrorResult, TransactionOptions, TransactionResult } from './types'
 import { computeMultisig, evmToSubstrateAddress, isSameAddress } from './utils'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
@@ -36,7 +36,7 @@ import { getPolkadotApi } from './utils/web3'
 type ProxyType = string
 
 const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
-const EVM_DISPATCH_OVERHEAD_GAS = 50_000
+const EVM_DISPATCH_OVERHEAD_GAS = 100_000
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -77,41 +77,29 @@ const defaultConfig: Config = {
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
   centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools',
   altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-altair',
-  metadataHost: 'https://altair.mypinata.cloud',
+  metadataHost: 'https://centrifuge.mypinata.cloud',
 }
 
 const relayChainTypes = {}
 
 const parachainTypes = {
-  // NFTs
-  ClassId: 'u64',
-  InstanceId: 'u128',
-  // Crowdloan
-  RootHashOf: 'Hash',
-  TrieIndex: 'u32',
-  RelayChainAccountId: 'AccountId',
-  ParachainAccountIdOf: 'AccountId',
-  Proof: {
-    leafHash: 'Hash',
-    sortedHashes: 'Vec<Hash>',
+  ActiveLoanInfo: {
+    activeLoan: 'PalletLoansEntitiesLoansActiveLoan',
+    presentValue: 'Balance',
+    outstandingPrincipal: 'Balance',
+    outstandingInterest: 'Balance',
   },
-  PoolId: 'u64',
-  TrancheId: '[u8; 16]',
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
   },
-  StakingCurrency: {
-    _enum: ['BlockRewards'],
-  },
-  CurrencyId: {
-    _enum: {
-      Native: 'Native',
-      Tranche: '(PoolId, TrancheId)',
-      KSM: 'KSM',
-      AUSD: 'AUSD',
-      ForeignAsset: 'u32',
-      Staking: 'StakingCurrency',
-    },
+  InvestmentPortfolio: {
+    poolCurrencyId: 'CfgTypesTokensCurrencyId',
+    pendingInvestCurrency: 'Balance',
+    claimableTrancheTokens: 'Balance',
+    freeTrancheTokens: 'Balance',
+    reservedTrancheTokens: 'Balance',
+    pendingRedeemTrancheTokens: 'Balance',
+    claimableCurrency: 'Balance',
   },
 }
 
@@ -142,7 +130,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
           type: 'AccountId',
         },
       ],
-      type: 'Vec<CurrencyId>',
+      type: 'Vec<CfgTypesTokensCurrencyId>',
     },
     computeReward: {
       description: 'Compute the claimable reward for the given triplet of domain, currency and account',
@@ -153,7 +141,7 @@ const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
         },
         {
           name: 'currency_id',
-          type: 'CurrencyId',
+          type: 'CfgTypesTokensCurrencyId',
         },
         {
           name: 'account_id',
@@ -183,6 +171,71 @@ const parachainRuntimeApi: DefinitionsCall = {
       methods: {
         compute_reward: parachainRpcMethods.rewards.computeReward,
         list_currencies: parachainRpcMethods.rewards.listCurrencies,
+      },
+      version: 1,
+    },
+  ],
+  InvestmentsApi: [
+    {
+      methods: {
+        investment_portfolio: {
+          description: 'Get account portfolio',
+          params: [
+            {
+              name: 'account_id',
+              type: 'AccountId',
+            },
+          ],
+          type: 'Vec<(CfgTypesTokensTrancheCurrency, InvestmentPortfolio)>',
+        },
+      },
+      version: 1,
+    },
+  ],
+  LoansApi: [
+    {
+      methods: {
+        portfolio: {
+          description: 'Get active pool loan',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Vec<(u64, ActiveLoanInfo)>',
+        },
+        portfolio_loan: {
+          description: 'Get active pool loan',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+            {
+              name: 'loan_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Option<PalletLoansEntitiesLoansActiveLoan>',
+        },
+      },
+      version: 1,
+    },
+  ],
+  AccountConversionApi: [
+    {
+      methods: {
+        conversion_of: {
+          description: 'Get converted address',
+          params: [
+            {
+              name: 'location',
+              type: 'XcmV3MultiLocation',
+            },
+          ],
+          type: 'Option<AccountId32>',
+        },
       },
       version: 1,
     },
@@ -283,7 +336,7 @@ export class CentrifugeBase {
 
     try {
       const $paymentInfo = submittable.paymentInfo(signingAddress)
-      const $balances = api.query.system.account(signingAddress)
+      const $balances = api.query.system.account(this.getSignerAddress())
 
       if (options?.paymentInfo) {
         return $paymentInfo.pipe(
@@ -324,11 +377,7 @@ export class CentrifugeBase {
               switchMap(() => actualSubmittable.signAndSend(signingAddress, { signer, era: options?.era }))
             )
       ).pipe(
-        tap((result) => {
-          options?.onStatusChange?.(result)
-          if (result.status.isInBlock) this.getTxCompletedEvents().next(result.events)
-        }),
-        takeWhile((result) => {
+        map((result) => {
           const errors = result.events.filter(({ event }) => {
             const possibleProxyErr = event.data[0]?.toHuman()
             return (
@@ -342,9 +391,21 @@ export class CentrifugeBase {
           if (errors.length && this.config.debug) {
             console.log('🚨 error', JSON.stringify(errors))
           }
-          const hasError = !!(result.dispatchError || errors.length)
-
-          return !result.status.isInBlock && !hasError
+          return {
+            data: result,
+            events: result.events,
+            status: result.status.type,
+            error: result.dispatchError || errors[0],
+            txHash: result.txHash.toHuman() as string,
+            blockNumber: (result as any).blockNumber ? Number((result as any).blockNumber?.toString()) : undefined,
+          }
+        }),
+        tap((result) => {
+          options?.onStatusChange?.(result)
+          if (result.status === 'InBlock') this.getTxCompletedEvents().next(result.events)
+        }),
+        takeWhile((result) => {
+          return result.status !== 'InBlock' && !result.error
         }, true)
       )
     } catch (e) {
@@ -377,26 +438,31 @@ export class CentrifugeBase {
             return from(response.wait()).pipe(
               map((receipt) => [response, receipt] as const),
               startWith([response, null] as const),
-              catchError(() => of([{ ...response, error: new Error('failed') }] as const)),
-              tap(([result, receipt]) => {
-                if ('error' in result || receipt?.status === 0) {
-                  options?.onStatusChange?.({
-                    events: [],
-                    dispatchError: {},
-                    status: {
-                      hash: { toHex: () => result.hash as any },
-                    },
-                  } as any)
-                } else {
-                  options?.onStatusChange?.({
-                    events: [],
-                    status: {
-                      isInBlock: receipt?.status === 1,
-                      isFinalized: receipt?.status === 1,
-                      hash: { toHex: () => result.hash as any },
-                    },
-                  } as any)
+              map(([response, receipt]) => {
+                const result: TransactionResult = {
+                  data: { response, receipt: receipt ?? undefined },
+                  // TODO: Events
+                  events: [],
+                  status: receipt ? 'InBlock' : 'Broadcast',
+                  error: receipt?.status === 0 ? new Error('failed') : undefined,
+                  txHash: response.hash,
+                  blockNumber: receipt?.blockNumber,
                 }
+                return result
+              }),
+              catchError(() => {
+                const result: TransactionErrorResult = {
+                  data: { response, receipt: undefined },
+                  events: [],
+                  status: 'Invalid',
+                  error: new Error('failed'),
+                  txHash: response.hash,
+                  blockNumber: undefined,
+                }
+                return of(result)
+              }),
+              tap((result) => {
+                options?.onStatusChange?.(result)
               })
             )
           })
@@ -545,13 +611,18 @@ export class CentrifugeBase {
     }
   }
 
-  getSignerAddress(type?: 'substrate') {
+  getSignerAddress(type?: 'substrate' | 'evm') {
     const { signingAddress, evmSigningAddress } = this.config
 
+    if (type === 'evm') {
+      if (!evmSigningAddress) throw new Error('no signer set')
+      return evmSigningAddress
+    }
     if (!signingAddress) {
-      if (evmSigningAddress && this.config.substrateEvmChainId) {
+      if (evmSigningAddress) {
+        if (type === 'substrate' && !this.config.substrateEvmChainId) throw new Error('no signer set')
         return type === 'substrate'
-          ? evmToSubstrateAddress(evmSigningAddress, this.config.substrateEvmChainId)
+          ? evmToSubstrateAddress(evmSigningAddress, this.config.substrateEvmChainId!)
           : evmSigningAddress
       }
       throw new Error('no signer set')

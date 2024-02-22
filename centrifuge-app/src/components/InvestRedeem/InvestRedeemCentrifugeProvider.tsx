@@ -23,9 +23,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
-  const {
-    state: { combinedStakes },
-  } = useLiquidityRewards()
+  const liquidityState = useLiquidityRewards().state
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -34,13 +32,15 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
 
   const price = tranche.tokenPrice?.toDecimal() ?? Dec(1)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
+  const currencyToCollect = order?.payoutCurrencyAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
-  const stakedAmount = combinedStakes ?? Dec(0)
+  const stakedAmount = liquidityState?.combinedStakes ?? Dec(0)
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem).add(stakedAmount)
   const investmentValue = combinedBalance.mul(price)
   const poolCurBalance =
     (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) ?? Dec(0)
   const poolCurBalanceCombined = poolCurBalance.add(order?.remainingInvestCurrency.toDecimal() ?? 0)
+  const collectType = currencyToCollect.gt(0) ? 'redeem' : investToCollect.gt(0) ? 'invest' : null
 
   const isCalculatingOrders = pool.epoch.status !== 'ongoing'
 
@@ -48,11 +48,12 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
   const redeem = useCentrifugeTransaction('Redeem', (cent) => cent.pools.updateRedeemOrder)
   const cancelInvest = useCentrifugeTransaction('Cancel order', (cent) => cent.pools.updateInvestOrder)
   const cancelRedeem = useCentrifugeTransaction('Cancel order', (cent) => cent.pools.updateRedeemOrder)
+  const collect = useCentrifugeTransaction('Claim', (cent) => cent.pools.collect)
 
   const txActions = {
     invest,
     redeem,
-    collect: undefined,
+    collect,
     approvePoolCurrency: undefined,
     approveTrancheToken: undefined,
     cancelInvest,
@@ -95,9 +96,11 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
       trancheMeta?.minInitialInvestment ?? 0,
       pool.currency.decimals
     ).toDecimal(),
+    minOrder: Dec(0),
     nativeBalance: balances?.native.balance.toDecimal() ?? Dec(0),
+    poolCurrencies: [pool.currency],
     poolCurrencyBalance: poolCurBalance,
-    poolCUrrencyBalanceWithPending: poolCurBalanceCombined,
+    poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,
     trancheBalanceWithPending: combinedBalance,
     investmentValue,
@@ -112,23 +115,27 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
           remainingRedeemToken: order.remainingRedeemToken.toDecimal(),
         }
       : null,
-    collectAmount: Dec(0),
-    collectType: null,
+    collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
+    collectType,
     needsToCollectBeforeOrder: false,
-    needsPoolCurrencyApproval: false,
-    needsTrancheTokenApproval: false,
+    needsPoolCurrencyApproval: () => false,
+    needsTrancheTokenApproval: () => false,
+    canChangeOrder: true,
+    canCancelOrder: true,
     pendingAction,
-    pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
+    pendingTransaction,
+    actingAddress: account?.actingAddress,
   }
 
   const actions: InvestRedeemActions = {
     invest: doAction('invest', (newOrder: BN) => [poolId, trancheId, newOrder], { account, forceProxyType: 'Invest' }),
     redeem: doAction('redeem', (newOrder: BN) => [poolId, trancheId, newOrder], { account, forceProxyType: 'Invest' }),
-    collect: () => {},
+    collect: doAction('collect', () => [poolId, trancheId], { account, forceProxyType: 'Invest' }),
     approvePoolCurrency: () => {},
     approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
     cancelRedeem: doAction('cancelRedeem', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
+    selectPoolCurrency() {},
   }
 
   const hooks = {

@@ -16,25 +16,16 @@ type IconProps = {
   size?: ResponsiveValue<Size>
 }
 
-type Props = React.PropsWithChildren<{
+export type DialogProps = React.PropsWithChildren<{
   isOpen: boolean
   onClose: () => void
   width?: string | number
   title?: string | React.ReactElement
   subtitle?: string | React.ReactElement
   icon?: React.ComponentType<IconProps> | React.ReactElement
-  children?: React.ReactNode
 }>
 
-const DialogInner: React.FC<Props> = ({
-  children,
-  isOpen,
-  onClose,
-  width = 'dialog',
-  icon: IconComp,
-  title,
-  subtitle,
-}) => {
+function DialogInner({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title, subtitle }: DialogProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const { overlayProps, underlayProps } = useOverlay(
@@ -93,7 +84,7 @@ const DialogInner: React.FC<Props> = ({
   )
 }
 
-export const Dialog: React.FC<Props> = (props) => {
+export function Dialog(props: DialogProps) {
   return props.isOpen ? (
     <OverlayContainer>
       <DialogInner {...props} />

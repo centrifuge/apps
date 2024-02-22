@@ -1,12 +1,15 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Step, Stepper } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { Container, Header, Layout, PoolBranding } from '../../components/Onboarding'
+import { useOnboardingAuth } from '../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { Accreditation } from './Accreditation'
 import { ApprovalStatus } from './ApprovalStatus'
+import { CompleteExternalOnboarding } from './CompleteExternalOnboarding'
 import { GlobalStatus } from './GlobalStatus'
 import { InvestorType } from './InvestorType'
 import { KnowYourBusiness } from './KnowYourBusiness'
@@ -15,15 +18,27 @@ import { LinkWallet } from './LinkWallet'
 import { useGlobalOnboardingStatus } from './queries/useGlobalOnboardingStatus'
 import { useSignedAgreement } from './queries/useSignedAgreement'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
-import { TaxInfo } from './TaxInfo'
 import { UltimateBeneficialOwners } from './UltimateBeneficialOwners'
 
-export const OnboardingPage: React.FC = () => {
+export default function OnboardingPage() {
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
   const { search } = useLocation()
   const poolId = new URLSearchParams(search).get('poolId')
   const trancheId = new URLSearchParams(search).get('trancheId')
-  const { onboardingUser, activeStep, setActiveStep, isLoadingStep, setPool, pool } = useOnboarding()
+  const externalSignature = new URLSearchParams(search).get('externalSignature')
+  const { disconnect } = useWallet()
+  const {
+    onboardingUser,
+    activeStep,
+    setActiveStep,
+    isLoadingStep,
+    setPool,
+    pool,
+    isOnboardingExternally,
+    setIsOnboardingExternally,
+  } = useOnboarding()
+  const { isAuth, authToken } = useOnboardingAuth()
+
   const { data: globalOnboardingStatus, isFetching: isFetchingGlobalOnboardingStatus } = useGlobalOnboardingStatus()
 
   const history = useHistory()
@@ -31,6 +46,20 @@ export const OnboardingPage: React.FC = () => {
   const { data: metadata } = usePoolMetadata(poolDetails)
 
   React.useEffect(() => {
+    if (externalSignature) {
+      disconnect()
+
+      const decodedExternalSignature = decodeURIComponent(externalSignature)
+
+      sessionStorage.clear()
+      sessionStorage.setItem(
+        'external-centrifuge-onboarding-auth',
+        JSON.stringify({ signed: decodedExternalSignature })
+      )
+
+      setIsOnboardingExternally(true)
+    }
+
     const isTinlakePool = poolId?.startsWith('0x')
     const trancheName = trancheId?.split('-')[1] === '0' ? 'junior' : 'senior'
     const canOnboard = isTinlakePool && metadata?.pool?.newInvestmentsStatus?.[trancheName] !== 'closed'
@@ -40,7 +69,6 @@ export const OnboardingPage: React.FC = () => {
       return history.push('/onboarding')
     }
 
-    // @ts-expect-error known typescript issue: https://github.com/microsoft/TypeScript/issues/44373
     const trancheDetails = poolDetails?.tranches.find((tranche) => tranche.id === trancheId)
 
     if (trancheDetails) {
@@ -54,9 +82,19 @@ export const OnboardingPage: React.FC = () => {
 
     setPool(null)
     return history.push('/onboarding')
-  }, [poolId, setPool, trancheId, history, poolDetails, metadata])
+  }, [
+    poolId,
+    setPool,
+    trancheId,
+    history,
+    poolDetails,
+    metadata,
+    disconnect,
+    setIsOnboardingExternally,
+    externalSignature,
+  ])
 
-  const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
+  const { data: signedAgreementData } = useSignedAgreement()
 
   React.useEffect(() => {
     if (onboardingUser?.investorType) {
@@ -64,11 +102,28 @@ export const OnboardingPage: React.FC = () => {
     }
   }, [onboardingUser?.investorType])
 
+  const isIframe = window.self !== window.top
+
+  const openNewTab = () => {
+    const origin = window.location.origin
+
+    const encodedExternalSignature = encodeURIComponent(authToken)
+
+    window.open(`${origin}/onboarding?externalSignature=${encodedExternalSignature}`, '_blank')
+  }
+
+  if (isIframe && isAuth && !onboardingUser?.globalSteps?.verifyIdentity?.completed) {
+    return <CompleteExternalOnboarding openNewTab={openNewTab} poolSymbol={pool?.symbol} poolId={poolId} />
+  }
+
   return (
     <Layout>
-      <Header>{!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}</Header>
+      <Header walletMenu={!isOnboardingExternally}>
+        {!!poolId && <PoolBranding poolId={poolId} symbol={pool?.symbol} />}
+      </Header>
 
       <Container
+        closeable={!isOnboardingExternally}
         isLoading={isLoadingStep || isFetchingGlobalOnboardingStatus}
         aside={
           <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
@@ -77,7 +132,6 @@ export const OnboardingPage: React.FC = () => {
             {investorType === 'individual' && (activeStep > 2 || !!onboardingUser?.investorType) && (
               <>
                 <Step label="Identity verification" />
-                <Step label="Tax information" />
                 {onboardingUser?.countryOfCitizenship === 'us' && <Step label="Accreditation" />}
                 {pool ? (
                   <>
@@ -94,7 +148,6 @@ export const OnboardingPage: React.FC = () => {
                 <Step label="Business information" />
                 <Step label="Confirm ultimate beneficial owners" />
                 <Step label="Authorized signer verification" />
-                <Step label="Tax information" />
                 {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode.startsWith('us') && (
                   <Step label="Accreditation" />
                 )}
@@ -119,55 +172,53 @@ export const OnboardingPage: React.FC = () => {
             {activeStep === 3 && <KnowYourBusiness />}
             {activeStep === 4 && <UltimateBeneficialOwners />}
             {activeStep === 5 && <KnowYourCustomer />}
-            {activeStep === 6 && <TaxInfo />}
             {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us') ? (
               <>
-                {activeStep === 7 && <Accreditation />}
+                {activeStep === 6 && <Accreditation />}
                 {pool ? (
                   <>
-                    {activeStep === 8 && (
+                    {activeStep === 7 && (
                       <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData as string} />
                     )}
 
-                    {activeStep === 9 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                    {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
-                  activeStep === 8 && <GlobalStatus />
+                  activeStep === 7 && <GlobalStatus />
                 )}
               </>
             ) : pool ? (
               <>
-                {activeStep === 7 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
-                {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 6 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (
-              activeStep === 7 && <GlobalStatus />
+              activeStep === 6 && <GlobalStatus />
             )}
           </>
         )}
         {investorType === 'individual' && (
           <>
             {activeStep === 3 && <KnowYourCustomer />}
-            {activeStep === 4 && <TaxInfo />}
             {onboardingUser?.investorType === 'individual' && onboardingUser.countryOfCitizenship === 'us' ? (
               <>
-                {activeStep === 5 && <Accreditation />}
+                {activeStep === 4 && <Accreditation />}
                 {pool ? (
                   <>
-                    {activeStep === 6 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
-                    {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                    {activeStep === 5 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
+                    {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
-                  activeStep === 6 && <GlobalStatus />
+                  activeStep === 5 && <GlobalStatus />
                 )}
               </>
             ) : pool ? (
               <>
-                {activeStep === 5 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
-                {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 4 && <SignSubscriptionAgreement signedAgreementUrl={signedAgreementData} />}
+                {activeStep === 5 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
               </>
             ) : (
-              activeStep === 5 && <GlobalStatus />
+              activeStep === 4 && <GlobalStatus />
             )}
           </>
         )}

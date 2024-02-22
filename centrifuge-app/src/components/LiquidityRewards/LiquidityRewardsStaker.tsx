@@ -2,8 +2,8 @@ import { Box, Divider, Grid, IconCheckInCircle, Shelf, Stack, Text } from '@cent
 import * as React from 'react'
 import { millisecondsToDays } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
+import { LightButton } from '../InvestRedeem/LightButton'
 import { useActiveEpochData } from './hooks'
-import { LightButton } from './LightButton'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
 
 export function LiquidityRewardsStaker() {
@@ -69,19 +69,14 @@ export function LiquidityRewardsStaker() {
 
       <Grid mt="1px" gap="1px" columns={canStake && canUnstake ? 2 : 1}>
         {canStake && (
-          <LightButton onClick={stake} $left $right={!canUnstake} disabled={isLoading.unstake || isLoading.stake}>
+          <LightButton onClick={stake} disabled={isLoading.unstake || isLoading.stake}>
             <Text variant="body2" color="inherit">
               Stake
             </Text>
           </LightButton>
         )}
         {canUnstake && (
-          <LightButton
-            onClick={() => unstake()}
-            $left={!canStake}
-            $right
-            disabled={isLoading.unstake || isLoading.stake}
-          >
+          <LightButton onClick={() => unstake()} disabled={isLoading.unstake || isLoading.stake}>
             <Text variant="body2" color="inherit">
               Unstake
             </Text>

@@ -1,10 +1,13 @@
-import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
-import { useEffect } from 'react'
-import { useQuery } from 'react-query'
-import { combineLatest, map, Observable } from 'rxjs'
+import Centrifuge, { addressToHex, AssetTransaction, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifugeApi, useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
+import BN from 'bn.js'
+import { useEffect, useMemo } from 'react'
+import { useQueries, useQuery } from 'react-query'
+import { combineLatest, map, Observable, switchMap } from 'rxjs'
+import { Dec } from './Decimal'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
-import { useMetadata } from './useMetadata'
+import { useLoan, useLoans } from './useLoans'
+import { useMetadata, useMetadataMulti } from './useMetadata'
 
 export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
@@ -49,51 +52,113 @@ export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
+export function useTransactionsByAddress(address?: string) {
+  const [result] = useCentrifugeQuery(
+    ['txByAddress', address],
+    (cent) => cent.pools.getTransactionsByAddress([address!]),
+    {
+      enabled: !!address,
+    }
+  )
+
+  return result
+}
+
+export function useHolders(poolId: string, trancheId?: string) {
+  const [result] = useCentrifugeQuery(['holders', poolId, trancheId], (cent) =>
+    cent.pools.getHolders([poolId, trancheId])
+  )
+
+  return result
+}
+
 export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(['investorTransactions', poolId, trancheId, from, to], (cent) =>
+    cent.pools.getInvestorTransactions([poolId, trancheId, from, to])
+  )
+
+  return result
+}
+
+export function useAssetTransactions(poolId: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
-    ['investorTransactions', poolId, trancheId, from, to],
-    (cent) => cent.pools.getInvestorTransactions([poolId, trancheId, from, to]),
+    ['assetTransactions', poolId, from, to],
+    (cent) => cent.pools.getAssetTransactions([poolId, from, to]),
     {
-      suspense: true,
+      enabled: !poolId.startsWith('0x'),
     }
   )
 
   return result
 }
 
-export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) {
+export function useAverageAmount(poolId: string) {
+  const pool = usePool(poolId)
+  const loans = useLoans(poolId)
+
+  if (!loans?.length || !pool) return new BN(0)
+
+  return (loans as Loan[])
+    .reduce((sum, loan) => {
+      if (loan.status !== 'Active') return sum
+      return sum.add(loan.presentValue.toDecimal())
+    }, Dec(0))
+    .div((loans as Loan[]).filter((loan) => loan.status === 'Active').length)
+}
+
+export function useBorrowerAssetTransactions(poolId: string, assetId: string, from?: Date, to?: Date) {
+  const pool = usePool(poolId)
+  const loan = useLoan(poolId, assetId)
+
   const [result] = useCentrifugeQuery(
-    ['borrowerTransactions', poolId, from, to],
-    (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
+    ['borrowerAssetTransactions', poolId, assetId, from, to],
+    (cent) => {
+      const assetTransactions = cent.pools.getAssetTransactions([poolId, from, to])
+
+      return assetTransactions.pipe(
+        map((transactions: AssetTransaction[]) =>
+          transactions.filter((transaction) => transaction.assetId.split('-')[1] === assetId)
+        )
+      )
+    },
     {
-      suspense: true,
+      enabled: !!pool && !poolId.startsWith('0x') && !!loan,
     }
   )
 
   return result
 }
 
-export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
-  if (poolId.startsWith('0x')) throw new Error('Only works with Centrifuge Pools')
+export function useDailyPoolStates(poolId: string, from?: Date, to?: Date, suspense = true) {
   const [result] = useCentrifugeQuery(
     ['dailyPoolStates', poolId, from, to],
     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
     {
-      suspense: true,
+      suspense,
+      enabled: !poolId.startsWith('0x'),
     }
   )
 
   return result
 }
 
-export function useDailyTrancheStates(trancheId: string) {
+export function useDailyTranchesStates(trancheIds: string[]) {
   const [result] = useCentrifugeQuery(
-    ['dailyTrancheStates', { trancheId }],
-    (cent) => cent.pools.getDailyTrancheStates([trancheId]),
+    ['dailyTrancheStates', { trancheIds }],
+    (cent) => combineLatest(trancheIds.map((tid) => cent.pools.getDailyTrancheStates([tid]))),
     {
       suspense: true,
+      enabled: !!trancheIds?.length,
     }
   )
+
+  return result
+}
+
+export function useDailyTVL() {
+  const [result] = useCentrifugeQuery(['daily TVL'], (cent) => cent.pools.getDailyTVL(), {
+    suspense: true,
+  })
 
   return result
 }
@@ -156,6 +221,49 @@ export function usePendingCollectMulti(poolId: string, trancheIds?: string[], ad
   return result
 }
 
+export function usePoolAccountOrders(poolId: string) {
+  const api = useCentrifugeApi()
+  const [orders] = useCentrifugeQuery(['poolAccountOrders', poolId], () =>
+    combineLatest([api.query.investments.investOrders.keys(), api.query.investments.redeemOrders.keys()]).pipe(
+      switchMap(([investKeys, redeemKeys]) => {
+        const keys = [...investKeys, ...redeemKeys]
+          .map((k, i) => {
+            const key = k.toHuman() as [string, { poolId: string; trancheId: string }]
+            return {
+              accountId: addressToHex(key[0]),
+              poolId: key[1].poolId.replace(/\D/g, ''),
+              trancheId: key[1].trancheId,
+              type: i >= investKeys.length ? 'redeem' : 'invest',
+            }
+          })
+          .filter((k) => k.poolId === poolId && k)
+        return api
+          .queryMulti(
+            keys.map((key) => [
+              key.type === 'invest' ? api.query.investments.investOrders : api.query.investments.redeemOrders,
+              [key.accountId, [key.poolId, key.trancheId]],
+            ])
+          )
+          .pipe(
+            map((orders) => {
+              return keys
+                .map((key, i) => {
+                  const order = orders[i].toPrimitive() as { amount: string; submittedAt: number }
+                  return {
+                    ...key,
+                    amount: new BN(order.amount),
+                    submittedAt: order.submittedAt,
+                  }
+                })
+                .filter((order) => order.amount.gt(new BN(0)))
+            })
+          )
+      })
+    )
+  )
+  return orders
+}
+
 const addedMultisigs = new WeakSet()
 
 export function usePoolMetadata(
@@ -176,26 +284,33 @@ export function usePoolMetadata(
   }, [data.data])
   return typeof pool?.metadata === 'string' ? data : tinlakeData
 }
+export function usePoolMetadataMulti(pools?: (Pool | TinlakePool)[]) {
+  const poolsIndexed = pools?.map((p, i) => [i, p, 'isTinlakePool' in p] as const) ?? []
+  const indices: Record<number, number> = {}
+  const centPools = poolsIndexed?.filter(([, , isTinlake]) => !isTinlake)
+  const tinlakePools = poolsIndexed?.filter(([, , isTinlake]) => isTinlake)
+  centPools.forEach(([pi], qi) => {
+    indices[pi] = qi
+  })
+  tinlakePools.forEach(([pi], qi) => {
+    indices[pi] = qi
+  })
 
-export function useConstants() {
-  const centrifuge = useCentrifuge()
-  const { data } = useQuery(
-    ['constants'],
-    async () => {
-      const api = await centrifuge.getApiPromise()
+  const centData = useMetadataMulti<PoolMetadata>(centPools?.map(([, p]) => p.metadata as string) ?? [])
+  const tinlakeData = useQueries(
+    tinlakePools?.map(([, p]) => {
       return {
-        minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toHuman()),
-        maxTranches: Number(api.consts.poolSystem.maxTranches.toHuman()),
-        challengeTime: Number(api.consts.poolSystem.challengeTime.toHuman()),
-        maxWriteOffPolicySize: Number(api.consts.loans.maxWriteOffPolicySize.toHuman()),
+        queryKey: ['tinlakeMetadata', p.id],
+        queryFn: () => p.metadata as PoolMetadata,
+        enabled: !!p.metadata,
+        staleTime: Infinity,
       }
-    },
-    {
-      staleTime: Infinity,
-    }
+    })
   )
-
-  return data
+  return poolsIndexed.map(([poolIndex, , isTinlake]) => {
+    const queryIndex = indices[poolIndex]
+    return isTinlake ? tinlakeData[queryIndex] : centData[queryIndex]
+  })
 }
 
 export function useWriteOffGroups(poolId: string) {
@@ -204,16 +319,67 @@ export function useWriteOffGroups(poolId: string) {
   return result
 }
 
+const POOL_CHANGE_DELAY = 1000 * 60 * 60 * 24 * 7 // Currently hard-coded to 1 week on chain, will probably change to a constant we can query
+
 export function useLoanChanges(poolId: string) {
+  const poolOrders = usePoolOrders(poolId)
+
   const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) => cent.pools.getProposedLoanChanges([poolId]))
 
-  return result
+  const policyChanges = useMemo(() => {
+    const hasLockedRedemptions = (poolOrders?.reduce((acc, cur) => acc + cur.activeRedeem.toFloat(), 0) ?? 0) > 0
+
+    return result
+      ?.filter(({ change }) => !!change.loan?.policy?.length)
+      .map((policy) => {
+        const waitingPeriodDone = new Date(policy.submittedAt).getTime() + POOL_CHANGE_DELAY < Date.now()
+        return {
+          ...policy,
+          status: !waitingPeriodDone
+            ? ('waiting' as const)
+            : hasLockedRedemptions
+            ? ('blocked' as const)
+            : ('ready' as const),
+        }
+      })
+  }, [poolOrders, result])
+
+  return { policyChanges }
 }
 
 export function usePoolChanges(poolId: string) {
+  const pool = usePool(poolId)
+  const poolOrders = usePoolOrders(poolId)
+  const consts = useCentrifugeConsts()
   const [result] = useCentrifugeQuery(['poolChanges', poolId], (cent) => cent.pools.getProposedPoolChanges([poolId]))
 
-  return result
+  return useMemo(
+    () => {
+      if (!result) return result
+      const submittedTime = new Date(result.submittedAt).getTime()
+      const waitingPeriodDone = submittedTime + consts.poolSystem.minUpdateDelay * 1000 < Date.now()
+      const hasLockedRedemptions = (poolOrders?.reduce((acc, cur) => acc + cur.activeRedeem.toFloat(), 0) ?? 0) > 0
+      const isEpochOngoing = pool.epoch.status === 'ongoing'
+      const epochNeedsClosing = submittedTime > new Date(pool.epoch.lastClosed).getTime()
+      return {
+        ...result,
+        status: !waitingPeriodDone
+          ? ('waiting' as const)
+          : hasLockedRedemptions || !isEpochOngoing || epochNeedsClosing
+          ? ('blocked' as const)
+          : ('ready' as const),
+        blockedBy: epochNeedsClosing
+          ? ('epochNeedsClosing' as const)
+          : hasLockedRedemptions
+          ? ('redemptions' as const)
+          : !isEpochOngoing
+          ? ('epochIsClosing' as const)
+          : null,
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [result, poolOrders, pool]
+  )
 }
 
 export function usePodUrl(poolId: string) {

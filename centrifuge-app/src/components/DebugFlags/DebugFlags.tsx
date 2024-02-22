@@ -65,7 +65,7 @@ const Panel: React.FC<{
   const { showUnusedFlags } = useDebugFlags()
 
   return (
-    <StyledPanel position="fixed" bottom={0} right={0} zIndex="overlay">
+    <StyledPanel position="fixed" bottom={0} right={0} zIndex="onTopOfTheWorld">
       <Shelf
         justifyContent="center"
         width="400px"
@@ -94,17 +94,11 @@ const Panel: React.FC<{
                   name={key}
                   checked={value as boolean}
                   onChange={(e) => onChange(key as Key, e.target.checked)}
-                  disabled={!used}
                 />
               )
             } else if (obj.type === 'select' && obj.options) {
               el = (
-                <select
-                  name={key}
-                  value={value as string}
-                  onChange={(e) => onChange(key as Key, e.target.value)}
-                  disabled={!used}
-                >
+                <select name={key} value={value as string} onChange={(e) => onChange(key as Key, e.target.value)}>
                   {Object.keys(obj.options).map((option, index) => (
                     <option key={`${option}-${index}`} value={option}>
                       {option}
@@ -121,18 +115,12 @@ const Panel: React.FC<{
                   onChange={(e) => onChange(key as Key, e.target.value)}
                   type="text"
                   color="#ddd"
-                  disabled={!used}
                 />
               )
             }
 
             return visible ? (
-              <Shelf
-                as="label"
-                justifyContent="space-between"
-                key={key}
-                style={{ pointerEvents: used ? 'initial' : 'none' }}
-              >
+              <Shelf as="label" justifyContent="space-between" key={key}>
                 <Text
                   fontSize="inherit"
                   fontFamily="inherit"

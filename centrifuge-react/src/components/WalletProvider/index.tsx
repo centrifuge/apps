@@ -1,5 +1,5 @@
 export { ConnectionGuard } from './ConnectionGuard'
-export type { EvmChains } from './evm/chains'
+export * from './evm/chains'
 export type { EvmConnectorMeta } from './evm/connectors'
 export {
   createConnector,
@@ -11,5 +11,12 @@ export {
   useProviderForConnector,
 } from './evm/utils'
 export type { CombinedSubstrateAccount, EvmChainId, Network, Proxy, SubstrateAccount } from './types'
-export { getNetworkName, useGetExplorerUrl, useGetNetworkName, useNetworkName } from './utils'
+export {
+  getNetworkName,
+  useGetExplorerUrl,
+  useGetNetworkIcon,
+  useGetNetworkName,
+  useNetworkIcon,
+  useNetworkName,
+} from './utils'
 export * from './WalletProvider'

@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { Stack } from '.'
 import { Box } from '../Box'
@@ -12,9 +12,9 @@ export default {
       control: { type: 'select' },
     },
   },
-} as ComponentMeta<typeof Stack>
+} as Meta<typeof Stack>
 
-type StackStory = ComponentStory<typeof Stack>
+type StackStory = StoryFn<typeof Stack>
 const Template: StackStory = (args) => (
   <Stack {...args}>
     <Box backgroundColor="accentPrimary" minWidth={200} height={75} />

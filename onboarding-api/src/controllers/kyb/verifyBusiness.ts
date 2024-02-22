@@ -73,9 +73,9 @@ export const verifyBusinessController = async (
         confirmOwners: { completed: false, timeStamp: null },
         verifyIdentity: { completed: false, timeStamp: null },
         verifyAccreditation: { completed: false, timeStamp: null },
-        verifyTaxInfo: { completed: false, timeStamp: null },
       },
       poolSteps: {},
+      taxDocument: null,
     }
 
     if (!(jurisdictionCode.slice(0, 2) in KYB_COUNTRY_CODES)) {

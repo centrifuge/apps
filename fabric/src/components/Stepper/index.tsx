@@ -60,8 +60,7 @@ const ListItem = styled(Grid)<{ isActive?: boolean; empty?: boolean; isFinal?: b
     display: flex;
     justify-content: center;
     align-items: center;
-
-    background-color: ${({ empty, isActive, theme }) => theme.colors[getStepColor(!!isActive, !!empty)]};
+    background-color: ${({ empty, isActive, theme }) => (theme.colors as any)[getStepColor(!!isActive, !!empty)]};
     border: 2px solid;
     border-color: ${({ theme, isActive }) => (isActive ? theme.colors.textPrimary : theme.colors.borderPrimary)};
     border-radius: 50%;

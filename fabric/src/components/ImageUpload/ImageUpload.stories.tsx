@@ -1,14 +1,21 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { ImageUpload } from '.'
+import { Stack } from '../Stack'
 
 export default {
   title: 'Components/ImageUpload',
   component: ImageUpload,
-} as ComponentMeta<typeof ImageUpload>
+} as Meta<typeof ImageUpload>
 
-type ImageUploadStory = ComponentStory<typeof ImageUpload>
-const Template: ImageUploadStory = (args) => <ImageUpload {...args} />
+type ImageUploadStory = StoryFn<typeof ImageUpload>
+const Template: ImageUploadStory = (args) => (
+  <Stack gap={4}>
+    <ImageUpload {...args} />
+    <ImageUpload {...args} height="300px" label="Bigger preview" />
+    <ImageUpload {...args} height="150px" label="Different aspect ratio" />
+  </Stack>
+)
 
 export const Default = Template.bind({})
 Default.args = {
@@ -18,6 +25,5 @@ Default.args = {
   errorMessage: '',
   disabled: false,
   loading: false,
-  aspectRatio: '1 / 1',
   height: '',
 }

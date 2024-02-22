@@ -1,20 +1,20 @@
 import { Box, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 
-export const IssuerPoolViewLoanTemplatePage: React.FC = () => {
+export function IssuerPoolViewLoanTemplatePage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <ViewLoanTemplate />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
-export const ViewLoanTemplate: React.FC = () => {
+export function ViewLoanTemplate() {
   const { pid: poolId, sid: templateId } = useParams<{ pid: string; sid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)

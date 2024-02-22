@@ -4,9 +4,9 @@ import * as React from 'react'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/Dialogs/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
+import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
@@ -15,11 +15,11 @@ import { useMetadata } from '../utils/useMetadata'
 import { useAccountNfts } from '../utils/useNFTs'
 import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
-export const CollectionsPage: React.FC = () => {
+export default function CollectionsPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <Collections />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -64,14 +64,7 @@ const Collections: React.FC = () => {
 
   return (
     <Stack>
-      <PageHeader
-        title="NFTs"
-        actions={
-          <Button onClick={() => setCreateOpen(true)} variant="secondary" small icon={IconPlus} disabled={!address}>
-            Create Collection
-          </Button>
-        }
-      />
+      <PageHeader title="NFTs" />
       {featuredCollections?.length ? (
         <PageSection title="Featured collections">
           <LayoutGrid>
@@ -85,7 +78,14 @@ const Collections: React.FC = () => {
       ) : null}
 
       {address && (
-        <PageSection title="My collections">
+        <PageSection
+          title="My collections"
+          headerRight={
+            <Button onClick={() => setCreateOpen(true)} variant="secondary" small icon={IconPlus} disabled={!address}>
+              Create Collection
+            </Button>
+          }
+        >
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
               {accountNfts?.length ? (

@@ -1,5 +1,6 @@
 import React from 'react'
-import { ConvertEvmAddress } from './components/ConvertEvmAddress'
+import { config, isTestEnv } from '../../config'
+import { ConvertAddress } from './components/ConvertAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
@@ -30,87 +31,118 @@ export type DebugFlagConfig =
     }
 
 export type Key =
+  | 'showOrderExecution'
   | 'address'
   | 'evmAddress'
   | 'batchMintNFTs'
   | 'persistDebugFlags'
-  | 'showAvalanche'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
   | 'editPoolConfig'
-  | 'poolReporting'
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
   | 'showPodAccountCreation'
-  | 'convertEvmAddress'
+  | 'convertAddress'
+  | 'showTestNets'
+  | 'showSwaps'
+  | 'showPrime'
+  | 'poolCreationType'
+  | 'podAdminSeed'
+  | 'holdersReport'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
-    type: 'text',
     default: '',
-  },
-  evmAddress: {
     type: 'text',
-    default: '',
-  },
-  batchMintNFTs: {
-    type: 'checkbox',
-    default: false,
   },
   allowInvestBelowMin: {
-    type: 'checkbox',
     default: false,
+    type: 'checkbox',
   },
   alternativeTheme: {
-    type: 'checkbox',
-    default: false,
     alwaysShow: true,
-  },
-  showAvalanche: {
-    type: 'checkbox',
     default: false,
+    type: 'checkbox',
+  },
+  batchMintNFTs: {
+    default: false,
+    type: 'checkbox',
+  },
+  convertAddress: {
+    Component: ConvertAddress,
     alwaysShow: true,
-  },
-  editPoolConfig: {
-    type: 'checkbox',
-    default: false,
+    default: null,
+    type: 'component',
   },
   editAdminConfig: {
-    type: 'checkbox',
     default: false,
+    type: 'checkbox',
   },
-  poolReporting: {
+  editPoolConfig: {
+    default: false,
+    type: 'checkbox',
+  },
+  editPoolVisibility: {
+    default: false,
+    type: 'checkbox',
+  },
+  evmAddress: {
+    default: '',
+    type: 'text',
+  },
+  holdersReport: {
     type: 'checkbox',
     default: false,
   },
   persistDebugFlags: {
-    type: 'checkbox',
-    default: !!localStorage.getItem('debugFlags'),
     alwaysShow: true,
-  },
-  showUnusedFlags: {
+    default: !!localStorage.getItem('debugFlags'),
     type: 'checkbox',
-    default: false,
   },
-  editPoolVisibility: {
-    type: 'checkbox',
-    default: false,
+  podAdminSeed: {
+    default: '//Eve',
+    type: 'text',
   },
-  showPodAccountCreation: {
-    type: 'checkbox',
-    default: false,
+  poolCreationType: {
+    default: config.poolCreationType || 'immediate',
+    options: {
+      immediate: 'immediate',
+      notePreimage: 'notePreimage',
+      propose: 'propose',
+    },
+    type: 'select',
   },
   showAdvancedAccounts: {
-    type: 'checkbox',
+    alwaysShow: true,
     default: false,
-    alwaysShow: true,
+    type: 'checkbox',
   },
-  convertEvmAddress: {
-    type: 'component',
-    Component: ConvertEvmAddress,
-    default: null,
+  showOrderExecution: {
+    default: false,
+    type: 'checkbox',
+  },
+  showPodAccountCreation: {
+    default: false,
+    type: 'checkbox',
+  },
+  showPrime: {
     alwaysShow: true,
+    default: false,
+    type: 'checkbox',
+  },
+  showSwaps: {
+    default: false,
+    type: 'checkbox',
+  },
+  showTestNets: {
+    alwaysShow: true,
+    default: isTestEnv,
+    type: 'checkbox',
+  },
+  showUnusedFlags: {
+    default: false,
+    type: 'checkbox',
   },
 }

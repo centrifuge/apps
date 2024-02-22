@@ -1,5 +1,6 @@
 import Centrifuge, { Account, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { UserProvidedConfig } from '@centrifuge/centrifuge-js/dist/CentrifugeBase'
+import { getAddress, isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
@@ -40,7 +41,6 @@ export function useCentrifugeApi(): ApiRx {
     staleTime: Infinity,
   })
 
-  // @ts-ignore type mismatch
   return api!
 }
 
@@ -70,6 +70,7 @@ export function useCentrifugeConsts() {
           .add(depositPerByte.mul(new BN(LOAN_NFT_DATA_BYTES))),
         chainDecimals
       ),
+      maxWriteOffPolicySize: Number(api.consts.loans.maxWriteOffPolicySize.toPrimitive()),
     },
     proxy: {
       proxyDepositBase: new CurrencyBalance(consts.proxy.proxyDepositBase, chainDecimals),
@@ -84,6 +85,9 @@ export function useCentrifugeConsts() {
     },
     poolSystem: {
       poolDeposit: new CurrencyBalance(consts.poolSystem.poolDeposit, chainDecimals),
+      minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toPrimitive()),
+      maxTranches: Number(api.consts.poolSystem.maxTranches.toPrimitive()),
+      challengeTime: Number(api.consts.poolSystem.challengeTime.toPrimitive()),
     },
     keystore: {
       keyDeposit: CurrencyBalance.fromFloat(100, chainDecimals),
@@ -91,6 +95,12 @@ export function useCentrifugeConsts() {
     identity: {
       basicDeposit: new CurrencyBalance(consts.identity.basicDeposit, chainDecimals),
       fieldDeposit: new CurrencyBalance(consts.identity.fieldDeposit, chainDecimals),
+    },
+    transferAllowlist: {
+      receiverDeposit: CurrencyBalance.fromFloat(1, chainDecimals),
+    },
+    orderBook: {
+      minFulfillment: new CurrencyBalance(consts.orderBook.minFulfillmentAmountNative, chainDecimals),
     },
   }
 }
@@ -102,7 +112,9 @@ export function useCentrifugeUtils() {
   return {
     ...cent.utils,
     formatAddress(address: Account) {
-      return encodeAddress(address, consts.ss58Prefix)
+      return typeof address === 'string' && isEvmAddress(address)
+        ? getAddress(address)
+        : encodeAddress(address, consts.ss58Prefix)
     },
   }
 }

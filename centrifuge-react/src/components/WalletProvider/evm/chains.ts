@@ -3,6 +3,7 @@ import type { AddEthereumChainParameter } from '@web3-react/types'
 type BasicChainInformation = {
   urls: string[]
   iconUrl?: string
+  isTestnet: boolean
 }
 
 type ExtendedChainInformation = BasicChainInformation & {
@@ -11,12 +12,10 @@ type ExtendedChainInformation = BasicChainInformation & {
   blockExplorerUrl: string
 }
 
-export type EvmChains =
-  | { [chainId in 1 | 5 | 43113 | 43114]?: BasicChainInformation }
-  | { [chainId: number]: ExtendedChainInformation }
+export type EvmChains = { [chainId in 1 | 5]?: BasicChainInformation } | { [chainId: number]: ExtendedChainInformation }
 
 export function getAddChainParameters(chains: EvmChains, chainId: number): AddEthereumChainParameter | number {
-  const chainInfo = chains[chainId]
+  const chainInfo = (chains as any)[chainId]
   if (chainInfo && 'nativeCurrency' in chainInfo) {
     return {
       chainId,
@@ -32,7 +31,7 @@ export function getAddChainParameters(chains: EvmChains, chainId: number): AddEt
 
 export function getEvmUrls(chains: EvmChains) {
   return Object.keys(chains).reduce<{ [chainId: number]: string[] }>((accumulator, chainId) => {
-    const validURLs: string[] = chains[Number(chainId)].urls
+    const validURLs: string[] = (chains as any)[Number(chainId)].urls
 
     if (validURLs.length) {
       accumulator[Number(chainId)] = validURLs
@@ -49,25 +48,15 @@ const chainExtendedInfo = {
     blockExplorerUrl: 'https://etherscan.io/',
   },
   5: {
-    name: 'Görli',
+    name: 'Ethereum Görli',
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     blockExplorerUrl: 'https://goerli.etherscan.io/',
-  },
-  43113: {
-    name: 'Fuji',
-    nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
-    blockExplorerUrl: 'https://testnet.snowtrace.io/',
-  },
-  43114: {
-    name: 'Avalanche',
-    nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
-    blockExplorerUrl: 'https://snowtrace.io/',
   },
 }
 
 export function getChainInfo(chains: EvmChains, chainId: number): ExtendedChainInformation {
-  const chainInfo = chains[chainId]
-  const chainInfoExtended = chainExtendedInfo[chainId]
+  const chainInfo = (chains as any)[chainId]
+  const chainInfoExtended = (chainExtendedInfo as any)[chainId]
   return {
     ...chainInfoExtended,
     ...chainInfo,

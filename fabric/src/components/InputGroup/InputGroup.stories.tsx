@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { InputGroup } from '.'
 import { Checkbox } from '../Checkbox'
@@ -8,9 +8,9 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/InputGroup',
   component: InputGroup,
-} as ComponentMeta<typeof InputGroup>
+} as Meta<typeof InputGroup>
 
-type InputGroupStory = ComponentStory<typeof InputGroup>
+type InputGroupStory = StoryFn<typeof InputGroup>
 const Template: InputGroupStory = (args) => (
   <Stack gap={3}>
     <InputGroup {...args}>

@@ -1,13 +1,12 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { IconChevronDown } from '../..'
-import { Box } from '../Box'
-import { InputBox } from '../InputBox'
-import { Stack } from '../Stack'
-import { Text } from '../Text'
+import { IconChevronDown } from '../../icon'
+import { Flex } from '../Flex'
+import { InputUnit } from '../InputUnit'
+import { StyledInputBox } from '../TextInput'
 
 export type SelectOptionItem = {
-  label: string
+  label: React.ReactNode
   value: string
   disabled?: boolean
 }
@@ -23,7 +22,7 @@ const StyledSelect = styled.select`
   appearance: none;
   background-color: transparent;
   border: none;
-  padding: ${({ theme }) => `0 ${theme.sizes.iconMedium}px 0 0`};
+  padding-right: ${({ theme }) => `${theme.sizes.iconMedium + theme.space[1]}px`};
   margin: 0;
   width: 100%;
   font-family: inherit;
@@ -45,40 +44,45 @@ const Chevron = styled(IconChevronDown)`
   position: absolute;
   top: 0;
   right: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
   pointer-events: none;
 `
 
-export const Select: React.FC<SelectProps> = ({ options, label, placeholder, errorMessage, disabled, ...rest }) => {
+export function SelectInner({ options, placeholder, disabled, ...rest }: Omit<SelectProps, 'label' | 'errorMessage'>) {
   return (
-    <Stack gap={1} width="100%">
-      <InputBox
-        as="div"
-        label={label}
-        inputElement={
-          <>
-            <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
-            <StyledSelect disabled={disabled} {...rest}>
-              {placeholder && (
-                <option value="" disabled>
-                  {placeholder}
-                </option>
-              )}
-              {options.map((option, index) => (
-                <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
-                  {option.label}
-                </option>
-              ))}
-            </StyledSelect>
-          </>
-        }
-      />
-      {errorMessage && (
-        <Box px={2}>
-          <Text variant="label2" color="statusCritical">
-            {errorMessage}
-          </Text>
-        </Box>
-      )}
-    </Stack>
+    <Flex position="relative" width="100%">
+      <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
+      <StyledSelect disabled={disabled} {...rest}>
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((option, index) => (
+          <option key={`${index}${option.value}`} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </option>
+        ))}
+      </StyledSelect>
+    </Flex>
+  )
+}
+
+export function Select({ label, errorMessage, id, ...rest }: SelectProps) {
+  const defaultId = React.useId()
+  id ??= defaultId
+  return (
+    <InputUnit
+      id={id}
+      label={label}
+      errorMessage={errorMessage}
+      inputElement={
+        <StyledInputBox alignItems="stretch" height="input" px={1}>
+          <SelectInner id={id} {...rest} />
+        </StyledInputBox>
+      }
+    />
   )
 }

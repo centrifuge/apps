@@ -1,4 +1,4 @@
-import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
 import {
   formatBalance,
   Transaction,
@@ -17,19 +17,21 @@ import {
   ImageUpload,
   NumberInput,
   Select,
+  Shelf,
   Stack,
   Text,
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
@@ -43,11 +45,11 @@ import { combine, max, maxLength, min, positiveNumber, required } from '../../..
 import { validate } from '../../IssuerCreatePool/validate'
 import { PricingInput } from './PricingInput'
 
-export const IssuerCreateLoanPage: React.FC = () => {
+export default function IssuerCreateLoanPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <IssuerCreateLoan />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -57,7 +59,7 @@ export type CreateLoanFormValues = {
   assetName: string
   attributes: Record<string, string | number>
   pricing: {
-    valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle'
+    valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle' | 'cash'
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
     value: number | ''
     maturityDate: string
@@ -70,6 +72,7 @@ export type CreateLoanFormValues = {
     maxBorrowQuantity: number | ''
     Isin: string
     notional: number | ''
+    maxPriceVariation: number | ''
   }
 }
 
@@ -104,7 +107,6 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
             return (
               <CurrencyInput
                 {...field}
-                variant="small"
                 label={`${label}*`}
                 errorMessage={meta.touched ? meta.error : undefined}
                 currency={input.symbol}
@@ -126,7 +128,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
           label={`${label}*`}
           placeholder={input.placeholder}
           validate={combine(required(), min(input.min ?? -Infinity), max(input.max ?? Infinity))}
-          rightElement={input.unit}
+          symbol={input.unit}
           min={input.min}
           max={input.max}
         />
@@ -224,49 +226,68 @@ function IssuerCreateLoan() {
         maxBorrowQuantity: '',
         Isin: '',
         notional: '',
+        maxPriceVariation: '',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
       const { decimals } = pool.currency
-      const pricingInfo =
-        values.pricing.valuationMethod === 'oracle'
-          ? {
-              valuationMethod: values.pricing.valuationMethod,
-              maxBorrowAmount: values.pricing.maxBorrowQuantity
-                ? CurrencyBalance.fromFloat(values.pricing.maxBorrowQuantity, decimals)
-                : null,
-              Isin: values.pricing.Isin || '',
-              maturityDate: new Date(values.pricing.maturityDate),
-              maturityExtensionDays: values.pricing.maturityExtensionDays,
-              interestRate: Rate.fromPercent(values.pricing.interestRate),
-              notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
-            }
-          : {
-              valuationMethod: values.pricing.valuationMethod,
-              maxBorrowAmount: values.pricing.maxBorrowAmount,
-              value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
-              maturityDate: new Date(values.pricing.maturityDate),
-              maturityExtensionDays: values.pricing.maturityExtensionDays,
-              advanceRate: Rate.fromPercent(values.pricing.advanceRate),
-              interestRate: Rate.fromPercent(values.pricing.interestRate),
-              probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
-              lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
-              discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
-            }
+      const getPricingInfo = () => {
+        if (values.pricing.valuationMethod === 'cash') {
+          return {
+            valuationMethod: values.pricing.valuationMethod,
+            advanceRate: Rate.fromPercent(100),
+            interestRate: Rate.fromPercent(0),
+            value: new BN(2).pow(new BN(128)).subn(1), // max uint128
+            maxBorrowAmount: 'upToOutstandingDebt' as const,
+            maturityDate: new Date(values.pricing.maturityDate),
+          }
+        }
+
+        if (values.pricing.valuationMethod === 'oracle') {
+          return {
+            valuationMethod: values.pricing.valuationMethod,
+            maxPriceVariation: Rate.fromPercent(values.pricing.maxPriceVariation),
+            maxBorrowAmount: values.pricing.maxBorrowQuantity
+              ? Price.fromFloat(values.pricing.maxBorrowQuantity)
+              : null,
+            Isin: values.pricing.Isin || '',
+            maturityDate: new Date(values.pricing.maturityDate),
+            interestRate: Rate.fromPercent(values.pricing.interestRate),
+            notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
+          }
+        }
+
+        return {
+          valuationMethod: values.pricing.valuationMethod,
+          maxBorrowAmount: values.pricing.maxBorrowAmount,
+          value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+          maturityDate: new Date(values.pricing.maturityDate),
+          maturityExtensionDays: values.pricing.maturityExtensionDays,
+          advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+          interestRate: Rate.fromPercent(values.pricing.interestRate),
+          probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
+          lossGivenDefault: Rate.fromPercent(values.pricing.lossGivenDefault || 0),
+          discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
+        }
+      }
 
       const txId = Math.random().toString(36).substring(2)
 
       const tx: Transaction = {
         id: txId,
-        title: 'Create document',
+        title: 'Create asset',
         status: 'creating',
         args: [],
       }
       addTransaction(tx)
 
-      const attributes = valuesToPodAttributes(values.attributes, templateMetadata as any) as any
-      attributes._template = { type: 'string', value: templateId }
+      const attributes =
+        values.pricing.valuationMethod === 'cash'
+          ? {}
+          : (valuesToPodAttributes(values.attributes, templateMetadata as any) as any)
+      attributes._template =
+        values.pricing.valuationMethod === 'cash' ? undefined : { type: 'string', value: templateId }
 
       let imageMetadataHash
       if (values.image) {
@@ -296,10 +317,10 @@ function IssuerCreateLoan() {
             documentId,
             collectionId: collateralCollectionId,
             owner: account.actingAddress,
-            publicAttributes,
+            publicAttributes: values.pricing.valuationMethod === 'cash' ? undefined : publicAttributes,
             name: values.assetName,
-            description: values.description,
-            image: imageMetadataHash?.uri,
+            description: values.pricing.valuationMethod === 'cash' ? undefined : values.description,
+            image: values.pricing.valuationMethod === 'cash' ? undefined : imageMetadataHash?.uri,
           },
         ])
 
@@ -309,7 +330,7 @@ function IssuerCreateLoan() {
 
         // Sign createLoan transaction
         const submittable = await lastValueFrom(
-          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, pricingInfo], {
+          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, getPricingInfo()], {
             signOnly: true,
             era: 100,
             proxies: account.proxies?.map((p) => [p.delegator, p.types.includes('Borrow') ? 'Borrow' : undefined]),
@@ -325,7 +346,7 @@ function IssuerCreateLoan() {
         doTransaction([submittable], undefined, txId)
       } catch (e) {
         console.error(e)
-        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create document NFT' })
+        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create asset' })
       }
 
       setSubmitting(false)
@@ -354,31 +375,11 @@ function IssuerCreateLoan() {
     <FormikProvider value={form}>
       <Form ref={formRef} noValidate>
         <Stack>
-          <PageHeader
-            title="Create asset"
-            subtitle={poolMetadata?.pool?.name}
-            actions={
-              isAuthed && (
-                <>
-                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
-                  <Button variant="secondary" onClick={() => history.goBack()}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    loading={isPending}
-                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
-                  >
-                    Create
-                  </Button>
-                </>
-              )
-            }
-          />
+          <PageHeader title="Create asset" subtitle={poolMetadata?.pool?.name} />
           {isAuthed ? (
             <>
               <PageSection>
-                {!templateId && (
+                {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
                   <Box
                     mb={3}
                     py={2}
@@ -400,7 +401,24 @@ function IssuerCreateLoan() {
                     maxLength={100}
                     disabled={!templateId}
                   />
-                  {!templateId && (
+                  <Field name="pricing.valuationMethod">
+                    {({ field, meta, form }: FieldProps) => (
+                      <Select
+                        {...field}
+                        label="Asset type"
+                        onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        options={[
+                          { value: 'discountedCashFlow', label: 'Non-fungible asset - DCF' },
+                          { value: 'outstandingDebt', label: 'Non-fungible asset - at par' },
+                          { value: 'oracle', label: 'Fungible asset - external pricing' },
+                          { value: 'cash', label: 'Cash' },
+                        ]}
+                        placeholder="Choose asset type"
+                      />
+                    )}
+                  </Field>
+                  {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
                     <Box alignSelf="center" justifySelf="end">
                       <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`}>
                         Create template
@@ -412,56 +430,60 @@ function IssuerCreateLoan() {
               <PageSection title="Pricing">
                 <PricingInput poolId={pid} />
               </PageSection>
-              {templateMetadata?.sections?.map((section) => (
-                <PageSection
-                  title={section.name}
-                  titleAddition={
-                    section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public) ? 'Public' : 'Private'
-                  }
-                  key={section.name}
-                >
-                  <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-                    {section.attributes?.map((key) => {
-                      const attr = templateMetadata?.attributes?.[key]
-                      if (!attr) return null
-                      const name = `attributes.${key}`
-                      return <TemplateField {...attr} name={name} key={key} />
-                    })}
-                  </Grid>
-                </PageSection>
-              ))}
+              {form.values.pricing.valuationMethod !== 'cash' &&
+                templateMetadata?.sections?.map((section) => (
+                  <PageSection
+                    title={section.name}
+                    titleAddition={
+                      section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public)
+                        ? 'Public'
+                        : 'Private'
+                    }
+                    key={section.name}
+                  >
+                    <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+                      {section.attributes?.map((key) => {
+                        const attr = templateMetadata?.attributes?.[key]
+                        if (!attr) return null
+                        const name = `attributes.${key}`
+                        return <TemplateField {...attr} name={name} key={key} />
+                      })}
+                    </Grid>
+                  </PageSection>
+                ))}
 
-              {(templateMetadata?.options?.image || templateMetadata?.options?.description) && (
-                <PageSection title="Description" titleAddition="Optional">
-                  <Stack gap={3}>
-                    {templateMetadata.options.image && (
-                      <Field name="image" validate={validate.nftImage}>
-                        {({ field, meta, form }: FieldProps) => (
-                          <ImageUpload
-                            file={field.value}
-                            onFileChange={(file) => {
-                              form.setFieldTouched('image', true, false)
-                              form.setFieldValue('image', file)
-                            }}
-                            requirements="JPG/PNG/SVG, max 1MB"
-                            label="Asset image"
-                            errorMessage={meta.touched ? meta.error : undefined}
-                          />
-                        )}
-                      </Field>
-                    )}
-                    {templateMetadata.options.description && (
-                      <FieldWithErrorMessage
-                        name="description"
-                        as={TextAreaInput}
-                        label="Description"
-                        placeholder="Add asset description paragraph..."
-                        maxLength={100}
-                      />
-                    )}
-                  </Stack>
-                </PageSection>
-              )}
+              {form.values.pricing.valuationMethod !== 'cash' &&
+                (templateMetadata?.options?.image || templateMetadata?.options?.description) && (
+                  <PageSection title="Description" titleAddition="Optional">
+                    <Stack gap={3}>
+                      {templateMetadata.options.image && (
+                        <Field name="image" validate={validate.nftImage}>
+                          {({ field, meta, form }: FieldProps) => (
+                            <ImageUpload
+                              file={field.value}
+                              onFileChange={(file) => {
+                                form.setFieldTouched('image', true, false)
+                                form.setFieldValue('image', file)
+                              }}
+                              requirements="JPG/PNG/SVG, max 1MB"
+                              label="Asset image"
+                              errorMessage={meta.touched ? meta.error : undefined}
+                            />
+                          )}
+                        </Field>
+                      )}
+                      {templateMetadata.options.description && (
+                        <FieldWithErrorMessage
+                          name="description"
+                          as={TextAreaInput}
+                          label="Description"
+                          placeholder="Add asset description paragraph..."
+                          maxLength={100}
+                        />
+                      )}
+                    </Stack>
+                  </PageSection>
+                )}
             </>
           ) : podUrl ? (
             <Box py={8}>
@@ -475,6 +497,27 @@ function IssuerCreateLoan() {
             )
           )}
         </Stack>
+        <Box position="sticky" bottom={0} backgroundColor="backgroundPage" zIndex={3}>
+          <PageSection>
+            <Shelf gap={1} justifyContent="end">
+              {isAuthed && (
+                <>
+                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
+                  <Button variant="secondary" onClick={() => history.goBack()}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    loading={isPending}
+                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
+                  >
+                    Create
+                  </Button>
+                </>
+              )}
+            </Shelf>
+          </PageSection>
+        </Box>
       </Form>
     </FormikProvider>
   )

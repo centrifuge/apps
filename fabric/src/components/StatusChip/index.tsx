@@ -7,7 +7,15 @@ export type StatusChipProps = React.PropsWithChildren<{
   status: 'default' | 'info' | 'ok' | 'warning' | 'critical'
 }>
 
-const colors = {
+const backgroundColor = {
+  default: 'statusDefault',
+  info: 'statusDefault',
+  ok: 'statusOk',
+  warning: 'statusWarning',
+  critical: 'statusCritical',
+}
+
+const textColor = {
   default: 'statusDefault',
   info: 'statusInfo',
   ok: 'statusOk',
@@ -15,23 +23,23 @@ const colors = {
   critical: 'statusCritical',
 }
 
-const Wrapper = styled.span<{ $color: string }>((props) =>
+const Chip = styled(Text)((props) =>
   css({
-    padding: '0 8px',
-    borderColor: props.$color,
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderRadius: '20px',
+    display: 'inline-block',
+    px: 1,
+    bg: `${props.backgroundColor}Bg`,
+    borderRadius: 'chip',
+    whiteSpace: 'nowrap',
+    color: `${props.color}`,
   })
 )
 
-export const StatusChip: React.FC<StatusChipProps> = ({ status, children }) => {
-  const color = colors[status]
+export function StatusChip({ status, children }: StatusChipProps) {
   return (
-    <Wrapper $color={color}>
-      <Text variant="label2" lineHeight="20px" color={color}>
+    <Chip forwardedAs="span" variant="label2" lineHeight="20px" backgroundColor={backgroundColor[status]}>
+      <Text fontWeight={500} variant="label2" color={textColor[status]}>
         {children}
       </Text>
-    </Wrapper>
+    </Chip>
   )
 }

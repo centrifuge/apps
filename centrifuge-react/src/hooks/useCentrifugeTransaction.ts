@@ -1,4 +1,4 @@
-import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
+import Centrifuge, { TransactionOptions, TransactionSuccessResult } from '@centrifuge/centrifuge-js'
 import { ISubmittableResult } from '@polkadot/types/types'
 import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
@@ -7,15 +7,18 @@ import { Transaction, useTransaction, useTransactions } from '../components/Tran
 import { CombinedSubstrateAccount, SubstrateAccount, useEvmProvider, useWallet } from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
-export type CentrifugeTransactionOptions = Pick<TransactionOptions, 'createType'> & {
+export type CentrifugeTransactionOptions = Partial<Pick<TransactionOptions, 'createType'>> & {
   account?: CombinedSubstrateAccount
+  // If a transaction can be done via a proxy other than Any, pass the allowed types here,
+  // to make sure the transaction selects the right one.
+  // Otherwise by default it will try the transaction with the Any proxy type
   forceProxyType?: string | string[]
 }
 
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
   transactionCallback: (centrifuge: Centrifuge) => (args: T, options?: TransactionOptions) => Observable<any>,
-  options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
+  options: { onSuccess?: (args: T, result: TransactionSuccessResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
   const { showWallets, substrate, walletDialog, evm, isEvmOnSubstrate } = useWallet()
@@ -78,22 +81,28 @@ export function useCentrifugeTransaction<T extends Array<any>>(
             })
             let errorObject: any
 
-            if (result.dispatchError || errors.length) {
+            const { data } = result
+
+            if (result.error) {
+              txError = result.error
               let errorMessage = 'Transaction failed'
-              txError = result.dispatchError || errors[0]
-              if (errors.length) {
-                const error = errors[0].event.data[0] as any
-                if (error.isModule) {
-                  // for module errors, we have the section indexed, lookup
-                  const decoded = api.registry.findMetaError(error.asModule)
-                  const { section, method, docs } = decoded
-                  errorObject = new PalletError(section, method)
-                  errorMessage = errorObject.message || errorMessage
-                  console.error(`${section}.${method}: ${docs.join(' ')}`)
-                } else {
-                  // Other, CannotLookup, BadOrigin, no extra info
-                  console.error(error.toString())
+              if (isSubstrateResult(data)) {
+                if (errors.length) {
+                  const error = errors[0].event.data[0] as any
+                  if (error.isModule) {
+                    // for module errors, we have the section indexed, lookup
+                    const decoded = api.registry.findMetaError(error.asModule)
+                    const { section, method, docs } = decoded
+                    errorObject = new PalletError(section, method)
+                    errorMessage = errorObject.message || errorMessage
+                    console.error(`${section}.${method}: ${docs.join(' ')}`)
+                  } else {
+                    // Other, CannotLookup, BadOrigin, no extra info
+                    console.error(error.toString())
+                  }
                 }
+              } else {
+                console.error(result.error)
               }
 
               updateTransaction(id, (prev) => ({
@@ -102,14 +111,14 @@ export function useCentrifugeTransaction<T extends Array<any>>(
                 error: errorObject,
                 dismissed: prev.status === 'failed' && prev.dismissed,
               }))
-            } else if (result.status.isInBlock || result.status.isFinalized) {
+            } else if (['InBlock', 'Finalized'].includes(result.status)) {
               updateTransaction(id, (prev) =>
                 prev.status === 'failed'
                   ? {}
                   : { status: 'succeeded', dismissed: prev.status === 'succeeded' && prev.dismissed }
               )
             } else {
-              updateTransaction(id, { status: 'pending', hash: result.status.hash.toHex() })
+              updateTransaction(id, { status: 'pending', hash: result.txHash })
             }
           },
         })
@@ -172,4 +181,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       ? ['creating', 'unconfirmed', 'pending'].includes(lastCreatedTransaction.status)
       : false,
   }
+}
+
+function isSubstrateResult(data: any): data is ISubmittableResult {
+  return 'toHuman' in data
 }

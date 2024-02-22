@@ -22,31 +22,25 @@ const StyledGrid = styled(Box)`
   }
 `
 
-export const Grid: React.FC<GridProps> = ({
-  gap,
-  rowGap = gap,
-  equalRows,
-  equalColumns = false,
-  minColumnWidth,
-  columns = 2,
-  ...rest
-}) => {
-  const templateColumns = minColumnWidth
-    ? widthToColumns(minColumnWidth, equalColumns)
-    : countToColumns(columns, equalColumns)
+export const Grid = React.forwardRef<any, GridProps>(
+  ({ gap, rowGap = gap, equalRows, equalColumns = false, minColumnWidth, columns = 1, ...rest }, ref) => {
+    const templateColumns = minColumnWidth
+      ? widthToColumns(minColumnWidth, equalColumns)
+      : countToColumns(columns, equalColumns)
 
-  return (
-    <StyledGrid
-      display="grid"
-      gridColumnGap={gap}
-      gridRowGap={rowGap}
-      gridTemplateColumns={templateColumns}
-      gridAutoRows={equalRows ? '1fr' : undefined}
-      {...rest}
-    />
-  )
-}
-
+    return (
+      <StyledGrid
+        display="grid"
+        gridColumnGap={gap}
+        gridRowGap={rowGap}
+        gridTemplateColumns={templateColumns}
+        gridAutoRows={equalRows ? '1fr' : undefined}
+        {...rest}
+        ref={ref}
+      />
+    )
+  }
+)
 function widthToColumns(width: ResponsiveValue<TLengthStyledSystem>, equalColumns: boolean) {
   return mapResponsive(width, (value) => `repeat(auto-fit, minmax(${toPx(value)}, ${equalColumns ? '1fr' : 'auto'}))`)
 }

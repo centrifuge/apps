@@ -10,3 +10,7 @@ Decimal.set({
 export function Dec(value: Numeric) {
   return new Decimal(value)
 }
+
+export function min(...nums: Decimal[]) {
+  return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
+}

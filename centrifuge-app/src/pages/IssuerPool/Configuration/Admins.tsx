@@ -12,7 +12,7 @@ import { Tooltips } from '../../../components/Tooltips'
 import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { AddAddressInput } from './AddAddressInput'
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin'
+type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin' | "PODReadAccess"
 
 type Admin = {
   address: string
@@ -124,7 +124,7 @@ export function Admins({ poolId }: { poolId: string }) {
                           <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />
                         </Text>
                       ),
-                      flex: '3',
+                      width: 'max-content',
                     },
                     {
                       align: 'center',
@@ -137,7 +137,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -150,7 +149,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -163,7 +161,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -176,7 +173,6 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -189,7 +185,18 @@ export function Admins({ poolId }: { poolId: string }) {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '2',
+                    },
+                    {
+                      align: 'center',
+                      header: "Investor access",
+                      cell: (row: Row) => (
+                        <Field
+                          name={`admins.${row.index}.roles.PODReadAccess`}
+                          as={Checkbox}
+                          type="checkbox"
+                          disabled={!isEditing || isLoading}
+                        />
+                      ),
                     },
                     {
                       header: '',
@@ -202,7 +209,7 @@ export function Admins({ poolId }: { poolId: string }) {
                             disabled={isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                           />
                         ),
-                      flex: '0 0 72px',
+                      width: '72px',
                     },
                   ]}
                 />
@@ -223,7 +230,7 @@ export function Admins({ poolId }: { poolId: string }) {
   )
 }
 
-const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin']
+const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'InvestorAdmin', 'LoanAdmin', 'PODReadAccess']
 
 export function diffPermissions(storedValues: Admin[], formValues: Admin[], rolesToCheck = roles) {
   const storedObj = Object.fromEntries(storedValues.map((admin) => [admin.address, admin.roles]))

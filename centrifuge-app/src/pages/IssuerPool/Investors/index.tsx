@@ -1,22 +1,21 @@
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { PendingMultisigs } from '../../../components/PendingMultisigs'
 import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { InvestorStatus } from './InvestorStatus'
+import { LiquidityPools } from './LiquidityPools'
 import { OnboardingSettings } from './OnboardingSettings'
 
 export function IssuerPoolInvestorsPage() {
-  const { pid: poolId } = useParams<{ pid: string }>()
   return (
-    <PageWithSideBar sidebar={<PendingMultisigs poolId={poolId} />}>
+    <LayoutBase>
       <IssuerPoolHeader />
       <LoadBoundary>
         <IssuerPoolInvestors />
       </LoadBoundary>
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -28,6 +27,7 @@ function IssuerPoolInvestors() {
   return (
     <>
       {canEditInvestors && <InvestorStatus />}
+      {isPoolAdmin && <LiquidityPools />}
       {isPoolAdmin && <OnboardingSettings />}
     </>
   )

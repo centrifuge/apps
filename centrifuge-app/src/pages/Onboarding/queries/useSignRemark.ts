@@ -1,4 +1,5 @@
 import {
+  Network,
   useBalances,
   useCentrifuge,
   useCentrifugeTransaction,
@@ -6,6 +7,7 @@ import {
   useTransactions,
   useWallet,
 } from '@centrifuge/centrifuge-react'
+import { useNativeBalance } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/evm/utils'
 import { Contract } from '@ethersproject/contracts'
 import React, { useEffect } from 'react'
 import { UseMutateFunction } from 'react-query'
@@ -23,7 +25,7 @@ export const useSignRemark = (
     {
       txHash: string
       blockNumber: string
-      isEvmOnSubstrate?: boolean
+      chainId: Network
     },
     unknown
   >
@@ -37,31 +39,25 @@ export const useSignRemark = (
     connectedType,
     isEvmOnSubstrate,
     substrate: { selectedAddress, selectedAccount },
+    evm: { selectedAddress: evmSelectedAddress, chainId: evmChainId },
+    connectedNetwork,
   } = useWallet()
   const [expectedTxFee, setExpectedTxFee] = React.useState(Dec(0))
-  const balances = useBalances(selectedAddress || '')
+  const balances = useBalances(selectedAddress || undefined)
+  const { data: evmBalance } = useNativeBalance()
   const { authToken } = useOnboardingAuth()
   const [account] = useSuitableAccounts({ actingAddress: [selectedAddress || ''] })
 
   const substrateMutation = useCentrifugeTransaction('Sign remark', (cent) => cent.remark.signRemark, {
     onSuccess: async (_, result) => {
       try {
-        let txHash: string
-        let blockNumber: string
-        // @ts-expect-error
-        if (isEvmOnSubstrate && result?.[0]?.wait) {
-          // @ts-expect-error
-          const evmResult = await result[0].wait()
-          txHash = evmResult?.transactionHash
-          blockNumber = evmResult?.blockNumber.toString()
-        } else {
-          txHash = result.txHash.toHex()
-          // @ts-expect-error
-          blockNumber = result.blockNumber.toString()
-        }
-        await sendDocumentsToIssuer({ txHash, blockNumber, isEvmOnSubstrate })
-        setIsSubstrateTxLoading(false)
-      } catch (e) {
+        const chainId = connectedNetwork === 'centrifuge' ? await centrifuge.getChainId() : connectedNetwork
+        await sendDocumentsToIssuer({
+          txHash: result.txHash,
+          blockNumber: result.blockNumber.toString(),
+          chainId: chainId || 136,
+        })
+      } finally {
         setIsSubstrateTxLoading(false)
       }
     },
@@ -71,7 +67,7 @@ export const useSignRemark = (
     const txIdSignRemark = Math.random().toString(36).substr(2)
     addOrUpdateTransaction({
       id: txIdSignRemark,
-      title: `Get ${balances?.native.currency.symbol}`,
+      title: `Get ${balances?.native.currency.symbol || 'CFG'}`,
       status: 'pending',
       args: [],
     })
@@ -87,16 +83,16 @@ export const useSignRemark = (
     if (response.status !== 201) {
       addOrUpdateTransaction({
         id: txIdSignRemark,
-        title: `Get ${balances?.native.currency.symbol}`,
+        title: `Get ${balances?.native.currency.symbol || 'CFG'}`,
         status: 'failed',
         args: [],
       })
       setIsSubstrateTxLoading(false)
-      throw new Error('Insufficient funds')
+      throw new Error('Unable to get balance for signing')
     } else {
       addOrUpdateTransaction({
         id: txIdSignRemark,
-        title: `Get ${balances?.native.currency.symbol}`,
+        title: `Get ${balances?.native.currency.symbol || 'CFG'}`,
         status: 'succeeded',
         args: [],
       })
@@ -105,7 +101,10 @@ export const useSignRemark = (
 
   const signSubstrateRemark = async (args: [message: string]) => {
     setIsSubstrateTxLoading(true)
-    if (!isEvmOnSubstrate && balances?.native.balance?.toDecimal().lt(expectedTxFee.mul(1.1))) {
+    if (balances?.native.balance?.toDecimal().lt(expectedTxFee.mul(1.1))) {
+      await getBalanceForSigning()
+    }
+    if (isEvmOnSubstrate && evmBalance?.toDecimal().lt(expectedTxFee.mul(1.1))) {
       await getBalanceForSigning()
     }
     substrateMutation.execute(args, { account })
@@ -113,15 +112,20 @@ export const useSignRemark = (
 
   useEffect(() => {
     const executePaymentInfo = async () => {
-      if (selectedAccount && selectedAccount.signer) {
-        const api = await centrifuge.connect(selectedAccount.address, selectedAccount.signer as any)
+      if ((selectedAccount && selectedAccount.signer) || (isEvmOnSubstrate && evmSelectedAddress)) {
+        const address =
+          isEvmOnSubstrate && evmSelectedAddress
+            ? centrifuge.utils.evmToSubstrateAddress(evmSelectedAddress, evmChainId!)
+            : selectedAccount?.address
+        const signer = selectedAccount?.signer || (await evmProvider?.getSigner())
+        const api = await centrifuge.connect(address!, signer as any)
         const paymentInfo = await lastValueFrom(
           api.remark.signRemark(
             [
               `I hereby sign the subscription agreement of pool [POOL_ID] and tranche [TRANCHE_ID]: [IPFS_HASH_OF_TEMPLATE]`,
             ],
             {
-              paymentInfo: selectedAccount.address,
+              paymentInfo: address!,
             }
           )
         )
@@ -130,6 +134,7 @@ export const useSignRemark = (
       }
     }
     executePaymentInfo()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [centrifuge, selectedAccount])
 
   const signEvmRemark = async (args: [message: string]) => {
@@ -157,6 +162,7 @@ export const useSignRemark = (
       await sendDocumentsToIssuer({
         txHash: result.hash,
         blockNumber: finalizedTx.blockNumber.toString(),
+        chainId: connectedNetwork || 'centrifuge',
       })
       updateTransaction(txId, () => ({
         status: 'succeeded',

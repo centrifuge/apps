@@ -1,0 +1,17 @@
+name: Deploy to Catalyst and demo
+on:
+  workflow_dispatch:
+      inputs:
+          environment:
+            type: choice
+            description: where to deploy
+            options:
+                - demo
+                - catalyst
+jobs:
+  deploy:
+    name: deploy-${{ inputs.environment }}
+    uses: ./.github/workflows/deploy_all.yml
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}              

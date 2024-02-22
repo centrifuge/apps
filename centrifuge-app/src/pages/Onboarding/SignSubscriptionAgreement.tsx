@@ -3,13 +3,18 @@ import { AnchorButton, Box, Button, Checkbox, IconDownload, Shelf, Spinner, Stac
 import { useFormik } from 'formik'
 import * as React from 'react'
 import { boolean, object } from 'yup'
-import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
+import { ConfirmResendEmailVerificationDialog } from '../../components/Dialogs/ConfirmResendEmailVerificationDialog'
+import { EditOnboardingEmailAddressDialog } from '../../components/Dialogs/EditOnboardingEmailAddressDialog'
+import { ActionBar, Content, ContentHeader, Notification, NotificationBar } from '../../components/Onboarding'
 import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
+import { ValidationToast } from '../../components/ValidationToast'
 import { OnboardingUser } from '../../types'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
 import { useSignRemark } from './queries/useSignRemark'
+import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
+import { TaxInfo } from './TaxInfo'
 
 type Props = {
   signedAgreementUrl: string | undefined
@@ -32,6 +37,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
   const { data: poolMetadata } = usePoolMetadata(poolData)
   const centrifuge = useCentrifuge()
 
+  const isTaxDocsRequired = poolMetadata?.onboarding?.taxInfoRequired
   const hasSignedAgreement = !!onboardingUser.poolSteps?.[poolId]?.[trancheId]?.signAgreement.completed
   const unsignedAgreementUrl = poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri
     ? centrifuge.metadata.parseMetadataUrl(poolMetadata.onboarding.tranches[trancheId].agreement?.uri!)
@@ -39,12 +45,16 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
     ? centrifuge.metadata.parseMetadataUrl(GENERIC_SUBSCRIPTION_AGREEMENT)
     : null
 
+  const isEmailVerified = !!onboardingUser.globalSteps.verifyEmail.completed
   const formik = useFormik({
     initialValues: {
       isAgreed: hasSignedAgreement,
+      isEmailVerified,
+      taxInfo: undefined,
     },
     validationSchema,
-    onSubmit: () => {
+    onSubmit: async (values) => {
+      isTaxDocsRequired && (await uploadTaxInfo(values.taxInfo))
       signRemark([
         `I hereby sign the subscription agreement of pool ${poolId} and tranche ${trancheId}: ${poolMetadata?.onboarding?.tranches?.[trancheId]?.agreement?.uri}`,
       ])
@@ -53,6 +63,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
 
   const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
+  const { mutate: uploadTaxInfo, isLoading: isTaxUploadLoading } = useUploadTaxInfo()
 
   // tinlake pools without subdocs cannot accept investors
   const isPoolClosedToOnboarding = poolId.startsWith('0x') && !unsignedAgreementUrl
@@ -70,6 +81,12 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
 
   return !isPoolClosedToOnboarding && isCountrySupported ? (
     <Content>
+      {formik.errors.isEmailVerified && <ValidationToast label={formik.errors.isEmailVerified} />}
+      {!hasSignedAgreement && onboardingUser.investorType === 'individual' && (
+        <NotificationBar>
+          <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
+        </NotificationBar>
+      )}
       <ContentHeader
         title="Sign subscription agreement"
         body="Read the subscription agreement and click the box below to automatically e-sign the subscription agreement. You don't need to download and sign manually."
@@ -129,6 +146,14 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
           </AnchorButton>
         )}
       </Stack>
+      {isTaxDocsRequired && (
+        <TaxInfo
+          value={formik.values.taxInfo}
+          setValue={(file) => formik.setFieldValue('taxInfo', file)}
+          touched={formik.touched.taxInfo}
+          error={formik.errors.taxInfo}
+        />
+      )}
       <Checkbox
         {...formik.getFieldProps('isAgreed')}
         checked={formik.values.isAgreed}
@@ -137,19 +162,29 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
             I hereby sign and agree to the terms of the subscription agreement
           </Text>
         }
-        disabled={isSigningTransaction || isSending || hasSignedAgreement}
+        disabled={isSigningTransaction || isSending || hasSignedAgreement || isTaxUploadLoading}
         errorMessage={formik.errors.isAgreed}
       />
 
       <ActionBar>
-        <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
+        <Button
+          onClick={() => previousStep()}
+          variant="secondary"
+          disabled={isSigningTransaction || isSending || isTaxUploadLoading}
+        >
           Back
         </Button>
         <Button
           onClick={hasSignedAgreement ? () => nextStep() : () => formik.handleSubmit()}
           loadingMessage="Signing"
-          loading={isSigningTransaction || isSending}
-          disabled={isSigningTransaction || isSending}
+          loading={isSigningTransaction || isSending || isTaxUploadLoading}
+          disabled={
+            isSigningTransaction ||
+            isSending ||
+            isTaxUploadLoading ||
+            (isTaxDocsRequired && !formik.values.taxInfo) ||
+            !formik.values.isAgreed
+          }
         >
           {hasSignedAgreement ? 'Next' : 'Sign'}
         </Button>
@@ -185,5 +220,41 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl }: Props) => {
         }
       />
     </Content>
+  )
+}
+
+const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; completed: boolean }) => {
+  const [isEditOnboardingEmailAddressDialogOpen, setIsEditOnboardingEmailAddressDialogOpen] = React.useState(false)
+  const [isConfirmResendEmailVerificationDialogOpen, setIsConfirmResendEmailVerificationDialogOpen] =
+    React.useState(false)
+
+  if (completed) {
+    return <Notification>Email address verified</Notification>
+  }
+
+  return (
+    <>
+      <Notification type="alert">
+        Please verify your email address. Email sent to {email}. If you did not receive an email,{' '}
+        <button onClick={() => setIsConfirmResendEmailVerificationDialogOpen(true)}>send again</button> or{' '}
+        <button onClick={() => setIsEditOnboardingEmailAddressDialogOpen(true)}>edit email</button>. Otherwise contact{' '}
+        <a href="mailto:support@centrifuge.io?subject=Onboarding email verification&body=I’m reaching out about…">
+          support@centrifuge.io
+        </a>
+        .
+      </Notification>
+
+      <EditOnboardingEmailAddressDialog
+        currentEmail={email}
+        isDialogOpen={isEditOnboardingEmailAddressDialogOpen}
+        setIsDialogOpen={setIsEditOnboardingEmailAddressDialogOpen}
+      />
+
+      <ConfirmResendEmailVerificationDialog
+        isDialogOpen={isConfirmResendEmailVerificationDialogOpen}
+        setIsDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
+        currentEmail={email}
+      />
+    </>
   )
 }

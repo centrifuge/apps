@@ -1,25 +1,32 @@
 import { Request, Response } from 'express'
 import { InferType } from 'yup'
-import { verifyEthWallet, verifySubstrateWallet } from '../../controllers/auth/authenticateWallet'
 import { signAndSendDocumentsInput } from '../../controllers/emails/signAndSendDocuments'
 import { SupportedNetworks } from '../../database'
 import { HttpError } from '../httpError'
-import { addCentInvestorToMemberList, getCentPoolById, validateSubstrateRemark } from './centrifuge'
-import { addTinlakeInvestorToMemberList, getTinlakePoolById, validateEvmRemark } from './tinlake'
+import {
+  addCentInvestorToMemberList,
+  getCentPoolById,
+  validateSubstrateRemark,
+  verifySubstrateWallet,
+} from './centrifuge'
+import { validateEvmRemark, verifyEvmWallet, verifySafeWallet } from './evm'
+import { addTinlakeInvestorToMemberList, getTinlakePoolById } from './tinlake'
 
 export class NetworkSwitch {
-  network: SupportedNetworks
-  constructor(network: SupportedNetworks = 'substrate') {
+  network: SupportedNetworks | 'evmOnSafe'
+  constructor(network: SupportedNetworks | 'evmOnSafe' = 'substrate') {
     this.network = network
   }
 
-  verifiyWallet = (req: Request, res: Response) => {
+  verifyWallet = (req: Request, res: Response) => {
     if (this.network === 'substrate') {
       return verifySubstrateWallet(req, res)
+    } else if (this.network === 'evmOnSafe') {
+      return verifySafeWallet(req, res)
     } else if (this.network === 'evm' || this.network === 'evmOnSubstrate') {
-      return verifyEthWallet(req, res)
+      return verifyEvmWallet(req, res)
     }
-    throw new Error('Unsupported network')
+    throw new HttpError(404, 'Unsupported network')
   }
 
   validateRemark = (
@@ -36,20 +43,16 @@ export class NetworkSwitch {
   }
 
   addInvestorToMemberList = async (wallet: Request['wallet'], poolId: string, trancheId: string) => {
-    if (this.network === 'evmOnSubstrate' || this.network === 'substrate') {
-      return addCentInvestorToMemberList(wallet, poolId, trancheId)
-    } else if (this.network === 'evm') {
+    if (this.network === 'evm' && poolId.startsWith('0x')) {
       return addTinlakeInvestorToMemberList(wallet, poolId, trancheId)
     }
-    throw new HttpError(404, 'Unsupported network')
+    return addCentInvestorToMemberList(wallet, poolId, trancheId)
   }
 
   getPoolById = async (poolId: string) => {
-    if (this.network === 'evmOnSubstrate' || this.network === 'substrate') {
-      return getCentPoolById(poolId)
-    } else if (this.network === 'evm') {
+    if (this.network === 'evm' && poolId.startsWith('0x')) {
       return getTinlakePoolById(poolId)
     }
-    throw new HttpError(404, 'Unsupported network')
+    return getCentPoolById(poolId)
   }
 }

@@ -1,4 +1,4 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, ExternalLoan, Loan } from '@centrifuge/centrifuge-js'
 import { LoanTemplateAttribute } from '../../types'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -16,8 +16,12 @@ export function formatNftAttribute(value: any, attr: LoanTemplateAttribute) {
         attr.input.symbol
       )
     case 'date':
-      return formatDate(value)
+      return value ? formatDate(value) : ''
     default:
       return value
   }
+}
+
+export function isExternalLoan(loan: Loan): loan is ExternalLoan {
+  return 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
 }

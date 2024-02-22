@@ -3,11 +3,11 @@ import { Box, Grid, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Identity } from '../components/Identity'
+import { LayoutBase } from '../components/LayoutBase'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { VisibilityChecker } from '../components/VisibilityChecker'
@@ -17,11 +17,11 @@ import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
 import { useSuitableAccounts } from '../utils/usePermissions'
 
-export const CollectionPage: React.FC = () => {
+export default function CollectionPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <Collection />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -53,13 +53,6 @@ const Collection: React.FC = () => {
             <>
               by <Identity address={collection.owner} clickToCopy />
             </>
-          )
-        }
-        actions={
-          canMint && (
-            <RouterLinkButton to={`/nfts/collection/${collectionId}/object/mint`} variant="secondary" small>
-              Mint NFT
-            </RouterLinkButton>
           )
         }
       />
@@ -134,7 +127,16 @@ const Collection: React.FC = () => {
       </Stack>
       {nfts?.length ? (
         <>
-          <PageSection title={`${collection?.items ?? 0} NFTs`}>
+          <PageSection
+            title={`${collection?.items ?? 0} NFTs`}
+            headerRight={
+              canMint && (
+                <RouterLinkButton to={`/nfts/collection/${collectionId}/object/mint`} variant="secondary" small>
+                  Mint NFT
+                </RouterLinkButton>
+              )
+            }
+          >
             <Grid gap={[2, 3]} columns={[1, 2, 2, 3, 4]} equalColumns>
               {nfts.slice(0, shownCount).map((nft) => (
                 <NFTCard nft={nft} key={nft.id} />

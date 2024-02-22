@@ -1,4 +1,4 @@
-import { CurrencyBalance, isSameAddress, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, isSameAddress, Perquintill, Rate, TransactionOptions } from '@centrifuge/centrifuge-js'
 import { CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   useBalances,
@@ -14,6 +14,7 @@ import {
   FileUpload,
   Grid,
   Select,
+  Shelf,
   Text,
   TextInput,
   TextWithPlaceholder,
@@ -25,12 +26,13 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
+import { LayoutBase } from '../../components/LayoutBase'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
-import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
@@ -48,17 +50,16 @@ import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
 
-const ASSET_CLASSES = config.assetClasses.map((label) => ({
-  label,
-  value: label,
+const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
+  label: key,
+  value: key,
 }))
-const DEFAULT_ASSET_CLASS = config.defaultAssetClass
 
-export const IssuerCreatePoolPage: React.FC = () => {
+export default function IssuerCreatePoolPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <CreatePoolForm />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -97,13 +98,14 @@ export type CreatePoolValues = Omit<
 const initialValues: CreatePoolValues = {
   poolIcon: null,
   poolName: '',
-  assetClass: DEFAULT_ASSET_CLASS,
+  assetClass: 'Private credit',
+  subAssetClass: '',
   currency: '',
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   podEndpoint: config.defaultPodUrl ?? '',
-  listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_NEW_POOLS,
+  listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
 
   issuerName: '',
   issuerRepName: '',
@@ -154,6 +156,9 @@ function CreatePoolForm() {
   const [preimageHash, setPreimageHash] = React.useState('')
   const [createdPoolId, setCreatedPoolId] = React.useState('')
   const [multisigData, setMultisigData] = React.useState<{ hash: string; callData: string }>()
+  const { poolCreationType } = useDebugFlags()
+  const consts = useCentrifugeConsts()
+  const createType = (poolCreationType as TransactionOptions['createType']) || config.poolCreationType || 'immediate'
 
   React.useEffect(() => {
     // If the hash can't be found on Pinata the request can take a long time to time out
@@ -182,7 +187,7 @@ function CreatePoolForm() {
     notePreimage: 'Note preimage',
   }
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    `${txMessage[config.poolCreationType || 'immediate']} 2/2`,
+    `${txMessage[createType]} 2/2`,
     (cent) =>
       (
         args: [
@@ -200,9 +205,11 @@ function CreatePoolForm() {
       ) => {
         const [transferToMultisig, aoProxy, adminProxy, , , , , , { adminMultisig }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
-        console.log('adminMultisig', multisigAddr)
         const poolArgs = args.slice(2) as any
-        return combineLatest([cent.getApi(), cent.pools.createPool(poolArgs, { batch: true })]).pipe(
+        return combineLatest([
+          cent.getApi(),
+          cent.pools.createPool(poolArgs, { createType: options?.createType, batch: true }),
+        ]).pipe(
           switchMap(([api, poolSubmittable]) => {
             const adminProxyDelegate = multisigAddr ?? address
             const otherMultisigSigners =
@@ -210,15 +217,10 @@ function CreatePoolForm() {
             const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
             const submittable = api.tx.utility.batchAll(
               [
-                api.tx.balances.transfer(
-                  adminProxy,
-                  new CurrencyBalance(api.consts.proxy.proxyDepositFactor, chainDecimals).add(transferToMultisig)
-                ),
+                api.tx.balances.transfer(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
                 api.tx.balances.transfer(
                   aoProxy,
-                  new CurrencyBalance(api.consts.proxy.proxyDepositFactor, chainDecimals).add(
-                    new CurrencyBalance(api.consts.uniques.collectionDeposit, chainDecimals)
-                  )
+                  consts.proxy.proxyDepositFactor.add(consts.uniques.collectionDeposit)
                 ),
                 adminProxyDelegate !== address &&
                   api.tx.proxy.proxy(
@@ -251,7 +253,7 @@ function CreatePoolForm() {
       onSuccess: (args) => {
         if (form.values.adminMultisigEnabled) setIsMultisigDialogOpen(true)
         const [, , , poolId] = args
-        if (config.poolCreationType === 'immediate') {
+        if (createType === 'immediate') {
           setCreatedPoolId(poolId)
         }
       },
@@ -259,7 +261,7 @@ function CreatePoolForm() {
   )
 
   const { execute: createProxies, isLoading: createProxiesIsPending } = useCentrifugeTransaction(
-    `${txMessage[config.poolCreationType || 'immediate']} 1/2`,
+    `${txMessage[createType]} 1/2`,
     (cent) => {
       return (_: [nextTx: (adminProxy: string, aoProxy: string) => void], options) =>
         cent.getApi().pipe(
@@ -395,7 +397,7 @@ function CreatePoolForm() {
               CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
               metadataValues,
             ],
-            { createType: config.poolCreationType }
+            { createType }
           )
         },
       ])
@@ -420,7 +422,7 @@ function CreatePoolForm() {
   }, [isStoredIssuerLoading])
 
   React.useEffect(() => {
-    if (config.poolCreationType === 'notePreimage') {
+    if (createType === 'notePreimage') {
       const $events = centrifuge
         .getEvents()
         .pipe(
@@ -436,7 +438,7 @@ function CreatePoolForm() {
         .subscribe()
       return () => $events.unsubscribe()
     }
-  }, [centrifuge])
+  }, [centrifuge, createType])
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
@@ -446,6 +448,12 @@ function CreatePoolForm() {
     .add(poolDeposit.toDecimal())
     .add(collectionDeposit.toDecimal())
   const deposit = createDeposit.add(proxyDeposit.toDecimal())
+
+  const subAssetClasses =
+    config.assetClasses[form.values.assetClass]?.map((label) => ({
+      label,
+      value: label,
+    })) ?? []
 
   return (
     <>
@@ -472,25 +480,6 @@ function CreatePoolForm() {
               <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
                 by {form.values.issuerName || (address && truncate(address))}
               </TextWithPlaceholder>
-            }
-            actions={
-              <>
-                <Text variant="body3">
-                  Deposit required: {formatBalance(deposit, balances?.native.currency.symbol, 1)}
-                </Text>
-
-                <Button variant="secondary" onClick={() => history.goBack()}>
-                  Cancel
-                </Button>
-
-                <Button
-                  loading={form.isSubmitting || createProxiesIsPending || transactionIsPending}
-                  type="submit"
-                  loadingMessage={`Creating pool ${form.isSubmitting || createProxiesIsPending ? '1/2' : '2/2'}`}
-                >
-                  Create
-                </Button>
-              </>
             }
           />
           <PageSection title="Details">
@@ -528,11 +517,30 @@ function CreatePoolForm() {
                     <Select
                       name="assetClass"
                       label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                      onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
+                      onChange={(event) => {
+                        form.setFieldValue('assetClass', event.target.value)
+                        form.setFieldValue('subAssetClass', '', false)
+                      }}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
                       options={ASSET_CLASSES}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
+                <Field name="subAssetClass" validate={validate.subAssetClass}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <Select
+                      name="subAssetClass"
+                      label="Secondary asset class"
+                      onChange={(event) => form.setFieldValue('subAssetClass', event.target.value)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={subAssetClasses}
                       placeholder="Select..."
                     />
                   )}
@@ -563,7 +571,6 @@ function CreatePoolForm() {
                       label="Initial maximum reserve*"
                       placeholder="0"
                       currency={form.values.currency}
-                      variant="small"
                       onChange={(value) => form.setFieldValue('maxReserve', value)}
                     />
                   )}
@@ -587,6 +594,25 @@ function CreatePoolForm() {
           <TrancheSection />
 
           <AdminMultisigSection />
+          <Box position="sticky" bottom={0} backgroundColor="backgroundPage" zIndex={3}>
+            <PageSection>
+              <Shelf gap={1} justifyContent="end">
+                <Text variant="body3">
+                  Deposit required: {formatBalance(deposit, balances?.native.currency.symbol, 1)}
+                </Text>
+                <Button variant="secondary" onClick={() => history.goBack()}>
+                  Cancel
+                </Button>
+                <Button
+                  loading={form.isSubmitting || createProxiesIsPending || transactionIsPending}
+                  type="submit"
+                  loadingMessage={`Creating pool ${form.isSubmitting || createProxiesIsPending ? '1/2' : '2/2'}`}
+                >
+                  Create
+                </Button>
+              </Shelf>
+            </PageSection>
+          </Box>
         </Form>
       </FormikProvider>
     </>

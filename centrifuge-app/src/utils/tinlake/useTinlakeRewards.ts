@@ -4,12 +4,13 @@ import Decimal from 'decimal.js-light'
 import { useQuery } from 'react-query'
 import { combineLatest, map } from 'rxjs'
 import { useAddress } from '../../utils/useAddress'
+import { isEvmAddress } from '../address'
 import { RewardBalance, RewardClaim, RewardDayTotals, RewardsData, UserRewardsData } from './types'
 
 async function getTinlakeUserRewards(ethAddr: string) {
   let rewardBalances: RewardBalance[] = []
 
-  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+  const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -66,14 +67,14 @@ async function getTinlakeUserRewards(ethAddr: string) {
 
 export function useTinlakeUserRewards(ethAddr?: string | null) {
   return useQuery(['getTinlakeUserRewards', ethAddr], () => getTinlakeUserRewards(ethAddr!), {
-    enabled: !!ethAddr,
+    enabled: !!ethAddr && isEvmAddress(ethAddr),
   })
 }
 
 async function getTinlakeRewards(): Promise<RewardsData | null> {
   let rewardDayTotals: RewardDayTotals[] = []
 
-  const response = await fetch('https://graph.centrifuge.io/tinlake', {
+  const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

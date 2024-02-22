@@ -13,7 +13,7 @@ import { useTinlakeTransaction } from '../../utils/tinlake/useTinlakeTransaction
 import { useAddress } from '../../utils/useAddress'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { InvestRedeemContext } from './InvestRedeemProvider'
-import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
+import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
 export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Props) {
   const address = useAddress('evm')
@@ -28,7 +28,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
   const { data: investment, refetch: refetchInvestment } = useTinlakeInvestments(poolId, address)
-  const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances()
+  const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances(address)
   const { data: nativeBalance, refetch: refetchBalance, isLoading: isBalanceLoading } = useNativeBalance()
   const { data: permissions, isLoading: isPermissionsLoading } = useTinlakePermissions(poolId, address)
   const trancheInvestment = investment?.[seniority]
@@ -72,13 +72,18 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       setPendingAction(name)
     }
   }
+  React.useEffect(() => {
+    if (pendingAction && pendingTransaction?.status === 'succeeded') {
+      refetchInvestment()
+      refetchBalance()
+      refetchBalances()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTransaction?.status])
 
   function useActionSucceeded(cb: (action: InvestRedeemAction) => void) {
     React.useEffect(() => {
       if (pendingAction && pendingTransaction?.status === 'succeeded') {
-        refetchInvestment()
-        refetchBalance()
-        refetchBalances()
         cb(pendingAction)
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,9 +105,11 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       trancheMeta?.minInitialInvestment || 0,
       pool.currency.decimals
     ).toDecimal(),
+    minOrder: Dec(0),
     nativeBalance: nativeBalance?.toDecimal() || Dec(0),
+    poolCurrencies: [pool.currency],
     poolCurrencyBalance: poolCurrencyBalance,
-    poolCUrrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
+    poolCurrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
     trancheBalance,
     trancheBalanceWithPending: combinedBalance,
     investmentValue,
@@ -116,12 +123,15 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       remainingRedeemToken: disburse?.remainingRedeemToken || Dec(0),
     },
     collectAmount,
-    collectType: disburse?.payoutCurrencyAmount.isZero() ? 'invest' : 'redeem',
+    collectType: !disburse?.payoutCurrencyAmount.isZero() ? 'redeem' : !disburse?.payoutTokenAmount.isZero() ? 'invest' : null,
     needsToCollectBeforeOrder: !collectAmount.isZero(),
-    needsPoolCurrencyApproval: !!trancheInvestment?.poolCurrencyAllowance.isZero(),
-    needsTrancheTokenApproval: !!trancheInvestment?.tokenAllowance.isZero(),
+    needsPoolCurrencyApproval: () => !!trancheInvestment?.poolCurrencyAllowance.isZero(),
+    needsTrancheTokenApproval: () => !!trancheInvestment?.tokenAllowance.isZero(),
+    canChangeOrder: true,
+    canCancelOrder: true,
     pendingAction,
-    pendingTransaction: pendingAction && txActions[pendingAction]?.lastCreatedTransaction,
+    pendingTransaction,
+    actingAddress: address,
   }
 
   const actions: InvestRedeemActions = {
@@ -132,6 +142,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     approveTrancheToken: doAction('approveTrancheToken', () => [seniority]),
     cancelInvest: doAction('cancelInvest', () => [seniority, new BN(0)]),
     cancelRedeem: doAction('cancelRedeem', () => [seniority, new BN(0)]),
+    selectPoolCurrency() {},
   }
 
   const hooks = {

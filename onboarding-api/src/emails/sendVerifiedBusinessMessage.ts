@@ -59,7 +59,7 @@ export const sendVerifiedBusinessMessage = async (
     from: {
       name: 'Centrifuge',
       email: isGloballyOnboarding
-        ? 'hello@centrifuge.io'
+        ? 'support@centrifuge.io'
         : `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,
     },
   }

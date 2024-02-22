@@ -1,6 +1,8 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { evmChains } from '../../config'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
@@ -10,17 +12,14 @@ import { Spinner } from '../Spinner'
 import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
-import { formatInvestorTransactionsType } from './utils'
+import { copyable, formatInvestorTransactionsType } from './utils'
 
-function truncate(string: string) {
-  const first = string.slice(0, 5)
-  const last = string.slice(-5)
-
-  return `${first}...${last}`
-}
+const noop = (v: any) => v
+const cellFormatters = [noop, noop, copyable, noop, noop, noop, noop, noop, noop]
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
-  const { activeTranche, setCsvData, startDate, endDate } = React.useContext(ReportContext)
+  const { activeTranche, setCsvData, startDate, endDate, investorTxType } = React.useContext(ReportContext)
+  const utils = useCentrifugeUtils()
 
   const transactions = useInvestorTransactions(
     pool.id,
@@ -31,6 +30,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
 
   const headers = [
     'Token',
+    'Network',
     'Account',
     'Epoch',
     'Date',
@@ -39,13 +39,11 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     'Token amount',
     'Price',
   ]
-  const columnWidths = ['220px', '150px', '100px', '120px', '300px', '180px', '180px', '180px']
 
   const columns = headers.map((col, index) => ({
     align: 'left',
     header: col,
-    cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-    flex: `0 0 ${columnWidths[index]}`,
+    cell: (row: TableDataRow) => <Text variant="body2">{cellFormatters[index]((row.value as any)[index])}</Text>,
   }))
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -53,31 +51,66 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       return []
     }
 
-    return transactions?.map((tx) => {
-      const tokenId = tx.trancheId.split('-')[1]
-      const token = pool.tranches.find((t) => t.id === tokenId)!
+    return transactions
+      ?.filter((tx) => {
+        if (investorTxType == 'all') {
+          return true
+        }
 
-      return {
-        name: '',
-        value: [
-          token.currency.name,
-          truncate(tx.accountId),
-          tx.epochNumber.toString(),
-          formatDate(tx.timestamp.toString()),
-          formatInvestorTransactionsType({
-            type: tx.type,
-            trancheTokenSymbol: token.currency.symbol,
-            poolCurrencySymbol: pool.currency.symbol,
-            currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toNumber() : null,
-          }),
-          tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal(), pool.currency) : '-',
-          tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.currency) : '-',
-          tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 4) : '-',
-        ],
-        heading: false,
-      }
-    })
-  }, [transactions, pool.currency, pool.tranches])
+        if (
+          investorTxType == 'orders' &&
+          (tx.type == 'INVEST_ORDER_UPDATE' ||
+            tx.type == 'REDEEM_ORDER_UPDATE' ||
+            tx.type == 'INVEST_ORDER_CANCEL' ||
+            tx.type == 'REDEEM_ORDER_CANCEL')
+        ) {
+          return true
+        }
+
+        if (investorTxType == 'executions' && (tx.type == 'INVEST_EXECUTION' || tx.type == 'REDEEM_EXECUTION')) {
+          return true
+        }
+
+        if (
+          investorTxType == 'transfers' &&
+          (tx.type == 'INVEST_COLLECT' ||
+            tx.type == 'REDEEM_COLLECT' ||
+            tx.type == 'INVEST_LP_COLLECT' ||
+            tx.type == 'REDEEM_LP_COLLECT' ||
+            tx.type == 'TRANSFER_IN' ||
+            tx.type == 'TRANSFER_OUT')
+        ) {
+          return true
+        }
+
+        return false
+      })
+      .map((tx) => {
+        const tokenId = tx.trancheId.split('-')[1]
+        const token = pool.tranches.find((t) => t.id === tokenId)!
+
+        return {
+          name: '',
+          value: [
+            token.currency.name,
+            (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
+            tx.evmAddress || utils.formatAddress(tx.accountId),
+            tx.epochNumber ? tx.epochNumber.toString() : '-',
+            formatDate(tx.timestamp.toString()),
+            formatInvestorTransactionsType({
+              type: tx.type,
+              trancheTokenSymbol: token.currency.symbol,
+              poolCurrencySymbol: pool.currency.symbol,
+              currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toNumber() : null,
+            }),
+            tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal(), pool.currency) : '-',
+            tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.tranches[0].currency) : '-', // TODO: not hardcode to 0
+            tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 6) : '-',
+          ],
+          heading: false,
+        }
+      })
+  }, [transactions, pool.currency, pool.tranches, investorTxType])
 
   const dataUrl = React.useMemo(() => {
     if (!data.length) {
@@ -111,7 +144,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   }
 
   return data.length > 0 ? (
-    <DataTable data={data} columns={columns} hoverable rounded={false} />
+    <DataTable data={data} columns={columns} hoverable />
   ) : (
     <UserFeedback reportType="Investor transactions" />
   )

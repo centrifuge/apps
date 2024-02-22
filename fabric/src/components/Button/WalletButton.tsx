@@ -60,7 +60,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
         icon={
           address ? (
             <IdenticonWrapper>
-              {React.isValidElement(icon) ? icon : <Identicon value={address} size={24} theme={icon} />}
+              {typeof icon === 'string' ? <Identicon value={address} size={24} theme={icon} /> : icon}
             </IdenticonWrapper>
           ) : undefined
         }
@@ -74,7 +74,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
             <Shelf position="absolute" top="0" bottom="0" left="0" width="100%" m="auto" height="30px">
               <Text
                 fontSize={small ? 14 : 16}
-                color="inherit"
+                color="textInteractive"
                 fontWeight={500}
                 style={{
                   overflow: 'hidden',
@@ -86,12 +86,17 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
             </Shelf>
           </Box>
         ) : (
-          <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500} style={{ margin: address ? 0 : 'auto' }}>
+          <Text
+            fontSize={small ? 14 : 16}
+            color="textInteractive"
+            fontWeight={500}
+            style={{ margin: address ? 0 : 'auto' }}
+          >
             {displayAddress ? truncate(displayAddress) : connectLabel}
           </Text>
         )}
         {address && balance && (
-          <Text variant="body3" color="inherit" style={{ marginLeft: 'auto' }}>
+          <Text variant="body3" color="textInteractive" style={{ marginLeft: 'auto' }}>
             {balance}
           </Text>
         )}

@@ -1,5 +1,11 @@
 import { findBalance, Pool, Token } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  getChainInfo,
+  useBalances,
+  useCentrifugeTransaction,
+  useCentrifugeUtils,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import {
   Button,
   Grid,
@@ -9,26 +15,46 @@ import {
   IconMinus,
   IconPlus,
   SearchInput,
+  Select,
   Shelf,
   Stack,
   Text,
   TextWithPlaceholder,
 } from '@centrifuge/fabric'
+import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress } from '@polkadot/util-crypto'
 import React from 'react'
 import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
+import { useActiveDomains } from '../../../utils/useLiquidityPools'
 import { usePermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { useOrder, usePool } from '../../../utils/usePools'
 
 const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
 
-export const InvestorStatus: React.FC = () => {
+export function InvestorStatus() {
+  const {
+    evm: { chains },
+    substrate: { evmChainId: substrateEvmChainId },
+  } = useWallet()
   const { pid: poolId } = useParams<{ pid: string }>()
   const [address, setAddress] = React.useState('')
-  const validAddress = isAddress(address) ? address : undefined
-  const permissions = usePermissions(validAddress)
+  const [chain, setChain] = React.useState<number | ''>('')
+  const validator = chain ? isEvmAddress : isAddress
+  const validAddress = validator(address) ? address : undefined
+  const utils = useCentrifugeUtils()
+  const centAddress =
+    chain && validAddress
+      ? utils.evmToSubstrateAddress(address, chain)
+      : chain === '' && substrateEvmChainId && isEvmAddress(address)
+      ? utils.evmToSubstrateAddress(address, substrateEvmChainId)
+      : validAddress
+  const permissions = usePermissions(centAddress)
+
+  const { data: domains } = useActiveDomains(poolId)
+  const deployedLpChains = domains?.map((d) => d.chainId) ?? []
+
   const [pendingTrancheId, setPendingTrancheId] = React.useState('')
 
   const [account] = useSuitableAccounts({ poolId, poolRole: ['InvestorAdmin'] })
@@ -45,15 +71,20 @@ export const InvestorStatus: React.FC = () => {
   const pool = usePool(poolId) as Pool
 
   function toggleAllowed(trancheId: string) {
-    if (!validAddress) return
+    if (!centAddress || !validAddress) return
     const isAllowed = allowedTranches.includes(trancheId)
     const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
     const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
+    const domains = chain ? [[chain, validAddress]] : undefined
 
     if (isAllowed) {
-      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]], { account })
+      execute([poolId, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
+        account,
+      })
     } else {
-      execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []], { account })
+      execute([poolId, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []], {
+        account,
+      })
     }
     setPendingTrancheId(trancheId)
   }
@@ -64,12 +95,21 @@ export const InvestorStatus: React.FC = () => {
       subtitle="Display investor status, and add or remove from investor memberlist."
     >
       <Stack gap={2}>
-        <Grid columns={2} equalColumns gap={4} alignItems="center">
-          <SearchInput
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter address..."
-            clear={() => setAddress('')}
+        <Grid columns={2} gap={2} alignItems="center">
+          <SearchInput value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address..." />
+          <Select
+            value={chain}
+            options={[
+              { value: '', label: 'Centrifuge' },
+              ...deployedLpChains.map((chainId) => ({
+                value: String(chainId),
+                label: getChainInfo(chains, chainId).name,
+              })),
+            ]}
+            onChange={(e) => {
+              setChain(Number(e.target.value))
+            }}
+            disabled={!deployedLpChains.length}
           />
           {address && !validAddress ? (
             <Text variant="label2" color="statusCritical">
@@ -97,7 +137,7 @@ export const InvestorStatus: React.FC = () => {
             ) : null)
           )}
         </Grid>
-        {pool?.tranches && validAddress && permissions && (
+        {pool?.tranches && centAddress && permissions && (
           <DataTable
             data={pool.tranches}
             columns={[
@@ -109,13 +149,11 @@ export const InvestorStatus: React.FC = () => {
                     {row.currency.name}
                   </Text>
                 ),
-                flex: '1',
               },
               {
                 align: 'left',
                 header: 'Investment',
-                cell: (row: Token) => <InvestedCell address={validAddress} poolId={poolId} trancheId={row.id} />,
-                flex: '1',
+                cell: (row: Token) => <InvestedCell address={centAddress} poolId={poolId} trancheId={row.id} />,
               },
               {
                 header: '',
@@ -135,7 +173,6 @@ export const InvestorStatus: React.FC = () => {
                     </Button>
                   )
                 },
-                flex: '1',
               },
             ]}
           />

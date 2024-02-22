@@ -13,7 +13,6 @@ export function getPolkadotApi(
     cached[wsUrl] ||
     (cached[wsUrl] = ApiRx.create({
       provider: new WsProvider(wsUrl),
-      // @ts-ignore
       types,
       rpc,
       runtime,

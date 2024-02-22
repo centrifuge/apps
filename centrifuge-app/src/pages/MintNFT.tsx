@@ -3,7 +3,7 @@ import { useAsyncCallback, useBalances, useCentrifuge, useCentrifugeTransaction 
 import {
   Box,
   Button,
-  Flex,
+  Grid,
   ImageUpload,
   NumberInput,
   Shelf,
@@ -15,10 +15,11 @@ import {
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
+import { ButtonGroup } from '../components/ButtonGroup'
 import { useDebugFlags } from '../components/DebugFlags'
+import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
-import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { nftMetadataSchema } from '../schemas'
 import { Dec } from '../utils/Decimal'
@@ -44,11 +45,11 @@ const ALLOWED_TYPES = [
 ]
 const ACCEPT_STRING = ALLOWED_TYPES.join(',')
 
-export const MintNFTPage: React.FC = () => {
+export default function MintNFTPage() {
   return (
-    <PageWithSideBar>
+    <LayoutBase>
       <MintNFT />
-    </PageWithSideBar>
+    </LayoutBase>
   )
 }
 
@@ -137,31 +138,10 @@ const MintNFT: React.FC = () => {
   return (
     <form onSubmit={execute} action="">
       <Stack>
-        <PageHeader
-          title={nftName || DEFAULT_NFT_NAME}
-          subtitle={collectionMetadata?.name}
-          actions={
-            <>
-              {uploadError && <Text color="criticalPrimary">Image failed to upload</Text>}
-              {(balanceLow || !canMint) && (
-                <Text variant="label1" color="criticalForeground">
-                  {!canMint
-                    ? `You're not the owner of the collection`
-                    : `Your balance is too low (${(balanceDec || 0).toFixed(2)} AIR)`}
-                </Text>
-              )}
-              <Button disabled={submitDisabled} type="submit" loading={isMinting}>
-                Mint
-              </Button>
-              <RouterLinkButton to={`/nfts/collection/${collectionId}`} variant="secondary">
-                Cancel
-              </RouterLinkButton>
-            </>
-          }
-        />
+        <PageHeader title={nftName || DEFAULT_NFT_NAME} subtitle={collectionMetadata?.name} />
         <PageSection>
           <Shelf alignItems="stretch" flexWrap="wrap" gap={4}>
-            <Flex alignItems="stretch" justifyContent="center" flex="1 1 60%" aspectRatio="3 / 2">
+            <Grid flex="1 1 60%" aspectRatio="3 / 2">
               <ImageUpload
                 key={version}
                 file={file}
@@ -179,8 +159,9 @@ const MintNFT: React.FC = () => {
                   }
                 }}
                 accept={ACCEPT_STRING}
+                height="50vh"
               />
-            </Flex>
+            </Grid>
             <Box flex="1 1 30%" minWidth={250}>
               <Box mb={3}>
                 <TextInput
@@ -218,6 +199,25 @@ const MintNFT: React.FC = () => {
                   />
                 </Box>
               )}
+
+              <Stack gap={1} mt={3}>
+                <ButtonGroup>
+                  <RouterLinkButton to={`/nfts/collection/${collectionId}`} variant="secondary">
+                    Cancel
+                  </RouterLinkButton>
+                  <Button disabled={submitDisabled} type="submit" loading={isMinting}>
+                    Mint
+                  </Button>
+                </ButtonGroup>
+                {uploadError && <Text color="criticalPrimary">Image failed to upload</Text>}
+                {(balanceLow || !canMint) && (
+                  <Text variant="label1" color="criticalForeground">
+                    {!canMint
+                      ? `You're not the owner of the collection`
+                      : `Your balance is too low (${(balanceDec || 0).toFixed(2)} AIR)`}
+                  </Text>
+                )}
+              </Stack>
             </Box>
           </Shelf>
         </PageSection>

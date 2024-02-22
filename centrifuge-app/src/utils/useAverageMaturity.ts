@@ -10,7 +10,7 @@ export const useAverageMaturity = (poolId: string) => {
   const avgMaturity = React.useMemo(() => {
     const assets = (loans && [...loans].filter((asset) => asset.status === 'Active')) as ActiveLoan[]
     const maturityPerAsset = assets.reduce((sum, asset) => {
-      if ('maturityDate' in asset.pricing) {
+      if ('maturityDate' in asset.pricing && asset.pricing.valuationMethod !== 'cash') {
         return sum.add(
           Dec(daysBetween(asset.originationDate, asset.pricing.maturityDate)).mul(asset.outstandingDebt.toDecimal())
         )

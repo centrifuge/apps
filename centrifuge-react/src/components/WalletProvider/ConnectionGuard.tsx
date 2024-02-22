@@ -8,22 +8,41 @@ type Props = {
   networks: Network[]
   children: React.ReactNode
   body?: string
+  variant?: 'card' | 'plain'
+  showConnect?: boolean
 }
 
-export function ConnectionGuard({ networks, children, body = 'Unsupported network.' }: Props) {
+export function ConnectionGuard({
+  networks,
+  children,
+  variant = 'plain',
+  showConnect,
+  body = 'Unsupported network.',
+}: Props) {
   const {
     isEvmOnSubstrate,
     connectedType,
     connectedNetwork,
-    evm: { chains, selectedWallet },
+    evm: { selectedWallet },
     substrate: { evmChainId },
     showWallets,
+    showNetworks,
     connect,
   } = useWallet()
-
   const getName = useGetNetworkName()
 
   if (!connectedNetwork) {
+    if (showConnect) {
+      const element = (
+        <Stack gap={2} pb={3}>
+          <Text variant="body3">{body}</Text>
+          <Button onClick={() => showNetworks()}>Connect</Button>
+        </Stack>
+      )
+
+      if (variant === 'card') return <Card p={2}>{element}</Card>
+      return element
+    }
     return <>{children}</>
   }
 
@@ -43,45 +62,46 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
 
   const name = getName(networks[0])
 
-  if (connectedNetwork) {
-    return (
-      <Card p={2}>
-        <Stack gap={2} pb={3}>
-          <Text variant="body3">{body}</Text>
-          {networks.length === 1 ? (
-            <Button onClick={() => switchNetwork(networks[0])}>Switch to {name}</Button>
-          ) : (
-            <Popover
-              renderTrigger={(props, ref, state) => (
-                <Stack ref={ref} width="100%" alignItems="stretch">
-                  <Button iconRight={IconChevronDown} active={state.isOpen} {...props}>
-                    Switch Network
-                  </Button>
-                </Stack>
-              )}
-              renderContent={(props, ref, state) => (
-                <div {...props} ref={ref}>
-                  <Menu>
-                    <MenuItemGroup>
-                      {networks.map((network) => (
-                        <MenuItem
-                          label={network === 'centrifuge' ? 'Centrifuge' : chains[network]?.name}
-                          onClick={() => {
-                            state.close()
-                            switchNetwork(network)
-                          }}
-                          key={network}
-                        />
-                      ))}
-                    </MenuItemGroup>
-                  </Menu>
-                </div>
-              )}
-            />
+  const element = (
+    <Stack gap={2} pb={3}>
+      <Text variant="body3">{body}</Text>
+      {networks.length === 1 ? (
+        <Button onClick={() => switchNetwork(networks[0])}>Switch to {name}</Button>
+      ) : (
+        <Popover
+          renderTrigger={(props, ref, state) => (
+            <Stack ref={ref} width="100%" alignItems="stretch">
+              <Button iconRight={IconChevronDown} active={state.isOpen} {...props}>
+                Switch network
+              </Button>
+            </Stack>
           )}
-        </Stack>
-      </Card>
-    )
+          renderContent={(props, ref, state) => (
+            <div {...props} ref={ref}>
+              <Menu>
+                <MenuItemGroup>
+                  {networks.map((network) => (
+                    <MenuItem
+                      label={getName(network)}
+                      onClick={() => {
+                        state.close()
+                        switchNetwork(network)
+                      }}
+                      key={network}
+                    />
+                  ))}
+                </MenuItemGroup>
+              </Menu>
+            </div>
+          )}
+        />
+      )}
+    </Stack>
+  )
+
+  if (connectedNetwork) {
+    if (variant === 'card') return <Card p={2}>{element}</Card>
+    return element
   }
 
   return null

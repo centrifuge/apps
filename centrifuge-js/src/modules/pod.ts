@@ -252,9 +252,20 @@ export function getPodModule() {
     return res
   }
 
+  async function getInvestorAccess(args: [podUrl: string, token: string, documentId: string, poolId: string, loanId: string]) {
+    const [podUrl, token, asset_id, pool_id, loan_id] = args
+    const params = new URLSearchParams({
+      pool_id,
+      loan_id,
+      asset_id,
+    })
+    const res = await callPod<CommitedDocumentResponse>(podUrl, `/v3/investor/assets?${params}`, 'get', token)
+    return res
+  }
+
   async function getSelf(args: [podUrl: string, token: string]) {
     const [podUrl, token] = args
-    const res = await callPod<CommitedDocumentResponse>(podUrl, `v2/accounts/self`, 'get', token)
+    const res = await callPod(podUrl, `v2/accounts/self`, 'get', token)
     return res
   }
 
@@ -266,6 +277,7 @@ export function getPodModule() {
     commitDocumentAndMintNft,
     getPendingDocument,
     getCommittedDocument,
+    getInvestorAccess,
     awaitJob,
     getSelf,
     getReports,

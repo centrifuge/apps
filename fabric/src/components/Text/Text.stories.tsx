@@ -1,4 +1,4 @@
-import { ComponentMeta } from '@storybook/react'
+import { Meta } from '@storybook/react'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { Text } from '.'
@@ -8,7 +8,7 @@ import { Stack } from '../Stack'
 export default {
   title: 'Components/Text',
   component: Text,
-} as ComponentMeta<typeof Text>
+} as Meta<typeof Text>
 
 export const Variants: React.FC = () => {
   const theme = useTheme()

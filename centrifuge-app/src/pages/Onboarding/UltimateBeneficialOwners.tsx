@@ -94,6 +94,7 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
       <ConfirmResendEmailVerificationDialog
         isDialogOpen={isConfirmResendEmailVerificationDialogOpen}
         setIsDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
+        currentEmail={email}
       />
     </>
   )

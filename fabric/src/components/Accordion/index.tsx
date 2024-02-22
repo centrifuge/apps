@@ -6,7 +6,7 @@ import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
 export type AccordionProps = BoxProps & {
-  items: { title: string; body: string }[]
+  items: { title: React.ReactNode; body: React.ReactNode }[]
 }
 
 const Root = styled(Box)`
@@ -39,7 +39,7 @@ export function Accordion({ items, ...boxProps }: AccordionProps) {
       borderRadius="card"
       borderStyle="solid"
       borderWidth={1}
-      borderColor="borderSecondary"
+      borderColor="borderPrimary"
       role="list"
       {...boxProps}
     >
@@ -55,7 +55,7 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
   const id = React.useId()
 
   return (
-    <Box as="li" borderStyle="solid" borderWidth={0} borderColor="borderSecondary" {...boxProps}>
+    <Box as="li" borderStyle="solid" borderWidth={0} borderColor="borderPrimary" {...boxProps}>
       <Toggle
         as="button"
         id={`accordion-control-${id}`}
@@ -73,10 +73,8 @@ function AccordionEntry({ title, body, ...boxProps }: AccordionProps['items'][nu
         <CollapsibleChevron open={open} />
       </Toggle>
       <Collapsible id={`content-${id}`} open={open}>
-        <Box p={2} backgroundColor="backgroundSecondary">
-          <Text variant="body2" as="p">
-            {body}
-          </Text>
+        <Box p={2}>
+          <Text variant="body2">{body}</Text>
         </Box>
       </Collapsible>
     </Box>

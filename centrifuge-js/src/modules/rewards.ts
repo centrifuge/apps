@@ -1,4 +1,5 @@
 import BN from 'bn.js'
+import { forkJoin } from 'rxjs'
 import { combineLatestWith, filter, map, repeat, switchMap } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { RewardDomain } from '../CentrifugeBase'
@@ -6,9 +7,10 @@ import { Account, TransactionOptions } from '../types'
 import { TokenBalance } from '../utils/BN'
 
 export function getRewardsModule(inst: Centrifuge) {
-  function computeReward(args: [address: Account, poolId: string, trancheId: string, rewardDomain: RewardDomain]) {
-    const [address, poolId, trancheId, rewardDomain] = args
-    const currencyId = { Tranche: [poolId, trancheId] }
+  function computeReward(
+    args: [address: Account, tranches: { poolId: string; trancheId: string }[], rewardDomain: RewardDomain]
+  ) {
+    const [address, tranches, rewardDomain] = args
 
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
@@ -18,11 +20,19 @@ export function getRewardsModule(inst: Centrifuge) {
     )
 
     return inst.getApi().pipe(
-      switchMap((api) => api.call.rewardsApi.computeReward(rewardDomain, currencyId, address)),
+      switchMap((api) => {
+        const computeRewardObservables = tranches.map(({ poolId, trancheId }) =>
+          api.call.rewardsApi.computeReward(rewardDomain, { Tranche: [poolId, trancheId] }, address)
+        )
+        return forkJoin(computeRewardObservables)
+      }),
       map((data) => {
-        const reward = data?.toPrimitive() as string
+        const rewards = data
+          ?.map((entry) => entry.toPrimitive() as string)
+          .map((entry) => new BN(entry))
+          .reduce((a, b) => a.add(b), new BN(0))
 
-        return reward ? new TokenBalance(reward, 18).toDecimal() : null
+        return data ? new TokenBalance(rewards, 18).toDecimal() : null
       }),
       repeat({ delay: () => $events })
     )
@@ -113,24 +123,35 @@ export function getRewardsModule(inst: Centrifuge) {
     )
   }
 
-  function claimLiquidityRewards(args: [poolId: string, trancheId: string], options?: TransactionOptions) {
-    const [poolId, trancheId] = args
+  function claimLiquidityRewards(
+    args: [tranches: { poolId: string; trancheId: string }[]],
+    options?: TransactionOptions
+  ) {
+    const [tranches] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.liquidityRewards.claimReward({ Tranche: [poolId, trancheId] })
+        const submittable = api.tx.utility.batchAll(
+          tranches.flatMap((tranche) => {
+            return api.tx.liquidityRewards.claimReward({ Tranche: [tranche.poolId, tranche.trancheId] })
+          })
+        )
+
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
 
   function getAccountStakes(args: [address: Account, poolId: string, trancheId: string]) {
-    const [address, poolId, trancheId] = args
+    const [addressEvm, poolId, trancheId] = args
     const { getPoolCurrency } = inst.pools
-
     return inst.getApi().pipe(
-      switchMap((api) => api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })),
+      combineLatestWith(inst.getChainId()),
+      switchMap(([api, chainId]) => {
+        const address = inst.utils.evmToSubstrateAddress(addressEvm.toString(), chainId)
+        return api.query.liquidityRewardsBase.stakeAccount(address, { Tranche: [poolId, trancheId] })
+      }),
       combineLatestWith(getPoolCurrency([poolId])),
       map(([data, currency]) => {
         const { stake, pendingStake, rewardTally, lastCurrencyMovement } = data.toPrimitive() as {

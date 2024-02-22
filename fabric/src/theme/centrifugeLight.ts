@@ -1,6 +1,6 @@
 import { baseTheme } from './tokens/baseTheme'
 import { brandCentrifuge } from './tokens/brandCentrifuge'
-import { blueScale, yellowScale } from './tokens/colors'
+import { blueScale, grayScale, yellowScale } from './tokens/colors'
 import { modeLight } from './tokens/modeLight'
 import { FabricTheme } from './types'
 
@@ -12,6 +12,7 @@ export const centrifugeLight: FabricTheme = {
     ...modeLight.colors,
     primarySelectedBackground: blueScale[500],
     secondarySelectedBackground: blueScale[50],
+    focus: blueScale[500],
     borderFocus: blueScale[500],
     borderSelected: blueScale[500],
     textSelected: blueScale[500],
@@ -20,6 +21,7 @@ export const centrifugeLight: FabricTheme = {
     accentScale: blueScale,
     blueScale,
     yellowScale,
+    grayScale,
   },
 }
 

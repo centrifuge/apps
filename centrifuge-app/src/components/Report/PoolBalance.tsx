@@ -1,6 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
@@ -14,7 +15,7 @@ import { UserFeedback } from './UserFeedback'
 export function PoolBalance({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
 
-  const dailyPoolStates = useDailyPoolStates(pool.id, startDate, endDate)
+  const { poolStates: dailyPoolStates } = useDailyPoolStates(pool.id, startDate, endDate) || {}
   const monthlyPoolStates = useMonthlyPoolStates(pool.id, startDate, endDate)
   const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
 
@@ -28,22 +29,29 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         align: 'left',
         header: '',
         cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body2'}>{row.name}</Text>,
-        flex: '0 0 200px',
+        width: '200px',
       },
-    ].concat(
-      poolStates.map((state, index) => ({
-        align: 'right',
-        header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
-          month: 'short',
-        })} ${
-          groupBy === 'day'
-            ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
-            : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
-        }`,
-        cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-        flex: '0 0 120px',
-      }))
-    )
+    ]
+      .concat(
+        poolStates.map((state, index) => ({
+          align: 'right',
+          header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
+            month: 'short',
+          })} ${
+            groupBy === 'day'
+              ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
+              : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
+          }`,
+          cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
+          width: '120px',
+        }))
+      )
+      .concat({
+        align: 'left',
+        header: '',
+        cell: () => <span />,
+        width: '1fr',
+      })
   }, [poolStates, groupBy])
 
   const overviewRecords: TableDataRow[] = React.useMemo(() => {
@@ -86,7 +94,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) =>
-              state.tranches[token.id].price
+              state.tranches[token.id]?.price
                 ? formatBalanceAbbreviated(state.tranches[token.id].price?.toFloat()!, pool.currency.symbol)
                 : '1.000'
             ) || [],
@@ -110,7 +118,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) =>
-              formatBalanceAbbreviated(state.tranches[token.id].fulfilledInvestOrders.toDecimal(), pool.currency.symbol)
+              formatBalanceAbbreviated(
+                state.tranches[token.id]?.fulfilledInvestOrders.toDecimal() ?? Dec(0),
+                pool.currency.symbol
+              )
             ) || [],
           heading: false,
         })) || [],
@@ -129,7 +140,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
             value:
               poolStates?.map((state) =>
                 formatBalanceAbbreviated(
-                  state.tranches[token.id].fulfilledRedeemOrders.toDecimal(),
+                  state.tranches[token.id]?.fulfilledRedeemOrders.toDecimal() ?? Dec(0),
                   pool.currency.symbol
                 )
               ) || [],
@@ -165,10 +176,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
   }
 
   return poolStates?.length > 0 ? (
-    <DataTableGroup rounded={false}>
-      <DataTable data={overviewRecords} columns={columns} hoverable rounded={false} />
-      <DataTable data={priceRecords} columns={columns} hoverable rounded={false} />
-      <DataTable data={inOutFlowRecords} columns={columns} hoverable rounded={false} />
+    <DataTableGroup>
+      <DataTable data={overviewRecords} columns={columns} hoverable />
+      <DataTable data={priceRecords} columns={columns} hoverable />
+      <DataTable data={inOutFlowRecords} columns={columns} hoverable />
     </DataTableGroup>
   ) : (
     <UserFeedback reportType="Pool balance" />
