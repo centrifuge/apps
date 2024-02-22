@@ -185,7 +185,9 @@ function Loan() {
                           : nftMetadata?.properties[key],
                       })) || []
                   : []),
-                ...(loan.pricing.maturityDate
+                ...(loan.pricing.maturityDate &&
+                'valuationMethod' in loan.pricing &&
+                loan.pricing.valuationMethod !== 'cash'
                   ? [
                       {
                         label: 'Maturity date',

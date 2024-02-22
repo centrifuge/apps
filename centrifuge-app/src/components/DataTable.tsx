@@ -30,12 +30,19 @@ type GroupedProps = {
 
 export type DataTableProps<T = any> = {
   data: Array<T>
+  /**
+   * pinnedData is not included in sorting and will be pinned to the top of the table in the order provided
+   *  */
+  pinnedData?: Array<T>
   columns: Column[]
   keyField?: string
   onRowClicked?: (row: T) => string | LinkProps['to']
   defaultSortKey?: string
   defaultSortOrder?: OrderBy
   hoverable?: boolean
+  /**
+   * summary row is not included in sorting
+   */
   summary?: T
   pageSize?: number
   page?: number
@@ -88,6 +95,7 @@ const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, s
 
 export const DataTable = <T extends Record<string, any>>({
   data,
+  pinnedData,
   columns,
   keyField,
   onRowClicked,
@@ -140,6 +148,21 @@ export const DataTable = <T extends Record<string, any>>({
           ))}
         </HeaderRow>
       )}
+      {pinnedData?.map((row, i) => (
+        <DataRow
+          hoverable={hoverable}
+          as={onRowClicked ? Link : 'div'}
+          to={onRowClicked && (() => onRowClicked(row))}
+          key={keyField ? row[keyField] : i}
+          tabIndex={onRowClicked ? 0 : undefined}
+        >
+          {columns.map((col, index) => (
+            <DataCol variant="body2" align={col?.align} key={index}>
+              {col.cell(row, i)}
+            </DataCol>
+          ))}
+        </DataRow>
+      ))}
       {sortedAndPaginatedData?.map((row, i) => (
         <DataRow
           hoverable={hoverable}

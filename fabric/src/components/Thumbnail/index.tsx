@@ -54,8 +54,8 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
           background: 'transparent',
           '&::before': {
             content: '""',
-            width: '80%',
-            height: '80%',
+            width: '50%',
+            height: '50%',
             position: 'absolute',
             left: 0,
             top: 0,
@@ -64,9 +64,9 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
             margin: 'auto',
             zIndex: 0,
             transform: 'rotate(45deg)',
-            background: theme.colors.backgroundThumbnail,
+            background: theme.colors.statusInfo,
             color: theme.colors.textInverted,
-            borderRadius: '4px',
+            borderRadius: '2px',
           },
         })
       case 'token':
