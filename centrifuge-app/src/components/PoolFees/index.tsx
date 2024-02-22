@@ -25,6 +25,7 @@ type Row = {
   action: null | React.ReactNode
   poolCurrency?: string
   index: number
+  feePosition: 'Top of waterfall'
 }
 
 export function PoolFees() {
@@ -75,8 +76,8 @@ export function PoolFees() {
     {
       align: 'left',
       header: 'Fee position',
-      cell: () => {
-        return <Text variant="body3">Top of waterfall</Text>
+      cell: (row: Row) => {
+        return <Text variant="body3">{row.feePosition}</Text>
       },
     },
     {
@@ -134,11 +135,12 @@ export function PoolFees() {
 
           return {
             index,
-            name: feeMetadata!.name,
+            name: feeMetadata?.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
             pendingFees: fixedFee ? feeChainData?.amounts.pending : feeChainData.amounts.maxPayable,
             receivingAddress: feeChainData?.destination,
+            feePosition: feeMetadata?.feePosition,
             action:
               (isAllowedToCharge || poolAdmin) && !fixedFee ? (
                 <RouterLinkButton

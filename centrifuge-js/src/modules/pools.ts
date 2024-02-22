@@ -633,7 +633,7 @@ export interface PoolMetadataInput {
     threshold: number
   }
 
-  poolFees: { id: number; name: string }[]
+  poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; feeType: FeeTypes }[]
 
   poolType: 'open' | 'closed'
 }
@@ -657,6 +657,7 @@ export type PoolMetadata = {
     poolFees?: {
       id: number
       name: string
+      feePosition: 'Top of waterfall'
     }[]
     newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
@@ -825,12 +826,13 @@ export type ActivePoolFeesData = {
 export type AddFee = {
   fee: {
     destination: string
-    type: 'Fixed' | 'ChargedUpTo'
+    feeType: FeeTypes
     limit: 'ShareOfPortfolioValuation' | 'AmountPerSecond'
     name: string
     feeId: number
     amount: Rate
     account?: string
+    feePosition: 'Top of waterfall'
   }
   poolId: string
 }
@@ -876,7 +878,7 @@ export function getPoolsModule(inst: Centrifuge) {
         {
           destination: fee.destination,
           editor: fee?.account ? { account: fee.account } : 'Root',
-          feeType: { [fee.type]: { limit: { [fee.limit]: fee?.amount } } },
+          feeType: { [fee.feeType]: { limit: { [fee.limit]: fee?.amount } } },
         },
       ]
     })
@@ -3572,7 +3574,7 @@ export function getPoolsModule(inst: Centrifuge) {
           return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
             destination: fee.destination,
             editor: { account: fee?.account },
-            feeType: { [fee.type]: { limit: { [fee.limit]: fee.amount } } },
+            feeType: { [fee.feeType]: { limit: { [fee.limit]: fee.amount } } },
           })
         })
         const updatedMetadata = {

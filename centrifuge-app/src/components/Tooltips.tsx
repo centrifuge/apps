@@ -270,6 +270,10 @@ export const tooltipText = {
     label: 'Fee type',
     body: 'The protocol fee is mandatory and will be charged every epoch automatically. The fee amount is dependent on the asset class.',
   },
+  feePosition: {
+    label: 'Fee position',
+    body: 'Fees are settled using available liquidity before investments or redemptions, prioritizing and paying the highest fees first.',
+  },
 }
 
 export type TooltipsProps = {
