@@ -2024,7 +2024,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 // @ts-expect-error
                 const rawNav = rawNavs && rawNavs[poolIndex]?.toJSON()
                 const totalNavAum = rawNav?.navAum
-                  ? new CurrencyBalance(rawNav.navAum, currency.decimals)
+                  ? new CurrencyBalance(hexToBN(rawNav.navAum), currency.decimals)
                   : new CurrencyBalance(0, currency.decimals)
 
                 const mappedPool: Pool = {
@@ -2137,7 +2137,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     lastUpdated: lastUpdatedNav,
                   },
                   value: rawNav?.total
-                    ? new CurrencyBalance(rawNav.total, currency.decimals)
+                    ? new CurrencyBalance(hexToBN(rawNav.total), currency.decimals)
                     : new CurrencyBalance(0, currency.decimals),
                 }
 
