@@ -1,9 +1,11 @@
 import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
+import { nftMetadataSchema } from '../../schemas'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
+import { useMetadataMulti } from '../../utils/useMetadata'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { AnchorTextLink } from '../TextLink'
@@ -14,6 +16,7 @@ type Row = {
   assetId: string
   amount: CurrencyBalance | undefined
   hash: string
+  assetName: string
 }
 
 const getTransactionTypeStatus = (type: string) => {
@@ -40,15 +43,18 @@ export const columns = [
   },
   {
     align: 'left',
-    header: 'Asset ID',
-    cell: ({ assetId }: Row) => (
-      <Text as="span" variant="body3">
-        {assetId}
-      </Text>
-    ),
+    header: 'Asset name',
+    cell: ({ assetId, assetName }: Row) => {
+      const [poolId, id] = assetId.split('-')
+      return (
+        <Text as="span" variant="body3">
+          <AnchorTextLink href={`/pools/${poolId}/assets/${id}`}>{assetName}</AnchorTextLink>
+        </Text>
+      )
+    },
   },
   {
-    align: 'left',
+    align: 'right',
     header: <SortableTableHeader label="Amount" />,
     cell: ({ amount }: Row) => (
       <Text as="span" variant="body3">
@@ -59,7 +65,7 @@ export const columns = [
   },
   {
     align: 'right',
-    header: '',
+    header: 'View transaction',
     cell: ({ hash }: Row) => {
       return (
         <Stack
@@ -78,6 +84,11 @@ export const columns = [
 
 export const TransactionHistory = ({ poolId, preview = true }: { poolId: string; preview?: boolean }) => {
   const transactions = useAssetTransactions(poolId, new Date(0))
+
+  const assetMetadata = useMetadataMulti(
+    [...new Set(transactions?.map((transaction) => transaction.asset.metadata))] || [],
+    nftMetadataSchema
+  )
 
   const getLabelAndAmount = (transaction: AssetTransaction) => {
     if (transaction.type === 'BORROWED') {
@@ -105,6 +116,7 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
     )
     .map((transaction) => {
       const { label, amount } = getLabelAndAmount(transaction)
+      const [, id] = transaction.asset.id.split('-')
       return {
         Type: label,
         'Transaction Date': `"${formatDate(transaction.timestamp, {
@@ -116,7 +128,7 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           second: 'numeric',
           timeZoneName: 'short',
         })}"`,
-        'Asset ID': transaction.assetId,
+        'Asset Name': assetMetadata[Number(id) - 1]?.data?.name || '-',
         Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
         Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
       }
@@ -133,11 +145,13 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
       .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1))
       .slice(0, preview ? 8 : Infinity)
       .map((transaction) => {
+        const [, id] = transaction.asset.id.split('-')
         const { label, amount } = getLabelAndAmount(transaction)
         return {
           type: label,
           transactionDate: transaction.timestamp,
-          assetId: transaction.assetId,
+          assetId: transaction.asset.id,
+          assetName: assetMetadata[Number(id) - 1]?.data?.name,
           amount,
           hash: transaction.hash,
         }

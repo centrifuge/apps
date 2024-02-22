@@ -731,7 +731,6 @@ export type AssetTransaction = {
   poolId: string
   accountId: string
   epochId: string
-  assetId: string
   type: AssetTransactionType
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
@@ -739,6 +738,10 @@ export type AssetTransaction = {
   principalAmount: CurrencyBalance | undefined
   interestAmount: CurrencyBalance | undefined
   hash: string
+  asset: {
+    id: string
+    metadata: string
+  }
 }
 
 type Holder = {
@@ -2524,7 +2527,6 @@ export function getPoolsModule(inst: Centrifuge) {
             timestamp: { greaterThan: $from, lessThan: $to },
           }) {
           nodes {
-            assetId
             principalAmount
             interestAmount
             epochId
@@ -2534,6 +2536,10 @@ export function getPoolsModule(inst: Centrifuge) {
             settlementPrice
             quantity
             hash
+            asset {
+              id
+              metadata
+            }
           }
         }
       }

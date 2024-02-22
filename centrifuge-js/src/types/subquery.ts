@@ -83,13 +83,16 @@ export type SubqueryAssetTransaction = {
   poolId: string
   accountId: string
   epochId: string
-  assetId: string
   type: AssetTransactionType
   amount: CurrencyBalance | undefined
   principalAmount: CurrencyBalance | undefined
   interestAmount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  asset: {
+    id: string
+    metadata: string
+  }
 }
 
 export type SubqueryTrancheBalances = {
