@@ -2033,7 +2033,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   metadata,
                   currency,
                   poolFees: poolFees?.map((fee) => {
-                    console.log('🚀 ~ fee:', fee.amounts.payable)
                     const secondsSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
                     const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                     const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
