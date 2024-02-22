@@ -10,22 +10,22 @@ import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
-    BorrowerTransactionType,
-    InvestorTransactionType,
-    SubqueryBorrowerTransaction,
-    SubqueryCurrencyBalances,
-    SubqueryInvestorTransaction,
-    SubqueryPoolSnapshot,
-    SubqueryTrancheBalances,
-    SubqueryTrancheSnapshot,
+  BorrowerTransactionType,
+  InvestorTransactionType,
+  SubqueryBorrowerTransaction,
+  SubqueryCurrencyBalances,
+  SubqueryInvestorTransaction,
+  SubqueryPoolSnapshot,
+  SubqueryTrancheBalances,
+  SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
-    addressToHex,
-    computeTrancheId,
-    getDateMonthsFromNow,
-    getDateYearsFromNow,
-    getRandomUint,
-    isSameAddress,
+  addressToHex,
+  computeTrancheId,
+  getDateMonthsFromNow,
+  getDateYearsFromNow,
+  getRandomUint,
+  isSameAddress,
 } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -957,16 +957,18 @@ export function getPoolsModule(inst: Centrifuge) {
         status: 'open',
         listed: metadata.listed ?? true,
         poolFees: metadata.poolFees,
-        reports: metadata.poolReport ? [
-          {
-            author: {
-              name: metadata.poolReport.authorName,
-              title: metadata.poolReport.authorTitle,
-              avatar: metadata.poolReport.authorAvatar
-            },
-            uri: metadata.poolReport.url
-          }
-        ] : undefined
+        reports: metadata.poolReport
+          ? [
+              {
+                author: {
+                  name: metadata.poolReport.authorName,
+                  title: metadata.poolReport.authorTitle,
+                  avatar: metadata.poolReport.authorAvatar,
+                },
+                uri: metadata.poolReport.url,
+              },
+            ]
+          : undefined,
       },
       pod: {
         node: metadata.podEndpoint ?? null,
@@ -2018,8 +2020,8 @@ export function getPoolsModule(inst: Centrifuge) {
                 const lastUpdatedNav = new Date((portfolioValuationData?.lastUpdated ?? 0) * 1000).toISOString()
                 // @ts-expect-error
                 const rawNav = rawNavs && rawNavs[poolIndex]?.toJSON()
-                  const totalNavAum = rawNav?.navAum
-                  ? new CurrencyBalance(rawNav.navAum, currency.decimals)
+                const totalNavAum = rawNav?.navAum
+                  ? new CurrencyBalance(hexToBN(rawNav.navAum), currency.decimals)
                   : new CurrencyBalance(0, currency.decimals)
 
                 const mappedPool: Pool = {
@@ -2130,7 +2132,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     lastUpdated: lastUpdatedNav,
                   },
                   value: rawNav?.total
-                    ? new CurrencyBalance(rawNav.total, currency.decimals)
+                    ? new CurrencyBalance(hexToBN(rawNav.total), currency.decimals)
                     : new CurrencyBalance(0, currency.decimals),
                 }
 
