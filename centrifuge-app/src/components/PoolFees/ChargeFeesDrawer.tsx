@@ -49,7 +49,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       }
       return errors
     },
-    onSubmit: (values, actions) => {
+    onSubmit: (values) => {
       if (!feeIndex) throw new Error('feeIndex not found')
       if (!values.amount) throw new Error('amount not found')
       chargeFeeTx([
@@ -87,7 +87,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
               </Text>
             </Stack>
             <Stack gap="4px">
-              <Text variant="label2">Limit</Text>
+              <Text variant="label2">Max fees</Text>
               <Text variant="body3">{`${formatPercentage(
                 feeChainData?.amounts.percentOfNav.toPercent() || 0
               )} of NAV`}</Text>
