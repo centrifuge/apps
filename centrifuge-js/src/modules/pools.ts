@@ -736,8 +736,8 @@ export type AssetTransaction = {
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
-  principalAmount: string | null
-  interestAmount: string | null
+  principalAmount: CurrencyBalance | undefined
+  interestAmount: CurrencyBalance | undefined
   hash: string
 }
 
@@ -2552,6 +2552,8 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.assetTransactions.nodes.map((tx) => ({
           ...tx,
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+          principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
+          interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) as unknown as AssetTransaction[]
       })

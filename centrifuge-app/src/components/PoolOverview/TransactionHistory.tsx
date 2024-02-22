@@ -12,7 +12,7 @@ type Row = {
   type: string
   transactionDate: string
   assetId: string
-  amount: string | CurrencyBalance | null
+  amount: CurrencyBalance | undefined
   hash: string
 }
 
@@ -20,12 +20,6 @@ const getTransactionTypeStatus = (type: string) => {
   if (type === 'Principal payment' || type === 'Repaid') return 'warning'
   if (type === 'Interest') return 'ok'
   return 'default'
-}
-
-const getAmount = (amount: string | CurrencyBalance | null) => {
-  if (typeof amount === 'string') return formatBalance(new CurrencyBalance(amount, 6), 'USD', 2, 2)
-  if (amount) return formatBalance(amount, 'USD', 2, 2)
-  return '-'
 }
 
 export const columns = [
@@ -58,7 +52,7 @@ export const columns = [
     header: <SortableTableHeader label="Amount" />,
     cell: ({ amount }: Row) => (
       <Text as="span" variant="body3">
-        {getAmount(amount)}
+        {amount ? formatBalance(amount, 'USD', 2, 2) : ''}
       </Text>
     ),
     sortKey: 'amount',
@@ -123,7 +117,7 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           timeZoneName: 'short',
         })}"`,
         'Asset ID': transaction.assetId,
-        Amount: amount ? `"${getAmount(amount)}"` : '-',
+        Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
         Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
       }
     })
@@ -144,7 +138,7 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           type: label,
           transactionDate: transaction.timestamp,
           assetId: transaction.assetId,
-          amount: amount,
+          amount,
           hash: transaction.hash,
         }
       }) || []

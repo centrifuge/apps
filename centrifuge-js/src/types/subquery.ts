@@ -85,7 +85,9 @@ export type SubqueryAssetTransaction = {
   epochId: string
   assetId: string
   type: AssetTransactionType
-  amount?: number | null
+  amount: CurrencyBalance | undefined
+  principalAmount: CurrencyBalance | undefined
+  interestAmount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
 }
