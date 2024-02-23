@@ -59,7 +59,6 @@ function PoolPerformanceChart() {
   const chartData = data.slice(-rangeNumber)
 
   const today = {
-    day: new Date(),
     nav: todayReserve + todayAssetValue,
     navChange: chartData.length > 0 ? todayReserve + todayAssetValue - chartData[0]?.nav : 0,
   }
@@ -167,7 +166,6 @@ function CustomLegend({
   data,
 }: {
   data: {
-    day: Date
     nav: number
     navChange: number
   }
