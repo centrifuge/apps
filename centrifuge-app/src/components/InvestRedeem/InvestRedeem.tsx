@@ -12,6 +12,7 @@ import {
   IconCheckInCircle,
   IconClock,
   InlineFeedback,
+  SelectInner,
   Shelf,
   Stack,
   Tabs,
@@ -405,7 +406,17 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
                     : ''
                 }`}
                 disabled={isInvesting}
-                currency={state.poolCurrency?.symbol}
+                currency={
+                  state?.poolCurrencies.length > 1 ? (
+                    <SelectInner
+                      {...field}
+                      onChange={(e) => actions.selectPoolCurrency(e.target.value)}
+                      options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.symbol }))}
+                    />
+                  ) : (
+                    state.poolCurrency?.symbol
+                  )
+                }
                 secondaryLabel={
                   state.poolCurrencyBalance &&
                   state.poolCurrency &&
