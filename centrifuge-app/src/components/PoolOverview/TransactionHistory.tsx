@@ -152,7 +152,7 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           transactionDate: transaction.timestamp,
           assetId: transaction.asset.id,
           assetName: assetMetadata[Number(id) - 1]?.data?.name,
-          amount,
+          amount: amount || 0,
           hash: transaction.hash,
         }
       }) || []
