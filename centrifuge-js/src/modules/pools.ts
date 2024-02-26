@@ -10,14 +10,14 @@ import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
-    AssetTransactionType,
-    InvestorTransactionType,
-    SubqueryAssetTransaction,
-    SubqueryCurrencyBalances,
-    SubqueryInvestorTransaction,
-    SubqueryPoolSnapshot,
-    SubqueryTrancheBalances,
-    SubqueryTrancheSnapshot,
+  AssetTransactionType,
+  InvestorTransactionType,
+  SubqueryAssetTransaction,
+  SubqueryCurrencyBalances,
+  SubqueryInvestorTransaction,
+  SubqueryPoolSnapshot,
+  SubqueryTrancheBalances,
+  SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
   addressToHex,
@@ -2046,7 +2046,7 @@ export function getPoolsModule(inst: Centrifuge) {
                           type === 'chargedUpTo'
                             ? new CurrencyBalance(fee.amounts.pending, currency.decimals)
                             : new CurrencyBalance(
-                              new CurrencyBalance(fee.amounts.payable.upTo, currency.decimals)
+                                new CurrencyBalance(fee.amounts.payable.upTo, currency.decimals)
                                   .divn(limit === 'amountPerSecond' ? 1 : SEC_PER_YEAR)
                                   .add(new BN(fee.amounts.pending)),
                                 currency.decimals
