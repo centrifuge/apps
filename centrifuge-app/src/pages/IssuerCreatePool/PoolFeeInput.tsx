@@ -86,7 +86,6 @@ export const PoolFeeSection: React.FC = () => {
 export const PoolFeeInput: React.FC = () => {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
-  console.log('🚀 ~ values:', values.poolFees)
 
   return (
     <FieldArray name="poolFees">
