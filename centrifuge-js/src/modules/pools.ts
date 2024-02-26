@@ -559,7 +559,8 @@ export type DailyPoolState = {
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
 
-  sumBorrowedAmountByPeriod?: number | null
+  sumBorrowedAmountByPeriod?: string | null
+  sumInterestRepaidAmountByPeriod?: string | null
   sumRepaidAmountByPeriod?: number | null
   sumInvestedAmountByPeriod?: number | null
   sumRedeemedAmountByPeriod?: number | null
@@ -2076,6 +2077,7 @@ export function getPoolsModule(inst: Centrifuge) {
           sumRepaidAmountByPeriod
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
+          sumInterestRepaidAmountByPeriod
         }
         pageInfo {
           hasNextPage

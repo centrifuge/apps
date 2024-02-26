@@ -156,7 +156,7 @@ export function PoolDetailOverview() {
           <PoolOverviewSection>
             <React.Suspense fallback={<Spinner />}>
               <Box height={373}>
-                <Cashflows />
+                <Cashflows poolId={poolId} />
               </Box>
             </React.Suspense>
           </PoolOverviewSection>
