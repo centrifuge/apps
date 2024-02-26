@@ -18,8 +18,8 @@
     "esbuild": "^0.16.17",
     "esbuild-node-externals": "^1.6.0",
     "husky": "^6.0.0",
-    "prettier": "^2.3.1",
-    "prettier-plugin-organize-imports": "1.1.1",
+    "prettier": "^2.4.1",
+    "prettier-plugin-organize-imports": "3.2.4",
     "pretty-quick": "^3.1.1",
     "ts-node": "9.0.0",
     "typescript": "~5.3.3"

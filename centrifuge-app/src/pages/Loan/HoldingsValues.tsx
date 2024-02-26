@@ -1,4 +1,4 @@
-import { BorrowerTransaction, CurrencyBalance, ExternalPricingInfo, Pool } from '@centrifuge/centrifuge-js'
+import { AssetTransaction, CurrencyBalance, ExternalPricingInfo, Pool } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { Dec } from '../../utils/Decimal'
@@ -6,7 +6,7 @@ import { formatBalance } from '../../utils/formatting'
 
 type Props = {
   pool: Pool
-  transactions?: BorrowerTransaction[] | null
+  transactions?: AssetTransaction[] | null
   currentFace: Decimal | null
   pricing: ExternalPricingInfo
 }

@@ -10,14 +10,14 @@ import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
-  BorrowerTransactionType,
-  InvestorTransactionType,
-  SubqueryBorrowerTransaction,
-  SubqueryCurrencyBalances,
-  SubqueryInvestorTransaction,
-  SubqueryPoolSnapshot,
-  SubqueryTrancheBalances,
-  SubqueryTrancheSnapshot,
+    AssetTransactionType,
+    InvestorTransactionType,
+    SubqueryAssetTransaction,
+    SubqueryCurrencyBalances,
+    SubqueryInvestorTransaction,
+    SubqueryPoolSnapshot,
+    SubqueryTrancheBalances,
+    SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
   addressToHex,
@@ -744,14 +744,14 @@ type InvestorTransaction = {
   evmAddress?: string
 }
 
-export type BorrowerTransaction = {
+export type AssetTransaction = {
   id: string
   timestamp: string
   poolId: string
   accountId: string
   epochId: string
   loanId: string
-  type: BorrowerTransactionType
+  type: AssetTransactionType
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
@@ -2662,21 +2662,21 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getBorrowerTransactions(args: [poolId: string, from?: Date, to?: Date]) {
+  function getAssetTransactions(args: [poolId: string, from?: Date, to?: Date]) {
     const [poolId, from, to] = args
 
     const $query = inst.getSubqueryObservable<{
-      borrowerTransactions: { nodes: SubqueryBorrowerTransaction[] }
+      assetTransactions: { nodes: SubqueryAssetTransaction[] }
     }>(
       `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
-        borrowerTransactions(
+        assetTransactions(
           orderBy: TIMESTAMP_ASC,
           filter: {
             poolId: { equalTo: $poolId },
             timestamp: { greaterThan: $from, lessThan: $to },
           }) {
           nodes {
-            loanId
+            assetId
             epochId
             type
             timestamp
@@ -2698,11 +2698,11 @@ export function getPoolsModule(inst: Centrifuge) {
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
       map(([data, currency]) => {
-        return data!.borrowerTransactions.nodes.map((tx) => ({
+        return data!.assetTransactions.nodes.map((tx) => ({
           ...tx,
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
-        })) as unknown as BorrowerTransaction[]
+        })) as unknown as AssetTransaction[]
       })
     )
   }
@@ -3719,7 +3719,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyPoolStates,
     getMonthlyPoolStates,
     getInvestorTransactions,
-    getBorrowerTransactions,
+    getAssetTransactions,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
