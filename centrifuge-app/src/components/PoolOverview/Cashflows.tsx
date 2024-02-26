@@ -1,9 +1,10 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Card, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
+import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { CashflowsChart } from '../Charts/CashflowsChart'
 
@@ -11,8 +12,24 @@ export const Cashflows = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
+  const loans = useLoans(poolId) as Loan[] | undefined | null
 
-  const csvData = poolStates?.map((poolState) => {
+  const firstOriginationDate = loans?.reduce((acc, cur) => {
+    if ('originationDate' in cur) {
+      if (!acc) return cur.originationDate
+      return acc < cur.originationDate ? acc : cur.originationDate
+    }
+    return acc
+  }, '')
+
+  const truncatedPoolStates = poolStates?.filter((poolState) => {
+    if (firstOriginationDate) {
+      return new Date(poolState.timestamp) >= new Date(firstOriginationDate)
+    }
+    return true
+  })
+
+  const csvData = truncatedPoolStates?.map((poolState) => {
     return {
       Date: `"${formatDate(poolState.timestamp, {
         year: 'numeric',
@@ -68,7 +85,7 @@ export const Cashflows = () => {
             Download
           </AnchorButton>
         </Shelf>
-        <CashflowsChart poolStates={poolStates} pool={pool} />
+        <CashflowsChart poolStates={truncatedPoolStates} pool={pool} />
       </Stack>
     </Card>
   )
