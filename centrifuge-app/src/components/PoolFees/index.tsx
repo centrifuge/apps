@@ -82,7 +82,7 @@ export function PoolFees() {
     },
     {
       align: 'left',
-      header: 'Percentage/limit',
+      header: 'Percentage/Limit',
       cell: (row: Row) => {
         return row.percentOfNav ? (
           <Text variant="body3">
@@ -98,7 +98,7 @@ export function PoolFees() {
       header: 'Pending fees',
       cell: (row: Row) => {
         return row?.pendingFees ? (
-          <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 2)}</Text>
+          <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 4)}</Text>
         ) : null
       },
     },
@@ -138,7 +138,7 @@ export function PoolFees() {
             name: feeMetadata?.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
-            pendingFees: fixedFee ? feeChainData?.amounts.pending : feeChainData.amounts.maxPayable,
+            pendingFees: feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
             feePosition: feeMetadata?.feePosition,
             action:

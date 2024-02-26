@@ -2033,7 +2033,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   metadata,
                   currency,
                   poolFees: poolFees?.map((fee) => {
-                    const secondsSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
                     const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                     const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
                     const percentOfNav = new Rate(hexToBN(fee.amounts.feeType[type].limit[limit]))
@@ -2046,14 +2045,10 @@ export function getPoolsModule(inst: Centrifuge) {
                         pending:
                           type === 'chargedUpTo'
                             ? new CurrencyBalance(fee.amounts.pending, currency.decimals)
-                            : CurrencyBalance.fromFloat(
-                                percentOfNav
-                                  .toDecimal()
-                                  .div(100)
-                                  .mul(previousNav.gtn(0) ? previousNav.toDecimal() : 1)
-                                  .mul(secondsSinceLastEpoch)
-                                  .div(limit === 'amountPerSecond' ? 1 : SEC_PER_YEAR)
-                                  .add(new CurrencyBalance(fee.amounts.pending, currency.decimals).toDecimal()),
+                            : new CurrencyBalance(
+                              new CurrencyBalance(fee.amounts.payable.upTo, currency.decimals)
+                                  .divn(limit === 'amountPerSecond' ? 1 : SEC_PER_YEAR)
+                                  .add(new BN(fee.amounts.pending)),
                                 currency.decimals
                               ),
                         maxPayable: new CurrencyBalance(fee.amounts.payable.upTo, currency.decimals),
