@@ -35,10 +35,6 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Pr
       ).replace(/^Us /, 'US ')}`,
     },
     {
-      metric: 'Pool type',
-      value: capitalize(poolStatus),
-    },
-    {
       metric: 'Average asset maturity',
       value: averageMaturity,
     },
@@ -50,14 +46,22 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Pr
       metric: 'Ongoing assets',
       value: ongoingAssetCount,
     },
-    {
-      metric: 'Written off assets',
-      value: writtenOffAssetCount,
-    },
-    {
-      metric: 'Overdue assets',
-      value: overdueAssetCount,
-    },
+    ...(writtenOffAssetCount
+      ? [
+          {
+            metric: 'Written off assets',
+            value: writtenOffAssetCount,
+          },
+        ]
+      : []),
+    ...(overdueAssetCount
+      ? [
+          {
+            metric: 'Overdue assets',
+            value: overdueAssetCount,
+          },
+        ]
+      : []),
   ]
 
   return (

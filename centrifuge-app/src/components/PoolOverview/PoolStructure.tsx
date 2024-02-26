@@ -44,7 +44,7 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
       value: firstInvestment ? formatDate(firstInvestment) : '-',
     },
     {
-      metric: 'Available network',
+      metric: 'Available networks',
       value: `Centrifuge${deployedLpChains.length ? `, ${deployedLpChains.join(', ')}` : ''}`,
     },
     // {
@@ -75,6 +75,15 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
         <Tooltip body="For each tranche, tokens are issued that investors receive, representing interests in the tranches of the pool.">
           <Text variant="label2" color="textPrimary">
             {value}
+          </Text>
+        </Tooltip>
+      )
+
+    if (metric === 'Pool type' && value === 'Open')
+      return (
+        <Tooltip body="An open pool that allows for a broader distribution to third-party investors as well as DeFi protocols. These pools have multiple unrelated token holders and can onboard third party investors.">
+          <Text variant="label2" color="textPrimary">
+            Open
           </Text>
         </Tooltip>
       )
