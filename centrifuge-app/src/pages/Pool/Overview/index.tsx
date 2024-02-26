@@ -9,7 +9,6 @@ import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedee
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { AssetsByMaturity } from '../../../components/PoolOverview/AssetsByMaturity'
 import { Cashflows } from '../../../components/PoolOverview/Cashflows'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
 import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
@@ -148,15 +147,15 @@ export function PoolDetailOverview() {
                   poolStatus={metadata?.pool?.status}
                 />
               </React.Suspense>
-              <React.Suspense fallback={<Spinner />}>
+              {/* <React.Suspense fallback={<Spinner />}>
                 <AssetsByMaturity />
-              </React.Suspense>
+              </React.Suspense> */}
             </Grid>
           </PoolOverviewSection>
           <PoolOverviewSection>
             <React.Suspense fallback={<Spinner />}>
               <Box height={373}>
-                <Cashflows poolId={poolId} />
+                <Cashflows />
               </Box>
             </React.Suspense>
           </PoolOverviewSection>
