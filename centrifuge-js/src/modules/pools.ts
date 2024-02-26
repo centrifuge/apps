@@ -794,7 +794,6 @@ export type ActivePoolFees = {
   amounts: {
     percentOfNav: Rate
     pending: CurrencyBalance
-    maxPayable: CurrencyBalance
   }
   limit: FeeLimits
   destination: string
@@ -1877,12 +1876,8 @@ export function getPoolsModule(inst: Centrifuge) {
             api.query.poolSystem.epochExecution.entries(),
             getCurrencies(),
             api.query.poolFees.activeFees.entries(),
-            api.query.poolFees.assetsUnderManagement.entries(),
           ]),
-        (
-          api,
-          [rawPools, rawMetadatas, rawPortfolioValuation, rawEpochExecutions, currencies, activePoolFees, previousNavs]
-        ) => ({
+        (api, [rawPools, rawMetadatas, rawPortfolioValuation, rawEpochExecutions, currencies, activePoolFees]) => ({
           api,
           rawPools,
           rawMetadatas,
@@ -1890,20 +1885,10 @@ export function getPoolsModule(inst: Centrifuge) {
           rawEpochExecutions,
           currencies,
           activePoolFees,
-          previousNavs,
         })
       ),
       switchMap(
-        ({
-          api,
-          rawPools,
-          rawMetadatas,
-          rawPortfolioValuation,
-          rawEpochExecutions,
-          currencies,
-          activePoolFees,
-          previousNavs,
-        }) => {
+        ({ api, rawPools, rawMetadatas, rawPortfolioValuation, rawEpochExecutions, currencies, activePoolFees }) => {
           if (!rawPools.length) return of([])
 
           const poolFeesMap = activePoolFees.reduce((acc, [key, fees]) => {
@@ -1911,12 +1896,6 @@ export function getPoolsModule(inst: Centrifuge) {
             acc[poolId] = fees.toJSON() as unknown as ActivePoolFeesData[]
             return acc
           }, {} as Record<string, ActivePoolFeesData[]>)
-
-          const previousNavsMap = previousNavs.reduce((acc, [key, navValue]) => {
-            const poolId = formatPoolKey(key as StorageKey<[u32]>)
-            acc[poolId] = navValue.toJSON() as unknown as any
-            return acc
-          }, {} as Record<string, any>)
 
           const portfolioValuationMap = rawPortfolioValuation.reduce((acc, [key, navValue]) => {
             const poolId = formatPoolKey(key as StorageKey<[u32]>)
@@ -2007,7 +1986,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 const portfolioValuationData = portfolioValuationMap[poolId]
                 const epochExecution = epochExecutionMap[poolId]
                 const currency = findCurrency(currencies, pool.currency)!
-                const previousNav = new CurrencyBalance(previousNavsMap[poolId], currency.decimals)
 
                 const poolValue = new CurrencyBalance(
                   pool.tranches.tranches.reduce((prev: BN, tranche: TrancheDetailsData) => {
@@ -2051,7 +2029,6 @@ export function getPoolsModule(inst: Centrifuge) {
                                   .add(new BN(fee.amounts.pending)),
                                 currency.decimals
                               ),
-                        maxPayable: new CurrencyBalance(fee.amounts.payable.upTo, currency.decimals),
                       },
                     }
                   }),
@@ -2131,7 +2108,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     lastUpdated: lastUpdatedNav,
                   },
                   value: rawNav?.total
-                    ? new CurrencyBalance(hexToBN(rawNav.total), currency.decimals)
+                    ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)
                     : new CurrencyBalance(0, currency.decimals),
                 }
 
