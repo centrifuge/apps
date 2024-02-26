@@ -5,15 +5,14 @@ import {
   useEvmNativeBalance,
   useEvmNativeCurrency,
   useEvmProvider,
-  useWallet
+  useWallet,
 } from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
 import * as React from 'react'
-import { Dec, max } from '../../utils/Decimal'
+import { Dec } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
-import { useAssetPair } from '../../utils/useCurrencies'
 import { useLPEvents, useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
 import { useDebugFlags } from '../DebugFlags'
@@ -69,8 +68,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const collectType = currencyToCollect.gt(0) ? 'redeem' : investToCollect.gt(0) ? 'invest' : null
 
-  const assetPairMinOrder = useAssetPair(pool.currency, lpInvest?.currency)
-  const minOrder = max(assetPairMinOrder?.toDecimal() ?? Dec(0), consts.orderBook.minFulfillment.toDecimal())
+  const minOrder = consts.orderBook.minFulfillment.toDecimal()
 
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrder)
   const decreaseInvest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.decreaseInvestOrder)

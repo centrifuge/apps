@@ -44,9 +44,9 @@ import * as React from 'react'
 import { filter, map, repeatWhen, switchMap } from 'rxjs'
 import { parachainNames } from '../../config'
 import { copyToClipboard } from '../../utils/copyToClipboard'
-import { Dec, max as maxDecimal } from '../../utils/Decimal'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
-import { findAssetPairPrice, useAssetPair, useAssetPairPrices, useCurrencies } from '../../utils/useCurrencies'
+import { findAssetPairPrice, useAssetPairPrices, useCurrencies } from '../../utils/useCurrencies'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { address, combine, max, min, required } from '../../utils/validation'
 import { ButtonGroup } from '../ButtonGroup'
@@ -149,7 +149,7 @@ export function Orders({ buyOrSell }: OrdersProps) {
               maxSellAmount: string
               amountOut: string
               amountOutInitial: string
-              ratio: {custom: string} | {market: null}
+              ratio: { custom: string } | { market: null }
             }
 
             const currencyIn = parseCurrencyKey(order.currencyIn)
@@ -157,11 +157,13 @@ export function Orders({ buyOrSell }: OrdersProps) {
             const buyCurrency = findCurrency(currencies!, currencyIn)!
             const sellCurrency = findCurrency(currencies!, currencyOut)!
             const sellAmount = new CurrencyBalance(order.amountOut, sellCurrency!.decimals)
-            const price = "market" in order.ratio ? null : new Price(order.ratio.custom)
+            const price = 'market' in order.ratio ? null : new Price(order.ratio.custom)
             return {
               id: String(order.orderId),
               account: addressToHex(order.placingAccount),
-              buyAmount: price ? CurrencyBalance.fromFloat(sellAmount.toDecimal().mul(price.toDecimal()), buyCurrency!.decimals) : null,
+              buyAmount: price
+                ? CurrencyBalance.fromFloat(sellAmount.toDecimal().mul(price.toDecimal()), buyCurrency!.decimals)
+                : null,
               sellAmount,
               price,
               buyCurrency,
@@ -209,12 +211,9 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
   const api = useCentrifugeApi()
   const consts = useCentrifugeConsts()
   const getNetworkName = useGetNetworkName()
-  const assetPairMinOrder = useAssetPair(order.buyCurrency, order.sellCurrency)
- 
-  const minFulfillDec = maxDecimal(
-    assetPairMinOrder?.toDecimal() ?? Dec(0),
-    consts.orderBook.minFulfillment.toDecimal().mul(order.price.toDecimal())
-  )
+
+  const minFulfillDec = consts.orderBook.minFulfillment.toDecimal().mul(order.price.toDecimal())
+
   const balanceDec =
     (balances && findBalance(balances.currencies, order.buyCurrency.key))?.balance.toDecimal() || Dec(0)
   const orderBuyDec = order.buyAmount.toDecimal()
@@ -241,14 +240,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
       if (transferTo) {
         return cent.pools
           .withdraw(
-            [
-              amount
-                ? amount
-                : order.sellAmount,
-              order.sellCurrency.key,
-              transferTo,
-              orderSellCurrencyLocation,
-            ],
+            [amount ? amount : order.sellAmount, order.sellCurrency.key, transferTo, orderSellCurrencyLocation],
             { batch: true }
           )
           .pipe(
@@ -281,7 +273,10 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
         [
           values.isTransferEnabled ? values.tranferReceiverAddress : null,
           values.isPartialEnabled && values.partialTransfer
-            ? CurrencyBalance.fromFloat(Dec(values.partialTransfer).div(order.price.toDecimal()), order.sellCurrency.decimals)
+            ? CurrencyBalance.fromFloat(
+                Dec(values.partialTransfer).div(order.price.toDecimal()),
+                order.sellCurrency.decimals
+              )
             : null,
         ],
         { account }
