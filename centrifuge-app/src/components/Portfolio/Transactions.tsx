@@ -1,4 +1,4 @@
-import { BorrowerTransactionType, InvestorTransactionType, Pool, Token, TokenBalance } from '@centrifuge/centrifuge-js'
+import { AssetTransactionType, InvestorTransactionType, Pool, Token, TokenBalance } from '@centrifuge/centrifuge-js'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
@@ -30,7 +30,7 @@ type TransactionsProps = {
 }
 
 type Row = {
-  action: InvestorTransactionType | BorrowerTransactionType
+  action: InvestorTransactionType | AssetTransactionType
   date: number
   tranche?: Token
   tranchePrice: string

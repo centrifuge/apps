@@ -26,7 +26,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     return transactions?.map((tx) => ({
       name: '',
       value: [
-        tx.loanId.split('-').at(-1)!,
+        tx.assetId.split('-').at(-1)!,
         tx.epochId.split('-').at(-1)!,
         formatDate(tx.timestamp.toString()),
         formatAssetTransactionType(tx.type),

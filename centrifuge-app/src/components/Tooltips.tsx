@@ -262,6 +262,18 @@ export const tooltipText = {
     label: 'Pool type',
     body: 'An open pool can have multiple unrelated token holders and can onboard third party investors. A closed pool has very limited distributions and is not available for investment on the app.',
   },
+ totalNav: {
+  label: "Total NAV",
+  body: "The total Net Asset Value (NAV) reflects the combined present value of assets, cash held in the onchain reserve of the pool, and cash in the bank account designated as offchain cash."
+ } ,
+ onchainReserve: {
+  label: "Onchain reserve",
+  body: "The onchain reserve represents the amount of available liquidity in the pool available for asset originations and redemptions."
+ },
+ offchainCash: {
+  label: "Offchain cash",
+  body: "Offchain cash represents funds held in a traditional bank account or custody account."
+ }
 }
 
 export type TooltipsProps = {
