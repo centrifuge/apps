@@ -12,7 +12,7 @@ export const getRangeNumber = (rangeValue: string, poolAge?: number) => {
     const timeDifference = new Date(today).getTime() - new Date(januaryFirst).getTime()
     const daysSinceJanuary1 = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
 
-    return daysSinceJanuary1
+    return daysSinceJanuary1 + 1
   }
 
   if (rangeValue === 'all' && poolAge) {
