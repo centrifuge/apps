@@ -1,5 +1,11 @@
 import { CurrencyBalance, isSameAddress, Perquintill, Rate, TransactionOptions } from '@centrifuge/centrifuge-js'
-import { AddFee, CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import {
+  AddFee,
+  CurrencyKey,
+  FeeTypes,
+  PoolMetadataInput,
+  TrancheInput,
+} from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   useBalances,
   useCentrifuge,
@@ -94,18 +100,19 @@ export type CreatePoolValues = Omit<
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
-  reportAuthorName:string
-  reportAuthorTitle:string
+  reportAuthorName: string
+  reportAuthorTitle: string
   reportAuthorAvatar: File | null
-  reportUrl:string
+  reportUrl: string
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
   poolFees: {
     id?: number
     name: string
-    feeType: 'Fixed' | 'ChargedUpTo'
+    feeType: FeeTypes
     percentOfNav: number | ''
     walletAddress: string
+    feePosition: 'Top of waterfall'
   }[]
   poolType: 'open' | 'closed'
 }
@@ -324,8 +331,8 @@ function CreatePoolForm() {
         if (fee.name === '') {
           errors = setIn(errors, `poolFees.${i}.name`, 'Name is required')
         }
-        if (fee.percentOfNav === '' || fee.percentOfNav <= 0 || fee.percentOfNav >= 100) {
-          errors = setIn(errors, `poolFees.${i}.percentOfNav`, 'Percentage between 1 and 99 is required')
+        if (fee.percentOfNav === '' || fee.percentOfNav < 0.0001 || fee.percentOfNav > 10) {
+          errors = setIn(errors, `poolFees.${i}.percentOfNav`, 'Percentage between 0.0001 and 10 is required')
         }
         if (fee.walletAddress === '') {
           errors = setIn(errors, `poolFees.${i}.walletAddress`, 'Wallet address is required')
@@ -415,14 +422,16 @@ function CreatePoolForm() {
       if (values.reportUrl) {
         let avatar = null
         if (values.reportAuthorAvatar) {
-          const pinned = await lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar)))
+          const pinned = await lastValueFrom(
+            centrifuge.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar))
+          )
           avatar = { uri: pinned.uri, mime: values.reportAuthorAvatar.type }
         }
         metadataValues.poolReport = {
           authorAvatar: avatar,
           authorName: values.reportAuthorName,
           authorTitle: values.reportAuthorTitle,
-          url: values.reportUrl
+          url: values.reportUrl,
         }
       }
 
@@ -442,13 +451,19 @@ function CreatePoolForm() {
           name: fee.name,
           destination: fee.walletAddress,
           amount: Rate.fromPercent(fee.percentOfNav),
-          type: fee.feeType,
+          feeType: fee.feeType,
           limit: 'ShareOfPortfolioValuation',
           feeId: feeId + i,
-          account: fee.feeType === 'ChargedUpTo' ? fee.walletAddress : undefined,
+          account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
+          feePosition: fee.feePosition,
         }
       })
-      metadataValues.poolFees = poolFees.map((fee) => ({ name: fee.name, id: fee.feeId }))
+      metadataValues.poolFees = poolFees.map((fee) => ({
+        name: fee.name,
+        id: fee.feeId,
+        feePosition: fee.feePosition,
+        feeType: fee.feeType,
+      }))
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 

@@ -18,9 +18,9 @@ import {
 import { Field, FieldArray, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React from 'react'
 import { useParams } from 'react-router'
+import { Dec } from '../../utils/Decimal'
 import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
 import { copyToClipboard } from '../../utils/copyToClipboard'
-import { Dec } from '../../utils/Decimal'
 import { formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -145,9 +145,10 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
               destination: fee.receivingAddress,
               amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
-              type: 'ChargedUpTo',
+              feeType: 'chargedUpTo',
               limit: 'ShareOfPortfolioValuation',
               account: account.actingAddress,
+              feePosition: 'Top of waterfall',
             },
           }
         })

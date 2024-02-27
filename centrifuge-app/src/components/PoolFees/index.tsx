@@ -1,14 +1,18 @@
-import { addressToHex, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
+import { addressToHex, CurrencyBalance, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text, truncate } from '@centrifuge/fabric'
+import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import * as React from 'react'
 import { useHistory, useLocation, useParams } from 'react-router'
+import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
+import { PageSummary } from '../PageSummary'
 import { RouterLinkButton } from '../RouterLinkButton'
+import { Tooltips } from '../Tooltips'
 import { ChargeFeesDrawer } from './ChargeFeesDrawer'
 import { EditFeesDrawer } from './EditFeesDrawer'
 
@@ -20,58 +24,9 @@ type Row = {
   receivingAddress?: string
   action: null | React.ReactNode
   poolCurrency?: string
+  index: number
+  feePosition: 'Top of waterfall'
 }
-
-const columns = [
-  {
-    align: 'left',
-    header: 'Name',
-    cell: (row: Row) => {
-      return <Text variant="body3">{row.name}</Text>
-    },
-  },
-  {
-    align: 'left',
-    header: 'Type',
-    cell: (row: Row) => {
-      return <Text variant="body3">{row.type === 'fixed' ? 'Fixed % of NAV' : 'Direct charge'}</Text>
-    },
-  },
-  {
-    align: 'left',
-    header: 'Percentage',
-    cell: (row: Row) => {
-      return (
-        <Text variant="body3">
-          {row.percentOfNav ? `${formatPercentage(row.percentOfNav?.toPercent(), true, {}, 3)} of NAV` : ''}
-        </Text>
-      )
-    },
-  },
-  {
-    align: 'left',
-    header: 'Pending fees',
-    cell: (row: Row) => {
-      return row?.pendingFees ? (
-        <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 2)}</Text>
-      ) : null
-    },
-  },
-  {
-    align: 'left',
-    header: 'Receiving address',
-    cell: (row: Row) => {
-      return <Text variant="body3">{row.receivingAddress ? truncate(row.receivingAddress) : ''}</Text>
-    },
-  },
-  {
-    align: 'left',
-    header: 'Action',
-    cell: (row: Row) => {
-      return row.action
-    },
-  },
-]
 
 export function PoolFees() {
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -88,21 +43,104 @@ export function PoolFees() {
   const address = useAddress()
   const { execute: applyNewFee } = useCentrifugeTransaction('Apply new fee', (cent) => cent.pools.applyNewFee)
 
+  const columns = [
+    {
+      align: 'left',
+      header: 'Name',
+      cell: (row: Row) => {
+        return (
+          <Shelf gap={1}>
+            <Box
+              borderRadius="50%"
+              height="16px"
+              width="16px"
+              backgroundColor="backgroundSecondary"
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Text variant="body3">{row.index + 1}</Text>
+            </Box>
+            <Text variant="body3">{row.name}</Text>
+          </Shelf>
+        )
+      },
+    },
+    {
+      align: 'left',
+      header: 'Type',
+      cell: (row: Row) => {
+        return <Text variant="body3">{row.type === 'fixed' ? 'Fixed % of NAV' : 'Direct charge'}</Text>
+      },
+    },
+    {
+      align: 'left',
+      header: 'Fee position',
+      cell: (row: Row) => {
+        return <Text variant="body3">{row.feePosition}</Text>
+      },
+    },
+    {
+      align: 'left',
+      header: 'Percentage/Limit',
+      cell: (row: Row) => {
+        return row.percentOfNav ? (
+          <Text variant="body3">
+            {row.type === 'fixed'
+              ? `${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of NAV`
+              : `<${formatPercentage(row.percentOfNav.toPercent(), true, {}, 3)} of non-cash NAV`}
+          </Text>
+        ) : null
+      },
+    },
+    {
+      align: 'left',
+      header: 'Pending fees',
+      cell: (row: Row) => {
+        return row?.pendingFees ? (
+          <Text variant="body3">{formatBalance(row.pendingFees, row.poolCurrency, 4)}</Text>
+        ) : null
+      },
+    },
+    {
+      align: 'left',
+      header: 'Receiving address',
+      cell: (row: Row) => {
+        return (
+          <Text variant="body3">
+            <CopyToClipboard variant="body3" address={row.receivingAddress || ''} />
+          </Text>
+        )
+      },
+    },
+    ...(!!poolAdmin || pool?.poolFees?.map((fee) => addressToHex(fee.destination)).includes(address! as `0x${string}`)
+      ? [
+          {
+            align: 'left',
+            header: 'Action',
+            cell: (row: Row) => row.action,
+          },
+        ]
+      : []),
+  ]
+
   const data = React.useMemo(() => {
     const activeFees =
       pool.poolFees
         ?.filter((feeChainData) => poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id))
-        ?.map((feeChainData) => {
+        ?.map((feeChainData, index) => {
           const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
           const fixedFee = feeChainData?.type === 'fixed'
           const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
 
           return {
-            name: feeMetadata!.name,
+            index,
+            name: feeMetadata?.name,
             type: feeChainData?.type,
             percentOfNav: feeChainData?.amounts?.percentOfNav,
             pendingFees: feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
+            feePosition: feeMetadata?.feePosition,
             action:
               (isAllowedToCharge || poolAdmin) && !fixedFee ? (
                 <RouterLinkButton
@@ -128,8 +166,9 @@ export function PoolFees() {
     if (changes?.length) {
       return [
         ...activeFees,
-        ...changes.map(({ change, hash }) => {
+        ...changes.map(({ change, hash }, index) => {
           return {
+            index: activeFees.length + index,
             name: poolMetadata?.pool?.poolFees?.find((f) => f.id === change.feeId)?.name,
             type: change.type,
             percentOfNav: change.amounts.percentOfNav,
@@ -166,6 +205,20 @@ export function PoolFees() {
     }
   }, [drawer])
 
+  const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
+    {
+      label: <Tooltips type="totalPendingFees" />,
+      value: formatBalance(
+        new CurrencyBalance(
+          pool.poolFees?.reduce((acc, fee) => acc.add(fee.amounts.pending), new BN(0)) || new BN(0),
+          pool.currency.decimals
+        ) || 0,
+        pool.currency.symbol,
+        2
+      ),
+    },
+  ]
+
   return (
     <>
       <ChargeFeesDrawer
@@ -182,6 +235,7 @@ export function PoolFees() {
           push(pathname)
         }}
       />
+      <PageSummary data={pageSummaryData} />
       <PageSection
         title="Fee structure"
         headerRight={
@@ -191,6 +245,7 @@ export function PoolFees() {
             </RouterLinkButton>
           ) : null
         }
+        subtitle="Fees are settled using available liquidity before investments or redemptions, prioritizing and paying the highest fees first"
       >
         {data?.length ? (
           <DataTable data={data || []} columns={columns} />

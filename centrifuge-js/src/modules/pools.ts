@@ -10,14 +10,14 @@ import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
-    AssetTransactionType,
-    InvestorTransactionType,
-    SubqueryAssetTransaction,
-    SubqueryCurrencyBalances,
-    SubqueryInvestorTransaction,
-    SubqueryPoolSnapshot,
-    SubqueryTrancheBalances,
-    SubqueryTrancheSnapshot,
+  AssetTransactionType,
+  InvestorTransactionType,
+  SubqueryAssetTransaction,
+  SubqueryCurrencyBalances,
+  SubqueryInvestorTransaction,
+  SubqueryPoolSnapshot,
+  SubqueryTrancheBalances,
+  SubqueryTrancheSnapshot,
 } from '../types/subquery'
 import {
   addressToHex,
@@ -633,7 +633,7 @@ export interface PoolMetadataInput {
     threshold: number
   }
 
-  poolFees: { id: number; name: string }[]
+  poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; feeType: FeeTypes }[]
 
   poolType: 'open' | 'closed'
 }
@@ -657,6 +657,7 @@ export type PoolMetadata = {
     poolFees?: {
       id: number
       name: string
+      feePosition: 'Top of waterfall'
     }[]
     newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
@@ -810,7 +811,7 @@ export type ActivePoolFeesData = {
       }
     }
     payable: {
-      allPending: null
+      upTo: string
     }
     pending: CurrencyBalance
   }
@@ -824,12 +825,13 @@ export type ActivePoolFeesData = {
 export type AddFee = {
   fee: {
     destination: string
-    type: 'Fixed' | 'ChargedUpTo'
+    feeType: FeeTypes
     limit: 'ShareOfPortfolioValuation' | 'AmountPerSecond'
     name: string
     feeId: number
     amount: Rate
     account?: string
+    feePosition: 'Top of waterfall'
   }
   poolId: string
 }
@@ -875,7 +877,7 @@ export function getPoolsModule(inst: Centrifuge) {
         {
           destination: fee.destination,
           editor: fee?.account ? { account: fee.account } : 'Root',
-          feeType: { [fee.type]: { limit: { [fee.limit]: fee?.amount } } },
+          feeType: { [fee.feeType]: { limit: { [fee.limit]: fee?.amount } } },
         },
       ]
     })
@@ -1874,12 +1876,8 @@ export function getPoolsModule(inst: Centrifuge) {
             api.query.poolSystem.epochExecution.entries(),
             getCurrencies(),
             api.query.poolFees.activeFees.entries(),
-            api.query.poolFees.assetsUnderManagement.entries(),
           ]),
-        (
-          api,
-          [rawPools, rawMetadatas, rawPortfolioValuation, rawEpochExecutions, currencies, activePoolFees, previousNavs]
-        ) => ({
+        (api, [rawPools, rawMetadatas, rawPortfolioValuation, rawEpochExecutions, currencies, activePoolFees]) => ({
           api,
           rawPools,
           rawMetadatas,
@@ -1887,20 +1885,10 @@ export function getPoolsModule(inst: Centrifuge) {
           rawEpochExecutions,
           currencies,
           activePoolFees,
-          previousNavs,
         })
       ),
       switchMap(
-        ({
-          api,
-          rawPools,
-          rawMetadatas,
-          rawPortfolioValuation,
-          rawEpochExecutions,
-          currencies,
-          activePoolFees,
-          previousNavs,
-        }) => {
+        ({ api, rawPools, rawMetadatas, rawPortfolioValuation, rawEpochExecutions, currencies, activePoolFees }) => {
           if (!rawPools.length) return of([])
 
           const poolFeesMap = activePoolFees.reduce((acc, [key, fees]) => {
@@ -1908,12 +1896,6 @@ export function getPoolsModule(inst: Centrifuge) {
             acc[poolId] = fees.toJSON() as unknown as ActivePoolFeesData[]
             return acc
           }, {} as Record<string, ActivePoolFeesData[]>)
-
-          const previousNavsMap = previousNavs.reduce((acc, [key, navValue]) => {
-            const poolId = formatPoolKey(key as StorageKey<[u32]>)
-            acc[poolId] = navValue.toJSON() as unknown as any
-            return acc
-          }, {} as Record<string, any>)
 
           const portfolioValuationMap = rawPortfolioValuation.reduce((acc, [key, navValue]) => {
             const poolId = formatPoolKey(key as StorageKey<[u32]>)
@@ -2004,7 +1986,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 const portfolioValuationData = portfolioValuationMap[poolId]
                 const epochExecution = epochExecutionMap[poolId]
                 const currency = findCurrency(currencies, pool.currency)!
-                const previousNav = new CurrencyBalance(previousNavsMap[poolId], currency.decimals)
 
                 const poolValue = new CurrencyBalance(
                   pool.tranches.tranches.reduce((prev: BN, tranche: TrancheDetailsData) => {
@@ -2030,7 +2011,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   metadata,
                   currency,
                   poolFees: poolFees?.map((fee) => {
-                    const secondsSinceLastEpoch = (Date.now() - new Date(lastUpdatedNav).getTime()) / 1000
                     const type = Object.keys(fee.amounts.feeType)[0] as FeeTypes
                     const limit = Object.keys(fee.amounts.feeType[type].limit)[0] as FeeLimits
                     const percentOfNav = new Rate(hexToBN(fee.amounts.feeType[type].limit[limit]))
@@ -2043,14 +2023,10 @@ export function getPoolsModule(inst: Centrifuge) {
                         pending:
                           type === 'chargedUpTo'
                             ? new CurrencyBalance(fee.amounts.pending, currency.decimals)
-                            : CurrencyBalance.fromFloat(
-                                percentOfNav
-                                  .toDecimal()
-                                  .div(100)
-                                  .mul(previousNav.gtn(0) ? previousNav.toDecimal() : 1)
-                                  .mul(secondsSinceLastEpoch)
-                                  .div(limit === 'amountPerSecond' ? 1 : SEC_PER_YEAR)
-                                  .add(new CurrencyBalance(fee.amounts.pending, currency.decimals).toDecimal()),
+                            : new CurrencyBalance(
+                                new CurrencyBalance(fee.amounts.payable.upTo, currency.decimals)
+                                  .divn(limit === 'amountPerSecond' ? 1 : SEC_PER_YEAR)
+                                  .add(new BN(fee.amounts.pending)),
                                 currency.decimals
                               ),
                       },
@@ -2132,7 +2108,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     lastUpdated: lastUpdatedNav,
                   },
                   value: rawNav?.total
-                    ? new CurrencyBalance(hexToBN(rawNav.total), currency.decimals)
+                    ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)
                     : new CurrencyBalance(0, currency.decimals),
                 }
 
@@ -3569,7 +3545,7 @@ export function getPoolsModule(inst: Centrifuge) {
           return api.tx.poolFees.proposeNewFee(poolId, 'Top', {
             destination: fee.destination,
             editor: { account: fee?.account },
-            feeType: { [fee.type]: { limit: { [fee.limit]: fee.amount } } },
+            feeType: { [fee.feeType]: { limit: { [fee.limit]: fee.amount } } },
           })
         })
         const updatedMetadata = {
