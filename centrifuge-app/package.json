@@ -52,7 +52,8 @@
     "recharts": "2.6.2",
     "styled-components": "^5.3.5",
     "styled-system": "^5.1.5",
-    "typescript": "~5.3.3"
+    "typescript": "~5.3.3",
+    "vitest": "^1.2.1"
   },
   "devDependencies": {
     "@synthetixio/synpress": "^3.7.2-beta.9",

@@ -49,10 +49,10 @@ describe('Tinlake Rewards Proofs', () => {
 
     const leaf = hashLeaf(claim0.accountID, claim0.balance)
     const proof = createProofFromClaim(tree, claim0)
-    expect(proof.length).toEqual(4)
+    expect(proof.length).to.equal(4)
     const proofArray = createBufferProofFromClaim(tree, claim0)
-    expect(proofArray.length).toEqual(4)
-    expect(tree.getHexRoot()).toEqual('0xb86441971a590bb28da204c422f8f90e5bdbe4eed7149c489be23b534f8eff6b')
-    expect(verifyProof(tree, leaf, proof)).toBeTruthy()
+    expect(proofArray.length).to.equal(4)
+    expect(tree.getHexRoot()).to.equal('0xb86441971a590bb28da204c422f8f90e5bdbe4eed7149c489be23b534f8eff6b')
+    expect(verifyProof(tree, leaf, proof)).to.be.true
   })
 })
