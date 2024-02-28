@@ -3,7 +3,9 @@ import * as React from 'react'
 
 export type GroupBy = 'day' | 'month'
 
-export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'borrower-tx' | 'holders'
+export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'asset-tx' | 'holders'
+
+export type InvestorTxType = 'all' | 'orders' | 'executions' | 'transfers'
 
 export type ReportContextType = {
   csvData?: CsvDataProps
@@ -26,6 +28,9 @@ export type ReportContextType = {
 
   activeTranche?: string
   setActiveTranche: (tranche: string) => void
+
+  investorTxType: InvestorTxType
+  setInvestorTxType: (investorTxType: InvestorTxType) => void
 }
 
 export type CsvDataProps = {
@@ -54,6 +59,9 @@ const defaultContext = {
 
   activeTranche: 'all',
   setActiveTranche() {},
+
+  investorTxType: 'all' as InvestorTxType,
+  setInvestorTxType() {},
 }
 
 export const ReportContext = React.createContext<ReportContextType>(defaultContext)
@@ -70,6 +78,7 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   // Custom filters for specific reports
   const [groupBy, setGroupBy] = React.useState(defaultContext.groupBy)
   const [activeTranche, setActiveTranche] = React.useState(defaultContext.activeTranche)
+  const [investorTxType, setInvestorTxType] = React.useState(defaultContext.investorTxType)
 
   return (
     <ReportContext.Provider
@@ -88,6 +97,8 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
         setGroupBy,
         activeTranche,
         setActiveTranche,
+        investorTxType,
+        setInvestorTxType,
       }}
     >
       {children}

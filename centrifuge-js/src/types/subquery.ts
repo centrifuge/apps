@@ -51,6 +51,8 @@ export type InvestorTransactionType =
   | 'TRANSFER_OUT'
   | 'INVEST_COLLECT'
   | 'REDEEM_COLLECT'
+  | 'INVEST_LP_COLLECT'
+  | 'REDEEM_LP_COLLECT'
 
 export type SubqueryInvestorTransaction = {
   __typename?: 'InvestorTransaction'
@@ -72,17 +74,17 @@ export type SubqueryInvestorTransaction = {
   transactionFee?: number | null
 }
 
-export type BorrowerTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
+export type AssetTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
 
-export type SubqueryBorrowerTransaction = {
-  __typename?: 'BorrowerTransaction'
+export type SubqueryAssetTransaction = {
+  __typename?: 'AssetTransaction'
   id: string
   timestamp: string
   poolId: string
   accountId: string
   epochId: string
-  loanId: string
-  type: BorrowerTransactionType
+  assetId: string
+  type: AssetTransactionType
   amount?: number | null
   settlementPrice: string | null
   quantity: string | null

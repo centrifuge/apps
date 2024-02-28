@@ -96,7 +96,9 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
       trancheMeta?.minInitialInvestment ?? 0,
       pool.currency.decimals
     ).toDecimal(),
+    minOrder: Dec(0),
     nativeBalance: balances?.native.balance.toDecimal() ?? Dec(0),
+    poolCurrencies: [pool.currency],
     poolCurrencyBalance: poolCurBalance,
     poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,
@@ -133,6 +135,7 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
     approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
     cancelRedeem: doAction('cancelRedeem', () => [poolId, trancheId, new BN(0)], { account, forceProxyType: 'Invest' }),
+    selectPoolCurrency() {},
   }
 
   const hooks = {

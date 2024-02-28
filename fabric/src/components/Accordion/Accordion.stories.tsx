@@ -1,13 +1,13 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { Accordion } from '.'
 
 export default {
   title: 'Components/Accordion',
   component: Accordion,
-} as ComponentMeta<typeof Accordion>
+} as Meta<typeof Accordion>
 
-type AccordionStory = ComponentStory<typeof Accordion>
+type AccordionStory = StoryFn<typeof Accordion>
 const Template: AccordionStory = (args) => <Accordion {...args} />
 
 export const Default = Template.bind({})

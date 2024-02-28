@@ -31,8 +31,7 @@
   "include": [
     "src",
     "**/*.d.ts",
-    ".eslintrc.js",
-    "functions"
+    ".eslintrc.js"
   ],
   "exclude": [
     "tsconfig.json"

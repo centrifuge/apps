@@ -91,18 +91,18 @@ function FinanceButton({ loan }: { loan: LoanType }) {
 }
 
 function Loan() {
-  const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
+  const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
   const pool = usePool(poolId)
-  const loan = useLoan(poolId, assetId)
+  const loan = useLoan(poolId, loanId)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const address = useAddress()
   const canOraclePrice = useCanSetOraclePrice(address)
-  const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, assetId)
+  const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
   const [oraclePriceShown, setOraclePriceShown] = React.useState(false)
 
   const currentFace =
@@ -121,7 +121,7 @@ function Loan() {
   )
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
-  const { data: document } = usePodDocument(poolId, documentId)
+  const { data: document } = usePodDocument(poolId, loanId, documentId)
 
   const publicData = nftMetadata?.properties
     ? Object.fromEntries(Object.entries(nftMetadata.properties).map(([key, obj]: any) => [key, obj]))
@@ -185,7 +185,9 @@ function Loan() {
                           : nftMetadata?.properties[key],
                       })) || []
                   : []),
-                ...(loan.pricing.maturityDate
+                ...(loan.pricing.maturityDate &&
+                'valuationMethod' in loan.pricing &&
+                loan.pricing.valuationMethod !== 'cash'
                   ? [
                       {
                         label: 'Maturity date',
@@ -343,7 +345,7 @@ function Loan() {
           {isTinlakePool && loan && 'owner' in loan ? (
             <PageSection title={<Box>NFT</Box>}>
               <Shelf gap={6}>
-                <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
+                <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={loanId} />
                 <LabelValueStack
                   label="Owner"
                   value={

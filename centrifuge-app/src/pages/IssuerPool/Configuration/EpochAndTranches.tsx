@@ -269,7 +269,7 @@ export function EpochAndTranches() {
                     as={NumberInput}
                     label="Epoch hours*"
                     maxLength={2}
-                    rightElement="hrs"
+                    symbol="hrs"
                   />
                   <FieldWithErrorMessage
                     validate={validate.epochMinutes}
@@ -277,7 +277,7 @@ export function EpochAndTranches() {
                     as={NumberInput}
                     label="Epoch minutes*"
                     maxLength={2}
-                    rightElement="min"
+                    symbol="min"
                   />
                 </Grid>
               ) : (

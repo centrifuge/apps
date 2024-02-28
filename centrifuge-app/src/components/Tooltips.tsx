@@ -258,14 +258,26 @@ export const tooltipText = {
     label: 'T-Bill APR',
     body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
   },
+ totalNav: {
+  label: "Total NAV",
+  body: "The total Net Asset Value (NAV) reflects the combined present value of assets, cash held in the onchain reserve of the pool, and cash in the bank account designated as offchain cash."
+ } ,
+ onchainReserve: {
+  label: "Onchain reserve",
+  body: "The onchain reserve represents the amount of available liquidity in the pool available for asset originations and redemptions."
+ },
+ offchainCash: {
+  label: "Offchain cash",
+  body: "Offchain cash represents funds held in a traditional bank account or custody account."
+ }
 }
 
 export type TooltipsProps = {
-  type: keyof typeof tooltipText
+  type?: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string | React.ReactNode
   props?: any
-} & TextProps
+} & Partial<Pick<TextProps, 'style' | 'body'>>
 
 export const Tooltips: React.FC<TooltipsProps> = ({
   type,
@@ -274,7 +286,7 @@ export const Tooltips: React.FC<TooltipsProps> = ({
   props,
   ...textProps
 }) => {
-  const { label, body } = tooltipText[type]
+  const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   const isPrimary = variant === 'primary'
   return (
     <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body} {...textProps}>

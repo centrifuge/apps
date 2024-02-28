@@ -1,8 +1,8 @@
-import { BorrowerTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
 
 export const getLatestPrice = (
   oracleValue: CurrencyBalance,
-  borrowerAssetTransactions: BorrowerTransaction[] | undefined,
+  borrowerAssetTransactions: AssetTransaction[] | undefined,
   decimals: number
 ) => {
   if (!borrowerAssetTransactions) return null

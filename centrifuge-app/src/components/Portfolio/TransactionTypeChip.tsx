@@ -1,10 +1,10 @@
-import { BorrowerTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js'
+import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js'
 import { StatusChip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatTransactionsType } from '../Report/utils'
 
 type TransactionTypeProps = {
-  type: InvestorTransactionType | BorrowerTransactionType
+  type: InvestorTransactionType | AssetTransactionType
   trancheTokenSymbol: string
   poolCurrencySymbol: string
   currencyAmount: number | null
@@ -21,6 +21,8 @@ const status = {
   TRANSFER_OUT: 'default',
   INVEST_COLLECT: 'default',
   REDEEM_COLLECT: 'default',
+  INVEST_LP_COLLECT: 'default',
+  REDEEM_LP_COLLECT: 'default',
   CREATED: 'default',
   BORROWED: 'default',
   REPAID: 'default',

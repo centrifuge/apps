@@ -1,7 +1,6 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Button, Card, Shelf, Stack, Text, TextAreaInput, TextInput_DEPRECATED } from '@centrifuge/fabric'
+import { Box, Button, Card, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
-import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { validate } from './validate'
 
@@ -22,7 +21,7 @@ export function CustomDetails() {
   return (
     <FieldArray name="details">
       {(fldArr) => (
-        <Box>
+        <Stack gap={2}>
           <Shelf justifyContent="space-between">
             <Box>
               <Text as="h3">Issuer profile</Text>
@@ -45,11 +44,11 @@ export function CustomDetails() {
 
           {!!values?.details?.length &&
             values.details.map((_, index) => (
-              <Stack key={index} as={Card} p={1} gap={2} mt={2} alignItems="end">
+              <Stack key={index} as={Card} p={1} gap={2}>
                 <FieldWithErrorMessage
                   name={`details.${index}.title`}
                   validate={validate.issuerDetailTitle}
-                  as={TextInput_DEPRECATED}
+                  as={TextInput}
                   label="Title (max 50 characters)*"
                   maxLength={50}
                 />
@@ -62,19 +61,21 @@ export function CustomDetails() {
                   maxLength={3000}
                 />
 
-                <Button
-                  type="button"
-                  variant="secondary"
-                  small
-                  onClick={() => {
-                    fldArr.remove(index)
-                  }}
-                >
-                  Remove
-                </Button>
+                <Box alignSelf="end">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    small
+                    onClick={() => {
+                      fldArr.remove(index)
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Box>
               </Stack>
             ))}
-        </Box>
+        </Stack>
       )}
     </FieldArray>
   )

@@ -59,6 +59,7 @@ export function DateRange({ onSelection, defaultOption = rangeOptions[1], end }:
       value={value}
       onChange={({ target }) => {
         setValue(target.value as RangeOptionValue)
+        // @ts-expect-error
         setStartDate(getDate[target.value](end))
       }}
     />

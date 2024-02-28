@@ -1,4 +1,4 @@
-import Centrifuge, { addressToHex, BorrowerTransaction, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { addressToHex, AssetTransaction, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useEffect, useMemo } from 'react'
@@ -80,10 +80,10 @@ export function useInvestorTransactions(poolId: string, trancheId?: string, from
   return result
 }
 
-export function useBorrowerTransactions(poolId: string, from?: Date, to?: Date) {
+export function useAssetTransactions(poolId: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
-    ['borrowerTransactions', poolId, from, to],
-    (cent) => cent.pools.getBorrowerTransactions([poolId, from, to]),
+    ['assetTransactions', poolId, from, to],
+    (cent) => cent.pools.getAssetTransactions([poolId, from, to]),
     {
       enabled: !poolId.startsWith('0x'),
     }
@@ -113,11 +113,11 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
   const [result] = useCentrifugeQuery(
     ['borrowerAssetTransactions', poolId, assetId, from, to],
     (cent) => {
-      const borrowerTransactions = cent.pools.getBorrowerTransactions([poolId, from, to])
+      const assetTransactions = cent.pools.getAssetTransactions([poolId, from, to])
 
-      return borrowerTransactions.pipe(
-        map((transactions: BorrowerTransaction[]) =>
-          transactions.filter((transaction) => transaction.loanId.split('-')[1] === assetId)
+      return assetTransactions.pipe(
+        map((transactions: AssetTransaction[]) =>
+          transactions.filter((transaction) => transaction.assetId.split('-')[1] === assetId)
         )
       )
     },
@@ -129,25 +129,13 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
   return result
 }
 
-export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
-  if (poolId.startsWith('0x')) throw new Error('Only works with Centrifuge Pools')
+export function useDailyPoolStates(poolId: string, from?: Date, to?: Date, suspense = true) {
   const [result] = useCentrifugeQuery(
     ['dailyPoolStates', poolId, from, to],
     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
     {
-      suspense: true,
-    }
-  )
-
-  return result
-}
-
-export function useDailyTrancheStates(trancheId: string) {
-  const [result] = useCentrifugeQuery(
-    ['dailyTrancheStates', { trancheId }],
-    (cent) => cent.pools.getDailyTrancheStates([trancheId]),
-    {
-      suspense: true,
+      suspense,
+      enabled: !poolId.startsWith('0x'),
     }
   )
 

@@ -29,7 +29,6 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../utils/useAddress'
-import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -175,8 +174,8 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
                 `${state.trancheCurrency?.name} is only available to Non-U.S. persons.`
               ) : (
                 <>
-                  ({metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must
-                  be verified “accredited investors”.{' '}
+                  {metadata?.pool?.issuer?.name} tokens are available to U.S. and Non-U.S. persons. U.S. persons must be
+                  verified "accredited investors".{' '}
                   <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#onboarding-as-an-us-investor">
                     Learn more
                   </AnchorTextLink>
@@ -218,7 +217,7 @@ function Header() {
               {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
             </TextWithPlaceholder>
           </Stack>
-          {/* 
+          {/*
           <Stack>
             <TextWithPlaceholder variant="body3" color="textSecondary">
               Cost basis
@@ -359,6 +358,8 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
         Dec(values.amount || 0).lt(state.minInitialInvestment)
       ) {
         errors.amount = 'Investment amount too low'
+      } else if (Dec(values.amount || 0).lt(state.minOrder)) {
+        errors.amount = 'Order amount too low'
       }
 
       return errors
@@ -563,6 +564,8 @@ function RedeemForm({ autoFocus }: RedeemFormProps) {
         errors.amount = validateNumberInput(amountTokens, 0, maxRedeemTokens)
       } else if (hasPendingOrder && amountTokens.eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
+      } else if (Dec(values.amount || 0).lt(state.minOrder)) {
+        errors.amount = 'Order amount too low'
       }
 
       return errors
@@ -751,7 +754,6 @@ function PendingOrder({
   onChangeOrder: () => void
 }) {
   const { state } = useInvestRedeem()
-  const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id!)
   const calculatingOrders = pool.epoch.status !== 'ongoing'
   return (
     <Stack gap={2}>

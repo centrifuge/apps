@@ -35,7 +35,7 @@ export default function LiquidityTransactionsSection({
 }: LiquidityTransactionsSectionProps) {
   const to = new Date(pool.epoch.lastClosed)
   const from = pool.createdAt ? new Date(pool.createdAt) : new Date(to.getDate() - 10)
-  const dailyPoolStates = useDailyPoolStates(pool.id, from, to)
+  const { poolStates: dailyPoolStates } = useDailyPoolStates(pool.id, from, to) || {}
 
   const dataUrl: any = React.useMemo(() => {
     if (!dailyPoolStates || !dailyPoolStates?.length) {

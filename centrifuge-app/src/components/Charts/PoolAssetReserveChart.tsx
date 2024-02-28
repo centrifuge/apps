@@ -16,10 +16,10 @@ type ChartData = {
   reserve: [number, number]
 }
 
-const PoolAssetReserveChart: React.VFC = () => {
+function PoolAssetReserveChart() {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
-  const poolStates = useDailyPoolStates(poolId)
+  const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
 
@@ -93,10 +93,7 @@ const PoolAssetReserveChart: React.VFC = () => {
   )
 }
 
-const CustomLegend: React.VFC<{
-  currency: string
-  data: ChartData
-}> = ({ data, currency }) => {
+function CustomLegend({ data, currency }: { currency: string; data: ChartData }) {
   const theme = useTheme()
 
   return (

@@ -1,5 +1,7 @@
+import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
@@ -13,8 +15,8 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PoolToken } from '../../../components/PoolToken'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { formatDate } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
+import { formatDate } from '../../../utils/date'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
@@ -24,6 +26,21 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
+
+export type Token = {
+  poolId: string
+  apy: Decimal
+  protection: Decimal
+  ratio: number
+  name: string
+  symbol: string
+  seniority: number
+  valueLocked: Decimal
+  id: string
+  capacity: CurrencyBalance
+  tokenPrice: Price | null
+  yield30DaysAnnualized?: string | null
+}
 
 export function PoolDetailOverviewTab() {
   return (
@@ -64,11 +81,12 @@ export function PoolDetailOverview() {
     })
   }
 
-  const tokens = pool?.tranches
+  const tokens: Token[] = pool?.tranches
     .map((tranche) => {
       const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
       return {
-        apr: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
+        poolId: tranche.poolId,
+        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
         name: tranche.currency.name,
@@ -80,6 +98,7 @@ export function PoolDetailOverview() {
         id: tranche.id,
         capacity: tranche.capacity,
         tokenPrice: tranche.tokenPrice,
+        yield30DaysAnnualized: tranche?.yield30DaysAnnualized,
       }
     })
     .reverse()
@@ -137,7 +156,7 @@ export function PoolDetailOverview() {
                   ) : (
                     <LabelValueStack
                       label={<Tooltips variant="secondary" type="seniorTokenAPR" />}
-                      value={formatPercentage(token.apr)}
+                      value={formatPercentage(token.apy)}
                     />
                   )}
                   <LabelValueStack
@@ -174,7 +193,7 @@ export function PoolDetailOverview() {
   )
 }
 
-function InvestButton(props: InvestRedeemProps) {
+export function InvestButton(props: InvestRedeemProps) {
   const [open, setOpen] = React.useState(false)
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
 

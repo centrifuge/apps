@@ -73,7 +73,7 @@ type EnvironmentConfig = {
   }
   defaultTheme: 'light' | 'dark'
   baseCurrency: 'USD'
-  assetClasses: Record<'publicCredit' | 'privateCredit', string[]>
+  assetClasses: Record<'Public credit' | 'Private credit', string[]>
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
   defaultPodUrl: string
@@ -95,7 +95,7 @@ const ALTAIR: EnvironmentConfig = {
   },
   defaultTheme: 'dark',
   baseCurrency: 'USD',
-  assetClasses: { privateCredit: ['Art NFTs'], publicCredit: [] },
+  assetClasses: { 'Private credit': ['Art NFTs'], 'Public credit': [] },
   poolCreationType,
   useDocumentNfts: true,
   defaultPodUrl,
@@ -112,15 +112,15 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultTheme: 'light',
   baseCurrency: 'USD',
   assetClasses: {
-    privateCredit: [
-      'Consumer Credit',
-      'Corporate Credit',
-      'Commercial Real Estate',
-      'Residential Real Estate',
-      'Project Finance',
-      'Trade Finance',
+    'Private credit': [
+      'Consumer credit',
+      'Corporate credit',
+      'Commercial real estate',
+      'Residential real estate',
+      'Project finance',
+      'Trade finance',
     ],
-    publicCredit: ['Corporate Bonds', 'US Treasuries'],
+    'Public credit': ['Corporate bonds', 'US treasuries'],
   },
   poolCreationType,
   useDocumentNfts: true,
@@ -143,7 +143,7 @@ const mainnetConfig = {
   chainId: 1,
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmNvauf8E6TkUiyF1ZgtYtntHz335tCswKp2uhBH1fiui1', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmVL3N8A1LB6EoWbnH1qDn4XBCWHcL74gfRMJprzstPK8Z', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
 }
 

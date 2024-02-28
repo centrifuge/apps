@@ -15,7 +15,8 @@ export const useEpochTimeCountdown = (poolId: string) => {
       const interval = setInterval(() => {
         const newDifference = start + duration - Date.now()
         if (newDifference <= 0) {
-          return clearInterval()
+          clearInterval(interval)
+          return
         }
         setTimeRemaining(formatMilliseconds(newDifference))
       }, 1000)

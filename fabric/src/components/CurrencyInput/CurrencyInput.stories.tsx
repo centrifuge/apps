@@ -1,13 +1,13 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryFn } from '@storybook/react'
 import * as React from 'react'
 import { CurrencyInput } from '.'
 
 export default {
   title: 'Components/CurrencyInput',
   component: CurrencyInput,
-} as ComponentMeta<typeof CurrencyInput>
+} as Meta<typeof CurrencyInput>
 
-type CurrencyInputStory = ComponentStory<typeof CurrencyInput>
+type CurrencyInputStory = StoryFn<typeof CurrencyInput>
 const Template: CurrencyInputStory = (args) => {
   const [value, setValue] = React.useState<number | ''>(123456.789)
   return <CurrencyInput {...args} value={value} onChange={setValue} />

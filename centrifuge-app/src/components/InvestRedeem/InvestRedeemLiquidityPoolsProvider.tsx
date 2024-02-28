@@ -1,6 +1,9 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, CurrencyMetadata, Pool } from '@centrifuge/centrifuge-js'
 import {
   useCentrifuge,
+  useCentrifugeApi,
+  useCentrifugeConsts,
+  useCentrifugeQuery,
   useEvmNativeBalance,
   useEvmNativeCurrency,
   useEvmProvider,
@@ -8,34 +11,42 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { TransactionRequest } from '@ethersproject/providers'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
+import { map } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
 import { useLiquidityPoolInvestment, useLiquidityPools, useLPEvents } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
+import { useDebugFlags } from '../DebugFlags'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
 
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
+  const { allowInvestBelowMin } = useDebugFlags()
   const {
     evm: { isSmartContractWallet },
   } = useWallet()
+  const consts = useCentrifugeConsts()
+  const [lpIndex, setLpIndex] = React.useState(0)
 
   const { data: evmNativeBalance } = useEvmNativeBalance(evmAddress)
   const evmNativeCurrency = useEvmNativeCurrency()
   const centOrder = usePendingCollect(poolId, trancheId, centAddress)
   const pool = usePool(poolId) as Pool
   const cent = useCentrifuge()
-  const [pendingActionState, setPendingAction] = React.useState<InvestRedeemAction | 'investWithPermit'>()
-  const { isLoading: isLpsLoading } = useLiquidityPools(poolId, trancheId)
+  const [pendingActionState, setPendingAction] = React.useState<
+    InvestRedeemAction | 'investWithPermit' | 'decreaseInvest'
+  >()
+  const { isLoading: isLpsLoading, data: lps } = useLiquidityPools(poolId, trancheId)
   const {
     data: lpInvest,
     refetch: refetchInvest,
     isLoading: isInvestmentLoading,
-  } = useLiquidityPoolInvestment(poolId, trancheId)
+  } = useLiquidityPoolInvestment(poolId, trancheId, lpIndex)
   const provider = useEvmProvider()
 
   const { data: lpEvents } = useLPEvents(poolId, trancheId, lpInvest?.lpAddress)
@@ -61,7 +72,11 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const collectType = currencyToCollect.gt(0) ? 'redeem' : investToCollect.gt(0) ? 'invest' : null
 
+  const assetPairMinOrder = useAssetPair(pool.currency, lpInvest?.currency)
+  const minOrder = max(assetPairMinOrder?.toDecimal() ?? Dec(0), consts.orderBook.minFulfillment.toDecimal())
+
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrder)
+  const decreaseInvest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.decreaseInvestOrder)
   const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrderWithPermit)
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.increaseRedeemOrder)
   const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
@@ -73,6 +88,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const txActions = {
     invest,
     investWithPermit,
+    decreaseInvest,
     redeem,
     collect: collectType === 'invest' ? collectInvest : collectRedeem,
     approvePoolCurrency: approve,
@@ -80,7 +96,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     cancelInvest,
     cancelRedeem,
   }
-  const pendingAction = pendingActionState === 'investWithPermit' ? 'invest' : pendingActionState
+  const pendingAction = ['investWithPermit', 'decreaseInvest'].includes(pendingActionState!)
+    ? 'invest'
+    : (pendingActionState as InvestRedeemAction | undefined)
   const pendingTransaction = pendingActionState && txActions[pendingActionState]?.lastCreatedTransaction
   let statusMessage
   if (
@@ -124,6 +142,15 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     }, [pendingTransaction?.status])
   }
 
+  React.useEffect(() => {
+    if (lps && lps.length > 1) {
+      const index = lps?.findIndex((lp) => lp.currency.symbol === 'USDC')
+      if (index && index > -1) {
+        setLpIndex(index)
+      }
+    }
+  }, [lps])
+
   const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet
 
   const state: InvestRedeemState = {
@@ -135,16 +162,15 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     isFirstInvestment: centOrder?.submittedAt === 0 && centOrder.investCurrency.isZero(),
     nativeCurrency: evmNativeCurrency,
     trancheCurrency: tranche.currency,
-    poolCurrency: lpInvest && {
-      decimals: lpInvest.currencyDecimals,
-      symbol: lpInvest.currencySymbol,
-    },
+    poolCurrency: lpInvest?.currency,
     capacity: tranche.capacity.toDecimal(),
     minInitialInvestment: new CurrencyBalance(
       trancheMeta?.minInitialInvestment ?? 0,
       pool.currency.decimals
     ).toDecimal(),
+    minOrder,
     nativeBalance: evmNativeBalance?.toDecimal() ?? Dec(0),
+    poolCurrencies: lps?.map((lp) => ({ symbol: lp.currency.symbol })) ?? [],
     poolCurrencyBalance: poolCurBalance,
     poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,
@@ -167,7 +193,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     needsPoolCurrencyApproval: (amount) =>
       lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
     needsTrancheTokenApproval: () => false,
-    canChangeOrder: false,
+    canChangeOrder: !!allowInvestBelowMin,
     canCancelOrder: true,
     pendingAction,
     pendingTransaction,
@@ -178,21 +204,29 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const actions: InvestRedeemActions = {
     invest: async (newOrder: BN) => {
       if (!lpInvest) return
+
+      let assets = newOrder.sub(lpInvest.pendingInvest)
+      if (assets.lt(new BN(0))) {
+        assets = assets.abs()
+        decreaseInvest.execute([lpInvest.lpAddress, assets])
+        setPendingAction('invest')
+      }
+
       // If the last tx was an approve, we may not have refetched the allowance yet,
       // so assume the allowance is enough to do a normal invest
-      if (lpInvest.lpCurrencyAllowance.lt(newOrder) && supportsPermits && pendingAction !== 'approvePoolCurrency') {
+      else if (lpInvest.lpCurrencyAllowance.lt(assets) && supportsPermits && pendingAction !== 'approvePoolCurrency') {
         const signer = provider!.getSigner()
         const connectedCent = cent.connectEvm(evmAddress!, signer)
         const permit = await connectedCent.liquidityPools.signPermit([
           lpInvest.lpAddress,
-          lpInvest.currencyAddress,
-          newOrder,
+          lpInvest.currency.address,
+          assets,
         ])
         console.log('permit', permit)
-        investWithPermit.execute([lpInvest.lpAddress, newOrder, permit])
+        investWithPermit.execute([lpInvest.lpAddress, assets, permit])
         setPendingAction('investWithPermit')
       } else {
-        invest.execute([lpInvest.lpAddress, newOrder])
+        invest.execute([lpInvest.lpAddress, assets])
         setPendingAction('invest')
       }
     },
@@ -206,12 +240,15 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     ),
     approvePoolCurrency: doAction('approvePoolCurrency', (amount) => [
       lpInvest?.lpAddress,
-      lpInvest?.currencyAddress,
+      lpInvest?.currency.address,
       amount.toString(),
     ]),
     approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress]),
     cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress]),
+    selectPoolCurrency(symbol) {
+      setLpIndex(lps!.findIndex((lp) => lp.currency.symbol === symbol))
+    },
   }
 
   const hooks = {
@@ -219,4 +256,23 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   }
 
   return <InvestRedeemContext.Provider value={{ state, actions, hooks }}>{children}</InvestRedeemContext.Provider>
+}
+
+function useAssetPair(currency: CurrencyMetadata, otherCurrency?: CurrencyMetadata) {
+  const api = useCentrifugeApi()
+  const [data] = useCentrifugeQuery(
+    ['assetPair', currency.key, otherCurrency?.key],
+    () =>
+      api.query.orderBook.tradingPair(currency.key, otherCurrency!.key).pipe(
+        map((minOrderData) => {
+          return new CurrencyBalance(minOrderData.toPrimitive() as string, otherCurrency!.decimals)
+        })
+      ),
+    { enabled: !!otherCurrency }
+  )
+  return data
+}
+
+function max(...nums: Decimal[]) {
+  return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
 }

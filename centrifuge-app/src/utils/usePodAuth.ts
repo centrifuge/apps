@@ -8,8 +8,9 @@ import { usePodUrl } from './usePools'
 export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAccount) {
   const { selectedCombinedAccount } = useWallet().substrate
   const podUrl = usePodUrl(poolId)
-  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] }).filter(
-    (acc) => acc.proxies?.length === 1
+  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['Borrower', 'PODReadAccess'], proxyType: ['PodAuth'] })
+  .filter(
+    (acc) => !acc.proxies || acc.proxies.length === 1
   )
   const account = accountOverride || selectedCombinedAccount || suitableAccounts[0]
   const cent = useCentrifuge()
@@ -71,7 +72,7 @@ export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAc
     isLoading: isAuthing,
     isSuccess: isAuthed,
   } = useQuery(['podAccount', podUrl, authToken], () => cent.pod.getSelf([podUrl!, authToken]), {
-    enabled: !!podUrl && !!authToken,
+    enabled: !!podUrl && !!authToken && account?.proxies?.length === 1,
     staleTime: Infinity,
     retry: 1,
     refetchOnWindowFocus: false,
@@ -80,9 +81,10 @@ export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAc
   return {
     isSigning,
     login,
+    account,
     token: session?.signed,
     payload: session?.payload,
-    isAuthed,
+    isAuthed: isAuthed || (account && account.proxies?.length !== 1),
     isAuthing: isSigning || isAuthing,
     authError,
   }

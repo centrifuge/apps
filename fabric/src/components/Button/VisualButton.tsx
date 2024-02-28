@@ -22,7 +22,7 @@ type IconProps = {
 }
 
 export type VisualButtonProps = React.PropsWithChildren<{
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'wallet'
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'wallet' | 'inverted'
   small?: boolean
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
@@ -33,7 +33,7 @@ export type VisualButtonProps = React.PropsWithChildren<{
 }>
 
 type StyledProps = {
-  $variant: 'primary' | 'secondary' | 'tertiary' | 'wallet'
+  $variant: 'primary' | 'secondary' | 'tertiary' | 'wallet' | 'inverted'
   $iconOnly?: boolean
   $small?: boolean
   $disabled?: boolean

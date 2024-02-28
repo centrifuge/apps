@@ -13,7 +13,7 @@ import { useTinlakeTransaction } from '../../utils/tinlake/useTinlakeTransaction
 import { useAddress } from '../../utils/useAddress'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { InvestRedeemContext } from './InvestRedeemProvider'
-import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
+import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
 export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Props) {
   const address = useAddress('evm')
@@ -105,7 +105,9 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       trancheMeta?.minInitialInvestment || 0,
       pool.currency.decimals
     ).toDecimal(),
+    minOrder: Dec(0),
     nativeBalance: nativeBalance?.toDecimal() || Dec(0),
+    poolCurrencies: [pool.currency],
     poolCurrencyBalance: poolCurrencyBalance,
     poolCurrencyBalanceWithPending: poolCurrencyBalance.add(disburse?.remainingInvestCurrency || 0),
     trancheBalance,
@@ -121,7 +123,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       remainingRedeemToken: disburse?.remainingRedeemToken || Dec(0),
     },
     collectAmount,
-    collectType: disburse?.payoutCurrencyAmount.isZero() ? 'invest' : 'redeem',
+    collectType: !disburse?.payoutCurrencyAmount.isZero() ? 'redeem' : !disburse?.payoutTokenAmount.isZero() ? 'invest' : null,
     needsToCollectBeforeOrder: !collectAmount.isZero(),
     needsPoolCurrencyApproval: () => !!trancheInvestment?.poolCurrencyAllowance.isZero(),
     needsTrancheTokenApproval: () => !!trancheInvestment?.tokenAllowance.isZero(),
@@ -140,6 +142,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     approveTrancheToken: doAction('approveTrancheToken', () => [seniority]),
     cancelInvest: doAction('cancelInvest', () => [seniority, new BN(0)]),
     cancelRedeem: doAction('cancelRedeem', () => [seniority, new BN(0)]),
+    selectPoolCurrency() {},
   }
 
   const hooks = {
