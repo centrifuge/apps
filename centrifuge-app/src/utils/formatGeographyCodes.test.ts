@@ -7,7 +7,7 @@ describe('formatGeographyCodes', () => {
         al: 'Albania',
         aw: 'Aruba',
       })
-    ).to.equal([
+    ).toEqual([
       {
         label: 'Albania',
         value: 'al',

@@ -8,9 +8,6 @@
     ],
     "types": [
       "vite/client",
-      "cypress",
-      "cypress-wait-until",
-      "@testing-library/cypress",
       "node"
     ],
     "allowJs": false,
@@ -34,6 +31,8 @@
     ".eslintrc.js"
   ],
   "exclude": [
-    "tsconfig.json"
+    "tsconfig.json",
+    "**/*.test.ts",
+    "**/*.cy.ts"
   ]
 }
