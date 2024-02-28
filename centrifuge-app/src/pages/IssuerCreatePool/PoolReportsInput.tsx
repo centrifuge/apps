@@ -8,11 +8,11 @@ export function PoolReportsInput() {
   return (
     <Grid columns={[1, 2]} equalColumns gap={2} rowGap={3}>
       <FieldWithErrorMessage
-          name="reportUrl"
-          as={TextInput}
-          label="Report URL"
-          placeholder="https://..."
-          validate={validate.website}
+        name="reportUrl"
+        as={TextInput}
+        label="Report URL"
+        placeholder="https://..."
+        validate={validate.website}
       />
       <FieldWithErrorMessage
         name="reportAuthorName"
@@ -28,7 +28,10 @@ export function PoolReportsInput() {
         placeholder="Title..."
         maxLength={100}
       />
-      <Field name="reportAuthorAvatar" validate={combineAsync(imageFile(), maxFileSize(1024 ** 2), maxImageSize(40, 40))}>
+      <Field
+        name="reportAuthorAvatar"
+        validate={combineAsync(imageFile(), maxFileSize(1024 ** 2), maxImageSize(200, 200))}
+      >
         {({ field, meta, form }: FieldProps) => (
           <FileUpload
             file={field.value}
