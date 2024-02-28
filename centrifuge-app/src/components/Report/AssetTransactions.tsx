@@ -7,9 +7,9 @@ import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
-import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import type { TableDataRow } from './index'
 import { formatAssetTransactionType } from './utils'
 
 export function AssetTransactions({ pool }: { pool: Pool }) {
@@ -26,7 +26,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     return transactions?.map((tx) => ({
       name: '',
       value: [
-        tx.assetId.split('-').at(-1)!,
+        tx.id.split('-').at(-1)!,
         tx.epochId.split('-').at(-1)!,
         formatDate(tx.timestamp.toString()),
         formatAssetTransactionType(tx.type),
