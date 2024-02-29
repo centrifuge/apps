@@ -726,6 +726,12 @@ type InvestorTransaction = {
   evmAddress?: string
 }
 
+export enum AssetType {
+  OnchainCash = 'OnchainCash',
+  OffchainCash = 'OffchainCash',
+  Other = 'Other',
+}
+
 export type AssetTransaction = {
   id: string
   timestamp: string
@@ -742,6 +748,17 @@ export type AssetTransaction = {
   asset: {
     id: string
     metadata: string
+    type: AssetType
+  }
+  fromAsset: {
+    id: string
+    metadata: string
+    type: AssetType
+  }
+  toAsset: {
+    id: string
+    metadata: string
+    type: AssetType
   }
 }
 
@@ -2541,6 +2558,17 @@ export function getPoolsModule(inst: Centrifuge) {
             asset {
               id
               metadata
+              type
+            }
+            fromAsset {
+              id
+              metadata
+              type
+            }
+            toAsset {
+              id
+              metadata
+              type
             }
           }
         }

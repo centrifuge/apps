@@ -78,24 +78,28 @@ export function PoolDetailAssets() {
       ),
       value: formatBalance(pool.reserve.total || 0, pool.currency.symbol),
     },
-    {
-      label: (
-        <Shelf alignItems="center" gap="2px">
-          <Box as="img" src={currencyDollar} alt="" height={13} width={13} />
-          <Tooltips type="offchainCash" />
-        </Shelf>
-      ),
-      value: formatBalance(offchainReserve, 'USD'),
-    },
-    {
-      label: 'Total assets',
-      value: loans.length,
-    },
-    { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
-    {
-      label: 'Overdue assets',
-      value: <Text color={overdueAssets.length > 0 ? 'statusCritical' : 'inherit'}>{overdueAssets.length}</Text>,
-    },
+    ...(!isTinlakePool
+      ? [
+          {
+            label: (
+              <Shelf alignItems="center" gap="2px">
+                <Box as="img" src={currencyDollar} alt="" height={13} width={13} />
+                <Tooltips type="offchainCash" />
+              </Shelf>
+            ),
+            value: formatBalance(offchainReserve, 'USD'),
+          },
+          {
+            label: 'Total assets',
+            value: loans.length,
+          },
+          { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
+          {
+            label: 'Overdue assets',
+            value: <Text color={overdueAssets.length > 0 ? 'statusCritical' : 'inherit'}>{overdueAssets.length}</Text>,
+          },
+        ]
+      : []),
   ]
 
   return (

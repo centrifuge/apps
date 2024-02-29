@@ -1,4 +1,4 @@
-import { AssetTransaction, AssetTransactionType, CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { AssetTransaction, AssetTransactionType, AssetType, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { nftMetadataSchema } from '../../schemas'
@@ -20,6 +20,8 @@ type Row = {
 }
 
 const getTransactionTypeStatus = (type: string) => {
+  if (type === 'Cash transfer') return 'default'
+  if (type === 'Purchase') return 'ok'
   if (type === 'Principal payment' || type === 'Repaid') return 'warning'
   if (type === 'Interest') return 'ok'
   return 'default'
@@ -93,6 +95,13 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
   const getLabelAndAmount = (
     transaction: Omit<AssetTransaction, 'type'> & { type: AssetTransactionType | 'SETTLED' }
   ) => {
+    if (transaction.asset.type == AssetType.OffchainCash) {
+      return {
+        label: 'Cash transfer',
+        amount: transaction.amount,
+      }
+    }
+
     if (transaction.type === 'BORROWED' || transaction.type === 'SETTLED') {
       return {
         label: 'Purchase',
