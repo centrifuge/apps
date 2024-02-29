@@ -1,7 +1,6 @@
 import { getChainInfo, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Card, Grid, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
-import { formatDate } from '../../utils/date'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useInvestorTransactions } from '../../utils/usePools'
 
@@ -39,10 +38,10 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
       metric: 'Tranche structure',
       value: numOfTranches === 1 ? 'Unitranche' : `${numOfTranches} tranches`,
     },
-    {
-      metric: 'First investment',
-      value: firstInvestment ? formatDate(firstInvestment) : '-',
-    },
+    // {
+    //   metric: 'First investment',
+    //   value: firstInvestment ? formatDate(firstInvestment) : '-',
+    // },
     {
       metric: 'Available networks',
       value: `Centrifuge${deployedLpChains.length ? `, ${deployedLpChains.join(', ')}` : ''}`,
