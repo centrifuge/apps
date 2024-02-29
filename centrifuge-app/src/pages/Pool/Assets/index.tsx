@@ -3,6 +3,7 @@ import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import currencyDollar from '../../../assets/images/currency-dollar.svg'
+import daiLogo from '../../../assets/images/dai-logo.svg'
 import usdcLogo from '../../../assets/images/usdc-logo.svg'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -72,7 +73,7 @@ export function PoolDetailAssets() {
     {
       label: (
         <Shelf alignItems="center" gap="2px">
-          <Box as="img" src={usdcLogo} alt="" height={13} width={13} />
+          <Box as="img" src={isTinlakePool ? daiLogo : usdcLogo} alt="" height={13} width={13} />
           <Tooltips type="onchainReserve" />
         </Shelf>
       ),

@@ -15,6 +15,7 @@ import get from 'lodash/get'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import currencyDollar from '../assets/images/currency-dollar.svg'
+import daiLogo from '../assets/images/dai-logo.svg'
 import usdcLogo from '../assets/images/usdc-logo.svg'
 import { formatNftAttribute } from '../pages/Loan/utils'
 import { nftMetadataSchema } from '../schemas'
@@ -72,7 +73,7 @@ export function LoanList({ loans }: Props) {
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
   const loansWithLabelStatus = React.useMemo(() => {
     return loans
-      .filter((loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash')
+      .filter((loan) => isTinlakePool || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'))
       .map((loan) => ({
         ...loan,
         labelStatus: getLoanStatus(loan),
@@ -279,7 +280,7 @@ function AssetName({ loan }: { loan: Row }) {
     return (
       <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
         <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
-          <Box as="img" src={usdcLogo} alt="" height="13px" width="13px" />
+          <Box as="img" src={isTinlakePool ? daiLogo : usdcLogo} alt="" height="13px" width="13px" />
         </Shelf>
         <TextWithPlaceholder
           isLoading={isLoading}
