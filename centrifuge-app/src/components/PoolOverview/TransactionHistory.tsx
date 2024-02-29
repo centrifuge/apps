@@ -19,11 +19,7 @@ type Row = {
   assetName: string
 }
 
-const getTransactionTypeStatus = (type: string) => {
-  if (type === 'Cash transfer') return 'default'
-  if (type === 'Purchase') return 'warning'
-  if (type === 'Principal payment' || type === 'Repaid') return 'ok'
-  if (type === 'Interest') return 'ok'
+const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
   return 'default'
 }
 
