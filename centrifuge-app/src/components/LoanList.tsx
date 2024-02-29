@@ -266,7 +266,7 @@ function AssetMetadataField({ loan, name, attribute }: { loan: Row; name: string
         variant="body2"
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {formatNftAttribute(metadata?.properties?.[name], attribute)}
+        {metadata?.properties?.[name] ? formatNftAttribute(metadata?.properties?.[name], attribute) : '-'}
       </TextWithPlaceholder>
     </Shelf>
   )
