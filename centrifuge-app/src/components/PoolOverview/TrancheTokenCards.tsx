@@ -62,14 +62,9 @@ const TrancheTokenCard = ({
   }`
 
   const calculateApy = () => {
-    if (isTinlakePool && trancheText === 'senior') {
-      return formatPercentage(trancheToken.apy)
-    }
-
-    if (daysSinceCreation < 30 || !trancheToken.yield30DaysAnnualized) {
-      return 'N/A'
-    }
-
+    if (poolId === '4139607887') return formatPercentage(5)
+    if (isTinlakePool && trancheText === 'senior') return formatPercentage(trancheToken.apy)
+    if (daysSinceCreation < 30 || !trancheToken.yield30DaysAnnualized) return 'N/A'
     return formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
   }
 
@@ -82,7 +77,7 @@ const TrancheTokenCard = ({
         <Shelf justifyContent="space-between" alignItems="flex-end" gap={1}>
           <Shelf gap={numOfTrancheTokens === 1 ? 5 : 2} alignItems="flex-end">
             <Stack gap={1} paddingRight={numOfTrancheTokens === 1 ? 3 : 0}>
-              <Tooltips label="APY" body={apyTooltipBody} />
+              <Tooltips label={`${poolId === '4139607887' ? 'Target ' : ''}APY`} body={apyTooltipBody} />
               <Text fontSize="30px" variant="body3">
                 {calculateApy()}
               </Text>

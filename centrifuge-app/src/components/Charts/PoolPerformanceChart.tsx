@@ -5,6 +5,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import styled, { useTheme } from 'styled-components'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 import { getRangeNumber } from './utils'
@@ -35,22 +36,39 @@ function PoolPerformanceChart() {
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
+  const loans = useLoans(poolId)
+
+  const firstOriginationDate = loans?.reduce((acc, cur) => {
+    if ('originationDate' in cur) {
+      if (!acc) return cur.originationDate
+      return acc < cur.originationDate ? acc : cur.originationDate
+    }
+    return acc
+  }, '')
+
+  const truncatedPoolStates = poolStates?.filter((poolState) => {
+    if (firstOriginationDate) {
+      return new Date(poolState.timestamp) >= new Date(firstOriginationDate)
+    }
+    return true
+  })
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
   const rangeNumber = getRangeNumber(range.value, poolAge)
 
   const data: ChartData[] = React.useMemo(
     () =>
-      poolStates?.map((day) => {
+      truncatedPoolStates?.map((day) => {
         const nav =
           day.poolState.portfolioValuation.toDecimal().toNumber() + day.poolState.totalReserve.toDecimal().toNumber()
 
         return { day: new Date(day.timestamp), nav }
       }) || [],
-    [poolStates]
+    [truncatedPoolStates]
   )
 
-  if (poolStates && poolStates?.length < 1 && poolAge > 0) return <Text variant="body2">No data available</Text>
+  if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
+    return <Text variant="body2">No data available</Text>
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0

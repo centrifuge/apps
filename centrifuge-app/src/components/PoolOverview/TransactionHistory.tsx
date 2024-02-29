@@ -1,4 +1,4 @@
-import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { AssetTransaction, AssetTransactionType, AssetType, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { nftMetadataSchema } from '../../schemas'
@@ -19,9 +19,7 @@ type Row = {
   assetName: string
 }
 
-const getTransactionTypeStatus = (type: string) => {
-  if (type === 'Principal payment' || type === 'Repaid') return 'warning'
-  if (type === 'Interest') return 'ok'
+const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
   return 'default'
 }
 
@@ -90,8 +88,17 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
     nftMetadataSchema
   )
 
-  const getLabelAndAmount = (transaction: AssetTransaction) => {
-    if (transaction.type === 'BORROWED') {
+  const getLabelAndAmount = (
+    transaction: Omit<AssetTransaction, 'type'> & { type: AssetTransactionType | 'SETTLED' }
+  ) => {
+    if (transaction.asset.type == AssetType.OffchainCash) {
+      return {
+        label: 'Cash transfer',
+        amount: transaction.amount,
+      }
+    }
+
+    if (transaction.type === 'BORROWED' || transaction.type === 'SETTLED') {
       return {
         label: 'Purchase',
         amount: transaction.amount,
@@ -110,52 +117,72 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
     }
   }
 
-  const csvData = transactions
-    ?.filter(
+  const settlements = transactions?.reduce((acc, transaction, index) => {
+    if (transaction.hash === transactions[index + 1]?.hash) {
+      acc[transaction.hash] = { ...transaction, type: 'SETTLED' }
+    }
+
+    return acc
+  }, {} as Record<string, Omit<AssetTransaction, 'type'> & { type: AssetTransactionType | 'SETTLED' }>)
+
+  const transformedTransactions = [
+    ...(transactions?.filter((transaction) => !settlements?.[transaction.hash]) || []),
+    ...Object.values(settlements || []),
+  ]
+    .filter(
       (transaction) => transaction.type !== 'CREATED' && transaction.type !== 'CLOSED' && transaction.type !== 'PRICED'
     )
-    .map((transaction) => {
-      const { label, amount } = getLabelAndAmount(transaction)
-      const [, id] = transaction.asset.id.split('-')
-      return {
-        Type: label,
-        'Transaction Date': `"${formatDate(transaction.timestamp, {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-          second: 'numeric',
-          timeZoneName: 'short',
-        })}"`,
-        'Asset Name': assetMetadata[Number(id) - 1]?.data?.name || '-',
-        Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
-        Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
-      }
-    })
+    .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1))
+
+  const csvData = transformedTransactions.map((transaction) => {
+    const { label, amount } = getLabelAndAmount(transaction)
+    const [, id] = transaction.asset.id.split('-')
+    return {
+      Type: label,
+      'Transaction Date': `"${formatDate(transaction.timestamp, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      })}"`,
+      'Asset Name':
+        transaction.asset.type == AssetType.OffchainCash
+          ? transaction.type === 'BORROWED'
+            ? `Onchain reserve > Settlement Account`
+            : `Settlement Account > onchain reserve`
+          : transaction.type === 'SETTLED'
+          ? `Settlement Account > ${assetMetadata[Number(id) - 1].data?.name || '-'}`
+          : assetMetadata[Number(id) - 1].data?.name || '-',
+      Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
+      Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
+    }
+  })
 
   const csvUrl = csvData?.length ? getCSVDownloadUrl(csvData) : ''
 
   const tableData =
-    transactions
-      ?.filter(
-        (transaction) =>
-          transaction.type !== 'CREATED' && transaction.type !== 'CLOSED' && transaction.type !== 'PRICED'
-      )
-      .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1))
-      .slice(0, preview ? 8 : Infinity)
-      .map((transaction) => {
-        const [, id] = transaction.asset.id.split('-')
-        const { label, amount } = getLabelAndAmount(transaction)
-        return {
-          type: label,
-          transactionDate: transaction.timestamp,
-          assetId: transaction.asset.id,
-          assetName: assetMetadata[Number(id) - 1]?.data?.name,
-          amount: amount || 0,
-          hash: transaction.hash,
-        }
-      }) || []
+    transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
+      const [, id] = transaction.asset.id.split('-')
+      const { label, amount } = getLabelAndAmount(transaction)
+      return {
+        type: label,
+        transactionDate: transaction.timestamp,
+        assetId: transaction.asset.id,
+        assetName:
+          transaction.asset.type == AssetType.OffchainCash
+            ? transaction.type === 'BORROWED'
+              ? `Onchain reserve > Settlement account`
+              : `Settlement account > onchain reserve`
+            : transaction.type === 'SETTLED'
+            ? `${assetMetadata[Number(id) - 1].data?.name || '-'}`
+            : assetMetadata[Number(id) - 1].data?.name || '-',
+        amount: amount || 0,
+        hash: transaction.hash,
+      }
+    }) || []
 
   return (
     <Stack gap={2}>

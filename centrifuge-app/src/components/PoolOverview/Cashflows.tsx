@@ -1,4 +1,4 @@
-import { CurrencyBalance, Loan } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Card, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { formatDate } from '../../utils/date'
@@ -12,7 +12,7 @@ export const Cashflows = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
-  const loans = useLoans(poolId) as Loan[] | undefined | null
+  const loans = useLoans(poolId)
 
   const firstOriginationDate = loans?.reduce((acc, cur) => {
     if ('originationDate' in cur) {
