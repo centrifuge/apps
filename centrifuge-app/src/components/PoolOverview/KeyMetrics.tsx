@@ -8,10 +8,10 @@ type Props = {
   assetType?: { class: string; subClass: string }
   averageMaturity: string
   loans: TinlakeLoan[] | Loan[] | null | undefined
-  poolStatus?: string
+  poolId: string
 }
 
-export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Props) => {
+export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props) => {
   const ongoingAssetCount =
     loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
 
@@ -27,6 +27,10 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Pr
       return loan.status === 'Active' && loan.pricing.maturityDate && days < 0
     }).length
 
+  const isBT3BT4 =
+    poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
+    poolId.toLowerCase() === '0x55d86d51ac3bcab7ab7d2124931fba106c8b60c7'
+
   const metrics = [
     {
       metric: 'Asset class',
@@ -34,10 +38,14 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolStatus }: Pr
         startCase(assetType?.subClass)
       ).replace(/^Us /, 'US ')}`,
     },
-    {
-      metric: 'Average asset maturity',
-      value: averageMaturity,
-    },
+    ...(isBT3BT4
+      ? []
+      : [
+          {
+            metric: 'Average asset maturity',
+            value: averageMaturity,
+          },
+        ]),
     {
       metric: 'Total assets',
       value: loans?.length || 0,

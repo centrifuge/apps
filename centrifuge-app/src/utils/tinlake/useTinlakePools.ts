@@ -1,12 +1,12 @@
 import {
-    CurrencyBalance,
-    Perquintill,
-    Pool,
-    PoolMetadata,
-    Price,
-    Rate,
-    TinlakeLoan,
-    TokenBalance,
+  CurrencyBalance,
+  Perquintill,
+  Pool,
+  PoolMetadata,
+  Price,
+  Rate,
+  TinlakeLoan,
+  TokenBalance,
 } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
@@ -20,14 +20,14 @@ import { currencies } from './currencies'
 import { Call, multicall } from './multicall'
 import { Fixed27Base } from './ratios'
 import {
-    ActivePool,
-    ArchivedPool,
-    IpfsPools,
-    LaunchingPool,
-    PoolMetadataDetails,
-    PoolStatus,
-    TinlakeMetadataPool,
-    UpcomingPool,
+  ActivePool,
+  ArchivedPool,
+  IpfsPools,
+  LaunchingPool,
+  PoolMetadataDetails,
+  PoolStatus,
+  TinlakeMetadataPool,
+  UpcomingPool,
 } from './types'
 
 export interface PoolData {
@@ -788,7 +788,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         : null,
     }
   })
-
 
   return { pools: combined }
 }

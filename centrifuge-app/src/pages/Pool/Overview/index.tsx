@@ -114,7 +114,7 @@ export function PoolDetailOverview() {
               assetType={metadata?.pool?.asset}
               averageMaturity={averageMaturity}
               loans={loans}
-              poolStatus={metadata?.pool?.status}
+              poolId={poolId}
             />
           </React.Suspense>
         </Grid>
