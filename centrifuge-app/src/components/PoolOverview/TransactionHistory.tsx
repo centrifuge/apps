@@ -21,8 +21,8 @@ type Row = {
 
 const getTransactionTypeStatus = (type: string) => {
   if (type === 'Cash transfer') return 'default'
-  if (type === 'Purchase') return 'ok'
-  if (type === 'Principal payment' || type === 'Repaid') return 'warning'
+  if (type === 'Purchase') return 'warning'
+  if (type === 'Principal payment' || type === 'Repaid') return 'ok'
   if (type === 'Interest') return 'ok'
   return 'default'
 }
@@ -153,8 +153,12 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
         timeZoneName: 'short',
       })}"`,
       'Asset Name':
-        transaction.type === 'SETTLED'
-          ? `Settlement > ${assetMetadata[Number(id) - 1].data?.name}`
+        transaction.asset.type == AssetType.OffchainCash
+          ? transaction.type === 'BORROWED'
+            ? `Onchain reserve > Settlement Account`
+            : `Settlement Account > onchain reserve`
+          : transaction.type === 'SETTLED'
+          ? `Settlement Account > ${assetMetadata[Number(id) - 1].data?.name || '-'}`
           : assetMetadata[Number(id) - 1].data?.name || '-',
       Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
       Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
@@ -172,9 +176,13 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
         transactionDate: transaction.timestamp,
         assetId: transaction.asset.id,
         assetName:
-          transaction.type === 'SETTLED'
-            ? `Settlement > ${assetMetadata[Number(id) - 1]?.data?.name}`
-            : assetMetadata[Number(id) - 1]?.data?.name,
+          transaction.asset.type == AssetType.OffchainCash
+            ? transaction.type === 'BORROWED'
+              ? `Onchain reserve > Settlement account`
+              : `Settlement account > onchain reserve`
+            : transaction.type === 'SETTLED'
+            ? `${assetMetadata[Number(id) - 1].data?.name || '-'}`
+            : assetMetadata[Number(id) - 1].data?.name || '-',
         amount: amount || 0,
         hash: transaction.hash,
       }

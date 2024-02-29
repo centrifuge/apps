@@ -750,12 +750,12 @@ export type AssetTransaction = {
     metadata: string
     type: AssetType
   }
-  fromAsset: {
+  fromAsset?: {
     id: string
     metadata: string
     type: AssetType
   }
-  toAsset: {
+  toAsset?: {
     id: string
     metadata: string
     type: AssetType
