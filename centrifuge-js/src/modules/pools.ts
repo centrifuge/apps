@@ -15,6 +15,7 @@ import {
   SubqueryAssetTransaction,
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
+  SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
   SubqueryTrancheSnapshot,
@@ -755,6 +756,24 @@ export type AssetTransaction = {
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+}
+
+export enum FeeTransactionType {
+  Proposed = 'Proposed',
+  Added = 'Added',
+  Removed = 'Removed',
+  Charged = 'Charged',
+  Uncharged = 'Uncharged',
+  Paid = 'Paid',
+  Accrued = 'Accrued',
+}
+
+export type FeeTransaction = {
+  id: string
+  timestamp: string
+  epochNumber: string
+  type: FeeTransactionType
+  amount: CurrencyBalance | undefined
 }
 
 type Holder = {
@@ -2684,6 +2703,50 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getFeeTransactions(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      poolFeeTransactions: { nodes: SubqueryPoolFeeTransaction[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        poolFeeTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: {
+            poolFee: { poolId: { equalTo: $poolId } },
+            timestamp: { greaterThan: $from, lessThan: $to },
+          }) {
+          nodes {
+            id
+            type
+            timestamp
+            blockNumber
+            epochNumber
+            amount
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
+        return data!.poolFeeTransactions.nodes.map((tx) => ({
+          ...tx,
+          amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+          timestamp: new Date(`${tx.timestamp}+00:00`),
+        })) as unknown as FeeTransaction[]
+      })
+    )
+  }
+
   function getHolders(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
     const $query = inst.getApi().pipe(
@@ -3697,6 +3760,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getMonthlyPoolStates,
     getInvestorTransactions,
     getAssetTransactions,
+    getFeeTransactions,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
