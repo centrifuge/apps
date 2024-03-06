@@ -112,6 +112,9 @@ const parachainTypes = {
     bucket: 'PoolFeeBucket',
     fees: 'Vec<PoolFee>',
   },
+  PriceCollectionInput: {
+    _enum: ['Empty', 'Custom(BoundedBTreeMap<OracleKey, Balance, MaxActiveLoansPerPool>)', 'FromRegistry'],
+  },
 }
 
 // NOTE: Should never be extended due to deprecation of RPC in favor of RtAPI calls
@@ -226,8 +229,22 @@ const parachainRuntimeApi: DefinitionsCall = {
           ],
           type: 'Option<PalletLoansEntitiesLoansActiveLoan>',
         },
+        portfolio_valuation: {
+          description: 'Get an emulated portfolio update with custom prices',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+            {
+              name: 'input_prices',
+              type: 'PriceCollectionInput',
+            },
+          ],
+          type: 'Result<Balance, DispatchError>',
+        },
       },
-      version: 1,
+      version: 2,
     },
   ],
   AccountConversionApi: [
