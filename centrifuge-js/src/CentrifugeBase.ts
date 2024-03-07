@@ -7,6 +7,8 @@ import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
 import {
+  Observable,
+  Subject,
   bufferCount,
   catchError,
   combineLatest,
@@ -16,11 +18,9 @@ import {
   from,
   map,
   mergeWith,
-  Observable,
   of,
   share,
   startWith,
-  Subject,
   switchMap,
   take,
   takeWhile,
@@ -140,7 +140,16 @@ const parachainRuntimeApi: DefinitionsCall = {
     {
       methods: {
         tranche_token_prices: parachainRpcMethods.pools.trancheTokenPrices,
-        nav: parachainRpcMethods.pools.nav,
+        nav: {
+          description: 'Retrieve the net asset value of a pool',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Option<PoolNav>',
+        },
       },
       version: 1,
     },
