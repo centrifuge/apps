@@ -1803,7 +1803,7 @@ __metadata:
     "@mdx-js/preact": ^2.1.1
     "@mdx-js/react": ^1.6.22
     "@polkadot/extension-dapp": ~0.45.5
-    "@polkadot/react-identicon": ~3.1.4
+    "@polkadot/react-identicon": ^2.12.1
     "@subwallet/wallet-connect": 0.2.5
     "@types/bn.js": ^5
     "@types/eslint": ^7
@@ -1848,7 +1848,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/fabric@workspace:fabric"
   dependencies:
-    "@polkadot/react-identicon": ^3.1.4
+    "@polkadot/react-identicon": ^2.12.1
     "@react-aria/button": ^3.3.4
     "@react-aria/dialog": ^3.1.4
     "@react-aria/focus": ^3.5.0
@@ -1991,21 +1991,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/is-prop-valid@npm:1.2.1, @emotion/is-prop-valid@npm:^1.1.0":
-  version: 1.2.1
-  resolution: "@emotion/is-prop-valid@npm:1.2.1"
-  dependencies:
-    "@emotion/memoize": ^0.8.1
-  checksum: 8f42dc573a3fad79b021479becb639b8fe3b60bdd1081a775d32388bca418ee53074c7602a4c845c5f75fa6831eb1cbdc4d208cc0299f57014ed3a02abcad16a
-  languageName: node
-  linkType: hard
-
 "@emotion/is-prop-valid@npm:^0.8.1":
   version: 0.8.8
   resolution: "@emotion/is-prop-valid@npm:0.8.8"
   dependencies:
     "@emotion/memoize": 0.7.4
   checksum: bb7ec6d48c572c540e24e47cc94fc2f8dec2d6a342ae97bc9c8b6388d9b8d283862672172a1bb62d335c02662afe6291e10c71e9b8642664a8b43416cdceffac
+  languageName: node
+  linkType: hard
+
+"@emotion/is-prop-valid@npm:^1.1.0":
+  version: 1.2.1
+  resolution: "@emotion/is-prop-valid@npm:1.2.1"
+  dependencies:
+    "@emotion/memoize": ^0.8.1
+  checksum: 8f42dc573a3fad79b021479becb639b8fe3b60bdd1081a775d32388bca418ee53074c7602a4c845c5f75fa6831eb1cbdc4d208cc0299f57014ed3a02abcad16a
   languageName: node
   linkType: hard
 
@@ -2034,13 +2034,6 @@ __metadata:
   version: 0.8.5
   resolution: "@emotion/stylis@npm:0.8.5"
   checksum: 67ff5958449b2374b329fb96e83cb9025775ffe1e79153b499537c6c8b2eb64b77f32d7b5d004d646973662356ceb646afd9269001b97c54439fceea3203ce65
-  languageName: node
-  linkType: hard
-
-"@emotion/unitless@npm:0.8.0":
-  version: 0.8.0
-  resolution: "@emotion/unitless@npm:0.8.0"
-  checksum: 176141117ed23c0eb6e53a054a69c63e17ae532ec4210907a20b2208f91771821835f1c63dd2ec63e30e22fcc984026d7f933773ee6526dd038e0850919fae7a
   languageName: node
   linkType: hard
 
@@ -4550,7 +4543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/keyring@npm:^12.6.1, @polkadot/keyring@npm:^12.6.2":
+"@polkadot/keyring@npm:^12.6.2":
   version: 12.6.2
   resolution: "@polkadot/keyring@npm:12.6.2"
   dependencies:
@@ -4586,7 +4579,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/networks@npm:12.6.2, @polkadot/networks@npm:^12.6.1, @polkadot/networks@npm:^12.6.2":
+"@polkadot/networks@npm:12.6.2, @polkadot/networks@npm:^12.6.2":
   version: 12.6.2
   resolution: "@polkadot/networks@npm:12.6.2"
   dependencies:
@@ -4632,57 +4625,6 @@ __metadata:
     react-is: "*"
     styled-components: "*"
   checksum: 5fbb640edcbfb0f3fb00170dcb5585c10dc7d578e9fd958c257b8853d5627fb561d34ee20af1a11a6838a4dabce78afdbf05a6945615341576389c6d714c786c
-  languageName: node
-  linkType: hard
-
-"@polkadot/react-identicon@npm:^3.1.4":
-  version: 3.6.4
-  resolution: "@polkadot/react-identicon@npm:3.6.4"
-  dependencies:
-    "@polkadot/keyring": ^12.6.1
-    "@polkadot/ui-settings": 3.6.4
-    "@polkadot/ui-shared": 3.6.4
-    "@polkadot/util": ^12.6.1
-    "@polkadot/util-crypto": ^12.6.1
-    ethereum-blockies-base64: ^1.0.2
-    jdenticon: 3.2.0
-    react-copy-to-clipboard: ^5.1.0
-    styled-components: ^6.1.1
-    tslib: ^2.6.2
-  peerDependencies:
-    "@polkadot/keyring": "*"
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-    react: "*"
-    react-dom: "*"
-    react-is: "*"
-  checksum: cc5b2ab2da4aef1b33515999b1a9b4108d4636873c208e22807e7d61c8b79edeaf38dacc89b88da82763d47dd6620094dffcf545ef849ad9e8aa805065aa0f89
-  languageName: node
-  linkType: hard
-
-"@polkadot/react-identicon@npm:~3.1.4":
-  version: 3.1.4
-  resolution: "@polkadot/react-identicon@npm:3.1.4"
-  dependencies:
-    "@polkadot/keyring": ^11.1.3
-    "@polkadot/ui-settings": 3.1.4
-    "@polkadot/ui-shared": 3.1.4
-    "@polkadot/util": ^11.1.3
-    "@polkadot/util-crypto": ^11.1.3
-    ethereum-blockies-base64: ^1.0.2
-    jdenticon: 3.2.0
-    react-copy-to-clipboard: ^5.1.0
-    styled-components: ^5.3.9
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/keyring": "*"
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-    react: "*"
-    react-dom: "*"
-    react-is: "*"
-    styled-components: "*"
-  checksum: 0edfc5e4f4549da39ebe2fa03e9e9d6f0284ea2b615b0b13e2446d0d30b25bf7f87d7daea904ae79a1ea6a5f49cb264eb94fdae06557d1e0bba85a60ecdc8ea4
   languageName: node
   linkType: hard
 
@@ -5033,38 +4975,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-settings@npm:3.1.4":
-  version: 3.1.4
-  resolution: "@polkadot/ui-settings@npm:3.1.4"
-  dependencies:
-    "@polkadot/networks": ^11.1.3
-    "@polkadot/util": ^11.1.3
-    eventemitter3: ^5.0.0
-    store: ^2.0.12
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/networks": "*"
-    "@polkadot/util": "*"
-  checksum: 04ca0bccbf87d8d8704a932786bd82dfe255b74cd32a943ae7414a5054918b558aacdf9102b9a09b82bdc9a6c52d1b6cfe6ba6e3a2cb8df1c95b1dbf634d39d0
-  languageName: node
-  linkType: hard
-
-"@polkadot/ui-settings@npm:3.6.4":
-  version: 3.6.4
-  resolution: "@polkadot/ui-settings@npm:3.6.4"
-  dependencies:
-    "@polkadot/networks": ^12.6.1
-    "@polkadot/util": ^12.6.1
-    eventemitter3: ^5.0.1
-    store: ^2.0.12
-    tslib: ^2.6.2
-  peerDependencies:
-    "@polkadot/networks": "*"
-    "@polkadot/util": "*"
-  checksum: 77aa9b6f63c6f01a69cd19830961b17293f7a84acb4f9d01bae5af8315fae8540d64f170c99d9d8dd1c7ac774a31d3a5f524db5e34af05affe3c9ded81513279
-  languageName: node
-  linkType: hard
-
 "@polkadot/ui-shared@npm:2.12.1":
   version: 2.12.1
   resolution: "@polkadot/ui-shared@npm:2.12.1"
@@ -5075,32 +4985,6 @@ __metadata:
     "@polkadot/util": "*"
     "@polkadot/util-crypto": "*"
   checksum: c9c16bf04166ae15d5d494723805b469e149a01bc5b50184d6bac1ee0fe854f13b492241d229a81b4949c0a081a94d95b78a479c63a875b9218ad3c27eb90935
-  languageName: node
-  linkType: hard
-
-"@polkadot/ui-shared@npm:3.1.4":
-  version: 3.1.4
-  resolution: "@polkadot/ui-shared@npm:3.1.4"
-  dependencies:
-    colord: ^2.9.3
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-  checksum: 5f658bcf0618f73801249300589f014f0ca4379aa66afb5a980884be0a1f91d67be0c191461e92782fc4504dc16d16ea0bc5a555e8515a634f16f8af4961376d
-  languageName: node
-  linkType: hard
-
-"@polkadot/ui-shared@npm:3.6.4":
-  version: 3.6.4
-  resolution: "@polkadot/ui-shared@npm:3.6.4"
-  dependencies:
-    colord: ^2.9.3
-    tslib: ^2.6.2
-  peerDependencies:
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-  checksum: a29b5f684a14cd231dd8e9aeecc9f958442bd8870c642681db5a8bc6847f8c99962b835a46f40efa33e6a9eb5195fb2605f55e3bada72e2ca3986b63de76fc88
   languageName: node
   linkType: hard
 
@@ -9237,13 +9121,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/stylis@npm:4.2.0":
-  version: 4.2.0
-  resolution: "@types/stylis@npm:4.2.0"
-  checksum: 02a47584acd2fcb664f7d8270a69686c83752bdfb855f804015d33116a2b09c0b2ac535213a4a7b6d3a78b2915b22b4024cce067ae979beee0e4f8f5fdbc26a9
-  languageName: node
-  linkType: hard
-
 "@types/trusted-types@npm:^2.0.2":
   version: 2.0.7
   resolution: "@types/trusted-types@npm:2.0.7"
@@ -11947,13 +11824,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colord@npm:^2.9.3":
-  version: 2.9.3
-  resolution: "colord@npm:2.9.3"
-  checksum: 95d909bfbcfd8d5605cbb5af56f2d1ce2b323990258fd7c0d2eb0e6d3bb177254d7fb8213758db56bb4ede708964f78c6b992b326615f81a18a6aaf11d64c650
-  languageName: node
-  linkType: hard
-
 "combined-stream@npm:^1.0.8":
   version: 1.0.8
   resolution: "combined-stream@npm:1.0.8"
@@ -12567,7 +12437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css-to-react-native@npm:3.2.0, css-to-react-native@npm:^3.0.0":
+"css-to-react-native@npm:^3.0.0":
   version: 3.2.0
   resolution: "css-to-react-native@npm:3.2.0"
   dependencies:
@@ -12648,13 +12518,6 @@ __metadata:
   dependencies:
     cssom: ~0.3.6
   checksum: 5f05e6fd2e3df0b44695c2f08b9ef38b011862b274e320665176467c0725e44a53e341bc4959a41176e83b66064ab786262e7380fd1cabeae6efee0d255bb4e3
-  languageName: node
-  linkType: hard
-
-"csstype@npm:3.1.2":
-  version: 3.1.2
-  resolution: "csstype@npm:3.1.2"
-  checksum: e1a52e6c25c1314d6beef5168da704ab29c5186b877c07d822bd0806717d9a265e8493a2e35ca7e68d0f5d472d43fac1cdce70fd79fd0853dff81f3028d857b5
   languageName: node
   linkType: hard
 
@@ -19236,7 +19099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.6, nanoid@npm:^3.3.7":
+"nanoid@npm:^3.3.7":
   version: 3.3.7
   resolution: "nanoid@npm:3.3.7"
   bin:
@@ -20439,17 +20302,6 @@ __metadata:
   version: 4.2.0
   resolution: "postcss-value-parser@npm:4.2.0"
   checksum: 819ffab0c9d51cf0acbabf8996dffbfafbafa57afc0e4c98db88b67f2094cb44488758f06e5da95d7036f19556a4a732525e84289a425f4f6fd8e412a9d7442f
-  languageName: node
-  linkType: hard
-
-"postcss@npm:8.4.31":
-  version: 8.4.31
-  resolution: "postcss@npm:8.4.31"
-  dependencies:
-    nanoid: ^3.3.6
-    picocolors: ^1.0.0
-    source-map-js: ^1.0.2
-  checksum: 1d8611341b073143ad90486fcdfeab49edd243377b1f51834dc4f6d028e82ce5190e4f11bb2633276864503654fb7cab28e67abdc0fbf9d1f88cad4a0ff0beea
   languageName: node
   linkType: hard
 
@@ -22202,7 +22054,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shallowequal@npm:1.1.0, shallowequal@npm:^1.1.0":
+"shallowequal@npm:^1.1.0":
   version: 1.1.0
   resolution: "shallowequal@npm:1.1.0"
   checksum: f4c1de0837f106d2dbbfd5d0720a5d059d1c66b42b580965c8f06bb1db684be8783538b684092648c981294bf817869f743a066538771dbecb293df78f765e00
@@ -22932,7 +22784,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^5.3.5, styled-components@npm:^5.3.6, styled-components@npm:^5.3.9":
+"styled-components@npm:^5.3.5, styled-components@npm:^5.3.6":
   version: 5.3.11
   resolution: "styled-components@npm:5.3.11"
   dependencies:
@@ -22954,26 +22806,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^6.1.1":
-  version: 6.1.8
-  resolution: "styled-components@npm:6.1.8"
-  dependencies:
-    "@emotion/is-prop-valid": 1.2.1
-    "@emotion/unitless": 0.8.0
-    "@types/stylis": 4.2.0
-    css-to-react-native: 3.2.0
-    csstype: 3.1.2
-    postcss: 8.4.31
-    shallowequal: 1.1.0
-    stylis: 4.3.1
-    tslib: 2.5.0
-  peerDependencies:
-    react: ">= 16.8.0"
-    react-dom: ">= 16.8.0"
-  checksum: 367858097ca57911cc310ddf95d16fed162fbb1d2f187366b33ce5e6e22c324f9bcc7206686624a3edd15e3e9605875c8c041ac5ffb430bbee98f1ad0be71604
-  languageName: node
-  linkType: hard
-
 "styled-system@npm:^5.1.5":
   version: 5.1.5
   resolution: "styled-system@npm:5.1.5"
@@ -22992,13 +22824,6 @@ __metadata:
     "@styled-system/variant": ^5.1.5
     object-assign: ^4.1.1
   checksum: e1345f88e0962ad785a500b656c9b7120d87e12ab16b7c107cf745d676190918b169a849eacdf3b09b2f765d9e22838c00211200f6ebbb3cde8eaddce3535054
-  languageName: node
-  linkType: hard
-
-"stylis@npm:4.3.1":
-  version: 4.3.1
-  resolution: "stylis@npm:4.3.1"
-  checksum: d365f1b008677b2147e8391e9cf20094a4202a5f9789562e7d9d0a3bd6f0b3067d39e8fd17cce5323903a56f6c45388e3d839e9c0bb5a738c91726992b14966d
   languageName: node
   linkType: hard
 
@@ -23583,13 +23408,6 @@ __metadata:
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
-  languageName: node
-  linkType: hard
-
-"tslib@npm:2.5.0":
-  version: 2.5.0
-  resolution: "tslib@npm:2.5.0"
-  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
   languageName: node
   linkType: hard
 
