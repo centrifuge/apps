@@ -27,7 +27,7 @@ export function PricingValues({ loan, pool }: Props) {
     const days = getAge(new Date(pricing.oracle.timestamp).toISOString())
 
     const borrowerAssetTransactions = assetTransactions?.filter(
-      (assetTransaction) => assetTransaction.loanId === `${loan.poolId}-${loan.id}`
+      (assetTransaction) => assetTransaction.asset.id === `${loan.poolId}-${loan.id}`
     )
     const latestPrice = getLatestPrice(pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals)
 
