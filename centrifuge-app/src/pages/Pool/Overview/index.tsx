@@ -1,32 +1,30 @@
 import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
-import { useWallet } from '@centrifuge/centrifuge-react'
-import { Button, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
-import { useLocation, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { useTheme } from 'styled-components'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerSection } from '../../../components/IssuerSection'
-import { LabelValueStack } from '../../../components/LabelValueStack'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { PageSection } from '../../../components/PageSection'
-import { PageSummary } from '../../../components/PageSummary'
-import { PodIndexerReports } from '../../../components/PodIndexerReports'
-import { PoolToken } from '../../../components/PoolToken'
+import { Cashflows } from '../../../components/PoolOverview/Cashflows'
+import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
+import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
+import { PoolStructure } from '../../../components/PoolOverview/PoolStructure'
+import { TrancheTokenCards } from '../../../components/PoolOverview/TrancheTokenCards'
+import { TransactionHistory } from '../../../components/PoolOverview/TransactionHistory'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { Dec } from '../../../utils/Decimal'
-import { formatDate } from '../../../utils/date'
-import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { formatBalance } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
-import { useTinlakePermissions } from '../../../utils/tinlake/useTinlakePermissions'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
+import { useLoans } from '../../../utils/useLoans'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
-
-const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export type Token = {
   poolId: string
@@ -59,13 +57,13 @@ function AverageMaturity({ poolId }: { poolId: string }) {
 }
 
 export function PoolDetailOverview() {
+  const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
-  const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const { evm } = useWallet()
-  const { data: tinlakePermissions } = useTinlakePermissions(poolId, evm?.selectedAddress || '')
+  const averageMaturity = useAverageMaturity(poolId)
+  const loans = useLoans(poolId)
 
   const pageSummaryData = [
     {
@@ -104,98 +102,80 @@ export function PoolDetailOverview() {
     })
     .reverse()
 
-  const hasScrolledToToken = React.useRef(false)
-  function handleTokenMount(node: HTMLDivElement, id: string) {
-    if (hasScrolledToToken.current === true || id !== state?.token) return
-    node.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    hasScrolledToToken.current = true
-  }
-
-  const getTrancheAvailability = (token: string) => {
-    if (isTinlakePool && metadata?.pool?.newInvestmentsStatus) {
-      const trancheName = token.split('-')[1] === '0' ? 'junior' : 'senior'
-
-      const isMember = tinlakePermissions?.[trancheName].inMemberlist
-
-      return isMember || metadata.pool.newInvestmentsStatus[trancheName] !== 'closed'
-    }
-
-    return true
-  }
-
   return (
-    <>
-      <PageSummary data={pageSummaryData} />
+    <Box bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
+      <PoolOverviewSection>
+        <Grid height="fit-content" gridTemplateColumns="66fr minmax(275px, 33fr)" gap={3}>
+          <React.Suspense fallback={<Spinner />}>
+            <PoolPerformance />
+          </React.Suspense>
+          <React.Suspense fallback={<Spinner />}>
+            <KeyMetrics
+              assetType={metadata?.pool?.asset}
+              averageMaturity={averageMaturity}
+              loans={loans}
+              poolId={poolId}
+            />
+          </React.Suspense>
+        </Grid>
+      </PoolOverviewSection>
+      {tokens.length > 0 && (
+        <PoolOverviewSection>
+          <React.Suspense fallback={<Spinner />}>
+            <TrancheTokenCards
+              trancheTokens={tokens}
+              poolId={poolId}
+              createdAt={pool.createdAt}
+              poolCurrencySymbol={pool.currency.symbol}
+            />
+          </React.Suspense>
+        </PoolOverviewSection>
+      )}
+      <PoolOverviewSection>
+        <React.Suspense fallback={<Spinner />}>
+          <IssuerSection metadata={metadata} />
+        </React.Suspense>
+      </PoolOverviewSection>
       {!isTinlakePool && (
-        <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
-          <Stack height="290px">
+        <>
+          <PoolOverviewSection>
+            <Grid height="fit-content" gridTemplateColumns="1fr 1fr" gap={3}>
+              <React.Suspense fallback={<Spinner />}>
+                <PoolStructure
+                  numOfTranches={pool.tranches.length}
+                  poolId={poolId}
+                  poolStatus={metadata?.pool?.status}
+                />
+              </React.Suspense>
+              {/* <React.Suspense fallback={<Spinner />}>
+                <AssetsByMaturity />
+              </React.Suspense> */}
+            </Grid>
+          </PoolOverviewSection>
+          <PoolOverviewSection>
             <React.Suspense fallback={<Spinner />}>
-              <PoolAssetReserveChart />
+              <Box height={373}>
+                <Cashflows />
+              </Box>
             </React.Suspense>
-          </Stack>
-        </PageSection>
+          </PoolOverviewSection>
+          <PoolOverviewSection>
+            <React.Suspense fallback={<Spinner />}>
+              <Box height={447}>
+                <Card p={3}>
+                  <TransactionHistory poolId={poolId} />
+                </Card>
+              </Box>
+            </React.Suspense>
+          </PoolOverviewSection>
+          {metadata?.reports && 'poolOverview' in metadata?.reports && (
+            <PoolOverviewSection>
+              <PodIndexerReports poolId={poolId} page="poolOverview" />
+            </PoolOverviewSection>
+          )}
+        </>
       )}
-      <PageSection title="Pool tokens">
-        <Stack gap={2}>
-          {tokens?.map((token, i) => (
-            <div key={token.id} ref={(node) => node && handleTokenMount(node, token.id)}>
-              <PoolToken token={token} defaultOpen={i === 0}>
-                <Shelf gap={6}>
-                  <LabelValueStack
-                    label={<Tooltips variant="secondary" type="subordination" />}
-                    value={formatPercentage(token.protection)}
-                  />
-                  <LabelValueStack
-                    label={<Tooltips variant="secondary" type="valueLocked" />}
-                    value={formatBalance(token.valueLocked, pool?.currency.symbol)}
-                  />
-                  {token.seniority === 0 ? (
-                    <LabelValueStack
-                      label={<Tooltips variant="secondary" type="juniorTrancheYields" />}
-                      value="Variable"
-                    />
-                  ) : (
-                    <LabelValueStack
-                      label={<Tooltips variant="secondary" type="seniorTokenAPR" />}
-                      value={formatPercentage(token.apy)}
-                    />
-                  )}
-                  <LabelValueStack
-                    label="Capacity"
-                    value={
-                      <Text
-                        variant="body2"
-                        fontWeight={600}
-                        color={token.capacity.isZero() ? 'statusWarning' : 'statusOk'}
-                      >
-                        {formatBalanceAbbreviated(token.capacity, pool?.currency.symbol)}
-                      </Text>
-                    }
-                  />
-                  <LabelValueStack
-                    label="Token price"
-                    value={
-                      <TextWithPlaceholder isLoading={!token.tokenPrice}>
-                        {token.tokenPrice && formatBalance(token.tokenPrice, pool?.currency.symbol, 4, 2)}
-                      </TextWithPlaceholder>
-                    }
-                  />
-                  {getTrancheAvailability(token.id) && <InvestButton poolId={poolId} trancheId={token.id} />}
-                </Shelf>
-              </PoolToken>
-            </div>
-          ))}
-        </Stack>
-      </PageSection>
-      <PageSection title="Issuer">
-        <IssuerSection metadata={metadata} />
-      </PageSection>
-      {metadata?.reports && 'poolOverview' in metadata?.reports && (
-        <PageSection title="Portfolio">
-          <PodIndexerReports poolId={poolId} page="poolOverview" />
-        </PageSection>
-      )}
-    </>
+    </Box>
   )
 }
 
@@ -210,5 +190,13 @@ export function InvestButton(props: InvestRedeemProps) {
         Invest
       </Button>
     </>
+  )
+}
+
+const PoolOverviewSection = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <Box px={3} py={1}>
+      {children}
+    </Box>
   )
 }
