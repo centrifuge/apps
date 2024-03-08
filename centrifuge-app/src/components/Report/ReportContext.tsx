@@ -11,6 +11,9 @@ export type ReportContextType = {
   csvData?: CsvDataProps
   setCsvData: (data?: CsvDataProps) => void
 
+  queryDialogOpen: boolean
+  setQueryDialogOpen: (open: boolean) => void
+
   startDate: Date
   setStartDate: (date: Date) => void
 
@@ -42,6 +45,9 @@ const defaultContext = {
   csvData: undefined,
   setCsvData() {},
 
+  queryDialogOpen: false,
+  setQueryDialogOpen() {},
+
   startDate: new Date(),
   setStartDate() {},
 
@@ -68,6 +74,7 @@ export const ReportContext = React.createContext<ReportContextType>(defaultConte
 
 export function ReportContextProvider({ children }: { children: React.ReactNode }) {
   const [csvData, setCsvData] = React.useState<CsvDataProps | undefined>(undefined)
+  const [queryDialogOpen, setQueryDialogOpen] = React.useState(false)
 
   // Global filters
   const [startDate, setStartDate] = React.useState(defaultContext.startDate)
@@ -85,6 +92,8 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
       value={{
         csvData,
         setCsvData,
+        queryDialogOpen,
+        setQueryDialogOpen,
         startDate,
         setStartDate,
         endDate,
