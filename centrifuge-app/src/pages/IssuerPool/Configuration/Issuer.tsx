@@ -32,7 +32,7 @@ type Values = Pick<
   | 'reportAuthorName'
   | 'reportAuthorTitle'
 > & {
-  'reportAuthorAvatar': string | null | File
+  reportAuthorAvatar: string | null | File
 }
 
 export function Issuer() {
@@ -59,7 +59,9 @@ export function Issuer() {
       reportUrl: metadata?.pool?.reports?.[0]?.uri ?? '',
       reportAuthorName: metadata?.pool?.reports?.[0]?.author?.name ?? '',
       reportAuthorTitle: metadata?.pool?.reports?.[0]?.author?.title ?? '',
-      reportAuthorAvatar: metadata?.pool?.reports?.[0]?.author?.avatar ? `avatar.${metadata.pool.reports[0].author.avatar.mime?.split('/')[1]}` : null,
+      reportAuthorAvatar: metadata?.pool?.reports?.[0]?.author?.avatar
+        ? `avatar.${metadata.pool.reports[0].author.avatar.mime?.split('/')[1]}`
+        : null,
     }),
     [metadata, logoFile]
   )
@@ -135,17 +137,21 @@ export function Issuer() {
         let avatar = null
         const avatarChanged = values.reportAuthorAvatar !== initialValues.reportAuthorAvatar
         if (avatarChanged && values.reportAuthorAvatar) {
-          const pinned = await lastValueFrom(cent.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar as File)))
+          const pinned = await lastValueFrom(
+            cent.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar as File))
+          )
           avatar = { uri: pinned.uri, mime: (values.reportAuthorAvatar as File).type }
         }
-        newPoolMetadata.pool.reports = [{
-          author: {
-            avatar: avatar,
-            name: values.reportAuthorName,
-            title: values.reportAuthorTitle,
+        newPoolMetadata.pool.reports = [
+          {
+            author: {
+              avatar: avatar,
+              name: values.reportAuthorName,
+              title: values.reportAuthorTitle,
+            },
+            uri: values.reportUrl,
           },
-          uri: values.reportUrl
-        }]
+        ]
       }
 
       execute([poolId, newPoolMetadata], { account })

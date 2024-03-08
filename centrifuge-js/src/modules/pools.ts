@@ -562,7 +562,8 @@ export type DailyPoolState = {
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
 
-  sumBorrowedAmountByPeriod?: number | null
+  sumBorrowedAmountByPeriod?: string | null
+  sumInterestRepaidAmountByPeriod?: string | null
   sumRepaidAmountByPeriod?: number | null
   sumInvestedAmountByPeriod?: number | null
   sumRedeemedAmountByPeriod?: number | null
@@ -744,17 +745,40 @@ type InvestorTransaction = {
   evmAddress?: string
 }
 
+export enum AssetType {
+  OnchainCash = 'OnchainCash',
+  OffchainCash = 'OffchainCash',
+  Other = 'Other',
+}
+
 export type AssetTransaction = {
   id: string
   timestamp: string
   poolId: string
   accountId: string
   epochId: string
-  loanId: string
   type: AssetTransactionType
   amount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  principalAmount: CurrencyBalance | undefined
+  interestAmount: CurrencyBalance | undefined
+  hash: string
+  asset: {
+    id: string
+    metadata: string
+    type: AssetType
+  }
+  fromAsset?: {
+    id: string
+    metadata: string
+    type: AssetType
+  }
+  toAsset?: {
+    id: string
+    metadata: string
+    type: AssetType
+  }
 }
 
 type Holder = {
@@ -2202,6 +2226,7 @@ export function getPoolsModule(inst: Centrifuge) {
           sumRepaidAmountByPeriod
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
+          sumInterestRepaidAmountByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2653,13 +2678,30 @@ export function getPoolsModule(inst: Centrifuge) {
             timestamp: { greaterThan: $from, lessThan: $to },
           }) {
           nodes {
-            assetId
+            principalAmount
+            interestAmount
             epochId
             type
             timestamp
             amount
             settlementPrice
             quantity
+            hash
+            asset {
+              id
+              metadata
+              type
+            }
+            fromAsset {
+              id
+              metadata
+              type
+            }
+            toAsset {
+              id
+              metadata
+              type
+            }
           }
         }
       }
@@ -2678,6 +2720,8 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.assetTransactions.nodes.map((tx) => ({
           ...tx,
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+          principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
+          interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) as unknown as AssetTransaction[]
       })
@@ -3084,7 +3128,6 @@ export function getPoolsModule(inst: Centrifuge) {
             oraclePrices[isin] = [entry]
           }
         })
-
         const activeLoansPortfolio: Record<
           string,
           {
