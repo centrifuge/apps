@@ -132,6 +132,7 @@ const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
 const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
+const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 
 const routes: RouteProps[] = [
   { path: '/nfts/collection/:cid/object/mint', component: MintNFTPage },
@@ -159,6 +160,7 @@ const routes: RouteProps[] = [
   { path: '/onboarding/updateInvestorStatus', component: UpdateInvestorStatus, exact: true },
   { path: '/multisig-approval', component: MultisigApprovalPage, exact: true },
   { path: '/swaps', component: SwapsPage },
+  { path: '/convert', component: ConvertAddressPage },
   { path: '/', children: <Redirect to="/pools" /> },
   {
     children: <NotFoundPage />,
