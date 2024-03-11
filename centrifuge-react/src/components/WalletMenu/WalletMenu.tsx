@@ -23,10 +23,10 @@ import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
-import { useCentrifugeConsts, useCentrifugeUtils } from '../CentrifugeProvider'
+import { useCentrifugeUtils } from '../CentrifugeProvider'
 import { useAddress, useGetExplorerUrl, useWallet } from '../WalletProvider'
-import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
+import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { useNetworkIcon } from '../WalletProvider/utils'
 import { ConnectButton } from './ConnectButton'
 
@@ -50,7 +50,6 @@ export function WalletMenu({ menuItems }: WalletMenuProps) {
 
 function ConnectedMenu({ menuItems }: WalletMenuProps) {
   const address = useAddress()!
-  const consts = useCentrifugeConsts()
   const utils = useCentrifugeUtils()
   const ctx = useWallet()
   const {
@@ -114,49 +113,33 @@ function ConnectedMenu({ menuItems }: WalletMenuProps) {
         <Box {...props} ref={ref} width={220}>
           <Menu>
             <MenuItemGroup>
-              <Stack
-                backgroundColor={isEvmOnSubstrate ? 'backgroundButtonTertiaryHover' : undefined}
-                pt={2}
-                pb={isEvmOnSubstrate ? 2 : 0}
-                px={2}
-                gap="4px"
-                alignItems={isEvmOnSubstrate ? 'flex-start' : 'center'}
-              >
-                {isEvmOnSubstrate && (
-                  <Text variant="heading5" color="textPrimary">
-                    Your Centrifuge account
-                  </Text>
-                )}
-                <Shelf gap={1} justifyContent="space-between">
-                  <Shelf gap={1}>
-                    <Text variant="interactive1" fontWeight={400}>
-                      {truncateAddress(isEvmOnSubstrate ? utils.formatAddress(address) : formattedAddress)}
-                    </Text>
-                  </Shelf>
+              {!isEvmOnSubstrate && (
+                <Stack pt={2} pb={0} px={2} gap="4px" alignItems="center">
+                  <Shelf gap={1} justifyContent="space-between">
+                    <Shelf gap={1}>
+                      <Text variant="interactive1" fontWeight={400}>
+                        {truncateAddress(formattedAddress)}
+                      </Text>
+                    </Shelf>
 
-                  <Shelf gap="2px">
-                    <IconButton
-                      onClick={() =>
-                        copyToClipboard(isEvmOnSubstrate ? utils.formatAddress(address) : formattedAddress)
-                      }
-                      title="Copy address to clipboard"
-                    >
-                      <IconCopy />
-                    </IconButton>
-                    {subScanUrl && (
-                      <IconAnchor
-                        href={subScanUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title={`View account on ${subScanUrl}`}
-                      >
-                        <IconExternalLink />
-                      </IconAnchor>
-                    )}
+                    <Shelf gap="2px">
+                      <IconButton onClick={() => copyToClipboard(formattedAddress)} title="Copy address to clipboard">
+                        <IconCopy />
+                      </IconButton>
+                      {subScanUrl && (
+                        <IconAnchor
+                          href={subScanUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`View account on ${subScanUrl}`}
+                        >
+                          <IconExternalLink />
+                        </IconAnchor>
+                      )}
+                    </Shelf>
                   </Shelf>
-                </Shelf>
-                {isEvmOnSubstrate && <Text variant="body4">Send your {consts.chainSymbol} tokens here</Text>}
-              </Stack>
+                </Stack>
+              )}
 
               <Stack gap={0} mt={1} px={2} pb={1}>
                 <Text variant="label2" textAlign="center" color="textPrimary">
