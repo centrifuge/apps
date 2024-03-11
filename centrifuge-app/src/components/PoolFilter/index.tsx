@@ -2,15 +2,15 @@ import { Grid, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { COLUMNS, COLUMN_GAPS, PoolCardProps } from '../PoolCard'
 import { PoolStatusKey } from '../PoolCard/PoolStatus'
-import { poolFilterConfig } from './config'
 import { FilterMenu } from './FilterMenu'
 import { SortButton } from './SortButton'
+import { poolFilterConfig } from './config'
 
 type PoolFilterProps = {
   pools?: PoolCardProps[]
 }
 
-const defaultPoolStatus: PoolStatusKey[] = ['Open for investments', 'Upcoming', 'Maker Pool', 'Closed', 'Archived']
+const defaultPoolStatus: PoolStatusKey[] = ['Open for investments', 'Upcoming', 'Maker Pool', 'Closed']
 
 export function PoolFilter({ pools }: PoolFilterProps) {
   const [assetClasses, poolStatuses] = React.useMemo(() => {
@@ -18,7 +18,7 @@ export function PoolFilter({ pools }: PoolFilterProps) {
       return [[], []]
     }
 
-    return [[...new Set(pools.map(({ assetClass }) => assetClass).filter(Boolean))], defaultPoolStatus] as [
+    return [[...new Set(pools.map(({ assetClass }) => assetClass).filter(Boolean))].filter(s => s !== 'Archived'), defaultPoolStatus] as [
       string[],
       PoolStatusKey[]
     ]
