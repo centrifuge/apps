@@ -5,7 +5,7 @@ import css from '@styled-system/css'
 import * as React from 'react'
 import styled from 'styled-components'
 import { IconX } from '../../icon'
-import { Box } from '../Box'
+import { Box, BoxProps } from '../Box'
 import { Button } from '../Button'
 import { Stack } from '../Stack'
 
@@ -13,7 +13,8 @@ export type DrawerProps = React.PropsWithChildren<{
   isOpen: boolean
   onClose: () => void
   width?: string | number
-}>
+}> &
+  BoxProps
 
 const DrawerCard = styled(Box)(
   css({
@@ -21,7 +22,7 @@ const DrawerCard = styled(Box)(
   })
 )
 
-function DrawerInner({ children, isOpen, onClose, width = 'drawer' }: DrawerProps) {
+function DrawerInner({ children, isOpen, onClose, width = 'drawer', ...props }: DrawerProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const underlayRef = React.useRef<HTMLDivElement>(null)
   const animation = React.useRef<Animation | undefined>(undefined)
@@ -106,6 +107,7 @@ function DrawerInner({ children, isOpen, onClose, width = 'drawer' }: DrawerProp
           {...modalProps}
           ref={ref}
           style={{ pointerEvents: 'auto' }}
+          {...props}
         >
           <Stack gap={3}>
             <Box position="absolute" right="8px" top="8px">

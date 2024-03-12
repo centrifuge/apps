@@ -5,11 +5,11 @@ import {
   TransactionToasts,
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
-import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import { GlobalStyle as FabricGlobalStyle, FabricProvider } from '@centrifuge/fabric'
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { BrowserRouter as Router, LinkProps, matchPath, Redirect, Route, RouteProps, Switch } from 'react-router-dom'
+import { LinkProps, Redirect, Route, RouteProps, BrowserRouter as Router, Switch, matchPath } from 'react-router-dom'
 import { config, evmChains } from '../config'
 import PoolsPage from '../pages/Pools'
 import { pinToApi } from '../utils/pinToApi'
@@ -131,6 +131,8 @@ const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/Trans
 const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
+const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
+const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
 
 const routes: RouteProps[] = [
   { path: '/nfts/collection/:cid/object/mint', component: MintNFTPage },
@@ -144,6 +146,7 @@ const routes: RouteProps[] = [
   { path: '/issuer/:pid', component: IssuerPoolPage },
   { path: '/pools/:pid/assets/:aid', component: LoanPage },
   { path: '/pools/tokens', component: TokenOverviewPage },
+  { path: '/pools/:pid/transactions', component: PoolTransactionsPage },
   { path: '/pools/:pid', component: PoolDetailPage },
   { path: '/pools', component: PoolsPage },
   { path: '/history/:address', component: TransactionHistoryPage },
@@ -157,6 +160,7 @@ const routes: RouteProps[] = [
   { path: '/onboarding/updateInvestorStatus', component: UpdateInvestorStatus, exact: true },
   { path: '/multisig-approval', component: MultisigApprovalPage, exact: true },
   { path: '/swaps', component: SwapsPage },
+  { path: '/nav-management', component: NavManagementPage },
   { path: '/', children: <Redirect to="/pools" /> },
   {
     children: <NotFoundPage />,

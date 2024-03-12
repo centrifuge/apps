@@ -23,19 +23,25 @@ export function PricingValues({ loan, pool }: Props) {
   if ('valuationMethod' in pricing && pricing.valuationMethod === 'oracle') {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
+    let latestOraclePrice = pricing.oracle[0]
+    pricing.oracle.forEach((price) => {
+      if (price.timestamp > latestOraclePrice.timestamp) {
+        latestOraclePrice = price
+      }
+    })
 
-    const days = getAge(new Date(pricing.oracle.timestamp).toISOString())
+    const days = getAge(new Date(latestOraclePrice.timestamp).toISOString())
 
     const borrowerAssetTransactions = assetTransactions?.filter(
-      (assetTransaction) => assetTransaction.loanId === `${loan.poolId}-${loan.id}`
+      (assetTransaction) => assetTransaction.asset.id === `${loan.poolId}-${loan.id}`
     )
-    const latestPrice = getLatestPrice(pricing.oracle.value, borrowerAssetTransactions, pool.currency.decimals)
+    const latestPrice = getLatestPrice(latestOraclePrice.value, borrowerAssetTransactions, pool.currency.decimals)
 
     return (
       <>
         <LabelValueStack label="ISIN" value={pricing.Isin} />
         <LabelValueStack
-          label={`Latest price${pricing.oracle.value.isZero() && latestPrice ? ' (settlement)' : ''}`}
+          label={`Latest price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`}
           value={latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-'}
         />
         <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />

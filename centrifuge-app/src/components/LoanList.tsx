@@ -15,6 +15,7 @@ import get from 'lodash/get'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import currencyDollar from '../assets/images/currency-dollar.svg'
+import daiLogo from '../assets/images/dai-logo.svg'
 import usdcLogo from '../assets/images/usdc-logo.svg'
 import { formatNftAttribute } from '../pages/Loan/utils'
 import { nftMetadataSchema } from '../schemas'
@@ -72,19 +73,14 @@ export function LoanList({ loans }: Props) {
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
   const loansWithLabelStatus = React.useMemo(() => {
     return loans
+      .filter((loan) => isTinlakePool || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'))
       .map((loan) => ({
         ...loan,
         labelStatus: getLoanStatus(loan),
       }))
       .sort((a, b) => {
-        const aValuation = get(a, 'pricing.valuationMethod')
-        const bValuation = get(b, 'pricing.valuationMethod')
         const aId = get(a, 'id') as string
         const bId = get(b, 'id') as string
-
-        if (aValuation === 'cash' && bValuation !== 'cash') return -1
-        if (aValuation !== 'cash' && bValuation === 'cash') return 1
-        if (aValuation === 'cash' && bValuation === 'cash') return aId.localeCompare(bId)
 
         return aId.localeCompare(bId)
       })
@@ -182,8 +178,7 @@ export function LoanList({ loans }: Props) {
       !loan?.totalBorrowed?.isZero()
         ? loan.originationDate
         : '',
-    maturityDate:
-      'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? null : loan.pricing.maturityDate,
+    maturityDate: loan.pricing.maturityDate,
     ...loan,
   }))
 
@@ -207,6 +202,25 @@ export function LoanList({ loans }: Props) {
       totalRepaid: CurrencyBalance.fromFloat(0, 18),
       outstandingDebt: CurrencyBalance.fromFloat(0, 18),
     },
+    ...loans
+      .filter((loan) => 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash')
+      .map((loan) => {
+        return {
+          nftIdSortKey: loan.asset.nftId,
+          idSortKey: parseInt(loan.id, 10),
+          outstandingDebtSortKey: loan.status !== 'Closed' && loan?.outstandingDebt?.toDecimal().toNumber(),
+          originationDateSortKey:
+            loan.status === 'Active' &&
+            loan?.originationDate &&
+            'interestRate' in loan.pricing &&
+            !loan?.pricing.interestRate?.isZero() &&
+            !loan?.totalBorrowed?.isZero()
+              ? loan.originationDate
+              : '',
+          maturityDate: null,
+          ...loan,
+        }
+      }),
   ]
 
   const pagination = usePagination({ data: rows, pageSize: 20 })
@@ -252,13 +266,13 @@ function AssetMetadataField({ loan, name, attribute }: { loan: Row; name: string
         variant="body2"
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {formatNftAttribute(metadata?.properties?.[name], attribute)}
+        {metadata?.properties?.[name] ? formatNftAttribute(metadata?.properties?.[name], attribute) : '-'}
       </TextWithPlaceholder>
     </Shelf>
   )
 }
 
-function AssetName({ loan }: { loan: Row }) {
+export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' | 'pricing'> }) {
   const isTinlakePool = loan.poolId.startsWith('0x')
   const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
@@ -266,7 +280,7 @@ function AssetName({ loan }: { loan: Row }) {
     return (
       <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
         <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
-          <Box as="img" src={usdcLogo} alt="" height="13px" width="13px" />
+          <Box as="img" src={isTinlakePool ? daiLogo : usdcLogo} alt="" height="13px" width="13px" />
         </Shelf>
         <TextWithPlaceholder
           isLoading={isLoading}
@@ -280,7 +294,7 @@ function AssetName({ loan }: { loan: Row }) {
     )
   }
 
-  if (loan.status === 'Active' && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash') {
+  if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash') {
     return (
       <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
         <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
@@ -292,7 +306,7 @@ function AssetName({ loan }: { loan: Row }) {
           variant="body2"
           style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
         >
-          <Tooltips type="onchainReserve" label={<Text variant="body2">Bank account</Text>} />
+          <Tooltips type="offchainCash" label={<Text variant="body2">{metadata?.name}</Text>} />
         </TextWithPlaceholder>
       </Shelf>
     )

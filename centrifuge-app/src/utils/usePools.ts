@@ -117,7 +117,7 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
 
       return assetTransactions.pipe(
         map((transactions: AssetTransaction[]) =>
-          transactions.filter((transaction) => transaction.assetId.split('-')[1] === assetId)
+          transactions.filter((transaction) => transaction.asset.id.split('-')[1] === assetId)
         )
       )
     },
@@ -324,7 +324,9 @@ const POOL_CHANGE_DELAY = 1000 * 60 * 60 * 24 * 7 // Currently hard-coded to 1 w
 export function useLoanChanges(poolId: string) {
   const poolOrders = usePoolOrders(poolId)
 
-  const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) => cent.pools.getProposedLoanChanges([poolId]))
+  const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) =>
+    cent.pools.getProposedPoolSystemChanges([poolId])
+  )
 
   const policyChanges = useMemo(() => {
     const hasLockedRedemptions = (poolOrders?.reduce((acc, cur) => acc + cur.activeRedeem.toFloat(), 0) ?? 0) > 0

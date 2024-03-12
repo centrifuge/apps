@@ -1,5 +1,11 @@
 import { CurrencyBalance, isSameAddress, Perquintill, Rate, TransactionOptions } from '@centrifuge/centrifuge-js'
-import { CurrencyKey, PoolMetadataInput, TrancheInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import {
+  AddFee,
+  CurrencyKey,
+  FeeTypes,
+  PoolMetadataInput,
+  TrancheInput,
+} from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   useBalances,
   useCentrifuge,
@@ -25,7 +31,7 @@ import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs'
+import { combineLatest, firstValueFrom, lastValueFrom, switchMap, tap } from 'rxjs'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { ShareMultisigDialog } from '../../components/Dialogs/ShareMultisigDialog'
@@ -35,6 +41,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
+import { isSubstrateAddress } from '../../utils/address'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
@@ -46,6 +53,8 @@ import { usePools } from '../../utils/usePools'
 import { truncate } from '../../utils/web3'
 import { AdminMultisigSection } from './AdminMultisig'
 import { IssuerInput } from './IssuerInput'
+import { PoolFeeSection } from './PoolFeeInput'
+import { PoolReportsInput } from './PoolReportsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -86,13 +95,26 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
 
 export type CreatePoolValues = Omit<
   PoolMetadataInput,
-  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig'
+  'poolIcon' | 'issuerLogo' | 'executiveSummary' | 'adminMultisig' | 'poolFees' | 'poolReport'
 > & {
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
+  reportAuthorName: string
+  reportAuthorTitle: string
+  reportAuthorAvatar: File | null
+  reportUrl: string
   adminMultisigEnabled: boolean
   adminMultisig: Exclude<PoolMetadataInput['adminMultisig'], undefined>
+  poolFees: {
+    id?: number
+    name: string
+    feeType: FeeTypes
+    percentOfNav: number | ''
+    walletAddress: string
+    feePosition: 'Top of waterfall'
+  }[]
+  poolType: 'open' | 'closed'
 }
 
 const initialValues: CreatePoolValues = {
@@ -117,6 +139,10 @@ const initialValues: CreatePoolValues = {
   forum: '',
   email: '',
   details: [],
+  reportAuthorName: '',
+  reportAuthorTitle: '',
+  reportAuthorAvatar: null,
+  reportUrl: '',
 
   tranches: [createEmptyTranche(true)],
   adminMultisig: {
@@ -124,6 +150,8 @@ const initialValues: CreatePoolValues = {
     threshold: 1,
   },
   adminMultisigEnabled: false,
+  poolFees: [],
+  poolType: 'open',
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
@@ -199,7 +227,8 @@ function CreatePoolForm() {
           tranches: TrancheInput[],
           currency: CurrencyKey,
           maxReserve: BN,
-          metadata: PoolMetadataInput
+          metadata: PoolMetadataInput,
+          poolFees: AddFee['fee'][]
         ],
         options
       ) => {
@@ -298,6 +327,21 @@ function CreatePoolForm() {
       let prevInterest = Infinity
       let prevRiskBuffer = 0
 
+      values.poolFees.forEach((fee, i) => {
+        if (fee.name === '') {
+          errors = setIn(errors, `poolFees.${i}.name`, 'Name is required')
+        }
+        if (fee.percentOfNav === '' || fee.percentOfNav < 0.0001 || fee.percentOfNav > 10) {
+          errors = setIn(errors, `poolFees.${i}.percentOfNav`, 'Percentage between 0.0001 and 10 is required')
+        }
+        if (fee.walletAddress === '') {
+          errors = setIn(errors, `poolFees.${i}.walletAddress`, 'Wallet address is required')
+        }
+        if (!isSubstrateAddress(fee?.walletAddress)) {
+          errors = setIn(errors, `poolFees.${i}.walletAddress`, 'Invalid address')
+        }
+      })
+
       values.tranches.forEach((t, i) => {
         if (tokenNames.has(t.tokenName)) {
           errors = setIn(errors, `tranches.${i}.tokenName`, 'Tranche names must be unique')
@@ -332,6 +376,14 @@ function CreatePoolForm() {
           prevRiskBuffer = t.minRiskBuffer
         }
       })
+      if (values.reportUrl) {
+        if (!values.reportAuthorName) {
+          errors = setIn(errors, 'reportAuthorName', 'Required')
+        }
+        if (!values.reportAuthorTitle) {
+          errors = setIn(errors, 'reportAuthorTitle', 'Required')
+        }
+      }
 
       return errors
     },
@@ -367,6 +419,22 @@ function CreatePoolForm() {
       metadataValues.executiveSummary = { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
       metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
+      if (values.reportUrl) {
+        let avatar = null
+        if (values.reportAuthorAvatar) {
+          const pinned = await lastValueFrom(
+            centrifuge.metadata.pinFile(await getFileDataURI(values.reportAuthorAvatar))
+          )
+          avatar = { uri: pinned.uri, mime: values.reportAuthorAvatar.type }
+        }
+        metadataValues.poolReport = {
+          authorAvatar: avatar,
+          authorName: values.reportAuthorName,
+          authorTitle: values.reportAuthorTitle,
+          url: values.reportUrl,
+        }
+      }
+
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const nonJuniorTranches = metadataValues.tranches.slice(1)
       const tranches = [
@@ -376,6 +444,26 @@ function CreatePoolForm() {
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),
       ]
+
+      const feeId = await firstValueFrom(centrifuge.pools.getNextPoolFeeId())
+      const poolFees: AddFee['fee'][] = values.poolFees.map((fee, i) => {
+        return {
+          name: fee.name,
+          destination: fee.walletAddress,
+          amount: Rate.fromPercent(fee.percentOfNav),
+          feeType: fee.feeType,
+          limit: 'ShareOfPortfolioValuation',
+          feeId: feeId + i,
+          account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
+          feePosition: fee.feePosition,
+        }
+      })
+      metadataValues.poolFees = poolFees.map((fee) => ({
+        name: fee.name,
+        id: fee.feeId,
+        feePosition: fee.feePosition,
+        feeType: fee.feeType,
+      }))
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
@@ -396,6 +484,7 @@ function CreatePoolForm() {
               currency.key,
               CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
               metadataValues,
+              poolFees,
             ],
             { createType }
           )
@@ -494,6 +583,25 @@ function CreatePoolForm() {
                   maxLength={100}
                 />
               </Box>
+              <Box gridColumn="span 2">
+                <Field name="poolType" validate={validate.poolType}>
+                  {({ field, form, meta }: FieldProps) => (
+                    <Select
+                      name="poolType"
+                      label={<Tooltips type="poolType" variant="secondary" />}
+                      onChange={(event) => form.setFieldValue('poolType', event.target.value)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={[
+                        { label: 'Open', value: 'open' },
+                        { label: 'Closed', value: 'closed' },
+                      ]}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
               <Box gridColumn="span 2" width="100%">
                 <Field name="poolIcon" validate={validate.poolIcon}>
                   {({ field, meta, form }: FieldProps) => (
@@ -590,8 +698,12 @@ function CreatePoolForm() {
           <PageSection title="Issuer">
             <IssuerInput waitingForStoredIssuer={waitingForStoredIssuer} />
           </PageSection>
+          <PageSection title="Pool analysis">
+            <PoolReportsInput />
+          </PageSection>
 
           <TrancheSection />
+          <PoolFeeSection />
 
           <AdminMultisigSection />
           <Box position="sticky" bottom={0} backgroundColor="backgroundPage" zIndex={3}>
