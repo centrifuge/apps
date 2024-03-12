@@ -107,12 +107,13 @@ export function PoolList() {
           )}
         </Box>
       </Stack>
-      {!metadataIsLoading && archivedPools.length > 0}
-      <Text color="textSecondary">
-        <ButtonTextLink onClick={() => setShowArchived((show) => !show)}>
-          {showArchived ? 'Hide archived pools' : 'View archived pools'}
-        </ButtonTextLink>
-      </Text>
+      {!metadataIsLoading && archivedPools.length > 0 && (
+        <Text color="textSecondary">
+          <ButtonTextLink onClick={() => setShowArchived((show) => !show)}>
+            {showArchived ? 'Hide archived pools' : 'View archived pools'}
+          </ButtonTextLink>
+        </Text>
+      )}
       {showArchived && <ArchivedPools pools={archivedPools} />}
     </Stack>
   )
