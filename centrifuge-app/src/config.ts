@@ -139,7 +139,7 @@ const goerliConfig = {
   blockExplorerUrl: 'https://goerli.etherscan.io',
 }
 const mainnetConfig = {
-  rpcUrl: `https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
+  rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
   chainId: 1,
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
