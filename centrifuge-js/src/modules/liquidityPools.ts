@@ -460,7 +460,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       managerAddress,
       trancheTokenSymbol: currencyData.trancheTokenSymbol,
       trancheTokenDecimals: currencyData.trancheTokenDecimals,
-      currencySupportsPermit: currencyData.currencies[i].currencySupportsPermit,
+      currencySupportsPermit: currencyData.currencies?.[i]?.currencySupportsPermit,
     }))
     return result
   }
