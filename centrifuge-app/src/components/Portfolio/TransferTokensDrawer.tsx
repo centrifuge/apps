@@ -9,6 +9,7 @@ import {
   AddressInput,
   Box,
   Button,
+  Checkbox,
   CurrencyInput,
   Drawer,
   IconCheckCircle,
@@ -28,8 +29,8 @@ import { useQuery } from 'react-query'
 import { useHistory, useLocation, useRouteMatch } from 'react-router'
 import styled from 'styled-components'
 import centrifugeLogo from '../../assets/images/logoCentrifuge.svg'
-import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
+import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useCFGTokenPrice, useDailyCFGPrice } from '../../utils/useCFGTokenPrice'
 import { useTransactionFeeEstimate } from '../../utils/useTransactionFeeEstimate'
@@ -54,8 +55,14 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
   const transferCurrencySymbol = params.get('receive') || params.get('send')
   const isNativeTransfer = transferCurrencySymbol?.toLowerCase() === centBalances?.native.currency.symbol.toLowerCase()
   const currency = useMemo(() => {
-    if (isNativeTransfer) {
-      return centBalances?.native
+    if (isNativeTransfer && centBalances?.native) {
+      return {
+        ...centBalances.native,
+        balance: new CurrencyBalance(
+          centBalances?.native.balance.sub(centBalances.native.locked),
+          centBalances.native.currency.decimals
+        ),
+      }
     }
     return centBalances?.currencies.find((token) => token.currency.symbol === transferCurrencySymbol)
   }, [centBalances, transferCurrencySymbol])
@@ -102,7 +109,11 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
               <TabsItem>Receive</TabsItem>
             </Tabs>
             {params.get('send') ? (
-              <SendToken address={address} currency={currency as SendReceiveProps['currency']} />
+              <SendToken
+                address={address}
+                currency={currency as SendReceiveProps['currency']}
+                isNativeTransfer={isNativeTransfer}
+              />
             ) : (
               <ReceiveToken address={address} currency={currency as SendReceiveProps['currency']} />
             )}
@@ -129,9 +140,10 @@ type SendReceiveProps = {
     balance: CurrencyBalance
     currency: { symbol: string; decimals: number; key: string | { ForeignAsset: number } }
   }
+  isNativeTransfer?: boolean
 }
 
-const SendToken = ({ address, currency }: SendReceiveProps) => {
+const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
   const chainId = useCentEvmChainId()
 
@@ -159,13 +171,17 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
     }
   )
 
-  const form = useFormik<{ amount: Decimal | undefined; recipientAddress: string }>({
+  const form = useFormik<{ amount: Decimal | undefined; recipientAddress: string; isDisclaimerAgreed: boolean }>({
     initialValues: {
       amount: undefined,
       recipientAddress: '',
+      isDisclaimerAgreed: false,
     },
     validate(values) {
-      const errors: Partial<{ amount: string; recipientAddress: string }> = {}
+      const errors: Partial<{ amount: string; recipientAddress: string; isDisclaimerAgreed: string }> = {}
+      if (!values.isDisclaimerAgreed && values.recipientAddress.startsWith('0x')) {
+        errors.isDisclaimerAgreed = 'Please read and accept the above'
+      }
       if (values.amount && Dec(values.amount).gt(currency?.balance.toDecimal() || Dec(0))) {
         errors.amount = 'Amount exceeds wallet balance'
       }
@@ -237,6 +253,36 @@ const SendToken = ({ address, currency }: SendReceiveProps) => {
                 Wallet balance: {formatBalance(currency?.balance || 0, currency?.currency.symbol, 2)}
               </Text>
             </Shelf>
+            {form.values.recipientAddress.startsWith('0x') && isNativeTransfer && (
+              <>
+                <Shelf bg="statusCriticalBg" borderRadius="2px" py={2} px={3}>
+                  <Text color="statusCritical" variant="body2">
+                    Only use this page to transfer native CFG to Centrifuge. Transfers to addresses on other networks or
+                    on exchanges could result in loss of funds. If you want to bridge native CFG to Ethereum, go to{' '}
+                    <a
+                      style={{ color: 'inherit', textDecoration: 'underline' }}
+                      href="https://bridge.centrifuge.io"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      bridge.centrifuge.io
+                    </a>
+                    .
+                  </Text>
+                </Shelf>
+                <Shelf>
+                  <Field name="isDisclaimerAgreed">
+                    {({ field, meta }: FieldProps) => (
+                      <Checkbox
+                        errorMessage={meta.touched ? meta.error : undefined}
+                        label="I have read the above and understand the risk"
+                        {...field}
+                      />
+                    )}
+                  </Field>
+                </Shelf>
+              </>
+            )}
             <Shelf>
               <Button variant="primary" type="submit" loading={isLoading} loadingMessage={'Confirming'}>
                 Send
