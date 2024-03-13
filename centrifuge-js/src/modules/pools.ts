@@ -534,6 +534,8 @@ export type AccountTokenBalance = {
   trancheId: string
 }
 
+export type AccountNativeLock = { id: string; amount: CurrencyBalance; reasons: string }
+
 export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
@@ -2745,16 +2747,24 @@ export function getPoolsModule(inst: Centrifuge) {
         combineLatest([
           api.query.ormlTokens.accounts.entries(address),
           api.query.system.account(address),
+          api.query.balances.locks(address),
           getCurrencies(),
         ]).pipe(
           take(1),
-          map(([rawBalances, nativeBalance, currencies]) => {
+          map(([rawBalances, nativeBalance, nativeLocks, currencies]) => {
             const balances = {
               tranches: [] as AccountTokenBalance[],
               currencies: [] as AccountCurrencyBalance[],
               native: {
                 balance: new CurrencyBalance(
                   (nativeBalance as any).data.free.toString(),
+                  api.registry.chainDecimals[0]
+                ),
+                locked: new CurrencyBalance(
+                  (nativeLocks as unknown as AccountNativeLock[]).reduce(
+                    (sum, lock) => sum.add(new BN(lock.amount.toString())),
+                    new BN(0)
+                  ),
                   api.registry.chainDecimals[0]
                 ),
                 currency: {
