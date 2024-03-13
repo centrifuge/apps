@@ -1,4 +1,4 @@
-import { CurrencyBalance, Price } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
 import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
@@ -145,6 +145,15 @@ export function PoolDetailOverview() {
                   numOfTranches={pool.tranches.length}
                   poolId={poolId}
                   poolStatus={metadata?.pool?.status}
+                  poolFees={
+                    metadata?.pool?.poolFees?.map((fee) => {
+                      return {
+                        fee: pool.poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
+                        name: fee.name,
+                        id: fee.id,
+                      }
+                    }) || []
+                  }
                 />
               </React.Suspense>
               {/* <React.Suspense fallback={<Spinner />}>
