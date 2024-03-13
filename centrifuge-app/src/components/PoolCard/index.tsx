@@ -107,7 +107,7 @@ export function PoolCard({
         </Box>
       </Grid>
 
-      {status === 'Upcoming' ? null : <Anchor to={`${basePath}/${poolId}`} aria-label="Go to pool details" />}
+      {status === 'Upcoming' ? null : <Anchor to={`${basePath}/${poolId}`} aria-label={`Go to ${name} details`} />}
     </Root>
   )
 }
