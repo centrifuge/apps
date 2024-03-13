@@ -337,12 +337,13 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
   const hasPendingOrder = !pendingInvest.isZero()
 
   const loadingMessage = state.pendingTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
-
+  console.log('state', state)
   const form = useFormik<{ amount: number | Decimal }>({
     initialValues: {
       amount: 0,
     },
     onSubmit: (values, fromActions) => {
+      console.log('🚀 ~ values:', values)
       const amount = CurrencyBalance.fromFloat(values.amount, state.poolCurrency!.decimals)
       actions.invest(amount)
       fromActions.setSubmitting(false)
@@ -410,7 +411,10 @@ function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
                   state?.poolCurrencies.length > 1 ? (
                     <SelectInner
                       {...field}
-                      onChange={(e) => actions.selectPoolCurrency(e.target.value)}
+                      onChange={(e) => {
+                        actions.selectPoolCurrency(e.target.value)
+                      }}
+                      value={state.poolCurrency?.symbol}
                       options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.symbol }))}
                     />
                   ) : (
