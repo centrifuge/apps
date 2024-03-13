@@ -1,7 +1,6 @@
 import { Rate } from '@centrifuge/centrifuge-js'
 import { Box, Grid, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -44,7 +43,7 @@ export function PoolCard({
   const iconSrc = iconUri?.includes('ipfs') ? `https://ipfs.io/ipfs/${iconUri.split('ipfs/')[1]}` : iconUri
 
   return (
-    <Root as="article">
+    <Root as="article" bg={status === 'Archived' ? 'backgroundSecondary'  : 'transparent'}>
       <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={poolId?.startsWith('0x')}>
