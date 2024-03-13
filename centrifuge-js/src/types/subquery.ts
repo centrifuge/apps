@@ -100,6 +100,9 @@ export type SubqueryPoolFeeTransaction = {
   blockNumber: string
   epochNumber: string
   amount: CurrencyBalance | undefined
+  poolFee: {
+    feeId: Number
+  }
 }
 
 export type SubqueryTrancheBalances = {

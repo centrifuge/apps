@@ -774,6 +774,9 @@ export type FeeTransaction = {
   epochNumber: string
   type: FeeTransactionType
   amount: CurrencyBalance | undefined
+  poolFee: {
+    feeId: Number
+  }
 }
 
 type Holder = {
@@ -2723,6 +2726,9 @@ export function getPoolsModule(inst: Centrifuge) {
             blockNumber
             epochNumber
             amount
+            poolFee {
+              feeId
+            }
           }
         }
       }
