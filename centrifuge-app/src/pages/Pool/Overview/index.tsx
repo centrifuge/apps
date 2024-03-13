@@ -9,6 +9,7 @@ import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedee
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LoadBoundary } from '../../../components/LoadBoundary'
+import { PodIndexerReports } from '../../../components/PodIndexerReports'
 import { Cashflows } from '../../../components/PoolOverview/Cashflows'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
 import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
@@ -168,6 +169,11 @@ export function PoolDetailOverview() {
               </Box>
             </React.Suspense>
           </PoolOverviewSection>
+          {metadata?.reports && 'poolOverview' in metadata?.reports && (
+            <PoolOverviewSection>
+              <PodIndexerReports poolId={poolId} page="poolOverview" />
+            </PoolOverviewSection>
+          )}
         </>
       )}
     </Box>
