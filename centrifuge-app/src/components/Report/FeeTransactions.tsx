@@ -32,7 +32,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
           formatDate(tx.timestamp.toString()),
           poolMetadata?.pool?.poolFees?.find((f) => f.id === tx.poolFee.feeId)?.name || '-',
           formatPoolFeeTransactionType(tx.type),
-          tx.amount ? formatBalanceAbbreviated(tx.amount, pool.currency.symbol) : '-',
+          tx.amount ? formatBalanceAbbreviated(tx.amount, pool.currency.symbol, 3) : '-',
         ],
         heading: false,
       }))
