@@ -60,7 +60,7 @@ export function getAuthModule(inst: Centrifuge) {
     try {
       const polkaJsVerifier = new jw3t.PolkaJsVerifier()
       const verifier = new jw3t.JW3TVerifier(polkaJsVerifier)
-      const { payload } = await verifier.verify(token)
+      const { payload } = (await verifier.verify(token)) as any
 
       return {
         verified: true,
