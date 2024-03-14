@@ -88,6 +88,7 @@ const parachainTypes = {
     presentValue: 'Balance',
     outstandingPrincipal: 'Balance',
     outstandingInterest: 'Balance',
+    currentPrice: 'Option<Balance>',
   },
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
