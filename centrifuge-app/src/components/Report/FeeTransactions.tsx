@@ -17,7 +17,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
   const transactions = useFeeTransactions(pool.id, startDate, endDate)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const headers = ['Date', 'Fee', 'Type', `${pool ? `${pool.currency.symbol} amount` : '—'}`]
+  const headers = ['Date', 'Fee name', 'Transaction type', `${pool ? `${pool.currency.symbol} amount` : '—'}`]
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!transactions) {
