@@ -12,6 +12,7 @@ import { Account, TransactionOptions } from '../types'
 import {
   AssetTransactionType,
   InvestorTransactionType,
+  PoolFeeTransactionType,
   SubqueryAssetTransaction,
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
@@ -782,21 +783,11 @@ export type AssetTransaction = {
   }
 }
 
-export enum FeeTransactionType {
-  Proposed = 'Proposed',
-  Added = 'Added',
-  Removed = 'Removed',
-  Charged = 'Charged',
-  Uncharged = 'Uncharged',
-  Paid = 'Paid',
-  Accrued = 'Accrued',
-}
-
-export type FeeTransaction = {
+export type PoolFeeTransaction = {
   id: string
   timestamp: string
   epochNumber: string
-  type: FeeTransactionType
+  type: PoolFeeTransactionType
   amount: CurrencyBalance | undefined
   poolFee: {
     feeId: Number
@@ -2792,7 +2783,10 @@ export function getPoolsModule(inst: Centrifuge) {
           ...tx,
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
-        })) as unknown as FeeTransaction[]
+          poolFee: {
+            feeId: Number(tx.poolFee.feeId),
+          },
+        })) as unknown as PoolFeeTransaction[]
       })
     )
   }
