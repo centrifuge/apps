@@ -129,7 +129,7 @@ export function useBorrowerAssetTransactions(poolId: string, assetId: string, fr
 
       return assetTransactions.pipe(
         map((transactions: AssetTransaction[]) =>
-          transactions.filter((transaction) => transaction.assetId.split('-')[1] === assetId)
+          transactions.filter((transaction) => transaction.asset.id.split('-')[1] === assetId)
         )
       )
     },

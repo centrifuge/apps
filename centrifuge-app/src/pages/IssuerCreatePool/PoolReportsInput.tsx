@@ -30,7 +30,7 @@ export function PoolReportsInput() {
       />
       <Field
         name="reportAuthorAvatar"
-        validate={combineAsync(imageFile(), maxFileSize(1024 ** 2), maxImageSize(40, 40))}
+        validate={combineAsync(imageFile(), maxFileSize(1024 ** 2), maxImageSize(200, 200))}
       >
         {({ field, meta, form }: FieldProps) => (
           <FileUpload

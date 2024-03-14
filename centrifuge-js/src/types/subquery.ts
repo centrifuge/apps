@@ -14,7 +14,8 @@ export type SubqueryPoolSnapshot = {
   totalInvested?: number | null
   totalRedeemed?: number | null
   sumBorrowedAmount?: number | null
-  sumBorrowedAmountByPeriod?: number | null
+  sumBorrowedAmountByPeriod?: string | null
+  sumInterestRepaidAmountByPeriod?: string | null
   sumRepaidAmountByPeriod?: number | null
   sumInvestedAmountByPeriod?: number | null
   sumRedeemedAmountByPeriod?: number | null
@@ -83,11 +84,16 @@ export type SubqueryAssetTransaction = {
   poolId: string
   accountId: string
   epochId: string
-  assetId: string
   type: AssetTransactionType
-  amount?: number | null
+  amount: CurrencyBalance | undefined
+  principalAmount: CurrencyBalance | undefined
+  interestAmount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  asset: {
+    id: string
+    metadata: string
+  }
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
