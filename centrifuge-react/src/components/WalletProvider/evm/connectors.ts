@@ -7,10 +7,17 @@ import talismanLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/Tal
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
-import { Connector } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import { isMobile } from '../../../utils/device'
-import { createConnector, isCoinbaseWallet, isInjected, isMetaMaskWallet, isSubWallet, isTalismanWallet } from './utils'
+import {
+  Connector,
+  createConnector,
+  isCoinbaseWallet,
+  isInjected,
+  isMetaMaskWallet,
+  isSubWallet,
+  isTalismanWallet,
+} from './utils'
 
 export type EvmConnectorMeta = {
   id: string

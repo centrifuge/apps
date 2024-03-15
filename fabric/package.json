@@ -52,7 +52,7 @@
     "styled-components": "*"
   },
   "dependencies": {
-    "@polkadot/react-identicon": "^3.1.4",
+    "@polkadot/react-identicon": "^2.12.1",
     "@react-aria/button": "^3.3.4",
     "@react-aria/dialog": "^3.1.4",
     "@react-aria/focus": "^3.5.0",

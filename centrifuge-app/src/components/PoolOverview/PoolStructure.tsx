@@ -28,9 +28,11 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus, poolFees }: P
     (investorTransaction) => investorTransaction.type === 'INVEST_EXECUTION'
   )?.timestamp
   const deployedLpChains =
-    domains?.map((domain) => {
-      return getChainInfo(chains, domain.chainId).name
-    }) ?? []
+    domains
+      ?.filter((domain) => domain.isActive === true)
+      .map((domain) => {
+        return getChainInfo(chains, domain.chainId).name
+      }) ?? []
 
   const metrics = [
     {

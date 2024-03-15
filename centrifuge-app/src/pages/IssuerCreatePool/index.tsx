@@ -606,6 +606,7 @@ function CreatePoolForm() {
                 <Field name="poolIcon" validate={validate.poolIcon}>
                   {({ field, meta, form }: FieldProps) => (
                     <FileUpload
+                      name="poolIcon"
                       file={field.value}
                       onFileChange={async (file) => {
                         form.setFieldTouched('poolIcon', true, false)

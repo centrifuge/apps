@@ -1,18 +1,26 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { Networkish } from '@ethersproject/networks'
 import type { BaseProvider, Web3Provider } from '@ethersproject/providers'
-import { EMPTY } from '@web3-react/empty'
+import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
+import { EMPTY, Empty } from '@web3-react/empty'
+import { GnosisSafe } from '@web3-react/gnosis-safe'
+import { MetaMask } from '@web3-react/metamask'
 import { createWeb3ReactStoreAndActions } from '@web3-react/store'
-import { Actions, Connector, Provider, Web3ReactState, Web3ReactStore } from '@web3-react/types'
+import { Actions, Provider, Web3ReactState, Web3ReactStore } from '@web3-react/types'
+import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useWallet } from '../WalletProvider'
 import { getChainInfo } from './chains'
 
+export type Connector = MetaMask | WalletConnectV2 | CoinbaseWallet | GnosisSafe | Empty
+
 const stores = new WeakMap<Connector, Web3ReactStore>()
 const [emptyConnector, emptyStore] = createConnector(() => EMPTY)
 
-export function createConnector<T extends Connector>(f: (actions: Actions) => T): [T, Web3ReactStore] {
+export function createConnector<T extends MetaMask | WalletConnectV2 | CoinbaseWallet | GnosisSafe | Empty>(
+  f: (actions: Actions) => T
+): [T, Web3ReactStore] {
   const [store, actions] = createWeb3ReactStoreAndActions()
   const connector = f(actions)
   stores.set(connector, store)
