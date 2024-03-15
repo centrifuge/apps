@@ -1,6 +1,8 @@
+import { Rate } from '@centrifuge/centrifuge-js'
 import { getChainInfo, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Card, Grid, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
+import { formatPercentage } from '../../utils/formatting'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useInvestorTransactions } from '../../utils/usePools'
 
@@ -8,9 +10,14 @@ type Props = {
   numOfTranches: number
   poolId: string
   poolStatus?: string
+  poolFees: {
+    fee: Rate
+    name: string
+    id: number
+  }[]
 }
 
-export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
+export const PoolStructure = ({ numOfTranches, poolId, poolStatus, poolFees }: Props) => {
   const investorTransactions = useInvestorTransactions(poolId)
   const { data: domains } = useActiveDomains(poolId)
   const {
@@ -46,18 +53,12 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus }: Props) => {
       metric: 'Available networks',
       value: `Centrifuge${deployedLpChains.length ? `, ${deployedLpChains.join(', ')}` : ''}`,
     },
-    // {
-    //   metric: 'Protocol fee',
-    //   value: '1% of NAV', // TODO: get fees
-    // },
-    // {
-    //   metric: 'Priority fee',
-    //   value: '1% of NAV', // TODO: get fees
-    // },
-    // {
-    //   metric: 'Manangement fee',
-    //   value: '1% of NAV', // TODO: get fees
-    // },
+    ...poolFees.map((fee) => {
+      return {
+        metric: fee.name,
+        value: formatPercentage(fee.fee.toPercent(), true, {}, 3),
+      }
+    }),
   ]
 
   const getValue = (metric: string, value: string) => {
