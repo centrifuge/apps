@@ -1,7 +1,9 @@
 import { IconArrowRight } from '@centrifuge/fabric'
 import coinbasewalletLogo from '@centrifuge/fabric/assets/logos/coinbasewallet.svg'
+import finoaLogo from '@centrifuge/fabric/assets/logos/finoa.svg'
 import metamaskLogo from '@centrifuge/fabric/assets/logos/metamask.svg'
 import walletconnectLogo from '@centrifuge/fabric/assets/logos/walletconnect.svg'
+import { FinoaEIP1193Provider } from '@finoa/finoa-connect-sdk'
 import subWalletLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/SubWalletLogo.svg'
 import talismanLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/TalismanLogo.svg'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
@@ -43,6 +45,7 @@ export function getEvmConnectors(
     substrateEvmChainId?: number
   } = {}
 ): EvmConnectorMeta[] {
+  const finoaProvider = new FinoaEIP1193Provider()
   const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
   const { ['1']: _, ...optional } = urls
   const chains = [1, ...Object.keys(optional).map(Number)]
@@ -75,6 +78,9 @@ export function getEvmConnectors(
       })
   )
   const [gnosisSafe] = createConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
+  const finoa = {
+    activate: () => finoaProvider.client.onboard(),
+  }
 
   return [
     {
@@ -93,6 +99,23 @@ export function getEvmConnectors(
         return false
       },
     },
+    {
+      id: 'finoa',
+      title: 'Finoa',
+      installUrl: '',
+      logo: {
+        src: finoaLogo,
+        alt: 'Finoa',
+      },
+      connector: finoa,
+      get installed() {
+        return true
+      },
+      get shown() {
+        return true
+      },
+    },
+
     {
       id: 'metamask',
       get title() {

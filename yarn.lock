@@ -3181,6 +3181,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@finoa/finoa-connect-sdk@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@finoa/finoa-connect-sdk@npm:1.0.1"
+  checksum: 094b0907a55fc8d2c75f1f4d61b7e4ebf59fcc681ff9d739e9170912a190bee6528e1b6d32236c0c4004753b3345e46d3f4a8802f9e49a320a46bd293bed429f
+  languageName: node
+  linkType: hard
+
 "@floating-ui/core@npm:^1.0.0":
   version: 1.6.0
   resolution: "@floating-ui/core@npm:1.6.0"
@@ -24723,6 +24730,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
+    "@finoa/finoa-connect-sdk": ^1.0.1
     "@polkadot/api": ~10.12.2
     "@polkadot/types": ~10.12.2
     "@polkadot/util-crypto": ^11.1.3
