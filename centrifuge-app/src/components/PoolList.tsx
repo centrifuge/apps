@@ -38,7 +38,7 @@ const upcomingPools: PoolCardProps[] = [
 export function PoolList() {
   const cent = useCentrifuge()
   const { search } = useLocation()
-  const [showArchived, setShowArchived] = React.useState(true)
+  const [showArchived, setShowArchived] = React.useState(false)
   const [listedPools, , metadataIsLoading] = useListedPools()
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
@@ -108,13 +108,15 @@ export function PoolList() {
         </Box>
       </Stack>
       {!metadataIsLoading && archivedPools.length > 0 && (
-        <Text color="textSecondary">
-          <ButtonTextLink onClick={() => setShowArchived((show) => !show)}>
-            {showArchived ? 'Hide archived pools' : 'View archived pools'}
-          </ButtonTextLink>
-        </Text>
+        <>
+          <Text color="textSecondary">
+            <ButtonTextLink onClick={() => setShowArchived((show) => !show)}>
+              {showArchived ? 'Hide archived pools' : 'View archived pools'}
+            </ButtonTextLink>
+          </Text>
+          {showArchived && <ArchivedPools pools={archivedPools} />}
+        </>
       )}
-      {showArchived && <ArchivedPools pools={archivedPools} />}
     </Stack>
   )
 }
