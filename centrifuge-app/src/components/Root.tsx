@@ -160,7 +160,7 @@ const routes: RouteProps[] = [
   { path: '/onboarding/updateInvestorStatus', component: UpdateInvestorStatus, exact: true },
   { path: '/multisig-approval', component: MultisigApprovalPage, exact: true },
   { path: '/swaps', component: SwapsPage },
-  { path: '/convert', component: ConvertAddressPage },
+  { path: '/utils/address-format-converter', component: ConvertAddressPage },
   { path: '/', children: <Redirect to="/pools" /> },
   {
     children: <NotFoundPage />,
