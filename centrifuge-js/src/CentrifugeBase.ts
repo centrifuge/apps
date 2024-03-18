@@ -36,7 +36,7 @@ import { getPolkadotApi } from './utils/web3'
 type ProxyType = string
 
 const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
-const EVM_DISPATCH_OVERHEAD_GAS = 100_000
+const EVM_DISPATCH_OVERHEAD_GAS = 1_000_000
 
 export type Config = {
   network: 'altair' | 'centrifuge'

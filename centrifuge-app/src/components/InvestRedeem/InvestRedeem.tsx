@@ -152,8 +152,8 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
           selectedIndex={view === 'invest' ? 0 : 1}
           onChange={(index) => setView(index === 0 ? 'invest' : 'redeem')}
         >
-          <TabsItem>Invest</TabsItem>
-          <TabsItem>Redeem</TabsItem>
+          <TabsItem ariaLabel="Go to invest tab">Invest</TabsItem>
+          <TabsItem ariaLabel="Go to redeem tab">Redeem</TabsItem>
         </Tabs>
       </Flex>
       <Box p={2} backgroundColor="backgroundTertiary">
@@ -639,7 +639,9 @@ function RedeemForm({ autoFocus }: RedeemFormProps) {
         )}
         <ButtonGroup>
           {preSubmitAction ? (
-            <Button {...preSubmitAction}>Redeem</Button>
+            <Button {...preSubmitAction} type="submit">
+              Redeem
+            </Button>
           ) : (
             <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
               Redeem
@@ -860,7 +862,14 @@ function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismiss?: () 
       )}
       {state.needsToCollectBeforeOrder && <InlineFeedback>Claim tokens before placing another order</InlineFeedback>}
       <ButtonGroup>
-        <Button onClick={actions.collect} loading={isCollecting}>
+        <Button
+          onClick={actions.collect}
+          loading={isCollecting}
+          aria-label={`Claim ${formatBalanceAbbreviated(
+            state.collectAmount,
+            state.collectType === 'invest' ? state.trancheCurrency?.symbol : state.poolCurrency?.symbol
+          )}`}
+        >
           Claim{' '}
           {formatBalanceAbbreviated(
             state.collectAmount,

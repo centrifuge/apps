@@ -71,7 +71,7 @@ export function LayoutMain({
   children: React.ReactNode
 }) {
   return (
-    <BasePadding>
+    <BasePadding py={5}>
       <Stack gap={4}>
         <Stack>
           <Text as="h1" variant="heading1">

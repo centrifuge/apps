@@ -8,6 +8,7 @@ import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LayoutBase } from '../../../components/LayoutBase'
+import { LayoutSection } from '../../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { Cashflows } from '../../../components/PoolOverview/Cashflows'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
@@ -103,74 +104,58 @@ export function PoolDetailOverview() {
     .reverse()
 
   return (
-    <Box bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
-      <PoolOverviewSection>
-        <Grid height="fit-content" gridTemplateColumns="66fr minmax(275px, 33fr)" gap={3}>
-          <React.Suspense fallback={<Spinner />}>
-            <PoolPerformance />
-          </React.Suspense>
-          <React.Suspense fallback={<Spinner />}>
-            <KeyMetrics
-              assetType={metadata?.pool?.asset}
-              averageMaturity={averageMaturity}
-              loans={loans}
-              poolId={poolId}
-            />
-          </React.Suspense>
-        </Grid>
-      </PoolOverviewSection>
-      {tokens.length > 0 && (
-        <PoolOverviewSection>
-          <React.Suspense fallback={<Spinner />}>
-            <TrancheTokenCards
-              trancheTokens={tokens}
-              poolId={poolId}
-              createdAt={pool.createdAt}
-              poolCurrencySymbol={pool.currency.symbol}
-            />
-          </React.Suspense>
-        </PoolOverviewSection>
-      )}
-      <PoolOverviewSection>
+    <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
+      <Grid height="fit-content" gridTemplateColumns="66fr minmax(275px, 33fr)" gap={3}>
         <React.Suspense fallback={<Spinner />}>
-          <IssuerSection metadata={metadata} />
+          <PoolPerformance />
         </React.Suspense>
-      </PoolOverviewSection>
+        <React.Suspense fallback={<Spinner />}>
+          <KeyMetrics
+            assetType={metadata?.pool?.asset}
+            averageMaturity={averageMaturity}
+            loans={loans}
+            poolId={poolId}
+          />
+        </React.Suspense>
+      </Grid>
+      {tokens.length > 0 && (
+        <React.Suspense fallback={<Spinner />}>
+          <TrancheTokenCards
+            trancheTokens={tokens}
+            poolId={poolId}
+            createdAt={pool.createdAt}
+            poolCurrencySymbol={pool.currency.symbol}
+          />
+        </React.Suspense>
+      )}
+      <React.Suspense fallback={<Spinner />}>
+        <IssuerSection metadata={metadata} />
+      </React.Suspense>
       {!isTinlakePool && (
         <>
-          <PoolOverviewSection>
-            <Grid height="fit-content" gridTemplateColumns="1fr 1fr" gap={3}>
-              <React.Suspense fallback={<Spinner />}>
-                <PoolStructure
-                  numOfTranches={pool.tranches.length}
-                  poolId={poolId}
-                  poolStatus={metadata?.pool?.status}
-                />
-              </React.Suspense>
-              {/* <React.Suspense fallback={<Spinner />}>
+          <Grid height="fit-content" gridTemplateColumns="1fr 1fr" gap={3}>
+            <React.Suspense fallback={<Spinner />}>
+              <PoolStructure numOfTranches={pool.tranches.length} poolId={poolId} poolStatus={metadata?.pool?.status} />
+            </React.Suspense>
+            {/* <React.Suspense fallback={<Spinner />}>
                 <AssetsByMaturity />
               </React.Suspense> */}
-            </Grid>
-          </PoolOverviewSection>
-          <PoolOverviewSection>
-            <React.Suspense fallback={<Spinner />}>
-              <Box height={373}>
-                <Cashflows />
-              </Box>
-            </React.Suspense>
-          </PoolOverviewSection>
-          <PoolOverviewSection>
-            <React.Suspense fallback={<Spinner />}>
-              <Box height={447}>
-                <Card p={3}>
-                  <TransactionHistory poolId={poolId} />
-                </Card>
-              </Box>
-            </React.Suspense>
-          </PoolOverviewSection>
+          </Grid>
+          <React.Suspense fallback={<Spinner />}>
+            <Box height={373}>
+              <Cashflows />
+            </Box>
+          </React.Suspense>
+          <React.Suspense fallback={<Spinner />}>
+            <Box height={447}>
+              <Card p={3}>
+                <TransactionHistory poolId={poolId} />
+              </Card>
+            </Box>
+          </React.Suspense>
         </>
       )}
-    </Box>
+    </LayoutSection>
   )
 }
 
@@ -181,17 +166,13 @@ export function InvestButton(props: InvestRedeemProps) {
   return (
     <>
       <InvestRedeemDrawer open={open} onClose={() => setOpen(false)} {...props} />
-      <Button onClick={() => connectAndOpen()} style={{ marginLeft: 'auto' }}>
+      <Button
+        aria-label={`Invest in ${props.trancheId}`}
+        onClick={() => connectAndOpen()}
+        style={{ marginLeft: 'auto' }}
+      >
         Invest
       </Button>
     </>
-  )
-}
-
-const PoolOverviewSection = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Box px={3} py={1}>
-      {children}
-    </Box>
   )
 }
