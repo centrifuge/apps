@@ -16,6 +16,7 @@ import {
   useBalances,
   useCentrifuge,
   useCentrifugeApi,
+  useCentrifugeConsts,
   useCentrifugeQuery,
   useCentrifugeTransaction,
   useCentrifugeUtils,
@@ -45,7 +46,7 @@ import { parachainNames } from '../../config'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
-import { useCurrencies } from '../../utils/useCurrencies'
+import { findAssetPairPrice, useAssetPairPrices, useCurrencies } from '../../utils/useCurrencies'
 import { useSuitableAccounts } from '../../utils/usePermissions'
 import { address, combine, max, min, required } from '../../utils/validation'
 import { ButtonGroup } from '../ButtonGroup'
@@ -69,9 +70,11 @@ export type SwapOrder = {
 
 export function Orders({ buyOrSell }: OrdersProps) {
   const cent = useCentrifuge()
+  const api = useCentrifugeApi()
   const currencies = useCurrencies()
   const utils = useCentrifugeUtils()
   const [selectedOrder, setSelectedOrder] = React.useState<SwapOrder>()
+  const marketPrices = useAssetPairPrices()
 
   const columns: Column[] = React.useMemo(
     () => [
@@ -120,7 +123,7 @@ export function Orders({ buyOrSell }: OrdersProps) {
     []
   )
 
-  const [orders] = useCentrifugeQuery(
+  const [ordersWithSomePrices] = useCentrifugeQuery(
     ['swapOrders'],
     () => {
       const $events = cent.getEvents().pipe(
@@ -134,33 +137,35 @@ export function Orders({ buyOrSell }: OrdersProps) {
           )
         })
       )
-      return cent.getApi().pipe(
-        switchMap((api) => api.query.orderBook.orders.entries()),
+      return api.query.orderBook.orders.entries().pipe(
         map((rawOrders) => {
           return rawOrders.map(([, value]) => {
             const order = value.toPrimitive() as {
               orderId: number
               placingAccount: string
-              assetInId: CurrencyKey
-              assetOutId: CurrencyKey
-              buyAmount: string
-              initialBuyAmount: string
-              maxSellRate: string
-              minFulfillmentAmount: string
+              currencyIn: CurrencyKey
+              currencyOut: CurrencyKey
+              amountIn: string
               maxSellAmount: string
+              amountOut: string
+              amountOutInitial: string
+              ratio: { custom: string } | { market: null }
             }
 
-            const assetInId = parseCurrencyKey(order.assetInId)
-            const assetOutId = parseCurrencyKey(order.assetOutId)
-            const buyCurrency = findCurrency(currencies!, assetInId)!
-            const sellCurrency = findCurrency(currencies!, assetOutId)!
+            const currencyIn = parseCurrencyKey(order.currencyIn)
+            const currencyOut = parseCurrencyKey(order.currencyOut)
+            const buyCurrency = findCurrency(currencies!, currencyIn)!
+            const sellCurrency = findCurrency(currencies!, currencyOut)!
+            const sellAmount = new CurrencyBalance(order.amountOut, sellCurrency!.decimals)
+            const price = 'market' in order.ratio ? null : new Price(order.ratio.custom)
             return {
               id: String(order.orderId),
               account: addressToHex(order.placingAccount),
-              buyAmount: new CurrencyBalance(order.buyAmount, buyCurrency!.decimals),
-              sellAmount: new CurrencyBalance(order.maxSellAmount, sellCurrency!.decimals),
-              minFulfillmentAmount: new CurrencyBalance(order.minFulfillmentAmount, buyCurrency!.decimals),
-              price: new Price(order.maxSellRate),
+              buyAmount: price
+                ? CurrencyBalance.fromFloat(sellAmount.toDecimal().mul(price.toDecimal()), buyCurrency!.decimals)
+                : null,
+              sellAmount,
+              price,
               buyCurrency,
               sellCurrency,
             }
@@ -171,6 +176,19 @@ export function Orders({ buyOrSell }: OrdersProps) {
     },
     { enabled: !!currencies }
   )
+
+  const orders = ordersWithSomePrices?.map((order) => {
+    const price = marketPrices ? findAssetPairPrice(marketPrices, order.buyCurrency, order.sellCurrency) : null
+    return {
+      ...order,
+      price: order.price || price || Price.fromFloat(0),
+      buyAmount:
+        order.buyAmount ||
+        (price
+          ? CurrencyBalance.fromFloat(order.sellAmount.toDecimal().mul(price.toDecimal()), order.buyCurrency!.decimals)
+          : CurrencyBalance.fromFloat(0, 0)),
+    }
+  })
 
   const filtered = orders?.filter(
     (order) =>
@@ -191,14 +209,16 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
   const utils = useCentrifugeUtils()
   const balances = useBalances(account?.actingAddress)
   const api = useCentrifugeApi()
+  const consts = useCentrifugeConsts()
   const getNetworkName = useGetNetworkName()
+
+  const minFulfillDec = consts.orderBook.minFulfillment.toDecimal().mul(order.price.toDecimal())
 
   const balanceDec =
     (balances && findBalance(balances.currencies, order.buyCurrency.key))?.balance.toDecimal() || Dec(0)
   const orderBuyDec = order.buyAmount.toDecimal()
-  const minFulfillDec = order.minFulfillmentAmount.toDecimal()
-  let orderBuyCurrencyLocation = getCurrencyLocation(order.buyCurrency)
-  let orderSellCurrencyLocation = getCurrencyLocation(order.sellCurrency)
+  const orderBuyCurrencyLocation = getCurrencyLocation(order.buyCurrency)
+  const orderSellCurrencyLocation = getCurrencyLocation(order.sellCurrency)
 
   function getLocationName(location: WithdrawAddress['location']) {
     return typeof location === 'string'
@@ -212,25 +232,15 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     'Fulfill order',
     (cent) => (args: [transferTo: string | null, amount: CurrencyBalance | null], options) => {
       const [transferTo, amount] = args
-      let swapTx = api.tx.orderBook.fillOrderFull(order.id)
+      let swapTx = api.tx.orderBook.fillOrder(order.id, order.sellAmount.toString())
       if (amount) {
-        swapTx = api.tx.orderBook.fillOrderPartial(order.id, amount.toString())
+        swapTx = api.tx.orderBook.fillOrder(order.id, amount.toString())
       }
 
       if (transferTo) {
         return cent.pools
           .withdraw(
-            [
-              amount
-                ? CurrencyBalance.fromFloat(
-                    amount.toDecimal().mul(order.price.toDecimal()),
-                    order.sellCurrency.decimals
-                  )
-                : order.sellAmount,
-              order.sellCurrency.key,
-              transferTo,
-              orderSellCurrencyLocation,
-            ],
+            [amount ? amount : order.sellAmount, order.sellCurrency.key, transferTo, orderSellCurrencyLocation],
             { batch: true }
           )
           .pipe(
@@ -263,7 +273,10 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
         [
           values.isTransferEnabled ? values.tranferReceiverAddress : null,
           values.isPartialEnabled && values.partialTransfer
-            ? CurrencyBalance.fromFloat(values.partialTransfer, order.buyCurrency.decimals)
+            ? CurrencyBalance.fromFloat(
+                Dec(values.partialTransfer).div(order.price.toDecimal()),
+                order.sellCurrency.decimals
+              )
             : null,
         ],
         { account }

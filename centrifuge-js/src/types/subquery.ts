@@ -96,6 +96,21 @@ export type SubqueryAssetTransaction = {
   }
 }
 
+export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
+
+export type SubqueryPoolFeeTransaction = {
+  __typename?: 'PoolFeeTransaction'
+  id: string
+  type: PoolFeeTransactionType
+  timestamp: string
+  blockNumber: string
+  epochNumber: string
+  amount: CurrencyBalance | undefined
+  poolFee: {
+    feeId: Number
+  }
+}
+
 export type SubqueryTrancheBalances = {
   __typename?: 'TrancheBalances'
   id: string

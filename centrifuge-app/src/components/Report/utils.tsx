@@ -1,3 +1,4 @@
+import { PoolFeeTransactionType } from '@centrifuge/centrifuge-js'
 import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { Text } from '@centrifuge/fabric'
 import { copyToClipboard } from '../../utils/copyToClipboard'
@@ -45,6 +46,27 @@ export function formatInvestorTransactionsType({
   }
 
   return investorTransactionTypes[type]({ poolCurrencySymbol, trancheTokenSymbol })
+}
+
+const feeTransactionTypes: {
+  [key in PoolFeeTransactionType]: () => string
+} = {
+  PROPOSED: () => 'Proposed',
+  ADDED: () => 'Added',
+  REMOVED: () => 'Removed',
+  CHARGED: () => 'Direct charge made',
+  UNCHARGED: () => 'Direct charge cancelled',
+  ACCRUED: () => 'Accrued',
+  PAID: () => 'Paid',
+}
+
+export function formatPoolFeeTransactionType(type: PoolFeeTransactionType) {
+  if (!feeTransactionTypes[type]) {
+    console.warn(`Type '${type}' is not assignable to type 'PoolFeeTransactionType'`)
+    return type
+  }
+
+  return feeTransactionTypes[type]()
 }
 
 const assetTransactionTypes: {

@@ -28,17 +28,15 @@ import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
 import { formatBalance, truncateText } from '../../utils/formatting'
-import { useAddress } from '../../utils/useAddress'
 import { useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
-import { useCanBorrowAsset, useCanSetOraclePrice } from '../../utils/usePermissions'
+import { useCanBorrowAsset } from '../../utils/usePermissions'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
 import { HoldingsValues } from './HoldingsValues'
-import { OraclePriceForm } from './OraclePriceForm'
 import { PricingValues } from './PricingValues'
 import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
@@ -100,10 +98,7 @@ function Loan() {
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
-  const address = useAddress()
-  const canOraclePrice = useCanSetOraclePrice(address)
   const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
-  const [oraclePriceShown, setOraclePriceShown] = React.useState(false)
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -146,13 +141,6 @@ function Loan() {
 
   return (
     <Stack>
-      {loan && !isTinlakeLoan(loan) && (
-        <Drawer isOpen={oraclePriceShown} onClose={() => setOraclePriceShown(false)}>
-          <LoadBoundary>
-            <OraclePriceForm loan={loan} />
-          </LoadBoundary>
-        </Drawer>
-      )}
       <Box mt={2} ml={2}>
         <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
           {poolMetadata?.pool?.name ?? 'Pool assets'}
@@ -261,13 +249,6 @@ function Loan() {
                   <Shelf gap={6} flexWrap="wrap">
                     <PricingValues loan={loan} pool={pool} />
                   </Shelf>
-                  {canOraclePrice && loan.status !== 'Closed' && loan.pricing.valuationMethod === 'oracle' && (
-                    <Box marginTop="3">
-                      <Button onClick={() => setOraclePriceShown(true)} small>
-                        Update price
-                      </Button>
-                    </Box>
-                  )}
                 </Stack>
               </PageSection>
             )}

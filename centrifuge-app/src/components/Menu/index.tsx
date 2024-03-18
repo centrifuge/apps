@@ -4,6 +4,7 @@ import {
   IconGlobe,
   IconInvestments,
   IconNft,
+  IconPools,
   IconSwitch,
   IconWallet,
   Menu as Panel,
@@ -27,7 +28,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps, showPrime } = useDebugFlags()
+  const { showSwaps, showPrime, showOracle } = useDebugFlags()
   const transactions = useTransactionsByAddress(address)
 
   return (
@@ -103,6 +104,13 @@ export function Menu() {
         <PageLink to="/swaps" stacked={!isLarge}>
           <IconSwitch />
           Swaps
+        </PageLink>
+      )}
+
+      {showOracle && (
+        <PageLink to="/nav-management" stacked={!isLarge}>
+          <IconPools />
+          NAV management
         </PageLink>
       )}
 

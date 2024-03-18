@@ -10,7 +10,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, positiveNumber, required, settlementPrice } from '../../utils/validation'
 
 type RepayValues = {
   price: number | '' | Decimal
@@ -106,6 +106,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
               </Field>
               <Field
                 validate={combine(
+                  required(),
                   settlementPrice(),
                   (val) => {
                     const num = val instanceof Decimal ? val.toNumber() : val

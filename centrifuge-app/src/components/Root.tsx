@@ -131,6 +131,7 @@ const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/Trans
 const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
+const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
 const PoolTransactionsPage = React.lazy(() => import('../pages/PoolTransactions'))
 const ConvertAddressPage = React.lazy(() => import('../pages/ConvertAddress'))
 
@@ -161,6 +162,7 @@ const routes: RouteProps[] = [
   { path: '/multisig-approval', component: MultisigApprovalPage, exact: true },
   { path: '/swaps', component: SwapsPage },
   { path: '/utils/address-format-converter', component: ConvertAddressPage },
+  { path: '/nav-management', component: NavManagementPage },
   { path: '/', children: <Redirect to="/pools" /> },
   {
     children: <NotFoundPage />,

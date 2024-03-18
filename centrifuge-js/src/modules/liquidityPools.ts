@@ -70,7 +70,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 // Ensure the domain currencies are enabled
                 // Using a batch, because theoretically they could have been enabled already for a different domain
                 api.tx.utility.batch(
-                  currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, trancheId, cur.key))
+                  currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key))
                 ),
               ]),
             ])
@@ -418,7 +418,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-
     const currencyData = await multicall<{
       currencies: { currencySupportsPermit?: boolean }[]
       trancheTokenSymbol: string
@@ -460,7 +459,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       managerAddress,
       trancheTokenSymbol: currencyData.trancheTokenSymbol,
       trancheTokenDecimals: currencyData.trancheTokenDecimals,
-      currencySupportsPermit: currencyData.currencies[i].currencySupportsPermit,
+      currencySupportsPermit: currencyData.currencies?.[i]?.currencySupportsPermit,
     }))
     return result
   }

@@ -1,5 +1,6 @@
 import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
+import * as React from 'react'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
 import { usePool } from '../../../utils/usePools'
@@ -33,14 +34,6 @@ export function PricingInput({ poolId }: { poolId: string }) {
               />
             )}
           </Field>
-          <FieldWithErrorMessage
-            as={NumberInput}
-            label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
-            placeholder={0}
-            symbol="%"
-            name="pricing.maxPriceVariation"
-            validate={validate.maxPriceVariation}
-          />
         </>
       )}
 

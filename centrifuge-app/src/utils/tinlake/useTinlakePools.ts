@@ -695,6 +695,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     return {
       ...p,
       metadata,
+      poolFees: [],
       tinlakeMetadata: p.metadata,
       id,
       isTinlakePool: true,
