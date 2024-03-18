@@ -77,6 +77,7 @@ export function Select({ label, errorMessage, id, ...rest }: SelectProps) {
     <InputUnit
       id={id}
       label={label}
+      disabled={rest.disabled}
       errorMessage={errorMessage}
       inputElement={
         <StyledInputBox alignItems="stretch" height="input" px={1}>

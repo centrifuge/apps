@@ -3,9 +3,8 @@ import {
   Collection,
   computeMultisig,
   evmToSubstrateAddress,
-  isSameAddress,
   PoolRoles,
-  WithdrawAddress,
+  WithdrawAddress
 } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
@@ -78,18 +77,6 @@ export function usePoolsThatAnyConnectedAddressHasPermissionsFor() {
 export function useCanBorrow(poolId: string) {
   const [account] = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] })
   return !!account
-}
-
-export function useCanSetOraclePrice(address?: string) {
-  const [members] = useCentrifugeQuery(['oracleMembers'], (cent) =>
-    cent.getApi().pipe(
-      switchMap((api) => api.query.priceOracleMembership.members()),
-      map((memberData) => {
-        return memberData.toJSON() as string[]
-      })
-    )
-  )
-  return address && !!members?.find((addr) => isSameAddress(addr, address))
 }
 
 // Returns whether the connected address can borrow against a specific asset from a pool

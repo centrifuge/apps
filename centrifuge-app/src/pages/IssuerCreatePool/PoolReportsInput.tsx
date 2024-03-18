@@ -10,21 +10,21 @@ export function PoolReportsInput() {
       <FieldWithErrorMessage
         name="reportUrl"
         as={TextInput}
-        label="Report URL"
+        label="Report URL*"
         placeholder="https://..."
         validate={validate.website}
       />
       <FieldWithErrorMessage
         name="reportAuthorName"
         as={TextInput}
-        label="Reviewer name"
+        label="Reviewer name*"
         placeholder="Name..."
         maxLength={100}
       />
       <FieldWithErrorMessage
         name="reportAuthorTitle"
         as={TextInput}
-        label="Reviewer job title"
+        label="Reviewer job title*"
         placeholder="Title..."
         maxLength={100}
       />

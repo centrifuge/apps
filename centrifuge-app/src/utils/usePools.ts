@@ -92,6 +92,18 @@ export function useAssetTransactions(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
+export function useFeeTransactions(poolId: string, from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['feeTransactions', poolId, from, to],
+    (cent) => cent.pools.getFeeTransactions([poolId, from, to]),
+    {
+      enabled: !poolId.startsWith('0x'),
+    }
+  )
+
+  return result
+}
+
 export function useAverageAmount(poolId: string) {
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
@@ -324,7 +336,9 @@ const POOL_CHANGE_DELAY = 1000 * 60 * 60 * 24 * 7 // Currently hard-coded to 1 w
 export function useLoanChanges(poolId: string) {
   const poolOrders = usePoolOrders(poolId)
 
-  const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) => cent.pools.getProposedLoanChanges([poolId]))
+  const [result] = useCentrifugeQuery(['loanChanges', poolId], (cent) =>
+    cent.pools.getProposedPoolSystemChanges([poolId])
+  )
 
   const policyChanges = useMemo(() => {
     const hasLockedRedemptions = (poolOrders?.reduce((acc, cur) => acc + cur.activeRedeem.toFloat(), 0) ?? 0) > 0

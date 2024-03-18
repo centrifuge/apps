@@ -48,7 +48,8 @@ export function formatBalanceAbbreviated(
 export function formatPercentage(
   amount: Perquintill | Decimal | number,
   includeSymbol = true,
-  options: Intl.NumberFormatOptions = {}
+  options: Intl.NumberFormatOptions = {},
+  precision?: number
 ) {
   const formattedAmount = (
     amount instanceof Perquintill
@@ -57,8 +58,8 @@ export function formatPercentage(
       ? amount.toNumber()
       : amount
   ).toLocaleString('en', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: precision || 2,
+    maximumFractionDigits: precision || 2,
     ...options,
   })
   return includeSymbol ? `${formattedAmount}%` : formattedAmount
