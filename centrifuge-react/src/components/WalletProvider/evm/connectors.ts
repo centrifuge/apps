@@ -7,6 +7,7 @@ import { FinoaEIP1193Provider } from '@finoa/finoa-connect-sdk'
 import subWalletLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/SubWalletLogo.svg'
 import talismanLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/TalismanLogo.svg'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
+import { EIP1193 } from '@web3-react/eip1193'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
@@ -78,9 +79,8 @@ export function getEvmConnectors(
       })
   )
   const [gnosisSafe] = createConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
-  const finoa = {
-    activate: () => finoaProvider.client.onboard(),
-  }
+
+  const [finoa] = createConnector<EIP1193>((actions) => new EIP1193({ actions, provider: finoaProvider }))
 
   return [
     {

@@ -1831,6 +1831,7 @@ __metadata:
     "@ethersproject/bignumber": ^5.6.0
     "@ethersproject/networks": ^5.6.0
     "@ethersproject/providers": ^5.6.0
+    "@finoa/finoa-connect-sdk": ^1.0.1
     "@mdx-js/preact": ^2.1.1
     "@mdx-js/react": ^1.6.22
     "@polkadot/extension-dapp": ~0.45.5
@@ -1848,6 +1849,7 @@ __metadata:
     "@walletconnect/ethereum-provider": ^2.8.3
     "@walletconnect/modal": ^2.5.4
     "@web3-react/coinbase-wallet": 8.2.3
+    "@web3-react/eip1193": ^8.2.3
     "@web3-react/empty": 8.2.3
     "@web3-react/gnosis-safe": 8.2.4
     "@web3-react/metamask": 8.2.4
@@ -10479,6 +10481,16 @@ __metadata:
   peerDependencies:
     "@coinbase/wallet-sdk": ^3.0.4
   checksum: b622161fb958e5cb8805c5088dc27f143d382529006c08e56c7a99c17c7b1b10e9df6fd439feb69080f6ef68d043f076d136ea5f43d1f4890dbe12db12c45dbb
+  languageName: node
+  linkType: hard
+
+"@web3-react/eip1193@npm:^8.2.3":
+  version: 8.2.3
+  resolution: "@web3-react/eip1193@npm:8.2.3"
+  dependencies:
+    "@web3-react/types": ^8.2.3
+    eventemitter3: ^4.0.7
+  checksum: dadeec1fcfcad555074470ea1afaeef7617b31691961ad093b1e5f7c702f7f308a5e4d13cf8ddf7f9c6c9134b1bf352e0bdc56c52f6872b63e6c04d437ffc735
   languageName: node
   linkType: hard
 
@@ -24730,7 +24742,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@finoa/finoa-connect-sdk": ^1.0.1
     "@polkadot/api": ~10.12.2
     "@polkadot/types": ~10.12.2
     "@polkadot/util-crypto": ^11.1.3
