@@ -16,6 +16,7 @@ describe('Invest flows', () => {
     })
     cy.switchMetamaskAccount('Pool Admin')
     cy.get('input[name="amount"]').type('1')
+    cy.get('input[name=isDisclaimerAgreed]').check()
     cy.get('button[type="submit"]').click()
     cy.confirmTransaction()
   })
