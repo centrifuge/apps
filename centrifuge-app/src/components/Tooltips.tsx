@@ -16,7 +16,7 @@ export const tooltipText = {
   },
   collateralValue: {
     label: 'Collateral value',
-    body: 'Collateral value refers to the value of the collateral underlying the real-world asset on-chain.',
+    body: 'Collateral value refers to the value of the collateral underlying the real-world asset onchain.',
   },
   riskGroup: {
     label: 'Risk group',
