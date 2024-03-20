@@ -25,7 +25,26 @@ type Row = {
   action: null | React.ReactNode
   poolCurrency?: string
   index: number
-  feePosition: 'Top of waterfall'
+  feePosition: 'Top'
+}
+
+type PoolFeeChange = {
+  poolFee: {
+    appendFee: [
+      number,
+      'Top',
+      {
+        destination: string
+        feeType:
+          | { fixed: { limit: { shareOfPortfolioValuation: number } } }
+          | { chargedUpTo: { limit: { shareOfPortfolioValuation: number } } }
+
+        editor: {
+          root: null
+        }
+      }
+    ]
+  }
 }
 
 export function PoolFees() {
@@ -42,6 +61,14 @@ export function PoolFees() {
   const poolAdmin = usePoolAdmin(poolId)
   const address = useAddress()
   const { execute: applyNewFee } = useCentrifugeTransaction('Apply new fee', (cent) => cent.pools.applyNewFee)
+
+  const getFeePosition = (feePosition: string) => {
+    if (feePosition === 'Top') {
+      return 'Top of waterfall'
+    }
+
+    return feePosition
+  }
 
   const columns = [
     {
@@ -77,7 +104,7 @@ export function PoolFees() {
       align: 'left',
       header: 'Fee position',
       cell: (row: Row) => {
-        return <Text variant="body3">{row.feePosition}</Text>
+        return <Text variant="body3">{getFeePosition(row.feePosition)}</Text>
       },
     },
     {
@@ -170,6 +197,7 @@ export function PoolFees() {
           return {
             index: activeFees.length + index,
             name: poolMetadata?.pool?.poolFees?.find((f) => f.id === change.feeId)?.name,
+            feePosition: change.feePosition,
             type: change.type,
             percentOfNav: change.amounts.percentOfNav,
             pendingFees: undefined,
@@ -266,16 +294,29 @@ export function useProposedFeeChanges(poolId: string) {
     cent.pools.getProposedPoolSystemChanges([poolId])
   )
 
+  const calculatePercentOfNav = (change: PoolFeeChange) => {
+    if ('fixed' in change.poolFee.appendFee[2].feeType) {
+      return new Rate(change.poolFee.appendFee[2].feeType.fixed.limit.shareOfPortfolioValuation)
+    }
+
+    if ('chargedUpTo' in change.poolFee.appendFee[2].feeType) {
+      return new Rate(change.poolFee.appendFee[2].feeType.chargedUpTo.limit.shareOfPortfolioValuation)
+    }
+
+    return new Rate(0)
+  }
+
   const poolFeeChanges = React.useMemo(() => {
     return result
-      ?.filter(({ change }) => !!change.poolFee?.appendFee?.length)
-      .map(({ change, hash }) => {
+      ?.filter(({ change }: { change: PoolFeeChange }) => !!change.poolFee?.appendFee?.length)
+      .map(({ change, hash }: { change: PoolFeeChange; hash: string }) => {
         return {
           change: {
+            feePosition: change.poolFee.appendFee[1],
             destination: change.poolFee.appendFee[2].destination,
             type: Object.keys(change.poolFee.appendFee[2].feeType)[0],
             amounts: {
-              percentOfNav: new Rate(change.poolFee.appendFee[2].feeType.chargedUpTo.limit.shareOfPortfolioValuation),
+              percentOfNav: calculatePercentOfNav(change),
             },
             feeId: change.poolFee.appendFee[0],
           },
