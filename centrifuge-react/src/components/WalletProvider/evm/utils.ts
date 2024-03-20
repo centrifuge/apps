@@ -2,6 +2,7 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { Networkish } from '@ethersproject/networks'
 import type { BaseProvider, Web3Provider } from '@ethersproject/providers'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
+import { EIP1193 } from '@web3-react/eip1193'
 import { EMPTY, Empty } from '@web3-react/empty'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
@@ -13,14 +14,12 @@ import { useQuery } from 'react-query'
 import { useWallet } from '../WalletProvider'
 import { getChainInfo } from './chains'
 
-export type Connector = MetaMask | WalletConnectV2 | CoinbaseWallet | GnosisSafe | Empty
+export type Connector = MetaMask | WalletConnectV2 | CoinbaseWallet | GnosisSafe | Empty | EIP1193
 
 const stores = new WeakMap<Connector, Web3ReactStore>()
 const [emptyConnector, emptyStore] = createConnector(() => EMPTY)
 
-export function createConnector<T extends MetaMask | WalletConnectV2 | CoinbaseWallet | GnosisSafe | Empty>(
-  f: (actions: Actions) => T
-): [T, Web3ReactStore] {
+export function createConnector<T extends Connector>(f: (actions: Actions) => T): [T, Web3ReactStore] {
   const [store, actions] = createWeb3ReactStoreAndActions()
   const connector = f(actions)
   stores.set(connector, store)
