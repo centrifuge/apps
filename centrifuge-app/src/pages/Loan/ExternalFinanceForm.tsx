@@ -71,6 +71,10 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const maturityDatePassed =
     loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
 
+  const amountDec = Dec(financeForm.values.price || 0)
+    .mul(Dec(financeForm.values.faceValue || 0))
+    .div(loan.pricing.notional.toDecimal())
+
   return (
     <Stack as={Card} gap={2} p={2}>
       <Box paddingY={1}>
@@ -86,13 +90,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
                 <Text variant="emphasized">Total amount</Text>
                 <Text variant="emphasized">
                   {financeForm.values.price && !Number.isNaN(financeForm.values.price as number)
-                    ? formatBalance(
-                        Dec(financeForm.values.price || 0)
-                          .mul(Dec(financeForm.values.faceValue || 0))
-                          .div(loan.pricing.notional.toDecimal()),
-                        pool?.currency.symbol,
-                        2
-                      )
+                    ? formatBalance(amountDec, pool?.currency.symbol, 2)
                     : `0.00 ${pool.currency.symbol}`}
                 </Text>
               </Shelf>

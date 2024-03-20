@@ -1,15 +1,41 @@
-import { CurrencyBalance, ExternalLoan, Loan as LoanType, Pool, WithdrawAddress } from '@centrifuge/centrifuge-js'
+import {
+  AccountCurrencyBalance,
+  CurrencyBalance,
+  CurrencyMetadata,
+  ExternalLoan,
+  Loan as LoanType,
+  Pool,
+  WithdrawAddress,
+  getCurrencyLocation,
+} from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
   truncateAddress,
+  useBalances,
+  useCentrifuge,
+  useCentrifugeApi,
   useCentrifugeTransaction,
   useCentrifugeUtils,
   useGetNetworkName,
+  wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Button,
+  Card,
+  CurrencyInput,
+  Grid,
+  GridRow,
+  InlineFeedback,
+  Select,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
+import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
+import { combineLatest, map, of, switchMap } from 'rxjs'
 import { parachainNames } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
@@ -21,9 +47,13 @@ import { combine, max, positiveNumber } from '../../utils/validation'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
 import { isExternalLoan } from './utils'
 
+const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000000000000000000000000'
+
+type Key = `${'parachain' | 'evm'}:${number}`
 type FinanceValues = {
   amount: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
+  // mux: Record<Key, { amount?: number | '' | Decimal; withdraw?: WithdrawAddress }>
 }
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
@@ -37,11 +67,31 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
 function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
+  const api = useCentrifugeApi()
   if (!account) throw new Error('No borrower')
+
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
+
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    (cent) => cent.pools.financeLoan,
+    // (cent) => cent.pools.financeLoan,
+    (cent) => (args: [poolId: string, loanId: string, amount: BN], options) => {
+      const [poolId, loanId, amount] = args
+      return combineLatest([
+        cent.pools.financeLoan([poolId, loanId, amount], { batch: true }),
+        withdraw.getBatch(),
+      ]).pipe(
+        switchMap(([loanTx, batch]) => {
+          let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
+          if (batch.length) {
+            tx = api.tx.utility.batchAll([tx, ...batch])
+          }
+          const opts = { ...options }
+          delete opts.proxies
+          return cent.wrapSignAndSend(api, tx, opts)
+        })
+      )
+    },
     {
       onSuccess: () => {
         financeForm.resetForm()
@@ -53,6 +103,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
     initialValues: {
       amount: '',
       withdraw: undefined,
+      // mux: {},
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
@@ -61,7 +112,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
           loan.poolId,
           loan.id,
           amount,
-          values.withdraw ? { ...values.withdraw, currency: pool.currency.key } : undefined,
+          // values.withdraw ? { ...values.withdraw, currency: pool.currency.key } : undefined,
         ],
         { account, forceProxyType: 'Borrow' }
       )
@@ -72,6 +123,8 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
+
+  const withdraw = useWithdraw(loan.poolId, account, Dec(financeForm.values.amount || 0))
 
   if (loan.status === 'Closed') {
     return null
@@ -126,7 +179,13 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                 )
               }}
             </Field>
-            <WithdrawSelect loan={loan} borrower={account} />
+            {withdraw.render()}
+            {/* <WithdrawSelect
+              loan={loan}
+              borrower={account}
+              isLocalAsset={isLocalAsset}
+              amount={Dec(financeForm.values.amount || 0)}
+            /> */}
             {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
               <InlineFeedback>
                 The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
@@ -134,7 +193,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
               </InlineFeedback>
             )}
             <Stack px={1}>
-              <Button type="submit" loading={isFinanceLoading}>
+              <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
                 Finance asset
               </Button>
             </Stack>
@@ -145,34 +204,30 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   )
 }
 
-export function WithdrawSelect({ loan, borrower }: { loan: LoanType; borrower: CombinedSubstrateAccount }) {
+export function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddress[] }) {
   const form = useFormikContext<Pick<FinanceValues, 'withdraw'>>()
-  const access = usePoolAccess(loan.poolId)
-  const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
   const utils = useCentrifugeUtils()
   const getName = useGetNetworkName()
   const [field, meta, helpers] = useField('withdraw')
 
-  const options = ((ao?.transferAllowlist.filter((l) => !!l.meta && !!l.key) ?? []) as { meta: WithdrawAddress }[]).map(
-    ({ meta: { address, location }, meta }) => ({
-      label: `${truncateAddress(utils.formatAddress(address))} on ${
-        typeof location === 'string'
-          ? getName(location as any)
-          : 'parachain' in location
-          ? parachainNames[location.parachain]
-          : getName(location.evm)
-      }`,
-      value: JSON.stringify(meta),
-    })
-  )
+  const options = withdrawAddresses.map((meta) => ({
+    label: `${truncateAddress(utils.formatAddress(meta.address))} on ${
+      typeof meta.location === 'string'
+        ? getName(meta.location as any)
+        : 'parachain' in meta.location
+        ? parachainNames[meta.location.parachain]
+        : getName(meta.location.evm)
+    }`,
+    value: JSON.stringify(meta),
+  }))
 
   React.useEffect(() => {
-    if (!ao?.transferAllowlist.length) return
-    helpers.setValue(ao.transferAllowlist[0].meta, false)
+    if (!withdrawAddresses.length) return
+    helpers.setValue(withdrawAddresses[0], false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ao?.transferAllowlist.length])
+  }, [withdrawAddresses.length])
 
-  if (!ao?.transferAllowlist.length) return null
+  if (!withdrawAddresses.length) return null
 
   return (
     <Select
@@ -183,7 +238,213 @@ export function WithdrawSelect({ loan, borrower }: { loan: LoanType; borrower: C
       errorMessage={(meta.touched || form.submitCount > 0) && meta.error ? meta.error : undefined}
       value={field.value ? JSON.stringify(field.value) : ''}
       options={options}
-      disabled={ao.transferAllowlist.length === 1}
+      disabled={withdrawAddresses.length === 1}
     />
   )
+}
+
+function Mux({
+  amount,
+  withdrawAddressesByDomain,
+  withdrawAmounts,
+  total,
+}: {
+  amount: Decimal
+  total: Decimal
+  withdrawAddressesByDomain: Record<string, WithdrawAddress[]>
+  withdrawAmounts: WithdrawBucket[]
+}) {
+  const utils = useCentrifugeUtils()
+  const getName = useGetNetworkName()
+
+  return (
+    <Grid columns={3}>
+      <GridRow borderBottomColor="borderSecondary" borderBottomWidth="1px" borderBottomStyle="solid">
+        <Text>Amount</Text>
+        <Text>Address</Text>
+        <Text>Network</Text>
+      </GridRow>
+      {!withdrawAmounts.length && <Text>No suitable withdraw addresses</Text>}
+      {withdrawAmounts.map(({ currency, amount, locationKey }) => {
+        const address = withdrawAddressesByDomain[locationKey][0]
+        return (
+          <GridRow>
+            <Text>{formatBalance(amount, currency.symbol)}</Text>
+            <Text>{truncateAddress(utils.formatAddress(address.address))}</Text>
+            <Text>
+              {typeof address.location === 'string'
+                ? getName(address.location as any)
+                : 'parachain' in address.location
+                ? parachainNames[address.location.parachain]
+                : getName(address.location.evm)}
+            </Text>
+          </GridRow>
+        )
+      })}
+    </Grid>
+  )
+}
+
+function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal) {
+  const pool = usePool(poolId)
+  const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
+  const form = useFormikContext<Pick<FinanceValues, 'withdraw'>>()
+  const access = usePoolAccess(poolId)
+  const muxBalances = useBalances(TOKENMUX_PALLET_ACCOUNTID)
+  const cent = useCentrifuge()
+  const api = useCentrifugeApi()
+
+  const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
+  const withdrawAddresses = ao?.transferAllowlist.map((l) => l.meta) ?? []
+
+  console.log('muxBalances', muxBalances)
+  console.log('withdrawAddresses', withdrawAddresses)
+
+  if (!isLocalAsset) {
+    if (!withdrawAddresses.length)
+      return {
+        render: () => null,
+        isValid: true,
+        getBatch: () => of([]),
+      }
+    return {
+      render: () => <WithdrawSelect withdrawAddresses={withdrawAddresses} />,
+      isValid: true,
+      getBatch: () => {
+        if (!form.values.withdraw) return of([])
+        return cent.pools
+          .withdraw(
+            [
+              CurrencyBalance.fromFloat(amount, pool.currency.decimals),
+              pool.currency.key,
+              form.values.withdraw.address,
+              form.values.withdraw.location,
+            ],
+            { batch: true }
+          )
+          .pipe(
+            map((tx) => {
+              return [wrapProxyCallsForAccount(api, tx, borrower, 'Transfer')]
+            })
+          )
+      },
+    }
+  }
+
+  const sortedBalances = sortBalances(muxBalances?.currencies || [])
+  const withdrawAmounts = muxBalances?.currencies
+    ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses)
+    : []
+  const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
+  const withdrawAddressesByDomain: Record<string, WithdrawAddress[]> = {}
+  withdrawAddresses.forEach((addr) => {
+    const key = locationToKey(addr.location)
+    if (withdrawAddressesByDomain[key]) {
+      withdrawAddressesByDomain[key].push(addr)
+    } else {
+      withdrawAddressesByDomain[key] = [addr]
+    }
+  })
+
+  return {
+    render: () => (
+      <Mux
+        withdrawAddressesByDomain={withdrawAddressesByDomain}
+        withdrawAmounts={withdrawAmounts}
+        total={totalAvailable}
+        amount={amount}
+      />
+    ),
+    isValid: amount.lte(totalAvailable),
+    getBatch: () => {
+      return combineLatest(
+        withdrawAmounts.flatMap((bucket) => {
+          // TODO: Select specific withdraw address for a domain if there's multiple
+          const withdraw = withdrawAddressesByDomain[bucket.locationKey][0]
+          return [
+            of(
+              wrapProxyCallsForAccount(
+                api,
+                api.tx.tokenMux.burn(
+                  bucket.currency.key,
+                  CurrencyBalance.fromFloat(bucket.amount, bucket.currency.decimals)
+                ),
+                borrower,
+                'Borrow'
+              )
+            ),
+            cent.pools
+              .withdraw(
+                [
+                  CurrencyBalance.fromFloat(bucket.amount, bucket.currency.decimals),
+                  pool.currency.key,
+                  withdraw.address,
+                  withdraw.location,
+                ],
+                { batch: true }
+              )
+              .pipe(map((tx) => wrapProxyCallsForAccount(api, tx, borrower, 'Transfer'))),
+          ]
+        })
+      )
+    },
+  }
+}
+
+// Balances of the tokenMux pallet get sorted with the cheapest network first
+const order: Record<string, number> = {
+  'evm:8453': 5,
+  'evm:84531': 5,
+  'parachain:2000': 4,
+  'evm:42220': 3,
+  'evm:44787': 3,
+  'evm:42161': 2,
+  'evm:421613': 2,
+}
+
+function sortBalances(balances: AccountCurrencyBalance[]) {
+  return balances
+    .filter((bal) => typeof getCurrencyLocation(bal.currency) !== 'string')
+    .sort(
+      (a, b) =>
+        (order[locationToKey(getCurrencyLocation(b.currency))] ?? 0) -
+        (order[locationToKey(getCurrencyLocation(a.currency))] ?? 0)
+    )
+}
+
+function locationToKey(location: WithdrawAddress['location']) {
+  return Object.entries(location)[0].join(':') as Key
+}
+
+type WithdrawBucket = { currency: CurrencyMetadata; amount: Decimal; locationKey: Key }
+function divideBetweenCurrencies(
+  amount: Decimal,
+  balances: AccountCurrencyBalance[],
+  withdrawAddresses: WithdrawAddress[],
+  result: WithdrawBucket[] = []
+) {
+  const [next, ...rest] = balances
+
+  if (!next) return result
+
+  const hasAddress = !!withdrawAddresses.find(
+    (addr) => locationToKey(addr.location) === locationToKey(getCurrencyLocation(next.currency))
+  )
+  const key = locationToKey(getCurrencyLocation(next.currency))
+
+  let combinedResult = [...result]
+  let remainder = amount
+  if (hasAddress) {
+    const balanceDec = next.balance.toDecimal()
+    console.log('balanceDec', balanceDec.toString(), remainder.toString())
+    if (remainder.lte(balanceDec)) {
+      combinedResult.push({ amount: remainder, currency: next.currency, locationKey: key })
+      return combinedResult
+    } else {
+      remainder = remainder.sub(balanceDec)
+      combinedResult.push({ amount: balanceDec, currency: next.currency, locationKey: key })
+    }
+  }
+
+  return divideBetweenCurrencies(remainder, rest, withdrawAddresses, combinedResult)
 }

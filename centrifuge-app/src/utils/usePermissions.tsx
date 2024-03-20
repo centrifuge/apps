@@ -4,7 +4,7 @@ import {
   computeMultisig,
   evmToSubstrateAddress,
   PoolRoles,
-  WithdrawAddress
+  WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
@@ -228,9 +228,7 @@ export function usePoolAccess(poolId: string) {
       return cent.getApi().pipe(
         switchMap((api) =>
           combineLatest(
-            aoProxies.map((addr) =>
-              api.query.transferAllowList.accountCurrencyTransferAllowance.entries(addr, pool.currency.key)
-            )
+            aoProxies.map((addr) => api.query.transferAllowList.accountCurrencyTransferAllowance.entries(addr, 'All'))
           )
         ),
         combineLatestWith(cent.getBlocks().pipe(take(1))),
@@ -271,10 +269,12 @@ export function usePoolAccess(poolId: string) {
     return transferAllowlists?.map((aoList, i) => {
       const addr = aoProxies[i]
       const receiversMeta = metadata?.pool?.assetOriginators?.[addr]?.withdrawAddresses
-      return aoList.map((key) => ({
-        key,
-        meta: receiversMeta?.find((receiver) => looksLike(key, getKeyForReceiver(api, receiver))),
-      }))
+      return aoList
+        .map((key) => ({
+          key,
+          meta: receiversMeta?.find((receiver) => looksLike(key, getKeyForReceiver(api, receiver)))!,
+        }))
+        .filter((i) => !!i.meta)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transferAllowlists, metadata])

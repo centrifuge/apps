@@ -59,7 +59,7 @@ export type PoolRoleInput =
       ]
     }
 
-export type CurrencyKey = string | { ForeignAsset: string } | { Tranche: [string, string] }
+export type CurrencyKey = string | { ForeignAsset: string } | { Tranche: [string, string] } | { LocalAsset: string }
 
 export type CurrencyMetadata = {
   key: CurrencyKey
@@ -1712,45 +1712,42 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function financeLoan(
-    args: [poolId: string, loanId: string, amount: BN, withdraw?: WithdrawAddress & { currency: CurrencyKey }],
-    options?: TransactionOptions
-  ) {
-    const [poolId, loanId, amountBN, withdrawTo] = args
+  function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
+    const [poolId, loanId, amountBN] = args
     const amount = amountBN.toString()
     return inst.getApi().pipe(
       switchMap((api) => {
-        let borrowTx = api.tx.loans.borrow(poolId, loanId, { internal: amount })
+        const borrowTx = api.tx.loans.borrow(poolId, loanId, { internal: amount })
 
-        if (withdrawTo) {
-          const { address, location, currency } = withdrawTo
-          return withdraw([amountBN, currency, address, location], { batch: true }).pipe(
-            switchMap((_withdrawTx) => {
-              let withdrawTx = _withdrawTx
-              const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
-                Array.isArray(p) ? p : ([p, undefined] as const)
-              )
-              if (proxies) {
-                // The borrow and withdraw txs need different proxy types
-                // If a proxy type was passed, replace it with the right one
-                // Otherwise pass none, as it means the delegatee has the Any proxy type
-                borrowTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
-                  borrowTx
-                )
-                withdrawTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
-                  withdrawTx
-                )
-              }
-              const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
+        // if (withdrawTo) {
+        //   const { address, location, currency } = withdrawTo
+        //   return withdraw([amountBN, currency, address, location], { batch: true }).pipe(
+        //     switchMap((_withdrawTx) => {
+        //       let withdrawTx = _withdrawTx
+        //       const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
+        //         Array.isArray(p) ? p : ([p, undefined] as const)
+        //       )
+        //       if (proxies) {
+        //         // The borrow and withdraw txs need different proxy types
+        //         // If a proxy type was passed, replace it with the right one
+        //         // Otherwise pass none, as it means the delegatee has the Any proxy type
+        //         borrowTx = proxies.reduceRight(
+        //           (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
+        //           borrowTx
+        //         )
+        //         withdrawTx = proxies.reduceRight(
+        //           (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
+        //           withdrawTx
+        //         )
+        //       }
+        //       const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
 
-              const opt = { ...options }
-              delete opt.proxies
-              return inst.wrapSignAndSend(api, batchTx, opt)
-            })
-          )
-        }
+        //       const opt = { ...options }
+        //       delete opt.proxies
+        //       return inst.wrapSignAndSend(api, batchTx, opt)
+        //     })
+        //   )
+        // }
         return inst.wrapSignAndSend(api, borrowTx, options)
       })
     )
@@ -3853,7 +3850,7 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
   return balances.find((balance) => looksLike(balance.currency.key, key))
 }
 
-type RawCurrencyKey = CurrencyKey | { foreignAsset: number | string }
+type RawCurrencyKey = CurrencyKey | { foreignAsset: number | string } | { localAsset: number | string }
 export function parseCurrencyKey(key: RawCurrencyKey): CurrencyKey {
   if (typeof key === 'object') {
     if ('Tranche' in key) {
@@ -3867,6 +3864,14 @@ export function parseCurrencyKey(key: RawCurrencyKey): CurrencyKey {
     } else if ('foreignAsset' in key) {
       return {
         ForeignAsset: String(key.foreignAsset).replace(/\D/g, ''),
+      }
+    } else if ('LocalAsset' in key) {
+      return {
+        LocalAsset: String(key.LocalAsset).replace(/\D/g, ''),
+      }
+    } else if ('localAsset' in key) {
+      return {
+        LocalAsset: String(key.localAsset).replace(/\D/g, ''),
       }
     }
   }

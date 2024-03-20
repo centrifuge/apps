@@ -41,10 +41,20 @@ export const Grid = React.forwardRef<any, GridProps>(
     )
   }
 )
+
+export const GridRow = styled(Box)`
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: start / end;
+`
+
 function widthToColumns(width: ResponsiveValue<TLengthStyledSystem>, equalColumns: boolean) {
-  return mapResponsive(width, (value) => `repeat(auto-fit, minmax(${toPx(value)}, ${equalColumns ? '1fr' : 'auto'}))`)
+  return mapResponsive(
+    width,
+    (value) => `[start] repeat(auto-fit, minmax(${toPx(value)}, ${equalColumns ? '1fr' : 'auto'})) [end]`
+  )
 }
 
 function countToColumns(count: ResponsiveValue<number>, equalColumns: boolean) {
-  return mapResponsive(count, (value) => `repeat(${value}, ${equalColumns ? '1fr' : 'auto'})`)
+  return mapResponsive(count, (value) => `[start] repeat(${value}, ${equalColumns ? '1fr' : 'auto'}) [end]`)
 }
