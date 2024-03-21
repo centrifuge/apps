@@ -3,7 +3,7 @@ import * as React from 'react'
 
 export type GroupBy = 'day' | 'month'
 
-export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'asset-tx' | 'holders'
+export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'asset-tx' | 'fee-tx' | 'holders'
 
 export type InvestorTxType = 'all' | 'orders' | 'executions' | 'transfers'
 

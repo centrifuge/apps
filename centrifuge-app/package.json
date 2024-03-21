@@ -20,7 +20,10 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "test:ci": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "e2e:run": "synpress run -cf synpress.config.ts -s tests/e2e/specs/invest.cy.ts",
+    "e2e:run:ci": "synpress run --record -cf synpress.config.ts",
+    "e2e:open": "synpress open -cf synpress.config.ts"
   },
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:*",
@@ -53,6 +56,7 @@
     "vitest": "^1.2.1"
   },
   "devDependencies": {
+    "@synthetixio/synpress": "^3.7.2-beta.9",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@types/react-helmet-async": "^1.0.3",

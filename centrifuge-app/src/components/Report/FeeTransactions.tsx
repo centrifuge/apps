@@ -1,39 +1,41 @@
-import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useAssetTransactions } from '../../utils/usePools'
+import { useFeeTransactions, usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
-import { formatAssetTransactionType } from './utils'
+import { formatPoolFeeTransactionType } from './utils'
 
-export function AssetTransactions({ pool }: { pool: Pool }) {
+export function FeeTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData } = React.useContext(ReportContext)
-  const transactions = useAssetTransactions(pool.id, startDate, endDate)
+  const transactions = useFeeTransactions(pool.id, startDate, endDate)
+  const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const headers = ['Asset ID', 'Epoch', 'Date', 'Type', `${pool ? `${pool.currency.symbol} amount` : '—'}`]
+  const headers = ['Date', 'Fee name', 'Transaction type', `${pool ? `${pool.currency.symbol} amount` : '—'}`]
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!transactions) {
       return []
     }
 
-    return transactions?.map((tx) => ({
-      name: '',
-      value: [
-        tx.asset.id.split('-').at(-1)!,
-        tx.epochId.split('-').at(-1)!,
-        formatDate(tx.timestamp.toString()),
-        formatAssetTransactionType(tx.type),
-        tx.amount ? formatBalanceAbbreviated(tx.amount, pool.currency.symbol) : '-',
-      ],
-      heading: false,
-    }))
+    return transactions
+      ?.filter((tx) => tx.type !== 'PROPOSED' && tx.type !== 'ADDED' && tx.type !== 'REMOVED')
+      .map((tx) => ({
+        name: '',
+        value: [
+          formatDate(tx.timestamp.toString()),
+          poolMetadata?.pool?.poolFees?.find((f) => f.id === tx.poolFee.feeId)?.name || '-',
+          formatPoolFeeTransactionType(tx.type),
+          tx.amount ? formatBalanceAbbreviated(tx.amount, pool.currency.symbol, 3) : '-',
+        ],
+        heading: false,
+      }))
   }, [transactions, pool.currency.symbol])
 
   const columns = headers.map((col, index) => ({
@@ -59,7 +61,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       dataUrl
         ? {
             dataUrl,
-            fileName: `${pool.id}-asset-transactions-${startDate}-${endDate}.csv`,
+            fileName: `${pool.id}-fee-transactions-${startDate}-${endDate}.csv`,
           }
         : undefined
     )
@@ -75,6 +77,6 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
   return data.length > 0 ? (
     <DataTable data={data} columns={columns} hoverable />
   ) : (
-    <UserFeedback reportType="Asset transactions" />
+    <UserFeedback reportType="Fee transactions" />
   )
 }

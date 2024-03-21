@@ -13,7 +13,7 @@ export type TabsProps = {
 
 export const Tabs: React.FC<TabsProps> = ({ selectedIndex, onChange, children }) => {
   return (
-    <Shelf>
+    <Shelf role="tablist">
       {React.Children.map(children, (child, index) =>
         React.isValidElement(child)
           ? React.cloneElement(child, {
@@ -59,16 +59,23 @@ const StyledTabsItem = styled.button<{ $active?: boolean }>(
   }
 )
 
-export type TabsItemProps = Omit<PropsOf<typeof StyledTabsItem>, '$active'>
+export type TabsItemProps = Omit<PropsOf<typeof StyledTabsItem>, '$active' | 'ariaLabel'>
 
 type TabsItemPrivateProps = TabsItemProps & {
   active?: boolean
   onClick?: () => void
+  ariaLabel?: string
 }
 
-export const TabsItem: React.FC<TabsItemProps> = ({ children, active, onClick, ...rest }: TabsItemPrivateProps) => {
+export const TabsItem: React.FC<TabsItemProps> = ({
+  children,
+  active,
+  onClick,
+  ariaLabel,
+  ...rest
+}: TabsItemPrivateProps) => {
   return (
-    <StyledTabsItem onClick={onClick} $active={active} {...rest}>
+    <StyledTabsItem onClick={onClick} $active={active} role="tab" aria-label={ariaLabel} {...rest}>
       <Text variant="interactive1" color="inherit">
         {children}
       </Text>

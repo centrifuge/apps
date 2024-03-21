@@ -1,6 +1,6 @@
 import React from 'react'
 import { config, isTestEnv } from '../../config'
-import { ConvertAddress } from './components/ConvertAddress'
+import { ConvertAddressDialogWithButton } from './components/ConvertAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
@@ -72,7 +72,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   convertAddress: {
-    Component: ConvertAddress,
+    Component: ConvertAddressDialogWithButton,
     alwaysShow: true,
     default: null,
     type: 'component',

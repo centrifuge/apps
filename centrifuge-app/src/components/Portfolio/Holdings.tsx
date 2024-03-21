@@ -14,7 +14,6 @@ import {
   Thumbnail,
 } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import React from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import daiLogo from '../../assets/images/dai-logo.svg'
@@ -22,8 +21,8 @@ import ethLogo from '../../assets/images/ethereum.svg'
 import centLogo from '../../assets/images/logoCentrifuge.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import usdtLogo from '../../assets/images/usdt-logo.svg'
-import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
 import { Dec } from '../../utils/Decimal'
+import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { useTinlakePools } from '../../utils/tinlake/useTinlakePools'
@@ -208,7 +207,7 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
             },
             poolId: '',
             trancheId: '',
-            position: centBalances?.native.balance.toDecimal() || Dec(0),
+            position: centBalances?.native.balance.toDecimal().sub(centBalances.native.locked.toDecimal()) || Dec(0),
             tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
             marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) ?? Dec(0) : Dec(0),
             canInvestRedeem: false,

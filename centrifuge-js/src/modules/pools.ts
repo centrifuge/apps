@@ -12,9 +12,11 @@ import { Account, TransactionOptions } from '../types'
 import {
   AssetTransactionType,
   InvestorTransactionType,
+  PoolFeeTransactionType,
   SubqueryAssetTransaction,
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
+  SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
   SubqueryTrancheSnapshot,
@@ -537,6 +539,8 @@ export type AccountTokenBalance = {
   trancheId: string
 }
 
+export type AccountNativeLock = { id: string; amount: CurrencyBalance; reasons: string }
+
 export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
@@ -778,6 +782,17 @@ export type AssetTransaction = {
     id: string
     metadata: string
     type: AssetType
+  }
+}
+
+export type PoolFeeTransaction = {
+  id: string
+  timestamp: string
+  epochNumber: string
+  type: PoolFeeTransactionType
+  amount: CurrencyBalance | undefined
+  poolFee: {
+    feeId: Number
   }
 }
 
@@ -2728,6 +2743,56 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getFeeTransactions(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      poolFeeTransactions: { nodes: SubqueryPoolFeeTransaction[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        poolFeeTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: {
+            poolFee: { poolId: { equalTo: $poolId } },
+            timestamp: { greaterThan: $from, lessThan: $to },
+          }) {
+          nodes {
+            id
+            type
+            timestamp
+            blockNumber
+            epochNumber
+            amount
+            poolFee {
+              feeId
+            }
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
+        return data!.poolFeeTransactions.nodes.map((tx) => ({
+          ...tx,
+          amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+          timestamp: new Date(`${tx.timestamp}+00:00`),
+          poolFee: {
+            feeId: Number(tx.poolFee.feeId),
+          },
+        })) as unknown as PoolFeeTransaction[]
+      })
+    )
+  }
+
   function getHolders(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
     const $query = inst.getApi().pipe(
@@ -2833,8 +2898,8 @@ export function getPoolsModule(inst: Centrifuge) {
           const currency: CurrencyMetadata = {
             key,
             decimals: value.decimals,
-            name: value.name,
-            symbol: value.symbol,
+            name: value.symbol === 'localUSDC' ? 'USDC' : value.name,
+            symbol: value.symbol === 'localUSDC' ? 'USDC' : value.symbol,
             isPoolCurrency: value.additional.poolCurrency,
             isPermissioned: value.additional.permissioned,
             additional: value.additional,
@@ -2858,16 +2923,24 @@ export function getPoolsModule(inst: Centrifuge) {
         combineLatest([
           api.query.ormlTokens.accounts.entries(address),
           api.query.system.account(address),
+          api.query.balances.locks(address),
           getCurrencies(),
         ]).pipe(
           take(1),
-          map(([rawBalances, nativeBalance, currencies]) => {
+          map(([rawBalances, nativeBalance, nativeLocks, currencies]) => {
             const balances = {
               tranches: [] as AccountTokenBalance[],
               currencies: [] as AccountCurrencyBalance[],
               native: {
                 balance: new CurrencyBalance(
                   (nativeBalance as any).data.free.toString(),
+                  api.registry.chainDecimals[0]
+                ),
+                locked: new CurrencyBalance(
+                  (nativeLocks as unknown as AccountNativeLock[]).reduce(
+                    (sum, lock) => sum.add(new BN(lock.amount.toString())),
+                    new BN(0)
+                  ),
                   api.registry.chainDecimals[0]
                 ),
                 currency: {
@@ -3740,6 +3813,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getMonthlyPoolStates,
     getInvestorTransactions,
     getAssetTransactions,
+    getFeeTransactions,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
