@@ -110,11 +110,11 @@ export function GovernanceMenu() {
 const links = [
   {
     href: 'https://centrifuge.subsquare.io/democracy/referenda',
-    label: 'On-chain voting',
+    label: 'Onchain voting',
   },
   {
     href: 'https://voting.opensquare.io/space/centrifuge',
-    label: 'Off-chain voting',
+    label: 'Offchain voting',
   },
   {
     href: 'https://gov.centrifuge.io/',
