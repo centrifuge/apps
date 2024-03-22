@@ -16,6 +16,7 @@ describe('Invest flows', () => {
     })
     cy.switchMetamaskAccount('Pool Admin')
     cy.get('input[name="amount"]').type('1')
+    cy.get('input[name=isDisclaimerAgreed]').check()
     cy.get('button[type="submit"]').click()
     cy.confirmTransaction()
   })
@@ -23,7 +24,7 @@ describe('Invest flows', () => {
     cy.visit('/portfolio', { failOnStatusCode: false })
     cy.connectWallet()
     cy.switchMetamaskAccount('Investor') // switch to investor account to grab address
-    cy.visit(`/portfolio?send=${pool.poolCurrency}`)
+    cy.visit(`/portfolio?send=${pool.poolCurrency}`, { failOnStatusCode: false })
     cy.getMetamaskWalletAddress().then((address) => {
       cy.get('input[name="recipientAddress"]').type(address)
     })

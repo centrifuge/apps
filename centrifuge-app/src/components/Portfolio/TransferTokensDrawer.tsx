@@ -179,7 +179,7 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
     },
     validate(values) {
       const errors: Partial<{ amount: string; recipientAddress: string; isDisclaimerAgreed: string }> = {}
-      if (!values.isDisclaimerAgreed && values.recipientAddress.startsWith('0x')) {
+      if (!values.isDisclaimerAgreed && values.recipientAddress.startsWith('0x') && isNativeTransfer) {
         errors.isDisclaimerAgreed = 'Please read and accept the above'
       }
       if (values.amount && Dec(values.amount).gt(currency?.balance.toDecimal() || Dec(0))) {
