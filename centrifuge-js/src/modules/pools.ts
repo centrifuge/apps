@@ -1665,48 +1665,47 @@ export function getPoolsModule(inst: Centrifuge) {
       loanId: string,
       quantity: Price,
       price: CurrencyBalance,
-      withdraw?: WithdrawAddress & { currency: CurrencyKey }
     ],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, price, withdrawTo] = args
+    const [poolId, loanId, quantity, price] = args
 
     return inst.getApi().pipe(
       switchMap((api) => {
-        let borrowTx = api.tx.loans.borrow(poolId, loanId, {
+        const borrowTx = api.tx.loans.borrow(poolId, loanId, {
           external: { quantity: quantity.toString(), settlementPrice: price.toString() },
         })
-        if (withdrawTo) {
-          const { address, location, currency } = withdrawTo
-          return withdraw([quantity.mul(price).div(Price.fromFloat(1)), currency, address, location], {
-            batch: true,
-          }).pipe(
-            switchMap((_withdrawTx) => {
-              let withdrawTx = _withdrawTx
-              const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
-                Array.isArray(p) ? p : ([p, undefined] as const)
-              )
-              if (proxies) {
-                // The borrow and withdraw txs need different proxy types
-                // If a proxy type was passed, replace it with the right one
-                // Otherwise pass none, as it means the delegatee has the Any proxy type
-                borrowTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
-                  borrowTx
-                )
-                withdrawTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
-                  withdrawTx
-                )
-              }
-              const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
+        // if (withdrawTo) {
+        //   const { address, location, currency } = withdrawTo
+        //   return withdraw([quantity.mul(price).div(Price.fromFloat(1)), currency, address, location], {
+        //     batch: true,
+        //   }).pipe(
+        //     switchMap((_withdrawTx) => {
+        //       let withdrawTx = _withdrawTx
+        //       const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
+        //         Array.isArray(p) ? p : ([p, undefined] as const)
+        //       )
+        //       if (proxies) {
+        //         // The borrow and withdraw txs need different proxy types
+        //         // If a proxy type was passed, replace it with the right one
+        //         // Otherwise pass none, as it means the delegatee has the Any proxy type
+        //         borrowTx = proxies.reduceRight(
+        //           (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
+        //           borrowTx
+        //         )
+        //         withdrawTx = proxies.reduceRight(
+        //           (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
+        //           withdrawTx
+        //         )
+        //       }
+        //       const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
 
-              const opt = { ...options }
-              delete opt.proxies
-              return inst.wrapSignAndSend(api, batchTx, opt)
-            })
-          )
-        }
+        //       const opt = { ...options }
+        //       delete opt.proxies
+        //       return inst.wrapSignAndSend(api, batchTx, opt)
+        //     })
+        //   )
+        // }
         return inst.wrapSignAndSend(api, borrowTx, options)
       })
     )

@@ -16,10 +16,12 @@ import {
   useCentrifugeApi,
   useCentrifugeTransaction,
   useCentrifugeUtils,
+  useGetNetworkIcon,
   useGetNetworkName,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
 import {
+  Box,
   Button,
   Card,
   CurrencyInput,
@@ -53,7 +55,6 @@ type Key = `${'parachain' | 'evm'}:${number}`
 type FinanceValues = {
   amount: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
-  // mux: Record<Key, { amount?: number | '' | Decimal; withdraw?: WithdrawAddress }>
 }
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
@@ -74,7 +75,6 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    // (cent) => cent.pools.financeLoan,
     (cent) => (args: [poolId: string, loanId: string, amount: BN], options) => {
       const [poolId, loanId, amount] = args
       return combineLatest([
@@ -86,9 +86,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
           if (batch.length) {
             tx = api.tx.utility.batchAll([tx, ...batch])
           }
-          const opts = { ...options }
-          delete opts.proxies
-          return cent.wrapSignAndSend(api, tx, opts)
+          return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
         })
       )
     },
@@ -103,19 +101,10 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
     initialValues: {
       amount: '',
       withdraw: undefined,
-      // mux: {},
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doFinanceTransaction(
-        [
-          loan.poolId,
-          loan.id,
-          amount,
-          // values.withdraw ? { ...values.withdraw, currency: pool.currency.key } : undefined,
-        ],
-        { account, forceProxyType: 'Borrow' }
-      )
+      doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -180,12 +169,6 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
               }}
             </Field>
             {withdraw.render()}
-            {/* <WithdrawSelect
-              loan={loan}
-              borrower={account}
-              isLocalAsset={isLocalAsset}
-              amount={Dec(financeForm.values.amount || 0)}
-            /> */}
             {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
               <InlineFeedback>
                 The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
@@ -204,7 +187,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   )
 }
 
-export function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddress[] }) {
+function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddress[] }) {
   const form = useFormikContext<Pick<FinanceValues, 'withdraw'>>()
   const utils = useCentrifugeUtils()
   const getName = useGetNetworkName()
@@ -256,36 +239,56 @@ function Mux({
 }) {
   const utils = useCentrifugeUtils()
   const getName = useGetNetworkName()
+  const getIcon = useGetNetworkIcon()
 
   return (
-    <Grid columns={3}>
-      <GridRow borderBottomColor="borderSecondary" borderBottomWidth="1px" borderBottomStyle="solid">
-        <Text>Amount</Text>
-        <Text>Address</Text>
-        <Text>Network</Text>
-      </GridRow>
-      {!withdrawAmounts.length && <Text>No suitable withdraw addresses</Text>}
-      {withdrawAmounts.map(({ currency, amount, locationKey }) => {
-        const address = withdrawAddressesByDomain[locationKey][0]
-        return (
-          <GridRow>
-            <Text>{formatBalance(amount, currency.symbol)}</Text>
-            <Text>{truncateAddress(utils.formatAddress(address.address))}</Text>
-            <Text>
-              {typeof address.location === 'string'
-                ? getName(address.location as any)
-                : 'parachain' in address.location
-                ? parachainNames[address.location.parachain]
-                : getName(address.location.evm)}
-            </Text>
-          </GridRow>
-        )
-      })}
-    </Grid>
+    <Stack gap={1}>
+      <Text variant="body2">Transactions per network</Text>
+      <Grid columns={3} rowGap={1}>
+        <GridRow borderBottomColor="borderSecondary" borderBottomWidth="1px" borderBottomStyle="solid" pb="4px">
+          <Text variant="label2">Amount</Text>
+          <Text variant="label2">Address</Text>
+          <Text variant="label2">Network</Text>
+        </GridRow>
+        {!withdrawAmounts.length && <Text>No suitable withdraw addresses</Text>}
+        {withdrawAmounts.map(({ currency, amount, locationKey }) => {
+          const address = withdrawAddressesByDomain[locationKey][0]
+          return (
+            <GridRow>
+              <Text variant="body3">{formatBalance(amount, currency.symbol)}</Text>
+              <Text variant="body3">{truncateAddress(utils.formatAddress(address.address))}</Text>
+              <Text variant="body3">
+                <Shelf gap="4px">
+                  <Box
+                    as="img"
+                    src={getIcon(
+                      typeof address.location === 'string'
+                        ? address.location
+                        : 'parachain' in address.location
+                        ? 'centrifuge'
+                        : address.location.evm
+                    )}
+                    alt=""
+                    width="iconSmall"
+                    height="iconSmall"
+                    style={{ objectFit: 'contain' }}
+                  />
+                  {typeof address.location === 'string'
+                    ? getName(address.location as any)
+                    : 'parachain' in address.location
+                    ? parachainNames[address.location.parachain]
+                    : getName(address.location.evm)}
+                </Shelf>
+              </Text>
+            </GridRow>
+          )
+        })}
+      </Grid>
+    </Stack>
   )
 }
 
-function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal) {
+export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal) {
   const pool = usePool(poolId)
   const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
   const form = useFormikContext<Pick<FinanceValues, 'withdraw'>>()
@@ -296,9 +299,6 @@ function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount:
 
   const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
   const withdrawAddresses = ao?.transferAllowlist.map((l) => l.meta) ?? []
-
-  console.log('muxBalances', muxBalances)
-  console.log('withdrawAddresses', withdrawAddresses)
 
   if (!isLocalAsset) {
     if (!withdrawAddresses.length)
@@ -361,6 +361,7 @@ function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount:
         withdrawAmounts.flatMap((bucket) => {
           // TODO: Select specific withdraw address for a domain if there's multiple
           const withdraw = withdrawAddressesByDomain[bucket.locationKey][0]
+          if (bucket.amount.isZero()) return []
           return [
             of(
               wrapProxyCallsForAccount(
@@ -377,7 +378,7 @@ function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount:
               .withdraw(
                 [
                   CurrencyBalance.fromFloat(bucket.amount, bucket.currency.decimals),
-                  pool.currency.key,
+                  bucket.currency.key,
                   withdraw.address,
                   withdraw.location,
                 ],
@@ -436,10 +437,9 @@ function divideBetweenCurrencies(
   let remainder = amount
   if (hasAddress) {
     const balanceDec = next.balance.toDecimal()
-    console.log('balanceDec', balanceDec.toString(), remainder.toString())
     if (remainder.lte(balanceDec)) {
       combinedResult.push({ amount: remainder, currency: next.currency, locationKey: key })
-      return combinedResult
+      remainder = Dec(0)
     } else {
       remainder = remainder.sub(balanceDec)
       combinedResult.push({ amount: balanceDec, currency: next.currency, locationKey: key })
