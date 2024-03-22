@@ -331,7 +331,7 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
     }
   }
 
-  const sortedBalances = sortBalances(muxBalances?.currencies || [])
+  const sortedBalances = sortBalances(muxBalances?.currencies || [], pool.currency)
   const withdrawAmounts = muxBalances?.currencies
     ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses)
     : []
@@ -403,9 +403,15 @@ const order: Record<string, number> = {
   'evm:421613': 2,
 }
 
-function sortBalances(balances: AccountCurrencyBalance[]) {
+function sortBalances(balances: AccountCurrencyBalance[], localPoolCurrency: CurrencyMetadata) {
+  const localAssetId = String((localPoolCurrency.key as any).LocalAsset)
+
   return balances
-    .filter((bal) => typeof getCurrencyLocation(bal.currency) !== 'string')
+    .filter(
+      (bal) =>
+        typeof getCurrencyLocation(bal.currency) !== 'string' &&
+        String(bal.currency.additional?.localRepresentation) === localAssetId
+    )
     .sort(
       (a, b) =>
         (order[locationToKey(getCurrencyLocation(b.currency))] ?? 0) -
