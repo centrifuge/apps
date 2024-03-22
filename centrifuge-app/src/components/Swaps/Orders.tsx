@@ -247,7 +247,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     (cent) => (args: [transferTo: string | null, amount: CurrencyBalance | null], options) => {
       const [transferTo, amount] = args
       let fn = api.tx.orderBook.fillOrder
-      if (isMuxSwap /* TODO: && hasLocalRepresentation */) {
+      if (isMuxSwap) {
         fn = api.tx.tokenMux.matchSwap
       }
       let swapTx = fn(order.id, order.sellAmount.toString())
