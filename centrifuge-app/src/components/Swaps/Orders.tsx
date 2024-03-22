@@ -141,7 +141,6 @@ export function Orders({ buyOrSell }: OrdersProps) {
       return cent.getApi().pipe(
         switchMap((api) => api.query.orderBook.orders.entries()),
         map((rawOrders) => {
-          console.log('rawOrders', rawOrders)
           return rawOrders.map(([, value]) => {
             const order = value.toPrimitive() as {
               orderId: number
