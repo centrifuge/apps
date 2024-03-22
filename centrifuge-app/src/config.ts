@@ -2,6 +2,7 @@ import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { EvmChains } from '@centrifuge/centrifuge-react'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
+import assetHubLogo from '@centrifuge/fabric/assets/logos/assethub.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
@@ -158,6 +159,9 @@ export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : 
 
 export const parachainNames: Record<number, string> = {
   1000: 'Asset Hub',
+}
+export const parachainIcons: Record<number, string> = {
+  1000: assetHubLogo,
 }
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
