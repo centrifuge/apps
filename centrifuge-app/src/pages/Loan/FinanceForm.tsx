@@ -227,10 +227,8 @@ function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddr
 }
 
 function Mux({
-  amount,
   withdrawAddressesByDomain,
   withdrawAmounts,
-  total,
 }: {
   amount: Decimal
   total: Decimal
@@ -250,7 +248,11 @@ function Mux({
           <Text variant="label2">Address</Text>
           <Text variant="label2">Network</Text>
         </GridRow>
-        {!withdrawAmounts.length && <Text>No suitable withdraw addresses</Text>}
+        {!withdrawAmounts.length && (
+          <Text variant="body3" color="statusCritical">
+            No suitable withdraw addresses
+          </Text>
+        )}
         {withdrawAmounts.map(({ currency, amount, locationKey }) => {
           const address = withdrawAddressesByDomain[locationKey][0]
           return (
