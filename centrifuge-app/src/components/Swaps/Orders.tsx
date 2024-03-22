@@ -211,9 +211,16 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
   const [account] = useSuitableAccounts({})
   const utils = useCentrifugeUtils()
 
-  const isMuxDeposit = typeof order.buyCurrency.key !== 'string' && 'LocalAsset' in order.buyCurrency.key
-  const isMuxBurn = typeof order.sellCurrency.key !== 'string' && 'LocalAsset' in order.sellCurrency.key
-  const isMuxSwap = isMuxDeposit || isMuxBurn
+  const isMaybeMuxDeposit = typeof order.buyCurrency.key !== 'string' && 'LocalAsset' in order.buyCurrency.key
+  const isMaybeMuxBurn = typeof order.sellCurrency.key !== 'string' && 'LocalAsset' in order.sellCurrency.key
+  const isMaybeMuxSwap = isMaybeMuxBurn || isMaybeMuxDeposit
+  const localCurrency = isMaybeMuxDeposit ? order.buyCurrency : order.sellCurrency
+  const otherCurrency = isMaybeMuxDeposit ? order.sellCurrency : order.buyCurrency
+  const isMuxSwap =
+    isMaybeMuxSwap &&
+    String((localCurrency.key as any).LocalAsset) === String(otherCurrency.additional?.localRepresentation)
+  const isMuxBurn = isMuxSwap && isMaybeMuxBurn
+  const isMuxDeposit = isMuxSwap && isMaybeMuxDeposit
 
   const balances = useBalances(isMuxBurn ? TOKENMUX_PALLET_ACCOUNTID : account?.actingAddress)
   const api = useCentrifugeApi()
