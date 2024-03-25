@@ -79,7 +79,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
       const [poolId, loanId, amount] = args
       return combineLatest([
         cent.pools.financeLoan([poolId, loanId, amount], { batch: true }),
-        withdraw.getBatch(),
+        withdraw.getBatch(financeForm),
       ]).pipe(
         switchMap(([loanTx, batch]) => {
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
@@ -291,7 +291,6 @@ function Mux({
 export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, amount: Decimal) {
   const pool = usePool(poolId)
   const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
-  const form = useFormikContext<Pick<FinanceValues, 'withdraw'>>()
   const access = usePoolAccess(poolId)
   const muxBalances = useBalances(TOKENMUX_PALLET_ACCOUNTID)
   const cent = useCentrifuge()
@@ -310,15 +309,15 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
     return {
       render: () => <WithdrawSelect withdrawAddresses={withdrawAddresses} />,
       isValid: true,
-      getBatch: () => {
-        if (!form.values.withdraw) return of([])
+      getBatch: ({ values }: { values: Pick<FinanceValues, 'withdraw'> }) => {
+        if (!values.withdraw) return of([])
         return cent.pools
           .withdraw(
             [
               CurrencyBalance.fromFloat(amount, pool.currency.decimals),
               pool.currency.key,
-              form.values.withdraw.address,
-              form.values.withdraw.location,
+              values.withdraw.address,
+              values.withdraw.location,
             ],
             { batch: true }
           )

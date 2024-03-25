@@ -32,7 +32,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
       const [poolId, loanId, quantity, price] = args
       return combineLatest([
         cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true }),
-        withdraw.getBatch(),
+        withdraw.getBatch(financeForm),
       ]).pipe(
         switchMap(([loanTx, batch]) => {
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')

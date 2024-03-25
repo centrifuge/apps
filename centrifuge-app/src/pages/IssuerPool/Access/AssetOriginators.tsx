@@ -1,6 +1,7 @@
 import {
   addressToHex,
   computeTrancheId,
+  getCurrencyLocation,
   isSameAddress,
   PoolMetadata,
   TransactionOptions,
@@ -38,6 +39,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { parachainNames } from '../../../config'
+import { looksLike } from '../../../utils/helpers'
 import { useIdentity } from '../../../utils/useIdentity'
 import { useDomainRouters } from '../../../utils/useLiquidityPools'
 import { getKeyForReceiver, usePoolAccess, useSuitableAccounts, WithdrawKey } from '../../../utils/usePermissions'
@@ -137,8 +139,10 @@ function AOForm({
     ...chainIds
       .map((cid) => ({ evm: cid }))
       .filter(
-        () =>
-          (pool.currency.additional?.transferability && 'liquidityPools' in pool.currency.additional.transferability) ||
+        (location) =>
+          (pool.currency.additional?.transferability &&
+            'liquidityPools' in pool.currency.additional.transferability &&
+            looksLike(location, getCurrencyLocation(pool.currency))) ||
           isLocalAsset
       ),
     ...(Object.keys(parachainNames)
