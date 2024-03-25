@@ -38,7 +38,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, map, of, switchMap } from 'rxjs'
-import { parachainNames } from '../../config'
+import { parachainIcons, parachainNames } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -263,13 +263,11 @@ function Mux({
                 <Shelf gap="4px">
                   <Box
                     as="img"
-                    src={getIcon(
-                      typeof address.location === 'string'
-                        ? address.location
-                        : 'parachain' in address.location
-                        ? 'centrifuge'
-                        : address.location.evm
-                    )}
+                    src={
+                      typeof address.location !== 'string' && 'parachain' in address.location
+                        ? parachainIcons[address.location.parachain]
+                        : getIcon(typeof address.location === 'string' ? address.location : address.location.evm)
+                    }
                     alt=""
                     width="iconSmall"
                     height="iconSmall"
