@@ -7,20 +7,16 @@ on:
     #   - '.github/workflows/main-branch-deploys.yml'
   
 jobs:
-  main_branch:
+  development:
     if: github.ref == 'refs/heads/main'
-    name: deploy-${{ matrix.env }}
-    strategy:
-      matrix:
-        env: ['ff-prod', 'development']
+    name: deploy-development
     uses: ./.github/workflows/deploy_all.yml
     secrets: inherit
     with:
-      environment: ${{ matrix.env }}
-
-  pull_request:
-    if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/deploy_all.yml
+      environment: development
+# For FF-PROD deploy only webApp
+  ff-prod:
+    uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
     with:
-      environment: 'ff-prod'
+      deploy_env: 'ff-prod'
