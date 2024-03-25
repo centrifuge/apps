@@ -74,7 +74,7 @@ runs:
           if ${{ github.event_name == 'pull_request' }}; then
             # FF-PRODUCTION-PR
             # A build from the DEV env that points to prod
-            echo "function_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}-ff-production" >> $GITHUB_OUTPUT
+            echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
             echo "front_url=pr${{ github.event.number }}-app-ff-production.k-f.dev" >> $GITHUB_OUTPUT
             echo "env_name=production" >> $GITHUB_OUTPUT 
           elif ${{ github.ref == 'refs/heads/main' }}; then
