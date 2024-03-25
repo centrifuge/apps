@@ -1,7 +1,7 @@
 {
   "name": "Centrifuge",
   "short_name": "Centrifuge App",
-  "description": "On-chain ecosystem for structured credit",
+  "description": "The platform for onchain finance",
   "icons": [
     {
       "src": "/centrifuge/centrifuge-safe-icon.svg",
