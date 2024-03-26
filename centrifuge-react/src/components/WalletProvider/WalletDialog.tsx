@@ -19,18 +19,19 @@ import { MetaMask } from '@web3-react/metamask'
 import * as React from 'react'
 import { Network } from '.'
 import { AccountButton, AccountIcon, AccountName } from './AccountButton'
+import { Logo, NetworkIcon, SelectAnchor, SelectButton } from './SelectButton'
+import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
+import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { isSubWallet, isTalismanWallet } from './evm/utils'
-import { Logo, NetworkIcon, SelectAnchor, SelectButton } from './SelectButton'
-import { SelectionStep, SelectionStepTooltip } from './SelectionStep'
 import { sortCentrifugeWallets, sortEvmWallets, useGetNetworkName } from './utils'
-import { useCentEvmChainId, useWallet, wallets } from './WalletProvider'
 
 type Props = {
   evmChains: EvmChains
   showAdvancedAccounts?: boolean
   showTestNets?: boolean
+  showFinoa?: boolean
 }
 
 const title = {
@@ -39,7 +40,7 @@ const title = {
   accounts: 'Choose account',
 }
 
-export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets }: Props) {
+export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets, showFinoa }: Props) {
   const evmChains = Object.keys(allEvmChains)
     .filter((chainId) => (!showTestNets ? !(allEvmChains as any)[chainId].isTestnet : true))
     .reduce((obj, chainId) => {
@@ -65,7 +66,9 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
 
   const isCentChainSelected = selectedNetwork === 'centrifuge' || selectedNetwork === evmChainId
 
-  const sortedEvmWallets = sortEvmWallets(evm.connectors.filter((c) => c.shown))
+  const sortedEvmWallets = sortEvmWallets(
+    evm.connectors.filter((c) => (c.id !== 'finoa' && c.shown) || (c.id === 'finoa' && showFinoa))
+  )
   const centWallets = centEvmChainId
     ? [...sortCentrifugeWallets(wallets), ...sortedEvmWallets]
     : sortCentrifugeWallets(wallets)
