@@ -40,15 +40,13 @@ export function PoolCard({
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
   const { sizes, zIndices } = useTheme()
 
-  const iconSrc = iconUri?.includes('ipfs') ? `https://ipfs.io/ipfs/${iconUri.split('ipfs/')[1]}` : iconUri
-
   return (
-    <Root as="article" bg={status === 'Archived' ? 'backgroundSecondary'  : 'transparent'}>
+    <Root as="article" bg={status === 'Archived' ? 'backgroundSecondary' : 'transparent'}>
       <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={poolId?.startsWith('0x')}>
             {iconUri ? (
-              <Box as="img" src={iconSrc} alt="" height="iconMedium" width="iconMedium" />
+              <Box as="img" src={iconUri} alt="" height="iconMedium" width="iconMedium" />
             ) : (
               <Thumbnail type="pool" label="LP" size="small" />
             )}
