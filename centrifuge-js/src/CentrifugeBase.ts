@@ -323,7 +323,7 @@ export class CentrifugeBase {
     if (options?.batch) return of(actualSubmittable)
 
     const proxies = (options?.proxies || this.config.proxies)?.map((p) =>
-      Array.isArray(p) ? p : ([p, undefined] as const)
+      Array.isArray(p) ? p : ([p, undefined] as [string, undefined])
     )
 
     let transferTx
@@ -333,10 +333,7 @@ export class CentrifugeBase {
     }
 
     if (proxies && !options?.sendOnly) {
-      actualSubmittable = proxies.reduceRight(
-        (acc, [delegator, forceProxyType]) => api.tx.proxy.proxy(delegator, forceProxyType, acc),
-        actualSubmittable
-      )
+      actualSubmittable = wrapProxyCalls(api, actualSubmittable, proxies)
     }
 
     if (options?.multisig) {
@@ -706,4 +703,16 @@ export class CentrifugeBase {
   clearProxies() {
     this.config.proxies = undefined
   }
+}
+
+export function wrapProxyCalls(
+  api: ApiRx,
+  tx: SubmittableExtrinsic<'rxjs'>,
+  proxies: Exclude<Config['proxies'], undefined>
+) {
+  const mapped = proxies.map((p) => (Array.isArray(p) ? p : ([p, undefined] as const)))
+  return mapped.reduceRight(
+    (acc, [delegator, forceProxyType]) => api.tx.proxy.proxy(delegator, forceProxyType, acc),
+    tx
+  )
 }

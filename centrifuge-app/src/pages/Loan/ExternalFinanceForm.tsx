@@ -1,9 +1,10 @@
 import { CurrencyBalance, ExternalLoan, Pool, Price, WithdrawAddress } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
+import { combineLatest, switchMap } from 'rxjs'
 import { Dec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -11,7 +12,7 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, nonNegativeNumber, required, settlementPrice } from '../../utils/validation'
-import { WithdrawSelect } from './FinanceForm'
+import { useWithdraw } from './FinanceForm'
 
 type FinanceValues = {
   price: number | '' | Decimal
@@ -22,11 +23,26 @@ type FinanceValues = {
 export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
+  const api = useCentrifugeApi()
   if (!account) throw new Error('No borrower')
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    (cent) => cent.pools.financeExternalLoan,
+    (cent) => (args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance], options) => {
+      const [poolId, loanId, quantity, price] = args
+      return combineLatest([
+        cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true }),
+        withdraw.getBatch(financeForm),
+      ]).pipe(
+        switchMap(([loanTx, batch]) => {
+          let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
+          if (batch.length) {
+            tx = api.tx.utility.batchAll([tx, ...batch])
+          }
+          return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
+        })
+      )
+    },
     {
       onSuccess: () => {
         financeForm.resetForm()
@@ -44,18 +60,9 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
       const quantity = Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal()))
 
-      doFinanceTransaction(
-        [
-          loan.poolId,
-          loan.id,
-          quantity,
-          price,
-          values.withdraw ? { ...values.withdraw, currency: pool.currency.key } : undefined,
-        ],
-        {
-          account,
-        }
-      )
+      doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
+        account,
+      })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -63,6 +70,12 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
 
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
+
+  const amountDec = Dec(financeForm.values.price || 0)
+    .mul(Dec(financeForm.values.faceValue || 0))
+    .div(loan.pricing.notional.toDecimal())
+
+  const withdraw = useWithdraw(loan.poolId, account, amountDec)
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
@@ -80,25 +93,19 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <ExternalFinanceFields loan={loan} pool={pool} />
-            <WithdrawSelect loan={loan} borrower={account} />
+            {withdraw.render()}
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Total amount</Text>
                 <Text variant="emphasized">
                   {financeForm.values.price && !Number.isNaN(financeForm.values.price as number)
-                    ? formatBalance(
-                        Dec(financeForm.values.price || 0)
-                          .mul(Dec(financeForm.values.faceValue || 0))
-                          .div(loan.pricing.notional.toDecimal()),
-                        pool?.currency.symbol,
-                        2
-                      )
+                    ? formatBalance(amountDec, pool?.currency.symbol, 2)
                     : `0.00 ${pool.currency.symbol}`}
                 </Text>
               </Shelf>
             </Stack>
             <Stack px={1}>
-              <Button type="submit" loading={isFinanceLoading}>
+              <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
                 Finance asset
               </Button>
             </Stack>

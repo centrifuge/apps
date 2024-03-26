@@ -1,6 +1,7 @@
 import {
   addressToHex,
   computeTrancheId,
+  getCurrencyLocation,
   isSameAddress,
   PoolMetadata,
   TransactionOptions,
@@ -38,6 +39,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { parachainNames } from '../../../config'
+import { looksLike } from '../../../utils/helpers'
 import { useIdentity } from '../../../utils/useIdentity'
 import { useDomainRouters } from '../../../utils/useLiquidityPools'
 import { getKeyForReceiver, usePoolAccess, useSuitableAccounts, WithdrawKey } from '../../../utils/usePermissions'
@@ -131,16 +133,22 @@ function AOForm({
   const chainIds = routers?.map((r) => r.chainId) || []
   const getName = useGetNetworkName()
 
+  const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
   const destinations = [
     'centrifuge',
     ...chainIds
       .map((cid) => ({ evm: cid }))
       .filter(
-        () => pool.currency.additional?.transferability && 'liquidityPools' in pool.currency.additional.transferability
+        (location) =>
+          (pool.currency.additional?.transferability &&
+            'liquidityPools' in pool.currency.additional.transferability &&
+            looksLike(location, getCurrencyLocation(pool.currency))) ||
+          isLocalAsset
       ),
-    ...Object.keys(parachainNames)
+    ...(Object.keys(parachainNames)
       .map((pid) => ({ parachain: Number(pid) }))
-      .filter(() => pool.currency.additional?.transferability && 'xcm' in pool.currency.additional.transferability),
+      .filter(() => pool.currency.additional?.transferability && 'xcm' in pool.currency.additional.transferability) ||
+      isLocalAsset),
   ]
 
   const { showPodAccountCreation } = useDebugFlags()
@@ -267,12 +275,8 @@ function AOForm({
                             [keys.documentKey, 'P2PDocumentSigning', 'ECDSA'],
                           ]),
                         collectionId && [api.tx.uniques.create(collectionId, ao.address)],
-                        addedWithdrawAddresses.map((w) =>
-                          api.tx.transferAllowList.addTransferAllowance(pool.currency.key, w)
-                        ),
-                        removedWithdrawAddresses.map((w) =>
-                          api.tx.transferAllowList.removeTransferAllowance(pool.currency.key, w)
-                        ),
+                        addedWithdrawAddresses.map((w) => api.tx.transferAllowList.addTransferAllowance('All', w)),
+                        removedWithdrawAddresses.map((w) => api.tx.transferAllowList.removeTransferAllowance('All', w)),
                       ]
                         .filter(Boolean)
                         .flat(2)

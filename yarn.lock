@@ -1836,6 +1836,7 @@ __metadata:
     "@mdx-js/react": ^1.6.22
     "@polkadot/extension-dapp": ~0.45.5
     "@polkadot/react-identicon": ~3.1.4
+    "@polkadot/types": ~10.12.2
     "@subwallet/wallet-connect": 0.2.5
     "@types/bn.js": ^5
     "@types/eslint": ^7

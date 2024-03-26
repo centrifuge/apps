@@ -1,4 +1,5 @@
 import { Centrifuge } from './Centrifuge'
+export { wrapProxyCalls } from './CentrifugeBase'
 export type { UserProvidedConfig } from './CentrifugeBase'
 export * from './modules/liquidityPools'
 export * from './modules/multisig'
