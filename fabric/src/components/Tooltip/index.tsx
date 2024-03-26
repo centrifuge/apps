@@ -80,7 +80,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
 
   return (
     <>
-      <StyledTrigger as="button" type="button" ref={triggerRef} {...triggerProps} {...textProps}>
+      <StyledTrigger ref={triggerRef} {...triggerProps} tabIndex={0} {...textProps}>
         {children}
       </StyledTrigger>
       {state.isOpen && (
