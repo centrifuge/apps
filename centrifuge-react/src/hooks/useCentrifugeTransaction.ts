@@ -1,10 +1,18 @@
-import Centrifuge, { TransactionOptions, TransactionSuccessResult } from '@centrifuge/centrifuge-js'
+import Centrifuge, { TransactionOptions, TransactionSuccessResult, wrapProxyCalls } from '@centrifuge/centrifuge-js'
+import { ApiRx } from '@polkadot/api'
+import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import * as React from 'react'
-import { lastValueFrom, Observable } from 'rxjs'
+import { Observable, lastValueFrom } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/Transactions'
-import { CombinedSubstrateAccount, SubstrateAccount, useEvmProvider, useWallet } from '../components/WalletProvider'
+import {
+  CombinedSubstrateAccount,
+  Proxy,
+  SubstrateAccount,
+  useEvmProvider,
+  useWallet,
+} from '../components/WalletProvider'
 import { PalletError } from '../utils/errors'
 
 export type CentrifugeTransactionOptions = Partial<Pick<TransactionOptions, 'createType'>> & {
@@ -59,14 +67,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       const lastResult = await lastValueFrom(
         transaction(args, {
           multisig: account.multisig,
-          proxies: account.proxies?.map((p) => [
-            p.delegator,
-            txOptions?.forceProxyType
-              ? (Array.isArray(txOptions.forceProxyType) ? txOptions.forceProxyType : [txOptions.forceProxyType]).find(
-                  (type) => p.types.includes(type)
-                )
-              : undefined,
-          ]),
+          proxies: account.proxies && getTypePerProxyCall(account.proxies, txOptions?.forceProxyType),
           ...txOptions,
           onStatusChange: (result) => {
             const errors = result.events.filter(({ event }) => {
@@ -185,4 +186,25 @@ export function useCentrifugeTransaction<T extends Array<any>>(
 
 function isSubstrateResult(data: any): data is ISubmittableResult {
   return 'toHuman' in data
+}
+
+export function wrapProxyCallsForAccount(
+  api: ApiRx,
+  tx: SubmittableExtrinsic<'rxjs'>,
+  account: CombinedSubstrateAccount,
+  forceProxyType: string | string[] | undefined
+) {
+  return wrapProxyCalls(api, tx, getTypePerProxyCall(account.proxies || [], forceProxyType))
+}
+
+export function getTypePerProxyCall(accountProxies: Proxy[], forceProxyType: string | string[] | undefined) {
+  return accountProxies.map(
+    (p) =>
+      [
+        p.delegator,
+        forceProxyType
+          ? (Array.isArray(forceProxyType) ? forceProxyType : [forceProxyType]).find((type) => p.types.includes(type))
+          : undefined,
+      ] as [string, string | undefined]
+  )
 }

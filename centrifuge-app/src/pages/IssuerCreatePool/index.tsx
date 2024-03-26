@@ -274,7 +274,7 @@ function CreatePoolForm() {
               ].filter(Boolean)
             )
             setMultisigData({ callData: proxiedPoolCreate.method.toHex(), hash: proxiedPoolCreate.method.hash.toHex() })
-            return cent.wrapSignAndSend(api, submittable, { ...options, multisig: undefined, proxy: [] })
+            return cent.wrapSignAndSend(api, submittable, { ...options, multisig: undefined, proxies: undefined })
           })
         )
       },
