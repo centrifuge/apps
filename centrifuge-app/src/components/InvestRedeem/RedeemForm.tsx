@@ -191,13 +191,13 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
             type="redeem"
             pool={pool}
             amount={pendingRedeem}
-            onCancelOrder={() => actions.cancelRedeem()}
-            isCancelling={isCancelling}
-            onChangeOrder={() => {
-              form.resetForm()
-              form.setFieldValue('amount', pendingRedeem, false)
-              setChangeOrderFormShown(true)
-            }}
+            // onCancelOrder={() => actions.cancelRedeem()}
+            // isCancelling={isCancelling}
+            // onChangeOrder={() => {
+            //   form.resetForm()
+            //   form.setFieldValue('amount', pendingRedeem, false)
+            //   setChangeOrderFormShown(true)
+            // }}
           />
         ) : state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
           renderInput(undefined, {
