@@ -125,7 +125,7 @@ jobs:
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || inputs.deploy_env == 'ff-prod'
+    if: github.event_name == 'pull_request' || (inputs.deploy_env == 'ff-prod' &&  github.event_name == 'pull_request')
     steps:
       - name: PR comment with preview URL
         id: prcomment
