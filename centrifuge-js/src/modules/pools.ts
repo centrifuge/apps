@@ -2653,7 +2653,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `,
       {
         poolId,
-        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
         to: to ? to.toISOString() : new Date().toISOString(),
       },
       false
