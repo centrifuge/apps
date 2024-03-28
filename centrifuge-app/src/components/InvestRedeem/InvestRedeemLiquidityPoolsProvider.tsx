@@ -188,8 +188,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     needsPoolCurrencyApproval: (amount) =>
       lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
     needsTrancheTokenApproval: () => false,
-    canChangeOrder: !!allowInvestBelowMin,
-    canCancelOrder: true,
+    canChangeOrder: false, // LP contracts don't suuport changing orders yet, TypeError: contract(...).decreaseDepositRequest is not a function
+    canCancelOrder: false, // LP contracts don't suuport canceling orders yet
     pendingAction,
     pendingTransaction,
     statusMessage,

@@ -1,5 +1,5 @@
 import { Pool, TokenBalance } from '@centrifuge/centrifuge-js'
-import { Box, Button, CurrencyInput, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, SelectInner, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import React from 'react'
@@ -27,7 +27,6 @@ type RedeemValues = {
 export function RedeemForm({ autoFocus }: RedeemFormProps) {
   const { state, actions, hooks } = useInvestRedeem()
   const pool = usePool(state.poolId) as Pool
-  const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const [claimDismissed, setClaimDismissed] = React.useState(false)
 
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
@@ -41,7 +40,6 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
       form.submitForm()
     } else {
       form.resetForm()
-      setChangeOrderFormShown(false)
     }
   })
 
@@ -95,119 +93,110 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'
 
-  function renderInput(cancelCb?: () => void, preSubmitAction?: { onClick: () => void; loading?: boolean }) {
-    return (
-      <Stack gap={2}>
-        {state.order && !state.order.payoutCurrencyAmount.isZero() && (
-          <SuccessBanner
-            title="Redemption successful"
-            body={
-              <Stack gap={1}>
-                <div>
-                  Redeemed {state.poolCurrency?.symbol}:{' '}
-                  <Text fontWeight="bold">
-                    {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
-                  </Text>
-                </div>
-              </Stack>
-            }
-          />
-        )}
-        <EpochBusy busy={calculatingOrders} />
-
-        <Field name="amount" validate={positiveNumber()}>
-          {({ field, meta }: FieldProps) => (
-            <CurrencyInput
-              {...field}
-              // when the value is a decimal we assume the user clicked the max button
-              // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
-              value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
-              errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
-              label="Amount"
-              disabled={isRedeeming}
-              onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
-              onChange={(value) => form.setFieldValue('amount', value)}
-              currency={state.poolCurrency?.symbol}
-              secondaryLabel={`${formatBalance(roundDown(maxRedeemCurrency), state.poolCurrency?.symbol, 2)} available`}
-              autoFocus={autoFocus}
-            />
-          )}
-        </Field>
-        {inputToNumber(form.values.amount) > 0 && (
-          <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="card">
-            <Text variant="body3">
-              Token amount{' '}
-              <Text variant="body3" fontWeight="bold" width={12} variance={0}>
-                {!state.tokenPrice.isZero() &&
-                  `~${formatBalance(
-                    form.values.amount instanceof Decimal
-                      ? form.values.amount
-                      : Dec(form.values.amount).div(state.tokenPrice),
-                    tokenSymbol
-                  )}`}
-              </Text>
-            </Text>
-          </Box>
-        )}
-        <ButtonGroup>
-          {preSubmitAction ? (
-            <Button {...preSubmitAction} type="submit">
-              Redeem
-            </Button>
-          ) : (
-            <Button type="submit" loading={isRedeeming} loadingMessage={loadingMessage} disabled={calculatingOrders}>
-              Redeem
-            </Button>
-          )}
-          {cancelCb && (
-            <Button variant="secondary" onClick={cancelCb} disabled={calculatingOrders}>
-              Cancel
-            </Button>
-          )}
-        </ButtonGroup>
-      </Stack>
-    )
+  const preSubmitAction = () => {
+    if (state.needsTrancheTokenApproval(inputToNumber(form.values.amount))) {
+      return {
+        onClick: () =>
+          actions.approveTrancheToken(TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)),
+        loading: isApproving,
+      }
+    }
   }
 
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
-        {state.collectType && !claimDismissed ? (
-          <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
-        ) : changeOrderFormShown ? (
-          state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
-            renderInput(() => setChangeOrderFormShown(false), {
-              onClick: () =>
-                actions.approveTrancheToken(
-                  TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)
-                ),
-              loading: isApproving,
-            })
-          ) : (
-            renderInput(() => setChangeOrderFormShown(false))
-          )
-        ) : hasPendingOrder ? (
-          <PendingOrder
-            type="redeem"
-            pool={pool}
-            amount={pendingRedeem}
-            // onCancelOrder={() => actions.cancelRedeem()}
-            // isCancelling={isCancelling}
-            // onChangeOrder={() => {
-            //   form.resetForm()
-            //   form.setFieldValue('amount', pendingRedeem, false)
-            //   setChangeOrderFormShown(true)
-            // }}
-          />
-        ) : state.needsTrancheTokenApproval(inputToNumber(form.values.amount)) ? (
-          renderInput(undefined, {
-            onClick: () =>
-              actions.approveTrancheToken(TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)),
-            loading: isApproving,
-          })
-        ) : (
-          renderInput(undefined)
-        )}
+        <Stack gap={2}>
+          {state.order && !state.order.payoutCurrencyAmount.isZero() && (
+            <SuccessBanner
+              title="Redemption successful"
+              body={
+                <Stack gap={1}>
+                  <div>
+                    Redeemed {state.poolCurrency?.symbol}:{' '}
+                    <Text fontWeight="bold">
+                      {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
+                    </Text>
+                  </div>
+                </Stack>
+              }
+            />
+          )}
+          <EpochBusy busy={calculatingOrders} />
+
+          <Field name="amount" validate={positiveNumber()}>
+            {({ field, meta }: FieldProps) => (
+              <CurrencyInput
+                {...field}
+                // when the value is a decimal we assume the user clicked the max button
+                // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
+                value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
+                errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
+                label="Amount"
+                disabled={isRedeeming || hasPendingOrder}
+                onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
+                onChange={(value) => form.setFieldValue('amount', value)}
+                currency={
+                  state?.poolCurrencies.length > 1 ? (
+                    <SelectInner
+                      {...field}
+                      onChange={(e) => {
+                        actions.selectPoolCurrency(e.target.value)
+                      }}
+                      value={state.poolCurrency?.symbol}
+                      options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.symbol }))}
+                      style={{ textAlign: 'right' }}
+                    />
+                  ) : (
+                    state.poolCurrency?.symbol
+                  )
+                }
+                secondaryLabel={`${formatBalance(
+                  roundDown(maxRedeemCurrency),
+                  state.poolCurrency?.symbol,
+                  2
+                )} available`}
+                autoFocus={autoFocus}
+              />
+            )}
+          </Field>
+          {inputToNumber(form.values.amount) > 0 && (
+            <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="card">
+              <Text variant="body3">
+                Token amount{' '}
+                <Text variant="body3" fontWeight="bold" width={12} variance={0}>
+                  {!state.tokenPrice.isZero() &&
+                    `~${formatBalance(
+                      form.values.amount instanceof Decimal
+                        ? form.values.amount
+                        : Dec(form.values.amount).div(state.tokenPrice),
+                      tokenSymbol
+                    )}`}
+                </Text>
+              </Text>
+            </Box>
+          )}
+          {hasPendingOrder ? <PendingOrder type="redeem" pool={pool} amount={pendingRedeem} /> : null}
+          <ButtonGroup>
+            {state.collectType && !claimDismissed ? (
+              <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
+            ) : null}
+            {preSubmitAction ? (
+              <Button {...preSubmitAction} disabled={hasPendingOrder} type="submit">
+                Redeem
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                loading={isRedeeming}
+                loadingMessage={loadingMessage}
+                disabled={calculatingOrders || hasPendingOrder}
+              >
+                Redeem
+              </Button>
+            )}
+          </ButtonGroup>
+        </Stack>
       </Form>
     </FormikProvider>
   )
