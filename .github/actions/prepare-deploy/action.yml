@@ -71,14 +71,22 @@ runs:
           echo "front_url=app-demo.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=demo" >> $GITHUB_OUTPUT
         elif ${{ inputs.deploy_to == 'ff-prod' }}; then
-          # FF-PRODUCTION
-          # A build from the DEV env that points to prod
-          echo "function_name=${{ inputs.app_base_name }}-ff-production" >> $GITHUB_OUTPUT
-          echo "front_url=app-ff-production.k-f.dev" >> $GITHUB_OUTPUT
-          echo "env_name=production" >> $GITHUB_OUTPUT 
+          if ${{ github.event_name == 'pull_request' }}; then
+            # FF-PRODUCTION-PR
+            # A build from the DEV env that points to prod
+            echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
+            echo "front_url=pr${{ github.event.number }}-app-ff-production.k-f.dev" >> $GITHUB_OUTPUT
+            echo "env_name=ff-prod" >> $GITHUB_OUTPUT 
+          elif ${{ github.ref == 'refs/heads/main' }}; then
+            # FF-PRODUCTION-MAIN
+            # A build from the DEV env that points to prod
+            echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
+            echo "front_url=app-ff-production.k-f.dev" >> $GITHUB_OUTPUT
+            echo "env_name=ff-prod" >> $GITHUB_OUTPUT 
+          fi
         elif  ${{ github.ref == 'refs/heads/main' }}; then
           # DEV
-          echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
+          echo "function_name=NEVER_USED" >> $GITHUB_OUTPUT
           echo "front_url=app-dev.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=development" >> $GITHUB_OUTPUT                  
         elif ${{ github.event_name == 'pull_request' }}; then

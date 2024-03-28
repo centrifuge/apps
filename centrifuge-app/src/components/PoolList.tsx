@@ -1,4 +1,4 @@
-import Centrifuge, { Pool, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Grid, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -23,17 +23,7 @@ const PoolCardBox = styled<typeof Box & { status?: PoolStatusKey }>(Box)`
   }
 `
 
-const upcomingPools: PoolCardProps[] = [
-  {
-    apr: Rate.fromApr(0.08),
-    assetClass: 'Real Estate Bridge Loans',
-    iconUri: 'https://storage.googleapis.com/tinlake/pool-media/new-silver-2/icon.svg',
-    name: 'New Silver Series 3',
-    status: 'Upcoming' as PoolStatusKey,
-    valueLocked: undefined,
-    poolId: '',
-  },
-]
+const upcomingPools: PoolCardProps[] = []
 
 export function PoolList() {
   const cent = useCentrifuge()

@@ -125,7 +125,7 @@ jobs:
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || (inputs.deploy_env == 'ff-prod' &&  github.event_name == 'pull_request')
     steps:
       - name: PR comment with preview URL
         id: prcomment
@@ -133,8 +133,8 @@ jobs:
         env:
           pull_sha: ${{ github.event.pull_request.head.sha }}
         with:
-          comment_tag: pr_preview_url
-          mode: recreate
+          comment_tag: pr_preview_url${{ inputs.deploy_env }}
+          mode: upsert
           message: |
             PR deployed in Google Cloud
             URL: https://${{ needs.deploy-app.outputs.bucket_url }}

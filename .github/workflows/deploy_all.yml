@@ -18,7 +18,6 @@ jobs:
 
 
   pinning:
-    if: ${{ inputs.environment != 'ff-prod' }}
     name: pinning
     uses:  ./.github/workflows/pinning-api.yml
     secrets: inherit
@@ -27,7 +26,6 @@ jobs:
 
 
   onboarding:
-    if: ${{ inputs.environment != 'ff-prod' }}
     name: onboarding
     uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit

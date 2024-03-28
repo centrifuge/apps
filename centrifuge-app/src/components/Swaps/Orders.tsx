@@ -53,6 +53,8 @@ import { ButtonGroup } from '../ButtonGroup'
 import { Column, DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
 
+const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000000000000000000000000'
+
 export type OrdersProps = {
   buyOrSell?: CurrencyKey
 }
@@ -70,7 +72,6 @@ export type SwapOrder = {
 
 export function Orders({ buyOrSell }: OrdersProps) {
   const cent = useCentrifuge()
-  const api = useCentrifugeApi()
   const currencies = useCurrencies()
   const utils = useCentrifugeUtils()
   const [selectedOrder, setSelectedOrder] = React.useState<SwapOrder>()
@@ -137,7 +138,8 @@ export function Orders({ buyOrSell }: OrdersProps) {
           )
         })
       )
-      return api.query.orderBook.orders.entries().pipe(
+      return cent.getApi().pipe(
+        switchMap((api) => api.query.orderBook.orders.entries()),
         map((rawOrders) => {
           return rawOrders.map(([, value]) => {
             const order = value.toPrimitive() as {
@@ -207,7 +209,19 @@ export function Orders({ buyOrSell }: OrdersProps) {
 export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onClose: () => void; order: SwapOrder }) {
   const [account] = useSuitableAccounts({})
   const utils = useCentrifugeUtils()
-  const balances = useBalances(account?.actingAddress)
+
+  const isMaybeMuxDeposit = typeof order.buyCurrency.key !== 'string' && 'LocalAsset' in order.buyCurrency.key
+  const isMaybeMuxBurn = typeof order.sellCurrency.key !== 'string' && 'LocalAsset' in order.sellCurrency.key
+  const isMaybeMuxSwap = isMaybeMuxBurn || isMaybeMuxDeposit
+  const localCurrency = isMaybeMuxDeposit ? order.buyCurrency : order.sellCurrency
+  const otherCurrency = isMaybeMuxDeposit ? order.sellCurrency : order.buyCurrency
+  const isMuxSwap =
+    isMaybeMuxSwap &&
+    String((localCurrency.key as any).LocalAsset) === String(otherCurrency.additional?.localRepresentation)
+  const isMuxBurn = isMuxSwap && isMaybeMuxBurn
+  const isMuxDeposit = isMuxSwap && isMaybeMuxDeposit
+
+  const balances = useBalances(isMuxBurn ? TOKENMUX_PALLET_ACCOUNTID : account?.actingAddress)
   const api = useCentrifugeApi()
   const consts = useCentrifugeConsts()
   const getNetworkName = useGetNetworkName()
@@ -232,9 +246,13 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     'Fulfill order',
     (cent) => (args: [transferTo: string | null, amount: CurrencyBalance | null], options) => {
       const [transferTo, amount] = args
-      let swapTx = api.tx.orderBook.fillOrder(order.id, order.sellAmount.toString())
+      let fn = api.tx.orderBook.fillOrder
+      if (isMuxSwap) {
+        fn = api.tx.tokenMux.matchSwap
+      }
+      let swapTx = fn(order.id, order.sellAmount.toString())
       if (amount) {
-        swapTx = api.tx.orderBook.fillOrder(order.id, amount.toString())
+        swapTx = fn(order.id, amount.toString())
       }
 
       if (transferTo) {
@@ -298,7 +316,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
 
   if (!account) return null
 
-  const balanceLow = balanceDec.lt(orderBuyDec)
+  const balanceLow = !isMuxDeposit && balanceDec.lt(orderBuyDec)
   const { isTransferEnabled, isPartialEnabled } = form.values
   const disabled = isPartialEnabled ? false : balanceLow
 
@@ -311,22 +329,24 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
               <Shelf alignItems="center" alignSelf="center" gap={4} flexWrap="nowrap" mb={2}>
                 <Text variant="heading3" style={{ position: 'relative' }}>
                   <Text fontSize={24}>{formatBalance(order.buyAmount)}</Text> {order.buyCurrency.symbol}
-                  <Box position="absolute" top="100%" left={0}>
-                    <Text
-                      variant="label2"
-                      color={balanceLow ? 'statusCritical' : undefined}
-                      style={{ whiteSpace: 'nowrap' }}
-                    >
-                      {formatBalance(balanceDec, order.buyCurrency.symbol)} available
-                    </Text>
-                  </Box>
+                  {!isMuxDeposit && (
+                    <Box position="absolute" top="100%" left={0}>
+                      <Text
+                        variant="label2"
+                        color={balanceLow ? 'statusCritical' : undefined}
+                        style={{ whiteSpace: 'nowrap' }}
+                      >
+                        {formatBalance(balanceDec, order.buyCurrency.symbol)} available
+                      </Text>
+                    </Box>
+                  )}
                 </Text>
                 <IconArrowRight />
                 <Text variant="heading3">
                   <Text fontSize={24}>{formatBalance(order.sellAmount)}</Text> {order.sellCurrency.symbol}
                 </Text>
               </Shelf>
-              {balanceLow && (
+              {balanceLow && !isMuxSwap && (
                 <TextInput
                   label={
                     orderBuyCurrencyLocation
@@ -349,7 +369,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
               )}
             </Stack>
 
-            {orderBuyDec.gt(minFulfillDec) && (
+            {orderBuyDec.gt(minFulfillDec) && !isMuxDeposit && (
               <Card p={2}>
                 <Stack gap={2}>
                   <Field type="checkbox" name="isPartialEnabled" as={Checkbox} label="Fulfill order partially" />
@@ -387,7 +407,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
               </Card>
             )}
 
-            {orderSellCurrencyLocation && (
+            {orderSellCurrencyLocation && !isMuxSwap && (
               <Card p={2}>
                 <Stack gap={2}>
                   <Field

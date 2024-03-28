@@ -59,7 +59,7 @@ export type PoolRoleInput =
       ]
     }
 
-export type CurrencyKey = string | { ForeignAsset: string } | { Tranche: [string, string] }
+export type CurrencyKey = string | { ForeignAsset: string } | { Tranche: [string, string] } | { LocalAsset: string }
 
 export type CurrencyMetadata = {
   key: CurrencyKey
@@ -1663,97 +1663,27 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function financeExternalLoan(
-    args: [
-      poolId: string,
-      loanId: string,
-      quantity: Price,
-      price: CurrencyBalance,
-      withdraw?: WithdrawAddress & { currency: CurrencyKey }
-    ],
+    args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, quantity, price, withdrawTo] = args
+    const [poolId, loanId, quantity, price] = args
 
     return inst.getApi().pipe(
       switchMap((api) => {
-        let borrowTx = api.tx.loans.borrow(poolId, loanId, {
+        const borrowTx = api.tx.loans.borrow(poolId, loanId, {
           external: { quantity: quantity.toString(), settlementPrice: price.toString() },
         })
-        if (withdrawTo) {
-          const { address, location, currency } = withdrawTo
-          return withdraw([quantity.mul(price).div(Price.fromFloat(1)), currency, address, location], {
-            batch: true,
-          }).pipe(
-            switchMap((_withdrawTx) => {
-              let withdrawTx = _withdrawTx
-              const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
-                Array.isArray(p) ? p : ([p, undefined] as const)
-              )
-              if (proxies) {
-                // The borrow and withdraw txs need different proxy types
-                // If a proxy type was passed, replace it with the right one
-                // Otherwise pass none, as it means the delegatee has the Any proxy type
-                borrowTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
-                  borrowTx
-                )
-                withdrawTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
-                  withdrawTx
-                )
-              }
-              const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
-
-              const opt = { ...options }
-              delete opt.proxies
-              return inst.wrapSignAndSend(api, batchTx, opt)
-            })
-          )
-        }
         return inst.wrapSignAndSend(api, borrowTx, options)
       })
     )
   }
 
-  function financeLoan(
-    args: [poolId: string, loanId: string, amount: BN, withdraw?: WithdrawAddress & { currency: CurrencyKey }],
-    options?: TransactionOptions
-  ) {
-    const [poolId, loanId, amountBN, withdrawTo] = args
+  function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
+    const [poolId, loanId, amountBN] = args
     const amount = amountBN.toString()
     return inst.getApi().pipe(
       switchMap((api) => {
-        let borrowTx = api.tx.loans.borrow(poolId, loanId, { internal: amount })
-
-        if (withdrawTo) {
-          const { address, location, currency } = withdrawTo
-          return withdraw([amountBN, currency, address, location], { batch: true }).pipe(
-            switchMap((_withdrawTx) => {
-              let withdrawTx = _withdrawTx
-              const proxies = (options?.proxies || inst.config.proxies)?.map((p) =>
-                Array.isArray(p) ? p : ([p, undefined] as const)
-              )
-              if (proxies) {
-                // The borrow and withdraw txs need different proxy types
-                // If a proxy type was passed, replace it with the right one
-                // Otherwise pass none, as it means the delegatee has the Any proxy type
-                borrowTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Borrow' : undefined, acc),
-                  borrowTx
-                )
-                withdrawTx = proxies.reduceRight(
-                  (acc, [delegator, origType]) => api.tx.proxy.proxy(delegator, origType ? 'Transfer' : undefined, acc),
-                  withdrawTx
-                )
-              }
-              const batchTx = api.tx.utility.batchAll([borrowTx, withdrawTx])
-
-              const opt = { ...options }
-              delete opt.proxies
-              return inst.wrapSignAndSend(api, batchTx, opt)
-            })
-          )
-        }
+        const borrowTx = api.tx.loans.borrow(poolId, loanId, { internal: amount })
         return inst.wrapSignAndSend(api, borrowTx, options)
       })
     )
@@ -2726,7 +2656,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `,
       {
         poolId,
-        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
         to: to ? to.toISOString() : new Date().toISOString(),
       },
       false
@@ -3856,7 +3786,7 @@ export function findBalance<T extends Pick<AccountCurrencyBalance, 'currency'>>(
   return balances.find((balance) => looksLike(balance.currency.key, key))
 }
 
-type RawCurrencyKey = CurrencyKey | { foreignAsset: number | string }
+type RawCurrencyKey = CurrencyKey | { foreignAsset: number | string } | { localAsset: number | string }
 export function parseCurrencyKey(key: RawCurrencyKey): CurrencyKey {
   if (typeof key === 'object') {
     if ('Tranche' in key) {
@@ -3870,6 +3800,14 @@ export function parseCurrencyKey(key: RawCurrencyKey): CurrencyKey {
     } else if ('foreignAsset' in key) {
       return {
         ForeignAsset: String(key.foreignAsset).replace(/\D/g, ''),
+      }
+    } else if ('LocalAsset' in key) {
+      return {
+        LocalAsset: String(key.LocalAsset).replace(/\D/g, ''),
+      }
+    } else if ('localAsset' in key) {
+      return {
+        LocalAsset: String(key.localAsset).replace(/\D/g, ''),
       }
     }
   }

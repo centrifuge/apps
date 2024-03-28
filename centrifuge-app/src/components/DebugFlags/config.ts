@@ -31,6 +31,7 @@ export type DebugFlagConfig =
     }
 
 export type Key =
+  | 'showFinoa'
   | 'showOrderExecution'
   | 'address'
   | 'evmAddress'
@@ -116,6 +117,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'select',
   },
   showAdvancedAccounts: {
+    alwaysShow: true,
+    default: false,
+    type: 'checkbox',
+  },
+  showFinoa: {
     alwaysShow: true,
     default: false,
     type: 'checkbox',
