@@ -1,8 +1,6 @@
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
-import { useQuery } from 'react-query'
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { getTinlakeSubgraphTVL } from '../../utils/tinlake/getTinlakeSubgraphTVL'
 import { useDailyTVL } from '../../utils/usePools'
 
 export type DataPoint = {
@@ -17,11 +15,10 @@ type TotalValueLockedProps = {
 
 export default function TotalValueLocked({ chainTVL, setHovered }: TotalValueLockedProps) {
   const centrifugeTVL = useDailyTVL()
-  const tinlakeTVL = useDailyTinlakeTVL()
   const chartColor = '#ff8c00'
 
   const chartData = React.useMemo(() => {
-    if (!tinlakeTVL || !centrifugeTVL) {
+    if (!centrifugeTVL) {
       return []
     }
 
@@ -32,8 +29,10 @@ export default function TotalValueLocked({ chainTVL, setHovered }: TotalValueLoc
         }
       : undefined
 
-    return getMergedData([...tinlakeTVL, ...centrifugeTVL], currentTVL)
-  }, [tinlakeTVL, centrifugeTVL, chainTVL])
+    const tvlSnapshots = centrifugeTVL.map((entry) => ({ ...entry, tvl: entry.tvl.toNumber() }))
+
+    return [...tvlSnapshots, currentTVL]
+  }, [centrifugeTVL, chainTVL])
 
   return (
     <ResponsiveContainer>
@@ -68,37 +67,4 @@ export default function TotalValueLocked({ chainTVL, setHovered }: TotalValueLoc
       </AreaChart>
     </ResponsiveContainer>
   )
-}
-
-function useDailyTinlakeTVL() {
-  const { data } = useQuery('use daily tinlake tvl', getTinlakeSubgraphTVL, {
-    staleTime: Infinity,
-    suspense: true,
-  })
-
-  return data
-}
-
-function getMergedData(combined: DataPoint[], current?: DataPoint) {
-  const mergedMap = new Map()
-
-  combined.forEach((entry) => {
-    const { dateInMilliseconds, tvl } = entry
-
-    if (mergedMap.has(dateInMilliseconds)) {
-      mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
-    } else {
-      mergedMap.set(dateInMilliseconds, tvl)
-    }
-  })
-
-  if (current) {
-    mergedMap.set(current.dateInMilliseconds, current.tvl)
-  }
-
-  const merged = Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
-    .sort((a, b) => a.dateInMilliseconds - b.dateInMilliseconds)
-    .map((entry) => ({ ...entry, tvl: entry.tvl.toNumber() }))
-
-  return merged
 }
