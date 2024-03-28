@@ -37,7 +37,6 @@ type InvestFormProps = {
 
 export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProps) {
   const { state, actions, hooks } = useInvestRedeem()
-  const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const [claimDismissed, setClaimDismissed] = React.useState(false)
   const { allowInvestBelowMin } = useDebugFlags()
   const pool = usePool(state.poolId)
@@ -47,7 +46,6 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
       form.submitForm()
     } else {
       form.resetForm()
-      setChangeOrderFormShown(false)
     }
   })
 
@@ -55,6 +53,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
   const hasPendingOrder = !pendingInvest.isZero()
 
   const loadingMessage = state.pendingTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
+
   const form = useFormik<{ amount: number | Decimal }>({
     initialValues: {
       amount: 0,
@@ -97,17 +96,13 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
   const isCancelling = state.pendingAction === 'cancelInvest' && isPending
   const isApproving = state.pendingAction === 'approvePoolCurrency' && isPending
 
-  const cancelCb = changeOrderFormShown ? () => setChangeOrderFormShown(false) : null
-
-  const preSubmitAction =
-    (changeOrderFormShown && state.needsPoolCurrencyApproval(inputToNumber(form.values.amount))) ||
-    state.needsPoolCurrencyApproval(inputToNumber(form.values.amount))
-      ? {
-          onClick: () =>
-            actions.approvePoolCurrency(CurrencyBalance.fromFloat(form.values.amount, state.poolCurrency!.decimals)),
-          loading: isApproving,
-        }
-      : null
+  const preSubmitAction = state.needsPoolCurrencyApproval(inputToNumber(form.values.amount))
+    ? {
+        onClick: () =>
+          actions.approvePoolCurrency(CurrencyBalance.fromFloat(form.values.amount, state.poolCurrency!.decimals)),
+        loading: isApproving,
+      }
+    : null
 
   return (
     <FormikProvider value={form}>
@@ -183,17 +178,18 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
               </InlineFeedback>
             )}
           </Shelf>
-          {state.collectType && !claimDismissed ? (
-            <Claim type="invest" onDismiss={() => setClaimDismissed(true)} />
-          ) : hasPendingOrder ? (
+          {hasPendingOrder ? (
             <Stack gap={2}>
-              {state.statusMessage && <InlineFeedback>{state.statusMessage}</InlineFeedback>}
               <PendingOrder type="invest" pool={pool} amount={pendingInvest} />
             </Stack>
           ) : null}
           <ButtonGroup>
             {!!preSubmitAction ? (
               <Button {...preSubmitAction}>{investLabel}</Button>
+            ) : state.canChangeOrder && hasPendingOrder ? (
+              <Button onClick={form.submitForm} disabled={isCancelling || pool.epoch.status !== 'ongoing'}>
+                Change order
+              </Button>
             ) : (
               <Button
                 type="submit"
@@ -201,26 +197,12 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                 loadingMessage={loadingMessage}
                 disabled={state.isPoolBusy || nativeBalanceTooLow}
               >
-                {changeOrderFormShown ? 'Change order' : investLabel}
+                {investLabel}
               </Button>
             )}
-            {cancelCb && (
-              <Button variant="secondary" onClick={cancelCb}>
-                Cancel
-              </Button>
-            )}
-            {state.canChangeOrder && hasPendingOrder && (
-              <Button
-                onClick={() => {
-                  form.resetForm()
-                  form.setFieldValue('amount', pendingInvest, false)
-                  setChangeOrderFormShown(true)
-                }}
-                disabled={isCancelling || pool.epoch.status !== 'ongoing'}
-              >
-                Change order
-              </Button>
-            )}
+            {state.collectType && !claimDismissed ? (
+              <Claim type="invest" onDismiss={() => setClaimDismissed(true)} />
+            ) : null}
             {state.canCancelOrder && (
               <Button
                 onClick={() => actions.cancelInvest()}
