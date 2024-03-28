@@ -943,7 +943,10 @@ export function getPoolsModule(inst: Centrifuge) {
             if (options?.createType === 'propose') {
               const proposalTx = api.tx.utility.batchAll([
                 api.tx.preimage.notePreimage(tx.method.toHex()),
-                api.tx.democracy.propose({ Inline: tx.method.hash }, api.consts.democracy.minimumDeposit),
+                api.tx.democracy.propose(
+                  { Lookup: [tx.method.hash, tx.method.encodedLength] },
+                  api.consts.democracy.minimumDeposit
+                ),
               ])
               return inst.wrapSignAndSend(api, proposalTx, options)
             }
@@ -2653,7 +2656,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `,
       {
         poolId,
-        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
         to: to ? to.toISOString() : new Date().toISOString(),
       },
       false

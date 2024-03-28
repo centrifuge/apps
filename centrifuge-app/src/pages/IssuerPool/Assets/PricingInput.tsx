@@ -1,6 +1,5 @@
 import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
-import * as React from 'react'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
 import { usePool } from '../../../utils/usePools'
@@ -90,6 +89,14 @@ export function PricingInput({ poolId }: { poolId: string }) {
         min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
         // Max 5 years from now
         max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+      />
+      <FieldWithErrorMessage
+        as={NumberInput}
+        label={<Tooltips type="maturityExtensionDays" variant="secondary" label="Extension period*" />}
+        placeholder={0}
+        symbol="days"
+        name="pricing.maturityExtensionDays"
+        validate={validate.maturityExtensionDays}
       />
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
