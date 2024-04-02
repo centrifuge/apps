@@ -88,7 +88,6 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
   const isPending =
     !!state.pendingTransaction && ['creating', 'unconfirmed', 'pending'].includes(state.pendingTransaction?.status)
   const isRedeeming = state.pendingAction === 'redeem' && isPending
-  const isCancelling = state.pendingAction === 'cancelRedeem' && isPending
   const isApproving = state.pendingAction === 'approveTrancheToken' && isPending
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'

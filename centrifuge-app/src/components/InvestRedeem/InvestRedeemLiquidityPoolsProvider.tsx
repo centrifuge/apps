@@ -15,14 +15,12 @@ import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
 import { useLPEvents, useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
-import { useDebugFlags } from '../DebugFlags'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
-  const { allowInvestBelowMin } = useDebugFlags()
   const {
     evm: { isSmartContractWallet },
   } = useWallet()
