@@ -121,7 +121,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     if (currencyAddress.toLowerCase() === '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') {
       // USDC has custom version
       domainOrCurrency = { name: 'USD Coin', version: '2', chainId, verifyingContract: currencyAddress }
-    } else if (chainId === 5 || chainId === 84531 || chainId === 421613) {
+    } else if (chainId === 5 || chainId === 84531 || chainId === 421613 || chainId === 11155111) {
       // Assume on testnets the LP currencies are used which have custom domains
       domainOrCurrency = { name: 'Centrifuge', version: '1', chainId, verifyingContract: currencyAddress }
     }
