@@ -9,7 +9,7 @@ import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
 import { useLiquidityRewards } from '../LiquidityRewards/LiquidityRewardsContext'
 import { InvestRedeemContext } from './InvestRedeemProvider'
-import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as Props, InvestRedeemState } from './types'
+import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
 export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: Props) {
   const [account] = useSuitableAccounts({ poolId, poolRole: [{ trancheInvestor: trancheId }], proxyType: ['Invest'] })
