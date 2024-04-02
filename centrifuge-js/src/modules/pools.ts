@@ -1929,8 +1929,7 @@ export function getPoolsModule(inst: Centrifuge) {
           const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys).pipe(take(1))
 
           const $prices = combineLatest(
-            // @ts-expect-error
-            pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<
+            pools.map((p) => api.call.poolsApi.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<
               Codec[] | null
             >[]
           )
