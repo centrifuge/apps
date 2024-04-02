@@ -2021,8 +2021,10 @@ export function getPoolsModule(inst: Centrifuge) {
                       }, new BN(0)),
                       currency.decimals
                     )
-                    const rawPrice = rawPrices[poolIndex]?.[index]
-                    const tokenPrice = rawPrice ? new Price(hexToBN(rawPrice.toHex())) : Price.fromFloat(1)
+
+                    // @ts-expect-error
+                    const rawPrice = rawPrices?.[poolIndex]?.toPrimitive()?.[index]
+                    const tokenPrice = rawPrice ? new Price(rawPrice) : Price.fromFloat(1)
 
                     const currentRiskBuffer = subordinateTranchesValue.gtn(0)
                       ? Perquintill.fromFloat(subordinateTranchesValue.toDecimal().div(poolValue.toDecimal()))
