@@ -60,6 +60,7 @@ function NavManagement() {
         ...values.feed
           .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
           .map((f) => api.tx.oraclePriceFeed.feed({ Isin: f.Isin }, CurrencyBalance.fromFloat(f.value, 18))),
+        api.tx.oraclePriceCollection.updateCollection(poolId),
         api.tx.loans.updatePortfolioValuation(poolId),
       ]
       if (values.closeEpoch) {
