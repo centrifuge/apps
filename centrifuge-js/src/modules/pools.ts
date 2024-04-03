@@ -70,6 +70,7 @@ export type CurrencyMetadata = {
   isPermissioned: boolean
   additional?: any
   location?: any
+  displayName: string
 }
 
 const AdminRoleBits = {
@@ -2838,6 +2839,7 @@ export function getPoolsModule(inst: Centrifuge) {
             isPermissioned: value.additional.permissioned,
             additional: value.additional,
             location: value.location,
+            displayName: value.symbol.includes('USDC') ? 'USDC' : value.symbol.includes('FRAX') ? 'FRAX' : value.symbol,
           }
           return currency
         })
@@ -3866,6 +3868,7 @@ function getCurrency(api: ApiRx, currencyKey: RawCurrencyKey) {
         isPermissioned: value.additional.permissioned,
         additional: value.additional,
         location: value.location,
+        displayName: value.symbol.includes('USDC') ? 'USDC' : value.symbol.includes('FRAX') ? 'FRAX' : value.symbol,
       }
       return currency
     }),

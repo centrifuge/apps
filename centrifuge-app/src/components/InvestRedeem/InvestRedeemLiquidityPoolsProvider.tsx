@@ -163,7 +163,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     ).toDecimal(),
     minOrder,
     nativeBalance: evmNativeBalance?.toDecimal() ?? Dec(0),
-    poolCurrencies: lps?.map((lp) => ({ symbol: lp.currency.symbol })) ?? [],
+    poolCurrencies: lps?.map((lp) => ({ symbol: lp.currency.symbol, displayName: lp.currency.displayName })) ?? [],
     poolCurrencyBalance: poolCurBalance,
     poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,

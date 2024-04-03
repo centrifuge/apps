@@ -112,7 +112,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
               body={
                 <Stack gap={1}>
                   <div>
-                    Redeemed {state.poolCurrency?.symbol}:{' '}
+                    Redeemed {state.poolCurrency?.displayName}:{' '}
                     <Text fontWeight="bold">
                       {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
                     </Text>
@@ -143,16 +143,16 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                         actions.selectPoolCurrency(e.target.value)
                       }}
                       value={state.poolCurrency?.symbol}
-                      options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.symbol }))}
+                      options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.displayName }))}
                       style={{ textAlign: 'right' }}
                     />
                   ) : (
-                    state.poolCurrency?.symbol
+                    state.poolCurrency?.displayName
                   )
                 }
                 secondaryLabel={`${formatBalance(
                   roundDown(maxRedeemCurrency),
-                  state.poolCurrency?.symbol,
+                  state.poolCurrency?.displayName,
                   2
                 )} available`}
                 autoFocus={autoFocus}

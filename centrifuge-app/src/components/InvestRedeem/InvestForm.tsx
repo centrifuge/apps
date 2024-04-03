@@ -124,7 +124,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                   errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
                   label={`Amount ${
                     state.isFirstInvestment
-                      ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.symbol)})`
+                      ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.displayName)})`
                       : ''
                   }`}
                   disabled={isInvesting}
@@ -136,11 +136,11 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                           actions.selectPoolCurrency(e.target.value)
                         }}
                         value={state.poolCurrency?.symbol}
-                        options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.symbol }))}
+                        options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.displayName }))}
                         style={{ textAlign: 'right' }}
                       />
                     ) : (
-                      state.poolCurrency?.symbol
+                      state.poolCurrency?.displayName
                     )
                   }
                   secondaryLabel={
@@ -166,7 +166,10 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                 Token amount{' '}
                 <TextWithPlaceholder isLoading={state.isDataLoading} fontWeight={600} width={12} variance={0}>
                   {!state.tokenPrice.isZero() &&
-                    `~${formatBalance(Dec(form.values.amount).div(state.tokenPrice), state.trancheCurrency?.symbol)}`}
+                    `~${formatBalance(
+                      Dec(form.values.amount).div(state.tokenPrice),
+                      state.trancheCurrency?.displayName
+                    )}`}
                 </TextWithPlaceholder>
               </Text>
             </Box>

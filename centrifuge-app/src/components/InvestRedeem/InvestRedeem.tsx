@@ -170,7 +170,7 @@ function Header() {
               Position
             </TextWithPlaceholder>
             <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
-              {formatBalance(state.investmentValue, state.poolCurrency?.symbol, 2, 0)}
+              {formatBalance(state.investmentValue, state.poolCurrency?.displayName, 2, 0)}
             </TextWithPlaceholder>
           </Stack>
           {/*
