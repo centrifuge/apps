@@ -132,7 +132,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                 value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
                 errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
                 label="Amount"
-                disabled={isRedeeming || hasPendingOrder}
+                disabled={isRedeeming}
                 onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
                 onChange={(value) => form.setFieldValue('amount', value)}
                 currency={
@@ -181,7 +181,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
               <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
             ) : null}
             {preSubmitAction ? (
-              <Button {...preSubmitAction} disabled={hasPendingOrder} type="submit">
+              <Button {...preSubmitAction} type="submit">
                 Redeem
               </Button>
             ) : (

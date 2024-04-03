@@ -146,7 +146,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                   secondaryLabel={
                     state.poolCurrencyBalance &&
                     state.poolCurrency &&
-                    `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
+                    `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.displayName, 2)} balance`
                   }
                   onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
                   autoFocus={autoFocus}
