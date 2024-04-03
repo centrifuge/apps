@@ -125,7 +125,9 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                         actions.selectPoolCurrency(e.target.value)
                       }}
                       value={state.poolCurrency?.symbol}
-                      options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.displayName }))}
+                      options={state?.poolCurrencies
+                        .sort((_, b) => (b.displayName.toLowerCase().includes('usdc') ? 1 : -1))
+                        .map((c) => ({ value: c.symbol, label: c.displayName }))}
                       style={{ textAlign: 'right' }}
                     />
                   ) : (
