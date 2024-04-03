@@ -84,7 +84,7 @@ describe('Invest flows', () => {
     cy.connectWallet()
     cy.get(`a[aria-label="Go to ${pool.name} details"]`).click() // investor pool link
     cy.get(`button[aria-label="Invest in ${pool.tranches[0].id}"]`).click()
-    cy.get(`button[aria-label="Claim ${pool.investAmount}.00 ${pool.tranches[0].symbol}"]`).click()
+    cy.get(`button[aria-label="Claim ${pool.investAmount}.0 ${pool.tranches[0].symbol}"]`).click()
   })
   it('Investor: Redeem investment', () => {
     cy.visit('/pools', { failOnStatusCode: false })
@@ -93,7 +93,7 @@ describe('Invest flows', () => {
     cy.get(`a[aria-label="Go to ${pool.name} details"]`).click() // investor pool link
     cy.get(`button[aria-label="Invest in ${pool.tranches[0].id}"]`).click()
     cy.get('button[aria-label="Go to redeem tab"]').click()
-    cy.get(`button[aria-label="Claim ${pool.investAmount}.00 ${pool.tranches[0].symbol}"]`).click()
+    cy.get(`button[aria-label="Claim ${pool.investAmount}.0 ${pool.tranches[0].symbol}"]`).click()
     cy.confirmTransaction()
     cy.get('button[aria-label="Set max amount"]').click()
     cy.get('button[type="submit"]').click()
@@ -123,7 +123,7 @@ describe('Invest flows', () => {
     cy.connectWallet()
     cy.get(`button[aria-label="Invest in ${pool.tranches[0].id}"]`).click()
     cy.get('button[aria-label="Go to redeem tab"]').click()
-    cy.get(`button[aria-label="Claim ${pool.investAmount}.00 ${pool.poolCurrency}"]`).click()
+    cy.get(`button[aria-label="Claim ${pool.investAmount}.0 ${pool.poolCurrency}"]`).click()
     cy.confirmTransaction()
   })
 })
