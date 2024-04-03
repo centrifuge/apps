@@ -13,7 +13,6 @@ import { Claim } from './Claim'
 import { EpochBusy } from './EpochBusy'
 import { useInvestRedeem } from './InvestRedeemProvider'
 import { PendingOrder } from './PendingOrder'
-import { SuccessBanner } from './SuccessBanner'
 import { inputToNumber, validateNumberInput } from './utils'
 
 type RedeemFormProps = {
@@ -92,35 +91,18 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'
 
-  const preSubmitAction = () => {
-    if (state.needsTrancheTokenApproval(inputToNumber(form.values.amount))) {
-      return {
+  const preSubmitAction = state.needsTrancheTokenApproval(inputToNumber(form.values.amount))
+    ? {
         onClick: () =>
           actions.approveTrancheToken(TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)),
         loading: isApproving,
       }
-    }
-  }
+    : null
 
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
         <Stack gap={2}>
-          {state.order && !state.order.payoutCurrencyAmount.isZero() && (
-            <SuccessBanner
-              title="Redemption successful"
-              body={
-                <Stack gap={1}>
-                  <div>
-                    Redeemed {state.poolCurrency?.displayName}:{' '}
-                    <Text fontWeight="bold">
-                      {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
-                    </Text>
-                  </div>
-                </Stack>
-              }
-            />
-          )}
           <EpochBusy busy={calculatingOrders} />
 
           <Field name="amount" validate={positiveNumber()}>
@@ -180,11 +162,11 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
             {state.collectType && !claimDismissed ? (
               <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
             ) : null}
-            {preSubmitAction ? (
+            {!!preSubmitAction ? (
               <Button {...preSubmitAction} type="submit">
                 Redeem
               </Button>
-            ) : (
+            ) : !state.collectType || claimDismissed ? (
               <Button
                 type="submit"
                 loading={isRedeeming}
@@ -193,7 +175,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
               >
                 Redeem
               </Button>
-            )}
+            ) : null}
           </ButtonGroup>
         </Stack>
       </Form>
