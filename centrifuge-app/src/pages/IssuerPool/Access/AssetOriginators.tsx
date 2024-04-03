@@ -145,10 +145,13 @@ function AOForm({
             looksLike(location, getCurrencyLocation(pool.currency))) ||
           isLocalAsset
       ),
-    ...(Object.keys(parachainNames)
+    ...Object.keys(parachainNames)
       .map((pid) => ({ parachain: Number(pid) }))
-      .filter(() => pool.currency.additional?.transferability && 'xcm' in pool.currency.additional.transferability) ||
-      isLocalAsset),
+      .filter(
+        () =>
+          (pool.currency.additional?.transferability && 'xcm' in pool.currency.additional.transferability) ||
+          isLocalAsset
+      ),
   ]
 
   const { showPodAccountCreation } = useDebugFlags()
