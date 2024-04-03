@@ -6,6 +6,7 @@ export const currencies = {
     key: 'Dai',
     isPoolCurrency: false,
     isPermissioned: false,
+    displayName: 'DAI',
   },
   wCFG: {
     decimals: 18,
@@ -14,5 +15,6 @@ export const currencies = {
     key: 'wCFG',
     isPoolCurrency: false,
     isPermissioned: false,
+    displayName: 'wCFG',
   },
 }

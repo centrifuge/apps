@@ -13,7 +13,6 @@ import { Claim } from './Claim'
 import { EpochBusy } from './EpochBusy'
 import { useInvestRedeem } from './InvestRedeemProvider'
 import { PendingOrder } from './PendingOrder'
-import { SuccessBanner } from './SuccessBanner'
 import { inputToNumber, validateNumberInput } from './utils'
 
 type RedeemFormProps = {
@@ -92,35 +91,18 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
 
   const calculatingOrders = pool.epoch.status !== 'ongoing'
 
-  const preSubmitAction = () => {
-    if (state.needsTrancheTokenApproval(inputToNumber(form.values.amount))) {
-      return {
+  const preSubmitAction = state.needsTrancheTokenApproval(inputToNumber(form.values.amount))
+    ? {
         onClick: () =>
           actions.approveTrancheToken(TokenBalance.fromFloat(form.values.amount, state.trancheCurrency!.decimals)),
         loading: isApproving,
       }
-    }
-  }
+    : null
 
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
         <Stack gap={2}>
-          {state.order && !state.order.payoutCurrencyAmount.isZero() && (
-            <SuccessBanner
-              title="Redemption successful"
-              body={
-                <Stack gap={1}>
-                  <div>
-                    Redeemed {state.poolCurrency?.symbol}:{' '}
-                    <Text fontWeight="bold">
-                      {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
-                    </Text>
-                  </div>
-                </Stack>
-              }
-            />
-          )}
           <EpochBusy busy={calculatingOrders} />
 
           <Field name="amount" validate={positiveNumber()}>
@@ -132,7 +114,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                 value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
                 errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
                 label="Amount"
-                disabled={isRedeeming || hasPendingOrder}
+                disabled={isRedeeming}
                 onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
                 onChange={(value) => form.setFieldValue('amount', value)}
                 currency={
@@ -143,16 +125,18 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
                         actions.selectPoolCurrency(e.target.value)
                       }}
                       value={state.poolCurrency?.symbol}
-                      options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.symbol }))}
+                      options={state?.poolCurrencies
+                        .sort((_, b) => (b.displayName.toLowerCase().includes('usdc') ? 1 : -1))
+                        .map((c) => ({ value: c.symbol, label: c.displayName }))}
                       style={{ textAlign: 'right' }}
                     />
                   ) : (
-                    state.poolCurrency?.symbol
+                    state.poolCurrency?.displayName
                   )
                 }
                 secondaryLabel={`${formatBalance(
                   roundDown(maxRedeemCurrency),
-                  state.poolCurrency?.symbol,
+                  state.poolCurrency?.displayName,
                   2
                 )} available`}
                 autoFocus={autoFocus}
@@ -180,11 +164,11 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
             {state.collectType && !claimDismissed ? (
               <Claim type="redeem" onDismiss={() => setClaimDismissed(true)} />
             ) : null}
-            {preSubmitAction ? (
-              <Button {...preSubmitAction} disabled={hasPendingOrder} type="submit">
+            {!!preSubmitAction ? (
+              <Button {...preSubmitAction} type="submit">
                 Redeem
               </Button>
-            ) : (
+            ) : !state.collectType || claimDismissed ? (
               <Button
                 type="submit"
                 loading={isRedeeming}
@@ -193,7 +177,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
               >
                 Redeem
               </Button>
-            )}
+            ) : null}
           </ButtonGroup>
         </Stack>
       </Form>

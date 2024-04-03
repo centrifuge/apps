@@ -115,62 +115,77 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
               {state.nativeCurrency && `${state.nativeCurrency.symbol} balance is too low.`}
             </InlineFeedback>
           )}
-          <Field name="amount" validate={positiveNumber()}>
-            {({ field, meta }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  onChange={(value) => form.setFieldValue('amount', value)}
-                  errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
-                  label={`Amount ${
-                    state.isFirstInvestment
-                      ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.symbol)})`
-                      : ''
-                  }`}
-                  disabled={isInvesting}
-                  currency={
-                    state?.poolCurrencies.length > 1 ? (
-                      <SelectInner
-                        {...field}
-                        onChange={(e) => {
-                          actions.selectPoolCurrency(e.target.value)
-                        }}
-                        value={state.poolCurrency?.symbol}
-                        options={state?.poolCurrencies.map((c) => ({ value: c.symbol, label: c.symbol }))}
-                        style={{ textAlign: 'right' }}
-                      />
-                    ) : (
-                      state.poolCurrency?.symbol
-                    )
-                  }
-                  secondaryLabel={
-                    state.poolCurrencyBalance &&
-                    state.poolCurrency &&
-                    `${formatBalance(state.poolCurrencyBalanceWithPending, state.poolCurrency.symbol, 2)} balance`
-                  }
-                  onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
-                  autoFocus={autoFocus}
-                />
-              )
-            }}
-          </Field>
-          {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
-            <Text variant="label2" color="statusOk">
-              Full amount covered by investment capacity ✓
-            </Text>
-          )}
+          {!state.collectType || claimDismissed ? (
+            <>
+              <Field name="amount" validate={positiveNumber()}>
+                {({ field, meta }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      onChange={(value) => form.setFieldValue('amount', value)}
+                      errorMessage={
+                        meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined
+                      }
+                      label={`Amount ${
+                        state.isFirstInvestment
+                          ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.displayName)})`
+                          : ''
+                      }`}
+                      disabled={isInvesting}
+                      currency={
+                        state?.poolCurrencies.length > 1 ? (
+                          <SelectInner
+                            {...field}
+                            onChange={(e) => {
+                              actions.selectPoolCurrency(e.target.value)
+                            }}
+                            value={state.poolCurrency?.symbol}
+                            options={state?.poolCurrencies
+                              .sort((_, b) => (b.displayName.toLowerCase().includes('usdc') ? 1 : -1))
+                              .map((c) => ({ value: c.symbol, label: c.displayName }))}
+                            style={{ textAlign: 'right' }}
+                          />
+                        ) : (
+                          state.poolCurrency?.displayName
+                        )
+                      }
+                      secondaryLabel={
+                        state.poolCurrencyBalance &&
+                        state.poolCurrency &&
+                        `${formatBalance(
+                          state.poolCurrencyBalanceWithPending,
+                          state.poolCurrency.displayName,
+                          2
+                        )} balance`
+                      }
+                      onSetMax={() => form.setFieldValue('amount', state.poolCurrencyBalanceWithPending)}
+                      autoFocus={autoFocus}
+                    />
+                  )
+                }}
+              </Field>
+              {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
+                <Text variant="label2" color="statusOk">
+                  Full amount covered by investment capacity ✓
+                </Text>
+              )}
 
-          {inputToNumber(form.values.amount) > 0 && (
-            <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="input">
-              <Text variant="body3">
-                Token amount{' '}
-                <TextWithPlaceholder isLoading={state.isDataLoading} fontWeight={600} width={12} variance={0}>
-                  {!state.tokenPrice.isZero() &&
-                    `~${formatBalance(Dec(form.values.amount).div(state.tokenPrice), state.trancheCurrency?.symbol)}`}
-                </TextWithPlaceholder>
-              </Text>
-            </Box>
-          )}
+              {inputToNumber(form.values.amount) > 0 && (
+                <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="input">
+                  <Text variant="body3">
+                    Token amount{' '}
+                    <TextWithPlaceholder isLoading={state.isDataLoading} fontWeight={600} width={12} variance={0}>
+                      {!state.tokenPrice.isZero() &&
+                        `~${formatBalance(
+                          Dec(form.values.amount).div(state.tokenPrice),
+                          state.trancheCurrency?.displayName
+                        )}`}
+                    </TextWithPlaceholder>
+                  </Text>
+                </Box>
+              )}
+            </>
+          ) : null}
           <Shelf>
             {state.isFirstInvestment && (
               <InlineFeedback>
@@ -190,20 +205,24 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
               <Button onClick={form.submitForm} disabled={isCancelling || pool.epoch.status !== 'ongoing'}>
                 Change order
               </Button>
-            ) : (
+            ) : !state.collectType || claimDismissed ? (
               <Button
                 type="submit"
                 loading={isInvesting}
                 loadingMessage={loadingMessage}
-                disabled={state.isPoolBusy || nativeBalanceTooLow}
+                disabled={
+                  state.isPoolBusy ||
+                  nativeBalanceTooLow ||
+                  (state.poolCurrency?.symbol.toLowerCase().includes('lp') && hasPendingOrder)
+                }
               >
                 {investLabel}
               </Button>
-            )}
+            ) : null}
             {state.collectType && !claimDismissed ? (
               <Claim type="invest" onDismiss={() => setClaimDismissed(true)} />
             ) : null}
-            {state.canCancelOrder && (
+            {state.canCancelOrder && !state.collectType && (
               <Button
                 onClick={() => actions.cancelInvest()}
                 loading={isCancelling}

@@ -70,6 +70,7 @@ export type CurrencyMetadata = {
   isPermissioned: boolean
   additional?: any
   location?: any
+  displayName: string
 }
 
 const AdminRoleBits = {
@@ -1929,8 +1930,7 @@ export function getPoolsModule(inst: Centrifuge) {
           const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys).pipe(take(1))
 
           const $prices = combineLatest(
-            // @ts-expect-error
-            pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<
+            pools.map((p) => api.call.poolsApi.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<
               Codec[] | null
             >[]
           )
@@ -2022,8 +2022,10 @@ export function getPoolsModule(inst: Centrifuge) {
                       }, new BN(0)),
                       currency.decimals
                     )
-                    const rawPrice = rawPrices[poolIndex]?.[index]
-                    const tokenPrice = rawPrice ? new Price(hexToBN(rawPrice.toHex())) : Price.fromFloat(1)
+
+                    // @ts-expect-error
+                    const rawPrice = rawPrices?.[poolIndex]?.toPrimitive()?.[index]
+                    const tokenPrice = rawPrice ? new Price(rawPrice) : Price.fromFloat(1)
 
                     const currentRiskBuffer = subordinateTranchesValue.gtn(0)
                       ? Perquintill.fromFloat(subordinateTranchesValue.toDecimal().div(poolValue.toDecimal()))
@@ -2837,6 +2839,7 @@ export function getPoolsModule(inst: Centrifuge) {
             isPermissioned: value.additional.permissioned,
             additional: value.additional,
             location: value.location,
+            displayName: value.symbol.includes('USDC') ? 'USDC' : value.symbol.includes('FRAX') ? 'FRAX' : value.symbol,
           }
           return currency
         })
@@ -3865,6 +3868,7 @@ function getCurrency(api: ApiRx, currencyKey: RawCurrencyKey) {
         isPermissioned: value.additional.permissioned,
         additional: value.additional,
         location: value.location,
+        displayName: value.symbol.includes('USDC') ? 'USDC' : value.symbol.includes('FRAX') ? 'FRAX' : value.symbol,
       }
       return currency
     }),
