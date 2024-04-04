@@ -710,8 +710,9 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         total: data.reserve,
       },
       nav: {
-        latest: data.netAssetValue,
         lastUpdated: new Date().toISOString(),
+        total: data.netAssetValue,
+        aum: data.netAssetValue,
       },
       createdAt: null,
       isInitialised: true,
