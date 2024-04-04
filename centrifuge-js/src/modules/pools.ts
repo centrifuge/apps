@@ -349,8 +349,9 @@ export type Pool = {
     status: 'submissionPeriod' | 'challengePeriod' | 'executionPeriod' | 'ongoing'
   }
   nav: {
-    latest: CurrencyBalance
     lastUpdated: string
+    total: CurrencyBalance
+    aum: CurrencyBalance
   }
   parameters: {
     minEpochTime: number
@@ -1271,7 +1272,7 @@ export function getPoolsModule(inst: Centrifuge) {
           minRiskBuffer: tranche.minRiskBuffer,
         }))
         const poolState = {
-          netAssetValue: pool.nav.latest,
+          netAssetValue: pool.nav.aum,
           reserve: pool.reserve.total,
           tranches: solutionTranches,
           maxReserve: pool.reserve.max,
@@ -1973,9 +1974,6 @@ export function getPoolsModule(inst: Centrifuge) {
                 const lastUpdatedNav = new Date((portfolioValuationData?.lastUpdated ?? 0) * 1000).toISOString()
                 // @ts-expect-error
                 const rawNav = rawNavs && rawNavs[poolIndex]?.toJSON()
-                const totalNavAum = rawNav?.navAum
-                  ? new CurrencyBalance(hexToBN(rawNav.navAum), currency.decimals)
-                  : new CurrencyBalance(0, currency.decimals)
 
                 const mappedPool: Pool = {
                   id: poolId,
@@ -2078,8 +2076,13 @@ export function getPoolsModule(inst: Centrifuge) {
                     challengeTime: api.consts.poolSystem.challengeTime.toJSON() as number, // in blocks
                   },
                   nav: {
-                    latest: totalNavAum,
                     lastUpdated: lastUpdatedNav,
+                    total: rawNav?.total
+                      ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)
+                      : new CurrencyBalance(0, currency.decimals),
+                    aum: rawNav?.navAum
+                      ? new CurrencyBalance(hexToBN(rawNav.navAum), currency.decimals)
+                      : new CurrencyBalance(0, currency.decimals),
                   },
                   value: rawNav?.total
                     ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)

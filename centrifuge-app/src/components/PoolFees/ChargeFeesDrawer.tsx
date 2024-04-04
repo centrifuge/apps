@@ -25,7 +25,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const feeIndex = params.get('charge')
   const feeMetadata = feeIndex ? poolMetadata?.pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
   const feeChainData = feeIndex ? pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
-  const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.latest.toDecimal()).div(100)
+  const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.aum.toDecimal()).div(100)
   const [updateCharge, setUpdateCharge] = React.useState(false)
   const address = useAddress()
   const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address

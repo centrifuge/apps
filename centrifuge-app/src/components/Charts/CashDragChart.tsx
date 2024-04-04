@@ -1,5 +1,4 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
@@ -30,7 +29,7 @@ export default function CashDragChart() {
     }) || []
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
-  const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
+  const todayAssetValue = pool?.nav.aum.toDecimal().toNumber() || 0
   const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
   const cashDrag = (todayReserve / (todayAssetValue + todayReserve)) * 100
   const today: ChartData = {
