@@ -79,7 +79,7 @@ export function Root() {
           <CentrifugeProvider config={centConfig}>
             <Router>
               <DemoBanner />
-              <SupportedBrowserBanner />
+
               <WalletProvider
                 evmChains={evmChains}
                 subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
@@ -88,6 +88,7 @@ export function Root() {
                 showTestNets={debugState.showTestNets as any}
                 showFinoa={debugState.showFinoa as any}
               >
+                <SupportedBrowserBanner />
                 <OnboardingAuthProvider>
                   <OnboardingProvider>
                     <DebugFlags onChange={(state) => setDebugState(state)}>
