@@ -68,6 +68,9 @@ export type SwapOrder = {
   buyCurrency: CurrencyMetadata
   sellCurrency: CurrencyMetadata
   minFulfillmentAmount: CurrencyBalance
+  isMuxSwap: boolean
+  isMuxDeposit: boolean
+  isMuxBurn: boolean
 }
 
 export function Orders({ buyOrSell }: OrdersProps) {
@@ -159,7 +162,25 @@ export function Orders({ buyOrSell }: OrdersProps) {
             const buyCurrency = findCurrency(currencies!, currencyIn)!
             const sellCurrency = findCurrency(currencies!, currencyOut)!
             const sellAmount = new CurrencyBalance(order.amountOut, sellCurrency!.decimals)
-            const price = 'market' in order.ratio ? null : new Price(order.ratio.custom)
+
+            const isMaybeMuxDeposit = typeof buyCurrency.key !== 'string' && 'LocalAsset' in buyCurrency.key
+            const isMaybeMuxBurn = typeof sellCurrency.key !== 'string' && 'LocalAsset' in sellCurrency.key
+            const isMaybeMuxSwap = isMaybeMuxBurn || isMaybeMuxDeposit
+            const localCurrency = isMaybeMuxDeposit ? buyCurrency : sellCurrency
+            const otherCurrency = isMaybeMuxDeposit ? sellCurrency : buyCurrency
+            const isMuxSwap =
+              isMaybeMuxSwap &&
+              String((localCurrency.key as any).LocalAsset) === String(otherCurrency.additional?.localRepresentation)
+            const isMuxBurn = isMuxSwap && isMaybeMuxBurn
+            const isMuxDeposit = isMuxSwap && isMaybeMuxDeposit
+            console.log('isMuxSwap', isMuxSwap)
+
+            const price = isMuxSwap
+              ? Price.fromFloat(1)
+              : 'market' in order.ratio
+              ? null
+              : new Price(order.ratio.custom)
+
             return {
               id: String(order.orderId),
               account: addressToHex(order.placingAccount),
@@ -170,6 +191,9 @@ export function Orders({ buyOrSell }: OrdersProps) {
               price,
               buyCurrency,
               sellCurrency,
+              isMuxSwap,
+              isMuxBurn,
+              isMuxDeposit,
             }
           })
         }),
@@ -210,18 +234,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
   const [account] = useSuitableAccounts({})
   const utils = useCentrifugeUtils()
 
-  const isMaybeMuxDeposit = typeof order.buyCurrency.key !== 'string' && 'LocalAsset' in order.buyCurrency.key
-  const isMaybeMuxBurn = typeof order.sellCurrency.key !== 'string' && 'LocalAsset' in order.sellCurrency.key
-  const isMaybeMuxSwap = isMaybeMuxBurn || isMaybeMuxDeposit
-  const localCurrency = isMaybeMuxDeposit ? order.buyCurrency : order.sellCurrency
-  const otherCurrency = isMaybeMuxDeposit ? order.sellCurrency : order.buyCurrency
-  const isMuxSwap =
-    isMaybeMuxSwap &&
-    String((localCurrency.key as any).LocalAsset) === String(otherCurrency.additional?.localRepresentation)
-  const isMuxBurn = isMuxSwap && isMaybeMuxBurn
-  const isMuxDeposit = isMuxSwap && isMaybeMuxDeposit
-
-  const balances = useBalances(isMuxBurn ? TOKENMUX_PALLET_ACCOUNTID : account?.actingAddress)
+  const balances = useBalances(order.isMuxBurn ? TOKENMUX_PALLET_ACCOUNTID : account?.actingAddress)
   const api = useCentrifugeApi()
   const consts = useCentrifugeConsts()
   const getNetworkName = useGetNetworkName()
@@ -247,7 +260,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
     (cent) => (args: [transferTo: string | null, amount: CurrencyBalance | null], options) => {
       const [transferTo, amount] = args
       let fn = api.tx.orderBook.fillOrder
-      if (isMuxSwap) {
+      if (order.isMuxSwap) {
         fn = api.tx.tokenMux.matchSwap
       }
       let swapTx = fn(order.id, order.sellAmount.toString())
@@ -316,7 +329,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
 
   if (!account) return null
 
-  const balanceLow = !isMuxDeposit && balanceDec.lt(orderBuyDec)
+  const balanceLow = !order.isMuxDeposit && balanceDec.lt(orderBuyDec)
   const { isTransferEnabled, isPartialEnabled } = form.values
   const disabled = isPartialEnabled ? false : balanceLow
 
@@ -325,11 +338,20 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
       <FormikProvider value={form}>
         <Form>
           <Stack gap={3}>
-            <Stack alignSelf="center" gap={5}>
+            <Stack alignSelf={order.isMuxSwap ? 'start' : 'center'} gap={5}>
               <Shelf alignItems="center" alignSelf="center" gap={4} flexWrap="nowrap" mb={2}>
                 <Text variant="heading3" style={{ position: 'relative' }}>
-                  <Text fontSize={24}>{formatBalance(order.buyAmount)}</Text> {order.buyCurrency.symbol}
-                  {!isMuxDeposit && (
+                  {order.isMuxSwap ? (
+                    <>
+                      {order.isMuxDeposit ? 'Depositing' : 'Redeeming'} {formatBalance(order.buyAmount)}{' '}
+                      {order.isMuxDeposit ? order.sellCurrency.symbol : order.buyCurrency.symbol} on Centrifuge
+                    </>
+                  ) : (
+                    <>
+                      <Text fontSize={24}>{formatBalance(order.buyAmount)}</Text> {order.buyCurrency.symbol}
+                    </>
+                  )}
+                  {!order.isMuxDeposit && (
                     <Box position="absolute" top="100%" left={0}>
                       <Text
                         variant="label2"
@@ -341,12 +363,17 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                     </Box>
                   )}
                 </Text>
-                <IconArrowRight />
-                <Text variant="heading3">
-                  <Text fontSize={24}>{formatBalance(order.sellAmount)}</Text> {order.sellCurrency.symbol}
-                </Text>
+                {!order.isMuxSwap && (
+                  <>
+                    {' '}
+                    <IconArrowRight />
+                    <Text variant="heading3">
+                      <Text fontSize={24}>{formatBalance(order.sellAmount)}</Text> {order.sellCurrency.symbol}
+                    </Text>
+                  </>
+                )}
               </Shelf>
-              {balanceLow && !isMuxSwap && (
+              {balanceLow && !order.isMuxSwap && (
                 <TextInput
                   label={
                     orderBuyCurrencyLocation
@@ -369,7 +396,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
               )}
             </Stack>
 
-            {orderBuyDec.gt(minFulfillDec) && !isMuxDeposit && (
+            {orderBuyDec.gt(minFulfillDec) && !order.isMuxDeposit && (
               <Card p={2}>
                 <Stack gap={2}>
                   <Field type="checkbox" name="isPartialEnabled" as={Checkbox} label="Fulfill order partially" />
@@ -407,7 +434,7 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
               </Card>
             )}
 
-            {orderSellCurrencyLocation && !isMuxSwap && (
+            {orderSellCurrencyLocation && !order.isMuxSwap && (
               <Card p={2}>
                 <Stack gap={2}>
                   <Field
@@ -433,7 +460,8 @@ export function SwapAndSendDialog({ open, onClose, order }: { open: boolean; onC
                 Cancel
               </Button>
               <Button type="submit" disabled={disabled} loading={isLoading}>
-                Swap {isTransferEnabled && 'and transfer'}
+                {order.isMuxBurn ? 'Redeem' : order.isMuxDeposit ? 'Deposit' : 'Swap'}{' '}
+                {isTransferEnabled && 'and transfer'}
               </Button>
             </ButtonGroup>
           </Stack>
