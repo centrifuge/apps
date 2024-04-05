@@ -67,8 +67,8 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
       let interest: BN = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
       let principal = new BN(0)
 
-      // Calculate interest from the time the loan was fetched until 5 minutes in the future
-      const time = (Date.now() - loan.fetchedAt.getTime()) / 1000 + 5 * 60
+      // Calculate interest from the time the loan was fetched until now
+      const time = Date.now() - loan.fetchedAt.getTime()
       const margin = CurrencyBalance.fromFloat(
         loan.outstandingPrincipal
           .toDecimal()
