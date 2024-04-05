@@ -14,9 +14,18 @@ jobs:
       - name: Check workflow status
         id: check
         run: |
-          status=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/runs" \
-            | jq -r '.workflow_runs[] | select(.name=="Centrifuge App") | .status')
+          status=""
+          count=0
+          while [[ "$status" != "completed" && $count -lt 100 ]]; do
+            status=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs" \
+              | jq -r '.workflow_runs[] | select(.name=="Centrifuge App") | .status')
+            if [[ "$status" != "completed" ]]; then
+              echo "Workflow not completed, waiting..."
+              sleep 60
+              count=$((count+1))
+            fi
+          done
           echo "::set-output name=status::$status"
   cypress-run:
     needs: check-workflow-status
