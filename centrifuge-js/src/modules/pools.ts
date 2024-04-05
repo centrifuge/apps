@@ -3080,7 +3080,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.priceOracle.NewFeedData.is(event) ||
+            api.events.oraclePriceFeed.Fed.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
@@ -3089,10 +3089,9 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.loans.Closed.is(event) ||
             api.events.loans.PortfolioValuationUpdated.is(event)
         )
-
         if (!event) return false
-
         const { poolId: eventPoolId } = (event.toHuman() as any).event.data
+        if (!eventPoolId) return true
         return eventPoolId.replace(/\D/g, '') === poolId
       })
     )
