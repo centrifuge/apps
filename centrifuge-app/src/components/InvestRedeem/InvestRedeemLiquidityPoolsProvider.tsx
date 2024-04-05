@@ -15,14 +15,12 @@ import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
 import { useLPEvents, useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
-import { useDebugFlags } from '../DebugFlags'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
 
 export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children }: Props) {
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
-  const { allowInvestBelowMin } = useDebugFlags()
   const {
     evm: { isSmartContractWallet },
   } = useWallet()
@@ -165,7 +163,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     ).toDecimal(),
     minOrder,
     nativeBalance: evmNativeBalance?.toDecimal() ?? Dec(0),
-    poolCurrencies: lps?.map((lp) => ({ symbol: lp.currency.symbol })) ?? [],
+    poolCurrencies: lps?.map((lp) => ({ symbol: lp.currency.symbol, displayName: lp.currency.displayName })) ?? [],
     poolCurrencyBalance: poolCurBalance,
     poolCurrencyBalanceWithPending: poolCurBalanceCombined,
     trancheBalance,
@@ -188,8 +186,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     needsPoolCurrencyApproval: (amount) =>
       lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
     needsTrancheTokenApproval: () => false,
-    canChangeOrder: !!allowInvestBelowMin,
-    canCancelOrder: true,
+    canChangeOrder: false, // LP contracts don't suuport changing orders yet, TypeError: contract(...).decreaseDepositRequest is not a function
+    canCancelOrder: false, // LP contracts don't suuport canceling orders yet
     pendingAction,
     pendingTransaction,
     statusMessage,

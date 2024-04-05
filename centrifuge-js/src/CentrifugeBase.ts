@@ -119,20 +119,7 @@ const parachainTypes = {
 }
 
 // NOTE: Should never be extended due to deprecation of RPC in favor of RtAPI calls
-const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
-  pools: {
-    trancheTokenPrices: {
-      description: 'Retrieve prices for all tranches',
-      params: [
-        {
-          name: 'pool_id',
-          type: 'u64',
-        },
-      ],
-      type: 'Vec<u128>',
-    },
-  },
-}
+const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {}
 
 // NOTE: Runtime API calls must be in snake case (as defined in rust)
 // However, RPCs are usually in camel case
@@ -140,7 +127,16 @@ const parachainRuntimeApi: DefinitionsCall = {
   PoolsApi: [
     {
       methods: {
-        tranche_token_prices: parachainRpcMethods.pools.trancheTokenPrices,
+        tranche_token_prices: {
+          description: 'Retrieve prices for all tranches',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Option<Vec<u128>>',
+        },
         nav: {
           description: 'Retrieve the net asset value of a pool',
           params: [

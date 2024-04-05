@@ -68,7 +68,7 @@ export function PoolDetailAssets() {
   const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
     {
       label: <Tooltips type="totalNav" />,
-      value: formatBalance(pool.nav.latest.toDecimal(), pool.currency.symbol),
+      value: formatBalance(pool.nav.total.toDecimal(), pool.currency.symbol),
     },
     {
       label: (

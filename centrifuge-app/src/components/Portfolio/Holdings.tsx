@@ -204,6 +204,7 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
               key: 'centrifuge',
               isPoolCurrency: false,
               isPermissioned: false,
+              displayName: centBalances?.native.currency.symbol ?? 'CFG',
             },
             poolId: '',
             trancheId: '',

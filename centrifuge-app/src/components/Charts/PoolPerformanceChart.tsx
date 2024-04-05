@@ -71,7 +71,7 @@ function PoolPerformanceChart() {
     return <Text variant="body2">No data available</Text>
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
-  const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
+  const todayAssetValue = pool?.nav.aum.toDecimal().toNumber() || 0
   const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
 
   const chartData = data.slice(-rangeNumber)
