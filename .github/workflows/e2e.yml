@@ -2,11 +2,25 @@ name: Synpress tests
 
 on:
   pull_request:
-    types: [closed]
-    branches: [main]
+    # types: [closed]
+    branches: [main, wait-for-deploy-e2e]
 
 jobs:
+  check-workflow-status:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.check.outputs.status }}
+    steps:
+      - name: Check workflow status
+        id: check
+        run: |
+          status=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs" \
+            | jq -r '.workflow_runs[] | select(.name=="Centrifuge App") | .status')
+          echo "::set-output name=status::$status"
   cypress-run:
+    needs: check-workflow-status
+    if: ${{ needs.check-workflow-status.outputs.status == 'completed' }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read

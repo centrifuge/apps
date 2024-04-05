@@ -50,6 +50,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
   })
 
   const pendingInvest = state.order?.remainingInvestCurrency ?? Dec(0)
+  console.log('🚀 ~ pendingInvest:', pendingInvest.toString())
   const hasPendingOrder = !pendingInvest.isZero()
 
   const loadingMessage = state.pendingTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
