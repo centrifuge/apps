@@ -144,7 +144,7 @@ const mainnetConfig = {
   chainId: 1,
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmVL3N8A1LB6EoWbnH1qDn4XBCWHcL74gfRMJprzstPK8Z', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmRzbEpwFnJE8M4URQEA9JB7pCbh98XnbowXXH8tipoPL3', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
 }
 
@@ -164,8 +164,6 @@ export const parachainIcons: Record<number, string> = {
   1000: assetHubLogo,
 }
 
-const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
-
 export const evmChains: EvmChains = {
   1: {
     name: 'Ethereum',
@@ -174,7 +172,7 @@ export const evmChains: EvmChains = {
       symbol: 'ETH',
       decimals: 18,
     },
-    urls: [`https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
     iconUrl: ethereumLogo,
     isTestnet: false,
   },
@@ -185,7 +183,7 @@ export const evmChains: EvmChains = {
       symbol: 'görETH',
       decimals: 18,
     },
-    urls: [`https://eth-goerli.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://goerli.infura.io/v3/${infuraKey}`],
     iconUrl: goerliLogo,
     isTestnet: true,
   },
