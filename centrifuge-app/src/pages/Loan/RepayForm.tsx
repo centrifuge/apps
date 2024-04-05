@@ -1,4 +1,4 @@
-import { ActiveLoan, CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, Rate, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
@@ -63,14 +63,25 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const outstandingPrincipal = loan.totalBorrowed.sub(loan.repaid.principal)
-      let amount: BN = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      let interest = new BN(0)
-      if (amount.gt(outstandingPrincipal)) {
-        interest = amount.sub(outstandingPrincipal)
-        amount = outstandingPrincipal
+      // Pay the interest with a small margin first, then the principal
+      let interest: BN = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
+      let principal = new BN(0)
+
+      // Calculate interest from the time the loan was fetched until 5 minutes in the future
+      const time = (Date.now() - loan.fetchedAt.getTime()) / 1000 + 5 * 60
+      const margin = CurrencyBalance.fromFloat(
+        loan.outstandingPrincipal
+          .toDecimal()
+          .mul(Rate.fractionFromApr(loan.pricing.interestRate.toDecimal()).toDecimal())
+          .mul(time),
+        pool.currency.decimals
+      )
+      const interestWithMargin = loan.outstandingInterest.add(margin)
+      if (interest.gt(interestWithMargin)) {
+        principal = interest.sub(interestWithMargin)
+        interest = interestWithMargin
       }
-      doRepayTransaction([loan.poolId, loan.id, amount, interest, new BN(0)], { account, forceProxyType: 'Borrow' })
+      doRepayTransaction([loan.poolId, loan.id, principal, interest, new BN(0)], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,

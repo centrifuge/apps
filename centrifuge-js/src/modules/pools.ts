@@ -464,6 +464,7 @@ export type TinlakeLoan = {
 // transformed type for UI
 export type CreatedLoan = {
   status: 'Created'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -481,6 +482,7 @@ export type CreatedLoan = {
 // transformed type for UI
 export type ActiveLoan = {
   status: 'Active'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -511,6 +513,7 @@ export type ActiveLoan = {
 // transformed type for UI
 export type ClosedLoan = {
   status: 'Closed'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -3184,6 +3187,7 @@ export function getPoolsModule(inst: Centrifuge) {
               ? pricingInfo.valuationMethod.discountedCashFlow
               : undefined
           return {
+            fetchedAt: new Date(),
             asset: {
               collectionId: collectionId.toString(),
               nftId: nftId.toString(),
