@@ -18,12 +18,13 @@ const Root = styled(Text)`
 
 type PoolLinkProps = {
   pool: Pool
+  path?: string
 }
 
-export function PoolLink({ pool }: PoolLinkProps) {
-  const match = useRouteMatch<{ pid: string }>('/issuer/:pid')
+export function PoolLink({ pool, path = 'issuer' }: PoolLinkProps) {
+  const match = useRouteMatch<{ pid: string }>(`/${path}/:pid`)
   const { data: metadata } = usePoolMetadata(pool)
-  const to = `/issuer/${pool.id}`
+  const to = `/${path}/${pool.id}`
   return (
     <Root
       forwardedAs={Link}
