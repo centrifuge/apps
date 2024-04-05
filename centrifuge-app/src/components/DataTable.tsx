@@ -44,6 +44,7 @@ export type DataTableProps<T = any> = {
    * summary row is not included in sorting
    */
   summary?: T
+  footer?: React.ReactNode
   pageSize?: number
   page?: number
 } & GroupedProps
@@ -102,6 +103,7 @@ export const DataTable = <T extends Record<string, any>>({
   defaultSortKey,
   hoverable = undefined,
   summary,
+  footer,
   groupIndex,
   lastGroupIndex,
   defaultSortOrder = 'desc',
@@ -194,6 +196,7 @@ export const DataTable = <T extends Record<string, any>>({
           ))}
         </DataRow>
       )}
+      {footer}
       {groupIndex != null && groupIndex !== lastGroupIndex && (
         <Row>
           <DataCol />
@@ -221,7 +224,7 @@ const HeaderRow = styled(Row)<any>(
   })
 )
 
-const DataRow = styled(Row)<any>`
+export const DataRow = styled(Row)<any>`
   ${({ hoverable, as: comp }) =>
     css({
       width: '100%',
@@ -247,7 +250,7 @@ const DataRow = styled(Row)<any>`
     })}
 `
 
-const DataCol = styled(Text)<{ align: Column['align'] }>`
+export const DataCol = styled(Text)<{ align: Column['align'] }>`
   background: initial;
   border: none;
   padding: 8px 16px;
