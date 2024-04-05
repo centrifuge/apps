@@ -1,7 +1,9 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Banner, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 
 export const SupportedBrowserBanner = () => {
+  const wallet = useWallet()
   const storageKey = 'browser-banner-seen'
   const isSupported = navigator.userAgent.indexOf('Chrome') > -1
   const [isOpen, setIsOpen] = React.useState(false)
@@ -15,7 +17,7 @@ export const SupportedBrowserBanner = () => {
     setIsOpen(false)
   }
 
-  if (isSupported) {
+  if (isSupported || !wallet.connectedNetwork) {
     return null
   }
 
