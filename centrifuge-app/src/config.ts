@@ -164,6 +164,8 @@ export const parachainIcons: Record<number, string> = {
   1000: assetHubLogo,
 }
 
+const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
+
 export const evmChains: EvmChains = {
   1: {
     name: 'Ethereum',
