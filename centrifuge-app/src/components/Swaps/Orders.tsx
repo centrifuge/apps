@@ -163,17 +163,15 @@ export function Orders({ buyOrSell }: OrdersProps) {
             const sellCurrency = findCurrency(currencies!, currencyOut)!
             const sellAmount = new CurrencyBalance(order.amountOut, sellCurrency!.decimals)
 
-            const isMaybeMuxDeposit = typeof buyCurrency.key !== 'string' && 'LocalAsset' in buyCurrency.key
-            const isMaybeMuxBurn = typeof sellCurrency.key !== 'string' && 'LocalAsset' in sellCurrency.key
-            const isMaybeMuxSwap = isMaybeMuxBurn || isMaybeMuxDeposit
-            const localCurrency = isMaybeMuxDeposit ? buyCurrency : sellCurrency
-            const otherCurrency = isMaybeMuxDeposit ? sellCurrency : buyCurrency
-            const isMuxSwap =
-              isMaybeMuxSwap &&
-              String((localCurrency.key as any).LocalAsset) === String(otherCurrency.additional?.localRepresentation)
-            const isMuxBurn = isMuxSwap && isMaybeMuxBurn
-            const isMuxDeposit = isMuxSwap && isMaybeMuxDeposit
-            console.log('isMuxSwap', isMuxSwap)
+            const isMuxBurn =
+              typeof sellCurrency.key !== 'string' &&
+              'LocalAsset' in sellCurrency.key &&
+              String(sellCurrency.key.LocalAsset) === String(buyCurrency.additional?.localRepresentation)
+            const isMuxDeposit =
+              typeof buyCurrency.key !== 'string' &&
+              'LocalAsset' in buyCurrency.key &&
+              String(buyCurrency.key.LocalAsset) === String(sellCurrency.additional?.localRepresentation)
+            const isMuxSwap = isMuxBurn || isMuxDeposit
 
             const price = isMuxSwap
               ? Price.fromFloat(1)
