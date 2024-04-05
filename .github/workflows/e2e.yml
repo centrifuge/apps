@@ -21,7 +21,7 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/actions/runs")
             echo $response
             status=$(echo $response | jq -r '.workflow_runs[] | select(.name=="Centrifuge App") | .status')
-            if [$count -eq 10]; then
+            if [ $count -eq 10 ]; then
               echo "Workflow not completed in 100 minutes, exiting..."
               exit 1
             fi
