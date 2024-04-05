@@ -163,7 +163,7 @@ const routes: RouteProps[] = [
   { path: '/multisig-approval', component: MultisigApprovalPage, exact: true },
   { path: '/swaps', component: SwapsPage },
   { path: '/utils/address-format-converter', component: ConvertAddressPage },
-  { path: '/nav-management', component: NavManagementPage },
+  { path: '/nav-management/:pid', component: NavManagementPage },
   { path: '/', children: <Redirect to="/pools" /> },
   {
     children: <NotFoundPage />,

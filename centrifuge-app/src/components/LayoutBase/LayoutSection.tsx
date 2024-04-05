@@ -1,7 +1,5 @@
 import { Box, BoxProps, Shelf, Stack, Text } from '@centrifuge/fabric'
-import css from '@styled-system/css'
 import * as React from 'react'
-import styled from 'styled-components'
 import { BasePadding } from './BasePadding'
 
 type Props = {
@@ -16,7 +14,7 @@ export function LayoutSection({ title, titleAddition, subtitle, headerRight, chi
   return (
     <BasePadding as="section" gap={2} {...boxProps}>
       {(title || titleAddition || subtitle || headerRight) && (
-        <Shelf justifyContent="space-between" as="header">
+        <Shelf justifyContent="space-between" as="header" maxWidth="mainContent">
           <Stack>
             {(title || titleAddition) && (
               <Shelf gap={1} alignItems="baseline">
@@ -39,13 +37,9 @@ export function LayoutSection({ title, titleAddition, subtitle, headerRight, chi
           <Box ml="auto">{headerRight}</Box>
         </Shelf>
       )}
-      <MainContainer gap={2}>{children}</MainContainer>
+      <Stack gap={2} maxWidth="mainContent">
+        {children}
+      </Stack>
     </BasePadding>
   )
 }
-
-const MainContainer = styled(Stack)(
-  css({
-    maxWidth: 'mainContent',
-  })
-)

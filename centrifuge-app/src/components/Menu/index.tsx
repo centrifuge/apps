@@ -4,11 +4,10 @@ import {
   IconGlobe,
   IconInvestments,
   IconNft,
-  IconPools,
   IconSwitch,
   IconWallet,
-  Menu as Panel,
   MenuItemGroup,
+  Menu as Panel,
   Shelf,
   Stack,
 } from '@centrifuge/fabric'
@@ -21,6 +20,7 @@ import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
+import { NavManagementMenu } from './NavManagementMenu'
 import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
@@ -107,12 +107,7 @@ export function Menu() {
         </PageLink>
       )}
 
-      {showOracle && (
-        <PageLink to="/nav-management" stacked={!isLarge}>
-          <IconPools />
-          NAV management
-        </PageLink>
-      )}
+      {showOracle && <NavManagementMenu stacked={!isLarge} />}
 
       {config.network !== 'centrifuge' && (
         <PageLink to="/nfts" stacked={!isLarge}>
