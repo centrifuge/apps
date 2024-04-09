@@ -2,6 +2,7 @@ import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { EvmChains } from '@centrifuge/centrifuge-react'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import arbitrumLogo from '@centrifuge/fabric/assets/logos/arbitrum.svg'
+import assetHubLogo from '@centrifuge/fabric/assets/logos/assethub.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
@@ -143,7 +144,7 @@ const mainnetConfig = {
   chainId: 1,
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
-  poolsHash: 'QmVL3N8A1LB6EoWbnH1qDn4XBCWHcL74gfRMJprzstPK8Z', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmRzbEpwFnJE8M4URQEA9JB7pCbh98XnbowXXH8tipoPL3', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
 }
 
@@ -159,6 +160,9 @@ export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : 
 export const parachainNames: Record<number, string> = {
   1000: 'Asset Hub',
 }
+export const parachainIcons: Record<number, string> = {
+  1000: assetHubLogo,
+}
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
@@ -170,7 +174,7 @@ export const evmChains: EvmChains = {
       symbol: 'ETH',
       decimals: 18,
     },
-    urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+    urls: [`https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
     iconUrl: ethereumLogo,
     isTestnet: false,
   },
@@ -181,7 +185,7 @@ export const evmChains: EvmChains = {
       symbol: 'görETH',
       decimals: 18,
     },
-    urls: [`https://goerli.infura.io/v3/${infuraKey}`],
+    urls: [`https://eth-goerli.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
     iconUrl: goerliLogo,
     isTestnet: true,
   },
@@ -189,7 +193,7 @@ export const evmChains: EvmChains = {
     name: 'Ethereum Sepolia',
     nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
     blockExplorerUrl: 'https://sepolia.etherscan.io/',
-    urls: [`https://sepolia.infura.io/v3/${infuraKey}`],
+    urls: [`https://eth-sepolia.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
     iconUrl: sepoliaLogo,
     isTestnet: true,
   },

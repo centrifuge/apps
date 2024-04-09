@@ -57,9 +57,12 @@ const TrancheTokenCard = ({
 }) => {
   const isTinlakePool = poolId.startsWith('0x')
   const daysSinceCreation = createdAt ? daysBetween(new Date(createdAt), new Date()) : 0
-  const apyTooltipBody = `The 30d ${trancheText} yield is the effective annualized return of the pool's ${trancheText} token over the last 30 days.${
-    daysSinceCreation < 30 && !isTinlakePool ? ' APY displayed after 30 days following token launch.' : ''
-  }`
+  const apyTooltipBody =
+    poolId === '4139607887'
+      ? 'Based on 3-month to 6-month T-Bills returns.'
+      : `The 30d ${trancheText} yield is the effective annualized return of the pool's ${trancheText} token over the last 30 days.${
+          daysSinceCreation < 30 && !isTinlakePool ? ' APY displayed after 30 days following token launch.' : ''
+        }`
 
   const calculateApy = () => {
     if (poolId === '4139607887') return formatPercentage(5)
@@ -90,7 +93,7 @@ const TrancheTokenCard = ({
               <Text textAlign="left" variant="label2" color="textSecondary">
                 Token price
               </Text>
-              <Text variant="body2">{formatBalance(trancheToken.tokenPrice || 0, poolCurrencySymbol, 2, 2)}</Text>
+              <Text variant="body2">{formatBalance(trancheToken.tokenPrice || 0, poolCurrencySymbol, 5, 5)}</Text>
             </Stack>
             <Stack gap={1}>
               <Tooltips variant="secondary" type="valueLocked" />

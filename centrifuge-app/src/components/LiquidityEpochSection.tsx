@@ -23,7 +23,7 @@ import { usePoolAccountOrders } from '../utils/usePools'
 import { DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
 import { useDebugFlags } from './DebugFlags'
-import { columns, EpochList, LiquidityTableRow } from './EpochList'
+import { EpochList, LiquidityTableRow, columns } from './EpochList'
 import { PageSection } from './PageSection'
 import { AnchorTextLink } from './TextLink'
 
@@ -405,21 +405,21 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
   const sumOfLockedRedemptions = juniorRedeem.add(seniorRedeem)
   const investments: LiquidityTableRow[] = [
     {
-      order: `${pool.tranches[0].currency.symbol} investments`,
+      order: `${pool.tranches[0].currency.displayName} investments`,
       locked: juniorInvest,
     },
     {
-      order: `${pool.tranches[1].currency.symbol} investments`,
+      order: `${pool.tranches[1].currency.displayName} investments`,
       locked: seniorInvest,
     },
   ]
   const redemptions: LiquidityTableRow[] = [
     {
-      order: `${pool.tranches[0].currency.symbol} redemptions`,
+      order: `${pool.tranches[0].currency.displayName} redemptions`,
       locked: juniorRedeem,
     },
     {
-      order: `${pool.tranches[1].currency.symbol} redemptions`,
+      order: `${pool.tranches[1].currency.displayName} redemptions`,
       locked: seniorRedeem,
     },
   ]
@@ -432,7 +432,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
     ),
     locked: (
       <Text variant="body2" fontWeight={600}>
-        {formatBalance(sumOfLockedInvestments, pool.currency.symbol)}
+        {formatBalance(sumOfLockedInvestments, pool.currency.displayName)}
       </Text>
     ),
   }
@@ -445,7 +445,7 @@ function TinlakeEpochStatus({ pool }: { pool: TinlakePool }) {
     ),
     locked: (
       <Text variant="body2" fontWeight={600}>
-        {formatBalance(sumOfLockedRedemptions, pool.currency.symbol)}
+        {formatBalance(sumOfLockedRedemptions, pool.currency.displayName)}
       </Text>
     ),
   }

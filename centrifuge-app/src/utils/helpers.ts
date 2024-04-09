@@ -10,3 +10,20 @@ export function find<T extends Array<any>>(
 ): T[0] | undefined {
   return arr.find(predicate as any)
 }
+
+export function looksLike(a: any, b: any): boolean {
+  return isPrimitive(b)
+    ? b === a
+    : Object.keys(b).every((bKey) => {
+        const bVal = b[bKey]
+        const aVal = a?.[bKey]
+        if (typeof bVal === 'function') {
+          return bVal(aVal)
+        }
+        return looksLike(aVal, bVal)
+      })
+}
+
+function isPrimitive(val: any): val is boolean | string | number | null | undefined {
+  return val == null || /^[sbn]/.test(typeof val)
+}

@@ -1,6 +1,7 @@
 import {
   addressToHex,
   computeTrancheId,
+  getCurrencyLocation,
   isSameAddress,
   PoolMetadata,
   TransactionOptions,
@@ -30,7 +31,7 @@ import {
   useFormik,
 } from 'formik'
 import * as React from 'react'
-import { combineLatest, switchMap } from 'rxjs'
+import { combineLatest, of, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
 import { useDebugFlags } from '../../../components/DebugFlags'
@@ -38,6 +39,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { parachainNames } from '../../../config'
+import { looksLike } from '../../../utils/helpers'
 import { useIdentity } from '../../../utils/useIdentity'
 import { useDomainRouters } from '../../../utils/useLiquidityPools'
 import { getKeyForReceiver, usePoolAccess, useSuitableAccounts, WithdrawKey } from '../../../utils/usePermissions'
@@ -131,16 +133,25 @@ function AOForm({
   const chainIds = routers?.map((r) => r.chainId) || []
   const getName = useGetNetworkName()
 
+  const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
   const destinations = [
     'centrifuge',
     ...chainIds
       .map((cid) => ({ evm: cid }))
       .filter(
-        () => pool.currency.additional?.transferability && 'liquidityPools' in pool.currency.additional.transferability
+        (location) =>
+          (pool.currency.additional?.transferability &&
+            'liquidityPools' in pool.currency.additional.transferability &&
+            looksLike(location, getCurrencyLocation(pool.currency))) ||
+          isLocalAsset
       ),
     ...Object.keys(parachainNames)
       .map((pid) => ({ parachain: Number(pid) }))
-      .filter(() => pool.currency.additional?.transferability && 'xcm' in pool.currency.additional.transferability),
+      .filter(
+        () =>
+          (pool.currency.additional?.transferability && 'xcm' in pool.currency.additional.transferability) ||
+          isLocalAsset
+      ),
   ]
 
   const { showPodAccountCreation } = useDebugFlags()
@@ -184,7 +195,7 @@ function AOForm({
         args: [
           addedWithdrawAddresses: WithdrawKey[],
           removedWithdrawAddresses: WithdrawKey[],
-          newMetadata: PoolMetadata,
+          newMetadata: PoolMetadata | null,
           addedPermissions?: ReturnType<typeof diffPermissions>['add'],
           addedAddresses?: string[],
           removedAddresses?: string[],
@@ -210,13 +221,12 @@ function AOForm({
         ] = args
 
         return combineLatest([
-          cent.getApi(),
           cent.pools.updatePoolRoles([poolId, [...access.missingPermissions, ...addedPermissions], []], {
             batch: true,
           }),
-          cent.pools.setMetadata([poolId, newMetadata], { batch: true }),
+          newMetadata ? cent.pools.setMetadata([poolId, newMetadata], { batch: true }) : of(null),
         ]).pipe(
-          switchMap(([api, permissionTx, setMetadataTx]) => {
+          switchMap(([permissionTx, setMetadataTx]) => {
             const numProxyTypesPerHotWallet = 4
             const deposit = proxyDepositFactor
               .mul(new BN(Math.max(addedAddresses.length - removedAddresses.length, 0) * numProxyTypesPerHotWallet))
@@ -234,51 +244,49 @@ function AOForm({
             let tx = api.tx.proxy.proxy(
               account.proxies![0].delegator,
               undefined,
-              api.tx.utility.batchAll([
-                // Adding the permissions and metadata needs to be done by the Pool Admin, the rest by the AO
-                ...permissionTx.method.args[0],
-                setMetadataTx,
-                api.tx.proxy.proxy(
-                  account.proxies![1].delegator,
-                  undefined,
-                  api.tx.utility.batchAll(
-                    [
-                      removedAddresses.length &&
-                        api.tx.utility.batch(
-                          removedAddresses
-                            .map((addr) => [
-                              api.tx.proxy.removeProxy(addr, 'Borrow', 0),
-                              api.tx.proxy.removeProxy(addr, 'Invest', 0),
-                              api.tx.proxy.removeProxy(addr, 'PodAuth', 0),
-                              api.tx.proxy.removeProxy(addr, 'Transfer', 0),
-                            ])
-                            .flat()
-                        ),
-                      addedAddresses.map((addr) => [
-                        api.tx.proxy.addProxy(addr, 'Borrow', 0),
-                        api.tx.proxy.addProxy(addr, 'Invest', 0),
-                        api.tx.proxy.addProxy(addr, 'PodAuth', 0),
-                        api.tx.proxy.addProxy(addr, 'Transfer', 0),
-                      ]),
-                      podOperator && api.tx.proxy.addProxy(podOperator, 'PodOperation', 0),
-                      keys &&
-                        api.tx.keystore.addKeys([
-                          [keys.p2pKey, 'P2PDiscovery', 'ECDSA'],
-                          [keys.documentKey, 'P2PDocumentSigning', 'ECDSA'],
+              api.tx.utility.batchAll(
+                [
+                  // Adding the permissions and metadata needs to be done by the Pool Admin, the rest by the AO
+                  ...permissionTx.method.args[0],
+                  setMetadataTx,
+                  api.tx.proxy.proxy(
+                    account.proxies![1].delegator,
+                    undefined,
+                    api.tx.utility.batchAll(
+                      [
+                        removedAddresses.length &&
+                          api.tx.utility.batch(
+                            removedAddresses
+                              .map((addr) => [
+                                api.tx.proxy.removeProxy(addr, 'Borrow', 0),
+                                api.tx.proxy.removeProxy(addr, 'Invest', 0),
+                                api.tx.proxy.removeProxy(addr, 'PodAuth', 0),
+                                api.tx.proxy.removeProxy(addr, 'Transfer', 0),
+                              ])
+                              .flat()
+                          ),
+                        addedAddresses.map((addr) => [
+                          api.tx.proxy.addProxy(addr, 'Borrow', 0),
+                          api.tx.proxy.addProxy(addr, 'Invest', 0),
+                          api.tx.proxy.addProxy(addr, 'PodAuth', 0),
+                          api.tx.proxy.addProxy(addr, 'Transfer', 0),
                         ]),
-                      collectionId && [api.tx.uniques.create(collectionId, ao.address)],
-                      addedWithdrawAddresses.map((w) =>
-                        api.tx.transferAllowList.addTransferAllowance(pool.currency.key, w)
-                      ),
-                      removedWithdrawAddresses.map((w) =>
-                        api.tx.transferAllowList.removeTransferAllowance(pool.currency.key, w)
-                      ),
-                    ]
-                      .filter(Boolean)
-                      .flat(2)
-                  )
-                ),
-              ])
+                        podOperator && api.tx.proxy.addProxy(podOperator, 'PodOperation', 0),
+                        keys &&
+                          api.tx.keystore.addKeys([
+                            [keys.p2pKey, 'P2PDiscovery', 'ECDSA'],
+                            [keys.documentKey, 'P2PDocumentSigning', 'ECDSA'],
+                          ]),
+                        collectionId && [api.tx.uniques.create(collectionId, ao.address)],
+                        addedWithdrawAddresses.map((w) => api.tx.transferAllowList.addTransferAllowance('All', w)),
+                        removedWithdrawAddresses.map((w) => api.tx.transferAllowList.removeTransferAllowance('All', w)),
+                      ]
+                        .filter(Boolean)
+                        .flat(2)
+                    )
+                  ),
+                ].filter(Boolean)
+              )
             )
 
             if (options?.multisig) {
@@ -332,6 +340,8 @@ function AOForm({
         ])
       }
 
+      const hasMetadataChanges =
+        form.values.name !== initialValues.name || addedWithdraw.length || removedWithdraw.length
       const newMetadata: PoolMetadata = {
         ...(metadata as any),
         pool: {
@@ -357,7 +367,7 @@ function AOForm({
         [
           addedWithdraw.map((w) => getKeyForReceiver(api, w.meta!)),
           removedWithdraw.map((w) => w.key!),
-          newMetadata,
+          hasMetadataChanges ? newMetadata : null,
           addedPermissions,
           addedDelegates,
           removedDelegates,

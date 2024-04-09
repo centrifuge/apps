@@ -120,7 +120,7 @@ export function CurrencyInput({
           symbol={currency}
           action={
             onSetMax && (
-              <InputAction onClick={onSetMax} disabled={disabled}>
+              <InputAction aria-label="Set max amount" onClick={onSetMax} disabled={disabled}>
                 Max
               </InputAction>
             )

@@ -1,0 +1,22 @@
+name: dev-n-ffprod-deploys
+on:
+  push:
+    branches: main
+  pull_request:
+    # paths:
+    #   - '.github/workflows/main-branch-deploys.yml'
+  
+jobs:
+  development:
+    if: github.ref == 'refs/heads/main'
+    name: deploy-development
+    uses: ./.github/workflows/deploy_all.yml
+    secrets: inherit
+    with:
+      environment: development
+# For FF-PROD deploy only webApp
+  ff-prod:
+    uses: ./.github/workflows/centrifuge-app.yml
+    secrets: inherit
+    with:
+      deploy_env: 'ff-prod'

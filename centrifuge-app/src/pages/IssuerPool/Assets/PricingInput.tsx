@@ -33,14 +33,6 @@ export function PricingInput({ poolId }: { poolId: string }) {
               />
             )}
           </Field>
-          <FieldWithErrorMessage
-            as={NumberInput}
-            label={<Tooltips type="maxPriceVariation" variant="secondary" label="Max price variation*" />}
-            placeholder={0}
-            symbol="%"
-            name="pricing.maxPriceVariation"
-            validate={validate.maxPriceVariation}
-          />
         </>
       )}
 
@@ -97,6 +89,14 @@ export function PricingInput({ poolId }: { poolId: string }) {
         min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
         // Max 5 years from now
         max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+      />
+      <FieldWithErrorMessage
+        as={NumberInput}
+        label={<Tooltips type="maturityExtensionDays" variant="secondary" label="Extension period*" />}
+        placeholder={0}
+        symbol="days"
+        name="pricing.maturityExtensionDays"
+        validate={validate.maturityExtensionDays}
       />
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||

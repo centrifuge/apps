@@ -1,16 +1,26 @@
 import { IconArrowRight } from '@centrifuge/fabric'
 import coinbasewalletLogo from '@centrifuge/fabric/assets/logos/coinbasewallet.svg'
+import finoaLogo from '@centrifuge/fabric/assets/logos/finoa.svg'
 import metamaskLogo from '@centrifuge/fabric/assets/logos/metamask.svg'
 import walletconnectLogo from '@centrifuge/fabric/assets/logos/walletconnect.svg'
+import { FinoaEIP1193Provider } from '@finoa/finoa-connect-sdk'
 import subWalletLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/SubWalletLogo.svg'
 import talismanLogo from '@subwallet/wallet-connect/dotsama/predefinedWallet/TalismanLogo.svg'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
+import { EIP1193 } from '@web3-react/eip1193'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
-import { Connector } from '@web3-react/types'
 import { WalletConnect as WalletConnectV2 } from '@web3-react/walletconnect-v2'
 import { isMobile } from '../../../utils/device'
-import { createConnector, isCoinbaseWallet, isInjected, isMetaMaskWallet, isSubWallet, isTalismanWallet } from './utils'
+import {
+  Connector,
+  createConnector,
+  isCoinbaseWallet,
+  isInjected,
+  isMetaMaskWallet,
+  isSubWallet,
+  isTalismanWallet,
+} from './utils'
 
 export type EvmConnectorMeta = {
   id: string
@@ -36,6 +46,7 @@ export function getEvmConnectors(
     substrateEvmChainId?: number
   } = {}
 ): EvmConnectorMeta[] {
+  const finoaProvider = new FinoaEIP1193Provider()
   const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
   const { ['1']: _, ...optional } = urls
   const chains = [1, ...Object.keys(optional).map(Number)]
@@ -69,6 +80,8 @@ export function getEvmConnectors(
   )
   const [gnosisSafe] = createConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
 
+  const [finoa] = createConnector<EIP1193>((actions) => new EIP1193({ actions, provider: finoaProvider }))
+
   return [
     {
       id: 'gnosis-safe',
@@ -86,6 +99,23 @@ export function getEvmConnectors(
         return false
       },
     },
+    {
+      id: 'finoa',
+      title: 'Finoa',
+      installUrl: '',
+      logo: {
+        src: finoaLogo,
+        alt: 'Finoa',
+      },
+      connector: finoa,
+      get installed() {
+        return true
+      },
+      get shown() {
+        return true
+      },
+    },
+
     {
       id: 'metamask',
       get title() {

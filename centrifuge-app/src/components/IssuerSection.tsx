@@ -13,35 +13,15 @@ type IssuerSectionProps = {
 
 export function IssuerSection({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
-
   const report = metadata?.pool?.reports?.[0]
+
   return (
     <Card p={3} backgroundColor="backgroundAccentSecondary">
       <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
         {report && (
           <Stack gap={2}>
             <Text variant="heading2">Pool analysis</Text>
-            <Shelf gap={1}>
-              {report.author.avatar?.uri && (
-                <Box
-                  as="img"
-                  height={40}
-                  borderRadius={30}
-                  src={cent.metadata.parseMetadataUrl(report.author.avatar.uri)}
-                  alt=""
-                />
-              )}
-              <Text variant="body2">
-                Reviewer: {report.author.name}
-                <br />
-                {report.author.title}
-              </Text>
-            </Shelf>
-            <div>
-              <AnchorButton href={report.uri} target="_blank" variant="inverted" icon={IconExternalLink}>
-                View full report
-              </AnchorButton>
-            </div>
+            <ReportDetails metadata={metadata} />
           </Stack>
         )}
         <Stack gap={2}>
@@ -84,7 +64,6 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
     )
   )
 }
-
 export function IssuerDetails({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)

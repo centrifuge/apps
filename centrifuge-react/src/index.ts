@@ -7,7 +7,11 @@ export * from './components/WalletProvider'
 export { useAsyncCallback } from './hooks/useAsyncCallback'
 export { useBalances } from './hooks/useBalances'
 export * from './hooks/useCentrifugeQuery'
-export { useCentrifugeTransaction } from './hooks/useCentrifugeTransaction'
+export {
+  getTypePerProxyCall,
+  useCentrifugeTransaction,
+  wrapProxyCallsForAccount,
+} from './hooks/useCentrifugeTransaction'
 export { useEns } from './hooks/useEns'
 export * from './utils/errors'
 export * from './utils/formatting'

@@ -1,6 +1,6 @@
 import React from 'react'
 import { config, isTestEnv } from '../../config'
-import { ConvertAddress } from './components/ConvertAddress'
+import { ConvertAddressDialogWithButton } from './components/ConvertAddress'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
@@ -31,6 +31,7 @@ export type DebugFlagConfig =
     }
 
 export type Key =
+  | 'showFinoa'
   | 'showOrderExecution'
   | 'address'
   | 'evmAddress'
@@ -48,6 +49,7 @@ export type Key =
   | 'showTestNets'
   | 'showSwaps'
   | 'showPrime'
+  | 'showOracle'
   | 'poolCreationType'
   | 'podAdminSeed'
   | 'holdersReport'
@@ -71,7 +73,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   convertAddress: {
-    Component: ConvertAddress,
+    Component: ConvertAddressDialogWithButton,
     alwaysShow: true,
     default: null,
     type: 'component',
@@ -119,6 +121,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     type: 'checkbox',
   },
+  showFinoa: {
+    alwaysShow: true,
+    default: false,
+    type: 'checkbox',
+  },
   showOrderExecution: {
     default: false,
     type: 'checkbox',
@@ -133,6 +140,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   showSwaps: {
+    default: false,
+    type: 'checkbox',
+  },
+  showOracle: {
     default: false,
     type: 'checkbox',
   },

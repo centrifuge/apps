@@ -1,0 +1,58 @@
+name: Synpress tests
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install linux deps
+        run: |
+          sudo apt-get install --no-install-recommends -y \
+          fluxbox \
+          xvfb
+
+      - name: Run xvfb and fluxbox
+        run: |
+          Xvfb :0 -screen 0 1024x768x24 -listen tcp -ac &
+          fluxbox &
+        env:
+          DISPLAY: :0.0
+      - uses: iamsauravsharma/create-dotenv@v2.0.1
+        with:
+          # input-prefix: '' # Optional (default: '')
+          file-path: 'centrifuge-app/.env' # Optional (default : '.env')
+        # output-prefix: 'OUTPUT_' # Optional (default: '')
+        env: # env available for only this steps
+          CYPRESS_PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
+          PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
+          NETWORK_NAME: centrifuge
+          RPC_URL: https://fullnode.development.cntrfg.com
+          CHAIN_ID: 2000
+          SYMBOL: DEVEL
+          IS_TESTNET: true
+          DEBUG: true
+      - name: Synpress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: centrifuge-app
+          install-command: yarn
+          command: yarn run e2e:run:ci
+          browser: chrome
+          config-file: synpress.config.ts
+          ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
+        env:
+          # pass the Cypress Cloud record key as an environment variable
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY }}
+          CYPRESS_BASE_URL: https://app-dev.k-f.dev
+          DISPLAY: :0.0

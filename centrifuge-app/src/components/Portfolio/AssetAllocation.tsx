@@ -22,7 +22,7 @@ export function AssetAllocation({ address }: { address?: string }) {
     const poolIndex = filteredPools.findIndex((p) => p.id === balance.poolId)
     const price =
       filteredPools[poolIndex]?.tranches.find((t) => t.id === balance.trancheId)?.tokenPrice?.toDecimal() ?? Dec(0)
-    const asset = metas[poolIndex].data?.pool?.asset?.class
+    const asset = metas[poolIndex]?.data?.pool?.asset?.class
     const value = balance.balance.toDecimal().mul(price)
     total = total.add(value)
     valueByClass[asset!] = valueByClass[asset!]?.add(value)

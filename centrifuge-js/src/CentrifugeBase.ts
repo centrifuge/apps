@@ -7,6 +7,8 @@ import { hexToBn } from '@polkadot/util'
 import { sortAddresses } from '@polkadot/util-crypto'
 import 'isomorphic-fetch'
 import {
+  Observable,
+  Subject,
   bufferCount,
   catchError,
   combineLatest,
@@ -16,11 +18,9 @@ import {
   from,
   map,
   mergeWith,
-  Observable,
   of,
   share,
   startWith,
-  Subject,
   switchMap,
   take,
   takeWhile,
@@ -36,7 +36,7 @@ import { getPolkadotApi } from './utils/web3'
 type ProxyType = string
 
 const EVM_DISPATCH_PRECOMPILE = '0x0000000000000000000000000000000000000401'
-const EVM_DISPATCH_OVERHEAD_GAS = 100_000
+const EVM_DISPATCH_OVERHEAD_GAS = 1_000_000
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -88,6 +88,7 @@ const parachainTypes = {
     presentValue: 'Balance',
     outstandingPrincipal: 'Balance',
     outstandingInterest: 'Balance',
+    currentPrice: 'Option<Balance>',
   },
   RewardDomain: {
     _enum: ['Block', 'Liquidity'],
@@ -101,76 +102,91 @@ const parachainTypes = {
     pendingRedeemTrancheTokens: 'Balance',
     claimableCurrency: 'Balance',
   },
-}
-
-const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {
-  pools: {
-    trancheTokenPrices: {
-      description: 'Retrieve prices for all tranches',
-      params: [
-        {
-          name: 'pool_id',
-          type: 'u64',
-        },
-      ],
-      type: 'Vec<u128>',
-    },
+  PoolNav: {
+    navAum: 'Balance',
+    navFees: 'Balance',
+    reserve: 'Balance',
+    total: 'Balance',
   },
-  rewards: {
-    listCurrencies: {
-      description:
-        'List all reward currencies for the given domain and account. These currencies could be used as keys for the computeReward call',
-      params: [
-        {
-          name: 'domain',
-          type: 'RewardDomain',
-        },
-        {
-          name: 'account_id',
-          type: 'AccountId',
-        },
-      ],
-      type: 'Vec<CfgTypesTokensCurrencyId>',
-    },
-    computeReward: {
-      description: 'Compute the claimable reward for the given triplet of domain, currency and account',
-      params: [
-        {
-          name: 'domain',
-          type: 'RewardDomain',
-        },
-        {
-          name: 'currency_id',
-          type: 'CfgTypesTokensCurrencyId',
-        },
-        {
-          name: 'account_id',
-          type: 'AccountId',
-        },
-      ],
-      type: 'Option<Balance>',
-    },
+  PoolFeesList: 'Vec<PoolFeesOfBucket>',
+  PoolFeesOfBucket: {
+    bucket: 'PoolFeeBucket',
+    fees: 'Vec<PoolFee>',
+  },
+  PriceCollectionInput: {
+    _enum: ['Empty', 'Custom(BoundedBTreeMap<OracleKey, Balance, MaxActiveLoansPerPool>)', 'FromRegistry'],
   },
 }
 
+// NOTE: Should never be extended due to deprecation of RPC in favor of RtAPI calls
+const parachainRpcMethods: Record<string, Record<string, DefinitionRpc>> = {}
+
+// NOTE: Runtime API calls must be in snake case (as defined in rust)
+// However, RPCs are usually in camel case
 const parachainRuntimeApi: DefinitionsCall = {
   PoolsApi: [
     {
-      // Runtime API calls must be in snake case (as defined in rust)
-      // However, RPCs are usually in camel case
       methods: {
-        tranche_token_prices: parachainRpcMethods.pools.trancheTokenPrices,
+        tranche_token_prices: {
+          description: 'Retrieve prices for all tranches',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Option<Vec<u128>>',
+        },
+        nav: {
+          description: 'Retrieve the net asset value of a pool',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'Option<PoolNav>',
+        },
       },
       version: 1,
     },
   ],
   RewardsApi: [
     {
-      // Runtime API calls must be in snake case (as defined in rust)
-      // However, RPCs are usually in camel case
       methods: {
-        compute_reward: parachainRpcMethods.rewards.computeReward,
-        list_currencies: parachainRpcMethods.rewards.listCurrencies,
+        compute_reward: {
+          description: 'Compute the claimable reward for the given triplet of domain, currency and account',
+          params: [
+            {
+              name: 'domain',
+              type: 'RewardDomain',
+            },
+            {
+              name: 'currency_id',
+              type: 'CfgTypesTokensCurrencyId',
+            },
+            {
+              name: 'account_id',
+              type: 'AccountId',
+            },
+          ],
+          type: 'Option<Balance>',
+        },
+        list_currencies: {
+          description:
+            'List all reward currencies for the given domain and account. These currencies could be used as keys for the computeReward call',
+          params: [
+            {
+              name: 'domain',
+              type: 'RewardDomain',
+            },
+            {
+              name: 'account_id',
+              type: 'AccountId',
+            },
+          ],
+          type: 'Vec<CfgTypesTokensCurrencyId>',
+        },
       },
       version: 1,
     },
@@ -219,8 +235,22 @@ const parachainRuntimeApi: DefinitionsCall = {
           ],
           type: 'Option<PalletLoansEntitiesLoansActiveLoan>',
         },
+        portfolio_valuation: {
+          description: 'Get an emulated portfolio update with custom prices',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+            {
+              name: 'input_prices',
+              type: 'PriceCollectionInput',
+            },
+          ],
+          type: 'Result<Balance, DispatchError>',
+        },
       },
-      version: 1,
+      version: 2,
     },
   ],
   AccountConversionApi: [
@@ -235,6 +265,23 @@ const parachainRuntimeApi: DefinitionsCall = {
             },
           ],
           type: 'Option<AccountId32>',
+        },
+      },
+      version: 1,
+    },
+  ],
+  PoolFeesApi: [
+    {
+      methods: {
+        list_fees: {
+          description: 'Simulate pool fees update and get all fees for the given pool',
+          params: [
+            {
+              name: 'pool_id',
+              type: 'u64',
+            },
+          ],
+          type: 'PoolFeesList',
         },
       },
       version: 1,
@@ -272,7 +319,7 @@ export class CentrifugeBase {
     if (options?.batch) return of(actualSubmittable)
 
     const proxies = (options?.proxies || this.config.proxies)?.map((p) =>
-      Array.isArray(p) ? p : ([p, undefined] as const)
+      Array.isArray(p) ? p : ([p, undefined] as [string, undefined])
     )
 
     let transferTx
@@ -282,10 +329,7 @@ export class CentrifugeBase {
     }
 
     if (proxies && !options?.sendOnly) {
-      actualSubmittable = proxies.reduceRight(
-        (acc, [delegator, forceProxyType]) => api.tx.proxy.proxy(delegator, forceProxyType, acc),
-        actualSubmittable
-      )
+      actualSubmittable = wrapProxyCalls(api, actualSubmittable, proxies)
     }
 
     if (options?.multisig) {
@@ -655,4 +699,16 @@ export class CentrifugeBase {
   clearProxies() {
     this.config.proxies = undefined
   }
+}
+
+export function wrapProxyCalls(
+  api: ApiRx,
+  tx: SubmittableExtrinsic<'rxjs'>,
+  proxies: Exclude<Config['proxies'], undefined>
+) {
+  const mapped = proxies.map((p) => (Array.isArray(p) ? p : ([p, undefined] as const)))
+  return mapped.reduceRight(
+    (acc, [delegator, forceProxyType]) => api.tx.proxy.proxy(delegator, forceProxyType, acc),
+    tx
+  )
 }

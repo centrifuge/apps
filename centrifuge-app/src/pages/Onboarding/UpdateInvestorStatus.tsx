@@ -60,7 +60,7 @@ export default function UpdateInvestorStatus() {
             <>
               <ContentHeader
                 title="Updating investor status"
-                body={`The investor is being ${status} on-chain. This may take a few seconds.`}
+                body={`The investor is being ${status} onchain. This may take a few seconds.`}
               />
               <Box>
                 <Spinner size="iconLarge" />

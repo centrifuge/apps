@@ -6,8 +6,8 @@ import {
   IconNft,
   IconSwitch,
   IconWallet,
-  Menu as Panel,
   MenuItemGroup,
+  Menu as Panel,
   Shelf,
   Stack,
 } from '@centrifuge/fabric'
@@ -20,6 +20,7 @@ import { useDebugFlags } from '../DebugFlags'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { GovernanceMenu } from './GovernanceMenu'
 import { IssuerMenu } from './IssuerMenu'
+import { NavManagementMenu } from './NavManagementMenu'
 import { PageLink } from './PageLink'
 import { PoolLink } from './PoolLink'
 
@@ -27,7 +28,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps, showPrime } = useDebugFlags()
+  const { showSwaps, showPrime, showOracle } = useDebugFlags()
   const transactions = useTransactionsByAddress(address)
 
   return (
@@ -105,6 +106,8 @@ export function Menu() {
           Swaps
         </PageLink>
       )}
+
+      {showOracle && <NavManagementMenu stacked={!isLarge} />}
 
       {config.network !== 'centrifuge' && (
         <PageLink to="/nfts" stacked={!isLarge}>

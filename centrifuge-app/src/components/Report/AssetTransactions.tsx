@@ -59,7 +59,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       dataUrl
         ? {
             dataUrl,
-            fileName: `${pool.id}-borrower-transactions-${startDate}-${endDate}.csv`,
+            fileName: `${pool.id}-asset-transactions-${startDate}-${endDate}.csv`,
           }
         : undefined
     )
@@ -75,6 +75,6 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
   return data.length > 0 ? (
     <DataTable data={data} columns={columns} hoverable />
   ) : (
-    <UserFeedback reportType="Borrower transactions" />
+    <UserFeedback reportType="Asset transactions" />
   )
 }

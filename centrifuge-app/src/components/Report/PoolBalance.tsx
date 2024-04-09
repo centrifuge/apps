@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -8,9 +9,9 @@ import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
-import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import type { TableDataRow } from './index'
 
 export function PoolBalance({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
@@ -57,7 +58,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
   const overviewRecords: TableDataRow[] = React.useMemo(() => {
     return [
       {
-        name: 'Pool value',
+        name: 'NAV',
         value: poolStates?.map((state) => formatBalanceAbbreviated(state.poolValue, pool.currency.symbol)) || [],
         heading: false,
       },
@@ -65,7 +66,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         name: 'Asset value',
         value:
           poolStates?.map((state) =>
-            formatBalanceAbbreviated(state.poolState.portfolioValuation, pool.currency.symbol)
+            formatBalanceAbbreviated(
+              new CurrencyBalance(state.poolValue.sub(state.poolState.totalReserve), pool.currency.decimals),
+              pool.currency.symbol
+            )
           ) || [],
         heading: false,
       },
@@ -95,7 +99,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           value:
             poolStates?.map((state) =>
               state.tranches[token.id]?.price
-                ? formatBalanceAbbreviated(state.tranches[token.id].price?.toFloat()!, pool.currency.symbol)
+                ? formatBalanceAbbreviated(state.tranches[token.id].price?.toFloat()!, pool.currency.symbol, 5)
                 : '1.000'
             ) || [],
           heading: false,

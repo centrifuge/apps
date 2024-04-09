@@ -10,7 +10,7 @@ export function Head() {
       <title>{network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
       <meta
         name="description"
-        content="The on-chain ecosystem for structured credit. Institutional investors earn yield backed by tokenized RWAs, while SMEs get access to a cheaper cost of capital."
+        content="Centrifuge is the platform for onchain finance, providing the infrastructure to tokenize, manage, and invest into a complete, diversified portfolio of real-world assets."
       />
       <link rel="icon" href={`/${network}/favicon.ico`} />
       <link rel="apple-touch-icon" sizes="180x180" href={`/${network}/apple-touch-icon.png`} />
