@@ -2318,10 +2318,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
                 totalReserve: new CurrencyBalance(state.totalReserve, poolCurrency.decimals),
               }
-              const poolValue = new CurrencyBalance(
-                new BN(state?.portfolioValuation || '0').add(new BN(state?.totalReserve || '0')),
-                poolCurrency.decimals
-              )
+              const poolValue = new CurrencyBalance(new BN(state?.portfolioValuation || '0'), poolCurrency.decimals)
 
               // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
               const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp === state.timestamp)
