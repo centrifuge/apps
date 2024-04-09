@@ -150,13 +150,11 @@ export function PoolDetailOverview() {
                   }) || []
                 }
               />
+              {metadata?.reports && 'poolOverview' in metadata?.reports && (
+                <PodIndexerReports poolId={poolId} page="poolOverview" />
+              )}
             </React.Suspense>
           </Grid>
-          <React.Suspense fallback={<Spinner />}>
-            {metadata?.reports && 'poolOverview' in metadata?.reports && (
-              <PodIndexerReports poolId={poolId} page="poolOverview" />
-            )}
-          </React.Suspense>
           <React.Suspense fallback={<Spinner />}>
             <Box height={373}>
               <Cashflows />

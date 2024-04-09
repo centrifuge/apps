@@ -1,10 +1,9 @@
 import { PoolMetadata, TokenBalance } from '@centrifuge/centrifuge-js'
 import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Shelf, Text } from '@centrifuge/fabric'
+import { Box, Card, Stack, Text } from '@centrifuge/fabric'
 import Chart from 'chart.js/auto'
 import * as React from 'react'
 import { useQuery } from 'react-query'
-import styled from 'styled-components'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -62,22 +61,10 @@ function displayChart(reportSection: ReportSectionWithData, data: ChartData, nod
   })
 }
 
-const Section = styled(Shelf)`
-  height: 300px;
-`
-
-const SectionContent = styled.div`
-  text-align: center;
-`
-
 function ReportSections({ sections }: { sections: ReportSectionWithData[] }) {
-  return (
-    <Section gap="50px" alignItems="flex-start">
-      {sections.map((section) =>
-        section.view === 'chart' ? <ChartSection section={section} /> : <CounterSection section={section} />
-      )}
-    </Section>
-  )
+  return sections.map((section) => (
+    <Box>{section.view === 'chart' ? <ChartSection section={section} /> : <CounterSection section={section} />}</Box>
+  ))
 }
 
 Chart.defaults.borderColor = '#eee'
@@ -95,34 +82,32 @@ function ChartSection({ section }: { section: ReportSectionWithData }) {
   }, [])
 
   return (
-    <div style={{ width: '50%' }}>
-      <Text variant="heading5" style={{ marginBottom: '24px' }}>
-        {section.name}
-      </Text>
-      <SectionContent>
-        <canvas ref={ref} />
-      </SectionContent>
-    </div>
+    <Card p={3} height="100%">
+      <Stack gap={3}>
+        <Text variant="heading5">{section.name}</Text>
+        <Box textAlign="center">
+          <canvas ref={undefined} />
+        </Box>
+      </Stack>
+    </Card>
   )
 }
 
 function CounterSection({ section }: { section: ReportSectionWithData }) {
   return (
-    <div style={{ width: '50%' }}>
-      <Text variant="heading5" style={{ marginBottom: '24px' }}>
-        {section.name}
-      </Text>
-      <SectionContent>
-        <Text variant="heading1" style={{ marginBottom: '24px', fontSize: '60px' }}>
-          {formatBalance(
-            new TokenBalance(section.data[0].value0, section.viewData.decimals || 0),
-            section.viewData.symbol
-          )}
-        </Text>
-        <Text variant="heading6" style={{ marginBottom: '24px' }}>
-          {section.viewData.label}
-        </Text>
-      </SectionContent>
-    </div>
+    <Card p={3} height="100%">
+      <Stack gap={3}>
+        <Text variant="heading5">{section.name}</Text>
+        <Stack textAlign="center" gap={2}>
+          <Text variant="heading1" fontSize="60px">
+            {formatBalance(
+              new TokenBalance(section.data[0].value0, section.viewData.decimals || 0),
+              section.viewData.symbol
+            )}
+          </Text>
+          <Text variant="heading6">{section.viewData.label}</Text>
+        </Stack>
+      </Stack>
+    </Card>
   )
 }
