@@ -58,7 +58,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
   const overviewRecords: TableDataRow[] = React.useMemo(() => {
     return [
       {
-        name: 'NAv',
+        name: 'NAV',
         value: poolStates?.map((state) => formatBalanceAbbreviated(state.poolValue, pool.currency.symbol)) || [],
         heading: false,
       },
