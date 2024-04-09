@@ -1,4 +1,4 @@
-import { Button, Drawer, Stack } from '@centrifuge/fabric'
+import { Button, Drawer } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -6,7 +6,6 @@ import { LayoutBase } from '../../../components/LayoutBase'
 import { LiquidityEpochSection } from '../../../components/LiquidityEpochSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
-import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { Tooltips } from '../../../components/Tooltips'
 import { formatBalance } from '../../../utils/formatting'
@@ -83,14 +82,14 @@ export function PoolDetailLiquidity() {
               tooltips={['investment', 'redemption']}
             />
           </LoadBoundary>
-
+          {/* 
           <PageSection title="Cash drag">
             <Stack height="290px">
               <LoadBoundary>
                 <CashDragChart />
               </LoadBoundary>
             </Stack>
-          </PageSection>
+          </PageSection> */}
         </>
       )}
       <LiquidityEpochSection pool={pool} />
