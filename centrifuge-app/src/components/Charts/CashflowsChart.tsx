@@ -1,5 +1,5 @@
 import { CurrencyBalance, DailyPoolState, Pool } from '@centrifuge/centrifuge-js'
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import * as React from 'react'
@@ -174,7 +174,7 @@ function CustomLegend({
 
   return (
     <Shelf bg="backgroundPage" width="100%" gap={2}>
-      <Grid gridTemplateColumns="fit-content(100%) fit-content(100%) fit-content(100%) fit-content(100%)" gap={3}>
+      <Shelf gap={3}>
         <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#001C66" gap="4px">
           <Text variant="body3" color="textSecondary">
             Total purchases
@@ -211,7 +211,7 @@ function CustomLegend({
           </Text>
           <Text variant="body1">{formatBalance(0, 'USD', 2)}</Text>
         </Stack> */}
-      </Grid>
+      </Shelf>
     </Shelf>
   )
 }
