@@ -39,7 +39,7 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
           body={
             <Stack gap={1}>
               <div>
-                Redeemed {state.poolCurrency?.symbol} amount{' '}
+                Redeemed{' '}
                 <Text fontWeight="bold">
                   {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
                 </Text>
