@@ -137,7 +137,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   React.useEffect(() => {
     if (lps && lps.length > 1) {
-      const index = lps?.findIndex((lp) => lp.currency.symbol === 'USDC')
+      const index = lps?.findIndex((lp) => lp.currency.symbol.toLowerCase().includes('usdc'))
       if (index && index > -1) {
         setLpIndex(index)
       }
