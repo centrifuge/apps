@@ -531,6 +531,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           ['hasInvested'],
         ],
       },
+      {
+        target: lp,
+        call: ['function maxDeposit(address) view returns (uint256)', user],
+        returns: [['maxDeposit', toCurrencyBalance(currency.currencyDecimals)]],
+      },
     ]
 
     const pool = await multicall<{
@@ -544,6 +549,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       managerTrancheTokenAllowance: CurrencyBalance
       pendingInvest: CurrencyBalance
       pendingRedeem: TokenBalance
+      maxDeposit: CurrencyBalance
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
