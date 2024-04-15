@@ -1,12 +1,12 @@
 import { useBalances, useCentrifugeConsts, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useListedPools } from '../../utils/useListedPools'
+import { useScreenSize } from '../../utils/useScreenSize'
 import { useComputeLiquidityRewards } from '../LiquidityRewards/hooks'
 import { Cubes } from './Cubes'
 
@@ -17,6 +17,7 @@ export function PortfolioCta() {
   const balances = useBalances(address)
   const consts = useCentrifugeConsts()
   const [, listedTokens] = useListedPools()
+  const screenSize = useScreenSize()
 
   const stakes = balances?.tranches.map(({ poolId, trancheId }) => ({ poolId, trancheId })) ?? []
   const rewards = useComputeLiquidityRewards(address, stakes)
@@ -42,7 +43,7 @@ export function PortfolioCta() {
     },
   ]
 
-  if (address) return null
+  if (address || screenSize.width < 900) return null
 
   return (
     <Box

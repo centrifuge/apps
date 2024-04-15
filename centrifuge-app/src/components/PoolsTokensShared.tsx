@@ -2,6 +2,7 @@ import { Grid, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { config } from '../config'
+import { useScreenSize } from '../utils/useScreenSize'
 import { CardTotalValueLocked } from './CardTotalValueLocked'
 import { LayoutSection } from './LayoutBase/LayoutSection'
 import { LoadBoundary } from './LoadBoundary'
@@ -15,6 +16,8 @@ type PoolsTokensSharedProps = {
 
 export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const screenSize = useScreenSize()
+
   const links = [
     {
       to: `${basePath}`,
@@ -47,9 +50,11 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
           </LoadBoundary>
         </Grid>
 
-        <Stack alignItems="end">
-          <MenuSwitch links={links} />
-        </Stack>
+        {screenSize.width >= 900 && (
+          <Stack alignItems="end">
+            <MenuSwitch links={links} />
+          </Stack>
+        )}
         {children}
       </Stack>
     </LayoutSection>

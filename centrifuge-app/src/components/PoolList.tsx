@@ -2,12 +2,15 @@ import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Grid, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useLocation } from 'react-router'
+import { useLocation, useRouteMatch } from 'react-router'
 import styled from 'styled-components'
+import { formatBalance } from '../utils/formatting'
 import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
+import { useScreenSize } from '../utils/useScreenSize'
+import { DataTable } from './DataTable'
 import { COLUMNS, COLUMN_GAPS, PoolCard, PoolCardProps } from './PoolCard'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
 import { PoolFilter } from './PoolFilter'
@@ -30,6 +33,8 @@ export function PoolList() {
   const { search } = useLocation()
   const [showArchived, setShowArchived] = React.useState(false)
   const [listedPools, , metadataIsLoading] = useListedPools()
+  const screenSize = useScreenSize()
+  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -61,6 +66,27 @@ export function PoolList() {
           There are no pools yet
         </Text>
       </Shelf>
+    )
+  }
+
+  if (screenSize.width < 900) {
+    return (
+      <DataTable
+        onRowClicked={(row) => `${basePath}/${row.poolId}`}
+        data={filteredPools}
+        columns={[
+          {
+            align: 'left',
+            header: 'Pool name',
+            width: 'minmax(100px, 1fr)',
+            cell: (row) => <Text textOverflow="ellipsis">{row.name}</Text>,
+          },
+          {
+            header: 'Value locked',
+            cell: (row) => (row.valueLocked ? formatBalance(row.valueLocked, row.currencySymbol) : '-'),
+          },
+        ]}
+      />
     )
   }
 

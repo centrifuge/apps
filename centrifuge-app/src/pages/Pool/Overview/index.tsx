@@ -25,6 +25,7 @@ import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { useLoans } from '../../../utils/useLoans'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { useScreenSize } from '../../../utils/useScreenSize'
 import { PoolDetailHeader } from '../Header'
 
 export type Token = {
@@ -65,6 +66,8 @@ export function PoolDetailOverview() {
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const averageMaturity = useAverageMaturity(poolId)
   const loans = useLoans(poolId)
+  const screenSize = useScreenSize()
+  const isMobile = screenSize.width < 900
 
   const pageSummaryData = [
     {
@@ -105,7 +108,11 @@ export function PoolDetailOverview() {
 
   return (
     <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
-      <Grid height="fit-content" gridTemplateColumns="66fr minmax(275px, 33fr)" gap={3}>
+      <Grid
+        height="fit-content"
+        gridTemplateColumns={screenSize ? '1fr' : '66fr minmax(275px, 33fr)'}
+        gap={isMobile ? 2 : 3}
+      >
         <React.Suspense fallback={<Spinner />}>
           <PoolPerformance />
         </React.Suspense>
@@ -133,7 +140,7 @@ export function PoolDetailOverview() {
       </React.Suspense>
       {!isTinlakePool && (
         <>
-          <Grid height="fit-content" gridTemplateColumns="1fr 1fr" gap={3}>
+          <Grid height="fit-content" gridTemplateColumns={isMobile ? '1fr' : '1fr 1fr'} gap={isMobile ? 2 : 3}>
             <React.Suspense fallback={<Spinner />}>
               <PoolStructure
                 numOfTranches={pool.tranches.length}
@@ -154,18 +161,22 @@ export function PoolDetailOverview() {
                 <AssetsByMaturity />
               </React.Suspense> */}
           </Grid>
-          <React.Suspense fallback={<Spinner />}>
-            <Box height={373}>
-              <Cashflows />
-            </Box>
-          </React.Suspense>
-          <React.Suspense fallback={<Spinner />}>
-            <Box height={447}>
-              <Card p={3}>
-                <TransactionHistory poolId={poolId} />
-              </Card>
-            </Box>
-          </React.Suspense>
+          {!isMobile && (
+            <>
+              <React.Suspense fallback={<Spinner />}>
+                <Box height={373}>
+                  <Cashflows />
+                </Box>
+              </React.Suspense>
+              <React.Suspense fallback={<Spinner />}>
+                <Box height={447}>
+                  <Card p={3}>
+                    <TransactionHistory poolId={poolId} />
+                  </Card>
+                </Box>
+              </React.Suspense>
+            </>
+          )}
         </>
       )}
     </LayoutSection>
