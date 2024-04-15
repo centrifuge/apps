@@ -53,6 +53,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       actions={actions}
     >
       <Shelf
+        overflowX="scroll"
         px={BASE_PADDING}
         bg="backgroundPage"
         style={{

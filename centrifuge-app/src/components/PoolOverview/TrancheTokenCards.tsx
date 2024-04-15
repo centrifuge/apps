@@ -3,6 +3,7 @@ import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { InvestButton, Token } from '../../pages/Pool/Overview'
 import { daysBetween } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Tooltips } from '../Tooltips'
 
 export const TrancheTokenCards = ({
@@ -55,6 +56,8 @@ const TrancheTokenCard = ({
   poolCurrencySymbol: string
   trancheText: 'senior' | 'junior' | 'mezzanine'
 }) => {
+  const isMedium = useIsAboveBreakpoint('M')
+
   const isTinlakePool = poolId.startsWith('0x')
   const daysSinceCreation = createdAt ? daysBetween(new Date(createdAt), new Date()) : 0
   const apyTooltipBody =
@@ -72,12 +75,17 @@ const TrancheTokenCard = ({
   }
 
   return (
-    <Box p={2} backgroundColor="backgroundButtonSecondary" borderRadius="card" width={'100%'}>
+    <Box p={2} backgroundColor="backgroundButtonSecondary" borderRadius="card" width="100%" overflowX="scroll">
       <Stack height="100%" justifyContent="space-between" gap={2}>
         <Text fontSize="12px" variant="body3">
           {trancheToken.name} ({trancheToken.symbol})
         </Text>
-        <Shelf justifyContent="space-between" alignItems="flex-end" gap={1}>
+        <Shelf
+          justifyContent="space-between"
+          alignItems="flex-start"
+          gap={[2, 2, 1]}
+          flexDirection={['column', 'column', 'row']}
+        >
           <Shelf gap={numOfTrancheTokens === 1 ? 5 : 2} alignItems="flex-end">
             <Stack gap={1} paddingRight={numOfTrancheTokens === 1 ? 3 : 0}>
               <Tooltips label={`${poolId === '4139607887' ? 'Target ' : ''}APY`} body={apyTooltipBody} />
@@ -85,10 +93,12 @@ const TrancheTokenCard = ({
                 {calculateApy()}
               </Text>
             </Stack>
-            <Stack gap={1}>
-              <Tooltips variant="secondary" type="subordination" />
-              <Text variant="body2">{formatPercentage(trancheToken.protection)}</Text>
-            </Stack>
+            {isMedium && (
+              <Stack gap={1}>
+                <Tooltips variant="secondary" type="subordination" />
+                <Text variant="body2">{formatPercentage(trancheToken.protection)}</Text>
+              </Stack>
+            )}
             <Stack gap={1}>
               <Text textAlign="left" variant="label2" color="textSecondary">
                 Token price

@@ -4,16 +4,16 @@ import {
   IconChevronRight,
   IconExternalLink,
   IconGovernance,
-  Menu as Panel,
   MenuItemGroup,
+  Menu as Panel,
   Stack,
   Text,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
-import { baseButton } from './styles'
 import { Toggle } from './Toggle'
+import { baseButton } from './styles'
 
 const ExternalLink = styled(Text)`
   ${baseButton}
@@ -24,8 +24,8 @@ const ExternalLink = styled(Text)`
 
   svg {
     display: block;
-    width: ${({ theme }) => theme.sizes.iconSmall}px;
-    height: ${({ theme }) => theme.sizes.iconSmall}px;
+    width: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
+    height: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
     object-fit: contain;
   }
 `
@@ -37,6 +37,7 @@ export function GovernanceMenu() {
   const offset = `calc(100% + 2 * ${space[1]}px)`
   const id = React.useId()
   const isLarge = useIsAboveBreakpoint('L')
+  const isMedium = useIsAboveBreakpoint('M')
 
   return (
     <Box position={['static', 'static', 'relative', 'relative', 'static']}>
@@ -60,6 +61,7 @@ export function GovernanceMenu() {
         aria-label={open ? 'Hide menu' : 'Show menu'}
         onClick={() => setOpen(!open)}
         stacked={!isLarge}
+        isMedium={isMedium}
       >
         <IconGovernance />
         Governance
@@ -123,6 +125,8 @@ const links = [
 ]
 
 function Link({ href, stacked, children }: { href: string; stacked: boolean; children: React.ReactNode }) {
+  const isMedium = useIsAboveBreakpoint('M')
+
   return (
     <ExternalLink
       variant="interactive1"
@@ -131,6 +135,7 @@ function Link({ href, stacked, children }: { href: string; stacked: boolean; chi
       rel="noopener noreferrer"
       href={href}
       stacked={stacked}
+      isMedium={isMedium}
     >
       {children} <IconExternalLink />
     </ExternalLink>

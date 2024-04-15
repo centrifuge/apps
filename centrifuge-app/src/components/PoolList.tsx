@@ -2,15 +2,13 @@ import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Grid, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useLocation, useRouteMatch } from 'react-router'
+import { useLocation } from 'react-router'
 import styled from 'styled-components'
-import { formatBalance } from '../utils/formatting'
 import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
-import { useScreenSize } from '../utils/useScreenSize'
-import { DataTable } from './DataTable'
 import { COLUMNS, COLUMN_GAPS, PoolCard, PoolCardProps } from './PoolCard'
 import { PoolStatusKey } from './PoolCard/PoolStatus'
 import { PoolFilter } from './PoolFilter'
@@ -33,8 +31,7 @@ export function PoolList() {
   const { search } = useLocation()
   const [showArchived, setShowArchived] = React.useState(false)
   const [listedPools, , metadataIsLoading] = useListedPools()
-  const screenSize = useScreenSize()
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
+  const isMedium = useIsAboveBreakpoint('M')
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -69,27 +66,6 @@ export function PoolList() {
     )
   }
 
-  if (screenSize.width < 900) {
-    return (
-      <DataTable
-        onRowClicked={(row) => `${basePath}/${row.poolId}`}
-        data={filteredPools}
-        columns={[
-          {
-            align: 'left',
-            header: 'Pool name',
-            width: 'minmax(100px, 1fr)',
-            cell: (row) => <Text textOverflow="ellipsis">{row.name}</Text>,
-          },
-          {
-            header: 'Value locked',
-            cell: (row) => (row.valueLocked ? formatBalance(row.valueLocked, row.currencySymbol) : '-'),
-          },
-        ]}
-      />
-    )
-  }
-
   return (
     <Stack gap={2}>
       <Stack gap={1}>
@@ -105,7 +81,7 @@ export function PoolList() {
               </Box>
             </Shelf>
           ) : (
-            <Stack as="ul" role="list" gap={1} minWidth={970} py={1}>
+            <Stack as="ul" role="list" gap={1} minWidth={isMedium ? 970 : 0} py={1}>
               {metadataIsLoading
                 ? Array(6)
                     .fill(true)
@@ -138,26 +114,40 @@ export function PoolList() {
 }
 
 function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
+  const isMedium = useIsAboveBreakpoint('M')
+
   return (
     <Stack gap={1}>
-      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" minWidth={970} px={2}>
+      <Grid
+        gridTemplateColumns={['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', ...COLUMNS]}
+        gap={[...[3, 6], ...[3, 6], ...COLUMN_GAPS]}
+        alignItems="start"
+        minWidth={isMedium ? 970 : 0}
+        px={2}
+      >
         <Text as="span" variant="body3">
           Pool name
         </Text>
-        <Text as="span" variant="body3">
-          Asset class
-        </Text>
+        {isMedium && (
+          <Text as="span" variant="body3">
+            Asset class
+          </Text>
+        )}
         <Text as="span" variant="body3" textAlign="right">
           Value locked
         </Text>
-        <Text as="span" variant="body3">
-          APR
-        </Text>
-        <Text as="span" variant="body3">
-          Pool status
-        </Text>
+        {isMedium && (
+          <Text as="span" variant="body3">
+            APR
+          </Text>
+        )}
+        {isMedium && (
+          <Text as="span" variant="body3">
+            Pool status
+          </Text>
+        )}
       </Grid>
-      <Stack as="ul" role="list" gap={1} minWidth={970} py={1}>
+      <Stack as="ul" role="list" gap={1} minWidth={isMedium ? 970 : 0} py={1}>
         {pools.map((pool) => (
           <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
             <PoolCard {...pool} />

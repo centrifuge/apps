@@ -1,7 +1,7 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useScreenSize } from '../../utils/useScreenSize'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Footer } from '../Footer'
 import { LoadBoundary } from '../LoadBoundary'
 import { LogoLink } from '../LogoLink'
@@ -27,7 +27,7 @@ type LayoutBaseProps = {
 }
 
 export function LayoutBase({ children, gap }: LayoutBaseProps) {
-  const screenSize = useScreenSize()
+  const isMedium = useIsAboveBreakpoint('M')
 
   return (
     <Root>
@@ -56,7 +56,7 @@ export function LayoutBase({ children, gap }: LayoutBaseProps) {
           </MainContainer>
         </LoadBoundary>
 
-        {screenSize.width >= 900 && (
+        {isMedium && (
           <FooterContainer>
             <Footer />
           </FooterContainer>

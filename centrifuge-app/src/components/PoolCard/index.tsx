@@ -4,6 +4,7 @@ import Decimal from 'decimal.js-light'
 import { useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Eththumbnail } from '../EthThumbnail'
 import { Anchor, Ellipsis, Root } from '../ListItemCardStyles'
 import { Tooltips } from '../Tooltips'
@@ -37,12 +38,18 @@ export function PoolCard({
   iconUri,
   isLoading,
 }: PoolCardProps) {
+  const isMedium = useIsAboveBreakpoint('M')
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || '/pools'
   const { sizes, zIndices } = useTheme()
 
   return (
     <Root as="article" bg={status === 'Archived' ? 'backgroundSecondary' : 'transparent'}>
-      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} p={2} alignItems="center">
+      <Grid
+        gridTemplateColumns={['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', ...COLUMNS]}
+        gap={[...[3, 6], ...[3, 6], ...COLUMN_GAPS]}
+        p={2}
+        alignItems="center"
+      >
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={poolId?.startsWith('0x')}>
             {iconUri ? (
@@ -57,52 +64,58 @@ export function PoolCard({
           </TextWithPlaceholder>
         </Grid>
 
-        <TextWithPlaceholder as="span" variant="body2" color="textSecondary" isLoading={isLoading}>
-          <Ellipsis>{assetClass}</Ellipsis>
-        </TextWithPlaceholder>
+        {isMedium && (
+          <TextWithPlaceholder as="span" variant="body2" color="textSecondary" isLoading={isLoading}>
+            <Ellipsis>{assetClass}</Ellipsis>
+          </TextWithPlaceholder>
+        )}
 
         <TextWithPlaceholder as="span" variant="body1" color="textPrimary" textAlign="right" isLoading={isLoading}>
           <Ellipsis>{valueLocked ? formatBalance(valueLocked, currencySymbol) : '-'}</Ellipsis>
         </TextWithPlaceholder>
 
-        <TextWithPlaceholder
-          as="span"
-          variant="body1"
-          color="textPrimary"
-          fontWeight={500}
-          textAlign="left"
-          isLoading={isLoading}
-          maxLines={1}
-        >
-          <Ellipsis>
-            {apr ? (
-              formatPercentage(apr.toAprPercent(), true, {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              })
-            ) : name?.toLowerCase().includes('anemoy') ? (
-              <Tooltips
-                style={{ zIndex: zIndices.overlay }}
-                type="tbillApr"
-                label={
-                  <>
-                    <Text fontWeight={500} variant="body1">
-                      5.0%
-                    </Text>
-                    <Text variant="body3"> target</Text>{' '}
-                  </>
-                }
-              />
-            ) : (
-              '—'
-            )}
-          </Ellipsis>
-          {status === 'Upcoming' && apr ? <Text variant="body3"> target</Text> : ''}
-        </TextWithPlaceholder>
+        {isMedium && (
+          <TextWithPlaceholder
+            as="span"
+            variant="body1"
+            color="textPrimary"
+            fontWeight={500}
+            textAlign="left"
+            isLoading={isLoading}
+            maxLines={1}
+          >
+            <Ellipsis>
+              {apr ? (
+                formatPercentage(apr.toAprPercent(), true, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })
+              ) : name?.toLowerCase().includes('anemoy') ? (
+                <Tooltips
+                  style={{ zIndex: zIndices.overlay }}
+                  type="tbillApr"
+                  label={
+                    <>
+                      <Text fontWeight={500} variant="body1">
+                        5.0%
+                      </Text>
+                      <Text variant="body3"> target</Text>{' '}
+                    </>
+                  }
+                />
+              ) : (
+                '—'
+              )}
+            </Ellipsis>
+            {status === 'Upcoming' && apr ? <Text variant="body3"> target</Text> : ''}
+          </TextWithPlaceholder>
+        )}
 
-        <Box>
-          <PoolStatus status={status} />
-        </Box>
+        {isMedium && (
+          <Box>
+            <PoolStatus status={status} />
+          </Box>
+        )}
       </Grid>
 
       {status === 'Upcoming' ? null : <Anchor to={`${basePath}/${poolId}`} aria-label={`Go to ${name} details`} />}

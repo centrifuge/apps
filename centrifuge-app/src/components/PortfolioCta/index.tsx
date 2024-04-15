@@ -5,8 +5,8 @@ import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../../utils/useListedPools'
-import { useScreenSize } from '../../utils/useScreenSize'
 import { useComputeLiquidityRewards } from '../LiquidityRewards/hooks'
 import { Cubes } from './Cubes'
 
@@ -17,7 +17,7 @@ export function PortfolioCta() {
   const balances = useBalances(address)
   const consts = useCentrifugeConsts()
   const [, listedTokens] = useListedPools()
-  const screenSize = useScreenSize()
+  const isMedium = useIsAboveBreakpoint('M')
 
   const stakes = balances?.tranches.map(({ poolId, trancheId }) => ({ poolId, trancheId })) ?? []
   const rewards = useComputeLiquidityRewards(address, stakes)
@@ -43,7 +43,7 @@ export function PortfolioCta() {
     },
   ]
 
-  if (address || screenSize.width < 900) return null
+  if (address || !isMedium) return null
 
   return (
     <Box
