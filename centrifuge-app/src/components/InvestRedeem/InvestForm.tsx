@@ -5,7 +5,6 @@ import {
   CurrencyInput,
   InlineFeedback,
   SelectInner,
-  Shelf,
   Stack,
   Text,
   TextWithPlaceholder,
@@ -50,7 +49,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
   })
 
   const pendingInvest = state.order?.remainingInvestCurrency ?? Dec(0)
-  const hasPendingOrder = !pendingInvest.isZero()
+  const hasPendingOrder = pendingInvest.greaterThan(1)
 
   const loadingMessage = state.pendingTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
 
@@ -170,7 +169,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                 </Text>
               )}
 
-              {inputToNumber(form.values.amount) > 0 && (
+              {inputToNumber(form.values.amount) > 0 && !hasPendingOrder && (
                 <Box p={2} backgroundColor="secondarySelectedBackground" borderRadius="input">
                   <Text variant="body3">
                     Token amount{' '}
@@ -186,14 +185,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
               )}
             </>
           ) : null}
-          <Shelf>
-            {state.isFirstInvestment && (
-              <InlineFeedback>
-                All orders are being collected and will be executed by the issuer of the pool.
-              </InlineFeedback>
-            )}
-          </Shelf>
-          {hasPendingOrder ? (
+          {hasPendingOrder && !state.collectType ? (
             <Stack gap={2}>
               <PendingOrder type="invest" pool={pool} amount={pendingInvest} />
             </Stack>
