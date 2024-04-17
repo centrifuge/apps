@@ -12,7 +12,7 @@ import { PoolStatus, PoolStatusKey } from './PoolStatus'
 
 const columns_base = 'minmax(150px, 2fr) minmax(100px, 1fr) 140px 70px 150px'
 const columns_extended = 'minmax(200px, 2fr) minmax(100px, 1fr) 140px 100px 150px'
-export const COLUMNS = [columns_base, columns_base, columns_base, columns_extended]
+export const COLUMNS = ['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', columns_base, columns_extended]
 export const COLUMN_GAPS = [3, 3, 6, 8]
 
 export type PoolCardProps = {
@@ -44,12 +44,7 @@ export function PoolCard({
 
   return (
     <Root as="article" bg={status === 'Archived' ? 'backgroundSecondary' : 'transparent'}>
-      <Grid
-        gridTemplateColumns={['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', ...COLUMNS]}
-        gap={[...[3, 6], ...[3, 6], ...COLUMN_GAPS]}
-        p={2}
-        alignItems="center"
-      >
+      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} p={2} alignItems="center">
         <Grid as="header" gridTemplateColumns={`${sizes.iconMedium}px 1fr`} alignItems="center" gap={2}>
           <Eththumbnail show={poolId?.startsWith('0x')}>
             {iconUri ? (

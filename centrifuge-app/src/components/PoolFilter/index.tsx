@@ -27,13 +27,7 @@ export function PoolFilter({ pools }: PoolFilterProps) {
   }, [pools])
 
   return (
-    <Grid
-      gridTemplateColumns={['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', ...COLUMNS]}
-      gap={[...[3, 6], ...[3, 6], ...COLUMN_GAPS]}
-      alignItems="start"
-      minWidth={isMedium ? 970 : 0}
-      px={2}
-    >
+    <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" minWidth={isMedium ? 970 : 0} px={2}>
       <Text as="span" variant="body3">
         Pool name
       </Text>

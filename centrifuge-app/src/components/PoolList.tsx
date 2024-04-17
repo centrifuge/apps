@@ -117,14 +117,8 @@ function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
   const isMedium = useIsAboveBreakpoint('M')
 
   return (
-    <Stack gap={1}>
-      <Grid
-        gridTemplateColumns={['minmax(100px, 1fr) 1fr', 'minmax(100px, 1fr) 1fr', ...COLUMNS]}
-        gap={[...[3, 6], ...[3, 6], ...COLUMN_GAPS]}
-        alignItems="start"
-        minWidth={isMedium ? 970 : 0}
-        px={2}
-      >
+    <Stack gap={1} overflow="auto">
+      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" minWidth={isMedium ? 970 : 0} px={2}>
         <Text as="span" variant="body3">
           Pool name
         </Text>
