@@ -6,6 +6,7 @@ import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { getPoolValueLocked } from '../utils/getPoolValueLocked'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { useListedPools } from '../utils/useListedPools'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { COLUMNS, COLUMN_GAPS, PoolCard, PoolCardProps } from './PoolCard'
@@ -30,6 +31,7 @@ export function PoolList() {
   const { search } = useLocation()
   const [showArchived, setShowArchived] = React.useState(false)
   const [listedPools, , metadataIsLoading] = useListedPools()
+  const isMedium = useIsAboveBreakpoint('M')
 
   const centPools = listedPools.filter(({ id }) => !id.startsWith('0x')) as Pool[]
   const centPoolsMetaData: PoolMetaDataPartial[] = useMetadataMulti<PoolMetadata>(
@@ -79,7 +81,7 @@ export function PoolList() {
               </Box>
             </Shelf>
           ) : (
-            <Stack as="ul" role="list" gap={1} minWidth={970} py={1}>
+            <Stack as="ul" role="list" gap={1} minWidth={isMedium ? 970 : 0} py={1}>
               {metadataIsLoading
                 ? Array(6)
                     .fill(true)
@@ -112,26 +114,34 @@ export function PoolList() {
 }
 
 function ArchivedPools({ pools }: { pools: PoolCardProps[] }) {
+  const isMedium = useIsAboveBreakpoint('M')
+
   return (
-    <Stack gap={1}>
-      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" minWidth={970} px={2}>
+    <Stack gap={1} overflow="auto">
+      <Grid gridTemplateColumns={COLUMNS} gap={COLUMN_GAPS} alignItems="start" minWidth={isMedium ? 970 : 0} px={2}>
         <Text as="span" variant="body3">
           Pool name
         </Text>
-        <Text as="span" variant="body3">
-          Asset class
-        </Text>
+        {isMedium && (
+          <Text as="span" variant="body3">
+            Asset class
+          </Text>
+        )}
         <Text as="span" variant="body3" textAlign="right">
           Value locked
         </Text>
-        <Text as="span" variant="body3">
-          APR
-        </Text>
-        <Text as="span" variant="body3">
-          Pool status
-        </Text>
+        {isMedium && (
+          <Text as="span" variant="body3">
+            APR
+          </Text>
+        )}
+        {isMedium && (
+          <Text as="span" variant="body3">
+            Pool status
+          </Text>
+        )}
       </Grid>
-      <Stack as="ul" role="list" gap={1} minWidth={970} py={1}>
+      <Stack as="ul" role="list" gap={1} minWidth={isMedium ? 970 : 0} py={1}>
         {pools.map((pool) => (
           <PoolCardBox as="li" key={pool.poolId} status={pool.status}>
             <PoolCard {...pool} />

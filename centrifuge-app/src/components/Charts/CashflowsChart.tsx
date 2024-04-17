@@ -74,7 +74,7 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
 
   return (
     <Stack gap={4}>
-      <Shelf>
+      <Shelf gap={2}>
         <CustomLegend data={today} />
         <Shelf justifyContent="flex-end" pr={1}>
           {chartData.length > 0 &&
@@ -176,16 +176,20 @@ function CustomLegend({
     <Shelf bg="backgroundPage" width="100%" gap={2}>
       <Shelf gap={3}>
         <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#001C66" gap="4px">
-          <Text variant="body3" color="textSecondary">
+          <Text variant="body3" color="textSecondary" whiteSpace="nowrap">
             Total purchases
           </Text>
-          <Text variant="body1">{formatBalance(data.totalPurchases, 'USD', 2)}</Text>
+          <Text variant="body1" whiteSpace="nowrap">
+            {formatBalance(data.totalPurchases, 'USD', 2)}
+          </Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#A4D5D8" gap="4px">
-          <Text variant="body3" color="textSecondary">
+          <Text variant="body3" color="textSecondary" whiteSpace="nowrap">
             Principal repayments
           </Text>
-          <Text variant="body1">{formatBalance(data.principalRepayments, 'USD', 2)}</Text>
+          <Text variant="body1" whiteSpace="nowrap">
+            {formatBalance(data.principalRepayments, 'USD', 2)}
+          </Text>
         </Stack>
         <Stack
           borderLeftWidth="3px"
@@ -194,10 +198,12 @@ function CustomLegend({
           borderLeftColor={theme.colors.borderPrimary}
           gap="4px"
         >
-          <Text variant="body3" color="textSecondary">
+          <Text variant="body3" color="textSecondary" whiteSpace="nowrap">
             Interest
           </Text>
-          <Text variant="body1">{formatBalance(data.interest, 'USD', 2)}</Text>
+          <Text variant="body1" whiteSpace="nowrap">
+            {formatBalance(data.interest, 'USD', 2)}
+          </Text>
         </Stack>
         {/* <Stack
           borderLeftWidth="3px"

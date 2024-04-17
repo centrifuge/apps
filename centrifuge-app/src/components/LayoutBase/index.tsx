@@ -1,6 +1,7 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { Footer } from '../Footer'
 import { LoadBoundary } from '../LoadBoundary'
 import { LogoLink } from '../LogoLink'
@@ -26,6 +27,8 @@ type LayoutBaseProps = {
 }
 
 export function LayoutBase({ children, gap }: LayoutBaseProps) {
+  const isMedium = useIsAboveBreakpoint('M')
+
   return (
     <Root>
       <Inner>
@@ -53,9 +56,11 @@ export function LayoutBase({ children, gap }: LayoutBaseProps) {
           </MainContainer>
         </LoadBoundary>
 
-        <FooterContainer>
-          <Footer />
-        </FooterContainer>
+        {isMedium && (
+          <FooterContainer>
+            <Footer />
+          </FooterContainer>
+        )}
       </Inner>
     </Root>
   )
