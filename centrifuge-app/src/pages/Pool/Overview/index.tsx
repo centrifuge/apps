@@ -159,7 +159,7 @@ export function PoolDetailOverview() {
           {isMedium && (
             <React.Suspense fallback={<Spinner />}>
               <Box height="100%">
-                <Card p={3} overflowX={isMedium ? 'auto' : 'scroll'}>
+                <Card p={3} overflow="auto">
                   <Cashflows />
                 </Card>
               </Box>
@@ -167,7 +167,7 @@ export function PoolDetailOverview() {
           )}
           <React.Suspense fallback={<Spinner />}>
             <Box height="100%">
-              <Card p={3} overflowX={isMedium ? 'auto' : 'scroll'}>
+              <Card p={3} overflow="auto">
                 <TransactionHistory poolId={poolId} />
               </Card>
             </Box>

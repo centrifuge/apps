@@ -6,7 +6,7 @@ import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { prefetchRoute } from '../Root'
 import { baseButton, primaryButton } from './styles'
 
-export const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
+const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   ${baseButton}
   ${primaryButton}
   grid-template-columns: ${({ stacked, theme }) => (stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr`)};
