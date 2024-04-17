@@ -156,13 +156,15 @@ export function PoolDetailOverview() {
                 <AssetsByMaturity />
               </React.Suspense> */}
           </Grid>
-          <React.Suspense fallback={<Spinner />}>
-            <Box height="100%">
-              <Card p={3} overflowX={isMedium ? 'auto' : 'scroll'}>
-                <Cashflows />
-              </Card>
-            </Box>
-          </React.Suspense>
+          {isMedium && (
+            <React.Suspense fallback={<Spinner />}>
+              <Box height="100%">
+                <Card p={3} overflowX={isMedium ? 'auto' : 'scroll'}>
+                  <Cashflows />
+                </Card>
+              </Box>
+            </React.Suspense>
+          )}
           <React.Suspense fallback={<Spinner />}>
             <Box height="100%">
               <Card p={3} overflowX={isMedium ? 'auto' : 'scroll'}>
