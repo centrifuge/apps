@@ -2,40 +2,58 @@ import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoans } from '../../utils/useLoans'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
-import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import type { TableDataRow } from './index'
 
+const noop = (v: any) => v
 const headers = [
   'ID',
   'Status',
-  // 'Collateral value',
   'Outstanding',
+  'Outstanding currency',
   'Total financed',
+  'Total financed currency',
   'Total repaid',
+  'Total repaid currency',
   'Financing date',
   'Maturity date',
   'Interest rate',
-  // 'Advance rate',
-  // 'PD',
-  // 'LGD',
-  // 'Discount rate',
 ]
-
-const columns = headers.map((col, index) => ({
-  align: 'left',
-  header: col,
-  cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-}))
+const align = ['left', 'left', 'right', 'left', 'right', 'left', 'right', 'left', 'left', 'left', 'left']
+const csvOnly = [false, false, false, true, false, true, false, true, false, false, false]
 
 export function AssetList({ pool }: { pool: Pool }) {
   const loans = useLoans(pool.id) as Loan[]
-  const { setCsvData, startDate, endDate } = React.useContext(ReportContext)
+  const { setCsvData, loanStatus } = React.useContext(ReportContext)
+  const { symbol } = pool.currency
+
+  const cellFormatters = [
+    noop,
+    noop,
+    (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    noop,
+    (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    noop,
+    (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    noop,
+    (v: any) => (v !== '-' ? formatDate(v) : v),
+    formatDate,
+    (v: any) => (typeof v === 'number' ? formatPercentage(v, true, undefined, 5) : '-'),
+  ]
+
+  const columns = headers
+    .map((col, index) => ({
+      align: align[index],
+      header: col,
+      cell: (row: TableDataRow) => <Text variant="body3">{cellFormatters[index]((row.value as any)[index])}</Text>,
+    }))
+    .filter((_, index) => !csvOnly[index])
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!loans) {
@@ -48,58 +66,43 @@ export function AssetList({ pool }: { pool: Pool }) {
         name: '',
         value: [
           loan.id,
-          loan.status === 'Created' ? 'New' : loan.status,
-          // 'value' in loan.pricing
-          //   ? formatBalanceAbbreviated(loan.pricing.value.toDecimal(), pool.currency.symbol)
-          //   : '-',
-          'outstandingDebt' in loan
-            ? formatBalanceAbbreviated(loan.outstandingDebt.toDecimal(), pool.currency.symbol)
-            : '-',
-          'totalBorrowed' in loan
-            ? formatBalanceAbbreviated(loan.totalBorrowed.toDecimal(), pool.currency.symbol)
-            : '-',
-          'totalRepaid' in loan ? formatBalanceAbbreviated(loan.totalRepaid.toDecimal(), pool.currency.symbol) : '-',
-          'originationDate' in loan ? formatDate(loan.originationDate) : '-',
-          formatDate(loan.pricing.maturityDate),
-          'interestRate' in loan.pricing ? formatPercentage(loan.pricing.interestRate.toPercent()) : '-',
-          // 'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
-          // 'probabilityOfDefault' in loan.pricing
-          //   ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
-          //   : '-',
-          // 'lossGivenDefault' in loan.pricing
-          //   ? formatPercentage((loan.pricing.lossGivenDefault as Rate).toPercent())
-          //   : '-',
-          // 'discountRate' in loan.pricing ? formatPercentage((loan.pricing.discountRate as Rate).toPercent()) : '-',
+          loan.status === 'Closed' ? 'Repaid' : new Date() > new Date(loan.pricing.maturityDate) ? 'Overdue' : 'Active',
+          'outstandingDebt' in loan ? loan.outstandingDebt.toFloat() : '-',
+          symbol,
+          'totalBorrowed' in loan ? loan.totalBorrowed.toFloat() : '-',
+          symbol,
+          'totalRepaid' in loan ? loan.totalRepaid.toFloat() : '-',
+          symbol,
+          'originationDate' in loan ? loan.originationDate : '-',
+          loan.pricing.maturityDate,
+          'interestRate' in loan.pricing ? loan.pricing.interestRate.toPercent().toNumber() : '-',
         ],
         heading: false,
       }))
-  }, [loans, pool.currency.symbol])
+      .filter((row) => (loanStatus === 'all' || !loanStatus ? true : row.value[1] === loanStatus))
+  }, [loans, symbol, loanStatus])
 
-  const dataUrl = React.useMemo(() => {
+  React.useEffect(() => {
     if (!data.length) {
       return
     }
 
-    const formatted = data
-      .map(({ value }) => value as string[])
-      .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
-
-    return getCSVDownloadUrl(formatted)
-  }, [data])
-
-  React.useEffect(() => {
-    setCsvData(
-      dataUrl
-        ? {
-            dataUrl,
-            fileName: `${pool.id}-asset-list-${startDate}-${endDate}.csv`,
-          }
-        : undefined
+    const formatted = data.map(({ value: values }) =>
+      Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`]))
     )
+    const dataUrl = getCSVDownloadUrl(formatted)
 
-    return () => setCsvData(undefined)
+    setCsvData({
+      dataUrl,
+      fileName: `${pool.id}-asset-list-${loanStatus.toLowerCase()}.csv`,
+    })
+
+    return () => {
+      setCsvData(undefined)
+      URL.revokeObjectURL(dataUrl)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataUrl, pool.id, startDate, endDate])
+  }, [data])
 
   if (!loans) {
     return <Spinner />

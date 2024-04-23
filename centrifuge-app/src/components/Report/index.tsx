@@ -11,8 +11,8 @@ import { PoolBalance } from './PoolBalance'
 import { ReportContext } from './ReportContext'
 
 export type TableDataRow = {
-  name: string | React.ReactElement
-  value: string[] | React.ReactElement
+  name: string
+  value: (string | number)[]
   heading?: boolean
 }
 
@@ -23,9 +23,13 @@ export function ReportComponent({ pool }: { pool: Pool }) {
     <Box pb={6}>
       <Shelf p={2} justifyContent="space-between">
         <Text as="span" variant="body3" color="textSecondary">
-          <time dateTime={startDate.toISOString()}>{formatDate(startDate)}</time>
-          {' - '}
-          <time dateTime={endDate.toISOString()}>{formatDate(endDate)}</time>
+          {!['holders', 'asset-list'].includes(report) && (
+            <>
+              <time dateTime={startDate}>{formatDate(startDate)}</time>
+              {' - '}
+              <time dateTime={endDate}>{formatDate(endDate)}</time>
+            </>
+          )}
         </Text>
         {(report === 'pool-balance' || report === 'asset-list') && pool && (
           <Text as="span" variant="body3" color="textSecondary">

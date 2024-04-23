@@ -1,51 +1,103 @@
+import { isSameAddress } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Text } from '@centrifuge/fabric'
+import { useCentrifugeUtils, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
+import { IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
+import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { evmChains } from '../../config'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useInvestorTransactions } from '../../utils/usePools'
-import { DataTable } from '../DataTable'
+import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
-import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import type { TableDataRow } from './index'
 import { copyable, formatInvestorTransactionsType } from './utils'
 
 const noop = (v: any) => v
-const cellFormatters = [noop, noop, copyable, noop, noop, noop, noop, noop, noop]
+const headers = [
+  'Token',
+  'Network',
+  'Account',
+  'Epoch',
+  'Date',
+  'Transaction type',
+  'Currency amount',
+  'Currency',
+  'Token amount',
+  'Token currency',
+  'Price',
+  'Price currency',
+  'Transaction',
+]
+const align = [
+  'left',
+  'left',
+  'left',
+  'left',
+  'left',
+  'left',
+  'right',
+  'left',
+  'right',
+  'left',
+  'right',
+  'left',
+  'left',
+]
+const sortable = [false, false, false, false, true, false, true, false, true, false, true, false, false]
+const csvOnly = [false, false, false, false, false, false, false, true, false, true, false, true, false]
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
-  const { activeTranche, setCsvData, startDate, endDate, investorTxType } = React.useContext(ReportContext)
+  const { activeTranche, setCsvData, startDate, endDate, txType, address, network } = React.useContext(ReportContext)
   const utils = useCentrifugeUtils()
+  const explorer = useGetExplorerUrl('centrifuge')
+
+  const cellFormatters = [
+    noop,
+    noop,
+    copyable,
+    noop,
+    (v: any) => formatDate(v),
+    noop,
+    (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+    noop,
+    (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[9], 5) : '-'),
+    noop,
+    (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+    noop,
+    (v: any) => (
+      <IconAnchor
+        href={explorer.tx(v)}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="View account on block explorer"
+      >
+        <IconExternalLink />
+      </IconAnchor>
+    ),
+  ]
 
   const transactions = useInvestorTransactions(
     pool.id,
     activeTranche === 'all' ? undefined : activeTranche,
-    startDate,
-    endDate
+    new Date(startDate),
+    new Date(endDate)
   )
 
-  const headers = [
-    'Token',
-    'Network',
-    'Account',
-    'Epoch',
-    'Date',
-    'Type',
-    `${pool ? `${pool.currency.symbol} amount` : '—'}`,
-    'Token amount',
-    'Price',
-  ]
-
-  const columns = headers.map((col, index) => ({
-    align: 'left',
-    header: col,
-    cell: (row: TableDataRow) => <Text variant="body2">{cellFormatters[index]((row.value as any)[index])}</Text>,
-  }))
-
+  const columns = headers
+    .map((col, index) => ({
+      align: align[index],
+      header: sortable[index] ? <SortableTableHeader label={col} /> : col,
+      cell: (row: TableDataRow) => (
+        <Text variant="body3">{cellFormatters[index]((row.value as any)[index], row.value)}</Text>
+      ),
+      sortKey: sortable[index] ? `value[${index}]` : undefined,
+    }))
+    .filter((_, index) => !csvOnly[index])
+  console.log('transactions', transactions)
   const data: TableDataRow[] = React.useMemo(() => {
     if (!transactions) {
       return []
@@ -53,91 +105,107 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
 
     return transactions
       ?.filter((tx) => {
-        if (investorTxType == 'all') {
+        if (txType === 'all') {
           return true
         }
 
         if (
-          investorTxType == 'orders' &&
-          (tx.type == 'INVEST_ORDER_UPDATE' ||
-            tx.type == 'REDEEM_ORDER_UPDATE' ||
-            tx.type == 'INVEST_ORDER_CANCEL' ||
-            tx.type == 'REDEEM_ORDER_CANCEL')
+          txType === 'orders' &&
+          (tx.type === 'INVEST_ORDER_UPDATE' ||
+            tx.type === 'REDEEM_ORDER_UPDATE' ||
+            tx.type === 'INVEST_ORDER_CANCEL' ||
+            tx.type === 'REDEEM_ORDER_CANCEL')
         ) {
           return true
         }
 
-        if (investorTxType == 'executions' && (tx.type == 'INVEST_EXECUTION' || tx.type == 'REDEEM_EXECUTION')) {
+        if (txType === 'executions' && (tx.type === 'INVEST_EXECUTION' || tx.type === 'REDEEM_EXECUTION')) {
           return true
         }
 
         if (
-          investorTxType == 'transfers' &&
-          (tx.type == 'INVEST_COLLECT' ||
-            tx.type == 'REDEEM_COLLECT' ||
-            tx.type == 'INVEST_LP_COLLECT' ||
-            tx.type == 'REDEEM_LP_COLLECT' ||
-            tx.type == 'TRANSFER_IN' ||
-            tx.type == 'TRANSFER_OUT')
+          txType === 'transfers' &&
+          (tx.type === 'INVEST_COLLECT' ||
+            tx.type === 'REDEEM_COLLECT' ||
+            tx.type === 'INVEST_LP_COLLECT' ||
+            tx.type === 'REDEEM_LP_COLLECT' ||
+            tx.type === 'TRANSFER_IN' ||
+            tx.type === 'TRANSFER_OUT')
         ) {
           return true
         }
 
         return false
       })
+      .filter((tx) => {
+        if (!network || network === 'all') return true
+        return network === (tx.chainId || 'centrifuge')
+      })
       .map((tx) => {
-        const tokenId = tx.trancheId.split('-')[1]
-        const token = pool.tranches.find((t) => t.id === tokenId)!
-
+        const token = pool.tranches.find((t) => t.id === tx.trancheId)!
         return {
           name: '',
           value: [
             token.currency.name,
             (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
-            tx.evmAddress || utils.formatAddress(tx.accountId),
+            utils.formatAddress(tx.evmAddress || tx.accountId),
             tx.epochNumber ? tx.epochNumber.toString() : '-',
-            formatDate(tx.timestamp.toString()),
+            tx.timestamp.toISOString(),
             formatInvestorTransactionsType({
               type: tx.type,
               trancheTokenSymbol: token.currency.symbol,
               poolCurrencySymbol: pool.currency.symbol,
               currencyAmount: tx.currencyAmount ? tx.currencyAmount?.toNumber() : null,
             }),
-            tx.currencyAmount ? formatBalance(tx.currencyAmount.toDecimal(), pool.currency) : '-',
-            tx.tokenAmount ? formatBalance(tx.tokenAmount.toDecimal(), pool.tranches[0].currency) : '-', // TODO: not hardcode to 0
-            tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 6) : '-',
+            tx.currencyAmount?.toFloat() ?? '-',
+            pool.currency.symbol,
+            tx.tokenAmount?.toFloat() ?? '-',
+            token.currency.symbol,
+            tx.tokenPrice?.toFloat() ?? '-',
+            pool.currency.symbol,
+            tx.hash,
           ],
           heading: false,
         }
       })
-  }, [transactions, pool.currency, pool.tranches, investorTxType])
+      .filter((row) => {
+        if (!address) return true
+        return isAddress(address) && isSameAddress(address, row.value[2])
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transactions, pool.currency, pool.tranches, txType, address, network])
 
-  const dataUrl = React.useMemo(() => {
+  React.useEffect(() => {
     if (!data.length) {
       return
     }
 
-    const formatted = data
-      .map(({ value }) => value as string[])
-      .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
+    const formatted = data.map(({ value: values }) =>
+      Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`]))
+    )
+    const dataUrl = getCSVDownloadUrl(formatted)
 
-    return getCSVDownloadUrl(formatted)
+    setCsvData({
+      dataUrl,
+      fileName: `${pool.id}-investor-transactions-${formatDate(startDate, {
+        weekday: 'short',
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+      }).replaceAll(',', '')}-${formatDate(endDate, {
+        weekday: 'short',
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+      }).replaceAll(',', '')}.csv`,
+    })
+
+    return () => {
+      setCsvData(undefined)
+      URL.revokeObjectURL(dataUrl)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
-
-  React.useEffect(() => {
-    setCsvData(
-      dataUrl
-        ? {
-            dataUrl,
-            fileName: `${pool.id}-investor-transactions-${startDate}-${endDate}.csv`,
-          }
-        : undefined
-    )
-
-    return () => setCsvData(undefined)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataUrl, pool.id, startDate, endDate])
 
   if (!transactions) {
     return <Spinner mt={2} />
