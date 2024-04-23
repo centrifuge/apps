@@ -93,7 +93,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = (props) => {
         <Box
           p={2}
           style={{
-            boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}`,
+            boxShadow: `0 -1px 0 ${theme.colors.borderPrimary}`,
           }}
         >
           {secondaryHeader}
@@ -127,7 +127,7 @@ function Content({ backgroundColor = 'none', children }: ContentProps) {
       borderBottomLeftRadius="card"
       borderBottomRightRadius="card"
       style={{
-        boxShadow: `0 -1px 0 ${colors.borderSecondary}`,
+        boxShadow: `0 -1px 0 ${colors.borderPrimary}`,
       }}
     >
       {children}

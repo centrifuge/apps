@@ -9,8 +9,8 @@ import { useEvmNativeBalance, useEvmNativeCurrency } from '.'
 import { useBalances } from '../../hooks/useBalances'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useCentrifugeUtils } from '../CentrifugeProvider'
-import { Proxy } from './types'
 import { useWallet } from './WalletProvider'
+import { Proxy } from './types'
 
 type AccountButtonProps = {
   address: string
@@ -31,7 +31,7 @@ const Root = styled(Shelf)<{ selected: boolean }>`
 
   &:hover {
     background-color: ${({ theme, selected }) =>
-      selected ? theme.colors.borderSecondary : theme.colors.backgroundSecondary};
+      selected ? theme.colors.borderPrimary : theme.colors.backgroundSecondary};
   }
 
   &:focus-visible {

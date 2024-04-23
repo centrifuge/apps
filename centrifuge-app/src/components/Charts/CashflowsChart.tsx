@@ -100,12 +100,12 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
       <Box height="100%" width="100%" color="textSecondary">
         <ResponsiveContainer width="100%" height="100%" minHeight="200px">
           <BarChart data={chartData} margin={{ left: -20, right: 24 }} barGap={0} barSize={16}>
-            <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
+            <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
             <XAxis
               dataKey="name"
               style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
               tickLine={false}
-              stroke={theme.colors.borderSecondary}
+              stroke={theme.colors.borderPrimary}
               tickFormatter={(tick: number) => {
                 if (data.length > 180) {
                   return new Date(tick).toLocaleString('en-US', { month: 'short' })
@@ -117,7 +117,7 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
             <YAxis
               style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
               tickLine={false}
-              stroke={theme.colors.borderSecondary}
+              stroke={theme.colors.borderPrimary}
               tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
             />
             <Tooltip

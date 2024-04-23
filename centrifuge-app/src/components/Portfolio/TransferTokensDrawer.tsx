@@ -214,7 +214,7 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
   })
 
   return (
-    <Stack px={2} py={4} backgroundColor="backgroundTertiary">
+    <Stack px={2} py={4} backgroundColor="backgroundSecondary">
       <FormikProvider value={form}>
         <Form>
           <Stack gap="2">
@@ -305,7 +305,7 @@ const ReceiveToken = ({ address }: SendReceiveProps) => {
   )
 
   return (
-    <Stack gap={2} px={1} py={2} backgroundColor="backgroundTertiary">
+    <Stack gap={2} px={1} py={2} backgroundColor="backgroundSecondary">
       <Stack gap={3}>
         <Text variant="interactive2" color="textSecondary">
           Your address on Centrifuge Chain

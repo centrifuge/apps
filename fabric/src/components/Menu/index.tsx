@@ -30,7 +30,7 @@ const ScrollContainer = styled(Stack)`
 export const MenuItemGroup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <>
-      <MenuDivider borderColor="borderSecondary" />
+      <MenuDivider borderColor="borderPrimary" />
       {children}
     </>
   )

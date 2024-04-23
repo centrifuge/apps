@@ -24,7 +24,7 @@ export const iconActionStyles = css`
 
   &:focus-visible,
   &:hover {
-    background-color: ${({ theme }) => theme.colors.blueScale[50]};
+    background-color: ${({ theme }) => theme.colors.blueScale[100]};
     color: ${({ theme }) => theme.colors.accentPrimary};
   }
 `

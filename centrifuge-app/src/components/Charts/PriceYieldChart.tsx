@@ -73,7 +73,7 @@ function PriceYieldChart({
               }}
               domain={['dataMin - 0.2', 'dataMax + 0.2']}
             />
-            <CartesianGrid stroke={theme.colors.borderSecondary} />
+            <CartesianGrid stroke={theme.colors.borderPrimary} />
             <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} precision={4} />} />
             <Line dot={false} dataKey="tokenPrice" stroke={theme.colors.accentPrimary} name="Pool value" />
           </ComposedChart>

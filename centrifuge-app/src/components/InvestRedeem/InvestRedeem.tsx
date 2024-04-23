@@ -103,7 +103,7 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
     <Stack>
       <Flex
         style={{
-          boxShadow: `inset 0 -2px 0 ${theme.colors.borderSecondary}`,
+          boxShadow: `inset 0 -2px 0 ${theme.colors.borderPrimary}`,
         }}
       >
         <Tabs
@@ -114,7 +114,7 @@ function InvestRedeemInput({ defaultView: defaultViewProp }: InputProps) {
           <TabsItem ariaLabel="Go to redeem tab">Redeem</TabsItem>
         </Tabs>
       </Flex>
-      <Box p={2} backgroundColor="backgroundTertiary">
+      <Box p={2} backgroundColor="backgroundSecondary">
         {state.isDataLoading ? (
           <Spinner />
         ) : state.isAllowedToInvest ? (
@@ -163,7 +163,7 @@ function Header() {
         <Shelf
           justifyContent="space-between"
           borderWidth="1px 0"
-          borderColor="borderSecondary"
+          borderColor="borderPrimary"
           borderStyle="solid"
           py={1}
         >

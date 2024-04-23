@@ -44,7 +44,7 @@ export const PageHeader: React.FC<Props> = ({
       top={0}
       zIndex="sticky"
       style={{
-        boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,
+        boxShadow: border ? `0 1px 0 ${theme.colors.borderPrimary}` : undefined,
       }}
     >
       <Shelf px={[2, 3]} py="20px" justifyContent="space-between" alignItems="center" backgroundColor="backgroundPage">
