@@ -41,7 +41,8 @@ export const PageHeader: React.FC<Props> = ({
     <Box
       as="header"
       position="sticky"
-      top={0}
+      // Aprox height of top bar - height of title and subtitle
+      top={[-20, -26, 0]}
       zIndex="sticky"
       style={{
         boxShadow: border ? `0 1px 0 ${theme.colors.borderPrimary}` : undefined,

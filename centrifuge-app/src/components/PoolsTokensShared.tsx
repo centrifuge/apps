@@ -30,7 +30,7 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
   ]
 
   return (
-    <LayoutSection pt={5}>
+    <LayoutSection py={5}>
       <Stack gap={4}>
         <Stack>
           <Text as="h1" variant="heading1">

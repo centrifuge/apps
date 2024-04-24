@@ -1,5 +1,5 @@
 import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
-import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -158,19 +158,15 @@ export function PoolDetailOverview() {
           </Grid>
           {isMedium && (
             <React.Suspense fallback={<Spinner />}>
-              <Box height="100%">
-                <Card p={3} overflow="auto">
-                  <Cashflows />
-                </Card>
-              </Box>
+              <Card p={3}>
+                <Cashflows />
+              </Card>
             </React.Suspense>
           )}
           <React.Suspense fallback={<Spinner />}>
-            <Box height="100%">
-              <Card p={3} overflow="auto">
-                <TransactionHistory poolId={poolId} />
-              </Card>
-            </Box>
+            <Card p={3}>
+              <TransactionHistory poolId={poolId} />
+            </Card>
           </React.Suspense>
         </>
       )}
