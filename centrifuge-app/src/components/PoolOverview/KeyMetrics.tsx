@@ -24,7 +24,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
       const days = daysBetween(today, loan.pricing.maturityDate)
-      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0
+      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0 && !loan.outstandingDebt.isZero()
     }).length
 
   const isBT3BT4 =

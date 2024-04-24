@@ -3611,10 +3611,9 @@ export function getPoolsModule(inst: Centrifuge) {
               }) || []),
               ...add.map((metadata, index) => {
                 return {
-                  // chain refactor required: feeId needs to be assigned to fee when it's proposed
-                  // until then multiple fees have to be added at once or all pending fees have to be applied before adding more
                   id: parseInt(lastFeeId.toHuman() as string) + index + 1,
                   name: metadata.fee.name,
+                  feePosition: metadata.fee.feePosition,
                 }
               }),
             ],
