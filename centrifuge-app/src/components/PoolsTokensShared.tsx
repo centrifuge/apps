@@ -36,7 +36,7 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
           <Text as="h1" variant="heading1">
             {title}
           </Text>
-          <Text as="p" variant="heading6">
+          <Text as="p" variant="heading4">
             {`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
           </Text>
         </Stack>

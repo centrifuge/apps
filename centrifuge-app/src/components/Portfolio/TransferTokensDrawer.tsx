@@ -121,7 +121,7 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
         )}
         {isNativeTransfer && (
           <Stack gap={12}>
-            <Text variant="heading6" color="textPrimary" fontWeight={600}>
+            <Text variant="heading4" color="textPrimary" fontWeight={600}>
               Price
             </Text>
             <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">

@@ -71,7 +71,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
           <Text variant="interactive1" color="inherit">
             {label}
           </Text>
-          <Sublabel variant="label3" color="inherit">
+          <Sublabel variant="label2" color="inherit">
             {sublabel}
           </Sublabel>
         </Stack>

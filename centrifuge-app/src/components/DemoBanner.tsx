@@ -25,7 +25,7 @@ export const DemoBanner = () => {
       isOpen={isOpen}
       onClose={() => onClose()}
       title={
-        <Text as="h3" color="textInverted" variant="heading5">
+        <Text as="h3" color="textInverted" variant="heading4">
           Welcome to the demo environment of the Centrifuge App. All data and wallet transactions are not real as this
           is purely a testing environment. Read{' '}
           <Text
@@ -33,7 +33,7 @@ export const DemoBanner = () => {
             as="a"
             href="https://centrifuge.hackmd.io/@Anna/H1ylqpRQj"
             color="textInverted"
-            variant="heading5"
+            variant="heading4"
             display="inline"
             textDecoration="underline"
           >

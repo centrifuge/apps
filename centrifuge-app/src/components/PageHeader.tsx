@@ -63,7 +63,7 @@ export const PageHeader: React.FC<Props> = ({
               {titleAddition}
             </Shelf>
             {subtitle && (
-              <Text variant="heading6">
+              <Text variant="heading5">
                 {subtitle}
                 {subtitleLink && (
                   <>

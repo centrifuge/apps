@@ -83,7 +83,7 @@ export function LayoutMain({
             {title}
           </Text>
           {subtitle && (
-            <Text as="p" variant="heading6">
+            <Text as="p" variant="heading4">
               {subtitle}
             </Text>
           )}

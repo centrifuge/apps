@@ -171,7 +171,7 @@ function Header() {
             <TextWithPlaceholder variant="body3" color="textSecondary">
               Position
             </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
+            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
               {formatBalance(state.investmentValue, state.poolCurrency?.displayName, 2, 0)}
             </TextWithPlaceholder>
           </Stack>
@@ -180,7 +180,7 @@ function Header() {
             <TextWithPlaceholder variant="body3" color="textSecondary">
               Cost basis
             </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
+            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
               -
             </TextWithPlaceholder>
           </Stack>
@@ -189,7 +189,7 @@ function Header() {
             <TextWithPlaceholder variant="body3" color="textSecondary">
               Profit
             </TextWithPlaceholder>
-            <TextWithPlaceholder variant="heading6" isLoading={state.isDataLoading} width={12} variance={0}>
+            <TextWithPlaceholder variant="heading4" isLoading={state.isDataLoading} width={12} variance={0}>
               -
             </TextWithPlaceholder>
           </Stack> */}

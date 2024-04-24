@@ -94,7 +94,6 @@ export type TextVariantName =
   | 'heading3'
   | 'heading4'
   | 'heading5'
-  | 'heading6'
   | 'emphasized'
   | 'interactive1'
   | 'interactive2'
@@ -104,7 +103,6 @@ export type TextVariantName =
   | 'body4'
   | 'label1'
   | 'label2'
-  | 'label3'
 
 type TypographyValue = Partial<{
   fontSize: ResponsiveValue<number | string>

@@ -15,7 +15,7 @@ const statusCriticalBg = '#fcf0ee'
 const statusPromoteBg = '#f8107114'
 
 const lightColors = {
-  textPrimary: 'black',
+  textPrimary: grayScale[900],
   textSecondary: grayScale[800],
   textDisabled: grayScale[500],
   textInverted: 'white',

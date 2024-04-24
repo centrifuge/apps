@@ -73,7 +73,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = (props) => {
                 </Text>
                 <Text variant="body2">{titleAddition}</Text>
               </Shelf>
-              {subtitle && <Text variant="heading6">{subtitle}</Text>}
+              {subtitle && <Text variant="heading4">{subtitle}</Text>}
             </Stack>
           </Shelf>
         </Shelf>
