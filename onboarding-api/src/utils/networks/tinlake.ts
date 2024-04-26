@@ -106,7 +106,7 @@ const goerliConfig = {
   memberListAddress: '0xaEcFA11fE9601c1B960661d7083A08A5df7c1947',
 }
 const mainnetConfig = {
-  poolsHash: 'QmYfjiwzdCbpv3YkqAHit1KPDAVpftBnWeyaNfaJYBuEvW', // TODO: add registry to config and fetch poolHash
+  poolsHash: 'QmaMA1VYSKuuYhBcQCyf5Ek4VoiiEG6oLGp3iGbsQPGpkS', // TODO: add registry to config and fetch poolHash
   memberListAddress: '0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b',
 }
 
