@@ -5,6 +5,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 // https://vitejs.dev/config/
 // when making changes to this file start vite with --force flag
 export default defineConfig({
+  base: './',
   server: {
     watch: {
       // configuration to allow HMR in other modules in yarn

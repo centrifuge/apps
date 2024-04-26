@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { LinkProps, Redirect, Route, RouteProps, BrowserRouter as Router, Switch, matchPath } from 'react-router-dom'
 import { config, evmChains } from '../config'
 import PoolsPage from '../pages/Pools'
+import { getBasename } from '../utils/ipfs'
 import { pinToApi } from '../utils/pinToApi'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -55,6 +56,9 @@ const centConfig: UserProvidedConfig = {
     }),
 }
 
+const path = window?.location?.pathname ?? '/'
+const basename = getBasename(path)
+
 export function Root() {
   const [debugState, setDebugState] = React.useState(initialFlagsState)
   const isThemeToggled = debugState.alternativeTheme
@@ -77,7 +81,7 @@ export function Root() {
           <GlobalStyle />
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
-            <Router>
+            <Router basename={basename}>
               <DemoBanner />
 
               <WalletProvider
