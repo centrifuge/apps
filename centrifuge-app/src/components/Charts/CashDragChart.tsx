@@ -24,14 +24,14 @@ export default function CashDragChart() {
     poolStates?.map((day) => {
       const assetValue = day.poolState.portfolioValuation.toDecimal().toNumber()
       const reserve = day.poolState.totalReserve.toDecimal().toNumber()
-      const cashDrag = (reserve / (reserve + assetValue)) * 100
+      const cashDrag = (reserve / assetValue) * 100
       return { day: new Date(day.timestamp), cashDrag: cashDrag || 0 }
     }) || []
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
-  const todayAssetValue = pool?.nav.aum.toDecimal().toNumber() || 0
+  const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
   const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
-  const cashDrag = (todayReserve / (todayAssetValue + todayReserve)) * 100
+  const cashDrag = (todayReserve / todayAssetValue) * 100
   const today: ChartData = {
     day: new Date(),
     cashDrag: cashDrag || 0,

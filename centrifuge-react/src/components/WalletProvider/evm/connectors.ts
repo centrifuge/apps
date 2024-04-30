@@ -46,10 +46,7 @@ export function getEvmConnectors(
     substrateEvmChainId?: number
   } = {}
 ): EvmConnectorMeta[] {
-  const finoaProvider = new FinoaEIP1193Provider()
-  const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
-  const { ['1']: _, ...optional } = urls
-  const chains = [1, ...Object.keys(optional).map(Number)]
+  const chains = Object.keys(urls).map(Number)
   if (!walletConnectId) {
     throw new Error('WalletConnect ID is required')
   }
@@ -59,8 +56,7 @@ export function getEvmConnectors(
         actions,
         options: {
           projectId: walletConnectId,
-          chains: chains,
-          optionalChains: chains.slice(1),
+          optionalChains: chains,
           showQrModal: true,
           rpcMap: Object.entries(urls).reduce((prev, curr) => {
             return { ...prev, [`eip155:${curr[0]}`]: curr[1] }
@@ -79,8 +75,8 @@ export function getEvmConnectors(
       })
   )
   const [gnosisSafe] = createConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
-
-  const [finoa] = createConnector<EIP1193>((actions) => new EIP1193({ actions, provider: finoaProvider }))
+  const [metaMask] = createConnector((actions) => new MetaMask({ actions }))
+  const [finoa] = createConnector<EIP1193>((actions) => new EIP1193({ actions, provider: new FinoaEIP1193Provider() }))
 
   return [
     {

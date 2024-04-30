@@ -2321,10 +2321,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
                 totalReserve: new CurrencyBalance(state.totalReserve, poolCurrency.decimals),
               }
-              const poolValue = new CurrencyBalance(
-                new BN(state?.portfolioValuation || '0').add(new BN(state?.totalReserve || '0')),
-                poolCurrency.decimals
-              )
+              const poolValue = new CurrencyBalance(new BN(state?.portfolioValuation || '0'), poolCurrency.decimals)
 
               // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
               const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp === state.timestamp)
@@ -3620,10 +3617,9 @@ export function getPoolsModule(inst: Centrifuge) {
               }) || []),
               ...add.map((metadata, index) => {
                 return {
-                  // chain refactor required: feeId needs to be assigned to fee when it's proposed
-                  // until then multiple fees have to be added at once or all pending fees have to be applied before adding more
                   id: parseInt(lastFeeId.toHuman() as string) + index + 1,
                   name: metadata.fee.name,
+                  feePosition: metadata.fee.feePosition,
                 }
               }),
             ],

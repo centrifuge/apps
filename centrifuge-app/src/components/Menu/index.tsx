@@ -38,32 +38,43 @@ export function Menu() {
       gap={1}
       flexDirection={['row', 'row', 'column']}
       alignItems={['center', 'center', 'stretch']}
+      justifyContent={['space-between', 'space-between']}
     >
-      <PageLink to="/pools" stacked={!isLarge}>
-        <IconInvestments />
-        Pools
-      </PageLink>
+      <Box width="100%">
+        <PageLink to="/pools" stacked={!isLarge}>
+          <IconInvestments />
+          Pools
+        </PageLink>
+      </Box>
 
-      <PageLink to="/portfolio" stacked={!isLarge}>
-        <IconWallet />
-        Portfolio
-      </PageLink>
+      <Box width="100%">
+        <PageLink to="/portfolio" stacked={!isLarge}>
+          <IconWallet />
+          Portfolio
+        </PageLink>
+      </Box>
 
       {address && (transactions ?? null) && (
-        <PageLink to="/history" stacked={!isLarge}>
-          <IconClock />
-          History
-        </PageLink>
+        <Box width="100%">
+          <PageLink to="/history" stacked={!isLarge}>
+            <IconClock />
+            History
+          </PageLink>
+        </Box>
       )}
 
       {showPrime && (
-        <PageLink to="/prime" stacked={!isLarge}>
-          <IconGlobe />
-          Prime
-        </PageLink>
+        <Box width="100%">
+          <PageLink to="/prime" stacked={!isLarge}>
+            <IconGlobe />
+            Prime
+          </PageLink>
+        </Box>
       )}
 
-      <GovernanceMenu />
+      <Box width="100%">
+        <GovernanceMenu />
+      </Box>
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>
