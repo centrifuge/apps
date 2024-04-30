@@ -3186,6 +3186,9 @@ export function getPoolsModule(inst: Centrifuge) {
               ? pricingInfo.valuationMethod.discountedCashFlow
               : undefined
           return {
+            // Return the time the loans were fetched, in order to calculate a more accurate/up-to-date outstandingInterest
+            // Mainly for when repaying interest, to repay as close to the correct amount of interest
+            // Refetching before repaying would be another ideas, but less practical with substriptions
             fetchedAt: new Date(),
             asset: {
               collectionId: collectionId.toString(),
