@@ -575,6 +575,10 @@ export type DailyPoolState = {
   sumInvestedAmountByPeriod?: string | null
   sumRedeemedAmountByPeriod?: string | null
   blockNumber: number
+
+  sumChargedAmountByPeriod?: string | null
+  sumAccruedAmountByPeriod?: string | null
+  sumPaidAmountByPeriod?: string | null
 }
 
 interface TrancheFormValues {
@@ -2177,6 +2181,9 @@ export function getPoolsModule(inst: Centrifuge) {
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
           sumInterestRepaidAmountByPeriod
+          sumChargedAmountByPeriod
+          sumAccruedAmountByPeriod
+          sumPaidAmountByPeriod        
           value
         }
         pageInfo {

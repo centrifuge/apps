@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -75,6 +76,16 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       {
         name: 'Onchain reserve',
         value: poolStates?.map((state) => state.poolState.totalReserve.toFloat()) || [],
+        heading: false,
+      },
+      {
+        name: 'Accrued fees',
+        value:
+          poolStates?.map(
+            (state) =>
+              state.sumAccruedAmountByPeriod &&
+              new CurrencyBalance(state.sumAccruedAmountByPeriod, pool.currency.decimals).toDecimal().toNumber()
+          ) || [],
         heading: false,
       },
     ]

@@ -20,6 +20,9 @@ export type SubqueryPoolSnapshot = {
   sumRepaidAmountByPeriod?: string | null
   sumInvestedAmountByPeriod?: string | null
   sumRedeemedAmountByPeriod?: string | null
+  sumChargedAmountByPeriod: string
+  sumAccruedAmountByPeriod: string
+  sumPaidAmountByPeriod: string
   blockNumber: number
 }
 
