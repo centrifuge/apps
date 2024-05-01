@@ -81,10 +81,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       {
         name: 'Accrued fees',
         value:
-          poolStates?.map(
-            (state) =>
-              state.sumAccruedAmountByPeriod &&
-              new CurrencyBalance(state.sumAccruedAmountByPeriod, pool.currency.decimals).toDecimal().toNumber()
+          poolStates?.map((state) =>
+            state.sumAccruedAmountByPeriod
+              ? new CurrencyBalance(state.sumAccruedAmountByPeriod, pool.currency.decimals).toDecimal().toNumber()
+              : '-'
           ) || [],
         heading: false,
       },
