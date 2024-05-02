@@ -1,6 +1,6 @@
 import { ComputedMultisig, computeMultisig, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button } from '@centrifuge/fabric'
+import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { Button, Text } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
@@ -12,6 +12,7 @@ import { diffPermissions } from '../Configuration/Admins'
 import { MultisigForm } from './MultisigForm'
 
 export type PoolManagersInput = {
+  enabled: boolean
   adminMultisig: {
     signers: string[]
     threshold: number
@@ -25,9 +26,17 @@ export function PoolManagers({ poolId }: { poolId: string }) {
   const poolPermissions = usePoolPermissions(poolId)
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
   const { data: metadata } = usePoolMetadata(pool)
+  const {
+    substrate: { proxies },
+  } = useWallet()
+  const oldAdminProxies = Object.entries(proxies ?? {})
+    .filter(([, delegators]) => delegators.find((d) => d.delegator === access.admin))
+    .map(([d]) => d)
+  const storedManagerPermissions = access.managerPermissions
 
   const initialValues: PoolManagersInput = React.useMemo(
     () => ({
+      enabled: !!access.multisig,
       adminMultisig: {
         signers: access.multisig?.signers || [],
         threshold: access.multisig?.threshold || 1,
@@ -35,15 +44,6 @@ export function PoolManagers({ poolId }: { poolId: string }) {
     }),
     [access?.multisig]
   )
-
-  const storedManagerPermissions = poolPermissions
-    ? Object.entries(poolPermissions)
-        .filter(([addr, p]) => p.roles.length && initialValues.adminMultisig.signers.includes(addr))
-        .map(([address, permissions]) => ({
-          address,
-          roles: Object.fromEntries(permissions.roles.map((role) => [role, true])),
-        }))
-    : []
 
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update pool managers',
@@ -71,7 +71,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
               metadataTx,
               ...permissionTx.method.args[0],
               api.tx.proxy.addProxy(newMultisig.address, 'Any', 0),
-              api.tx.proxy.removeProxy(access.multisig!.address, 'Any', 0),
+              ...oldAdminProxies.map((addr) => api.tx.proxy.removeProxy(addr, 'Any', 0)),
             ])
             return cent.wrapSignAndSend(api, tx, options)
           })
@@ -130,15 +130,25 @@ export function PoolManagers({ poolId }: { poolId: string }) {
     adminMultisig.signers.length !== initialValues.adminMultisig.signers.length ||
     !adminMultisig.signers.every((s) => initialValues.adminMultisig.signers.includes(s))
 
-  if (!access.multisig) return null
-
   return (
     <FormikProvider value={form}>
       <Form>
         <PageSection
           title="Pool managers"
           headerRight={
-            isEditing ? (
+            !form.values.enabled ? (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setIsEditing(true)
+                  form.setFieldValue('enabled', true, false)
+                }}
+                small
+                key="edit"
+              >
+                Enable
+              </Button>
+            ) : isEditing ? (
               <ButtonGroup variant="small">
                 <Button variant="secondary" onClick={() => setIsEditing(false)} small>
                   Cancel
@@ -161,7 +171,11 @@ export function PoolManagers({ poolId }: { poolId: string }) {
             )
           }
         >
-          <MultisigForm isEditing={isEditing} isLoading={isLoading} />
+          {!form.values.enabled ? (
+            <Text>Pool managers not enabled</Text>
+          ) : (
+            <MultisigForm isEditing={isEditing} isLoading={isLoading} />
+          )}
         </PageSection>
       </Form>
     </FormikProvider>
