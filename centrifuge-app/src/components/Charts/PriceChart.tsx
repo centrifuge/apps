@@ -49,6 +49,7 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
                 { label: 'YTD', value: 'YTD' },
               ]}
               onChange={(option) => setFilter(option.target.value as FilterOptions)}
+              defaultValue={filter}
             />
           </Box>
         )}
