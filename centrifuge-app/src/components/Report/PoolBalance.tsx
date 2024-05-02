@@ -87,7 +87,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
             if (i === 0) return ''
             const prev = poolStates[i - 1].poolValue.toFloat()
             const cur = state.poolValue.toFloat()
-            const change = cur / prev - 1
+            const change = (cur / prev - 1) * 100
             return change < 0 ? change : `+${change}`
           }) || [],
         heading: false,
