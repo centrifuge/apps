@@ -59,7 +59,7 @@ describe('Invest flows', () => {
     cy.get('input[name="amount"]').type(pool.investAmount)
     cy.get('button[type="submit"]').click()
     cy.confirmTransaction()
-    cy.contains(`Invested ${pool.poolCurrency} value ${pool.investAmount} ${pool.poolCurrency}`).should('exist')
+    cy.contains(`Invested ${pool.investAmount} ${pool.poolCurrency}`).should('exist')
   })
   it('Pool Admin: Close epoch (execute investment)', () => {
     cy.visit('/pools', { failOnStatusCode: false })
