@@ -554,6 +554,7 @@ export type TrancheInput = {
 export type DailyTrancheState = {
   id: string
   price: null | Price
+  tokenSupply: TokenBalance
   fulfilledInvestOrders: CurrencyBalance
   fulfilledRedeemOrders: CurrencyBalance
   outstandingInvestOrders: CurrencyBalance
@@ -2271,27 +2272,18 @@ export function getPoolsModule(inst: Centrifuge) {
         expand(({ trancheSnapshots, endCursor, hasNextPage }) => {
           if (!hasNextPage) return EMPTY
           return getTrancheSnapshotsWithCursor(poolId, endCursor, from, to).pipe(
-            map(
-              (
-                response: {
-                  trancheSnapshots: {
-                    nodes: SubqueryTrancheSnapshot[]
-                    pageInfo: { hasNextPage: boolean; endCursor: string }
-                  }
-                } | null
-              ) => {
-                if (response?.trancheSnapshots) {
-                  const { endCursor, hasNextPage } = response.trancheSnapshots.pageInfo
+            map((response) => {
+              if (response?.trancheSnapshots) {
+                const { endCursor, hasNextPage } = response.trancheSnapshots.pageInfo
 
-                  return {
-                    endCursor,
-                    hasNextPage,
-                    trancheSnapshots: [...trancheSnapshots, ...response.trancheSnapshots.nodes],
-                  }
+                return {
+                  endCursor,
+                  hasNextPage,
+                  trancheSnapshots: [...trancheSnapshots, ...response.trancheSnapshots.nodes],
                 }
-                return {}
               }
-            )
+              return {}
+            })
           )
         })
       ),
@@ -2327,6 +2319,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 tranches[tid] = {
                   id: tranche.trancheId,
                   price: tranche.tokenPrice ? new Price(tranche.tokenPrice) : null,
+                  tokenSupply: new TokenBalance(tranche.tokenSupply, poolCurrency.decimals),
                   fulfilledInvestOrders: new CurrencyBalance(
                     tranche.sumFulfilledInvestOrdersByPeriod,
                     poolCurrency.decimals
@@ -2426,6 +2419,7 @@ export function getPoolsModule(inst: Centrifuge) {
           }) {
           nodes {
             tokenPrice
+            tokenSupply
             blockNumber
             timestamp
             trancheId
@@ -2446,12 +2440,7 @@ export function getPoolsModule(inst: Centrifuge) {
         if (!data) {
           return []
         }
-        return data.trancheSnapshots.nodes.reverse().map((state) => {
-          return {
-            ...state,
-            tokenPrice: new Price(state.tokenPrice),
-          }
-        })
+        return data.trancheSnapshots.nodes.reverse()
       })
     )
   }

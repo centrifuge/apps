@@ -83,8 +83,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
   const transactions = useInvestorTransactions(
     pool.id,
     activeTranche === 'all' ? undefined : activeTranche,
-    new Date(startDate),
-    new Date(endDate)
+    startDate ? new Date(startDate) : undefined,
+    endDate ? new Date(endDate) : undefined
   )
 
   const columns = headers

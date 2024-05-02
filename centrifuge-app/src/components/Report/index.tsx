@@ -9,6 +9,7 @@ import { Holders } from './Holders'
 import { InvestorTransactions } from './InvestorTransactions'
 import { PoolBalance } from './PoolBalance'
 import { ReportContext } from './ReportContext'
+import { TokenPrice } from './TokenPrice'
 
 export type TableDataRow = {
   name: string
@@ -25,13 +26,13 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         <Text as="span" variant="body3" color="textSecondary">
           {!['holders', 'asset-list'].includes(report) && (
             <>
-              <time dateTime={startDate}>{formatDate(startDate)}</time>
+              {startDate ? formatDate(startDate) : 'The beginning of time'}
               {' - '}
-              <time dateTime={endDate}>{formatDate(endDate)}</time>
+              {endDate ? formatDate(endDate) : 'now'}
             </>
           )}
         </Text>
-        {(report === 'pool-balance' || report === 'asset-list') && pool && (
+        {['pool-balance', 'asset-list'].includes(report) && pool && (
           <Text as="span" variant="body3" color="textSecondary">
             All amounts are in {pool.currency.symbol}
           </Text>
@@ -39,6 +40,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
       </Shelf>
       <Box overflow="auto" width="100%">
         {report === 'pool-balance' && <PoolBalance pool={pool} />}
+        {report === 'token-price' && <TokenPrice pool={pool} />}
         {report === 'asset-list' && <AssetList pool={pool} />}
         {report === 'holders' && <Holders pool={pool} />}
         {report === 'investor-tx' && <InvestorTransactions pool={pool} />}

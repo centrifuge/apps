@@ -34,8 +34,7 @@ export type SubqueryTrancheSnapshot = {
     poolId: string
     trancheId: string
   }
-  tokenSupply?: string | null
-
+  tokenSupply: string
   sumOutstandingInvestOrdersByPeriod: string
   sumOutstandingRedeemOrdersByPeriod: string
   sumFulfilledInvestOrdersByPeriod: string
