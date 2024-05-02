@@ -2,7 +2,7 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
@@ -11,6 +11,10 @@ import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
+
+type Row = TableDataRow & {
+  formatter?: (v: any) => any
+}
 
 export function PoolBalance({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
@@ -34,7 +38,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       {
         align: 'left',
         header: '',
-        cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body3'}>{row.name}</Text>,
+        cell: (row: Row) => <Text variant={row.heading ? 'heading4' : 'body3'}>{row.name}</Text>,
         width: '200px',
       },
     ]
@@ -50,9 +54,12 @@ export function PoolBalance({ pool }: { pool: Pool }) {
                   year: 'numeric',
                 })
               : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
-          cell: (row: TableDataRow) => (
+          cell: (row: Row) => (
             <Text variant="body3">
-              {(row.value as any)[index] !== '' && formatBalance((row.value as any)[index], pool.currency.symbol, 5)}
+              {(row.value as any)[index] !== '' &&
+                (row.formatter
+                  ? row.formatter((row.value as any)[index])
+                  : formatBalance((row.value as any)[index], pool.currency.symbol, 5))}
             </Text>
           ),
           width: '200px',
@@ -66,12 +73,25 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       })
   }, [poolStates, groupBy, pool])
 
-  const overviewRecords: TableDataRow[] = React.useMemo(() => {
+  const overviewRecords: Row[] = React.useMemo(() => {
     return [
       {
         name: 'NAV',
         value: poolStates?.map((state) => state.poolValue.toFloat()) || [],
         heading: false,
+      },
+      {
+        name: 'NAV change',
+        value:
+          poolStates?.map((state, i) => {
+            if (i === 0) return ''
+            const prev = poolStates[i - 1].poolValue.toFloat()
+            const cur = state.poolValue.toFloat()
+            const change = cur / prev - 1
+            return change < 0 ? change : `+${change}`
+          }) || [],
+        heading: false,
+        formatter: (v: any) => `${v < 0 ? '' : '+'}${formatPercentage(v, true, {}, 5)}`,
       },
       {
         name: 'Asset value',
@@ -86,7 +106,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
     ]
   }, [poolStates])
 
-  const inOutFlowRecords: TableDataRow[] = React.useMemo(() => {
+  const inOutFlowRecords: Row[] = React.useMemo(() => {
     return [
       {
         name: 'Investments',
