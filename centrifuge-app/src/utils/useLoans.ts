@@ -67,10 +67,10 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   if (loan.status !== 'Active') return { current: initialCeiling, initial: initialCeiling }
 
   const debtWithMargin =
-    'interestRate' in loan.pricing
+    'interestRate' in loan.pricing && 'outstandingPrincipal' in loan
       ? loan.outstandingDebt
           .toDecimal()
-          .add(loan.outstandingDebt.toDecimal().mul(loan.pricing.interestRate.toDecimal().div(365 * 8))) // Additional 3 hour interest as margin
+          .add(loan.outstandingPrincipal.toDecimal().mul(loan.pricing.interestRate.toDecimal().div(365 * 8))) // Additional 3 hour interest as margin
       : Dec(0)
 
   let ceiling = initialCeiling

@@ -87,7 +87,9 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       let repay: any = { principal, interest }
       if (isExternalLoan(selectedLoan)) {
         const repayPriceBN = CurrencyBalance.fromFloat(form.values.targetLoanPrice || 1, pool.currency.decimals)
-        const repayQuantityBN = Price.fromFloat(Dec(values.targetLoanFaceValue || 0).div(selectedLoan.pricing.notional.toDecimal()))
+        const repayQuantityBN = Price.fromFloat(
+          Dec(values.targetLoanFaceValue || 0).div(selectedLoan.pricing.notional.toDecimal())
+        )
         repay = { quantity: repayQuantityBN, price: repayPriceBN, interest }
       }
 
@@ -97,18 +99,20 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       })
       actions.setSubmitting(false)
     },
-    validate(values) { 
+    validate(values) {
       const financeAmount = isExternalLoan(loan)
         ? Dec(values.price || 0)
             .mul(Dec(values.faceValue || 0))
             .div(loan.pricing.notional.toDecimal())
-        : selectedLoan && isExternalLoan(selectedLoan) ? Dec(values.targetLoanPrice || 0)
-        .mul(Dec(values.targetLoanFaceValue || 0))
-        .div(selectedLoan.pricing.notional.toDecimal()):  Dec(values.amount || 0) 
+        : selectedLoan && isExternalLoan(selectedLoan)
+        ? Dec(values.targetLoanPrice || 0)
+            .mul(Dec(values.targetLoanFaceValue || 0))
+            .div(selectedLoan.pricing.notional.toDecimal())
+        : Dec(values.amount || 0)
 
       let errors: any = {}
-      
-      const error = validate(financeAmount) 
+
+      const error = validate(financeAmount)
       if (error) {
         if (selectedLoan && isExternalLoan(selectedLoan)) {
           errors = setIn(errors, 'targetLoanPrice', error)
@@ -116,7 +120,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
           errors = setIn(errors, 'amount', error)
         }
       }
-      
+
       return errors
     },
   })
@@ -151,9 +155,11 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
     ? Dec(form.values.price || 0)
         .mul(Dec(form.values.faceValue || 0))
         .div(loan.pricing.notional.toDecimal())
-    : selectedLoan && isExternalLoan(selectedLoan) ? Dec(form.values.targetLoanPrice || 0)
-    .mul(Dec(form.values.targetLoanFaceValue || 0))
-    .div(selectedLoan.pricing.notional.toDecimal()):  Dec(form.values.amount || 0) 
+    : selectedLoan && isExternalLoan(selectedLoan)
+    ? Dec(form.values.targetLoanPrice || 0)
+        .mul(Dec(form.values.targetLoanFaceValue || 0))
+        .div(selectedLoan.pricing.notional.toDecimal())
+    : Dec(form.values.amount || 0)
 
   return (
     <Stack as={Card} gap={2} p={2}>
@@ -239,7 +245,10 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
                   )
                 }}
               </Field>
-              <Field name="targetLoanPrice" validate={combine(settlementPrice(), maxPriceVariance(selectedLoan.pricing))}>
+              <Field
+                name="targetLoanPrice"
+                validate={combine(settlementPrice(), maxPriceVariance(selectedLoan.pricing))}
+              >
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
@@ -255,9 +264,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
               </Field>
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Total amount</Text>
-                <Text variant="emphasized">
-                    {formatBalance(financeAmount, pool?.currency.symbol, 2)}
-                </Text>
+                <Text variant="emphasized">{formatBalance(financeAmount, pool?.currency.symbol, 2)}</Text>
               </Shelf>
             </>
           )}
@@ -276,8 +283,8 @@ function LoanOption({ loan }: { loan: Loan }) {
   const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, false)
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
-    <option value={loan.id}>
+    <>
       {loan.id} - {metadata?.name}
-    </option>
+    </>
   )
 }
