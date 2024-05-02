@@ -269,6 +269,7 @@ function Loan() {
                       ? 'external'
                       : 'internal'
                   }
+                  poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
                   decimals={pool.currency.decimals}
                   pricing={loan.pricing as PricingInfo}
                 />
