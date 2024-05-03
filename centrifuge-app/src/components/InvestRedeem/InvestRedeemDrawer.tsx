@@ -56,14 +56,18 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
     if (filter === '30days') {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      thirtyDaysAgo.setHours(0, 0, 0, 0) // set to midnight
       return thirtyDaysAgo
     }
     if (filter === '90days') {
       const ninetyDaysAgo = new Date()
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+      ninetyDaysAgo.setHours(0, 0, 0, 0)
       return ninetyDaysAgo
     }
-    return new Date()
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today
   }, [filter])
 
   const { poolStates: dailyPoolStates } = useDailyPoolStates(poolId, new Date(dateFrom)) || {}
@@ -77,13 +81,12 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
       tokenData.push({
         day: new Date(),
         price:
-          pool.tranches
+          pool?.tranches
             .find((tranche) => tranche.id === trancheId)
             ?.tokenPrice?.toDecimal()
             .toNumber() || 1,
       })
     }
-    console.log(pool.tranches.find((tranche) => tranche.id === trancheId))
     return tokenData
   }, [dailyPoolStates, filter])
 
