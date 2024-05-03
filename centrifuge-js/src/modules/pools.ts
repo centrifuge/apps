@@ -464,6 +464,7 @@ export type TinlakeLoan = {
 // transformed type for UI
 export type CreatedLoan = {
   status: 'Created'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -481,6 +482,7 @@ export type CreatedLoan = {
 // transformed type for UI
 export type ActiveLoan = {
   status: 'Active'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -511,6 +513,7 @@ export type ActiveLoan = {
 // transformed type for UI
 export type ClosedLoan = {
   status: 'Closed'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -3074,7 +3077,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.priceOracle.NewFeedData.is(event) ||
+            api.events.oraclePriceFeed.Fed.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
@@ -3083,10 +3086,9 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.loans.Closed.is(event) ||
             api.events.loans.PortfolioValuationUpdated.is(event)
         )
-
         if (!event) return false
-
         const { poolId: eventPoolId } = (event.toHuman() as any).event.data
+        if (!eventPoolId) return true
         return eventPoolId.replace(/\D/g, '') === poolId
       })
     )
@@ -3181,6 +3183,10 @@ export function getPoolsModule(inst: Centrifuge) {
               ? pricingInfo.valuationMethod.discountedCashFlow
               : undefined
           return {
+            // Return the time the loans were fetched, in order to calculate a more accurate/up-to-date outstandingInterest
+            // Mainly for when repaying interest, to repay as close to the correct amount of interest
+            // Refetching before repaying would be another ideas, but less practical with substriptions
+            fetchedAt: new Date(),
             asset: {
               collectionId: collectionId.toString(),
               nftId: nftId.toString(),
