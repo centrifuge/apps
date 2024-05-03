@@ -1,5 +1,5 @@
 import { ComputedMultisig, computeMultisig, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Text } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -26,13 +26,6 @@ export function PoolManagers({ poolId }: { poolId: string }) {
   const poolPermissions = usePoolPermissions(poolId)
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
   const { data: metadata } = usePoolMetadata(pool)
-  const {
-    substrate: { proxies },
-  } = useWallet()
-  const oldAdminProxies = Object.entries(proxies ?? {})
-    .filter(([, delegators]) => delegators.find((d) => d.delegator === access.admin))
-    .map(([d]) => d)
-  const storedManagerPermissions = access.managerPermissions
 
   const initialValues: PoolManagersInput = React.useMemo(
     () => ({
@@ -71,7 +64,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
               metadataTx,
               ...permissionTx.method.args[0],
               api.tx.proxy.addProxy(newMultisig.address, 'Any', 0),
-              ...oldAdminProxies.map((addr) => api.tx.proxy.removeProxy(addr, 'Any', 0)),
+              ...access.adminDelegates.map((proxy) => api.tx.proxy.removeProxy(proxy.delegatee, 'Any', 0)),
             ])
             return cent.wrapSignAndSend(api, tx, options)
           })
@@ -103,7 +96,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
         [
           newMultisig,
           diffPermissions(
-            storedManagerPermissions,
+            access.managerPermissions,
             values.adminMultisig.signers.map((address) => ({
               address,
               roles: { InvestorAdmin: true, LiquidityAdmin: true },
