@@ -2,10 +2,11 @@ import { AssetTransaction, CurrencyBalance, ExternalPricingInfo, PricingInfo } f
 import { AssetTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { StatusChip, Tooltip } from '@centrifuge/fabric'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
-import { DataTable } from '../../components/DataTable'
-import { formatDate } from '../../utils/date'
+import { Column, DataTable } from '../../components/DataTable'
 import { Dec } from '../../utils/Decimal'
+import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 
 type Props = {
@@ -14,9 +15,20 @@ type Props = {
   decimals: number
   loanType: 'external' | 'internal'
   pricing: PricingInfo
+  poolType: 'publicCredit' | 'privateCredit' | undefined
 }
 
-export const TransactionTable = ({ transactions, currency, loanType, decimals, pricing }: Props) => {
+type Row = {
+  type: AssetTransactionType
+  amount: CurrencyBalance | undefined
+  quantity: CurrencyBalance | null
+  transactionDate: string
+  settlePrice: CurrencyBalance | null
+  faceFlow: Decimal | null
+  position: Decimal
+}
+
+export const TransactionTable = ({ transactions, currency, loanType, decimals, pricing, poolType }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
       if (a.timestamp > b.timestamp) {
@@ -92,68 +104,74 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
     return `${type[0]}${type.slice(1).toLowerCase()}`
   }
 
-  return (
-    <DataTable
-      data={assetTransactions.reverse()}
-      columns={[
-        {
-          align: 'left',
-          header: 'Type',
-          cell: (row: { type: AssetTransactionType }) => (
-            <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>
-          ),
-        },
-        {
-          align: 'left',
-          header: 'Transaction date',
-          cell: (row) => (
-            <Tooltip
-              title="Transaction date"
-              body={formatDate(row.transactionDate, { hour: 'numeric', minute: 'numeric', second: 'numeric' })}
-            >
-              {formatDate(row.transactionDate)}
-            </Tooltip>
-          ),
-        },
+  let columns: Column[] = [
+    {
+      align: 'left',
+      header: 'Type',
+      cell: (row: Row) => <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>,
+    },
+    {
+      align: 'left',
+      header: 'Transaction date',
+      cell: (row: Row) => (
+        <Tooltip
+          title="Transaction date"
+          body={formatDate(row.transactionDate, { hour: 'numeric', minute: 'numeric', second: 'numeric' })}
+        >
+          {formatDate(row.transactionDate)}
+        </Tooltip>
+      ),
+    },
+  ]
 
-        {
-          align: 'left',
-          header: 'Face flow',
-          cell: (row) =>
-            row.faceFlow ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceFlow, currency, 2, 2)}` : '-',
-        },
-        {
-          align: 'left',
-          header: 'Quantity',
-          cell: (row) => (row.quantity ? formatBalance(row.quantity, undefined, 2, 0) : '-'),
-        },
-        {
-          align: 'left',
-          header: 'Settle price',
-          cell: (row) => (row.settlePrice ? formatBalance(row.settlePrice, currency, 6, 2) : '-'),
-        },
-        {
-          align: 'left',
-          header: 'Net cash flow',
-          cell: (row) =>
-            row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, currency, 2, 2)}` : '-',
-        },
-        {
-          align: 'left',
-          header: 'Position',
-          cell: (row) => (row.type === 'CREATED' ? '-' : formatBalance(row.position, currency, 2, 2)),
-        },
-        // TODO: add link to transaction
-        // {
-        //   align: 'right',
-        //   header: '',
-        //   cell: () => (
-        //     <IconAnchor href={''} target="_blank" rel="noopener noreferrer">
-        //        <IconExternalLink />
-        //     </IconAnchor>
-        //   ),
-        // },
-      ]}
-    />
-  )
+  if (poolType === 'publicCredit') {
+    columns = [
+      ...columns,
+      {
+        align: 'left',
+        header: `Face flow (${currency})`,
+        cell: (row: Row) =>
+          row.faceFlow ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceFlow, undefined, 2, 2)}` : '-',
+      },
+      {
+        align: 'left',
+        header: 'Quantity',
+        cell: (row: Row) => (row.quantity ? formatBalance(row.quantity, undefined, 2, 0) : '-'),
+      },
+      {
+        align: 'left',
+        header: `Settle price (${currency})`,
+        cell: (row: Row) => (row.settlePrice ? formatBalance(row.settlePrice, undefined, 6, 2) : '-'),
+      },
+      {
+        align: 'left',
+        header: `Net cash flow (${currency})`,
+        cell: (row: Row) =>
+          row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+      },
+      {
+        align: 'left',
+        header: `Position (${currency})`,
+        cell: (row: Row) => (row.type === 'CREATED' ? '-' : formatBalance(row.position, undefined, 2, 2)),
+      },
+    ]
+  } else {
+    columns = [
+      ...columns,
+      {
+        align: 'left',
+        header: `Amount (${currency})`,
+        cell: (row: Row) =>
+          row.amount ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+      },
+      {
+        align: 'left',
+        header: `Principal (${currency})`,
+        cell: (row: Row) =>
+          row.position ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}` : '-',
+      },
+    ]
+  }
+
+  return <DataTable data={assetTransactions.reverse()} columns={columns} />
 }
