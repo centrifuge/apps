@@ -42,7 +42,7 @@ export function StackedBarChart({ data, names, colors, currency }: StackedBarCha
           margin={{ bottom: 5, left: -16 }}
           stackOffset="sign"
         >
-          <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
+          <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
 
           <XAxis
             dataKey="xAxis"

@@ -63,7 +63,7 @@ const StyledLabel = styled.label<{ $extendedClickArea: boolean }>`
     left: calc(var(--offset) * -1);
     width: calc(100% + var(--offset) * 2);
     height: calc(100% + var(--offset) * 2);
-    background-color: ${({ theme }) => theme.colors.borderSecondary};
+    background-color: ${({ theme }) => theme.colors.borderPrimary};
     border-radius: ${({ theme }) => theme.radii.tooltip}px;
     opacity: 0;
     transition: opacity 0.1s linear;

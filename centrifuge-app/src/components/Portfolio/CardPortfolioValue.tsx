@@ -47,7 +47,7 @@ export function CardPortfolioValue({ address }: { address?: string }) {
         borderRadius="card"
         borderStyle="solid"
         borderWidth={1}
-        borderColor="borderSecondary"
+        borderColor="borderPrimary"
         p={2}
         style={{
           boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,

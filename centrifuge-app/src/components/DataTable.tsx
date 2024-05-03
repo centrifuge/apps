@@ -212,7 +212,7 @@ const Row = styled('div')`
   display: grid;
   grid-template-columns: subgrid;
   grid-column: start / end;
-  box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderSecondary}, 1px 0 0 0 ${theme.colors.borderSecondary}`};
+  box-shadow: ${({ theme }) => `-1px 0 0 0 ${theme.colors.borderPrimary}, 1px 0 0 0 ${theme.colors.borderPrimary}`};
 `
 
 const HeaderRow = styled(Row)<any>(
@@ -220,7 +220,7 @@ const HeaderRow = styled(Row)<any>(
     backgroundColor: 'backgroundSecondary',
     borderStyle: 'solid',
     borderWidth: '1px 0',
-    borderColor: 'borderSecondary',
+    borderColor: 'borderPrimary',
   })
 )
 
@@ -230,7 +230,7 @@ export const DataRow = styled(Row)<any>`
       width: '100%',
       borderBottomStyle: 'solid',
       borderBottomWidth: '1px',
-      borderBottomColor: 'borderSecondary',
+      borderBottomColor: 'borderPrimary',
       backgroundColor: 'transparent',
       // using a&:hover caused the background sometimes not to update when switching themes
       '&:hover':

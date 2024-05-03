@@ -30,13 +30,13 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
   ]
 
   return (
-    <LayoutSection pt={5}>
+    <LayoutSection py={5}>
       <Stack gap={4}>
         <Stack>
           <Text as="h1" variant="heading1">
             {title}
           </Text>
-          <Text as="p" variant="heading6">
+          <Text as="p" variant="heading4">
             {`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
           </Text>
         </Stack>

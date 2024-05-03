@@ -98,7 +98,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             </Stack>
           </Shelf>
         </Stack>
-        <Stack bg="backgroundTertiary" py={2} px={3} width="100%">
+        <Stack bg="backgroundSecondary" py={2} px={3} width="100%">
           {feeChainData?.amounts.pending.gtn(0) && !updateCharge ? (
             <Stack gap={2}>
               <Stack gap={1} bg="backgroundButtonSecondary" p={1} borderRadius="2px">

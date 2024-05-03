@@ -21,13 +21,6 @@ const ExternalLink = styled(Text)`
   justify-content: space-between;
   gap: ${({ theme }) => theme.space[1]}px;
   white-space: nowrap;
-
-  svg {
-    display: block;
-    width: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
-    height: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
-    object-fit: contain;
-  }
 `
 
 export function GovernanceMenu() {
@@ -63,9 +56,14 @@ export function GovernanceMenu() {
         stacked={!isLarge}
         isMedium={isMedium}
       >
-        <IconGovernance />
+        <IconGovernance size={['iconMedium', 'iconMedium', 'iconSmall']} />
         Governance
-        {isLarge && (open ? <IconChevronDown /> : <IconChevronRight />)}
+        {isLarge &&
+          (open ? (
+            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          ) : (
+            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          ))}
       </Toggle>
 
       <Box
@@ -125,8 +123,6 @@ const links = [
 ]
 
 function Link({ href, stacked, children }: { href: string; stacked: boolean; children: React.ReactNode }) {
-  const isMedium = useIsAboveBreakpoint('M')
-
   return (
     <ExternalLink
       variant="interactive1"
@@ -135,9 +131,8 @@ function Link({ href, stacked, children }: { href: string; stacked: boolean; chi
       rel="noopener noreferrer"
       href={href}
       stacked={stacked}
-      isMedium={isMedium}
     >
-      {children} <IconExternalLink />
+      {children} <IconExternalLink size={['iconMedium', 'iconMedium', 'iconSmall']} />
     </ExternalLink>
   )
 }

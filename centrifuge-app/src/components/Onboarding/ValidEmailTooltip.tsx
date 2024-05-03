@@ -1,5 +1,4 @@
 import { Box, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import styled from 'styled-components'
 
 const Title = styled(Text)`
@@ -44,7 +43,7 @@ export function ValidEmailTooltip() {
       backgroundColor="backgroundPrimary"
       borderRadius="tooltip"
     >
-      <Title forwardedAs="span" variant="heading6" color="statusInfo">
+      <Title forwardedAs="span" variant="heading4" color="statusInfo">
         Please enter a valid email
       </Title>
       <Text as="span" variant="body3">

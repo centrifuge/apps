@@ -42,14 +42,14 @@ export function Menu() {
     >
       <Box width="100%">
         <PageLink to="/pools" stacked={!isLarge}>
-          <IconInvestments />
+          <IconInvestments size={['iconMedium', 'iconMedium', 'iconSmall']} />
           Pools
         </PageLink>
       </Box>
 
       <Box width="100%">
         <PageLink to="/portfolio" stacked={!isLarge}>
-          <IconWallet />
+          <IconWallet size={['iconMedium', 'iconMedium', 'iconSmall']} />
           Portfolio
         </PageLink>
       </Box>
@@ -57,7 +57,7 @@ export function Menu() {
       {address && (transactions ?? null) && (
         <Box width="100%">
           <PageLink to="/history" stacked={!isLarge}>
-            <IconClock />
+            <IconClock size={['iconMedium', 'iconMedium', 'iconSmall']} />
             History
           </PageLink>
         </Box>
@@ -66,7 +66,7 @@ export function Menu() {
       {showPrime && (
         <Box width="100%">
           <PageLink to="/prime" stacked={!isLarge}>
-            <IconGlobe />
+            <IconGlobe size={['iconMedium', 'iconMedium', 'iconSmall']} />
             Prime
           </PageLink>
         </Box>
@@ -113,7 +113,7 @@ export function Menu() {
 
       {showSwaps && (
         <PageLink to="/swaps" stacked={!isLarge}>
-          <IconSwitch />
+          <IconSwitch size={['iconMedium', 'iconMedium', 'iconSmall']} />
           Swaps
         </PageLink>
       )}
@@ -122,7 +122,7 @@ export function Menu() {
 
       {config.network !== 'centrifuge' && (
         <PageLink to="/nfts" stacked={!isLarge}>
-          <IconNft />
+          <IconNft size={['iconMedium', 'iconMedium', 'iconSmall']} />
           NFTs
         </PageLink>
       )}

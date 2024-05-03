@@ -92,7 +92,7 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
             domain={['dataMin - 0.001', 'dataMax + 0.001']}
             interval={'preserveStartEnd'}
           />
-          <CartesianGrid stroke={theme.colors.borderSecondary} />
+          <CartesianGrid stroke={theme.colors.borderPrimary} />
           <Tooltip content={<CustomizedTooltip currency={currency} precision={6} />} />
           <Area
             type="monotone"

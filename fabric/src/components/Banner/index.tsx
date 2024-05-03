@@ -43,7 +43,7 @@ export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => 
         style={{ boxShadow: theme.shadows.cardInteractive }}
       >
         <Shelf gap="1">
-          <Text color={theme.colors.textInverted} variant="heading5">
+          <Text color={theme.colors.textInverted} variant="heading4">
             {title}
           </Text>
           <Button

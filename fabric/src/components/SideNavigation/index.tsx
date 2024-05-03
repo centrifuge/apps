@@ -24,7 +24,7 @@ export function SideNavigation({ items }: SideNavigationProps) {
 
 export function SideNavigationContainer({ children }: { children: React.ReactNode }) {
   return (
-    <Shelf as="nav" bg="backgroundTertiary" borderRadius="4px" p="5px">
+    <Shelf as="nav" bg="backgroundSecondary" borderRadius="4px" p="5px">
       {children}
     </Shelf>
   )
@@ -41,5 +41,5 @@ export const SideNavigationItem = styled.a<{ $isActive: boolean }>`
   font-weight: ${({ theme }) => theme.typography.interactive2.fontWeight};
 
   box-shadow: ${({ theme, $isActive }) => ($isActive ? theme.shadows.buttonSecondary : 'none')};
-  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.backgroundPage : theme.colors.backgroundTertiary)};
+  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.backgroundPage : theme.colors.backgroundSecondary)};
 `
