@@ -44,7 +44,7 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
   poolId: string
   trancheId: string
 }) {
-  const [filter, setFilter] = React.useState<FilterOptions>('YTD')
+  const [filter, setFilter] = React.useState<FilterOptions>('30days')
   const pool = usePool(poolId)
 
   const dateFrom = React.useMemo(() => {
