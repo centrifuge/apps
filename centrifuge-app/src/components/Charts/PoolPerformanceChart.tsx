@@ -28,10 +28,9 @@ const rangeFilters = [
   { value: 'all', label: 'All' },
 ] as const
 
-const chartColor = '#A4D5D8'
-
 function PoolPerformanceChart() {
   const theme = useTheme()
+  const chartColor = theme.colors.accentPrimary
   const { pid: poolId } = useParams<{ pid: string }>()
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
@@ -147,7 +146,7 @@ function PoolPerformanceChart() {
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
-              <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
+              <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
                 content={({ payload }) => {
                   if (payload && payload?.length > 0) {

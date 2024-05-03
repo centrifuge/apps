@@ -41,7 +41,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
               width="iconLarge"
               height="iconLarge"
               borderRadius="card"
-              backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
+              backgroundColor={isLoading ? 'borderPrimary' : 'backgroundThumbnail'}
               justifyContent="center"
             >
               <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
@@ -57,7 +57,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
         px={BASE_PADDING}
         bg="backgroundPage"
         style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+          boxShadow: `0 1px 0 ${theme.colors.borderPrimary}`,
         }}
         color="textSelected"
       >

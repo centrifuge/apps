@@ -1,5 +1,5 @@
 import { AssetTransaction, AssetTransactionType, AssetType, CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { nftMetadataSchema } from '../../schemas'
 import { formatDate } from '../../utils/date'
@@ -203,7 +203,9 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           </AnchorButton>
         )}
       </Shelf>
-      <DataTable data={tableData} columns={columns} />
+      <Box overflowX="auto" width="100%">
+        <DataTable data={tableData} columns={columns} />
+      </Box>
       {transactions?.length! > 8 && preview && (
         <Text variant="body2" color="textSecondary">
           <AnchorTextLink href={`/pools/${poolId}/transactions`}>View all</AnchorTextLink>

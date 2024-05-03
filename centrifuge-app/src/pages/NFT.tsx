@@ -78,7 +78,7 @@ const NFT: React.FC = () => {
               />
             ) : (
               <Box
-                bg="borderSecondary"
+                bg="borderPrimary"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"

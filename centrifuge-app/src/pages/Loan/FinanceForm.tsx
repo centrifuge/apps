@@ -243,7 +243,7 @@ function Mux({
     <Stack gap={1}>
       <Text variant="body2">Transactions per network</Text>
       <Grid columns={3} rowGap={1}>
-        <GridRow borderBottomColor="borderSecondary" borderBottomWidth="1px" borderBottomStyle="solid" pb="4px">
+        <GridRow borderBottomColor="borderPrimary" borderBottomWidth="1px" borderBottomStyle="solid" pb="4px">
           <Text variant="label2">Amount</Text>
           <Text variant="label2">Address</Text>
           <Text variant="label2">Network</Text>

@@ -30,7 +30,7 @@ const ScrollContainer = styled(Stack)`
 export const MenuItemGroup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <>
-      <MenuDivider borderColor="borderSecondary" />
+      <MenuDivider borderColor="borderPrimary" />
       {children}
     </>
   )
@@ -71,7 +71,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
           <Text variant="interactive1" color="inherit">
             {label}
           </Text>
-          <Sublabel variant="label3" color="inherit">
+          <Sublabel variant="label2" color="inherit">
             {sublabel}
           </Sublabel>
         </Stack>

@@ -190,7 +190,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
               })}
           </Stack>
         </Shelf>
-        <Stack width="100%" backgroundColor="backgroundTertiary">
+        <Stack width="100%" backgroundColor="backgroundSecondary">
           <Stack p={3}>
             <FormikProvider value={form}>
               <Form>
