@@ -342,6 +342,7 @@ export function usePoolAccess(poolId: string) {
           roles: Object.fromEntries(permissions.roles.map((role) => [role, true])),
         }))
     : []
+
   const missingAdminPermissions = diffPermissions(
     [storedAdminRoles],
     [{ address: storedAdminRoles.address, roles: { InvestorAdmin: true } }]
@@ -361,6 +362,8 @@ export function usePoolAccess(poolId: string) {
       [metadata?.adminMultisig]
     ),
     adminPermissions,
+    adminDelegates,
+    managerPermissions: storedManagerPermissions,
     missingPermissions: [...missingAdminPermissions, ...missingManagerPermissions],
     missingAdminPermissions,
     missingManagerPermissions,
