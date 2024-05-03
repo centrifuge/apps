@@ -45,7 +45,6 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
 
       return 0
     })
-    console.log('🚀 ~ sortedTransactions:', sortedTransactions)
 
     return sortedTransactions.map((transaction, index, array) => ({
       type: transaction.type,
