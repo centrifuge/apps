@@ -67,12 +67,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               api.tx.liquidityPools.addPool(poolId, { EVM: chainId }),
               ...pool.tranches.ids.flatMap((trancheId: string) => [
                 api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
-                // Ensure the domain currencies are enabled
-                // Using a batch, because theoretically they could have been enabled already for a different domain
-                api.tx.utility.batch(
-                  currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key))
-                ),
               ]),
+              ...currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key)),
             ])
             return inst.wrapSignAndSend(api, tx, options)
           })
