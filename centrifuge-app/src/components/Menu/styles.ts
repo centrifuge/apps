@@ -16,7 +16,7 @@ export const baseButton = css<{ isActive?: boolean }>`
   }
 `
 
-export const primaryButton = css<{ isActive?: boolean; stacked?: boolean; isMedium?: boolean }>`
+export const primaryButton = css<{ isActive?: boolean; stacked?: boolean }>`
   display: grid;
   gap: ${({ stacked, theme }) => (stacked ? 0 : `${theme.space[1]}px`)};
   grid-template-rows: ${({ stacked }) => (stacked ? '20px 1fr' : '1fr')};
@@ -34,12 +34,5 @@ export const primaryButton = css<{ isActive?: boolean; stacked?: boolean; isMedi
   @media (min-width: ${({ theme }) => theme.breakpoints['L']}) {
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
-  }
-
-  svg {
-    display: block;
-    width: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
-    height: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
-    object-fit: contain;
   }
 `

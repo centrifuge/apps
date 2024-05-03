@@ -47,7 +47,7 @@ export function AssetAllocation({ address }: { address?: string }) {
       <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>
         {shares.map((cell, i) => (
           <Box key={`asset-allocation-${cell.name}-${i}`}>
-            {i > 0 && <Box width="1px" backgroundColor="borderSecondary" />}
+            {i > 0 && <Box width="1px" backgroundColor="borderPrimary" />}
             <LabelValueStack
               label={
                 <Box position="relative" ml={22}>

@@ -72,7 +72,7 @@ export default function CashDragChart() {
                 tickLine={false}
                 tickFormatter={(tick: number) => `${tick}%`}
               />
-              <CartesianGrid stroke={theme.colors.borderSecondary} />
+              <CartesianGrid stroke={theme.colors.borderPrimary} />
               <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} />} />
               <Line
                 dot={false}

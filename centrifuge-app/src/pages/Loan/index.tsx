@@ -284,7 +284,7 @@ function Loan() {
                 <PageSection title={<Box>Remaining maturity</Box>}>
                   <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
                     <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
-                    <Box width="60%" backgroundColor="borderSecondary" position="relative">
+                    <Box width="60%" backgroundColor="borderPrimary" position="relative">
                       <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
                       <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
                         <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />

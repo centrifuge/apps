@@ -78,12 +78,12 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         <Text fontSize="18px" fontWeight="500">
           Key metrics
         </Text>
-        <Box borderStyle="solid" borderWidth="1px" borderColor="borderSecondary">
+        <Box borderStyle="solid" borderWidth="1px" borderColor="borderPrimary">
           {metrics.map(({ metric, value }, index) => (
             <Grid
               borderBottomStyle={index === metrics.length - 1 ? 'none' : 'solid'}
               borderBottomWidth={index === metrics.length - 1 ? '0' : '1px'}
-              borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderSecondary'}
+              borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderPrimary'}
               height={32}
               key={index}
               px={1}

@@ -11,7 +11,7 @@ export const altairDark: FabricTheme = {
     ...brandAltair,
     ...modeDark.colors,
     primarySelectedBackground: yellowScale[500],
-    secondarySelectedBackground: yellowScale[700],
+    secondarySelectedBackground: yellowScale[800],
     focus: yellowScale[500],
     borderFocus: yellowScale[500],
     borderSelected: yellowScale[500],

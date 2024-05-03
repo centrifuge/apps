@@ -89,7 +89,7 @@ const TrancheTokenCard = ({
           <Shelf gap={numOfTrancheTokens === 1 ? 5 : 2} alignItems="flex-end">
             <Stack gap={1} paddingRight={numOfTrancheTokens === 1 ? 3 : 0}>
               <Tooltips label={`${poolId === '4139607887' ? 'Target ' : ''}APY`} body={apyTooltipBody} />
-              <Text fontSize="30px" variant="body3">
+              <Text fontSize={[14, 20, 30]} variant="body3" style={{ whiteSpace: 'nowrap' }}>
                 {calculateApy()}
               </Text>
             </Stack>

@@ -16,7 +16,7 @@ export const Card = styled(Box)<Props>(({ variant = 'default', backgroundColor }
     borderRadius: 'card',
     borderWidth: variant === 'default' && !backgroundColor ? 1 : 0,
     borderStyle: 'solid',
-    borderColor: 'borderSecondary',
+    borderColor: 'borderPrimary',
     boxShadow: variant === 'interactive' ? 'cardInteractive' : variant === 'overlay' ? 'cardOverlay' : undefined,
     transition: 'box-shadow 100ms ease',
 

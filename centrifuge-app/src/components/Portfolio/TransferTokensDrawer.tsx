@@ -121,7 +121,7 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
         )}
         {isNativeTransfer && (
           <Stack gap={12}>
-            <Text variant="heading6" color="textPrimary" fontWeight={600}>
+            <Text variant="heading4" color="textPrimary" fontWeight={600}>
               Price
             </Text>
             <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
@@ -214,7 +214,7 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
   })
 
   return (
-    <Stack px={2} py={4} backgroundColor="backgroundTertiary">
+    <Stack px={2} py={4} backgroundColor="backgroundSecondary">
       <FormikProvider value={form}>
         <Form>
           <Stack gap="2">
@@ -305,7 +305,7 @@ const ReceiveToken = ({ address }: SendReceiveProps) => {
   )
 
   return (
-    <Stack gap={2} px={1} py={2} backgroundColor="backgroundTertiary">
+    <Stack gap={2} px={1} py={2} backgroundColor="backgroundSecondary">
       <Stack gap={3}>
         <Text variant="interactive2" color="textSecondary">
           Your address on Centrifuge Chain
