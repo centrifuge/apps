@@ -146,10 +146,9 @@ export function PoolBalance({ pool }: { pool: Pool }) {
   React.useEffect(() => {
     const f = [...overviewRecords, ...inOutFlowRecords].map(({ name, value }) => [name.trim(), ...(value as string[])])
     let formatted = f.map((values) =>
-      Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`]))
+      Object.fromEntries(headers.map((_, index) => [`"${headers[index]}"`, `"${values[index]}"`]))
     )
 
-    console.log('formatted', formatted, f)
     if (!formatted.length) {
       return
     }
