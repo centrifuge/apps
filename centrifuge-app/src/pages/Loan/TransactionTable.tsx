@@ -7,7 +7,7 @@ import { useMemo } from 'react'
 import { Column, DataTable } from '../../components/DataTable'
 import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 
 type Props = {
   transactions: AssetTransaction[]
@@ -16,6 +16,7 @@ type Props = {
   loanType: 'external' | 'internal'
   pricing: PricingInfo
   poolType: 'publicCredit' | 'privateCredit' | undefined
+  maturityDate: string
 }
 
 type Row = {
@@ -24,11 +25,20 @@ type Row = {
   quantity: CurrencyBalance | null
   transactionDate: string
   settlePrice: CurrencyBalance | null
-  faceFlow: Decimal | null
+  faceValue: Decimal | null
   position: Decimal
+  yieldToMaturity: Decimal | null
 }
 
-export const TransactionTable = ({ transactions, currency, loanType, decimals, pricing, poolType }: Props) => {
+export const TransactionTable = ({
+  transactions,
+  currency,
+  loanType,
+  decimals,
+  pricing,
+  poolType,
+  maturityDate,
+}: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
       if (a.timestamp > b.timestamp) {
@@ -46,46 +56,64 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
       return 0
     })
 
-    return sortedTransactions.map((transaction, index, array) => ({
-      type: transaction.type,
-      amount: transaction.amount,
-      quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
-      transactionDate: transaction.timestamp,
-      settlePrice: transaction.settlementPrice
-        ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
-        : null,
-      faceFlow:
+    return sortedTransactions.map((transaction, index, array) => {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const timeDifference = new Date(maturityDate).getTime() - today.getTime()
+      const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25 // number of milliseconds in a year
+      const yearsUntilMaturity = timeDifference / millisecondsPerYear
+
+      const faceValue =
         transaction.quantity && (pricing as ExternalPricingInfo).notional
           ? new CurrencyBalance(transaction.quantity, 18)
               .toDecimal()
               .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+          : null
+
+      return {
+        type: transaction.type,
+        amount: transaction.amount,
+        quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
+        transactionDate: transaction.timestamp,
+        yieldToMaturity:
+          transaction.amount && faceValue
+            ? faceValue
+                .sub(transaction.amount.toDecimal())
+                .div(yearsUntilMaturity)
+                .div(faceValue.add(transaction.amount.toDecimal()))
+                .div(2)
+            : null,
+        settlePrice: transaction.settlementPrice
+          ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
           : null,
-      position: array.slice(0, index + 1).reduce((sum, trx) => {
-        if (trx.type === 'BORROWED') {
-          sum = sum.add(
-            trx.quantity
-              ? new CurrencyBalance(trx.quantity, 18)
-                  .toDecimal()
-                  .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-              : trx.amount
-              ? trx.amount.toDecimal()
-              : Dec(0)
-          )
-        }
-        if (trx.type === 'REPAID') {
-          sum = sum.sub(
-            trx.quantity
-              ? new CurrencyBalance(trx.quantity, 18)
-                  .toDecimal()
-                  .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-              : trx.amount
-              ? trx.amount.toDecimal()
-              : Dec(0)
-          )
-        }
-        return sum
-      }, Dec(0)),
-    }))
+        faceValue,
+        position: array.slice(0, index + 1).reduce((sum, trx) => {
+          if (trx.type === 'BORROWED') {
+            sum = sum.add(
+              trx.quantity
+                ? new CurrencyBalance(trx.quantity, 18)
+                    .toDecimal()
+                    .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+                : trx.amount
+                ? trx.amount.toDecimal()
+                : Dec(0)
+            )
+          }
+          if (trx.type === 'REPAID') {
+            sum = sum.sub(
+              trx.quantity
+                ? new CurrencyBalance(trx.quantity, 18)
+                    .toDecimal()
+                    .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+                : trx.amount
+                ? trx.amount.toDecimal()
+                : Dec(0)
+            )
+          }
+          return sum
+        }, Dec(0)),
+      }
+    })
   }, [transactions, decimals, pricing])
 
   const getStatusChipType = (type: AssetTransactionType) => {
@@ -129,9 +157,9 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
       ...columns,
       {
         align: 'left',
-        header: `Face flow (${currency})`,
+        header: `Face value (${currency})`,
         cell: (row: Row) =>
-          row.faceFlow ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceFlow, undefined, 2, 2)}` : '-',
+          row.faceValue ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceValue, undefined, 2, 2)}` : '-',
       },
       {
         align: 'left',
@@ -142,6 +170,12 @@ export const TransactionTable = ({ transactions, currency, loanType, decimals, p
         align: 'left',
         header: `Settle price (${currency})`,
         cell: (row: Row) => (row.settlePrice ? formatBalance(row.settlePrice, undefined, 6, 2) : '-'),
+      },
+      {
+        align: 'left',
+        header: `YTM (%)`,
+        cell: (row: Row) =>
+          !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
       },
       {
         align: 'left',
