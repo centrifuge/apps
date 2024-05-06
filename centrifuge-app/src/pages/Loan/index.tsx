@@ -1,4 +1,11 @@
-import { CurrencyBalance, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import {
+  CurrencyBalance,
+  ExternalPricingInfo,
+  Loan as LoanType,
+  Pool,
+  PricingInfo,
+  TinlakeLoan,
+} from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -25,9 +32,10 @@ import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
+import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
-import { formatBalance, truncateText } from '../../utils/formatting'
+import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
 import { useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
@@ -139,6 +147,45 @@ function Loan() {
     return 0
   }, [originationDate, loan?.pricing.maturityDate])
 
+  const weightedYTM = React.useMemo(() => {
+    if (loan?.pricing && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const timeDifference = new Date(loan.pricing.maturityDate).getTime() - today.getTime()
+      const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25 // number of milliseconds in a year
+      const yearsUntilMaturity = timeDifference / millisecondsPerYear
+
+      return borrowerAssetTransactions?.reduce((prev, curr) => {
+        const faceValue =
+          curr.quantity && (loan.pricing as ExternalPricingInfo).notional
+            ? new CurrencyBalance(curr.quantity, 18)
+                .toDecimal()
+                .mul((loan.pricing as ExternalPricingInfo).notional.toDecimal())
+            : null
+
+        const yieldToMaturity =
+          curr.amount && faceValue
+            ? faceValue
+                .sub(curr.amount.toDecimal())
+                .div(yearsUntilMaturity)
+                .div(faceValue.add(curr.amount.toDecimal()))
+                .div(2)
+            : null
+        return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev
+      }, Dec(0))
+    }
+    return null
+  }, [loan, borrowerAssetTransactions])
+
+  const averageWeightedYTM = React.useMemo(() => {
+    if (borrowerAssetTransactions?.length && weightedYTM) {
+      const sum = borrowerAssetTransactions.reduce((prev, curr) => {
+        return curr.quantity ? Dec(curr.quantity).add(prev) : prev
+      }, Dec(0))
+      return sum.isZero() ? Dec(0) : weightedYTM.div(sum)
+    }
+  }, [weightedYTM])
+
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -194,6 +241,12 @@ function Loan() {
                     )}`,
                   },
                 ],
+                ...(loan.pricing.maturityDate &&
+                'valuationMethod' in loan.pricing &&
+                loan.pricing.valuationMethod === 'oracle' &&
+                averageWeightedYTM
+                  ? [{ label: 'Average YTM (%)', value: formatPercentage(averageWeightedYTM) }]
+                  : []),
               ]}
             />
 
@@ -272,6 +325,7 @@ function Loan() {
                   poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
                   decimals={pool.currency.decimals}
                   pricing={loan.pricing as PricingInfo}
+                  maturityDate={loan.pricing.maturityDate}
                 />
               </PageSection>
             ) : null}
