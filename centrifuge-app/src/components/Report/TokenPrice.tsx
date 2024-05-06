@@ -103,17 +103,16 @@ export function TokenPrice({ pool }: { pool: Pool }) {
           formatter: (v: any) => formatBalance(v, '', 5),
         })) || []),
     ]
-  }, [poolStates, pool?.tranches])
+  }, [poolStates, pool])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
   React.useEffect(() => {
     const f = priceRecords.map(({ name, value }) => [name.trim(), ...(value as string[])])
     let formatted = f.map((values) =>
-      Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`]))
+      Object.fromEntries(headers.map((_, index) => [`"${headers[index]}"`, `"${values[index]}"`]))
     )
 
-    console.log('formatted', formatted, f)
     if (!formatted.length) {
       return
     }
