@@ -148,12 +148,16 @@ function Loan() {
   }, [originationDate, loan?.pricing.maturityDate])
 
   const weightedYTM = React.useMemo(() => {
-    if (loan?.pricing && 'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle') {
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const timeDifference = new Date(loan.pricing.maturityDate).getTime() - today.getTime()
-      const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25 // number of milliseconds in a year
-      const yearsUntilMaturity = timeDifference / millisecondsPerYear
+    if (
+      loan?.pricing &&
+      'valuationMethod' in loan.pricing &&
+      loan.pricing.valuationMethod === 'oracle' &&
+      loan.pricing.interestRate.isZero()
+    ) {
+      const termDays = originationDate
+        ? daysBetween(originationDate, loan?.pricing.maturityDate)
+        : daysBetween(new Date(), loan?.pricing.maturityDate)
+      const yearsBetweenDates = termDays / 365
 
       return borrowerAssetTransactions?.reduce((prev, curr) => {
         const faceValue =
@@ -165,11 +169,10 @@ function Loan() {
 
         const yieldToMaturity =
           curr.amount && faceValue
-            ? faceValue
-                .sub(curr.amount.toDecimal())
-                .div(yearsUntilMaturity)
-                .div(faceValue.add(curr.amount.toDecimal()))
-                .div(2)
+            ? Dec(2)
+                .mul(faceValue?.sub(curr.amount.toDecimal()))
+                .div(Dec(yearsBetweenDates).mul(faceValue.add(curr.amount.toDecimal())))
+                .mul(100)
             : null
         return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev
       }, Dec(0))
@@ -245,7 +248,7 @@ function Loan() {
                 'valuationMethod' in loan.pricing &&
                 loan.pricing.valuationMethod === 'oracle' &&
                 averageWeightedYTM
-                  ? [{ label: 'Average YTM (%)', value: formatPercentage(averageWeightedYTM) }]
+                  ? [{ label: 'Average YTM', value: formatPercentage(averageWeightedYTM) }]
                   : []),
               ]}
             />
@@ -325,7 +328,8 @@ function Loan() {
                   poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
                   decimals={pool.currency.decimals}
                   pricing={loan.pricing as PricingInfo}
-                  maturityDate={loan.pricing.maturityDate}
+                  maturityDate={new Date(loan.pricing.maturityDate)}
+                  originationDate={originationDate ? new Date(originationDate) : undefined}
                 />
               </PageSection>
             ) : null}

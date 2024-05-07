@@ -6,7 +6,7 @@ import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Column, DataTable } from '../../components/DataTable'
 import { Dec } from '../../utils/Decimal'
-import { formatDate } from '../../utils/date'
+import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 
 type Props = {
@@ -16,7 +16,8 @@ type Props = {
   loanType: 'external' | 'internal'
   pricing: PricingInfo
   poolType: 'publicCredit' | 'privateCredit' | undefined
-  maturityDate: string
+  maturityDate: Date
+  originationDate: Date | undefined
 }
 
 type Row = {
@@ -38,6 +39,7 @@ export const TransactionTable = ({
   pricing,
   poolType,
   maturityDate,
+  originationDate,
 }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
@@ -57,11 +59,10 @@ export const TransactionTable = ({
     })
 
     return sortedTransactions.map((transaction, index, array) => {
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const timeDifference = new Date(maturityDate).getTime() - today.getTime()
-      const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25 // number of milliseconds in a year
-      const yearsUntilMaturity = timeDifference / millisecondsPerYear
+      const termDays = originationDate
+        ? daysBetween(originationDate, maturityDate)
+        : daysBetween(new Date(), maturityDate)
+      const yearsBetweenDates = termDays / 365
 
       const faceValue =
         transaction.quantity && (pricing as ExternalPricingInfo).notional
@@ -77,11 +78,10 @@ export const TransactionTable = ({
         transactionDate: transaction.timestamp,
         yieldToMaturity:
           transaction.amount && faceValue
-            ? faceValue
-                .sub(transaction.amount.toDecimal())
-                .div(yearsUntilMaturity)
-                .div(faceValue.add(transaction.amount.toDecimal()))
-                .div(2)
+            ? Dec(2)
+                .mul(faceValue?.sub(transaction.amount.toDecimal()))
+                .div(Dec(yearsBetweenDates).mul(faceValue.add(transaction.amount.toDecimal())))
+                .mul(100)
             : null,
         settlePrice: transaction.settlementPrice
           ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
@@ -173,7 +173,7 @@ export const TransactionTable = ({
             },
             {
               align: 'left',
-              header: `YTM (%)`,
+              header: `YTM`,
               cell: (row: Row) =>
                 !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
             },
