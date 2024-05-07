@@ -49,12 +49,13 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
                 { label: 'YTD', value: 'YTD' },
               ]}
               onChange={(option) => setFilter(option.target.value as FilterOptions)}
+              defaultValue={filter}
             />
           </Box>
         )}
       </Shelf>
       <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-        <AreaChart data={data || []} margin={{ top: 18, left: -30 }}>
+        <AreaChart data={data || []} margin={{ top: 18, left: -10 }}>
           <defs>
             <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={'#626262'} stopOpacity={0.4} />
@@ -86,12 +87,13 @@ export const PriceChart = ({ data, currency, filter, setFilter }: PriceChartProp
             tickLine={false}
             style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
             tickFormatter={(tick: number) => {
-              return tick.toFixed(2)
+              return tick.toFixed(6)
             }}
+            domain={['dataMin - 0.001', 'dataMax + 0.001']}
             interval={'preserveStartEnd'}
           />
           <CartesianGrid stroke={theme.colors.borderPrimary} />
-          <Tooltip content={<CustomizedTooltip currency={currency} precision={4} />} />
+          <Tooltip content={<CustomizedTooltip currency={currency} precision={6} />} />
           <Area
             type="monotone"
             dataKey="price"
