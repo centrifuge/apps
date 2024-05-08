@@ -159,32 +159,36 @@ function Loan() {
         : daysBetween(new Date(), loan?.pricing.maturityDate)
       const yearsBetweenDates = termDays / 365
 
-      return borrowerAssetTransactions?.reduce((prev, curr) => {
-        const faceValue =
-          curr.quantity && (loan.pricing as ExternalPricingInfo).notional
-            ? new CurrencyBalance(curr.quantity, 18)
-                .toDecimal()
-                .mul((loan.pricing as ExternalPricingInfo).notional.toDecimal())
-            : null
+      return borrowerAssetTransactions
+        ?.filter((tx) => tx.type !== 'REPAID')
+        .reduce((prev, curr) => {
+          const faceValue =
+            curr.quantity && (loan.pricing as ExternalPricingInfo).notional
+              ? new CurrencyBalance(curr.quantity, 18)
+                  .toDecimal()
+                  .mul((loan.pricing as ExternalPricingInfo).notional.toDecimal())
+              : null
 
-        const yieldToMaturity =
-          curr.amount && faceValue
-            ? Dec(2)
-                .mul(faceValue?.sub(curr.amount.toDecimal()))
-                .div(Dec(yearsBetweenDates).mul(faceValue.add(curr.amount.toDecimal())))
-                .mul(100)
-            : null
-        return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev
-      }, Dec(0))
+          const yieldToMaturity =
+            curr.amount && faceValue
+              ? Dec(2)
+                  .mul(faceValue?.sub(curr.amount.toDecimal()))
+                  .div(Dec(yearsBetweenDates).mul(faceValue.add(curr.amount.toDecimal())))
+                  .mul(100)
+              : null
+          return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev
+        }, Dec(0))
     }
     return null
   }, [loan, borrowerAssetTransactions])
 
   const averageWeightedYTM = React.useMemo(() => {
     if (borrowerAssetTransactions?.length && weightedYTM) {
-      const sum = borrowerAssetTransactions.reduce((prev, curr) => {
-        return curr.quantity ? Dec(curr.quantity).add(prev) : prev
-      }, Dec(0))
+      const sum = borrowerAssetTransactions
+        .filter((tx) => tx.type !== 'REPAID')
+        .reduce((prev, curr) => {
+          return curr.quantity ? Dec(curr.quantity).add(prev) : prev
+        }, Dec(0))
       return sum.isZero() ? Dec(0) : weightedYTM.div(sum)
     }
   }, [weightedYTM])
