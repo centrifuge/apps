@@ -1,9 +1,10 @@
 name: Synpress tests
 
 on:
-  pull_request:
-    types: [closed]
-    branches: [main]
+  workflow_run:
+    workflows: ['Demo deployments (manual)']
+    types:
+      - completed
 
 jobs:
   cypress-run:
@@ -35,9 +36,9 @@ jobs:
           CYPRESS_PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
           PRIVATE_KEY: ${{secrets.CYPRESS_PRIVATE_KEY}}
           NETWORK_NAME: centrifuge
-          RPC_URL: https://fullnode.development.cntrfg.com
-          CHAIN_ID: 2000
-          SYMBOL: DEVEL
+          RPC_URL: https://fullnode-apps.demo.k-f.dev
+          CHAIN_ID: 2090
+          SYMBOL: DEMO
           IS_TESTNET: true
           DEBUG: true
       - name: Synpress run
@@ -54,5 +55,5 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CYPRESS_PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY }}
           PRIVATE_KEY: ${{ secrets.CYPRESS_PRIVATE_KEY }}
-          CYPRESS_BASE_URL: https://app-dev.k-f.dev
+          CYPRESS_BASE_URL: https://app-demo.k-f.dev
           DISPLAY: :0.0
