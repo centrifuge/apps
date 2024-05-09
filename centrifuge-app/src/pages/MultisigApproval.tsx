@@ -46,11 +46,35 @@ export default function MultisigApprovalPage() {
   const suitableAccount = accounts?.find((acc) => multisig.signers.includes(acc.address))
   return (
     <LayoutBase>
-      <PageHeader
-        title="Approve multisig transaction"
-        subtitle={`Call hash: ${truncate(hash)}`}
-        actions={
-          selectedAddress && !multisig.signers.includes(selectedAddress) ? (
+      <PageHeader title="Approve multisig transaction" subtitle={`Call hash: ${truncate(hash)}`}></PageHeader>
+      <PageSection>
+        <Shelf justifyContent="space-between">
+          {isCallDataNeeded && !callString && (
+            <>
+              <TextAreaInput
+                label="Call data"
+                placeholder="0x..."
+                value={callFormInput}
+                onChange={(e) => setCallFormInput(e.target.value)}
+              />
+              {callInputError && (
+                <Text variant="label2" color="statusCritical">
+                  Calldata doesn't match hash
+                </Text>
+              )}
+            </>
+          )}
+          {callString && (
+            <details>
+              <Text as="summary" variant="heading2">
+                Call details
+              </Text>
+              <Text as="pre" variant="body2" style={{ whiteSpace: 'pre-wrap' }}>
+                {callString}
+              </Text>
+            </details>
+          )}
+          {selectedAddress && !multisig.signers.includes(selectedAddress) ? (
             <Shelf gap={2}>
               <Text variant="body2">selected account not signer to multisig</Text>
               {suitableAccount && (
@@ -63,35 +87,8 @@ export default function MultisigApprovalPage() {
             <Button onClick={approveOrReject} loading={transactionIsPending}>
               {isReject ? 'Reject' : 'Approve'}
             </Button>
-          )
-        }
-      ></PageHeader>
-      <PageSection>
-        {isCallDataNeeded && !callString && (
-          <>
-            <TextAreaInput
-              label="Call data"
-              placeholder="0x..."
-              value={callFormInput}
-              onChange={(e) => setCallFormInput(e.target.value)}
-            />
-            {callInputError && (
-              <Text variant="label2" color="statusCritical">
-                Calldata doesn't match hash
-              </Text>
-            )}
-          </>
-        )}
-        {callString && (
-          <details>
-            <Text as="summary" variant="heading2">
-              Call details
-            </Text>
-            <Text as="pre" variant="body2" style={{ whiteSpace: 'pre-wrap' }}>
-              {callString}
-            </Text>
-          </details>
-        )}
+          )}
+        </Shelf>
       </PageSection>
     </LayoutBase>
   )
