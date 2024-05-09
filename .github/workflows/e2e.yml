@@ -38,7 +38,7 @@ jobs:
           NETWORK_NAME: centrifuge
           RPC_URL: https://fullnode-apps.demo.k-f.dev
           CHAIN_ID: 2090
-          SYMBOL: DEMO
+          SYMBOL: DEVEL
           IS_TESTNET: true
           DEBUG: true
       - name: Synpress run
