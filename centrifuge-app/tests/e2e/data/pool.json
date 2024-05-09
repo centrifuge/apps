@@ -1,19 +1,19 @@
 {
   "name": "E2E Pool",
-  "poolId": "3515519799",
-  "poolCurrency": "USDT",
+  "poolId": "1101557597",
+  "poolCurrency": "USDC",
   "investAmount": "2",
   "poolAdmin": "0x70fC4d9C87E9e9B0751A5680b1Dd654517f02309",
   "tranches": [
     {
       "name": "Junior",
       "symbol": "E2EJUN",
-      "id": "0xec6528e5b1a899fed47777b19963b1a6"
+      "id": "0xbf444862859556b448b9242c9cfee126"
     },
     {
       "name": "Senior",
       "symbol": "E2ESEN",
-      "id": "0xc18e73516eda0e038c50f6ab075b74ec"
+      "id": "0x7ccd846d1116ce4a751edf9d01e484b7"
     }
   ]
 }
