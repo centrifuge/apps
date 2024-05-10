@@ -73,7 +73,8 @@ export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
   const pool = usePool(poolId)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const { poolStates: dailyPoolStates } = useDailyPoolStates(poolId, new Date(pool.nav.lastUpdated), today) || {}
+  const { poolStates: dailyPoolStates } =
+    useDailyPoolStates(poolId, new Date(new Date(pool.createdAt || today)), today) || {}
 
   const pendingFees = React.useMemo(() => {
     return new CurrencyBalance(
@@ -83,10 +84,13 @@ export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
   }, [pool.poolFees, pool.currency.decimals])
 
   const changeInValuation = React.useMemo(() => {
-    return dailyPoolStates?.length
-      ? new BN(dailyPoolStates[0]?.sumBorrowedAmountByPeriod ?? 0).add(
-          new BN(dailyPoolStates.reverse()[0]?.sumBorrowedAmountByPeriod ?? new BN(0))
-        )
+    const lastUpdated = pool?.nav.lastUpdated || new Date()
+    const lastUpdatedSumBorrowedAmountByPeriod = dailyPoolStates?.find(
+      (state) => state.timestamp >= lastUpdated
+    )?.sumBorrowedAmountByPeriod
+    const todaySumBorrowedAmountByPeriod = dailyPoolStates?.[0].sumBorrowedAmountByPeriod
+    return lastUpdatedSumBorrowedAmountByPeriod && todaySumBorrowedAmountByPeriod
+      ? new BN(todaySumBorrowedAmountByPeriod).sub(new BN(lastUpdatedSumBorrowedAmountByPeriod))
       : new BN(0)
   }, [dailyPoolStates])
 
