@@ -10,9 +10,9 @@ import { AssetName } from '../../components/LoanList'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
+import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
 import { settlementPrice } from '../../utils/validation'
 import { isCashLoan, isExternalLoan } from '../Loan/utils'
-import { usePoolsForWhichAccountIsFeeder } from './Overview'
 
 type FormValues = {
   feed: {
