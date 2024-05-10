@@ -890,7 +890,6 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       admin: string,
       poolId: string,
-      collectionId: string,
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
@@ -899,7 +898,7 @@ export function getPoolsModule(inst: Centrifuge) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, metadata, fees] = args
+    const [admin, poolId, tranches, currency, maxReserve, metadata, fees] = args
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
