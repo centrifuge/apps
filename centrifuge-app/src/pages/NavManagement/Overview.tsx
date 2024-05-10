@@ -3,11 +3,12 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { PageSummary } from '../../components/PageSummary'
 import { Tooltips } from '../../components/Tooltips'
 import { formatBalance } from '../../utils/formatting'
-import { useDailyPoolStates, useInvestorTransactions, usePool } from '../../utils/usePools'
+import { useDailyPoolStates, usePool } from '../../utils/usePools'
 
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Box, Divider, IconClockForward, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
+import React from 'react'
 import { NavManagementAssetTable } from './NavManagementAssetTable'
 import { NavManagementHeader } from './NavManagementHeader'
 
@@ -25,18 +26,24 @@ export default function NavManagementOverviewPage() {
 
 export const NavManagementPageSummary = ({ poolId }: { poolId: string }) => {
   const pool = usePool(poolId)
-  const investorTransactions = useInvestorTransactions(poolId)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const dailyPoolStates = useDailyPoolStates(poolId, new Date(pool.createdAt || today), today)
   const investments =
     pool &&
-    investorTransactions
-      ?.filter((t) => t.type === 'INVEST_COLLECT')
-      .reduce((acc, tx) => (tx.currencyAmount ? acc.add(tx.currencyAmount) : new BN(0)), new BN(0))
+    dailyPoolStates?.poolStates?.reduce(
+      (acc, state) =>
+        state && state?.sumInvestedAmountByPeriod ? acc.add(new BN(state.sumInvestedAmountByPeriod)) : new BN(0),
+      new BN(0)
+    )
 
   const redemptions =
     pool &&
-    investorTransactions
-      ?.filter((t) => t.type === 'REDEEM_COLLECT')
-      .reduce((acc, tx) => (tx.currencyAmount ? acc.add(tx.currencyAmount) : new BN(0)), new BN(0))
+    dailyPoolStates?.poolStates?.reduce(
+      (acc, state) =>
+        state && state?.sumRedeemedAmountByPeriod ? acc.add(new BN(state.sumRedeemedAmountByPeriod)) : new BN(0),
+      new BN(0)
+    )
 
   return (
     <PageSummary
@@ -68,20 +75,26 @@ export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
   today.setHours(0, 0, 0, 0)
   const { poolStates: dailyPoolStates } = useDailyPoolStates(poolId, new Date(pool.nav.lastUpdated), today) || {}
 
-  const pendingFees = new CurrencyBalance(
-    pool?.poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
-    pool.currency.decimals
-  )
-  const changeInValuation = dailyPoolStates?.length
-    ? new BN(dailyPoolStates[0]?.sumBorrowedAmountByPeriod ?? 0).add(
-        new BN(dailyPoolStates.reverse()[0]?.sumBorrowedAmountByPeriod ?? new BN(0))
-      )
-    : new BN(0)
+  const pendingFees = React.useMemo(() => {
+    return new CurrencyBalance(
+      pool?.poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
+      pool.currency.decimals
+    )
+  }, [pool.poolFees, pool.currency.decimals])
 
-  const pendingNav =
-    dailyPoolStates && dailyPoolStates?.length
+  const changeInValuation = React.useMemo(() => {
+    return dailyPoolStates?.length
+      ? new BN(dailyPoolStates[0]?.sumBorrowedAmountByPeriod ?? 0).add(
+          new BN(dailyPoolStates.reverse()[0]?.sumBorrowedAmountByPeriod ?? new BN(0))
+        )
+      : new BN(0)
+  }, [dailyPoolStates])
+
+  const pendingNav = React.useMemo(() => {
+    return dailyPoolStates && dailyPoolStates?.length
       ? new BN(dailyPoolStates.reverse()[0].portfolioValuation).add(pool.reserve.total)
       : new BN(0)
+  }, [dailyPoolStates, pool.reserve.total])
   return (
     <Box>
       <Stack
