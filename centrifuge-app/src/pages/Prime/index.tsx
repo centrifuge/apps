@@ -1,15 +1,14 @@
-import { Price } from '@centrifuge/centrifuge-js'
-import { useCentrifuge, useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
+import { CurrencyBalance, Price, addressToHex } from '@centrifuge/centrifuge-js'
+import { useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
-import { useQuery } from 'react-query'
-import { firstValueFrom } from 'rxjs'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { DAO, useDAOConfig } from '../../utils/useDAOConfig'
 import { useFilters } from '../../utils/useFilters'
+import { usePools } from '../../utils/usePools'
 import { useSubquery } from '../../utils/useSubquery'
 
 export default function PrimePage() {
@@ -53,22 +52,18 @@ type Row = DAO & { value?: number; profit?: number; networkName: string; firstIn
 
 function DaoPortfoliosTable() {
   const utils = useCentrifugeUtils()
-  const cent = useCentrifuge()
   const getNetworkName = useGetNetworkName()
   const { data: daoData } = useDAOConfig()
+  const pools = usePools()
 
   const daos =
     daoData?.map((dao) => ({
       ...dao,
-      address: utils.formatAddress(
+      centAddress: addressToHex(
         typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
       ),
     })) || []
 
-  // TODO: Update to use new portfolio Runtime API
-  const { data, isLoading: isPortfoliosLoading } = useQuery(['daoPortfolios', daos.map((dao) => dao.address)], () =>
-    Promise.all(daos.map((dao) => firstValueFrom(cent.pools.getBalances([dao.address]))))
-  )
 
   const { data: subData, isLoading: isSubqueryLoading } = useSubquery(
     `query ($accounts: [String!]) {
@@ -87,28 +82,70 @@ function DaoPortfoliosTable() {
               }
             }
           }
+          trancheBalances {
+            nodes {
+              claimableCurrency
+              claimableTrancheTokens
+              pendingInvestCurrency
+              pendingRedeemTrancheTokens
+              sumClaimedCurrency
+              sumClaimedTrancheTokens
+              trancheId
+              poolId
+            }
+          }
+          currencyBalances {
+            nodes {
+              amount
+              currency {
+                symbol
+                decimals
+                trancheId
+              }
+            }
+          }
         }
       }
     }`,
     {
-      accounts: daos.map((dao) => dao.address),
+      accounts: daos.map((dao) => dao.centAddress),
     }
   )
 
   const mapped: Row[] = daos.map((dao, i) => {
-    const investTxs = subData?.accounts.nodes.find((n: any) => n.id === dao.address)?.investorTransactions.nodes
-    const trancheBalances =
-      data?.[i].tranches && Object.fromEntries(data[i].tranches.map((t) => [t.trancheId, t.balance.toFloat()]))
-    const yields =
-      trancheBalances &&
-      Object.keys(trancheBalances).map((tid) => {
-        const firstTx = investTxs?.find((tx: any) => tx.tranche.trancheId === tid)
-        const initialTokenPrice = firstTx && new Price(firstTx.tokenPrice).toFloat()
-        const tokenPrice = firstTx && new Price(firstTx.tranche.tokenPrice).toFloat()
-        const profit = tokenPrice / initialTokenPrice - 1
-        return [tid, profit] as const
-      })
-    const totalValue = trancheBalances && Object.values(trancheBalances)?.reduce((acc, balance) => acc + balance, 0)
+    const account = subData?.accounts.nodes.find((n: any) => n.id === dao.centAddress)
+    const investTxs = account?.investorTransactions.nodes
+    console.log('account', account)
+    const trancheBalances = !!account
+      ? Object.fromEntries(
+          account.trancheBalances.nodes.map((tranche: any) => {
+            const pool = pools?.find((p) => p.id === tranche.poolId)
+            const decimals = pool?.currency.decimals ?? 18
+            const tokenPrice = pool?.tranches.find((t) => tranche.trancheId.endsWith(t.id))?.tokenPrice?.toFloat() ?? 1
+            let balance = new CurrencyBalance(tranche.claimableTrancheTokens, decimals).toFloat()
+
+            const subqueryCurrency = account?.currencyBalances.nodes.find(
+              (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
+            )
+            console.log('subqueryCurrency', subqueryCurrency)
+            if (subqueryCurrency) {
+              balance += new CurrencyBalance(subqueryCurrency.amount, decimals).toFloat()
+            }
+            return [tranche.trancheId.split('-')[1], { balance, tokenPrice }]
+          })
+        )
+      : {}
+    const yields = Object.keys(trancheBalances).map((tid) => {
+      const firstTx = investTxs?.find((tx: any) => tx.tranche.trancheId === tid)
+      const initialTokenPrice = firstTx && new Price(firstTx.tokenPrice).toFloat()
+      const tokenPrice = firstTx && new Price(firstTx.tranche.tokenPrice).toFloat()
+      const profit = tokenPrice / initialTokenPrice - 1
+      return [tid, profit] as const
+    })
+    const totalValue = Object.values(trancheBalances)?.reduce(
+      (acc, { balance, tokenPrice }) => acc + balance * tokenPrice,
+      0
+    )
     const weightedYield =
       yields &&
       totalValue &&
@@ -147,26 +184,26 @@ function DaoPortfoliosTable() {
           options={Object.fromEntries(uniqueNetworks.map((chain) => [chain, getNetworkName(chain)]))}
         />
       ),
-      cell: (row: Row) => <Text>{row.network}</Text>,
+      cell: (row: Row) => <Text>{getNetworkName(row.network)}</Text>,
     },
     {
       header: <SortableTableHeader label="Portfolio value" />,
       cell: (row: Row) => (
-        <TextWithPlaceholder isLoading={isPortfoliosLoading}>
+        <TextWithPlaceholder isLoading={isSubqueryLoading}>
           {row.value != null && formatBalance(row.value, 'USD')}
         </TextWithPlaceholder>
       ),
       sortKey: 'value',
     },
-    {
-      header: <SortableTableHeader label="Profit" />,
-      cell: (row: Row) => (
-        <TextWithPlaceholder isLoading={isPortfoliosLoading || isSubqueryLoading}>
-          {row.profit != null && formatPercentage(row.profit)}
-        </TextWithPlaceholder>
-      ),
-      sortKey: 'profit',
-    },
+    // {
+    //   header: <SortableTableHeader label="Profit" />,
+    //   cell: (row: Row) => (
+    //     <TextWithPlaceholder isLoading={isPortfoliosLoading || isSubqueryLoading}>
+    //       {row.profit != null && formatPercentage(row.profit)}
+    //     </TextWithPlaceholder>
+    //   ),
+    //   sortKey: 'profit',
+    // },
     {
       align: 'left',
       header: 'First investment',
