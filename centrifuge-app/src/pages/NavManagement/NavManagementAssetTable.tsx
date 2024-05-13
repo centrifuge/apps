@@ -23,6 +23,7 @@ type FormValues = {
     Isin: string
     quantity: number
     maturity: string
+    currentPrice: number
   }[]
   closeEpoch: boolean
 }
@@ -84,6 +85,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             Isin: l.pricing.Isin,
             quantity: l.pricing.outstandingQuantity.toFloat(),
             maturity: formatDate(l.pricing.maturityDate),
+            currentPrice: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
           }
         }) ?? [],
       closeEpoch: false,
@@ -104,7 +106,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     form.resetForm()
     form.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues, isEditing])
+  }, [initialValues, isEditing, isLoading])
 
   const newNavExternal = form.values.feed.reduce((acc, cur) => acc + cur.quantity * (cur.value || cur.oldValue), 0)
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
@@ -146,23 +148,24 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     {
       align: 'right',
       header: 'New price',
-      cell: (row: Row) =>
-        'oldValue' in row
-          ? (console.log('row.formIndex', row.formIndex),
-            (
-              <Field name={`feed.${row.formIndex}.value`} validate={settlementPrice()}>
-                {({ field, meta, form }: FieldProps) => (
-                  <CurrencyInput
-                    {...field}
-                    placeholder={row.oldValue.toString()}
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    currency={pool?.currency.symbol}
-                    onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
-                  />
-                )}
-              </Field>
-            ))
-          : '',
+      cell: (row: Row) => {
+        return 'oldValue' in row ? (
+          <Field name={`feed.${row.formIndex}.value`} validate={settlementPrice()}>
+            {({ field, meta, form }: FieldProps) => (
+              <CurrencyInput
+                {...field}
+                placeholder={row.oldValue.toString()}
+                errorMessage={meta.touched ? meta.error : undefined}
+                currency={pool?.currency.symbol}
+                onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
+                value={row.currentPrice}
+              />
+            )}
+          </Field>
+        ) : (
+          ''
+        )
+      },
     },
     {
       align: 'right',
@@ -230,6 +233,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           <DataTable
             data={[...cashLoans, ...form.values.feed]}
             columns={columns}
+            onRowClicked={(row) => `/pools/${pool?.id}/assets/${row.id}`}
             footer={
               <DataRow>
                 <DataCol align="left">
