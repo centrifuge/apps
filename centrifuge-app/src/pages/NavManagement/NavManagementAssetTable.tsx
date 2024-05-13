@@ -159,6 +159,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 currency={pool?.currency.symbol}
                 onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
                 value={row.currentPrice}
+                onClick={(e) => e.preventDefault()}
               />
             )}
           </Field>
