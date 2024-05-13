@@ -66,7 +66,6 @@ function DaoPortfoliosTable() {
           : addressToHex(dao.address),
     })) || []
 
-
   const { data: subData, isLoading: isSubqueryLoading } = useSubquery(
     `query ($accounts: [String!]) {
       accounts(
@@ -117,7 +116,6 @@ function DaoPortfoliosTable() {
   const mapped: Row[] = daos.map((dao, i) => {
     const account = subData?.accounts.nodes.find((n: any) => n.id === dao.centAddress)
     const investTxs = account?.investorTransactions.nodes
-    console.log('account', account)
     const trancheBalances = !!account
       ? Object.fromEntries(
           account.trancheBalances.nodes.map((tranche: any) => {
@@ -132,7 +130,6 @@ function DaoPortfoliosTable() {
             const subqueryCurrency = account?.currencyBalances.nodes.find(
               (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
             )
-            console.log('subqueryCurrency', subqueryCurrency)
             if (subqueryCurrency) {
               balance += new CurrencyBalance(subqueryCurrency.amount, decimals).toFloat()
             }

@@ -25,17 +25,6 @@ type InvestorTransaction = {
   type: InvestorTransactionType
 }
 
-type TrancheSnapshot = {
-  blockNumber: number
-  timestamp: string
-  tokenPrice: Price
-  trancheId: string
-  tranche: {
-    poolId: string
-    trancheId: string
-  }
-}
-
 export function useDailyPortfolioValue(address: string, rangeValue: number) {
   const transactions = useTransactionsByAddress(address)
 
@@ -47,26 +36,10 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
     {} as Record<string, InvestorTransaction[]>
   )
 
-  const dailyTrancheStates = useDailyTranchesStates(Object.keys(transactionsByTrancheId || {}))
-
-  const dailyTrancheStatesByTrancheId = dailyTrancheStates?.reduce((tranches, trancheSnapshots) => {
-    if (trancheSnapshots.length) {
-      const trancheId = trancheSnapshots[0].tranche.trancheId
-      return {
-        ...tranches,
-        [trancheId]: trancheSnapshots,
-      }
-    }
-
-    return tranches
-  }, {} as Record<string, TrancheSnapshot[]>)
+  const dailyTrancheStatesByTrancheId = useDailyTranchesStates(Object.keys(transactionsByTrancheId || {}))
 
   return useMemo(() => {
-    if (
-      dailyTrancheStatesByTrancheId &&
-      transactionsByTrancheId &&
-      Object.keys(dailyTrancheStatesByTrancheId).length === dailyTrancheStates?.length
-    ) {
+    if (dailyTrancheStatesByTrancheId && transactionsByTrancheId) {
       const today = new Date()
 
       return Array(rangeValue + 1)
@@ -113,11 +86,17 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
           )
         })
     }
-  }, [dailyTrancheStates?.length, dailyTrancheStatesByTrancheId, rangeValue, transactionsByTrancheId])
+  }, [dailyTrancheStatesByTrancheId, rangeValue, transactionsByTrancheId])
 }
 
 const getPriceAtDate = (
-  dailyTrancheStatesByTrancheId: Record<string, TrancheSnapshot[]>,
+  dailyTrancheStatesByTrancheId: Record<
+    string,
+    {
+      timestamp: string
+      tokenPrice: Price
+    }[]
+  >,
   trancheId: string,
   rangeValue: number,
   day: number,

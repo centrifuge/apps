@@ -35,7 +35,7 @@ import { InvestRedeemDrawer } from '../InvestRedeem/InvestRedeemDrawer'
 import { RouterLinkButton } from '../RouterLinkButton'
 import { Tooltips } from '../Tooltips'
 import { TransferTokensDrawer } from './TransferTokensDrawer'
-import { usePortfolio, usePortfolioTokens } from './usePortfolio'
+import { usePortfolioTokens } from './usePortfolio'
 
 type Row = {
   currency: Token['currency']
@@ -141,7 +141,6 @@ export function useHoldings(address?: string, showActions = true) {
   const centBalances = useBalances(address && isSubstrateAddress(address) ? address : undefined)
 
   const wallet = useWallet()
-  const port = usePortfolio(address && isSubstrateAddress(address) ? address : undefined)
   const tinlakePools = useTinlakePools()
   const portfolioTokens = usePortfolioTokens(address)
   const currencies = usePoolCurrencies()

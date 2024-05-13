@@ -157,7 +157,7 @@ export function useDailyPoolStates(poolId: string, from?: Date, to?: Date, suspe
 export function useDailyTranchesStates(trancheIds: string[]) {
   const [result] = useCentrifugeQuery(
     ['dailyTrancheStates', { trancheIds }],
-    (cent) => combineLatest(trancheIds.map((tid) => cent.pools.getDailyTrancheStates([tid]))),
+    (cent) => cent.pools.getDailyTrancheStates([{ trancheIds }]),
     {
       suspense: true,
       enabled: !!trancheIds?.length,
