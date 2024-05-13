@@ -25,7 +25,7 @@ type InvestorTransaction = {
   type: InvestorTransactionType
 }
 
-export function useDailyPortfolioValue(address: string, rangeValue: number) {
+export function useDailyPortfolioValue(address: string, rangeValue?: number) {
   const transactions = useTransactionsByAddress(address)
 
   const transactionsByTrancheId = transactions?.investorTransactions.reduce(
@@ -36,13 +36,22 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
     {} as Record<string, InvestorTransaction[]>
   )
 
+  const daysSinceFirstTx = transactions?.investorTransactions
+    ? Math.ceil(
+        (new Date().getTime() - new Date(transactions.investorTransactions.at(-1)!.timestamp).getTime()) /
+          (1000 * 3600 * 24)
+      )
+    : 0
+
   const dailyTrancheStatesByTrancheId = useDailyTranchesStates(Object.keys(transactionsByTrancheId || {}))
+
+  const rangeDays = (rangeValue ?? daysSinceFirstTx) + 1
 
   return useMemo(() => {
     if (dailyTrancheStatesByTrancheId && transactionsByTrancheId) {
       const today = new Date()
 
-      return Array(rangeValue + 1)
+      return Array((rangeValue ?? daysSinceFirstTx) + 1)
         .fill(null)
         .map((_, i) => i)
         .map((day) => {
@@ -52,7 +61,7 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
             )
 
             return transactionsInDateRange.reduce((trancheValues: Decimal, transaction) => {
-              const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
+              const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeDays, day, today)
               if (!priceAtDate) return trancheValues
 
               // TODO: remove this once we have the correct price -- https://github.com/centrifuge/pools-subql/issues/76
@@ -167,7 +176,7 @@ export function usePortfolio(address?: string) {
 
   const data = useMemo(() => {
     return (
-      (subData as undefined | {}) &&
+      (subData?.account as undefined | {}) &&
       (Object.fromEntries(
         subData.account.trancheBalances.nodes.map((tranche: any) => {
           const decimals = tranche.pool.currency.decimals

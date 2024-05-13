@@ -19,7 +19,7 @@ const rangeFilters = [
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
   { value: 'ytd', label: 'Year to date' },
-  // { value: 'all', label: 'All' },
+  { value: 'all', label: 'All' },
 ] as const
 
 export function CardPortfolioValue({ address }: { address?: string }) {
