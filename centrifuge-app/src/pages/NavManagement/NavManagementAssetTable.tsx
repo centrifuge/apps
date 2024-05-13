@@ -48,6 +48,19 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     (allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') as (CreatedLoan | ActiveLoan)[]) ?? []
   const api = useCentrifugeApi()
 
+  const reserveRow = [
+    {
+      id: 'reserve',
+      Isin: '',
+      quantity: 1,
+      currentPrice: 0,
+      value: pool?.reserve.total.toDecimal().toNumber(),
+      formIndex: -1,
+      maturity: '',
+      oldValue: '',
+    },
+  ]
+
   const { execute, isLoading } = useCentrifugeTransaction(
     'Set oracle prices',
     (cent) => (args: [values: FormValues], options) => {
@@ -108,9 +121,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, isEditing, isLoading])
 
-  const newNavExternal = form.values.feed.reduce((acc, cur) => acc + cur.quantity * (cur.value || cur.oldValue), 0)
+  const newNavExternal = form.values.feed.reduce(
+    (acc, cur) => acc + cur?.quantity || 1 * (cur.value || cur.oldValue),
+    0
+  )
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
   const newNav = newNavExternal + newNavCash
+  console.log('🚀 ~ newNav:', form.values.feed)
 
   const columns = [
     {
@@ -138,12 +155,14 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     {
       align: 'right',
       header: 'Quantity',
-      cell: (row: Row) => formatBalance('oldValue' in row ? row.quantity : row.outstandingDebt),
+      cell: (row: Row) =>
+        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.quantity : row.outstandingDebt) : '',
     },
     {
       align: 'right',
       header: 'Asset price',
-      cell: (row: Row) => formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.symbol, 8),
+      cell: (row: Row) =>
+        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.symbol, 8) : '',
     },
     {
       align: 'right',
@@ -232,7 +251,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           }
         >
           <DataTable
-            data={[...cashLoans, ...form.values.feed]}
+            data={[...reserveRow, ...cashLoans, ...form.values.feed]}
             columns={columns}
             onRowClicked={(row) => `/pools/${pool?.id}/assets/${row.id}`}
             footer={
