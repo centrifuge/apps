@@ -1,4 +1,4 @@
-import { CurrencyBalance, Price, addressToHex } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
@@ -73,7 +73,7 @@ function DaoPortfoliosTable() {
       ) {
         nodes {
           id
-          investorTransactions {
+          investorTransactions(orderBy: TIMESTAMP_ASC, first: 1) {
             nodes {
               timestamp
               tokenPrice
@@ -137,26 +137,14 @@ function DaoPortfoliosTable() {
           })
         )
       : {}
-    const yields = Object.keys(trancheBalances).map((tid) => {
-      const firstTx = investTxs?.find((tx: any) => tx.tranche.trancheId === tid)
-      const initialTokenPrice = firstTx && new Price(firstTx.tokenPrice).toFloat()
-      const tokenPrice = firstTx && new Price(firstTx.tranche.tokenPrice).toFloat()
-      const profit = tokenPrice / initialTokenPrice - 1
-      return [tid, profit] as const
-    })
     const totalValue = Object.values(trancheBalances)?.reduce(
       (acc, { balance, tokenPrice }) => acc + balance * tokenPrice,
       0
     )
-    const weightedYield =
-      yields &&
-      totalValue &&
-      yields.reduce((acc, [tid, profit]) => acc + profit * trancheBalances![tid], 0) / totalValue
 
     return {
       ...dao,
       value: totalValue ?? 0,
-      profit: weightedYield ? weightedYield * 100 : 0,
       networkName: getNetworkName(dao.network),
       firstInvestment: investTxs?.[0] && new Date(investTxs[0].timestamp),
     }
@@ -197,15 +185,6 @@ function DaoPortfoliosTable() {
       ),
       sortKey: 'value',
     },
-    // {
-    //   header: <SortableTableHeader label="Profit" />,
-    //   cell: (row: Row) => (
-    //     <TextWithPlaceholder isLoading={isPortfoliosLoading || isSubqueryLoading}>
-    //       {row.profit != null && formatPercentage(row.profit)}
-    //     </TextWithPlaceholder>
-    //   ),
-    //   sortKey: 'profit',
-    // },
     {
       align: 'left',
       header: 'First investment',
