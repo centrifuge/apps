@@ -48,7 +48,7 @@ function PrimeDetail() {
         <CardPortfolioValue address={centAddress} />
       </LayoutSection>
       <LayoutSection title="Holdings">
-        <Holdings address={centAddress} />
+        <Holdings address={centAddress} showActions={false} />
       </LayoutSection>
       <LayoutSection title="Transaction history">
         <Transactions onlyMostRecent address={centAddress} />

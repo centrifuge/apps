@@ -1,6 +1,7 @@
 import { CurrencyBalance, Price, addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils, useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, IconExternalLink, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
@@ -59,9 +60,10 @@ function DaoPortfoliosTable() {
   const daos =
     daoData?.map((dao) => ({
       ...dao,
-      centAddress: addressToHex(
-        typeof dao.network === 'number' ? utils.evmToSubstrateAddress(dao.address, dao.network) : dao.address
-      ),
+      centAddress:
+        typeof dao.network === 'number'
+          ? utils.evmToSubstrateAddress(dao.address, dao.network)
+          : addressToHex(dao.address),
     })) || []
 
 
@@ -122,7 +124,10 @@ function DaoPortfoliosTable() {
             const pool = pools?.find((p) => p.id === tranche.poolId)
             const decimals = pool?.currency.decimals ?? 18
             const tokenPrice = pool?.tranches.find((t) => tranche.trancheId.endsWith(t.id))?.tokenPrice?.toFloat() ?? 1
-            let balance = new CurrencyBalance(tranche.claimableTrancheTokens, decimals).toFloat()
+            let balance = new CurrencyBalance(
+              new BN(tranche.claimableTrancheTokens).add(new BN(tranche.pendingRedeemTrancheTokens)),
+              decimals
+            ).toFloat()
 
             const subqueryCurrency = account?.currencyBalances.nodes.find(
               (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId

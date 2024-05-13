@@ -1,10 +1,18 @@
-import { CurrencyBalance, CurrencyMetadata, InvestorTransactionType, Price, Token } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import {
+  CurrencyBalance,
+  CurrencyMetadata,
+  InvestorTransactionType,
+  Price,
+  Token,
+  TokenBalance,
+  addressToHex,
+} from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useDailyTranchesStates, usePools, useTransactionsByAddress } from '../../utils/usePools'
+import { useSubquery } from '../../utils/useSubquery'
 
 type InvestorTransaction = {
   currencyAmount: CurrencyBalance
@@ -128,10 +136,120 @@ const getPriceAtDate = (
 }
 
 export function usePortfolio(address?: string) {
-  const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
-    enabled: !!address,
-  })
-  return result
+  // const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
+  //   enabled: !!address,
+  // })
+  // return result
+
+  const { data: subData } = useSubquery(
+    `query ($account: String!) {
+    account(
+      id: $account
+    ) {
+      trancheBalances {
+        nodes {
+          claimableCurrency
+          claimableTrancheTokens
+          pendingInvestCurrency
+          pendingRedeemTrancheTokens
+          sumClaimedCurrency
+          sumClaimedTrancheTokens
+          trancheId
+          poolId
+          tranche {
+            tokenPrice
+          }
+          pool {
+            currency {
+              decimals
+            }
+          }
+        }
+      }
+      currencyBalances {
+        nodes {
+          amount
+          currency {
+            symbol
+            decimals
+            trancheId
+          }
+        }
+      }
+    }
+  }`,
+    {
+      account: address && addressToHex(address),
+    },
+    {
+      enabled: !!address,
+    }
+  )
+
+  const data = useMemo(() => {
+    return (
+      (subData as undefined | {}) &&
+      (Object.fromEntries(
+        subData.account.trancheBalances.nodes.map((tranche: any) => {
+          const decimals = tranche.pool.currency.decimals
+          const tokenPrice = new Price(tranche.tranche.tokenPrice)
+          let freeTrancheTokens = new CurrencyBalance(0, decimals)
+
+          const claimableCurrency = new CurrencyBalance(tranche.claimableCurrency, decimals)
+          const claimableTrancheTokens = new TokenBalance(tranche.claimableTrancheTokens, decimals)
+          const pendingInvestCurrency = new CurrencyBalance(tranche.pendingInvestCurrency, decimals)
+          const pendingRedeemTrancheTokens = new TokenBalance(tranche.pendingRedeemTrancheTokens, decimals)
+          const sumClaimedCurrency = new CurrencyBalance(tranche.sumClaimedCurrency, decimals)
+          const sumClaimedTrancheTokens = new TokenBalance(tranche.sumClaimedTrancheTokens, decimals)
+
+          const currencyAmount = subData.account.currencyBalances.nodes.find(
+            (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
+          )
+          if (currencyAmount) {
+            freeTrancheTokens = new CurrencyBalance(currencyAmount.amount, decimals)
+          }
+
+          const totalTrancheTokens = new CurrencyBalance(
+            new BN(tranche.claimableTrancheTokens)
+              .add(new BN(tranche.pendingRedeemTrancheTokens))
+              .add(freeTrancheTokens),
+            decimals
+          )
+
+          return [
+            tranche.trancheId.split('-')[1],
+            {
+              claimableCurrency,
+              claimableTrancheTokens,
+              pendingInvestCurrency,
+              pendingRedeemTrancheTokens,
+              sumClaimedCurrency,
+              sumClaimedTrancheTokens,
+              totalTrancheTokens,
+              freeTrancheTokens,
+              tokenPrice,
+            },
+          ]
+        })
+      ) as Record<
+        string,
+        {
+          claimableCurrency: CurrencyBalance
+          claimableTrancheTokens: TokenBalance
+          pendingInvestCurrency: CurrencyBalance
+          pendingRedeemTrancheTokens: TokenBalance
+          sumClaimedCurrency: CurrencyBalance
+          sumClaimedTrancheTokens: TokenBalance
+          totalTrancheTokens: TokenBalance
+          freeTrancheTokens: TokenBalance
+          tokenPrice: Price
+          // TODO: add reservedTrancheTokens
+        }
+      >)
+    )
+  }, [subData])
+
+  return data
 }
 
 type PortfolioToken = {
@@ -161,28 +279,19 @@ export function usePortfolioTokens(address?: string) {
   )
 
   if (portfolioData && trancheTokenPrices) {
-    return Object.keys(portfolioData)?.reduce((sum, trancheId) => {
-      const tranche = portfolioData[trancheId]
-
+    return Object.entries(portfolioData).map(([trancheId, tranche]) => {
       const trancheTokenPrice = trancheTokenPrices[trancheId].tokenPrice || new Price(0)
 
-      const trancheTokensBalance = tranche.claimableTrancheTokens
-        .toDecimal()
-        .add(tranche.freeTrancheTokens.toDecimal())
-        .add(tranche.reservedTrancheTokens.toDecimal())
-        .add(tranche.pendingRedeemTrancheTokens.toDecimal())
+      const trancheTokensBalance = tranche.totalTrancheTokens.toDecimal()
 
-      return [
-        ...sum,
-        {
-          position: trancheTokensBalance,
-          marketValue: trancheTokensBalance.mul(trancheTokenPrice.toDecimal()),
-          tokenPrice: trancheTokenPrice,
-          trancheId: trancheId,
-          poolId: trancheTokenPrices[trancheId].poolId,
-          currency: trancheTokenPrices[trancheId].currency,
-        },
-      ]
+      return {
+        position: trancheTokensBalance,
+        marketValue: trancheTokensBalance.mul(trancheTokenPrice.toDecimal()),
+        tokenPrice: trancheTokenPrice,
+        trancheId: trancheId,
+        poolId: trancheTokenPrices[trancheId].poolId,
+        currency: trancheTokenPrices[trancheId].currency,
+      }
     }, [] as PortfolioToken[])
   }
 
