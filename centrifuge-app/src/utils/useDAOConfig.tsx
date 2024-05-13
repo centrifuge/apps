@@ -19,17 +19,6 @@ export type Resolution = {
   link: string
 }
 
-const TEMP_DATA = {
-  aave: {
-    name: 'Aave DAO',
-    slug: 'aave',
-    network: 1,
-    logo: 'https://europe1.discourse-cdn.com/business20/uploads/aave/optimized/1X/2ada312765106aec8e237bb1f628fd38e403069c_2_180x180.jpeg',
-    address: '0x30d3bbae8623d0e9c0db5c27b82dcda39de40997',
-    resolutions: [],
-  },
-}
-
 export const useDAOConfig = () => {
   const query = useQuery(
     'daoData',
@@ -51,7 +40,7 @@ export const useDAOConfig = () => {
       const json = await res.json()
       const content = atob(json.content)
 
-      const data = TEMP_DATA
+      const data = JSON.parse(content)
       return Object.values(data) as DAO[]
     },
     {
