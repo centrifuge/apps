@@ -51,7 +51,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const reserveRow = [
     {
       id: 'reserve',
-      Isin: '',
+      Isin: 'Reserve',
       quantity: 1,
       currentPrice: 0,
       value: pool?.reserve.total.toDecimal().toNumber(),
@@ -121,13 +121,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, isEditing, isLoading])
 
+  const poolReserve = pool?.reserve.total.toDecimal().toNumber() || 0
   const newNavExternal = form.values.feed.reduce(
-    (acc, cur) => acc + cur?.quantity || 1 * (cur.value || cur.oldValue),
+    (acc, cur) => acc + cur.quantity * (isEditing ? cur.currentPrice : cur.value || cur.oldValue),
     0
   )
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
-  const newNav = newNavExternal + newNavCash
-  console.log('🚀 ~ newNav:', form.values.feed)
+  const newNav = newNavExternal + newNavCash + poolReserve
 
   const columns = [
     {
