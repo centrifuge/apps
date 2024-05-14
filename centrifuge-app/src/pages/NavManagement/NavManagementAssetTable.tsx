@@ -262,7 +262,9 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           <DataTable
             data={[...reserveRow, ...cashLoans, ...form.values.feed]}
             columns={columns}
-            onRowClicked={(row) => `/pools/${pool?.id}/assets/${row.id}`}
+            onRowClicked={(row) =>
+              row.id !== 'reserve' ? `/issuer/${pool?.id}/assets/${row.id}` : `/nav-management/${pool?.id}`
+            }
             footer={
               <DataRow>
                 <DataCol align="left">
