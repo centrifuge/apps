@@ -1,8 +1,10 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, Drawer, IconDownload, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Drawer, IconDownload, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import daiLogo from '../../assets/images/dai-logo.svg'
+import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
 import { DataCol, DataRow, DataTable } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
@@ -128,6 +130,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   )
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
   const newNav = newNavExternal + newNavCash + poolReserve
+  const isTinlakePool = poolId.startsWith('0x')
 
   const columns = [
     {
@@ -136,7 +139,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       cell: (row: Row) =>
         'oldValue' in row ? (
           <Shelf gap={1} height={40}>
-            <Thumbnail type="asset" label={row.id} />
+            {row.id === 'reserve' ? (
+              <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
+                <Box as="img" src={isTinlakePool ? daiLogo : usdcLogo} alt="" height="13px" width="13px" />
+              </Shelf>
+            ) : (
+              <Thumbnail type="asset" label={row.id} />
+            )}
             <Text variant="body2" fontWeight={600}>
               {row.Isin}
             </Text>
@@ -168,7 +177,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       align: 'right',
       header: 'New price',
       cell: (row: Row) => {
-        return 'oldValue' in row ? (
+        return 'oldValue' in row && row.id !== 'reserve' ? (
           <Field name={`feed.${row.formIndex}.value`} validate={settlementPrice()}>
             {({ field, meta, form }: FieldProps) => (
               <CurrencyInput
