@@ -1,10 +1,12 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { useQuery } from 'react-query'
+import { UseQueryOptions, useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
 
-export function useSubquery(query: string, variables?: object) {
+export function useSubquery<T = any>(query: string, variables?: object, options?: Omit<UseQueryOptions, 'queryKey'>) {
   const cent = useCentrifuge()
-  return useQuery(['subquery', query, variables], () =>
-    firstValueFrom(cent.getSubqueryObservable(query, variables, false))
+  return useQuery<T>(
+    ['subquery', query, variables],
+    () => firstValueFrom(cent.getSubqueryObservable(query, variables, false)) as any,
+    options as any
   )
 }

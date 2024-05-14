@@ -53,7 +53,7 @@ function PoolPerformanceChart() {
   })
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
-  const rangeNumber = getRangeNumber(range.value, poolAge)
+  const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const data: ChartData[] = React.useMemo(
     () =>

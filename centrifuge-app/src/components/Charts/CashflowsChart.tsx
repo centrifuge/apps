@@ -34,7 +34,7 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
 
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
-  const rangeNumber = getRangeNumber(range.value, poolAge)
+  const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const data = React.useMemo(
     () =>
