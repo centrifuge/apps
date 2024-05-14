@@ -196,7 +196,7 @@ export function useHoldings(address?: string, showActions = true) {
           connectedNetwork: wallet.connectedNetworkName,
         }
       }) || []),
-    ...(wallet.connectedNetworkName === 'Centrifuge'
+    ...((wallet.connectedNetworkName === 'Centrifuge' && showActions) || centBalances?.native.balance.gtn(0)
       ? [
           {
             currency: {
