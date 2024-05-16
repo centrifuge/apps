@@ -77,12 +77,12 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
         borrowAmount = borrow.amount
       }
 
-      const outstandingPrincipal = selectedLoan.totalBorrowed.sub(selectedLoan.repaid.principal)
-      let principal: BN = new BN(borrowAmount)
-      let interest = new BN(0)
-      if (principal.gt(outstandingPrincipal)) {
-        interest = principal.sub(outstandingPrincipal)
-        principal = outstandingPrincipal
+      const { outstandingInterest } = selectedLoan
+      let interest = new BN(borrowAmount)
+      let principal = new BN(0)
+      if (interest.gt(outstandingInterest)) {
+        interest = outstandingInterest
+        principal = interest.sub(outstandingInterest)
       }
       let repay: any = { principal, interest }
       if (isExternalLoan(selectedLoan)) {
