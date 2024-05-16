@@ -1,4 +1,4 @@
-import { AssetTransaction, AssetTransactionType, AssetType, CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { AssetTransaction, AssetType, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { nftMetadataSchema } from '../../schemas'
@@ -88,25 +88,43 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
     nftMetadataSchema
   )
 
-  const getLabelAndAmount = (
-    transaction: Omit<AssetTransaction, 'type'> & { type: AssetTransactionType | 'SETTLED' }
-  ) => {
-    if (transaction.asset.type == AssetType.OffchainCash) {
+  const getLabelAndAmount = (transaction: AssetTransaction) => {
+    if (transaction.type === 'CASH_TRANSFER') {
       return {
         label: 'Cash transfer',
         amount: transaction.amount,
       }
     }
 
-    if (transaction.type === 'BORROWED' || transaction.type === 'SETTLED') {
+    if (transaction.type === 'BORROWED') {
       return {
         label: 'Purchase',
         amount: transaction.amount,
       }
     }
-    if (transaction.type === 'REPAID' && !new BN(transaction.interestAmount || 0).isZero()) {
+
+    // TODO: ideally, if both principalAmount and interestAmount are non-zero, there should be 2 separate transactions
+    if (
+      transaction.type === 'REPAID' &&
+      !new BN(transaction.interestAmount || 0).isZero() &&
+      !new BN(transaction.principalAmount || 0).isZero()
+    ) {
       return {
-        label: 'Interest',
+        label: 'Principal & interest payment',
+        amount: new CurrencyBalance(
+          new BN(transaction.principalAmount || 0).add(new BN(transaction.interestAmount || 0)),
+          transaction.principalAmount!.decimals
+        ),
+      }
+    }
+
+    if (
+      transaction.type === 'REPAID' &&
+      !new BN(transaction.interestAmount || 0).isZero() &&
+      new BN(transaction.principalAmount || 0).isZero()
+    ) {
+      return {
+        label: 'Interest payment',
         amount: transaction.interestAmount,
       }
     }
@@ -117,22 +135,13 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
     }
   }
 
-  const settlements = transactions?.reduce((acc, transaction, index) => {
-    if (transaction.hash === transactions[index + 1]?.hash) {
-      acc[transaction.hash] = { ...transaction, type: 'SETTLED' }
-    }
-
-    return acc
-  }, {} as Record<string, Omit<AssetTransaction, 'type'> & { type: AssetTransactionType | 'SETTLED' }>)
-
-  const transformedTransactions = [
-    ...(transactions?.filter((transaction) => !settlements?.[transaction.hash]) || []),
-    ...Object.values(settlements || []),
-  ]
-    .filter(
-      (transaction) => transaction.type !== 'CREATED' && transaction.type !== 'CLOSED' && transaction.type !== 'PRICED'
-    )
-    .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1))
+  const transformedTransactions =
+    transactions
+      ?.filter(
+        (transaction) =>
+          transaction.type !== 'CREATED' && transaction.type !== 'CLOSED' && transaction.type !== 'PRICED'
+      )
+      .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1)) || []
 
   const csvData = transformedTransactions.map((transaction) => {
     const { label, amount } = getLabelAndAmount(transaction)
@@ -153,8 +162,6 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           ? transaction.type === 'BORROWED'
             ? `Onchain reserve > Settlement Account`
             : `Settlement Account > onchain reserve`
-          : transaction.type === 'SETTLED'
-          ? `Settlement Account > ${assetMetadata[Number(id) - 1].data?.name || '-'}`
           : assetMetadata[Number(id) - 1].data?.name || '-',
       Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
       Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
@@ -172,12 +179,10 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
         transactionDate: transaction.timestamp,
         assetId: transaction.asset.id,
         assetName:
-          transaction.asset.type == AssetType.OffchainCash
-            ? transaction.type === 'BORROWED'
-              ? `Onchain reserve > Settlement account`
-              : `Settlement account > onchain reserve`
-            : transaction.type === 'SETTLED'
-            ? `${assetMetadata[Number(id) - 1].data?.name || '-'}`
+          transaction.type == 'CASH_TRANSFER'
+            ? transaction.fromAsset?.id === '0'
+              ? 'Onchain reserve > Offchain cash'
+              : 'Offchain cash > Onchain reserve'
             : assetMetadata[Number(id) - 1].data?.name || '-',
         amount: amount || 0,
         hash: transaction.hash,
@@ -189,6 +194,7 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
       <Shelf justifyContent="space-between">
         <Text fontSize="18px" fontWeight="500">
           Transaction history
+          {console.log(transactions?.filter((tx) => tx.type === 'REPAID' && tx.interestAmount?.gtn(0)))}
         </Text>
         {transactions?.length && (
           <AnchorButton

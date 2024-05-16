@@ -2629,16 +2629,19 @@ export function getPoolsModule(inst: Centrifuge) {
             asset {
               id
               metadata
+              name
               type
             }
             fromAsset {
               id
               metadata
+              name
               type
             }
             toAsset {
               id
               metadata
+              name
               type
             }
           }
