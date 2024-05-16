@@ -2,7 +2,7 @@ import { Box, IconChevronDown, IconChevronRight, IconMonitor, Menu, MenuItemGrou
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
-import { usePoolsForWhichAccountIsFeeder } from '../../pages/NavManagement/Overview'
+import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
 import { PoolLink } from './PoolLink'
 import { Toggle } from './Toggle'
 
@@ -22,7 +22,7 @@ export function NavManagementMenu({ stacked }: NavManagementMenuProps) {
 
   return (
     allowedPools &&
-    allowedPools?.length > 1 && (
+    allowedPools?.length >= 1 && (
       <Box position={['static', 'static', 'relative', 'static']}>
         {open && (
           <Box
@@ -46,9 +46,9 @@ export function NavManagementMenu({ stacked }: NavManagementMenuProps) {
           isActive={isActive}
           stacked={stacked}
         >
-          <IconMonitor />
+          <IconMonitor size={['iconMedium', 'iconMedium', 'iconSmall']} />
           NAV management
-          {!stacked && (open ? <IconChevronDown /> : <IconChevronRight />)}
+          {!stacked && (open ? <IconChevronDown size="iconSmall" /> : <IconChevronRight size="iconSmall" />)}
         </Toggle>
 
         <Box
