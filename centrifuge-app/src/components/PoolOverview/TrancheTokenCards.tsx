@@ -100,9 +100,11 @@ const TrancheTokenCard = ({
               </Stack>
             )}
             <Stack gap={1}>
-              <Text textAlign="left" variant="label2" color="textSecondary">
-                Token price
-              </Text>
+              <Box pb="3px">
+                <Text textAlign="left" variant="label2" color="textSecondary">
+                  Token price
+                </Text>
+              </Box>
               <Text variant="body2">{formatBalance(trancheToken.tokenPrice || 0, poolCurrencySymbol, 5, 5)}</Text>
             </Stack>
             <Stack gap={1}>

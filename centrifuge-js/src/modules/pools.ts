@@ -508,6 +508,7 @@ export type ActiveLoan = {
   outstandingPrincipal: CurrencyBalance
   outstandingInterest: CurrencyBalance
   presentValue: CurrencyBalance
+  currentPrice: CurrencyBalance // may not actually be set yet, this is what the price should be
 }
 
 // transformed type for UI
@@ -890,7 +891,6 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       admin: string,
       poolId: string,
-      collectionId: string,
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
@@ -899,7 +899,7 @@ export function getPoolsModule(inst: Centrifuge) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, metadata, fees] = args
+    const [admin, poolId, tranches, currency, maxReserve, metadata, fees] = args
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
@@ -3171,6 +3171,7 @@ export function getPoolsModule(inst: Centrifuge) {
             presentValue: CurrencyBalance
             outstandingPrincipal: CurrencyBalance
             outstandingInterest: CurrencyBalance
+            currentPrice: CurrencyBalance
           }
         > = {}
 
@@ -3180,6 +3181,7 @@ export function getPoolsModule(inst: Centrifuge) {
             presentValue: new CurrencyBalance(data.presentValue, currency.decimals),
             outstandingPrincipal: new CurrencyBalance(data.outstandingPrincipal, currency.decimals),
             outstandingInterest: new CurrencyBalance(data.outstandingInterest, currency.decimals),
+            currentPrice: new CurrencyBalance(data.currentPrice ?? 0, currency.decimals),
           }
         })
 
@@ -3331,6 +3333,7 @@ export function getPoolsModule(inst: Centrifuge) {
               outstandingPrincipal: portfolio.outstandingPrincipal,
               outstandingInterest: portfolio.outstandingInterest,
               presentValue: portfolio.presentValue,
+              currentPrice: portfolio.currentPrice,
             }
           }
         )
