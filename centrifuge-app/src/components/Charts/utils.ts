@@ -15,7 +15,7 @@ export const getRangeNumber = (rangeValue: string, poolAge?: number) => {
     return daysSinceJanuary1 + 1
   }
 
-  if (rangeValue === 'all' && poolAge) {
+  if (rangeValue === 'all') {
     return poolAge
   }
 

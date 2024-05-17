@@ -53,7 +53,7 @@ function PoolPerformanceChart() {
   })
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
-  const rangeNumber = getRangeNumber(range.value, poolAge)
+  const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const data: ChartData[] = React.useMemo(
     () =>
@@ -70,7 +70,6 @@ function PoolPerformanceChart() {
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
-  const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
 
   const chartData = data.slice(-rangeNumber)
 

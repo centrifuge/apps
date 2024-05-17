@@ -48,7 +48,6 @@ export type Key =
   | 'convertAddress'
   | 'showTestNets'
   | 'showSwaps'
-  | 'showPrime'
   | 'showOracle'
   | 'poolCreationType'
   | 'podAdminSeed'
@@ -131,11 +130,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   showPodAccountCreation: {
-    default: false,
-    type: 'checkbox',
-  },
-  showPrime: {
-    alwaysShow: true,
     default: false,
     type: 'checkbox',
   },

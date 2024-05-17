@@ -85,8 +85,6 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
-  const nativeBalanceTooLow = state.nativeBalance.eq(0)
-
   const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(state.capacity ?? 0)
 
   const isPending =
@@ -109,11 +107,6 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
         <Stack gap={2}>
           <EpochBusy busy={state.isPoolBusy} />
           {state.statusMessage && <InlineFeedback>{state.statusMessage}</InlineFeedback>}
-          {nativeBalanceTooLow && (
-            <InlineFeedback>
-              {state.nativeCurrency && `${state.nativeCurrency.symbol} balance is too low.`}
-            </InlineFeedback>
-          )}
           {!state.collectType || claimDismissed ? (
             <>
               <Field name="amount" validate={positiveNumber()}>
@@ -203,9 +196,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                 loading={isInvesting}
                 loadingMessage={loadingMessage}
                 disabled={
-                  state.isPoolBusy ||
-                  nativeBalanceTooLow ||
-                  (state.poolCurrency?.symbol.toLowerCase().includes('lp') && hasPendingOrder)
+                  state.isPoolBusy || (state.poolCurrency?.symbol.toLowerCase().includes('lp') && hasPendingOrder)
                 }
               >
                 {investLabel}

@@ -20,7 +20,7 @@ describe('Invest flows', () => {
     cy.get('button[type="submit"]').click()
     cy.confirmTransaction()
   })
-  it('Pool Admin: Transfer USDT (fund investor)', () => {
+  it(`Pool Admin: Transfer ${pool.poolCurrency} (fund investor)`, () => {
     cy.visit('/portfolio', { failOnStatusCode: false })
     cy.connectWallet()
     cy.switchMetamaskAccount('Investor') // switch to investor account to grab address

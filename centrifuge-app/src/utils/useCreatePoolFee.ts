@@ -2,7 +2,7 @@ import Centrifuge, { CurrencyBalance, Perquintill, PoolMetadataInput, Rate } fro
 import { useCentrifuge, useCentrifugeConsts, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import * as React from 'react'
-import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
+import { Subject, combineLatest, map, of, switchMap } from 'rxjs'
 import { config } from '../config'
 import { useCurrencies } from './useCurrencies'
 
@@ -115,12 +115,11 @@ export function useCreatePoolFee(formValues: Pick<PoolMetadataInput, 'tranches' 
       feeSubject.next([
         selectedAccount.address,
         '1234567890',
-        '1234567890',
         tranches,
         currencies[0].key,
         CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
         { ...mockMetadata, tranches } as any,
-        []
+        [],
       ] as CreatePoolArgs)
     }, 1000),
     []
