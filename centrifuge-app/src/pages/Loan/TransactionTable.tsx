@@ -155,7 +155,7 @@ export const TransactionTable = ({
         ? [
             {
               align: 'left',
-              header: `Face flow (${currency})`,
+              header: `Face value (${currency})`,
               cell: (row: Row) =>
                 row.faceValue
                   ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceValue, undefined, 2, 2)}`
