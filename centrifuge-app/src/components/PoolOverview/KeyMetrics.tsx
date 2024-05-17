@@ -75,7 +75,6 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
           },
         ]
       : []),
-    // add it here
     ...(activeDomains.data?.length
       ? [
           {
