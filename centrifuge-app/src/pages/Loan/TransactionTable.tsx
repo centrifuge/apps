@@ -123,11 +123,8 @@ export const TransactionTable = ({
   }
 
   const getStatusText = (type: AssetTransactionType) => {
-    if (loanType === 'external' && type === 'BORROWED') return 'Purchase'
-    if (loanType === 'external' && type === 'REPAID') return 'Sale'
-
-    if (loanType === 'internal' && type === 'BORROWED') return 'Financed'
-    if (loanType === 'internal' && type === 'REPAID') return 'Repaid'
+    if (type === 'BORROWED') return 'Financed'
+    if (type === 'REPAID') return 'Repaid'
 
     return `${type[0]}${type.slice(1).toLowerCase()}`
   }
