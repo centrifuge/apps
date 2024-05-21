@@ -2579,7 +2579,6 @@ export function getPoolsModule(inst: Centrifuge) {
     return combineLatest([$query, getPoolCurrency([poolId])]).pipe(
       switchMap(([queryData, currency]) => {
         const currencyDecimals = currency.decimals
-        console.log('queryData?.investorTransactions.nodes', queryData?.investorTransactions.nodes)
         return [
           queryData?.investorTransactions.nodes.map((tx) => {
             return {

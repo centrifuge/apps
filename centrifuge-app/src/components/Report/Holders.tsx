@@ -39,7 +39,7 @@ export function Holders({ pool }: { pool: Pool }) {
       header: 'Position',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[3], 5) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
     },
     {
       header: 'Position currency',
@@ -63,7 +63,7 @@ export function Holders({ pool }: { pool: Pool }) {
       header: 'Pending redeem order',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[3], 5) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
     },
     {
       header: 'Pending redeem order currency',
@@ -77,7 +77,7 @@ export function Holders({ pool }: { pool: Pool }) {
     .map((col, index) => ({
       align: col.align,
       header: col.header,
-      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row.value)}</Text>,
+      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row)}</Text>,
       csvOnly: col.csvOnly,
     }))
     .filter((col) => !col.csvOnly)
@@ -106,6 +106,7 @@ export function Holders({ pool }: { pool: Pool }) {
             holder.pendingRedeemTrancheTokens.toFloat(),
             token.currency.symbol,
           ],
+          token,
           heading: false,
         }
       })
