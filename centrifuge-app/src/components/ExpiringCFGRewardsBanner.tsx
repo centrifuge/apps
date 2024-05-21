@@ -25,7 +25,7 @@ export const ExpiringCFGRewardsBanner = () => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title={
-          <Text as="h3" color="textInverted" variant="heading5">
+          <Text as="h3" color="textInverted" variant="heading4">
             Claim your Tinlake Rewards before it is too late. Rewards will expire on {formattedExpirationDate} CET.
             After the deadline, users will not be able to claim their CFG rewards. Check{' '}
             <Text
@@ -33,7 +33,7 @@ export const ExpiringCFGRewardsBanner = () => {
               as="a"
               href="https://legacy.tinlake.centrifuge.io/rewards"
               color="textInverted"
-              variant="heading5"
+              variant="heading4"
               display="inline"
               textDecoration="underline"
             >
@@ -45,7 +45,7 @@ export const ExpiringCFGRewardsBanner = () => {
               as="a"
               href="https://gov.centrifuge.io/t/cp81-unclaimed-tinlake-rewards/5885/4"
               color="textInverted"
-              variant="heading5"
+              variant="heading4"
               display="inline"
               textDecoration="underline"
             >

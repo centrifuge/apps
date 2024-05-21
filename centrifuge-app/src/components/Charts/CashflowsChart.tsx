@@ -1,5 +1,5 @@
 import { CurrencyBalance, DailyPoolState, Pool } from '@centrifuge/centrifuge-js'
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import * as React from 'react'
@@ -34,7 +34,7 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
 
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
-  const rangeNumber = getRangeNumber(range.value, poolAge)
+  const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const data = React.useMemo(
     () =>
@@ -74,7 +74,7 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
 
   return (
     <Stack gap={4}>
-      <Shelf>
+      <Shelf gap={2}>
         <CustomLegend data={today} />
         <Shelf justifyContent="flex-end" pr={1}>
           {chartData.length > 0 &&
@@ -100,12 +100,12 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
       <Box height="100%" width="100%" color="textSecondary">
         <ResponsiveContainer width="100%" height="100%" minHeight="200px">
           <BarChart data={chartData} margin={{ left: -20, right: 24 }} barGap={0} barSize={16}>
-            <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
+            <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
             <XAxis
               dataKey="name"
               style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
               tickLine={false}
-              stroke={theme.colors.borderSecondary}
+              stroke={theme.colors.borderPrimary}
               tickFormatter={(tick: number) => {
                 if (data.length > 180) {
                   return new Date(tick).toLocaleString('en-US', { month: 'short' })
@@ -117,7 +117,7 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
             <YAxis
               style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
               tickLine={false}
-              stroke={theme.colors.borderSecondary}
+              stroke={theme.colors.borderPrimary}
               tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
             />
             <Tooltip
@@ -174,18 +174,22 @@ function CustomLegend({
 
   return (
     <Shelf bg="backgroundPage" width="100%" gap={2}>
-      <Grid gridTemplateColumns="fit-content(100%) fit-content(100%) fit-content(100%) fit-content(100%)" gap={3}>
+      <Shelf gap={3}>
         <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#001C66" gap="4px">
-          <Text variant="body3" color="textSecondary">
+          <Text variant="body3" color="textSecondary" whiteSpace="nowrap">
             Total purchases
           </Text>
-          <Text variant="body1">{formatBalance(data.totalPurchases, 'USD', 2)}</Text>
+          <Text variant="body1" whiteSpace="nowrap">
+            {formatBalance(data.totalPurchases, 'USD', 2)}
+          </Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#A4D5D8" gap="4px">
-          <Text variant="body3" color="textSecondary">
+          <Text variant="body3" color="textSecondary" whiteSpace="nowrap">
             Principal repayments
           </Text>
-          <Text variant="body1">{formatBalance(data.principalRepayments, 'USD', 2)}</Text>
+          <Text variant="body1" whiteSpace="nowrap">
+            {formatBalance(data.principalRepayments, 'USD', 2)}
+          </Text>
         </Stack>
         <Stack
           borderLeftWidth="3px"
@@ -194,10 +198,12 @@ function CustomLegend({
           borderLeftColor={theme.colors.borderPrimary}
           gap="4px"
         >
-          <Text variant="body3" color="textSecondary">
+          <Text variant="body3" color="textSecondary" whiteSpace="nowrap">
             Interest
           </Text>
-          <Text variant="body1">{formatBalance(data.interest, 'USD', 2)}</Text>
+          <Text variant="body1" whiteSpace="nowrap">
+            {formatBalance(data.interest, 'USD', 2)}
+          </Text>
         </Stack>
         {/* <Stack
           borderLeftWidth="3px"
@@ -211,7 +217,7 @@ function CustomLegend({
           </Text>
           <Text variant="body1">{formatBalance(0, 'USD', 2)}</Text>
         </Stack> */}
-      </Grid>
+      </Shelf>
     </Shelf>
   )
 }

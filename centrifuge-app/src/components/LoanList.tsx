@@ -229,7 +229,7 @@ export function LoanList({ loans }: Props) {
     <PaginationContainer pagination={pagination}>
       <Stack gap={2}>
         <LoadBoundary>
-          <Box overflow="auto" width="100%" borderWidth="0 1px" borderStyle="solid" borderColor="borderSecondary">
+          <Box overflow="auto" width="100%" borderWidth="0 1px" borderStyle="solid" borderColor="borderPrimary">
             <DataTable
               data={rows}
               columns={columns}

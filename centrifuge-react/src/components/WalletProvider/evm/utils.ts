@@ -79,7 +79,6 @@ export function useEvmProvider() {
 }
 
 export function useNativeBalance(address?: string) {
-  const provider = useEvmProvider()
   const { evm } = useWallet()
 
   const addr = address || evm.selectedAddress
@@ -87,10 +86,10 @@ export function useNativeBalance(address?: string) {
   const query = useQuery(
     ['evmNativeBalance', addr, evm.chainId],
     async () => {
-      const balance = await provider!.getBalance(addr!)
+      const balance = await evm.getProvider(evm.chainId!).getBalance(addr!)
       return new CurrencyBalance(balance.toString(), 18)
     },
-    { enabled: !!provider && !!addr }
+    { enabled: !!evm.chainId && !!addr }
   )
   return query
 }

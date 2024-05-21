@@ -14,7 +14,7 @@ export type PlaceholderProps = BoxProps
 
 export const Placeholder = styled(Box)`
   --color1: ${({ theme }) => theme.colors.borderPrimary};
-  --color2: ${({ theme }) => theme.colors.borderSecondary};
+  --color2: ${({ theme }) => theme.colors.borderPrimary};
   background: linear-gradient(90deg, var(--color1), var(--color2), var(--color1));
   background-size: 200% 100%;
   background-position-y: 50%;

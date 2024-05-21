@@ -40,7 +40,7 @@ export function IssuerHeader({ actions, children }: Props) {
             width="iconLarge"
             height="iconLarge"
             borderRadius="card"
-            backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
+            backgroundColor={isLoading ? 'borderPrimary' : 'backgroundThumbnail'}
             justifyContent="center"
           >
             <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
@@ -54,7 +54,7 @@ export function IssuerHeader({ actions, children }: Props) {
         px={BASE_PADDING}
         bg="backgroundPage"
         style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+          boxShadow: `0 1px 0 ${theme.colors.borderPrimary}`,
         }}
       >
         {children}

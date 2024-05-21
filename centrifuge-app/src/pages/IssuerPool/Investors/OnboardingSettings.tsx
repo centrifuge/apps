@@ -261,7 +261,7 @@ export const OnboardingSettings = () => {
               {Object.entries(formik.values.openForOnboarding).map(([tId, open]) => (
                 <Shelf width="100%" justifyContent="space-between" gap={2} key={tId}>
                   <Text variant="body1">{(pool.tranches as Token[]).find((t) => t.id === tId)?.currency.name}</Text>
-                  <Shelf as="nav" bg="backgroundTertiary" borderRadius="4px" p="5px" width="fit-content">
+                  <Shelf as="nav" bg="backgroundSecondary" borderRadius="4px" p="5px" width="fit-content">
                     <ToggleButton
                       forwardedAs="button"
                       $isActive={open}
@@ -489,7 +489,7 @@ const ToggleButton = styled(Text)<{ isActive: boolean }>`
   font-weight: ${({ theme }) => theme.typography.interactive2.fontWeight};
 
   box-shadow: ${({ theme, $isActive }) => ($isActive ? theme.shadows.buttonSecondary : 'none')};
-  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.backgroundPage : theme.colors.backgroundTertiary)};
+  background: ${({ theme, $isActive }) => ($isActive ? theme.colors.backgroundPage : theme.colors.backgroundSecondary)};
 
   ${({ disabled, theme }) =>
     disabled &&

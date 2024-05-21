@@ -26,7 +26,7 @@ export const SupportedBrowserBanner = () => {
       isOpen={isOpen}
       onClose={() => onClose()}
       title={
-        <Text as="h3" color="textInverted" variant="heading5">
+        <Text as="h3" color="textInverted" variant="heading4">
           Change your browser for a fully supported experience. Centrifuge App supports Chromium web browsers (Brave,
           Google Chrome or Opera).
         </Text>

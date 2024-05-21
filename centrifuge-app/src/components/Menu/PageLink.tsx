@@ -1,8 +1,8 @@
 import { Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { prefetchRoute } from '../Root'
 import { baseButton, primaryButton } from './styles'
 
@@ -18,6 +18,7 @@ type PageLinkProps = LinkProps & {
 
 export function PageLink({ stacked = false, to, children }: PageLinkProps) {
   const match = useRouteMatch(to as string)
+  const isMedium = useIsAboveBreakpoint('M')
 
   return (
     <Root
@@ -27,6 +28,7 @@ export function PageLink({ stacked = false, to, children }: PageLinkProps) {
       isActive={Boolean(match)}
       stacked={stacked}
       onMouseOver={() => prefetchRoute(to)}
+      isMedium={isMedium}
     >
       {children}
     </Root>

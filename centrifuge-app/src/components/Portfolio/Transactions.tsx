@@ -15,7 +15,6 @@ import {
 import * as React from 'react'
 import { TransactionTypeChip } from '../../components/Portfolio/TransactionTypeChip'
 import { formatDate } from '../../utils/date'
-import { Dec } from '../../utils/Decimal'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { usePools, useTransactionsByAddress } from '../../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from '../DataTable'
@@ -33,7 +32,7 @@ type Row = {
   action: InvestorTransactionType | AssetTransactionType
   date: number
   tranche?: Token
-  tranchePrice: string
+  tranchePrice: number
   amount: TokenBalance
   hash: string
   pool?: Pool
@@ -81,9 +80,9 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
     {
       align: 'right',
       header: 'Token price',
-      cell: ({ tranche, pool }: Row) => (
+      cell: ({ tranche, tranchePrice, pool }: Row) => (
         <Text as="span" variant="body3">
-          {formatBalance(tranche?.tokenPrice?.toDecimal() || Dec(1), pool?.currency.symbol, 4)}
+          {formatBalance(tranchePrice, pool?.currency.symbol, 4)}
         </Text>
       ),
     },
@@ -130,13 +129,13 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
           date: new Date(tx.timestamp).getTime(),
           action: tx.type,
           tranche,
-          tranchePrice: tranche?.tokenPrice?.toDecimal().toString() || '',
+          tranchePrice: tx?.tokenPrice?.toFloat() ?? 1,
           amount: tx.currencyAmount,
           hash: tx.hash,
           poolId: tx.poolId,
           pool,
           trancheId: tx.trancheId,
-        } as Row
+        } satisfies Row
       })
     return txs
   }, [transactions?.investorTransactions, onlyMostRecent, txTypes, pools, trancheId])

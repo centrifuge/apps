@@ -5,7 +5,7 @@ import { Codec } from '@polkadot/types-codec/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
-import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -464,6 +464,7 @@ export type TinlakeLoan = {
 // transformed type for UI
 export type CreatedLoan = {
   status: 'Created'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -481,6 +482,7 @@ export type CreatedLoan = {
 // transformed type for UI
 export type ActiveLoan = {
   status: 'Active'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -506,11 +508,13 @@ export type ActiveLoan = {
   outstandingPrincipal: CurrencyBalance
   outstandingInterest: CurrencyBalance
   presentValue: CurrencyBalance
+  currentPrice: CurrencyBalance // may not actually be set yet, this is what the price should be
 }
 
 // transformed type for UI
 export type ClosedLoan = {
   status: 'Closed'
+  fetchedAt: Date
   id: string
   poolId: string
   pricing: PricingInfo
@@ -887,7 +891,6 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       admin: string,
       poolId: string,
-      collectionId: string,
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
@@ -896,7 +899,7 @@ export function getPoolsModule(inst: Centrifuge) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, metadata, fees] = args
+    const [admin, poolId, tranches, currency, maxReserve, metadata, fees] = args
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
@@ -2197,22 +2200,38 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getTrancheSnapshotsWithCursor(poolId: string, endCursor: string | null, from?: Date, to?: Date) {
+  function getTrancheSnapshotsWithCursor(
+    filterBy: { poolId: string } | { trancheIds: string[] },
+    endCursor: string | null,
+    from?: Date,
+    to?: Date
+  ) {
+    const filter: any = {
+      timestamp: {
+        greaterThan: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+        lessThan: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+      },
+    }
+    if ('poolId' in filterBy) {
+      filter.tranche = { poolId: { equalTo: filterBy.poolId } }
+    } else if ('trancheIds' in filterBy) {
+      filter.tranche = { trancheId: { in: filterBy.trancheIds } }
+    }
+
     return inst.getSubqueryObservable<{
       trancheSnapshots: { nodes: SubqueryTrancheSnapshot[]; pageInfo: { hasNextPage: boolean; endCursor: string } }
     }>(
-      `query($poolId: String!, $from: Datetime!, $to: Datetime!, $trancheCursor: Cursor) {
+      `query($filter: TrancheSnapshotFilter, $trancheCursor: Cursor) {
         trancheSnapshots(
           orderBy: BLOCK_NUMBER_ASC,
-          filter: {
-            id: { startsWith: $poolId },
-            timestamp: { greaterThan: $from, lessThan: $to }
-          }
+          filter: $filter
           after: $trancheCursor
         ) {
           nodes {
-            id
-            trancheId
+            tranche {
+              poolId
+              trancheId
+            }
             timestamp
             tokenSupply
             tokenPrice
@@ -2229,11 +2248,62 @@ export function getPoolsModule(inst: Centrifuge) {
     }
     `,
       {
-        poolId,
-        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        filter,
         trancheCursor: endCursor,
       }
+    )
+  }
+
+  function getDailyTrancheStates(
+    args: [filter: { poolId: string } | { trancheIds: string[] }, from?: Date, to?: Date]
+  ) {
+    const [filter, from, to] = args
+
+    return of({ trancheSnapshots: [], endCursor: null, hasNextPage: true }).pipe(
+      expand(({ trancheSnapshots, endCursor, hasNextPage }) => {
+        if (!hasNextPage) return EMPTY
+        return getTrancheSnapshotsWithCursor(filter, endCursor, from, to).pipe(
+          map(
+            (
+              response: {
+                trancheSnapshots: {
+                  nodes: SubqueryTrancheSnapshot[]
+                  pageInfo: { hasNextPage: boolean; endCursor: string }
+                }
+              } | null
+            ) => {
+              if (response?.trancheSnapshots) {
+                const { endCursor, hasNextPage } = response.trancheSnapshots.pageInfo
+
+                return {
+                  endCursor,
+                  hasNextPage,
+                  trancheSnapshots: [...trancheSnapshots, ...response.trancheSnapshots.nodes],
+                }
+              }
+              return {}
+            }
+          )
+        )
+      }),
+      takeLast(1),
+      map(({ trancheSnapshots }) => {
+        const trancheStates: Record<string, { timestamp: string; tokenPrice: Price }[]> = {}
+        trancheSnapshots?.forEach((state) => {
+          const tid = state.tranche.trancheId
+          const entry = {
+            timestamp: state.timestamp,
+            tokenPrice: new Price(state.tokenPrice),
+            pool: state.tranche.poolId,
+          }
+          if (trancheStates[tid]) {
+            trancheStates[tid].push(entry)
+          } else {
+            trancheStates[tid] = [entry]
+          }
+        })
+        return trancheStates
+      })
     )
   }
 
@@ -2272,7 +2342,7 @@ export function getPoolsModule(inst: Centrifuge) {
       of({ trancheSnapshots: [], endCursor: null, hasNextPage: true }).pipe(
         expand(({ trancheSnapshots, endCursor, hasNextPage }) => {
           if (!hasNextPage) return EMPTY
-          return getTrancheSnapshotsWithCursor(poolId, endCursor, from, to).pipe(
+          return getTrancheSnapshotsWithCursor({ poolId }, endCursor, from, to).pipe(
             map(
               (
                 response: {
@@ -2302,7 +2372,7 @@ export function getPoolsModule(inst: Centrifuge) {
       map(([{ poolSnapshots }, { trancheSnapshots }, poolCurrency]) => {
         const trancheStates: Record<string, { timestamp: string; tokenPrice: Price }[]> = {}
         trancheSnapshots?.forEach((state) => {
-          const tid = state.trancheId.split('-')[1]
+          const tid = state.tranche.trancheId
           const entry = { timestamp: state.timestamp, tokenPrice: new Price(state.tokenPrice) }
           if (trancheStates[tid]) {
             trancheStates[tid].push(entry)
@@ -2325,7 +2395,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
               const tranches: { [trancheId: string]: DailyTrancheState } = {}
               trancheSnapshotsToday?.forEach((tranche) => {
-                const tid = tranche.trancheId.split('-')[1]
+                const tid = tranche.tranche.trancheId
                 tranches[tid] = {
                   id: tranche.trancheId,
                   price: tranche.tokenPrice ? new Price(tranche.tokenPrice) : null,
@@ -2413,47 +2483,6 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
-      })
-    )
-  }
-
-  function getDailyTrancheStates(args: [trancheId: string]) {
-    const [trancheId] = args
-    const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
-      `query($trancheId: String!) {
-        trancheSnapshots(
-          orderBy: BLOCK_NUMBER_DESC,
-          filter: {
-            trancheId: { includes: $trancheId },
-          }) {
-          nodes {
-            tokenPrice
-            blockNumber
-            timestamp
-            trancheId
-            tranche {
-              poolId
-              trancheId
-            }
-          }
-        }
-      }
-      `,
-      {
-        trancheId,
-      }
-    )
-    return $query.pipe(
-      map((data) => {
-        if (!data) {
-          return []
-        }
-        return data.trancheSnapshots.nodes.reverse().map((state) => {
-          return {
-            ...state,
-            tokenPrice: new Price(state.tokenPrice),
-          }
-        })
       })
     )
   }
@@ -3074,7 +3103,7 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.priceOracle.NewFeedData.is(event) ||
+            api.events.oraclePriceFeed.Fed.is(event) ||
             api.events.loans.Created.is(event) ||
             api.events.loans.Borrowed.is(event) ||
             api.events.loans.Repaid.is(event) ||
@@ -3083,10 +3112,9 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.loans.Closed.is(event) ||
             api.events.loans.PortfolioValuationUpdated.is(event)
         )
-
         if (!event) return false
-
         const { poolId: eventPoolId } = (event.toHuman() as any).event.data
+        if (!eventPoolId) return true
         return eventPoolId.replace(/\D/g, '') === poolId
       })
     )
@@ -3143,6 +3171,7 @@ export function getPoolsModule(inst: Centrifuge) {
             presentValue: CurrencyBalance
             outstandingPrincipal: CurrencyBalance
             outstandingInterest: CurrencyBalance
+            currentPrice: CurrencyBalance
           }
         > = {}
 
@@ -3152,6 +3181,7 @@ export function getPoolsModule(inst: Centrifuge) {
             presentValue: new CurrencyBalance(data.presentValue, currency.decimals),
             outstandingPrincipal: new CurrencyBalance(data.outstandingPrincipal, currency.decimals),
             outstandingInterest: new CurrencyBalance(data.outstandingInterest, currency.decimals),
+            currentPrice: new CurrencyBalance(data.currentPrice ?? 0, currency.decimals),
           }
         })
 
@@ -3181,6 +3211,10 @@ export function getPoolsModule(inst: Centrifuge) {
               ? pricingInfo.valuationMethod.discountedCashFlow
               : undefined
           return {
+            // Return the time the loans were fetched, in order to calculate a more accurate/up-to-date outstandingInterest
+            // Mainly for when repaying interest, to repay as close to the correct amount of interest
+            // Refetching before repaying would be another ideas, but less practical with substriptions
+            fetchedAt: new Date(),
             asset: {
               collectionId: collectionId.toString(),
               nftId: nftId.toString(),
@@ -3299,6 +3333,7 @@ export function getPoolsModule(inst: Centrifuge) {
               outstandingPrincipal: portfolio.outstandingPrincipal,
               outstandingInterest: portfolio.outstandingInterest,
               presentValue: portfolio.presentValue,
+              currentPrice: portfolio.currentPrice,
             }
           }
         )
@@ -3611,10 +3646,9 @@ export function getPoolsModule(inst: Centrifuge) {
               }) || []),
               ...add.map((metadata, index) => {
                 return {
-                  // chain refactor required: feeId needs to be assigned to fee when it's proposed
-                  // until then multiple fees have to be added at once or all pending fees have to be applied before adding more
                   id: parseInt(lastFeeId.toHuman() as string) + index + 1,
                   name: metadata.fee.name,
+                  feePosition: metadata.fee.feePosition,
                 }
               }),
             ],

@@ -5,7 +5,7 @@ import styled from 'styled-components'
 export const Root = styled(Box)`
   position: relative;
   border-radius: ${({ theme }) => theme.radii.card}px;
-  border: ${({ theme }) => `1px solid ${theme.colors.borderSecondary}`};
+  border: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
   box-shadow: ${({ theme }) => `0px 1px 0px ${theme.colors.borderPrimary}`};
   transition: box-shadow 0.15s linear;
 

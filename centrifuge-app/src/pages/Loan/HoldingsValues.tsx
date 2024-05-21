@@ -1,5 +1,6 @@
 import { AssetTransaction, CurrencyBalance, ExternalPricingInfo, Pool } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
+import React from 'react'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
@@ -25,7 +26,7 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
       return sum
     }, Dec(0)) || Dec(0)
 
-  const getAverageSettlePrice = () => {
+  const averageSettlePrice = React.useMemo(() => {
     if (!transactions?.length) return Dec(0)
 
     const weightedSum = transactions.reduce((sum, trx) => {
@@ -39,12 +40,17 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
     }, Dec(0))
 
     const sumOfAmounts = transactions.reduce(
-      (sum, trx) => sum.add(trx.amount ? new CurrencyBalance(trx.amount, pool.currency.decimals).toDecimal() : Dec(0)),
+      (sum, trx) =>
+        sum.add(
+          trx.settlementPrice && trx.amount
+            ? new CurrencyBalance(trx.amount, pool.currency.decimals).toDecimal()
+            : Dec(0)
+        ),
       Dec(0)
     )
 
     return weightedSum.div(sumOfAmounts)
-  }
+  }, [transactions])
 
   return (
     <>
@@ -55,11 +61,7 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
       <LabelValueStack label="Net spent" value={`${formatBalance(netSpent, pool.currency.symbol, 2, 2)}`} />
       <LabelValueStack
         label="Average settle price"
-        value={
-          getAverageSettlePrice().isZero()
-            ? '-'
-            : `${formatBalance(getAverageSettlePrice(), pool.currency.symbol, 2, 2)}`
-        }
+        value={averageSettlePrice.isZero() ? '-' : `${formatBalance(averageSettlePrice, pool.currency.symbol, 2, 2)}`}
       />
       <LabelValueStack label="Notional" value={`${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}`} />
       <LabelValueStack label="Quantity" value={`${formatBalance(pricing.outstandingQuantity, undefined, 2, 0)}`} />

@@ -167,7 +167,7 @@ export function PoolFees() {
             percentOfNav: feeChainData?.amounts?.percentOfNav,
             pendingFees: feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
-            feePosition: feeMetadata?.feePosition,
+            feePosition: feeMetadata?.feePosition || 'Top of waterfall',
             action:
               (isAllowedToCharge || poolAdmin) && !fixedFee ? (
                 <RouterLinkButton

@@ -67,12 +67,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               api.tx.liquidityPools.addPool(poolId, { EVM: chainId }),
               ...pool.tranches.ids.flatMap((trancheId: string) => [
                 api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
-                // Ensure the domain currencies are enabled
-                // Using a batch, because theoretically they could have been enabled already for a different domain
-                api.tx.utility.batch(
-                  currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key))
-                ),
               ]),
+              ...currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key)),
             ])
             return inst.wrapSignAndSend(api, tx, options)
           })
@@ -531,6 +527,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           ['hasInvested'],
         ],
       },
+      {
+        target: lp,
+        call: ['function maxDeposit(address) view returns (uint256)', user],
+        returns: [['maxDeposit', toCurrencyBalance(currency.currencyDecimals)]],
+      },
     ]
 
     const pool = await multicall<{
@@ -544,6 +545,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       managerTrancheTokenAllowance: CurrencyBalance
       pendingInvest: CurrencyBalance
       pendingRedeem: TokenBalance
+      maxDeposit: CurrencyBalance
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
