@@ -75,7 +75,7 @@ const defaultConfig: Config = {
   altairWsUrl: 'wss://fullnode.altair.centrifuge.io',
   polkadotWsUrl: 'wss://rpc.polkadot.io',
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
-  centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools',
+  centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-multichain',
   altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-altair',
   metadataHost: 'https://centrifuge.mypinata.cloud',
 }
