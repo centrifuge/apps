@@ -17,67 +17,113 @@ import type { TableDataRow } from './index'
 import { copyable, formatInvestorTransactionsType } from './utils'
 
 const noop = (v: any) => v
-const headers = [
-  'Token',
-  'Network',
-  'Account',
-  'Epoch',
-  'Date',
-  'Transaction type',
-  'Currency amount',
-  'Currency',
-  'Token amount',
-  'Token currency',
-  'Price',
-  'Price currency',
-  'Transaction',
-]
-const align = [
-  'left',
-  'left',
-  'left',
-  'left',
-  'left',
-  'left',
-  'right',
-  'left',
-  'right',
-  'left',
-  'right',
-  'left',
-  'left',
-]
-const sortable = [false, false, false, false, true, false, true, false, true, false, true, false, false]
-const csvOnly = [false, false, false, false, false, false, false, true, false, true, false, true, false]
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, startDate, endDate, txType, address, network } = React.useContext(ReportContext)
   const utils = useCentrifugeUtils()
   const explorer = useGetExplorerUrl('centrifuge')
 
-  const cellFormatters = [
-    noop,
-    noop,
-    copyable,
-    noop,
-    (v: any) => formatDate(v),
-    noop,
-    (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
-    noop,
-    (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[9], 5) : '-'),
-    noop,
-    (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
-    noop,
-    (v: any) => (
-      <IconAnchor
-        href={explorer.tx(v)}
-        target="_blank"
-        rel="noopener noreferrer"
-        title="View account on block explorer"
-      >
-        <IconExternalLink />
-      </IconAnchor>
-    ),
+  const columnConfig = [
+    {
+      header: 'Token',
+      align: 'left',
+      sortable: false,
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Network',
+      align: 'left',
+      sortable: false,
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Account',
+      align: 'left',
+      sortable: false,
+      csvOnly: false,
+      formatter: copyable,
+    },
+    {
+      header: 'Epoch',
+      align: 'left',
+      sortable: false,
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Date',
+      align: 'left',
+      sortable: true,
+      csvOnly: false,
+      formatter: (v: any) => formatDate(v),
+    },
+    {
+      header: 'Transaction type',
+      align: 'left',
+      sortable: false,
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Currency amount',
+      align: 'right',
+      sortable: true,
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+    },
+    {
+      header: 'Currency',
+      align: 'left',
+      sortable: false,
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Token amount',
+      align: 'right',
+      sortable: true,
+      csvOnly: false,
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[9], 5) : '-'),
+    },
+    {
+      header: 'Token currency',
+      align: 'left',
+      sortable: false,
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Price',
+      align: 'right',
+      sortable: true,
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+    },
+    {
+      header: 'Price currency',
+      align: 'left',
+      sortable: false,
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Transaction',
+      align: 'left',
+      sortable: false,
+      csvOnly: false,
+      formatter: (v: any) => (
+        <IconAnchor
+          href={explorer.tx(v)}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View account on block explorer"
+        >
+          <IconExternalLink />
+        </IconAnchor>
+      ),
+    },
   ]
 
   const transactions = useInvestorTransactions(
@@ -87,17 +133,17 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     endDate ? new Date(endDate) : undefined
   )
 
-  const columns = headers
+  const columns = columnConfig
+
     .map((col, index) => ({
-      align: align[index],
-      header: sortable[index] ? <SortableTableHeader label={col} /> : col,
-      cell: (row: TableDataRow) => (
-        <Text variant="body3">{cellFormatters[index]((row.value as any)[index], row.value)}</Text>
-      ),
-      sortKey: sortable[index] ? `value[${index}]` : undefined,
+      align: col.align,
+      header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
+      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row.value)}</Text>,
+      sortKey: col.sortable ? `value[${index}]` : undefined,
+      csvOnly: col.csvOnly,
     }))
-    .filter((_, index) => !csvOnly[index])
-  console.log('transactions', transactions)
+    .filter((col) => !col.csvOnly)
+
   const data: TableDataRow[] = React.useMemo(() => {
     if (!transactions) {
       return []
@@ -181,7 +227,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     }
 
     const formatted = data.map(({ value: values }) =>
-      Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`]))
+      Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
     )
     const dataUrl = getCSVDownloadUrl(formatted)
 

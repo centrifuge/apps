@@ -13,20 +13,43 @@ import type { TableDataRow } from './index'
 import { formatPoolFeeTransactionType } from './utils'
 
 const noop = (v: any) => v
-const headers = ['Date', 'Fee name', 'Transaction type', 'Currency ammount', 'Currency']
-const align = ['left', 'left', 'left', 'right', 'left']
-const csvOnly = [false, false, false, false, true]
+
 export function FeeTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData, txType } = React.useContext(ReportContext)
   const transactions = useFeeTransactions(pool.id, new Date(startDate), new Date(endDate))
   const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const cellFormatters = [
-    formatDate,
-    noop,
-    noop,
-    (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
-    noop,
+  const columnConfig = [
+    {
+      header: 'Date',
+      align: 'left',
+      csvOnly: false,
+      formatter: formatDate,
+    },
+    {
+      header: 'Fee name',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Transaction type',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Currency ammount',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+    },
+    {
+      header: 'Currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
   ]
 
   const data: TableDataRow[] = React.useMemo(() => {
@@ -50,13 +73,14 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
       }))
   }, [transactions, txType, poolMetadata, pool.currency.symbol])
 
-  const columns = headers
+  const columns = columnConfig
     .map((col, index) => ({
-      align: align[index],
-      header: col,
-      cell: (row: TableDataRow) => <Text variant="body3">{cellFormatters[index]((row.value as any)[index])}</Text>,
+      align: col.align,
+      header: col.header,
+      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
+      csvOnly: col.csvOnly,
     }))
-    .filter((_, index) => !csvOnly[index])
+    .filter((col) => !col.csvOnly)
 
   React.useEffect(() => {
     if (!data.length) {
@@ -64,7 +88,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     }
 
     const formatted = data.map(({ value: values }) =>
-      Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`]))
+      Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
     )
     const dataUrl = getCSVDownloadUrl(formatted)
 

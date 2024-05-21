@@ -12,48 +12,89 @@ import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
 
 const noop = (v: any) => v
-const headers = [
-  'ID',
-  'Status',
-  'Outstanding',
-  'Outstanding currency',
-  'Total financed',
-  'Total financed currency',
-  'Total repaid',
-  'Total repaid currency',
-  'Financing date',
-  'Maturity date',
-  'Interest rate',
-]
-const align = ['left', 'left', 'right', 'left', 'right', 'left', 'right', 'left', 'left', 'left', 'left']
-const csvOnly = [false, false, false, true, false, true, false, true, false, false, false]
 
 export function AssetList({ pool }: { pool: Pool }) {
   const loans = useLoans(pool.id) as Loan[]
   const { setCsvData, loanStatus } = React.useContext(ReportContext)
   const { symbol } = pool.currency
 
-  const cellFormatters = [
-    noop,
-    noop,
-    (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
-    noop,
-    (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
-    noop,
-    (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
-    noop,
-    (v: any) => (v !== '-' ? formatDate(v) : v),
-    formatDate,
-    (v: any) => (typeof v === 'number' ? formatPercentage(v, true, undefined, 5) : '-'),
+  const columnConfig = [
+    {
+      header: 'ID',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Status',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Outstanding',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    },
+    {
+      header: 'Outstanding currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Total financed',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    },
+    {
+      header: 'Total financed currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Total repaid',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    },
+    {
+      header: 'Total repaid currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Financing date',
+      align: 'left',
+      csvOnly: false,
+      formatter: (v: any) => (v !== '-' ? formatDate(v) : v),
+    },
+    {
+      header: 'Maturity date',
+      align: 'left',
+      csvOnly: false,
+      formatter: formatDate,
+    },
+    {
+      header: 'Interest rate',
+      align: 'left',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatPercentage(v, true, undefined, 5) : '-'),
+    },
   ]
 
-  const columns = headers
+  const columns = columnConfig
     .map((col, index) => ({
-      align: align[index],
-      header: col,
-      cell: (row: TableDataRow) => <Text variant="body3">{cellFormatters[index]((row.value as any)[index])}</Text>,
+      align: col.align,
+      header: col.header,
+      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
+      csvOnly: col.csvOnly,
     }))
-    .filter((_, index) => !csvOnly[index])
+    .filter((col) => !col.csvOnly)
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!loans) {
@@ -88,7 +129,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     }
 
     const formatted = data.map(({ value: values }) =>
-      Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`]))
+      Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
     )
     const dataUrl = getCSVDownloadUrl(formatted)
 

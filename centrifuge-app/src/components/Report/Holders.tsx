@@ -15,18 +15,6 @@ import type { TableDataRow } from './index'
 import { copyable } from './utils'
 
 const noop = (v: any) => v
-const headers = [
-  'Network',
-  'Account',
-  'Position',
-  'Position currency',
-  'Pending invest order',
-  'Pending invest order currency',
-  'Pending redeem order',
-  'Pending redeem order currency',
-]
-const align = ['left', 'left', 'right', 'left', 'right', 'left', 'right', 'left']
-const csvOnly = [false, false, false, true, false, true, false, true, false]
 
 export function Holders({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, network, address } = React.useContext(ReportContext)
@@ -34,26 +22,65 @@ export function Holders({ pool }: { pool: Pool }) {
   const utils = useCentrifugeUtils()
   const holders = useHolders(pool.id, activeTranche === 'all' ? undefined : activeTranche)
 
-  const cellFormatters = [
-    noop,
-    copyable,
-    (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[3], 5) : '-'),
-    noop,
-    (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
-    noop,
-    (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[3], 5) : '-'),
-    noop,
+  const columnConfig = [
+    {
+      header: 'Network',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Account',
+      align: 'left',
+      csvOnly: false,
+      formatter: copyable,
+    },
+    {
+      header: 'Position',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[3], 5) : '-'),
+    },
+    {
+      header: 'Position currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Pending invest order',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+    },
+    {
+      header: 'Pending invest order currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Pending redeem order',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[3], 5) : '-'),
+    },
+    {
+      header: 'Pending redeem order currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
   ]
 
-  const columns = headers
+  const columns = columnConfig
     .map((col, index) => ({
-      align: align[index],
-      header: col,
-      cell: (row: TableDataRow) => (
-        <Text variant="body3">{cellFormatters[index]((row.value as any)[index], row.value)}</Text>
-      ),
+      align: col.align,
+      header: col.header,
+      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row.value)}</Text>,
+      csvOnly: col.csvOnly,
     }))
-    .filter((_, index) => !csvOnly[index])
+    .filter((col) => !col.csvOnly)
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!holders) {
@@ -96,9 +123,10 @@ export function Holders({ pool }: { pool: Pool }) {
 
     const formatted = data
       .map(({ value }) => value as string[])
-      .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
+      .map((values) => Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`])))
 
     return getCSVDownloadUrl(formatted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   React.useEffect(() => {
