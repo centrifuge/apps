@@ -14,7 +14,7 @@ import {
   Thumbnail,
 } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
@@ -139,6 +139,8 @@ const columns: Column[] = [
 export function useHoldings(address?: string, showActions = true) {
   const { data: tinlakeBalances } = useTinlakeBalances(address && isEvmAddress(address) ? address : undefined)
   const centBalances = useBalances(address && isSubstrateAddress(address) ? address : undefined)
+  const match = useRouteMatch<{ address: string }>('/portfolio')
+  const isPortfolioPage = match?.isExact
 
   const wallet = useWallet()
   const tinlakePools = useTinlakePools()
@@ -192,7 +194,7 @@ export function useHoldings(address?: string, showActions = true) {
           position: currency.balance.toDecimal(),
           tokenPrice: Dec(1),
           marketValue: currency.balance.toDecimal(),
-          showActions: false,
+          showActions: isPortfolioPage,
           connectedNetwork: wallet.connectedNetworkName,
         }
       }) || []),
@@ -214,7 +216,7 @@ export function useHoldings(address?: string, showActions = true) {
             position: centBalances?.native.balance.toDecimal().sub(centBalances.native.locked.toDecimal()) || Dec(0),
             tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
             marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) ?? Dec(0) : Dec(0),
-            showActions: false,
+            showActions: isPortfolioPage,
             connectedNetwork: wallet.connectedNetworkName,
           },
         ]
