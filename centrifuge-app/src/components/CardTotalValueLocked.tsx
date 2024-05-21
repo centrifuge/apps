@@ -2,8 +2,8 @@ import { Box, Stack, Text, TextWithPlaceholder, Tooltip } from '@centrifuge/fabr
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
-import { formatDate } from '../utils/date'
 import { Dec } from '../utils/Decimal'
+import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { useListedPools } from '../utils/useListedPools'
 import type { DataPoint } from './Charts/TotalValueLocked'
@@ -45,7 +45,7 @@ export function CardTotalValueLocked() {
       borderRadius="card"
       borderStyle="solid"
       borderWidth={1}
-      borderColor="borderSecondary"
+      borderColor="borderPrimary"
       p={3}
       pb={chartHeight * 0.6}
       position="relative"

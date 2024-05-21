@@ -38,7 +38,7 @@ Cypress.Commands.add('connectWallet', (config) => {
 })
 
 Cypress.Commands.add('confirmTransaction', () => {
-  cy.confirmMetamaskTransaction()
+  cy.confirmMetamaskTransaction({ gasConfig: 'market' })
   cy.contains('Transaction pending').should('exist')
   cy.contains('Transaction pending', { timeout: 100000 }).should('not.exist')
   cy.contains('Transaction failed').should('not.exist')

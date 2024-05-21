@@ -19,9 +19,9 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
           body={
             <Stack gap={1}>
               <div>
-                Invested {state.poolCurrency?.symbol} value{' '}
+                Invested{' '}
                 <Text fontWeight="bold">
-                  {formatBalance(state.order.payoutTokenAmount.mul(state.tokenPrice), state.poolCurrency?.symbol)}
+                  {formatBalance(state.order.payoutTokenAmount.mul(state.tokenPrice), state.poolCurrency?.displayName)}
                 </Text>
               </div>
               <div>
@@ -39,7 +39,7 @@ export function Claim({ type, onDismiss }: { type: 'invest' | 'redeem'; onDismis
           body={
             <Stack gap={1}>
               <div>
-                Redeemed {state.poolCurrency?.symbol} amount{' '}
+                Redeemed{' '}
                 <Text fontWeight="bold">
                   {formatBalance(state.order.payoutCurrencyAmount, state.poolCurrency?.symbol)}
                 </Text>

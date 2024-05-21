@@ -31,7 +31,7 @@ export function PoolChangesBanner({ poolId }: PoolChangesBannerProps) {
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <Text as="h3" color="textInverted" variant="heading5">
+        <Text as="h3" color="textInverted" variant="heading4">
           There are pending pool changes that can now be enabled{' '}
           <RouterTextLink to={`/issuer/${poolId}/configuration`}>here</RouterTextLink>
         </Text>

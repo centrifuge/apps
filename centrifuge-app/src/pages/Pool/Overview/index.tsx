@@ -1,5 +1,5 @@
 import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
-import { Box, Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -24,6 +24,7 @@ import { formatBalance } from '../../../utils/formatting'
 import { getPoolValueLocked } from '../../../utils/getPoolValueLocked'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
+import { useIsAboveBreakpoint } from '../../../utils/useIsAboveBreakpoint'
 import { useLoans } from '../../../utils/useLoans'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -66,6 +67,7 @@ export function PoolDetailOverview() {
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const averageMaturity = useAverageMaturity(poolId)
   const loans = useLoans(poolId)
+  const isMedium = useIsAboveBreakpoint('M')
 
   const pageSummaryData = [
     {
@@ -106,7 +108,7 @@ export function PoolDetailOverview() {
 
   return (
     <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
-      <Grid height="fit-content" gridTemplateColumns="66fr minmax(275px, 33fr)" gap={3}>
+      <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
         <React.Suspense fallback={<Spinner />}>
           <PoolPerformance />
         </React.Suspense>
@@ -134,7 +136,7 @@ export function PoolDetailOverview() {
       </React.Suspense>
       {!isTinlakePool && (
         <>
-          <Grid height="fit-content" gridTemplateColumns="1fr 1fr" gap={3}>
+          <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
             <React.Suspense fallback={<Spinner />}>
               <PoolStructure
                 numOfTranches={pool.tranches.length}
@@ -155,17 +157,17 @@ export function PoolDetailOverview() {
               )}
             </React.Suspense>
           </Grid>
-          <React.Suspense fallback={<Spinner />}>
-            <Box height={373}>
-              <Cashflows />
-            </Box>
-          </React.Suspense>
-          <React.Suspense fallback={<Spinner />}>
-            <Box height={447}>
+          {isMedium && (
+            <React.Suspense fallback={<Spinner />}>
               <Card p={3}>
-                <TransactionHistory poolId={poolId} />
+                <Cashflows />
               </Card>
-            </Box>
+            </React.Suspense>
+          )}
+          <React.Suspense fallback={<Spinner />}>
+            <Card p={3}>
+              <TransactionHistory poolId={poolId} />
+            </Card>
           </React.Suspense>
         </>
       )}
@@ -176,6 +178,7 @@ export function PoolDetailOverview() {
 export function InvestButton(props: InvestRedeemProps) {
   const [open, setOpen] = React.useState(false)
   const connectAndOpen = useConnectBeforeAction(() => setOpen(true))
+  const isMedium = useIsAboveBreakpoint('M')
 
   return (
     <>
@@ -183,7 +186,7 @@ export function InvestButton(props: InvestRedeemProps) {
       <Button
         aria-label={`Invest in ${props.trancheId}`}
         onClick={() => connectAndOpen()}
-        style={{ marginLeft: 'auto' }}
+        style={{ marginLeft: 'auto', width: isMedium ? 'auto' : ' 100%' }}
       >
         Invest
       </Button>

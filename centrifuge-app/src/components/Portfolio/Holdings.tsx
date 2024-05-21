@@ -14,7 +14,7 @@ import {
   Thumbnail,
 } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
@@ -44,7 +44,7 @@ type Row = {
   marketValue: Decimal
   position: Decimal
   tokenPrice: Decimal
-  canInvestRedeem: boolean
+  showActions: boolean
   address?: string
   connectedNetwork?: string
 }
@@ -95,7 +95,7 @@ const columns: Column[] = [
   {
     align: 'left',
     header: '', // invest redeem buttons
-    cell: ({ canInvestRedeem, poolId, trancheId, currency, connectedNetwork }: Row) => {
+    cell: ({ showActions, poolId, trancheId, currency, connectedNetwork }: Row) => {
       const isTinlakePool = poolId.startsWith('0x')
       return (
         <Grid gap={1} justifySelf="end">
@@ -109,24 +109,26 @@ const columns: Column[] = [
             >
               View on Tinlake
             </AnchorButton>
-          ) : canInvestRedeem ? (
-            <Shelf>
-              <RouterLinkButton to={`?redeem=${poolId}-${trancheId}`} small variant="tertiary" icon={IconMinus}>
-                Redeem
-              </RouterLinkButton>
-              <RouterLinkButton to={`?invest=${poolId}-${trancheId}`} small variant="tertiary" icon={IconPlus}>
-                Invest
-              </RouterLinkButton>
-            </Shelf>
-          ) : connectedNetwork === 'Centrifuge' ? (
-            <Shelf>
-              <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
-                Receive
-              </RouterLinkButton>
-              <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="tertiary" icon={IconSend}>
-                Send
-              </RouterLinkButton>
-            </Shelf>
+          ) : showActions ? (
+            trancheId ? (
+              <Shelf>
+                <RouterLinkButton to={`?redeem=${poolId}-${trancheId}`} small variant="tertiary" icon={IconMinus}>
+                  Redeem
+                </RouterLinkButton>
+                <RouterLinkButton to={`?invest=${poolId}-${trancheId}`} small variant="tertiary" icon={IconPlus}>
+                  Invest
+                </RouterLinkButton>
+              </Shelf>
+            ) : connectedNetwork === 'Centrifuge' ? (
+              <Shelf>
+                <RouterLinkButton to={`?receive=${currency?.symbol}`} small variant="tertiary" icon={IconDownload}>
+                  Receive
+                </RouterLinkButton>
+                <RouterLinkButton to={`?send=${currency?.symbol}`} small variant="tertiary" icon={IconSend}>
+                  Send
+                </RouterLinkButton>
+              </Shelf>
+            ) : null
           ) : null}
         </Grid>
       )
@@ -134,9 +136,12 @@ const columns: Column[] = [
   },
 ]
 
-export function useHoldings(address?: string, canInvestRedeem = true) {
+export function useHoldings(address?: string, showActions = true) {
   const { data: tinlakeBalances } = useTinlakeBalances(address && isEvmAddress(address) ? address : undefined)
   const centBalances = useBalances(address && isSubstrateAddress(address) ? address : undefined)
+  const match = useRouteMatch<{ address: string }>('/portfolio')
+  const isPortfolioPage = match?.isExact
+
   const wallet = useWallet()
   const tinlakePools = useTinlakePools()
   const portfolioTokens = usePortfolioTokens(address)
@@ -147,7 +152,7 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
     ...portfolioTokens.map((token) => ({
       ...token,
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
-      canInvestRedeem,
+      showActions,
     })),
     ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero()) || []).map((balance) => {
       const pool = tinlakePools.data?.pools?.find((pool) => pool.id === balance.poolId)
@@ -160,7 +165,7 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
         trancheId: balance.trancheId,
         poolId: balance.poolId,
         currency: tranche.currency,
-        canInvestRedeem,
+        showActions,
         connectedNetwork: wallet.connectedNetworkName,
       }
     }),
@@ -173,7 +178,7 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
         trancheId: '',
         poolId: '',
         currency: currency.currency,
-        canInvestRedeem: false,
+        showActions: false,
         connectedNetwork: wallet.connectedNetworkName,
       }
     }),
@@ -189,11 +194,11 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
           position: currency.balance.toDecimal(),
           tokenPrice: Dec(1),
           marketValue: currency.balance.toDecimal(),
-          canInvestRedeem: false,
+          showActions: isPortfolioPage,
           connectedNetwork: wallet.connectedNetworkName,
         }
       }) || []),
-    ...(wallet.connectedNetworkName === 'Centrifuge'
+    ...((wallet.connectedNetworkName === 'Centrifuge' && showActions) || centBalances?.native.balance.gtn(0)
       ? [
           {
             currency: {
@@ -211,7 +216,7 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
             position: centBalances?.native.balance.toDecimal().sub(centBalances.native.locked.toDecimal()) || Dec(0),
             tokenPrice: CFGPrice ? Dec(CFGPrice) : Dec(0),
             marketValue: CFGPrice ? centBalances?.native.balance.toDecimal().mul(CFGPrice) ?? Dec(0) : Dec(0),
-            canInvestRedeem: false,
+            showActions: isPortfolioPage,
             connectedNetwork: wallet.connectedNetworkName,
           },
         ]
@@ -221,7 +226,7 @@ export function useHoldings(address?: string, canInvestRedeem = true) {
   return tokens
 }
 
-export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?: boolean; address?: string }) {
+export function Holdings({ showActions = true, address }: { showActions?: boolean; address?: string }) {
   const { search, pathname } = useLocation()
   const history = useHistory()
   const params = new URLSearchParams(search)
@@ -233,7 +238,7 @@ export function Holdings({ canInvestRedeem = true, address }: { canInvestRedeem?
   const [investPoolId, investTrancheId] = openInvestDrawer?.split('-') || []
   const [redeemPoolId, redeemTrancheId] = openRedeemDrawer?.split('-') || []
 
-  const tokens = useHoldings(address, canInvestRedeem)
+  const tokens = useHoldings(address, showActions)
 
   return address && tokens.length ? (
     <>

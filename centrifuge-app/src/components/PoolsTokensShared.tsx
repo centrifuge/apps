@@ -2,6 +2,7 @@ import { Grid, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { config } from '../config'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { CardTotalValueLocked } from './CardTotalValueLocked'
 import { LayoutSection } from './LayoutBase/LayoutSection'
 import { LoadBoundary } from './LoadBoundary'
@@ -15,6 +16,8 @@ type PoolsTokensSharedProps = {
 
 export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
   const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const isMedium = useIsAboveBreakpoint('M')
+
   const links = [
     {
       to: `${basePath}`,
@@ -27,13 +30,13 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
   ]
 
   return (
-    <LayoutSection pt={5}>
+    <LayoutSection py={5}>
       <Stack gap={4}>
         <Stack>
           <Text as="h1" variant="heading1">
             {title}
           </Text>
-          <Text as="p" variant="heading6">
+          <Text as="p" variant="heading4">
             {`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
           </Text>
         </Stack>
@@ -47,9 +50,11 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
           </LoadBoundary>
         </Grid>
 
-        <Stack alignItems="end">
-          <MenuSwitch links={links} />
-        </Stack>
+        {isMedium && (
+          <Stack alignItems="end">
+            <MenuSwitch links={links} />
+          </Stack>
+        )}
         {children}
       </Stack>
     </LayoutSection>

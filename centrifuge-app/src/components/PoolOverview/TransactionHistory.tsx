@@ -1,5 +1,5 @@
 import { AssetTransaction, AssetTransactionType, AssetType, CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import { nftMetadataSchema } from '../../schemas'
 import { formatDate } from '../../utils/date'
@@ -151,11 +151,9 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
       'Asset Name':
         transaction.asset.type == AssetType.OffchainCash
           ? transaction.type === 'BORROWED'
-            ? `Onchain reserve > Settlement Account`
-            : `Settlement Account > onchain reserve`
-          : transaction.type === 'SETTLED'
-          ? `Settlement Account > ${assetMetadata[Number(id) - 1].data?.name || '-'}`
-          : assetMetadata[Number(id) - 1].data?.name || '-',
+            ? `Onchain reserve > Settlement account`
+            : `Settlement account`
+          : `${assetMetadata[Number(id) - 1].data?.name || '-'}`,
       Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
       Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
     }
@@ -175,10 +173,8 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           transaction.asset.type == AssetType.OffchainCash
             ? transaction.type === 'BORROWED'
               ? `Onchain reserve > Settlement account`
-              : `Settlement account > onchain reserve`
-            : transaction.type === 'SETTLED'
-            ? `${assetMetadata[Number(id) - 1].data?.name || '-'}`
-            : assetMetadata[Number(id) - 1].data?.name || '-',
+              : `Settlement account`
+            : `${assetMetadata[Number(id) - 1].data?.name || '-'}`,
         amount: amount || 0,
         hash: transaction.hash,
       }
@@ -203,7 +199,9 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
           </AnchorButton>
         )}
       </Shelf>
-      <DataTable data={tableData} columns={columns} />
+      <Box overflowX="auto" width="100%">
+        <DataTable data={tableData} columns={columns} />
+      </Box>
       {transactions?.length! > 8 && preview && (
         <Text variant="body2" color="textSecondary">
           <AnchorTextLink href={`/pools/${poolId}/transactions`}>View all</AnchorTextLink>

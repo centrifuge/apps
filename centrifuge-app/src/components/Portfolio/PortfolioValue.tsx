@@ -32,6 +32,7 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
   const dailyPortfolioValue = useDailyPortfolioValue(address, rangeNumber)
 
   const getXAxisInterval = () => {
+    if (!rangeNumber) return dailyPortfolioValue ? Math.floor(dailyPortfolioValue.length / 10) : 45
     if (rangeNumber <= 30) return 5
     if (rangeNumber > 30 && rangeNumber <= 90) {
       return 14

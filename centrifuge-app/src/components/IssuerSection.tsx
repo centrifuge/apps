@@ -16,7 +16,7 @@ export function IssuerSection({ metadata }: IssuerSectionProps) {
   const report = metadata?.pool?.reports?.[0]
 
   return (
-    <Card p={3} backgroundColor="backgroundAccentSecondary">
+    <Card p={3}>
       <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
         {report && (
           <Stack gap={2}>
@@ -56,7 +56,7 @@ export function ReportDetails({ metadata }: IssuerSectionProps) {
           </Text>
         </Shelf>
         <div>
-          <AnchorButton href={report.uri} target="_blank" variant="inverted" icon={IconExternalLink}>
+          <AnchorButton href={report.uri} target="_blank" variant="secondary" icon={IconExternalLink}>
             View full report
           </AnchorButton>
         </div>

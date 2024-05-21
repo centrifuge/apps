@@ -47,9 +47,14 @@ export function IssuerMenu({ defaultOpen = false, stacked, children }: IssuerMen
         isActive={isActive}
         stacked={stacked}
       >
-        <IconUser />
+        <IconUser size={['iconMedium', 'iconMedium', 'iconSmall']} />
         Issuer
-        {!stacked && (open ? <IconChevronDown /> : <IconChevronRight />)}
+        {!stacked &&
+          (open ? (
+            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          ) : (
+            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          ))}
       </Toggle>
 
       <Box

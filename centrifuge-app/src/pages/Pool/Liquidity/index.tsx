@@ -67,7 +67,7 @@ export function PoolDetailLiquidity() {
               title="Originations & repayments"
               dataKeys={['sumRepaidAmountByPeriod', 'sumBorrowedAmountByPeriod']}
               dataNames={['Repayment', 'Origination']}
-              dataColors={[colors.blueScale[200], colors.blueScale[400]]}
+              dataColors={[colors.grayScale[500], colors.blueScale[500]]}
               tooltips={['repayment', 'origination']}
             />
           </LoadBoundary>

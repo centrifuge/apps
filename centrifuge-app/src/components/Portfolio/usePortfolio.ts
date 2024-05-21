@@ -1,10 +1,18 @@
-import { CurrencyBalance, CurrencyMetadata, InvestorTransactionType, Price, Token } from '@centrifuge/centrifuge-js'
-import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
+import {
+  CurrencyBalance,
+  CurrencyMetadata,
+  InvestorTransactionType,
+  Price,
+  Token,
+  TokenBalance,
+  addressToHex,
+} from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useDailyTranchesStates, usePools, useTransactionsByAddress } from '../../utils/usePools'
+import { useSubquery } from '../../utils/useSubquery'
 
 type InvestorTransaction = {
   currencyAmount: CurrencyBalance
@@ -17,18 +25,7 @@ type InvestorTransaction = {
   type: InvestorTransactionType
 }
 
-type TrancheSnapshot = {
-  blockNumber: number
-  timestamp: string
-  tokenPrice: Price
-  trancheId: string
-  tranche: {
-    poolId: string
-    trancheId: string
-  }
-}
-
-export function useDailyPortfolioValue(address: string, rangeValue: number) {
+export function useDailyPortfolioValue(address: string, rangeValue?: number) {
   const transactions = useTransactionsByAddress(address)
 
   const transactionsByTrancheId = transactions?.investorTransactions.reduce(
@@ -39,29 +36,22 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
     {} as Record<string, InvestorTransaction[]>
   )
 
-  const dailyTrancheStates = useDailyTranchesStates(Object.keys(transactionsByTrancheId || {}))
+  const daysSinceFirstTx = transactions?.investorTransactions
+    ? Math.ceil(
+        (new Date().getTime() - new Date(transactions.investorTransactions.at(-1)!.timestamp).getTime()) /
+          (1000 * 3600 * 24)
+      )
+    : 0
 
-  const dailyTrancheStatesByTrancheId = dailyTrancheStates?.reduce((tranches, trancheSnapshots) => {
-    if (trancheSnapshots.length) {
-      const trancheId = trancheSnapshots[0].tranche.trancheId
-      return {
-        ...tranches,
-        [trancheId]: trancheSnapshots,
-      }
-    }
+  const dailyTrancheStatesByTrancheId = useDailyTranchesStates(Object.keys(transactionsByTrancheId || {}))
 
-    return tranches
-  }, {} as Record<string, TrancheSnapshot[]>)
+  const rangeDays = (rangeValue ?? daysSinceFirstTx) + 1
 
   return useMemo(() => {
-    if (
-      dailyTrancheStatesByTrancheId &&
-      transactionsByTrancheId &&
-      Object.keys(dailyTrancheStatesByTrancheId).length === dailyTrancheStates?.length
-    ) {
+    if (dailyTrancheStatesByTrancheId && transactionsByTrancheId) {
       const today = new Date()
 
-      return Array(rangeValue + 1)
+      return Array((rangeValue ?? daysSinceFirstTx) + 1)
         .fill(null)
         .map((_, i) => i)
         .map((day) => {
@@ -71,7 +61,7 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
             )
 
             return transactionsInDateRange.reduce((trancheValues: Decimal, transaction) => {
-              const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeValue, day, today)
+              const priceAtDate = getPriceAtDate(dailyTrancheStatesByTrancheId, trancheId, rangeDays, day, today)
               if (!priceAtDate) return trancheValues
 
               // TODO: remove this once we have the correct price -- https://github.com/centrifuge/pools-subql/issues/76
@@ -105,11 +95,17 @@ export function useDailyPortfolioValue(address: string, rangeValue: number) {
           )
         })
     }
-  }, [dailyTrancheStates?.length, dailyTrancheStatesByTrancheId, rangeValue, transactionsByTrancheId])
+  }, [dailyTrancheStatesByTrancheId, rangeValue, transactionsByTrancheId])
 }
 
 const getPriceAtDate = (
-  dailyTrancheStatesByTrancheId: Record<string, TrancheSnapshot[]>,
+  dailyTrancheStatesByTrancheId: Record<
+    string,
+    {
+      timestamp: string
+      tokenPrice: Price
+    }[]
+  >,
   trancheId: string,
   rangeValue: number,
   day: number,
@@ -128,10 +124,120 @@ const getPriceAtDate = (
 }
 
 export function usePortfolio(address?: string) {
-  const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
-    enabled: !!address,
-  })
-  return result
+  // const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
+  //   enabled: !!address,
+  // })
+  // return result
+
+  const { data: subData } = useSubquery(
+    `query ($account: String!) {
+    account(
+      id: $account
+    ) {
+      trancheBalances {
+        nodes {
+          claimableCurrency
+          claimableTrancheTokens
+          pendingInvestCurrency
+          pendingRedeemTrancheTokens
+          sumClaimedCurrency
+          sumClaimedTrancheTokens
+          trancheId
+          poolId
+          tranche {
+            tokenPrice
+          }
+          pool {
+            currency {
+              decimals
+            }
+          }
+        }
+      }
+      currencyBalances {
+        nodes {
+          amount
+          currency {
+            symbol
+            decimals
+            trancheId
+          }
+        }
+      }
+    }
+  }`,
+    {
+      account: address && addressToHex(address),
+    },
+    {
+      enabled: !!address,
+    }
+  )
+
+  const data = useMemo(() => {
+    return (
+      (subData?.account as undefined | {}) &&
+      (Object.fromEntries(
+        subData.account.trancheBalances.nodes.map((tranche: any) => {
+          const decimals = tranche.pool.currency.decimals
+          const tokenPrice = new Price(tranche.tranche.tokenPrice)
+          let freeTrancheTokens = new CurrencyBalance(0, decimals)
+
+          const claimableCurrency = new CurrencyBalance(tranche.claimableCurrency, decimals)
+          const claimableTrancheTokens = new TokenBalance(tranche.claimableTrancheTokens, decimals)
+          const pendingInvestCurrency = new CurrencyBalance(tranche.pendingInvestCurrency, decimals)
+          const pendingRedeemTrancheTokens = new TokenBalance(tranche.pendingRedeemTrancheTokens, decimals)
+          const sumClaimedCurrency = new CurrencyBalance(tranche.sumClaimedCurrency, decimals)
+          const sumClaimedTrancheTokens = new TokenBalance(tranche.sumClaimedTrancheTokens, decimals)
+
+          const currencyAmount = subData.account.currencyBalances.nodes.find(
+            (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
+          )
+          if (currencyAmount) {
+            freeTrancheTokens = new CurrencyBalance(currencyAmount.amount, decimals)
+          }
+
+          const totalTrancheTokens = new CurrencyBalance(
+            new BN(tranche.claimableTrancheTokens)
+              .add(new BN(tranche.pendingRedeemTrancheTokens))
+              .add(freeTrancheTokens),
+            decimals
+          )
+
+          return [
+            tranche.trancheId.split('-')[1],
+            {
+              claimableCurrency,
+              claimableTrancheTokens,
+              pendingInvestCurrency,
+              pendingRedeemTrancheTokens,
+              sumClaimedCurrency,
+              sumClaimedTrancheTokens,
+              totalTrancheTokens,
+              freeTrancheTokens,
+              tokenPrice,
+            },
+          ]
+        })
+      ) as Record<
+        string,
+        {
+          claimableCurrency: CurrencyBalance
+          claimableTrancheTokens: TokenBalance
+          pendingInvestCurrency: CurrencyBalance
+          pendingRedeemTrancheTokens: TokenBalance
+          sumClaimedCurrency: CurrencyBalance
+          sumClaimedTrancheTokens: TokenBalance
+          totalTrancheTokens: TokenBalance
+          freeTrancheTokens: TokenBalance
+          tokenPrice: Price
+          // TODO: add reservedTrancheTokens
+        }
+      >)
+    )
+  }, [subData])
+
+  return data
 }
 
 type PortfolioToken = {
@@ -161,28 +267,19 @@ export function usePortfolioTokens(address?: string) {
   )
 
   if (portfolioData && trancheTokenPrices) {
-    return Object.keys(portfolioData)?.reduce((sum, trancheId) => {
-      const tranche = portfolioData[trancheId]
-
+    return Object.entries(portfolioData).map(([trancheId, tranche]) => {
       const trancheTokenPrice = trancheTokenPrices[trancheId].tokenPrice || new Price(0)
 
-      const trancheTokensBalance = tranche.claimableTrancheTokens
-        .toDecimal()
-        .add(tranche.freeTrancheTokens.toDecimal())
-        .add(tranche.reservedTrancheTokens.toDecimal())
-        .add(tranche.pendingRedeemTrancheTokens.toDecimal())
+      const trancheTokensBalance = tranche.totalTrancheTokens.toDecimal()
 
-      return [
-        ...sum,
-        {
-          position: trancheTokensBalance,
-          marketValue: trancheTokensBalance.mul(trancheTokenPrice.toDecimal()),
-          tokenPrice: trancheTokenPrice,
-          trancheId: trancheId,
-          poolId: trancheTokenPrices[trancheId].poolId,
-          currency: trancheTokenPrices[trancheId].currency,
-        },
-      ]
+      return {
+        position: trancheTokensBalance,
+        marketValue: trancheTokensBalance.mul(trancheTokenPrice.toDecimal()),
+        tokenPrice: trancheTokenPrice,
+        trancheId: trancheId,
+        poolId: trancheTokenPrices[trancheId].poolId,
+        currency: trancheTokenPrices[trancheId].currency,
+      }
     }, [] as PortfolioToken[])
   }
 

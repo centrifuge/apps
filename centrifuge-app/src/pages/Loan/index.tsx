@@ -1,4 +1,11 @@
-import { CurrencyBalance, Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import {
+  CurrencyBalance,
+  ExternalPricingInfo,
+  Loan as LoanType,
+  Pool,
+  PricingInfo,
+  TinlakeLoan,
+} from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -25,9 +32,10 @@ import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
+import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
-import { formatBalance, truncateText } from '../../utils/formatting'
+import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
 import { useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
@@ -139,6 +147,52 @@ function Loan() {
     return 0
   }, [originationDate, loan?.pricing.maturityDate])
 
+  const weightedYTM = React.useMemo(() => {
+    if (
+      loan?.pricing &&
+      'valuationMethod' in loan.pricing &&
+      loan.pricing.valuationMethod === 'oracle' &&
+      loan.pricing.interestRate.isZero()
+    ) {
+      const termDays = originationDate
+        ? daysBetween(originationDate, loan?.pricing.maturityDate)
+        : daysBetween(new Date(), loan?.pricing.maturityDate)
+      const yearsBetweenDates = termDays / 365
+
+      return borrowerAssetTransactions
+        ?.filter((tx) => tx.type !== 'REPAID')
+        .reduce((prev, curr) => {
+          const faceValue =
+            curr.quantity && (loan.pricing as ExternalPricingInfo).notional
+              ? new CurrencyBalance(curr.quantity, 18)
+                  .toDecimal()
+                  .mul((loan.pricing as ExternalPricingInfo).notional.toDecimal())
+              : null
+
+          const yieldToMaturity =
+            curr.amount && faceValue
+              ? Dec(2)
+                  .mul(faceValue?.sub(curr.amount.toDecimal()))
+                  .div(Dec(yearsBetweenDates).mul(faceValue.add(curr.amount.toDecimal())))
+                  .mul(100)
+              : null
+          return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev
+        }, Dec(0))
+    }
+    return null
+  }, [loan, borrowerAssetTransactions])
+
+  const averageWeightedYTM = React.useMemo(() => {
+    if (borrowerAssetTransactions?.length && weightedYTM) {
+      const sum = borrowerAssetTransactions
+        .filter((tx) => tx.type !== 'REPAID')
+        .reduce((prev, curr) => {
+          return curr.quantity ? Dec(curr.quantity).add(prev) : prev
+        }, Dec(0))
+      return sum.isZero() ? Dec(0) : weightedYTM.div(sum)
+    }
+  }, [weightedYTM])
+
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -194,6 +248,12 @@ function Loan() {
                     )}`,
                   },
                 ],
+                ...(loan.pricing.maturityDate &&
+                'valuationMethod' in loan.pricing &&
+                loan.pricing.valuationMethod === 'oracle' &&
+                averageWeightedYTM
+                  ? [{ label: 'Average YTM', value: formatPercentage(averageWeightedYTM) }]
+                  : []),
               ]}
             />
 
@@ -269,8 +329,11 @@ function Loan() {
                       ? 'external'
                       : 'internal'
                   }
+                  poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
                   decimals={pool.currency.decimals}
                   pricing={loan.pricing as PricingInfo}
+                  maturityDate={new Date(loan.pricing.maturityDate)}
+                  originationDate={originationDate ? new Date(originationDate) : undefined}
                 />
               </PageSection>
             ) : null}
@@ -283,7 +346,7 @@ function Loan() {
                 <PageSection title={<Box>Remaining maturity</Box>}>
                   <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
                     <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
-                    <Box width="60%" backgroundColor="borderSecondary" position="relative">
+                    <Box width="60%" backgroundColor="borderPrimary" position="relative">
                       <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
                       <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
                         <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />
