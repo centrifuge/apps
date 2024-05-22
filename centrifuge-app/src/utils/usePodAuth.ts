@@ -5,13 +5,14 @@ import { usePodUrl } from './usePools'
 
 // const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'PodAdmin']
 
-export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAccount) {
+export function usePodAuth(poolId: string, accountOverride?: CombinedSubstrateAccount, allowPODReadAccess = true) {
   const { selectedCombinedAccount } = useWallet().substrate
   const podUrl = usePodUrl(poolId)
-  const suitableAccounts = useSuitableAccounts({ poolId, poolRole: ['Borrower', 'PODReadAccess'], proxyType: ['PodAuth'] })
-  .filter(
-    (acc) => !acc.proxies || acc.proxies.length === 1
-  )
+  const suitableAccounts = useSuitableAccounts({
+    poolId,
+    poolRole: ['Borrower', allowPODReadAccess && ('PODReadAccess' as any)].filter(Boolean),
+    proxyType: ['PodAuth'],
+  }).filter((acc) => !acc.proxies || acc.proxies.length === 1)
   const account = accountOverride || selectedCombinedAccount || suitableAccounts[0]
   const cent = useCentrifuge()
   const utils = useCentrifugeUtils()

@@ -483,7 +483,11 @@ function IssuerCreateLoan() {
             </>
           ) : podUrl ? (
             <Box py={8}>
-              <PodAuthSection poolId={pid} message="You need to be logged in to create assets" />
+              <PodAuthSection
+                poolId={pid}
+                message="You need to be logged in to create assets"
+                allowPODReadAccess={false}
+              />
             </Box>
           ) : (
             !poolMetadataIsLoading && (
