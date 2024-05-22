@@ -14,7 +14,7 @@ import { combine, maxPriceVariance, positiveNumber, required, settlementPrice } 
 
 type RepayValues = {
   price: number | '' | Decimal
-  faceValue: number | ''
+  quantity: number | ''
 }
 
 export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
@@ -47,11 +47,11 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
   const repayForm = useFormik<RepayValues>({
     initialValues: {
       price: '',
-      faceValue: '',
+      quantity: '',
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal()))
+      const quantity = Price.fromFloat(values.quantity || 0)
 
       doRepayTransaction([loan.poolId, loan.id, quantity, new BN(0), new BN(0), price], {
         account,
@@ -73,7 +73,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
   return (
     <Stack as={Card} gap={2} p={2}>
       <Box paddingY={1}>
-        <Text variant="heading4">To repay the asset, enter face value and settlement price of the transaction.</Text>
+        <Text variant="heading4">To repay the asset, enter quantity and settlement price of the transaction.</Text>
       </Box>
 
       {currentFace ? (
@@ -89,16 +89,16 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
         (debt.gt(0) ? (
           <FormikProvider value={repayForm}>
             <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-              <Field validate={combine(positiveNumber())} name="faceValue">
+              <Field validate={combine(positiveNumber())} name="quantity">
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
                       {...field}
-                      label="Face value"
+                      label="Quantity"
                       disabled={isRepayLoading}
                       errorMessage={meta.touched ? meta.error : undefined}
                       decimals={8}
-                      onChange={(value) => form.setFieldValue('faceValue', value)}
+                      onChange={(value) => form.setFieldValue('quantity', value)}
                       currency={pool.currency.symbol}
                     />
                   )
@@ -110,9 +110,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                   settlementPrice(),
                   (val) => {
                     const num = val instanceof Decimal ? val.toNumber() : val
-                    const repayAmount = Dec(num)
-                      .mul(repayForm.values.faceValue || 1)
-                      .div(loan.pricing.notional.toDecimal())
+                    const repayAmount = Dec(num).mul(repayForm.values.quantity)
 
                     return repayAmount.gt(balance)
                       ? `Your wallet balance (${formatBalance(
@@ -147,9 +145,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                   <Text variant="emphasized">
                     {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                       ? formatBalance(
-                          Dec(repayForm.values.price || 0)
-                            .mul(Dec(repayForm.values.faceValue || 0))
-                            .div(loan.pricing.notional.toDecimal()),
+                          Dec(repayForm.values.price || 0).mul(Dec(repayForm.values.quantity || 0)),
                           pool?.currency.symbol,
                           2
                         )

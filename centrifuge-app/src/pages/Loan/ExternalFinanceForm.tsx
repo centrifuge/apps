@@ -16,7 +16,7 @@ import { useWithdraw } from './FinanceForm'
 
 type FinanceValues = {
   price: number | '' | Decimal
-  faceValue: number | ''
+  quantity: number | ''
   withdraw: undefined | WithdrawAddress
 }
 
@@ -53,12 +53,12 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
       price: '',
-      faceValue: '',
+      quantity: '',
       withdraw: undefined,
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const quantity = Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal()))
+      const quantity = Price.fromFloat(values.quantity)
 
       doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
         account,
@@ -71,9 +71,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const amountDec = Dec(financeForm.values.price || 0)
-    .mul(Dec(financeForm.values.faceValue || 0))
-    .div(loan.pricing.notional.toDecimal())
+  const amountDec = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
 
   const withdraw = useWithdraw(loan.poolId, account, amountDec)
 
@@ -87,7 +85,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   return (
     <Stack as={Card} gap={2} p={2}>
       <Box paddingY={1}>
-        <Text variant="heading4">To finance the asset, enter face value and settlement price of the transaction.</Text>
+        <Text variant="heading4">To finance the asset, enter quantity and settlement price of the transaction.</Text>
       </Box>
       {availableFinancing.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
@@ -131,15 +129,15 @@ export function ExternalFinanceFields({
   const maxBorrow = min(poolReserve, availableFinancing)
   return (
     <>
-      <Field name="faceValue" validate={combine(nonNegativeNumber())}>
+      <Field name="quantity" validate={combine(nonNegativeNumber())}>
         {({ field, meta, form }: FieldProps) => {
           return (
             <CurrencyInput
               {...field}
-              label="Face value"
+              label="Quantity"
               errorMessage={meta.touched ? meta.error : undefined}
               decimals={8}
-              onChange={(value) => form.setFieldValue('faceValue', value)}
+              onChange={(value) => form.setFieldValue('quantity', value)}
               currency={pool.currency.symbol}
             />
           )
@@ -152,9 +150,7 @@ export function ExternalFinanceFields({
           settlementPrice(),
           validate ??
             ((val) => {
-              const financeAmount = Dec(val)
-                .mul(form.values.faceValue || 1)
-                .div(loan.pricing.notional.toDecimal())
+              const financeAmount = Dec(val).mul(form.values.quantity || 1)
 
               return financeAmount.gt(maxBorrow)
                 ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool.currency.symbol, 2)})`

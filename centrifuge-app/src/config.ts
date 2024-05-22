@@ -120,6 +120,7 @@ const CENTRIFUGE: EnvironmentConfig = {
       'Residential real estate',
       'Project finance',
       'Trade finance',
+      'Digital assets',
     ],
     'Public credit': ['Corporate bonds', 'US treasuries'],
   },

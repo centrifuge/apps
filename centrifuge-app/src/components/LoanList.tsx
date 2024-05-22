@@ -350,7 +350,9 @@ function Amount({ loan }: { loan: Row }) {
           return formatBalance(l.totalRepaid, pool?.currency.symbol)
         }
 
-        if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && currentFace) {
+        // @ts-expect-error
+        if ('valuationMethod' in l.pricing && l.pricing.valuationMethod === 'oracle' && l.presentValue) {
+          // @ts-expect-error
           return formatBalance(currentFace, pool?.currency.symbol)
         }
 

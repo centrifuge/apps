@@ -251,6 +251,7 @@ function Loan() {
                 ...(loan.pricing.maturityDate &&
                 'valuationMethod' in loan.pricing &&
                 loan.pricing.valuationMethod === 'oracle' &&
+                loan.pricing.notional.gtn(0) &&
                 averageWeightedYTM
                   ? [{ label: 'Average YTM', value: formatPercentage(averageWeightedYTM) }]
                   : []),
