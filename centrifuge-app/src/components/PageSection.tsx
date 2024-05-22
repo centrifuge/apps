@@ -52,7 +52,7 @@ export const PageSection: React.FC<Props> = ({
       gap={3}
       borderTopWidth={1}
       borderTopStyle="solid"
-      borderTopColor="borderSecondary"
+      borderTopColor="borderPrimary"
     >
       {(title || titleAddition) && (
         <Shelf justifyContent="space-between" as="header">

@@ -54,7 +54,7 @@ export const StyledInputBox = styled(Shelf)`
   width: 100%;
   position: relative;
   background: ${({ theme }) => theme.colors.backgroundPage};
-  border: 1px solid ${({ theme }) => theme.colors.borderSecondary};
+  border: 1px solid ${({ theme }) => theme.colors.borderPrimary};
   border-radius: ${({ theme }) => theme.radii.input}px;
 
   &::before {
@@ -86,7 +86,7 @@ export const StyledInputAction = styled.button`
   align-items: center;
   font-family: inherit;
   padding: 0 12px;
-  box-shadow: 0 0 0 1px ${(props) => props.theme.colors.borderSecondary};
+  box-shadow: 0 0 0 1px ${(props) => props.theme.colors.borderPrimary};
   border-radius: ${({
     theme: {
       radii: { input },
@@ -314,7 +314,7 @@ export function AddressInput({
                 gap={1}
                 p="8px"
                 border="1px solid"
-                borderColor="borderSecondary"
+                borderColor="borderPrimary"
                 backgroundColor="backgroundPage"
                 borderRadius="input"
               >

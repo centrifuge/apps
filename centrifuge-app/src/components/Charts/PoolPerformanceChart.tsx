@@ -28,10 +28,9 @@ const rangeFilters = [
   { value: 'all', label: 'All' },
 ] as const
 
-const chartColor = '#A4D5D8'
-
 function PoolPerformanceChart() {
   const theme = useTheme()
+  const chartColor = theme.colors.accentPrimary
   const { pid: poolId } = useParams<{ pid: string }>()
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
@@ -54,7 +53,7 @@ function PoolPerformanceChart() {
   })
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'ytd', label: 'Year to date' })
-  const rangeNumber = getRangeNumber(range.value, poolAge)
+  const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const data: ChartData[] = React.useMemo(
     () =>
@@ -71,7 +70,6 @@ function PoolPerformanceChart() {
 
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
-  const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
 
   const chartData = data.slice(-rangeNumber)
 
@@ -147,7 +145,7 @@ function PoolPerformanceChart() {
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
-              <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
+              <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
               <Tooltip
                 content={({ payload }) => {
                   if (payload && payload?.length > 0) {

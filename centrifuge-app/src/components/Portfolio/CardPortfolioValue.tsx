@@ -5,6 +5,7 @@ import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useTransactionsByAddress } from '../../utils/usePools'
+import { LoadBoundary } from '../LoadBoundary'
 import { useHoldings } from './Holdings'
 import { PortfolioValue } from './PortfolioValue'
 
@@ -18,7 +19,7 @@ const rangeFilters = [
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
   { value: 'ytd', label: 'Year to date' },
-  // { value: 'all', label: 'All' },
+  { value: 'all', label: 'All' },
 ] as const
 
 export function CardPortfolioValue({ address }: { address?: string }) {
@@ -47,7 +48,7 @@ export function CardPortfolioValue({ address }: { address?: string }) {
         borderRadius="card"
         borderStyle="solid"
         borderWidth={1}
-        borderColor="borderSecondary"
+        borderColor="borderPrimary"
         p={2}
         style={{
           boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
@@ -100,7 +101,9 @@ export function CardPortfolioValue({ address }: { address?: string }) {
             </Stack>
 
             <Box width="100%" height="300px">
-              <PortfolioValue rangeValue={range.value} address={address} />
+              <LoadBoundary>
+                <PortfolioValue rangeValue={range.value} address={address} />
+              </LoadBoundary>
             </Box>
           </>
         ) : null}

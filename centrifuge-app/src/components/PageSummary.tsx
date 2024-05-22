@@ -19,7 +19,7 @@ export const PageSummary: React.FC<Props> = ({ data, children }) => {
       pl={[2, 6]}
       py="3"
       style={{
-        boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+        boxShadow: `0 1px 0 ${theme.colors.borderPrimary}`,
       }}
     >
       {data?.map(({ label, value }, index) => (

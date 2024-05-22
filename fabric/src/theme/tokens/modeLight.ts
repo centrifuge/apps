@@ -1,37 +1,37 @@
-import { blueScale, centrifugeBlue, grayScale } from './colors'
+import { blueScale, centrifugeBlue, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[800]
-const statusInfo = '#1253ff'
+const statusInfo = blueScale[500]
 const statusOk = '#519b10'
-const statusWarning = '#ffc012'
+const statusWarning = yellowScale[500]
 const statusCritical = '#d43f2b'
 const statusPromote = '#f81071'
 
-const statusDefaultBg = `${grayScale[800]}14`
-const statusInfoBg = '#1253ff14'
-const statusOkBg = '#519b1014'
-const statusWarningBg = '#ffc01214'
-const statusCriticalBg = '#d43f2b14'
+const statusDefaultBg = grayScale[300]
+const statusInfoBg = grayScale[300]
+const statusOkBg = '#f1f7ec'
+const statusWarningBg = yellowScale[50]
+const statusCriticalBg = '#fcf0ee'
 const statusPromoteBg = '#f8107114'
 
 const lightColors = {
-  textPrimary: 'black',
+  textPrimary: grayScale[900],
   textSecondary: grayScale[800],
-  textDisabled: grayScale[400],
+  textDisabled: grayScale[500],
   textInverted: 'white',
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
-  backgroundTertiary: grayScale[50],
+  backgroundTertiary: grayScale[100],
   backgroundAccentPrimary: blueScale[100],
   backgroundAccentSecondary: '#e9eff2',
   backgroundPage: 'white',
   backgroundInput: 'white',
-  backgroundThumbnail: grayScale[600],
+  backgroundThumbnail: grayScale[500],
   backgroundInverted: grayScale[900],
 
-  borderPrimary: grayScale[300],
-  borderSecondary: grayScale[200],
+  borderPrimary: grayScale[100],
+  borderSecondary: grayScale[300],
 
   statusDefault,
   statusInfo,
@@ -49,13 +49,13 @@ const lightColors = {
   backgroundButtonPrimary: centrifugeBlue,
   backgroundButtonPrimaryFocus: centrifugeBlue,
   backgroundButtonPrimaryHover: centrifugeBlue,
-  backgroundButtonPrimaryPressed: blueScale[600],
+  backgroundButtonPrimaryPressed: blueScale[500],
   backgroundButtonPrimaryDisabled: grayScale[300],
   textButtonPrimary: 'white',
   textButtonPrimaryFocus: 'white',
   textButtonPrimaryHover: 'white',
   textButtonPrimaryPressed: 'white',
-  textButtonPrimaryDisabled: grayScale[600],
+  textButtonPrimaryDisabled: grayScale[500],
   borderButtonPrimary: centrifugeBlue,
   borderButtonPrimaryFocus: blueScale[700],
   borderButtonPrimaryHover: blueScale[700],
@@ -66,14 +66,14 @@ const lightColors = {
   backgroundButtonSecondary: blueScale[100],
   backgroundButtonSecondaryFocus: blueScale[100],
   backgroundButtonSecondaryHover: blueScale[100],
-  backgroundButtonSecondaryPressed: blueScale[200],
-  backgroundButtonSecondaryDisabled: blueScale[300],
+  backgroundButtonSecondaryPressed: blueScale[100],
+  backgroundButtonSecondaryDisabled: grayScale[300],
   textButtonSecondary: centrifugeBlue,
   textButtonSecondaryFocus: centrifugeBlue,
   textButtonSecondaryHover: centrifugeBlue,
   textButtonSecondaryPressed: centrifugeBlue,
-  textButtonSecondaryDisabled: blueScale[600],
-  borderButtonSecondary: grayScale[200],
+  textButtonSecondaryDisabled: grayScale[500],
+  borderButtonSecondary: grayScale[300],
   borderButtonSecondaryFocus: centrifugeBlue,
   borderButtonSecondaryHover: centrifugeBlue,
   borderButtonSecondaryPressed: centrifugeBlue,
@@ -96,17 +96,17 @@ const lightColors = {
   borderButtonTertiaryPressed: 'transparent',
   borderButtonTertiaryDisabled: 'transparent',
 
-  backgroundButtonInverted: 'white',
-  backgroundButtonInvertedFocus: 'white',
-  backgroundButtonInvertedHover: 'white',
-  backgroundButtonInvertedPressed: blueScale[100],
+  backgroundButtonInverted: grayScale[100],
+  backgroundButtonInvertedFocus: grayScale[100],
+  backgroundButtonInvertedHover: grayScale[100],
+  backgroundButtonInvertedPressed: grayScale[100],
   backgroundButtonInvertedDisabled: grayScale[100],
   textButtonInverted: centrifugeBlue,
   textButtonInvertedFocus: centrifugeBlue,
   textButtonInvertedHover: centrifugeBlue,
   textButtonInvertedPressed: centrifugeBlue,
-  textButtonInvertedDisabled: blueScale[600],
-  borderButtonInverted: grayScale[200],
+  textButtonInvertedDisabled: grayScale[500],
+  borderButtonInverted: grayScale[100],
   borderButtonInvertedFocus: centrifugeBlue,
   borderButtonInvertedHover: centrifugeBlue,
   borderButtonInvertedPressed: centrifugeBlue,

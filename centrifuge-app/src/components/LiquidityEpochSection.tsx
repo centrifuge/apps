@@ -18,7 +18,7 @@ import { useTinlakeTransaction } from '../utils/tinlake/useTinlakeTransaction'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'
-import { usePoolPermissions, useSuitableAccounts } from '../utils/usePermissions'
+import { useSuitableAccounts } from '../utils/usePermissions'
 import { usePoolAccountOrders } from '../utils/usePools'
 import { DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
@@ -68,21 +68,14 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
     useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
-  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
+  const [account] = useSuitableAccounts({
+    poolId: pool.id,
+    proxyType: ['Borrow', 'Invest'],
+    poolRole: ['InvestorAdmin', 'LoanAdmin'],
+  })
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
-  const poolPermissions = usePoolPermissions(pool.id)
   const { showOrderExecution } = useDebugFlags()
-
-  const isIssuer = account
-    ? Object.keys(poolPermissions || {})
-        .filter(
-          (address) =>
-            poolPermissions?.[address].roles.includes('InvestorAdmin') ||
-            poolPermissions?.[address].roles.includes('LoanAdmin')
-        )
-        .includes(account.actingAddress)
-    : false
 
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Start order execution',
@@ -166,7 +159,7 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
             </Text>
           )} */}
 
-          {(isIssuer || showOrderExecution) && (
+          {(account || showOrderExecution) && (
             <Button
               small
               variant="secondary"
@@ -257,19 +250,14 @@ function EpochStatusSubmission({ pool }: { pool: Pool }) {
 
 function EpochStatusExecution({ pool }: { pool: Pool }) {
   const { minutesRemaining, minutesTotal } = useChallengeTimeCountdown(pool.id)
-  const [account] = useSuitableAccounts({ poolId: pool.id, proxyType: ['Borrow', 'Invest'] })
+  const [account] = useSuitableAccounts({
+    poolId: pool.id,
+    proxyType: ['Borrow', 'Invest'],
+    poolRole: ['InvestorAdmin', 'LoanAdmin'],
+  })
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
-  const poolPermissions = usePoolPermissions(pool.id)
   const { showOrderExecution } = useDebugFlags()
-
-  const isIssuer = Object.keys(poolPermissions || {})
-    .filter(
-      (address) =>
-        poolPermissions?.[address].roles.includes('InvestorAdmin') ||
-        poolPermissions?.[address].roles.includes('LoanAdmin')
-    )
-    .includes(account.actingAddress)
 
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute order',
@@ -309,7 +297,7 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
       title="Order overview"
       titleAddition={<Text variant="body2">{loadingExecution && 'Order executing'}</Text>}
       headerRight={
-        (isIssuer || showOrderExecution) && (
+        (account || showOrderExecution) && (
           <Button
             small
             variant={minutesRemaining > 0 ? 'secondary' : 'primary'}

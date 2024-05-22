@@ -56,7 +56,7 @@ const Container = styled(Grid)<{ $disabled?: boolean; $active: boolean }>`
     top: 0;
     border: ${({ theme, $disabled, $active }) =>
       $disabled
-        ? `1px dashed ${theme.colors.borderSecondary}`
+        ? `1px dashed ${theme.colors.borderPrimary}`
         : $active
         ? `1px solid ${theme.colors.accentPrimary}`
         : `1px dashed ${theme.colors.borderPrimary}`};
@@ -243,7 +243,7 @@ export function ImageUpload({
                   {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Flex>
               </Shelf>
-              <Divider borderColor="borderSecondary" />
+              <Divider borderColor="borderPrimary" />
               <Stack mt={2} flex={1} minHeight={60} position="relative">
                 {fileUrl && (
                   <Box

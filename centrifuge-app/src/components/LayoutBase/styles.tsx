@@ -67,7 +67,7 @@ export const HeaderBackground = styled(Box)`
   height: ${HEADER_HEIGHT}px;
 
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
-  border-bottom: ${({ theme }) => `1px solid ${theme.colors.borderSecondary}`};
+  border-bottom: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     display: none;
@@ -82,7 +82,7 @@ export const ToolbarContainer = styled(Box)`
   bottom: 0;
   height: ${TOOLBAR_HEIGHT}px;
 
-  border-top: ${({ theme }) => `1px solid ${theme.colors.borderSecondary}`};
+  border-top: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
   background-color: ${({ theme }) => theme.colors.backgroundPrimary};
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
@@ -147,7 +147,7 @@ export const MainContainer = styled(Stack)`
 
   @media (min-width: ${({ theme }) => theme.breakpoints[BREAK_POINT_COLUMNS]}) {
     margin-top: calc(${HEADER_HEIGHT}px * -1);
-    border-left: ${({ theme }) => `1px solid ${theme.colors.borderSecondary}`};
+    border-left: ${({ theme }) => `1px solid ${theme.colors.borderPrimary}`};
   }
 `
 

@@ -28,7 +28,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps, showPrime, showOracle } = useDebugFlags()
+  const { showSwaps, showOracle } = useDebugFlags()
   const transactions = useTransactionsByAddress(address)
 
   return (
@@ -38,32 +38,41 @@ export function Menu() {
       gap={1}
       flexDirection={['row', 'row', 'column']}
       alignItems={['center', 'center', 'stretch']}
+      justifyContent={['space-between', 'space-between']}
     >
-      <PageLink to="/pools" stacked={!isLarge}>
-        <IconInvestments />
-        Pools
-      </PageLink>
+      <Box width="100%">
+        <PageLink to="/pools" stacked={!isLarge}>
+          <IconInvestments size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          Pools
+        </PageLink>
+      </Box>
 
-      <PageLink to="/portfolio" stacked={!isLarge}>
-        <IconWallet />
-        Portfolio
-      </PageLink>
+      <Box width="100%">
+        <PageLink to="/portfolio" stacked={!isLarge}>
+          <IconWallet size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          Portfolio
+        </PageLink>
+      </Box>
 
       {address && (transactions ?? null) && (
-        <PageLink to="/history" stacked={!isLarge}>
-          <IconClock />
-          History
-        </PageLink>
+        <Box width="100%">
+          <PageLink to="/history" stacked={!isLarge}>
+            <IconClock size={['iconMedium', 'iconMedium', 'iconSmall']} />
+            History
+          </PageLink>
+        </Box>
       )}
 
-      {showPrime && (
+      <Box width="100%">
         <PageLink to="/prime" stacked={!isLarge}>
-          <IconGlobe />
+          <IconGlobe size={['iconMedium', 'iconMedium', 'iconSmall']} />
           Prime
         </PageLink>
-      )}
+      </Box>
 
-      <GovernanceMenu />
+      <Box width="100%">
+        <GovernanceMenu />
+      </Box>
 
       {(pools.length > 0 || config.poolCreationType === 'immediate') && (
         <IssuerMenu defaultOpen={isLarge} stacked={!isLarge}>
@@ -102,7 +111,7 @@ export function Menu() {
 
       {showSwaps && (
         <PageLink to="/swaps" stacked={!isLarge}>
-          <IconSwitch />
+          <IconSwitch size={['iconMedium', 'iconMedium', 'iconSmall']} />
           Swaps
         </PageLink>
       )}
@@ -111,7 +120,7 @@ export function Menu() {
 
       {config.network !== 'centrifuge' && (
         <PageLink to="/nfts" stacked={!isLarge}>
-          <IconNft />
+          <IconNft size={['iconMedium', 'iconMedium', 'iconSmall']} />
           NFTs
         </PageLink>
       )}

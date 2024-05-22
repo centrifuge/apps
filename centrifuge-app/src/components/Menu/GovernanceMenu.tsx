@@ -4,16 +4,16 @@ import {
   IconChevronRight,
   IconExternalLink,
   IconGovernance,
-  Menu as Panel,
   MenuItemGroup,
+  Menu as Panel,
   Stack,
   Text,
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
-import { baseButton } from './styles'
 import { Toggle } from './Toggle'
+import { baseButton } from './styles'
 
 const ExternalLink = styled(Text)`
   ${baseButton}
@@ -21,13 +21,6 @@ const ExternalLink = styled(Text)`
   justify-content: space-between;
   gap: ${({ theme }) => theme.space[1]}px;
   white-space: nowrap;
-
-  svg {
-    display: block;
-    width: ${({ theme }) => theme.sizes.iconSmall}px;
-    height: ${({ theme }) => theme.sizes.iconSmall}px;
-    object-fit: contain;
-  }
 `
 
 export function GovernanceMenu() {
@@ -37,6 +30,7 @@ export function GovernanceMenu() {
   const offset = `calc(100% + 2 * ${space[1]}px)`
   const id = React.useId()
   const isLarge = useIsAboveBreakpoint('L')
+  const isMedium = useIsAboveBreakpoint('M')
 
   return (
     <Box position={['static', 'static', 'relative', 'relative', 'static']}>
@@ -60,10 +54,16 @@ export function GovernanceMenu() {
         aria-label={open ? 'Hide menu' : 'Show menu'}
         onClick={() => setOpen(!open)}
         stacked={!isLarge}
+        isMedium={isMedium}
       >
-        <IconGovernance />
+        <IconGovernance size={['iconMedium', 'iconMedium', 'iconSmall']} />
         Governance
-        {isLarge && (open ? <IconChevronDown /> : <IconChevronRight />)}
+        {isLarge &&
+          (open ? (
+            <IconChevronDown size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          ) : (
+            <IconChevronRight size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          ))}
       </Toggle>
 
       <Box
@@ -132,7 +132,7 @@ function Link({ href, stacked, children }: { href: string; stacked: boolean; chi
       href={href}
       stacked={stacked}
     >
-      {children} <IconExternalLink />
+      {children} <IconExternalLink size={['iconMedium', 'iconMedium', 'iconSmall']} />
     </ExternalLink>
   )
 }

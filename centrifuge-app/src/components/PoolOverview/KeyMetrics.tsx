@@ -24,7 +24,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
       const days = daysBetween(today, loan.pricing.maturityDate)
-      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0
+      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0 && !loan.outstandingDebt.isZero()
     }).length
 
   const isBT3BT4 =
@@ -78,12 +78,12 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         <Text fontSize="18px" fontWeight="500">
           Key metrics
         </Text>
-        <Box borderStyle="solid" borderWidth="1px" borderColor="borderSecondary">
+        <Box borderStyle="solid" borderWidth="1px" borderColor="borderPrimary">
           {metrics.map(({ metric, value }, index) => (
             <Grid
               borderBottomStyle={index === metrics.length - 1 ? 'none' : 'solid'}
               borderBottomWidth={index === metrics.length - 1 ? '0' : '1px'}
-              borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderSecondary'}
+              borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderPrimary'}
               height={32}
               key={index}
               px={1}

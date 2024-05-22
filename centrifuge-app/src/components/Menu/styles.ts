@@ -35,11 +35,4 @@ export const primaryButton = css<{ isActive?: boolean; stacked?: boolean }>`
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
   }
-
-  svg {
-    display: block;
-    width: ${({ theme }) => theme.sizes.iconSmall}px;
-    height: ${({ theme }) => theme.sizes.iconSmall}px;
-    object-fit: contain;
-  }
 `

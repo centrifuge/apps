@@ -35,8 +35,7 @@ export function PendingOrder({
           {type === 'invest' ? (
             <>
               <Text variant="body3">
-                Invested {state.poolCurrency?.displayName} value{' '}
-                <Text fontWeight={600}>{formatBalance(amount, state.poolCurrency?.displayName)}</Text>
+                Invested <Text fontWeight={600}>{formatBalance(amount, state.poolCurrency?.displayName)}</Text>
               </Text>
               <Text variant="body3">
                 Token amount ~
