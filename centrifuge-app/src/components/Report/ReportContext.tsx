@@ -2,7 +2,16 @@ import * as React from 'react'
 
 export type GroupBy = 'day' | 'month'
 
-export type Report = 'pool-balance' | 'token-price' | 'asset-list' | 'investor-tx' | 'asset-tx' | 'fee-tx' | 'holders'
+export type Report =
+  | 'pool-balance'
+  | 'token-price'
+  | 'asset-list'
+  | 'investor-tx'
+  | 'asset-tx'
+  | 'fee-tx'
+  | 'holders'
+  | 'balance-sheet'
+  | 'cashflow-sheet'
 
 export type ReportContextType = {
   csvData?: CsvDataProps
@@ -54,7 +63,7 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
   )
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
-  const [report, setReport] = React.useState<Report>('investor-tx')
+  const [report, setReport] = React.useState<Report>('balance-sheet')
 
   // Custom filters for specific reports
   const [loanStatus, setLoanStatus] = React.useState('all')

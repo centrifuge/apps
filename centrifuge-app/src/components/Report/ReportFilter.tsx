@@ -46,6 +46,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const loans = useLoans(pool.id) as Loan[] | undefined
 
   const reportOptions: { label: string; value: Report }[] = [
+    { label: 'Balance sheet', value: 'balance-sheet' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
