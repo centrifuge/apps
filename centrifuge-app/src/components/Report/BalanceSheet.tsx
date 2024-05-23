@@ -1,6 +1,10 @@
+import { Price } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import * as React from 'react'
+import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
@@ -73,7 +77,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     return [
       {
         name: 'Asset valuation',
-        value: poolStates?.map(() => '' as any) || [],
+        value: [],
         heading: false,
       },
       {
@@ -114,18 +118,27 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
           return [
             {
               name: `${name} token supply`,
-              value: [''],
+              value: poolStates?.map((poolState) => poolState.tranches[token.id].tokenSupply || ('' as any)) || [],
               heading: false,
+              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), token.currency.displayName) : ''),
             },
             {
               name: `* ${name} token price`,
-              value: [''],
+              value: poolStates?.map((poolState) => poolState.tranches[token.id].price || ('' as any)) || [],
               heading: false,
+              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 5) : ''),
             },
             {
               name: `= ${name} tranche value`,
-              value: [''],
+              value:
+                poolStates?.map(
+                  (poolState) =>
+                    poolState.tranches[token.id].price
+                      ?.toDecimal()
+                      .mul(poolState.tranches[token.id].tokenSupply.toDecimal()) || ('' as any)
+                ) || [],
               heading: false,
+              formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
             },
           ]
         })
@@ -194,8 +207,18 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         hoverable
         summary={{
           name: '= Total capital',
-          value: poolStates?.map(() => '' as any) || [],
+          value:
+            poolStates?.map((poolState) => {
+              return Object.values(poolState.tranches)
+                .reduce((acc, tranche) => {
+                  const price = tranche.price || new Price(0)
+                  const supply = tranche.tokenSupply || new BN(0)
+                  return acc.add(price.toDecimal().mul(supply.toDecimal()))
+                }, Dec(0))
+                .toString()
+            }) || [],
           heading: true,
+          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
         }}
       />
     </DataTableGroup>
