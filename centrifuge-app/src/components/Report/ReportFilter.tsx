@@ -79,7 +79,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         }}
       />
 
-      {!['holders', 'asset-list'].includes(report) && (
+      {!['holders', 'asset-list', 'balance-sheet'].includes(report) && (
         <>
           <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
           <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
@@ -175,6 +175,29 @@ export function ReportFilter({ pool }: ReportFilterProps) {
             ...(loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []),
           ]}
         />
+      )}
+
+      {report === 'balance-sheet' && (
+        <>
+          <Select
+            name="balanceSheetGroupBy"
+            label="Group by"
+            onChange={(event) => {
+              setGroupBy(event.target.value as GroupBy)
+            }}
+            value={groupBy}
+            options={[
+              { label: 'Daily', value: '30-day' },
+              { label: 'Day', value: 'day' },
+              { label: 'Monthly', value: 'month' },
+              { label: 'Quarterly', value: 'quarter' },
+              { label: 'Yearly', value: 'year' },
+            ]}
+          />
+          {groupBy === 'day' && (
+            <DateInput label="Day" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          )}
+        </>
       )}
 
       {['investor-tx', 'asset-tx', 'fee-tx'].includes(report) && (

@@ -21,15 +21,53 @@ type Row = TableDataRow & {
 export function BalanceSheet({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
 
+  const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
+    const today = new Date()
+    today.setDate(today.getDate())
+    today.setHours(0, 0, 0, 0)
+    switch (groupBy) {
+      case 'day':
+        const from = new Date(startDate ?? today)
+        from.setHours(0, 0, 0, 0)
+        const to = new Date(startDate ?? today)
+        to.setDate(to.getDate() + 1)
+        to.setHours(0, 0, 0, 0)
+        return [from, to]
+      case '30-day':
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        thirtyDaysAgo.setHours(0, 0, 0, 0)
+        return [thirtyDaysAgo, today]
+      case 'month':
+      case 'quarter':
+        const oneYearAgo = new Date()
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+        oneYearAgo.setHours(0, 0, 0, 0)
+        return [oneYearAgo, today]
+      case 'year':
+        // TODO: figure out how many years are available to show, sum and aggregate
+        const oneYearsAgo = new Date()
+        oneYearsAgo.setFullYear(oneYearsAgo.getFullYear() - 1)
+        oneYearsAgo.setHours(0, 0, 0, 0)
+        return [oneYearsAgo, today]
+      default:
+        throw new Error('No filter set')
+    }
+  }, [groupBy])
+
   const { poolStates: dailyPoolStates } =
-    useDailyPoolStates(pool.id, startDate ? new Date(startDate) : undefined, endDate ? new Date(endDate) : undefined) ||
-    {}
+    useDailyPoolStates(
+      pool.id,
+      adjustedStartDate ? adjustedStartDate : undefined,
+      adjustedEndDate ? adjustedEndDate : undefined
+    ) || {}
+
   const monthlyPoolStates = useMonthlyPoolStates(
     pool.id,
-    startDate ? new Date(startDate) : undefined,
-    endDate ? new Date(endDate) : undefined
+    adjustedStartDate ? adjustedStartDate : undefined,
+    adjustedEndDate ? adjustedEndDate : undefined
   )
-  const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
+  const poolStates = groupBy.includes('day') ? dailyPoolStates : monthlyPoolStates
 
   const columns = React.useMemo(() => {
     if (!poolStates) {
@@ -40,7 +78,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       {
         align: 'left',
         header: '',
-        cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading5' : 'body3'}>{row.name}</Text>,
+        cell: (row: TableDataRow) => <Text variant={row.heading ? 'body3' : 'body3'}>{row.name}</Text>,
         width: '200px',
       },
     ]
@@ -48,14 +86,13 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         poolStates.map((state, index) => ({
           align: 'right',
           timestamp: state.timestamp,
-          header:
-            groupBy === 'day'
-              ? new Date(state.timestamp).toLocaleDateString('en-US', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })
-              : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+          header: groupBy.includes('day')
+            ? new Date(state.timestamp).toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })
+            : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
           cell: (row: Row) => (
             <Text variant="body3">
               {row.formatter ? row.formatter((row.value as any)[index]) : (row.value as any)[index]}
@@ -146,14 +183,6 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
   }, [poolStates, pool])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
-
-  const totalCapital = poolStates?.map((poolState) => {
-    return Object.values(poolState.tranches).reduce((acc, tranche) => {
-      const price = tranche.price || new Price(0)
-      const supply = tranche.tokenSupply
-      return acc.add(price.toDecimal().mul(supply.toDecimal()))
-    }, Dec(0))
-  })
 
   React.useEffect(() => {
     const f = [...trancheRecords, ...assetValuationRecords].map(({ name, value }) => [

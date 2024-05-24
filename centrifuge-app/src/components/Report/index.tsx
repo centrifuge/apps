@@ -1,5 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
@@ -14,7 +15,7 @@ import { TokenPrice } from './TokenPrice'
 
 export type TableDataRow = {
   name: string
-  value: (string | number)[]
+  value: (string | number | Decimal)[]
   heading?: boolean
 }
 

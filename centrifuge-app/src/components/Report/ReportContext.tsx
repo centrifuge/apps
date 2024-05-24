@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-export type GroupBy = 'day' | 'month'
+export type GroupBy = 'day' | 'month' | 'quarter' | 'year' | '30-day'
 
 export type Report =
   | 'pool-balance'
