@@ -118,8 +118,9 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       },
       {
         name: '\u00A0 \u00A0 + On-chain reserve',
-        value: poolStates?.map(() => '' as any) || [],
+        value: poolStates?.map((poolState) => poolState.poolState.totalReserve.toDecimal()) || [],
         heading: false,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
       },
       {
         name: '\u00A0 \u00A0 + Settlement accounts(s)',
