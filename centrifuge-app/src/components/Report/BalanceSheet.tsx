@@ -2,7 +2,6 @@ import { Price } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
@@ -81,22 +80,22 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         heading: false,
       },
       {
-        name: '+ On-chain reserve',
+        name: '\u00A0 \u00A0 + On-chain reserve',
         value: poolStates?.map(() => '' as any) || [],
         heading: false,
       },
       {
-        name: '+ Settlement accounts(s)',
+        name: '\u00A0 \u00A0 + Settlement accounts(s)',
         value: poolStates?.map(() => '' as any) || [],
         heading: false,
       },
       {
-        name: '+ Bank accounts(s)',
+        name: '\u00A0 \u00A0 + Bank accounts(s)',
         value: poolStates?.map(() => '' as any) || [],
         heading: false,
       },
       {
-        name: '- Accrued fees',
+        name: '\u00A0 \u00A0 - Accrued fees',
         value: poolStates?.map(() => '' as any) || [],
         heading: false,
       },
@@ -123,13 +122,13 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
               formatter: (v: any) => (v ? formatBalance(v.toDecimal(), token.currency.displayName) : ''),
             },
             {
-              name: `* ${name} token price`,
+              name: `\u00A0 \u00A0 * ${name} token price`,
               value: poolStates?.map((poolState) => poolState.tranches[token.id].price || ('' as any)) || [],
               heading: false,
               formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 5) : ''),
             },
             {
-              name: `= ${name} tranche value`,
+              name: `\u00A0 \u00A0 = ${name} tranche value`,
               value:
                 poolStates?.map(
                   (poolState) =>
@@ -147,6 +146,14 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
   }, [poolStates, pool])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
+
+  const totalCapital = poolStates?.map((poolState) => {
+    return Object.values(poolState.tranches).reduce((acc, tranche) => {
+      const price = tranche.price || new Price(0)
+      const supply = tranche.tokenSupply
+      return acc.add(price.toDecimal().mul(supply.toDecimal()))
+    }, Dec(0))
+  })
 
   React.useEffect(() => {
     const f = [...trancheRecords, ...assetValuationRecords].map(({ name, value }) => [
@@ -198,7 +205,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         summary={{
           name: '= Total assets/NAV',
           value: poolStates?.map(() => '' as any) || [],
-          heading: true,
+          heading: false,
         }}
       />
       <DataTable
@@ -208,17 +215,15 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         summary={{
           name: '= Total capital',
           value:
-            poolStates?.map((poolState) => {
-              return Object.values(poolState.tranches)
-                .reduce((acc, tranche) => {
-                  const price = tranche.price || new Price(0)
-                  const supply = tranche.tokenSupply || new BN(0)
-                  return acc.add(price.toDecimal().mul(supply.toDecimal()))
-                }, Dec(0))
-                .toString()
-            }) || [],
-          heading: true,
-          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
+            poolStates?.map((poolState) =>
+              Object.values(poolState.tranches).reduce((acc, tranche) => {
+                const price = tranche.price || new Price(0)
+                const supply = tranche.tokenSupply
+                return acc.add(price.toDecimal().mul(supply.toDecimal()))
+              }, Dec(0))
+            ) || [],
+          heading: false,
+          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 0) : ''),
         }}
       />
     </DataTableGroup>
