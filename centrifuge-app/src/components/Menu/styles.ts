@@ -16,7 +16,7 @@ export const baseButton = css<{ isActive?: boolean }>`
   }
 `
 
-export const primaryButton = css<{ isActive?: boolean; stacked?: boolean }>`
+export const primaryButton = css<{ isActive?: boolean; stacked?: boolean; isMedium?: boolean }>`
   display: grid;
   gap: ${({ stacked, theme }) => (stacked ? 0 : `${theme.space[1]}px`)};
   grid-template-rows: ${({ stacked }) => (stacked ? '20px 1fr' : '1fr')};
@@ -38,8 +38,8 @@ export const primaryButton = css<{ isActive?: boolean; stacked?: boolean }>`
 
   svg {
     display: block;
-    width: ${({ theme }) => theme.sizes.iconSmall}px;
-    height: ${({ theme }) => theme.sizes.iconSmall}px;
+    width: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
+    height: ${({ theme, isMedium }) => (isMedium ? theme.sizes.iconSmall : theme.sizes.iconMedium)}px;
     object-fit: contain;
   }
 `

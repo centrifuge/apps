@@ -45,7 +45,7 @@ export function RedeemForm({ autoFocus }: RedeemFormProps) {
   // const availableReserve = Dec(pool.reserve.available ?? '0').div('1e18')
   // const redeemCapacity = min(availableReserve.div(price)) // TODO: check risk buffer
   // const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(redeemCapacity)
-  const hasPendingOrder = !pendingRedeem.isZero()
+  const hasPendingOrder = pendingRedeem.greaterThan(1)
 
   const loadingMessage = state.pendingTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
 

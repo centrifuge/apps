@@ -1,5 +1,5 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Card, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useParams } from 'react-router'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
@@ -68,25 +68,23 @@ export const Cashflows = () => {
   const csvUrl = csvData?.length ? getCSVDownloadUrl(csvData) : ''
 
   return (
-    <Card p={3}>
-      <Stack gap={2}>
-        <Shelf justifyContent="space-between">
-          <Text fontSize="18px" fontWeight="500">
-            Cashflows
-          </Text>
-          <AnchorButton
-            href={csvUrl}
-            download={`pool-cashflow-data-${poolId}.csv`}
-            variant="secondary"
-            icon={IconDownload}
-            small
-            target="_blank"
-          >
-            Download
-          </AnchorButton>
-        </Shelf>
-        <CashflowsChart poolStates={truncatedPoolStates} pool={pool} />
-      </Stack>
-    </Card>
+    <Stack gap={2}>
+      <Shelf justifyContent="space-between">
+        <Text fontSize="18px" fontWeight="500">
+          Cashflows
+        </Text>
+        <AnchorButton
+          href={csvUrl}
+          download={`pool-cashflow-data-${poolId}.csv`}
+          variant="secondary"
+          icon={IconDownload}
+          small
+          target="_blank"
+        >
+          Download
+        </AnchorButton>
+      </Shelf>
+      <CashflowsChart poolStates={truncatedPoolStates} pool={pool} />
+    </Stack>
   )
 }
