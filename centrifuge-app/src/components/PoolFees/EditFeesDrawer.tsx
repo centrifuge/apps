@@ -215,6 +215,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                               form.setFieldValue(`poolFees.${index}.type`, event.target.value)
                                             }
                                             onBlur={field.onBlur}
+                                            disabled={!poolAdmin || updateFeeTxLoading}
                                             errorMessage={meta.touched && meta.error ? meta.error : undefined}
                                             value={field.value}
                                             options={[
