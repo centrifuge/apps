@@ -2115,7 +2115,11 @@ export function getPoolsModule(inst: Centrifuge) {
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
         const event = events.find(
-          ({ event }) => api.events.poolFees.Charged.is(event) || api.events.poolFees.Added.is(event)
+          ({ event }) =>
+            api.events.poolFees.Charged.is(event) ||
+            api.events.poolFees.Added.is(event) ||
+            api.events.poolFees.Removed.is(event) ||
+            api.events.poolFees.Proposed.is(event)
         )
         return !!event
       })
@@ -3629,6 +3633,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => api.query.poolFees.lastFeeId()),
+      take(1),
       combineLatestWith($api),
       switchMap(([lastFeeId, api]) => {
         const removeSubmittables = remove.map((feeId) => api.tx.poolFees.removeFee([feeId]))

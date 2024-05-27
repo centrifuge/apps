@@ -57,7 +57,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       ?.map((feeChainData) => {
         const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
         return {
-          percentOfNav: parseFloat(feeChainData?.amounts.percentOfNav.toDecimal().toFixed(2)) ?? undefined,
+          percentOfNav: feeChainData?.amounts.percentOfNav.toPercent().toNumber() ?? undefined,
           feeName: feeMetadata?.name || '',
           receivingAddress: feeChainData?.destination || '',
           feeId: feeChainData.id || 0,
@@ -67,11 +67,11 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   }, [poolFees, poolMetadata?.pool?.poolFees])
 
   React.useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && isOpen) {
       form.setValues({ poolFees: initialFormData || [] })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, initialFormData])
+  }, [isLoading, initialFormData, isOpen])
 
   const { execute: updateFeesTx, isLoading: updateFeeTxLoading } = useCentrifugeTransaction(
     'Update fees',
@@ -131,7 +131,6 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             },
           }
         })
-
       updateFeesTx([add, remove, poolId, poolMetadata as PoolMetadata], { account })
     },
   })
