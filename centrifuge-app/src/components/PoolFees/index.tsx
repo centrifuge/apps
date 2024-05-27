@@ -224,7 +224,8 @@ export function PoolFees() {
     }
 
     return activeFees
-  }, [poolMetadata, pool, poolId, changes, applyNewFee])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poolMetadata, pool, poolId, changes, address, poolFees, poolAdmin])
 
   React.useEffect(() => {
     if (drawer === 'edit') {
