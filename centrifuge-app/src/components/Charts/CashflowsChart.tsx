@@ -40,15 +40,18 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
     () =>
       poolStates?.map((day) => {
         const purchases = day.sumBorrowedAmountByPeriod
-          ? new CurrencyBalance(day.sumBorrowedAmountByPeriod, pool.currency.decimals).toDecimal().toNumber()
+          ? new CurrencyBalance(day.sumBorrowedAmountByPeriod, pool.currency.decimals).toFloat()
           : 0
         const principalRepayments = day.sumRepaidAmountByPeriod
-          ? new CurrencyBalance(day.sumRepaidAmountByPeriod, pool.currency.decimals).toDecimal().toNumber()
+          ? new CurrencyBalance(day.sumRepaidAmountByPeriod, pool.currency.decimals).toFloat()
           : 0
         const interest = day.sumInterestRepaidAmountByPeriod
-          ? new CurrencyBalance(day.sumInterestRepaidAmountByPeriod, pool.currency.decimals).toDecimal().toNumber()
+          ? new CurrencyBalance(day.sumInterestRepaidAmountByPeriod, pool.currency.decimals).toFloat()
           : 0
-        return { name: new Date(day.timestamp), purchases, principalRepayments, interest }
+        const fees = day.sumChargedAmountByPeriod
+          ? new CurrencyBalance(day.sumChargedAmountByPeriod, pool.currency.decimals).toFloat()
+          : 0
+        return { name: new Date(day.timestamp), purchases, principalRepayments, interest, fees }
       }) || [],
     [poolStates, pool.currency.decimals]
   )
@@ -59,6 +62,7 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
     totalPurchases: data.reduce((acc, cur) => acc + cur.purchases, 0),
     interest: data.reduce((acc, cur) => acc + cur.interest, 0),
     principalRepayments: data.reduce((acc, cur) => acc + cur.principalRepayments, 0),
+    fees: data.reduce((acc, cur) => acc + cur.fees, 0),
   }
 
   const getXAxisInterval = () => {
@@ -152,8 +156,8 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
             />
             <Bar dataKey="purchases" stackId="a" fill="#001C66" />
             <Bar dataKey="principalRepayments" stackId="b" fill="#A4D5D8" />
-            <Bar dataKey="interest" stackId="b" fill={theme.colors.borderPrimary} />
-            {/* <Bar dataKey="fees" stackId="a" fill={theme.colors.statusCritical} /> */}
+            <Bar dataKey="interest" stackId="b" fill={theme.colors.borderSecondary} />
+            <Bar dataKey="fees" stackId="a" fill={theme.colors.statusCritical} />
           </BarChart>
         </ResponsiveContainer>
       </Box>
@@ -168,6 +172,7 @@ function CustomLegend({
     totalPurchases: number
     principalRepayments: number
     interest: number
+    fees: number
   }
 }) {
   const theme = useTheme()
@@ -195,7 +200,7 @@ function CustomLegend({
           borderLeftWidth="3px"
           pl={1}
           borderLeftStyle="solid"
-          borderLeftColor={theme.colors.borderPrimary}
+          borderLeftColor={theme.colors.borderSecondary}
           gap="4px"
         >
           <Text variant="body3" color="textSecondary" whiteSpace="nowrap">
@@ -205,7 +210,7 @@ function CustomLegend({
             {formatBalance(data.interest, 'USD', 2)}
           </Text>
         </Stack>
-        {/* <Stack
+        <Stack
           borderLeftWidth="3px"
           pl={1}
           borderLeftStyle="solid"
@@ -215,8 +220,8 @@ function CustomLegend({
           <Text variant="body3" color="textSecondary">
             Fees
           </Text>
-          <Text variant="body1">{formatBalance(0, 'USD', 2)}</Text>
-        </Stack> */}
+          <Text variant="body1">{formatBalance(data.fees, 'USD', 2)}</Text>
+        </Stack>
       </Shelf>
     </Shelf>
   )

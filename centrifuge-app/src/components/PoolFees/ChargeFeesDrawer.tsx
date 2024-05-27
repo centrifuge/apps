@@ -8,7 +8,7 @@ import { useLocation, useParams } from 'react-router'
 import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { ButtonGroup } from '../ButtonGroup'
 
 type ChargeFeesProps = {
@@ -19,12 +19,13 @@ type ChargeFeesProps = {
 export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const { search } = useLocation()
   const params = new URLSearchParams(search)
   const feeIndex = params.get('charge')
   const feeMetadata = feeIndex ? poolMetadata?.pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
-  const feeChainData = feeIndex ? pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
+  const feeChainData = feeIndex ? poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
   const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.aum.toDecimal()).div(100)
   const [updateCharge, setUpdateCharge] = React.useState(false)
   const address = useAddress()

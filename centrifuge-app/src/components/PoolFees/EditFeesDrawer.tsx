@@ -4,12 +4,14 @@ import {
   Box,
   Button,
   Drawer,
+  Flex,
   Grid,
   IconButton,
   IconCopy,
   IconMinusCircle,
   IconPlusCircle,
   NumberInput,
+  Select,
   Shelf,
   Stack,
   Text,
@@ -19,11 +21,11 @@ import { Field, FieldArray, FieldProps, Form, FormikProvider, useFormik } from '
 import React from 'react'
 import { useParams } from 'react-router'
 import { Dec } from '../../utils/Decimal'
-import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin, useSuitableAccounts } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
+import { combine, max, positiveNumber, required, substrateAddress } from '../../utils/validation'
 import { ButtonGroup } from '../ButtonGroup'
 
 type ChargeFeesProps = {
@@ -31,31 +33,44 @@ type ChargeFeesProps = {
   isOpen: boolean
 }
 
+type FormValues = {
+  poolFees: {
+    feeName: string
+    percentOfNav: number | ''
+    receivingAddress: string
+    feeId: number | undefined
+    type: 'fixed' | 'chargedUpTo'
+  }[]
+}
+
 export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
   const { data: poolMetadata, isLoading } = usePoolMetadata(pool)
   const poolAdmin = usePoolAdmin(poolId)
   const account = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })[0]
 
   const initialFormData = React.useMemo(() => {
-    return pool.poolFees
-      ?.filter((poolFees) => poolFees.type !== 'fixed')
-      .map((feeChainData) => {
+    return poolFees
+      ?.filter((poolFees) => !('root' in poolFees.editor))
+      ?.map((feeChainData) => {
         const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
         return {
           percentOfNav: parseFloat(feeChainData?.amounts.percentOfNav.toDecimal().toFixed(2)) ?? undefined,
           feeName: feeMetadata?.name || '',
           receivingAddress: feeChainData?.destination || '',
-          feeId: feeChainData?.id || 0,
+          feeId: feeChainData.id || 0,
+          type: feeChainData.type,
         }
       })
-  }, [pool.poolFees, poolMetadata?.pool?.poolFees])
+  }, [poolFees, poolMetadata?.pool?.poolFees])
 
   React.useEffect(() => {
     if (!isLoading) {
       form.setValues({ poolFees: initialFormData || [] })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, initialFormData])
 
   const { execute: updateFeesTx, isLoading: updateFeeTxLoading } = useCentrifugeTransaction(
@@ -63,49 +78,11 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
     (cent) => cent.pools.updateFees
   )
 
-  const form = useFormik<{
-    poolFees: { feeName: string; percentOfNav?: number; receivingAddress: string; feeId: number }[]
-  }>({
+  const form = useFormik<FormValues>({
     initialValues: {
       poolFees: initialFormData || [],
     },
     validateOnChange: false,
-    validate(values) {
-      let errors: { poolFees?: { feeName?: string; percentOfNav?: string; receivingAddress?: string }[] } = {}
-      values.poolFees.forEach((fee, index) => {
-        if (!fee.feeName) {
-          errors.poolFees = errors.poolFees || []
-          errors.poolFees[index] = errors.poolFees[index] || {}
-          errors.poolFees[index].feeName = 'Required'
-        }
-        if (!fee.percentOfNav) {
-          errors.poolFees = errors.poolFees || []
-          errors.poolFees[index] = errors.poolFees[index] || {}
-          errors.poolFees[index].percentOfNav = 'Required'
-        }
-        if (fee.percentOfNav && fee.percentOfNav <= 0) {
-          errors.poolFees = errors.poolFees || []
-          errors.poolFees[index] = errors.poolFees[index] || {}
-          errors.poolFees[index].percentOfNav = 'Must be greater than 0%'
-        }
-        if (fee.percentOfNav && fee.percentOfNav >= 100) {
-          errors.poolFees = errors.poolFees || []
-          errors.poolFees[index] = errors.poolFees[index] || {}
-          errors.poolFees[index].percentOfNav = 'Must be less than 100%'
-        }
-        if (!fee.receivingAddress) {
-          errors.poolFees = errors.poolFees || []
-          errors.poolFees[index] = errors.poolFees[index] || {}
-          errors.poolFees[index].receivingAddress = 'Required'
-        }
-        if (fee.receivingAddress && !isEvmAddress(fee.receivingAddress) && !isSubstrateAddress(fee.receivingAddress)) {
-          errors.poolFees = errors.poolFees || []
-          errors.poolFees[index] = errors.poolFees[index] || {}
-          errors.poolFees[index].receivingAddress = 'Invalid address'
-        }
-      })
-      return errors
-    },
     onSubmit: (values) => {
       if (!poolMetadata) throw new Error('poolMetadata not found')
       // find fees that have been updated so they can be removed (and re-added)
@@ -119,7 +96,8 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
             return (
               initialFee.feeName !== fee?.feeName ||
               parseFloat(initialFee?.percentOfNav?.toString() || '0') !== parseFloat(newPercent) ||
-              initialFee.receivingAddress !== fee?.receivingAddress
+              initialFee.receivingAddress !== fee?.receivingAddress ||
+              initialFee.type !== fee?.type
             )
           })
           .map((initialFee) => initialFee.feeId) || []
@@ -134,7 +112,8 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           return !(
             initialFee?.feeName === fee.feeName &&
             parseFloat(initialFee?.percentOfNav?.toString() || '0') === parseFloat(newPercent) &&
-            initialFee?.receivingAddress === fee.receivingAddress
+            initialFee?.receivingAddress === fee.receivingAddress &&
+            initialFee?.type === fee.type
           )
         })
         .map((fee) => {
@@ -145,7 +124,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
               destination: fee.receivingAddress,
               amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
-              feeType: 'chargedUpTo',
+              feeType: fee.type,
               limit: 'ShareOfPortfolioValuation',
               account: account.actingAddress,
               feePosition: 'Top of waterfall',
@@ -164,9 +143,9 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           <Text variant="heading2">Fee structure</Text>
         </Stack>
         <Shelf px={3} gap={3} alignItems="flex-start" justifyContent="flex-start">
-          <Stack width="100%" borderTop={pool.poolFees ? '0.5px solid' : undefined} borderColor="borderPrimary">
-            {pool.poolFees
-              ?.filter((poolFees) => poolFees.type === 'fixed')
+          <Stack width="100%" borderTop={poolFees ? '0.5px solid' : undefined} borderColor="borderPrimary">
+            {poolFees
+              ?.filter((poolFees) => 'root' in poolFees.editor)
               .map((feeChainData, index) => {
                 const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
                 return (
@@ -200,40 +179,79 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                       <Stack gap={1} justifyContent="flex-start">
                         <Stack gap={3} justifyContent="flex-start">
                           <Text variant="body2" minWidth="250px">
-                            Direct charge
+                            Other fees
                           </Text>
                           {form.values.poolFees.map((values, index) => {
                             return (
-                              <Shelf key={`poolFees.${index}`} gap={4}>
-                                <Stack gap={2} borderBottom="0.5px solid borderPrimary" pb={3} maxWidth="350px">
+                              <Shelf
+                                key={`poolFees.${index}`}
+                                gap={2}
+                                alignItems="flex-start"
+                                borderBottomColor="borderSecondary"
+                                borderBottomWidth={1}
+                                borderBottomStyle="solid"
+                              >
+                                <Stack gap={2} pb={3}>
+                                  <Field name={`poolFees.${index}.feeName`} validate={required()}>
+                                    {({ field, meta }: FieldProps) => {
+                                      return (
+                                        <TextInput
+                                          {...field}
+                                          label="Name"
+                                          disabled={!poolAdmin || updateFeeTxLoading}
+                                          errorMessage={(meta.touched && meta.error) || ''}
+                                        />
+                                      )
+                                    }}
+                                  </Field>
                                   <Shelf gap={2} alignItems="flex-start">
-                                    <Field name={`poolFees.${index}.feeName`}>
-                                      {({ field, meta }: FieldProps) => {
-                                        return (
-                                          <TextInput
-                                            {...field}
-                                            label="Name"
-                                            disabled={!poolAdmin || updateFeeTxLoading}
-                                            errorMessage={(meta.touched && meta.error) || ''}
+                                    <Stack flex="0 1 50%">
+                                      <Field name={`poolFees.${index}.type`}>
+                                        {({ field, form, meta }: FieldProps) => (
+                                          <Select
+                                            name="type"
+                                            label="Fee type"
+                                            onChange={(event) =>
+                                              form.setFieldValue(`poolFees.${index}.type`, event.target.value)
+                                            }
+                                            onBlur={field.onBlur}
+                                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                                            value={field.value}
+                                            options={[
+                                              { label: 'Fixed', value: 'fixed' },
+                                              { label: 'Direct charge', value: 'chargedUpTo' },
+                                            ]}
                                           />
-                                        )
-                                      }}
-                                    </Field>
-                                    <Field name={`poolFees.${index}.percentOfNav`}>
-                                      {({ field, meta }: FieldProps) => {
-                                        return (
-                                          <NumberInput
-                                            {...field}
-                                            label="Max fees in % of NAV"
-                                            symbol="%"
-                                            disabled={!poolAdmin || updateFeeTxLoading}
-                                            errorMessage={(meta.touched && meta.error) || ''}
-                                          />
-                                        )
-                                      }}
-                                    </Field>
+                                        )}
+                                      </Field>
+                                    </Stack>
+                                    <Stack flex="0 1 50%">
+                                      <Field
+                                        name={`poolFees.${index}.percentOfNav`}
+                                        validate={combine(
+                                          required(),
+                                          positiveNumber(),
+                                          max(100, 'Must be less than 100%')
+                                        )}
+                                      >
+                                        {({ field, meta }: FieldProps) => {
+                                          return (
+                                            <NumberInput
+                                              {...field}
+                                              label="Max fees in % of NAV"
+                                              symbol="%"
+                                              disabled={!poolAdmin || updateFeeTxLoading}
+                                              errorMessage={(meta.touched && meta.error) || ''}
+                                            />
+                                          )
+                                        }}
+                                      </Field>
+                                    </Stack>
                                   </Shelf>
-                                  <Field name={`poolFees.${index}.receivingAddress`}>
+                                  <Field
+                                    name={`poolFees.${index}.receivingAddress`}
+                                    validate={combine(required(), substrateAddress())}
+                                  >
                                     {({ field, meta }: FieldProps) => {
                                       return (
                                         <TextInput
@@ -254,15 +272,18 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                     }}
                                   </Field>
                                 </Stack>
-                                <Button
-                                  onClick={() => {
-                                    remove(index)
-                                  }}
-                                  variant="tertiary"
-                                  disabled={!poolAdmin || updateFeeTxLoading}
-                                >
-                                  <IconMinusCircle size="20px" />
-                                </Button>
+                                <Flex flex="0 0 20px" pt="26px">
+                                  <Button
+                                    onClick={() => {
+                                      remove(index)
+                                    }}
+                                    variant="tertiary"
+                                    disabled={!poolAdmin || updateFeeTxLoading}
+                                    small
+                                  >
+                                    <IconMinusCircle size="20px" />
+                                  </Button>
+                                </Flex>
                               </Shelf>
                             )
                           })}
@@ -273,7 +294,13 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                             variant="tertiary"
                             disabled={!poolAdmin || updateFeeTxLoading}
                             onClick={() =>
-                              push({ feeName: '', percentOfNav: undefined, receivingAddress: '', feeId: undefined })
+                              push({
+                                feeName: '',
+                                percentOfNav: '',
+                                receivingAddress: '',
+                                feeId: undefined,
+                                type: 'chargedUpTo',
+                              })
                             }
                           >
                             Add new fee

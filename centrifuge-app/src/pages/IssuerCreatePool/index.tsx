@@ -453,14 +453,13 @@ function CreatePoolForm() {
           amount: Rate.fromPercent(fee.percentOfNav),
           feeType: fee.feeType,
           limit: 'ShareOfPortfolioValuation',
-          feeId: feeId + i,
           account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
           feePosition: fee.feePosition,
         }
       })
-      metadataValues.poolFees = poolFees.map((fee) => ({
+      metadataValues.poolFees = poolFees.map((fee, i) => ({
         name: fee.name,
-        id: fee.feeId,
+        id: feeId + i,
         feePosition: fee.feePosition,
         feeType: fee.feeType,
       }))
