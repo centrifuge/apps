@@ -39,18 +39,13 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
   const data = React.useMemo(
     () =>
       poolStates?.map((day) => {
-        const purchases = day.sumBorrowedAmountByPeriod
-          ? new CurrencyBalance(day.sumBorrowedAmountByPeriod, pool.currency.decimals).toFloat()
-          : 0
-        const principalRepayments = day.sumRepaidAmountByPeriod
-          ? new CurrencyBalance(day.sumRepaidAmountByPeriod, pool.currency.decimals).toFloat()
-          : 0
-        const interest = day.sumInterestRepaidAmountByPeriod
-          ? new CurrencyBalance(day.sumInterestRepaidAmountByPeriod, pool.currency.decimals).toFloat()
-          : 0
-        const fees = day.sumChargedAmountByPeriod
-          ? new CurrencyBalance(day.sumChargedAmountByPeriod, pool.currency.decimals).toFloat()
-          : 0
+        const purchases = new CurrencyBalance(day.sumBorrowedAmountByPeriod, pool.currency.decimals).toFloat()
+        const principalRepayments = new CurrencyBalance(day.sumRepaidAmountByPeriod, pool.currency.decimals).toFloat()
+
+        const interest = new CurrencyBalance(day.sumInterestRepaidAmountByPeriod, pool.currency.decimals).toFloat()
+        const fees =
+          new CurrencyBalance(day.sumChargedAmountByPeriod ?? 0, pool.currency.decimals).toFloat() +
+          new CurrencyBalance(day.sumAccruedAmountByPeriod ?? 0, pool.currency.decimals).toFloat()
         return { name: new Date(day.timestamp), purchases, principalRepayments, interest, fees }
       }) || [],
     [poolStates, pool.currency.decimals]
