@@ -1,10 +1,8 @@
 name: Synpress tests
 
 on:
-  workflow_run:
-    workflows: ['Demo deployments (manual)']
-    types:
-      - completed
+  schedule:
+    - cron: '0 12 * * *'
 
 jobs:
   cypress-run:

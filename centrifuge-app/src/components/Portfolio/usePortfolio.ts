@@ -111,16 +111,18 @@ const getPriceAtDate = (
   day: number,
   today: Date
 ) => {
-  return dailyTrancheStatesByTrancheId[trancheId].slice(0 - rangeValue)?.find((state) => {
-    return (
-      `${new Date(state.timestamp).getMonth()}/${new Date(state.timestamp).getDate()}/${new Date(
-        state.timestamp
-      ).getFullYear()}` ===
-      `${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getMonth()}/${new Date(
-        today.getTime() - day * 1000 * 60 * 60 * 24
-      ).getDate()}/${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getFullYear()}`
-    )
-  })?.tokenPrice
+  return new Price(
+    dailyTrancheStatesByTrancheId[trancheId].slice(0 - rangeValue)?.find((state) => {
+      return (
+        `${new Date(state.timestamp).getMonth()}/${new Date(state.timestamp).getDate()}/${new Date(
+          state.timestamp
+        ).getFullYear()}` ===
+        `${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getMonth()}/${new Date(
+          today.getTime() - day * 1000 * 60 * 60 * 24
+        ).getDate()}/${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getFullYear()}`
+      )
+    })?.tokenPrice ?? Price.fromFloat(1)
+  )
 }
 
 export function usePortfolio(address?: string) {
