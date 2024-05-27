@@ -1,22 +1,21 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, IconAlertCircle, Shelf, Stack, Text } from '@centrifuge/fabric'
+import * as React from 'react'
 import { usePodAuth } from '../utils/usePodAuth'
 
 type Props = {
   message?: string
   buttonLabel?: string
   poolId: string
-  allowPODReadAccess?: boolean
 }
 
-export function PodAuthSection({
+export const PodAuthSection: React.FC<Props> = ({
   message = 'This information is private',
   buttonLabel = 'Authenticate',
   poolId,
-  allowPODReadAccess = true,
-}: Props) {
+}) => {
   const { selectedAccount } = useWallet().substrate
-  const { isAuthing, isAuthed, authError, login } = usePodAuth(poolId, undefined, allowPODReadAccess)
+  const { isAuthing, isAuthed, authError, login } = usePodAuth(poolId)
 
   return isAuthed ? null : (
     <Stack alignItems="center">
