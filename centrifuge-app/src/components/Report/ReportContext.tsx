@@ -1,24 +1,18 @@
-import { RangeOptionValue } from '@centrifuge/fabric'
 import * as React from 'react'
 
 export type GroupBy = 'day' | 'month'
 
-export type Report = 'pool-balance' | 'asset-list' | 'investor-tx' | 'asset-tx' | 'fee-tx' | 'holders'
-
-export type InvestorTxType = 'all' | 'orders' | 'executions' | 'transfers'
+export type Report = 'pool-balance' | 'token-price' | 'asset-list' | 'investor-tx' | 'asset-tx' | 'fee-tx' | 'holders'
 
 export type ReportContextType = {
   csvData?: CsvDataProps
   setCsvData: (data?: CsvDataProps) => void
 
-  startDate: Date
-  setStartDate: (date: Date) => void
+  startDate: string
+  setStartDate: (date: string) => void
 
-  endDate: Date
-  setEndDate: (date: Date) => void
-
-  range: RangeOptionValue
-  setRange: (range: RangeOptionValue) => void
+  endDate: string
+  setEndDate: (date: string) => void
 
   report: Report
   setReport: (report: Report) => void
@@ -26,11 +20,23 @@ export type ReportContextType = {
   groupBy: GroupBy
   setGroupBy: (groupBy: GroupBy) => void
 
+  loanStatus: string
+  setLoanStatus: (status: string) => void
+
+  txType: string
+  setTxType: (type: string) => void
+
   activeTranche?: string
   setActiveTranche: (tranche: string) => void
 
-  investorTxType: InvestorTxType
-  setInvestorTxType: (investorTxType: InvestorTxType) => void
+  address: string
+  setAddress: (type: string) => void
+
+  network: string | number
+  setNetwork: (type: string | number) => void
+
+  loan: string
+  setLoan: (type: string) => void
 }
 
 export type CsvDataProps = {
@@ -38,47 +44,26 @@ export type CsvDataProps = {
   fileName: string
 }
 
-const defaultContext = {
-  csvData: undefined,
-  setCsvData() {},
-
-  startDate: new Date(),
-  setStartDate() {},
-
-  endDate: new Date(),
-  setEndDate() {},
-
-  range: 'last-month' as RangeOptionValue,
-  setRange() {},
-
-  report: 'investor-tx' as Report,
-  setReport() {},
-
-  groupBy: 'month' as GroupBy,
-  setGroupBy() {},
-
-  activeTranche: 'all',
-  setActiveTranche() {},
-
-  investorTxType: 'all' as InvestorTxType,
-  setInvestorTxType() {},
-}
-
-export const ReportContext = React.createContext<ReportContextType>(defaultContext)
+export const ReportContext = React.createContext<ReportContextType>({} as any)
 
 export function ReportContextProvider({ children }: { children: React.ReactNode }) {
   const [csvData, setCsvData] = React.useState<CsvDataProps | undefined>(undefined)
 
   // Global filters
-  const [startDate, setStartDate] = React.useState(defaultContext.startDate)
-  const [endDate, setEndDate] = React.useState(defaultContext.endDate)
-  const [report, setReport] = React.useState(defaultContext.report)
-  const [range, setRange] = React.useState(defaultContext.range)
+  const [startDate, setStartDate] = React.useState(
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  )
+  const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
+  const [report, setReport] = React.useState<Report>('investor-tx')
 
   // Custom filters for specific reports
-  const [groupBy, setGroupBy] = React.useState(defaultContext.groupBy)
-  const [activeTranche, setActiveTranche] = React.useState(defaultContext.activeTranche)
-  const [investorTxType, setInvestorTxType] = React.useState(defaultContext.investorTxType)
+  const [loanStatus, setLoanStatus] = React.useState('all')
+  const [groupBy, setGroupBy] = React.useState<GroupBy>('month')
+  const [activeTranche, setActiveTranche] = React.useState('all')
+  const [txType, setTxType] = React.useState('all')
+  const [address, setAddress] = React.useState('')
+  const [network, setNetwork] = React.useState<string | number>('all')
+  const [loan, setLoan] = React.useState('all')
 
   return (
     <ReportContext.Provider
@@ -89,16 +74,22 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
         setStartDate,
         endDate,
         setEndDate,
-        range,
-        setRange,
         report,
         setReport,
+        loanStatus,
+        setLoanStatus,
+        txType,
+        setTxType,
         groupBy,
         setGroupBy,
         activeTranche,
         setActiveTranche,
-        investorTxType,
-        setInvestorTxType,
+        address,
+        setAddress,
+        network,
+        setNetwork,
+        loan,
+        setLoan,
       }}
     >
       {children}

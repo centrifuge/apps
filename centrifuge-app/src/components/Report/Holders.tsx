@@ -1,6 +1,7 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { Pool, isSameAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
+import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { evmChains } from '../../config'
 import { formatBalance } from '../../utils/formatting'
@@ -8,50 +9,113 @@ import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useHolders } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
-import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import type { TableDataRow } from './index'
 import { copyable } from './utils'
 
-const headers = ['Network', 'Account', 'Position', 'Pending invest order', 'Pending redeem order']
-
 const noop = (v: any) => v
-const cellFormatters = [noop, copyable, noop, noop, noop]
-
-const columns = headers.map((col, index) => ({
-  align: 'left',
-  header: col,
-  cell: (row: TableDataRow) => <Text variant="body2">{cellFormatters[index]((row.value as any)[index])}</Text>,
-}))
 
 export function Holders({ pool }: { pool: Pool }) {
-  const { activeTranche, setCsvData } = React.useContext(ReportContext)
+  const { activeTranche, setCsvData, network, address } = React.useContext(ReportContext)
 
   const utils = useCentrifugeUtils()
   const holders = useHolders(pool.id, activeTranche === 'all' ? undefined : activeTranche)
+
+  const columnConfig = [
+    {
+      header: 'Network',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Account',
+      align: 'left',
+      csvOnly: false,
+      formatter: copyable,
+    },
+    {
+      header: 'Position',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
+    },
+    {
+      header: 'Position currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Pending invest order',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+    },
+    {
+      header: 'Pending invest order currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Pending redeem order',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
+    },
+    {
+      header: 'Pending redeem order currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+  ]
+
+  const columns = columnConfig
+    .map((col, index) => ({
+      align: col.align,
+      header: col.header,
+      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row)}</Text>,
+      csvOnly: col.csvOnly,
+    }))
+    .filter((col) => !col.csvOnly)
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!holders) {
       return []
     }
-
     return holders
       .filter((holder) => !holder.balance.isZero() || !holder.claimableTrancheTokens.isZero())
-      .map((holder) => ({
-        name: '',
-        value: [
-          (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
-          holder.evmAddress || utils.formatAddress(holder.accountId),
-          formatBalance(
-            holder.balance.toDecimal().add(holder.claimableTrancheTokens.toDecimal()),
-            pool.tranches[0].currency // TODO: not hardcode to tranche index 0
-          ),
-          formatBalance(holder.pendingInvestCurrency.toDecimal(), pool.currency),
-          formatBalance(holder.pendingRedeemTrancheTokens.toDecimal(), pool.tranches[0].currency), // TODO: not hardcode to tranche index 0
-        ],
-        heading: false,
-      }))
-  }, [holders])
+      .filter((tx) => {
+        if (!network || network === 'all') return true
+        return network === (tx.chainId || 'centrifuge')
+      })
+      .map((holder) => {
+        const token = pool.tranches.find((t) => t.id === holder.trancheId)!
+        return {
+          name: '',
+          value: [
+            (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
+            holder.evmAddress || utils.formatAddress(holder.accountId),
+            holder.balance.toFloat() + holder.claimableTrancheTokens.toFloat(),
+            token.currency.symbol,
+            holder.pendingInvestCurrency.toFloat(),
+            pool.currency.symbol,
+            holder.pendingRedeemTrancheTokens.toFloat(),
+            token.currency.symbol,
+          ],
+          token,
+          heading: false,
+        }
+      })
+      .filter((row) => {
+        if (!address) return true
+        return isAddress(address) && isSameAddress(address, row.value[1])
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [holders, network, pool, address])
 
   const dataUrl = React.useMemo(() => {
     if (!data.length) {
@@ -60,9 +124,10 @@ export function Holders({ pool }: { pool: Pool }) {
 
     const formatted = data
       .map(({ value }) => value as string[])
-      .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
+      .map((values) => Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`])))
 
     return getCSVDownloadUrl(formatted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   React.useEffect(() => {

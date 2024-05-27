@@ -28,7 +28,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps, showPrime, showOracle } = useDebugFlags()
+  const { showSwaps, showOracle } = useDebugFlags()
   const transactions = useTransactionsByAddress(address)
 
   return (
@@ -63,14 +63,12 @@ export function Menu() {
         </Box>
       )}
 
-      {showPrime && (
-        <Box width="100%">
-          <PageLink to="/prime" stacked={!isLarge}>
-            <IconGlobe size={['iconMedium', 'iconMedium', 'iconSmall']} />
-            Prime
-          </PageLink>
-        </Box>
-      )}
+      <Box width="100%">
+        <PageLink to="/prime" stacked={!isLarge}>
+          <IconGlobe size={['iconMedium', 'iconMedium', 'iconSmall']} />
+          Prime
+        </PageLink>
+      </Box>
 
       <Box width="100%">
         <GovernanceMenu />

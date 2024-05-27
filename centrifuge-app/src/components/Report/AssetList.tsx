@@ -2,40 +2,99 @@ import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoans } from '../../utils/useLoans'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
-import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
+import type { TableDataRow } from './index'
 
-const headers = [
-  'ID',
-  'Status',
-  // 'Collateral value',
-  'Outstanding',
-  'Total financed',
-  'Total repaid',
-  'Financing date',
-  'Maturity date',
-  'Interest rate',
-  // 'Advance rate',
-  // 'PD',
-  // 'LGD',
-  // 'Discount rate',
-]
-
-const columns = headers.map((col, index) => ({
-  align: 'left',
-  header: col,
-  cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-}))
+const noop = (v: any) => v
 
 export function AssetList({ pool }: { pool: Pool }) {
   const loans = useLoans(pool.id) as Loan[]
-  const { setCsvData, startDate, endDate } = React.useContext(ReportContext)
+  const { setCsvData, loanStatus } = React.useContext(ReportContext)
+  const { symbol } = pool.currency
+
+  const columnConfig = [
+    {
+      header: 'ID',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Status',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
+    },
+    {
+      header: 'Outstanding',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    },
+    {
+      header: 'Outstanding currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Total financed',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    },
+    {
+      header: 'Total financed currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Total repaid',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+    },
+    {
+      header: 'Total repaid currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
+      header: 'Financing date',
+      align: 'left',
+      csvOnly: false,
+      formatter: (v: any) => (v !== '-' ? formatDate(v) : v),
+    },
+    {
+      header: 'Maturity date',
+      align: 'left',
+      csvOnly: false,
+      formatter: formatDate,
+    },
+    {
+      header: 'Interest rate',
+      align: 'left',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatPercentage(v, true, undefined, 5) : '-'),
+    },
+  ]
+
+  const columns = columnConfig
+    .map((col, index) => ({
+      align: col.align,
+      header: col.header,
+      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
+      csvOnly: col.csvOnly,
+    }))
+    .filter((col) => !col.csvOnly)
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!loans) {
@@ -48,58 +107,43 @@ export function AssetList({ pool }: { pool: Pool }) {
         name: '',
         value: [
           loan.id,
-          loan.status === 'Created' ? 'New' : loan.status,
-          // 'value' in loan.pricing
-          //   ? formatBalanceAbbreviated(loan.pricing.value.toDecimal(), pool.currency.symbol)
-          //   : '-',
-          'outstandingDebt' in loan
-            ? formatBalanceAbbreviated(loan.outstandingDebt.toDecimal(), pool.currency.symbol)
-            : '-',
-          'totalBorrowed' in loan
-            ? formatBalanceAbbreviated(loan.totalBorrowed.toDecimal(), pool.currency.symbol)
-            : '-',
-          'totalRepaid' in loan ? formatBalanceAbbreviated(loan.totalRepaid.toDecimal(), pool.currency.symbol) : '-',
-          'originationDate' in loan ? formatDate(loan.originationDate) : '-',
-          formatDate(loan.pricing.maturityDate),
-          'interestRate' in loan.pricing ? formatPercentage(loan.pricing.interestRate.toPercent()) : '-',
-          // 'advanceRate' in loan.pricing ? formatPercentage(loan.pricing.advanceRate.toPercent()) : '-',
-          // 'probabilityOfDefault' in loan.pricing
-          //   ? formatPercentage((loan.pricing.probabilityOfDefault as Rate).toPercent())
-          //   : '-',
-          // 'lossGivenDefault' in loan.pricing
-          //   ? formatPercentage((loan.pricing.lossGivenDefault as Rate).toPercent())
-          //   : '-',
-          // 'discountRate' in loan.pricing ? formatPercentage((loan.pricing.discountRate as Rate).toPercent()) : '-',
+          loan.status === 'Closed' ? 'Repaid' : new Date() > new Date(loan.pricing.maturityDate) ? 'Overdue' : 'Active',
+          'outstandingDebt' in loan ? loan.outstandingDebt.toFloat() : '-',
+          symbol,
+          'totalBorrowed' in loan ? loan.totalBorrowed.toFloat() : '-',
+          symbol,
+          'totalRepaid' in loan ? loan.totalRepaid.toFloat() : '-',
+          symbol,
+          'originationDate' in loan ? loan.originationDate : '-',
+          loan.pricing.maturityDate,
+          'interestRate' in loan.pricing ? loan.pricing.interestRate.toPercent().toNumber() : '-',
         ],
         heading: false,
       }))
-  }, [loans, pool.currency.symbol])
+      .filter((row) => (loanStatus === 'all' || !loanStatus ? true : row.value[1] === loanStatus))
+  }, [loans, symbol, loanStatus])
 
-  const dataUrl = React.useMemo(() => {
+  React.useEffect(() => {
     if (!data.length) {
       return
     }
 
-    const formatted = data
-      .map(({ value }) => value as string[])
-      .map((values) => Object.fromEntries(headers.map((_, index) => [headers[index], `"${values[index]}"`])))
-
-    return getCSVDownloadUrl(formatted)
-  }, [data])
-
-  React.useEffect(() => {
-    setCsvData(
-      dataUrl
-        ? {
-            dataUrl,
-            fileName: `${pool.id}-asset-list-${startDate}-${endDate}.csv`,
-          }
-        : undefined
+    const formatted = data.map(({ value: values }) =>
+      Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
     )
+    const dataUrl = getCSVDownloadUrl(formatted)
 
-    return () => setCsvData(undefined)
+    setCsvData({
+      dataUrl,
+      fileName: `${pool.id}-asset-list-${loanStatus.toLowerCase()}.csv`,
+    })
+
+    return () => {
+      setCsvData(undefined)
+      URL.revokeObjectURL(dataUrl)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataUrl, pool.id, startDate, endDate])
+  }, [data])
 
   if (!loans) {
     return <Spinner />

@@ -3,6 +3,7 @@ import { CurrencyBalance, Price } from '../utils/BN'
 export type SubqueryPoolSnapshot = {
   id: string
   timestamp: string
+  value: string
   portfolioValuation: number
   totalReserve: number
   sumChargedAmountByPeriod: string
@@ -25,12 +26,11 @@ export type SubqueryTrancheSnapshot = {
     poolId: string
     trancheId: string
   }
-  tokenSupply?: number | null
-
-  sumOutstandingInvestOrdersByPeriod: number
-  sumOutstandingRedeemOrdersByPeriod: number
-  sumFulfilledInvestOrdersByPeriod: number
-  sumFulfilledRedeemOrdersByPeriod: number
+  tokenSupply: string
+  sumOutstandingInvestOrdersByPeriod: string
+  sumOutstandingRedeemOrdersByPeriod: string
+  sumFulfilledInvestOrdersByPeriod: string
+  sumFulfilledRedeemOrdersByPeriod: string
 }
 
 export type InvestorTransactionType =
@@ -61,13 +61,19 @@ export type SubqueryInvestorTransaction = {
   epochNumber: number
   type: InvestorTransactionType
   hash: string
-  currencyAmount?: CurrencyBalance | number | null
-  tokenAmount?: CurrencyBalance | number | null
-  tokenPrice?: Price | number | null
-  transactionFee?: number | null
+  currencyAmount?: CurrencyBalance | null
+  tokenAmount?: CurrencyBalance | null
+  tokenPrice?: Price | null
+  transactionFee?: string | null
 }
 
 export type AssetTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
+
+export enum AssetType {
+  OnchainCash = 'OnchainCash',
+  OffchainCash = 'OffchainCash',
+  Other = 'Other',
+}
 
 export type SubqueryAssetTransaction = {
   __typename?: 'AssetTransaction'
@@ -75,6 +81,7 @@ export type SubqueryAssetTransaction = {
   timestamp: string
   poolId: string
   accountId: string
+  hash: string
   epochId: string
   type: AssetTransactionType
   amount: CurrencyBalance | undefined
@@ -85,6 +92,7 @@ export type SubqueryAssetTransaction = {
   asset: {
     id: string
     metadata: string
+    type: AssetType
   }
 }
 
@@ -125,6 +133,9 @@ export type SubqueryCurrencyBalances = {
   __typename?: 'CurrencyBalances'
   id: string
   accountId: string
+  currency: {
+    trancheId: string | null
+  }
   account: {
     chainId: string
     evmAddress?: string

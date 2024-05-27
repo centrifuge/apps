@@ -1,28 +1,15 @@
-import { ActiveLoan, addressToHex, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
-import {
-  useAddress,
-  useCentrifugeApi,
-  useCentrifugeQuery,
-  useCentrifugeTransaction,
-} from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, Drawer, IconDownload, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
-import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
-import * as React from 'react'
 import { useParams } from 'react-router'
-import { map } from 'rxjs'
-import { ButtonGroup } from '../../components/ButtonGroup'
-import { DataCol, DataRow, DataTable } from '../../components/DataTable'
 import { LayoutBase } from '../../components/LayoutBase'
-import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
-import { AssetName } from '../../components/LoanList'
 import { PageSummary } from '../../components/PageSummary'
 import { Tooltips } from '../../components/Tooltips'
-import { isSubstrateAddress } from '../../utils/address'
-import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
-import { usePool, usePoolMetadata, usePools } from '../../utils/usePools'
-import { settlementPrice } from '../../utils/validation'
-import { isCashLoan, isExternalLoan } from '../Loan/utils'
+import { useDailyPoolStates, usePool } from '../../utils/usePools'
+
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { Box, Divider, IconClockForward, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
+import React from 'react'
+import { NavManagementAssetTable } from './NavManagementAssetTable'
 import { NavManagementHeader } from './NavManagementHeader'
 
 export default function NavManagementOverviewPage() {
@@ -30,311 +17,137 @@ export default function NavManagementOverviewPage() {
   return (
     <LayoutBase>
       <NavManagementHeader />
-      <NavManagement key={pid} poolId={pid} />
+      <NavManagementPageSummary poolId={pid} />
+      <NavOverviewCard poolId={pid} />
+      <NavManagementAssetTable key={pid} poolId={pid} />
     </LayoutBase>
   )
 }
 
-type FormValues = {
-  feed: {
-    formIndex: number
-    id: string
-    oldValue: number
-    value: number | ''
-    Isin: string
-    quantity: number
-    maturity: string
-  }[]
-  closeEpoch: boolean
-}
-type Row = FormValues['feed'][0] | ActiveLoan | CreatedLoan
+export const NavManagementPageSummary = ({ poolId }: { poolId: string }) => {
+  const pool = usePool(poolId)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const dailyPoolStates = useDailyPoolStates(poolId, new Date(pool.createdAt || today), today)
+  const investments =
+    pool &&
+    dailyPoolStates?.poolStates?.reduce(
+      (acc, state) =>
+        state && state?.sumInvestedAmountByPeriod ? acc.add(new BN(state.sumInvestedAmountByPeriod)) : new BN(0),
+      new BN(0)
+    )
 
-function NavManagement({ poolId }: { poolId: string }) {
-  const allowedPools = usePoolsForWhichAccountIsFeeder()
-  const isFeeder = !!allowedPools?.find((p) => p.id === poolId)
-  const [isEditing, setIsEditing] = React.useState(false)
-  const [isConfirming, setIsConfirming] = React.useState(false)
-
-  const pool = usePool(poolId, false)
-  const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
-    enabled: !!poolId && !!pool,
-  })
-
-  const externalLoans = React.useMemo(
-    () => (allLoans?.filter((l) => isExternalLoan(l) && l.status !== 'Closed') as ExternalLoan[]) ?? [],
-    [allLoans]
-  )
-  const cashLoans =
-    (allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') as (CreatedLoan | ActiveLoan)[]) ?? []
-  const api = useCentrifugeApi()
-
-  const { execute, isLoading } = useCentrifugeTransaction(
-    'Set oracle prices',
-    (cent) => (args: [values: FormValues], options) => {
-      const [values] = args
-      const batch = [
-        ...values.feed
-          .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
-          .map((f) => api.tx.oraclePriceFeed.feed({ Isin: f.Isin }, CurrencyBalance.fromFloat(f.value, 18))),
-        api.tx.oraclePriceCollection.updateCollection(poolId),
-        api.tx.loans.updatePortfolioValuation(poolId),
-      ]
-      if (values.closeEpoch) {
-        batch.push(api.tx.poolSystem.closeEpoch(poolId))
-      }
-      const tx = api.tx.utility.batchAll(batch)
-      return cent.wrapSignAndSend(api, tx, options)
-    }
-  )
-
-  const initialValues = React.useMemo(
-    () => ({
-      feed:
-        externalLoans?.map((l, i) => {
-          let latestOraclePrice = l.pricing.oracle[0]
-          l.pricing.oracle.forEach((price) => {
-            if (price.timestamp > latestOraclePrice.timestamp) {
-              latestOraclePrice = price
-            }
-          })
-          return {
-            formIndex: i,
-            id: l.id,
-            oldValue: latestOraclePrice.value.toFloat(),
-            value: '' as const,
-            Isin: l.pricing.Isin,
-            quantity: l.pricing.outstandingQuantity.toFloat(),
-            maturity: formatDate(l.pricing.maturityDate),
-          }
-        }) ?? [],
-      closeEpoch: false,
-    }),
-    [externalLoans]
-  )
-
-  const form = useFormik<FormValues>({
-    initialValues,
-    onSubmit(values, actions) {
-      execute([values])
-      actions.setSubmitting(false)
-    },
-  })
-
-  React.useEffect(() => {
-    if (isEditing && !isLoading) return
-    form.resetForm()
-    form.setValues(initialValues, false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues, isEditing])
-
-  const newNavExternal = form.values.feed.reduce((acc, cur) => acc + cur.quantity * (cur.value || cur.oldValue), 0)
-  const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
-  const newNav = newNavExternal + newNavCash
-
-  const columns = [
-    {
-      align: 'left',
-      header: 'Asset',
-      cell: (row: Row) =>
-        'oldValue' in row ? (
-          <Shelf gap={1} height={40}>
-            <Thumbnail type="asset" label={row.id} />
-            <Text variant="body2" fontWeight={600}>
-              {row.Isin}
-            </Text>
-          </Shelf>
-        ) : (
-          <Shelf height={40}>
-            <AssetName loan={row} />
-          </Shelf>
-        ),
-    },
-    {
-      align: 'left',
-      header: 'Maturity date',
-      cell: (row: Row) => ('oldValue' in row ? row.maturity : ''),
-    },
-    {
-      align: 'right',
-      header: 'Quantity',
-      cell: (row: Row) => formatBalance('oldValue' in row ? row.quantity : row.outstandingDebt),
-    },
-    {
-      align: 'right',
-      header: 'Asset price',
-      cell: (row: Row) => formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.symbol, 8),
-    },
-    {
-      align: 'right',
-      header: 'New price',
-      cell: (row: Row) =>
-        'oldValue' in row
-          ? (console.log('row.formIndex', row.formIndex),
-            (
-              <Field name={`feed.${row.formIndex}.value`} validate={settlementPrice()}>
-                {({ field, meta, form }: FieldProps) => (
-                  <CurrencyInput
-                    {...field}
-                    placeholder={row.oldValue.toString()}
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    currency={pool?.currency.symbol}
-                    onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
-                  />
-                )}
-              </Field>
-            ))
-          : '',
-    },
-    {
-      align: 'right',
-      header: 'Value',
-      cell: (row: Row) =>
-        'oldValue' in row
-          ? formatBalance(row.quantity * (row.value || row.oldValue), pool?.currency.symbol)
-          : formatBalance(row.outstandingDebt, pool?.currency.symbol),
-    },
-  ]
-
-  if (!isEditing) {
-    columns.splice(4, 1)
-  }
+  const redemptions =
+    pool &&
+    dailyPoolStates?.poolStates?.reduce(
+      (acc, state) =>
+        state && state?.sumRedeemedAmountByPeriod ? acc.add(new BN(state.sumRedeemedAmountByPeriod)) : new BN(0),
+      new BN(0)
+    )
 
   return (
-    <FormikProvider value={form}>
-      <PageSummary
-        data={[
-          {
-            label: <Tooltips type="totalNav" />,
-            value: formatBalance(pool?.nav.latest ?? 0, pool?.currency.symbol),
-          },
-        ]}
-      />
-      <Drawer isOpen={isConfirming} onClose={() => setIsConfirming(false)}>
-        <ButtonGroup>
-          <Button
-            onClick={() => {
-              form.submitForm()
-              setIsConfirming(false)
-            }}
-          >
-            Confirm NAV
-          </Button>
-          <Button variant="secondary" onClick={() => setIsConfirming(false)}>
-            Cancel
-          </Button>
-        </ButtonGroup>
-      </Drawer>
-      <LayoutSection
-        title="Assets"
-        pt={5}
-        headerRight={
-          isEditing ? (
-            <ButtonGroup variant="small" key="editing">
-              <Button variant="secondary" onClick={() => setIsEditing(false)} small>
-                Cancel
-              </Button>
-              <Button
-                small
-                onClick={() => setIsConfirming(true)}
-                loading={isLoading || form.isSubmitting}
-                loadingMessage={isLoading ? 'Pending...' : undefined}
-                disabled={!isFeeder}
-              >
-                Done
-              </Button>
-            </ButtonGroup>
-          ) : (
-            <ButtonGroup variant="small" key="edit">
-              <Button variant="tertiary" small icon={IconDownload}>
-                Download
-              </Button>
-              <Button onClick={() => setIsEditing(true)} small>
-                Edit
-              </Button>
-            </ButtonGroup>
-          )
-        }
-      >
-        <DataTable
-          data={[...cashLoans, ...form.values.feed]}
-          columns={columns}
-          footer={
-            <DataRow>
-              <DataCol align="left">
-                <Text color="accentPrimary" variant="body2">
-                  Total
-                </Text>
-              </DataCol>
-              <DataCol />
-              <DataCol />
-              <DataCol />
-              {isEditing && <DataCol />}
-              <DataCol>
-                <Text color="accentPrimary" variant="body2">
-                  {formatBalance(newNav, pool?.currency.symbol)}
-                </Text>
-              </DataCol>
-            </DataRow>
-          }
-        />
-      </LayoutSection>
-    </FormikProvider>
+    <PageSummary
+      data={[
+        {
+          label: <Tooltips type="totalNav" />,
+          value: formatBalance(pool?.nav.total ?? 0, pool?.currency.symbol, 2),
+        },
+        {
+          label: 'Investments',
+          value: formatBalance(
+            new CurrencyBalance(investments ?? 0, pool?.currency.decimals || 18),
+            pool?.currency.symbol,
+            2
+          ),
+        },
+        {
+          label: 'Redemptions',
+          value: formatBalance(new CurrencyBalance(redemptions ?? 0, pool.currency.decimals), pool?.currency.symbol, 2),
+        },
+      ]}
+    />
   )
 }
 
-function PoolName({ poolId }: { poolId: string }) {
+export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
   const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
-  return metadata?.pool?.name || poolId
-}
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const { poolStates: dailyPoolStates } =
+    useDailyPoolStates(poolId, new Date(new Date(pool.createdAt || today)), today) || {}
 
-function usePoolFeeders() {
-  const api = useCentrifugeApi()
-  const [storedInfo] = useCentrifugeQuery(['oracleCollectionInfos'], () =>
-    api.query.oraclePriceCollection.collectionInfo.entries().pipe(
-      map((data) => {
-        const poolsByFeeder: Record<string, string[]> = {}
-        const feedersByPool: Record<string, { minFeeders: number; valueLifetime: number; feeders: string[] }> = {}
-        data.forEach(([keys, value]) => {
-          const poolId = (keys.toHuman() as string[])[0].replace(/\D/g, '')
-          const info = value.toPrimitive() as any
-          const feeders = info.feeders
-            .filter((f: any) => !!f.system.signed)
-            .map((f: any) => addressToHex(f.system.signed)) as string[]
-
-          feeders.forEach((feeder) => {
-            if (poolsByFeeder[feeder]) {
-              poolsByFeeder[feeder].push(poolId)
-            } else {
-              poolsByFeeder[feeder] = [poolId]
-            }
-          })
-
-          feedersByPool[poolId] = {
-            valueLifetime: info.valueLifetime as number,
-            minFeeders: info.minFeeders as number,
-            feeders,
-          }
-        })
-
-        return {
-          poolsByFeeder,
-          feedersByPool,
-        }
-      })
+  const pendingFees = React.useMemo(() => {
+    return new CurrencyBalance(
+      pool?.poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
+      pool.currency.decimals
     )
+  }, [pool.poolFees, pool.currency.decimals])
+
+  const changeInValuation = React.useMemo(() => {
+    const lastUpdated = pool?.nav.lastUpdated || new Date()
+    const lastUpdatedSumBorrowedAmountByPeriod = dailyPoolStates?.find(
+      (state) => state.timestamp >= lastUpdated
+    )?.sumBorrowedAmountByPeriod
+    const todaySumBorrowedAmountByPeriod = dailyPoolStates?.[0].sumBorrowedAmountByPeriod
+    return lastUpdatedSumBorrowedAmountByPeriod && todaySumBorrowedAmountByPeriod
+      ? new BN(todaySumBorrowedAmountByPeriod).sub(new BN(lastUpdatedSumBorrowedAmountByPeriod))
+      : new BN(0)
+  }, [dailyPoolStates])
+
+  const pendingNav = React.useMemo(() => {
+    return dailyPoolStates && dailyPoolStates?.length
+      ? new BN(dailyPoolStates.reverse()[0].portfolioValuation).add(pool.reserve.total)
+      : new BN(0)
+  }, [dailyPoolStates, pool.reserve.total])
+  return (
+    <Box>
+      <Stack
+        m="22px"
+        p="16px"
+        borderRadius="6px"
+        maxWidth="444px"
+        style={{ background: 'linear-gradient(0deg, #FEFEFE 0%, #FAFAFA 100%)' }}
+      >
+        <Shelf justifyContent="space-between" my={2}>
+          <Text variant="body2" color="textPrimary">
+            Current NAV
+          </Text>
+          <Text variant="body2">{formatBalance(pool?.nav.total, pool.currency.displayName, 2)}</Text>
+        </Shelf>
+        <Divider borderColor="statusInfoBg" />
+        <Shelf justifyContent="space-between" mt={2} mb={1}>
+          <Text variant="body2" color="textPrimary">
+            Change in asset valuation
+          </Text>
+          <Text variant="body2" color="statusOk">
+            {formatBalance(
+              changeInValuation ? new CurrencyBalance(changeInValuation, pool.currency.decimals) : 0,
+              pool.currency.displayName,
+              2
+            )}
+          </Text>
+        </Shelf>
+        <Shelf justifyContent="space-between" mb={2}>
+          <Text variant="body2" color="textPrimary">
+            Pending fees
+          </Text>
+          <Text variant="body2" color="statusCritical">
+            -{formatBalance(pendingFees, pool.currency.displayName, 2)}
+          </Text>
+        </Shelf>
+        <Divider borderColor="statusInfoBg" />
+        <Shelf justifyContent="space-between" my={2}>
+          <Shelf gap={1}>
+            <IconClockForward color="textSelected" size="iconSmall" />
+            <Text variant="body2" color="textSelected">
+              Pending NAV
+            </Text>
+          </Shelf>
+          <Text variant="body2" color="textSelected">
+            {formatBalance(new CurrencyBalance(pendingNav, pool.currency.decimals), pool.currency.displayName, 2)}
+          </Text>
+        </Shelf>
+      </Stack>
+    </Box>
   )
-
-  return {
-    poolsByFeeder: storedInfo?.poolsByFeeder ?? {},
-    feedersByPool: storedInfo?.feedersByPool ?? {},
-  }
-}
-
-export function usePoolsForWhichAccountIsFeeder(address?: string) {
-  const defaultAddress = useAddress('substrate')
-  address ??= defaultAddress
-  const { poolsByFeeder } = usePoolFeeders()
-  const poolIds = (address && isSubstrateAddress(address) && poolsByFeeder[address]) || []
-  return usePools()?.filter((p) => poolIds.includes(p.id))
 }

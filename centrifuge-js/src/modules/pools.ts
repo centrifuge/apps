@@ -11,6 +11,7 @@ import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
   AssetTransactionType,
+  AssetType,
   InvestorTransactionType,
   PoolFeeTransactionType,
   SubqueryAssetTransaction,
@@ -507,6 +508,7 @@ export type ActiveLoan = {
   outstandingPrincipal: CurrencyBalance
   outstandingInterest: CurrencyBalance
   presentValue: CurrencyBalance
+  currentPrice: CurrencyBalance // may not actually be set yet, this is what the price should be
 }
 
 // transformed type for UI
@@ -555,6 +557,7 @@ export type TrancheInput = {
 export type DailyTrancheState = {
   id: string
   price: null | Price
+  tokenSupply: TokenBalance
   fulfilledInvestOrders: CurrencyBalance
   fulfilledRedeemOrders: CurrencyBalance
   outstandingInvestOrders: CurrencyBalance
@@ -569,7 +572,6 @@ export type DailyPoolState = {
   poolValue: CurrencyBalance
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
-
   sumChargedAmountByPeriod: string
   sumBorrowedAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
@@ -741,28 +743,23 @@ export type WriteOffGroup = {
 
 type InvestorTransaction = {
   id: string
-  timestamp: string
+  timestamp: Date
   accountId: string
   trancheId: string
   epochNumber: number
   type: InvestorTransactionType
-  currencyAmount: CurrencyBalance | undefined
-  tokenAmount: CurrencyBalance | undefined
-  tokenPrice: Price | undefined
-  transactionFee: CurrencyBalance | null
+  currencyAmount?: CurrencyBalance
+  tokenAmount?: CurrencyBalance
+  tokenPrice?: Price
+  transactionFee?: CurrencyBalance
   chainId: number
   evmAddress?: string
-}
-
-export enum AssetType {
-  OnchainCash = 'OnchainCash',
-  OffchainCash = 'OffchainCash',
-  Other = 'Other',
+  hash: string
 }
 
 export type AssetTransaction = {
   id: string
-  timestamp: string
+  timestamp: Date
   poolId: string
   accountId: string
   epochId: string
@@ -792,7 +789,7 @@ export type AssetTransaction = {
 
 export type PoolFeeTransaction = {
   id: string
-  timestamp: string
+  timestamp: Date
   epochNumber: string
   type: PoolFeeTransactionType
   amount: CurrencyBalance | undefined
@@ -804,6 +801,7 @@ export type PoolFeeTransaction = {
 type Holder = {
   accountId: string
   chainId: number
+  trancheId: string
   evmAddress?: string
   balance: CurrencyBalance
   pendingInvestCurrency: CurrencyBalance
@@ -897,7 +895,6 @@ export function getPoolsModule(inst: Centrifuge) {
     args: [
       admin: string,
       poolId: string,
-      collectionId: string,
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
@@ -906,7 +903,7 @@ export function getPoolsModule(inst: Centrifuge) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, metadata, fees] = args
+    const [admin, poolId, tranches, currency, maxReserve, metadata, fees] = args
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
         ? {
@@ -2201,6 +2198,7 @@ export function getPoolsModule(inst: Centrifuge) {
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
           sumInterestRepaidAmountByPeriod
+          value
         }
         pageInfo {
           hasNextPage
@@ -2343,27 +2341,18 @@ export function getPoolsModule(inst: Centrifuge) {
         expand(({ trancheSnapshots, endCursor, hasNextPage }) => {
           if (!hasNextPage) return EMPTY
           return getTrancheSnapshotsWithCursor({ poolId }, endCursor, from, to).pipe(
-            map(
-              (
-                response: {
-                  trancheSnapshots: {
-                    nodes: SubqueryTrancheSnapshot[]
-                    pageInfo: { hasNextPage: boolean; endCursor: string }
-                  }
-                } | null
-              ) => {
-                if (response?.trancheSnapshots) {
-                  const { endCursor, hasNextPage } = response.trancheSnapshots.pageInfo
+            map((response) => {
+              if (response?.trancheSnapshots) {
+                const { endCursor, hasNextPage } = response.trancheSnapshots.pageInfo
 
-                  return {
-                    endCursor,
-                    hasNextPage,
-                    trancheSnapshots: [...trancheSnapshots, ...response.trancheSnapshots.nodes],
-                  }
+                return {
+                  endCursor,
+                  hasNextPage,
+                  trancheSnapshots: [...trancheSnapshots, ...response.trancheSnapshots.nodes],
                 }
-                return {}
               }
-            )
+              return {}
+            })
           )
         })
       ),
@@ -2408,6 +2397,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 tranches[tid] = {
                   id: tranche.trancheId,
                   price: tranche.tokenPrice ? new Price(tranche.tokenPrice) : null,
+                  tokenSupply: new TokenBalance(tranche.tokenSupply, poolCurrency.decimals),
                   fulfilledInvestOrders: new CurrencyBalance(
                     tranche.sumFulfilledInvestOrdersByPeriod,
                     poolCurrency.decimals
@@ -2605,6 +2595,7 @@ export function getPoolsModule(inst: Centrifuge) {
               chainId
               evmAddress
             }
+            hash
             poolId
             trancheId
             epochNumber
@@ -2629,7 +2620,6 @@ export function getPoolsModule(inst: Centrifuge) {
     return combineLatest([$query, getPoolCurrency([poolId])]).pipe(
       switchMap(([queryData, currency]) => {
         const currencyDecimals = currency.decimals
-
         return [
           queryData?.investorTransactions.nodes.map((tx) => {
             return {
@@ -2638,15 +2628,16 @@ export function getPoolsModule(inst: Centrifuge) {
               accountId: tx.accountId,
               chainId: Number(tx.account.chainId),
               evmAddress: tx.account.evmAddress,
-              trancheId: tx.trancheId,
+              trancheId: tx.trancheId.split('-')[1],
               epochNumber: tx.epochNumber,
               type: tx.type as InvestorTransactionType,
               currencyAmount: tx.currencyAmount ? new CurrencyBalance(tx.currencyAmount, currencyDecimals) : undefined,
               tokenAmount: tx.tokenAmount ? new CurrencyBalance(tx.tokenAmount, currencyDecimals) : undefined,
               tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
               transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
-            }
-          }) as unknown as InvestorTransaction[],
+              hash: tx.hash,
+            } satisfies InvestorTransaction
+          }),
         ]
       })
     )
@@ -2711,7 +2702,7 @@ export function getPoolsModule(inst: Centrifuge) {
           principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
           interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
-        })) as unknown as AssetTransaction[]
+        })) satisfies AssetTransaction[]
       })
     )
   }
@@ -2754,14 +2745,17 @@ export function getPoolsModule(inst: Centrifuge) {
     return $query.pipe(
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
       map(([data, currency]) => {
-        return data!.poolFeeTransactions.nodes.map((tx) => ({
-          ...tx,
-          amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
-          timestamp: new Date(`${tx.timestamp}+00:00`),
-          poolFee: {
-            feeId: Number(tx.poolFee.feeId),
-          },
-        })) as unknown as PoolFeeTransaction[]
+        return data!.poolFeeTransactions.nodes.map(
+          (tx) =>
+            ({
+              ...tx,
+              amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
+              timestamp: new Date(`${tx.timestamp}+00:00`),
+              poolFee: {
+                feeId: Number(tx.poolFee.feeId),
+              },
+            } satisfies PoolFeeTransaction)
+        )
       })
     )
   }
@@ -2781,6 +2775,7 @@ export function getPoolsModule(inst: Centrifuge) {
               }) {
             nodes {
               accountId
+              trancheId
               account {
                 chainId
                 evmAddress
@@ -2804,6 +2799,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 chainId
                 evmAddress
               }
+              currency {
+                trancheId
+              }
               currencyId
               amount
             }
@@ -2822,32 +2820,30 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
       map(([data, currency]) => {
         // TODO: this should be a map by account ID + tranche ID
-        const currencyBalancesByAccountId = data!.currencyBalances.nodes.reduce((obj, balance) => {
-          if (balance.accountId in obj) obj[balance.accountId].push(balance)
-          else obj[balance.accountId] = [balance]
-          return obj
-        }, {} as any)
+        const currencyBalancesByAccountId: Record<string, SubqueryCurrencyBalances> = {}
+        data!.currencyBalances.nodes.forEach((balance) => {
+          currencyBalancesByAccountId[`${balance.accountId}-${balance.currency.trancheId?.split('-')[1]}`] = balance
+        })
 
-        return data!.trancheBalances.nodes.map((balance) => ({
-          accountId: balance.accountId,
-          chainId: Number(balance.account?.chainId || 2031),
-          evmAddress: balance.account?.evmAddress,
-          balance: new CurrencyBalance(
-            balance.accountId in currencyBalancesByAccountId
-              ? currencyBalancesByAccountId[balance.accountId].reduce(
-                  (sum: BN, balance: SubqueryCurrencyBalances) => sum.add(new BN(balance.amount)),
-                  new BN(0)
-                )
-              : '0',
-            currency.decimals
-          ),
-          pendingInvestCurrency: new CurrencyBalance(balance.pendingInvestCurrency, currency.decimals),
-          claimableTrancheTokens: new CurrencyBalance(balance.claimableTrancheTokens, currency.decimals),
-          sumClaimedTrancheTokens: new CurrencyBalance(balance.sumClaimedTrancheTokens, currency.decimals),
-          pendingRedeemTrancheTokens: new CurrencyBalance(balance.pendingRedeemTrancheTokens, currency.decimals),
-          claimableCurrency: new CurrencyBalance(balance.claimableCurrency, currency.decimals),
-          sumClaimedCurrency: new CurrencyBalance(balance.sumClaimedCurrency, currency.decimals),
-        })) as unknown as Holder[]
+        return data!.trancheBalances.nodes.map(
+          (balance) =>
+            ({
+              accountId: balance.accountId,
+              chainId: Number(balance.account?.chainId ?? 0),
+              trancheId: balance.trancheId.split('-')[1],
+              evmAddress: balance.account?.evmAddress,
+              balance: new CurrencyBalance(
+                currencyBalancesByAccountId[`${balance.accountId}-${balance.trancheId.split('-')[1]}`]?.amount ?? 0,
+                currency.decimals
+              ),
+              pendingInvestCurrency: new CurrencyBalance(balance.pendingInvestCurrency, currency.decimals),
+              claimableTrancheTokens: new CurrencyBalance(balance.claimableTrancheTokens, currency.decimals),
+              sumClaimedTrancheTokens: new CurrencyBalance(balance.sumClaimedTrancheTokens, currency.decimals),
+              pendingRedeemTrancheTokens: new CurrencyBalance(balance.pendingRedeemTrancheTokens, currency.decimals),
+              claimableCurrency: new CurrencyBalance(balance.claimableCurrency, currency.decimals),
+              sumClaimedCurrency: new CurrencyBalance(balance.sumClaimedCurrency, currency.decimals),
+            } satisfies Holder)
+        )
       })
     )
   }
@@ -3180,6 +3176,7 @@ export function getPoolsModule(inst: Centrifuge) {
             presentValue: CurrencyBalance
             outstandingPrincipal: CurrencyBalance
             outstandingInterest: CurrencyBalance
+            currentPrice: CurrencyBalance
           }
         > = {}
 
@@ -3189,6 +3186,7 @@ export function getPoolsModule(inst: Centrifuge) {
             presentValue: new CurrencyBalance(data.presentValue, currency.decimals),
             outstandingPrincipal: new CurrencyBalance(data.outstandingPrincipal, currency.decimals),
             outstandingInterest: new CurrencyBalance(data.outstandingInterest, currency.decimals),
+            currentPrice: new CurrencyBalance(data.currentPrice ?? 0, currency.decimals),
           }
         })
 
@@ -3340,6 +3338,7 @@ export function getPoolsModule(inst: Centrifuge) {
               outstandingPrincipal: portfolio.outstandingPrincipal,
               outstandingInterest: portfolio.outstandingInterest,
               presentValue: portfolio.presentValue,
+              currentPrice: portfolio.currentPrice,
             }
           }
         )

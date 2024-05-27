@@ -223,7 +223,6 @@ function CreatePoolForm() {
           aoProxy: string,
           adminProxy: string,
           poolId: string,
-          collectionId: string,
           tranches: TrancheInput[],
           currency: CurrencyKey,
           maxReserve: BN,
@@ -232,7 +231,7 @@ function CreatePoolForm() {
         ],
         options
       ) => {
-        const [transferToMultisig, aoProxy, adminProxy, , , , , , { adminMultisig }] = args
+        const [transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
         const poolArgs = args.slice(2) as any
         return combineLatest([
@@ -403,7 +402,6 @@ function CreatePoolForm() {
       const currency = currencies.find((c) => c.symbol === values.currency)!
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
-      const collectionId = await centrifuge.nfts.getAvailableCollectionId()
       if (!values.poolIcon || !values.executiveSummary) {
         return
       }
@@ -478,7 +476,6 @@ function CreatePoolForm() {
               aoProxy,
               adminProxy,
               poolId,
-              collectionId,
               tranches,
               currency.key,
               CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
