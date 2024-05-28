@@ -1,25 +1,18 @@
 import { CurrencyBalance, Price } from '../utils/BN'
 
 export type SubqueryPoolSnapshot = {
-  __typename?: 'PoolSnapshot'
   id: string
   timestamp: string
   value: string
-  portfolioValuation: string
-  totalReserve: string
-  availableReserve: string
-  maxReserve: string
-  totalDebt?: string | null
-  totalBorrowed?: string | null
-  totalRepaid?: string | null
-  totalInvested?: string | null
-  totalRedeemed?: string | null
-  sumBorrowedAmount?: string | null
-  sumBorrowedAmountByPeriod?: string | null
-  sumInterestRepaidAmountByPeriod?: string | null
-  sumRepaidAmountByPeriod?: string | null
-  sumInvestedAmountByPeriod?: string | null
-  sumRedeemedAmountByPeriod?: string | null
+  portfolioValuation: number
+  totalReserve: number
+  sumChargedAmountByPeriod: string | null
+  sumAccruedAmountByPeriod: string | null
+  sumBorrowedAmountByPeriod: string
+  sumInterestRepaidAmountByPeriod: string
+  sumRepaidAmountByPeriod: string
+  sumInvestedAmountByPeriod: string
+  sumRedeemedAmountByPeriod: string
   blockNumber: number
 }
 
