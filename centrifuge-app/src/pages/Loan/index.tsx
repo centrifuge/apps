@@ -7,11 +7,13 @@ import {
   TinlakeLoan,
 } from '@centrifuge/centrifuge-js'
 import {
+  AnchorButton,
   Box,
   Button,
   Drawer,
   Flex,
   IconChevronLeft,
+  IconDownload,
   Shelf,
   Stack,
   Text,
@@ -22,6 +24,7 @@ import {
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { AssetSummary } from '../../components/AssetSummary'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LoadBoundary } from '../../components/LoadBoundary'
@@ -36,12 +39,13 @@ import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
 import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
+import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset } from '../../utils/usePermissions'
 import { usePodDocument } from '../../utils/usePodDocument'
-import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
+import { useAssetSnapshots, useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
 import { HoldingsValues } from './HoldingsValues'
@@ -107,6 +111,23 @@ function Loan() {
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
+
+  const { assetSnapshots: showAssetSnapshots } = useDebugFlags()
+  const assetSnapshots = useAssetSnapshots(poolId, loanId)
+
+  const dataUrl: any = React.useMemo(() => {
+    if (!assetSnapshots || !assetSnapshots?.length) {
+      return undefined
+    }
+
+    const formatted = assetSnapshots.map((snapshot) => {
+      return {
+        ...snapshot,
+      }
+    })
+
+    return getCSVDownloadUrl(formatted as any)
+  }, [assetSnapshots, pool.currency.symbol])
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -292,7 +313,22 @@ function Loan() {
             ) : null}
 
             {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
-              <PageSection title={<Box>Holdings</Box>}>
+              <PageSection
+                title={<Box>Holdings</Box>}
+                headerRight={
+                  showAssetSnapshots && (
+                    <AnchorButton
+                      href={dataUrl}
+                      download={`asset-${loanId}-timeseries.csv`}
+                      variant="secondary"
+                      icon={IconDownload}
+                      small
+                    >
+                      Timeseries
+                    </AnchorButton>
+                  )
+                }
+              >
                 <Shelf gap={6} flexWrap="wrap">
                   <HoldingsValues
                     pool={pool as Pool}

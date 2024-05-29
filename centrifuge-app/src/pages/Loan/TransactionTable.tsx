@@ -58,62 +58,66 @@ export const TransactionTable = ({
       return 0
     })
 
-    return sortedTransactions.map((transaction, index, array) => {
-      const termDays = originationDate
-        ? daysBetween(originationDate, maturityDate)
-        : daysBetween(new Date(), maturityDate)
-      const yearsBetweenDates = termDays / 365
+    return sortedTransactions
+      .filter((transaction) => {
+        return !transaction.amount?.isZero()
+      })
+      .map((transaction, index, array) => {
+        const termDays = originationDate
+          ? daysBetween(originationDate, maturityDate)
+          : daysBetween(new Date(), maturityDate)
+        const yearsBetweenDates = termDays / 365
 
-      const faceValue =
-        transaction.quantity && (pricing as ExternalPricingInfo).notional
-          ? new CurrencyBalance(transaction.quantity, 18)
-              .toDecimal()
-              .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-          : null
+        const faceValue =
+          transaction.quantity && (pricing as ExternalPricingInfo).notional
+            ? new CurrencyBalance(transaction.quantity, 18)
+                .toDecimal()
+                .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+            : null
 
-      return {
-        type: transaction.type,
-        amount: transaction.amount,
-        quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
-        transactionDate: transaction.timestamp,
-        yieldToMaturity:
-          transaction.amount && faceValue && transaction.type !== 'REPAID'
-            ? Dec(2)
-                .mul(faceValue?.sub(transaction.amount.toDecimal()))
-                .div(Dec(yearsBetweenDates).mul(faceValue.add(transaction.amount.toDecimal())))
-                .mul(100)
+        return {
+          type: transaction.type,
+          amount: transaction.amount,
+          quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
+          transactionDate: transaction.timestamp,
+          yieldToMaturity:
+            transaction.amount && faceValue && transaction.type !== 'REPAID'
+              ? Dec(2)
+                  .mul(faceValue?.sub(transaction.amount.toDecimal()))
+                  .div(Dec(yearsBetweenDates).mul(faceValue.add(transaction.amount.toDecimal())))
+                  .mul(100)
+              : null,
+          settlePrice: transaction.settlementPrice
+            ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
             : null,
-        settlePrice: transaction.settlementPrice
-          ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
-          : null,
-        faceValue,
-        position: array.slice(0, index + 1).reduce((sum, trx) => {
-          if (trx.type === 'BORROWED') {
-            sum = sum.add(
-              trx.quantity
-                ? new CurrencyBalance(trx.quantity, 18)
-                    .toDecimal()
-                    .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-                : trx.amount
-                ? trx.amount.toDecimal()
-                : Dec(0)
-            )
-          }
-          if (trx.type === 'REPAID') {
-            sum = sum.sub(
-              trx.quantity
-                ? new CurrencyBalance(trx.quantity, 18)
-                    .toDecimal()
-                    .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-                : trx.amount
-                ? trx.amount.toDecimal()
-                : Dec(0)
-            )
-          }
-          return sum
-        }, Dec(0)),
-      }
-    })
+          faceValue,
+          position: array.slice(0, index + 1).reduce((sum, trx) => {
+            if (trx.type === 'BORROWED') {
+              sum = sum.add(
+                trx.quantity
+                  ? new CurrencyBalance(trx.quantity, 18)
+                      .toDecimal()
+                      .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+                  : trx.amount
+                  ? trx.amount.toDecimal()
+                  : Dec(0)
+              )
+            }
+            if (trx.type === 'REPAID') {
+              sum = sum.sub(
+                trx.quantity
+                  ? new CurrencyBalance(trx.quantity, 18)
+                      .toDecimal()
+                      .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+                  : trx.amount
+                  ? trx.amount.toDecimal()
+                  : Dec(0)
+              )
+            }
+            return sum
+          }, Dec(0)),
+        }
+      })
   }, [transactions, decimals, pricing])
 
   const getStatusChipType = (type: AssetTransactionType) => {

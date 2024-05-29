@@ -2,7 +2,7 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
@@ -59,7 +59,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
               {(row.value as any)[index] !== '' &&
                 (row.formatter
                   ? row.formatter((row.value as any)[index])
-                  : formatBalance((row.value as any)[index], pool.currency.symbol, 5))}
+                  : formatBalance((row.value as any)[index], pool.currency.symbol, 2))}
             </Text>
           ),
           width: '200px',
@@ -81,25 +81,17 @@ export function PoolBalance({ pool }: { pool: Pool }) {
         heading: false,
       },
       {
-        name: 'NAV change',
-        value:
-          poolStates?.map((state, i) => {
-            if (i === 0) return ''
-            const prev = poolStates[i - 1].poolValue.toFloat()
-            const cur = state.poolValue.toFloat()
-            const change = (cur / prev - 1) * 100
-            return change < 0 ? change : `+${change}`
-          }) || [],
-        heading: false,
-        formatter: (v: any) => `${v < 0 ? '' : '+'}${formatPercentage(v, true, {}, 5)}`,
-      },
-      {
-        name: 'Asset value',
+        name: '+ Asset value',
         value: poolStates?.map((state) => state.poolValue.toFloat() - state.poolState.totalReserve.toFloat()) || [],
         heading: false,
       },
+      // {
+      //   name: '+ Offchain cash',
+      //   value: poolStates?.map((state) => state.poolState.cashAssetValue.toFloat()) || [],
+      //   heading: false,
+      // },
       {
-        name: 'Onchain reserve',
+        name: '+ Onchain reserve',
         value: poolStates?.map((state) => state.poolState.totalReserve.toFloat()) || [],
         heading: false,
       },

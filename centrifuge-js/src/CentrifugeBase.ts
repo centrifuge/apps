@@ -110,8 +110,8 @@ const parachainTypes = {
   },
   PoolFeesList: 'Vec<PoolFeesOfBucket>',
   PoolFeesOfBucket: {
-    bucket: 'PoolFeeBucket',
-    fees: 'Vec<PoolFee>',
+    bucket: 'CfgTraitsFeePoolFeeBucket',
+    fees: 'Vec<CfgTypesPoolsPoolFee>',
   },
   PriceCollectionInput: {
     _enum: ['Empty', 'Custom(BoundedBTreeMap<OracleKey, Balance, MaxActiveLoansPerPool>)', 'FromRegistry'],

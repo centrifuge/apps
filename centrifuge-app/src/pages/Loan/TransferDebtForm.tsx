@@ -81,8 +81,8 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       let interest = new BN(borrowAmount)
       let principal = new BN(0)
       if (interest.gt(outstandingInterest)) {
-        interest = outstandingInterest
         principal = interest.sub(outstandingInterest)
+        interest = outstandingInterest
       }
       let repay: any = { principal, interest }
       if (isExternalLoan(selectedLoan)) {

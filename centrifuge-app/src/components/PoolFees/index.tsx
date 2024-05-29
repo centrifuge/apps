@@ -7,7 +7,7 @@ import { useHistory, useLocation, useParams } from 'react-router'
 import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { PageSection } from '../PageSection'
 import { PageSummary } from '../PageSummary'
@@ -50,6 +50,7 @@ type PoolFeeChange = {
 export function PoolFees() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const { search, pathname } = useLocation()
   const { push } = useHistory()
@@ -140,7 +141,7 @@ export function PoolFees() {
         )
       },
     },
-    ...(!!poolAdmin || pool?.poolFees?.map((fee) => addressToHex(fee.destination)).includes(address! as `0x${string}`)
+    ...(!!poolAdmin || poolFees?.map((fee) => addressToHex(fee.destination)).includes(address! as `0x${string}`)
       ? [
           {
             align: 'left',
@@ -153,7 +154,7 @@ export function PoolFees() {
 
   const data = React.useMemo(() => {
     const activeFees =
-      pool.poolFees
+      poolFees
         ?.filter((feeChainData) => poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id))
         ?.map((feeChainData, index) => {
           const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === feeChainData.id)
@@ -223,7 +224,8 @@ export function PoolFees() {
     }
 
     return activeFees
-  }, [poolMetadata, pool, poolId, changes, applyNewFee])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poolMetadata, pool, poolId, changes, address, poolFees, poolAdmin])
 
   React.useEffect(() => {
     if (drawer === 'edit') {
@@ -238,7 +240,7 @@ export function PoolFees() {
       label: <Tooltips type="totalPendingFees" />,
       value: formatBalance(
         new CurrencyBalance(
-          pool.poolFees?.reduce((acc, fee) => acc.add(fee.amounts.pending), new BN(0)) || new BN(0),
+          poolFees?.reduce((acc, fee) => acc.add(fee.amounts.pending), new BN(0)) || new BN(0),
           pool.currency.decimals
         ) || 0,
         pool.currency.symbol,

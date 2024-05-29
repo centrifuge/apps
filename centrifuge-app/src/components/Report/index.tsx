@@ -5,7 +5,7 @@ import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
 import { AssetTransactions } from './AssetTransactions'
 import { FeeTransactions } from './FeeTransactions'
-import { Holders } from './Holders'
+import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
 import { PoolBalance } from './PoolBalance'
 import { ReportContext } from './ReportContext'
@@ -24,7 +24,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
     <Box pb={6}>
       <Shelf p={2} justifyContent="space-between">
         <Text as="span" variant="body3" color="textSecondary">
-          {!['holders', 'asset-list'].includes(report) && (
+          {!['investor-list', 'asset-list'].includes(report) && (
             <>
               {startDate ? formatDate(startDate) : 'The beginning of time'}
               {' - '}
@@ -42,7 +42,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'pool-balance' && <PoolBalance pool={pool} />}
         {report === 'token-price' && <TokenPrice pool={pool} />}
         {report === 'asset-list' && <AssetList pool={pool} />}
-        {report === 'holders' && <Holders pool={pool} />}
+        {report === 'investor-list' && <InvestorList pool={pool} />}
         {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
         {report === 'asset-tx' && <AssetTransactions pool={pool} />}
         {report === 'fee-tx' && <FeeTransactions pool={pool} />}

@@ -1,25 +1,19 @@
 import { CurrencyBalance, Price } from '../utils/BN'
 
 export type SubqueryPoolSnapshot = {
-  __typename?: 'PoolSnapshot'
   id: string
   timestamp: string
   value: string
-  portfolioValuation: string
-  totalReserve: string
-  availableReserve: string
-  maxReserve: string
-  totalDebt?: string | null
-  totalBorrowed?: string | null
-  totalRepaid?: string | null
-  totalInvested?: string | null
-  totalRedeemed?: string | null
-  sumBorrowedAmount?: string | null
-  sumBorrowedAmountByPeriod?: string | null
-  sumInterestRepaidAmountByPeriod?: string | null
-  sumRepaidAmountByPeriod?: string | null
-  sumInvestedAmountByPeriod?: string | null
-  sumRedeemedAmountByPeriod?: string | null
+  portfolioValuation: number
+  totalReserve: number
+  cashAssetValue: number
+  sumPoolFeesChargedAmountByPeriod: string | null
+  sumPoolFeesAccruedAmountByPeriod: string | null
+  sumBorrowedAmountByPeriod: string
+  sumInterestRepaidAmountByPeriod: string
+  sumRepaidAmountByPeriod: string
+  sumInvestedAmountByPeriod: string
+  sumRedeemedAmountByPeriod: string
   blockNumber: number
 }
 
@@ -75,7 +69,7 @@ export type SubqueryInvestorTransaction = {
   transactionFee?: string | null
 }
 
-export type AssetTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
+export type AssetTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED' | 'CASH_TRANSFER'
 
 export enum AssetType {
   OnchainCash = 'OnchainCash',
@@ -100,8 +94,41 @@ export type SubqueryAssetTransaction = {
   asset: {
     id: string
     metadata: string
+    name: string
     type: AssetType
   }
+  fromAsset?: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+  toAsset?: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+}
+
+export type SubqueryAssetSnapshot = {
+  __typename?: 'AssetSnapshot'
+  asset: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+  timestamp: string
+  presentValue: string
+  outstandingPrincipal: string
+  outstandingInterest: string
+  outstandingDebt: string
+  outstandingQuantity: string
+  totalBorrowed: string
+  totalRepaidPrincipal: string
+  totalRepaidInterest: string
+  totalRepaidUnscheduled: string
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'

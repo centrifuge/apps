@@ -42,7 +42,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     {
       header: 'Date',
       align: 'left',
-      csvOnly: true,
+      csvOnly: false,
       formatter: formatDate,
     },
     {
@@ -54,13 +54,13 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     {
       header: 'Currency amount',
       align: 'left',
-      csvOnly: true,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
     },
     {
       header: 'Currency',
       align: 'right',
-      csvOnly: false,
+      csvOnly: true,
       formatter: noop,
     },
     {
@@ -97,7 +97,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
         name: '',
         value: [
           tx.asset.id.split('-').at(-1)!,
-          metadataByUrl[tx.asset.metadata]?.name ?? '',
+          metadataByUrl[tx.asset.metadata]?.name ?? `Asset ${tx.asset.id.split('-').at(-1)!}`,
           tx.epochId.split('-').at(-1)!,
           tx.timestamp.toISOString(),
           formatAssetTransactionType(tx.type),
