@@ -58,7 +58,7 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
 
   // Global filters
   const [startDate, setStartDate] = React.useState(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10)
   )
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
   const [report, setReport] = React.useState<Report>('investor-tx')
