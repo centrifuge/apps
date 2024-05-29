@@ -12,6 +12,12 @@ import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
 
 const noop = (v: any) => v
+const valuationLabels = {
+  discountedCashFlow: 'Non-fungible asset - DCF',
+  outstandingDebt: 'Non-fungible asset - at par',
+  oracle: 'Fungible asset - external pricing',
+  cash: 'Cash',
+}
 
 export function AssetList({ pool }: { pool: Pool }) {
   const loans = useLoans(pool.id) as Loan[]
@@ -32,10 +38,22 @@ export function AssetList({ pool }: { pool: Pool }) {
       formatter: noop,
     },
     {
+      header: 'Value',
+      align: 'right',
+      csvOnly: false,
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
+    },
+    {
+      header: 'Value currency',
+      align: 'left',
+      csvOnly: true,
+      formatter: noop,
+    },
+    {
       header: 'Outstanding',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
     },
     {
       header: 'Outstanding currency',
@@ -47,7 +65,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       header: 'Total financed',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
     },
     {
       header: 'Total financed currency',
@@ -59,7 +77,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       header: 'Total repaid',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
     },
     {
       header: 'Total repaid currency',
@@ -83,7 +101,13 @@ export function AssetList({ pool }: { pool: Pool }) {
       header: 'Interest rate',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatPercentage(v, true, undefined, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatPercentage(v, true, undefined, 2) : '-'),
+    },
+    {
+      header: 'Valuation method',
+      align: 'left',
+      csvOnly: false,
+      formatter: noop,
     },
   ]
 
@@ -107,7 +131,15 @@ export function AssetList({ pool }: { pool: Pool }) {
         name: '',
         value: [
           loan.id,
-          loan.status === 'Closed' ? 'Repaid' : new Date() > new Date(loan.pricing.maturityDate) ? 'Overdue' : 'Active',
+          loan.status === 'Closed'
+            ? 'Repaid'
+            : new Date() > new Date(loan.pricing.maturityDate)
+            ? loan.outstandingDebt.isZero()
+              ? 'Repaid'
+              : 'Overdue'
+            : 'Active',
+          'presentValue' in loan ? loan.presentValue.toFloat() : '-',
+          symbol,
           'outstandingDebt' in loan ? loan.outstandingDebt.toFloat() : '-',
           symbol,
           'totalBorrowed' in loan ? loan.totalBorrowed.toFloat() : '-',
@@ -117,6 +149,7 @@ export function AssetList({ pool }: { pool: Pool }) {
           'originationDate' in loan ? loan.originationDate : '-',
           loan.pricing.maturityDate,
           'interestRate' in loan.pricing ? loan.pricing.interestRate.toPercent().toNumber() : '-',
+          valuationLabels[loan.pricing.valuationMethod],
         ],
         heading: false,
       }))

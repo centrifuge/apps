@@ -55,12 +55,12 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       header: 'Currency amount',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
     },
     {
       header: 'Currency',
       align: 'right',
-      csvOnly: false,
+      csvOnly: true,
       formatter: noop,
     },
     {

@@ -71,7 +71,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       align: 'right',
       sortable: true,
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
     },
     {
       header: 'Currency',
@@ -85,7 +85,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       align: 'right',
       sortable: true,
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[9], 5) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row[9], 2) : '-'),
     },
     {
       header: 'Token currency',
@@ -99,7 +99,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       align: 'right',
       sortable: true,
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 6) : '-'),
     },
     {
       header: 'Price currency',

@@ -39,7 +39,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
       header: 'Position',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
     },
     {
       header: 'Position currency',
@@ -51,7 +51,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
       header: 'Pending invest order',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
     },
     {
       header: 'Pending invest order currency',
@@ -63,7 +63,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
       header: 'Pending redeem order',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
     },
     {
       header: 'Pending redeem order currency',
