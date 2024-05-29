@@ -2681,16 +2681,19 @@ export function getPoolsModule(inst: Centrifuge) {
             asset {
               id
               metadata
+              name
               type
             }
             fromAsset {
               id
               metadata
+              name
               type
             }
             toAsset {
               id
               metadata
+              name
               type
             }
           }
@@ -2772,7 +2775,7 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getHolders(args: [poolId: string, trancheId?: string]) {
+  function getInvestors(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
     const $query = inst.getApi().pipe(
       switchMap(() => {
@@ -3808,7 +3811,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyTrancheStates,
     getTransactionsByAddress,
     getDailyTVL,
-    getHolders,
+    getInvestors,
   }
 }
 
