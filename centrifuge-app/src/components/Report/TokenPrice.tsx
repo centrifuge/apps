@@ -86,7 +86,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
               state.tranches[token.id]?.price ? state.tranches[token.id].price!.toFloat() : 1
             ) || [],
           heading: false,
-          formatter: (v: any) => formatBalance(v, pool.currency.symbol, 5),
+          formatter: (v: any) => formatBalance(v, pool.currency.symbol, 6),
         })) || []),
       {
         name: 'Token supply',

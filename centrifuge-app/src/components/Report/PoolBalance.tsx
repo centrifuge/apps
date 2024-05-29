@@ -59,7 +59,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
               {(row.value as any)[index] !== '' &&
                 (row.formatter
                   ? row.formatter((row.value as any)[index])
-                  : formatBalance((row.value as any)[index], pool.currency.symbol, 5))}
+                  : formatBalance((row.value as any)[index], pool.currency.symbol, 2))}
             </Text>
           ),
           width: '200px',
@@ -91,7 +91,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
             return change < 0 ? change : `+${change}`
           }) || [],
         heading: false,
-        formatter: (v: any) => `${v < 0 ? '' : '+'}${formatPercentage(v, true, {}, 5)}`,
+        formatter: (v: any) => `${v < 0 ? '' : '+'}${formatPercentage(v, true, {}, 2)}`,
       },
       {
         name: 'Asset value',
