@@ -100,7 +100,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value: poolStates?.map((state) => state.tranches[token.id].tokenSupply.toFloat()) || [],
           heading: false,
-          formatter: (v: any) => formatBalance(v, '', 5),
+          formatter: (v: any) => formatBalance(v, '', 2),
         })) || []),
     ]
   }, [poolStates, pool])
