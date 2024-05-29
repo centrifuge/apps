@@ -6,7 +6,7 @@ import * as React from 'react'
 import { evmChains } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useHolders } from '../../utils/usePools'
+import { useInvestorList } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
@@ -16,11 +16,11 @@ import { copyable } from './utils'
 
 const noop = (v: any) => v
 
-export function Holders({ pool }: { pool: Pool }) {
+export function InvestorList({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, network, address } = React.useContext(ReportContext)
 
   const utils = useCentrifugeUtils()
-  const holders = useHolders(pool.id, activeTranche === 'all' ? undefined : activeTranche)
+  const investors = useInvestorList(pool.id, activeTranche === 'all' ? undefined : activeTranche)
 
   const columnConfig = [
     {
@@ -83,27 +83,27 @@ export function Holders({ pool }: { pool: Pool }) {
     .filter((col) => !col.csvOnly)
 
   const data: TableDataRow[] = React.useMemo(() => {
-    if (!holders) {
+    if (!investors) {
       return []
     }
-    return holders
-      .filter((holder) => !holder.balance.isZero() || !holder.claimableTrancheTokens.isZero())
+    return investors
+      .filter((investor) => !investor.balance.isZero() || !investor.claimableTrancheTokens.isZero())
       .filter((tx) => {
         if (!network || network === 'all') return true
         return network === (tx.chainId || 'centrifuge')
       })
-      .map((holder) => {
-        const token = pool.tranches.find((t) => t.id === holder.trancheId)!
+      .map((investor) => {
+        const token = pool.tranches.find((t) => t.id === investor.trancheId)!
         return {
           name: '',
           value: [
-            (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
-            holder.evmAddress || utils.formatAddress(holder.accountId),
-            holder.balance.toFloat() + holder.claimableTrancheTokens.toFloat(),
+            (evmChains as any)[investor.chainId]?.name || 'Centrifuge',
+            investor.evmAddress || utils.formatAddress(investor.accountId),
+            investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat(),
             token.currency.symbol,
-            holder.pendingInvestCurrency.toFloat(),
+            investor.pendingInvestCurrency.toFloat(),
             pool.currency.symbol,
-            holder.pendingRedeemTrancheTokens.toFloat(),
+            investor.pendingRedeemTrancheTokens.toFloat(),
             token.currency.symbol,
           ],
           token,
@@ -115,7 +115,7 @@ export function Holders({ pool }: { pool: Pool }) {
         return isAddress(address) && isSameAddress(address, row.value[1])
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [holders, network, pool, address])
+  }, [investors, network, pool, address])
 
   const dataUrl = React.useMemo(() => {
     if (!data.length) {
@@ -135,7 +135,7 @@ export function Holders({ pool }: { pool: Pool }) {
       dataUrl
         ? {
             dataUrl,
-            fileName: `${pool.id}-holders.csv`,
+            fileName: `${pool.id}-investors.csv`,
           }
         : undefined
     )
@@ -144,9 +144,13 @@ export function Holders({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataUrl, pool.id])
 
-  if (!holders) {
+  if (!investors) {
     return <Spinner />
   }
 
-  return data.length > 0 ? <DataTable data={data} columns={columns} hoverable /> : <UserFeedback reportType="Holders" />
+  return data.length > 0 ? (
+    <DataTable data={data} columns={columns} hoverable />
+  ) : (
+    <UserFeedback reportType="InvestorList" />
+  )
 }

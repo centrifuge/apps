@@ -52,7 +52,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
-    ...(holdersReport === true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
+    ...(holdersReport === true ? [{ label: 'Investor list', value: 'investor-list' as Report }] : []),
   ]
 
   return (
@@ -78,7 +78,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         }}
       />
 
-      {!['holders', 'asset-list'].includes(report) && (
+      {!['investor-list', 'asset-list'].includes(report) && (
         <>
           <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
           <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
@@ -137,7 +137,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
 
-      {(report === 'holders' || report === 'investor-tx') && (
+      {(report === 'investor-list' || report === 'investor-tx') && (
         <Select
           name="activeTranche"
           label="Token"
@@ -258,7 +258,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           }}
         />
       )}
-      {['investor-tx', 'holders'].includes(report) && (
+      {['investor-tx', 'investor-list'].includes(report) && (
         <>
           <Select
             name="network"
