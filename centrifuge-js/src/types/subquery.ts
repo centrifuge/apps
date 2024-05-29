@@ -6,6 +6,7 @@ export type SubqueryPoolSnapshot = {
   value: string
   portfolioValuation: number
   totalReserve: number
+  cashAssetValue: number
   sumPoolFeesChargedAmountByPeriod: string | null
   sumPoolFeesAccruedAmountByPeriod: string | null
   sumBorrowedAmountByPeriod: string

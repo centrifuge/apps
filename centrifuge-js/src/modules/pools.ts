@@ -567,6 +567,7 @@ export type DailyTrancheState = {
 export type DailyPoolState = {
   poolState: {
     portfolioValuation: CurrencyBalance
+    cashAssetValue: CurrencyBalance
     totalReserve: CurrencyBalance
   }
   poolValue: CurrencyBalance
@@ -2215,6 +2216,7 @@ export function getPoolsModule(inst: Centrifuge) {
           timestamp
           totalReserve
           portfolioValuation
+          cashAssetValue
           blockNumber
           sumPoolFeesChargedAmountByPeriod
           sumPoolFeesAccruedAmountByPeriod
@@ -2400,6 +2402,7 @@ export function getPoolsModule(inst: Centrifuge) {
               const poolState = {
                 id: state.id,
                 portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
+                cashAssetValue: new CurrencyBalance(state.cashAssetValue, poolCurrency.decimals),
                 totalReserve: new CurrencyBalance(state.totalReserve, poolCurrency.decimals),
                 sumPoolFeesChargedAmountByPeriod: new CurrencyBalance(
                   state.sumPoolFeesChargedAmountByPeriod ?? 0,
