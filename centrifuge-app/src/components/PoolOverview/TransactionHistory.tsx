@@ -82,7 +82,19 @@ export const columns = [
 
 export const TransactionHistory = ({ poolId, preview = true }: { poolId: string; preview?: boolean }) => {
   const transactions = useAssetTransactions(poolId, new Date(0))
+  return <TransactionHistoryTable transactions={transactions ?? []} preview={preview} poolId={poolId} />
+}
 
+export const TransactionHistoryTable = ({
+  transactions,
+  poolId,
+  preview = true,
+}: {
+  poolId: string
+  transactions: any[]
+  preview?: boolean
+}) => {
+  console.log('transactions', transactions)
   const assetMetadata = useMetadataMulti(
     [...new Set(transactions?.map((transaction) => transaction.asset.metadata))] || [],
     nftMetadataSchema
@@ -158,7 +170,7 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
         timeZoneName: 'short',
       })}"`,
       'Asset Name':
-        transaction.asset.type == AssetType.OffchainCash
+        transaction.asset.type === AssetType.OffchainCash
           ? transaction.type === 'BORROWED'
             ? `Onchain reserve > Settlement Account`
             : `Settlement Account > onchain reserve`
@@ -179,8 +191,8 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
         transactionDate: transaction.timestamp,
         assetId: transaction.asset.id,
         assetName:
-          transaction.type == 'CASH_TRANSFER'
-            ? transaction.fromAsset?.id === '0'
+          transaction.type === 'CASH_TRANSFER'
+            ? transaction.fromAsset?.id.endsWith('0')
               ? 'Onchain reserve > Offchain cash'
               : 'Offchain cash > Onchain reserve'
             : assetMetadata[Number(id) - 1]?.data?.name || `Asset ${id}`,

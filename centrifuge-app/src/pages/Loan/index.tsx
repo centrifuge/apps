@@ -23,6 +23,7 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
+import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -31,6 +32,7 @@ import { LoadBoundary } from '../../components/LoadBoundary'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PodAuthSection } from '../../components/PodAuthSection'
+import { TransactionHistoryTable } from '../../components/PoolOverview/TransactionHistory'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
@@ -138,7 +140,10 @@ function Loan() {
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
 
-  const name = truncateText((isTinlakePool ? loan?.asset.nftId : nftMetadata?.name) || 'Unnamed asset', 30)
+  const name = truncateText(
+    (isTinlakePool ? loan?.asset.nftId : loanId === '0' ? 'Onchain reserve' : nftMetadata?.name) || 'Unnamed asset',
+    30
+  )
 
   const { data: templateData } = useMetadata<LoanTemplate>(
     nftMetadata?.properties?._template && `ipfs://${nftMetadata?.properties?._template}`
@@ -227,10 +232,21 @@ function Loan() {
         </Text>
       </Box>
       <PageHeader
-        icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
+        icon={
+          loanId === '0' ? (
+            <Box as="img" src={usdcLogo} alt="" height="iconMedium" width="iconMedium" />
+          ) : (
+            <Thumbnail type="asset" label={loan?.id ?? ''} size="large" />
+          )
+        }
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
       />
+      {loanId === '0' && (
+        <PageSection>
+          <TransactionHistoryTable transactions={borrowerAssetTransactions ?? []} poolId={poolId} preview={false} />
+        </PageSection>
+      )}
       {loan &&
         pool &&
         (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
