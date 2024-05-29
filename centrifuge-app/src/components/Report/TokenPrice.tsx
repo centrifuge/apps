@@ -2,11 +2,10 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
-import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
@@ -16,7 +15,7 @@ type Row = TableDataRow & {
   formatter?: (v: any) => any
 }
 
-export function PoolBalance({ pool }: { pool: Pool }) {
+export function TokenPrice({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
 
   const { poolStates: dailyPoolStates } =
@@ -38,7 +37,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       {
         align: 'left',
         header: '',
-        cell: (row: Row) => <Text variant={row.heading ? 'heading4' : 'body3'}>{row.name}</Text>,
+        cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body3'}>{row.name}</Text>,
         width: '200px',
       },
     ]
@@ -56,13 +55,10 @@ export function PoolBalance({ pool }: { pool: Pool }) {
               : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
           cell: (row: Row) => (
             <Text variant="body3">
-              {(row.value as any)[index] !== '' &&
-                (row.formatter
-                  ? row.formatter((row.value as any)[index])
-                  : formatBalance((row.value as any)[index], pool.currency.symbol, 2))}
+              {row.formatter ? row.formatter((row.value as any)[index]) : (row.value as any)[index]}
             </Text>
           ),
-          width: '200px',
+          width: '170px',
         }))
       )
       .concat({
@@ -73,78 +69,46 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       })
   }, [poolStates, groupBy, pool])
 
-  const overviewRecords: Row[] = React.useMemo(() => {
+  const priceRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'NAV',
-        value: poolStates?.map((state) => state.poolValue.toFloat()) || [],
-        heading: false,
-      },
-      {
-        name: 'NAV change',
-        value:
-          poolStates?.map((state, i) => {
-            if (i === 0) return ''
-            const prev = poolStates[i - 1].poolValue.toFloat()
-            const cur = state.poolValue.toFloat()
-            const change = (cur / prev - 1) * 100
-            return change < 0 ? change : `+${change}`
-          }) || [],
-        heading: false,
-        formatter: (v: any) => `${v < 0 ? '' : '+'}${formatPercentage(v, true, {}, 2)}`,
-      },
-      {
-        name: 'Asset value',
-        value: poolStates?.map((state) => state.poolValue.toFloat() - state.poolState.totalReserve.toFloat()) || [],
-        heading: false,
-      },
-      {
-        name: 'Onchain reserve',
-        value: poolStates?.map((state) => state.poolState.totalReserve.toFloat()) || [],
-        heading: false,
-      },
-    ]
-  }, [poolStates])
-
-  const inOutFlowRecords: Row[] = React.useMemo(() => {
-    return [
-      {
-        name: 'Investments',
+        name: 'Token price',
         value: poolStates?.map(() => '' as any) || [],
         heading: false,
       },
-    ].concat(
-      pool?.tranches
+      ...(pool?.tranches
         .slice()
         .reverse()
         .map((token) => ({
           name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
-          value: poolStates?.map((state) => state.tranches[token.id]?.fulfilledInvestOrders.toFloat() ?? 0) || [],
+          value:
+            poolStates?.map((state) =>
+              state.tranches[token.id]?.price ? state.tranches[token.id].price!.toFloat() : 1
+            ) || [],
           heading: false,
-        })) || [],
-      [
-        {
-          name: 'Redemptions',
-          value: poolStates?.map(() => '' as any) || [],
+          formatter: (v: any) => formatBalance(v, pool.currency.symbol, 6),
+        })) || []),
+      {
+        name: 'Token supply',
+        value: poolStates?.map(() => '' as any) || [],
+        heading: false,
+      },
+      ...(pool?.tranches
+        .slice()
+        .reverse()
+        .map((token) => ({
+          name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
+          value: poolStates?.map((state) => state.tranches[token.id].tokenSupply.toFloat()) || [],
           heading: false,
-        },
-      ].concat(
-        pool?.tranches
-          .slice()
-          .reverse()
-          .map((token) => ({
-            name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
-            value: poolStates?.map((state) => state.tranches[token.id]?.fulfilledRedeemOrders ?? 0) || [],
-            heading: false,
-          })) || []
-      )
-    )
-  }, [poolStates, pool?.tranches])
+          formatter: (v: any) => formatBalance(v, '', 2),
+        })) || []),
+    ]
+  }, [poolStates, pool])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
   React.useEffect(() => {
-    const f = [...overviewRecords, ...inOutFlowRecords].map(({ name, value }) => [name.trim(), ...(value as string[])])
+    const f = priceRecords.map(({ name, value }) => [name.trim(), ...(value as string[])])
     let formatted = f.map((values) =>
       Object.fromEntries(headers.map((_, index) => [`"${headers[index]}"`, `"${values[index]}"`]))
     )
@@ -157,7 +121,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
 
     setCsvData({
       dataUrl,
-      fileName: `${pool.id}-pool-balance-${formatDate(startDate, {
+      fileName: `${pool.id}-token-price-${formatDate(startDate, {
         weekday: 'short',
         month: 'short',
         day: '2-digit',
@@ -175,18 +139,15 @@ export function PoolBalance({ pool }: { pool: Pool }) {
       URL.revokeObjectURL(dataUrl)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overviewRecords, inOutFlowRecords])
+  }, [priceRecords])
 
   if (!poolStates) {
     return <Spinner mt={2} />
   }
 
   return poolStates?.length > 0 ? (
-    <DataTableGroup>
-      <DataTable data={overviewRecords} columns={columns} hoverable />
-      <DataTable data={inOutFlowRecords} columns={columns} hoverable />
-    </DataTableGroup>
+    <DataTable data={priceRecords} columns={columns} hoverable />
   ) : (
-    <UserFeedback reportType="Pool balance" />
+    <UserFeedback reportType="Token price" />
   )
 }

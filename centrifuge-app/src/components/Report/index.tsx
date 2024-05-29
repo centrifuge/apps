@@ -5,14 +5,15 @@ import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
 import { AssetTransactions } from './AssetTransactions'
 import { FeeTransactions } from './FeeTransactions'
-import { Holders } from './Holders'
+import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
 import { PoolBalance } from './PoolBalance'
 import { ReportContext } from './ReportContext'
+import { TokenPrice } from './TokenPrice'
 
 export type TableDataRow = {
-  name: string | React.ReactElement
-  value: string[] | React.ReactElement
+  name: string
+  value: (string | number)[]
   heading?: boolean
 }
 
@@ -23,11 +24,15 @@ export function ReportComponent({ pool }: { pool: Pool }) {
     <Box pb={6}>
       <Shelf p={2} justifyContent="space-between">
         <Text as="span" variant="body3" color="textSecondary">
-          <time dateTime={startDate.toISOString()}>{formatDate(startDate)}</time>
-          {' - '}
-          <time dateTime={endDate.toISOString()}>{formatDate(endDate)}</time>
+          {!['investor-list', 'asset-list'].includes(report) && (
+            <>
+              {startDate ? formatDate(startDate) : 'The beginning of time'}
+              {' - '}
+              {endDate ? formatDate(endDate) : 'now'}
+            </>
+          )}
         </Text>
-        {(report === 'pool-balance' || report === 'asset-list') && pool && (
+        {['pool-balance', 'asset-list'].includes(report) && pool && (
           <Text as="span" variant="body3" color="textSecondary">
             All amounts are in {pool.currency.symbol}
           </Text>
@@ -35,8 +40,9 @@ export function ReportComponent({ pool }: { pool: Pool }) {
       </Shelf>
       <Box overflow="auto" width="100%">
         {report === 'pool-balance' && <PoolBalance pool={pool} />}
+        {report === 'token-price' && <TokenPrice pool={pool} />}
         {report === 'asset-list' && <AssetList pool={pool} />}
-        {report === 'holders' && <Holders pool={pool} />}
+        {report === 'investor-list' && <InvestorList pool={pool} />}
         {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
         {report === 'asset-tx' && <AssetTransactions pool={pool} />}
         {report === 'fee-tx' && <FeeTransactions pool={pool} />}

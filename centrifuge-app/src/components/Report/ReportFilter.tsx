@@ -1,40 +1,55 @@
-import { Pool } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Box, DateRange, Select, Shelf } from '@centrifuge/fabric'
+import { Loan, Pool } from '@centrifuge/centrifuge-js'
+import { useGetNetworkName } from '@centrifuge/centrifuge-react'
+import { AnchorButton, Box, DateInput, SearchInput, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useDebugFlags } from '../DebugFlags'
-import { GroupBy, InvestorTxType, Report, ReportContext } from './ReportContext'
+import { nftMetadataSchema } from '../../schemas'
+import { useActiveDomains } from '../../utils/useLiquidityPools'
+import { useLoans } from '../../utils/useLoans'
+import { useMetadata } from '../../utils/useMetadata'
+import { useCentNFT } from '../../utils/useNFTs'
+import { GroupBy, Report, ReportContext } from './ReportContext'
+import { formatPoolFeeTransactionType } from './utils'
 
 type ReportFilterProps = {
   pool: Pool
 }
 
 export function ReportFilter({ pool }: ReportFilterProps) {
-  const { holdersReport } = useDebugFlags()
-
   const {
     csvData,
     setStartDate,
+    startDate,
     endDate,
     setEndDate,
-    range,
-    setRange,
     report,
     setReport,
+    loanStatus,
+    setLoanStatus,
+    txType,
+    setTxType,
     groupBy,
     setGroupBy,
     activeTranche,
     setActiveTranche,
-    investorTxType,
-    setInvestorTxType,
+    address,
+    setAddress,
+    network,
+    setNetwork,
+    loan,
+    setLoan,
   } = React.useContext(ReportContext)
+  const { data: domains } = useActiveDomains(pool.id)
+  const getNetworkName = useGetNetworkName()
+  const loans = useLoans(pool.id) as Loan[] | undefined
 
   const reportOptions: { label: string; value: Report }[] = [
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
     { label: 'Pool balance', value: 'pool-balance' },
+    { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
-    ...(holdersReport == true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
+    { label: 'Investor list', value: 'investor-list' },
   ]
 
   return (
@@ -46,12 +61,11 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       borderWidth={0}
       borderBottomWidth={1}
       borderStyle="solid"
-      borderColor="borderSecondary"
+      borderColor="borderPrimary"
     >
       <Select
         name="report"
         label="Report"
-        placeholder="Select a report"
         options={reportOptions}
         value={report}
         onChange={(event) => {
@@ -61,35 +75,26 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         }}
       />
 
-      {report !== 'holders' && (
-        <DateRange
-          end={endDate}
-          onSelection={(start, end, range) => {
-            setRange(range)
-            setStartDate(start)
-            setEndDate(end)
-          }}
-        />
+      {!['investor-list', 'asset-list'].includes(report) && (
+        <>
+          <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
+          <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
+        </>
       )}
 
-      {report === 'pool-balance' && (
+      {['pool-balance', 'token-price'].includes(report) && (
         <Select
           name="groupBy"
           label="Group by"
-          placeholder="Select a time period to group by"
           options={[
             {
               label: 'Day',
               value: 'day',
             },
-            ...(range !== 'last-week'
-              ? [
-                  {
-                    label: 'Month',
-                    value: 'month',
-                  },
-                ]
-              : []),
+            {
+              label: 'Month',
+              value: 'month',
+            },
           ]}
           value={groupBy}
           onChange={(event) => {
@@ -100,11 +105,39 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
 
-      {(report === 'holders' || report === 'investor-tx') && (
+      {report === 'asset-list' && (
+        <Select
+          name="loanStatus"
+          label="Status"
+          options={[
+            {
+              label: 'All',
+              value: 'all',
+            },
+            {
+              label: 'Active',
+              value: 'Active',
+            },
+            {
+              label: 'Repaid',
+              value: 'Repaid',
+            },
+            {
+              label: 'Overdue',
+              value: 'Overdue',
+            },
+          ]}
+          value={loanStatus}
+          onChange={(event) => {
+            setLoanStatus(event.target.value)
+          }}
+        />
+      )}
+
+      {(report === 'investor-list' || report === 'investor-tx') && (
         <Select
           name="activeTranche"
           label="Token"
-          placeholder="Select a token"
           options={[
             {
               label: 'All tokens',
@@ -125,37 +158,140 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           }}
         />
       )}
-
-      {report === 'investor-tx' && (
+      {report === 'asset-tx' && (
         <Select
-          name="investorTxType"
-          label="Transaction type"
-          placeholder="Select types of transactions to show"
+          name="loan"
+          label="Asset"
+          onChange={(event) => {
+            setLoan(event.target.value)
+          }}
+          value={loan}
           options={[
-            {
-              label: 'All',
-              value: 'all',
-            },
-            {
-              label: 'Submitted orders',
-              value: 'orders',
-            },
-            {
-              label: 'Executed orders',
-              value: 'executions',
-            },
-            {
-              label: 'Transfers',
-              value: 'transfers',
-            },
+            { label: 'All', value: 'all' },
+            ...(loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []),
           ]}
-          value={investorTxType}
+        />
+      )}
+
+      {['investor-tx', 'asset-tx', 'fee-tx'].includes(report) && (
+        <Select
+          name="txType"
+          label="Transaction type"
+          options={
+            report === 'investor-tx'
+              ? [
+                  {
+                    label: 'All',
+                    value: 'all',
+                  },
+                  {
+                    label: 'Submitted orders',
+                    value: 'orders',
+                  },
+                  {
+                    label: 'Executed orders',
+                    value: 'executions',
+                  },
+                  {
+                    label: 'Transfers',
+                    value: 'transfers',
+                  },
+                ]
+              : report === 'asset-tx'
+              ? [
+                  {
+                    label: 'All',
+                    value: 'all',
+                  },
+                  {
+                    label: 'Created',
+                    value: 'Created',
+                  },
+                  {
+                    label: 'Financed',
+                    value: 'Financed',
+                  },
+                  {
+                    label: 'Repaid',
+                    value: 'Repaid',
+                  },
+                  {
+                    label: 'Priced',
+                    value: 'Priced',
+                  },
+                  {
+                    label: 'Closed',
+                    value: 'Closed',
+                  },
+                ]
+              : [
+                  {
+                    label: 'All',
+                    value: 'all',
+                  },
+                  {
+                    label: formatPoolFeeTransactionType('CHARGED'),
+                    value: 'CHARGED',
+                  },
+                  {
+                    label: formatPoolFeeTransactionType('UNCHARGED'),
+                    value: 'UNCHARGED',
+                  },
+                  {
+                    label: formatPoolFeeTransactionType('ACCRUED'),
+                    value: 'ACCRUED',
+                  },
+                  {
+                    label: formatPoolFeeTransactionType('PAID'),
+                    value: 'PAID',
+                  },
+                ]
+          }
+          value={txType}
           onChange={(event) => {
             if (event.target.value) {
-              setInvestorTxType(event.target.value as InvestorTxType)
+              setTxType(event.target.value)
             }
           }}
         />
+      )}
+      {['investor-tx', 'investor-list'].includes(report) && (
+        <>
+          <Select
+            name="network"
+            label="Network"
+            options={[
+              {
+                label: 'All',
+                value: 'all',
+              },
+              {
+                label: 'Centrifuge',
+                value: 'centrifuge',
+              },
+              ...(domains ?? []).map((domain) => {
+                return {
+                  label: getNetworkName(domain.chainId),
+                  value: String(domain.chainId),
+                }
+              }),
+            ]}
+            value={network}
+            onChange={(e) => {
+              const { value } = e.target
+              if (value) {
+                setNetwork(isNaN(Number(value)) ? value : Number(value))
+              }
+            }}
+          />
+          <SearchInput
+            name="address"
+            label="Address"
+            placeholder="Filter by address..."
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+        </>
       )}
       <Box ml="auto">
         <AnchorButton href={csvData?.dataUrl} download={csvData?.fileName} variant="primary" small disabled={!csvData}>
@@ -163,5 +299,15 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         </AnchorButton>
       </Box>
     </Shelf>
+  )
+}
+
+function LoanOption({ loan }: { loan: Loan }) {
+  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, false)
+  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  return (
+    <option value={loan.id}>
+      {loan.id} - {metadata?.name}
+    </option>
   )
 }
