@@ -194,7 +194,6 @@ export const TransactionHistory = ({ poolId, preview = true }: { poolId: string;
       <Shelf justifyContent="space-between">
         <Text fontSize="18px" fontWeight="500">
           Transaction history
-          {console.log(transactions?.filter((tx) => tx.type === 'REPAID' && tx.interestAmount?.gtn(0)))}
         </Text>
         {transactions?.length && (
           <AnchorButton
