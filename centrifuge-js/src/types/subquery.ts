@@ -110,6 +110,26 @@ export type SubqueryAssetTransaction = {
   }
 }
 
+export type SubqueryAssetSnapshot = {
+  __typename?: 'AssetSnapshot'
+  asset: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+  timestamp: string
+  presentValue: string
+  outstandingPrincipal: string
+  outstandingInterest: string
+  outstandingDebt: string
+  outstandingQuantity: string
+  totalBorrowed: string
+  totalRepaidPrincipal: string
+  totalRepaidInterest: string
+  totalRepaidUnscheduled: string
+}
+
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
 
 export type SubqueryPoolFeeTransaction = {
