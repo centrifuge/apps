@@ -7,7 +7,6 @@ import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
-import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 import { formatPoolFeeTransactionType } from './utils'
 
@@ -16,8 +15,6 @@ type ReportFilterProps = {
 }
 
 export function ReportFilter({ pool }: ReportFilterProps) {
-  const { holdersReport } = useDebugFlags()
-
   const {
     csvData,
     setStartDate,
@@ -52,7 +49,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
-    ...(holdersReport === true ? [{ label: 'Investor list', value: 'investor-list' as Report }] : []),
+    { label: 'Investor list', value: 'investor-list' },
   ]
 
   return (
