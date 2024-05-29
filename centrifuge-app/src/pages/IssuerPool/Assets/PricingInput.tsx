@@ -78,7 +78,7 @@ export function PricingInput({ poolId }: { poolId: string }) {
           label={<Tooltips type="interestRate" variant="secondary" label="Interest rate*" />}
           placeholder="0.00"
           symbol="%"
-          disabled={Number(values.pricing.notional) < 0}
+          disabled={Number(values.pricing.notional) <= 0}
           name="pricing.interestRate"
           value={Number(values.pricing.notional) === 0 ? 0 : values.pricing.interestRate}
           validate={combine(required(), nonNegativeNumber(), max(100))}
