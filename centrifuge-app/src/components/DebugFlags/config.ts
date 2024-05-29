@@ -52,6 +52,7 @@ export type Key =
   | 'poolCreationType'
   | 'podAdminSeed'
   | 'holdersReport'
+  | 'assetSnapshots'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -94,6 +95,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'text',
   },
   holdersReport: {
+    type: 'checkbox',
+    default: false,
+  },
+  assetSnapshots: {
     type: 'checkbox',
     default: false,
   },

@@ -14,6 +14,7 @@ import {
   AssetType,
   InvestorTransactionType,
   PoolFeeTransactionType,
+  SubqueryAssetSnapshot,
   SubqueryAssetTransaction,
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
@@ -785,6 +786,26 @@ export type AssetTransaction = {
     metadata: string
     type: AssetType
   }
+}
+
+export type AssetSnapshot = {
+  id: string
+  timestamp: Date
+  asset: {
+    id: string
+    name: string
+    metadata: string
+    type: AssetType
+  }
+  presentValue: CurrencyBalance | undefined
+  outstandingPrincipal: CurrencyBalance | undefined
+  outstandingInterest: CurrencyBalance | undefined
+  outstandingDebt: CurrencyBalance | undefined
+  outstandingQuantity: CurrencyBalance | undefined
+  totalBorrowed: CurrencyBalance | undefined
+  totalRepaidPrincipal: CurrencyBalance | undefined
+  totalRepaidInterest: CurrencyBalance | undefined
+  totalRepaidUnscheduled: CurrencyBalance | undefined
 }
 
 export type PoolFeeTransaction = {
@@ -2775,6 +2796,77 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getAssetSnapshots(args: [poolId: string, loanId: string, from?: Date, to?: Date]) {
+    const [poolId, loanId, from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      assetSnapshots: { nodes: SubqueryAssetSnapshot[] }
+    }>(
+      `query($assetId: String!, $from: Datetime!, $to: Datetime!) {
+        assetSnapshots(
+          first: 1000,
+          orderBy: TIMESTAMP_ASC,
+          filter: {
+            assetId: { equalTo: $assetId },
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }
+        ) {
+          nodes {
+            assetId
+            timestamp
+            presentValue
+            outstandingPrincipal
+            outstandingInterest
+            outstandingDebt
+            outstandingQuantity
+            totalBorrowed
+            totalRepaidPrincipal
+            totalRepaidInterest
+            totalRepaidUnscheduled
+          }
+        }
+      }
+      `,
+      {
+        assetId: `${poolId}-${loanId}`,
+        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
+        return data!.assetSnapshots.nodes.map((tx) => ({
+          ...tx,
+          presentValue: tx.presentValue ? new CurrencyBalance(tx.presentValue, currency.decimals) : undefined,
+          outstandingPrincipal: tx.outstandingPrincipal
+            ? new CurrencyBalance(tx.outstandingPrincipal, currency.decimals)
+            : undefined,
+          outstandingInterest: tx.outstandingInterest
+            ? new CurrencyBalance(tx.outstandingInterest, currency.decimals)
+            : undefined,
+          outstandingDebt: tx.outstandingDebt ? new CurrencyBalance(tx.outstandingDebt, currency.decimals) : undefined,
+          outstandingQuantity: tx.outstandingQuantity
+            ? new CurrencyBalance(tx.outstandingQuantity, currency.decimals)
+            : undefined,
+          totalBorrowed: tx.totalBorrowed ? new CurrencyBalance(tx.totalBorrowed, currency.decimals) : undefined,
+          totalRepaidPrincipal: tx.totalRepaidPrincipal
+            ? new CurrencyBalance(tx.totalRepaidPrincipal, currency.decimals)
+            : undefined,
+          totalRepaidInterest: tx.totalRepaidInterest
+            ? new CurrencyBalance(tx.totalRepaidInterest, currency.decimals)
+            : undefined,
+          totalRepaidUnscheduled: tx.totalRepaidUnscheduled
+            ? new CurrencyBalance(tx.totalRepaidUnscheduled, currency.decimals)
+            : undefined,
+          timestamp: new Date(`${tx.timestamp}+00:00`),
+        })) satisfies AssetSnapshot[]
+      })
+    )
+  }
+
   function getInvestors(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
     const $query = inst.getApi().pipe(
@@ -3806,6 +3898,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,
+    getAssetSnapshots,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
