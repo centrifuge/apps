@@ -1,7 +1,7 @@
 import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
 import {
-  formatBalance,
   Transaction,
+  formatBalance,
   useBalances,
   useCentrifuge,
   useCentrifugeConsts,
@@ -251,7 +251,7 @@ function IssuerCreateLoan() {
               : null,
             Isin: values.pricing.Isin || '',
             maturityDate: new Date(values.pricing.maturityDate),
-            interestRate: Rate.fromPercent(values.pricing.interestRate),
+            interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
             notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
           }
         }
