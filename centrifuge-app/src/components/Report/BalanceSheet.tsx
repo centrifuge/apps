@@ -19,7 +19,7 @@ type Row = TableDataRow & {
 }
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData, setEndDate } = React.useContext(ReportContext)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
     const today = new Date()
@@ -32,6 +32,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         const to = new Date(startDate ?? today)
         to.setDate(to.getDate() + 1)
         to.setHours(0, 0, 0, 0)
+        setEndDate(to.toISOString())
         return [from, to]
       case '30-day':
         const thirtyDaysAgo = new Date()
@@ -53,7 +54,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       default:
         throw new Error('No filter set')
     }
-  }, [groupBy])
+  }, [groupBy, startDate])
 
   const { poolStates: dailyPoolStates } =
     useDailyPoolStates(
@@ -86,13 +87,11 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         poolStates.map((state, index) => ({
           align: 'right',
           timestamp: state.timestamp,
-          header: groupBy.includes('day')
-            ? new Date(state.timestamp).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })
-            : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+          header: new Date(state.timestamp).toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          }),
           cell: (row: Row) => (
             <Text variant="body3">
               {row.formatter ? row.formatter((row.value as any)[index]) : (row.value as any)[index]}
@@ -117,18 +116,13 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         heading: false,
       },
       {
-        name: '\u00A0 \u00A0 + On-chain reserve',
+        name: '\u00A0 \u00A0 + Onchain reserve',
         value: poolStates?.map((poolState) => poolState.poolState.totalReserve.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
       },
       {
-        name: '\u00A0 \u00A0 + Settlement accounts(s)',
-        value: poolStates?.map(() => '' as any) || [],
-        heading: false,
-      },
-      {
-        name: '\u00A0 \u00A0 + Bank accounts(s)',
+        name: '\u00A0 \u00A0 + Offchain cash',
         value: poolStates?.map(() => '' as any) || [],
         heading: false,
       },
@@ -151,22 +145,21 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         .slice()
         .reverse()
         .map((token) => {
-          const name = token.currency.name.split(' ').at(-1)
           return [
             {
-              name: `${name} token supply`,
+              name: `${token.currency.displayName} token supply`,
               value: poolStates?.map((poolState) => poolState.tranches[token.id].tokenSupply || ('' as any)) || [],
               heading: false,
               formatter: (v: any) => (v ? formatBalance(v.toDecimal(), token.currency.displayName) : ''),
             },
             {
-              name: `\u00A0 \u00A0 * ${name} token price`,
+              name: `\u00A0 \u00A0 * ${token.currency.displayName} token price`,
               value: poolStates?.map((poolState) => poolState.tranches[token.id].price || ('' as any)) || [],
               heading: false,
               formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 5) : ''),
             },
             {
-              name: `\u00A0 \u00A0 = ${name} tranche value`,
+              name: `\u00A0 \u00A0 = ${token.currency.displayName} tranche value`,
               value:
                 poolStates?.map(
                   (poolState) =>
