@@ -6,6 +6,7 @@ import startCase from 'lodash/startCase'
 import { evmChains } from '../../config'
 import { daysBetween } from '../../utils/date'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
+import { Spinner } from '../Spinner'
 
 type Props = {
   assetType?: { class: string; subClass: string }
@@ -75,45 +76,68 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
           },
         ]
       : []),
-    ...(activeDomains.data?.length
-      ? [
-          {
-            metric: 'Available networks',
-            value: (
-              <Shelf gap={1}>
-                {activeDomains.data.map((domain) => {
-                  const chain = (evmChains as any)[domain.chainId]
-                  return (
-                    <Tooltip
-                      bodyWidth="maxContent"
-                      bodyPadding={0}
-                      body={
-                        <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
-                          <Text variant="heading4">{chain.name} chain</Text>
-                          <a
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href={`${chain.blockExplorerUrl}address/${domain.managerAddress}`}
-                          >
-                            <Shelf gap={1} alignItems="center">
-                              <Text variant="body2" color="black">
-                                View transactions
-                              </Text>{' '}
-                              <IconExternalLink color="black" size="iconSmall" />
-                            </Shelf>
-                          </a>
-                        </Stack>
-                      }
-                    >
-                      <NetworkIcon size="iconSmall" network={domain.chainId} />
-                    </Tooltip>
-                  )
-                })}
-              </Shelf>
-            ),
-          },
-        ]
-      : []),
+
+    {
+      metric: 'Available networks',
+      value: (
+        <Shelf gap={1}>
+          {activeDomains.data?.length ? (
+            <Tooltip
+              bodyWidth="maxContent"
+              bodyPadding={0}
+              body={
+                <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
+                  <Text variant="heading4">Centrifuge chain</Text>
+                  <a target="_blank" rel="noopener noreferrer" href={`${process.env.REACT_APP_SUBSCAN_URL}`}>
+                    <Shelf gap={1} alignItems="center">
+                      <Text variant="body2" color="black">
+                        View transactions
+                      </Text>{' '}
+                      <IconExternalLink color="black" size="iconSmall" />
+                    </Shelf>
+                  </a>
+                </Stack>
+              }
+            >
+              <NetworkIcon size="iconSmall" network={'centrifuge'} />
+            </Tooltip>
+          ) : (
+            <Spinner size="iconSmall" />
+          )}
+          {activeDomains.data?.length &&
+            activeDomains.data
+              .filter((domain) => domain.isActive)
+              .map((domain) => {
+                const chain = (evmChains as any)[domain.chainId]
+                return (
+                  <Tooltip
+                    bodyWidth="maxContent"
+                    bodyPadding={0}
+                    body={
+                      <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
+                        <Text variant="heading4">{chain.name} chain</Text>
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={`${chain.blockExplorerUrl}address/${domain.managerAddress}`}
+                        >
+                          <Shelf gap={1} alignItems="center">
+                            <Text variant="body2" color="black">
+                              View transactions
+                            </Text>{' '}
+                            <IconExternalLink color="black" size="iconSmall" />
+                          </Shelf>
+                        </a>
+                      </Stack>
+                    }
+                  >
+                    <NetworkIcon size="iconSmall" network={domain.chainId} />
+                  </Tooltip>
+                )
+              })}
+        </Shelf>
+      ),
+    },
   ]
 
   return (
