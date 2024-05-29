@@ -789,7 +789,6 @@ export type AssetTransaction = {
 }
 
 export type AssetSnapshot = {
-  id: string
   timestamp: Date
   asset: {
     id: string
