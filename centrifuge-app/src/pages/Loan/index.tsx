@@ -366,28 +366,38 @@ function Loan() {
             )}
 
             {borrowerAssetTransactions?.length ? (
-              <PageSection
-                title={
-                  <Flex>
-                    <Text>Transaction history</Text>
-                  </Flex>
-                }
-              >
-                <TransactionTable
-                  transactions={borrowerAssetTransactions}
-                  currency={pool.currency.symbol}
-                  loanType={
-                    'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                      ? 'external'
-                      : 'internal'
+              'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
+                <PageSection>
+                  <TransactionHistoryTable
+                    transactions={borrowerAssetTransactions ?? []}
+                    poolId={poolId}
+                    preview={false}
+                  />
+                </PageSection>
+              ) : (
+                <PageSection
+                  title={
+                    <Flex>
+                      <Text>Transaction history</Text>
+                    </Flex>
                   }
-                  poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
-                  decimals={pool.currency.decimals}
-                  pricing={loan.pricing as PricingInfo}
-                  maturityDate={new Date(loan.pricing.maturityDate)}
-                  originationDate={originationDate ? new Date(originationDate) : undefined}
-                />
-              </PageSection>
+                >
+                  <TransactionTable
+                    transactions={borrowerAssetTransactions}
+                    currency={pool.currency.symbol}
+                    loanType={
+                      'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                        ? 'external'
+                        : 'internal'
+                    }
+                    poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
+                    decimals={pool.currency.decimals}
+                    pricing={loan.pricing as PricingInfo}
+                    maturityDate={new Date(loan.pricing.maturityDate)}
+                    originationDate={originationDate ? new Date(originationDate) : undefined}
+                  />
+                </PageSection>
+              )
             ) : null}
 
             {loan.status === 'Active' &&
