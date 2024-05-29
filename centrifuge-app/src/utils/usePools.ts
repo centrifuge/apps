@@ -92,6 +92,18 @@ export function useAssetTransactions(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
+export function useAssetSnapshots(poolId: string, loanId: string, from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['assetSnapshots', poolId, loanId, from, to],
+    (cent) => cent.pools.getAssetSnapshots([poolId, loanId, from, to]),
+    {
+      enabled: !poolId.startsWith('0x'),
+    }
+  )
+
+  return result
+}
+
 export function usePoolFees(poolId: string) {
   const [result] = useCentrifugeQuery(['poolFees', poolId], (cent) => cent.pools.getPoolFees([poolId]), {
     enabled: !poolId.startsWith('0x'),

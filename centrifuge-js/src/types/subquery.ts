@@ -6,8 +6,8 @@ export type SubqueryPoolSnapshot = {
   value: string
   portfolioValuation: number
   totalReserve: number
-  sumChargedAmountByPeriod: string | null
-  sumAccruedAmountByPeriod: string | null
+  sumPoolFeesChargedAmountByPeriod: string | null
+  sumPoolFeesAccruedAmountByPeriod: string | null
   sumBorrowedAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
   sumRepaidAmountByPeriod: string
@@ -108,6 +108,26 @@ export type SubqueryAssetTransaction = {
     name: string
     type: AssetType
   }
+}
+
+export type SubqueryAssetSnapshot = {
+  __typename?: 'AssetSnapshot'
+  asset: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+  timestamp: string
+  presentValue: string
+  outstandingPrincipal: string
+  outstandingInterest: string
+  outstandingDebt: string
+  outstandingQuantity: string
+  totalBorrowed: string
+  totalRepaidPrincipal: string
+  totalRepaidInterest: string
+  totalRepaidUnscheduled: string
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
