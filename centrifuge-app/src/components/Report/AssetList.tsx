@@ -5,7 +5,7 @@ import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoans } from '../../utils/useLoans'
-import { DataTable } from '../DataTable'
+import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
@@ -41,6 +41,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       header: 'Value',
       align: 'right',
       csvOnly: false,
+      sortable: true,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
     },
     {
@@ -53,6 +54,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       header: 'Outstanding',
       align: 'right',
       csvOnly: false,
+      sortable: true,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
     },
     {
@@ -65,6 +67,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       header: 'Total financed',
       align: 'right',
       csvOnly: false,
+      sortable: true,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
     },
     {
@@ -76,6 +79,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     {
       header: 'Total repaid',
       align: 'right',
+      sortable: true,
       csvOnly: false,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
     },
@@ -88,6 +92,7 @@ export function AssetList({ pool }: { pool: Pool }) {
     {
       header: 'Financing date',
       align: 'left',
+      sortable: true,
       csvOnly: false,
       formatter: (v: any) => (v !== '-' ? formatDate(v) : v),
     },
@@ -95,6 +100,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       header: 'Maturity date',
       align: 'left',
       csvOnly: false,
+      sortable: true,
       formatter: formatDate,
     },
     {
@@ -114,7 +120,8 @@ export function AssetList({ pool }: { pool: Pool }) {
   const columns = columnConfig
     .map((col, index) => ({
       align: col.align,
-      header: col.header,
+      header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
+      sortKey: col.sortable ? `value[${index}]` : undefined,
       cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
       csvOnly: col.csvOnly,
     }))
