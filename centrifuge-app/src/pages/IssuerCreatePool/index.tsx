@@ -375,14 +375,6 @@ function CreatePoolForm() {
           prevRiskBuffer = t.minRiskBuffer
         }
       })
-      if (values.reportUrl) {
-        if (!values.reportAuthorName) {
-          errors = setIn(errors, 'reportAuthorName', 'Required')
-        }
-        if (!values.reportAuthorTitle) {
-          errors = setIn(errors, 'reportAuthorTitle', 'Required')
-        }
-      }
 
       return errors
     },

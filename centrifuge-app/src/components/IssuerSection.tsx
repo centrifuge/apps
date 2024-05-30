@@ -12,7 +12,6 @@ type IssuerSectionProps = {
 }
 
 export function IssuerSection({ metadata }: IssuerSectionProps) {
-  const cent = useCentrifuge()
   const report = metadata?.pool?.reports?.[0]
 
   return (
