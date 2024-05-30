@@ -93,11 +93,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
                   <Text variant="heading4">Centrifuge</Text>
                   {pool.tranches.length > 1 ? (
                     pool.tranches.map((tranche) => (
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/${tranche.id}`}
-                      >
+                      <a target="_blank" rel="noopener noreferrer" href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}>
                         <Shelf gap={1} alignItems="center">
                           <Text variant="body2" color="black">
                             View {tranche.currency.name.split(' ').at(-1)}
