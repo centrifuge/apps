@@ -91,20 +91,31 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
               body={
                 <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
                   <Text variant="heading4">Centrifuge</Text>
-                  {pool.tranches.map((tranche) => (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/${tranche.id}`}
-                    >
+                  {pool.tranches.length > 1 ? (
+                    pool.tranches.map((tranche) => (
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/${tranche.id}`}
+                      >
+                        <Shelf gap={1} alignItems="center">
+                          <Text variant="body2" color="black">
+                            View {tranche.currency.name.split(' ').at(-1)}
+                          </Text>{' '}
+                          <IconExternalLink color="black" size="iconSmall" />
+                        </Shelf>
+                      </a>
+                    ))
+                  ) : (
+                    <a target="_blank" rel="noopener noreferrer" href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}>
                       <Shelf gap={1} alignItems="center">
                         <Text variant="body2" color="black">
-                          View {tranche.currency.name.split(' ').at(-1)}
+                          View transactions
                         </Text>{' '}
                         <IconExternalLink color="black" size="iconSmall" />
                       </Shelf>
                     </a>
-                  ))}
+                  )}
                 </Stack>
               }
             >
@@ -126,20 +137,35 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
                     body={
                       <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
                         <Text variant="heading4">{chain.name}</Text>
-                        {pool.tranches.map((tranche) => (
+                        {pool.tranches.length > 1 ? (
+                          pool.tranches.map((tranche) => (
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[tranche.id]}`}
+                            >
+                              <Shelf gap={1} alignItems="center">
+                                <Text variant="body2" color="black">
+                                  View {tranche.currency.name.split(' ').at(-1)}
+                                </Text>{' '}
+                                <IconExternalLink color="black" size="iconSmall" />
+                              </Shelf>
+                            </a>
+                          ))
+                        ) : (
                           <a
                             target="_blank"
                             rel="noopener noreferrer"
-                            href={`${chain.blockExplorerUrl}address/${domain.trancheTokens[tranche.id]}`}
+                            href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[pool.tranches[0].id]}`}
                           >
                             <Shelf gap={1} alignItems="center">
                               <Text variant="body2" color="black">
-                                View {tranche.currency.name.split(' ').at(-1)}
+                                View transactions
                               </Text>{' '}
                               <IconExternalLink color="black" size="iconSmall" />
                             </Shelf>
                           </a>
-                        ))}
+                        )}
                       </Stack>
                     }
                   >
