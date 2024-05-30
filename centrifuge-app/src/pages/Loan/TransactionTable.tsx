@@ -172,7 +172,7 @@ export const TransactionTable = ({
               header: `Settle price (${currency})`,
               cell: (row: Row) => (row.settlePrice ? formatBalance(row.settlePrice, undefined, 6, 2) : '-'),
             },
-            ...(loanType === 'external'
+            ...(loanType === 'external' && pricing.interestRate.gtn(0)
               ? [
                   {
                     align: 'left',
@@ -209,7 +209,7 @@ export const TransactionTable = ({
                   ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}`
                   : '-',
             },
-            ...(loanType === 'external'
+            ...(loanType === 'external' && pricing.interestRate.gtn(0)
               ? [
                   {
                     align: 'left',

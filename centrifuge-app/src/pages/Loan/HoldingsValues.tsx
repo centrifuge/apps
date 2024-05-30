@@ -54,16 +54,20 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
 
   return (
     <>
-      <LabelValueStack
-        label="Current face"
-        value={currentFace ? `${formatBalance(currentFace, pool.currency.symbol, 2, 2)}` : '-'}
-      />
+      {pricing.notional.gtn(0) && (
+        <LabelValueStack
+          label="Current face"
+          value={currentFace ? `${formatBalance(currentFace, pool.currency.symbol, 2, 2)}` : '-'}
+        />
+      )}
       <LabelValueStack label="Net spent" value={`${formatBalance(netSpent, pool.currency.symbol, 2, 2)}`} />
       <LabelValueStack
         label="Average settle price"
         value={averageSettlePrice.isZero() ? '-' : `${formatBalance(averageSettlePrice, pool.currency.symbol, 2, 2)}`}
       />
-      <LabelValueStack label="Notional" value={`${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}`} />
+      {pricing.notional.gtn(0) && (
+        <LabelValueStack label="Notional" value={`${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}`} />
+      )}
       <LabelValueStack label="Quantity" value={`${formatBalance(pricing.outstandingQuantity, undefined, 2, 0)}`} />
     </>
   )
