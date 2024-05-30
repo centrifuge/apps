@@ -40,10 +40,15 @@ export function useTokens() {
   return pools?.flatMap((p) => p.tranches)
 }
 
-export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
+export function usePoolStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | '30-day' | 'month' | 'quarter' | 'year'
+) {
   const [result] = useCentrifugeQuery(
-    ['monthlyPoolStates', poolId, from, to],
-    (cent) => cent.pools.getMonthlyPoolStates([poolId, from, to]),
+    ['monthlyPoolStates', poolId, from, to, groupBy],
+    (cent) => cent.pools.getPoolStatesByGroup([poolId, from, to], groupBy),
     {
       suspense: true,
     }

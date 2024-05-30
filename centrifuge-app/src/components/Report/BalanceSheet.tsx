@@ -6,7 +6,7 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
+import { usePoolStatesByGroup } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
@@ -56,19 +56,12 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     }
   }, [groupBy, startDate])
 
-  const { poolStates: dailyPoolStates } =
-    useDailyPoolStates(
-      pool.id,
-      adjustedStartDate ? adjustedStartDate : undefined,
-      adjustedEndDate ? adjustedEndDate : undefined
-    ) || {}
-
-  const monthlyPoolStates = useMonthlyPoolStates(
+  const poolStates = usePoolStatesByGroup(
     pool.id,
     adjustedStartDate ? adjustedStartDate : undefined,
-    adjustedEndDate ? adjustedEndDate : undefined
+    adjustedEndDate ? adjustedEndDate : undefined,
+    groupBy
   )
-  const poolStates = groupBy.includes('day') ? dailyPoolStates : monthlyPoolStates
 
   const columns = React.useMemo(() => {
     if (!poolStates) {
@@ -117,19 +110,21 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       },
       {
         name: '\u00A0 \u00A0 + Onchain reserve',
-        value: poolStates?.map((poolState) => poolState.poolState.totalReserve.toDecimal()) || [],
+        value: poolStates?.map(({ poolState }) => poolState.totalReserve.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
       },
       {
         name: '\u00A0 \u00A0 + Offchain cash',
-        value: poolStates?.map(() => '' as any) || [],
+        value: poolStates?.map(({ poolState }) => poolState.cashAssetValue.toDecimal()) || [],
         heading: false,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
       },
       {
         name: '\u00A0 \u00A0 - Accrued fees',
-        value: poolStates?.map(() => '' as any) || [],
+        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPendingAmount.toDecimal()) || [],
         heading: false,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
       },
     ]
   }, [poolStates])
