@@ -6,6 +6,7 @@ import startCase from 'lodash/startCase'
 import { evmChains } from '../../config'
 import { daysBetween } from '../../utils/date'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
+import { usePool } from '../../utils/usePools'
 import { Spinner } from '../Spinner'
 
 type Props = {
@@ -16,6 +17,7 @@ type Props = {
 }
 
 export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props) => {
+  const pool = usePool(poolId)
   const ongoingAssetCount =
     loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
 
@@ -85,17 +87,24 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
             <Tooltip
               bodyWidth="maxContent"
               bodyPadding={0}
+              delay={300}
               body={
                 <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
-                  <Text variant="heading4">Centrifuge chain</Text>
-                  <a target="_blank" rel="noopener noreferrer" href={`${process.env.REACT_APP_SUBSCAN_URL}`}>
-                    <Shelf gap={1} alignItems="center">
-                      <Text variant="body2" color="black">
-                        View transactions
-                      </Text>{' '}
-                      <IconExternalLink color="black" size="iconSmall" />
-                    </Shelf>
-                  </a>
+                  <Text variant="heading4">Centrifuge</Text>
+                  {pool.tranches.map((tranche) => (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/${tranche.id}`}
+                    >
+                      <Shelf gap={1} alignItems="center">
+                        <Text variant="body2" color="black">
+                          View {tranche.currency.name.split(' ').at(-1)}
+                        </Text>{' '}
+                        <IconExternalLink color="black" size="iconSmall" />
+                      </Shelf>
+                    </a>
+                  ))}
                 </Stack>
               }
             >
@@ -111,23 +120,26 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
                 const chain = (evmChains as any)[domain.chainId]
                 return (
                   <Tooltip
+                    delay={300}
                     bodyWidth="maxContent"
                     bodyPadding={0}
                     body={
                       <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
-                        <Text variant="heading4">{chain.name} chain</Text>
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          href={`${chain.blockExplorerUrl}address/${domain.managerAddress}`}
-                        >
-                          <Shelf gap={1} alignItems="center">
-                            <Text variant="body2" color="black">
-                              View transactions
-                            </Text>{' '}
-                            <IconExternalLink color="black" size="iconSmall" />
-                          </Shelf>
-                        </a>
+                        <Text variant="heading4">{chain.name}</Text>
+                        {pool.tranches.map((tranche) => (
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={`${chain.blockExplorerUrl}address/${domain.trancheTokens[tranche.id]}`}
+                          >
+                            <Shelf gap={1} alignItems="center">
+                              <Text variant="body2" color="black">
+                                View {tranche.currency.name.split(' ').at(-1)}
+                              </Text>{' '}
+                              <IconExternalLink color="black" size="iconSmall" />
+                            </Shelf>
+                          </a>
+                        ))}
                       </Stack>
                     }
                   >
