@@ -243,9 +243,19 @@ function Loan() {
         subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
       />
       {loanId === '0' && (
-        <PageSection>
-          <TransactionHistoryTable transactions={borrowerAssetTransactions ?? []} poolId={poolId} preview={false} />
-        </PageSection>
+        <>
+          <AssetSummary
+            data={[
+              {
+                label: 'Current value',
+                value: `${formatBalance(pool.reserve.total, pool.currency.symbol, 2, 2)}`,
+              },
+            ]}
+          />
+          <PageSection>
+            <TransactionHistoryTable transactions={borrowerAssetTransactions ?? []} poolId={poolId} preview={false} />
+          </PageSection>
+        </>
       )}
       {loan &&
         pool &&
