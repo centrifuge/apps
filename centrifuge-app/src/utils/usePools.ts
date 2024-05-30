@@ -124,6 +124,16 @@ export function useFeeTransactions(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
+export function useOracleTransactions(from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['oracleTransactions', from, to],
+    (cent) => cent.pools.getOracleTransactions([from, to]),
+    {}
+  )
+
+  return result
+}
+
 export function useAverageAmount(poolId: string) {
   const pool = usePool(poolId)
   const loans = useLoans(poolId)

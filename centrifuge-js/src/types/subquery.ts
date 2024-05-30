@@ -146,6 +146,14 @@ export type SubqueryPoolFeeTransaction = {
   }
 }
 
+export type SubqueryOracleTransaction = {
+  __typename?: 'OracleTransaction'
+  id: string
+  timestamp: string
+  key: string
+  value: string
+}
+
 export type SubqueryTrancheBalances = {
   __typename?: 'TrancheBalances'
   id: string

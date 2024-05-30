@@ -18,6 +18,7 @@ import {
   SubqueryAssetTransaction,
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
+  SubqueryOracleTransaction,
   SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
@@ -817,6 +818,13 @@ export type PoolFeeTransaction = {
   poolFee: {
     feeId: Number
   }
+}
+
+export type OracleTransaction = {
+  id: string
+  timestamp: Date
+  key: string
+  value: CurrencyBalance | undefined
 }
 
 type Holder = {
@@ -2798,6 +2806,48 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getOracleTransactions(args: [from?: Date, to?: Date]) {
+    const [from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      oracleTransactions: { nodes: SubqueryOracleTransaction[] }
+    }>(
+      `query($from: Datetime!, $to: Datetime!) {
+        oracleTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: {
+            timestamp: { greaterThan: $from, lessThan: $to },
+          }) {
+          nodes {
+            id
+            timestamp
+            key
+            value
+          }
+        }
+      }
+      `,
+      {
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      map((data) => {
+        return data!.oracleTransactions.nodes.map(
+          (tx) =>
+            ({
+              ...tx,
+              timestamp: new Date(`${tx.timestamp}+00:00`),
+              value: tx.value ? new CurrencyBalance(tx.value, 18) : undefined, // TODO: decimals
+            } satisfies OracleTransaction)
+        )
+      })
+    )
+  }
+
   function getAssetSnapshots(args: [poolId: string, loanId: string, from?: Date, to?: Date]) {
     const [poolId, loanId, from, to] = args
 
@@ -3900,6 +3950,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,
+    getOracleTransactions,
     getAssetSnapshots,
     getNativeCurrency,
     getCurrencies,
