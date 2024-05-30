@@ -7,7 +7,6 @@ import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
-import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 import { formatPoolFeeTransactionType } from './utils'
 
@@ -16,8 +15,6 @@ type ReportFilterProps = {
 }
 
 export function ReportFilter({ pool }: ReportFilterProps) {
-  const { holdersReport } = useDebugFlags()
-
   const {
     csvData,
     setStartDate,
@@ -53,7 +50,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
-    ...(holdersReport === true ? [{ label: 'Holders', value: 'holders' as Report }] : []),
+    { label: 'Investor list', value: 'investor-list' },
   ]
 
   return (
@@ -79,7 +76,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         }}
       />
 
-      {!['holders', 'asset-list', 'balance-sheet'].includes(report) && (
+      {!['investor-list', 'asset-list', 'balance-sheet'].includes(report) && (
         <>
           <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
           <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
@@ -138,7 +135,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
 
-      {(report === 'holders' || report === 'investor-tx') && (
+      {(report === 'investor-list' || report === 'investor-tx') && (
         <Select
           name="activeTranche"
           label="Token"
@@ -282,7 +279,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           }}
         />
       )}
-      {['investor-tx', 'holders'].includes(report) && (
+      {['investor-tx', 'investor-list'].includes(report) && (
         <>
           <Select
             name="network"

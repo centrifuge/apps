@@ -1,13 +1,14 @@
-import { Pool, isSameAddress } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool, isSameAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
 import { Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
+import BN from 'bn.js'
 import * as React from 'react'
 import { evmChains } from '../../config'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useHolders } from '../../utils/usePools'
-import { DataTable } from '../DataTable'
+import { useInvestorList } from '../../utils/usePools'
+import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
@@ -16,11 +17,11 @@ import { copyable } from './utils'
 
 const noop = (v: any) => v
 
-export function Holders({ pool }: { pool: Pool }) {
+export function InvestorList({ pool }: { pool: Pool }) {
   const { activeTranche, setCsvData, network, address } = React.useContext(ReportContext)
 
   const utils = useCentrifugeUtils()
-  const holders = useHolders(pool.id, activeTranche === 'all' ? undefined : activeTranche)
+  const investors = useInvestorList(pool.id, activeTranche === 'all' ? undefined : activeTranche)
 
   const columnConfig = [
     {
@@ -39,7 +40,14 @@ export function Holders({ pool }: { pool: Pool }) {
       header: 'Position',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
+    },
+    {
+      header: 'Pool %',
+      align: 'right',
+      sortable: true,
+      csvOnly: false,
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatPercentage(v * 100, true, {}, 2) : '-'),
     },
     {
       header: 'Position currency',
@@ -51,7 +59,7 @@ export function Holders({ pool }: { pool: Pool }) {
       header: 'Pending invest order',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 5) : '-'),
+      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
     },
     {
       header: 'Pending invest order currency',
@@ -63,7 +71,7 @@ export function Holders({ pool }: { pool: Pool }) {
       header: 'Pending redeem order',
       align: 'right',
       csvOnly: false,
-      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 5) : '-'),
+      formatter: (v: any, row: any) => (typeof v === 'number' ? formatBalance(v, row.token.currency.symbol, 2) : '-'),
     },
     {
       header: 'Pending redeem order currency',
@@ -76,34 +84,44 @@ export function Holders({ pool }: { pool: Pool }) {
   const columns = columnConfig
     .map((col, index) => ({
       align: col.align,
-      header: col.header,
+      header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
       cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index], row)}</Text>,
+      sortKey: col.sortable ? `value[${index}]` : undefined,
       csvOnly: col.csvOnly,
     }))
     .filter((col) => !col.csvOnly)
 
   const data: TableDataRow[] = React.useMemo(() => {
-    if (!holders) {
+    if (!investors) {
       return []
     }
-    return holders
-      .filter((holder) => !holder.balance.isZero() || !holder.claimableTrancheTokens.isZero())
+
+    const totalPositions = new CurrencyBalance(
+      investors.reduce((sum: BN, investor) => {
+        return sum.add(investor.balance).add(investor.claimableTrancheTokens)
+      }, new BN(0)),
+      investors[0].balance.decimals || 18
+    ).toFloat()
+
+    return investors
+      .filter((investor) => !investor.balance.isZero() || !investor.claimableTrancheTokens.isZero())
       .filter((tx) => {
         if (!network || network === 'all') return true
         return network === (tx.chainId || 'centrifuge')
       })
-      .map((holder) => {
-        const token = pool.tranches.find((t) => t.id === holder.trancheId)!
+      .map((investor) => {
+        const token = pool.tranches.find((t) => t.id === investor.trancheId)!
         return {
           name: '',
           value: [
-            (evmChains as any)[holder.chainId]?.name || 'Centrifuge',
-            holder.evmAddress || utils.formatAddress(holder.accountId),
-            holder.balance.toFloat() + holder.claimableTrancheTokens.toFloat(),
+            (evmChains as any)[investor.chainId]?.name || 'Centrifuge',
+            investor.evmAddress || utils.formatAddress(investor.accountId),
+            investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat(),
+            (investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat()) / totalPositions,
             token.currency.symbol,
-            holder.pendingInvestCurrency.toFloat(),
+            investor.pendingInvestCurrency.toFloat(),
             pool.currency.symbol,
-            holder.pendingRedeemTrancheTokens.toFloat(),
+            investor.pendingRedeemTrancheTokens.toFloat(),
             token.currency.symbol,
           ],
           token,
@@ -115,7 +133,7 @@ export function Holders({ pool }: { pool: Pool }) {
         return isAddress(address) && isSameAddress(address, row.value[1])
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [holders, network, pool, address])
+  }, [investors, network, pool, address])
 
   const dataUrl = React.useMemo(() => {
     if (!data.length) {
@@ -135,7 +153,7 @@ export function Holders({ pool }: { pool: Pool }) {
       dataUrl
         ? {
             dataUrl,
-            fileName: `${pool.id}-holders.csv`,
+            fileName: `${pool.id}-investors.csv`,
           }
         : undefined
     )
@@ -144,9 +162,13 @@ export function Holders({ pool }: { pool: Pool }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataUrl, pool.id])
 
-  if (!holders) {
+  if (!investors) {
     return <Spinner />
   }
 
-  return data.length > 0 ? <DataTable data={data} columns={columns} hoverable /> : <UserFeedback reportType="Holders" />
+  return data.length > 0 ? (
+    <DataTable data={data} columns={columns} hoverable defaultSortKey="value[3]" />
+  ) : (
+    <UserFeedback reportType="InvestorList" />
+  )
 }

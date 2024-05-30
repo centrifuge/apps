@@ -1,6 +1,5 @@
 import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js'
 import { StatusChip } from '@centrifuge/fabric'
-import * as React from 'react'
 import { formatTransactionsType } from '../Report/utils'
 
 type TransactionTypeProps = {
@@ -28,6 +27,7 @@ const status = {
   REPAID: 'default',
   CLOSED: 'default',
   PRICED: 'default',
+  CASH_TRANSFER: 'default',
 } as const
 
 export function TransactionTypeChip(props: TransactionTypeProps) {

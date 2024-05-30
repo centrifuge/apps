@@ -1,8 +1,11 @@
 import { ActiveLoan, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { Box, Card, Grid, Stack, Text } from '@centrifuge/fabric'
+import { NetworkIcon } from '@centrifuge/centrifuge-react'
+import { Box, Card, Grid, IconExternalLink, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
+import { evmChains } from '../../config'
 import { daysBetween } from '../../utils/date'
+import { useActiveDomains } from '../../utils/useLiquidityPools'
 
 type Props = {
   assetType?: { class: string; subClass: string }
@@ -26,6 +29,8 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
       const days = daysBetween(today, loan.pricing.maturityDate)
       return loan.status === 'Active' && loan.pricing.maturityDate && days < 0 && !loan.outstandingDebt.isZero()
     }).length
+
+  const activeDomains = useActiveDomains(poolId)
 
   const isBT3BT4 =
     poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
@@ -67,6 +72,45 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
           {
             metric: 'Overdue assets',
             value: overdueAssetCount,
+          },
+        ]
+      : []),
+    ...(activeDomains.data?.length
+      ? [
+          {
+            metric: 'Available networks',
+            value: (
+              <Shelf gap={1}>
+                {activeDomains.data.map((domain) => {
+                  const chain = (evmChains as any)[domain.chainId]
+                  return (
+                    <Tooltip
+                      bodyWidth="maxContent"
+                      bodyPadding={0}
+                      body={
+                        <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
+                          <Text variant="heading4">{chain.name} chain</Text>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={`${chain.blockExplorerUrl}address/${domain.managerAddress}`}
+                          >
+                            <Shelf gap={1} alignItems="center">
+                              <Text variant="body2" color="black">
+                                View transactions
+                              </Text>{' '}
+                              <IconExternalLink color="black" size="iconSmall" />
+                            </Shelf>
+                          </a>
+                        </Stack>
+                      }
+                    >
+                      <NetworkIcon size="iconSmall" network={domain.chainId} />
+                    </Tooltip>
+                  )
+                })}
+              </Shelf>
+            ),
           },
         ]
       : []),

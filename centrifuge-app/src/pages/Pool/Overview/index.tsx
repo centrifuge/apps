@@ -25,7 +25,7 @@ import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { useIsAboveBreakpoint } from '../../../utils/useIsAboveBreakpoint'
 import { useLoans } from '../../../utils/useLoans'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { usePool, usePoolFees, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export type Token = {
@@ -63,6 +63,7 @@ export function PoolDetailOverview() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const averageMaturity = useAverageMaturity(poolId)
   const loans = useLoans(poolId)
@@ -144,7 +145,7 @@ export function PoolDetailOverview() {
                 poolFees={
                   metadata?.pool?.poolFees?.map((fee) => {
                     return {
-                      fee: pool.poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
+                      fee: poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
                       name: fee.name,
                       id: fee.id,
                     }

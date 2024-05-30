@@ -77,6 +77,7 @@ const assetTransactionTypes: {
   BORROWED: 'Financed',
   REPAID: 'Repaid',
   CLOSED: 'Closed',
+  CASH_TRANSFER: 'Cash transfer',
 }
 
 export function formatAssetTransactionType(type: AssetTransactionType) {

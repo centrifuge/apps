@@ -51,7 +51,7 @@ export type Key =
   | 'showOracle'
   | 'poolCreationType'
   | 'podAdminSeed'
-  | 'holdersReport'
+  | 'assetSnapshots'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -93,7 +93,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: '',
     type: 'text',
   },
-  holdersReport: {
+  assetSnapshots: {
     type: 'checkbox',
     default: false,
   },

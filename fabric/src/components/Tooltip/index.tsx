@@ -13,6 +13,8 @@ export type TooltipProps = TextProps & {
   body: string | React.ReactNode
   disabled?: boolean
   delay?: number
+  bodyWidth?: string | number
+  bodyPadding?: string | number
 }
 
 const StyledTrigger = styled(Text)`
@@ -68,7 +70,16 @@ const Container = styled(Stack)<{ pointer: PlacementAxis }>`
   }
 `
 
-export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disabled, delay = 1000, ...textProps }) => {
+export const Tooltip: React.FC<TooltipProps> = ({
+  title,
+  body,
+  children,
+  disabled,
+  delay = 1000,
+  bodyWidth,
+  bodyPadding,
+  ...textProps
+}) => {
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const overlayRef = React.useRef<HTMLDivElement>(null)
 
@@ -95,9 +106,9 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
               {...rest}
               ref={overlayRef}
               backgroundColor="backgroundPrimary"
-              p={1}
+              p={bodyPadding ?? 1}
               borderRadius="tooltip"
-              width={220}
+              width={bodyWidth ?? 220}
               gap="3px"
               pointer={pointer}
             >
