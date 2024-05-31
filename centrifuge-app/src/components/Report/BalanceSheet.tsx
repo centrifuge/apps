@@ -46,7 +46,6 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         oneYearAgo.setHours(0, 0, 0, 0)
         return [oneYearAgo, today]
       case 'year':
-        // TODO: figure out how many years are available to show, sum and aggregate
         const oneYearsAgo = new Date()
         oneYearsAgo.setFullYear(oneYearsAgo.getFullYear() - 1)
         oneYearsAgo.setHours(0, 0, 0, 0)
@@ -112,7 +111,6 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
               .sub(poolState.cashAssetValue.toDecimal())
               .sub(poolState.totalReserve.toDecimal())
           ) || [],
-        // PoolSnapshot.NAV - PoolSnapshot.cashAssetValue - PoolSnapshot.totalReserve
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
