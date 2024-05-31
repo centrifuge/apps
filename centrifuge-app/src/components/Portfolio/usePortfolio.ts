@@ -192,11 +192,14 @@ export function usePortfolio(address?: string) {
           const sumClaimedCurrency = new CurrencyBalance(tranche.sumClaimedCurrency, decimals)
           const sumClaimedTrancheTokens = new TokenBalance(tranche.sumClaimedTrancheTokens, decimals)
 
-          const currencyAmount = subData.account.currencyBalances.nodes.find(
+          const currencyAmounts = subData.account.currencyBalances.nodes.filter(
             (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
           )
-          if (currencyAmount) {
-            freeTrancheTokens = new CurrencyBalance(currencyAmount.amount, decimals)
+          if (currencyAmounts.length) {
+            freeTrancheTokens = new CurrencyBalance(
+              currencyAmounts.reduce((acc: BN, cur: any) => acc.add(new BN(cur.amount)), new BN(0)),
+              decimals
+            )
           }
 
           const totalTrancheTokens = new CurrencyBalance(
