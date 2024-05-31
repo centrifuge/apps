@@ -2853,7 +2853,7 @@ export function getPoolsModule(inst: Centrifuge) {
             ({
               ...tx,
               timestamp: new Date(`${tx.timestamp}+00:00`),
-              value: tx.value ? new CurrencyBalance(tx.value, 18) : undefined, // TODO: decimals
+              value: tx.value ? new CurrencyBalance(tx.value, 18) : undefined,
             } satisfies OracleTransaction)
         )
       })
