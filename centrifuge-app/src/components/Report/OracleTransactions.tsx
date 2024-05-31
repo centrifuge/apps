@@ -28,7 +28,7 @@ export function OracleTransactions({ pool }: { pool: Pool }) {
       header: 'Oracle key',
       align: 'left',
       csvOnly: false,
-      formatter: noop,
+      formatter: (v: any) => v.substring(2),
     },
     {
       header: 'Value',
