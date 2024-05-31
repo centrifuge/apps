@@ -2239,7 +2239,6 @@ export function getPoolsModule(inst: Centrifuge) {
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
           sumInterestRepaidAmountByPeriod
-          value
         }
         pageInfo {
           hasNextPage
