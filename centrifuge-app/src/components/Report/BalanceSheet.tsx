@@ -105,26 +105,34 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     return [
       {
         name: 'Asset valuation',
-        value: [],
+        value:
+          poolStates?.map(({ poolState }) =>
+            poolState.portfolioValuation
+              .toDecimal()
+              .sub(poolState.cashAssetValue.toDecimal())
+              .sub(poolState.totalReserve.toDecimal())
+          ) || [],
+        // PoolSnapshot.NAV - PoolSnapshot.cashAssetValue - PoolSnapshot.totalReserve
         heading: false,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
         name: '\u00A0 \u00A0 + Onchain reserve',
         value: poolStates?.map(({ poolState }) => poolState.totalReserve.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
         name: '\u00A0 \u00A0 + Offchain cash',
         value: poolStates?.map(({ poolState }) => poolState.cashAssetValue.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
         name: '\u00A0 \u00A0 - Accrued fees',
         value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPendingAmount.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
   }, [poolStates])
@@ -222,8 +230,9 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         hoverable
         summary={{
           name: '= Total assets/NAV',
-          value: poolStates?.map(() => '' as any) || [],
+          value: poolStates?.map(({ poolState }) => poolState.portfolioValuation.toDecimal()) || [],
           heading: false,
+          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
         }}
       />
       <DataTable
