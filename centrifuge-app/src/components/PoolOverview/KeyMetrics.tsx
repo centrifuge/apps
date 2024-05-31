@@ -83,7 +83,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
       metric: 'Available networks',
       value: (
         <Shelf gap={1}>
-          {activeDomains.data?.length ? (
+          {activeDomains.data?.length || import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('development') ? (
             <Tooltip
               bodyWidth="maxContent"
               bodyPadding={0}
