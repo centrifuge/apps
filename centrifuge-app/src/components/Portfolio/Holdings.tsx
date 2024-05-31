@@ -44,7 +44,7 @@ type Row = {
   marketValue: Decimal
   position: Decimal
   tokenPrice: Decimal
-  showActions: boolean
+  showActions?: boolean
   address?: string
   connectedNetwork?: string
 }
