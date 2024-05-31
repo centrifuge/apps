@@ -2465,10 +2465,10 @@ export function getPoolsModule(inst: Centrifuge) {
                     tranche.sumOutstandingRedeemOrdersByPeriod,
                     poolCurrency.decimals
                   ),
-                  yield30DaysAnnualized: new Perquintill(hexToBN(tranche.yield30DaysAnnualized)),
-                  yield90DaysAnnualized: new Perquintill(hexToBN(tranche.yield90DaysAnnualized)),
-                  yieldSinceInception: new Perquintill(hexToBN(tranche.yieldSinceInception)),
-                  yieldSinceLastPeriod: new Perquintill(hexToBN(tranche.yieldSinceLastPeriod)),
+                  yield30DaysAnnualized: tranche.yield30DaysAnnualized ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized)) : new Perquintill(0),
+                  yield90DaysAnnualized: tranche.yield90DaysAnnualized ? new Perquintill(hexToBN(tranche.yield90DaysAnnualized)) : new Perquintill(0),
+                  yieldSinceInception: tranche.yieldSinceInception ? new Perquintill(hexToBN(tranche.yieldSinceInception)) : new Perquintill(0),
+                  yieldSinceLastPeriod: tranche.yieldSinceLastPeriod ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod)) : new Perquintill(0),
                 }
               })
 
