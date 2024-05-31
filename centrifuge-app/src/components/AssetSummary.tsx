@@ -10,7 +10,7 @@ type Props = {
     value: React.ReactNode
   }[]
   children?: React.ReactNode
-  loan: Loan | TinlakeLoan
+  loan?: Loan | TinlakeLoan
 }
 
 export const AssetSummary: React.FC<Props> = ({ data, children, loan }) => {
@@ -20,7 +20,7 @@ export const AssetSummary: React.FC<Props> = ({ data, children, loan }) => {
       <Box paddingTop={3}>
         <Shelf gap="2">
           <Text variant="heading2">Details</Text>
-          <LoanLabel loan={loan} />
+          {loan && <LoanLabel loan={loan} />}
         </Shelf>
       </Box>
       <Shelf
