@@ -43,7 +43,6 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const loans = useLoans(pool.id) as Loan[] | undefined
 
   const reportOptions: { label: string; value: Report }[] = [
-    { label: 'Balance sheet', value: 'balance-sheet' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
@@ -51,6 +50,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
     { label: 'Investor list', value: 'investor-list' },
+    { label: 'Balance sheet', value: 'balance-sheet' },
   ]
 
   return (
@@ -181,6 +181,9 @@ export function ReportFilter({ pool }: ReportFilterProps) {
             label="Group by"
             onChange={(event) => {
               setGroupBy(event.target.value as GroupBy)
+              if (event.target.value === 'day') {
+                setStartDate(new Date().toLocaleDateString('en-CA'))
+              }
             }}
             value={groupBy}
             options={[
