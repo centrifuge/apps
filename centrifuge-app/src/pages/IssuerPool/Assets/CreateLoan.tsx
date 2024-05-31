@@ -1,4 +1,4 @@
-import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, LoanInfoInput, Price, Rate } from '@centrifuge/centrifuge-js'
 import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import {
   formatBalance,
@@ -183,7 +183,10 @@ function IssuerCreateLoan() {
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
     (cent) =>
-      ([collectionId, nftId, owner, metadataUri, pricingInfo]: any[], options) => {
+      (
+        [collectionId, nftId, owner, metadataUri, pricingInfo]: [string, string, string, string, LoanInfoInput],
+        options
+      ) => {
         return centrifuge.pools.createLoan([pid, collectionId, nftId, pricingInfo], { batch: true }).pipe(
           switchMap((createTx) => {
             const tx = api.tx.utility.batchAll([

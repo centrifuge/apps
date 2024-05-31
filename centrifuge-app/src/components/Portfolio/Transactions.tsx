@@ -120,7 +120,6 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
   ].filter(Boolean) as Column[]
 
   const transactions = useTransactionsByAddress(address)
-  console.log('transactions', transactions)
   const pools = usePools()
   const investorTransactions = React.useMemo(() => {
     const txs = transactions?.investorTransactions
