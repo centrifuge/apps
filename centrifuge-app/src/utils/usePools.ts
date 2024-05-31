@@ -44,7 +44,7 @@ export function usePoolStatesByGroup(
   poolId: string,
   from?: Date,
   to?: Date,
-  groupBy?: 'day' | '30-day' | 'month' | 'quarter' | 'year'
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
 ) {
   const [result] = useCentrifugeQuery(
     ['monthlyPoolStates', poolId, from, to, groupBy],

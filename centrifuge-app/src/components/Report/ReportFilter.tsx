@@ -185,14 +185,11 @@ export function ReportFilter({ pool }: ReportFilterProps) {
             label="Group by"
             onChange={(event) => {
               setGroupBy(event.target.value as GroupBy)
-              if (event.target.value === 'day') {
-                setStartDate(new Date().toLocaleDateString('en-CA'))
-              }
             }}
             value={groupBy}
             options={[
-              { label: 'Daily', value: '30-day' },
               { label: 'Day', value: 'day' },
+              { label: 'Daily', value: 'daily' },
               { label: 'Monthly', value: 'month' },
               { label: 'Quarterly', value: 'quarter' },
               { label: 'Yearly', value: 'year' },
@@ -201,6 +198,12 @@ export function ReportFilter({ pool }: ReportFilterProps) {
           {groupBy === 'day' && (
             <DateInput label="Day" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
           )}
+          {groupBy === 'month' || groupBy === 'daily' ? (
+            <>
+              <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
+              <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
+            </>
+          ) : null}
         </>
       )}
 

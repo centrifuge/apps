@@ -19,47 +19,42 @@ type Row = TableDataRow & {
 }
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
-  const { startDate, endDate, groupBy, setCsvData, setEndDate } = React.useContext(ReportContext)
+  const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
     const today = new Date()
     today.setDate(today.getDate())
     today.setHours(0, 0, 0, 0)
-    switch (groupBy) {
-      case 'day':
-        const from = new Date(startDate ?? today)
-        from.setHours(0, 0, 0, 0)
-        const to = new Date(startDate ?? today)
-        to.setDate(to.getDate() + 1)
-        to.setHours(0, 0, 0, 0)
-        setEndDate(to.toISOString())
-        return [from, to]
-      case '30-day':
-        const thirtyDaysAgo = new Date()
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-        thirtyDaysAgo.setHours(0, 0, 0, 0)
-        return [thirtyDaysAgo, today]
-      case 'month':
-      case 'quarter':
-        const oneYearAgo = new Date()
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-        oneYearAgo.setHours(0, 0, 0, 0)
-        return [oneYearAgo, today]
-      case 'year':
-        const oneYearsAgo = new Date()
-        oneYearsAgo.setFullYear(oneYearsAgo.getFullYear() - 1)
-        oneYearsAgo.setHours(0, 0, 0, 0)
-        return [oneYearsAgo, today]
-      default:
-        throw new Error('No filter set')
+    if (groupBy === 'day') {
+      const from = new Date(startDate ?? today)
+      from.setHours(0, 0, 0, 0)
+      const to = new Date(startDate ?? today)
+      to.setDate(to.getDate() + 1)
+      to.setHours(0, 0, 0, 0)
+      return [from, to]
+    } else if (groupBy === 'daily') {
+      const from = new Date(startDate ?? today)
+      from.setHours(0, 0, 0, 0)
+      const to = new Date(endDate ?? today)
+      to.setDate(to.getDate() + 1)
+      to.setHours(0, 0, 0, 0)
+      return [from, to]
+    } else if (groupBy === 'quarter' || groupBy === 'year') {
+      const from = pool.createdAt ? new Date(pool.createdAt) : today
+      return [from, today]
+    } else {
+      const to = new Date(endDate ?? today)
+      to.setDate(to.getDate() + 1)
+      to.setHours(0, 0, 0, 0)
+      return [new Date(startDate), to]
     }
-  }, [groupBy, startDate])
+  }, [groupBy, startDate, endDate])
 
   const poolStates = usePoolStatesByGroup(
     pool.id,
-    adjustedStartDate ? adjustedStartDate : undefined,
-    adjustedEndDate ? adjustedEndDate : undefined,
-    groupBy
+    adjustedStartDate,
+    adjustedEndDate,
+    groupBy === 'daily' ? 'day' : groupBy
   )
 
   const columns = React.useMemo(() => {
@@ -151,7 +146,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
               name: `\u00A0 \u00A0 * ${token.currency.displayName} token price`,
               value: poolStates?.map((poolState) => poolState.tranches[token.id].price || ('' as any)) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 2) : ''),
+              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 6) : ''),
             },
             {
               name: `\u00A0 \u00A0 = ${token.currency.displayName} tranche value`,

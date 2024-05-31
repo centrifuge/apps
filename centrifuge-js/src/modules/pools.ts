@@ -2549,35 +2549,9 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  // function getPoolStatesByGroup(args: [poolId: string, from?: Date, to?: Date]) {
-  //   return getDailyPoolStates(args).pipe(
-  //     map(({ poolStates }) => {
-  //       if (!poolStates.length) return []
-  //       // group by month
-  //       // todo: find last of each month
-  //       const poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
-  //       poolStates.forEach((poolState) => {
-  //         const monthYear = `${new Date(poolState.timestamp).getMonth()}-${new Date(poolState.timestamp).getFullYear()}`
-  //         if (monthYear in poolStatesByMonth) {
-  //           poolStatesByMonth[monthYear].push(poolState)
-  //         } else {
-  //           poolStatesByMonth[monthYear] = [poolState]
-  //         }
-  //       })
-
-  //       return Object.values(poolStatesByMonth).map((statesOneMonth) => {
-  //         const base = statesOneMonth[statesOneMonth.length - 1]
-  //         // todo: sum aggregated values (e.g. tranches.fulfilledInvestOrders)
-
-  //         return base
-  //       })
-  //     })
-  //   )
-  // }
-
   function getPoolStatesByGroup(
     args: [poolId: string, from?: Date, to?: Date],
-    groupBy: 'day' | '30-day' | 'month' | 'quarter' | 'year' = 'month'
+    groupBy: 'day' | 'month' | 'quarter' | 'year' = 'month'
   ) {
     return getDailyPoolStates(args).pipe(
       map(({ poolStates }) => {
@@ -2590,12 +2564,6 @@ export function getPoolsModule(inst: Centrifuge) {
 
           if (groupBy === 'day') {
             period = date.toISOString().split('T')[0]
-          } else if (groupBy === '30-day') {
-            const thirtyDaysAgo = new Date()
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-            if (date >= thirtyDaysAgo) {
-              period = date.toISOString().split('T')[0] // Format as "YYYY-MM-DD"
-            }
           } else if (groupBy === 'month') {
             period = `${date.getMonth() + 1}-${date.getFullYear()}`
           } else if (groupBy === 'quarter') {
@@ -2615,78 +2583,6 @@ export function getPoolsModule(inst: Centrifuge) {
         return Object.values(poolStatesByGroup)
       })
     )
-    // return getDailyPoolStates(args).pipe(
-    //   map(({ poolStates }) => {
-    //     if (!poolStates.length) return []
-
-    // const poolStatesByGroup: { [period: string]: DailyPoolState[] } = {}
-    // if (groupBy === 'month') {
-    //   poolStates.forEach((poolState) => {
-    //     const monthYear = `${new Date(poolState.timestamp).getMonth()}-${new Date(
-    //       poolState.timestamp
-    //     ).getFullYear()}`
-    //     if (monthYear in poolStatesByGroup) {
-    //       poolStatesByGroup[monthYear].push(poolState)
-    //     } else {
-    //       poolStatesByGroup[monthYear] = [poolState]
-    //     }
-    //   })
-
-    //   return Object.values(poolStatesByGroup).map((statesOneMonth) => {
-    //     console.log('🚀 ~ poolStatesByGroup:', poolStatesByGroup)
-    //     const base = poolStatesByGroup[statesOneMonth.length - 1]
-    //     console.log('🚀 ~ base:', base)
-    //     return base
-    //   })
-    // } else if (groupBy === 'quarter') {
-    //   poolStates.forEach((poolState) => {
-    //     const date = new Date(poolState.timestamp)
-    //     const quarterEndMonth = Math.ceil((date.getMonth() + 1) / 3) * 3 - 1 // Get the last month of the current quarter
-    //     const isQuarterEnd =
-    //       date.getMonth() === quarterEndMonth &&
-    //       date.getDate() === new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() // Check if the date is the last day of the quarter
-
-    //     if (isQuarterEnd) {
-    //       const quarterYear = `${quarterEndMonth + 1}-${date.getDate()}-${date.getFullYear()}` // Format as "MM-DD-YYYY"
-
-    //       if (quarterYear in poolStatesByGroup) {
-    //         poolStatesByGroup[quarterYear].push(poolState)
-    //       } else {
-    //         poolStatesByGroup[quarterYear] = [poolState]
-    //       }
-    //     }
-    //   })
-    //   return Object.values(poolStatesByGroup).map((statesOneQuarter) => {
-    //     const base = poolStatesByGroup[statesOneQuarter.length - 1]
-    //     return base
-    //   })
-    // } else if (groupBy === 'year') {
-    //   poolStates.forEach((poolState) => {
-    //     const monthYear = `${new Date(poolState.timestamp).getMonth()}-${new Date(
-    //       poolState.timestamp
-    //     ).getFullYear()}`
-    //     if (monthYear in poolStatesByGroup) {
-    //       poolStatesByGroup[monthYear].push(poolState)
-    //     } else {
-    //       poolStatesByGroup[monthYear] = [poolState]
-    //     }
-    //   })
-    //   return Object.values(poolStatesByGroup).map((statesOneYear) => {
-    //     const base = poolStatesByGroup[statesOneYear.length - 1]
-    //     return base
-    //   })
-    // } else {
-    //   throw new Error(`Unsupported groupBy: ${groupBy}`)
-    // }
-    // console.log('🚀 ~ poolStatesByGroup:', poolStatesByGroup)
-    // return Object.values(poolStatesByGroup).map((statesOneMonth) => {
-    //   console.log('🚀 ~ statesOneMonth:', statesOneMonth)
-    //   const base = poolStatesByGroup[statesOneMonth.length - 1]
-    //   // todo: sum aggregated values (e.g. tranches.fulfilledInvestOrders)
-    //   return base
-    // })
-    //   })
-    // )
   }
 
   function getTransactionsByAddress(args: [address: string, count?: number, txTypes?: InvestorTransactionType[]]) {
