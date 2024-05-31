@@ -58,7 +58,7 @@ function PoolPerformanceChart() {
   const data: ChartData[] = React.useMemo(
     () =>
       truncatedPoolStates?.map((day) => {
-        const nav = day.poolState.portfolioValuation.toDecimal().toNumber()
+        const nav = day.poolState.netAssetValue.toDecimal().toNumber()
 
         return { day: new Date(day.timestamp), nav }
       }) || [],
