@@ -10,7 +10,6 @@ interface ImportMetaEnv {
   REACT_APP_WHITELISTED_ACCOUNTS: string
   REACT_APP_NETWORK: 'altair' | 'centrifuge'
   REACT_APP_POOL_CREATION_TYPE: 'immediate' | 'propose' | 'notePreimage'
-  REACT_APP_DEFAULT_NODE_URL: string
   REACT_APP_FAUCET_URL: string
   REACT_APP_ONBOARDING_API_URL: string
   REACT_APP_TINLAKE_NETWORK: 'goerli' | 'mainnet'

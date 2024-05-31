@@ -1,6 +1,5 @@
 import { Network } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
-import { isTestEnv } from '../config'
 
 export type DAO = {
   name: string
@@ -23,15 +22,12 @@ export const useDAOConfig = () => {
   const query = useQuery(
     'daoData',
     async () => {
-      const res = await fetch(
-        `https://api.github.com/repos/centrifuge/prime-data/contents/data${isTestEnv ? '-dev' : ''}.json`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        }
-      )
+      const res = await fetch(`https://api.github.com/repos/centrifuge/prime-data/contents/data${''}.json`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      })
 
       if (!res.ok) {
         throw new Error('Network response was not ok')

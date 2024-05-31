@@ -34,7 +34,6 @@ import * as React from 'react'
 import { combineLatest, of, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
-import { useDebugFlags } from '../../../components/DebugFlags'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
@@ -44,18 +43,14 @@ import { useIdentity } from '../../../utils/useIdentity'
 import { useDomainRouters } from '../../../utils/useLiquidityPools'
 import { getKeyForReceiver, usePoolAccess, useSuitableAccounts, WithdrawKey } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { address, required } from '../../../utils/validation'
+import { address } from '../../../utils/validation'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { diffPermissions } from '../Configuration/Admins'
-import { CreatePodAccount } from './CreatePodAccount'
 
 type AOFormValues = {
   withdrawAddresses: { key?: any; meta?: WithdrawAddress }[]
   name?: string
   delegates: string[]
-  p2pKey: string
-  documentKey: string
-  podOperator: string
 }
 
 export function AssetOriginators({ poolId }: { poolId: string }) {
@@ -154,13 +149,10 @@ function AOForm({
       ),
   ]
 
-  const { showPodAccountCreation } = useDebugFlags()
   const cent = useCentrifuge()
   const {
     proxy: { proxyDepositFactor },
     uniques: { collectionDeposit },
-    loans: { loanDeposit },
-    keystore: { keyDeposit },
     transferAllowlist: { receiverDeposit },
   } = useCentrifugeConsts()
 
@@ -175,9 +167,6 @@ function AOForm({
         ...new Array(3).fill({}),
       ].slice(0, 3),
       delegates: ao.delegates.map((d) => d.delegatee),
-      p2pKey: '',
-      documentKey: '',
-      podOperator: '',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ao, identity]
@@ -199,11 +188,6 @@ function AOForm({
           addedPermissions?: ReturnType<typeof diffPermissions>['add'],
           addedAddresses?: string[],
           removedAddresses?: string[],
-          keys?: {
-            p2pKey: string
-            documentKey: string
-          },
-          podOperator?: string,
           collectionId?: string
         ],
         options
@@ -215,8 +199,6 @@ function AOForm({
           addedPermissions = [],
           addedAddresses = [],
           removedAddresses = [],
-          keys,
-          podOperator,
           collectionId,
         ] = args
 
@@ -230,15 +212,12 @@ function AOForm({
             const numProxyTypesPerHotWallet = 4
             const deposit = proxyDepositFactor
               .mul(new BN(Math.max(addedAddresses.length - removedAddresses.length, 0) * numProxyTypesPerHotWallet))
-              .add(podOperator ? proxyDepositFactor : new BN(0))
               .add(collectionId ? collectionDeposit : new BN(0))
               .add(
                 receiverDeposit.mul(
                   new BN(Math.max(addedWithdrawAddresses.length - removedWithdrawAddresses.length, 0))
                 )
               )
-              // When setting up the AO, also add enough funds to create 100 loans
-              .add(keys ? keyDeposit.mul(new BN(2)).add(loanDeposit.mul(new BN(100))) : new BN(0))
 
             // doing the proxy and multisig transactions manually, because both the Pool Admin and the AO need to call extrinsics
             let tx = api.tx.proxy.proxy(
@@ -260,23 +239,17 @@ function AOForm({
                               .map((addr) => [
                                 api.tx.proxy.removeProxy(addr, 'Borrow', 0),
                                 api.tx.proxy.removeProxy(addr, 'Invest', 0),
-                                api.tx.proxy.removeProxy(addr, 'PodAuth', 0),
                                 api.tx.proxy.removeProxy(addr, 'Transfer', 0),
+                                api.tx.proxy.removeProxy(addr, 'PodOperation', 0),
                               ])
                               .flat()
                           ),
                         addedAddresses.map((addr) => [
                           api.tx.proxy.addProxy(addr, 'Borrow', 0),
                           api.tx.proxy.addProxy(addr, 'Invest', 0),
-                          api.tx.proxy.addProxy(addr, 'PodAuth', 0),
                           api.tx.proxy.addProxy(addr, 'Transfer', 0),
+                          api.tx.proxy.addProxy(addr, 'PodOperation', 0),
                         ]),
-                        podOperator && api.tx.proxy.addProxy(podOperator, 'PodOperation', 0),
-                        keys &&
-                          api.tx.keystore.addKeys([
-                            [keys.p2pKey, 'P2PDiscovery', 'ECDSA'],
-                            [keys.documentKey, 'P2PDocumentSigning', 'ECDSA'],
-                          ]),
                         collectionId && [api.tx.uniques.create(collectionId, ao.address)],
                         addedWithdrawAddresses.map((w) => api.tx.transferAllowList.addTransferAllowance('All', w)),
                         removedWithdrawAddresses.map((w) => api.tx.transferAllowList.removeTransferAllowance('All', w)),
@@ -371,8 +344,6 @@ function AOForm({
           addedPermissions,
           addedDelegates,
           removedDelegates,
-          values.p2pKey && values.documentKey ? { p2pKey: values.p2pKey, documentKey: values.documentKey } : undefined,
-          values.podOperator,
           !ao.collateralCollections.length ? await cent.nfts.getAvailableCollectionId() : undefined,
         ],
         { account }
@@ -417,7 +388,6 @@ function AOForm({
   )
 
   const hasChanges =
-    (!!form.values.documentKey && !!form.values.p2pKey) ||
     form.values.name !== initialValues.name ||
     form.values.delegates.length !== initialValues.delegates.length ||
     !form.values.delegates.every((s) => initialValues.delegates.includes(s)) ||
@@ -454,52 +424,6 @@ function AOForm({
           }
         >
           <Stack gap={4}>
-            {!ao.isSetUp && isEditing && (
-              <Stack gap={2}>
-                <Text as="h3" variant="heading4">
-                  POD Setup
-                </Text>
-                {showPodAccountCreation && (
-                  <CreatePodAccount
-                    poolId={poolId}
-                    address={ao.address}
-                    onSuccess={(res) => {
-                      form.setFieldValue('p2pKey', res.p2pDiscoveryKey, false)
-                      form.setFieldValue('documentKey', res.documentSigningKey, false)
-                      form.setFieldValue('podOperator', res.operatorAccountId, false)
-                    }}
-                  />
-                )}
-                <Text as="p" variant="body2" color="textSecondary">
-                  Values that need to be set in order to be able to authenticate with the POD and create assets
-                </Text>
-                <FieldWithErrorMessage
-                  validate={required()}
-                  name="documentKey"
-                  as={TextInput}
-                  label="Document Signing Key"
-                  placeholder="0x..."
-                  maxLength={66}
-                />
-                <FieldWithErrorMessage
-                  validate={required()}
-                  name="p2pKey"
-                  as={TextInput}
-                  label="P2P Discovery Key"
-                  placeholder="0x..."
-                  maxLength={66}
-                />
-                <FieldWithErrorMessage
-                  validate={required()}
-                  name="podOperator"
-                  as={TextInput}
-                  label="Pod Operator Account ID"
-                  placeholder="0x..."
-                  maxLength={66}
-                />
-              </Stack>
-            )}
-
             <Stack gap={2}>
               <Text as="h3" variant="heading4">
                 Delegates

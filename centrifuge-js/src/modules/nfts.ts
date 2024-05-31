@@ -1,6 +1,6 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, firstValueFrom, of } from 'rxjs'
+import { EMPTY, combineLatest, firstValueFrom, of } from 'rxjs'
 import { expand, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
@@ -37,8 +37,9 @@ export type CollectionMetadataInput = {
 
 export type NFTMetadataInput = {
   name: string
-  description: string
-  image: string
+  description?: string
+  image?: string
+  properties?: Record<string, string | number>
 }
 
 const MAX_ATTEMPTS = 10
@@ -313,6 +314,7 @@ export function getNftsModule(inst: Centrifuge) {
       image: metadata.image,
       name: metadata.name,
       description: metadata.description,
+      properties: metadata.properties || {},
     })
     return combineLatest([$api, $pinnedMetadata]).pipe(
       map(([api, pinnedMetadata]) => {
@@ -423,20 +425,6 @@ export function getNftsModule(inst: Centrifuge) {
     }
   }
 
-  function getNftDocumentId(args: [collectionId: string, nftId: string]) {
-    const [collectionId, nftId] = args
-    const $api = inst.getApi()
-
-    return $api.pipe(
-      switchMap((api) => api.query.uniques.attribute(collectionId, nftId, 'document_id')),
-      map((attributeValue) => {
-        const attribute = attributeValue.toJSON() as any
-        if (!attribute) return null
-        return attribute[0]
-      })
-    )
-  }
-
   return {
     getCollections,
     getCollection,
@@ -451,7 +439,6 @@ export function getNftsModule(inst: Centrifuge) {
     sellNft,
     removeNftListing,
     buyNft,
-    getNftDocumentId,
   }
 }
 

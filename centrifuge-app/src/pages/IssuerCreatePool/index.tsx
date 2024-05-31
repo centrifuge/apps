@@ -126,7 +126,6 @@ const initialValues: CreatePoolValues = {
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
-  podEndpoint: config.defaultPodUrl ?? '',
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
 
   issuerName: '',
@@ -672,15 +671,6 @@ function CreatePoolForm() {
                     />
                   )}
                 </Field>
-              </Box>
-              <Box gridColumn="span 2">
-                <FieldWithErrorMessage
-                  validate={validate.podEndpoint}
-                  name="podEndpoint"
-                  as={TextInput}
-                  label={`POD endpoint`}
-                  placeholder="https://"
-                />
               </Box>
             </Grid>
           </PageSection>
