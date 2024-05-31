@@ -573,7 +573,6 @@ export type DailyPoolState = {
   poolState: {
     netAssetValue: CurrencyBalance
     totalReserve: CurrencyBalance
-    sumPoolFeesPendingAmount: CurrencyBalance
     offchainCashValue: CurrencyBalance
     portfolioValuation: CurrencyBalance
   }
