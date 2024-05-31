@@ -6,6 +6,7 @@ export type SubqueryPoolSnapshot = {
   value: string
   portfolioValuation: number
   totalReserve: number
+  cashAssetValue: number
   sumPoolFeesChargedAmountByPeriod: string | null
   sumPoolFeesAccruedAmountByPeriod: string | null
   sumBorrowedAmountByPeriod: string
@@ -32,6 +33,10 @@ export type SubqueryTrancheSnapshot = {
   sumOutstandingRedeemOrdersByPeriod: string
   sumFulfilledInvestOrdersByPeriod: string
   sumFulfilledRedeemOrdersByPeriod: string
+  yield30DaysAnnualized: string
+  yield90DaysAnnualized: string
+  yieldSinceInception: string
+  yieldSinceLastPeriod: string
 }
 
 export type InvestorTransactionType =
@@ -143,6 +148,14 @@ export type SubqueryPoolFeeTransaction = {
   poolFee: {
     feeId: Number
   }
+}
+
+export type SubqueryOracleTransaction = {
+  __typename?: 'OracleTransaction'
+  id: string
+  timestamp: string
+  key: string
+  value: string
 }
 
 export type SubqueryTrancheBalances = {

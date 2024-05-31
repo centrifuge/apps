@@ -7,6 +7,7 @@ import { AssetTransactions } from './AssetTransactions'
 import { FeeTransactions } from './FeeTransactions'
 import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
+import { OracleTransactions } from './OracleTransactions'
 import { PoolBalance } from './PoolBalance'
 import { ReportContext } from './ReportContext'
 import { TokenPrice } from './TokenPrice'
@@ -46,6 +47,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
         {report === 'asset-tx' && <AssetTransactions pool={pool} />}
         {report === 'fee-tx' && <FeeTransactions pool={pool} />}
+        {report === 'oracle-tx' && <OracleTransactions pool={pool} />}
       </Box>
     </Box>
   )

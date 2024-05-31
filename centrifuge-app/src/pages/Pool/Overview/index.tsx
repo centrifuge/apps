@@ -132,12 +132,13 @@ export function PoolDetailOverview() {
         </React.Suspense>
       )}
       <React.Suspense fallback={<Spinner />}>
-        <IssuerSection metadata={metadata} />
+        {metadata?.pool?.reports?.length ? <IssuerSection metadata={metadata} /> : null}
       </React.Suspense>
       {!isTinlakePool && (
         <>
           <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
             <React.Suspense fallback={<Spinner />}>
+              {metadata?.pool?.reports?.length ? null : <IssuerSection metadata={metadata} />}
               <PoolStructure
                 numOfTranches={pool.tranches.length}
                 poolId={poolId}
