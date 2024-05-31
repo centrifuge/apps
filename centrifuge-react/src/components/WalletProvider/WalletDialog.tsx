@@ -291,6 +291,7 @@ const PROXY_TYPE_LABELS = {
   Borrow: 'Borrower',
   Invest: 'Investor',
   Price: 'Pricing',
+  PodOperation: 'POD Operation',
   PodAuth: 'POD Authentication',
   PermissionManagement: 'Manage permissions',
 }

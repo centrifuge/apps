@@ -304,7 +304,7 @@ export function getNftsModule(inst: Centrifuge) {
   }
 
   function mintNft(
-    args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput, amount?: number],
+    args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput],
     options?: TransactionOptions
   ) {
     const $api = inst.getApi()

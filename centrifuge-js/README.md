@@ -183,14 +183,14 @@ An array of tranches to be associated with the pool. The only data the pool is c
 Example:
 
 ```typescript
-  const tranches = [
-    {}, // most junior tranche (residual tranche)
-    {
-      interestRatePerSec: Rate.fromAprPercent("2"),
-      minRiskBuffer: Perquintill.fromPercent("20"),
-    },
-    // ...
-  ]
+const tranches = [
+  {}, // most junior tranche (residual tranche)
+  {
+    interestRatePerSec: Rate.fromAprPercent('2'),
+    minRiskBuffer: Perquintill.fromPercent('20'),
+  },
+  // ...
+]
 ```
 
 #### `max-reserve: CurrencyBalance`
@@ -215,55 +215,46 @@ Along with the regular tx options the `createPool()` supports an additional opti
 
 Like creating pools, minting assets also requires a series of transactions to be executed sequentially.
 
-> This guide does not cover authentication (yet), but it is required to make any request to the POD.
-
 The following steps must be executed in order to mint an asset on-chain:
 
-1. `cent.pod.createDocument`: Create a document containing private and public data on the POD. The POD will handle pinning the public metadata to IPFS internally
-2. `cent.pod.commitDocumentAndMintNft`: Commit the document to the POD. This will automatically make a request on chain to mint the collateral NFT and will add it to the supplied collection.
-3. `cent.pools.createLoan` Create the loan (asset) from the collateral NFT on-chain. This is a transaction/extrinsic on chain and will therefore require a signature.
+1. `cent.nfts.mintNft`: Mint the collateral NFT and will add it to the supplied collection.
+2. `cent.pools.createLoan` Create the loan (asset) from the collateral NFT on-chain.
 
-## `centrifuge.pod.createDocument([...args], options): { documentId: string }`
+## `centrifuge.nfts.mintNft([...args], options): Observable<ISubmittableResult>`
 
-First, create a document on the POD. This should include public and private asset data. The private data will be stored and encrypted in the POD. Public data will be pinned to IPFS. This tx does not require a signature, the POD will sign for it. Upon completion the request will return the newly created document ID which will be needed in the following steps.
+### `createLoan` args
 
-### `createDocument` args
+collectionId
+nftId
+owner
+metadata
 
-#### `podUrl: string`
+#### `collectionId: string`
 
-The endpoint to reach the POD at.
+The id used for the collateral collection.
 
-#### `signedToken: string`
+#### `nftId: string`
 
-TBD
+The id to give the NFT.
 
-#### `document: CommitDocumentInput`
+#### `owner: string`
 
-TBD
+The owner of the NFT. This will usually be the Asset Originator account
 
-## `centrifuge.pod.commitDocumentAndMintNft([...args], options): { nftId: string; jobId: string}`
+#### `owner: NFTMetadataInput`
 
-After the document is created (and `documentId` is known) it needs to be commited to the chain to prevent changes in the future. The POD will take care of creating the NFT on-chain using the attributes from the provided `documentId`. `commitDocumentAndMintNft()` is doing a lot behind the scenes. So instead of completing immediately, a `jobId` will be returned which can be used to track the progress of function call.
+```
+type NFTMetadataInput = {
+  name: string
+  description?: string
+  image?: string
+  properties?: Record<string, string | number>
+}
+```
 
-CentrifugeJS provides an async method to wait for the job to finish, which can be found under: `cent.pod.awaitJob()`.
-
-### `commitDocumentAndMintNft` args
-
-#### `podUrl: string`
-
-The endpoint to reach the POD at.
-
-#### `signedToken: string`
-
-TBD
-
-#### `document: CommitDocumentInput`\
-
-TBD
+The public metadata of the NFT.
 
 ## `cent.pools.createLoan([...args], options): Observable<ISubmittableResult>`
-
-To assign the newly created asset to a pool the job must be completed first. Make sure to use a connected instance of CentrifugeJS to that the transaction can be signed.
 
 ### `createLoan` args
 
@@ -277,7 +268,7 @@ The id used for the collateral collection.
 
 #### `nftId: string`
 
-The value returned from the `commitDocumentAndMintNft`
+The id of the previously minted NFT.
 
 ## Local development
 
