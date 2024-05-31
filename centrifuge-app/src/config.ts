@@ -76,7 +76,6 @@ type EnvironmentConfig = {
   baseCurrency: 'USD'
   assetClasses: Record<'Public credit' | 'Private credit', string[]>
   poolCreationType: TransactionOptions['createType']
-  useDocumentNfts: boolean
 }
 
 const poolCreationType = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
@@ -96,7 +95,6 @@ const ALTAIR: EnvironmentConfig = {
   baseCurrency: 'USD',
   assetClasses: { 'Private credit': ['Art NFTs'], 'Public credit': [] },
   poolCreationType,
-  useDocumentNfts: true,
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -122,7 +120,6 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Public credit': ['Corporate bonds', 'US treasuries'],
   },
   poolCreationType,
-  useDocumentNfts: true,
 }
 
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
