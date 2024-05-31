@@ -9,6 +9,7 @@ export type Report =
   | 'investor-tx'
   | 'asset-tx'
   | 'fee-tx'
+  | 'oracle-tx'
   | 'investor-list'
   | 'balance-sheet'
 

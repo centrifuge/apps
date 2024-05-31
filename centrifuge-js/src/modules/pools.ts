@@ -18,6 +18,7 @@ import {
   SubqueryAssetTransaction,
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
+  SubqueryOracleTransaction,
   SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
@@ -562,6 +563,10 @@ export type DailyTrancheState = {
   fulfilledRedeemOrders: CurrencyBalance
   outstandingInvestOrders: CurrencyBalance
   outstandingRedeemOrders: CurrencyBalance
+  yield30DaysAnnualized: Perquintill
+  yield90DaysAnnualized: Perquintill
+  yieldSinceInception: Perquintill
+  yieldSinceLastPeriod: Perquintill
 }
 
 export type DailyPoolState = {
@@ -818,6 +823,13 @@ export type PoolFeeTransaction = {
   poolFee: {
     feeId: Number
   }
+}
+
+export type OracleTransaction = {
+  id: string
+  timestamp: Date
+  key: string
+  value: CurrencyBalance | undefined
 }
 
 type Holder = {
@@ -2284,6 +2296,10 @@ export function getPoolsModule(inst: Centrifuge) {
             sumOutstandingRedeemOrdersByPeriod
             sumFulfilledInvestOrdersByPeriod
             sumFulfilledRedeemOrdersByPeriod
+            yield30DaysAnnualized
+            yield90DaysAnnualized
+            yieldSinceInception
+            yieldSinceLastPeriod
           }
           pageInfo {
             hasNextPage
@@ -2452,6 +2468,10 @@ export function getPoolsModule(inst: Centrifuge) {
                     tranche.sumOutstandingRedeemOrdersByPeriod,
                     poolCurrency.decimals
                   ),
+                  yield30DaysAnnualized: tranche.yield30DaysAnnualized ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized)) : new Perquintill(0),
+                  yield90DaysAnnualized: tranche.yield90DaysAnnualized ? new Perquintill(hexToBN(tranche.yield90DaysAnnualized)) : new Perquintill(0),
+                  yieldSinceInception: tranche.yieldSinceInception ? new Perquintill(hexToBN(tranche.yieldSinceInception)) : new Perquintill(0),
+                  yieldSinceLastPeriod: tranche.yieldSinceLastPeriod ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod)) : new Perquintill(0),
                 }
               })
 
@@ -2910,6 +2930,48 @@ export function getPoolsModule(inst: Centrifuge) {
                 feeId: Number(tx.poolFee.feeId),
               },
             } satisfies PoolFeeTransaction)
+        )
+      })
+    )
+  }
+
+  function getOracleTransactions(args: [from?: Date, to?: Date]) {
+    const [from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      oracleTransactions: { nodes: SubqueryOracleTransaction[] }
+    }>(
+      `query($from: Datetime!, $to: Datetime!) {
+        oracleTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: {
+            timestamp: { greaterThan: $from, lessThan: $to },
+          }) {
+          nodes {
+            id
+            timestamp
+            key
+            value
+          }
+        }
+      }
+      `,
+      {
+        from: from ? from.toISOString() : getDateMonthsFromNow(-1).toISOString(),
+        to: to ? to.toISOString() : new Date().toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      map((data) => {
+        return data!.oracleTransactions.nodes.map(
+          (tx) =>
+            ({
+              ...tx,
+              timestamp: new Date(`${tx.timestamp}+00:00`),
+              value: tx.value ? new CurrencyBalance(tx.value, 18) : undefined,
+            } satisfies OracleTransaction)
         )
       })
     )
@@ -4017,6 +4079,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,
+    getOracleTransactions,
     getAssetSnapshots,
     getNativeCurrency,
     getCurrencies,

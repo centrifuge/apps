@@ -255,8 +255,12 @@ export const tooltipText = {
     body: 'CFG price sourced externally from Uniswap.',
   },
   tbillApr: {
-    label: 'T-Bill APR',
+    label: 'LTF APR',
     body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
+  },
+  dyfApr: {
+    label: 'DYF APR',
+    body: 'Based on the return of the underlying funds',
   },
   poolType: {
     label: 'Pool type',

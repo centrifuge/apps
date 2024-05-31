@@ -7,6 +7,7 @@ import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
+import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 import { formatPoolFeeTransactionType } from './utils'
 
@@ -42,10 +43,13 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const getNetworkName = useGetNetworkName()
   const loans = useLoans(pool.id) as Loan[] | undefined
 
+  const { showOracleTx } = useDebugFlags()
+
   const reportOptions: { label: string; value: Report }[] = [
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
+    ...(showOracleTx == true ? [{ label: 'Oracle transactions', value: 'oracle-tx' as Report }] : []),
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },

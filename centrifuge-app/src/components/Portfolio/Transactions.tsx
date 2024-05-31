@@ -32,7 +32,7 @@ type Row = {
   action: InvestorTransactionType | AssetTransactionType
   date: number
   tranche?: Token
-  tranchePrice: number
+  tranchePrice: number | string
   amount: TokenBalance
   hash: string
   pool?: Pool
@@ -82,19 +82,23 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
       header: 'Token price',
       cell: ({ tranche, tranchePrice, pool }: Row) => (
         <Text as="span" variant="body3">
-          {formatBalance(tranchePrice, pool?.currency.symbol, 4)}
+          {typeof tranchePrice === 'string' ? tranchePrice : formatBalance(tranchePrice, pool?.currency.symbol, 4)}
         </Text>
       ),
     },
     {
       align: 'right',
-      header: <SortableTableHeader label="Amount" />,
-      cell: ({ amount, tranche }: Row) => (
+      header: 'Amount',
+      cell: ({ amount, tranche, action, pool }: Row) => (
         <Text as="span" variant="body3">
-          {formatBalance(amount.toDecimal(), tranche?.currency.symbol || '')}
+          {formatBalance(
+            amount.toDecimal(),
+            ['INVEST_ORDER_UPDATE', 'INVEST_ORDER_CANCEL', 'INVEST_EXECUTION', 'REDEEM_COLLECT'].includes(action)
+              ? pool?.currency.symbol
+              : tranche?.currency.symbol || ''
+          )}
         </Text>
       ),
-      sortKey: 'amount',
     },
     !narrow && {
       align: 'center',
@@ -129,8 +133,10 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
           date: new Date(tx.timestamp).getTime(),
           action: tx.type,
           tranche,
-          tranchePrice: tx?.tokenPrice?.toFloat() ?? 1,
-          amount: tx.currencyAmount,
+          tranchePrice: !tx?.tokenPrice || tx?.tokenPrice.isZero() ? '-' : tx.tokenPrice.toFloat(),
+          amount: ['INVEST_ORDER_UPDATE', 'INVEST_ORDER_CANCEL', 'INVEST_EXECUTION', 'REDEEM_COLLECT'].includes(tx.type)
+            ? tx.currencyAmount
+            : tx.tokenAmount,
           hash: tx.hash,
           poolId: tx.poolId,
           pool,

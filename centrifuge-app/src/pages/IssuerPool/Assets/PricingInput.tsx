@@ -31,7 +31,12 @@ export function PricingInput({ poolId }: { poolId: string }) {
                 label={<Tooltips type="notionalValue" variant="secondary" label="Notional value*" />}
                 placeholder="0.00"
                 errorMessage={meta.touched ? meta.error : undefined}
-                onChange={(value) => form.setFieldValue('pricing.notional', value)}
+                onChange={(value) => {
+                  form.setFieldValue('pricing.notional', value)
+                  if (value === 0) {
+                    form.setFieldValue('pricing.interestRate', 0)
+                  }
+                }}
                 currency={pool.currency.symbol}
               />
             )}
@@ -80,7 +85,6 @@ export function PricingInput({ poolId }: { poolId: string }) {
           symbol="%"
           disabled={Number(values.pricing.notional) <= 0}
           name="pricing.interestRate"
-          value={Number(values.pricing.notional) === 0 ? 0 : values.pricing.interestRate}
           validate={combine(required(), nonNegativeNumber(), max(100))}
         />
       )}

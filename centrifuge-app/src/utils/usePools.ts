@@ -1,4 +1,4 @@
-import Centrifuge, { addressToHex, AssetTransaction, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { addressToHex, Loan, Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeConsts, useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import { useEffect, useMemo } from 'react'
@@ -6,7 +6,7 @@ import { useQueries, useQuery } from 'react-query'
 import { combineLatest, map, Observable, switchMap } from 'rxjs'
 import { Dec } from './Decimal'
 import { TinlakePool, useTinlakePools } from './tinlake/useTinlakePools'
-import { useLoan, useLoans } from './useLoans'
+import { useLoans } from './useLoans'
 import { useMetadata, useMetadataMulti } from './useMetadata'
 
 export function usePools(suspense = true) {
@@ -129,6 +129,16 @@ export function useFeeTransactions(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
+export function useOracleTransactions(from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['oracleTransactions', from, to],
+    (cent) => cent.pools.getOracleTransactions([from, to]),
+    {}
+  )
+
+  return result
+}
+
 export function useAverageAmount(poolId: string) {
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
@@ -144,26 +154,14 @@ export function useAverageAmount(poolId: string) {
 }
 
 export function useBorrowerAssetTransactions(poolId: string, assetId: string, from?: Date, to?: Date) {
-  const pool = usePool(poolId)
-  const loan = useLoan(poolId, assetId)
+  const transactions = useAssetTransactions(poolId, from, to)
 
-  const [result] = useCentrifugeQuery(
-    ['borrowerAssetTransactions', poolId, assetId, from, to],
-    (cent) => {
-      const assetTransactions = cent.pools.getAssetTransactions([poolId, from, to])
-
-      return assetTransactions.pipe(
-        map((transactions: AssetTransaction[]) =>
-          transactions.filter((transaction) => transaction.asset.id.split('-')[1] === assetId)
-        )
-      )
-    },
-    {
-      enabled: !!pool && !poolId.startsWith('0x') && !!loan,
-    }
+  return transactions?.filter(
+    (transaction) =>
+      transaction.asset.id.split('-')[1] === assetId ||
+      transaction.fromAsset?.id.split('-')[1] === assetId ||
+      transaction.toAsset?.id.split('-')[1] === assetId
   )
-
-  return result
 }
 
 export function useDailyPoolStates(poolId: string, from?: Date, to?: Date, suspense = true) {
