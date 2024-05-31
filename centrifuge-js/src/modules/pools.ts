@@ -571,9 +571,10 @@ export type DailyTrancheState = {
 
 export type DailyPoolState = {
   poolState: {
-    portfolioValuation: CurrencyBalance
-    cashAssetValue: CurrencyBalance
+    netAssetValue: CurrencyBalance
     totalReserve: CurrencyBalance
+    offchainCashValue: CurrencyBalance
+    portfolioValuation: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -2226,9 +2227,10 @@ export function getPoolsModule(inst: Centrifuge) {
         nodes {
           id
           timestamp
+          netAssetValue
           totalReserve
+          offchainCashValue
           portfolioValuation
-          cashAssetValue
           blockNumber
           sumPoolFeesChargedAmountByPeriod
           sumPoolFeesAccruedAmountByPeriod
@@ -2417,9 +2419,10 @@ export function getPoolsModule(inst: Centrifuge) {
             poolSnapshots?.map((state) => {
               const poolState = {
                 id: state.id,
-                portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
-                cashAssetValue: new CurrencyBalance(state.cashAssetValue, poolCurrency.decimals),
+                netAssetValue: new CurrencyBalance(state.netAssetValue, poolCurrency.decimals),
                 totalReserve: new CurrencyBalance(state.totalReserve, poolCurrency.decimals),
+                offchainCashValue: new CurrencyBalance(state.offchainCashValue, poolCurrency.decimals),
+                portfolioValuation: new CurrencyBalance(state.portfolioValuation, poolCurrency.decimals),
                 sumPoolFeesChargedAmountByPeriod: new CurrencyBalance(
                   state.sumPoolFeesChargedAmountByPeriod ?? 0,
                   poolCurrency.decimals
@@ -2437,7 +2440,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumInvestedAmountByPeriod: new CurrencyBalance(state.sumInvestedAmountByPeriod, poolCurrency.decimals),
                 sumRedeemedAmountByPeriod: new CurrencyBalance(state.sumRedeemedAmountByPeriod, poolCurrency.decimals),
               }
-              const poolValue = new CurrencyBalance(new BN(state?.portfolioValuation || '0'), poolCurrency.decimals)
+              const poolValue = new CurrencyBalance(new BN(state?.netAssetValue || '0'), poolCurrency.decimals)
 
               // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
               const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp === state.timestamp)
@@ -2465,10 +2468,18 @@ export function getPoolsModule(inst: Centrifuge) {
                     tranche.sumOutstandingRedeemOrdersByPeriod,
                     poolCurrency.decimals
                   ),
-                  yield30DaysAnnualized: tranche.yield30DaysAnnualized ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized)) : new Perquintill(0),
-                  yield90DaysAnnualized: tranche.yield90DaysAnnualized ? new Perquintill(hexToBN(tranche.yield90DaysAnnualized)) : new Perquintill(0),
-                  yieldSinceInception: tranche.yieldSinceInception ? new Perquintill(hexToBN(tranche.yieldSinceInception)) : new Perquintill(0),
-                  yieldSinceLastPeriod: tranche.yieldSinceLastPeriod ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod)) : new Perquintill(0),
+                  yield30DaysAnnualized: tranche.yield30DaysAnnualized
+                    ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized))
+                    : new Perquintill(0),
+                  yield90DaysAnnualized: tranche.yield90DaysAnnualized
+                    ? new Perquintill(hexToBN(tranche.yield90DaysAnnualized))
+                    : new Perquintill(0),
+                  yieldSinceInception: tranche.yieldSinceInception
+                    ? new Perquintill(hexToBN(tranche.yieldSinceInception))
+                    : new Perquintill(0),
+                  yieldSinceLastPeriod: tranche.yieldSinceLastPeriod
+                    ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod))
+                    : new Perquintill(0),
                 }
               })
 
@@ -2484,8 +2495,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const $query = inst.getSubqueryObservable<{
       poolSnapshots: {
         nodes: {
-          portfolioValuation: string
-          totalReserve: string
+          netAssetValue: string
           periodStart: string
           pool: {
             currency: {
@@ -2498,8 +2508,7 @@ export function getPoolsModule(inst: Centrifuge) {
       `query {
         poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
           nodes {
-            portfolioValuation
-            totalReserve
+            netAssetValue
             periodStart
             pool {
               currency {
@@ -2518,12 +2527,9 @@ export function getPoolsModule(inst: Centrifuge) {
         }
 
         const mergedMap = new Map()
-        const formatted = data.poolSnapshots.nodes.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
+        const formatted = data.poolSnapshots.nodes.map(({ netAssetValue, periodStart, pool }) => ({
           dateInMilliseconds: new Date(periodStart).getTime(),
-          tvl: new CurrencyBalance(
-            new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
-            pool.currency.decimals
-          ).toDecimal(),
+          tvl: new CurrencyBalance(new BN(netAssetValue || '0'), pool.currency.decimals).toDecimal(),
         }))
 
         formatted.forEach((entry) => {
