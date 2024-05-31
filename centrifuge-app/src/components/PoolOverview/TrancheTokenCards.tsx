@@ -63,12 +63,15 @@ const TrancheTokenCard = ({
   const apyTooltipBody =
     poolId === '4139607887'
       ? 'Based on 3-month to 6-month T-Bills returns.'
+      : poolId === '1655476167'
+      ? 'Based on the return of the underlying funds'
       : `The 30d ${trancheText} yield is the effective annualized return of the pool's ${trancheText} token over the last 30 days.${
           daysSinceCreation < 30 && !isTinlakePool ? ' APY displayed after 30 days following token launch.' : ''
         }`
 
   const calculateApy = () => {
     if (poolId === '4139607887') return formatPercentage(5)
+    if (poolId === '1655476167') return formatPercentage(15)
     if (isTinlakePool && trancheText === 'senior') return formatPercentage(trancheToken.apy)
     if (daysSinceCreation < 30 || !trancheToken.yield30DaysAnnualized) return 'N/A'
     return formatPercentage(new Perquintill(trancheToken.yield30DaysAnnualized))
@@ -88,7 +91,10 @@ const TrancheTokenCard = ({
         >
           <Shelf gap={numOfTrancheTokens === 1 ? 5 : 2} alignItems="flex-end">
             <Stack gap={1} paddingRight={numOfTrancheTokens === 1 ? 3 : 0}>
-              <Tooltips label={`${poolId === '4139607887' ? 'Target ' : ''}APY`} body={apyTooltipBody} />
+              <Tooltips
+                label={`${['1655476167', '4139607887'].includes(poolId) ? 'Target ' : ''}APY`}
+                body={apyTooltipBody}
+              />
               <Text fontSize={[14, 20, 30]} variant="body3" style={{ whiteSpace: 'nowrap' }}>
                 {calculateApy()}
               </Text>

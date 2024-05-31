@@ -51,10 +51,6 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus, poolFees }: P
     //   metric: 'First investment',
     //   value: firstInvestment ? formatDate(firstInvestment) : '-',
     // },
-    {
-      metric: 'Available networks',
-      value: `Centrifuge${deployedLpChains.length ? `, ${deployedLpChains.join(', ')}` : ''}`,
-    },
     ...poolFees.map((fee) => {
       return {
         metric: fee.name,
