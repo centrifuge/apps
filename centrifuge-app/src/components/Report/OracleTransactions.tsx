@@ -28,7 +28,7 @@ export function OracleTransactions({ pool }: { pool: Pool }) {
       header: 'Oracle key',
       align: 'left',
       csvOnly: false,
-      formatter: (v: any) => v.substring(2),
+      formatter: noop,
     },
     {
       header: 'Value',
@@ -45,7 +45,7 @@ export function OracleTransactions({ pool }: { pool: Pool }) {
 
     return transactions.map((tx) => ({
       name: '',
-      value: [tx.timestamp.toISOString(), tx.key || '-', tx.value?.toFloat() ?? '-'],
+      value: [tx.timestamp.toISOString(), tx.key.substring(2) || '-', tx.value?.toFloat() ?? '-'],
       heading: false,
     }))
   }, [transactions, txType, pool.currency.symbol])
