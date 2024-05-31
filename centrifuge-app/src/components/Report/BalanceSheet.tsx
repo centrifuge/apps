@@ -222,7 +222,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         hoverable
         summary={{
           name: '= Total assets/NAV',
-          value: poolStates?.map(({ poolState }) => poolState.portfolioValuation.toDecimal()) || [],
+          value: poolStates?.map(({ poolState }) => poolState.netAssetValue.toDecimal()) || [],
           heading: false,
           formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
         }}
