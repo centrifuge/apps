@@ -46,6 +46,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
+    { label: 'Oracle transactions', value: 'oracle-tx' },
     { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
