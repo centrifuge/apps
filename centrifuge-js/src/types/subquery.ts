@@ -33,6 +33,10 @@ export type SubqueryTrancheSnapshot = {
   sumOutstandingRedeemOrdersByPeriod: string
   sumFulfilledInvestOrdersByPeriod: string
   sumFulfilledRedeemOrdersByPeriod: string
+  yield30DaysAnnualized: string
+  yield90DaysAnnualized: string
+  yieldSinceInception: string
+  yieldSinceLastPeriod: string
 }
 
 export type InvestorTransactionType =

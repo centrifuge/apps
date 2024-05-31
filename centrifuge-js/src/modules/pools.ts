@@ -563,6 +563,10 @@ export type DailyTrancheState = {
   fulfilledRedeemOrders: CurrencyBalance
   outstandingInvestOrders: CurrencyBalance
   outstandingRedeemOrders: CurrencyBalance
+  yield30DaysAnnualized: Perquintill
+  yield90DaysAnnualized: Perquintill
+  yieldSinceInception: Perquintill
+  yieldSinceLastPeriod: Perquintill
 }
 
 export type DailyPoolState = {
@@ -2290,6 +2294,10 @@ export function getPoolsModule(inst: Centrifuge) {
             sumOutstandingRedeemOrdersByPeriod
             sumFulfilledInvestOrdersByPeriod
             sumFulfilledRedeemOrdersByPeriod
+            yield30DaysAnnualized
+            yield90DaysAnnualized
+            yieldSinceInception
+            yieldSinceLastPeriod
           }
           pageInfo {
             hasNextPage
@@ -2457,6 +2465,10 @@ export function getPoolsModule(inst: Centrifuge) {
                     tranche.sumOutstandingRedeemOrdersByPeriod,
                     poolCurrency.decimals
                   ),
+                  yield30DaysAnnualized: new Perquintill(hexToBN(tranche.yield30DaysAnnualized)),
+                  yield90DaysAnnualized: new Perquintill(hexToBN(tranche.yield90DaysAnnualized)),
+                  yieldSinceInception: new Perquintill(hexToBN(tranche.yieldSinceInception)),
+                  yieldSinceLastPeriod: new Perquintill(hexToBN(tranche.yieldSinceLastPeriod)),
                 }
               })
 
