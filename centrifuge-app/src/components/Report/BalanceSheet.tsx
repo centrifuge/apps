@@ -121,6 +121,12 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
+      {
+        name: '= Total assets/NAV',
+        value: poolStates?.map(({ poolState }) => poolState.netAssetValue.toDecimal()) || [],
+        heading: false,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+      },
     ]
   }, [poolStates])
 
@@ -163,13 +169,26 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
           ]
         })
         .flat() || []),
+      {
+        name: '= Total capital',
+        value:
+          poolStates?.map((poolState) =>
+            Object.values(poolState.tranches).reduce((acc, tranche) => {
+              const price = tranche.price || new Price(0)
+              const supply = tranche.tokenSupply
+              return acc.add(price.toDecimal().mul(supply.toDecimal()))
+            }, Dec(0))
+          ) || [],
+        heading: false,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+      },
     ]
   }, [poolStates, pool])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
   React.useEffect(() => {
-    const f = [...trancheRecords, ...assetValuationRecords].map(({ name, value }) => [
+    const f = [...assetValuationRecords, ...trancheRecords].map(({ name, value }) => [
       name.trim(),
       ...(value as string[]),
     ])
@@ -211,35 +230,8 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
 
   return poolStates?.length > 0 ? (
     <DataTableGroup>
-      <DataTable
-        data={assetValuationRecords}
-        columns={columns}
-        hoverable
-        summary={{
-          name: '= Total assets/NAV',
-          value: poolStates?.map(({ poolState }) => poolState.netAssetValue.toDecimal()) || [],
-          heading: false,
-          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
-        }}
-      />
-      <DataTable
-        data={trancheRecords}
-        columns={columns}
-        hoverable
-        summary={{
-          name: '= Total capital',
-          value:
-            poolStates?.map((poolState) =>
-              Object.values(poolState.tranches).reduce((acc, tranche) => {
-                const price = tranche.price || new Price(0)
-                const supply = tranche.tokenSupply
-                return acc.add(price.toDecimal().mul(supply.toDecimal()))
-              }, Dec(0))
-            ) || [],
-          heading: false,
-          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
-        }}
-      />
+      <DataTable data={assetValuationRecords} columns={columns} hoverable />
+      <DataTable data={trancheRecords} columns={columns} hoverable />
     </DataTableGroup>
   ) : (
     <UserFeedback reportType="Token price" />
