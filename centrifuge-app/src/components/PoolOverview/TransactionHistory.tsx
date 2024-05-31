@@ -94,7 +94,6 @@ export const TransactionHistoryTable = ({
   transactions: any[]
   preview?: boolean
 }) => {
-  console.log('transactions', transactions)
   const assetMetadata = useMetadataMulti(
     [...new Set(transactions?.map((transaction) => transaction.asset.metadata))] || [],
     nftMetadataSchema
