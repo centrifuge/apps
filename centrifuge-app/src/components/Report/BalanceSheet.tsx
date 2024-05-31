@@ -104,13 +104,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
     return [
       {
         name: 'Asset valuation',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.portfolioValuation
-              .toDecimal()
-              .sub(poolState.cashAssetValue.toDecimal())
-              .sub(poolState.totalReserve.toDecimal())
-          ) || [],
+        value: poolStates?.map(({ poolState }) => poolState.portfolioValuation.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
@@ -122,7 +116,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       },
       {
         name: '\u00A0 \u00A0 + Offchain cash',
-        value: poolStates?.map(({ poolState }) => poolState.cashAssetValue.toDecimal()) || [],
+        value: poolStates?.map(({ poolState }) => poolState.offchainCashValue.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
@@ -151,13 +145,13 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
               name: `${token.currency.displayName} token supply`,
               value: poolStates?.map((poolState) => poolState.tranches[token.id].tokenSupply || ('' as any)) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), token.currency.displayName) : ''),
+              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), token.currency.displayName, 2) : ''),
             },
             {
               name: `\u00A0 \u00A0 * ${token.currency.displayName} token price`,
               value: poolStates?.map((poolState) => poolState.tranches[token.id].price || ('' as any)) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 5) : ''),
+              formatter: (v: any) => (v ? formatBalance(v.toDecimal(), pool.currency.displayName, 2) : ''),
             },
             {
               name: `\u00A0 \u00A0 = ${token.currency.displayName} tranche value`,
@@ -169,7 +163,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
                       .mul(poolState.tranches[token.id].tokenSupply.toDecimal()) || ('' as any)
                 ) || [],
               heading: false,
-              formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName) : ''),
+              formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
             },
           ]
         })
@@ -248,7 +242,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
               }, Dec(0))
             ) || [],
           heading: false,
-          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 0) : ''),
+          formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
         }}
       />
     </DataTableGroup>

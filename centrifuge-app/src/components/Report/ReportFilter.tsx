@@ -46,6 +46,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const { showOracleTx } = useDebugFlags()
 
   const reportOptions: { label: string; value: Report }[] = [
+    { label: 'Balance sheet', value: 'balance-sheet' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
@@ -54,7 +55,6 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
     { label: 'Investor list', value: 'investor-list' },
-    { label: 'Balance sheet', value: 'balance-sheet' },
   ]
 
   return (
