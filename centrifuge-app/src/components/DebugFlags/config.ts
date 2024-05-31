@@ -53,6 +53,7 @@ export type Key =
   | 'podAdminSeed'
   | 'assetSnapshots'
   | 'showTokenYields'
+  | 'showOracleTx'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -152,6 +153,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   showTokenYields: {
+    default: false,
+    type: 'checkbox',
+  },
+  showOracleTx: {
     default: false,
     type: 'checkbox',
   },
