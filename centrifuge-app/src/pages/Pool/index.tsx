@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router'
 import { PoolDetailAssetsTab } from './Assets'
 import { PoolDetailLiquidityTab } from './Liquidity'
@@ -10,6 +9,7 @@ export default function PoolDetailPage() {
   const { path } = useRouteMatch()
   return (
     <Switch>
+      <Route path={`${path}/reporting/:report`} component={PoolDetailReportingTab} />
       <Route path={`${path}/reporting`} component={PoolDetailReportingTab} />
       <Route path={`${path}/liquidity`} component={PoolDetailLiquidityTab} />
       <Route path={`${path}/assets`} component={PoolDetailAssetsTab} />

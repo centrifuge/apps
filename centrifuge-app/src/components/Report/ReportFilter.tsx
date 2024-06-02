@@ -2,6 +2,7 @@ import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, DateInput, SearchInput, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useHistory } from 'react-router'
 import { nftMetadataSchema } from '../../schemas'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
@@ -39,6 +40,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     loan,
     setLoan,
   } = React.useContext(ReportContext)
+  const history = useHistory()
+
   const { data: domains } = useActiveDomains(pool.id)
   const getNetworkName = useGetNetworkName()
   const loans = useLoans(pool.id) as Loan[] | undefined
@@ -75,7 +78,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         value={report}
         onChange={(event) => {
           if (event.target.value) {
-            setReport(event.target.value as Report)
+            history.push(`/pools/${pool.id}/reporting/${event.target.value}`)
           }
         }}
       />
