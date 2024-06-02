@@ -16,6 +16,7 @@ import type { TableDataRow } from './index'
 
 type Row = TableDataRow & {
   formatter?: (v: any) => any
+  bold?: boolean
 }
 
 export function BalanceSheet({ pool }: { pool: Pool }) {
@@ -66,7 +67,9 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       {
         align: 'left',
         header: '',
-        cell: (row: TableDataRow) => <Text variant={row.heading ? 'body3' : 'body3'}>{row.name}</Text>,
+        cell: (row: Row) => (
+          <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
+        ),
         width: '200px',
       },
     ]
@@ -80,7 +83,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
             year: 'numeric',
           }),
           cell: (row: Row) => (
-            <Text variant="body3">
+            <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>
               {row.formatter ? row.formatter((row.value as any)[index]) : (row.value as any)[index]}
             </Text>
           ),
@@ -98,33 +101,39 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
   const assetValuationRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Asset valuation',
+        name: 'Assets',
+        value: poolStates?.map(() => '' as any) || [],
+        heading: false,
+        bold: true,
+      },
+      {
+        name: '\u00A0 \u00A0 Asset valuation',
         value: poolStates?.map(({ poolState }) => poolState.portfolioValuation.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '\u00A0 \u00A0 + Onchain reserve',
+        name: '\u00A0 \u00A0 Onchain reserve',
         value: poolStates?.map(({ poolState }) => poolState.totalReserve.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '\u00A0 \u00A0 + Offchain cash',
+        name: '\u00A0 \u00A0 Offchain cash',
         value: poolStates?.map(({ poolState }) => poolState.offchainCashValue.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '\u00A0 \u00A0 - Accrued fees',
+        name: '\u00A0 \u00A0 Accrued fees',
         value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPendingAmount.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => (v ? `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}` : ''),
       },
       {
-        name: '= Total assets/NAV',
+        name: 'Total assets (NAV)',
         value: poolStates?.map(({ poolState }) => poolState.netAssetValue.toDecimal()) || [],
-        heading: false,
+        heading: true,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
@@ -133,9 +142,10 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
   const trancheRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: '',
+        name: 'Capital',
         value: poolStates?.map(() => '' as any) || [],
         heading: false,
+        bold: true,
       },
       ...(pool?.tranches
         .slice()
@@ -143,7 +153,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         .map((token) => {
           return [
             {
-              name: `${token.currency.displayName} token supply`,
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token supply`,
               value: poolStates?.map((poolState) => poolState.tranches[token.id].tokenSupply || ('' as any)) || [],
               heading: false,
               formatter: (v: any) => (v ? formatBalance(v.toDecimal(), token.currency.displayName, 2) : ''),
@@ -164,13 +174,14 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
                       .mul(poolState.tranches[token.id].tokenSupply.toDecimal()) || ('' as any)
                 ) || [],
               heading: false,
+              bold: true,
               formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
             },
           ]
         })
         .flat() || []),
       {
-        name: '= Total capital',
+        name: 'Total capital',
         value:
           poolStates?.map((poolState) =>
             Object.values(poolState.tranches).reduce((acc, tranche) => {
@@ -179,7 +190,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
               return acc.add(price.toDecimal().mul(supply.toDecimal()))
             }, Dec(0))
           ) || [],
-        heading: false,
+        heading: true,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
@@ -204,7 +215,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
 
     setCsvData({
       dataUrl,
-      fileName: `${pool.id}-token-price-${formatDate(startDate, {
+      fileName: `${pool.id}-balance-sheet-${formatDate(startDate, {
         weekday: 'short',
         month: 'short',
         day: '2-digit',
@@ -234,6 +245,6 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       <DataTable data={trancheRecords} columns={columns} hoverable />
     </DataTableGroup>
   ) : (
-    <UserFeedback reportType="Token price" />
+    <UserFeedback reportType="Balance sheet" />
   )
 }
