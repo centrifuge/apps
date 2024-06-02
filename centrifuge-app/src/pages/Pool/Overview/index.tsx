@@ -10,6 +10,7 @@ import { IssuerSection } from '../../../components/IssuerSection'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LayoutSection } from '../../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
+import { PodIndexerReports } from '../../../components/PodIndexerReports'
 import { Cashflows } from '../../../components/PoolOverview/Cashflows'
 import { KeyMetrics } from '../../../components/PoolOverview/KeyMetrics'
 import { PoolPerformance } from '../../../components/PoolOverview/PoolPerfomance'
@@ -153,10 +154,10 @@ export function PoolDetailOverview() {
                   }) || []
                 }
               />
+              {metadata?.reports && 'poolOverview' in metadata?.reports && (
+                <PodIndexerReports poolId={poolId} page="poolOverview" />
+              )}
             </React.Suspense>
-            {/* <React.Suspense fallback={<Spinner />}>
-                <AssetsByMaturity />
-              </React.Suspense> */}
           </Grid>
           {isMedium && (
             <React.Suspense fallback={<Spinner />}>

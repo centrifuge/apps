@@ -1739,7 +1739,7 @@ __metadata:
     "@ethersproject/contracts": ^5.6.0
     "@ethersproject/providers": ^5.6.0
     "@makerdao/multicall": ^0.12.0
-    "@polkadot/react-identicon": ~3.1.4
+    "@polkadot/react-identicon": ^2.12.1
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
     "@subwallet/wallet-connect": ^0.2.6
@@ -1760,11 +1760,13 @@ __metadata:
     "@web3modal/standalone": ^2.4.2
     babel-plugin-styled-components: ^2.1.4
     bn.js: ^5.2.1
+    chart.js: ^4.3.0
     esbuild-darwin-64: ^0.14.49
     esbuild-darwin-arm64: ^0.14.49
     eslint: 7.32.0
     eslint-config-react-app: ^7.0.1
     eslint-plugin-react: 7.30.1
+    form-data: ^4.0.0
     formik: ^2.4.5
     merkletreejs: ^0.3.11
     nodemon: ^2.0.20
@@ -1835,7 +1837,7 @@ __metadata:
     "@mdx-js/preact": ^2.1.1
     "@mdx-js/react": ^1.6.22
     "@polkadot/extension-dapp": ~0.45.5
-    "@polkadot/react-identicon": ~3.1.4
+    "@polkadot/react-identicon": ^2.12.1
     "@polkadot/types": ~10.12.2
     "@subwallet/wallet-connect": 0.2.5
     "@types/bn.js": ^5
@@ -3886,6 +3888,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.2
+  resolution: "@kurkle/color@npm:0.3.2"
+  checksum: 79e97b31f8f6efb28c69d373f94b0c7480226fe8ec95221f518ac998e156444a496727ce47de6d728eb5c3369288e794cba82cae34253deb0d472d3bfe080e49
+  languageName: node
+  linkType: hard
+
 "@leichtgewicht/ip-codec@npm:^2.0.1":
   version: 2.0.4
   resolution: "@leichtgewicht/ip-codec@npm:2.0.4"
@@ -4800,7 +4809,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/networks@npm:11.1.3, @polkadot/networks@npm:^11.1.3":
+"@polkadot/networks@npm:11.1.3":
   version: 11.1.3
   resolution: "@polkadot/networks@npm:11.1.3"
   dependencies:
@@ -4857,32 +4866,6 @@ __metadata:
     react-is: "*"
     styled-components: "*"
   checksum: 5fbb640edcbfb0f3fb00170dcb5585c10dc7d578e9fd958c257b8853d5627fb561d34ee20af1a11a6838a4dabce78afdbf05a6945615341576389c6d714c786c
-  languageName: node
-  linkType: hard
-
-"@polkadot/react-identicon@npm:~3.1.4":
-  version: 3.1.4
-  resolution: "@polkadot/react-identicon@npm:3.1.4"
-  dependencies:
-    "@polkadot/keyring": ^11.1.3
-    "@polkadot/ui-settings": 3.1.4
-    "@polkadot/ui-shared": 3.1.4
-    "@polkadot/util": ^11.1.3
-    "@polkadot/util-crypto": ^11.1.3
-    ethereum-blockies-base64: ^1.0.2
-    jdenticon: 3.2.0
-    react-copy-to-clipboard: ^5.1.0
-    styled-components: ^5.3.9
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/keyring": "*"
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-    react: "*"
-    react-dom: "*"
-    react-is: "*"
-    styled-components: "*"
-  checksum: 0edfc5e4f4549da39ebe2fa03e9e9d6f0284ea2b615b0b13e2446d0d30b25bf7f87d7daea904ae79a1ea6a5f49cb264eb94fdae06557d1e0bba85a60ecdc8ea4
   languageName: node
   linkType: hard
 
@@ -5108,22 +5091,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-settings@npm:3.1.4":
-  version: 3.1.4
-  resolution: "@polkadot/ui-settings@npm:3.1.4"
-  dependencies:
-    "@polkadot/networks": ^11.1.3
-    "@polkadot/util": ^11.1.3
-    eventemitter3: ^5.0.0
-    store: ^2.0.12
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/networks": "*"
-    "@polkadot/util": "*"
-  checksum: 04ca0bccbf87d8d8704a932786bd82dfe255b74cd32a943ae7414a5054918b558aacdf9102b9a09b82bdc9a6c52d1b6cfe6ba6e3a2cb8df1c95b1dbf634d39d0
-  languageName: node
-  linkType: hard
-
 "@polkadot/ui-shared@npm:2.12.1":
   version: 2.12.1
   resolution: "@polkadot/ui-shared@npm:2.12.1"
@@ -5134,19 +5101,6 @@ __metadata:
     "@polkadot/util": "*"
     "@polkadot/util-crypto": "*"
   checksum: c9c16bf04166ae15d5d494723805b469e149a01bc5b50184d6bac1ee0fe854f13b492241d229a81b4949c0a081a94d95b78a479c63a875b9218ad3c27eb90935
-  languageName: node
-  linkType: hard
-
-"@polkadot/ui-shared@npm:3.1.4":
-  version: 3.1.4
-  resolution: "@polkadot/ui-shared@npm:3.1.4"
-  dependencies:
-    colord: ^2.9.3
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-  checksum: 5f658bcf0618f73801249300589f014f0ca4379aa66afb5a980884be0a1f91d67be0c191461e92782fc4504dc16d16ea0bc5a555e8515a634f16f8af4961376d
   languageName: node
   linkType: hard
 
@@ -12551,6 +12505,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chart.js@npm:^4.3.0":
+  version: 4.4.2
+  resolution: "chart.js@npm:4.4.2"
+  dependencies:
+    "@kurkle/color": ^0.3.0
+  checksum: 72506af9abd33dd99484322dd26e854693323959fe2d6e750bf670e3959737bc195807e91a4d939bc04124c05c7a2f3c435e52d1a668e0e945869f37fcba90a8
+  languageName: node
+  linkType: hard
+
 "check-error@npm:^1.0.3":
   version: 1.0.3
   resolution: "check-error@npm:1.0.3"
@@ -12897,13 +12860,6 @@ __metadata:
     color-convert: ^1.9.3
     color-string: ^1.6.0
   checksum: f81220e8b774d35865c2561be921f5652117638dcda7ca4029262046e37fc2444ac7bbfdd110cf1fd9c074a4ee5eda8f85944ffbdda26186b602dd9bb05f6400
-  languageName: node
-  linkType: hard
-
-"colord@npm:^2.9.3":
-  version: 2.9.3
-  resolution: "colord@npm:2.9.3"
-  checksum: 95d909bfbcfd8d5605cbb5af56f2d1ce2b323990258fd7c0d2eb0e6d3bb177254d7fb8213758db56bb4ede708964f78c6b992b326615f81a18a6aaf11d64c650
   languageName: node
   linkType: hard
 
@@ -16374,7 +16330,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:^5.0.0, eventemitter3@npm:^5.0.1":
+"eventemitter3@npm:^5.0.1":
   version: 5.0.1
   resolution: "eventemitter3@npm:5.0.1"
   checksum: 543d6c858ab699303c3c32e0f0f47fc64d360bf73c3daf0ac0b5079710e340d6fe9f15487f94e66c629f5f82cd1a8678d692f3dbb6f6fcd1190e1b97fcad36f8
@@ -26106,7 +26062,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^5.3.5, styled-components@npm:^5.3.6, styled-components@npm:^5.3.9":
+"styled-components@npm:^5.3.5, styled-components@npm:^5.3.6":
   version: 5.3.11
   resolution: "styled-components@npm:5.3.11"
   dependencies:
