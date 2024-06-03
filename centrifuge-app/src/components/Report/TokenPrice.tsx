@@ -4,7 +4,7 @@ import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useDailyPoolStates, useMonthlyPoolStates } from '../../utils/usePools'
+import { useDailyPoolStates, usePoolStatesByGroup } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { useDebugFlags } from '../DebugFlags'
 import { Spinner } from '../Spinner'
@@ -23,10 +23,11 @@ export function TokenPrice({ pool }: { pool: Pool }) {
   const { poolStates: dailyPoolStates } =
     useDailyPoolStates(pool.id, startDate ? new Date(startDate) : undefined, endDate ? new Date(endDate) : undefined) ||
     {}
-  const monthlyPoolStates = useMonthlyPoolStates(
+  const monthlyPoolStates = usePoolStatesByGroup(
     pool.id,
     startDate ? new Date(startDate) : undefined,
-    endDate ? new Date(endDate) : undefined
+    endDate ? new Date(endDate) : undefined,
+    'month'
   )
   const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
 
