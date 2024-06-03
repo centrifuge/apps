@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useParams } from 'react-router'
 
 export type GroupBy = 'day' | 'month' | 'quarter' | 'year' | 'daily'
 
@@ -59,11 +60,19 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   const [csvData, setCsvData] = React.useState<CsvDataProps | undefined>(undefined)
 
   // Global filters
+  const { report: reportParam } = useParams<{ report: string }>()
+
+  React.useEffect(() => {
+    if (reportParam === undefined) return
+    setReport(reportParam as Report)
+  }, [reportParam])
+
+  const [report, setReport] = React.useState<Report>('balance-sheet')
+
   const [startDate, setStartDate] = React.useState(
     new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10)
   )
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
-  const [report, setReport] = React.useState<Report>('balance-sheet')
 
   // Custom filters for specific reports
   const [loanStatus, setLoanStatus] = React.useState('all')
