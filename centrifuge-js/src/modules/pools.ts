@@ -95,7 +95,7 @@ export type PoolRoles = {
   tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
 
-type LoanInfoInput =
+export type LoanInfoInput =
   | {
       valuationMethod: 'outstandingDebt'
       maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
@@ -624,7 +624,6 @@ export interface PoolMetadataInput {
   maxReserve: number | ''
   epochHours: number | ''
   epochMinutes: number | ''
-  podEndpoint: string
   listed?: boolean
 
   // issuer
@@ -700,7 +699,6 @@ export type PoolMetadata = {
     reports?: PoolReport[]
   }
   pod?: {
-    node: string | null
     indexer?: string | null
   }
   tranches: Record<
@@ -1058,9 +1056,7 @@ export function getPoolsModule(inst: Centrifuge) {
             ]
           : undefined,
       },
-      pod: {
-        node: metadata.podEndpoint ?? null,
-      },
+      pod: {},
       tranches: tranchesById,
       adminMultisig: metadata.adminMultisig,
     }

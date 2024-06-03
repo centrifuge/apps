@@ -76,12 +76,9 @@ type EnvironmentConfig = {
   baseCurrency: 'USD'
   assetClasses: Record<'Public credit' | 'Private credit', string[]>
   poolCreationType: TransactionOptions['createType']
-  useDocumentNfts: boolean
-  defaultPodUrl: string
 }
 
 const poolCreationType = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
-const defaultPodUrl = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
 export const isTestEnv =
   (window.location.hostname.endsWith('k-f.dev') && !window.location.hostname.includes('production')) ||
   window.location.hostname === 'localhost'
@@ -98,8 +95,6 @@ const ALTAIR: EnvironmentConfig = {
   baseCurrency: 'USD',
   assetClasses: { 'Private credit': ['Art NFTs'], 'Public credit': [] },
   poolCreationType,
-  useDocumentNfts: true,
-  defaultPodUrl,
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -125,8 +120,6 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Public credit': ['Corporate bonds', 'US treasuries'],
   },
   poolCreationType,
-  useDocumentNfts: true,
-  defaultPodUrl,
 }
 
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'

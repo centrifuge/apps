@@ -31,7 +31,6 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { LoadBoundary } from '../../components/LoadBoundary'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
-import { PodAuthSection } from '../../components/PodAuthSection'
 import { TransactionHistoryTable } from '../../components/PoolOverview/TransactionHistory'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
@@ -42,11 +41,10 @@ import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
 import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useLoan, useNftDocumentId } from '../../utils/useLoans'
+import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset } from '../../utils/usePermissions'
-import { usePodDocument } from '../../utils/usePodDocument'
 import { useAssetSnapshots, useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
@@ -149,14 +147,8 @@ function Loan() {
     nftMetadata?.properties?._template && `ipfs://${nftMetadata?.properties?._template}`
   )
 
-  const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
-  const { data: document } = usePodDocument(poolId, loanId, documentId)
-
   const publicData = nftMetadata?.properties
     ? Object.fromEntries(Object.entries(nftMetadata.properties).map(([key, obj]: any) => [key, obj]))
-    : {}
-  const privateData = document?.attributes
-    ? Object.fromEntries(Object.entries(document.attributes).map(([key, obj]: any) => [key, obj.value]))
     : {}
 
   const originationDate = loan && 'originationDate' in loan ? new Date(loan?.originationDate).toISOString() : undefined
@@ -442,18 +434,16 @@ function Loan() {
             const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
             return (
               <PageSection title={<Box>{section.name}</Box>} titleAddition={isPublic ? undefined : 'Private'} key={i}>
-                {isPublic || document ? (
+                {isPublic ? (
                   <Shelf gap={6} flexWrap="wrap">
                     {section.attributes.map((key) => {
                       const attribute = templateData.attributes?.[key]
                       if (!attribute) return null
-                      const value = publicData[key] ?? privateData[key]
+                      const value = publicData[key]
                       const formatted = value ? formatNftAttribute(value, attribute) : '-'
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
-                ) : !isPublic ? (
-                  <PodAuthSection poolId={poolId} buttonLabel="Authenticate to view" />
                 ) : null}
               </PageSection>
             )
