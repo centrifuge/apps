@@ -576,6 +576,12 @@ export type DailyPoolState = {
     offchainCashValue: CurrencyBalance
     portfolioValuation: CurrencyBalance
     sumPoolFeesPendingAmount: CurrencyBalance
+    sumBorrowedAmountByPeriod: CurrencyBalance
+    sumRepaidAmountByPeriod: CurrencyBalance
+    sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumInterestRepaidAmountByPeriod: CurrencyBalance
+    sumInvestedAmountByPeriod: CurrencyBalance
+    sumRedeemedAmountByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
