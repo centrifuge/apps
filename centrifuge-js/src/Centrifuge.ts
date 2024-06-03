@@ -7,7 +7,6 @@ import { getLiquidityPoolsModule } from './modules/liquidityPools'
 import { getMetadataModule } from './modules/metadata'
 import { getMultisigModule } from './modules/multisig'
 import { getNftsModule } from './modules/nfts'
-import { getPodModule } from './modules/pod'
 import { getPoolsModule } from './modules/pools'
 import { getProxiesModule } from './modules/proxies'
 import { getRemarkModule } from './modules/remark'
@@ -24,7 +23,6 @@ export class Centrifuge extends CentrifugeBase {
   proxies = getProxiesModule(this)
   metadata = getMetadataModule(this)
   tokens = getTokensModule(this)
-  pod = getPodModule()
   auth = getAuthModule(this)
   tinlake = getTinlakeModule(this)
   multisig = getMultisigModule(this)

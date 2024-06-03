@@ -20,7 +20,7 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
 
-type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'subAssetClass' | 'podEndpoint'> & {
+type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'subAssetClass'> & {
   listed: boolean
 }
 
@@ -50,7 +50,6 @@ export function Details() {
           ? metadata.pool.asset.class
           : 'Private credit',
       subAssetClass: metadata?.pool?.asset?.subClass ?? '',
-      podEndpoint: metadata?.pod?.node ?? '',
       listed: metadata?.pool?.listed ?? false,
     }),
     [metadata, iconFile]
@@ -92,7 +91,6 @@ export function Details() {
         },
         pod: {
           ...oldMetadata.pod,
-          node: values.podEndpoint,
         },
       }
 
@@ -219,13 +217,6 @@ export function Details() {
                 placeholder=""
                 disabled
               />
-              <FieldWithErrorMessage
-                validate={validate.podEndpoint}
-                name="podEndpoint"
-                as={TextInput}
-                label={`POD endpoint`}
-                placeholder="https://..."
-              />
 
               {((isDemo && editPoolVisibility) || !isDemo) && (
                 <Field name="listed" validate={validate.assetClass}>
@@ -245,14 +236,10 @@ export function Details() {
               <Box as={icon ? 'img' : 'div'} width="iconLarge" height="iconLarge" src={icon} />
               <LabelValueStack label="Pool name" value={metadata?.pool?.name} />
 
-              <LabelValueStack
-                label="Asset class"
-                value={metadata?.pool?.asset.class}
-              />
+              <LabelValueStack label="Asset class" value={metadata?.pool?.asset.class} />
               <LabelValueStack label="Secondary asset class" value={metadata?.pool?.asset.subClass} />
 
               <LabelValueStack label="Currency" value={currency} />
-              <LabelValueStack label="POD endpoint" value={metadata?.pod?.node ?? '-'} />
               <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
             </Shelf>
           )}

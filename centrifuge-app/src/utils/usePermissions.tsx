@@ -190,28 +190,6 @@ export function usePoolAccess(poolId: string) {
     aoCollateralCollections[ao] = (collections || [])?.filter((col) => col.issuer === ao)
   })
 
-  const [isAoSetUp] = useCentrifugeQuery(
-    ['aoSetup', aoProxies],
-    (cent) => {
-      const $events = cent.getEvents().pipe(
-        filter(({ api, events }) => {
-          const event = events.find(({ event }) => api.events.keystore.KeyAdded.is(event))
-          return !!event
-        })
-      )
-      return cent.getApi().pipe(
-        switchMap((api) => combineLatest(aoProxies.map((addr) => api.query.keystore.keys.entries(addr)))),
-        map((keyData) => {
-          const values = (keyData as any[]).map((data) => data.length > 0)
-          return values
-        }),
-        repeatWhen(() => $events)
-      )
-    },
-    {
-      enabled: !!aoProxies.length,
-    }
-  )
   const [transferAllowlists] = useCentrifugeQuery(
     ['aoTransferAllowlist', aoProxies],
     (cent) => {
@@ -371,14 +349,14 @@ export function usePoolAccess(poolId: string) {
       () =>
         aoProxies.map((addr, i) => ({
           address: addr,
-          isSetUp: !!isAoSetUp?.[i],
+          isSetUp: !!aoCollateralCollections[addr].length,
           collateralCollections: aoCollateralCollections[addr],
           permissions: poolPermissions?.[addr] || { roles: [], tranches: {} },
-          delegates: aoDelegates?.[i]?.filter((p) => !p.types.includes('PodOperation')) || [],
+          delegates: aoDelegates?.[i] || [],
           transferAllowlist: combinedAllowLists?.[i] || [],
         })),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [collections, aoDelegates, isAoSetUp, poolPermissions, combinedAllowLists]
+      [collections, aoDelegates, poolPermissions, combinedAllowLists]
     ),
   }
 }

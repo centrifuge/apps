@@ -44,7 +44,7 @@ export function useCentrifugeApi(): ApiRx {
   return api!
 }
 
-const LOAN_NFT_DATA_BYTES = 43 + 48 + 65 // document_id attribute + document_version attribute + metadata
+const LOAN_NFT_DATA_BYTES = 65 // bytes for the IPFS URI
 
 export function useCentrifugeConsts() {
   const api = useCentrifugeApi()
@@ -64,10 +64,7 @@ export function useCentrifugeConsts() {
     ss58Prefix: consts.system.ss58Prefix.toNumber(),
     loans: {
       loanDeposit: new CurrencyBalance(
-        itemDeposit
-          .add(metadataDepositBase)
-          .add(attributeDepositBase.mul(new BN(2)))
-          .add(depositPerByte.mul(new BN(LOAN_NFT_DATA_BYTES))),
+        itemDeposit.add(metadataDepositBase).add(depositPerByte.mul(new BN(LOAN_NFT_DATA_BYTES))),
         chainDecimals
       ),
       maxWriteOffPolicySize: Number(api.consts.loans.maxWriteOffPolicySize.toPrimitive()),

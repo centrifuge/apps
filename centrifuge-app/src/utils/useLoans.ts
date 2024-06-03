@@ -20,18 +20,6 @@ export function useLoan(poolId: string, assetId: string) {
   return loans && [...loans].find((loan) => loan.id === assetId)
 }
 
-export function useNftDocumentId(collectionId?: string, nftId?: string) {
-  const [result] = useCentrifugeQuery(
-    ['docId', collectionId, nftId],
-    (cent) => cent.nfts.getNftDocumentId([collectionId!, nftId!]),
-    {
-      enabled: !!collectionId && !!nftId,
-    }
-  )
-
-  return result
-}
-
 export function useAvailableFinancing(poolId: string, assetId: string) {
   const isTinlakePool = poolId.startsWith('0x')
   const loan = useLoan(poolId, assetId)

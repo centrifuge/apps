@@ -1,12 +1,13 @@
-import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, LoanInfoInput, Price, Rate } from '@centrifuge/centrifuge-js'
+import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import {
-  Transaction,
   formatBalance,
   useBalances,
   useCentrifuge,
+  useCentrifugeApi,
   useCentrifugeConsts,
   useCentrifugeTransaction,
-  useTransactions,
+  wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -32,14 +33,12 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
-import { PodAuthSection } from '../../../components/PodAuthSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { LoanTemplate, LoanTemplateAttribute } from '../../../types'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadata } from '../../../utils/useMetadata'
 import { usePoolAccess, useSuitableAccounts } from '../../../utils/usePermissions'
-import { usePodAuth } from '../../../utils/usePodAuth'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, min, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -168,30 +167,44 @@ function IssuerCreateLoan() {
   const history = useHistory()
   const centrifuge = useCentrifuge()
 
-  const { addTransaction, updateTransaction } = useTransactions()
   const {
     loans: { loanDeposit },
     chainSymbol,
   } = useCentrifugeConsts()
-  const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['PodAuth'] })
+  const api = useCentrifugeApi()
+  const [account] = useSuitableAccounts({ poolId: pid, poolRole: ['Borrower'], proxyType: ['Borrow'] })
   const { assetOriginators } = usePoolAccess(pid)
   const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
     ?.collateralCollections[0]?.id
   const balances = useBalances(account?.actingAddress)
 
-  const { isAuthed, token } = usePodAuth(pid)
-
-  const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
-  const podUrl = poolMetadata?.pod?.node
+  const { data: poolMetadata } = usePoolMetadata(pool)
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
     (cent) =>
-      ([submittable], options) =>
-        cent.getApi().pipe(switchMap((api) => cent.wrapSignAndSend(api, submittable, { ...options, sendOnly: true }))),
+      (
+        [collectionId, nftId, owner, metadataUri, pricingInfo]: [string, string, string, string, LoanInfoInput],
+        options
+      ) => {
+        return centrifuge.pools.createLoan([pid, collectionId, nftId, pricingInfo], { batch: true }).pipe(
+          switchMap((createTx) => {
+            const tx = api.tx.utility.batchAll([
+              wrapProxyCallsForAccount(api, api.tx.uniques.mint(collectionId, nftId, owner), account, 'PodOperation'),
+              wrapProxyCallsForAccount(
+                api,
+                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+                account,
+                'PodOperation'
+              ),
+              wrapProxyCallsForAccount(api, createTx, account, 'Borrow'),
+            ])
+            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
+          })
+        )
+      },
     {
-      onSuccess: async (_, result) => {
-        const api = await centrifuge.getApiPromise()
+      onSuccess: (_, result) => {
         const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
         if (event) {
           const eventData = event.toHuman() as any
@@ -228,35 +241,30 @@ function IssuerCreateLoan() {
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !account || !isAuthed || !token || !templateMetadata) return
+      if (!collateralCollectionId || !account || !templateMetadata) return
       const { decimals } = pool.currency
-      const getPricingInfo = () => {
-        if (values.pricing.valuationMethod === 'cash') {
-          return {
-            valuationMethod: values.pricing.valuationMethod,
-            advanceRate: Rate.fromPercent(100),
-            interestRate: Rate.fromPercent(0),
-            value: new BN(2).pow(new BN(128)).subn(1), // max uint128
-            maxBorrowAmount: 'upToOutstandingDebt' as const,
-            maturityDate: new Date(values.pricing.maturityDate),
-          }
+      let pricingInfo
+      if (values.pricing.valuationMethod === 'cash') {
+        pricingInfo = {
+          valuationMethod: values.pricing.valuationMethod,
+          advanceRate: Rate.fromPercent(100),
+          interestRate: Rate.fromPercent(0),
+          value: new BN(2).pow(new BN(128)).subn(1), // max uint128
+          maxBorrowAmount: 'upToOutstandingDebt' as const,
+          maturityDate: new Date(values.pricing.maturityDate),
         }
-
-        if (values.pricing.valuationMethod === 'oracle') {
-          return {
-            valuationMethod: values.pricing.valuationMethod,
-            maxPriceVariation: Rate.fromPercent(9999),
-            maxBorrowAmount: values.pricing.maxBorrowQuantity
-              ? Price.fromFloat(values.pricing.maxBorrowQuantity)
-              : null,
-            Isin: values.pricing.Isin || '',
-            maturityDate: new Date(values.pricing.maturityDate),
-            interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
-            notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
-          }
+      } else if (values.pricing.valuationMethod === 'oracle') {
+        pricingInfo = {
+          valuationMethod: values.pricing.valuationMethod,
+          maxPriceVariation: Rate.fromPercent(9999),
+          maxBorrowAmount: values.pricing.maxBorrowQuantity ? Price.fromFloat(values.pricing.maxBorrowQuantity) : null,
+          Isin: values.pricing.Isin || '',
+          maturityDate: new Date(values.pricing.maturityDate),
+          interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
+          notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
         }
-
-        return {
+      } else {
+        pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
           maxBorrowAmount: values.pricing.maxBorrowAmount,
           value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
@@ -270,83 +278,30 @@ function IssuerCreateLoan() {
         }
       }
 
-      const txId = Math.random().toString(36).substring(2)
-
-      const tx: Transaction = {
-        id: txId,
-        title: 'Create asset',
-        status: 'creating',
-        args: [],
-      }
-      addTransaction(tx)
-
-      const attributes =
+      const properties =
         values.pricing.valuationMethod === 'cash'
           ? {}
-          : (valuesToPodAttributes(values.attributes, templateMetadata as any) as any)
-      attributes._template =
-        values.pricing.valuationMethod === 'cash' ? undefined : { type: 'string', value: templateId }
+          : { ...(valuesToNftProperties(values.attributes, templateMetadata as any) as any), _template: templateId }
 
-      let imageMetadataHash
+      const metadataValues: NFTMetadataInput = {
+        name: values.assetName,
+        description: values.description,
+        properties,
+      }
+
       if (values.image) {
         const fileDataUri = await getFileDataURI(values.image)
-        imageMetadataHash = await lastValueFrom(centrifuge.metadata.pinFile(fileDataUri))
+        const imageMetadataHash = await lastValueFrom(centrifuge.metadata.pinFile(fileDataUri))
+        metadataValues.image = imageMetadataHash.uri
       }
 
-      try {
-        const { documentId } = await centrifuge.pod.createDocument([
-          podUrl,
-          token,
-          {
-            attributes,
-            writeAccess: [account.actingAddress],
-          },
-        ])
+      const metadataHash = await lastValueFrom(centrifuge.metadata.pinJson(metadataValues))
+      const nftId = await centrifuge.nfts.getAvailableNftId(collateralCollectionId)
 
-        const publicAttributes = Object.entries(templateMetadata.attributes!)
-          .filter(([, attr]) => attr.public)
-          .map(([key]) => key)
-        publicAttributes.push('_template')
-
-        const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
-          podUrl,
-          token,
-          {
-            documentId,
-            collectionId: collateralCollectionId,
-            owner: account.actingAddress,
-            publicAttributes: values.pricing.valuationMethod === 'cash' ? undefined : publicAttributes,
-            name: values.assetName,
-            description: values.pricing.valuationMethod === 'cash' ? undefined : values.description,
-            image: values.pricing.valuationMethod === 'cash' ? undefined : imageMetadataHash?.uri,
-          },
-        ])
-
-        updateTransaction(txId, { status: 'unconfirmed' })
-
-        const connectedCent = centrifuge.connect(account.signingAccount.address, account.signingAccount.signer as any)
-
-        // Sign createLoan transaction
-        const submittable = await lastValueFrom(
-          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId, getPricingInfo()], {
-            signOnly: true,
-            era: 100,
-            proxies: account.proxies?.map((p) => [p.delegator, p.types.includes('Borrow') ? 'Borrow' : undefined]),
-            multisig: account.multisig,
-          })
-        )
-
-        updateTransaction(txId, { status: 'pending' })
-
-        await centrifuge.pod.awaitJob([podUrl, token, jobId])
-
-        // Send the signed createLoan transaction
-        doTransaction([submittable], undefined, txId)
-      } catch (e) {
-        console.error(e)
-        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create asset' })
-      }
-
+      doTransaction([collateralCollectionId, nftId, account.actingAddress, metadataHash.uri, pricingInfo], {
+        account,
+        forceProxyType: 'Borrow',
+      })
       setSubmitting(false)
     },
   })
@@ -374,143 +329,123 @@ function IssuerCreateLoan() {
       <Form ref={formRef} noValidate>
         <Stack>
           <PageHeader title="Create asset" subtitle={poolMetadata?.pool?.name} />
-          {isAuthed ? (
-            <>
-              <PageSection>
-                {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
-                  <Shelf
-                    gap={2}
-                    mb={3}
-                    py={2}
-                    borderWidth={0}
-                    borderBottomWidth={1}
-                    borderColor="borderPrimary"
-                    borderStyle="solid"
-                  >
-                    <Text>Asset template is missing. Please create one first.</Text>
-                    <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`} small>
-                      Create template
-                    </RouterLinkButton>
-                  </Shelf>
-                )}
+          <PageSection>
+            {!templateId && form.values.pricing.valuationMethod !== 'cash' && (
+              <Shelf
+                gap={2}
+                mb={3}
+                py={2}
+                borderWidth={0}
+                borderBottomWidth={1}
+                borderColor="borderPrimary"
+                borderStyle="solid"
+              >
+                <Text>Asset template is missing. Please create one first.</Text>
+                <RouterLinkButton to={`/issuer/${pid}/configuration/create-asset-template`} small>
+                  Create template
+                </RouterLinkButton>
+              </Shelf>
+            )}
 
-                <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
-                  <FieldWithErrorMessage
-                    validate={combine(required(), maxLength(100))}
-                    name="assetName"
-                    as={TextInput}
-                    label="Asset name*"
-                    placeholder=""
-                    maxLength={100}
-                    disabled={!templateId}
+            <Grid columns={[1, 2, 2, 2]} equalColumns gap={2} rowGap={3}>
+              <FieldWithErrorMessage
+                validate={combine(required(), maxLength(100))}
+                name="assetName"
+                as={TextInput}
+                label="Asset name*"
+                placeholder=""
+                maxLength={100}
+                disabled={!templateId}
+              />
+              <Field name="pricing.valuationMethod">
+                {({ field, meta, form }: FieldProps) => (
+                  <Select
+                    {...field}
+                    label="Asset type"
+                    onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    options={[
+                      { value: 'discountedCashFlow', label: 'Non-fungible asset - DCF' },
+                      { value: 'outstandingDebt', label: 'Non-fungible asset - at par' },
+                      { value: 'oracle', label: 'Fungible asset - external pricing' },
+                      { value: 'cash', label: 'Cash' },
+                    ]}
+                    placeholder="Choose asset type"
                   />
-                  <Field name="pricing.valuationMethod">
-                    {({ field, meta, form }: FieldProps) => (
-                      <Select
-                        {...field}
-                        label="Asset type"
-                        onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
-                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                        options={[
-                          { value: 'discountedCashFlow', label: 'Non-fungible asset - DCF' },
-                          { value: 'outstandingDebt', label: 'Non-fungible asset - at par' },
-                          { value: 'oracle', label: 'Fungible asset - external pricing' },
-                          { value: 'cash', label: 'Cash' },
-                        ]}
-                        placeholder="Choose asset type"
-                      />
-                    )}
-                  </Field>
+                )}
+              </Field>
+            </Grid>
+          </PageSection>
+          <PageSection title="Pricing">
+            <PricingInput poolId={pid} />
+          </PageSection>
+          {form.values.pricing.valuationMethod !== 'cash' &&
+            templateMetadata?.sections?.map((section) => (
+              <PageSection
+                title={section.name}
+                titleAddition={
+                  section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public) ? 'Public' : 'Private'
+                }
+                key={section.name}
+              >
+                <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+                  {section.attributes?.map((key) => {
+                    const attr = templateMetadata?.attributes?.[key]
+                    if (!attr) return null
+                    const name = `attributes.${key}`
+                    return <TemplateField {...attr} name={name} key={key} />
+                  })}
                 </Grid>
               </PageSection>
-              <PageSection title="Pricing">
-                <PricingInput poolId={pid} />
-              </PageSection>
-              {form.values.pricing.valuationMethod !== 'cash' &&
-                templateMetadata?.sections?.map((section) => (
-                  <PageSection
-                    title={section.name}
-                    titleAddition={
-                      section.attributes.some((key) => templateMetadata?.attributes?.[key]?.public)
-                        ? 'Public'
-                        : 'Private'
-                    }
-                    key={section.name}
-                  >
-                    <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-                      {section.attributes?.map((key) => {
-                        const attr = templateMetadata?.attributes?.[key]
-                        if (!attr) return null
-                        const name = `attributes.${key}`
-                        return <TemplateField {...attr} name={name} key={key} />
-                      })}
-                    </Grid>
-                  </PageSection>
-                ))}
+            ))}
 
-              {form.values.pricing.valuationMethod !== 'cash' &&
-                (templateMetadata?.options?.image || templateMetadata?.options?.description) && (
-                  <PageSection title="Description" titleAddition="Optional">
-                    <Stack gap={3}>
-                      {templateMetadata.options.image && (
-                        <Field name="image" validate={validate.nftImage}>
-                          {({ field, meta, form }: FieldProps) => (
-                            <ImageUpload
-                              file={field.value}
-                              onFileChange={(file) => {
-                                form.setFieldTouched('image', true, false)
-                                form.setFieldValue('image', file)
-                              }}
-                              requirements="JPG/PNG/SVG, max 1MB"
-                              label="Asset image"
-                              errorMessage={meta.touched ? meta.error : undefined}
-                            />
-                          )}
-                        </Field>
-                      )}
-                      {templateMetadata.options.description && (
-                        <FieldWithErrorMessage
-                          name="description"
-                          as={TextAreaInput}
-                          label="Description"
-                          placeholder="Add asset description paragraph..."
-                          maxLength={100}
+          {form.values.pricing.valuationMethod !== 'cash' &&
+            (templateMetadata?.options?.image || templateMetadata?.options?.description) && (
+              <PageSection title="Description" titleAddition="Optional">
+                <Stack gap={3}>
+                  {templateMetadata.options.image && (
+                    <Field name="image" validate={validate.nftImage}>
+                      {({ field, meta, form }: FieldProps) => (
+                        <ImageUpload
+                          file={field.value}
+                          onFileChange={(file) => {
+                            form.setFieldTouched('image', true, false)
+                            form.setFieldValue('image', file)
+                          }}
+                          requirements="JPG/PNG/SVG, max 1MB"
+                          label="Asset image"
+                          errorMessage={meta.touched ? meta.error : undefined}
                         />
                       )}
-                    </Stack>
-                  </PageSection>
-                )}
-            </>
-          ) : podUrl ? (
-            <Box py={8}>
-              <PodAuthSection poolId={pid} message="You need to be logged in to create assets" />
-            </Box>
-          ) : (
-            !poolMetadataIsLoading && (
-              <Stack alignItems="center" py={8}>
-                <Text>POD endpoint is missing in pool configuration</Text>
-              </Stack>
-            )
-          )}
+                    </Field>
+                  )}
+                  {templateMetadata.options.description && (
+                    <FieldWithErrorMessage
+                      name="description"
+                      as={TextAreaInput}
+                      label="Description"
+                      placeholder="Add asset description paragraph..."
+                      maxLength={100}
+                    />
+                  )}
+                </Stack>
+              </PageSection>
+            )}
         </Stack>
         <Box position="sticky" bottom={0} backgroundColor="backgroundPage" zIndex={3}>
           <PageSection>
             <Shelf gap={1} justifyContent="end">
-              {isAuthed && (
-                <>
-                  {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
-                  <Button variant="secondary" onClick={() => history.goBack()}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    loading={isPending}
-                    disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
-                  >
-                    Create
-                  </Button>
-                </>
-              )}
+              {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
+              <Button variant="secondary" onClick={() => history.goBack()}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                loading={isPending}
+                disabled={!templateMetadata || !account || !collateralCollectionId || balanceLow}
+              >
+                Create
+              </Button>
             </Shelf>
           </PageSection>
         </Box>
@@ -519,58 +454,33 @@ function IssuerCreateLoan() {
   )
 }
 
-function valuesToPodAttributes(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
+function valuesToNftProperties(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
   return Object.fromEntries(
     template.sections.flatMap((section) =>
-      section.attributes.map((key) => {
-        const attr = template.attributes[key]
-        const value = values[key]
-        switch (attr.input.type) {
-          case 'date':
-            return [
-              key,
-              {
-                type: 'timestamp',
-                value: new Date(value).toISOString(),
-              },
-            ]
-          case 'currency': {
-            const formatted = attr.input.decimals
-              ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
-              : String(value)
-            return [
-              key,
-              {
-                type: 'monetary',
-                value: formatted,
-                monetary_value: {
-                  ID: attr.input.symbol,
-                  Value: formatted,
-                  ChainID: 1,
-                },
-              },
-            ]
+      section.attributes
+        .map((key) => {
+          const attr = template.attributes[key]
+          if (!attr.public) return undefined as never
+          const value = values[key]
+          switch (attr.input.type) {
+            case 'date':
+              return [key, new Date(value).toISOString()]
+            case 'currency': {
+              return [
+                key,
+                attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
+              ]
+            }
+            case 'number':
+              return [
+                key,
+                attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
+              ]
+            default:
+              return [key, String(value)]
           }
-          case 'number':
-            return [
-              key,
-              {
-                type: attr.input.decimals ? 'integer' : 'decimal',
-                value: attr.input.decimals
-                  ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString()
-                  : String(value),
-              },
-            ]
-          default:
-            return [
-              key,
-              {
-                type: 'string',
-                value: String(value),
-              },
-            ]
-        }
-      })
+        })
+        .filter(Boolean)
     )
   )
 }

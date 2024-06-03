@@ -413,10 +413,3 @@ export function usePoolChanges(poolId: string) {
     [result, poolOrders, pool]
   )
 }
-
-export function usePodUrl(poolId: string) {
-  const pool = usePool(poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
-  const podUrl = poolMetadata?.pod?.node
-  return podUrl
-}
