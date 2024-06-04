@@ -138,7 +138,6 @@ export function ExternalFinanceFields({
               errorMessage={meta.touched ? meta.error : undefined}
               decimals={8}
               onChange={(value) => form.setFieldValue('quantity', value)}
-              currency={pool.currency.symbol}
             />
           )
         }}
