@@ -233,6 +233,19 @@ function Loan() {
         }
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
+        actions={
+          showAssetSnapshots && (
+            <AnchorButton
+              href={dataUrl}
+              download={`asset-${loanId}-timeseries.csv`}
+              variant="secondary"
+              icon={IconDownload}
+              small
+            >
+              Timeseries
+            </AnchorButton>
+          )
+        }
       />
       {loanId === '0' && (
         <>
@@ -331,22 +344,7 @@ function Loan() {
             ) : null}
 
             {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
-              <PageSection
-                title={<Box>Holdings</Box>}
-                headerRight={
-                  showAssetSnapshots && (
-                    <AnchorButton
-                      href={dataUrl}
-                      download={`asset-${loanId}-timeseries.csv`}
-                      variant="secondary"
-                      icon={IconDownload}
-                      small
-                    >
-                      Timeseries
-                    </AnchorButton>
-                  )
-                }
-              >
+              <PageSection title={<Box>Holdings</Box>}>
                 <Shelf gap={6} flexWrap="wrap">
                   <HoldingsValues
                     pool={pool as Pool}
