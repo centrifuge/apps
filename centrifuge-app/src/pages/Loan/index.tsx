@@ -258,7 +258,12 @@ function Loan() {
             ]}
           />
           <PageSection>
-            <TransactionHistoryTable transactions={borrowerAssetTransactions ?? []} poolId={poolId} preview={false} />
+            <TransactionHistoryTable
+              transactions={borrowerAssetTransactions ?? []}
+              poolId={poolId}
+              preview={false}
+              activeAssetId={loanId}
+            />
           </PageSection>
         </>
       )}
@@ -373,6 +378,7 @@ function Loan() {
                     transactions={borrowerAssetTransactions ?? []}
                     poolId={poolId}
                     preview={false}
+                    activeAssetId={loanId}
                   />
                 </PageSection>
               ) : (
