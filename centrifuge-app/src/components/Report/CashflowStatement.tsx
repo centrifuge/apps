@@ -136,7 +136,12 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     return [
       {
         name: '- Fees / costs',
-        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesChargedAmountByPeriod.toDecimal()) || [],
+        value:
+          poolStates?.map(({ poolState }) =>
+            poolState.sumPoolFeesChargedAmountByPeriod
+              .toDecimal()
+              .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
+          ) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
@@ -148,7 +153,11 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
               .toDecimal()
               .sub(poolState.sumBorrowedAmountByPeriod.toDecimal())
               .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
+              .sub(
+                poolState.sumPoolFeesChargedAmountByPeriod
+                  .toDecimal()
+                  .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
+              )
           ) || [],
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
         heading: false,
@@ -179,7 +188,11 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
               .toDecimal()
               .sub(poolState.sumBorrowedAmountByPeriod.toDecimal())
               .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
+              .sub(
+                poolState.sumPoolFeesChargedAmountByPeriod
+                  .toDecimal()
+                  .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
+              )
               .add(poolState.sumInvestedAmountByPeriod.toDecimal())
               .sub(poolState.sumRedeemedAmountByPeriod.toDecimal())
           ) || [],
