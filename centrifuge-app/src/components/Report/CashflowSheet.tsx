@@ -4,7 +4,7 @@ import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { usePoolStatesByGroup } from '../../utils/usePools'
+import { useAggregatedPoolStatesByGroup } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
@@ -49,7 +49,7 @@ export function CashflowSheet({ pool }: { pool: Pool }) {
     }
   }, [groupBy, startDate, endDate])
 
-  const poolStates = usePoolStatesByGroup(
+  const poolStates = useAggregatedPoolStatesByGroup(
     pool.id,
     adjustedStartDate,
     adjustedEndDate,
