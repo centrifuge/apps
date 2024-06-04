@@ -76,11 +76,15 @@ export const columns = [
             {toAssetName}
           </AnchorTextLink>
         </Text>
-      ) : (
+      ) : activeAssetId != assetId?.split('-')[1] ? (
         <Text as="span" variant="body3">
           <AnchorTextLink target="_self" href={`/pools/${assetId?.split('-')[0]}/assets/${assetId?.split('-')[1]}`}>
             {assetName || `Asset ${assetId?.split('-')[1]}`}
           </AnchorTextLink>
+        </Text>
+      ) : (
+        <Text as="span" variant="body3">
+          {assetName || `Asset ${assetId?.split('-')[1]}`}
         </Text>
       )
     },
