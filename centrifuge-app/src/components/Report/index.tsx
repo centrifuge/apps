@@ -6,7 +6,7 @@ import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
 import { AssetTransactions } from './AssetTransactions'
 import { BalanceSheet } from './BalanceSheet'
-import { CashflowSheet } from './CashflowSheet'
+import { CashflowStatement } from './CashflowStatement'
 import { FeeTransactions } from './FeeTransactions'
 import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
@@ -51,7 +51,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'asset-tx' && <AssetTransactions pool={pool} />}
         {report === 'fee-tx' && <FeeTransactions pool={pool} />}
         {report === 'balance-sheet' && <BalanceSheet pool={pool} />}
-        {report === 'cashflow-sheet' && <CashflowSheet pool={pool} />}
+        {report === 'cashflow-statement' && <CashflowStatement pool={pool} />}
         {report === 'oracle-tx' && <OracleTransactions pool={pool} />}
       </Box>
     </Box>

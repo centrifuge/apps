@@ -17,7 +17,7 @@ type Row = TableDataRow & {
   bold?: boolean
 }
 
-export function CashflowSheet({ pool }: { pool: Pool }) {
+export function CashflowStatement({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
@@ -209,7 +209,7 @@ export function CashflowSheet({ pool }: { pool: Pool }) {
 
     setCsvData({
       dataUrl,
-      fileName: `${pool.id}-cashflow-sheet-${formatDate(startDate, {
+      fileName: `${pool.id}-cashflow-statement-${formatDate(startDate, {
         weekday: 'short',
         month: 'short',
         day: '2-digit',
@@ -240,6 +240,6 @@ export function CashflowSheet({ pool }: { pool: Pool }) {
       <DataTable data={investRedeemRecords} columns={columns} hoverable />
     </DataTableGroup>
   ) : (
-    <UserFeedback reportType="Cashflow sheet" />
+    <UserFeedback reportType="Cash flow statement" />
   )
 }
