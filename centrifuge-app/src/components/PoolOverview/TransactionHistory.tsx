@@ -213,9 +213,9 @@ export const TransactionHistoryTable = ({
         assetName:
           transaction.type === 'CASH_TRANSFER'
             ? transaction.fromAsset?.id.endsWith('0')
-              ? 'Onchain reserve > Offchain cash'
-              : 'Offchain cash > Onchain reserve'
-            : assetMetadata[Number(id) - 1]?.data?.name || `Asset ${id}`,
+              ? `${transaction.fromAsset?.name} > ${transaction.toAsset?.name}`
+              : `${transaction.fromAsset?.name} > ${transaction.toAsset?.name}`
+            : transaction.asset?.name || `Asset ${id}`,
         amount: amount || 0,
         hash: transaction.hash,
       }
