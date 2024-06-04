@@ -99,25 +99,25 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: '+ Sales / Repayments',
+        name: '+ Sales/Repayments',
         value: poolStates?.map(({ poolState }) => poolState.sumRepaidAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '- Purchases / Borrowing',
+        name: '- Purchases/Borrowing',
         value: poolStates?.map(({ poolState }) => poolState.sumBorrowedAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '+ Coupon / interest payments',
+        name: '+ Coupon/interest payments',
         value: poolStates?.map(({ poolState }) => poolState.sumInterestRepaidAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '= Gross CF from trading / lending',
+        name: '= Gross CF from trading/lending',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumRepaidAmountByPeriod
@@ -135,7 +135,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const netCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: '- Fees / costs',
+        name: '- Fees/costs',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumPoolFeesChargedAmountByPeriod
@@ -146,7 +146,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '= Net CF from trading / lending',
+        name: '= Net CF from trading/lending',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumRepaidAmountByPeriod
