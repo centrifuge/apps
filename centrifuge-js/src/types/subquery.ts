@@ -75,7 +75,16 @@ export type SubqueryInvestorTransaction = {
   transactionFee?: string | null
 }
 
-export type AssetTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED' | 'CASH_TRANSFER'
+export type AssetTransactionType =
+  | 'CREATED'
+  | 'PRICED'
+  | 'BORROWED'
+  | 'REPAID'
+  | 'CLOSED'
+  | 'CASH_TRANSFER'
+  | 'DEPOSIT_FROM_INVESTMENTS'
+  | 'WITHDRAWAL_FOR_REDEMPTIONS'
+  | 'WITHDRAWAL_FOR_FEES'
 
 export enum AssetType {
   OnchainCash = 'OnchainCash',

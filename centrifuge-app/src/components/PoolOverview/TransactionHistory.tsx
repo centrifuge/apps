@@ -107,6 +107,27 @@ export const TransactionHistoryTable = ({
       }
     }
 
+    if (transaction.type === 'DEPOSIT_FROM_INVESTMENTS') {
+      return {
+        label: 'Deposit from investments',
+        amount: transaction.amount,
+      }
+    }
+
+    if (transaction.type === 'WITHDRAWAL_FOR_REDEMPTIONS') {
+      return {
+        label: 'Withdrawal for redemptions',
+        amount: transaction.amount,
+      }
+    }
+
+    if (transaction.type === 'WITHDRAWAL_FOR_FEES') {
+      return {
+        label: 'Withdrawal for fees',
+        amount: transaction.amount,
+      }
+    }
+
     if (transaction.type === 'BORROWED') {
       return {
         label: 'Purchase',

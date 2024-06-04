@@ -78,6 +78,9 @@ const assetTransactionTypes: {
   REPAID: 'Repaid',
   CLOSED: 'Closed',
   CASH_TRANSFER: 'Cash transfer',
+  DEPOSIT_FROM_INVESTMENTS: 'Deposit from investments',
+  WITHDRAWAL_FOR_REDEMPTIONS: 'Withdrawal for redemptions',
+  WITHDRAWAL_FOR_FEES: 'Withdrawal for fees',
 }
 
 export function formatAssetTransactionType(type: AssetTransactionType) {
