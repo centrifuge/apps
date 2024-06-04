@@ -2623,6 +2623,9 @@ export function getPoolsModule(inst: Centrifuge) {
             orderBy: TIMESTAMP_DESC
           ) {
             nodes {
+              account {
+                chainId
+              }
               timestamp
               type
               poolId
