@@ -432,6 +432,7 @@ function Loan() {
         <>
           {templateData?.sections?.map((section, i) => {
             const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
+            if (!isPublic) return null
             return (
               <PageSection title={<Box>{section.name}</Box>} titleAddition={isPublic ? undefined : 'Private'} key={i}>
                 {isPublic ? (
