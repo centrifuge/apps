@@ -575,6 +575,7 @@ export type DailyPoolState = {
     totalReserve: CurrencyBalance
     offchainCashValue: CurrencyBalance
     portfolioValuation: CurrencyBalance
+    sumPoolFeesPendingAmount: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -2230,6 +2231,7 @@ export function getPoolsModule(inst: Centrifuge) {
           blockNumber
           sumPoolFeesChargedAmountByPeriod
           sumPoolFeesAccruedAmountByPeriod
+          sumPoolFeesPendingAmount
           sumBorrowedAmountByPeriod
           sumRepaidAmountByPeriod
           sumInvestedAmountByPeriod
@@ -2434,6 +2436,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumRepaidAmountByPeriod: new CurrencyBalance(state.sumRepaidAmountByPeriod, poolCurrency.decimals),
                 sumInvestedAmountByPeriod: new CurrencyBalance(state.sumInvestedAmountByPeriod, poolCurrency.decimals),
                 sumRedeemedAmountByPeriod: new CurrencyBalance(state.sumRedeemedAmountByPeriod, poolCurrency.decimals),
+                sumPoolFeesPendingAmount: new CurrencyBalance(state.sumPoolFeesPendingAmount, poolCurrency.decimals),
               }
               const poolValue = new CurrencyBalance(new BN(state?.netAssetValue || '0'), poolCurrency.decimals)
 
@@ -2542,28 +2545,38 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getMonthlyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
+  function getPoolStatesByGroup(
+    args: [poolId: string, from?: Date, to?: Date],
+    groupBy: 'day' | 'month' | 'quarter' | 'year' = 'month'
+  ) {
     return getDailyPoolStates(args).pipe(
       map(({ poolStates }) => {
         if (!poolStates.length) return []
-        // group by month
-        // todo: find last of each month
-        const poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
+        const poolStatesByGroup: { [period: string]: DailyPoolState } = {}
+
         poolStates.forEach((poolState) => {
-          const monthYear = `${new Date(poolState.timestamp).getMonth()}-${new Date(poolState.timestamp).getFullYear()}`
-          if (monthYear in poolStatesByMonth) {
-            poolStatesByMonth[monthYear].push(poolState)
+          const date = new Date(poolState.timestamp)
+          let period = date.toISOString().split('T')[0]
+
+          if (groupBy === 'day') {
+            period = date.toISOString().split('T')[0]
+          } else if (groupBy === 'month') {
+            period = `${date.getMonth() + 1}-${date.getFullYear()}`
+          } else if (groupBy === 'quarter') {
+            const quarter = Math.ceil((date.getMonth() + 1) / 3)
+            period = `Q${quarter}-${date.getFullYear()}`
+          } else if (groupBy === 'year') {
+            period = `${date.getFullYear()}`
           } else {
-            poolStatesByMonth[monthYear] = [poolState]
+            throw new Error(`Unsupported groupBy: ${groupBy}`)
+          }
+
+          if (!poolStatesByGroup[period] || new Date(poolStatesByGroup[period].timestamp) < date) {
+            poolStatesByGroup[period] = poolState
           }
         })
 
-        return Object.values(poolStatesByMonth).map((statesOneMonth) => {
-          const base = statesOneMonth[statesOneMonth.length - 1]
-          // todo: sum aggregated values (e.g. tranches.fulfilledInvestOrders)
-
-          return base
-        })
+        return Object.values(poolStatesByGroup)
       })
     )
   }
@@ -3962,7 +3975,7 @@ export function getPoolsModule(inst: Centrifuge) {
     adminWriteOff,
     getAvailablePoolId,
     getDailyPoolStates,
-    getMonthlyPoolStates,
+    getPoolStatesByGroup,
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,
