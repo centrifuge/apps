@@ -1,11 +1,9 @@
-import { AssetTransaction, AssetType, CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, IconExternalLink, Shelf, Stack, StatusChip, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
-import { nftMetadataSchema } from '../../schemas'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useMetadataMulti } from '../../utils/useMetadata'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { AnchorTextLink } from '../TextLink'
@@ -13,10 +11,15 @@ import { AnchorTextLink } from '../TextLink'
 type Row = {
   type: string
   transactionDate: string
+  activeAssetId?: string
   assetId: string
+  assetName: string
+  fromAssetId?: string
+  fromAssetName?: string
+  toAssetId?: string
+  toAssetName?: string
   amount: CurrencyBalance | undefined
   hash: string
-  assetName: string
 }
 
 const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
@@ -41,12 +44,47 @@ export const columns = [
   },
   {
     align: 'left',
-    header: 'Asset name',
-    cell: ({ assetId, assetName }: Row) => {
-      const [poolId, id] = assetId.split('-')
-      return (
+    header: 'Asset',
+    cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
+      return fromAssetId && toAssetId && activeAssetId == fromAssetId.split('-')[1] ? (
         <Text as="span" variant="body3">
-          <AnchorTextLink href={`/pools/${poolId}/assets/${id}`}>{assetName}</AnchorTextLink>
+          {fromAssetName} &rarr;{' '}
+          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
+            {toAssetName}
+          </AnchorTextLink>
+        </Text>
+      ) : fromAssetId && toAssetId && activeAssetId == toAssetId.split('-')[1] ? (
+        <Text as="span" variant="body3">
+          <AnchorTextLink
+            target="_self"
+            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
+          >
+            {fromAssetName}
+          </AnchorTextLink>{' '}
+          &rarr; {toAssetName}
+        </Text>
+      ) : fromAssetId && toAssetId ? (
+        <Text as="span" variant="body3">
+          <AnchorTextLink
+            target="_self"
+            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
+          >
+            {fromAssetName}
+          </AnchorTextLink>{' '}
+          &rarr;{' '}
+          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
+            {toAssetName}
+          </AnchorTextLink>
+        </Text>
+      ) : activeAssetId != assetId?.split('-')[1] ? (
+        <Text as="span" variant="body3">
+          <AnchorTextLink target="_self" href={`/pools/${assetId?.split('-')[0]}/assets/${assetId?.split('-')[1]}`}>
+            {assetName || `Asset ${assetId?.split('-')[1]}`}
+          </AnchorTextLink>
+        </Text>
+      ) : (
+        <Text as="span" variant="body3">
+          {assetName || `Asset ${assetId?.split('-')[1]}`}
         </Text>
       )
     },
@@ -80,25 +118,37 @@ export const columns = [
   },
 ]
 
-export const TransactionHistory = ({ poolId, preview = true }: { poolId: string; preview?: boolean }) => {
+export const TransactionHistory = ({
+  poolId,
+  activeAssetId,
+  preview = true,
+}: {
+  poolId: string
+  activeAssetId?: string
+  preview?: boolean
+}) => {
   const transactions = useAssetTransactions(poolId, new Date(0))
-  return <TransactionHistoryTable transactions={transactions ?? []} preview={preview} poolId={poolId} />
+  return (
+    <TransactionHistoryTable
+      transactions={transactions ?? []}
+      preview={preview}
+      poolId={poolId}
+      activeAssetId={activeAssetId}
+    />
+  )
 }
 
 export const TransactionHistoryTable = ({
   transactions,
   poolId,
+  activeAssetId,
   preview = true,
 }: {
   poolId: string
   transactions: any[]
+  activeAssetId?: string
   preview?: boolean
 }) => {
-  const assetMetadata = useMetadataMulti(
-    [...new Set(transactions?.map((transaction) => transaction.asset.metadata))] || [],
-    nftMetadataSchema
-  )
-
   const getLabelAndAmount = (transaction: AssetTransaction) => {
     if (transaction.type === 'CASH_TRANSFER') {
       return {
@@ -190,11 +240,11 @@ export const TransactionHistoryTable = ({
         timeZoneName: 'short',
       })}"`,
       'Asset Name':
-        transaction.asset.type === AssetType.OffchainCash
-          ? transaction.type === 'BORROWED'
-            ? `Onchain reserve > Settlement Account`
-            : `Settlement Account > onchain reserve`
-          : assetMetadata[Number(id) - 1]?.data?.name || `Asset ${id}`,
+        transaction.type === 'CASH_TRANSFER'
+          ? transaction.fromAsset?.id.endsWith('0')
+            ? `${transaction.fromAsset?.name} > ${transaction.toAsset?.name}`
+            : `${transaction.fromAsset?.name} > ${transaction.toAsset?.name}`
+          : transaction.asset?.name || `Asset ${id}`,
       Amount: amount ? `"${formatBalance(amount, 'USD', 2, 2)}"` : '-',
       Transaction: `${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${transaction.hash}`,
     }
@@ -204,18 +254,17 @@ export const TransactionHistoryTable = ({
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
-      const [, id] = transaction.asset.id.split('-')
       const { label, amount } = getLabelAndAmount(transaction)
       return {
+        activeAssetId,
         type: label,
         transactionDate: transaction.timestamp,
         assetId: transaction.asset.id,
-        assetName:
-          transaction.type === 'CASH_TRANSFER'
-            ? transaction.fromAsset?.id.endsWith('0')
-              ? 'Onchain reserve > Offchain cash'
-              : 'Offchain cash > Onchain reserve'
-            : assetMetadata[Number(id) - 1]?.data?.name || `Asset ${id}`,
+        assetName: transaction.asset.name,
+        fromAssetId: transaction.fromAsset?.id,
+        fromAssetName: transaction.fromAsset?.name,
+        toAssetId: transaction.toAsset?.id,
+        toAssetName: transaction.toAsset?.name,
         amount: amount || 0,
         hash: transaction.hash,
       }
