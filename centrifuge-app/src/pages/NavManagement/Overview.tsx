@@ -88,7 +88,7 @@ export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
     const lastUpdatedSumBorrowedAmountByPeriod = dailyPoolStates?.find(
       (state) => state.timestamp >= lastUpdated
     )?.sumBorrowedAmountByPeriod
-    const todaySumBorrowedAmountByPeriod = dailyPoolStates?.[0].sumBorrowedAmountByPeriod
+    const todaySumBorrowedAmountByPeriod = dailyPoolStates?.[0]?.sumBorrowedAmountByPeriod
     return lastUpdatedSumBorrowedAmountByPeriod && todaySumBorrowedAmountByPeriod
       ? new BN(todaySumBorrowedAmountByPeriod).sub(new BN(lastUpdatedSumBorrowedAmountByPeriod))
       : new BN(0)
