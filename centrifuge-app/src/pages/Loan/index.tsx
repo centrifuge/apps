@@ -211,6 +211,18 @@ function Loan() {
     }
   }, [weightedYTM])
 
+  const currentYTM = React.useMemo(() => {
+    const termDays = loan?.pricing ? daysBetween(new Date(), loan?.pricing.maturityDate) : 0
+
+    return currentFace && loan && 'presentValue' in loan
+      ? currentFace
+          ?.sub(loan.presentValue.toDecimal())
+          .div(loan.presentValue.toDecimal())
+          .mul(Dec(365).div(Dec(termDays)))
+          .mul(100)
+      : null
+  }, [loan])
+
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -305,6 +317,13 @@ function Loan() {
                     )}`,
                   },
                 ],
+                ...(loan.pricing.maturityDate &&
+                'valuationMethod' in loan.pricing &&
+                loan.pricing.valuationMethod === 'oracle' &&
+                loan.pricing.notional.gtn(0) &&
+                currentYTM
+                  ? [{ label: 'Current YTM', value: formatPercentage(currentYTM) }]
+                  : []),
                 ...(loan.pricing.maturityDate &&
                 'valuationMethod' in loan.pricing &&
                 loan.pricing.valuationMethod === 'oracle' &&
