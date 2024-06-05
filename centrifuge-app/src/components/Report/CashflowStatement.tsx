@@ -4,7 +4,7 @@ import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useAggregatedPoolStatesByGroup } from '../../utils/usePools'
+import { useAggregatedPoolStatesByGroup, usePoolMetadata } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
@@ -19,6 +19,7 @@ type Row = TableDataRow & {
 
 export function CashflowStatement({ pool }: { pool: Pool }) {
   const { startDate, endDate, groupBy, setCsvData } = React.useContext(ReportContext)
+  const { data: poolMetadata } = usePoolMetadata(pool)
 
   const [adjustedStartDate, adjustedEndDate] = React.useMemo(() => {
     const today = new Date()
@@ -99,25 +100,25 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: '+ Sales/Repayments',
+        name: poolMetadata?.pool?.asset.class === 'privateCredit' ? '+ Repayments' : 'Sales',
         value: poolStates?.map(({ poolState }) => poolState.sumRepaidAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '- Purchases/Borrowing',
+        name: poolMetadata?.pool?.asset.class === 'privateCredit' ? 'Purchases' : 'Borrowing',
         value: poolStates?.map(({ poolState }) => poolState.sumBorrowedAmountByPeriod.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
-        name: '+ Coupon/interest payments',
+        name: 'Interest payments',
         value: poolStates?.map(({ poolState }) => poolState.sumInterestRepaidAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '= Gross CF from trading/lending',
+        name: '= Gross cash flow',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumRepaidAmountByPeriod
@@ -135,7 +136,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const netCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: '- Fees/costs',
+        name: 'Fees/costs',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumPoolFeesChargedAmountByPeriod
@@ -143,10 +144,10 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
               .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
           ) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
-        name: '= Net CF from trading/lending',
+        name: '= Net cash flow',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumRepaidAmountByPeriod
@@ -169,19 +170,19 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const investRedeemRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: '+ Investment',
+        name: 'Pool investment',
         value: poolStates?.map(({ poolState }) => poolState.sumInvestedAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: '- Redemptions',
+        name: 'Pool redemptions',
         value: poolStates?.map(({ poolState }) => poolState.sumRedeemedAmountByPeriod.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
-        name: '= Total CF',
+        name: '= Total cash flow',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumRepaidAmountByPeriod
