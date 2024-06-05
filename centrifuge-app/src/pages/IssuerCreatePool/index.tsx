@@ -652,7 +652,7 @@ function CreatePoolForm() {
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
-                      options={currencies?.map((c) => ({ value: c.symbol, label: c.symbol })) ?? []}
+                      options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
                       placeholder="Select..."
                     />
                   )}

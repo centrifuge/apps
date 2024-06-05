@@ -3055,8 +3055,8 @@ export function getPoolsModule(inst: Centrifuge) {
           const currency: CurrencyMetadata = {
             key,
             decimals: value.decimals,
-            name: value.symbol === 'localUSDC' ? 'USDC' : value.name,
-            symbol: value.symbol === 'localUSDC' ? 'USDC' : value.symbol,
+            name: value.symbol === 'USDC' ? 'DOT USDC' : value.symbol === 'localUSDC' ? 'USDC' : value.name,
+            symbol: value.symbol === 'USDC' ? 'dotUSDC' : value.symbol === 'localUSDC' ? 'USDC' : value.symbol,
             isPoolCurrency: value.additional.poolCurrency,
             isPermissioned: value.additional.permissioned,
             additional: value.additional,
