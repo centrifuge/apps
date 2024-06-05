@@ -132,13 +132,15 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
       tokenPrice: token.tokenPrice.toDecimal() || Dec(0),
       showActions,
     })),
-    ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balance.isZero()) || []).map((balance) => {
+    ...(tinlakeBalances?.tranches.filter((tranche) => !tranche.balancePending.isZero()) || []).map((balance) => {
       const pool = tinlakePools.data?.pools?.find((pool) => pool.id === balance.poolId)
       const tranche = pool?.tranches.find((tranche) => tranche.id === balance.trancheId)
       if (!tranche) return null as never
       return {
-        position: balance.balance.toDecimal(),
-        marketValue: tranche.tokenPrice ? balance.balance.toDecimal().mul(tranche?.tokenPrice.toDecimal()) : Dec(0),
+        position: balance.balancePending.toDecimal(),
+        marketValue: tranche.tokenPrice
+          ? balance.balancePending.toDecimal().mul(tranche?.tokenPrice.toDecimal())
+          : Dec(0),
         tokenPrice: tranche.tokenPrice?.toDecimal() || Dec(0),
         trancheId: balance.trancheId,
         poolId: balance.poolId,

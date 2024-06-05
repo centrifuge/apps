@@ -43,12 +43,32 @@ async function getBalances(pools: TinlakePool[], address: string, provider: Json
       {
         target: pool.addresses.JUNIOR_TOKEN,
         call: ['function balanceOf(address) view returns (uint256)', address],
-        returns: [[`tokens.${pool.id}.junior`, toTokenBalance]],
+        returns: [[`tokens.${pool.id}.junior.balance`, toTokenBalance]],
       },
       {
         target: pool.addresses.SENIOR_TOKEN,
         call: ['function balanceOf(address) view returns (uint256)', address],
-        returns: [[`tokens.${pool.id}.senior`, toTokenBalance]],
+        returns: [[`tokens.${pool.id}.senior.balance`, toTokenBalance]],
+      },
+      {
+        target: pool.addresses.JUNIOR_TRANCHE,
+        call: ['function calcDisburse(address) view returns (uint256,uint256,uint256,uint256)', address],
+        returns: [
+          [`tokens.${pool.id}.junior.payoutCurrencyAmount`, toCurrencyBalance],
+          [`tokens.${pool.id}.junior.payoutTokenAmount`, toTokenBalance],
+          [`tokens.${pool.id}.junior.remainingInvestCurrency`, toCurrencyBalance],
+          [`tokens.${pool.id}.junior.remainingRedeemToken`, toTokenBalance],
+        ],
+      },
+      {
+        target: pool.addresses.SENIOR_TRANCHE,
+        call: ['function calcDisburse(address) view returns (uint256,uint256,uint256,uint256)', address],
+        returns: [
+          [`tokens.${pool.id}.senior.payoutCurrencyAmount`, toCurrencyBalance],
+          [`tokens.${pool.id}.senior.payoutTokenAmount`, toTokenBalance],
+          [`tokens.${pool.id}.senior.remainingInvestCurrency`, toCurrencyBalance],
+          [`tokens.${pool.id}.senior.remainingRedeemToken`, toTokenBalance],
+        ],
       }
     )
 
@@ -72,7 +92,7 @@ async function getBalances(pools: TinlakePool[], address: string, provider: Json
   const multicallData = await evmMulticall<State>(calls, { rpcProvider: provider })
 
   const balances = {
-    tranches: [] as AccountTokenBalance[],
+    tranches: [] as (AccountTokenBalance & { balancePending: TokenBalance })[],
     currencies: [] as AccountCurrencyBalance[],
   }
 
@@ -80,7 +100,14 @@ async function getBalances(pools: TinlakePool[], address: string, provider: Json
     ;(['junior', 'senior'] as const).forEach((trancheName, i) => {
       const tranche = pool.tranches[i]
       balances.tranches.push({
-        balance: new TokenBalance(multicallData.tokens[pool.id][trancheName], tranche.currency.decimals),
+        balance: new TokenBalance(multicallData.tokens[pool.id][trancheName].balance, tranche.currency.decimals),
+        balancePending: new TokenBalance(
+          multicallData.tokens[pool.id][trancheName].balance
+            .add(multicallData.tokens[pool.id][trancheName].remainingRedeemToken)
+            .add(multicallData.tokens[pool.id][trancheName].payoutTokenAmount),
+
+          tranche.currency.decimals
+        ),
         currency: tranche.currency,
         poolId: pool.id,
         trancheId: tranche.id,
@@ -99,6 +126,24 @@ async function getBalances(pools: TinlakePool[], address: string, provider: Json
 }
 
 type State = {
-  tokens: Record<string, { junior: TokenBalance; senior: TokenBalance }>
+  tokens: Record<
+    string,
+    {
+      junior: {
+        balance: TokenBalance
+        payoutCurrencyAmount: CurrencyBalance
+        payoutTokenAmount: TokenBalance
+        remainingInvestCurrency: CurrencyBalance
+        remainingRedeemToken: TokenBalance
+      }
+      senior: {
+        balance: TokenBalance
+        payoutCurrencyAmount: CurrencyBalance
+        payoutTokenAmount: TokenBalance
+        remainingInvestCurrency: CurrencyBalance
+        remainingRedeemToken: TokenBalance
+      }
+    }
+  >
   currencies: Record<string, CurrencyBalance>
 }
