@@ -1,18 +1,6 @@
-import { Token } from '@centrifuge/centrifuge-js'
+import { Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import {
-  AnchorButton,
-  Box,
-  Grid,
-  IconDownload,
-  IconExternalLink,
-  IconMinus,
-  IconPlus,
-  IconSend,
-  Shelf,
-  Text,
-  Thumbnail,
-} from '@centrifuge/fabric'
+import { Box, Grid, IconDownload, IconMinus, IconPlus, IconSend, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -22,7 +10,7 @@ import centLogo from '../../assets/images/logoCentrifuge.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import usdtLogo from '../../assets/images/usdt-logo.svg'
 import { Dec } from '../../utils/Decimal'
-import { isEvmAddress, isSubstrateAddress } from '../../utils/address'
+import { isEvmAddress } from '../../utils/address'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
 import { useTinlakePools } from '../../utils/tinlake/useTinlakePools'
@@ -46,7 +34,7 @@ type Row = {
   tokenPrice: Decimal
   showActions?: boolean
   address?: string
-  connectedNetwork?: string
+  connectedNetwork?: string | null
 }
 
 const columns: Column[] = [
@@ -96,26 +84,15 @@ const columns: Column[] = [
     align: 'left',
     header: '', // invest redeem buttons
     cell: ({ showActions, poolId, trancheId, currency, connectedNetwork }: Row) => {
-      const isTinlakePool = poolId.startsWith('0x')
       return (
         <Grid gap={1} justifySelf="end">
-          {isTinlakePool ? (
-            <AnchorButton
-              variant="tertiary"
-              small
-              icon={IconExternalLink}
-              href="https://legacy.tinlake.centrifuge.io/portfolio"
-              target="_blank"
-            >
-              View on Tinlake
-            </AnchorButton>
-          ) : showActions ? (
+          {showActions ? (
             trancheId ? (
               <Shelf>
-                <RouterLinkButton to={`?redeem=${poolId}-${trancheId}`} small variant="tertiary" icon={IconMinus}>
+                <RouterLinkButton to={`?redeem=${poolId}.${trancheId}`} small variant="tertiary" icon={IconMinus}>
                   Redeem
                 </RouterLinkButton>
-                <RouterLinkButton to={`?invest=${poolId}-${trancheId}`} small variant="tertiary" icon={IconPlus}>
+                <RouterLinkButton to={`?invest=${poolId}.${trancheId}`} small variant="tertiary" icon={IconPlus}>
                   Invest
                 </RouterLinkButton>
               </Shelf>
@@ -136,15 +113,16 @@ const columns: Column[] = [
   },
 ]
 
-export function useHoldings(address?: string, showActions = true) {
+export function useHoldings(address?: string, chainId?: number, showActions = true) {
+  const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
   const { data: tinlakeBalances } = useTinlakeBalances(address && isEvmAddress(address) ? address : undefined)
-  const centBalances = useBalances(address && isSubstrateAddress(address) ? address : undefined)
+  const centBalances = useBalances(centAddress)
   const match = useRouteMatch<{ address: string }>('/portfolio')
   const isPortfolioPage = match?.isExact
 
   const wallet = useWallet()
   const tinlakePools = useTinlakePools()
-  const portfolioTokens = usePortfolioTokens(address)
+  const portfolioTokens = usePortfolioTokens(centAddress)
   const currencies = usePoolCurrencies()
   const CFGPrice = useCFGTokenPrice()
 
@@ -226,7 +204,15 @@ export function useHoldings(address?: string, showActions = true) {
   return tokens
 }
 
-export function Holdings({ showActions = true, address }: { showActions?: boolean; address?: string }) {
+export function Holdings({
+  showActions = true,
+  address,
+  chainId,
+}: {
+  showActions?: boolean
+  address?: string
+  chainId?: number
+}) {
   const { search, pathname } = useLocation()
   const history = useHistory()
   const params = new URLSearchParams(search)
@@ -235,10 +221,10 @@ export function Holdings({ showActions = true, address }: { showActions?: boolea
   const openInvestDrawer = params.get('invest')
   const openRedeemDrawer = params.get('redeem')
 
-  const [investPoolId, investTrancheId] = openInvestDrawer?.split('-') || []
-  const [redeemPoolId, redeemTrancheId] = openRedeemDrawer?.split('-') || []
+  const [investPoolId, investTrancheId] = openInvestDrawer?.split('.') || []
+  const [redeemPoolId, redeemTrancheId] = openRedeemDrawer?.split('.') || []
 
-  const tokens = useHoldings(address, showActions)
+  const tokens = useHoldings(address, chainId, showActions)
 
   return address && tokens.length ? (
     <>

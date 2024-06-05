@@ -36,7 +36,7 @@ export function useDailyPortfolioValue(address: string, rangeValue?: number) {
     {} as Record<string, InvestorTransaction[]>
   )
 
-  const daysSinceFirstTx = transactions?.investorTransactions
+  const daysSinceFirstTx = transactions?.investorTransactions?.[0]
     ? Math.ceil(
         (new Date().getTime() - new Date(transactions.investorTransactions.at(-1)!.timestamp).getTime()) /
           (1000 * 3600 * 24)
@@ -125,9 +125,9 @@ const getPriceAtDate = (
   )
 }
 
-export function usePortfolio(address?: string) {
-  // const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
-  //   enabled: !!address,
+export function usePortfolio(substrateAddress?: string) {
+  // const [result] = useCentrifugeQuery(['accountPortfolio', substrateAddress], (cent) => cent.pools.getPortfolio([substrateAddress!]), {
+  //   enabled: !!substrateAddress,
   // })
   // return result
 
@@ -169,10 +169,10 @@ export function usePortfolio(address?: string) {
     }
   }`,
     {
-      account: address && addressToHex(address),
+      account: substrateAddress && addressToHex(substrateAddress),
     },
     {
-      enabled: !!address,
+      enabled: !!substrateAddress,
     }
   )
 

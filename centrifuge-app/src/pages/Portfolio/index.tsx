@@ -1,6 +1,6 @@
+import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetAllocation } from '../../components/Portfolio/AssetAllocation'
@@ -8,6 +8,7 @@ import { CardPortfolioValue } from '../../components/Portfolio/CardPortfolioValu
 import { Holdings } from '../../components/Portfolio/Holdings'
 import { Transactions } from '../../components/Portfolio/Transactions'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
+import { isEvmAddress } from '../../utils/address'
 import { useAddress } from '../../utils/useAddress'
 import { useTransactionsByAddress } from '../../utils/usePools'
 
@@ -22,7 +23,9 @@ export default function PortfolioPage() {
 function Portfolio() {
   const address = useAddress()
   const transactions = useTransactionsByAddress(address)
-  const { showNetworks, connectedNetwork } = useWallet()
+  const { showNetworks, connectedNetwork, evm } = useWallet()
+  const chainId = evm.chainId ?? undefined
+  const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
 
   return (
     <>
@@ -35,7 +38,7 @@ function Portfolio() {
             Track and manage your portfolio
           </Text>
         </Stack>
-        <CardPortfolioValue address={address} />
+        <CardPortfolioValue address={address} chainId={chainId} showGraph={false} />
       </LayoutSection>
 
       {transactions?.investorTransactions.length === 0 && connectedNetwork === 'centrifuge' ? (
@@ -64,15 +67,15 @@ function Portfolio() {
       )}
 
       <LayoutSection title="Holdings">
-        <Holdings address={address} />
+        <Holdings address={address} chainId={chainId} />
       </LayoutSection>
 
       <LayoutSection title="Transaction history">
-        <Transactions onlyMostRecent address={address} />
+        <Transactions onlyMostRecent address={centAddress} />
       </LayoutSection>
 
-      <LayoutSection title="Allocation">
-        <AssetAllocation address={address} />
+      <LayoutSection title="Allocation" pb={5}>
+        <AssetAllocation address={address} chainId={1} />
       </LayoutSection>
     </>
   )

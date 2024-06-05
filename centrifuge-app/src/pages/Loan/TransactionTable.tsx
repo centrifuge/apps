@@ -15,7 +15,7 @@ type Props = {
   decimals: number
   loanType: 'external' | 'internal'
   pricing: PricingInfo
-  poolType: 'publicCredit' | 'privateCredit' | undefined
+  poolType?: string
   maturityDate: Date
   originationDate: Date | undefined
 }
