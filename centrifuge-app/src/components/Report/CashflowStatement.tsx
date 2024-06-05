@@ -4,7 +4,7 @@ import { Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useAggregatedPoolStatesByGroup, usePoolMetadata } from '../../utils/usePools'
+import { useAggregatedPoolStatesByGroup, usePoolMetadata, usePoolStatesByGroup } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
@@ -57,8 +57,15 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     groupBy === 'daily' ? 'day' : groupBy
   )
 
+  const poolStatesNotAggregated = usePoolStatesByGroup(
+    pool.id,
+    adjustedStartDate,
+    adjustedEndDate,
+    groupBy === 'daily' ? 'day' : groupBy
+  )
+
   const columns = React.useMemo(() => {
-    if (!poolStates) {
+    if (!poolStates || !poolStates.length) {
       return []
     }
 
@@ -76,7 +83,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         poolStates.map((state, index) => ({
           align: 'right',
           timestamp: state.timestamp,
-          header: new Date(state.timestamp).toLocaleDateString('en-US', {
+          header: new Date(state.timestamp!).toLocaleDateString('en-US', {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
@@ -100,13 +107,13 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: poolMetadata?.pool?.asset.class === 'privateCredit' ? '+ Repayments' : 'Sales',
-        value: poolStates?.map(({ poolState }) => poolState.sumRepaidAmountByPeriod.toDecimal()) || [],
+        name: poolMetadata?.pool?.asset.class === 'privateCredit' ? 'Repayments' : 'Sales',
+        value: poolStates?.map(({ poolState }) => poolState?.sumRepaidAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: poolMetadata?.pool?.asset.class === 'privateCredit' ? 'Purchases' : 'Borrowing',
+        name: poolMetadata?.pool?.asset.class === 'privateCredit' ? 'Financings' : 'Purchases',
         value: poolStates?.map(({ poolState }) => poolState.sumBorrowedAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
@@ -136,13 +143,8 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const netCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Fees/costs',
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumPoolFeesChargedAmountByPeriod
-              .toDecimal()
-              .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
-          ) || [],
+        name: 'Fees',
+        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesChargedAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
       },
@@ -154,11 +156,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
               .toDecimal()
               .sub(poolState.sumBorrowedAmountByPeriod.toDecimal())
               .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .sub(
-                poolState.sumPoolFeesChargedAmountByPeriod
-                  .toDecimal()
-                  .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
-              )
+              .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
           ) || [],
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
         heading: false,
@@ -170,7 +168,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const investRedeemRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Pool investment',
+        name: 'Pool investments',
         value: poolStates?.map(({ poolState }) => poolState.sumInvestedAmountByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
@@ -189,11 +187,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
               .toDecimal()
               .sub(poolState.sumBorrowedAmountByPeriod.toDecimal())
               .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
-              .sub(
-                poolState.sumPoolFeesChargedAmountByPeriod
-                  .toDecimal()
-                  .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
-              )
+              .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
               .add(poolState.sumInvestedAmountByPeriod.toDecimal())
               .sub(poolState.sumRedeemedAmountByPeriod.toDecimal())
           ) || [],
@@ -204,17 +198,19 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     ]
   }, [poolStates, pool])
 
-  const endCashflowRecords = [
-    {
-      name: 'End cash balance',
-      value:
-        poolStates?.map(({ poolState }) =>
-          poolState.totalReserve.toDecimal().add(poolState.offchainCashValue.toDecimal())
-        ) || [],
-      heading: true,
-      formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
-    },
-  ]
+  const endCashflowRecords = React.useMemo(() => {
+    return [
+      {
+        name: 'End cash balance',
+        value:
+          poolStatesNotAggregated?.map(({ poolState }) =>
+            poolState.totalReserve.toDecimal().add(poolState.offchainCashValue.toDecimal())
+          ) || [],
+        heading: true,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+      },
+    ]
+  }, [poolStatesNotAggregated, pool])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 

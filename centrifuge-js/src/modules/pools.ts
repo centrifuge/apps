@@ -2571,7 +2571,7 @@ export function getPoolsModule(inst: Centrifuge) {
           poolStatesByGroup[period].push(poolState)
         })
 
-        const aggregatedPoolStatesByGroup: { [period: string]: Partial<DailyPoolState> } = {}
+        const aggregatedPoolStatesByGroup: { [period: string]: Pick<DailyPoolState, 'poolState' | 'timestamp'> } = {}
 
         for (const period in poolStatesByGroup) {
           const poolStates = poolStatesByGroup[period]
