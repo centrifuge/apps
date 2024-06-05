@@ -4,7 +4,6 @@ import { IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useMetadataMulti } from '../../utils/useMetadata'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
@@ -80,13 +79,6 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
     },
   ]
 
-  const metaUrls = [...new Set(transactions?.map((tx) => tx.asset.metadata) || [])]
-  const queries = useMetadataMulti(metaUrls)
-  const metadataByUrl: Record<string, any> = {}
-  metaUrls.forEach((url, i) => {
-    metadataByUrl[url] = queries[i].data
-  })
-
   const data: TableDataRow[] = React.useMemo(() => {
     if (!transactions) {
       return []
@@ -97,7 +89,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
         name: '',
         value: [
           tx.asset.id.split('-').at(-1)!,
-          metadataByUrl[tx.asset.metadata]?.name ?? `Asset ${tx.asset.id.split('-').at(-1)!}`,
+          tx.asset.name || `Asset ${tx.asset.id.split('-').at(-1)!}`,
           tx.epochId.split('-').at(-1)!,
           tx.timestamp.toISOString(),
           formatAssetTransactionType(tx.type),
@@ -113,7 +105,7 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       })
       .filter((row) => (!txType || txType === 'all' ? true : row.value[3] === txType))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactions, txType, loanId, ...queries.map((q) => q.data)])
+  }, [transactions, txType, loanId])
 
   const columns = columnConfig
     .map((col, index) => ({
