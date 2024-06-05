@@ -75,7 +75,7 @@ function Portfolio() {
       </LayoutSection>
 
       <LayoutSection title="Allocation" pb={5}>
-        <AssetAllocation address={address} chainId={1} />
+        <AssetAllocation address={address} chainId={chainId} />
       </LayoutSection>
     </>
   )
