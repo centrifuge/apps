@@ -172,14 +172,13 @@ function Loan() {
       loan.pricing.valuationMethod === 'oracle' &&
       loan.pricing.interestRate.isZero()
     ) {
-      const termDays = originationDate
-        ? daysBetween(originationDate, loan?.pricing.maturityDate)
-        : daysBetween(new Date(), loan?.pricing.maturityDate)
-      const yearsBetweenDates = termDays / 365
-
       return borrowerAssetTransactions
         ?.filter((tx) => tx.type !== 'REPAID')
         .reduce((prev, curr) => {
+          const termDays = curr.timestamp
+            ? daysBetween(curr.timestamp, loan?.pricing.maturityDate)
+            : daysBetween(new Date(), loan?.pricing.maturityDate)
+
           const faceValue =
             curr.quantity && (loan.pricing as ExternalPricingInfo).notional
               ? new CurrencyBalance(curr.quantity, 18)
@@ -189,9 +188,10 @@ function Loan() {
 
           const yieldToMaturity =
             curr.amount && faceValue
-              ? Dec(2)
-                  .mul(faceValue?.sub(curr.amount.toDecimal()))
-                  .div(Dec(yearsBetweenDates).mul(faceValue.add(curr.amount.toDecimal())))
+              ? faceValue
+                  ?.sub(curr.amount.toDecimal())
+                  .div(curr.amount.toDecimal())
+                  .mul(Dec(365).div(Dec(termDays)))
                   .mul(100)
               : null
           return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev

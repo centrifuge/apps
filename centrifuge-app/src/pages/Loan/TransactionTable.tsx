@@ -63,10 +63,9 @@ export const TransactionTable = ({
         return !transaction.amount?.isZero()
       })
       .map((transaction, index, array) => {
-        const termDays = originationDate
-          ? daysBetween(originationDate, maturityDate)
+        const termDays = transaction.timestamp
+          ? daysBetween(transaction.timestamp, maturityDate)
           : daysBetween(new Date(), maturityDate)
-        const yearsBetweenDates = termDays / 365
 
         const faceValue =
           transaction.quantity && (pricing as ExternalPricingInfo).notional
@@ -82,9 +81,10 @@ export const TransactionTable = ({
           transactionDate: transaction.timestamp,
           yieldToMaturity:
             transaction.amount && faceValue && transaction.type !== 'REPAID'
-              ? Dec(2)
-                  .mul(faceValue?.sub(transaction.amount.toDecimal()))
-                  .div(Dec(yearsBetweenDates).mul(faceValue.add(transaction.amount.toDecimal())))
+              ? faceValue
+                  ?.sub(transaction.amount.toDecimal())
+                  .div(transaction.amount.toDecimal())
+                  .mul(Dec(365).div(Dec(termDays)))
                   .mul(100)
               : null,
           settlePrice: transaction.settlementPrice
