@@ -4,6 +4,7 @@ import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
+import { camelCase } from 'lodash'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
@@ -677,7 +678,7 @@ export type PoolMetadata = {
     name: string
     icon: FileType | null
     asset: {
-      class: 'Public credit' | 'Private credit'
+      class: 'publicCredit' | 'privateCredit'
       subClass: string
     }
     poolFees?: {
@@ -1032,7 +1033,10 @@ export function getPoolsModule(inst: Centrifuge) {
       pool: {
         name: metadata.poolName,
         icon: metadata.poolIcon,
-        asset: { class: metadata.assetClass, subClass: metadata.subAssetClass },
+        asset: {
+          class: camelCase(metadata.assetClass) as PoolMetadata['pool']['asset']['class'],
+          subClass: metadata.subAssetClass,
+        },
         issuer: {
           name: metadata.issuerName,
           repName: metadata.issuerRepName,
@@ -2567,7 +2571,7 @@ export function getPoolsModule(inst: Centrifuge) {
           poolStatesByGroup[period].push(poolState)
         })
 
-        const aggregatedPoolStatesByGroup: { [period: string]: any } = {}
+        const aggregatedPoolStatesByGroup: { [period: string]: Partial<DailyPoolState> } = {}
 
         for (const period in poolStatesByGroup) {
           const poolStates = poolStatesByGroup[period]
