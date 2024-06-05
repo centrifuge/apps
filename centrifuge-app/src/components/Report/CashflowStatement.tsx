@@ -204,6 +204,18 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     ]
   }, [poolStates, pool])
 
+  const endCashflowRecords = [
+    {
+      name: 'End cash balance',
+      value:
+        poolStates?.map(({ poolState }) =>
+          poolState.totalReserve.toDecimal().add(poolState.offchainCashValue.toDecimal())
+        ) || [],
+      heading: true,
+      formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+    },
+  ]
+
   const headers = columns.slice(0, -1).map(({ header }) => header)
 
   React.useEffect(() => {
@@ -252,6 +264,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
       <DataTable data={grossCashflowRecords} columns={columns} hoverable />
       <DataTable data={netCashflowRecords} columns={columns} hoverable />
       <DataTable data={investRedeemRecords} columns={columns} hoverable />
+      <DataTable data={endCashflowRecords} columns={columns} hoverable />
     </DataTableGroup>
   ) : (
     <UserFeedback reportType="Cash flow statement" />
