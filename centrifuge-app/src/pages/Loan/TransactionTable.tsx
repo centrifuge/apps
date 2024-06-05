@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Column, DataTable } from '../../components/DataTable'
+import { Tooltips } from '../../components/Tooltips'
 import { Dec } from '../../utils/Decimal'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -176,7 +177,7 @@ export const TransactionTable = ({
               ? [
                   {
                     align: 'left',
-                    header: `YTM`,
+                    header: <Tooltips type="ytm" />,
                     cell: (row: Row) =>
                       !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
                   },
