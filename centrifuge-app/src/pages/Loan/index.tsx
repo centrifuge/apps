@@ -322,14 +322,14 @@ function Loan() {
                 loan.pricing.valuationMethod === 'oracle' &&
                 loan.pricing.notional.gtn(0) &&
                 currentYTM
-                  ? [{ label: 'Current YTM', value: formatPercentage(currentYTM) }]
+                  ? [{ label: <Tooltips type="currentYtm" />, value: formatPercentage(currentYTM) }]
                   : []),
                 ...(loan.pricing.maturityDate &&
                 'valuationMethod' in loan.pricing &&
                 loan.pricing.valuationMethod === 'oracle' &&
                 loan.pricing.notional.gtn(0) &&
                 averageWeightedYTM
-                  ? [{ label: 'Average YTM', value: formatPercentage(averageWeightedYTM) }]
+                  ? [{ label: <Tooltips type="averageYtm" />, value: formatPercentage(averageWeightedYTM) }]
                   : []),
               ]}
             />
