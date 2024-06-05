@@ -187,7 +187,7 @@ function Loan() {
               : null
 
           const yieldToMaturity =
-            curr.amount && faceValue
+            curr.amount && faceValue && termDays > 0
               ? faceValue
                   ?.sub(curr.amount.toDecimal())
                   .div(curr.amount.toDecimal())
@@ -214,7 +214,7 @@ function Loan() {
   const currentYTM = React.useMemo(() => {
     const termDays = loan?.pricing ? daysBetween(new Date(), loan?.pricing.maturityDate) : 0
 
-    return currentFace && loan && 'presentValue' in loan
+    return currentFace && loan && 'presentValue' in loan && termDays > 0
       ? currentFace
           ?.sub(loan.presentValue.toDecimal())
           .div(loan.presentValue.toDecimal())

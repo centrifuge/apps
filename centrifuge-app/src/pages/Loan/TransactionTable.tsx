@@ -81,7 +81,7 @@ export const TransactionTable = ({
           quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
           transactionDate: transaction.timestamp,
           yieldToMaturity:
-            transaction.amount && faceValue && transaction.type !== 'REPAID'
+            transaction.amount && faceValue && transaction.type !== 'REPAID' && termDays > 0
               ? faceValue
                   ?.sub(transaction.amount.toDecimal())
                   .div(transaction.amount.toDecimal())
