@@ -51,7 +51,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'asset-tx' && <AssetTransactions pool={pool} />}
         {report === 'fee-tx' && <FeeTransactions pool={pool} />}
         {report === 'balance-sheet' && <BalanceSheet pool={pool} />}
-        {report === 'cashflow-statement' && <CashflowStatement pool={pool} />}
+        {report === 'cash-flow-statement' && <CashflowStatement pool={pool} />}
         {report === 'oracle-tx' && <OracleTransactions pool={pool} />}
       </Box>
     </Box>
