@@ -215,15 +215,15 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
           ) : null}
           {selectedLoan && isExternalLoan(selectedLoan) && (
             <>
-              <Field validate={combine(positiveNumber())} name="targetLoanFaceValue">
+              <Field validate={combine(positiveNumber())} name="targetLoanQuantity">
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
                       {...field}
-                      label="Face value (settlement asset)"
+                      label="Quantity (settlement asset)"
                       errorMessage={meta.touched ? meta.error : undefined}
                       decimals={8}
-                      onChange={(value) => form.setFieldValue('targetLoanFaceValue', value)}
+                      onChange={(value) => form.setFieldValue('targetLoanQuantity', value)}
                       currency={pool.currency.symbol}
                     />
                   )
