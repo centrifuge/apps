@@ -1,34 +1,38 @@
-import { useBalances } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
+import capitalize from 'lodash/capitalize'
+import startCase from 'lodash/startCase'
 import { useTheme } from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated } from '../../utils/formatting'
-import { usePoolMetadataMulti, usePools } from '../../utils/usePools'
+import { useListedPools } from '../../utils/useListedPools'
+import { usePoolMetadataMulti } from '../../utils/usePools'
 import { LabelValueStack } from '../LabelValueStack'
 import { AssetClassChart } from './AssetClassChart'
+import { useHoldings } from './Holdings'
 
-export function AssetAllocation({ address }: { address?: string }) {
-  const balances = useBalances(address)
-  const pools = usePools()
+export function AssetAllocation({ address, chainId }: { address?: string; chainId?: number }) {
+  const holdings = useHoldings(address, chainId)
+  const [pools] = useListedPools()
   const theme = useTheme()
-  const poolIds = new Set(balances?.tranches.map((t) => t.poolId))
+  const poolIds = new Set(holdings.map((h) => h.poolId).filter((i) => !!i))
   const filteredPools = pools?.filter((p) => poolIds.has(p.id)) ?? []
   const metas = usePoolMetadataMulti(filteredPools)
-  const assetClasses = [...new Set(metas.map((m) => m.data?.pool?.asset?.class as string).filter(Boolean))]
+
+  const assetClasses = [
+    ...new Set(metas.map((m) => capitalize(startCase(m.data?.pool?.asset?.class)) as string).filter(Boolean)),
+  ]
   const valueByClass: Record<string, Decimal> = Object.fromEntries(assetClasses.map((item) => [item, Dec(0)]))
   let total = Dec(0)
-  balances?.tranches.forEach((balance) => {
-    const poolIndex = filteredPools.findIndex((p) => p.id === balance.poolId)
-    const price =
-      filteredPools[poolIndex]?.tranches.find((t) => t.id === balance.trancheId)?.tokenPrice?.toDecimal() ?? Dec(0)
-    const asset = metas[poolIndex]?.data?.pool?.asset?.class
-    const value = balance.balance.toDecimal().mul(price)
+  holdings.forEach((holding) => {
+    const poolIndex = filteredPools.findIndex((p) => p.id === holding.poolId)
+    const asset = capitalize(startCase(metas[poolIndex]?.data?.pool?.asset?.class))
+    const value = holding.marketValue
     total = total.add(value)
     valueByClass[asset!] = valueByClass[asset!]?.add(value)
   })
 
-  const shades = [600, 800, 200, 400]
+  const shades = [700, 500]
   const shares = assetClasses
     .map((item, index) => {
       const nextShade = shades[index % shades.length]
@@ -41,7 +45,7 @@ export function AssetAllocation({ address }: { address?: string }) {
     })
     .sort((a, b) => (b.value > a.value ? 1 : a === b ? 0 : -1))
 
-  return address && !!balances?.tranches && !!balances?.tranches.length ? (
+  return address && !!holdings.length ? (
     <Shelf gap={8}>
       <AssetClassChart data={shares} currency="USD" total={total.toNumber()} />
       <Shelf as="ul" alignSelf="stretch" alignItems="stretch" flex={1} gap={6}>

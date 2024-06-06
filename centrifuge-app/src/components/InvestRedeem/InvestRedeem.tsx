@@ -15,7 +15,7 @@ import {
   TextWithPlaceholder,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ethConfig } from '../../config'
 import { formatBalance } from '../../utils/formatting'
@@ -218,8 +218,7 @@ function Footer() {
 function OnboardingButton() {
   const { showNetworks, connectedType } = useWallet()
   const { state } = useInvestRedeem()
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
+  const pool = usePool(state.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
   const history = useHistory()
