@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Column, DataTable } from '../../components/DataTable'
+import { Tooltips } from '../../components/Tooltips'
 import { Dec } from '../../utils/Decimal'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -63,10 +64,9 @@ export const TransactionTable = ({
         return !transaction.amount?.isZero()
       })
       .map((transaction, index, array) => {
-        const termDays = originationDate
-          ? daysBetween(originationDate, maturityDate)
+        const termDays = transaction.timestamp
+          ? daysBetween(transaction.timestamp, maturityDate)
           : daysBetween(new Date(), maturityDate)
-        const yearsBetweenDates = termDays / 365
 
         const faceValue =
           transaction.quantity && (pricing as ExternalPricingInfo).notional
@@ -81,10 +81,11 @@ export const TransactionTable = ({
           quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
           transactionDate: transaction.timestamp,
           yieldToMaturity:
-            transaction.amount && faceValue && transaction.type !== 'REPAID'
-              ? Dec(2)
-                  .mul(faceValue?.sub(transaction.amount.toDecimal()))
-                  .div(Dec(yearsBetweenDates).mul(faceValue.add(transaction.amount.toDecimal())))
+            transaction.amount && faceValue && transaction.type !== 'REPAID' && termDays > 0
+              ? faceValue
+                  ?.sub(transaction.amount.toDecimal())
+                  .div(transaction.amount.toDecimal())
+                  .mul(Dec(365).div(Dec(termDays)))
                   .mul(100)
               : null,
           settlePrice: transaction.settlementPrice
@@ -176,7 +177,7 @@ export const TransactionTable = ({
               ? [
                   {
                     align: 'left',
-                    header: `YTM`,
+                    header: <Tooltips type="ytm" />,
                     cell: (row: Row) =>
                       !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
                   },

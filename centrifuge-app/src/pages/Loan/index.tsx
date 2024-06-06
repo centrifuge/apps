@@ -172,14 +172,13 @@ function Loan() {
       loan.pricing.valuationMethod === 'oracle' &&
       loan.pricing.interestRate.isZero()
     ) {
-      const termDays = originationDate
-        ? daysBetween(originationDate, loan?.pricing.maturityDate)
-        : daysBetween(new Date(), loan?.pricing.maturityDate)
-      const yearsBetweenDates = termDays / 365
-
       return borrowerAssetTransactions
         ?.filter((tx) => tx.type !== 'REPAID')
         .reduce((prev, curr) => {
+          const termDays = curr.timestamp
+            ? daysBetween(curr.timestamp, loan?.pricing.maturityDate)
+            : daysBetween(new Date(), loan?.pricing.maturityDate)
+
           const faceValue =
             curr.quantity && (loan.pricing as ExternalPricingInfo).notional
               ? new CurrencyBalance(curr.quantity, 18)
@@ -188,10 +187,11 @@ function Loan() {
               : null
 
           const yieldToMaturity =
-            curr.amount && faceValue
-              ? Dec(2)
-                  .mul(faceValue?.sub(curr.amount.toDecimal()))
-                  .div(Dec(yearsBetweenDates).mul(faceValue.add(curr.amount.toDecimal())))
+            curr.amount && faceValue && termDays > 0
+              ? faceValue
+                  ?.sub(curr.amount.toDecimal())
+                  .div(curr.amount.toDecimal())
+                  .mul(Dec(365).div(Dec(termDays)))
                   .mul(100)
               : null
           return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev
@@ -210,6 +210,18 @@ function Loan() {
       return sum.isZero() ? Dec(0) : weightedYTM.div(sum)
     }
   }, [weightedYTM])
+
+  const currentYTM = React.useMemo(() => {
+    const termDays = loan?.pricing ? daysBetween(new Date(), loan?.pricing.maturityDate) : 0
+
+    return currentFace && loan && 'presentValue' in loan && termDays > 0
+      ? currentFace
+          ?.sub(loan.presentValue.toDecimal())
+          .div(loan.presentValue.toDecimal())
+          .mul(Dec(365).div(Dec(termDays)))
+          .mul(100)
+      : null
+  }, [loan])
 
   return (
     <Stack>
@@ -258,7 +270,12 @@ function Loan() {
             ]}
           />
           <PageSection>
-            <TransactionHistoryTable transactions={borrowerAssetTransactions ?? []} poolId={poolId} preview={false} />
+            <TransactionHistoryTable
+              transactions={borrowerAssetTransactions ?? []}
+              poolId={poolId}
+              preview={false}
+              activeAssetId={loanId}
+            />
           </PageSection>
         </>
       )}
@@ -304,8 +321,15 @@ function Loan() {
                 'valuationMethod' in loan.pricing &&
                 loan.pricing.valuationMethod === 'oracle' &&
                 loan.pricing.notional.gtn(0) &&
+                currentYTM
+                  ? [{ label: <Tooltips type="currentYtm" />, value: formatPercentage(currentYTM) }]
+                  : []),
+                ...(loan.pricing.maturityDate &&
+                'valuationMethod' in loan.pricing &&
+                loan.pricing.valuationMethod === 'oracle' &&
+                loan.pricing.notional.gtn(0) &&
                 averageWeightedYTM
-                  ? [{ label: 'Average YTM', value: formatPercentage(averageWeightedYTM) }]
+                  ? [{ label: <Tooltips type="averageYtm" />, value: formatPercentage(averageWeightedYTM) }]
                   : []),
               ]}
             />
@@ -373,6 +397,7 @@ function Loan() {
                     transactions={borrowerAssetTransactions ?? []}
                     poolId={poolId}
                     preview={false}
+                    activeAssetId={loanId}
                   />
                 </PageSection>
               ) : (
