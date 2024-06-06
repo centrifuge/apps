@@ -57,6 +57,23 @@ export function usePoolStatesByGroup(
   return result
 }
 
+export function useAggregatedPoolStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
+) {
+  const [result] = useCentrifugeQuery(
+    ['aggregatedPoolStates', poolId, from, to, groupBy],
+    (cent) => cent.pools.getAggregatedPoolStatesByGroup([poolId, from, to], groupBy),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
 export function useTransactionsByAddress(address?: string) {
   const [result] = useCentrifugeQuery(
     ['txByAddress', address],

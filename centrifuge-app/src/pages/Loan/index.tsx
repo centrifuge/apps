@@ -187,7 +187,7 @@ function Loan() {
               : null
 
           const yieldToMaturity =
-            curr.amount && faceValue
+            curr.amount && faceValue && termDays > 0
               ? faceValue
                   ?.sub(curr.amount.toDecimal())
                   .div(curr.amount.toDecimal())
@@ -214,7 +214,7 @@ function Loan() {
   const currentYTM = React.useMemo(() => {
     const termDays = loan?.pricing ? daysBetween(new Date(), loan?.pricing.maturityDate) : 0
 
-    return currentFace && loan && 'presentValue' in loan
+    return currentFace && loan && 'presentValue' in loan && termDays > 0
       ? currentFace
           ?.sub(loan.presentValue.toDecimal())
           .div(loan.presentValue.toDecimal())
@@ -322,14 +322,14 @@ function Loan() {
                 loan.pricing.valuationMethod === 'oracle' &&
                 loan.pricing.notional.gtn(0) &&
                 currentYTM
-                  ? [{ label: 'Current YTM', value: formatPercentage(currentYTM) }]
+                  ? [{ label: <Tooltips type="currentYtm" />, value: formatPercentage(currentYTM) }]
                   : []),
                 ...(loan.pricing.maturityDate &&
                 'valuationMethod' in loan.pricing &&
                 loan.pricing.valuationMethod === 'oracle' &&
                 loan.pricing.notional.gtn(0) &&
                 averageWeightedYTM
-                  ? [{ label: 'Average YTM', value: formatPercentage(averageWeightedYTM) }]
+                  ? [{ label: <Tooltips type="averageYtm" />, value: formatPercentage(averageWeightedYTM) }]
                   : []),
               ]}
             />
@@ -416,7 +416,7 @@ function Loan() {
                         ? 'external'
                         : 'internal'
                     }
-                    poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
+                    poolType={poolMetadata?.pool?.asset.class}
                     decimals={pool.currency.decimals}
                     pricing={loan.pricing as PricingInfo}
                     maturityDate={new Date(loan.pricing.maturityDate)}

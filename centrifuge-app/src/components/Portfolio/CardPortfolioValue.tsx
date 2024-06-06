@@ -1,8 +1,10 @@
+import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
+import { isEvmAddress } from '../../utils/address'
 import { formatBalance } from '../../utils/formatting'
 import { useTransactionsByAddress } from '../../utils/usePools'
 import { LoadBoundary } from '../LoadBoundary'
@@ -22,9 +24,18 @@ const rangeFilters = [
   { value: 'all', label: 'All' },
 ] as const
 
-export function CardPortfolioValue({ address }: { address?: string }) {
-  const tokens = useHoldings(address)
-  const transactions = useTransactionsByAddress(address)
+export function CardPortfolioValue({
+  address,
+  chainId,
+  showGraph = true,
+}: {
+  address?: string
+  chainId?: number
+  showGraph?: boolean
+}) {
+  const tokens = useHoldings(address, chainId)
+  const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
+  const transactions = useTransactionsByAddress(showGraph ? centAddress : undefined)
 
   const { colors } = useTheme()
 
@@ -76,7 +87,7 @@ export function CardPortfolioValue({ address }: { address?: string }) {
             </Shelf>
           </Shelf>
         </Stack>
-        {address && transactions?.investorTransactions.length ? (
+        {showGraph && centAddress && transactions?.investorTransactions.length ? (
           <>
             <Stack gap={1}>
               <Shelf justifyContent="flex-end" pr="20px">
@@ -102,7 +113,7 @@ export function CardPortfolioValue({ address }: { address?: string }) {
 
             <Box width="100%" height="300px">
               <LoadBoundary>
-                <PortfolioValue rangeValue={range.value} address={address} />
+                <PortfolioValue rangeValue={range.value} address={centAddress} />
               </LoadBoundary>
             </Box>
           </>

@@ -4,6 +4,7 @@ import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
+import { camelCase } from 'lodash'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
@@ -576,6 +577,14 @@ export type DailyPoolState = {
     offchainCashValue: CurrencyBalance
     portfolioValuation: CurrencyBalance
     sumPoolFeesPendingAmount: CurrencyBalance
+    sumBorrowedAmountByPeriod: CurrencyBalance
+    sumRepaidAmountByPeriod: CurrencyBalance
+    sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumPrincipalRepaidAmountByPeriod: CurrencyBalance
+    sumInterestRepaidAmountByPeriod: CurrencyBalance
+    sumUnscheduledRepaidAmountByPeriod: CurrencyBalance
+    sumInvestedAmountByPeriod: CurrencyBalance
+    sumRedeemedAmountByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -583,7 +592,9 @@ export type DailyPoolState = {
   sumPoolFeesChargedAmountByPeriod: string | null
   sumPoolFeesAccruedAmountByPeriod: string | null
   sumBorrowedAmountByPeriod: string
+  sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
+  sumUnscheduledRepaidAmountByPeriod: string
   sumRepaidAmountByPeriod: string
   sumInvestedAmountByPeriod: string
   sumRedeemedAmountByPeriod: string
@@ -1026,7 +1037,10 @@ export function getPoolsModule(inst: Centrifuge) {
       pool: {
         name: metadata.poolName,
         icon: metadata.poolIcon,
-        asset: { class: metadata.assetClass, subClass: metadata.subAssetClass },
+        asset: {
+          class: camelCase(metadata.assetClass) as PoolMetadata['pool']['asset']['class'],
+          subClass: metadata.subAssetClass,
+        },
         issuer: {
           name: metadata.issuerName,
           repName: metadata.issuerRepName,
@@ -2236,7 +2250,9 @@ export function getPoolsModule(inst: Centrifuge) {
           sumRepaidAmountByPeriod
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
+          sumPrincipalRepaidAmountByPeriod
           sumInterestRepaidAmountByPeriod
+          sumUnscheduledRepaidAmountByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2429,8 +2445,16 @@ export function getPoolsModule(inst: Centrifuge) {
                   poolCurrency.decimals
                 ),
                 sumBorrowedAmountByPeriod: new CurrencyBalance(state.sumBorrowedAmountByPeriod, poolCurrency.decimals),
+                sumPrincipalRepaidAmountByPeriod: new CurrencyBalance(
+                  state.sumPrincipalRepaidAmountByPeriod,
+                  poolCurrency.decimals
+                ),
                 sumInterestRepaidAmountByPeriod: new CurrencyBalance(
                   state.sumInterestRepaidAmountByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumUnscheduledRepaidAmountByPeriod: new CurrencyBalance(
+                  state.sumUnscheduledRepaidAmountByPeriod,
                   poolCurrency.decimals
                 ),
                 sumRepaidAmountByPeriod: new CurrencyBalance(state.sumRepaidAmountByPeriod, poolCurrency.decimals),
@@ -2545,10 +2569,48 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getPoolStatesByGroup(
-    args: [poolId: string, from?: Date, to?: Date],
-    groupBy: 'day' | 'month' | 'quarter' | 'year' = 'month'
-  ) {
+  function getAggregatedPoolStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
+    return combineLatest([getDailyPoolStates(args), getPoolCurrency([args[0]])]).pipe(
+      map(([{ poolStates }, poolCurrency]) => {
+        if (!poolStates.length) return []
+        const poolStatesByGroup: { [period: string]: DailyPoolState[] } = {}
+
+        poolStates.forEach((poolState) => {
+          const date = new Date(poolState.timestamp)
+          const period = getGroupByPeriod(date, groupBy)
+          if (!poolStatesByGroup[period]) {
+            poolStatesByGroup[period] = []
+          }
+
+          poolStatesByGroup[period].push(poolState)
+        })
+
+        const aggregatedPoolStatesByGroup: { [period: string]: Pick<DailyPoolState, 'poolState' | 'timestamp'> } = {}
+
+        for (const period in poolStatesByGroup) {
+          const poolStates = poolStatesByGroup[period]
+
+          const poolStateKeys = Object.keys(poolStates.map(({ poolState }) => poolState)[0]).filter(
+            (key) => key !== 'id'
+          ) as Array<keyof DailyPoolState['poolState']>
+
+          const aggregates = poolStateKeys.reduce((total, key) => {
+            const sum = poolStates.reduce((sum, { poolState }) => sum.add(Dec(poolState[key].toDecimal())), Dec(0))
+            return { [key]: CurrencyBalance.fromFloat(sum.toString(), poolCurrency.decimals), ...total }
+          }, {} as Record<keyof DailyPoolState['poolState'], any>)
+
+          aggregatedPoolStatesByGroup[period] = {
+            poolState: { ...aggregates },
+            timestamp: poolStates.reverse()[0].timestamp,
+          }
+        }
+
+        return Object.values(aggregatedPoolStatesByGroup)
+      })
+    )
+  }
+
+  function getPoolStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
     return getDailyPoolStates(args).pipe(
       map(({ poolStates }) => {
         if (!poolStates.length) return []
@@ -2556,21 +2618,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
         poolStates.forEach((poolState) => {
           const date = new Date(poolState.timestamp)
-          let period = date.toISOString().split('T')[0]
-
-          if (groupBy === 'day') {
-            period = date.toISOString().split('T')[0]
-          } else if (groupBy === 'month') {
-            period = `${date.getMonth() + 1}-${date.getFullYear()}`
-          } else if (groupBy === 'quarter') {
-            const quarter = Math.ceil((date.getMonth() + 1) / 3)
-            period = `Q${quarter}-${date.getFullYear()}`
-          } else if (groupBy === 'year') {
-            period = `${date.getFullYear()}`
-          } else {
-            throw new Error(`Unsupported groupBy: ${groupBy}`)
-          }
-
+          const period = getGroupByPeriod(date, groupBy)
           if (!poolStatesByGroup[period] || new Date(poolStatesByGroup[period].timestamp) < date) {
             poolStatesByGroup[period] = poolState
           }
@@ -3055,8 +3103,8 @@ export function getPoolsModule(inst: Centrifuge) {
           const currency: CurrencyMetadata = {
             key,
             decimals: value.decimals,
-            name: value.symbol === 'localUSDC' ? 'USDC' : value.name,
-            symbol: value.symbol === 'localUSDC' ? 'USDC' : value.symbol,
+            name: value.symbol === 'USDC' ? 'Native USDC' : value.symbol === 'localUSDC' ? 'USDC' : value.name,
+            symbol: value.symbol === 'USDC' ? 'nUSDC' : value.symbol === 'localUSDC' ? 'USDC' : value.symbol,
             isPoolCurrency: value.additional.poolCurrency,
             isPermissioned: value.additional.permissioned,
             additional: value.additional,
@@ -3976,6 +4024,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getAvailablePoolId,
     getDailyPoolStates,
     getPoolStatesByGroup,
+    getAggregatedPoolStatesByGroup,
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,
@@ -4105,4 +4154,20 @@ function getCurrency(api: ApiRx, currencyKey: RawCurrencyKey) {
     }),
     take(1)
   )
+}
+
+type GroupBy = 'day' | 'month' | 'quarter' | 'year'
+function getGroupByPeriod(date: Date, groupBy: GroupBy) {
+  if (groupBy === 'day') {
+    return date.toISOString().split('T')[0]
+  } else if (groupBy === 'month') {
+    return `${date.getMonth() + 1}-${date.getFullYear()}`
+  } else if (groupBy === 'quarter') {
+    const quarter = Math.ceil((date.getMonth() + 1) / 3)
+    return `Q${quarter}-${date.getFullYear()}`
+  } else if (groupBy === 'year') {
+    return `${date.getFullYear()}`
+  } else {
+    throw new Error(`Unsupported groupBy: ${groupBy}`)
+  }
 }

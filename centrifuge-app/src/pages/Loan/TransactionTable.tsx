@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Column, DataTable } from '../../components/DataTable'
+import { Tooltips } from '../../components/Tooltips'
 import { Dec } from '../../utils/Decimal'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -15,7 +16,7 @@ type Props = {
   decimals: number
   loanType: 'external' | 'internal'
   pricing: PricingInfo
-  poolType: 'publicCredit' | 'privateCredit' | undefined
+  poolType?: string
   maturityDate: Date
   originationDate: Date | undefined
 }
@@ -80,7 +81,7 @@ export const TransactionTable = ({
           quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
           transactionDate: transaction.timestamp,
           yieldToMaturity:
-            transaction.amount && faceValue && transaction.type !== 'REPAID'
+            transaction.amount && faceValue && transaction.type !== 'REPAID' && termDays > 0
               ? faceValue
                   ?.sub(transaction.amount.toDecimal())
                   .div(transaction.amount.toDecimal())
@@ -176,7 +177,7 @@ export const TransactionTable = ({
               ? [
                   {
                     align: 'left',
-                    header: `YTM`,
+                    header: <Tooltips type="ytm" />,
                     cell: (row: Row) =>
                       !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
                   },
