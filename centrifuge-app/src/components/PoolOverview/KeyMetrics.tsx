@@ -42,9 +42,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
   const metrics = [
     {
       metric: 'Asset class',
-      value: `${capitalize(startCase(assetType?.class)).replace(/^Us /, 'US ')} - ${capitalize(
-        startCase(assetType?.subClass)
-      ).replace(/^Us /, 'US ')}`,
+      value: `${capitalize(startCase(assetType?.class))} - ${assetType?.subClass}`,
     },
     ...(isBT3BT4
       ? []

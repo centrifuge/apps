@@ -416,7 +416,7 @@ function Loan() {
                         ? 'external'
                         : 'internal'
                     }
-                    poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
+                    poolType={poolMetadata?.pool?.asset.class}
                     decimals={pool.currency.decimals}
                     pricing={loan.pricing as PricingInfo}
                     maturityDate={new Date(loan.pricing.maturityDate)}
