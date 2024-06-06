@@ -40,7 +40,10 @@ export const CashflowsChart = ({ poolStates, pool }: Props) => {
     () =>
       poolStates?.map((day) => {
         const purchases = new CurrencyBalance(day.sumBorrowedAmountByPeriod, pool.currency.decimals).toFloat()
-        const principalRepayments = new CurrencyBalance(day.sumRepaidAmountByPeriod, pool.currency.decimals).toFloat()
+        const principalRepayments = new CurrencyBalance(
+          day.sumPrincipalRepaidAmountByPeriod,
+          pool.currency.decimals
+        ).toFloat()
 
         const interest = new CurrencyBalance(day.sumInterestRepaidAmountByPeriod, pool.currency.decimals).toFloat()
         const fees =

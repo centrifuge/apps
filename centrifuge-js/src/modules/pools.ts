@@ -580,7 +580,9 @@ export type DailyPoolState = {
     sumBorrowedAmountByPeriod: CurrencyBalance
     sumRepaidAmountByPeriod: CurrencyBalance
     sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumPrincipalRepaidAmountByPeriod: CurrencyBalance
     sumInterestRepaidAmountByPeriod: CurrencyBalance
+    sumUnscheduledRepaidAmountByPeriod: CurrencyBalance
     sumInvestedAmountByPeriod: CurrencyBalance
     sumRedeemedAmountByPeriod: CurrencyBalance
   }
@@ -590,7 +592,9 @@ export type DailyPoolState = {
   sumPoolFeesChargedAmountByPeriod: string | null
   sumPoolFeesAccruedAmountByPeriod: string | null
   sumBorrowedAmountByPeriod: string
+  sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
+  sumUnscheduledRepaidAmountByPeriod: string
   sumRepaidAmountByPeriod: string
   sumInvestedAmountByPeriod: string
   sumRedeemedAmountByPeriod: string
@@ -678,7 +682,7 @@ export type PoolMetadata = {
     name: string
     icon: FileType | null
     asset: {
-      class: 'publicCredit' | 'privateCredit'
+      class: 'Public credit' | 'Private credit'
       subClass: string
     }
     poolFees?: {
@@ -2246,7 +2250,9 @@ export function getPoolsModule(inst: Centrifuge) {
           sumRepaidAmountByPeriod
           sumInvestedAmountByPeriod
           sumRedeemedAmountByPeriod
+          sumPrincipalRepaidAmountByPeriod
           sumInterestRepaidAmountByPeriod
+          sumUnscheduledRepaidAmountByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2439,8 +2445,16 @@ export function getPoolsModule(inst: Centrifuge) {
                   poolCurrency.decimals
                 ),
                 sumBorrowedAmountByPeriod: new CurrencyBalance(state.sumBorrowedAmountByPeriod, poolCurrency.decimals),
+                sumPrincipalRepaidAmountByPeriod: new CurrencyBalance(
+                  state.sumPrincipalRepaidAmountByPeriod,
+                  poolCurrency.decimals
+                ),
                 sumInterestRepaidAmountByPeriod: new CurrencyBalance(
                   state.sumInterestRepaidAmountByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumUnscheduledRepaidAmountByPeriod: new CurrencyBalance(
+                  state.sumUnscheduledRepaidAmountByPeriod,
                   poolCurrency.decimals
                 ),
                 sumRepaidAmountByPeriod: new CurrencyBalance(state.sumRepaidAmountByPeriod, poolCurrency.decimals),

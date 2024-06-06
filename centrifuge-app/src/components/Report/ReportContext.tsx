@@ -13,7 +13,7 @@ export type Report =
   | 'oracle-tx'
   | 'investor-list'
   | 'balance-sheet'
-  | 'cashflow-statement'
+  | 'cash-flow-statement'
 
 export type ReportContextType = {
   csvData?: CsvDataProps
