@@ -127,7 +127,7 @@ export function PoolBalance({ pool }: { pool: Pool }) {
           .reverse()
           .map((token) => ({
             name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
-            value: poolStates?.map((state) => state.tranches[token.id]?.fulfilledRedeemOrders ?? 0) || [],
+            value: poolStates?.map((state) => state.tranches[token.id]?.fulfilledRedeemOrders.toFloat() ?? 0) || [],
             heading: false,
           })) || []
       )
