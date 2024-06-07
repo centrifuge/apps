@@ -580,6 +580,7 @@ export type DailyPoolState = {
     sumBorrowedAmountByPeriod: CurrencyBalance
     sumRepaidAmountByPeriod: CurrencyBalance
     sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumPoolFeesPaidAmountByPeriod: CurrencyBalance
     sumPrincipalRepaidAmountByPeriod: CurrencyBalance
     sumInterestRepaidAmountByPeriod: CurrencyBalance
     sumUnscheduledRepaidAmountByPeriod: CurrencyBalance
@@ -591,6 +592,7 @@ export type DailyPoolState = {
   tranches: { [trancheId: string]: DailyTrancheState }
   sumPoolFeesChargedAmountByPeriod: string | null
   sumPoolFeesAccruedAmountByPeriod: string | null
+  sumPoolFeesPaidAmountByPeriod: string | null
   sumBorrowedAmountByPeriod: string
   sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
@@ -2245,6 +2247,7 @@ export function getPoolsModule(inst: Centrifuge) {
           blockNumber
           sumPoolFeesChargedAmountByPeriod
           sumPoolFeesAccruedAmountByPeriod
+          sumPoolFeesPaidAmountByPeriod
           sumPoolFeesPendingAmount
           sumBorrowedAmountByPeriod
           sumRepaidAmountByPeriod
@@ -2442,6 +2445,10 @@ export function getPoolsModule(inst: Centrifuge) {
                 ),
                 sumPoolFeesAccruedAmountByPeriod: new CurrencyBalance(
                   state.sumPoolFeesAccruedAmountByPeriod ?? 0,
+                  poolCurrency.decimals
+                ),
+                sumPoolFeesPaidAmountByPeriod: new CurrencyBalance(
+                  state.sumPoolFeesPaidAmountByPeriod ?? 0,
                   poolCurrency.decimals
                 ),
                 sumBorrowedAmountByPeriod: new CurrencyBalance(state.sumBorrowedAmountByPeriod, poolCurrency.decimals),
