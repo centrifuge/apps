@@ -221,7 +221,10 @@ export const TransactionHistoryTable = ({
     transactions
       ?.filter(
         (transaction) =>
-          transaction.type !== 'CREATED' && transaction.type !== 'CLOSED' && transaction.type !== 'PRICED'
+          transaction.type !== 'CREATED' &&
+          transaction.type !== 'CLOSED' &&
+          transaction.type !== 'PRICED' &&
+          !transaction.amount.isZero()
       )
       .sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1)) || []
 
