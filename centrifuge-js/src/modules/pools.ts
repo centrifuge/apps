@@ -586,6 +586,8 @@ export type DailyPoolState = {
     sumUnscheduledRepaidAmountByPeriod: CurrencyBalance
     sumInvestedAmountByPeriod: CurrencyBalance
     sumRedeemedAmountByPeriod: CurrencyBalance
+    sumDebtWrittenOffByPeriod: CurrencyBalance
+    sumInterestAccruedByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -2256,6 +2258,8 @@ export function getPoolsModule(inst: Centrifuge) {
           sumPrincipalRepaidAmountByPeriod
           sumInterestRepaidAmountByPeriod
           sumUnscheduledRepaidAmountByPeriod
+          sumInterestAccruedByPeriod
+          sumDebtWrittenOffByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2468,6 +2472,11 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumInvestedAmountByPeriod: new CurrencyBalance(state.sumInvestedAmountByPeriod, poolCurrency.decimals),
                 sumRedeemedAmountByPeriod: new CurrencyBalance(state.sumRedeemedAmountByPeriod, poolCurrency.decimals),
                 sumPoolFeesPendingAmount: new CurrencyBalance(state.sumPoolFeesPendingAmount, poolCurrency.decimals),
+                sumDebtWrittenOffByPeriod: new CurrencyBalance(state.sumDebtWrittenOffByPeriod, poolCurrency.decimals),
+                sumInterestAccruedByPeriod: new CurrencyBalance(
+                  state.sumInterestAccruedByPeriod,
+                  poolCurrency.decimals
+                ),
               }
               const poolValue = new CurrencyBalance(new BN(state?.netAssetValue || '0'), poolCurrency.decimals)
 
