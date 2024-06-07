@@ -48,8 +48,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const { showOracleTx } = useDebugFlags()
 
   const reportOptions: { label: string; value: Report }[] = [
-    { label: 'Profit and loss', value: 'profit-and-loss' },
     { label: 'Balance sheet', value: 'balance-sheet' },
+    { label: 'Profit & loss', value: 'profit-and-loss' },
     { label: 'Cash flow statement', value: 'cash-flow-statement' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },

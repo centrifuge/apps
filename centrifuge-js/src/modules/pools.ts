@@ -580,6 +580,7 @@ export type DailyPoolState = {
     sumBorrowedAmountByPeriod: CurrencyBalance
     sumRepaidAmountByPeriod: CurrencyBalance
     sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumPoolFeesAccruedAmountByPeriod: CurrencyBalance
     sumPoolFeesPaidAmountByPeriod: CurrencyBalance
     sumPrincipalRepaidAmountByPeriod: CurrencyBalance
     sumInterestRepaidAmountByPeriod: CurrencyBalance
