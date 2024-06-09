@@ -589,6 +589,7 @@ export type DailyPoolState = {
     sumRedeemedAmountByPeriod: CurrencyBalance
     sumDebtWrittenOffByPeriod: CurrencyBalance
     sumInterestAccruedByPeriod: CurrencyBalance
+    sumRealizedProfitFifoByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -600,6 +601,7 @@ export type DailyPoolState = {
   sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
   sumUnscheduledRepaidAmountByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
   sumRepaidAmountByPeriod: string
   sumInvestedAmountByPeriod: string
   sumRedeemedAmountByPeriod: string
@@ -2261,6 +2263,7 @@ export function getPoolsModule(inst: Centrifuge) {
           sumUnscheduledRepaidAmountByPeriod
           sumInterestAccruedByPeriod
           sumDebtWrittenOffByPeriod
+          sumRealizedProfitFifoByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2476,6 +2479,10 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumDebtWrittenOffByPeriod: new CurrencyBalance(state.sumDebtWrittenOffByPeriod, poolCurrency.decimals),
                 sumInterestAccruedByPeriod: new CurrencyBalance(
                   state.sumInterestAccruedByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumRealizedProfitFifoByPeriod: new CurrencyBalance(
+                  state.sumRealizedProfitFifoByPeriod,
                   poolCurrency.decimals
                 ),
               }

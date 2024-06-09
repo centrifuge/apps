@@ -22,6 +22,7 @@ export type SubqueryPoolSnapshot = {
   sumPoolFeesPendingAmount: string
   sumDebtWrittenOffByPeriod: string
   sumInterestAccruedByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
 }
 
 export type SubqueryTrancheSnapshot = {

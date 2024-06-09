@@ -127,8 +127,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       },
       {
         name: 'Realized profit / loss',
-        // TODO:
-        value: poolStates?.map(({ poolState }) => '') || [],
+        value: poolStates?.map(({ poolState }) => poolState.sumRealizedProfitFifoByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
@@ -156,8 +155,9 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         // TODO:
         value:
           poolStates?.map(({ poolState }) =>
-            poolState.sumInterestRepaidAmountByPeriod
+            poolState.sumRealizedProfitFifoByPeriod
               .toDecimal()
+              .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
               .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
           ) || [],
         heading: false,
@@ -222,6 +222,12 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
   const feesRecords: Row[] = React.useMemo(() => {
     return [
       {
+        name: 'Expenses',
+        value: poolStates?.map(() => '' as any) || [],
+        heading: false,
+        bold: true,
+      },
+      {
         name: 'Accrued fees',
         // TODO:
         value:
@@ -230,8 +236,6 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
               .toDecimal()
               .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
           ) || [],
-        heading: false,
-        bold: true,
         formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
       },
     ]
@@ -243,12 +247,13 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         name: 'Total profit / loss',
         value:
           poolStates?.map(({ poolState }) =>
-            poolState.sumPoolFeesChargedAmountByPeriod
+            poolState.sumRealizedProfitFifoByPeriod
               .toDecimal()
-              .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
+              .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
+              .sub(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
           ) || [],
         heading: true,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
     ]
   }, [poolStates, pool])
