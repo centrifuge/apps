@@ -1,6 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
-import { Text } from '@centrifuge/fabric'
+import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
@@ -15,6 +15,7 @@ import type { TableDataRow } from './index'
 
 type Row = TableDataRow & {
   formatter?: (v: any) => any
+  nameTooltip?: string
   bold?: boolean
 }
 
@@ -90,9 +91,14 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       {
         align: 'left',
         header: '',
-        cell: (row: Row) => (
-          <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
-        ),
+        cell: (row: Row) =>
+          row.nameTooltip ? (
+            <Tooltip body={row.nameTooltip}>
+              <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
+            </Tooltip>
+          ) : (
+            <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
+          ),
         width: '240px',
       },
     ]
@@ -127,6 +133,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       },
       {
         name: 'Realized profit / loss',
+        nameTooltip: 'Based on first-in, first-out calculation of the transactions of each individual asset',
         value: poolStates?.map(({ poolState }) => poolState.sumRealizedProfitFifoByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),

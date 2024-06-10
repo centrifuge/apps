@@ -795,6 +795,7 @@ export type AssetTransaction = {
   principalAmount: CurrencyBalance | undefined
   interestAmount: CurrencyBalance | undefined
   hash: string
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string
@@ -2810,6 +2811,7 @@ export function getPoolsModule(inst: Centrifuge) {
             settlementPrice
             quantity
             hash
+            realizedProfitFifo
             asset {
               id
               metadata
@@ -2848,6 +2850,9 @@ export function getPoolsModule(inst: Centrifuge) {
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
           principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
           interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
+          realizedProfitFifo: tx.realizedProfitFifo
+            ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
+            : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) satisfies AssetTransaction[]
       })

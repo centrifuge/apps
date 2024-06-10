@@ -112,6 +112,7 @@ export type SubqueryAssetTransaction = {
   interestAmount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string
