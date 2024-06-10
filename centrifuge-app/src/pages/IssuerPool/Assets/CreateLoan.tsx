@@ -71,6 +71,7 @@ export type CreateLoanFormValues = {
     maxBorrowQuantity: number | ''
     Isin: string
     notional: number | ''
+    withLinearPricing: boolean
   }
 }
 
@@ -238,6 +239,7 @@ function IssuerCreateLoan() {
         maxBorrowQuantity: '',
         Isin: '',
         notional: 100,
+        withLinearPricing: false,
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -262,6 +264,7 @@ function IssuerCreateLoan() {
           maturityDate: new Date(values.pricing.maturityDate),
           interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
+          withLinearPricing: values.pricing.withLinearPricing,
         }
       } else {
         pricingInfo = {

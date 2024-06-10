@@ -122,6 +122,7 @@ export type LoanInfoInput =
       maturityDate: Date
       interestRate: BN
       notional: BN
+      withLinearPricing: boolean
     }
   | {
       valuationMethod: 'discountedCashFlow'
@@ -159,6 +160,7 @@ export type LoanInfoData = {
           maxBorrowAmount: { noLimit: null } | { quantity: string }
           notional: string
           maxPriceVariation: string
+          withLinearPricing: boolean
         }
       }
     | {
@@ -1618,6 +1620,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     : { quantity: infoInput.maxBorrowAmount.toString() },
                 maxPriceVariation: infoInput.maxPriceVariation!.toString(),
                 notional: infoInput.notional.toString(),
+                withLinearPricing: infoInput.withLinearPricing,
               },
             }
           : {

@@ -1,4 +1,14 @@
-import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
+import {
+  Checkbox,
+  CurrencyInput,
+  DateInput,
+  Grid,
+  NumberInput,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
@@ -41,6 +51,17 @@ export function PricingInput({ poolId }: { poolId: string }) {
               />
             )}
           </Field>
+          <Stack py={2} justifyContent="flex-end">
+            <Field name="pricing.withLinearPricing">
+              {({ field, meta }: FieldProps) => (
+                <Checkbox
+                  errorMessage={meta.touched ? meta.error : undefined}
+                  label={<Text variant="body2">With linear pricing?</Text>}
+                  {...field}
+                />
+              )}
+            </Field>
+          </Stack>
         </>
       )}
 
