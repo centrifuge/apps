@@ -1,6 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
-import { Text } from '@centrifuge/fabric'
+import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
@@ -15,6 +15,7 @@ import type { TableDataRow } from './index'
 
 type Row = TableDataRow & {
   formatter?: (v: any) => any
+  nameTooltip?: string
   bold?: boolean
 }
 
@@ -90,9 +91,14 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       {
         align: 'left',
         header: '',
-        cell: (row: Row) => (
-          <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
-        ),
+        cell: (row: Row) =>
+          row.nameTooltip ? (
+            <Tooltip body={row.nameTooltip}>
+              <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
+            </Tooltip>
+          ) : (
+            <Text variant={row.heading ? 'heading4' : row.bold ? 'interactive2' : 'body3'}>{row.name}</Text>
+          ),
         width: '240px',
       },
     ]
@@ -120,14 +126,20 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
   const profitAndLossPublicRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Realized profit/loss',
-        // TODO:
-        value: poolStates?.map(({ poolState }) => '') || [],
+        name: 'Income',
+        value: poolStates?.map(() => '' as any) || [],
+        heading: false,
+        bold: true,
+      },
+      {
+        name: 'Realized profit / loss',
+        nameTooltip: 'Based on first-in, first-out calculation of the transactions of each individual asset',
+        value: poolStates?.map(({ poolState }) => poolState.sumRealizedProfitFifoByPeriod.toDecimal()) || [],
         heading: false,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: 'Unrealized profit/loss',
+        name: 'Unrealized profit / loss',
         // TODO:
         value: poolStates?.map(({ poolState }) => Dec(0)) || [],
         heading: false,
@@ -146,12 +158,13 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
-        name: 'Profit/loss from assets',
+        name: 'Total income ',
         // TODO:
         value:
           poolStates?.map(({ poolState }) =>
-            poolState.sumInterestRepaidAmountByPeriod
+            poolState.sumRealizedProfitFifoByPeriod
               .toDecimal()
+              .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
               .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
           ) || [],
         heading: false,
@@ -163,6 +176,12 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
 
   const profitAndLossPrivateRecords: Row[] = React.useMemo(() => {
     return [
+      {
+        name: 'Income',
+        value: poolStates?.map(() => '' as any) || [],
+        heading: false,
+        bold: true,
+      },
       {
         name: 'Interest payments',
         value: poolStates?.map(({ poolState }) => poolState?.sumInterestRepaidAmountByPeriod.toDecimal()) || [],
@@ -188,7 +207,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
-        name: 'Profit/loss from assets',
+        name: 'Profit / loss from assets ',
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumInterestRepaidAmountByPeriod
@@ -210,10 +229,20 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
   const feesRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Fees paid',
-        // TODO:
-        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPaidAmountByPeriod.toDecimal()) || [],
+        name: 'Expenses',
+        value: poolStates?.map(() => '' as any) || [],
         heading: false,
+        bold: true,
+      },
+      {
+        name: 'Accrued fees',
+        // TODO:
+        value:
+          poolStates?.map(({ poolState }) =>
+            poolState.sumPoolFeesChargedAmountByPeriod
+              .toDecimal()
+              .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
+          ) || [],
         formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
       },
     ]
@@ -222,10 +251,16 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
   const totalProfitRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Total profit/loss',
-        value: poolStates?.map(() => '') || [],
+        name: 'Total profit / loss',
+        value:
+          poolStates?.map(({ poolState }) =>
+            poolState.sumRealizedProfitFifoByPeriod
+              .toDecimal()
+              .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
+              .sub(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
+          ) || [],
         heading: true,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
     ]
   }, [poolStates, pool])

@@ -22,6 +22,7 @@ export type SubqueryPoolSnapshot = {
   sumPoolFeesPendingAmount: string
   sumDebtWrittenOffByPeriod: string
   sumInterestAccruedByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
 }
 
 export type SubqueryTrancheSnapshot = {
@@ -111,6 +112,7 @@ export type SubqueryAssetTransaction = {
   interestAmount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string

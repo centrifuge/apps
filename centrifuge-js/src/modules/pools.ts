@@ -580,6 +580,7 @@ export type DailyPoolState = {
     sumBorrowedAmountByPeriod: CurrencyBalance
     sumRepaidAmountByPeriod: CurrencyBalance
     sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumPoolFeesAccruedAmountByPeriod: CurrencyBalance
     sumPoolFeesPaidAmountByPeriod: CurrencyBalance
     sumPrincipalRepaidAmountByPeriod: CurrencyBalance
     sumInterestRepaidAmountByPeriod: CurrencyBalance
@@ -588,6 +589,7 @@ export type DailyPoolState = {
     sumRedeemedAmountByPeriod: CurrencyBalance
     sumDebtWrittenOffByPeriod: CurrencyBalance
     sumInterestAccruedByPeriod: CurrencyBalance
+    sumRealizedProfitFifoByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -599,6 +601,7 @@ export type DailyPoolState = {
   sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
   sumUnscheduledRepaidAmountByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
   sumRepaidAmountByPeriod: string
   sumInvestedAmountByPeriod: string
   sumRedeemedAmountByPeriod: string
@@ -792,6 +795,7 @@ export type AssetTransaction = {
   principalAmount: CurrencyBalance | undefined
   interestAmount: CurrencyBalance | undefined
   hash: string
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string
@@ -2260,6 +2264,7 @@ export function getPoolsModule(inst: Centrifuge) {
           sumUnscheduledRepaidAmountByPeriod
           sumInterestAccruedByPeriod
           sumDebtWrittenOffByPeriod
+          sumRealizedProfitFifoByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2475,6 +2480,10 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumDebtWrittenOffByPeriod: new CurrencyBalance(state.sumDebtWrittenOffByPeriod, poolCurrency.decimals),
                 sumInterestAccruedByPeriod: new CurrencyBalance(
                   state.sumInterestAccruedByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumRealizedProfitFifoByPeriod: new CurrencyBalance(
+                  state.sumRealizedProfitFifoByPeriod,
                   poolCurrency.decimals
                 ),
               }
@@ -2802,6 +2811,7 @@ export function getPoolsModule(inst: Centrifuge) {
             settlementPrice
             quantity
             hash
+            realizedProfitFifo
             asset {
               id
               metadata
@@ -2840,6 +2850,9 @@ export function getPoolsModule(inst: Centrifuge) {
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
           principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
           interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
+          realizedProfitFifo: tx.realizedProfitFifo
+            ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
+            : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) satisfies AssetTransaction[]
       })
