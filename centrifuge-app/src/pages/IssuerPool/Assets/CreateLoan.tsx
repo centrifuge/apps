@@ -27,6 +27,7 @@ import {
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { useQuery } from 'react-query'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
@@ -72,6 +73,7 @@ export type CreateLoanFormValues = {
     Isin: string
     notional: number | ''
     withLinearPricing: boolean
+    oracleSource: 'isin' | 'assetSpecific'
   }
 }
 
@@ -181,6 +183,15 @@ function IssuerCreateLoan() {
 
   const { data: poolMetadata } = usePoolMetadata(pool)
 
+  // TODO: useCentrifugeQuery to fetch next loan id, not working right now
+  // TODO: pass loan id to centrifuge.pools.createLoan if oracle source is assetSpecific
+  // TODO: display price id instead of isin if oracle source is assetSpecific in PricingValues.tsx
+  // TODO: do the same in nav managment asset table
+  const { data } = useQuery(['nextLoanId', pid], async () => {
+    const nextLoanId = await centrifuge.pools.getNextLoanId([pid])
+    return nextLoanId
+  })
+
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
     (cent) =>
@@ -240,6 +251,7 @@ function IssuerCreateLoan() {
         Isin: '',
         notional: 100,
         withLinearPricing: false,
+        oracleSource: 'isin',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -260,7 +272,7 @@ function IssuerCreateLoan() {
           valuationMethod: values.pricing.valuationMethod,
           maxPriceVariation: Rate.fromPercent(9999),
           maxBorrowAmount: values.pricing.maxBorrowQuantity ? Price.fromFloat(values.pricing.maxBorrowQuantity) : null,
-          Isin: values.pricing.Isin || '',
+          ...(values.pricing.oracleSource === 'isin' ? { Isin: values.pricing.Isin } : { PoolLoanId: [pid, pid] }),
           maturityDate: new Date(values.pricing.maturityDate),
           interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
@@ -323,6 +335,7 @@ function IssuerCreateLoan() {
   const isPending = isTxLoading || form.isSubmitting
 
   const balanceDec = balances?.native.balance.toDecimal()
+  console.log('🚀 ~ balanceDec:', balanceDec?.toString())
   const balanceLow = balanceDec?.lt(loanDeposit.toDecimal())
 
   const errorMessage = balanceLow ? `The AO account needs at least ${formatBalance(loanDeposit, chainSymbol, 1)}` : null

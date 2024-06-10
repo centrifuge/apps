@@ -24,13 +24,30 @@ export function PricingInput({ poolId }: { poolId: string }) {
     <Grid columns={[1, 2, 2, 3]} gap={2} rowGap={3}>
       {values.pricing.valuationMethod === 'oracle' && (
         <>
-          <FieldWithErrorMessage
-            as={TextInput}
-            label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
-            placeholder="010101010000"
-            name="pricing.Isin"
-            validate={validate.Isin}
-          />
+          <Field name="pricing.oracleSource">
+            {({ field, meta, form }: FieldProps) => (
+              <Select
+                {...field}
+                label="Oracle source"
+                onChange={(event) => form.setFieldValue('pricing.oracleSource', event.target.value, false)}
+                errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                options={[
+                  { value: 'isin', label: 'ISIN' },
+                  { value: 'assetSpecific', label: 'Asset specific' },
+                ]}
+                placeholder="..."
+              />
+            )}
+          </Field>
+          {values.pricing.oracleSource === 'isin' && (
+            <FieldWithErrorMessage
+              as={TextInput}
+              label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
+              placeholder="010101010000"
+              name="pricing.Isin"
+              validate={validate.Isin}
+            />
+          )}
           <Field
             name="pricing.notional"
             validate={combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER))}

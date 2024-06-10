@@ -141,7 +141,7 @@ export type LoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
     maturity: { fixed: { date: number; extension: number } }
-    interestPayments: 'None'
+    interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
 
@@ -195,7 +195,7 @@ export type ActiveLoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
     maturity: { fixed: { date: number; extension: number } }
-    interestPayments: 'None'
+    interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
 
@@ -212,6 +212,7 @@ export type ActiveLoanInfoData = {
             maxBorrowAmount: { noLimit: null } | { quantity: string }
             notional: string
             maxPriceVariation: string
+            withLinearPricing: boolean
           }
           outstandingQuantity: string
           interest: {
@@ -438,6 +439,7 @@ export type ExternalPricingInfo = {
   }[]
   notional: CurrencyBalance
   interestRate: Rate
+  withLinearPricing: boolean
 }
 
 type TinlakePricingInfo = {
@@ -1577,8 +1579,12 @@ export function getPoolsModule(inst: Centrifuge) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId(poolId))))
-    return id
+    return $api.pipe(
+      switchMap((api) => api.query.loans.lastLoanId(poolId)),
+      map((id) => {
+        return parseInt(id.toHuman() as string, 10) + 1
+      })
+    )
   }
 
   function createLoan(
@@ -1597,7 +1603,7 @@ export function getPoolsModule(inst: Centrifuge) {
             extension: 'maturityExtensionDays' in infoInput ? infoInput.maturityExtensionDays * SEC_PER_DAY : 0,
           },
         },
-        interestPayments: 'None',
+        interestPayments: 'OnceAtMaturity',
         payDownSchedule: 'None',
       },
 
@@ -3497,6 +3503,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     interestRate: new Rate(interestRate),
                     notional: new CurrencyBalance(pricingInfo.notional, currency.decimals),
                     maxPriceVariation: new Rate(pricingInfo.maxPriceVariation),
+                    withLinearPricing: pricingInfo.withLinearPricing,
                   }
                 : {
                     valuationMethod:
