@@ -72,7 +72,7 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
         switchMap(([api, createTx, permissionTx]) => {
           const tx = api.tx.utility.batchAll([
             ...permissionTx.method.args[0],
-            api.tx.balances.transfer(account.actingAddress, proxyDepositBase.add(proxyDepositFactor)),
+            api.tx.balances.transferKeepAlive(account.actingAddress, proxyDepositBase.add(proxyDepositFactor)),
             createTx,
           ])
           return cent.wrapSignAndSend(api, tx, options)
@@ -272,7 +272,7 @@ function AOForm({
 
             if (!deposit.isZero()) {
               tx = api.tx.utility.batchAll([
-                !deposit.isZero() && api.tx.balances.transfer(account.proxies![1].delegator, deposit),
+                !deposit.isZero() && api.tx.balances.transferKeepAlive(account.proxies![1].delegator, deposit),
                 tx,
               ])
             }

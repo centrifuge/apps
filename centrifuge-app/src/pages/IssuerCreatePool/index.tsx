@@ -244,8 +244,8 @@ function CreatePoolForm() {
             const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
             const submittable = api.tx.utility.batchAll(
               [
-                api.tx.balances.transfer(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
-                api.tx.balances.transfer(
+                api.tx.balances.transferKeepAlive(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
+                api.tx.balances.transferKeepAlive(
                   aoProxy,
                   consts.proxy.proxyDepositFactor.add(consts.uniques.collectionDeposit)
                 ),
