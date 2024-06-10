@@ -45,6 +45,7 @@ export function PricingValues({ loan, pool }: Props) {
           value={latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-'}
         />
         <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
+        <LabelValueStack label="With linear pricing" value={pricing.withLinearPricing ? 'Yes' : 'No'} />
       </>
     )
   }

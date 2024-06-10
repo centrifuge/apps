@@ -26,6 +26,7 @@ type FormValues = {
     quantity: number
     maturity: string
     currentPrice: number
+    withLinearPricing: boolean
   }[]
   closeEpoch: boolean
 }
@@ -100,6 +101,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             Isin: l.pricing.Isin,
             quantity: l.pricing.outstandingQuantity.toFloat(),
             maturity: formatDate(l.pricing.maturityDate),
+            withLinearPricing: l.pricing.withLinearPricing,
             currentPrice: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
           }
         }) ?? [],
@@ -160,6 +162,12 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       align: 'left',
       header: 'Maturity date',
       cell: (row: Row) => ('oldValue' in row ? row.maturity : ''),
+    },
+    {
+      align: 'left',
+      header: 'Linear pricing',
+      width: '100px',
+      cell: (row: Row) => (row.id === 'reserve' ? '' : 'oldValue' in row && row.withLinearPricing ? 'Yes' : 'No'),
     },
     {
       align: 'right',
