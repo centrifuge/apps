@@ -2,7 +2,6 @@ import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Dec } from '../../utils/Decimal'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAggregatedPoolStatesByGroup, usePoolMetadata } from '../../utils/usePools'
@@ -140,10 +139,10 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       },
       {
         name: 'Unrealized profit / loss',
-        // TODO:
-        value: poolStates?.map(({ poolState }) => Dec(0)) || [],
+        nameTooltip: 'Based on selling the assets in the pool at the current market price',
+        value: poolStates?.map(({ poolState }) => poolState.sumUnrealizedProfitByPeriod.toDecimal()) || [],
         heading: false,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
       {
         name: 'Interest payments',
@@ -159,11 +158,11 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       },
       {
         name: 'Total income ',
-        // TODO:
         value:
           poolStates?.map(({ poolState }) =>
             poolState.sumRealizedProfitFifoByPeriod
               .toDecimal()
+              .add(poolState.sumUnrealizedProfitByPeriod.toDecimal())
               .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
               .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
           ) || [],
@@ -213,7 +212,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
             poolState.sumInterestRepaidAmountByPeriod
               .toDecimal()
               .add(poolState.sumInterestAccruedByPeriod.toDecimal())
-              .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
+              .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
               .sub(poolState.sumDebtWrittenOffByPeriod.toDecimal())
           ) || [],
         heading: false,
@@ -254,8 +253,18 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         name: 'Total profit / loss',
         value:
           poolStates?.map(({ poolState }) =>
-            poolState.sumRealizedProfitFifoByPeriod
-              .toDecimal()
+            (poolMetadata?.pool?.asset.class === 'Private credit'
+              ? poolState.sumInterestRepaidAmountByPeriod
+                  .toDecimal()
+                  .add(poolState.sumInterestAccruedByPeriod.toDecimal())
+                  .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
+                  .sub(poolState.sumDebtWrittenOffByPeriod.toDecimal())
+              : poolState.sumRealizedProfitFifoByPeriod
+                  .toDecimal()
+                  .add(poolState.sumUnrealizedProfitByPeriod.toDecimal())
+                  .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
+                  .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
+            )
               .sub(poolState.sumPoolFeesChargedAmountByPeriod.toDecimal())
               .sub(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
           ) || [],

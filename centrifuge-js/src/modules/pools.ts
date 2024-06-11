@@ -590,6 +590,9 @@ export type DailyPoolState = {
     sumDebtWrittenOffByPeriod: CurrencyBalance
     sumInterestAccruedByPeriod: CurrencyBalance
     sumRealizedProfitFifoByPeriod: CurrencyBalance
+    sumUnrealizedProfitAtMarketPrice: CurrencyBalance
+    sumUnrealizedProfitAtNotional: CurrencyBalance
+    sumUnrealizedProfitByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -602,6 +605,9 @@ export type DailyPoolState = {
   sumInterestRepaidAmountByPeriod: string
   sumUnscheduledRepaidAmountByPeriod: string
   sumRealizedProfitFifoByPeriod: string
+  sumUnrealizedProfitAtMarketPrice: string
+  sumUnrealizedProfitAtNotional: string
+  sumUnrealizedProfitByPeriod: string
   sumRepaidAmountByPeriod: string
   sumInvestedAmountByPeriod: string
   sumRedeemedAmountByPeriod: string
@@ -2265,6 +2271,9 @@ export function getPoolsModule(inst: Centrifuge) {
           sumInterestAccruedByPeriod
           sumDebtWrittenOffByPeriod
           sumRealizedProfitFifoByPeriod
+          sumUnrealizedProfitAtMarketPrice
+          sumUnrealizedProfitAtNotional
+          sumUnrealizedProfitByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2484,6 +2493,18 @@ export function getPoolsModule(inst: Centrifuge) {
                 ),
                 sumRealizedProfitFifoByPeriod: new CurrencyBalance(
                   state.sumRealizedProfitFifoByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitAtMarketPrice: new CurrencyBalance(
+                  state.sumUnrealizedProfitAtMarketPrice,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitAtNotional: new CurrencyBalance(
+                  state.sumUnrealizedProfitAtNotional,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitByPeriod: new CurrencyBalance(
+                  state.sumUnrealizedProfitByPeriod,
                   poolCurrency.decimals
                 ),
               }
