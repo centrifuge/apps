@@ -9,7 +9,6 @@ import {
 import {
   CombinedSubstrateAccount,
   truncateAddress,
-  useCentrifugeApi,
   useCentrifugeQuery,
   useCentrifugeUtils,
   useWallet,
@@ -181,7 +180,6 @@ export function usePoolAccess(poolId: string) {
     []
   const aoProxies = (admin && proxies?.[admin]?.filter((p) => p.types.includes('Any')).map((p) => p.delegator)) || []
   const collections = useCollections()
-  const api = useCentrifugeApi()
 
   const aoCollateralCollections: Record<string, Collection[]> = {}
   aoProxies.forEach((ao) => {
@@ -220,10 +218,8 @@ export function usePoolAccess(poolId: string) {
                   if (blockNumber > value.blockedAt) return null as never
                   if ('Local' in key) {
                     return {
-                      [key.Local]: {
-                        address: addressToHex(key.Local),
-                        location: 'centrifuge',
-                      },
+                      address: addressToHex(key.Local),
+                      location: 'centrifuge',
                     }
                   } else if ('Address' in key) {
                     if ('EVM' in key.Address)

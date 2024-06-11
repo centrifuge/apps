@@ -118,7 +118,7 @@ export type LoanInfoInput =
       valuationMethod: 'oracle'
       maxBorrowAmount: BN | null
       maxPriceVariation: BN
-      Isin: string
+      priceId: { isin: string } | [string, string]
       maturityDate: Date
       interestRate: BN
       notional: BN
@@ -154,9 +154,7 @@ export type LoanInfoData = {
   pricing:
     | {
         external: {
-          priceId: {
-            isin: string
-          }
+          priceId: { isin: string } | [string, string]
           maxBorrowAmount: { noLimit: null } | { quantity: string }
           notional: string
           maxPriceVariation: string
@@ -429,7 +427,7 @@ export type ExternalPricingInfo = {
   maxBorrowAmount: CurrencyBalance | null
   maxPriceVariation: Rate
   outstandingQuantity: CurrencyBalance
-  Isin: string
+  priceId: { isin: string } | [string, string]
   maturityDate: string
   maturityExtensionDays: number
   oracle: {
@@ -1578,7 +1576,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const [poolId] = args
     const $api = inst.getApi()
     return $api.pipe(
-      switchMap((api) => combineLatest([api.query.poolFees.lastLoanId(poolId)])),
+      switchMap((api) => combineLatest([api.query.loans.lastLoanId(poolId)])),
       map((feeId) => parseInt(feeId[0].toHuman() as string, 10) + 1)
     )
   }
@@ -1613,9 +1611,7 @@ export function getPoolsModule(inst: Centrifuge) {
         infoInput.valuationMethod === 'oracle'
           ? {
               external: {
-                priceId: {
-                  isin: infoInput.Isin,
-                },
+                priceId: infoInput.priceId,
                 maxBorrowAmount:
                   infoInput.maxBorrowAmount === null
                     ? { noLimit: null }
@@ -3402,7 +3398,7 @@ export function getPoolsModule(inst: Centrifuge) {
         oracles.forEach((oracle) => {
           const [value, timestamp] = oracle[1].toPrimitive() as any
           const keys = oracle[0].toHuman() as any
-          const isin = keys[1].Isin
+          const isin = keys[1]?.Isin
           const account = keys[0].system?.Signed
           if (!isin || !account) return
           const entry = {
@@ -3482,10 +3478,12 @@ export function getPoolsModule(inst: Centrifuge) {
                       'noLimit' in pricingInfo.maxBorrowAmount
                         ? null
                         : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 18),
-                    Isin: pricingInfo.priceId.isin,
+                    priceId: pricingInfo.priceId,
                     maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
                     maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
-                    oracle: oraclePrices[pricingInfo.priceId.isin] || [
+                    oracle: oraclePrices[
+                      Array.isArray(pricingInfo.priceId) ? pricingInfo.priceId.join('-') : pricingInfo.priceId?.isin
+                    ] || [
                       {
                         value: new CurrencyBalance(0, 18),
                         timestamp: 0,

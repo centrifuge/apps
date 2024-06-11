@@ -22,7 +22,7 @@ type FormValues = {
     id: string
     oldValue: number
     value: number | ''
-    Isin: string
+    isin: string
     quantity: number
     maturity: string
     currentPrice: number
@@ -54,7 +54,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const reserveRow = [
     {
       id: 'reserve',
-      Isin: 'Reserve',
+      isin: 'Reserve',
       quantity: 1,
       currentPrice: 0,
       value: pool?.reserve.total.toDecimal().toNumber(),
@@ -71,7 +71,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       const batch = [
         ...values.feed
           .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
-          .map((f) => api.tx.oraclePriceFeed.feed({ Isin: f.Isin }, CurrencyBalance.fromFloat(f.value, 18))),
+          .map((f) => api.tx.oraclePriceFeed.feed({ Isin: f.isin }, CurrencyBalance.fromFloat(f.value, 18))),
         api.tx.oraclePriceCollection.updateCollection(poolId),
         api.tx.loans.updatePortfolioValuation(poolId),
       ]
@@ -98,7 +98,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             id: l.id,
             oldValue: latestOraclePrice.value.toFloat(),
             value: '' as const,
-            Isin: l.pricing.Isin,
+            isin: Array.isArray(l.pricing.priceId) ? '' : l.pricing.priceId.isin,
             quantity: l.pricing.outstandingQuantity.toFloat(),
             maturity: formatDate(l.pricing.maturityDate),
             withLinearPricing: l.pricing.withLinearPricing,
@@ -149,7 +149,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               <Thumbnail type="asset" label={row.id} />
             )}
             <Text variant="body2" fontWeight={600}>
-              {row.Isin}
+              {row.isin}
             </Text>
           </Shelf>
         ) : (

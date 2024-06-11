@@ -44,8 +44,8 @@ export function PricingInput({ poolId }: { poolId: string }) {
               as={TextInput}
               label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
               placeholder="010101010000"
-              name="pricing.Isin"
-              validate={validate.Isin}
+              name="pricing.isin"
+              validate={validate.isin}
             />
           )}
           <Field
