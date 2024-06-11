@@ -712,7 +712,6 @@ export type PoolMetadata = {
     details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
-    assetOriginators?: Record<string, { name?: string; withdrawAddresses: WithdrawAddress[] }>
     reports?: PoolReport[]
   }
   pod?: {
@@ -1575,15 +1574,12 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  async function getNextLoanId(args: [poolId: string]) {
+  function getNextLoanId(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
-
     return $api.pipe(
-      switchMap((api) => api.query.loans.lastLoanId(poolId)),
-      map((id) => {
-        return parseInt(id.toHuman() as string, 10) + 1
-      })
+      switchMap((api) => combineLatest([api.query.poolFees.lastLoanId(poolId)])),
+      map((feeId) => parseInt(feeId[0].toHuman() as string, 10) + 1)
     )
   }
 

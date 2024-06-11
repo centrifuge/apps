@@ -17,11 +17,9 @@ import {
 import { Select } from '@centrifuge/fabric'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
-import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import * as React from 'react'
 import { combineLatest, combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs'
 import { diffPermissions } from '../pages/IssuerPool/Configuration/Admins'
-import { looksLike } from './helpers'
 import { useCollections } from './useCollections'
 import { useLoan } from './useLoans'
 import { usePool, usePoolMetadata, usePools } from './usePools'
@@ -212,28 +210,39 @@ export function usePoolAccess(poolId: string) {
         ),
         combineLatestWith(cent.getBlocks().pipe(take(1))),
         map(([data, block]) => {
-          return data.map((entries) =>
-            entries
-              .map(([keyData, valueData]) => {
-                const key = (keyData.toHuman() as any)[2]
-                const value = valueData.toPrimitive() as { blockedAt: number }
-                const blockNumber = block.block.header.number.toNumber()
-                if (blockNumber > value.blockedAt) return null as never
-                if ('Local' in key) {
-                  return {
-                    Local: addressToHex(key.Local),
-                  }
-                } else if ('Address' in key) {
-                  if ('EVM' in key.Address)
+          return data.map(
+            (entries) =>
+              entries
+                .map(([keyData, valueData]) => {
+                  const key = (keyData.toHuman() as any)[2]
+                  const value = valueData.toPrimitive() as { blockedAt: number }
+                  const blockNumber = block.block.header.number.toNumber()
+                  if (blockNumber > value.blockedAt) return null as never
+                  if ('Local' in key) {
                     return {
-                      Address: {
-                        EVM: [Number(key.Address.EVM[0].replace(/\D/g, '')), key.Address.EVM[1].toLowerCase()],
+                      [key.Local]: {
+                        address: addressToHex(key.Local),
+                        location: 'centrifuge',
                       },
                     }
-                }
-                return key
-              })
-              .filter(Boolean)
+                  } else if ('Address' in key) {
+                    if ('EVM' in key.Address)
+                      return {
+                        address: key.Address.EVM[1].toLowerCase(),
+                        location: { evm: key.Address.EVM[0].replace(/\D/g, '') },
+                      }
+                  } else if ('Xcm' in key) {
+                    if (!key.Xcm?.V3?.interior?.X2?.[1]?.AccountId32?.id) {
+                      return null as never
+                    }
+                    return {
+                      address: key.Xcm.V3.interior.X2[1].AccountId32.id,
+                      location: { parachain: Number(key.Xcm.V3.interior.X2[0].Parachain.replace(/\D/g, '')) },
+                    }
+                  }
+                  return key
+                })
+                .filter(Boolean) as WithdrawAddress[]
           )
         }),
         repeatWhen(() => $events)
@@ -243,20 +252,6 @@ export function usePoolAccess(poolId: string) {
       enabled: !!aoProxies.length,
     }
   )
-
-  const combinedAllowLists = React.useMemo(() => {
-    return transferAllowlists?.map((aoList, i) => {
-      const addr = aoProxies[i]
-      const receiversMeta = metadata?.pool?.assetOriginators?.[addr]?.withdrawAddresses
-      return aoList
-        .map((key) => ({
-          key,
-          meta: receiversMeta?.find((receiver) => looksLike(key, getKeyForReceiver(api, receiver)))!,
-        }))
-        .filter((i) => !!i.meta)
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transferAllowlists, metadata])
 
   const [delegates] = useCentrifugeQuery(
     ['proxyDelegates', [admin, ...aoProxies]],
@@ -353,10 +348,10 @@ export function usePoolAccess(poolId: string) {
           collateralCollections: aoCollateralCollections[addr],
           permissions: poolPermissions?.[addr] || { roles: [], tranches: {} },
           delegates: aoDelegates?.[i] || [],
-          transferAllowlist: combinedAllowLists?.[i] || [],
+          transferAllowlist: transferAllowlists?.[i] || [],
         })),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [collections, aoDelegates, poolPermissions, combinedAllowLists]
+      [collections, aoDelegates, poolPermissions, transferAllowlists]
     ),
   }
 }
@@ -367,31 +362,31 @@ export function getKeyForReceiver(api: ApiRx, receiver: WithdrawAddress) {
       Local: addressToHex(receiver.address),
     }
   } else if ('parachain' in receiver.location) {
-    const type = api.createType('MultiLocation', {
-      parents: 1,
-      interior: {
-        X2: [
-          {
-            Parachain: receiver.location.parachain,
-          },
-          isEvmAddress(receiver.address)
-            ? {
-                AccountKey20: {
-                  network: null,
-                  key: receiver.address.toLowerCase(),
-                },
-              }
-            : {
-                AccountId32: {
-                  id: addressToHex(receiver.address),
-                },
-              },
-        ],
-      },
-    })
-    const hash = blake2AsHex(type.toU8a(), 256)
     return {
-      XCM: hash,
+      XCM: {
+        V3: {
+          parents: 1,
+          interior: {
+            X2: [
+              {
+                Parachain: receiver.location.parachain,
+              },
+              isEvmAddress(receiver.address)
+                ? {
+                    AccountKey20: {
+                      network: null,
+                      key: receiver.address.toLowerCase(),
+                    },
+                  }
+                : {
+                    AccountId32: {
+                      id: addressToHex(receiver.address),
+                    },
+                  },
+            ],
+          },
+        },
+      },
     }
   } else if ('evm' in receiver.location) {
     return {

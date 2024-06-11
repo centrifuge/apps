@@ -48,7 +48,7 @@ import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { diffPermissions } from '../Configuration/Admins'
 
 type AOFormValues = {
-  withdrawAddresses: { key?: any; meta?: WithdrawAddress }[]
+  withdrawAddresses: WithdrawAddress[]
   name?: string
   delegates: string[]
 }
@@ -160,10 +160,7 @@ function AOForm({
     () => ({
       name: identity?.display,
       withdrawAddresses: [
-        ...ao.transferAllowlist.map((l) => ({
-          ...l,
-          meta: { ...l.meta, address: l.meta?.address && utils.formatAddress(l.meta.address) },
-        })),
+        ...ao.transferAllowlist.map((allowList) => ({ ...allowList, address: utils.formatAddress(allowList.address) })),
         ...new Array(3).fill({}),
       ].slice(0, 3),
       delegates: ao.delegates.map((d) => d.delegatee),
@@ -312,35 +309,11 @@ function AOForm({
           { TrancheInvestor: [junTranche, Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)] } as any,
         ])
       }
-
-      const hasMetadataChanges =
-        form.values.name !== initialValues.name || addedWithdraw.length || removedWithdraw.length
-      const newMetadata: PoolMetadata = {
-        ...(metadata as any),
-        pool: {
-          ...(metadata.pool as any),
-          assetOriginators: {
-            ...metadata.pool?.assetOriginators,
-            [ao.address]: {
-              name: values.name,
-              withdrawAddresses: values.withdrawAddresses
-                .filter((w) => !!w.meta?.address)
-                .map((w) => ({
-                  location: w.meta!.location,
-                  address:
-                    typeof w.meta!.location !== 'string' && 'evm' in w.meta!.location
-                      ? w.meta!.address.toLowerCase()
-                      : addressToHex(w.meta!.address),
-                })),
-            },
-          },
-        },
-      }
       execute(
         [
-          addedWithdraw.map((w) => getKeyForReceiver(api, w.meta!)),
-          removedWithdraw.map((w) => w.key!),
-          hasMetadataChanges ? newMetadata : null,
+          addedWithdraw.map((w) => getKeyForReceiver(api, w)),
+          removedWithdraw.map((w) => getKeyForReceiver(api, w)),
+          null,
           addedPermissions,
           addedDelegates,
           removedDelegates,
@@ -352,16 +325,16 @@ function AOForm({
     validate: (values) => {
       let errors: FormikErrors<AOFormValues> = {}
       values.withdrawAddresses.forEach((value, index) => {
-        if (value.meta?.address) {
-          if (!value.meta.location) {
-            errors = setIn(errors, `withdrawAddresses.${index}.meta.location`, 'Select a destination')
+        if (value.address) {
+          if (!value.location) {
+            errors = setIn(errors, `withdrawAddresses.${index}.location`, 'Select a destination')
           } else {
-            if (typeof value.meta.location !== 'string' && 'evm' in value.meta.location) {
-              if (!isEvmAddress(value.meta.address)) {
-                errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid EVM address')
+            if (typeof value.location !== 'string' && 'evm' in value.location) {
+              if (!isEvmAddress(value.address)) {
+                errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Not a valid EVM address')
               }
-            } else if (!isSubstrateAddress(value.meta.address) || isEvmAddress(value.meta.address)) {
-              errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid Substrate address')
+            } else if (!isSubstrateAddress(value.address) || isEvmAddress(value.address)) {
+              errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Not a valid Substrate address')
             }
           }
         }
@@ -485,32 +458,29 @@ function AOForm({
               <Stack gap={1}>
                 {form.values.withdrawAddresses.map((value, index) => (
                   <FieldWithErrorMessage
-                    name={`withdrawAddresses.${index}.meta.address`}
+                    name={`withdrawAddresses.${index}.address`}
                     validate={address()}
                     label="Address"
                     disabled={!isEditing}
                     as={TextInput}
                     onChange={(event: any) => {
                       form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
-                      form.setFieldValue(`withdrawAddresses.${index}.meta.address`, event.target.value)
+                      form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
                     }}
-                    placeholder={value.key && !value.meta?.address ? '[Unknown address]' : ''}
+                    placeholder={''}
                     secondaryLabel={
                       <ErrorMessage
-                        name={`withdrawAddresses.${index}.meta.location`}
+                        name={`withdrawAddresses.${index}.location`}
                         render={(error) => error && <InputErrorMessage>{error}</InputErrorMessage>}
                       />
                     }
                     symbol={
-                      <Field name={`withdrawAddresses.${index}.meta.location`}>
+                      <Field name={`withdrawAddresses.${index}.location`}>
                         {({ field, form }: FieldProps) => (
                           <SelectInner
-                            name={`withdrawAddresses.${index}.meta.location`}
+                            name={`withdrawAddresses.${index}.location`}
                             onChange={(event) =>
-                              form.setFieldValue(
-                                `withdrawAddresses.${index}.meta.location`,
-                                JSON.parse(event.target.value)
-                              )
+                              form.setFieldValue(`withdrawAddresses.${index}.location`, JSON.parse(event.target.value))
                             }
                             onBlur={field.onBlur}
                             value={field.value ? JSON.stringify(field.value) : ''}
@@ -550,21 +520,15 @@ export function diffWithdrawAddresses(
   storedValues.forEach((stored) => {
     if (
       !formValues.find(
-        (value) =>
-          (value.meta?.address &&
-            value.meta.address === stored.meta?.address &&
-            value.meta?.location === stored.meta?.location) ||
-          value.key === stored.key
+        (value) => value?.address && value.address === stored?.address && value?.location === stored?.location
       )
     )
       remove.push(stored)
   })
   formValues.forEach((value) => {
     if (
-      value.meta?.address &&
-      !storedValues.find(
-        (stored) => value.meta?.address === stored.meta?.address && value.meta?.location === stored.meta?.location
-      )
+      value?.address &&
+      !storedValues.find((stored) => value?.address === stored?.address && value?.location === stored?.location)
     )
       add.push(value)
   })
