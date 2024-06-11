@@ -266,7 +266,7 @@ function IssuerCreateLoan() {
           priceId:
             values.pricing.oracleSource === 'isin'
               ? { isin: values.pricing.isin }
-              : ([pid, loanId.toString()] satisfies [string, string]),
+              : { poolLoanId: [pid, loanId.toString()] satisfies [string, string] },
           maturityDate: new Date(values.pricing.maturityDate),
           interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),

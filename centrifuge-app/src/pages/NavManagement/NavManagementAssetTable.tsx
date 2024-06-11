@@ -1,6 +1,6 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Drawer, IconDownload, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Drawer, IconDownload, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import daiLogo from '../../assets/images/dai-logo.svg'
@@ -47,6 +47,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     () => (allLoans?.filter((l) => isExternalLoan(l) && l.status !== 'Closed') as ExternalLoan[]) ?? [],
     [allLoans]
   )
+
   const cashLoans =
     (allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') as (CreatedLoan | ActiveLoan)[]) ?? []
   const api = useCentrifugeApi()
@@ -98,7 +99,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             id: l.id,
             oldValue: latestOraclePrice.value.toFloat(),
             value: '' as const,
-            isin: Array.isArray(l.pricing.priceId) ? '' : l.pricing.priceId.isin,
+            isin: 'isin' in l.pricing.priceId ? l.pricing.priceId.isin : '',
             quantity: l.pricing.outstandingQuantity.toFloat(),
             maturity: formatDate(l.pricing.maturityDate),
             withLinearPricing: l.pricing.withLinearPricing,
@@ -149,7 +150,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               <Thumbnail type="asset" label={row.id} />
             )}
             <Text variant="body2" fontWeight={600}>
-              {row.isin}
+              {row.isin || row.id}
             </Text>
           </Shelf>
         ) : (
@@ -179,20 +180,20 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       align: 'right',
       header: 'Asset price',
       cell: (row: Row) =>
-        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.symbol, 8) : '',
+        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.displayName, 8) : '',
     },
     {
       align: 'right',
       header: 'New price',
       cell: (row: Row) => {
-        return 'oldValue' in row && row.id !== 'reserve' ? (
+        return 'oldValue' in row && row.id !== 'reserve' && isEditing ? (
           <Field name={`feed.${row.formIndex}.value`} validate={settlementPrice()}>
             {({ field, meta, form }: FieldProps) => (
               <CurrencyInput
                 {...field}
                 placeholder={row.oldValue.toString()}
                 errorMessage={meta.touched ? meta.error : undefined}
-                currency={pool?.currency.symbol}
+                currency={pool?.currency.displayName}
                 onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
                 value={row.currentPrice}
                 onClick={(e) => e.preventDefault()}
@@ -215,11 +216,11 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   ]
 
   if (!isEditing) {
-    columns.splice(4, 1)
+    columns.splice(5, 1)
   }
 
   return (
-    <>
+    <Stack pb={8}>
       <FormikProvider value={form}>
         <Drawer isOpen={isConfirming} onClose={() => setIsConfirming(false)}>
           <ButtonGroup>
@@ -283,6 +284,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 <DataCol />
                 <DataCol />
                 <DataCol />
+                <DataCol />
                 {isEditing && <DataCol />}
                 <DataCol>
                   <Text color="accentPrimary" variant="body2">
@@ -294,6 +296,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           />
         </LayoutSection>
       </FormikProvider>
-    </>
+    </Stack>
   )
 }

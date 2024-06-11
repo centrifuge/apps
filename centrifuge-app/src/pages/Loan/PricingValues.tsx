@@ -39,7 +39,7 @@ export function PricingValues({ loan, pool }: Props) {
 
     return (
       <>
-        {!Array.isArray(pricing.priceId) && <LabelValueStack label="ISIN" value={pricing.priceId.isin} />}
+        {'isin' in pricing.priceId && <LabelValueStack label="ISIN" value={pricing.priceId.isin} />}
         <LabelValueStack
           label={`Latest price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`}
           value={latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-'}

@@ -118,7 +118,7 @@ export type LoanInfoInput =
       valuationMethod: 'oracle'
       maxBorrowAmount: BN | null
       maxPriceVariation: BN
-      priceId: { isin: string } | [string, string]
+      priceId: { isin: string } | { poolLoanId: [string, string] }
       maturityDate: Date
       interestRate: BN
       notional: BN
@@ -154,7 +154,7 @@ export type LoanInfoData = {
   pricing:
     | {
         external: {
-          priceId: { isin: string } | [string, string]
+          priceId: { isin: string } | { poolLoanId: [string, string] }
           maxBorrowAmount: { noLimit: null } | { quantity: string }
           notional: string
           maxPriceVariation: string
@@ -204,9 +204,7 @@ export type ActiveLoanInfoData = {
     | {
         external: {
           info: {
-            priceId: {
-              isin: string
-            }
+            priceId: { isin: string } | { poolLoanId: [string, string] }
             maxBorrowAmount: { noLimit: null } | { quantity: string }
             notional: string
             maxPriceVariation: string
@@ -427,7 +425,7 @@ export type ExternalPricingInfo = {
   maxBorrowAmount: CurrencyBalance | null
   maxPriceVariation: Rate
   outstandingQuantity: CurrencyBalance
-  priceId: { isin: string } | [string, string]
+  priceId: { isin: string } | { poolLoanId: [string, string] }
   maturityDate: string
   maturityExtensionDays: number
   oracle: {
@@ -3482,7 +3480,9 @@ export function getPoolsModule(inst: Centrifuge) {
                     maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
                     maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
                     oracle: oraclePrices[
-                      Array.isArray(pricingInfo.priceId) ? pricingInfo.priceId.join('-') : pricingInfo.priceId?.isin
+                      'isin' in pricingInfo.priceId
+                        ? pricingInfo.priceId?.isin
+                        : pricingInfo.priceId?.poolLoanId.join('-')
                     ] || [
                       {
                         value: new CurrencyBalance(0, 18),
