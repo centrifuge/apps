@@ -72,7 +72,10 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       const batch = [
         ...values.feed
           .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
-          .map((f) => api.tx.oraclePriceFeed.feed({ Isin: f.isin }, CurrencyBalance.fromFloat(f.value, 18))),
+          .map((f) => {
+            const feed = f.isin ? { Isin: f.isin } : { poolloanid: [poolId, f.id] }
+            return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
+          }),
         api.tx.oraclePriceCollection.updateCollection(poolId),
         api.tx.loans.updatePortfolioValuation(poolId),
       ]
@@ -98,7 +101,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             formIndex: i,
             id: l.id,
             oldValue: latestOraclePrice.value.toFloat(),
-            value: '' as const,
+            value: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
             isin: 'isin' in l.pricing.priceId ? l.pricing.priceId.isin : '',
             quantity: l.pricing.outstandingQuantity.toFloat(),
             maturity: formatDate(l.pricing.maturityDate),
@@ -128,7 +131,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
 
   const poolReserve = pool?.reserve.total.toDecimal().toNumber() || 0
   const newNavExternal = form.values.feed.reduce(
-    (acc, cur) => acc + cur.quantity * (isEditing ? cur.currentPrice : cur.value || cur.oldValue),
+    (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
     0
   )
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
@@ -195,7 +198,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 errorMessage={meta.touched ? meta.error : undefined}
                 currency={pool?.currency.displayName}
                 onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
-                value={row.currentPrice}
+                value={field.value}
                 onClick={(e) => e.preventDefault()}
               />
             )}
@@ -208,10 +211,15 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     {
       align: 'right',
       header: 'Value',
-      cell: (row: Row) =>
-        'oldValue' in row
-          ? formatBalance(row.quantity * (row.value || row.oldValue), pool?.currency.symbol)
-          : formatBalance(row.outstandingDebt, pool?.currency.symbol),
+      cell: (row: Row) => {
+        const newValue =
+          'value' in row && !Number.isNaN(row.value) && typeof row.value === 'number' && isEditing
+            ? row.value
+            : undefined
+        return 'oldValue' in row
+          ? formatBalance(row.quantity * (newValue ?? row.oldValue), pool?.currency.symbol)
+          : formatBalance(row.outstandingDebt, pool?.currency.symbol)
+      },
     },
   ]
 
