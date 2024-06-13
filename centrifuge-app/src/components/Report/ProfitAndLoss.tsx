@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
@@ -236,7 +237,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
   const profitAndLossRecords =
     poolMetadata?.pool?.asset.class === 'Private credit' ? profitAndLossPrivateRecords : profitAndLossPublicRecords
 
-  const feesRecords: Row[] = React.useMemo(() => {
+  const feesRecords = React.useMemo(() => {
     return [
       {
         name: 'Expenses',
@@ -244,19 +245,38 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         heading: false,
         bold: true,
       },
-      {
-        name: 'Accrued fees',
-        // TODO:
-        value:
-          poolStates?.map(({ poolState }) =>
-            poolState.sumPoolFeesChargedAmountByPeriod
-              .toDecimal()
-              .add(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
-          ) || [],
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
-      },
+      ...(poolFeeStates
+        ?.map((poolFeeStateByPeriod) => {
+          return Object.values(poolFeeStateByPeriod)
+            ?.map((feeState) => {
+              // some fee data may be incomplete since fees may have been added sometime after pool creation
+              // this fill the nonexistant fee data with zero values
+              let missingStates: { timestamp: string; sumAccruedAmount: CurrencyBalance }[] = []
+              if (feeState.length !== poolStates?.length) {
+                const missingTimestamps = poolStates
+                  ?.map((state) => state.timestamp)
+                  .filter((timestamp) => {
+                    return !feeState.find((state) => state.timestamp === timestamp)
+                  })
+                missingStates =
+                  missingTimestamps?.map((timestamp) => {
+                    return {
+                      timestamp,
+                      sumAccruedAmount: CurrencyBalance.fromFloat(0, pool.currency.decimals),
+                    }
+                  }) || []
+              }
+              return {
+                name: feeState[0].poolFee.name,
+                value: [...missingStates, ...feeState].map((state) => state.sumAccruedAmount.toDecimal()),
+                formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+              }
+            })
+            .flat()
+        })
+        .flat() || []),
     ]
-  }, [poolStates, pool])
+  }, [poolStates, pool, poolFeeStates])
 
   const totalProfitRecords: Row[] = React.useMemo(() => {
     return [
