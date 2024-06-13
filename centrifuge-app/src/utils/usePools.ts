@@ -47,7 +47,7 @@ export function usePoolStatesByGroup(
   groupBy?: 'day' | 'month' | 'quarter' | 'year'
 ) {
   const [result] = useCentrifugeQuery(
-    ['oolStatesByGroup', poolId, from, to, groupBy],
+    ['poolStatesByGroup', poolId, from, to, groupBy],
     (cent) => cent.pools.getPoolStatesByGroup([poolId, from, to], groupBy),
     {
       suspense: true,
