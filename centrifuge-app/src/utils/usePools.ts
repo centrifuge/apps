@@ -47,7 +47,7 @@ export function usePoolStatesByGroup(
   groupBy?: 'day' | 'month' | 'quarter' | 'year'
 ) {
   const [result] = useCentrifugeQuery(
-    ['monthlyPoolStates', poolId, from, to, groupBy],
+    ['oolStatesByGroup', poolId, from, to, groupBy],
     (cent) => cent.pools.getPoolStatesByGroup([poolId, from, to], groupBy),
     {
       suspense: true,
@@ -66,6 +66,40 @@ export function useAggregatedPoolStatesByGroup(
   const [result] = useCentrifugeQuery(
     ['aggregatedPoolStates', poolId, from, to, groupBy],
     (cent) => cent.pools.getAggregatedPoolStatesByGroup([poolId, from, to], groupBy),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
+export function usePoolFeeStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
+) {
+  const [result] = useCentrifugeQuery(
+    ['feeStatesByGroup', poolId, from, to, groupBy],
+    (cent) => cent.pools.getPoolFeeStatesByGroup([poolId, from, to], groupBy),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
+export function useAggregatedPoolFeeStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
+) {
+  const [result] = useCentrifugeQuery(
+    ['aggregatedPoolFeeStates', poolId, from, to, groupBy],
+    (cent) => cent.pools.getAggregatedPoolFeeStatesByGroup([poolId, from, to], groupBy),
     {
       suspense: true,
     }

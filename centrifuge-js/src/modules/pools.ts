@@ -20,6 +20,7 @@ import {
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
   SubqueryOracleTransaction,
+  SubqueryPoolFeeSnapshot,
   SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
@@ -568,6 +569,16 @@ export type DailyTrancheState = {
   yield90DaysAnnualized: Perquintill
   yieldSinceInception: Perquintill
   yieldSinceLastPeriod: Perquintill
+}
+
+export type DailyPoolFeesState = {
+  pendingAmount: CurrencyBalance
+  poolFee: { name: string }
+  poolFeeId: string
+  sumAccruedAmount: CurrencyBalance
+  sumChargedAmount: CurrencyBalance
+  sumPaidAmount: CurrencyBalance
+  timestamp: string
 }
 
 export type DailyPoolState = {
@@ -2615,6 +2626,146 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getDailyPoolFeeStates(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+    return inst
+      .getSubqueryObservable<{
+        poolFeeSnapshots: { nodes: SubqueryPoolFeeSnapshot[] }
+      }>(
+        `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        poolFeeSnapshots(
+          orderBy: BLOCK_NUMBER_ASC, 
+          filter: {
+            poolFeeId: { includes: $poolId }, 
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }
+        ) {
+          nodes {
+            id
+            poolFeeId
+            timestamp
+            sumPaidAmount
+            sumChargedAmount
+            sumAccruedAmount
+            sumPaidAmount
+            pendingAmount
+            poolFee {
+              name
+            }
+          }
+        }
+      }
+    `,
+        {
+          poolId,
+          from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+          to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        }
+      )
+      .pipe(
+        map((response) => {
+          const poolFeeSnapshots = response?.poolFeeSnapshots || { nodes: [] }
+          const poolFeesGroupedByFeeId = poolFeeSnapshots?.nodes.reduce((acc, snapshot) => {
+            const feeId = snapshot.poolFeeId.split('-')[1]
+            if (!acc[feeId]) {
+              acc[feeId] = []
+            }
+            acc[feeId].push(snapshot)
+            return acc
+          }, {} as { [feeId: string]: SubqueryPoolFeeSnapshot[] })
+          return poolFeesGroupedByFeeId
+        }),
+        combineLatestWith(getPoolCurrency([poolId])),
+        map(([poolFeesGroupedByFeeId, poolCurrency]) => {
+          const poolFeeStates: Record<string, DailyPoolFeesState[]> = {}
+          Object.entries(poolFeesGroupedByFeeId).forEach(([feeId, snapshots]) => {
+            poolFeeStates[feeId] = snapshots.map((snapshot) => {
+              return {
+                timestamp: snapshot.timestamp,
+                pendingAmount: new CurrencyBalance(hexToBN(snapshot.pendingAmount), poolCurrency.decimals),
+                poolFee: {
+                  name: snapshot.poolFee.name,
+                },
+                poolFeeId: snapshot.poolFeeId,
+                sumAccruedAmount: new CurrencyBalance(hexToBN(snapshot.sumAccruedAmount), poolCurrency.decimals),
+                sumChargedAmount: new CurrencyBalance(hexToBN(snapshot.sumChargedAmount), poolCurrency.decimals),
+                sumPaidAmount: new CurrencyBalance(hexToBN(snapshot.sumPaidAmount), poolCurrency.decimals),
+              }
+            })
+          })
+          return poolFeeStates
+        })
+      )
+  }
+
+  function getPoolFeeStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
+    return getDailyPoolFeeStates(args).pipe(
+      map((poolFees) => {
+        return Object.entries(poolFees).map(([feeId, feeStates]) => {
+          if (!feeStates.length) return []
+          const poolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+
+          feeStates.forEach((feeState) => {
+            const date = new Date(feeState.timestamp)
+            const period = getGroupByPeriod(date, groupBy)
+            if (!poolStatesByGroup[period] || new Date(poolStatesByGroup[period].timestamp) < date) {
+              poolStatesByGroup[period] = feeState
+            }
+          })
+
+          return { [feeId]: Object.values(poolStatesByGroup) }
+        })
+      })
+    )
+  }
+
+  function getAggregatedPoolFeeStatesByGroup(
+    args: [poolId: string, from?: Date, to?: Date],
+    groupBy: GroupBy = 'month'
+  ) {
+    return combineLatest([getDailyPoolFeeStates(args), getPoolCurrency([args[0]])]).pipe(
+      map(([poolFeeStates, poolCurrency]) => {
+        return Object.entries(poolFeeStates).map(([feeId, feeStates]) => {
+          if (!feeStates.length) return []
+          const feeStatesByGroup: { [period: string]: DailyPoolFeesState[] } = {}
+
+          feeStates.forEach((poolState) => {
+            const date = new Date(poolState.timestamp)
+            const period = getGroupByPeriod(date, groupBy)
+            if (!feeStatesByGroup[period]) {
+              feeStatesByGroup[period] = []
+            }
+
+            feeStatesByGroup[period].push(poolState)
+          })
+
+          const aggregatedPoolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+
+          for (const period in feeStatesByGroup) {
+            const feeStates = feeStatesByGroup[period]
+
+            const feeStateKeys = Object.keys(feeStates.map((fee) => fee)[0]).filter(
+              (key) => key !== 'poolFeeId' && key !== 'poolFee' && key !== 'timestamp'
+            ) as Array<keyof DailyPoolFeesState>
+
+            const aggregates = feeStateKeys.reduce((total, key) => {
+              const sum = feeStates.reduce((sum, feeState) => sum.add(Dec(feeState[key].toDecimal())), Dec(0))
+              return { [key]: CurrencyBalance.fromFloat(sum.toString(), poolCurrency.decimals), ...total }
+            }, {} as Record<keyof DailyPoolFeesState, any>)
+
+            aggregatedPoolStatesByGroup[period] = {
+              ...aggregates,
+              timestamp: feeStates.reverse()[0].timestamp,
+              poolFee: { name: feeStates.reverse()[0].poolFee.name },
+            }
+          }
+
+          return { [feeId]: Object.values(aggregatedPoolStatesByGroup) }
+        })
+      })
+    )
+  }
+
   function getAggregatedPoolStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
     return combineLatest([getDailyPoolStates(args), getPoolCurrency([args[0]])]).pipe(
       map(([{ poolStates }, poolCurrency]) => {
@@ -4075,6 +4226,8 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyPoolStates,
     getPoolStatesByGroup,
     getAggregatedPoolStatesByGroup,
+    getAggregatedPoolFeeStatesByGroup,
+    getPoolFeeStatesByGroup,
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,

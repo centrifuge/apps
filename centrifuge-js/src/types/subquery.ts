@@ -235,3 +235,16 @@ export type SubqueryEpoch = {
   sumInvestedAmount: number | null
   sumRedeemedAmount: number | null
 }
+
+// incomplete types
+export type SubqueryPoolFeeSnapshot = {
+  poolFeeId: string // poolId-feeId
+  timestamp: string
+  sumPaidAmount: string
+  sumChargedAmount: string
+  sumAccruedAmount: string
+  pendingAmount: string
+  poolFee: {
+    name: string
+  }
+}

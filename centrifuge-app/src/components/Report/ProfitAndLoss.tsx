@@ -4,7 +4,11 @@ import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useAggregatedPoolStatesByGroup, usePoolMetadata } from '../../utils/usePools'
+import {
+  useAggregatedPoolFeeStatesByGroup,
+  useAggregatedPoolStatesByGroup,
+  usePoolMetadata,
+} from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
@@ -52,6 +56,13 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
   }, [groupBy, startDate, endDate])
 
   const poolStates = useAggregatedPoolStatesByGroup(
+    pool.id,
+    adjustedStartDate,
+    adjustedEndDate,
+    groupBy === 'daily' ? 'day' : groupBy
+  )
+
+  const poolFeeStates = useAggregatedPoolFeeStatesByGroup(
     pool.id,
     adjustedStartDate,
     adjustedEndDate,
