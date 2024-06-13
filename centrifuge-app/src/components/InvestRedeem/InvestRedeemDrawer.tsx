@@ -23,16 +23,18 @@ export function InvestRedeemDrawer({
       <LoadBoundary>
         <InvestRedeem poolId={poolId} trancheId={trancheId} defaultView={defaultView} />
       </LoadBoundary>
-      <LoadBoundary>
-        <Stack gap={12}>
-          <Text variant="heading6" color="textPrimary" fontWeight={600}>
-            Price
-          </Text>
-          <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
-            <TokenPriceChart poolId={poolId} trancheId={trancheId} />
-          </Box>
-        </Stack>
-      </LoadBoundary>
+      {!poolId.startsWith('0x') && (
+        <LoadBoundary>
+          <Stack gap={12}>
+            <Text variant="heading6" color="textPrimary" fontWeight={600}>
+              Price
+            </Text>
+            <Box borderColor="rgba(0,0,0,0.08)" borderWidth="1px" borderStyle="solid" borderRadius="2px" p="6px">
+              <TokenPriceChart poolId={poolId} trancheId={trancheId} />
+            </Box>
+          </Stack>
+        </LoadBoundary>
+      )}
     </Drawer>
   )
 }

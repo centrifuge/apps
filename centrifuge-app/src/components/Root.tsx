@@ -91,15 +91,15 @@ export function Root() {
                 <SupportedBrowserBanner />
                 <OnboardingAuthProvider>
                   <OnboardingProvider>
-                    <DebugFlags onChange={(state) => setDebugState(state)}>
-                      <ExpiringCFGRewardsBanner />
-                      <TransactionProvider>
-                        <TransactionToasts />
+                    <TransactionProvider>
+                      <TransactionToasts />
+                      <DebugFlags onChange={(state) => setDebugState(state)}>
+                        <ExpiringCFGRewardsBanner />
                         <LoadBoundary>
                           <Routes />
                         </LoadBoundary>
-                      </TransactionProvider>
-                    </DebugFlags>
+                      </DebugFlags>
+                    </TransactionProvider>
                   </OnboardingProvider>
                 </OnboardingAuthProvider>
               </WalletProvider>

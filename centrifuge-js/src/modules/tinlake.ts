@@ -5,7 +5,7 @@ import { from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { CurrencyBalance } from '../utils/BN'
-import { calculateOptimalSolution, Orders, State } from '../utils/solver/tinlakeSolver'
+import { Orders, State, calculateOptimalSolution } from '../utils/solver/tinlakeSolver'
 import { abis } from './tinlake/abi'
 
 const contracts: Record<string, Contract> = {}
@@ -338,7 +338,7 @@ export function getTinlakeModule(inst: Centrifuge) {
   }
 
   async function getLatestBlockTimestamp() {
-    const { provider } = inst.config.evmSigner!
+    const provider = inst.config.evmSigner!.provider!
     const latestBlock = await provider.getBlock(await provider.getBlockNumber())
     if (!latestBlock) return new Date().getTime()
     return latestBlock.timestamp

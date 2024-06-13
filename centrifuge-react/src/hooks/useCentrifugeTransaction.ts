@@ -4,7 +4,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import * as React from 'react'
 import { Observable, lastValueFrom } from 'rxjs'
-import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useCentrifuge, useCentrifugeApi } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/Transactions'
 import {
   CombinedSubstrateAccount,
@@ -33,6 +33,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   const provider = useEvmProvider()
   const { selectedCombinedAccount, selectedAccount } = substrate
   const cent = useCentrifuge()
+  const api = useCentrifugeApi()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
   const pendingTransaction = React.useRef<{ id: string; args: T; options?: CentrifugeTransactionOptions }>()
@@ -57,7 +58,6 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       } else {
         connectedCent = cent.connect(account.signingAccount?.address, account.signingAccount?.signer as any)
       }
-      const api = await cent.getApiPromise()
 
       const transaction = transactionCallback(connectedCent)
 
@@ -191,7 +191,7 @@ function isSubstrateResult(data: any): data is ISubmittableResult {
 export function wrapProxyCallsForAccount(
   api: ApiRx,
   tx: SubmittableExtrinsic<'rxjs'>,
-  account: CombinedSubstrateAccount,
+  account: Pick<CombinedSubstrateAccount, 'proxies'>,
   forceProxyType: string | string[] | undefined
 ) {
   return wrapProxyCalls(api, tx, getTypePerProxyCall(account.proxies || [], forceProxyType))

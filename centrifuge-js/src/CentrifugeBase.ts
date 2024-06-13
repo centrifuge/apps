@@ -1,4 +1,5 @@
-import type { JsonRpcSigner, TransactionRequest } from '@ethersproject/providers'
+import type { Signer as EvmSigner } from '@ethersproject/abstract-signer'
+import type { TransactionRequest } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
@@ -51,7 +52,7 @@ export type Config = {
   pinJson?: (json: string) => Promise<{ uri: string }>
   signer?: Signer
   signingAddress?: AddressOrPair
-  evmSigner?: JsonRpcSigner
+  evmSigner?: EvmSigner
   evmSigningAddress?: string
   printExtrinsics?: boolean
   proxies?: ([delegator: string, forceProxyType?: ProxyType] | string)[]

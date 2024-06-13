@@ -1,6 +1,7 @@
+import type { Provider } from '@ethersproject/abstract-provider'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract, ContractInterface } from '@ethersproject/contracts'
-import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
+import type { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
@@ -15,7 +16,7 @@ const PERMIT_TYPEHASH = '0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c6
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 type EvmQueryOptions = {
-  rpcProvider?: JsonRpcProvider
+  rpcProvider?: Provider
 }
 
 export type Permit = {
