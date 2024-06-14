@@ -44,6 +44,8 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
 
     const days = Math.floor((maturity.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)) + 2
 
+    // TODO: future prices should only be calculated if either the valuation method is
+    // outstanding debt or DCF, or the oracle asset has withLinearPricing enabled
     const priceToday = assetSnapshots[assetSnapshots.length - 1].presentValue?.toFloat()
     const priceAtMaturity =
       asset.pricing && 'outstandingQuantity' in asset.pricing
