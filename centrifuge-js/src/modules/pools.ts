@@ -2757,13 +2757,12 @@ export function getPoolsModule(inst: Centrifuge) {
 
             const aggregates = feeStateKeys.reduce((total, key) => {
               const sum = feeStates.reduce((sum, feeState) => {
-                console.log('🚀 ~ key:', key, feeState.poolFeeId, Dec(feeState[key].toDecimal()).toString())
-                // @ts-expect-error ts unable to properly coerce type of key
-                // anything not of type CurrencyBalance has been filtered out already
-                return sum.add(Dec(feeState[key].toDecimal()))
+                return sum.add(Dec((feeState[key as keyof DailyPoolFeesState] as CurrencyBalance).toDecimal()))
               }, Dec(0))
-              // @ts-expect-error
-              return { [key]: CurrencyBalance.fromFloat(sum.toString(), poolCurrency.decimals), ...total }
+              return {
+                [key as keyof DailyPoolFeesState]: CurrencyBalance.fromFloat(sum.toString(), poolCurrency.decimals),
+                ...total,
+              }
             }, {} as Record<keyof DailyPoolFeesState, any>)
 
             aggregatedPoolStatesByGroup[period] = {
