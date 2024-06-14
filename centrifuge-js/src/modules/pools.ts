@@ -2685,31 +2685,20 @@ export function getPoolsModule(inst: Centrifuge) {
         map(([poolFeesGroupedByFeeId, poolCurrency]) => {
           const poolFeeStates: Record<string, DailyPoolFeesState[]> = {}
           Object.entries(poolFeesGroupedByFeeId).forEach(([feeId, snapshots]) => {
-            poolFeeStates[feeId] = snapshots.map((snapshot) => {
-              return {
-                timestamp: snapshot.timestamp,
-                pendingAmount: new CurrencyBalance(hexToBN(snapshot.pendingAmount), poolCurrency.decimals),
-                poolFee: {
-                  name: snapshot.poolFee.name,
-                },
-                poolFeeId: snapshot.poolFeeId,
-                sumAccruedAmount: new CurrencyBalance(hexToBN(snapshot.sumAccruedAmount), poolCurrency.decimals),
-                sumChargedAmount: new CurrencyBalance(hexToBN(snapshot.sumChargedAmount), poolCurrency.decimals),
-                sumPaidAmount: new CurrencyBalance(hexToBN(snapshot.sumPaidAmount), poolCurrency.decimals),
-                sumAccruedAmountByPeriod: new CurrencyBalance(
-                  hexToBN(snapshot.sumAccruedAmountByPeriod),
-                  poolCurrency.decimals
-                ),
-                sumChargedAmountByPeriod: new CurrencyBalance(
-                  hexToBN(snapshot.sumChargedAmountByPeriod),
-                  poolCurrency.decimals
-                ),
-                sumPaidAmountByPeriod: new CurrencyBalance(
-                  hexToBN(snapshot.sumPaidAmountByPeriod),
-                  poolCurrency.decimals
-                ),
-              }
-            })
+            poolFeeStates[feeId] = snapshots.map((snapshot) => ({
+              timestamp: snapshot.timestamp,
+              pendingAmount: new CurrencyBalance(snapshot.pendingAmount, poolCurrency.decimals),
+              poolFee: {
+                name: snapshot.poolFee.name,
+              },
+              poolFeeId: snapshot.poolFeeId,
+              sumAccruedAmount: new CurrencyBalance(snapshot.sumAccruedAmount, poolCurrency.decimals),
+              sumChargedAmount: new CurrencyBalance(snapshot.sumChargedAmount, poolCurrency.decimals),
+              sumPaidAmount: new CurrencyBalance(snapshot.sumPaidAmount, poolCurrency.decimals),
+              sumAccruedAmountByPeriod: new CurrencyBalance(snapshot.sumAccruedAmountByPeriod, poolCurrency.decimals),
+              sumChargedAmountByPeriod: new CurrencyBalance(snapshot.sumChargedAmountByPeriod, poolCurrency.decimals),
+              sumPaidAmountByPeriod: new CurrencyBalance(snapshot.sumPaidAmountByPeriod, poolCurrency.decimals),
+            }))
           })
           return poolFeeStates
         })
@@ -2767,9 +2756,12 @@ export function getPoolsModule(inst: Centrifuge) {
             ) as Omit<keyof DailyPoolFeesState, 'poolFee' | 'poolFeeId' | 'timestamp'>[]
 
             const aggregates = feeStateKeys.reduce((total, key) => {
-              // @ts-expect-error ts unable to properly coerce type of key
-              // anything not of type CurrencyBalance has been filtered out already
-              const sum = feeStates.reduce((sum, feeState) => sum.add(Dec(feeState[key].toDecimal())), Dec(0))
+              const sum = feeStates.reduce((sum, feeState) => {
+                console.log('🚀 ~ key:', key, feeState.poolFeeId, Dec(feeState[key].toDecimal()).toString())
+                // @ts-expect-error ts unable to properly coerce type of key
+                // anything not of type CurrencyBalance has been filtered out already
+                return sum.add(Dec(feeState[key].toDecimal()))
+              }, Dec(0))
               // @ts-expect-error
               return { [key]: CurrencyBalance.fromFloat(sum.toString(), poolCurrency.decimals), ...total }
             }, {} as Record<keyof DailyPoolFeesState, any>)

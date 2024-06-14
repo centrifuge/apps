@@ -259,9 +259,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
               if (feeState.length !== poolStates?.length) {
                 const missingTimestamps = poolStates
                   ?.map((state) => state.timestamp)
-                  .filter((timestamp) => {
-                    return !feeState.find((state) => state.timestamp === timestamp)
-                  })
+                  .filter((timestamp) => !feeState.find((state) => state.timestamp === timestamp))
                 missingStates =
                   missingTimestamps?.map((timestamp) => {
                     return {
