@@ -34,8 +34,9 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
       })
       .map((day) => {
         const presentValue = day.presentValue?.toDecimal().toNumber() || 0
+        const price = day.currentPrice?.toDecimal().toNumber() || null
 
-        return { day: new Date(day.timestamp), historic: presentValue, future: null }
+        return { day: new Date(day.timestamp), historic: presentValue, future: null, price }
       })
 
     const today = new Date()
@@ -105,12 +106,20 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
                       <TooltipContainer>
                         <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
                         {payload.map(({ value }, index) => (
-                          <Shelf justifyContent="space-between" pl="4px" key={index}>
-                            <Text variant="label2">{payload[0].payload.historic ? 'Value' : 'Expected value'}</Text>
-                            <Text variant="label2">
-                              {typeof value === 'number' ? formatBalance(value, 'USD' || '') : '-'}
-                            </Text>
-                          </Shelf>
+                          <>
+                            <Shelf justifyContent="space-between" pl="4px" key={index}>
+                              <Text variant="label2">{payload[0].payload.historic ? 'Value' : 'Expected value'}</Text>
+                              <Text variant="label2">
+                                {typeof value === 'number' ? formatBalance(value, 'USD' || '') : '-'}
+                              </Text>
+                            </Shelf>
+                            {payload[0].payload.price && (
+                              <Shelf justifyContent="space-between" pl="4px" key={index}>
+                                <Text variant="label2">{'Price'}</Text>
+                                <Text variant="label2">{formatBalance(payload[0].payload.price, 'USD' || '', 6)}</Text>
+                              </Shelf>
+                            )}
+                          </>
                         ))}
                       </TooltipContainer>
                     )
