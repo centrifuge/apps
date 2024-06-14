@@ -1,6 +1,6 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
@@ -53,10 +53,6 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
 
   const chartData = data.slice(-rangeNumber)
 
-  const today = {
-    presentValue: 0,
-  }
-
   const getXAxisInterval = () => {
     if (rangeNumber <= 30) return 5
     if (rangeNumber > 30 && rangeNumber <= 90) {
@@ -96,7 +92,7 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
       <Shelf gap={4} width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <AreaChart data={chartData} margin={{ left: -36 }}>
+            <LineChart data={chartData} margin={{ left: -36 }}>
               <defs>
                 <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={chartColor} stopOpacity={0.4} />
@@ -144,14 +140,8 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
                   return null
                 }}
               />
-              <Area
-                type="monotone"
-                dataKey="presentValue"
-                strokeWidth={0}
-                fillOpacity={1}
-                fill="url(#colorPoolValue)"
-              />
-            </AreaChart>
+              <Line type="monotone" dataKey="presentValue" stroke="#1253FF" strokeWidth={2} dot={false} />
+            </LineChart>
           </ResponsiveContainer>
         ) : (
           <Text variant="label1">No data yet</Text>
