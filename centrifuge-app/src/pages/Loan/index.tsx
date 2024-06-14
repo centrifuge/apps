@@ -375,7 +375,7 @@ function Loan() {
                 title={
                   <Box>
                     {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
-                      ? 'Asset value'
+                      ? 'Asset performance'
                       : 'Cash balance'}
                   </Box>
                 }
