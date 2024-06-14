@@ -371,7 +371,15 @@ function Loan() {
             ) : null}
 
             {assetSnapshots && (
-              <PageSection title={<Box>Asset value</Box>}>
+              <PageSection
+                title={
+                  <Box>
+                    {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
+                      ? 'Asset value'
+                      : 'Cash balance'}
+                  </Box>
+                }
+              >
                 <Grid
                   height="fit-content"
                   gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']}

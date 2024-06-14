@@ -10,8 +10,8 @@ import { TooltipContainer, TooltipTitle } from './Tooltip'
 
 type ChartData = {
   day: Date
-  historic?: number
-  future?: number
+  historic: number | null
+  future: number | null
 }
 
 interface Props {
