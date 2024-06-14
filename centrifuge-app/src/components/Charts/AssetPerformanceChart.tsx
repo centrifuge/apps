@@ -63,7 +63,7 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
       ...Array.from({ length: days }, (_, index) => {
         const newDate = new Date(today)
         newDate.setDate(today.getDate() + index)
-        return { day: newDate, historic: null, future: priceToday + deltaPerDay * (index + 1) }
+        return { day: newDate, historic: null, future: priceToday + deltaPerDay * (index + 1), price: null }
       }),
     ]
   }, [asset, assetSnapshots])
