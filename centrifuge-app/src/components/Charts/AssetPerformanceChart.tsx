@@ -167,7 +167,9 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
                             <Shelf justifyContent="space-between" pl="4px" key={index}>
                               <Text variant="label2">{payload[0].payload.historic ? 'Value' : 'Expected value'}</Text>
                               <Text variant="label2">
-                                {typeof value === 'number' ? formatBalance(value, 'USD' || '') : '-'}
+                                {payload[0].payload.historic
+                                  ? formatBalance(payload[0].payload.historic, 'USD' || '', 2)
+                                  : formatBalance(payload[0].payload.future, 'USD' || '', 2)}
                               </Text>
                             </Shelf>
                             {payload[0].payload.price && (
