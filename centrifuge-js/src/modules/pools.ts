@@ -578,6 +578,9 @@ export type DailyPoolFeesState = {
   sumAccruedAmount: CurrencyBalance
   sumChargedAmount: CurrencyBalance
   sumPaidAmount: CurrencyBalance
+  sumAccruedAmountByPeriod: CurrencyBalance
+  sumChargedAmountByPeriod: CurrencyBalance
+  sumPaidAmountByPeriod: CurrencyBalance
   timestamp: string
 }
 
@@ -2649,6 +2652,9 @@ export function getPoolsModule(inst: Centrifuge) {
             sumAccruedAmount
             sumPaidAmount
             pendingAmount
+            sumAccruedAmountByPeriod
+            sumPaidAmountByPeriod
+            sumChargedAmountByPeriod
             poolFee {
               name
             }
@@ -2690,6 +2696,18 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumAccruedAmount: new CurrencyBalance(hexToBN(snapshot.sumAccruedAmount), poolCurrency.decimals),
                 sumChargedAmount: new CurrencyBalance(hexToBN(snapshot.sumChargedAmount), poolCurrency.decimals),
                 sumPaidAmount: new CurrencyBalance(hexToBN(snapshot.sumPaidAmount), poolCurrency.decimals),
+                sumAccruedAmountByPeriod: new CurrencyBalance(
+                  hexToBN(snapshot.sumAccruedAmountByPeriod),
+                  poolCurrency.decimals
+                ),
+                sumChargedAmountByPeriod: new CurrencyBalance(
+                  hexToBN(snapshot.sumChargedAmountByPeriod),
+                  poolCurrency.decimals
+                ),
+                sumPaidAmountByPeriod: new CurrencyBalance(
+                  hexToBN(snapshot.sumPaidAmountByPeriod),
+                  poolCurrency.decimals
+                ),
               }
             })
           })

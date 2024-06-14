@@ -244,6 +244,9 @@ export type SubqueryPoolFeeSnapshot = {
   sumChargedAmount: string
   sumAccruedAmount: string
   pendingAmount: string
+  sumPaidAmountByPeriod: string
+  sumChargedAmountByPeriod: string
+  sumAccruedAmountByPeriod: string
   poolFee: {
     name: string
   }

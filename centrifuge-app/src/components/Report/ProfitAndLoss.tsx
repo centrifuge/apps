@@ -251,7 +251,11 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
             ?.map((feeState) => {
               // some fee data may be incomplete since fees may have been added sometime after pool creation
               // this fill the nonexistant fee data with zero values
-              let missingStates: { timestamp: string; sumAccruedAmount: CurrencyBalance }[] = []
+              let missingStates: {
+                timestamp: string
+                sumAccruedAmountByPeriod: CurrencyBalance
+                sumChargedAmountByPeriod: CurrencyBalance
+              }[] = []
               if (feeState.length !== poolStates?.length) {
                 const missingTimestamps = poolStates
                   ?.map((state) => state.timestamp)
@@ -262,19 +266,34 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
                   missingTimestamps?.map((timestamp) => {
                     return {
                       timestamp,
-                      sumAccruedAmount: CurrencyBalance.fromFloat(0, pool.currency.decimals),
+                      sumAccruedAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
+                      sumChargedAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
                     }
                   }) || []
               }
               return {
                 name: feeState[0].poolFee.name,
-                value: [...missingStates, ...feeState].map((state) => state.sumAccruedAmount.toDecimal()),
+                value: [...missingStates, ...feeState].map((state) =>
+                  state.sumAccruedAmountByPeriod.toDecimal().add(state.sumChargedAmountByPeriod.toDecimal())
+                ),
                 formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
               }
             })
             .flat()
         })
         .flat() || []),
+      {
+        name: 'Total expenses ',
+        value:
+          poolStates?.map(({ poolState }) =>
+            poolState.sumPoolFeesChargedAmountByPeriod
+              .toDecimal()
+              .sub(poolState.sumPoolFeesAccruedAmountByPeriod.toDecimal())
+          ) || [],
+        heading: false,
+        bold: true,
+        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+      },
     ]
   }, [poolStates, pool, poolFeeStates])
 
