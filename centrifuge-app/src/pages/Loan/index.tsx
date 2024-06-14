@@ -12,9 +12,11 @@ import {
   Button,
   Drawer,
   Flex,
+  Grid,
   IconChevronLeft,
   IconDownload,
   Shelf,
+  Spinner,
   Stack,
   Text,
   TextWithPlaceholder,
@@ -25,6 +27,7 @@ import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
+import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutBase } from '../../components/LayoutBase'
@@ -366,6 +369,21 @@ function Loan() {
                 </Shelf>
               </PageSection>
             ) : null}
+
+            {assetSnapshots && (
+              <PageSection title={<Box>Asset value</Box>}>
+                <Grid
+                  height="fit-content"
+                  gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']}
+                  gap={[2, 2, 3]}
+                >
+                  <React.Suspense fallback={<Spinner />}>
+                    <AssetPerformanceChart poolId={poolId} loanId={loanId} />
+                  </React.Suspense>
+                </Grid>
+                <Shelf width="500px" flexWrap="wrap"></Shelf>
+              </PageSection>
+            )}
 
             {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
               <PageSection title={<Box>Holdings</Box>}>
