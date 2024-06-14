@@ -4,6 +4,7 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import styled, { useTheme } from 'styled-components'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { useLoan } from '../../utils/useLoans'
 import { useAssetSnapshots } from '../../utils/usePools'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 import { getRangeNumber } from './utils'
@@ -34,6 +35,7 @@ interface Props {
 function AssetPerformanceChart({ poolId, loanId }: Props) {
   const theme = useTheme()
   const chartColor = theme.colors.accentPrimary
+  const asset = useLoan(poolId, loanId)
   const assetSnapshots = useAssetSnapshots(poolId, loanId)
 
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'all', label: 'All' })
@@ -41,11 +43,15 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
 
   const data: ChartData[] = React.useMemo(
     () =>
-      assetSnapshots?.map((day) => {
-        const presentValue = day.presentValue?.toDecimal().toNumber() || 0
+      assetSnapshots
+        ?.filter((day) => {
+          return asset && day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate).getTime()
+        })
+        .map((day) => {
+          const presentValue = day.presentValue?.toDecimal().toNumber() || 0
 
-        return { day: new Date(day.timestamp), presentValue }
-      }) || [],
+          return { day: new Date(day.timestamp), presentValue }
+        }) || [],
     [assetSnapshots]
   )
 
