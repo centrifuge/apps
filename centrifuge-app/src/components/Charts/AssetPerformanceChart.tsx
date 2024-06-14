@@ -12,6 +12,7 @@ type ChartData = {
   day: Date
   historic: number | null
   future: number | null
+  price: number | null
 }
 
 interface Props {
