@@ -146,6 +146,7 @@ export type SubqueryAssetSnapshot = {
   }
   timestamp: string
   presentValue: string
+  currentPrice: string
   outstandingPrincipal: string
   outstandingInterest: string
   outstandingDebt: string

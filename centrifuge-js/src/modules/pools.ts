@@ -842,6 +842,7 @@ export type AssetSnapshot = {
     type: AssetType
   }
   presentValue: CurrencyBalance | undefined
+  currentPrice: CurrencyBalance | undefined
   outstandingPrincipal: CurrencyBalance | undefined
   outstandingInterest: CurrencyBalance | undefined
   outstandingDebt: CurrencyBalance | undefined
@@ -3166,6 +3167,7 @@ export function getPoolsModule(inst: Centrifuge) {
             assetId
             timestamp
             presentValue
+            currentPrice
             outstandingPrincipal
             outstandingInterest
             outstandingDebt
@@ -3192,6 +3194,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.assetSnapshots.nodes.map((tx) => ({
           ...tx,
           presentValue: tx.presentValue ? new CurrencyBalance(tx.presentValue, currency.decimals) : undefined,
+          currentPrice: tx.currentPrice ? new CurrencyBalance(tx.currentPrice, currency.decimals) : undefined,
           outstandingPrincipal: tx.outstandingPrincipal
             ? new CurrencyBalance(tx.outstandingPrincipal, currency.decimals)
             : undefined,
