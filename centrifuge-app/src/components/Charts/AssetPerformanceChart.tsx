@@ -39,6 +39,7 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
       })
 
     const today = new Date()
+    today.setDate(today.getDate() + 1)
     const maturity = new Date(asset.pricing.maturityDate)
     if (today.getTime() >= maturity.getTime()) return historic
 
@@ -53,14 +54,14 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
         : null
 
     if (!priceAtMaturity || !priceToday) return historic
-    const deltaPerDay = (priceAtMaturity - priceToday) / (days - 1)
+    const deltaPerDay = (priceAtMaturity - priceToday) / days
 
     return [
       ...historic,
       ...Array.from({ length: days }, (_, index) => {
         const newDate = new Date(today)
         newDate.setDate(today.getDate() + index)
-        return { day: newDate, historic: null, future: priceToday + deltaPerDay * index }
+        return { day: newDate, historic: null, future: priceToday + deltaPerDay * (index + 1) }
       }),
     ]
   }, [asset, assetSnapshots])
