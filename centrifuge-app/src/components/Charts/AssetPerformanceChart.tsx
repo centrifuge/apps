@@ -82,13 +82,11 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
                 tickLine={false}
                 type="category"
                 tickFormatter={(tick: number) => {
-                  if (data.length > 180) {
-                    return new Date(tick).toLocaleString('en-US', { month: 'short' })
-                  }
                   return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
                 }}
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
                 dy={4}
+                interval={10}
               />
               <YAxis
                 stroke="none"
