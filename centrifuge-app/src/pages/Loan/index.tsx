@@ -206,17 +206,15 @@ function Loan() {
         pool &&
         (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
           <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
-            {assetSnapshots && (
-              <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
-                <React.Suspense fallback={<Spinner />}>
-                  <AssetPerformanceChart poolId={poolId} loanId={loanId} />
-                </React.Suspense>
-                {}
-                <React.Suspense fallback={<Spinner />}>
-                  <KeyMetrics pool={pool} loan={loan} />
-                </React.Suspense>
-              </Grid>
-            )}
+            <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
+              <React.Suspense fallback={<Spinner />}>
+                <AssetPerformanceChart poolId={poolId} loanId={loanId} />
+              </React.Suspense>
+              {}
+              <React.Suspense fallback={<Spinner />}>
+                <KeyMetrics pool={pool} loan={loan} />
+              </React.Suspense>
+            </Grid>
 
             <Grid height="fit-content" gridTemplateColumns={['1fr', '33fr 33fr 33fr']} gap={[2, 2, 3]}>
               {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (

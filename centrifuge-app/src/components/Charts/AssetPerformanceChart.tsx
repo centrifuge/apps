@@ -103,23 +103,25 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
   }, [asset, assetSnapshots, activeFilter])
 
   const priceRange = React.useMemo(() => {
+    if (!data) return [0, 100]
+
     const min =
       data?.reduce((prev, curr) => {
         const prevPrice = prev.historicPrice || prev.futurePrice
         const currPrice = curr.historicPrice || curr.futurePrice
         return prevPrice! < currPrice! ? prev : curr
-      }).historicPrice || 0
+      }, data[0])?.historicPrice || 0
 
     const max =
       data?.reduce((prev, curr) => {
         const prevPrice = prev.historicPrice || prev.futurePrice
         const currPrice = curr.historicPrice || curr.futurePrice
         return prevPrice! > currPrice! ? prev : curr
-      }).historicPrice || 100
+      }, data[0])?.historicPrice || 100
     return [min, max]
   }, [data])
 
-  if (assetSnapshots && assetSnapshots?.length < 1) return <Text variant="body2">No data available</Text>
+  if (!assetSnapshots || assetSnapshots?.length < 1) return <Text variant="body2">No data available</Text>
 
   return (
     <Card p={3}>
