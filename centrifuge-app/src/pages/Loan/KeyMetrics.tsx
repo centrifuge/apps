@@ -1,5 +1,5 @@
 import { CurrencyBalance, ExternalPricingInfo, Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
-import { Box, Card, Grid, Stack, Text } from '@centrifuge/fabric'
+import { Card, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
@@ -10,9 +10,10 @@ import { formatPercentage } from '../../utils/formatting'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrowerAssetTransactions, usePoolMetadata } from '../../utils/usePools'
+import { MetricsTable } from './MetricsTable'
 
 type Props = {
-  pool: Pool
+  pool: Pool | TinlakePool
   loan: Loan | TinlakeLoan
 }
 
@@ -131,29 +132,7 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
         <Text fontSize="18px" fontWeight="500">
           Key metrics
         </Text>
-        <Box borderStyle="solid" borderWidth="1px" borderColor="borderPrimary">
-          {metrics.map(({ label, value }, index) => (
-            <Grid
-              borderBottomStyle={index === metrics.length - 1 ? 'none' : 'solid'}
-              borderBottomWidth={index === metrics.length - 1 ? '0' : '1px'}
-              borderBottomColor={index === metrics.length - 1 ? 'none' : 'borderPrimary'}
-              height={32}
-              key={index}
-              px={1}
-              gridTemplateColumns="1fr 1fr"
-              width="100%"
-              alignItems="center"
-              gap={2}
-            >
-              <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
-                {label}
-              </Text>
-              <Text variant="body3" textOverflow="ellipsis" whiteSpace="nowrap">
-                {value}
-              </Text>
-            </Grid>
-          ))}
-        </Box>
+        <MetricsTable metrics={metrics} />
       </Stack>
     </Card>
   )

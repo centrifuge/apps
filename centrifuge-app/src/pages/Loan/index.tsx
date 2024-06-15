@@ -206,11 +206,7 @@ function Loan() {
         (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
           <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
             {assetSnapshots && (
-              <Grid
-                height="fit-content"
-                gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']}
-                gap={[2, 2, 3]}
-              >
+              <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
                 <React.Suspense fallback={<Spinner />}>
                   <AssetPerformanceChart poolId={poolId} loanId={loanId} />
                 </React.Suspense>
@@ -221,28 +217,24 @@ function Loan() {
               </Grid>
             )}
 
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
-              <PageSection title={<Box>Holdings</Box>}>
-                <Shelf gap={6} flexWrap="wrap">
+            <Grid height="fit-content" gridTemplateColumns={['1fr', '33fr 33fr 33fr']} gap={[2, 2, 3]}>
+              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
+                <React.Suspense fallback={<Spinner />}>
                   <HoldingsValues
                     pool={pool as Pool}
                     transactions={borrowerAssetTransactions}
                     currentFace={currentFace}
                     pricing={loan.pricing}
                   />
-                </Shelf>
-              </PageSection>
-            )}
+                </React.Suspense>
+              )}
 
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
-              <PageSection title={<Box>Pricing</Box>}>
-                <Stack>
-                  <Shelf gap={6} flexWrap="wrap">
-                    <PricingValues loan={loan} pool={pool} />
-                  </Shelf>
-                </Stack>
-              </PageSection>
-            )}
+              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+                <React.Suspense fallback={<Spinner />}>
+                  <PricingValues loan={loan} pool={pool} />
+                </React.Suspense>
+              )}
+            </Grid>
 
             {borrowerAssetTransactions?.length ? (
               'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (

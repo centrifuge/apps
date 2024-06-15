@@ -1,10 +1,12 @@
 import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { Card, Stack, Text } from '@centrifuge/fabric'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getLatestPrice } from '../../utils/getLatestPrice'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAssetTransactions } from '../../utils/usePools'
+import { MetricsTable } from './MetricsTable'
 
 type Props = {
   loan: Loan | TinlakeLoan
@@ -38,14 +40,23 @@ export function PricingValues({ loan, pool }: Props) {
     const latestPrice = getLatestPrice(latestOraclePrice.value, borrowerAssetTransactions, pool.currency.decimals)
 
     return (
-      <>
-        <LabelValueStack label="ISIN" value={pricing.Isin} />
-        <LabelValueStack
-          label={`Latest price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`}
-          value={latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-'}
-        />
-        <LabelValueStack label="Price last updated" value={days === '0' ? `${days} ago` : `Today`} />
-      </>
+      <Card p={3}>
+        <Stack gap={2}>
+          <Text fontSize="18px" fontWeight="500">
+            Pricing
+          </Text>
+          <MetricsTable
+            metrics={[
+              { label: 'ISIN', value: pricing.Isin },
+              {
+                label: `Latest price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
+                value: latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-',
+              },
+              { label: 'Price last updated', value: days === '0' ? `${days} ago` : `Today` },
+            ]}
+          />
+        </Stack>
+      </Card>
     )
   }
 
