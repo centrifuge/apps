@@ -1,4 +1,4 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
@@ -104,14 +104,14 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
 
   const priceRange = React.useMemo(() => {
     const min =
-      data.reduce((prev, curr) => {
+      data?.reduce((prev, curr) => {
         const prevPrice = prev.historicPrice || prev.futurePrice
         const currPrice = curr.historicPrice || curr.futurePrice
         return prevPrice! < currPrice! ? prev : curr
       }).historicPrice || 0
 
     const max =
-      data.reduce((prev, curr) => {
+      data?.reduce((prev, curr) => {
         const prevPrice = prev.historicPrice || prev.futurePrice
         const currPrice = curr.historicPrice || curr.futurePrice
         return prevPrice! > currPrice! ? prev : curr
@@ -122,131 +122,139 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
   if (assetSnapshots && assetSnapshots?.length < 1) return <Text variant="body2">No data available</Text>
 
   return (
-    <Stack gap={2}>
-      {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
-        <Stack>
-          <Shelf justifyContent="flex-end">
-            {data.length > 0 &&
-              filterOptions.map((filter, index) => (
-                <React.Fragment key={filter.label}>
-                  <FilterButton gap={1} onClick={() => setActiveFilter(filter)}>
-                    <Text variant="body3" whiteSpace="nowrap">
-                      <Text variant={filter.value === activeFilter.value && 'emphasized'}>{filter.label}</Text>
-                    </Text>
-                    <Box
-                      width="100%"
-                      backgroundColor={filter.value === activeFilter.value ? '#000000' : '#E0E0E0'}
-                      height="2px"
-                    />
-                  </FilterButton>
-                  {index !== filterOptions.length - 1 && (
-                    <Box width="24px" backgroundColor="#E0E0E0" height="2px" alignSelf="flex-end" />
-                  )}
-                </React.Fragment>
-              ))}
-          </Shelf>
-        </Stack>
-      )}
+    <Card p={3}>
+      <Stack gap={2}>
+        <Text fontSize="18px" fontWeight="500">
+          {asset && 'valuationMethod' in asset.pricing && asset?.pricing.valuationMethod !== 'cash'
+            ? 'Asset performance'
+            : 'Cash balance'}
+        </Text>
 
-      <Shelf gap={4} width="100%" color="textSecondary">
-        {data?.length ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <LineChart data={data} margin={{ left: -36 }}>
-              <defs>
-                <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={chartColor} stopOpacity={0.4} />
-                  <stop offset="95%" stopColor={chartColor} stopOpacity={0.2} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="day"
-                tickLine={false}
-                type="category"
-                tickFormatter={(tick: number) => {
-                  return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
-                }}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-                dy={4}
-                interval={10}
-              />
-              <YAxis
-                stroke="none"
-                tickLine={false}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
-                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
-                domain={activeFilter.value === 'price' ? priceRange : [0, 'auto']}
-              />
-              <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
-              <Tooltip
-                content={({ payload }) => {
-                  if (payload && payload?.length > 0) {
-                    return (
-                      <TooltipContainer>
-                        <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
-                        {payload.map(({ value }, index) => (
-                          <>
-                            <Shelf justifyContent="space-between" pl="4px" key={index}>
-                              <Text variant="label2">{'Value'}</Text>
-                              <Text variant="label2">
-                                {payload[0].payload.historicPV
-                                  ? formatBalance(payload[0].payload.historicPV, 'USD' || '', 2)
-                                  : payload[0].payload.futurePV
-                                  ? `~${formatBalance(payload[0].payload.futurePV, 'USD' || '', 2)}`
-                                  : '-'}
-                              </Text>
-                            </Shelf>
-                            <Shelf justifyContent="space-between" pl="4px" key={index}>
-                              <Text variant="label2">{'Price'}</Text>
-                              <Text variant="label2">
-                                {payload[0].payload.historicPrice
-                                  ? formatBalance(payload[0].payload.historicPrice, 'USD' || '', 6)
-                                  : payload[0].payload.futurePrice
-                                  ? `~${formatBalance(payload[0].payload.futurePrice, 'USD' || '', 6)}`
-                                  : '-'}
-                              </Text>
-                            </Shelf>
-                          </>
-                        ))}
-                      </TooltipContainer>
-                    )
-                  }
-                  return null
-                }}
-              />
-              {activeFilter.value === 'price' && (
-                <Line type="monotone" dataKey="historicPrice" stroke="#1253FF" strokeWidth={2} dot={false} />
-              )}
-              {activeFilter.value === 'price' && (
-                <Line
-                  type="monotone"
-                  dataKey="futurePrice"
-                  stroke="#c2d3ff"
-                  strokeWidth={2}
-                  dot={false}
-                  strokeDasharray="6 6"
-                />
-              )}
-
-              {activeFilter.value === 'value' && (
-                <Line type="monotone" dataKey="historicPV" stroke="#1253FF" strokeWidth={2} dot={false} />
-              )}
-              {activeFilter.value === 'value' && (
-                <Line
-                  type="monotone"
-                  dataKey="futurePV"
-                  stroke="#c2d3ff"
-                  strokeWidth={2}
-                  dot={false}
-                  strokeDasharray="6 6"
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <Text variant="label1">No data yet</Text>
+        {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
+          <Stack>
+            <Shelf justifyContent="flex-end">
+              {data.length > 0 &&
+                filterOptions.map((filter, index) => (
+                  <React.Fragment key={filter.label}>
+                    <FilterButton gap={1} onClick={() => setActiveFilter(filter)}>
+                      <Text variant="body3" whiteSpace="nowrap">
+                        <Text variant={filter.value === activeFilter.value && 'emphasized'}>{filter.label}</Text>
+                      </Text>
+                      <Box
+                        width="100%"
+                        backgroundColor={filter.value === activeFilter.value ? '#000000' : '#E0E0E0'}
+                        height="2px"
+                      />
+                    </FilterButton>
+                    {index !== filterOptions.length - 1 && (
+                      <Box width="24px" backgroundColor="#E0E0E0" height="2px" alignSelf="flex-end" />
+                    )}
+                  </React.Fragment>
+                ))}
+            </Shelf>
+          </Stack>
         )}
-      </Shelf>
-    </Stack>
+
+        <Shelf gap={4} width="100%" color="textSecondary">
+          {data?.length ? (
+            <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+              <LineChart data={data} margin={{ left: -36 }}>
+                <defs>
+                  <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={chartColor} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={chartColor} stopOpacity={0.2} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  dataKey="day"
+                  tickLine={false}
+                  type="category"
+                  tickFormatter={(tick: number) => {
+                    return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
+                  }}
+                  style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+                  dy={4}
+                  interval={10}
+                />
+                <YAxis
+                  stroke="none"
+                  tickLine={false}
+                  style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
+                  tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
+                  domain={activeFilter.value === 'price' ? priceRange : [0, 'auto']}
+                />
+                <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
+                <Tooltip
+                  content={({ payload }) => {
+                    if (payload && payload?.length > 0) {
+                      return (
+                        <TooltipContainer>
+                          <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
+                          {payload.map(({ value }, index) => (
+                            <>
+                              <Shelf justifyContent="space-between" pl="4px" key={index}>
+                                <Text variant="label2">{'Value'}</Text>
+                                <Text variant="label2">
+                                  {payload[0].payload.historicPV
+                                    ? formatBalance(payload[0].payload.historicPV, 'USD' || '', 2)
+                                    : payload[0].payload.futurePV
+                                    ? `~${formatBalance(payload[0].payload.futurePV, 'USD' || '', 2)}`
+                                    : '-'}
+                                </Text>
+                              </Shelf>
+                              <Shelf justifyContent="space-between" pl="4px" key={index}>
+                                <Text variant="label2">{'Price'}</Text>
+                                <Text variant="label2">
+                                  {payload[0].payload.historicPrice
+                                    ? formatBalance(payload[0].payload.historicPrice, 'USD' || '', 6)
+                                    : payload[0].payload.futurePrice
+                                    ? `~${formatBalance(payload[0].payload.futurePrice, 'USD' || '', 6)}`
+                                    : '-'}
+                                </Text>
+                              </Shelf>
+                            </>
+                          ))}
+                        </TooltipContainer>
+                      )
+                    }
+                    return null
+                  }}
+                />
+                {activeFilter.value === 'price' && (
+                  <Line type="monotone" dataKey="historicPrice" stroke="#1253FF" strokeWidth={2} dot={false} />
+                )}
+                {activeFilter.value === 'price' && (
+                  <Line
+                    type="monotone"
+                    dataKey="futurePrice"
+                    stroke="#c2d3ff"
+                    strokeWidth={2}
+                    dot={false}
+                    strokeDasharray="6 6"
+                  />
+                )}
+
+                {activeFilter.value === 'value' && (
+                  <Line type="monotone" dataKey="historicPV" stroke="#1253FF" strokeWidth={2} dot={false} />
+                )}
+                {activeFilter.value === 'value' && (
+                  <Line
+                    type="monotone"
+                    dataKey="futurePV"
+                    stroke="#c2d3ff"
+                    strokeWidth={2}
+                    dot={false}
+                    strokeDasharray="6 6"
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <Text variant="label1">No data yet</Text>
+          )}
+        </Shelf>
+      </Stack>
+    </Card>
   )
 }
 
