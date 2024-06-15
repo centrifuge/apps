@@ -45,6 +45,7 @@ import { useAssetSnapshots, useBorrowerAssetTransactions, usePool, usePoolMetada
 import { FinanceForm } from './FinanceForm'
 import { HoldingsValues } from './HoldingsValues'
 import { KeyMetrics } from './KeyMetrics'
+import { MetricsTable } from './MetricsTable'
 import { PricingValues } from './PricingValues'
 import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
@@ -234,6 +235,31 @@ function Loan() {
                   <PricingValues loan={loan} pool={pool} />
                 </React.Suspense>
               )}
+
+              {templateData?.sections?.map((section, i) => {
+                const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
+                if (!isPublic) return null
+                return (
+                  <React.Suspense fallback={<Spinner />}>
+                    <Card p={3}>
+                      <Stack gap={2}>
+                        <Text fontSize="18px" fontWeight="500">
+                          {section.name}
+                        </Text>
+                        <MetricsTable
+                          metrics={section.attributes.map((key) => {
+                            const attribute = templateData.attributes?.[key]
+                            if (!attribute) return null
+                            const value = publicData[key]
+                            const formatted = value ? formatNftAttribute(value, attribute) : '-'
+                            return { label: attribute.label, value: formatted }
+                          })}
+                        />
+                      </Stack>
+                    </Card>
+                  </React.Suspense>
+                )
+              })}
             </Grid>
 
             {borrowerAssetTransactions?.length ? (
@@ -275,51 +301,27 @@ function Loan() {
             ) : null}
           </LayoutSection>
         )}
-      {(loan && nft) || isTinlakePool ? (
-        <>
-          {templateData?.sections?.map((section, i) => {
-            const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
-            if (!isPublic) return null
-            return (
-              <PageSection title={<Box>{section.name}</Box>} titleAddition={isPublic ? undefined : 'Private'} key={i}>
-                {isPublic ? (
-                  <Shelf gap={6} flexWrap="wrap">
-                    {section.attributes.map((key) => {
-                      const attribute = templateData.attributes?.[key]
-                      if (!attribute) return null
-                      const value = publicData[key]
-                      const formatted = value ? formatNftAttribute(value, attribute) : '-'
-                      return <LabelValueStack label={attribute.label} value={formatted} key={key} />
-                    })}
-                  </Shelf>
-                ) : null}
-              </PageSection>
-            )
-          })}
-
-          {isTinlakePool && loan && 'owner' in loan ? (
-            <PageSection title={<Box>NFT</Box>}>
-              <Shelf gap={6}>
-                <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={loanId} />
-                <LabelValueStack
-                  label="Owner"
-                  value={
-                    <Text
-                      style={{
-                        cursor: 'copy',
-                        wordBreak: 'break-word',
-                        whiteSpace: 'normal',
-                      }}
-                      onClick={() => copyToClipboard(loan.owner || '')}
-                    >
-                      {truncate(loan.owner)}
-                    </Text>
-                  }
-                />
-              </Shelf>
-            </PageSection>
-          ) : null}
-        </>
+      {isTinlakePool && loan && 'owner' in loan ? (
+        <PageSection title={<Box>NFT</Box>}>
+          <Shelf gap={6}>
+            <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={loanId} />
+            <LabelValueStack
+              label="Owner"
+              value={
+                <Text
+                  style={{
+                    cursor: 'copy',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'normal',
+                  }}
+                  onClick={() => copyToClipboard(loan.owner || '')}
+                >
+                  {truncate(loan.owner)}
+                </Text>
+              }
+            />
+          </Shelf>
+        </PageSection>
       ) : null}
     </Stack>
   )
