@@ -222,6 +222,7 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
                     return null
                   }}
                 />
+
                 {activeFilter.value === 'price' && (
                   <Line type="monotone" dataKey="historicPrice" stroke="#1253FF" strokeWidth={2} dot={false} />
                 )}
