@@ -60,6 +60,7 @@ export type CreateLoanFormValues = {
   pricing: {
     valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle' | 'cash'
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+    maturity: 'fixed' | 'none' | 'fixedWithExtension'
     value: number | ''
     maturityDate: string
     maturityExtensionDays: number
@@ -227,6 +228,7 @@ function IssuerCreateLoan() {
       pricing: {
         valuationMethod: 'outstandingDebt',
         maxBorrowAmount: 'upToTotalBorrowed',
+        maturity: 'fixed',
         value: '',
         maturityDate: '',
         maturityExtensionDays: 0,
@@ -251,7 +253,7 @@ function IssuerCreateLoan() {
           interestRate: Rate.fromPercent(0),
           value: new BN(2).pow(new BN(128)).subn(1), // max uint128
           maxBorrowAmount: 'upToOutstandingDebt' as const,
-          maturityDate: new Date(values.pricing.maturityDate),
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
         }
       } else if (values.pricing.valuationMethod === 'oracle') {
         pricingInfo = {
@@ -259,7 +261,7 @@ function IssuerCreateLoan() {
           maxPriceVariation: Rate.fromPercent(9999),
           maxBorrowAmount: values.pricing.maxBorrowQuantity ? Price.fromFloat(values.pricing.maxBorrowQuantity) : null,
           Isin: values.pricing.Isin || '',
-          maturityDate: new Date(values.pricing.maturityDate),
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
           interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
         }
@@ -268,8 +270,9 @@ function IssuerCreateLoan() {
           valuationMethod: values.pricing.valuationMethod,
           maxBorrowAmount: values.pricing.maxBorrowAmount,
           value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
-          maturityDate: new Date(values.pricing.maturityDate),
-          maturityExtensionDays: values.pricing.maturityExtensionDays,
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
+          maturityExtensionDays:
+            values.pricing.maturity === 'fixedWithExtension' ? values.pricing.maturityExtensionDays : null,
           advanceRate: Rate.fromPercent(values.pricing.advanceRate),
           interestRate: Rate.fromPercent(values.pricing.interestRate),
           probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
@@ -312,6 +315,13 @@ function IssuerCreateLoan() {
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
+
+  React.useEffect(() => {
+    if (form.values.pricing.maturity === 'none' && form.values.pricing.valuationMethod === 'discountedCashFlow') {
+      form.setFieldValue('pricing.maturity', 'fixed', false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.values])
 
   if (redirect) {
     return <Redirect to={redirect} />

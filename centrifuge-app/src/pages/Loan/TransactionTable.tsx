@@ -17,7 +17,7 @@ type Props = {
   loanType: 'external' | 'internal'
   pricing: PricingInfo
   poolType?: string
-  maturityDate: Date
+  maturityDate?: Date
   originationDate: Date | undefined
 }
 
@@ -64,9 +64,11 @@ export const TransactionTable = ({
         return !transaction.amount?.isZero()
       })
       .map((transaction, index, array) => {
-        const termDays = transaction.timestamp
-          ? daysBetween(transaction.timestamp, maturityDate)
-          : daysBetween(new Date(), maturityDate)
+        const termDays = maturityDate
+          ? transaction.timestamp
+            ? daysBetween(transaction.timestamp, maturityDate)
+            : daysBetween(new Date(), maturityDate)
+          : 0
 
         const faceValue =
           transaction.quantity && (pricing as ExternalPricingInfo).notional
@@ -81,7 +83,7 @@ export const TransactionTable = ({
           quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
           transactionDate: transaction.timestamp,
           yieldToMaturity:
-            transaction.amount && faceValue && transaction.type !== 'REPAID' && termDays > 0
+            transaction.amount && maturityDate && faceValue && transaction.type !== 'REPAID' && termDays > 0
               ? faceValue
                   ?.sub(transaction.amount.toDecimal())
                   .div(transaction.amount.toDecimal())

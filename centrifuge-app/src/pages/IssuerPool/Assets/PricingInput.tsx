@@ -88,25 +88,47 @@ export function PricingInput({ poolId }: { poolId: string }) {
           validate={combine(required(), nonNegativeNumber(), max(100))}
         />
       )}
-      <FieldWithErrorMessage
-        as={DateInput}
-        validate={validate.maturityDate}
-        name="pricing.maturityDate"
-        label="Maturity date*"
-        type="date"
-        // Min one day from now
-        min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
-        // Max 5 years from now
-        max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
-      />
-      <FieldWithErrorMessage
-        as={NumberInput}
-        label={<Tooltips type="maturityExtensionDays" variant="secondary" label="Extension period*" />}
-        placeholder={0}
-        symbol="days"
-        name="pricing.maturityExtensionDays"
-        validate={validate.maturityExtensionDays}
-      />
+
+      <Field name="pricing.maturity">
+        {({ field, meta, form }: FieldProps) => (
+          <Select
+            {...field}
+            label="Maturity"
+            onChange={(event) => form.setFieldValue('pricing.maturity', event.target.value, false)}
+            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+            options={[
+              { value: 'fixed', label: 'Fixed' },
+              { value: 'fixedWithExtension', label: 'Fixed with extension period' },
+              form.values.pricing.valuationMethod !== 'discountedCashFlow'
+                ? { value: 'none', label: 'Open-end' }
+                : (null as never),
+            ].filter(Boolean)}
+          />
+        )}
+      </Field>
+      {values.pricing.maturity.startsWith('fixed') && (
+        <FieldWithErrorMessage
+          as={DateInput}
+          validate={validate.maturityDate}
+          name="pricing.maturityDate"
+          label="Maturity date*"
+          type="date"
+          // Min one day from now
+          min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+          // Max 5 years from now
+          max={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+        />
+      )}
+      {values.pricing.maturity === 'fixedWithExtension' && (
+        <FieldWithErrorMessage
+          as={NumberInput}
+          label={<Tooltips type="maturityExtensionDays" variant="secondary" label="Extension period*" />}
+          placeholder={0}
+          symbol="days"
+          name="pricing.maturityExtensionDays"
+          validate={validate.maturityExtensionDays}
+        />
+      )}
 
       {(values.pricing.valuationMethod === 'discountedCashFlow' ||
         values.pricing.valuationMethod === 'outstandingDebt') && (

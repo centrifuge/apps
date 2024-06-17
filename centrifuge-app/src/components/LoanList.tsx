@@ -84,7 +84,7 @@ export function LoanList({ loans }: Props) {
 
         return aId.localeCompare(bId)
       })
-  }, [loans])
+  }, [isTinlakePool, loans])
   const filters = useFilters({
     data: loansWithLabelStatus,
   })
@@ -217,7 +217,7 @@ export function LoanList({ loans }: Props) {
             !loan?.totalBorrowed?.isZero()
               ? loan.originationDate
               : '',
-          maturityDate: null,
+          maturityDate: loan.pricing.maturityDate,
           ...loan,
         }
       }),
