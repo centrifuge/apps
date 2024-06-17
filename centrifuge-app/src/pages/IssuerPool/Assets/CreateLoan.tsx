@@ -228,7 +228,7 @@ function IssuerCreateLoan() {
       assetName: '',
       attributes: {},
       pricing: {
-        valuationMethod: 'outstandingDebt',
+        valuationMethod: 'oracle',
         maxBorrowAmount: 'upToTotalBorrowed',
         maturity: 'fixed',
         value: '',
@@ -249,7 +249,7 @@ function IssuerCreateLoan() {
     onSubmit: async (values, { setSubmitting }) => {
       if (!collateralCollectionId || !account || !templateMetadata) return
       const { decimals } = pool.currency
-      let pricingInfo
+      let pricingInfo: LoanInfoInput
       if (values.pricing.valuationMethod === 'cash') {
         pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
