@@ -17,9 +17,10 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { TransactionReceipt } from '@ethersproject/providers'
 import { Wallet } from '@ethersproject/wallet'
+import { Keyring } from '@polkadot/api'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import { BN } from 'bn.js'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { combineLatest, firstValueFrom, lastValueFrom, of, switchMap } from 'rxjs'
 
 const poolManagerKey = '0xd2f2b2de40733b8fdcc750f0b9837f99d6e2b69112e70ab224386920eb860e10'
@@ -32,51 +33,23 @@ const TEMPLATE_HASH = 'QmYhNkqfyPzz9huxLLvoVuJJXM4GZBtSUU6JqgGRrLGR8P'
 
 const TEN_YEARS_FROM_NOW = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
 
-// const formattedMetadata: PoolMetadata = {
-// 	version: 1,
-// 	pool: {
-// 		name: metadata.poolName,
-// 		icon: metadata.poolIcon,
-// 		asset: { class: metadata.assetClass, subClass: metadata.subAssetClass },
-// 		issuer: {
-// 			name: metadata.issuerName,
-// 			repName: metadata.issuerRepName,
-// 			description: metadata.issuerDescription,
-// 			email: metadata.email,
-// 			logo: metadata.issuerLogo,
-// 		},
-// 		links: {
-// 			executiveSummary: metadata.executiveSummary,
-// 			forum: metadata.forum,
-// 			website: metadata.website,
-// 		},
-// 		details: metadata.details,
-// 		status: 'open',
-// 		listed: metadata.listed ?? true,
-// 		poolFees: metadata.poolFees,
-// 		reports: metadata.poolReport
-// 			? [
-// 					{
-// 						author: {
-// 							name: metadata.poolReport.authorName,
-// 							title: metadata.poolReport.authorTitle,
-// 							avatar: metadata.poolReport.authorAvatar,
-// 						},
-// 						uri: metadata.poolReport.url,
-// 					},
-// 				]
-// 			: undefined,
-// 	},
-// 	pod: {},
-// 	tranches: tranchesById,
-// 	adminMultisig: metadata.adminMultisig,
-// }
-
 export function CreateAndSetupPool() {
   const {
     substrate: { evmChainId },
     evm: { getProvider },
   } = useWallet()
+  const [[PoolManagerKeyring, BorrowerKeyring, InvestorKeyring, NavManagerKeyring, FeeReceiverKeyring]] = useState(
+    () => {
+      const keyring = new Keyring({ type: 'sr25519' })
+      return [
+        keyring.addFromUri('//Alice'),
+        keyring.addFromUri('//Bob'),
+        keyring.addFromUri('//Charlie'),
+        keyring.addFromUri('//Dave'),
+        keyring.addFromUri('//Eve'),
+      ]
+    }
+  )
   const cent = useCentrifuge()
   const api = useCentrifugeApi()
   const consts = useCentrifugeConsts()
@@ -96,34 +69,53 @@ export function CreateAndSetupPool() {
   }, [evmChainId])
 
   const { execute, isLoading } = useCentrifugeTransaction('Create pool', () => ([txId]: [string], options) => {
-    if (!evmChainId) throw new Error('No evm chain id')
-    const poolId = makeId()
-    const nftCollectionId = makeId()
-    const assetNftId1 = makeId()
-    const assetNftId2 = makeId()
-    const assetNftId3 = makeId()
-    const juniorTranche = computeTrancheId(0, poolId)
-    const isin1 = makeIsin()
-    const poolManagerCentAddress = evmToSubstrateAddress(PoolManager.address, evmChainId)
-    const borrowerCentAddress = evmToSubstrateAddress(Borrower.address, evmChainId)
-    const investorCentAddress = evmToSubstrateAddress(Investor.address, evmChainId)
-    const navManagerCentAddress = evmToSubstrateAddress(NavManager.address, evmChainId)
-    const feeReceiverCentAddress = evmToSubstrateAddress(FeeReceiver.address, evmChainId)
-    const poolManagerCent = cent.connectEvm(PoolManager.address, PoolManager, evmChainId)
-    const borrowerCent = cent.connectEvm(Borrower.address, Borrower, evmChainId)
-    const investorCent = cent.connectEvm(Investor.address, Investor, evmChainId)
-    const navManagerCent = cent.connectEvm(NavManager.address, NavManager, evmChainId)
+    async function doTransactions(useEvm = true) {
+      if (!evmChainId) throw new Error('No evm chain id')
 
-    console.log(
-      'poolManagerCentAddress',
-      poolManagerCentAddress,
-      borrowerCentAddress,
-      investorCentAddress,
-      navManagerCentAddress,
-      feeReceiverCentAddress
-    )
+      const poolId = makeId()
+      const nftCollectionId = makeId()
+      const assetNftId1 = makeId()
+      const assetNftId2 = makeId()
+      const assetNftId3 = makeId()
+      const juniorTranche = computeTrancheId(0, poolId)
+      const isin1 = makeIsin()
 
-    async function doTransactions() {
+      const poolManagerCentAddress = useEvm
+        ? evmToSubstrateAddress(PoolManager.address, evmChainId)
+        : PoolManagerKeyring.address
+      const borrowerCentAddress = useEvm ? evmToSubstrateAddress(Borrower.address, evmChainId) : BorrowerKeyring.address
+      const investorCentAddress = useEvm ? evmToSubstrateAddress(Investor.address, evmChainId) : InvestorKeyring.address
+      const navManagerCentAddress = useEvm
+        ? evmToSubstrateAddress(NavManager.address, evmChainId)
+        : NavManagerKeyring.address
+      const feeReceiverCentAddress = useEvm
+        ? evmToSubstrateAddress(FeeReceiver.address, evmChainId)
+        : FeeReceiverKeyring.address
+      const poolManagerCent = useEvm
+        ? cent.connectEvm(PoolManager.address, PoolManager, evmChainId)
+        : cent.connect(PoolManagerKeyring)
+      const borrowerCent = useEvm
+        ? cent.connectEvm(Borrower.address, Borrower, evmChainId)
+        : cent.connect(BorrowerKeyring)
+      const investorCent = useEvm
+        ? cent.connectEvm(Investor.address, Investor, evmChainId)
+        : cent.connect(InvestorKeyring)
+      const navManagerCent = useEvm
+        ? cent.connectEvm(NavManager.address, NavManager, evmChainId)
+        : cent.connect(NavManagerKeyring)
+      const feeReceiveCent = useEvm
+        ? cent.connectEvm(FeeReceiver.address, FeeReceiver, evmChainId)
+        : cent.connect(FeeReceiverKeyring)
+
+      console.log(
+        'poolManagerCentAddress',
+        poolManagerCentAddress,
+        borrowerCentAddress,
+        investorCentAddress,
+        navManagerCentAddress,
+        feeReceiverCentAddress
+      )
+
       const feeId = await firstValueFrom(cent.pools.getNextPoolFeeId())
 
       const metadata: PoolMetadata = {
@@ -400,19 +392,19 @@ export function CreateAndSetupPool() {
 
       // return res
 
-      updateTransaction(txId, {
-        title: 'Feed oracle values',
-        status: 'pending',
-      })
+      // updateTransaction(txId, {
+      //   title: 'Feed oracle values',
+      //   status: 'pending',
+      // })
 
-      // Feed oracle values
-      const navBatch = api.tx.utility.batchAll([
-        api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18)),
-        api.tx.oraclePriceCollection.updateCollection(poolId),
-        api.tx.loans.updatePortfolioValuation(poolId),
-      ])
+      // // Feed oracle values
+      // const navBatch = api.tx.utility.batchAll([
+      //   api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18)),
+      //   api.tx.oraclePriceCollection.updateCollection(poolId),
+      //   api.tx.loans.updatePortfolioValuation(poolId),
+      // ])
 
-      await lastValueFrom(navManagerCent.wrapSignAndSend(api, navBatch))
+      // await lastValueFrom(navManagerCent.wrapSignAndSend(api, navBatch))
 
       // await lastValueFrom(
       //   navManagerCent.wrapSignAndSend(
