@@ -139,8 +139,8 @@ export type LoanInfoInput =
 export type LoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
-    interestPayments: 'None'
     maturity: { fixed: { date: number; extension: number } } | { none: null }
+    interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
 
@@ -1596,6 +1596,7 @@ export function getPoolsModule(inst: Centrifuge) {
               },
             }
           : ('none' as any),
+        interestPayments: 'OnceAtMaturity',
         payDownSchedule: 'None',
       },
 
