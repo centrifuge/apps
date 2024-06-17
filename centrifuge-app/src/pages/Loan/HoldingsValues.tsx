@@ -64,7 +64,7 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
     ],
     { label: 'Net spent', value: `${formatBalance(netSpent, pool.currency.symbol, 2, 2)}` },
     {
-      label: 'Average purchase price',
+      label: 'Average settle price',
       value: averageSettlePrice.isZero() ? '-' : `${formatBalance(averageSettlePrice, pool.currency.symbol, 2, 2)}`,
     },
     ...[

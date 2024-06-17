@@ -250,13 +250,19 @@ function Loan() {
                           {section.name}
                         </Text>
                         <MetricsTable
-                          metrics={section.attributes.map((key) => {
-                            const attribute = templateData.attributes?.[key]
-                            if (!attribute) return null
-                            const value = publicData[key]
-                            const formatted = value ? formatNftAttribute(value, attribute) : '-'
-                            return { label: attribute.label, value: formatted }
-                          })}
+                          metrics={section.attributes
+                            .filter(
+                              (key) =>
+                                !!templateData.attributes?.[key] &&
+                                (!templateMetadata?.keyAttributes ||
+                                  !Object.values(templateMetadata?.keyAttributes).includes(key))
+                            )
+                            .map((key) => {
+                              const attribute = templateData.attributes?.[key]!
+                              const value = publicData[key]
+                              const formatted = value ? formatNftAttribute(value, attribute) : '-'
+                              return { label: attribute.label, value: formatted }
+                            })}
                         />
                       </Stack>
                     </Card>
