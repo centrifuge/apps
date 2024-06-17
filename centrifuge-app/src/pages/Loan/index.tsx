@@ -176,10 +176,11 @@ function Loan() {
               <React.Suspense fallback={<Spinner />}>
                 <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
               </React.Suspense>
-              {}
-              <React.Suspense fallback={<Spinner />}>
-                <KeyMetrics pool={pool} loan={loan} />
-              </React.Suspense>
+              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+                <React.Suspense fallback={<Spinner />}>
+                  <KeyMetrics pool={pool} loan={loan} />
+                </React.Suspense>
+              )}
             </Grid>
 
             <Grid
@@ -239,14 +240,14 @@ function Loan() {
 
             {borrowerAssetTransactions?.length ? (
               'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
-                <PageSection>
+                <Card p={3}>
                   <TransactionHistoryTable
                     transactions={borrowerAssetTransactions ?? []}
                     poolId={poolId}
                     preview={false}
                     activeAssetId={loanId}
                   />
-                </PageSection>
+                </Card>
               ) : (
                 <Grid height="fit-content" gridTemplateColumns={['1fr']} gap={[2, 2, 3]}>
                   <Card p={3}>
