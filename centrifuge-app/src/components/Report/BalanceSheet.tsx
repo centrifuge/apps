@@ -126,9 +126,9 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       },
       {
         name: '\u00A0 \u00A0 Accrued fees',
-        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPendingAmount.toDecimal()) || [],
+        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPendingAmount.toDecimal().neg()) || [],
         heading: false,
-        formatter: (v: any) => (v ? `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}` : ''),
+        formatter: (v: any) => (v ? `${formatBalance(v, pool.currency.displayName, 2)}` : ''),
       },
       {
         name: 'Total assets (NAV)',
