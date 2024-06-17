@@ -20,6 +20,12 @@ export type SubqueryPoolSnapshot = {
   sumRedeemedAmountByPeriod: string
   blockNumber: number
   sumPoolFeesPendingAmount: string
+  sumDebtWrittenOffByPeriod: string
+  sumInterestAccruedByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
+  sumUnrealizedProfitAtMarketPrice: string
+  sumUnrealizedProfitAtNotional: string
+  sumUnrealizedProfitByPeriod: string
 }
 
 export type SubqueryTrancheSnapshot = {
@@ -109,6 +115,7 @@ export type SubqueryAssetTransaction = {
   interestAmount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string
@@ -227,4 +234,20 @@ export type SubqueryEpoch = {
   sumRepaidAmount: number | null
   sumInvestedAmount: number | null
   sumRedeemedAmount: number | null
+}
+
+// incomplete types
+export type SubqueryPoolFeeSnapshot = {
+  poolFeeId: string // poolId-feeId
+  timestamp: string
+  sumPaidAmount: string
+  sumChargedAmount: string
+  sumAccruedAmount: string
+  pendingAmount: string
+  sumPaidAmountByPeriod: string
+  sumChargedAmountByPeriod: string
+  sumAccruedAmountByPeriod: string
+  poolFee: {
+    name: string
+  }
 }
