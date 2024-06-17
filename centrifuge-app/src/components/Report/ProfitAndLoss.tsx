@@ -142,13 +142,13 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         heading: false,
         bold: true,
       },
-      {
-        name: 'Realized profit / loss',
-        nameTooltip: 'Based on first-in, first-out calculation of the transactions of each individual asset',
-        value: poolStates?.map(({ poolState }) => poolState.sumRealizedProfitFifoByPeriod.toDecimal()) || [],
-        heading: false,
-        formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
-      },
+      // {
+      //   name: 'Realized profit / loss',
+      //   nameTooltip: 'Based on first-in, first-out calculation of the transactions of each individual asset',
+      //   value: poolStates?.map(({ poolState }) => poolState.sumRealizedProfitFifoByPeriod.toDecimal()) || [],
+      //   heading: false,
+      //   formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
+      // },
       {
         name: 'Unrealized profit / loss',
         nameTooltip: 'Based on selling the assets in the pool at the current market price',
@@ -172,9 +172,8 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         name: 'Total income ',
         value:
           poolStates?.map(({ poolState }) =>
-            poolState.sumRealizedProfitFifoByPeriod
+            poolState.sumUnrealizedProfitByPeriod
               .toDecimal()
-              .add(poolState.sumUnrealizedProfitByPeriod.toDecimal())
               .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
               .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
           ) || [],
@@ -213,9 +212,9 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       },
       {
         name: 'Asset write-offs',
-        value: poolStates?.map(({ poolState }) => poolState.sumDebtWrittenOffByPeriod.toDecimal()) || [],
+        value: poolStates?.map(({ poolState }) => poolState.sumDebtWrittenOffByPeriod.toDecimal().neg()) || [],
         heading: false,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
         name: 'Profit / loss from assets ',
@@ -272,9 +271,9 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
               return {
                 name: feeState[0].poolFee.name,
                 value: [...missingStates, ...feeState].map((state) =>
-                  state.sumAccruedAmountByPeriod.toDecimal().add(state.sumChargedAmountByPeriod.toDecimal())
+                  state.sumAccruedAmountByPeriod.toDecimal().add(state.sumChargedAmountByPeriod.toDecimal()).neg()
                 ),
-                formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+                formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
               }
             })
             .flat()
@@ -307,9 +306,8 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
                   .add(poolState.sumInterestAccruedByPeriod.toDecimal())
                   .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
                   .sub(poolState.sumDebtWrittenOffByPeriod.toDecimal())
-              : poolState.sumRealizedProfitFifoByPeriod
+              : poolState.sumUnrealizedProfitByPeriod
                   .toDecimal()
-                  .add(poolState.sumUnrealizedProfitByPeriod.toDecimal())
                   .add(poolState.sumInterestRepaidAmountByPeriod.toDecimal())
                   .add(poolState.sumUnscheduledRepaidAmountByPeriod.toDecimal())
             )

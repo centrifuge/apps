@@ -133,9 +133,9 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
       },
       {
         name: poolMetadata?.pool?.asset.class === 'Private credit' ? 'Asset financings' : 'Asset purchases',
-        value: poolStates?.map(({ poolState }) => poolState.sumBorrowedAmountByPeriod.toDecimal()) || [],
+        value: poolStates?.map(({ poolState }) => poolState.sumBorrowedAmountByPeriod.toDecimal().neg()) || [],
         heading: false,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
         name: 'Interest payments',
@@ -169,9 +169,9 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
     return [
       {
         name: 'Fees paid',
-        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPaidAmountByPeriod.toDecimal()) || [],
+        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPaidAmountByPeriod.toDecimal().neg()) || [],
         heading: false,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
         name: 'Net cash flow after fees',
@@ -201,9 +201,9 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
       },
       {
         name: 'Pool redemptions',
-        value: poolStates?.map(({ poolState }) => poolState.sumRedeemedAmountByPeriod.toDecimal()) || [],
+        value: poolStates?.map(({ poolState }) => poolState.sumRedeemedAmountByPeriod.toDecimal().neg()) || [],
         heading: false,
-        formatter: (v: any) => `${v.isZero() ? '' : '-'}${formatBalance(v, pool.currency.displayName, 2)}`,
+        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
       {
         name: 'Cash flow from investment activities',
