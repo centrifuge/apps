@@ -1,11 +1,13 @@
-import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Card, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoan } from '../../utils/useLoans'
 import { useAssetSnapshots } from '../../utils/usePools'
+import { useDebugFlags } from '../DebugFlags'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 
 type ChartData = {
@@ -17,6 +19,7 @@ type ChartData = {
 }
 
 interface Props {
+  pool: Pool | TinlakePool
   poolId: string
   loanId: string
 }
@@ -32,7 +35,7 @@ const filterOptions = [
   { value: 'value', label: 'Show asset value' },
 ] as const
 
-function AssetPerformanceChart({ poolId, loanId }: Props) {
+function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
   const theme = useTheme()
   const chartColor = theme.colors.accentPrimary
   const asset = useLoan(poolId, loanId)
@@ -45,6 +48,22 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
       setActiveFilter(filterOptions[1])
     }
   }, [assetSnapshots])
+
+  const { assetSnapshots: showAssetSnapshots } = useDebugFlags()
+
+  const dataUrl: any = React.useMemo(() => {
+    if (!assetSnapshots || !assetSnapshots?.length) {
+      return undefined
+    }
+
+    const formatted = assetSnapshots.map((snapshot) => {
+      return {
+        ...snapshot,
+      }
+    })
+
+    return getCSVDownloadUrl(formatted as any)
+  }, [assetSnapshots, pool.currency.symbol])
 
   const data: ChartData[] = React.useMemo(() => {
     if (!asset || !assetSnapshots) return []
@@ -126,11 +145,22 @@ function AssetPerformanceChart({ poolId, loanId }: Props) {
   return (
     <Card p={3}>
       <Stack gap={2}>
-        <Text fontSize="18px" fontWeight="500">
-          {asset && 'valuationMethod' in asset.pricing && asset?.pricing.valuationMethod !== 'cash'
-            ? 'Asset performance'
-            : 'Cash balance'}
-        </Text>
+        <Shelf justifyContent="space-between">
+          <Text fontSize="18px" fontWeight="500">
+            {asset && 'valuationMethod' in asset.pricing && asset?.pricing.valuationMethod !== 'cash'
+              ? 'Asset performance'
+              : 'Cash balance'}
+          </Text>
+          <AnchorButton
+            href={dataUrl}
+            download={`asset-${loanId}-timeseries.csv`}
+            variant="secondary"
+            icon={IconDownload}
+            small
+          >
+            Download
+          </AnchorButton>
+        </Shelf>
 
         {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
           <Stack>

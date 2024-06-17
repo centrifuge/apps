@@ -1,13 +1,11 @@
 import { Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
-  AnchorButton,
   Box,
   Button,
   Card,
   Drawer,
   Grid,
   IconChevronLeft,
-  IconDownload,
   Shelf,
   Spinner,
   Stack,
@@ -22,7 +20,6 @@ import { useTheme } from 'styled-components'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
-import { useDebugFlags } from '../../components/DebugFlags'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
@@ -36,12 +33,11 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, truncateText } from '../../utils/formatting'
-import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset } from '../../utils/usePermissions'
-import { useAssetSnapshots, useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
+import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { HoldingsValues } from './HoldingsValues'
 import { KeyMetrics } from './KeyMetrics'
@@ -110,23 +106,6 @@ function Loan() {
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
 
-  const { assetSnapshots: showAssetSnapshots } = useDebugFlags()
-  const assetSnapshots = useAssetSnapshots(poolId, loanId)
-
-  const dataUrl: any = React.useMemo(() => {
-    if (!assetSnapshots || !assetSnapshots?.length) {
-      return undefined
-    }
-
-    const formatted = assetSnapshots.map((snapshot) => {
-      return {
-        ...snapshot,
-      }
-    })
-
-    return getCSVDownloadUrl(formatted as any)
-  }, [assetSnapshots, pool.currency.symbol])
-
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
       ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
@@ -168,19 +147,6 @@ function Loan() {
         }
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
-        actions={
-          showAssetSnapshots && (
-            <AnchorButton
-              href={dataUrl}
-              download={`asset-${loanId}-timeseries.csv`}
-              variant="secondary"
-              icon={IconDownload}
-              small
-            >
-              Timeseries
-            </AnchorButton>
-          )
-        }
       />
       {loanId === '0' && (
         <>
@@ -208,7 +174,7 @@ function Loan() {
           <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
             <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr 34fr']} gap={[2, 2]}>
               <React.Suspense fallback={<Spinner />}>
-                <AssetPerformanceChart poolId={poolId} loanId={loanId} />
+                <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
               </React.Suspense>
               {}
               <React.Suspense fallback={<Spinner />}>
