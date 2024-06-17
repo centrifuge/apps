@@ -25,8 +25,8 @@ import { combineLatest, firstValueFrom, lastValueFrom, of, switchMap } from 'rxj
 const poolManagerKey = '0xd2f2b2de40733b8fdcc750f0b9837f99d6e2b69112e70ab224386920eb860e10'
 const borrowerKey = '0x554a099c95e64fe36ef91c151d0827e2f643f7434a22adfea17ae29b5e6fbfd5'
 const investorKey = '0x7778e5bbb188ed166afe9b54ca27636267f3e84042082645328bea07603b2818'
-const feeReceiverKey = '0x287100f2037ad46c4ea7fa08ffe051ec9b61bdc9dc172d09e98aa82619dc6635'
 const navManagerKey = '0xa0944046706748b3f07ac494a599a4b1264a864872fcd1a9dae704e1561e8d08'
+const feeReceiverKey = '0x287100f2037ad46c4ea7fa08ffe051ec9b61bdc9dc172d09e98aa82619dc6635'
 
 const TEMPLATE_HASH = 'QmYhNkqfyPzz9huxLLvoVuJJXM4GZBtSUU6JqgGRrLGR8P'
 
@@ -83,13 +83,14 @@ export function CreateAndSetupPool() {
 
   const { updateTransaction } = useTransactions()
 
-  const [PoolManager, Borrower, Investor, NavManager] = useMemo(() => {
+  const [PoolManager, Borrower, Investor, NavManager, FeeReceiver] = useMemo(() => {
     const provider = evmChainId ? getProvider(evmChainId) : undefined
     return [
       new Wallet(poolManagerKey, provider),
       new Wallet(borrowerKey, provider),
       new Wallet(investorKey, provider),
       new Wallet(navManagerKey, provider),
+      new Wallet(feeReceiverKey, provider),
     ]
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [evmChainId])
@@ -107,67 +108,81 @@ export function CreateAndSetupPool() {
     const borrowerCentAddress = evmToSubstrateAddress(Borrower.address, evmChainId)
     const investorCentAddress = evmToSubstrateAddress(Investor.address, evmChainId)
     const navManagerCentAddress = evmToSubstrateAddress(NavManager.address, evmChainId)
-
-    const metadata: PoolMetadata = {
-      version: 1,
-      pool: {
-        name: 'E2E Test Pool',
-        icon: { uri: 'ipfs://QmTocPtJYu2sXYoir52dR6iqDjg56v4Tc3sH8fxGNuLDWQ', mime: 'image/svg+xml' },
-        asset: { class: 'Public credit', subClass: 'US Treasuries' },
-        issuer: {
-          name: 'E2E Issuer',
-          repName: 'Alice',
-          description: 'We issue things',
-          email: 'test@k-f.co',
-          logo: { uri: 'ipfs://QmaJVD2b53xYFSRDBxg6X8977fwvyzoDuCxvambe4QvrqT', mime: 'image/png' },
-        },
-        links: {
-          executiveSummary: { uri: 'ipfs://QmSPNN2QsqBB9MkiifWQi55iVZ2CLicq7X6EezZwB98uLE', mime: 'application/pdf' },
-          forum: '',
-          website: '',
-        },
-        details: [],
-        status: 'open',
-        listed: false,
-        poolFees: [{ name: 'Protocol fee (Public Securities)', feePosition: 'Top of waterfall', id: 1 }],
-        reports: [
-          {
-            author: { avatar: null, name: 'Bob Alison', title: 'Facilitator of the E2E Credit Group' },
-            uri: 'https://gov.centrifuge.io/',
-          },
-        ],
-      },
-      pod: {},
-      tranches: { [juniorTranche]: { minInitialInvestment: '0' } },
-      // onboarding: {
-      //   tranches: { [juniorTranche]: { openForOnboarding: true } },
-      //   kycRestrictedCountries: ['us', 'um'],
-      //   kybRestrictedCountries: ['us'],
-      //   externalOnboardingUrl: 'https://www.anemoy.io/funds/ltf#get-access',
-      //   podReadAccess: true,
-      //   taxInfoRequired: true,
-      // },
-      loanTemplates: [{ id: TEMPLATE_HASH, createdAt: new Date().toISOString() }],
-    }
-    const metadataInput: Partial<PoolMetadataInput> = {
-      poolName: 'E2E Test Pool',
-      tranches: [
-        {
-          minInvestment: 0,
-          tokenName: 'Junior',
-          symbolName: 'E2EJUN',
-          interestRate: '',
-          minRiskBuffer: '',
-        },
-      ],
-    }
-
+    const feeReceiverCentAddress = evmToSubstrateAddress(FeeReceiver.address, evmChainId)
     const poolManagerCent = cent.connectEvm(PoolManager.address, PoolManager, evmChainId)
     const borrowerCent = cent.connectEvm(Borrower.address, Borrower, evmChainId)
     const investorCent = cent.connectEvm(Investor.address, Investor, evmChainId)
     const navManagerCent = cent.connectEvm(NavManager.address, NavManager, evmChainId)
 
+    console.log(
+      'poolManagerCentAddress',
+      poolManagerCentAddress,
+      borrowerCentAddress,
+      investorCentAddress,
+      navManagerCentAddress,
+      feeReceiverCentAddress
+    )
+
     async function doTransactions() {
+      const feeId = await firstValueFrom(cent.pools.getNextPoolFeeId())
+
+      const metadata: PoolMetadata = {
+        version: 1,
+        pool: {
+          name: 'E2E Test Pool',
+          icon: { uri: 'ipfs://QmTocPtJYu2sXYoir52dR6iqDjg56v4Tc3sH8fxGNuLDWQ', mime: 'image/svg+xml' },
+          asset: { class: 'Public credit', subClass: 'US Treasuries' },
+          issuer: {
+            name: 'E2E Issuer',
+            repName: 'Alice',
+            description: 'We issue things',
+            email: 'test@k-f.co',
+            logo: { uri: 'ipfs://QmaJVD2b53xYFSRDBxg6X8977fwvyzoDuCxvambe4QvrqT', mime: 'image/png' },
+          },
+          links: {
+            executiveSummary: { uri: 'ipfs://QmSPNN2QsqBB9MkiifWQi55iVZ2CLicq7X6EezZwB98uLE', mime: 'application/pdf' },
+            forum: '',
+            website: '',
+          },
+          details: [],
+          status: 'open',
+          listed: false,
+          poolFees: [
+            { name: 'Protocol fee', feePosition: 'Top of waterfall', id: feeId },
+            { name: 'Issuer fee', feePosition: 'Top of waterfall', id: feeId + 1 },
+          ],
+          reports: [
+            {
+              author: { avatar: null, name: 'Bob Alison', title: 'Facilitator of the E2E Credit Group' },
+              uri: 'https://gov.centrifuge.io/',
+            },
+          ],
+        },
+        pod: {},
+        tranches: { [juniorTranche]: { minInitialInvestment: '0' } },
+        // onboarding: {
+        //   tranches: { [juniorTranche]: { openForOnboarding: true } },
+        //   kycRestrictedCountries: ['us', 'um'],
+        //   kybRestrictedCountries: ['us'],
+        //   externalOnboardingUrl: 'https://www.anemoy.io/funds/ltf#get-access',
+        //   podReadAccess: true,
+        //   taxInfoRequired: true,
+        // },
+        loanTemplates: [{ id: TEMPLATE_HASH, createdAt: new Date().toISOString() }],
+      }
+      const metadataInput: Partial<PoolMetadataInput> = {
+        poolName: 'E2E Test Pool',
+        tranches: [
+          {
+            minInvestment: 0,
+            tokenName: 'Junior',
+            symbolName: 'E2EJUN',
+            interestRate: '',
+            minRiskBuffer: '',
+          },
+        ],
+      }
+
       const result: TransactionReceipt = await lastValueFrom(
         poolManagerCent.wrapSignAndSend(
           api,
@@ -206,8 +221,16 @@ export function CreateAndSetupPool() {
                   destination: import.meta.env.REACT_APP_TREASURY,
                   feeType: 'fixed',
                   limit: 'ShareOfPortfolioValuation',
-                  name: 'Protocol fee (Public Securities & Equities)',
+                  name: 'Protocol fee',
                   amount: Rate.fromPercent(0.075),
+                  feePosition: 'Top of waterfall',
+                },
+                {
+                  destination: feeReceiverCentAddress,
+                  feeType: 'chargedUpTo',
+                  limit: 'ShareOfPortfolioValuation',
+                  name: 'Issuer fee',
+                  amount: Rate.fromPercent(0.5),
                   feePosition: 'Top of waterfall',
                 },
               ],
@@ -314,7 +337,7 @@ export function CreateAndSetupPool() {
         maxPriceVariation: Rate.fromPercent(9999),
         maxBorrowAmount: null,
         Isin: isin1,
-        // priceId: {isin: 'US912797LD70',}
+        // priceId: {isin: isin1,}
         maturityDate: new Date('2025-12-31'),
         interestRate: Rate.fromPercent(0),
         notional: CurrencyBalance.fromFloat(100, 6),
@@ -370,26 +393,45 @@ export function CreateAndSetupPool() {
         ),
       ])
 
-      const res = await lastValueFrom(
-        // borrowerCent.wrapSignAndSend(api, loanBatch)
-        borrowerCent.wrapSignAndSend(api, loanBatch, { onStatusChange: options?.onStatusChange })
+      await lastValueFrom(
+        borrowerCent.wrapSignAndSend(api, loanBatch)
+        // borrowerCent.wrapSignAndSend(api, loanBatch, { onStatusChange: options?.onStatusChange })
       )
 
-      return res
+      // return res
 
+      updateTransaction(txId, {
+        title: 'Feed oracle values',
+        status: 'pending',
+      })
+
+      // Feed oracle values
+      const navBatch = api.tx.utility.batchAll([
+        api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18)),
+        api.tx.oraclePriceCollection.updateCollection(poolId),
+        api.tx.loans.updatePortfolioValuation(poolId),
+      ])
+
+      await lastValueFrom(navManagerCent.wrapSignAndSend(api, navBatch))
+
+      // await lastValueFrom(
+      //   navManagerCent.wrapSignAndSend(
+      //     api,
+      //     api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18))
+      //   )
+      // )
       // updateTransaction(txId, {
-      //   title: 'Feed oracle values',
+      //   title: 'Update collection',
       //   status: 'pending',
       // })
 
-      // // Feed oracle values
-      // const navBatch = api.tx.utility.batchAll([
-      //   api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18)),
-      //   api.tx.oraclePriceCollection.updateCollection(poolId),
-      //   api.tx.loans.updatePortfolioValuation(poolId),
-      // ])
+      // await lastValueFrom(navManagerCent.wrapSignAndSend(api, api.tx.oraclePriceCollection.updateCollection(poolId)))
 
-      // await lastValueFrom(navManagerCent.wrapSignAndSend(api, navBatch))
+      // updateTransaction(txId, {
+      //   title: 'Update valuation',
+      //   status: 'pending',
+      // })
+      // await lastValueFrom(navManagerCent.wrapSignAndSend(api, api.tx.loans.updatePortfolioValuation(poolId)))
 
       // updateTransaction(txId, {
       //   title: 'Close epoch',
@@ -419,159 +461,6 @@ export function CreateAndSetupPool() {
     }
 
     return of(doTransactions())
-
-    // const tx = api.tx.utility.batchAll([api.tx.proxy.createPure('Any', 0, 0), api.tx.proxy.createPure('Any', 0, 1)])
-    // return poolManagerCent.wrapSignAndSend(api, tx).pipe(
-    //   takeLast(1),
-    //   switchMap((result: TransactionReceipt) => api.rpc.chain.getBlockHash(result.blockNumber)),
-    //   switchMap((blockHash) => api.query.system.events.at(blockHash)),
-    //   take(1),
-    //   switchMap((blockEvents: any) => {
-    //     console.log('events', blockEvents)
-    //     const events = blockEvents.filter(({ event }: any) => api.events.proxy.PureCreated.is(event))
-    //     if (!events?.length) throw new Error('no events')
-    //      ;({ pure: adminProxy } = (events[0].toHuman() as any).event.data)
-    //      ;({ pure: aoProxy } = (events[1].toHuman() as any).event.data)
-
-    //     updateTransaction(txId, {
-    //       title: 'Create pool',
-    //       status: 'pending',
-    //     })
-
-    //     return combineLatest([
-    //       poolManagerCent.pools.createPool(
-    //         [
-    //           adminProxy,
-    //           poolId,
-    //           [{}],
-    //           { LocalAsset: '1' },
-    //           CurrencyBalance.fromFloat(1000000, 6),
-    //           metadataInput as any,
-    //           [
-    //             {
-    //               destination: import.meta.env.REACT_APP_TREASURY,
-    //               feeType: 'fixed',
-    //               limit: 'ShareOfPortfolioValuation',
-    //               name: 'Protocol fee (Public Securities & Equities)',
-    //               amount: Rate.fromPercent(0.075),
-    //               feePosition: 'Top of waterfall',
-    //             },
-    //           ],
-    //         ],
-    //         { createType: 'immediate', batch: true }
-    //       ),
-    //       poolManagerCent.pools.updatePoolRoles(
-    //         [
-    //           poolId,
-    //           [
-    //             [poolManagerCentAddress, 'InvestorAdmin'],
-    //             [poolManagerCentAddress, 'LiquidityAdmin'],
-    //             [adminProxy, 'InvestorAdmin'],
-    //             [aoProxy, 'Borrower'],
-    //             [aoProxy, 'LoanAdmin'],
-    //             [aoProxy, 'LiquidityAdmin'],
-    //             [aoProxy, { TrancheInvestor: [juniorTranche, TEN_YEARS_FROM_NOW] }],
-    //             [investorCentAddress, { TrancheInvestor: [juniorTranche, TEN_YEARS_FROM_NOW] }],
-    //           ],
-    //           [],
-    //         ],
-    //         { batch: true }
-    //       ),
-    //       poolManagerCent.pools.setMetadata([poolId, metadata], { batch: true }),
-    //     ]).pipe(
-    //       switchMap(([poolTx, permissionTx, metadataTx]) => {
-    //         const tx = api.tx.utility.batchAll([
-    //           api.tx.balances.transferKeepAlive(adminProxy, consts.proxy.proxyDepositFactor),
-    //           api.tx.balances.transferKeepAlive(
-    //             aoProxy,
-    //             consts.proxy.proxyDepositFactor.mul(new BN(5)).add(consts.uniques.collectionDeposit)
-    //           ),
-
-    //           // Setup the AO
-    //           // * Add admin proxy and borrower as proxies to the AO proxy
-    //           // * Create collateral NFT collection
-    //           api.tx.proxy.proxy(
-    //             aoProxy,
-    //             undefined,
-    //             api.tx.utility.batchAll([
-    //               api.tx.proxy.addProxy(adminProxy, 'Any', 0),
-    //               api.tx.proxy.removeProxy(poolManagerCentAddress, 'Any', 0),
-    //               api.tx.proxy.addProxy(borrowerCentAddress, 'Borrow', 0),
-    //               api.tx.proxy.addProxy(borrowerCentAddress, 'Invest', 0),
-    //               api.tx.proxy.addProxy(borrowerCentAddress, 'Transfer', 0),
-    //               api.tx.proxy.addProxy(borrowerCentAddress, 'PodOperation', 0),
-    //               api.tx.uniques.create(nftCollectionId, adminProxy),
-    //             ])
-    //           ),
-
-    //           // Create the pool
-    //           poolTx,
-
-    //           // Setup permissions and metadata
-    //           api.tx.proxy.proxy(adminProxy, undefined, api.tx.utility.batchAll([permissionTx, metadataTx])),
-    //         ])
-    //         return poolManagerCent.wrapSignAndSend(api, tx)
-    //       })
-    //     )
-    //   }),
-    //   takeLast(1),
-    //   switchMap(() => {
-    //     updateTransaction(txId, {
-    //       title: 'Invest',
-    //       status: 'pending',
-    //     })
-    //     // Invest
-    //     const tx = api.tx.investments.updateInvestOrder([poolId, juniorTranche], CurrencyBalance.fromFloat(10000, 6))
-    //     return investorCent.wrapSignAndSend(api, tx)
-    //   }),
-    //   takeLast(1),
-    // 	switchMap(() => {
-    // 		const pricing: LoanInfoInput = {
-    //       valuationMethod: 'oracle',
-    //       maxPriceVariation: Rate.fromPercent(9999),
-    //       maxBorrowAmount: null,
-    //       Isin: '',
-    //       maturityDate: new Date('2025-31-12'),
-    //       interestRate: Rate.fromPercent(0),
-    //       notional: CurrencyBalance.fromFloat(100, 6),
-    // 		}
-    // 		return borrowerCent.pools.createLoan([poolId, nftCollectionId, assetNftId1, pricing], {batch: true})
-    // 	}),
-    //   switchMap((createLoanTx) => {
-    //     updateTransaction(txId, {
-    //       title: 'Close epoch',
-    //       status: 'pending',
-    //     })
-    //     // Close epoch and borrow
-    //     const tx =
-    // 		api.tx.utility.batchAll([
-
-    // 			api.tx.proxy.proxy(
-    // 				aoProxy,
-    // 				'PodOperation',
-    // 				api.tx.utility.batchAll([
-    // 					api.tx.uniques.mint(nftCollectionId, assetNftId1, aoProxy),
-    // 					api.tx.uniques.setMetadata(nftCollectionId, assetNftId1, metadataUri, true)
-    // 				])
-    // 			),
-    // 		api.tx.proxy.proxy(
-    // 			aoProxy,
-    // 			'Borrow',
-    // 			api.tx.utility.batchAll([
-    // 				createLoanTx,
-    // 				api.tx.loans.updatePortfolioValuation(poolId),
-    // 				api.tx.poolSystem.closeEpoch(poolId),
-    // 				api.tx.investments.collectInvestmentsFor(investorCentAddress, [poolId, juniorTranche]),
-
-    // 			])
-    // 		),
-    // 		])
-
-    //     return investorCent.wrapSignAndSend(api,
-    // 			tx, { onStatusChange: options?.onStatusChange })
-    //   }),
-    //   takeLast(1)
-    // )
   })
   return (
     <button
