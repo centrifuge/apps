@@ -1,4 +1,4 @@
-import { AnchorButton, Box, Card, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Card, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
@@ -7,7 +7,6 @@ import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useLoan } from '../../utils/useLoans'
 import { useAssetSnapshots } from '../../utils/usePools'
-import { useDebugFlags } from '../DebugFlags'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 
 type ChartData = {
@@ -48,8 +47,6 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       setActiveFilter(filterOptions[1])
     }
   }, [assetSnapshots])
-
-  const { assetSnapshots: showAssetSnapshots } = useDebugFlags()
 
   const dataUrl: any = React.useMemo(() => {
     if (!assetSnapshots || !assetSnapshots?.length) {
@@ -140,7 +137,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     return [min, max]
   }, [data])
 
-  if (!assetSnapshots || assetSnapshots?.length < 1) return <Text variant="body2">No data available</Text>
+  if (!assetSnapshots || assetSnapshots?.length < 1) return <Spinner style={{ margin: 'auto' }} />
 
   return (
     <Card p={3}>
