@@ -47,6 +47,9 @@ export type SubqueryTrancheSnapshot = {
   yield30DaysAnnualized: string
   yield90DaysAnnualized: string
   yieldSinceInception: string
+  yieldMTD: string
+  yieldQTD: string
+  yieldYTD: string
   yieldSinceLastPeriod: string
 }
 

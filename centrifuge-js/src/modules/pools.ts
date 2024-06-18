@@ -568,6 +568,9 @@ export type DailyTrancheState = {
   yield30DaysAnnualized: Perquintill
   yield90DaysAnnualized: Perquintill
   yieldSinceInception: Perquintill
+  yieldMTD: Perquintill
+  yieldQTD: Perquintill
+  yieldYTD: Perquintill
   yieldSinceLastPeriod: Perquintill
 }
 
@@ -2348,6 +2351,9 @@ export function getPoolsModule(inst: Centrifuge) {
             yield30DaysAnnualized
             yield90DaysAnnualized
             yieldSinceInception
+            yieldMTD
+            yieldQTD
+            yieldYTD
             yieldSinceLastPeriod
           }
           pageInfo {
@@ -2560,6 +2566,9 @@ export function getPoolsModule(inst: Centrifuge) {
                   yieldSinceInception: tranche.yieldSinceInception
                     ? new Perquintill(hexToBN(tranche.yieldSinceInception))
                     : new Perquintill(0),
+                  yieldMTD: tranche.yieldMTD ? new Perquintill(hexToBN(tranche.yieldMTD)) : new Perquintill(0),
+                  yieldQTD: tranche.yieldQTD ? new Perquintill(hexToBN(tranche.yieldQTD)) : new Perquintill(0),
+                  yieldYTD: tranche.yieldYTD ? new Perquintill(hexToBN(tranche.yieldYTD)) : new Perquintill(0),
                   yieldSinceLastPeriod: tranche.yieldSinceLastPeriod
                     ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod))
                     : new Perquintill(0),
