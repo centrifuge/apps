@@ -1,16 +1,20 @@
-import { addressToHex } from '@centrifuge/centrifuge-js'
+import { evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import { useCentEvmChainId } from '@centrifuge/centrifuge-react'
 import { Button, IconMinusCircle, Stack, Text } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
 import * as React from 'react'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
+import { isEvmAddress } from '../../../utils/address'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { ChangeThreshold } from './ChangeTreshold'
 import type { PoolManagersInput } from './PoolManagers'
 
 type Row = { address: string; index: number }
 type Props = { isEditing?: boolean; isLoading?: boolean; canRemoveFirst?: boolean }
+
 export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoading }: Props) {
+  const chainId = useCentEvmChainId()
   const form = useFormikContext<PoolManagersInput>()
   const { adminMultisig } = form.values
   const rows = React.useMemo(
@@ -66,7 +70,7 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
                   if (adminMultisig.signers.length === 1) {
                     form.setFieldValue('adminMultisig.threshold', 2, false)
                   }
-                  fldArr.push(addressToHex(address))
+                  fldArr.push(isEvmAddress(address) ? evmToSubstrateAddress(address, chainId ?? 0) : address)
                 }}
               />
             )}
