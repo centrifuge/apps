@@ -30,8 +30,8 @@ const FilterButton = styled(Stack)`
 `
 
 const filterOptions = [
-  { value: 'price', label: 'Show price' },
-  { value: 'value', label: 'Show asset value' },
+  { value: 'price', label: 'Price' },
+  { value: 'value', label: 'Asset value' },
 ] as const
 
 function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
