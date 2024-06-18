@@ -119,10 +119,11 @@ export type LoanInfoInput =
       valuationMethod: 'oracle'
       maxBorrowAmount: BN | null
       maxPriceVariation: BN
-      Isin: string
+      priceId: { isin: string } | { poolLoanId: [string, string] }
       maturityDate: Date
       interestRate: BN
       notional: BN
+      withLinearPricing: boolean
     }
   | {
       valuationMethod: 'discountedCashFlow'
@@ -141,7 +142,7 @@ export type LoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
     maturity: { fixed: { date: number; extension: number } }
-    interestPayments: 'None'
+    interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
 
@@ -154,12 +155,11 @@ export type LoanInfoData = {
   pricing:
     | {
         external: {
-          priceId: {
-            isin: string
-          }
+          priceId: { isin: string } | { poolLoanId: [string, string] }
           maxBorrowAmount: { noLimit: null } | { quantity: string }
           notional: string
           maxPriceVariation: string
+          withLinearPricing: boolean
         }
       }
     | {
@@ -194,7 +194,7 @@ export type ActiveLoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
     maturity: { fixed: { date: number; extension: number } }
-    interestPayments: 'None'
+    interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
 
@@ -205,12 +205,11 @@ export type ActiveLoanInfoData = {
     | {
         external: {
           info: {
-            priceId: {
-              isin: string
-            }
+            priceId: { isin: string } | { poolLoanId: [string, string] }
             maxBorrowAmount: { noLimit: null } | { quantity: string }
             notional: string
             maxPriceVariation: string
+            withLinearPricing: boolean
           }
           outstandingQuantity: string
           interest: {
@@ -427,7 +426,7 @@ export type ExternalPricingInfo = {
   maxBorrowAmount: CurrencyBalance | null
   maxPriceVariation: Rate
   outstandingQuantity: CurrencyBalance
-  Isin: string
+  priceId: { isin: string } | { poolLoanId: [string, string] }
   maturityDate: string
   maturityExtensionDays: number
   oracle: {
@@ -437,6 +436,7 @@ export type ExternalPricingInfo = {
   }[]
   notional: CurrencyBalance
   interestRate: Rate
+  withLinearPricing: boolean
 }
 
 type TinlakePricingInfo = {
@@ -733,7 +733,6 @@ export type PoolMetadata = {
     details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
-    assetOriginators?: Record<string, { name?: string; withdrawAddresses: WithdrawAddress[] }>
     reports?: PoolReport[]
   }
   pod?: {
@@ -1597,12 +1596,13 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  async function getNextLoanId(args: [poolId: string]) {
+  function getNextLoanId(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
-
-    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId(poolId))))
-    return id
+    return $api.pipe(
+      switchMap((api) => combineLatest([api.query.loans.lastLoanId(poolId)])),
+      map((feeId) => parseInt(feeId[0].toHuman() as string, 10) + 1)
+    )
   }
 
   function createLoan(
@@ -1621,7 +1621,7 @@ export function getPoolsModule(inst: Centrifuge) {
             extension: 'maturityExtensionDays' in infoInput ? infoInput.maturityExtensionDays * SEC_PER_DAY : 0,
           },
         },
-        interestPayments: 'None',
+        interestPayments: 'OnceAtMaturity',
         payDownSchedule: 'None',
       },
 
@@ -1635,15 +1635,14 @@ export function getPoolsModule(inst: Centrifuge) {
         infoInput.valuationMethod === 'oracle'
           ? {
               external: {
-                priceId: {
-                  isin: infoInput.Isin,
-                },
+                priceId: infoInput.priceId,
                 maxBorrowAmount:
                   infoInput.maxBorrowAmount === null
                     ? { noLimit: null }
                     : { quantity: infoInput.maxBorrowAmount.toString() },
                 maxPriceVariation: infoInput.maxPriceVariation!.toString(),
                 notional: infoInput.notional.toString(),
+                withLinearPricing: infoInput.withLinearPricing,
               },
             }
           : {
@@ -3603,7 +3602,7 @@ export function getPoolsModule(inst: Centrifuge) {
         oracles.forEach((oracle) => {
           const [value, timestamp] = oracle[1].toPrimitive() as any
           const keys = oracle[0].toHuman() as any
-          const isin = keys[1].Isin
+          const isin = keys[1]?.Isin
           const account = keys[0].system?.Signed
           if (!isin || !account) return
           const entry = {
@@ -3683,10 +3682,14 @@ export function getPoolsModule(inst: Centrifuge) {
                       'noLimit' in pricingInfo.maxBorrowAmount
                         ? null
                         : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 18),
-                    Isin: pricingInfo.priceId.isin,
+                    priceId: pricingInfo.priceId,
                     maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
                     maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
-                    oracle: oraclePrices[pricingInfo.priceId.isin] || [
+                    oracle: oraclePrices[
+                      'isin' in pricingInfo.priceId
+                        ? pricingInfo.priceId?.isin
+                        : pricingInfo.priceId?.poolLoanId.join('-')
+                    ] || [
                       {
                         value: new CurrencyBalance(0, 18),
                         timestamp: 0,
@@ -3700,6 +3703,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     interestRate: new Rate(interestRate),
                     notional: new CurrencyBalance(pricingInfo.notional, currency.decimals),
                     maxPriceVariation: new Rate(pricingInfo.maxPriceVariation),
+                    withLinearPricing: pricingInfo.withLinearPricing,
                   }
                 : {
                     valuationMethod:

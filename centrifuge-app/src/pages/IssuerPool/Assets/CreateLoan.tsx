@@ -28,7 +28,7 @@ import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
-import { lastValueFrom, switchMap } from 'rxjs'
+import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
@@ -69,8 +69,10 @@ export type CreateLoanFormValues = {
     lossGivenDefault: number | ''
     discountRate: number | ''
     maxBorrowQuantity: number | ''
-    Isin: string
+    isin: string
     notional: number | ''
+    withLinearPricing: boolean
+    oracleSource: 'isin' | 'assetSpecific'
   }
 }
 
@@ -236,8 +238,10 @@ function IssuerCreateLoan() {
         lossGivenDefault: '',
         discountRate: '',
         maxBorrowQuantity: '',
-        Isin: '',
+        isin: '',
         notional: 100,
+        withLinearPricing: false,
+        oracleSource: 'isin',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -254,14 +258,19 @@ function IssuerCreateLoan() {
           maturityDate: new Date(values.pricing.maturityDate),
         }
       } else if (values.pricing.valuationMethod === 'oracle') {
+        const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))
         pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
           maxPriceVariation: Rate.fromPercent(9999),
           maxBorrowAmount: values.pricing.maxBorrowQuantity ? Price.fromFloat(values.pricing.maxBorrowQuantity) : null,
-          Isin: values.pricing.Isin || '',
+          priceId:
+            values.pricing.oracleSource === 'isin'
+              ? { isin: values.pricing.isin }
+              : { poolLoanId: [pid, loanId.toString()] satisfies [string, string] },
           maturityDate: new Date(values.pricing.maturityDate),
           interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
+          withLinearPricing: values.pricing.withLinearPricing,
         }
       } else {
         pricingInfo = {

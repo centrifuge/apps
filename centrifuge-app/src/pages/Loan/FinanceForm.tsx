@@ -1,4 +1,4 @@
-import {
+import Centrifuge, {
   AccountCurrencyBalance,
   CurrencyBalance,
   CurrencyMetadata,
@@ -293,11 +293,11 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
   const access = usePoolAccess(poolId)
   const muxBalances = useBalances(TOKENMUX_PALLET_ACCOUNTID)
-  const cent = useCentrifuge()
+  const cent: Centrifuge = useCentrifuge()
   const api = useCentrifugeApi()
 
   const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
-  const withdrawAddresses = ao?.transferAllowlist.map((l) => l.meta) ?? []
+  const withdrawAddresses = ao?.transferAllowlist ?? []
 
   if (!isLocalAsset) {
     if (!withdrawAddresses.length)

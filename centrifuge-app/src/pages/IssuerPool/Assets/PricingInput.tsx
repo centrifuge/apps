@@ -1,4 +1,14 @@
-import { CurrencyInput, DateInput, Grid, NumberInput, Select, TextInput } from '@centrifuge/fabric'
+import {
+  Checkbox,
+  CurrencyInput,
+  DateInput,
+  Grid,
+  NumberInput,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, useFormikContext } from 'formik'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../../components/Tooltips'
@@ -14,13 +24,30 @@ export function PricingInput({ poolId }: { poolId: string }) {
     <Grid columns={[1, 2, 2, 3]} gap={2} rowGap={3}>
       {values.pricing.valuationMethod === 'oracle' && (
         <>
-          <FieldWithErrorMessage
-            as={TextInput}
-            label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
-            placeholder="010101010000"
-            name="pricing.Isin"
-            validate={validate.Isin}
-          />
+          <Field name="pricing.oracleSource">
+            {({ field, meta, form }: FieldProps) => (
+              <Select
+                {...field}
+                label="Oracle source"
+                onChange={(event) => form.setFieldValue('pricing.oracleSource', event.target.value, false)}
+                errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                options={[
+                  { value: 'isin', label: 'ISIN' },
+                  { value: 'assetSpecific', label: 'Asset specific' },
+                ]}
+                placeholder="..."
+              />
+            )}
+          </Field>
+          {values.pricing.oracleSource === 'isin' && (
+            <FieldWithErrorMessage
+              as={TextInput}
+              label={<Tooltips type="isin" variant="secondary" label="ISIN*" />}
+              placeholder="010101010000"
+              name="pricing.isin"
+              validate={validate.isin}
+            />
+          )}
           <Field
             name="pricing.notional"
             validate={combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER))}
@@ -41,6 +68,17 @@ export function PricingInput({ poolId }: { poolId: string }) {
               />
             )}
           </Field>
+          <Stack py={2} justifyContent="flex-end">
+            <Field name="pricing.withLinearPricing">
+              {({ field, meta }: FieldProps) => (
+                <Checkbox
+                  errorMessage={meta.touched ? meta.error : undefined}
+                  label={<Text variant="body2">With linear pricing?</Text>}
+                  {...field}
+                />
+              )}
+            </Field>
+          </Stack>
         </>
       )}
 
