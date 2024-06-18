@@ -7,6 +7,7 @@ import {
   useWallet,
 } from '@centrifuge/centrifuge-react'
 import {
+  AddressInput,
   Button,
   Grid,
   IconAlertCircle,
@@ -14,7 +15,6 @@ import {
   IconInfoFailed,
   IconMinus,
   IconPlus,
-  SearchInput,
   Select,
   Shelf,
   Stack,
@@ -89,6 +89,10 @@ export function InvestorStatus() {
     setPendingTrancheId(trancheId)
   }
 
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setAddress(e.target.value)
+  }
+
   return (
     <PageSection
       title="Investor status"
@@ -96,12 +100,7 @@ export function InvestorStatus() {
     >
       <Stack gap={2}>
         <Grid columns={2} gap={2} alignItems="center">
-          <SearchInput
-            name="investorStatus"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter address..."
-          />
+          <AddressInput label="" placeholder="Add an address" onChange={handleChange} />
           <Select
             value={chain}
             options={[

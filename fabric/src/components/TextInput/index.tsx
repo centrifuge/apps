@@ -252,7 +252,12 @@ export function TextAreaInput({
 }
 
 export type AddressInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
-  Omit<InputUnitProps, 'inputElement'>
+  Omit<InputUnitProps, 'inputElement'> & {
+    value?: string
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
+    clearIcon?: boolean
+  }
 
 export function AddressInput({
   id,
@@ -262,6 +267,8 @@ export function AddressInput({
   errorMessage,
   onBlur,
   onChange,
+  value,
+  clearIcon,
   ...inputProps
 }: AddressInputProps) {
   const defaultId = React.useId()
@@ -288,7 +295,7 @@ export function AddressInput({
 
   function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
     const address = e.target.value
-    if (!(isSubstrateAddress(address) || isEvmAddress(address))) {
+    if (!(isSubstrateAddress(address) || isEvmAddress(address)) || clearIcon) {
       setNetwork(null)
     }
 
@@ -296,6 +303,7 @@ export function AddressInput({
       onBlur(e)
     }
   }
+
   return (
     <InputUnit
       label={label}
@@ -308,6 +316,7 @@ export function AddressInput({
           type="text"
           onChange={handleChange}
           onBlur={handleBlur}
+          value={value}
           action={
             network && (
               <Shelf

@@ -1,13 +1,12 @@
 import { AddFee, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
+  AddressInput,
   Box,
   Button,
   Drawer,
   Flex,
   Grid,
-  IconButton,
-  IconCopy,
   IconMinusCircle,
   IconPlusCircle,
   NumberInput,
@@ -21,7 +20,6 @@ import { Field, FieldArray, FieldProps, Form, FormikProvider, useFormik } from '
 import React from 'react'
 import { useParams } from 'react-router'
 import { Dec } from '../../utils/Decimal'
-import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
@@ -254,18 +252,10 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                   >
                                     {({ field, meta }: FieldProps) => {
                                       return (
-                                        <TextInput
+                                        <AddressInput
                                           {...field}
                                           disabled={!poolAdmin || updateFeeTxLoading}
                                           label="Receiving address"
-                                          symbol={
-                                            <IconButton
-                                              onClick={() => copyToClipboard(values.receivingAddress)}
-                                              title="Copy address to clipboard"
-                                            >
-                                              <IconCopy />
-                                            </IconButton>
-                                          }
                                           errorMessage={(meta.touched && meta.error) || ''}
                                         />
                                       )

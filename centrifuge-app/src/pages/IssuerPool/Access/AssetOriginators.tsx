@@ -311,8 +311,8 @@ function AOForm({
       }
       execute(
         [
-          addedWithdraw.map((w) => getKeyForReceiver(api, w)),
-          removedWithdraw.map((w) => getKeyForReceiver(api, w)),
+          addedWithdraw.filter((w) => Object.keys(w).length !== 0).map((w) => getKeyForReceiver(api, w)),
+          removedWithdraw.filter((w) => Object.keys(w).length !== 0).map((w) => getKeyForReceiver(api, w)),
           null,
           addedPermissions,
           addedDelegates,

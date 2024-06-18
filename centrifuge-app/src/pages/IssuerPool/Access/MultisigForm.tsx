@@ -1,4 +1,3 @@
-import { addressToHex } from '@centrifuge/centrifuge-js'
 import { Box, Button, IconMinusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { ErrorMessage, Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
@@ -10,6 +9,7 @@ import type { PoolManagersInput } from './PoolManagers'
 
 type Row = { address: string; index: number }
 type Props = { isEditing?: boolean; isLoading?: boolean; canRemoveFirst?: boolean }
+
 export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoading }: Props) {
   const form = useFormikContext<PoolManagersInput>()
   const { adminMultisig } = form.values
@@ -66,7 +66,7 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
                   if (adminMultisig.signers.length === 1) {
                     form.setFieldValue('adminMultisig.threshold', 2, false)
                   }
-                  fldArr.push(addressToHex(address))
+                  fldArr.push(address)
                 }}
               />
             )}
@@ -79,7 +79,6 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
               For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
               requires multiple signers. Any such change will require the confirmation of:
             </Text>
-
             <Shelf gap={2}>
               {isEditing && (
                 <Box maxWidth={150}>
