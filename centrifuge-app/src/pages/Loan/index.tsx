@@ -24,6 +24,7 @@ import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../components/LoadBoundary'
+import LoanLabel from '../../components/LoanLabel'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { TransactionHistoryTable } from '../../components/PoolOverview/TransactionHistory'
@@ -145,7 +146,14 @@ function Loan() {
             <Thumbnail type="asset" label={loan?.id ?? ''} size="large" />
           )
         }
-        title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
+        title={
+          <Shelf>
+            <Box mr="16px">
+              <TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>
+            </Box>
+            {loan && <LoanLabel loan={loan} />}
+          </Shelf>
+        }
         subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
       />
       {loanId === '0' && (

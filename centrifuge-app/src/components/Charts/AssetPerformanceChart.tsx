@@ -53,13 +53,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       return undefined
     }
 
-    const formatted = assetSnapshots.map((snapshot) => {
-      return {
-        ...snapshot,
-      }
-    })
-
-    return getCSVDownloadUrl(formatted as any)
+    return getCSVDownloadUrl(assetSnapshots as any)
   }, [assetSnapshots, pool.currency.symbol])
 
   const data: ChartData[] = React.useMemo(() => {
@@ -67,7 +61,11 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
 
     const historic = assetSnapshots
       .filter((day) => {
-        return asset && day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate).getTime()
+        return (
+          asset &&
+          day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate).getTime() &&
+          !day.presentValue?.isZero()
+        )
       })
       .map((day) => {
         const historicPV = day.presentValue?.toDecimal().toNumber() || 0
