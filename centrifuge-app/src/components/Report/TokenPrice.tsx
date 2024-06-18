@@ -29,7 +29,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
     endDate ? new Date(endDate) : undefined,
     'month'
   )
-  const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
+  const poolStates = groupBy === 'day' || groupBy === 'daily' ? dailyPoolStates : monthlyPoolStates
 
   const columns = React.useMemo(() => {
     if (!poolStates) {
