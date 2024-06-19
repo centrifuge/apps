@@ -49,6 +49,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
 
   const reportOptions: { label: string; value: Report }[] = [
     { label: 'Balance sheet', value: 'balance-sheet' },
+    { label: 'Profit & loss', value: 'profit-and-loss' },
     { label: 'Cash flow statement', value: 'cash-flow-statement' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
@@ -83,7 +84,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         }}
       />
 
-      {!['investor-list', 'asset-list', 'balance-sheet', 'cash-flow-statement'].includes(report) && (
+      {!['investor-list', 'asset-list', 'balance-sheet', 'cash-flow-statement', 'profit-and-loss'].includes(report) && (
         <>
           <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
           <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
@@ -181,7 +182,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         />
       )}
 
-      {['balance-sheet', 'cash-flow-statement'].includes(report) && (
+      {['balance-sheet', 'cash-flow-statement', 'profit-and-loss'].includes(report) && (
         <>
           <Select
             name="balanceSheetGroupBy"

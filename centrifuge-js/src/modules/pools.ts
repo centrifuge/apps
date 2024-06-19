@@ -20,6 +20,7 @@ import {
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
   SubqueryOracleTransaction,
+  SubqueryPoolFeeSnapshot,
   SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
@@ -570,6 +571,19 @@ export type DailyTrancheState = {
   yieldSinceLastPeriod: Perquintill
 }
 
+export type DailyPoolFeesState = {
+  pendingAmount: CurrencyBalance
+  poolFee: { name: string }
+  poolFeeId: string
+  sumAccruedAmount: CurrencyBalance
+  sumChargedAmount: CurrencyBalance
+  sumPaidAmount: CurrencyBalance
+  sumAccruedAmountByPeriod: CurrencyBalance
+  sumChargedAmountByPeriod: CurrencyBalance
+  sumPaidAmountByPeriod: CurrencyBalance
+  timestamp: string
+}
+
 export type DailyPoolState = {
   poolState: {
     netAssetValue: CurrencyBalance
@@ -580,12 +594,19 @@ export type DailyPoolState = {
     sumBorrowedAmountByPeriod: CurrencyBalance
     sumRepaidAmountByPeriod: CurrencyBalance
     sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumPoolFeesAccruedAmountByPeriod: CurrencyBalance
     sumPoolFeesPaidAmountByPeriod: CurrencyBalance
     sumPrincipalRepaidAmountByPeriod: CurrencyBalance
     sumInterestRepaidAmountByPeriod: CurrencyBalance
     sumUnscheduledRepaidAmountByPeriod: CurrencyBalance
     sumInvestedAmountByPeriod: CurrencyBalance
     sumRedeemedAmountByPeriod: CurrencyBalance
+    sumDebtWrittenOffByPeriod: CurrencyBalance
+    sumInterestAccruedByPeriod: CurrencyBalance
+    sumRealizedProfitFifoByPeriod: CurrencyBalance
+    sumUnrealizedProfitAtMarketPrice: CurrencyBalance
+    sumUnrealizedProfitAtNotional: CurrencyBalance
+    sumUnrealizedProfitByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
@@ -597,6 +618,10 @@ export type DailyPoolState = {
   sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
   sumUnscheduledRepaidAmountByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
+  sumUnrealizedProfitAtMarketPrice: string
+  sumUnrealizedProfitAtNotional: string
+  sumUnrealizedProfitByPeriod: string
   sumRepaidAmountByPeriod: string
   sumInvestedAmountByPeriod: string
   sumRedeemedAmountByPeriod: string
@@ -789,6 +814,7 @@ export type AssetTransaction = {
   principalAmount: CurrencyBalance | undefined
   interestAmount: CurrencyBalance | undefined
   hash: string
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string
@@ -2258,6 +2284,12 @@ export function getPoolsModule(inst: Centrifuge) {
           sumPrincipalRepaidAmountByPeriod
           sumInterestRepaidAmountByPeriod
           sumUnscheduledRepaidAmountByPeriod
+          sumInterestAccruedByPeriod
+          sumDebtWrittenOffByPeriod
+          sumRealizedProfitFifoByPeriod
+          sumUnrealizedProfitAtMarketPrice
+          sumUnrealizedProfitAtNotional
+          sumUnrealizedProfitByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2470,6 +2502,27 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumInvestedAmountByPeriod: new CurrencyBalance(state.sumInvestedAmountByPeriod, poolCurrency.decimals),
                 sumRedeemedAmountByPeriod: new CurrencyBalance(state.sumRedeemedAmountByPeriod, poolCurrency.decimals),
                 sumPoolFeesPendingAmount: new CurrencyBalance(state.sumPoolFeesPendingAmount, poolCurrency.decimals),
+                sumDebtWrittenOffByPeriod: new CurrencyBalance(state.sumDebtWrittenOffByPeriod, poolCurrency.decimals),
+                sumInterestAccruedByPeriod: new CurrencyBalance(
+                  state.sumInterestAccruedByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumRealizedProfitFifoByPeriod: new CurrencyBalance(
+                  state.sumRealizedProfitFifoByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitAtMarketPrice: new CurrencyBalance(
+                  state.sumUnrealizedProfitAtMarketPrice,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitAtNotional: new CurrencyBalance(
+                  state.sumUnrealizedProfitAtNotional,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitByPeriod: new CurrencyBalance(
+                  state.sumUnrealizedProfitByPeriod,
+                  poolCurrency.decimals
+                ),
               }
               const poolValue = new CurrencyBalance(new BN(state?.netAssetValue || '0'), poolCurrency.decimals)
 
@@ -2574,6 +2627,155 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+      })
+    )
+  }
+
+  function getDailyPoolFeeStates(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+    return inst
+      .getSubqueryObservable<{
+        poolFeeSnapshots: { nodes: SubqueryPoolFeeSnapshot[] }
+      }>(
+        `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        poolFeeSnapshots(
+          orderBy: BLOCK_NUMBER_ASC, 
+          filter: {
+            poolFeeId: { includes: $poolId }, 
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }
+        ) {
+          nodes {
+            id
+            poolFeeId
+            timestamp
+            sumPaidAmount
+            sumChargedAmount
+            sumAccruedAmount
+            sumPaidAmount
+            pendingAmount
+            sumAccruedAmountByPeriod
+            sumPaidAmountByPeriod
+            sumChargedAmountByPeriod
+            poolFee {
+              name
+            }
+          }
+        }
+      }
+    `,
+        {
+          poolId,
+          from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+          to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        }
+      )
+      .pipe(
+        map((response) => {
+          const poolFeeSnapshots = response?.poolFeeSnapshots || { nodes: [] }
+          const poolFeesGroupedByFeeId = poolFeeSnapshots?.nodes.reduce((acc, snapshot) => {
+            const feeId = snapshot.poolFeeId.split('-')[1]
+            if (!acc[feeId]) {
+              acc[feeId] = []
+            }
+            acc[feeId].push(snapshot)
+            return acc
+          }, {} as { [feeId: string]: SubqueryPoolFeeSnapshot[] })
+          return poolFeesGroupedByFeeId
+        }),
+        combineLatestWith(getPoolCurrency([poolId])),
+        map(([poolFeesGroupedByFeeId, poolCurrency]) => {
+          const poolFeeStates: Record<string, DailyPoolFeesState[]> = {}
+          Object.entries(poolFeesGroupedByFeeId).forEach(([feeId, snapshots]) => {
+            poolFeeStates[feeId] = snapshots.map((snapshot) => ({
+              timestamp: snapshot.timestamp,
+              pendingAmount: new CurrencyBalance(snapshot.pendingAmount, poolCurrency.decimals),
+              poolFee: {
+                name: snapshot.poolFee.name,
+              },
+              poolFeeId: snapshot.poolFeeId,
+              sumAccruedAmount: new CurrencyBalance(snapshot.sumAccruedAmount, poolCurrency.decimals),
+              sumChargedAmount: new CurrencyBalance(snapshot.sumChargedAmount, poolCurrency.decimals),
+              sumPaidAmount: new CurrencyBalance(snapshot.sumPaidAmount, poolCurrency.decimals),
+              sumAccruedAmountByPeriod: new CurrencyBalance(snapshot.sumAccruedAmountByPeriod, poolCurrency.decimals),
+              sumChargedAmountByPeriod: new CurrencyBalance(snapshot.sumChargedAmountByPeriod, poolCurrency.decimals),
+              sumPaidAmountByPeriod: new CurrencyBalance(snapshot.sumPaidAmountByPeriod, poolCurrency.decimals),
+            }))
+          })
+          return poolFeeStates
+        })
+      )
+  }
+
+  function getPoolFeeStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
+    return getDailyPoolFeeStates(args).pipe(
+      map((poolFees) => {
+        return Object.entries(poolFees).map(([feeId, feeStates]) => {
+          if (!feeStates.length) return []
+          const poolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+
+          feeStates.forEach((feeState) => {
+            const date = new Date(feeState.timestamp)
+            const period = getGroupByPeriod(date, groupBy)
+            if (!poolStatesByGroup[period] || new Date(poolStatesByGroup[period].timestamp) < date) {
+              poolStatesByGroup[period] = feeState
+            }
+          })
+
+          return { [feeId]: Object.values(poolStatesByGroup) }
+        })
+      })
+    )
+  }
+
+  function getAggregatedPoolFeeStatesByGroup(
+    args: [poolId: string, from?: Date, to?: Date],
+    groupBy: GroupBy = 'month'
+  ) {
+    return combineLatest([getDailyPoolFeeStates(args), getPoolCurrency([args[0]])]).pipe(
+      map(([poolFeeStates, poolCurrency]) => {
+        return Object.entries(poolFeeStates).map(([feeId, feeStates]) => {
+          if (!feeStates.length) return []
+          const feeStatesByGroup: { [period: string]: DailyPoolFeesState[] } = {}
+
+          feeStates.forEach((poolState) => {
+            const date = new Date(poolState.timestamp)
+            const period = getGroupByPeriod(date, groupBy)
+            if (!feeStatesByGroup[period]) {
+              feeStatesByGroup[period] = []
+            }
+
+            feeStatesByGroup[period].push(poolState)
+          })
+
+          const aggregatedPoolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+
+          for (const period in feeStatesByGroup) {
+            const feeStates = feeStatesByGroup[period]
+
+            const feeStateKeys = Object.keys(feeStates.map((fee) => fee)[0]).filter(
+              (key) => key !== 'poolFeeId' && key !== 'poolFee' && key !== 'timestamp'
+            ) as Omit<keyof DailyPoolFeesState, 'poolFee' | 'poolFeeId' | 'timestamp'>[]
+
+            const aggregates = feeStateKeys.reduce((total, key) => {
+              const sum = feeStates.reduce((sum, feeState) => {
+                return sum.add(Dec((feeState[key as keyof DailyPoolFeesState] as CurrencyBalance).toDecimal()))
+              }, Dec(0))
+              return {
+                [key as keyof DailyPoolFeesState]: CurrencyBalance.fromFloat(sum.toString(), poolCurrency.decimals),
+                ...total,
+              }
+            }, {} as Record<keyof DailyPoolFeesState, any>)
+
+            aggregatedPoolStatesByGroup[period] = {
+              ...aggregates,
+              timestamp: feeStates.reverse()[0].timestamp,
+              poolFee: { name: feeStates.reverse()[0].poolFee.name },
+            }
+          }
+
+          return { [feeId]: Object.values(aggregatedPoolStatesByGroup) }
+        })
       })
     )
   }
@@ -2795,6 +2997,7 @@ export function getPoolsModule(inst: Centrifuge) {
             settlementPrice
             quantity
             hash
+            realizedProfitFifo
             asset {
               id
               metadata
@@ -2833,6 +3036,9 @@ export function getPoolsModule(inst: Centrifuge) {
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
           principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
           interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
+          realizedProfitFifo: tx.realizedProfitFifo
+            ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
+            : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) satisfies AssetTransaction[]
       })
@@ -4047,6 +4253,8 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyPoolStates,
     getPoolStatesByGroup,
     getAggregatedPoolStatesByGroup,
+    getAggregatedPoolFeeStatesByGroup,
+    getPoolFeeStatesByGroup,
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,

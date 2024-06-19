@@ -30,6 +30,7 @@ type Row = {
   faceValue: Decimal | null
   position: Decimal
   yieldToMaturity: Decimal | null
+  realizedProfitFifo: CurrencyBalance | null
 }
 
 export const TransactionTable = ({
@@ -40,7 +41,6 @@ export const TransactionTable = ({
   pricing,
   poolType,
   maturityDate,
-  originationDate,
 }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
@@ -119,6 +119,7 @@ export const TransactionTable = ({
             }
             return sum
           }, Dec(0)),
+          realizedProfitFifo: transaction.realizedProfitFifo,
         }
       })
   }, [transactions, decimals, pricing])
@@ -190,6 +191,14 @@ export const TransactionTable = ({
               header: `Net cash flow (${currency})`,
               cell: (row: Row) =>
                 row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+            },
+            {
+              align: 'left',
+              header: `Realized P&L`,
+              cell: (row: Row) =>
+                row.realizedProfitFifo
+                  ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+                  : '-',
             },
             {
               align: 'left',
