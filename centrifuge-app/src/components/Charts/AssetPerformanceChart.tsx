@@ -77,7 +77,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     const today = new Date()
     today.setDate(today.getDate() + 1)
     const maturity = new Date(asset.pricing.maturityDate)
-    if (today.getTime() >= maturity.getTime()) return historic
+    if (today.getTime() >= maturity.getTime() || assetSnapshots.length == 0) return historic
 
     const days = Math.floor((maturity.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)) + 2
 
