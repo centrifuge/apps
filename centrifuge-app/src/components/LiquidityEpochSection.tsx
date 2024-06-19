@@ -71,7 +71,7 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   const [account] = useSuitableAccounts({
     poolId: pool.id,
     proxyType: ['Borrow', 'Invest'],
-    poolRole: ['InvestorAdmin', 'LoanAdmin'],
+    poolRole: ['LiquidityAdmin', 'PoolAdmin'],
   })
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
@@ -253,7 +253,7 @@ function EpochStatusExecution({ pool }: { pool: Pool }) {
   const [account] = useSuitableAccounts({
     poolId: pool.id,
     proxyType: ['Borrow', 'Invest'],
-    poolRole: ['InvestorAdmin', 'LoanAdmin'],
+    poolRole: ['LiquidityAdmin', 'PoolAdmin'],
   })
   const api = useCentrifugeApi()
   const orders = usePoolAccountOrders(pool.id)
