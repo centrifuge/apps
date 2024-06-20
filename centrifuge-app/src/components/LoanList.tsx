@@ -29,7 +29,7 @@ import { useCentNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
-import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
+import { LoanLabel, getLoanLabelStatus } from './LoanLabel'
 import { prefetchRoute } from './Root'
 import { Tooltips } from './Tooltips'
 
@@ -45,14 +45,7 @@ type Props = {
 }
 
 const getLoanStatus = (loan: Loan | TinlakeLoan) => {
-  const currentFace =
-    loan.pricing && 'outstandingQuantity' in loan.pricing
-      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
-      : null
-
-  const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
-
-  const [labelType, label] = getLoanLabelStatus(loan, isExternalAssetRepaid)
+  const [labelType, label] = getLoanLabelStatus(loan)
 
   if (label.includes('Due')) {
     return labelType === 'critical' ? 'Overdue' : 'Ongoing'
