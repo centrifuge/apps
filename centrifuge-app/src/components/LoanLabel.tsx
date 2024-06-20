@@ -43,7 +43,6 @@ export function getLoanLabelStatus(l: Loan | TinlakeLoan): [LabelStatus, string]
 export function LoanLabel({ loan }: Props) {
   const [status, text] = getLoanLabelStatus(loan)
   const isCashAsset = 'valuationMethod' in loan.pricing && loan.pricing?.valuationMethod === 'cash'
-  console.log('status', status)
   if (!status || isCashAsset) return null
   return <StatusChip status={status}>{text}</StatusChip>
 }
