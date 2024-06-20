@@ -207,8 +207,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                   stroke="none"
                   tickLine={false}
                   style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
-                  tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
+                  tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 2)}
                   domain={activeFilter.value === 'price' ? priceRange : [0, 'auto']}
+                  width={90}
                 />
                 <CartesianGrid stroke={theme.colors.borderPrimary} vertical={false} />
                 <Tooltip

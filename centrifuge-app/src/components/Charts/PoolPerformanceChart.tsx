@@ -70,20 +70,22 @@ function PoolPerformanceChart() {
     [truncatedPoolStates]
   )
 
+  const chartData = data.slice(-rangeNumber)
+
   const priceRange = React.useMemo(() => {
-    if (!data) return [0, 100]
+    if (!chartData) return [0, 100]
 
     const min =
-      data?.reduce((prev, curr) => {
+      chartData?.reduce((prev, curr) => {
         return prev.price! < curr.price! ? prev : curr
-      }, data[0])?.price || 0
+      }, chartData[0])?.price || 0
 
     const max =
-      data?.reduce((prev, curr) => {
+      chartData?.reduce((prev, curr) => {
         return prev.price! > curr.price! ? prev : curr
-      }, data[0])?.price || 1
+      }, chartData[0])?.price || 1
     return [min, max]
-  }, [data])
+  }, [chartData])
 
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
@@ -91,8 +93,6 @@ function PoolPerformanceChart() {
   // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
   const todayPrice = data.length > 0 ? data[data.length - 1].price : null
-
-  const chartData = data.slice(-rangeNumber)
 
   const today = {
     nav: todayAssetValue,
@@ -166,6 +166,7 @@ function PoolPerformanceChart() {
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
                 yAxisId="left"
+                width={80}
               />
               <YAxis
                 stroke="none"
@@ -185,9 +186,11 @@ function PoolPerformanceChart() {
                         <TooltipTitle>{formatDate(payload[0].payload.day)}</TooltipTitle>
                         {payload.map(({ name, value }, index) => (
                           <Shelf justifyContent="space-between" pl="4px" key={index}>
-                            <Text variant="label2">{name === 'nav' ? 'NAV' : 'Price'}</Text>
                             <Text variant="label2">
-                              {name === 'nav' && typeof value === 'number'
+                              {name === 'nav' ? 'NAV' : name === 'price' ? 'Token price' : 'Cash'}
+                            </Text>
+                            <Text variant="label2">
+                              {(name === 'nav' || name === 'cash') && typeof value === 'number'
                                 ? formatBalance(value, 'USD' || '')
                                 : typeof value === 'number'
                                 ? formatBalance(value, 'USD' || '', 6)
@@ -252,22 +255,24 @@ function CustomLegend({
           gap="4px"
         >
           <Text variant="body3" color="textSecondary">
-            NAV
+            NAV (including cash)
           </Text>
           <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#f5f5f5" gap="4px">
           <Text variant="body3" color="textSecondary">
-            Cash
+            Cash balance
           </Text>
           <Text variant="body1">5,239 USD</Text>
         </Stack>
-        <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
-          <Text variant="body3" color="textSecondary">
-            Token price
-          </Text>
-          <Text variant="body1">{data.price ? formatBalance(data.price, 'USD', 6) : '-'}</Text>
-        </Stack>
+        {data.price && (
+          <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
+            <Text variant="body3" color="textSecondary">
+              Token price
+            </Text>
+            <Text variant="body1">{data.price ? formatBalance(data.price, 'USD', 6) : '-'}</Text>
+          </Stack>
+        )}
       </Grid>
     </Shelf>
   )
