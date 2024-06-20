@@ -69,7 +69,7 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
     setReport(reportParam as Report)
   }, [reportParam])
 
-  const [report, setReport] = React.useState<Report | null>(null)
+  const [report, setReport] = React.useState<Report>('balance-sheet')
 
   const [startDate, setStartDate] = React.useState(
     new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10)
