@@ -120,8 +120,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   }
 
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
-  const maturityDatePassed =
-    loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+  const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
 
   return (

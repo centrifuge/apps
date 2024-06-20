@@ -79,8 +79,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
     return null
   }
 
-  const maturityDatePassed =
-    loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+  const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
 
   return (
     <Stack as={Card} gap={2} p={2}>
