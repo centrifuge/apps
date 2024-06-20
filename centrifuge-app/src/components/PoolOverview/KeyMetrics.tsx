@@ -4,7 +4,6 @@ import { Box, Card, Grid, IconExternalLink, Shelf, Stack, Text, Tooltip } from '
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { evmChains } from '../../config'
-import { daysBetween } from '../../utils/date'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { usePool } from '../../utils/usePools'
 import { Spinner } from '../Spinner'
@@ -29,8 +28,12 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
     [...loans].filter((loan) => {
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
-      const days = daysBetween(today, loan.pricing.maturityDate)
-      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0 && !loan.outstandingDebt.isZero()
+      return (
+        loan.status === 'Active' &&
+        loan.pricing.maturityDate &&
+        new Date(loan.pricing.maturityDate).getTime() < Date.now() &&
+        !loan.outstandingDebt.isZero()
+      )
     }).length
 
   const isBT3BT4 =
