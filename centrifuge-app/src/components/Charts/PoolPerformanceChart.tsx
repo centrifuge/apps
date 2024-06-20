@@ -1,4 +1,4 @@
-import { Box, Tooltip as FabricTooltip, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -7,6 +7,7 @@ import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
+import { Tooltips } from '../Tooltips'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
 import { getRangeNumber } from './utils'
 
@@ -233,22 +234,20 @@ function CustomLegend({
           borderLeftColor={theme.colors.accentPrimary}
           gap="4px"
         >
-          <FabricTooltip
-            body={
-              'The Net Asset Value (NAV) reflects the combined present value of assets, cash held in the onchain reserve of the pool, and cash in the bank account designated as offchain cash.'
-            }
-          >
+          <Tooltips type={'nav'}>
             <Text variant="body3" color="textSecondary">
               NAV
             </Text>
-          </FabricTooltip>
+          </Tooltips>
           <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
         </Stack>
         {data.price && (
           <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
-            <Text variant="body3" color="textSecondary">
-              Token price
-            </Text>
+            <Tooltips type={'singleTrancheTokenPrice'}>
+              <Text variant="body3" color="textSecondary">
+                Token price
+              </Text>
+            </Tooltips>
             <Text variant="body1">{data.price ? formatBalance(data.price, 'USD', 6) : '-'}</Text>
           </Stack>
         )}
