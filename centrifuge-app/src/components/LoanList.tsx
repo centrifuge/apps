@@ -23,7 +23,6 @@ import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
-import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
@@ -320,12 +319,6 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
 
 function Amount({ loan }: { loan: Row }) {
   const pool = usePool(loan.poolId)
-  const { current } = useAvailableFinancing(loan.poolId, loan.id)
-
-  const currentFace =
-    loan?.pricing && 'outstandingQuantity' in loan.pricing
-      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
-      : null
 
   function getAmount(l: Row) {
     switch (l.status) {
@@ -333,18 +326,12 @@ function Amount({ loan }: { loan: Row }) {
         return formatBalance(l.totalRepaid, pool?.currency.symbol)
 
       case 'Active':
-        if ('interestRate' in l.pricing && l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) {
-          return formatBalance(current, pool?.currency.symbol)
+        if ('presentValue' in l) {
+          return formatBalance(l.presentValue, pool?.currency.symbol)
         }
 
         if (l.outstandingDebt.isZero()) {
           return formatBalance(l.totalRepaid, pool?.currency.symbol)
-        }
-
-        // @ts-expect-error
-        if ('valuationMethod' in l.pricing && l.pricing.valuationMethod === 'oracle' && l.presentValue) {
-          // @ts-expect-error
-          return formatBalance(currentFace, pool?.currency.symbol)
         }
 
         return formatBalance(l.outstandingDebt, pool?.currency.symbol)
