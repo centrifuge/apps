@@ -1,3 +1,4 @@
+import { Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, Card, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -5,6 +6,7 @@ import styled, { useTheme } from 'styled-components'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
+import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useLoan } from '../../utils/useLoans'
 import { useAssetSnapshots } from '../../utils/usePools'
 import { TooltipContainer, TooltipTitle } from './Tooltip'
@@ -63,7 +65,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       .filter((day) => {
         return (
           asset &&
-          day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate).getTime() &&
+          day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate ?? '').getTime() &&
           !day.presentValue?.isZero()
         )
       })
@@ -76,7 +78,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
 
     const today = new Date()
     today.setDate(today.getDate() + 1)
-    const maturity = new Date(asset.pricing.maturityDate)
+    const maturity = new Date(asset.pricing.maturityDate ?? '')
     if (today.getTime() >= maturity.getTime() || assetSnapshots.length == 0) return historic
 
     const days = Math.floor((maturity.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)) + 2
@@ -135,7 +137,8 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     return [min, max]
   }, [data])
 
-  if (!assetSnapshots || assetSnapshots?.length < 1) return <Spinner style={{ margin: 'auto' }} />
+  if (!assetSnapshots) return <Spinner style={{ margin: 'auto' }} />
+  if (assetSnapshots?.length < 1) return null
 
   return (
     <Card p={3}>
@@ -277,9 +280,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                 )}
               </LineChart>
             </ResponsiveContainer>
-          ) : (
-            <Text variant="label1">No data yet</Text>
-          )}
+          ) : null}
         </Shelf>
       </Stack>
     </Card>
