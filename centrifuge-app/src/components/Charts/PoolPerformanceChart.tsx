@@ -1,4 +1,4 @@
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Tooltip as FabricTooltip, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -13,7 +13,6 @@ import { getRangeNumber } from './utils'
 type ChartData = {
   day: Date
   nav: number
-  cash: number
   price: number | null
 }
 
@@ -60,12 +59,10 @@ function PoolPerformanceChart() {
   const data: ChartData[] = React.useMemo(
     () =>
       truncatedPoolStates?.map((day) => {
-        const cash =
-          day.poolState.offchainCashValue.toDecimal().toNumber() + day.poolState.totalReserve.toDecimal().toNumber()
-        const nav = day.poolState.netAssetValue.toDecimal().toNumber() - cash
-        const price = Object.values(day.tranches).length === 1 ? Object.values(day.tranches)[0].price?.toFloat() : null
+        const nav = day.poolState.netAssetValue.toDecimal().toNumber()
+        const price = Object.values(day.tranches).length === 1 ? Object.values(day.tranches)[0].price!.toFloat() : null
 
-        return { day: new Date(day.timestamp), nav, cash, price }
+        return { day: new Date(day.timestamp), nav, price }
       }) || [],
     [truncatedPoolStates]
   )
@@ -190,7 +187,7 @@ function PoolPerformanceChart() {
                               {name === 'nav' ? 'NAV' : name === 'price' ? 'Token price' : 'Cash'}
                             </Text>
                             <Text variant="label2">
-                              {(name === 'nav' || name === 'cash') && typeof value === 'number'
+                              {name === 'nav' && typeof value === 'number'
                                 ? formatBalance(value, 'USD' || '')
                                 : typeof value === 'number'
                                 ? formatBalance(value, 'USD' || '', 6)
@@ -204,25 +201,7 @@ function PoolPerformanceChart() {
                   return null
                 }}
               />
-              <Bar
-                type="monotone"
-                dataKey="nav"
-                stackId="a"
-                strokeWidth={0}
-                fillOpacity={1}
-                fill="#dbe5ff"
-                yAxisId="left"
-              />
-              <Bar
-                type="monotone"
-                dataKey="cash"
-                stackId="a"
-                strokeWidth={0}
-                fillOpacity={1}
-                fill="#f5f5f5"
-                yAxisId="left"
-              />
-
+              <Bar type="monotone" dataKey="nav" strokeWidth={0} fillOpacity={1} fill="#dbe5ff" yAxisId="left" />
               <Line type="monotone" dataKey="price" stroke="#FFC012" strokeWidth={2} dot={false} yAxisId="right" />
             </ComposedChart>
           </ResponsiveContainer>
@@ -254,16 +233,16 @@ function CustomLegend({
           borderLeftColor={theme.colors.accentPrimary}
           gap="4px"
         >
-          <Text variant="body3" color="textSecondary">
-            NAV (including cash)
-          </Text>
+          <FabricTooltip
+            body={
+              'The Net Asset Value (NAV) reflects the combined present value of assets, cash held in the onchain reserve of the pool, and cash in the bank account designated as offchain cash.'
+            }
+          >
+            <Text variant="body3" color="textSecondary">
+              NAV
+            </Text>
+          </FabricTooltip>
           <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
-        </Stack>
-        <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#f5f5f5" gap="4px">
-          <Text variant="body3" color="textSecondary">
-            Cash balance
-          </Text>
-          <Text variant="body1">5,239 USD</Text>
         </Stack>
         {data.price && (
           <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
