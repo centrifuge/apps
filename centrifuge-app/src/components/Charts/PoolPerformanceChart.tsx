@@ -1,7 +1,7 @@
 import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
@@ -13,6 +13,7 @@ import { getRangeNumber } from './utils'
 type ChartData = {
   day: Date
   nav: number
+  cash: number
   price: number | null
 }
 
@@ -59,10 +60,12 @@ function PoolPerformanceChart() {
   const data: ChartData[] = React.useMemo(
     () =>
       truncatedPoolStates?.map((day) => {
-        const nav = day.poolState.netAssetValue.toDecimal().toNumber()
+        const cash =
+          day.poolState.offchainCashValue.toDecimal().toNumber() + day.poolState.totalReserve.toDecimal().toNumber()
+        const nav = day.poolState.netAssetValue.toDecimal().toNumber() - cash
         const price = Object.values(day.tranches).length === 1 ? Object.values(day.tranches)[0].price?.toFloat() : null
 
-        return { day: new Date(day.timestamp), nav, price }
+        return { day: new Date(day.timestamp), nav, cash, price }
       }) || [],
     [truncatedPoolStates]
   )
@@ -198,12 +201,22 @@ function PoolPerformanceChart() {
                   return null
                 }}
               />
-              <Area
+              <Bar
                 type="monotone"
                 dataKey="nav"
+                stackId="a"
                 strokeWidth={0}
                 fillOpacity={1}
-                fill="url(#colorPoolValue)"
+                fill="#dbe5ff"
+                yAxisId="left"
+              />
+              <Bar
+                type="monotone"
+                dataKey="cash"
+                stackId="a"
+                strokeWidth={0}
+                fillOpacity={1}
+                fill="#f5f5f5"
                 yAxisId="left"
               />
 
@@ -230,7 +243,7 @@ function CustomLegend({
 
   return (
     <Shelf bg="backgroundPage" width="100%" gap={2}>
-      <Grid pb={2} gridTemplateColumns="fit-content(100%) fit-content(100%)" width="100%" gap={8}>
+      <Grid pb={2} gridTemplateColumns="fit-content(100%) fit-content(100%) fit-content(100%)" width="100%" gap={8}>
         <Stack
           borderLeftWidth="3px"
           pl={1}
@@ -242,6 +255,12 @@ function CustomLegend({
             NAV
           </Text>
           <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
+        </Stack>
+        <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#f5f5f5" gap="4px">
+          <Text variant="body3" color="textSecondary">
+            Cash
+          </Text>
+          <Text variant="body1">5,239 USD</Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
           <Text variant="body3" color="textSecondary">
