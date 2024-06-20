@@ -102,8 +102,8 @@ export type LoanInfoInput =
       valuationMethod: 'outstandingDebt'
       maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
       value: BN
-      maturityDate: Date
-      maturityExtensionDays: number
+      maturityDate: Date | null
+      maturityExtensionDays: number | null
       advanceRate: BN
       interestRate: BN
     }
@@ -111,7 +111,7 @@ export type LoanInfoInput =
       valuationMethod: 'cash'
       maxBorrowAmount: 'upToOutstandingDebt'
       value: BN
-      maturityDate: Date
+      maturityDate: Date | null
       advanceRate: BN
       interestRate: BN
     }
@@ -120,7 +120,7 @@ export type LoanInfoInput =
       maxBorrowAmount: BN | null
       maxPriceVariation: BN
       priceId: { isin: string } | { poolLoanId: [string, string] }
-      maturityDate: Date
+      maturityDate: Date | null
       interestRate: BN
       notional: BN
       withLinearPricing: boolean
@@ -141,7 +141,7 @@ export type LoanInfoInput =
 export type LoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
-    maturity: { fixed: { date: number; extension: number } }
+    maturity: { fixed: { date: number; extension: number } } | { none: null }
     interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
@@ -193,7 +193,7 @@ export type LoanInfoData = {
 export type ActiveLoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
-    maturity: { fixed: { date: number; extension: number } }
+    maturity: { fixed: { date: number; extension: number } } | { none: null }
     interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
@@ -412,8 +412,8 @@ export type InternalPricingInfo = {
   valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'cash'
   maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
   value: CurrencyBalance
-  maturityDate: string
-  maturityExtensionDays: number
+  maturityDate: string | null
+  maturityExtensionDays: number | null
   advanceRate: Rate
   interestRate: Rate
   probabilityOfDefault?: Rate
@@ -427,8 +427,8 @@ export type ExternalPricingInfo = {
   maxPriceVariation: Rate
   outstandingQuantity: CurrencyBalance
   priceId: { isin: string } | { poolLoanId: [string, string] }
-  maturityDate: string
-  maturityExtensionDays: number
+  maturityDate: string | null
+  maturityExtensionDays: number | null
   oracle: {
     value: CurrencyBalance
     timestamp: number
@@ -1619,12 +1619,15 @@ export function getPoolsModule(inst: Centrifuge) {
     const info: LoanInfoData = {
       /// Specify the repayments schedule of the loan
       schedule: {
-        maturity: {
-          fixed: {
-            date: Math.round(infoInput.maturityDate.getTime() / 1000),
-            extension: 'maturityExtensionDays' in infoInput ? infoInput.maturityExtensionDays * SEC_PER_DAY : 0,
-          },
-        },
+        maturity: infoInput.maturityDate
+          ? {
+              fixed: {
+                date: Math.round(infoInput.maturityDate.getTime() / 1000),
+                extension:
+                  'maturityExtensionDays' in infoInput ? (infoInput.maturityExtensionDays ?? 0) * SEC_PER_DAY : 0,
+              },
+            }
+          : ('none' as any),
         interestPayments: 'OnceAtMaturity',
         payDownSchedule: 'None',
       },
@@ -3694,9 +3697,13 @@ export function getPoolsModule(inst: Centrifuge) {
                       'noLimit' in pricingInfo.maxBorrowAmount
                         ? null
                         : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 18),
+                    maturityDate: !('none' in info.schedule.maturity)
+                      ? new Date(info.schedule.maturity.fixed.date * 1000).toISOString()
+                      : null,
+                    maturityExtensionDays: !('none' in info.schedule.maturity)
+                      ? info.schedule.maturity.fixed.extension / SEC_PER_DAY
+                      : null,
                     priceId: pricingInfo.priceId,
-                    maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
-                    maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
                     oracle: oraclePrices[
                       'isin' in pricingInfo.priceId
                         ? pricingInfo.priceId?.isin
@@ -3733,8 +3740,12 @@ export function getPoolsModule(inst: Centrifuge) {
                       ? new Rate(discount.discountRate.fixed.ratePerYear)
                       : undefined,
                     interestRate: new Rate(interestRate),
-                    maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
-                    maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
+                    maturityDate: !('none' in info.schedule.maturity)
+                      ? new Date(info.schedule.maturity.fixed.date * 1000).toISOString()
+                      : null,
+                    maturityExtensionDays: !('none' in info.schedule.maturity)
+                      ? info.schedule.maturity.fixed.extension / SEC_PER_DAY
+                      : null,
                   },
           }
         }

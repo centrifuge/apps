@@ -13,7 +13,7 @@ import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { usePool } from '../../utils/usePools'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
-import { settlementPrice } from '../../utils/validation'
+import { positiveNumber } from '../../utils/validation'
 import { isCashLoan, isExternalLoan } from '../Loan/utils'
 
 type FormValues = {
@@ -190,7 +190,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       header: 'New price',
       cell: (row: Row) => {
         return 'oldValue' in row && row.id !== 'reserve' && isEditing ? (
-          <Field name={`feed.${row.formIndex}.value`} validate={settlementPrice()}>
+          <Field name={`feed.${row.formIndex}.value`} validate={positiveNumber()}>
             {({ field, meta, form }: FieldProps) => (
               <CurrencyInput
                 {...field}

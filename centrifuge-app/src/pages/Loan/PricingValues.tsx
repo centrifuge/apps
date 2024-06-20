@@ -46,7 +46,7 @@ export function PricingValues({ loan, pool }: Props) {
           </Text>
           <MetricsTable
             metrics={[
-              ...('isin' in pricing.priceId ? [{ label: 'ISIN', value: pricing.Isin }] : []),
+              ...('isin' in pricing.priceId ? [{ label: 'ISIN', value: pricing.priceId.isin }] : []),
               {
                 label: `Latest price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
                 value: latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-',

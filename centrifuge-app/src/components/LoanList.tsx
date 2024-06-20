@@ -23,13 +23,12 @@ import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { useFilters } from '../utils/useFilters'
-import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, FilterableTableHeader, SortableTableHeader } from './DataTable'
 import { LoadBoundary } from './LoadBoundary'
-import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
+import { LoanLabel, getLoanLabelStatus } from './LoanLabel'
 import { prefetchRoute } from './Root'
 import { Tooltips } from './Tooltips'
 
@@ -45,14 +44,7 @@ type Props = {
 }
 
 const getLoanStatus = (loan: Loan | TinlakeLoan) => {
-  const currentFace =
-    loan.pricing && 'outstandingQuantity' in loan.pricing
-      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
-      : null
-
-  const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
-
-  const [labelType, label] = getLoanLabelStatus(loan, isExternalAssetRepaid)
+  const [labelType, label] = getLoanLabelStatus(loan)
 
   if (label.includes('Due')) {
     return labelType === 'critical' ? 'Overdue' : 'Ongoing'
@@ -84,7 +76,7 @@ export function LoanList({ loans }: Props) {
 
         return aId.localeCompare(bId)
       })
-  }, [loans])
+  }, [isTinlakePool, loans])
   const filters = useFilters({
     data: loansWithLabelStatus,
   })
@@ -217,7 +209,7 @@ export function LoanList({ loans }: Props) {
             !loan?.totalBorrowed?.isZero()
               ? loan.originationDate
               : '',
-          maturityDate: null,
+          maturityDate: loan.pricing.maturityDate,
           ...loan,
         }
       }),
@@ -327,12 +319,6 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
 
 function Amount({ loan }: { loan: Row }) {
   const pool = usePool(loan.poolId)
-  const { current } = useAvailableFinancing(loan.poolId, loan.id)
-
-  const currentFace =
-    loan?.pricing && 'outstandingQuantity' in loan.pricing
-      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
-      : null
 
   function getAmount(l: Row) {
     switch (l.status) {
@@ -340,18 +326,12 @@ function Amount({ loan }: { loan: Row }) {
         return formatBalance(l.totalRepaid, pool?.currency.symbol)
 
       case 'Active':
-        if ('interestRate' in l.pricing && l.pricing.interestRate?.gtn(0) && l.totalBorrowed?.isZero()) {
-          return formatBalance(current, pool?.currency.symbol)
+        if ('presentValue' in l) {
+          return formatBalance(l.presentValue, pool?.currency.symbol)
         }
 
         if (l.outstandingDebt.isZero()) {
           return formatBalance(l.totalRepaid, pool?.currency.symbol)
-        }
-
-        // @ts-expect-error
-        if ('valuationMethod' in l.pricing && l.pricing.valuationMethod === 'oracle' && l.presentValue) {
-          // @ts-expect-error
-          return formatBalance(currentFace, pool?.currency.symbol)
         }
 
         return formatBalance(l.outstandingDebt, pool?.currency.symbol)

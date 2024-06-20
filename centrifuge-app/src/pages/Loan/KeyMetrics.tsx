@@ -34,7 +34,7 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
       : null
 
   const currentYTM = React.useMemo(() => {
-    const termDays = loan?.pricing ? daysBetween(new Date(), loan?.pricing.maturityDate) : 0
+    const termDays = loan?.pricing.maturityDate ? daysBetween(new Date(), loan.pricing.maturityDate) : 0
 
     return currentFace && loan && 'presentValue' in loan && termDays > 0
       ? currentFace
@@ -43,11 +43,12 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
           .mul(Dec(365).div(Dec(termDays)))
           .mul(100)
       : null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loan])
 
   const weightedYTM = React.useMemo(() => {
     if (
-      loan?.pricing &&
+      loan?.pricing.maturityDate &&
       'valuationMethod' in loan.pricing &&
       loan.pricing.valuationMethod === 'oracle' &&
       loan.pricing.interestRate.isZero()
@@ -56,8 +57,8 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
         ?.filter((tx) => tx.type !== 'REPAID')
         .reduce((prev, curr) => {
           const termDays = curr.timestamp
-            ? daysBetween(curr.timestamp, loan?.pricing.maturityDate)
-            : daysBetween(new Date(), loan?.pricing.maturityDate)
+            ? daysBetween(curr.timestamp, loan.pricing.maturityDate!)
+            : daysBetween(new Date(), loan.pricing.maturityDate!)
 
           const faceValue =
             curr.quantity && (loan.pricing as ExternalPricingInfo).notional
@@ -89,7 +90,7 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
         }, Dec(0))
       return sum.isZero() ? Dec(0) : weightedYTM.div(sum)
     }
-  }, [weightedYTM])
+  }, [weightedYTM, borrowerAssetTransactions])
 
   const metrics = [
     ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
