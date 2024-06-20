@@ -356,8 +356,8 @@ function AOForm({
   )
 
   const { add: addedWithdraw, remove: removedWithdraw } = diffWithdrawAddresses(
-    initialValues.withdrawAddresses,
-    form.values.withdrawAddresses
+    initialValues.withdrawAddresses.filter((w) => !!w.location),
+    form.values.withdrawAddresses.filter((w) => !!w.location)
   )
 
   const hasChanges =
