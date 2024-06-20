@@ -156,7 +156,7 @@ export const TransactionTable = ({
           </Tooltip>
         ),
       },
-      ...(poolType === 'publicCredit'
+      ...(poolType === 'Public credit'
         ? [
             {
               align: 'left',

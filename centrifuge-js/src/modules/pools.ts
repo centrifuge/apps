@@ -568,6 +568,9 @@ export type DailyTrancheState = {
   yield30DaysAnnualized: Perquintill
   yield90DaysAnnualized: Perquintill
   yieldSinceInception: Perquintill
+  yieldMTD: Perquintill
+  yieldQTD: Perquintill
+  yieldYTD: Perquintill
   yieldSinceLastPeriod: Perquintill
 }
 
@@ -841,6 +844,7 @@ export type AssetSnapshot = {
     type: AssetType
   }
   presentValue: CurrencyBalance | undefined
+  currentPrice: CurrencyBalance | undefined
   outstandingPrincipal: CurrencyBalance | undefined
   outstandingInterest: CurrencyBalance | undefined
   outstandingDebt: CurrencyBalance | undefined
@@ -2349,6 +2353,9 @@ export function getPoolsModule(inst: Centrifuge) {
             yield30DaysAnnualized
             yield90DaysAnnualized
             yieldSinceInception
+            yieldMTD
+            yieldQTD
+            yieldYTD
             yieldSinceLastPeriod
           }
           pageInfo {
@@ -2561,6 +2568,9 @@ export function getPoolsModule(inst: Centrifuge) {
                   yieldSinceInception: tranche.yieldSinceInception
                     ? new Perquintill(hexToBN(tranche.yieldSinceInception))
                     : new Perquintill(0),
+                  yieldMTD: tranche.yieldMTD ? new Perquintill(hexToBN(tranche.yieldMTD)) : new Perquintill(0),
+                  yieldQTD: tranche.yieldQTD ? new Perquintill(hexToBN(tranche.yieldQTD)) : new Perquintill(0),
+                  yieldYTD: tranche.yieldYTD ? new Perquintill(hexToBN(tranche.yieldYTD)) : new Perquintill(0),
                   yieldSinceLastPeriod: tranche.yieldSinceLastPeriod
                     ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod))
                     : new Perquintill(0),
@@ -3159,6 +3169,7 @@ export function getPoolsModule(inst: Centrifuge) {
             assetId
             timestamp
             presentValue
+            currentPrice
             outstandingPrincipal
             outstandingInterest
             outstandingDebt
@@ -3185,6 +3196,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.assetSnapshots.nodes.map((tx) => ({
           ...tx,
           presentValue: tx.presentValue ? new CurrencyBalance(tx.presentValue, currency.decimals) : undefined,
+          currentPrice: tx.currentPrice ? new CurrencyBalance(tx.currentPrice, currency.decimals) : undefined,
           outstandingPrincipal: tx.outstandingPrincipal
             ? new CurrencyBalance(tx.outstandingPrincipal, currency.decimals)
             : undefined,

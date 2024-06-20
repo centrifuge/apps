@@ -142,15 +142,8 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         heading: false,
         bold: true,
       },
-      // {
-      //   name: 'Realized profit / loss',
-      //   nameTooltip: 'Based on first-in, first-out calculation of the transactions of each individual asset',
-      //   value: poolStates?.map(({ poolState }) => poolState.sumRealizedProfitFifoByPeriod.toDecimal()) || [],
-      //   heading: false,
-      //   formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
-      // },
       {
-        name: 'Unrealized profit / loss',
+        name: 'Profit / loss from assets',
         nameTooltip: 'Based on selling the assets in the pool at the current market price',
         value: poolStates?.map(({ poolState }) => poolState.sumUnrealizedProfitByPeriod.toDecimal()) || [],
         heading: false,

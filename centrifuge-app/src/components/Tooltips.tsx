@@ -291,7 +291,7 @@ export const tooltipText = {
     body: 'Offchain cash represents funds held in a traditional bank account or custody account.',
   },
   averageYtm: {
-    label: 'Average YTM',
+    label: 'Average purchase YTM',
     body: 'Weighted average YTM (Yield to Maturity) at time of asset purchases',
   },
   currentYtm: {
