@@ -7,7 +7,6 @@ import { LayoutBase } from '../LayoutBase'
 import { LoadBoundary } from '../LoadBoundary'
 import { Spinner } from '../Spinner'
 import { ReportContextProvider } from './ReportContext'
-import { ReportFilter } from './ReportFilter'
 
 export function PoolReportPage({ header }: { header: React.ReactNode }) {
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -17,8 +16,6 @@ export function PoolReportPage({ header }: { header: React.ReactNode }) {
     <ReportContextProvider>
       <LayoutBase>
         {header}
-
-        {pool && <ReportFilter pool={pool} />}
 
         <LoadBoundary>
           <PoolDetailReporting pool={pool} />
