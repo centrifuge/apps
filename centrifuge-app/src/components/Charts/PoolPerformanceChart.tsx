@@ -67,6 +67,21 @@ function PoolPerformanceChart() {
     [truncatedPoolStates]
   )
 
+  const priceRange = React.useMemo(() => {
+    if (!data) return [0, 100]
+
+    const min =
+      data?.reduce((prev, curr) => {
+        return prev.price! < curr.price! ? prev : curr
+      }, data[0])?.price || 0
+
+    const max =
+      data?.reduce((prev, curr) => {
+        return prev.price! > curr.price! ? prev : curr
+      }, data[0])?.price || 1
+    return [min, max]
+  }, [data])
+
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
 
@@ -91,21 +106,6 @@ function PoolPerformanceChart() {
     }
     return 45
   }
-
-  const priceRange = React.useMemo(() => {
-    if (!data) return [0, 100]
-
-    const min =
-      data?.reduce((prev, curr) => {
-        return prev.price! < curr.price! ? prev : curr
-      }, data[0])?.price || 0
-
-    const max =
-      data?.reduce((prev, curr) => {
-        return prev.price! > curr.price! ? prev : curr
-      }, data[0])?.price || 1
-    return [min, max]
-  }, [data])
 
   return (
     <Stack gap={2}>
