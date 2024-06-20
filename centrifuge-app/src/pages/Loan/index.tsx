@@ -127,7 +127,7 @@ function Loan() {
     })
 
     return getCSVDownloadUrl(formatted as any)
-  }, [assetSnapshots, pool.currency.symbol])
+  }, [assetSnapshots])
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -167,7 +167,7 @@ function Loan() {
 
   const weightedYTM = React.useMemo(() => {
     if (
-      loan?.pricing &&
+      loan?.pricing.maturityDate &&
       'valuationMethod' in loan.pricing &&
       loan.pricing.valuationMethod === 'oracle' &&
       loan.pricing.interestRate.isZero()
@@ -176,8 +176,8 @@ function Loan() {
         ?.filter((tx) => tx.type !== 'REPAID')
         .reduce((prev, curr) => {
           const termDays = curr.timestamp
-            ? daysBetween(curr.timestamp, loan?.pricing.maturityDate)
-            : daysBetween(new Date(), loan?.pricing.maturityDate)
+            ? daysBetween(curr.timestamp, loan.pricing.maturityDate!)
+            : daysBetween(new Date(), loan.pricing.maturityDate!)
 
           const faceValue =
             curr.quantity && (loan.pricing as ExternalPricingInfo).notional
@@ -209,10 +209,10 @@ function Loan() {
         }, Dec(0))
       return sum.isZero() ? Dec(0) : weightedYTM.div(sum)
     }
-  }, [weightedYTM])
+  }, [borrowerAssetTransactions, weightedYTM])
 
   const currentYTM = React.useMemo(() => {
-    const termDays = loan?.pricing ? daysBetween(new Date(), loan?.pricing.maturityDate) : 0
+    const termDays = loan?.pricing.maturityDate ? daysBetween(new Date(), loan.pricing.maturityDate) : 0
 
     return currentFace && loan && 'presentValue' in loan && termDays > 0
       ? currentFace
@@ -221,6 +221,7 @@ function Loan() {
           .mul(Dec(365).div(Dec(termDays)))
           .mul(100)
       : null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loan])
 
   return (
@@ -279,178 +280,174 @@ function Loan() {
           </PageSection>
         </>
       )}
-      {loan &&
-        pool &&
-        (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
-          <>
-            <AssetSummary
-              loan={loan}
-              data={[
-                ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
-                  ? templateMetadata?.keyAttributes
-                      ?.filter((key) => templateMetadata?.attributes?.[key].public)
-                      .map((key) => ({
-                        label: templateMetadata?.attributes?.[key].label,
-                        value: isValidDate(nftMetadata?.properties[key])
-                          ? formatDate(nftMetadata?.properties[key])
-                          : nftMetadata?.properties[key],
-                      })) || []
-                  : []),
-                ...(loan.pricing.maturityDate &&
-                'valuationMethod' in loan.pricing &&
-                loan.pricing.valuationMethod !== 'cash'
-                  ? [
-                      {
-                        label: 'Maturity date',
-                        value: formatDate(loan.pricing.maturityDate),
-                      },
-                    ]
-                  : []),
-                ...[
-                  {
-                    label: 'Current value',
-                    value: `${formatBalance(
-                      'presentValue' in loan ? loan.presentValue : new CurrencyBalance(0, pool.currency.decimals),
-                      pool.currency.symbol,
-                      2,
-                      2
-                    )}`,
-                  },
-                ],
-                ...(loan.pricing.maturityDate &&
-                'valuationMethod' in loan.pricing &&
-                loan.pricing.valuationMethod === 'oracle' &&
-                loan.pricing.notional.gtn(0) &&
-                currentYTM
-                  ? [{ label: <Tooltips type="currentYtm" />, value: formatPercentage(currentYTM) }]
-                  : []),
-                ...(loan.pricing.maturityDate &&
-                'valuationMethod' in loan.pricing &&
-                loan.pricing.valuationMethod === 'oracle' &&
-                loan.pricing.notional.gtn(0) &&
-                averageWeightedYTM
-                  ? [{ label: <Tooltips type="averageYtm" />, value: formatPercentage(averageWeightedYTM) }]
-                  : []),
-              ]}
-            />
+      {loan && pool && (
+        <>
+          <AssetSummary
+            loan={loan}
+            data={[
+              ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
+                ? templateMetadata?.keyAttributes
+                    ?.filter((key) => templateMetadata?.attributes?.[key].public)
+                    .map((key) => ({
+                      label: templateMetadata?.attributes?.[key].label,
+                      value: isValidDate(nftMetadata?.properties[key])
+                        ? formatDate(nftMetadata?.properties[key])
+                        : nftMetadata?.properties[key],
+                    })) || []
+                : []),
+              ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
+                ? [
+                    {
+                      label: 'Maturity',
+                      value: loan.pricing.maturityDate ? formatDate(loan.pricing.maturityDate) : 'Open-end',
+                    },
+                  ]
+                : []),
+              ...[
+                {
+                  label: 'Current value',
+                  value: `${formatBalance(
+                    'presentValue' in loan ? loan.presentValue : new CurrencyBalance(0, pool.currency.decimals),
+                    pool.currency.symbol,
+                    2,
+                    2
+                  )}`,
+                },
+              ],
+              ...(loan.pricing.maturityDate &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod === 'oracle' &&
+              loan.pricing.notional.gtn(0) &&
+              currentYTM
+                ? [{ label: <Tooltips type="currentYtm" />, value: formatPercentage(currentYTM) }]
+                : []),
+              ...(loan.pricing.maturityDate &&
+              'valuationMethod' in loan.pricing &&
+              loan.pricing.valuationMethod === 'oracle' &&
+              loan.pricing.notional.gtn(0) &&
+              averageWeightedYTM
+                ? [{ label: <Tooltips type="averageYtm" />, value: formatPercentage(averageWeightedYTM) }]
+                : []),
+            ]}
+          />
 
-            {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&
+          {(!isTinlakePool || (isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan)) &&
+          'valuationMethod' in loan.pricing &&
+          loan.pricing.valuationMethod !== 'oracle' &&
+          loan.pricing.valuationMethod !== 'cash' ? (
+            <PageSection title={<Box>Financing & repayment cash flow</Box>}>
+              <Shelf gap={3} flexWrap="wrap">
+                {isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan ? (
+                  <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
+                ) : (
+                  <FinancingRepayment
+                    drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
+                    closingDate={null}
+                    outstandingPrincipal={formatBalance(
+                      'outstandingPrincipal' in loan ? loan.outstandingPrincipal : 0,
+                      pool.currency
+                    )}
+                    outstandingInterest={formatBalance(
+                      'outstandingInterest' in loan ? loan.outstandingInterest : 0,
+                      pool.currency
+                    )}
+                    repaidPrincipal={formatBalance('repaid' in loan ? loan.repaid.principal : 0, pool.currency)}
+                    repaidInterest={formatBalance('repaid' in loan ? loan.repaid.interest : 0, pool.currency)}
+                    repaidUnscheduled={
+                      'repaid' in loan && !loan.repaid.unscheduled.isZero()
+                        ? formatBalance(loan.repaid.unscheduled, pool.currency)
+                        : null
+                    }
+                  />
+                )}
+              </Shelf>
+            </PageSection>
+          ) : null}
+
+          {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
+            <PageSection title={<Box>Holdings</Box>}>
+              <Shelf gap={6} flexWrap="wrap">
+                <HoldingsValues
+                  pool={pool as Pool}
+                  transactions={borrowerAssetTransactions}
+                  currentFace={currentFace}
+                  pricing={loan.pricing}
+                />
+              </Shelf>
+            </PageSection>
+          )}
+
+          {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+            <PageSection title={<Box>Pricing</Box>}>
+              <Stack>
+                <Shelf gap={6} flexWrap="wrap">
+                  <PricingValues loan={loan} pool={pool} />
+                </Shelf>
+              </Stack>
+            </PageSection>
+          )}
+
+          {borrowerAssetTransactions?.length ? (
+            'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
+              <PageSection>
+                <TransactionHistoryTable
+                  transactions={borrowerAssetTransactions ?? []}
+                  poolId={poolId}
+                  preview={false}
+                  activeAssetId={loanId}
+                />
+              </PageSection>
+            ) : (
+              <PageSection
+                title={
+                  <Flex>
+                    <Text>Transaction history</Text>
+                  </Flex>
+                }
+              >
+                <TransactionTable
+                  transactions={borrowerAssetTransactions}
+                  currency={pool.currency.symbol}
+                  loanType={
+                    'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                      ? 'external'
+                      : 'internal'
+                  }
+                  poolType={poolMetadata?.pool?.asset.class}
+                  decimals={pool.currency.decimals}
+                  pricing={loan.pricing as PricingInfo}
+                  maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
+                  originationDate={originationDate ? new Date(originationDate) : undefined}
+                />
+              </PageSection>
+            )
+          ) : null}
+
+          {loan.status === 'Active' &&
+            loan.pricing.maturityDate &&
             'valuationMethod' in loan.pricing &&
             loan.pricing.valuationMethod !== 'oracle' &&
-            loan.pricing.valuationMethod !== 'cash' ? (
-              <PageSection title={<Box>Financing & repayment cash flow</Box>}>
-                <Shelf gap={3} flexWrap="wrap">
-                  {isTinlakePool && loan.status === 'Closed' && 'dateClosed' in loan ? (
-                    <LabelValueStack label="Date closed" value={formatDate(loan.dateClosed)} />
-                  ) : (
-                    <FinancingRepayment
-                      drawDownDate={'originationDate' in loan ? formatDate(loan.originationDate) : null}
-                      closingDate={null}
-                      outstandingPrincipal={formatBalance(
-                        'outstandingPrincipal' in loan ? loan.outstandingPrincipal : 0,
-                        pool.currency
-                      )}
-                      outstandingInterest={formatBalance(
-                        'outstandingInterest' in loan ? loan.outstandingInterest : 0,
-                        pool.currency
-                      )}
-                      repaidPrincipal={formatBalance('repaid' in loan ? loan.repaid.principal : 0, pool.currency)}
-                      repaidInterest={formatBalance('repaid' in loan ? loan.repaid.interest : 0, pool.currency)}
-                      repaidUnscheduled={
-                        'repaid' in loan && !loan.repaid.unscheduled.isZero()
-                          ? formatBalance(loan.repaid.unscheduled, pool.currency)
-                          : null
-                      }
-                    />
-                  )}
-                </Shelf>
-              </PageSection>
-            ) : null}
-
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
-              <PageSection title={<Box>Holdings</Box>}>
-                <Shelf gap={6} flexWrap="wrap">
-                  <HoldingsValues
-                    pool={pool as Pool}
-                    transactions={borrowerAssetTransactions}
-                    currentFace={currentFace}
-                    pricing={loan.pricing}
-                  />
-                </Shelf>
-              </PageSection>
-            )}
-
-            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
-              <PageSection title={<Box>Pricing</Box>}>
-                <Stack>
-                  <Shelf gap={6} flexWrap="wrap">
-                    <PricingValues loan={loan} pool={pool} />
-                  </Shelf>
-                </Stack>
-              </PageSection>
-            )}
-
-            {borrowerAssetTransactions?.length ? (
-              'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
-                <PageSection>
-                  <TransactionHistoryTable
-                    transactions={borrowerAssetTransactions ?? []}
-                    poolId={poolId}
-                    preview={false}
-                    activeAssetId={loanId}
-                  />
-                </PageSection>
-              ) : (
-                <PageSection
-                  title={
-                    <Flex>
-                      <Text>Transaction history</Text>
-                    </Flex>
-                  }
-                >
-                  <TransactionTable
-                    transactions={borrowerAssetTransactions}
-                    currency={pool.currency.symbol}
-                    loanType={
-                      'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                        ? 'external'
-                        : 'internal'
-                    }
-                    poolType={poolMetadata?.pool?.asset.class}
-                    decimals={pool.currency.decimals}
-                    pricing={loan.pricing as PricingInfo}
-                    maturityDate={new Date(loan.pricing.maturityDate)}
-                    originationDate={originationDate ? new Date(originationDate) : undefined}
-                  />
-                </PageSection>
-              )
-            ) : null}
-
-            {loan.status === 'Active' &&
-              loan.pricing.maturityDate &&
-              'valuationMethod' in loan.pricing &&
-              loan.pricing.valuationMethod !== 'oracle' &&
-              loan.pricing.valuationMethod !== 'cash' && (
-                <PageSection title={<Box>Remaining maturity</Box>}>
-                  <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
-                    <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
-                    <Box width="60%" backgroundColor="borderPrimary" position="relative">
-                      <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
-                      <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
-                        <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />
-                      </Box>
-                      {maturityPercentage !== 1 && (
-                        <Box position="absolute" left={`${maturityPercentage * 100 - 9}%`} bottom="36px" width="100px">
-                          <LabelValueStack label="Today" value={formatDate(new Date())} />
-                        </Box>
-                      )}
+            loan.pricing.valuationMethod !== 'cash' && (
+              <PageSection title={<Box>Remaining maturity</Box>}>
+                <Shelf gap={4} pt={maturityPercentage !== 1 ? 4 : 0}>
+                  <LabelValueStack label="Origination date" value={formatDate(originationDate!)} />
+                  <Box width="60%" backgroundColor="borderPrimary" position="relative">
+                    <Box height="16px" width={maturityPercentage} backgroundColor="primarySelectedBackground" />
+                    <Box position="absolute" left={`${maturityPercentage * 100}%`} bottom={0}>
+                      <Box width="1px" height="24px" backgroundColor="primarySelectedBackground" />
                     </Box>
-                    <LabelValueStack label="Maturity date" value={formatDate(loan.pricing.maturityDate)} />
-                  </Shelf>
-                </PageSection>
-              )}
-          </>
-        )}
+                    {maturityPercentage !== 1 && (
+                      <Box position="absolute" left={`${maturityPercentage * 100 - 9}%`} bottom="36px" width="100px">
+                        <LabelValueStack label="Today" value={formatDate(new Date())} />
+                      </Box>
+                    )}
+                  </Box>
+                  <LabelValueStack label="Maturity date" value={formatDate(loan.pricing.maturityDate)} />
+                </Shelf>
+              </PageSection>
+            )}
+        </>
+      )}
       {(loan && nft) || isTinlakePool ? (
         <>
           {templateData?.sections?.map((section, i) => {

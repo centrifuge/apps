@@ -61,6 +61,7 @@ export function PoolDetailAssets() {
     (loan) =>
       loan.status === 'Active' &&
       loan.outstandingDebt.gtn(0) &&
+      loan.pricing.maturityDate &&
       new Date(loan.pricing.maturityDate).getTime() < Date.now()
   )
 
