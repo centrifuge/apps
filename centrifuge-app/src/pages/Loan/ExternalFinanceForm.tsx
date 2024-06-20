@@ -11,7 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, nonNegativeNumber, required, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
 import { useWithdraw } from './FinanceForm'
 
 type FinanceValues = {
@@ -145,7 +145,7 @@ export function ExternalFinanceFields({
         name="price"
         validate={combine(
           required(),
-          settlementPrice(),
+          positiveNumber(),
           validate ??
             ((val) => {
               const financeAmount = Dec(val).mul(form.values.quantity || 1)
