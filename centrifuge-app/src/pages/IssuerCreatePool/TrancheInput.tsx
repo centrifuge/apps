@@ -1,5 +1,15 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  Grid,
+  IconMinusCircle,
+  NumberInput,
+  Stack,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import * as React from 'react'
 import { createEmptyTranche } from '.'
@@ -87,14 +97,19 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                     />
                   )}
                 </Field>
-                <FieldWithErrorMessage
-                  as={NumberInput}
-                  label={<Tooltips type="minimumInvestment" variant="secondary" label="Min. investment*" />}
-                  placeholder="0.00"
-                  name={`tranches.${index}.minInvestment`}
-                  validate={validate.minInvestment}
-                  symbol={values.currency}
-                />
+                <Field name={`tranches.${index}.minInvestment`} validate={validate.minInvestment}>
+                  {({ field, form, meta }: FieldProps) => (
+                    <CurrencyInput
+                      {...field}
+                      label={<Tooltips type="minimumInvestment" variant="secondary" label="Min. investment*" />}
+                      placeholder="0.00"
+                      currency={values.currency}
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      onChange={(value) => form.setFieldValue(field.name, value)}
+                      onBlur={() => form.setFieldTouched(field.name, true)}
+                    />
+                  )}
+                </Field>
                 {index === juniorTrancheIndex ? (
                   <>
                     <TextInput
