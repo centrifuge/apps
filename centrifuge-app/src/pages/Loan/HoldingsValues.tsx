@@ -54,24 +54,22 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
   }, [transactions])
 
   const metrics = [
-    ...[
-      pricing.notional.gtn(0)
-        ? {
+    ...(pricing.notional.gtn(0)
+      ? [
+          {
             label: 'Current face',
             value: currentFace ? `${formatBalance(currentFace, pool.currency.symbol, 2, 2)}` : '-',
-          }
-        : null,
-    ],
+          },
+        ]
+      : []),
     { label: 'Net spent', value: `${formatBalance(netSpent, pool.currency.symbol, 2, 2)}` },
     {
       label: 'Average settle price',
       value: averageSettlePrice.isZero() ? '-' : `${formatBalance(averageSettlePrice, pool.currency.symbol, 2, 2)}`,
     },
-    ...[
-      pricing.notional.gtn(0)
-        ? { label: 'Notional', value: `${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}` }
-        : null,
-    ],
+    ...(pricing.notional.gtn(0)
+      ? [{ label: 'Notional', value: `${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}` }]
+      : []),
     { label: 'Quantity', value: `${formatBalance(pricing.outstandingQuantity, undefined, 2, 0)}` },
   ]
 
