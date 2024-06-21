@@ -1,9 +1,10 @@
 import { AssetTransaction, CurrencyBalance, ExternalPricingInfo, Pool } from '@centrifuge/centrifuge-js'
+import { Card, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import React from 'react'
-import { LabelValueStack } from '../../components/LabelValueStack'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
+import { MetricsTable } from './MetricsTable'
 
 type Props = {
   pool: Pool
@@ -52,23 +53,34 @@ export function HoldingsValues({ pool, transactions, currentFace, pricing }: Pro
     return weightedSum.div(sumOfAmounts)
   }, [transactions])
 
+  const metrics = [
+    ...(pricing.notional.gtn(0)
+      ? [
+          {
+            label: 'Current face',
+            value: currentFace ? `${formatBalance(currentFace, pool.currency.symbol, 2, 2)}` : '-',
+          },
+        ]
+      : []),
+    { label: 'Net spent', value: `${formatBalance(netSpent, pool.currency.symbol, 2, 2)}` },
+    {
+      label: 'Average settle price',
+      value: averageSettlePrice.isZero() ? '-' : `${formatBalance(averageSettlePrice, pool.currency.symbol, 2, 2)}`,
+    },
+    ...(pricing.notional.gtn(0)
+      ? [{ label: 'Notional', value: `${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}` }]
+      : []),
+    { label: 'Quantity', value: `${formatBalance(pricing.outstandingQuantity, undefined, 2, 0)}` },
+  ]
+
   return (
-    <>
-      {pricing.notional.gtn(0) && (
-        <LabelValueStack
-          label="Current face"
-          value={currentFace ? `${formatBalance(currentFace, pool.currency.symbol, 2, 2)}` : '-'}
-        />
-      )}
-      <LabelValueStack label="Net spent" value={`${formatBalance(netSpent, pool.currency.symbol, 2, 2)}`} />
-      <LabelValueStack
-        label="Average settle price"
-        value={averageSettlePrice.isZero() ? '-' : `${formatBalance(averageSettlePrice, pool.currency.symbol, 2, 2)}`}
-      />
-      {pricing.notional.gtn(0) && (
-        <LabelValueStack label="Notional" value={`${formatBalance(pricing.notional, pool.currency.symbol, 2, 2)}`} />
-      )}
-      <LabelValueStack label="Quantity" value={`${formatBalance(pricing.outstandingQuantity, undefined, 2, 0)}`} />
-    </>
+    <Card p={3}>
+      <Stack gap={2}>
+        <Text fontSize="18px" fontWeight="500">
+          Holdings
+        </Text>
+        <MetricsTable metrics={metrics} />
+      </Stack>
+    </Card>
   )
 }

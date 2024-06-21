@@ -1,5 +1,5 @@
 import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
-import { Button, Card, Grid, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Button, Card, Grid, IconFileText, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -132,11 +132,16 @@ export function PoolDetailOverview() {
         </React.Suspense>
       )}
       <React.Suspense fallback={<Spinner />}>
-        {metadata?.pool?.reports?.length ? (
+        {metadata?.pool?.reports?.length || !isTinlakePool ? (
           <Card p={3}>
             <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
               <Stack gap={2}>
-                <Text variant="heading2">Pool analysis</Text>
+                <Box display="flex" flexDirection="row" alignItems="center">
+                  <IconFileText />
+                  <Text style={{ marginLeft: 8 }} variant="heading2">
+                    Reports
+                  </Text>
+                </Box>
                 <ReportDetails metadata={metadata} />
               </Stack>
               <Stack gap={2}>
@@ -145,27 +150,20 @@ export function PoolDetailOverview() {
               </Stack>
             </Grid>
           </Card>
-        ) : isTinlakePool ? (
+        ) : null}
+        {isTinlakePool && (
           <Card p={3}>
             <Stack gap={2}>
               <Text variant="heading2">Issuer details</Text>
               <IssuerDetails metadata={metadata} />
             </Stack>
           </Card>
-        ) : null}
+        )}
       </React.Suspense>
       {!isTinlakePool && (
         <>
           <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
             <React.Suspense fallback={<Spinner />}>
-              {metadata?.pool?.reports?.length === 0 || !isTinlakePool ? (
-                <Card p={3}>
-                  <Stack gap={2}>
-                    <Text variant="heading2">Issuer details</Text>
-                    <IssuerDetails metadata={metadata} />
-                  </Stack>
-                </Card>
-              ) : null}
               <PoolStructure
                 numOfTranches={pool.tranches.length}
                 poolId={poolId}

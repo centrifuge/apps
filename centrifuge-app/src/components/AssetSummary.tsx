@@ -2,7 +2,7 @@ import { Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
-import LoanLabel from './LoanLabel'
+import { LoanLabel } from './LoanLabel'
 
 type Props = {
   data?: {

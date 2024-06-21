@@ -49,7 +49,6 @@ export type Key =
   | 'showSwaps'
   | 'showOracle'
   | 'poolCreationType'
-  | 'assetSnapshots'
   | 'showTokenYields'
   | 'showOracleTx'
 
@@ -92,10 +91,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   evmAddress: {
     default: '',
     type: 'text',
-  },
-  assetSnapshots: {
-    type: 'checkbox',
-    default: false,
   },
   persistDebugFlags: {
     alwaysShow: true,
