@@ -140,7 +140,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool])
+  }, [poolStates, groupBy, pool, poolFeeStates])
 
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
@@ -249,7 +249,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         bold: true,
       },
     ]
-  }, [poolStates, pool])
+  }, [poolStates, pool, poolFeeStates])
 
   const investRedeemRecords: Row[] = React.useMemo(() => {
     return [
