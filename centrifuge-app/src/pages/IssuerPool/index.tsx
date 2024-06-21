@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Route, Switch, useParams, useRouteMatch } from 'react-router'
 import { PoolChangesBanner } from '../../components/PoolChangesBanner'
 import { IssuerPoolAccessPage } from './Access'

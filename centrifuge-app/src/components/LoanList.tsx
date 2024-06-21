@@ -184,7 +184,7 @@ export function LoanList({ loans }: Props) {
 
   const pinnedData: Row[] = [
     {
-      id: 'reserve',
+      id: '0',
       // @ts-expect-error
       status: '',
       poolId: pool.id,
@@ -235,9 +235,7 @@ export function LoanList({ loans }: Props) {
               columns={columns}
               pinnedData={pinnedData}
               defaultSortOrder="desc"
-              onRowClicked={(row) =>
-                row.status ? `${basePath}/${poolId}/assets/${row.id}` : `${basePath}/${poolId}/assets`
-              }
+              onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
               pageSize={20}
               page={pagination.page}
             />
@@ -276,7 +274,7 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
   const isTinlakePool = loan.poolId.startsWith('0x')
   const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, isTinlakePool)
   const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  if (loan.id === 'reserve') {
+  if (loan.id === '0') {
     return (
       <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
         <Shelf height="24px" width="24px" alignItems="center" justifyContent="center">
@@ -350,7 +348,9 @@ function Amount({ loan }: { loan: Row }) {
           return formatBalance(l.totalRepaid, pool?.currency.symbol)
         }
 
-        if ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && currentFace) {
+        // @ts-expect-error
+        if ('valuationMethod' in l.pricing && l.pricing.valuationMethod === 'oracle' && l.presentValue) {
+          // @ts-expect-error
           return formatBalance(currentFace, pool?.currency.symbol)
         }
 

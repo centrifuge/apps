@@ -44,14 +44,14 @@ export type Key =
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
-  | 'showPodAccountCreation'
   | 'convertAddress'
   | 'showTestNets'
   | 'showSwaps'
   | 'showOracle'
   | 'poolCreationType'
-  | 'podAdminSeed'
-  | 'holdersReport'
+  | 'assetSnapshots'
+  | 'showTokenYields'
+  | 'showOracleTx'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -93,7 +93,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: '',
     type: 'text',
   },
-  holdersReport: {
+  assetSnapshots: {
     type: 'checkbox',
     default: false,
   },
@@ -101,10 +101,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     alwaysShow: true,
     default: !!localStorage.getItem('debugFlags'),
     type: 'checkbox',
-  },
-  podAdminSeed: {
-    default: '//Eve',
-    type: 'text',
   },
   poolCreationType: {
     default: config.poolCreationType || 'immediate',
@@ -129,10 +125,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     type: 'checkbox',
   },
-  showPodAccountCreation: {
-    default: false,
-    type: 'checkbox',
-  },
   showSwaps: {
     default: false,
     type: 'checkbox',
@@ -147,6 +139,14 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   showUnusedFlags: {
+    default: false,
+    type: 'checkbox',
+  },
+  showTokenYields: {
+    default: false,
+    type: 'checkbox',
+  },
+  showOracleTx: {
     default: false,
     type: 'checkbox',
   },

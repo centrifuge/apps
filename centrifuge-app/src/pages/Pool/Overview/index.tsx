@@ -1,12 +1,12 @@
 import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
-import { Button, Card, Grid, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Button, Card, Grid, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
-import { IssuerSection } from '../../../components/IssuerSection'
+import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { LayoutSection } from '../../../components/LayoutBase/LayoutSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -25,7 +25,7 @@ import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useConnectBeforeAction } from '../../../utils/useConnectBeforeAction'
 import { useIsAboveBreakpoint } from '../../../utils/useIsAboveBreakpoint'
 import { useLoans } from '../../../utils/useLoans'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { usePool, usePoolFees, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export type Token = {
@@ -63,6 +63,7 @@ export function PoolDetailOverview() {
   const { pid: poolId } = useParams<{ pid: string }>()
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const averageMaturity = useAverageMaturity(poolId)
   const loans = useLoans(poolId)
@@ -131,12 +132,40 @@ export function PoolDetailOverview() {
         </React.Suspense>
       )}
       <React.Suspense fallback={<Spinner />}>
-        <IssuerSection metadata={metadata} />
+        {metadata?.pool?.reports?.length ? (
+          <Card p={3}>
+            <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
+              <Stack gap={2}>
+                <Text variant="heading2">Pool analysis</Text>
+                <ReportDetails metadata={metadata} />
+              </Stack>
+              <Stack gap={2}>
+                <Text variant="heading2">Issuer details</Text>
+                <IssuerDetails metadata={metadata} />
+              </Stack>
+            </Grid>
+          </Card>
+        ) : isTinlakePool ? (
+          <Card p={3}>
+            <Stack gap={2}>
+              <Text variant="heading2">Issuer details</Text>
+              <IssuerDetails metadata={metadata} />
+            </Stack>
+          </Card>
+        ) : null}
       </React.Suspense>
       {!isTinlakePool && (
         <>
           <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
             <React.Suspense fallback={<Spinner />}>
+              {metadata?.pool?.reports?.length === 0 || !isTinlakePool ? (
+                <Card p={3}>
+                  <Stack gap={2}>
+                    <Text variant="heading2">Issuer details</Text>
+                    <IssuerDetails metadata={metadata} />
+                  </Stack>
+                </Card>
+              ) : null}
               <PoolStructure
                 numOfTranches={pool.tranches.length}
                 poolId={poolId}
@@ -144,7 +173,7 @@ export function PoolDetailOverview() {
                 poolFees={
                   metadata?.pool?.poolFees?.map((fee) => {
                     return {
-                      fee: pool.poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
+                      fee: poolFees?.find((f) => f.id === fee.id)?.amounts.percentOfNav ?? Rate.fromFloat(0),
                       name: fee.name,
                       id: fee.id,
                     }

@@ -1,7 +1,7 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Stack, Text } from '@centrifuge/fabric'
-import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
+import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
@@ -74,20 +74,6 @@ export function Issuer() {
 
   const form = useFormik({
     initialValues,
-    validate: (values) => {
-      let errors: FormikErrors<any> = {}
-
-      if (values.reportUrl) {
-        if (!values.reportAuthorName) {
-          errors = setIn(errors, 'reportAuthorName', 'Required')
-        }
-        if (!values.reportAuthorTitle) {
-          errors = setIn(errors, 'reportAuthorTitle', 'Required')
-        }
-      }
-
-      return errors
-    },
     onSubmit: async (values, actions) => {
       const oldMetadata = metadata as PoolMetadata
       const execSummaryChanged = values.executiveSummary !== initialValues.executiveSummary

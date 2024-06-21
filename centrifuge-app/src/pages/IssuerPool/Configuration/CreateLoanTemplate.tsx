@@ -48,7 +48,7 @@ const initialSchemaJSON = `{
         "max": 100
       },
       "output": null,
-      "public": false
+      "public": true
     },
     "key3": {
       "label": "a date",
@@ -94,7 +94,7 @@ const initialSchemaJSON = `{
   },
   "sections": [
     {
-      "name": "A public data section",
+      "name": "A section",
       "attributes": [
         "key1",
         "key3",
@@ -103,7 +103,7 @@ const initialSchemaJSON = `{
       ]
     },
     {
-      "name": "A private data section",
+      "name": "Another section",
       "attributes": [
         "key2"
       ]

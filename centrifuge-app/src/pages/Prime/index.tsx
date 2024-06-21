@@ -127,11 +127,14 @@ function DaoPortfoliosTable() {
               decimals
             ).toFloat()
 
-            const subqueryCurrency = account?.currencyBalances.nodes.find(
+            const subqueryCurrencies = account?.currencyBalances.nodes.filter(
               (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
             )
-            if (subqueryCurrency) {
-              balance += new CurrencyBalance(subqueryCurrency.amount, decimals).toFloat()
+            if (subqueryCurrencies.length) {
+              balance += subqueryCurrencies.reduce(
+                (acc: number, cur: any) => acc + new CurrencyBalance(cur.amount, decimals).toFloat(),
+                0
+              )
             }
             return [tranche.trancheId.split('-')[1], { balance, tokenPrice }]
           })

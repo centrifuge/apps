@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Column, DataTable } from '../../components/DataTable'
+import { Tooltips } from '../../components/Tooltips'
 import { Dec } from '../../utils/Decimal'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -15,7 +16,7 @@ type Props = {
   decimals: number
   loanType: 'external' | 'internal'
   pricing: PricingInfo
-  poolType: 'publicCredit' | 'privateCredit' | undefined
+  poolType?: string
   maturityDate: Date
   originationDate: Date | undefined
 }
@@ -29,6 +30,7 @@ type Row = {
   faceValue: Decimal | null
   position: Decimal
   yieldToMaturity: Decimal | null
+  realizedProfitFifo: CurrencyBalance | null
 }
 
 export const TransactionTable = ({
@@ -39,7 +41,6 @@ export const TransactionTable = ({
   pricing,
   poolType,
   maturityDate,
-  originationDate,
 }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
@@ -58,62 +59,67 @@ export const TransactionTable = ({
       return 0
     })
 
-    return sortedTransactions.map((transaction, index, array) => {
-      const termDays = originationDate
-        ? daysBetween(originationDate, maturityDate)
-        : daysBetween(new Date(), maturityDate)
-      const yearsBetweenDates = termDays / 365
+    return sortedTransactions
+      .filter((transaction) => {
+        return !transaction.amount?.isZero()
+      })
+      .map((transaction, index, array) => {
+        const termDays = transaction.timestamp
+          ? daysBetween(transaction.timestamp, maturityDate)
+          : daysBetween(new Date(), maturityDate)
 
-      const faceValue =
-        transaction.quantity && (pricing as ExternalPricingInfo).notional
-          ? new CurrencyBalance(transaction.quantity, 18)
-              .toDecimal()
-              .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-          : null
+        const faceValue =
+          transaction.quantity && (pricing as ExternalPricingInfo).notional
+            ? new CurrencyBalance(transaction.quantity, 18)
+                .toDecimal()
+                .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+            : null
 
-      return {
-        type: transaction.type,
-        amount: transaction.amount,
-        quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
-        transactionDate: transaction.timestamp,
-        yieldToMaturity:
-          transaction.amount && faceValue && transaction.type !== 'REPAID'
-            ? Dec(2)
-                .mul(faceValue?.sub(transaction.amount.toDecimal()))
-                .div(Dec(yearsBetweenDates).mul(faceValue.add(transaction.amount.toDecimal())))
-                .mul(100)
+        return {
+          type: transaction.type,
+          amount: transaction.amount,
+          quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
+          transactionDate: transaction.timestamp,
+          yieldToMaturity:
+            transaction.amount && faceValue && transaction.type !== 'REPAID' && termDays > 0
+              ? faceValue
+                  ?.sub(transaction.amount.toDecimal())
+                  .div(transaction.amount.toDecimal())
+                  .mul(Dec(365).div(Dec(termDays)))
+                  .mul(100)
+              : null,
+          settlePrice: transaction.settlementPrice
+            ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
             : null,
-        settlePrice: transaction.settlementPrice
-          ? new CurrencyBalance(new BN(transaction.settlementPrice), decimals)
-          : null,
-        faceValue,
-        position: array.slice(0, index + 1).reduce((sum, trx) => {
-          if (trx.type === 'BORROWED') {
-            sum = sum.add(
-              trx.quantity
-                ? new CurrencyBalance(trx.quantity, 18)
-                    .toDecimal()
-                    .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-                : trx.amount
-                ? trx.amount.toDecimal()
-                : Dec(0)
-            )
-          }
-          if (trx.type === 'REPAID') {
-            sum = sum.sub(
-              trx.quantity
-                ? new CurrencyBalance(trx.quantity, 18)
-                    .toDecimal()
-                    .mul((pricing as ExternalPricingInfo).notional.toDecimal())
-                : trx.amount
-                ? trx.amount.toDecimal()
-                : Dec(0)
-            )
-          }
-          return sum
-        }, Dec(0)),
-      }
-    })
+          faceValue,
+          position: array.slice(0, index + 1).reduce((sum, trx) => {
+            if (trx.type === 'BORROWED') {
+              sum = sum.add(
+                trx.quantity
+                  ? new CurrencyBalance(trx.quantity, 18)
+                      .toDecimal()
+                      .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+                  : trx.amount
+                  ? trx.amount.toDecimal()
+                  : Dec(0)
+              )
+            }
+            if (trx.type === 'REPAID') {
+              sum = sum.sub(
+                trx.quantity
+                  ? new CurrencyBalance(trx.quantity, 18)
+                      .toDecimal()
+                      .mul((pricing as ExternalPricingInfo).notional.toDecimal())
+                  : trx.amount
+                  ? trx.amount.toDecimal()
+                  : Dec(0)
+              )
+            }
+            return sum
+          }, Dec(0)),
+          realizedProfitFifo: transaction.realizedProfitFifo,
+        }
+      })
   }, [transactions, decimals, pricing])
 
   const getStatusChipType = (type: AssetTransactionType) => {
@@ -168,11 +174,11 @@ export const TransactionTable = ({
               header: `Settle price (${currency})`,
               cell: (row: Row) => (row.settlePrice ? formatBalance(row.settlePrice, undefined, 6, 2) : '-'),
             },
-            ...(loanType === 'external'
+            ...(loanType === 'external' && (pricing as ExternalPricingInfo).notional.gtn(0)
               ? [
                   {
                     align: 'left',
-                    header: `YTM`,
+                    header: <Tooltips type="ytm" />,
                     cell: (row: Row) =>
                       !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
                   },
@@ -183,6 +189,14 @@ export const TransactionTable = ({
               header: `Net cash flow (${currency})`,
               cell: (row: Row) =>
                 row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+            },
+            {
+              align: 'left',
+              header: `Realized P&L`,
+              cell: (row: Row) =>
+                row.realizedProfitFifo
+                  ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+                  : '-',
             },
             {
               align: 'left',
@@ -205,16 +219,6 @@ export const TransactionTable = ({
                   ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}`
                   : '-',
             },
-            ...(loanType === 'external'
-              ? [
-                  {
-                    align: 'left',
-                    header: `YTM`,
-                    cell: (row: Row) =>
-                      !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
-                  },
-                ]
-              : []),
           ]),
     ] as Column[]
   }, [])

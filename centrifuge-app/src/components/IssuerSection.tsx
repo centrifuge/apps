@@ -1,6 +1,6 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Accordion, AnchorButton, Box, Card, Grid, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Accordion, AnchorButton, Box, IconExternalLink, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
@@ -9,28 +9,6 @@ import { AnchorTextLink } from './TextLink'
 
 type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
-}
-
-export function IssuerSection({ metadata }: IssuerSectionProps) {
-  const cent = useCentrifuge()
-  const report = metadata?.pool?.reports?.[0]
-
-  return (
-    <Card p={3}>
-      <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
-        {report && (
-          <Stack gap={2}>
-            <Text variant="heading2">Pool analysis</Text>
-            <ReportDetails metadata={metadata} />
-          </Stack>
-        )}
-        <Stack gap={2}>
-          <Text variant="heading2">Issuer details</Text>
-          <IssuerDetails metadata={metadata} />
-        </Stack>
-      </Grid>
-    </Card>
-  )
 }
 
 export function ReportDetails({ metadata }: IssuerSectionProps) {

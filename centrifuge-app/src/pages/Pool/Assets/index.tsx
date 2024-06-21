@@ -11,7 +11,6 @@ import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { Tooltips } from '../../../components/Tooltips'
-import { config } from '../../../config'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
@@ -116,9 +115,9 @@ export function PoolDetailAssets() {
 }
 
 function CreateAssetButton({ poolId }: { poolId: string }) {
-  const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] }).length > 0
+  const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
 
-  return canCreateAssets && config.useDocumentNfts ? (
+  return canCreateAssets ? (
     <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small>
       Create asset
     </RouterLinkButton>

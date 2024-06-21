@@ -12,6 +12,7 @@ export function useDomainRouters(suspense?: boolean) {
 export type Domain = (ReturnType<Centrifuge['liquidityPools']['getPool']> extends Promise<infer T> ? T : never) & {
   chainId: number
   managerAddress: string
+  hasDeployedLp: boolean
 }
 
 export function useActiveDomains(poolId: string, suspense?: boolean) {
@@ -45,6 +46,9 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
             ...pool,
             chainId: router.chainId,
             managerAddress: manager,
+            hasDeployedLp: Object.values(pool.liquidityPools).some(
+              (tranche) => !!Object.values(tranche).some((p) => !!p)
+            ),
           }
           return domain
         })

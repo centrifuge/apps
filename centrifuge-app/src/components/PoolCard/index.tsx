@@ -85,7 +85,7 @@ export function PoolCard({
                   minimumFractionDigits: 1,
                   maximumFractionDigits: 1,
                 })
-              ) : name?.toLowerCase().includes('anemoy') ? (
+              ) : poolId === '4139607887' ? (
                 <Tooltips
                   style={{ zIndex: zIndices.overlay }}
                   type="tbillApr"
@@ -93,6 +93,19 @@ export function PoolCard({
                     <>
                       <Text fontWeight={500} variant="body1">
                         5.0%
+                      </Text>
+                      <Text variant="body3"> target</Text>{' '}
+                    </>
+                  }
+                />
+              ) : poolId === '1655476167' ? (
+                <Tooltips
+                  style={{ zIndex: zIndices.overlay }}
+                  type="dyfApr"
+                  label={
+                    <>
+                      <Text fontWeight={500} variant="body1">
+                        15.0%
                       </Text>
                       <Text variant="body3"> target</Text>{' '}
                     </>

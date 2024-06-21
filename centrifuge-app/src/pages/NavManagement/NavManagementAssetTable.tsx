@@ -1,6 +1,6 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Drawer, IconDownload, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Drawer, IconDownload, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import daiLogo from '../../assets/images/dai-logo.svg'
@@ -22,10 +22,11 @@ type FormValues = {
     id: string
     oldValue: number
     value: number | ''
-    Isin: string
+    isin: string
     quantity: number
     maturity: string
     currentPrice: number
+    withLinearPricing: boolean
   }[]
   closeEpoch: boolean
 }
@@ -46,6 +47,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     () => (allLoans?.filter((l) => isExternalLoan(l) && l.status !== 'Closed') as ExternalLoan[]) ?? [],
     [allLoans]
   )
+
   const cashLoans =
     (allLoans?.filter((l) => isCashLoan(l) && l.status !== 'Closed') as (CreatedLoan | ActiveLoan)[]) ?? []
   const api = useCentrifugeApi()
@@ -53,7 +55,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const reserveRow = [
     {
       id: 'reserve',
-      Isin: 'Reserve',
+      isin: 'Reserve',
       quantity: 1,
       currentPrice: 0,
       value: pool?.reserve.total.toDecimal().toNumber(),
@@ -70,7 +72,10 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       const batch = [
         ...values.feed
           .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
-          .map((f) => api.tx.oraclePriceFeed.feed({ Isin: f.Isin }, CurrencyBalance.fromFloat(f.value, 18))),
+          .map((f) => {
+            const feed = f.isin ? { Isin: f.isin } : { poolloanid: [poolId, f.id] }
+            return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
+          }),
         api.tx.oraclePriceCollection.updateCollection(poolId),
         api.tx.loans.updatePortfolioValuation(poolId),
       ]
@@ -96,10 +101,11 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             formIndex: i,
             id: l.id,
             oldValue: latestOraclePrice.value.toFloat(),
-            value: '' as const,
-            Isin: l.pricing.Isin,
+            value: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
+            isin: 'isin' in l.pricing.priceId ? l.pricing.priceId.isin : '',
             quantity: l.pricing.outstandingQuantity.toFloat(),
             maturity: formatDate(l.pricing.maturityDate),
+            withLinearPricing: l.pricing.withLinearPricing,
             currentPrice: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
           }
         }) ?? [],
@@ -125,7 +131,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
 
   const poolReserve = pool?.reserve.total.toDecimal().toNumber() || 0
   const newNavExternal = form.values.feed.reduce(
-    (acc, cur) => acc + cur.quantity * (isEditing ? cur.currentPrice : cur.value || cur.oldValue),
+    (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
     0
   )
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
@@ -147,7 +153,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               <Thumbnail type="asset" label={row.id} />
             )}
             <Text variant="body2" fontWeight={600}>
-              {row.Isin}
+              {row.isin || row.id}
             </Text>
           </Shelf>
         ) : (
@@ -162,6 +168,12 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       cell: (row: Row) => ('oldValue' in row ? row.maturity : ''),
     },
     {
+      align: 'left',
+      header: 'Linear pricing',
+      width: '100px',
+      cell: (row: Row) => (row.id === 'reserve' ? '' : 'oldValue' in row && row.withLinearPricing ? 'Yes' : 'No'),
+    },
+    {
       align: 'right',
       header: 'Quantity',
       cell: (row: Row) =>
@@ -171,22 +183,22 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       align: 'right',
       header: 'Asset price',
       cell: (row: Row) =>
-        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.symbol, 8) : '',
+        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.displayName, 8) : '',
     },
     {
       align: 'right',
       header: 'New price',
       cell: (row: Row) => {
-        return 'oldValue' in row && row.id !== 'reserve' ? (
+        return 'oldValue' in row && row.id !== 'reserve' && isEditing ? (
           <Field name={`feed.${row.formIndex}.value`} validate={settlementPrice()}>
             {({ field, meta, form }: FieldProps) => (
               <CurrencyInput
                 {...field}
                 placeholder={row.oldValue.toString()}
                 errorMessage={meta.touched ? meta.error : undefined}
-                currency={pool?.currency.symbol}
+                currency={pool?.currency.displayName}
                 onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
-                value={row.currentPrice}
+                value={field.value}
                 onClick={(e) => e.preventDefault()}
               />
             )}
@@ -199,19 +211,24 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     {
       align: 'right',
       header: 'Value',
-      cell: (row: Row) =>
-        'oldValue' in row
-          ? formatBalance(row.quantity * (row.value || row.oldValue), pool?.currency.symbol)
-          : formatBalance(row.outstandingDebt, pool?.currency.symbol),
+      cell: (row: Row) => {
+        const newValue =
+          'value' in row && !Number.isNaN(row.value) && typeof row.value === 'number' && isEditing
+            ? row.value
+            : undefined
+        return 'oldValue' in row
+          ? formatBalance(row.quantity * (newValue ?? row.oldValue), pool?.currency.symbol)
+          : formatBalance(row.outstandingDebt, pool?.currency.symbol)
+      },
     },
   ]
 
   if (!isEditing) {
-    columns.splice(4, 1)
+    columns.splice(5, 1)
   }
 
   return (
-    <>
+    <Stack pb={8}>
       <FormikProvider value={form}>
         <Drawer isOpen={isConfirming} onClose={() => setIsConfirming(false)}>
           <ButtonGroup>
@@ -275,6 +292,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 <DataCol />
                 <DataCol />
                 <DataCol />
+                <DataCol />
                 {isEditing && <DataCol />}
                 <DataCol>
                   <Text color="accentPrimary" variant="body2">
@@ -286,6 +304,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           />
         </LayoutSection>
       </FormikProvider>
-    </>
+    </Stack>
   )
 }

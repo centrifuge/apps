@@ -36,7 +36,7 @@ export function useDailyPortfolioValue(address: string, rangeValue?: number) {
     {} as Record<string, InvestorTransaction[]>
   )
 
-  const daysSinceFirstTx = transactions?.investorTransactions
+  const daysSinceFirstTx = transactions?.investorTransactions?.[0]
     ? Math.ceil(
         (new Date().getTime() - new Date(transactions.investorTransactions.at(-1)!.timestamp).getTime()) /
           (1000 * 3600 * 24)
@@ -111,21 +111,23 @@ const getPriceAtDate = (
   day: number,
   today: Date
 ) => {
-  return dailyTrancheStatesByTrancheId[trancheId].slice(0 - rangeValue)?.find((state) => {
-    return (
-      `${new Date(state.timestamp).getMonth()}/${new Date(state.timestamp).getDate()}/${new Date(
-        state.timestamp
-      ).getFullYear()}` ===
-      `${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getMonth()}/${new Date(
-        today.getTime() - day * 1000 * 60 * 60 * 24
-      ).getDate()}/${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getFullYear()}`
-    )
-  })?.tokenPrice
+  return new Price(
+    dailyTrancheStatesByTrancheId[trancheId].slice(0 - rangeValue)?.find((state) => {
+      return (
+        `${new Date(state.timestamp).getMonth()}/${new Date(state.timestamp).getDate()}/${new Date(
+          state.timestamp
+        ).getFullYear()}` ===
+        `${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getMonth()}/${new Date(
+          today.getTime() - day * 1000 * 60 * 60 * 24
+        ).getDate()}/${new Date(today.getTime() - day * 1000 * 60 * 60 * 24).getFullYear()}`
+      )
+    })?.tokenPrice ?? Price.fromFloat(1)
+  )
 }
 
-export function usePortfolio(address?: string) {
-  // const [result] = useCentrifugeQuery(['accountPortfolio', address], (cent) => cent.pools.getPortfolio([address!]), {
-  //   enabled: !!address,
+export function usePortfolio(substrateAddress?: string) {
+  // const [result] = useCentrifugeQuery(['accountPortfolio', substrateAddress], (cent) => cent.pools.getPortfolio([substrateAddress!]), {
+  //   enabled: !!substrateAddress,
   // })
   // return result
 
@@ -167,10 +169,10 @@ export function usePortfolio(address?: string) {
     }
   }`,
     {
-      account: address && addressToHex(address),
+      account: substrateAddress && addressToHex(substrateAddress),
     },
     {
-      enabled: !!address,
+      enabled: !!substrateAddress,
     }
   )
 
@@ -190,11 +192,14 @@ export function usePortfolio(address?: string) {
           const sumClaimedCurrency = new CurrencyBalance(tranche.sumClaimedCurrency, decimals)
           const sumClaimedTrancheTokens = new TokenBalance(tranche.sumClaimedTrancheTokens, decimals)
 
-          const currencyAmount = subData.account.currencyBalances.nodes.find(
+          const currencyAmounts = subData.account.currencyBalances.nodes.filter(
             (b: any) => b.currency.trancheId && b.currency.trancheId === tranche.trancheId
           )
-          if (currencyAmount) {
-            freeTrancheTokens = new CurrencyBalance(currencyAmount.amount, decimals)
+          if (currencyAmounts.length) {
+            freeTrancheTokens = new CurrencyBalance(
+              currencyAmounts.reduce((acc: BN, cur: any) => acc.add(new BN(cur.amount)), new BN(0)),
+              decimals
+            )
           }
 
           const totalTrancheTokens = new CurrencyBalance(

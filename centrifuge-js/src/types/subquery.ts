@@ -1,25 +1,31 @@
 import { CurrencyBalance, Price } from '../utils/BN'
 
 export type SubqueryPoolSnapshot = {
-  __typename?: 'PoolSnapshot'
   id: string
   timestamp: string
-  portfolioValuation: number
+  value: string
+  netAssetValue: number
   totalReserve: number
-  availableReserve: number
-  maxReserve: number
-  totalDebt?: number | null
-  totalBorrowed?: number | null
-  totalRepaid?: number | null
-  totalInvested?: number | null
-  totalRedeemed?: number | null
-  sumBorrowedAmount?: number | null
-  sumBorrowedAmountByPeriod?: string | null
-  sumInterestRepaidAmountByPeriod?: string | null
-  sumRepaidAmountByPeriod?: number | null
-  sumInvestedAmountByPeriod?: number | null
-  sumRedeemedAmountByPeriod?: number | null
+  offchainCashValue: number
+  portfolioValuation: number
+  sumPoolFeesChargedAmountByPeriod: string | null
+  sumPoolFeesAccruedAmountByPeriod: string | null
+  sumPoolFeesPaidAmountByPeriod: string | null
+  sumBorrowedAmountByPeriod: string
+  sumPrincipalRepaidAmountByPeriod: string
+  sumInterestRepaidAmountByPeriod: string
+  sumUnscheduledRepaidAmountByPeriod: string
+  sumRepaidAmountByPeriod: string
+  sumInvestedAmountByPeriod: string
+  sumRedeemedAmountByPeriod: string
   blockNumber: number
+  sumPoolFeesPendingAmount: string
+  sumDebtWrittenOffByPeriod: string
+  sumInterestAccruedByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
+  sumUnrealizedProfitAtMarketPrice: string
+  sumUnrealizedProfitAtNotional: string
+  sumUnrealizedProfitByPeriod: string
   periodStart: string
   pool: {
     currency: {
@@ -39,12 +45,15 @@ export type SubqueryTrancheSnapshot = {
     poolId: string
     trancheId: string
   }
-  tokenSupply?: number | null
-
-  sumOutstandingInvestOrdersByPeriod: number
-  sumOutstandingRedeemOrdersByPeriod: number
-  sumFulfilledInvestOrdersByPeriod: number
-  sumFulfilledRedeemOrdersByPeriod: number
+  tokenSupply: string
+  sumOutstandingInvestOrdersByPeriod: string
+  sumOutstandingRedeemOrdersByPeriod: string
+  sumFulfilledInvestOrdersByPeriod: string
+  sumFulfilledRedeemOrdersByPeriod: string
+  yield30DaysAnnualized: string
+  yield90DaysAnnualized: string
+  yieldSinceInception: string
+  yieldSinceLastPeriod: string
 }
 
 export type InvestorTransactionType =
@@ -75,13 +84,28 @@ export type SubqueryInvestorTransaction = {
   epochNumber: number
   type: InvestorTransactionType
   hash: string
-  currencyAmount?: CurrencyBalance | number | null
-  tokenAmount?: CurrencyBalance | number | null
-  tokenPrice?: Price | number | null
-  transactionFee?: number | null
+  currencyAmount?: CurrencyBalance | null
+  tokenAmount?: CurrencyBalance | null
+  tokenPrice?: Price | null
+  transactionFee?: string | null
 }
 
-export type AssetTransactionType = 'CREATED' | 'PRICED' | 'BORROWED' | 'REPAID' | 'CLOSED'
+export type AssetTransactionType =
+  | 'CREATED'
+  | 'PRICED'
+  | 'BORROWED'
+  | 'REPAID'
+  | 'CLOSED'
+  | 'CASH_TRANSFER'
+  | 'DEPOSIT_FROM_INVESTMENTS'
+  | 'WITHDRAWAL_FOR_REDEMPTIONS'
+  | 'WITHDRAWAL_FOR_FEES'
+
+export enum AssetType {
+  OnchainCash = 'OnchainCash',
+  OffchainCash = 'OffchainCash',
+  Other = 'Other',
+}
 
 export type SubqueryAssetTransaction = {
   __typename?: 'AssetTransaction'
@@ -89,6 +113,7 @@ export type SubqueryAssetTransaction = {
   timestamp: string
   poolId: string
   accountId: string
+  hash: string
   epochId: string
   type: AssetTransactionType
   amount: CurrencyBalance | undefined
@@ -96,10 +121,45 @@ export type SubqueryAssetTransaction = {
   interestAmount: CurrencyBalance | undefined
   settlementPrice: string | null
   quantity: string | null
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string
+    name: string
+    type: AssetType
   }
+  fromAsset?: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+  toAsset?: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+}
+
+export type SubqueryAssetSnapshot = {
+  __typename?: 'AssetSnapshot'
+  asset: {
+    id: string
+    metadata: string
+    name: string
+    type: AssetType
+  }
+  timestamp: string
+  presentValue: string
+  outstandingPrincipal: string
+  outstandingInterest: string
+  outstandingDebt: string
+  outstandingQuantity: string
+  totalBorrowed: string
+  totalRepaidPrincipal: string
+  totalRepaidInterest: string
+  totalRepaidUnscheduled: string
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
@@ -115,6 +175,14 @@ export type SubqueryPoolFeeTransaction = {
   poolFee: {
     feeId: Number
   }
+}
+
+export type SubqueryOracleTransaction = {
+  __typename?: 'OracleTransaction'
+  id: string
+  timestamp: string
+  key: string
+  value: string
 }
 
 export type SubqueryTrancheBalances = {
@@ -139,6 +207,9 @@ export type SubqueryCurrencyBalances = {
   __typename?: 'CurrencyBalances'
   id: string
   accountId: string
+  currency: {
+    trancheId: string | null
+  }
   account: {
     chainId: string
     evmAddress?: string
@@ -169,4 +240,20 @@ export type SubqueryEpoch = {
   sumRepaidAmount: number | null
   sumInvestedAmount: number | null
   sumRedeemedAmount: number | null
+}
+
+// incomplete types
+export type SubqueryPoolFeeSnapshot = {
+  poolFeeId: string // poolId-feeId
+  timestamp: string
+  sumPaidAmount: string
+  sumChargedAmount: string
+  sumAccruedAmount: string
+  pendingAmount: string
+  sumPaidAmountByPeriod: string
+  sumChargedAmountByPeriod: string
+  sumAccruedAmountByPeriod: string
+  poolFee: {
+    name: string
+  }
 }

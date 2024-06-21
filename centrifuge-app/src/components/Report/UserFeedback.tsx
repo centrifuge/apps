@@ -1,5 +1,4 @@
 import { Box, InlineFeedback, Shelf, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 
 export function UserFeedback({ reportType }: { reportType: string }) {
   return (
@@ -10,7 +9,7 @@ export function UserFeedback({ reportType }: { reportType: string }) {
           <Text as="strong" fontWeight={600}>
             {reportType}
           </Text>{' '}
-          data available for this pool. Try to select another report or date range.
+          data available for this pool. Try to select another report or other filters.
         </InlineFeedback>
       </Box>
     </Shelf>

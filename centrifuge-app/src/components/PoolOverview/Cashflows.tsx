@@ -44,9 +44,11 @@ export const Cashflows = () => {
             2
           )}"`
         : '-',
-      'Principal repayments': poolState.sumRepaidAmountByPeriod
+      'Principal repayments': poolState.sumPrincipalRepaidAmountByPeriod
         ? `"${formatBalance(
-            new CurrencyBalance(poolState.sumRepaidAmountByPeriod, pool.currency.decimals).toDecimal().toNumber(),
+            new CurrencyBalance(poolState.sumPrincipalRepaidAmountByPeriod, pool.currency.decimals)
+              .toDecimal()
+              .toNumber(),
             'USD',
             2,
             2

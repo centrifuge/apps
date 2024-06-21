@@ -126,7 +126,6 @@ const initialValues: CreatePoolValues = {
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
-  podEndpoint: config.defaultPodUrl ?? '',
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
 
   issuerName: '',
@@ -245,8 +244,8 @@ function CreatePoolForm() {
             const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
             const submittable = api.tx.utility.batchAll(
               [
-                api.tx.balances.transfer(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
-                api.tx.balances.transfer(
+                api.tx.balances.transferKeepAlive(adminProxy, consts.proxy.proxyDepositFactor.add(transferToMultisig)),
+                api.tx.balances.transferKeepAlive(
                   aoProxy,
                   consts.proxy.proxyDepositFactor.add(consts.uniques.collectionDeposit)
                 ),
@@ -375,14 +374,6 @@ function CreatePoolForm() {
           prevRiskBuffer = t.minRiskBuffer
         }
       })
-      if (values.reportUrl) {
-        if (!values.reportAuthorName) {
-          errors = setIn(errors, 'reportAuthorName', 'Required')
-        }
-        if (!values.reportAuthorTitle) {
-          errors = setIn(errors, 'reportAuthorTitle', 'Required')
-        }
-      }
 
       return errors
     },
@@ -451,14 +442,13 @@ function CreatePoolForm() {
           amount: Rate.fromPercent(fee.percentOfNav),
           feeType: fee.feeType,
           limit: 'ShareOfPortfolioValuation',
-          feeId: feeId + i,
           account: fee.feeType === 'chargedUpTo' ? fee.walletAddress : undefined,
           feePosition: fee.feePosition,
         }
       })
-      metadataValues.poolFees = poolFees.map((fee) => ({
+      metadataValues.poolFees = poolFees.map((fee, i) => ({
         name: fee.name,
-        id: fee.feeId,
+        id: feeId + i,
         feePosition: fee.feePosition,
         feeType: fee.feeType,
       }))
@@ -662,7 +652,7 @@ function CreatePoolForm() {
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
-                      options={currencies?.map((c) => ({ value: c.symbol, label: c.symbol })) ?? []}
+                      options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
                       placeholder="Select..."
                     />
                   )}
@@ -681,15 +671,6 @@ function CreatePoolForm() {
                     />
                   )}
                 </Field>
-              </Box>
-              <Box gridColumn="span 2">
-                <FieldWithErrorMessage
-                  validate={validate.podEndpoint}
-                  name="podEndpoint"
-                  as={TextInput}
-                  label={`POD endpoint`}
-                  placeholder="https://"
-                />
               </Box>
             </Grid>
           </PageSection>

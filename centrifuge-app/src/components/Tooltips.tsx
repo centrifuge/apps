@@ -255,8 +255,12 @@ export const tooltipText = {
     body: 'CFG price sourced externally from Uniswap.',
   },
   tbillApr: {
-    label: 'T-Bill APR',
+    label: 'LTF APR',
     body: 'Based on 3- to 6-month T-bills returns. See pool details for further information.',
+  },
+  dyfApr: {
+    label: 'DYF APR',
+    body: 'Based on the return of the underlying funds',
   },
   poolType: {
     label: 'Pool type',
@@ -285,6 +289,18 @@ export const tooltipText = {
   offchainCash: {
     label: 'Offchain cash',
     body: 'Offchain cash represents funds held in a traditional bank account or custody account.',
+  },
+  averageYtm: {
+    label: 'Average YTM',
+    body: 'Weighted average YTM (Yield to Maturity) at time of asset purchases',
+  },
+  currentYtm: {
+    label: 'Current YTM',
+    body: 'YTM (Yield to Maturity) based on latest available price',
+  },
+  ytm: {
+    label: 'YTM',
+    body: 'YTM (Yield to Maturity) at time of purchase based on settlement price',
   },
 }
 

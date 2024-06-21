@@ -22,7 +22,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const centAddress = useAddress('substrate')
   const evmAddress = useAddress('evm')
   const {
-    evm: { isSmartContractWallet },
+    evm: { isSmartContractWallet, selectedWallet },
   } = useWallet()
   const consts = useCentrifugeConsts()
   const [lpIndex, setLpIndex] = React.useState(0)
@@ -144,7 +144,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     }
   }, [lps])
 
-  const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet
+  const supportsPermits = lpInvest?.currencySupportsPermit && !isSmartContractWallet && selectedWallet?.id !== 'finoa'
 
   const state: InvestRedeemState = {
     poolId,

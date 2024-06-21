@@ -7,11 +7,13 @@ import {
   TinlakeLoan,
 } from '@centrifuge/centrifuge-js'
 import {
+  AnchorButton,
   Box,
   Button,
   Drawer,
   Flex,
   IconChevronLeft,
+  IconDownload,
   Shelf,
   Stack,
   Text,
@@ -21,13 +23,15 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
+import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LoadBoundary } from '../../components/LoadBoundary'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
-import { PodAuthSection } from '../../components/PodAuthSection'
+import { TransactionHistoryTable } from '../../components/PoolOverview/TransactionHistory'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
@@ -36,12 +40,12 @@ import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
 import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
-import { useLoan, useNftDocumentId } from '../../utils/useLoans'
+import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
+import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset } from '../../utils/usePermissions'
-import { usePodDocument } from '../../utils/usePodDocument'
-import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
+import { useAssetSnapshots, useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { FinancingRepayment } from './FinancingRepayment'
 import { HoldingsValues } from './HoldingsValues'
@@ -108,6 +112,23 @@ function Loan() {
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
   const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
 
+  const { assetSnapshots: showAssetSnapshots } = useDebugFlags()
+  const assetSnapshots = useAssetSnapshots(poolId, loanId)
+
+  const dataUrl: any = React.useMemo(() => {
+    if (!assetSnapshots || !assetSnapshots?.length) {
+      return undefined
+    }
+
+    const formatted = assetSnapshots.map((snapshot) => {
+      return {
+        ...snapshot,
+      }
+    })
+
+    return getCSVDownloadUrl(formatted as any)
+  }, [assetSnapshots, pool.currency.symbol])
+
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
       ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
@@ -117,20 +138,17 @@ function Loan() {
   const templateId = templateIds.at(-1)
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
 
-  const name = truncateText((isTinlakePool ? loan?.asset.nftId : nftMetadata?.name) || 'Unnamed asset', 30)
+  const name = truncateText(
+    (isTinlakePool ? loan?.asset.nftId : loanId === '0' ? 'Onchain reserve' : nftMetadata?.name) || 'Unnamed asset',
+    30
+  )
 
   const { data: templateData } = useMetadata<LoanTemplate>(
     nftMetadata?.properties?._template && `ipfs://${nftMetadata?.properties?._template}`
   )
 
-  const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
-  const { data: document } = usePodDocument(poolId, loanId, documentId)
-
   const publicData = nftMetadata?.properties
     ? Object.fromEntries(Object.entries(nftMetadata.properties).map(([key, obj]: any) => [key, obj]))
-    : {}
-  const privateData = document?.attributes
-    ? Object.fromEntries(Object.entries(document.attributes).map(([key, obj]: any) => [key, obj.value]))
     : {}
 
   const originationDate = loan && 'originationDate' in loan ? new Date(loan?.originationDate).toISOString() : undefined
@@ -154,14 +172,13 @@ function Loan() {
       loan.pricing.valuationMethod === 'oracle' &&
       loan.pricing.interestRate.isZero()
     ) {
-      const termDays = originationDate
-        ? daysBetween(originationDate, loan?.pricing.maturityDate)
-        : daysBetween(new Date(), loan?.pricing.maturityDate)
-      const yearsBetweenDates = termDays / 365
-
       return borrowerAssetTransactions
         ?.filter((tx) => tx.type !== 'REPAID')
         .reduce((prev, curr) => {
+          const termDays = curr.timestamp
+            ? daysBetween(curr.timestamp, loan?.pricing.maturityDate)
+            : daysBetween(new Date(), loan?.pricing.maturityDate)
+
           const faceValue =
             curr.quantity && (loan.pricing as ExternalPricingInfo).notional
               ? new CurrencyBalance(curr.quantity, 18)
@@ -170,10 +187,11 @@ function Loan() {
               : null
 
           const yieldToMaturity =
-            curr.amount && faceValue
-              ? Dec(2)
-                  .mul(faceValue?.sub(curr.amount.toDecimal()))
-                  .div(Dec(yearsBetweenDates).mul(faceValue.add(curr.amount.toDecimal())))
+            curr.amount && faceValue && termDays > 0
+              ? faceValue
+                  ?.sub(curr.amount.toDecimal())
+                  .div(curr.amount.toDecimal())
+                  .mul(Dec(365).div(Dec(termDays)))
                   .mul(100)
               : null
           return yieldToMaturity?.mul(curr.quantity!).add(prev) || prev
@@ -193,6 +211,18 @@ function Loan() {
     }
   }, [weightedYTM])
 
+  const currentYTM = React.useMemo(() => {
+    const termDays = loan?.pricing ? daysBetween(new Date(), loan?.pricing.maturityDate) : 0
+
+    return currentFace && loan && 'presentValue' in loan && termDays > 0
+      ? currentFace
+          ?.sub(loan.presentValue.toDecimal())
+          .div(loan.presentValue.toDecimal())
+          .mul(Dec(365).div(Dec(termDays)))
+          .mul(100)
+      : null
+  }, [loan])
+
   return (
     <Stack>
       <Box mt={2} ml={2}>
@@ -206,10 +236,49 @@ function Loan() {
         </Text>
       </Box>
       <PageHeader
-        icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
+        icon={
+          loanId === '0' ? (
+            <Box as="img" src={usdcLogo} alt="" height="iconMedium" width="iconMedium" />
+          ) : (
+            <Thumbnail type="asset" label={loan?.id ?? ''} size="large" />
+          )
+        }
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
+        actions={
+          showAssetSnapshots && (
+            <AnchorButton
+              href={dataUrl}
+              download={`asset-${loanId}-timeseries.csv`}
+              variant="secondary"
+              icon={IconDownload}
+              small
+            >
+              Timeseries
+            </AnchorButton>
+          )
+        }
       />
+      {loanId === '0' && (
+        <>
+          <AssetSummary
+            data={[
+              {
+                label: 'Current value',
+                value: `${formatBalance(pool.reserve.total, pool.currency.symbol, 2, 2)}`,
+              },
+            ]}
+          />
+          <PageSection>
+            <TransactionHistoryTable
+              transactions={borrowerAssetTransactions ?? []}
+              poolId={poolId}
+              preview={false}
+              activeAssetId={loanId}
+            />
+          </PageSection>
+        </>
+      )}
       {loan &&
         pool &&
         (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
@@ -251,8 +320,16 @@ function Loan() {
                 ...(loan.pricing.maturityDate &&
                 'valuationMethod' in loan.pricing &&
                 loan.pricing.valuationMethod === 'oracle' &&
+                loan.pricing.notional.gtn(0) &&
+                currentYTM
+                  ? [{ label: <Tooltips type="currentYtm" />, value: formatPercentage(currentYTM) }]
+                  : []),
+                ...(loan.pricing.maturityDate &&
+                'valuationMethod' in loan.pricing &&
+                loan.pricing.valuationMethod === 'oracle' &&
+                loan.pricing.notional.gtn(0) &&
                 averageWeightedYTM
-                  ? [{ label: 'Average YTM', value: formatPercentage(averageWeightedYTM) }]
+                  ? [{ label: <Tooltips type="averageYtm" />, value: formatPercentage(averageWeightedYTM) }]
                   : []),
               ]}
             />
@@ -314,28 +391,39 @@ function Loan() {
             )}
 
             {borrowerAssetTransactions?.length ? (
-              <PageSection
-                title={
-                  <Flex>
-                    <Text>Transaction history</Text>
-                  </Flex>
-                }
-              >
-                <TransactionTable
-                  transactions={borrowerAssetTransactions}
-                  currency={pool.currency.symbol}
-                  loanType={
-                    'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                      ? 'external'
-                      : 'internal'
+              'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
+                <PageSection>
+                  <TransactionHistoryTable
+                    transactions={borrowerAssetTransactions ?? []}
+                    poolId={poolId}
+                    preview={false}
+                    activeAssetId={loanId}
+                  />
+                </PageSection>
+              ) : (
+                <PageSection
+                  title={
+                    <Flex>
+                      <Text>Transaction history</Text>
+                    </Flex>
                   }
-                  poolType={poolMetadata?.pool?.asset.class as 'publicCredit' | 'privateCredit' | undefined}
-                  decimals={pool.currency.decimals}
-                  pricing={loan.pricing as PricingInfo}
-                  maturityDate={new Date(loan.pricing.maturityDate)}
-                  originationDate={originationDate ? new Date(originationDate) : undefined}
-                />
-              </PageSection>
+                >
+                  <TransactionTable
+                    transactions={borrowerAssetTransactions}
+                    currency={pool.currency.symbol}
+                    loanType={
+                      'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                        ? 'external'
+                        : 'internal'
+                    }
+                    poolType={poolMetadata?.pool?.asset.class}
+                    decimals={pool.currency.decimals}
+                    pricing={loan.pricing as PricingInfo}
+                    maturityDate={new Date(loan.pricing.maturityDate)}
+                    originationDate={originationDate ? new Date(originationDate) : undefined}
+                  />
+                </PageSection>
+              )
             ) : null}
 
             {loan.status === 'Active' &&
@@ -367,20 +455,19 @@ function Loan() {
         <>
           {templateData?.sections?.map((section, i) => {
             const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
+            if (!isPublic) return null
             return (
               <PageSection title={<Box>{section.name}</Box>} titleAddition={isPublic ? undefined : 'Private'} key={i}>
-                {isPublic || document ? (
+                {isPublic ? (
                   <Shelf gap={6} flexWrap="wrap">
                     {section.attributes.map((key) => {
                       const attribute = templateData.attributes?.[key]
                       if (!attribute) return null
-                      const value = publicData[key] ?? privateData[key]
+                      const value = publicData[key]
                       const formatted = value ? formatNftAttribute(value, attribute) : '-'
                       return <LabelValueStack label={attribute.label} value={formatted} key={key} />
                     })}
                   </Shelf>
-                ) : !isPublic ? (
-                  <PodAuthSection poolId={poolId} buttonLabel="Authenticate to view" />
                 ) : null}
               </PageSection>
             )

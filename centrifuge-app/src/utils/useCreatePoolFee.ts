@@ -13,7 +13,6 @@ const mockMetadata = {
   maxReserve: 1,
   epochHours: 23,
   epochMinutes: 50,
-  podEndpoint: 'https://google.com',
   listed: true,
   issuerName: 'Polka Issuer',
   issuerLogo: '0x',

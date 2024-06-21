@@ -4,20 +4,18 @@ import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useFeeTransactions, usePoolMetadata } from '../../utils/usePools'
+import { useOracleTransactions } from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
-import { formatPoolFeeTransactionType } from './utils'
 
 const noop = (v: any) => v
 
-export function FeeTransactions({ pool }: { pool: Pool }) {
+export function OracleTransactions({ pool }: { pool: Pool }) {
   const { startDate, endDate, setCsvData, txType } = React.useContext(ReportContext)
-  const transactions = useFeeTransactions(pool.id, new Date(startDate), new Date(endDate))
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const transactions = useOracleTransactions(new Date(startDate), new Date(endDate))
 
   const columnConfig = [
     {
@@ -27,28 +25,16 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
       formatter: formatDate,
     },
     {
-      header: 'Fee name',
+      header: 'Oracle key',
       align: 'left',
       csvOnly: false,
       formatter: noop,
     },
     {
-      header: 'Transaction type',
-      align: 'left',
-      csvOnly: false,
-      formatter: noop,
-    },
-    {
-      header: 'Currency amount',
+      header: 'Value',
       align: 'right',
       csvOnly: false,
       formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, pool.currency.symbol, 2) : '-'),
-    },
-    {
-      header: 'Currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
     },
   ]
 
@@ -57,21 +43,12 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
       return []
     }
 
-    return transactions
-      ?.filter((tx) => tx.type !== 'PROPOSED' && tx.type !== 'ADDED' && tx.type !== 'REMOVED')
-      .filter((tx) => (!txType || txType === 'all' ? true : tx.type === txType))
-      .map((tx) => ({
-        name: '',
-        value: [
-          tx.timestamp.toISOString(),
-          poolMetadata?.pool?.poolFees?.find((f) => f.id === tx.poolFee.feeId)?.name || '-',
-          formatPoolFeeTransactionType(tx.type),
-          tx.amount?.toFloat() ?? '-',
-          pool.currency.symbol,
-        ],
-        heading: false,
-      }))
-  }, [transactions, txType, poolMetadata, pool.currency.symbol])
+    return transactions.map((tx) => ({
+      name: '',
+      value: [tx.timestamp.toISOString(), tx.key?.substring(2) || '-', tx.value?.toFloat() ?? '-'],
+      heading: false,
+    }))
+  }, [transactions, txType, pool.currency.symbol])
 
   const columns = columnConfig
     .map((col, index) => ({
@@ -94,7 +71,7 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
 
     setCsvData({
       dataUrl,
-      fileName: `${pool.id}-fee-transactions-${formatDate(startDate, {
+      fileName: `${pool.id}-oracle-transactions-${formatDate(startDate, {
         weekday: 'short',
         month: 'short',
         day: '2-digit',
@@ -121,6 +98,6 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
   return data.length > 0 ? (
     <DataTable data={data} columns={columns} hoverable />
   ) : (
-    <UserFeedback reportType="Fee transactions" />
+    <UserFeedback reportType="Oracle transactions" />
   )
 }
