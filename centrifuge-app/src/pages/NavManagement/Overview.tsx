@@ -3,20 +3,26 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { PageSummary } from '../../components/PageSummary'
 import { Tooltips } from '../../components/Tooltips'
 import { formatBalance } from '../../utils/formatting'
-import { useDailyPoolStates, usePool } from '../../utils/usePools'
+import { useDailyPoolStates, usePool, usePoolFees } from '../../utils/usePools'
 
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Box, Divider, IconClockForward, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import React from 'react'
+import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { NavManagementAssetTable } from './NavManagementAssetTable'
-import { NavManagementHeader } from './NavManagementHeader'
 
 export default function NavManagementOverviewPage() {
   const { pid } = useParams<{ pid: string }>()
   return (
     <LayoutBase>
-      <NavManagementHeader />
+      <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
+        <Stack as="header" gap={1} ml={1}>
+          <Text as="h1" variant="heading1">
+            NAV Management
+          </Text>
+        </Stack>
+      </LayoutSection>
       <NavManagementPageSummary poolId={pid} />
       <NavOverviewCard poolId={pid} />
       <NavManagementAssetTable key={pid} poolId={pid} />
@@ -71,6 +77,7 @@ export const NavManagementPageSummary = ({ poolId }: { poolId: string }) => {
 
 export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
   const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const { poolStates: dailyPoolStates } =
@@ -78,10 +85,10 @@ export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
 
   const pendingFees = React.useMemo(() => {
     return new CurrencyBalance(
-      pool?.poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
+      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
       pool.currency.decimals
     )
-  }, [pool.poolFees, pool.currency.decimals])
+  }, [poolFees, pool.currency.decimals])
 
   const changeInValuation = React.useMemo(() => {
     const lastUpdated = pool?.nav.lastUpdated || new Date()

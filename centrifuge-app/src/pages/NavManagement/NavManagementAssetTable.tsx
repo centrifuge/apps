@@ -11,7 +11,7 @@ import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolAccountOrders } from '../../utils/usePools'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
 import { positiveNumber } from '../../utils/validation'
 import { isCashLoan, isExternalLoan } from '../Loan/utils'
@@ -32,11 +32,14 @@ type FormValues = {
 }
 type Row = FormValues['feed'][0] | ActiveLoan | CreatedLoan
 
+const MAX_COLLECT = 100 // maximum number of transactions to collect in one batch
+
 export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const allowedPools = usePoolsForWhichAccountIsFeeder()
   const isFeeder = !!allowedPools?.find((p) => p.id === poolId)
   const [isEditing, setIsEditing] = React.useState(false)
   const [isConfirming, setIsConfirming] = React.useState(false)
+  const orders = usePoolAccountOrders(poolId)
 
   const pool = usePool(poolId, false)
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
@@ -79,6 +82,19 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
         api.tx.oraclePriceCollection.updateCollection(poolId),
         api.tx.loans.updatePortfolioValuation(poolId),
       ]
+      if (orders?.length) {
+        batch.push(
+          ...orders
+            .slice(0, MAX_COLLECT)
+            .map((order) =>
+              api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
+                order.accountId,
+                [poolId, order.trancheId]
+              )
+            )
+        )
+      }
+
       if (values.closeEpoch) {
         batch.push(api.tx.poolSystem.closeEpoch(poolId))
       }
@@ -104,7 +120,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             value: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
             isin: 'isin' in l.pricing.priceId ? l.pricing.priceId.isin : '',
             quantity: l.pricing.outstandingQuantity.toFloat(),
-            maturity: formatDate(l.pricing.maturityDate),
+            maturity: formatDate(l.pricing?.maturityDate ?? ''),
             withLinearPricing: l.pricing.withLinearPricing,
             currentPrice: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
           }

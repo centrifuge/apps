@@ -47,6 +47,9 @@ export function getMetadataModule(inst: Centrifuge) {
       }
 
       if (newUrl.protocol === 'http:' || newUrl.protocol === 'https:') {
+        // Pinata sometimes returns the wrong MIME type for SVG files
+        // This workaround fixes it, while not affecting other kinds of files
+        newUrl.search = '?format='
         return newUrl.href
       }
 
