@@ -145,7 +145,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Principal repayments',
+        name: 'Principal payments',
         value:
           poolStates?.map(({ poolState }) =>
             poolState?.sumPrincipalRepaidAmountByPeriod
