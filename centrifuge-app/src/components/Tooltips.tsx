@@ -291,7 +291,7 @@ export const tooltipText = {
     body: 'Offchain cash represents funds held in a traditional bank account or custody account.',
   },
   averageYtm: {
-    label: 'Average YTM',
+    label: 'Average purchase YTM',
     body: 'Weighted average YTM (Yield to Maturity) at time of asset purchases',
   },
   currentYtm: {
@@ -301,6 +301,14 @@ export const tooltipText = {
   ytm: {
     label: 'YTM',
     body: 'YTM (Yield to Maturity) at time of purchase based on settlement price',
+  },
+  nav: {
+    label: 'NAV',
+    body: 'The Net Asset Value (NAV) reflects the combined present value of assets, cash held in the onchain reserve of the pool, and cash in the bank account designated as offchain cash.',
+  },
+  singleTrancheTokenPrice: {
+    label: 'Token price',
+    body: 'The token price is equal to the NAV divided by the outstanding supply of tokens.',
   },
 }
 

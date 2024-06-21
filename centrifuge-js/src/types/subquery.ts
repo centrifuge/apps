@@ -53,6 +53,9 @@ export type SubqueryTrancheSnapshot = {
   yield30DaysAnnualized: string
   yield90DaysAnnualized: string
   yieldSinceInception: string
+  yieldMTD: string
+  yieldQTD: string
+  yieldYTD: string
   yieldSinceLastPeriod: string
 }
 
@@ -152,6 +155,7 @@ export type SubqueryAssetSnapshot = {
   }
   timestamp: string
   presentValue: string
+  currentPrice: string
   outstandingPrincipal: string
   outstandingInterest: string
   outstandingDebt: string

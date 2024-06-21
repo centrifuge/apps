@@ -131,7 +131,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? `${formatBalance(v, pool.currency.displayName, 2)}` : ''),
       },
       {
-        name: 'Total assets (NAV)',
+        name: 'Net Asset Value (NAV)',
         value: poolStates?.map(({ poolState }) => poolState.netAssetValue.toDecimal()) || [],
         heading: true,
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),

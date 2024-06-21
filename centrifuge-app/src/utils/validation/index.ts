@@ -2,8 +2,8 @@ import { ExternalPricingInfo } from '@centrifuge/centrifuge-js'
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { isAddress as isSubstrateAddress } from '@polkadot/util-crypto'
 import Decimal from 'decimal.js-light'
-import { daysBetween } from '../date'
 import { Dec } from '../Decimal'
+import { daysBetween } from '../date'
 import { formatPercentage } from '../formatting'
 import { getImageDimensions } from '../getImageDimensions'
 
@@ -33,16 +33,6 @@ export const nonNegativeNumber = (err?: CustomError) => (val?: any) => {
 export const positiveNumber = (err?: CustomError) => (val?: any) => {
   const num = val instanceof Decimal ? val.toNumber() : val
   return Number.isFinite(num) && num > 0 ? '' : getError(`Value must be positive`, err, num)
-}
-
-export const settlementPrice = (err?: CustomError) => (val?: any) => {
-  if (!val) return ''
-  if (val < 1) {
-    return getError('Value must be equal to or larger than 1', err, val)
-  }
-
-  const regex = new RegExp(/^\d{1,3}(?:\.\d{1,8})?$/)
-  return regex.test(val) ? '' : getError('Value must be in the format of (1-3).(0-8) digits', err, val)
 }
 
 const maxVariationFraction = Dec(99.99) // 9999%
