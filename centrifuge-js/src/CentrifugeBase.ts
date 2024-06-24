@@ -250,7 +250,7 @@ const parachainRuntimeApi: DefinitionsCall = {
           type: 'Result<Balance, DispatchError>',
         },
       },
-      version: 3,
+      version: 2,
     },
   ],
   AccountConversionApi: [
