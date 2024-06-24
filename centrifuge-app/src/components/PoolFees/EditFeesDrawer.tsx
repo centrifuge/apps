@@ -261,7 +261,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                       </Field>
                                     </Stack>
                                   </Shelf>
-                                  <Field name={`poolFees.${index}.receivingAddress`} validate={combine(required())}>
+                                  <Field name={`poolFees.${index}.receivingAddress`} validate={required()}>
                                     {({ field, meta }: FieldProps) => {
                                       return (
                                         <AddressInput
