@@ -1,5 +1,5 @@
-import { AddFee, PoolMetadata, Rate } from '@centrifuge/centrifuge-js'
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { AddFee, PoolMetadata, Rate, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   AddressInput,
   Box,
@@ -17,13 +17,14 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, Form, FormikProvider, useFormik } from 'formik'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { Dec } from '../../utils/Decimal'
+import { isEvmAddress } from '../../utils/address'
 import { formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
-import { combine, max, positiveNumber, required, substrateAddress } from '../../utils/validation'
+import { combine, max, positiveNumber, required } from '../../utils/validation'
 import { ButtonGroup } from '../ButtonGroup'
 
 type ChargeFeesProps = {
@@ -42,12 +43,23 @@ type FormValues = {
 }
 
 export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
+  const [chainId, setChainId] = useState<number>(0)
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const { data: poolMetadata, isLoading } = usePoolMetadata(pool)
   const poolAdmin = usePoolAdmin(poolId)
   const account = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })[0]
+  const cent = useCentrifuge()
+
+  useEffect(() => {
+    const fetchChainId = async () => {
+      const id = await cent.getChainId()
+      setChainId(id)
+    }
+
+    fetchChainId()
+  }, [cent])
 
   const initialFormData = React.useMemo(() => {
     return poolFees
@@ -115,11 +127,14 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
           )
         })
         .map((fee) => {
+          const destination = isEvmAddress(fee.receivingAddress)
+            ? evmToSubstrateAddress(fee.receivingAddress, chainId)
+            : fee.receivingAddress
           return {
             poolId,
             fee: {
               name: fee.feeName,
-              destination: fee.receivingAddress,
+              destination,
               amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
               feeType: fee.type,
@@ -246,10 +261,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                       </Field>
                                     </Stack>
                                   </Shelf>
-                                  <Field
-                                    name={`poolFees.${index}.receivingAddress`}
-                                    validate={combine(required(), substrateAddress())}
-                                  >
+                                  <Field name={`poolFees.${index}.receivingAddress`} validate={combine(required())}>
                                     {({ field, meta }: FieldProps) => {
                                       return (
                                         <AddressInput
