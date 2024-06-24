@@ -10,6 +10,12 @@ type Props = {
   waitingForStoredIssuer?: boolean
 }
 
+const IS_TESTNETS =
+  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('development') ||
+  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('demo')
+
+const createLabel = (label: string) => `${label}${IS_TESTNETS ? '' : '*'}`
+
 export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false }) => {
   return (
     <Grid columns={[1, 2]} equalColumns gap={2} rowGap={3}>
@@ -26,10 +32,16 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
-          validate={validate.issuerRepName}
+          validate={!IS_TESTNETS && validate.issuerRepName}
           name="issuerRepName"
           as={TextInput}
-          label={<Tooltips type="issuerRepName" label="Legal name of issuer representative*" variant="secondary" />}
+          label={
+            <Tooltips
+              type="issuerRepName"
+              label={createLabel('Legal name of issuer representative')}
+              variant="secondary"
+            />
+          }
           placeholder="Full name..."
           maxLength={100}
           disabled={waitingForStoredIssuer}
@@ -37,10 +49,16 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
-          validate={validate.issuerDescription}
+          validate={!IS_TESTNETS && validate.issuerDescription}
           name="issuerDescription"
           as={TextAreaInput}
-          label={<Tooltips type="poolDescription" variant="secondary" label="Description (minimum 100 characters)*" />}
+          label={
+            <Tooltips
+              type="poolDescription"
+              variant="secondary"
+              label={createLabel('Description (minimum 100 characters)')}
+            />
+          }
           placeholder="Description..."
           maxLength={1000}
           disabled={waitingForStoredIssuer}
@@ -67,7 +85,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       <Box gridColumn={['span 1', 'span 2']}>
         <Text>Links</Text>
       </Box>
-      <Field name="executiveSummary" validate={validate.executiveSummary}>
+      <Field name="executiveSummary" validate={!IS_TESTNETS && validate.executiveSummary}>
         {({ field, meta, form }: FieldProps) => (
           <FileUpload
             file={field.value}
@@ -76,7 +94,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
               form.setFieldValue('executiveSummary', file)
             }}
             accept="application/pdf"
-            label="Executive summary PDF*"
+            label={createLabel('Executive summary PDF')}
             placeholder="Choose file"
             errorMessage={meta.touched && meta.error ? meta.error : undefined}
           />
@@ -85,9 +103,9 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       <FieldWithErrorMessage
         name="website"
         as={TextInput}
-        label="Website*"
+        label={createLabel('Website')}
         placeholder="https://..."
-        validate={validate.website}
+        validate={!IS_TESTNETS && validate.website}
       />
       <FieldWithErrorMessage
         name="forum"
@@ -96,7 +114,13 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
         placeholder="https://..."
         validate={validate.forum}
       />
-      <FieldWithErrorMessage name="email" as={TextInput} label="Email*" placeholder="" validate={validate.email} />
+      <FieldWithErrorMessage
+        name="email"
+        as={TextInput}
+        label={createLabel('Email')}
+        placeholder=""
+        validate={!IS_TESTNETS && validate.email}
+      />
 
       <Box gridColumn={['span 1', 'span 2']}>
         <CustomDetails />

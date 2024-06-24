@@ -18,11 +18,24 @@ import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
 import { validate } from './validate'
 
-const MAX_TRANCHES = 5
+const MAX_TRANCHES = 3
 
 export const TrancheSection: React.FC = () => {
   const fmk = useFormikContext<PoolMetadataInput>()
-  const { values } = fmk
+  const { values, setFieldValue } = fmk
+
+  const getNewTrancheName = (numTranches: number) => {
+    switch (numTranches) {
+      case 0:
+        return 'Junior' // First tranche to be added
+      case 1:
+        return 'Senior' // Second tranche
+      case 2:
+        return 'Mezzanine' // Third tranche
+      default:
+        return '' // No more tranches allowed or needed
+    }
+  }
 
   return (
     <FieldArray name="tranches">
@@ -34,7 +47,14 @@ export const TrancheSection: React.FC = () => {
             <Button
               variant="secondary"
               onClick={() => {
-                fldArr.push(createEmptyTranche())
+                const newTrancheName = getNewTrancheName(values.tranches.length)
+                if (values.tranches.length === 2) {
+                  const updatedItems = values.tranches
+                  updatedItems.splice(1, 0, createEmptyTranche(newTrancheName))
+                  setFieldValue('tranches', updatedItems)
+                } else {
+                  fldArr.push(createEmptyTranche(newTrancheName))
+                }
               }}
               small
               disabled={values.tranches.length >= MAX_TRANCHES}
@@ -76,12 +96,12 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                 </Stack>
                 <FieldWithErrorMessage
                   as={TextInput}
-                  label="Token name*"
-                  placeholder={index === juniorTrancheIndex ? 'Junior' : ''}
+                  label="Token name"
+                  placeholder={index === juniorTrancheIndex ? values.poolName : ''}
                   maxLength={30}
                   name={`tranches.${index}.tokenName`}
-                  validate={validate.tokenName}
-                  disabled={isUpdating}
+                  disabled
+                  value={values.tranches.length === 1 ? values.poolName : s.tokenName}
                 />
                 <Field name={`tranches.${index}.symbolName`} validate={validate.symbolName}>
                   {({ field, form, meta }: FieldProps) => (
@@ -148,7 +168,14 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                 {canRemove && (
                   <Box pt={1}>
                     {index !== juniorTrancheIndex && (
-                      <Button variant="tertiary" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />
+                      <Button
+                        variant="tertiary"
+                        icon={IconMinusCircle}
+                        onClick={() => {
+                          // removes always mezzanine first and then senior to maintain order Junior | Senior or Junior | Mezzanine | Senior
+                          fldArr.remove(1)
+                        }}
+                      />
                     )}
                   </Box>
                 )}

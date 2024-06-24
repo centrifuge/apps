@@ -64,6 +64,10 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
   value: key,
 }))
 
+const IS_TESTNETS =
+  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('development') ||
+  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('demo')
+
 export default function IssuerCreatePoolPage() {
   return (
     <LayoutBase>
@@ -85,12 +89,12 @@ export interface WriteOffGroupInput {
   penaltyInterest: number | ''
 }
 
-export const createEmptyTranche = (junior?: boolean): Tranche => ({
-  tokenName: '',
+export const createEmptyTranche = (trancheName: string): Tranche => ({
+  tokenName: trancheName,
   symbolName: '',
-  interestRate: junior ? '' : 0,
-  minRiskBuffer: junior ? '' : 0,
-  minInvestment: 0,
+  interestRate: trancheName === 'Junior' ? '' : 0,
+  minRiskBuffer: trancheName === 'Junior' ? '' : 0,
+  minInvestment: 1000,
 })
 
 export type CreatePoolValues = Omit<
@@ -122,8 +126,8 @@ const initialValues: CreatePoolValues = {
   poolName: '',
   assetClass: 'Private credit',
   subAssetClass: '',
-  currency: '',
-  maxReserve: '',
+  currency: IS_TESTNETS ? 'USDC' : 'Native USDC',
+  maxReserve: 1000000,
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
@@ -143,7 +147,7 @@ const initialValues: CreatePoolValues = {
   reportAuthorAvatar: null,
   reportUrl: '',
 
-  tranches: [createEmptyTranche(true)],
+  tranches: [createEmptyTranche('Junior')],
   adminMultisig: {
     signers: [],
     threshold: 1,
@@ -644,18 +648,20 @@ function CreatePoolForm() {
               </Box>
               <Box gridColumn="span 2">
                 <Field name="currency" validate={validate.currency}>
-                  {({ field, form, meta }: FieldProps) => (
-                    <Select
-                      name="currency"
-                      label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
-                      onChange={(event) => form.setFieldValue('currency', event.target.value)}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
-                      placeholder="Select..."
-                    />
-                  )}
+                  {({ field, form, meta }: FieldProps) => {
+                    return (
+                      <Select
+                        name="currency"
+                        label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
+                        onChange={(event) => form.setFieldValue('currency', event.target.value)}
+                        onBlur={field.onBlur}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        value={field.value}
+                        options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
+                        placeholder="Select..."
+                      />
+                    )
+                  }}
                 </Field>
               </Box>
               <Box gridColumn="span 2">
