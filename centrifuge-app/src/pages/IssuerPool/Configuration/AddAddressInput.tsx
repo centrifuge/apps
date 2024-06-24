@@ -41,14 +41,14 @@ export function AddAddressInput({
     <Grid columns={2} equalColumns gap={4} alignItems="center">
       <AddressInput
         clearIcon
-        label="Search to add address..."
+        placeholder="Search to add address..."
         value={address}
         onChange={handleChange}
         onBlur={handleBlur}
       />
       {address &&
         (truncated ? (
-          <Shelf gap={2}>
+          <Shelf gap={2} alignItems="center">
             <Shelf style={{ pointerEvents: 'none' }} gap="4px">
               <Identicon value={address} size={16} theme="polkadot" />
               <Text variant="label2" color="textPrimary">

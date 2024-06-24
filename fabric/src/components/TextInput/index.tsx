@@ -254,8 +254,6 @@ export function TextAreaInput({
 export type AddressInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
   Omit<InputUnitProps, 'inputElement'> & {
     value?: string
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
     clearIcon?: boolean
   }
 
