@@ -1,6 +1,17 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Drawer, IconDownload, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  Checkbox,
+  CurrencyInput,
+  Drawer,
+  IconDownload,
+  Shelf,
+  Stack,
+  Text,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import daiLogo from '../../assets/images/dai-logo.svg'
@@ -11,6 +22,7 @@ import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
+import { useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolAccountOrders } from '../../utils/usePools'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
 import { positiveNumber } from '../../utils/validation'
@@ -40,7 +52,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const [isEditing, setIsEditing] = React.useState(false)
   const [isConfirming, setIsConfirming] = React.useState(false)
   const orders = usePoolAccountOrders(poolId)
-
+  const [liquidityAdminAccount] = useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })
   const pool = usePool(poolId, false)
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     enabled: !!poolId && !!pool,
@@ -58,7 +70,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const reserveRow = [
     {
       id: 'reserve',
-      isin: 'Reserve',
+      isin: 'Onchain reserve',
       quantity: 1,
       currentPrice: 0,
       value: pool?.reserve.total.toDecimal().toNumber(),
@@ -82,6 +94,11 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
         api.tx.oraclePriceCollection.updateCollection(poolId),
         api.tx.loans.updatePortfolioValuation(poolId),
       ]
+
+      if (liquidityAdminAccount && values.closeEpoch) {
+        batch.push(api.tx.poolSystem.closeEpoch(poolId))
+      }
+
       if (orders?.length) {
         batch.push(
           ...orders
@@ -93,10 +110,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               )
             )
         )
-      }
-
-      if (values.closeEpoch) {
-        batch.push(api.tx.poolSystem.closeEpoch(poolId))
       }
       const tx = api.tx.utility.batchAll(batch)
       return cent.wrapSignAndSend(api, tx, options)
@@ -199,7 +212,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       align: 'right',
       header: 'Asset price',
       cell: (row: Row) =>
-        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.displayName, 8) : '',
+        row.id !== 'reserve'
+          ? formatBalance(
+              'currentPrice' in row && typeof row.currentPrice === 'number' ? row.currentPrice : 0,
+              pool?.currency.displayName,
+              8
+            )
+          : '',
     },
     {
       align: 'right',
@@ -247,19 +266,25 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     <Stack pb={8}>
       <FormikProvider value={form}>
         <Drawer isOpen={isConfirming} onClose={() => setIsConfirming(false)}>
-          <ButtonGroup>
-            <Button
-              onClick={() => {
-                form.submitForm()
-                setIsConfirming(false)
-              }}
-            >
-              Confirm NAV
-            </Button>
-            <Button variant="secondary" onClick={() => setIsConfirming(false)}>
-              Cancel
-            </Button>
-          </ButtonGroup>
+          <Text variant="heading2">Confirm NAV</Text>
+          <Stack gap={2}>
+            {liquidityAdminAccount && (
+              <Checkbox {...form.getFieldProps('closeEpoch')} checked={form.values.closeEpoch} label="Close epoch" />
+            )}
+            <ButtonGroup>
+              <Button
+                onClick={() => {
+                  form.submitForm()
+                  setIsConfirming(false)
+                }}
+              >
+                Confirm
+              </Button>
+              <Button variant="secondary" onClick={() => setIsConfirming(false)}>
+                Cancel
+              </Button>
+            </ButtonGroup>
+          </Stack>
         </Drawer>
         <LayoutSection
           title="Assets"
