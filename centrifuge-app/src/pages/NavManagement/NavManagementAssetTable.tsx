@@ -70,7 +70,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const reserveRow = [
     {
       id: 'reserve',
-      isin: 'Reserve',
+      isin: 'Onchain reserve',
       quantity: 1,
       currentPrice: 0,
       value: pool?.reserve.total.toDecimal().toNumber(),
