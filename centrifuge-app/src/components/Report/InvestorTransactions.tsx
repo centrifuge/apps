@@ -197,7 +197,6 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
               <NetworkIcon size="iconSmall" network={tx.chainId || 'centrifuge'} />
               <Text style={{ marginLeft: 4 }}> {(evmChains as any)[tx.chainId]?.name || 'Centrifuge'}</Text>
             </Box>,
-            (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
             utils.formatAddress(tx.evmAddress || tx.accountId),
             tx.epochNumber ? tx.epochNumber.toString() : '-',
             tx.timestamp.toISOString(),
