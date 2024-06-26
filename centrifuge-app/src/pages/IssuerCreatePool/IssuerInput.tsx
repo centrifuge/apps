@@ -3,6 +3,7 @@ import { Field, FieldProps } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../components/Tooltips'
+import { isTestEnv } from '../../config'
 import { CustomDetails } from './CustomDetails'
 import { validate } from './validate'
 
@@ -10,11 +11,7 @@ type Props = {
   waitingForStoredIssuer?: boolean
 }
 
-const IS_TESTNETS =
-  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('development') ||
-  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('demo')
-
-const createLabel = (label: string) => `${label}${IS_TESTNETS ? '' : '*'}`
+const createLabel = (label: string) => `${label}${isTestEnv ? '' : '*'}`
 
 export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false }) => {
   return (
@@ -32,7 +29,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
-          validate={!IS_TESTNETS && validate.issuerRepName}
+          validate={!isTestEnv && validate.issuerRepName}
           name="issuerRepName"
           as={TextInput}
           label={
@@ -49,7 +46,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
-          validate={!IS_TESTNETS && validate.issuerDescription}
+          validate={!isTestEnv && validate.issuerDescription}
           name="issuerDescription"
           as={TextAreaInput}
           label={
@@ -85,7 +82,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       <Box gridColumn={['span 1', 'span 2']}>
         <Text>Links</Text>
       </Box>
-      <Field name="executiveSummary" validate={!IS_TESTNETS && validate.executiveSummary}>
+      <Field name="executiveSummary" validate={!isTestEnv && validate.executiveSummary}>
         {({ field, meta, form }: FieldProps) => (
           <FileUpload
             file={field.value}
@@ -105,7 +102,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
         as={TextInput}
         label={createLabel('Website')}
         placeholder="https://..."
-        validate={!IS_TESTNETS && validate.website}
+        validate={!isTestEnv && validate.website}
       />
       <FieldWithErrorMessage
         name="forum"
@@ -119,7 +116,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
         as={TextInput}
         label={createLabel('Email')}
         placeholder=""
-        validate={!IS_TESTNETS && validate.email}
+        validate={!isTestEnv && validate.email}
       />
 
       <Box gridColumn={['span 1', 'span 2']}>

@@ -40,7 +40,7 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
-import { config } from '../../config'
+import { config, isTestEnv } from '../../config'
 import { isSubstrateAddress } from '../../utils/address'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
@@ -63,10 +63,6 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
   label: key,
   value: key,
 }))
-
-const IS_TESTNETS =
-  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('development') ||
-  import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('demo')
 
 export default function IssuerCreatePoolPage() {
   return (
@@ -126,7 +122,7 @@ const initialValues: CreatePoolValues = {
   poolName: '',
   assetClass: 'Private credit',
   subAssetClass: '',
-  currency: IS_TESTNETS ? 'USDC' : 'Native USDC',
+  currency: isTestEnv ? 'USDC' : 'Native USDC',
   maxReserve: 1000000,
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
@@ -147,7 +143,7 @@ const initialValues: CreatePoolValues = {
   reportAuthorAvatar: null,
   reportUrl: '',
 
-  tranches: [createEmptyTranche('Junior')],
+  tranches: [createEmptyTranche('')],
   adminMultisig: {
     signers: [],
     threshold: 1,
@@ -397,19 +393,31 @@ function CreatePoolForm() {
       const currency = currencies.find((c) => c.symbol === values.currency)!
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
-      if (!values.poolIcon || !values.executiveSummary) {
+      if (!values.poolIcon || (!isTestEnv && !values.executiveSummary)) {
         return
       }
-      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all([
-        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon))),
-        values.issuerLogo ? lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))) : null,
-        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))),
-      ])
+
+      const promises = [lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon)))]
+
+      if (values.issuerLogo) {
+        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))))
+      }
+
+      if (!isTestEnv && values.executiveSummary) {
+        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))))
+      }
+
+      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all(promises)
 
       metadataValues.issuerLogo = pinnedIssuerLogo?.uri
         ? { uri: pinnedIssuerLogo.uri, mime: values?.issuerLogo?.type || '' }
         : null
-      metadataValues.executiveSummary = { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+
+      metadataValues.executiveSummary =
+        !isTestEnv && values.executiveSummary
+          ? { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+          : null
+
       metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
       if (values.reportUrl) {
@@ -534,6 +542,13 @@ function CreatePoolForm() {
       label,
       value: label,
     })) ?? []
+
+  // Use useEffect to update tranche name when poolName changes
+  React.useEffect(() => {
+    if (form.values.poolName) {
+      form.setFieldValue('tranches', [createEmptyTranche(form.values.poolName)])
+    }
+  }, [form.values.poolName])
 
   return (
     <>

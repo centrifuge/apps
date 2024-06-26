@@ -989,7 +989,7 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         : 'Residual',
       metadata: {
-        tokenName: `${metadata.poolName} ${metadata.tranches[i].tokenName}`,
+        tokenName: metadata.tranches[i].tokenName,
         tokenSymbol: metadata.tranches[i].symbolName,
       },
     }))
