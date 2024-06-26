@@ -1,7 +1,7 @@
 import { isSameAddress } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { useCentrifugeUtils, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
-import { IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
+import { NetworkIcon, useCentrifugeUtils, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
+import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { evmChains } from '../../config'
@@ -193,6 +193,10 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
           name: '',
           value: [
             token.currency.name,
+            <Box display={'flex'}>
+              <NetworkIcon size="iconSmall" network={tx.chainId || 'centrifuge'} />
+              <Text style={{ marginLeft: 4 }}> {(evmChains as any)[tx.chainId]?.name || 'Centrifuge'}</Text>
+            </Box>,
             (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
             utils.formatAddress(tx.evmAddress || tx.accountId),
             tx.epochNumber ? tx.epochNumber.toString() : '-',

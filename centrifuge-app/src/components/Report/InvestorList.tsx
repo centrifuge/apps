@@ -116,7 +116,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
           value: [
             <Box display={'flex'}>
               <NetworkIcon size="iconSmall" network={investor.chainId || 'centrifuge'} />
-              <Text style={{ marginLeft: 4 }}> {(evmChains as any)[investor.chainId]?.name || 'centrifuge'}</Text>
+              <Text style={{ marginLeft: 4 }}> {(evmChains as any)[investor.chainId]?.name || 'Centrifuge'}</Text>
             </Box>,
             investor.evmAddress || utils.formatAddress(investor.accountId),
             investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat(),
