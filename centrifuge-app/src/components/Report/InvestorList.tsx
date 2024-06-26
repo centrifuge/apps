@@ -1,6 +1,6 @@
 import { CurrencyBalance, Pool, isSameAddress } from '@centrifuge/centrifuge-js'
-import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Text } from '@centrifuge/fabric'
+import { NetworkIcon, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import { Box, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -114,7 +114,10 @@ export function InvestorList({ pool }: { pool: Pool }) {
         return {
           name: '',
           value: [
-            (evmChains as any)[investor.chainId]?.name || 'Centrifuge',
+            <Box display={'flex'}>
+              <NetworkIcon size="iconSmall" network={investor.chainId || 'centrifuge'} />
+              <p>{(evmChains as any)[investor.chainId]?.name || 'centrifuge'}</p>
+            </Box>,
             investor.evmAddress || utils.formatAddress(investor.accountId),
             investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat(),
             (investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat()) / totalPositions,
@@ -130,9 +133,9 @@ export function InvestorList({ pool }: { pool: Pool }) {
       })
       .filter((row) => {
         if (!address) return true
-        return isAddress(address) && isSameAddress(address, row.value[1])
+        const addressValue = row.value[1] as string
+        return isAddress(address) && isSameAddress(address, addressValue)
       })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [investors, network, pool, address])
 
   const dataUrl = React.useMemo(() => {
