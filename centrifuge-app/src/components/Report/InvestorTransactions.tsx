@@ -219,7 +219,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       })
       .filter((row) => {
         if (!address) return true
-        return isAddress(address) && isSameAddress(address, row.value[2])
+        const addressValue = row.value[2] as string
+        return isAddress(address) && isSameAddress(address, addressValue)
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactions, pool.currency, pool.tranches, txType, address, network])
@@ -230,8 +231,21 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     }
 
     const formatted = data.map(({ value: values }) =>
-      Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
+      Object.fromEntries(
+        columnConfig.map((col, index) => {
+          // First, check if the value is a React element
+          if (React.isValidElement(values[index])) {
+            // Access the network name within the JSX props
+            const element = values[index] as React.ReactElement
+            const textValue = element.props?.children[1]?.props?.children[1] ?? 'Default Text'
+            return [col.header, `"${textValue}"`]
+          } else {
+            return [col.header, `"${values[index]}"`]
+          }
+        })
+      )
     )
+
     const dataUrl = getCSVDownloadUrl(formatted)
 
     setCsvData({

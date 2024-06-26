@@ -143,9 +143,21 @@ export function InvestorList({ pool }: { pool: Pool }) {
       return
     }
 
-    const formatted = data
-      .map(({ value }) => value as string[])
-      .map((values) => Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`])))
+    const formatted = data.map(({ value: values }) =>
+      Object.fromEntries(
+        columnConfig.map((col, index) => {
+          // First, check if the value is a React element
+          if (React.isValidElement(values[index])) {
+            // Access the network name within the JSX props
+            const element = values[index] as React.ReactElement
+            const textValue = element.props?.children[1]?.props?.children[1] ?? 'Default Text'
+            return [col.header, `"${textValue}"`]
+          } else {
+            return [col.header, `"${values[index]}"`]
+          }
+        })
+      )
+    )
 
     return getCSVDownloadUrl(formatted)
     // eslint-disable-next-line react-hooks/exhaustive-deps
