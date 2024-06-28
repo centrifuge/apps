@@ -2256,6 +2256,28 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getPoolSnapshotsGroupedAggregates(poolId: string, from: Date, to: Date) {
+    return inst.getSubqueryObservable<{
+      poolSnapshots: { nodes: SubqueryPoolSnapshot[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        poolSnapshots (first: 1000) {
+        groupedAggregates(groupBy: [TIMESTAMP]) {
+          keys
+          sum {
+            normalizedNAV
+          }
+      }
+    }
+      }`,
+      {
+        poolId,
+        from: from.toISOString(),
+        to: to.toISOString(),
+      }
+    )
+  }
+
   function getPoolSnapshotsWithCursor(poolId: string, endCursor: string | null, from?: Date, to?: Date) {
     return inst.getSubqueryObservable<{
       poolSnapshots: { nodes: SubqueryPoolSnapshot[]; pageInfo: { hasNextPage: boolean; endCursor: string } }
@@ -2588,26 +2610,20 @@ export function getPoolsModule(inst: Centrifuge) {
   function getDailyTVL() {
     const $query = inst.getSubqueryObservable<{
       poolSnapshots: {
-        nodes: {
-          netAssetValue: string
-          periodStart: string
-          pool: {
-            currency: {
-              decimals: number
-            }
+        groupedAggregates: {
+          keys: string[]
+          sum: {
+            normalizedNAV: string
           }
         }[]
       }
     }>(
       `query {
-        poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
-          nodes {
-            netAssetValue
-            periodStart
-            pool {
-              currency {
-                decimals
-              }
+        poolSnapshots (first: 1000) {
+          groupedAggregates(groupBy: [TIMESTAMP]) {
+            keys
+            sum {
+              normalizedNAV
             }
           }
         }
@@ -2621,10 +2637,12 @@ export function getPoolsModule(inst: Centrifuge) {
         }
 
         const mergedMap = new Map()
-        const formatted = data.poolSnapshots.nodes.map(({ netAssetValue, periodStart, pool }) => ({
-          dateInMilliseconds: new Date(periodStart).getTime(),
-          tvl: new CurrencyBalance(new BN(netAssetValue || '0'), pool.currency.decimals).toDecimal(),
-        }))
+        const formatted = data.poolSnapshots.groupedAggregates
+          .map(({ keys, sum }) => ({
+            dateInMilliseconds: new Date(keys[0]).getTime(),
+            tvl: new CurrencyBalance(new BN(sum.normalizedNAV || '0'), 18).toDecimal(),
+          }))
+          .sort((a, b) => a.dateInMilliseconds - b.dateInMilliseconds)
 
         formatted.forEach((entry) => {
           const { dateInMilliseconds, tvl } = entry
