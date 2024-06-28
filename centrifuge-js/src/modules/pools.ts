@@ -2256,6 +2256,46 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getPoolSnapshotGroupedAggregatesWithCursor(
+    poolId: string,
+    endCursor: string | null,
+    options?: { from?: Date; to?: Date; orderBy?: 'BLOCK_NUMBER_ASC' | 'PERIOD_START_ASC' }
+  ) {
+    return inst.getSubqueryObservable<{
+      poolSnapshots: {
+        groupedAggregates: { keys: string[]; sum: { normalizedNAV: string } }[]
+        pageInfo: { hasNextPage: boolean; endCursor: string }
+      }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!, $poolCursor: Cursor) {
+        poolSnapshots(
+          filter: {
+            id: { startsWith: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }
+          after: $poolCursor
+        ) {
+          groupedAggregates(groupBy: [TIMESTAMP]) {
+            keys
+            sum {
+              normalizedNAV
+            }
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
+      }`,
+      {
+        poolId,
+        from: options?.from ? options.from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+        to: options?.to ? options.to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        poolCursor: endCursor,
+      }
+    )
+  }
+
   function getPoolSnapshotsWithCursor(
     poolId: string,
     endCursor: string | null,
@@ -2447,15 +2487,15 @@ export function getPoolsModule(inst: Centrifuge) {
                 if (response?.poolSnapshots) {
                   const { endCursor, hasNextPage } = response.poolSnapshots.pageInfo
 
-
-                return {
-                  endCursor,
-                  hasNextPage,
-                  poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.nodes],
+                  return {
+                    endCursor,
+                    hasNextPage,
+                    poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.nodes],
+                  }
                 }
+                return {}
               }
-              return {}
-            })
+            )
           )
         })
       ),
@@ -2610,13 +2650,13 @@ export function getPoolsModule(inst: Centrifuge) {
       .pipe(
         expand(({ poolSnapshots, endCursor, hasNextPage }) => {
           if (!hasNextPage) return EMPTY
-          return getPoolSnapshotsWithCursor('', endCursor, { orderBy: 'PERIOD_START_ASC' }).pipe(
+          return getPoolSnapshotGroupedAggregatesWithCursor('', endCursor, { orderBy: 'PERIOD_START_ASC' }).pipe(
             map(
               (
                 response: {
                   poolSnapshots: {
-                    nodes: SubqueryPoolSnapshot[]
                     pageInfo: { hasNextPage: boolean; endCursor: string }
+                    groupedAggregates: { keys: string[]; sum: { normalizedNAV: string } }[]
                   }
                 } | null
               ) => {
@@ -2626,7 +2666,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   return {
                     endCursor,
                     hasNextPage,
-                    poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.nodes],
+                    poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.groupedAggregates],
                   }
                 }
                 return {}
@@ -2642,13 +2682,13 @@ export function getPoolsModule(inst: Centrifuge) {
           }
 
           const mergedMap = new Map()
-          const formatted = poolSnapshots.map(({ portfolioValuation, totalReserve, periodStart, pool }) => ({
-            dateInMilliseconds: new Date(periodStart).getTime(),
-            tvl: new CurrencyBalance(
-              new BN(portfolioValuation || '0').add(new BN(totalReserve || '0')),
-              pool.currency.decimals
-            ).toDecimal(),
-          }))
+          const formatted = poolSnapshots
+            .map(({ keys, sum }) => ({
+              dateInMilliseconds: new Date(keys[0]).getTime(),
+              tvl: new CurrencyBalance(sum.normalizedNAV || '0', 18).toDecimal(),
+              // tvl: sum.normalizedNAV,
+            }))
+            .sort((a, b) => a.dateInMilliseconds - b.dateInMilliseconds)
           formatted.forEach((entry) => {
             const { dateInMilliseconds, tvl } = entry
 
