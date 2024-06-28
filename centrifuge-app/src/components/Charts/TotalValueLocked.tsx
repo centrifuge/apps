@@ -17,7 +17,6 @@ type TotalValueLockedProps = {
 
 export default function TotalValueLocked({ chainTVL, setHovered }: TotalValueLockedProps) {
   const centrifugeTVL = useDailyTVL()
-  // const tinlakeTVL = useDailyTinlakeTVL()
   const chartColor = '#ff8c00'
 
   const chartData = React.useMemo(() => {
@@ -32,7 +31,7 @@ export default function TotalValueLocked({ chainTVL, setHovered }: TotalValueLoc
         }
       : undefined
 
-    return getMergedData([...centrifugeTVL], currentTVL)
+    return getMergedData(centrifugeTVL, currentTVL)
   }, [centrifugeTVL, chainTVL])
 
   return (
