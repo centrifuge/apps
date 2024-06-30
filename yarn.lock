@@ -1743,7 +1743,7 @@ __metadata:
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
     "@subwallet/wallet-connect": ^0.2.6
-    "@synthetixio/synpress": ^3.7.2-beta.9
+    "@synthetixio/synpress": ^3.7.3
     "@types/react": ^18.0.27
     "@types/react-dom": ^18.0.10
     "@types/react-helmet-async": ^1.0.3
@@ -8768,9 +8768,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@synthetixio/synpress@npm:^3.7.2-beta.9":
-  version: 3.7.2-beta.10
-  resolution: "@synthetixio/synpress@npm:3.7.2-beta.10"
+"@synthetixio/synpress@npm:^3.7.3":
+  version: 3.7.3
+  resolution: "@synthetixio/synpress@npm:3.7.3"
   dependencies:
     "@cypress/code-coverage": ^3.11.0
     "@cypress/webpack-dev-server": ^3.5.2
@@ -8806,7 +8806,7 @@ __metadata:
     wait-on: ^7.0.1
   bin:
     synpress: synpress.js
-  checksum: 08c8d1da25b8f6322ff9c8df37aef32c5bf77fb58606418e89de77c6d5a83d5a43e273a664c6a0104789cb2a7f4730f2129e81dba31422cef22b4e654adb7491
+  checksum: 1915122344c5e3d554510ddb163f9d8a10657a4de102c5380845d033a27ee59794cc845f621aebf900cbb9af967f01570d1e44caad246432f73acde4fc1e7019
   languageName: node
   linkType: hard
 
