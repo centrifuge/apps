@@ -3,6 +3,7 @@ import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
+import set from 'lodash/set'
 import { combineLatestWith, firstValueFrom, from, map, startWith, switchMap } from 'rxjs'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
@@ -93,7 +94,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   ) {
     const [poolManager, poolId, trancheId, currencyAddress] = args
     return pending(
-      contract(poolManager, ABI.PoolManager).deployLiquidityPool(poolId, trancheId, currencyAddress, {
+      contract(poolManager, ABI.PoolManager).deployVault(poolId, trancheId, currencyAddress, {
         ...options,
         gasLimit: 5000000,
       })
@@ -304,21 +305,22 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 call: ['function getTrancheToken(uint64,bytes16) view returns (address)', poolId, trancheId],
                 returns: [[`trancheTokens[${trancheId}]`, (addr) => (addr !== NULL_ADDRESS ? addr : null)]],
               },
-              // ...(currencies.flatMap((currency) => ({
-              //   target: poolManager,
-              //   call: [
-              //     'function getVault(uint64,bytes16,address) view returns (address)',
-              //     poolId,
-              //     trancheId,
-              //     currency.address,
-              //   ],
-              //   returns: [
-              //     [
-              //       `liquidityPools[${trancheId}][${currency.address}]`,
-              //       (addr) => (addr !== NULL_ADDRESS ? addr : null),
-              //     ],
-              //   ],
-              // })) as Call[]),
+              ...(currencies.flatMap((currency) => ({
+                target: poolManager,
+                call: [
+                  'function getVault(uint64,bytes16,address) view returns (address)',
+                  poolId,
+                  trancheId,
+                  currency.address,
+                ],
+                returns: [
+                  [
+                    `liquidityPools[${trancheId}][${currency.address}]`,
+                    (addr) => (addr !== NULL_ADDRESS ? addr : null),
+                  ],
+                ],
+                allowFailure: true,
+              })) as Call[]),
             ] as Call[]
         ),
         {
@@ -336,6 +338,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         rpcProvider: getProvider(options)!,
       }
     )
+    trancheIds.forEach((tid) => {
+      currencies.forEach((cur) => {
+        set(poolData, `liquidityPools[${tid}][${cur.address}]`, poolData.liquidityPools?.[tid]?.[cur.address] || null)
+      })
+    })
 
     return { ...poolData, poolManager, currencies }
   }
