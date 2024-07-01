@@ -40,7 +40,7 @@ import { LayoutBase } from '../../components/LayoutBase'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
-import { config } from '../../config'
+import { config, isTestEnv } from '../../config'
 import { isSubstrateAddress } from '../../utils/address'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
@@ -85,12 +85,12 @@ export interface WriteOffGroupInput {
   penaltyInterest: number | ''
 }
 
-export const createEmptyTranche = (junior?: boolean): Tranche => ({
-  tokenName: '',
+export const createEmptyTranche = (trancheName: string): Tranche => ({
+  tokenName: trancheName,
   symbolName: '',
-  interestRate: junior ? '' : 0,
-  minRiskBuffer: junior ? '' : 0,
-  minInvestment: 0,
+  interestRate: trancheName === 'Junior' ? '' : 0,
+  minRiskBuffer: trancheName === 'Junior' ? '' : 0,
+  minInvestment: 1000,
 })
 
 export type CreatePoolValues = Omit<
@@ -122,8 +122,8 @@ const initialValues: CreatePoolValues = {
   poolName: '',
   assetClass: 'Private credit',
   subAssetClass: '',
-  currency: '',
-  maxReserve: '',
+  currency: isTestEnv ? 'USDC' : 'Native USDC',
+  maxReserve: 1000000,
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_POOLS,
@@ -143,7 +143,7 @@ const initialValues: CreatePoolValues = {
   reportAuthorAvatar: null,
   reportUrl: '',
 
-  tranches: [createEmptyTranche(true)],
+  tranches: [createEmptyTranche('')],
   adminMultisig: {
     signers: [],
     threshold: 1,
@@ -393,19 +393,31 @@ function CreatePoolForm() {
       const currency = currencies.find((c) => c.symbol === values.currency)!
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
-      if (!values.poolIcon || !values.executiveSummary) {
+      if (!values.poolIcon || (!isTestEnv && !values.executiveSummary)) {
         return
       }
-      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all([
-        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon))),
-        values.issuerLogo ? lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))) : null,
-        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))),
-      ])
+
+      const promises = [lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon)))]
+
+      if (values.issuerLogo) {
+        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))))
+      }
+
+      if (!isTestEnv && values.executiveSummary) {
+        promises.push(lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))))
+      }
+
+      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all(promises)
 
       metadataValues.issuerLogo = pinnedIssuerLogo?.uri
         ? { uri: pinnedIssuerLogo.uri, mime: values?.issuerLogo?.type || '' }
         : null
-      metadataValues.executiveSummary = { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+
+      metadataValues.executiveSummary =
+        !isTestEnv && values.executiveSummary
+          ? { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+          : null
+
       metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
       if (values.reportUrl) {
@@ -531,6 +543,13 @@ function CreatePoolForm() {
       value: label,
     })) ?? []
 
+  // Use useEffect to update tranche name when poolName changes
+  React.useEffect(() => {
+    if (form.values.poolName) {
+      form.setFieldValue('tranches', [createEmptyTranche(form.values.poolName)])
+    }
+  }, [form.values.poolName])
+
   return (
     <>
       <PreimageHashDialog
@@ -644,18 +663,20 @@ function CreatePoolForm() {
               </Box>
               <Box gridColumn="span 2">
                 <Field name="currency" validate={validate.currency}>
-                  {({ field, form, meta }: FieldProps) => (
-                    <Select
-                      name="currency"
-                      label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
-                      onChange={(event) => form.setFieldValue('currency', event.target.value)}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
-                      placeholder="Select..."
-                    />
-                  )}
+                  {({ field, form, meta }: FieldProps) => {
+                    return (
+                      <Select
+                        name="currency"
+                        label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
+                        onChange={(event) => form.setFieldValue('currency', event.target.value)}
+                        onBlur={field.onBlur}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        value={field.value}
+                        options={currencies?.map((c) => ({ value: c.symbol, label: c.name })) ?? []}
+                        placeholder="Select..."
+                      />
+                    )
+                  }}
                 </Field>
               </Box>
               <Box gridColumn="span 2">
