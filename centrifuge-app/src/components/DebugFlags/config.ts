@@ -1,6 +1,7 @@
 import React from 'react'
 import { config, isTestEnv } from '../../config'
 import { ConvertAddressDialogWithButton } from './components/ConvertAddress'
+import { CreateAndSetupPool } from './components/CreateAndSetupPool'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
@@ -50,6 +51,7 @@ export type Key =
   | 'poolCreationType'
   | 'showTokenYields'
   | 'showOracleTx'
+  | 'createPool'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -68,6 +70,12 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   batchMintNFTs: {
     default: false,
     type: 'checkbox',
+  },
+  createPool: {
+    Component: CreateAndSetupPool,
+    alwaysShow: true,
+    default: null,
+    type: 'component',
   },
   convertAddress: {
     Component: ConvertAddressDialogWithButton,
