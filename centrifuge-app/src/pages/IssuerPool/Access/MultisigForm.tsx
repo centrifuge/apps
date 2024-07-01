@@ -1,11 +1,11 @@
 import { addressToHex } from '@centrifuge/centrifuge-js'
-import { Box, Button, IconMinusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { ErrorMessage, Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { Button, IconMinusCircle, Stack, Text } from '@centrifuge/fabric'
+import { FieldArray, useFormikContext } from 'formik'
 import * as React from 'react'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
-import { min } from '../../../utils/validation'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
+import ChangeThreshold from './ChangeTreshold'
 import type { PoolManagersInput } from './PoolManagers'
 
 type Row = { address: string; index: number }
@@ -72,42 +72,15 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
             )}
           </Stack>
           <Stack gap={2}>
-            <Text as="h3" variant="heading3">
-              Configuration change threshold
-            </Text>
-            <Text as="p" variant="body2" color="textSecondary">
-              For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
-              requires multiple signers. Any such change will require the confirmation of:
-            </Text>
-
-            <Shelf gap={2}>
-              {isEditing && (
-                <Box maxWidth={150}>
-                  <Field name="adminMultisig.threshold" validate={min(2, 'Multisig needs at least two signers')}>
-                    {({ field, form }: FieldProps) => (
-                      <Select
-                        name="adminMultisig.threshold"
-                        onChange={(event) => form.setFieldValue('adminMultisig.threshold', Number(event.target.value))}
-                        onBlur={field.onBlur}
-                        value={field.value}
-                        options={adminMultisig.signers.map((_, i) => ({
-                          value: `${i + 1}`,
-                          label: `${i + 1}`,
-                          disabled: i === 0,
-                        }))}
-                        placeholder=""
-                      />
-                    )}
-                  </Field>
-                </Box>
-              )}
-              <Text>
-                {!isEditing && adminMultisig.threshold} out of {adminMultisig.signers.length} managers
-              </Text>
-            </Shelf>
-            <Text variant="label2" color="statusCritical">
-              <ErrorMessage name="adminMultisig.threshold" />
-            </Text>
+            <ChangeThreshold
+              secondaryText=" For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
+        requires multiple signers. Any such change will require the confirmation of:"
+              primaryText="Configuration change threshold"
+              isEditing={isEditing}
+              fieldName="adminMultisig.threshold"
+              signersFieldName="adminMultisig.signers"
+              type="managers"
+            />
           </Stack>
         </Stack>
       )}
