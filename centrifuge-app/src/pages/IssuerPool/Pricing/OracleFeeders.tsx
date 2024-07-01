@@ -13,6 +13,7 @@ import { PageSection } from '../../../components/PageSection'
 import { usePoolAdmin } from '../../../utils/usePermissions'
 import { positiveNumber } from '../../../utils/validation'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
+import { WriteOffGroups } from '../Configuration/WriteOffGroups'
 
 type FormValues = {
   feeders: string[]
@@ -88,88 +89,91 @@ export function OracleFeeders({ poolId }: { poolId: string }) {
   const rows = React.useMemo(() => form.values.feeders.map((a, i) => ({ address: a, index: i })), [form.values.feeders])
 
   return (
-    <FormikProvider value={form}>
-      <Form>
-        <PageSection
-          title="Oracle feeders"
-          headerRight={
-            isEditing ? (
-              <ButtonGroup variant="small">
-                <Button variant="secondary" onClick={() => setIsEditing(false)} small>
-                  Cancel
+    <Box>
+      <FormikProvider value={form}>
+        <Form>
+          <PageSection
+            title="Oracle providers"
+            headerRight={
+              isEditing ? (
+                <ButtonGroup variant="small">
+                  <Button variant="secondary" onClick={() => setIsEditing(false)} small>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    small
+                    loading={isLoading}
+                    loadingMessage={isLoading ? 'Pending...' : undefined}
+                    key="done"
+                    disabled={!admin}
+                  >
+                    Done
+                  </Button>
+                </ButtonGroup>
+              ) : (
+                <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
+                  Edit
                 </Button>
-                <Button
-                  type="submit"
-                  small
-                  loading={isLoading}
-                  loadingMessage={isLoading ? 'Pending...' : undefined}
-                  key="done"
-                  disabled={!admin}
-                >
-                  Done
-                </Button>
-              </ButtonGroup>
-            ) : (
-              <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
-                Edit
-              </Button>
-            )
-          }
-        >
-          <Stack gap={2}>
-            <Box width={200}>
-              <FieldWithErrorMessage
-                as={NumberInput}
-                label="Minimum feeders"
-                name="minFeeders"
-                validate={positiveNumber()}
-                disabled={!isEditing}
-              />
-            </Box>
-            <FieldArray name="feeders">
-              {(fldArr) => (
-                <Stack gap={3}>
-                  <DataTable
-                    data={rows}
-                    columns={[
-                      {
-                        align: 'left',
-                        header: 'Address(es)',
-                        cell: (row: Row) => (
-                          <Text variant="body2">
-                            <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
-                          </Text>
-                        ),
-                      },
-                      {
-                        header: '',
-                        cell: (row: Row) =>
-                          isEditing && (
-                            <Button
-                              variant="tertiary"
-                              icon={IconMinusCircle}
-                              onClick={() => fldArr.remove(row.index)}
-                              disabled={isLoading}
-                            />
+              )
+            }
+          >
+            <Stack gap={2}>
+              <Box width={200}>
+                <FieldWithErrorMessage
+                  as={NumberInput}
+                  label="Minimum feeders"
+                  name="minFeeders"
+                  validate={positiveNumber()}
+                  disabled={!isEditing}
+                />
+              </Box>
+              <FieldArray name="feeders">
+                {(fldArr) => (
+                  <Stack gap={3}>
+                    <DataTable
+                      data={rows}
+                      columns={[
+                        {
+                          align: 'left',
+                          header: 'Address(es)',
+                          cell: (row: Row) => (
+                            <Text variant="body2">
+                              <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
+                            </Text>
                           ),
-                        width: '72px',
-                      },
-                    ]}
-                  />
-                  {isEditing && !isLoading && (
-                    <AddAddressInput
-                      existingAddresses={form.values.feeders}
-                      onAdd={(address) => {
-                        fldArr.push(addressToHex(address))
-                      }}
+                        },
+                        {
+                          header: '',
+                          cell: (row: Row) =>
+                            isEditing && (
+                              <Button
+                                variant="tertiary"
+                                icon={IconMinusCircle}
+                                onClick={() => fldArr.remove(row.index)}
+                                disabled={isLoading}
+                              />
+                            ),
+                          width: '72px',
+                        },
+                      ]}
                     />
-                  )}
-                </Stack>
-              )}
-            </FieldArray>
-          </Stack>
-        </PageSection>
-      </Form>
-    </FormikProvider>
+                    {isEditing && !isLoading && (
+                      <AddAddressInput
+                        existingAddresses={form.values.feeders}
+                        onAdd={(address) => {
+                          fldArr.push(addressToHex(address))
+                        }}
+                      />
+                    )}
+                  </Stack>
+                )}
+              </FieldArray>
+            </Stack>
+          </PageSection>
+        </Form>
+      </FormikProvider>
+      <WriteOffGroups />
+    </Box>
   )
 }
