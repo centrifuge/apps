@@ -42,14 +42,16 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
           }
           const [manager, pool] = result.value
           const router = routers![i]
+          console.log(router)
           const domain: Domain = {
             ...pool,
             chainId: router.chainId,
             managerAddress: manager,
-            hasDeployedLp: Object.values(pool.liquidityPools).some(
-              (tranche) => !!Object.values(tranche).some((p) => !!p)
-            ),
+            hasDeployedLp:
+              pool.liquidityPools &&
+              Object.values(pool.liquidityPools).some((tranche) => !!Object.values(tranche).some((p) => !!p)),
           }
+          console.log(domain)
           return domain
         })
         .filter(Boolean)
