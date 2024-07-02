@@ -17,8 +17,20 @@ type Props = {
 
 export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props) => {
   const isTinlakePool = poolId.startsWith('0x')
+
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+    return pricing && typeof pricing.valuationMethod === 'string'
+  }
+
   const ongoingAssetCount =
-    loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
+    loans &&
+    [...loans].filter(
+      (loan) =>
+        loan.status === 'Active' &&
+        hasValuationMethod(loan.pricing) &&
+        loan.pricing.valuationMethod !== 'cash' &&
+        !loan.outstandingDebt.isZero()
+    ).length
 
   const writtenOffAssetCount =
     loans && [...loans].filter((loan) => loan.status === 'Active' && (loan as ActiveLoan).writeOffStatus).length
@@ -55,7 +67,9 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         ]),
     {
       metric: 'Total assets',
-      value: loans?.length || 0,
+      value:
+        loans?.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash').length ||
+        0,
     },
     {
       metric: 'Ongoing assets',

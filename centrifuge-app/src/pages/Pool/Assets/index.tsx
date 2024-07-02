@@ -46,11 +46,23 @@ export function PoolDetailAssets() {
     )
   }
 
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+    return pricing && typeof pricing.valuationMethod === 'string'
+  }
+
   const ongoingAssets = (loans &&
-    [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero())) as ActiveLoan[]
+    [...loans].filter(
+      (loan) =>
+        loan.status === 'Active' &&
+        hasValuationMethod(loan.pricing) &&
+        loan.pricing.valuationMethod !== 'cash' &&
+        !loan.outstandingDebt.isZero()
+    )) as ActiveLoan[]
 
   const offchainAssets = !isTinlakePool
-    ? loans.filter((loan) => (loan as Loan).pricing.valuationMethod === 'cash')
+    ? loans.filter(
+        (loan) => hasValuationMethod((loan as Loan).pricing) && (loan as Loan).pricing.valuationMethod === 'cash'
+      )
     : null
   const offchainReserve = offchainAssets?.reduce<any>(
     (curr, prev) => curr.add(prev.status === 'Active' ? prev.outstandingDebt.toDecimal() : Dec(0)),
@@ -92,7 +104,8 @@ export function PoolDetailAssets() {
           },
           {
             label: 'Total assets',
-            value: loans.length,
+            value: loans.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash')
+              .length,
           },
           { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
           {

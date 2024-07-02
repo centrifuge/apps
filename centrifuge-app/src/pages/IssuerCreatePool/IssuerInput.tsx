@@ -3,12 +3,15 @@ import { Field, FieldProps } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../components/Tooltips'
+import { isTestEnv } from '../../config'
 import { CustomDetails } from './CustomDetails'
 import { validate } from './validate'
 
 type Props = {
   waitingForStoredIssuer?: boolean
 }
+
+const createLabel = (label: string) => `${label}${isTestEnv ? '' : '*'}`
 
 export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false }) => {
   return (
@@ -26,10 +29,16 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
-          validate={validate.issuerRepName}
+          validate={!isTestEnv && validate.issuerRepName}
           name="issuerRepName"
           as={TextInput}
-          label={<Tooltips type="issuerRepName" label="Legal name of issuer representative*" variant="secondary" />}
+          label={
+            <Tooltips
+              type="issuerRepName"
+              label={createLabel('Legal name of issuer representative')}
+              variant="secondary"
+            />
+          }
           placeholder="Full name..."
           maxLength={100}
           disabled={waitingForStoredIssuer}
@@ -37,10 +46,16 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       </Box>
       <Box gridColumn={['span 1', 'span 2']}>
         <FieldWithErrorMessage
-          validate={validate.issuerDescription}
+          validate={!isTestEnv && validate.issuerDescription}
           name="issuerDescription"
           as={TextAreaInput}
-          label={<Tooltips type="poolDescription" variant="secondary" label="Description (minimum 100 characters)*" />}
+          label={
+            <Tooltips
+              type="poolDescription"
+              variant="secondary"
+              label={createLabel('Description (minimum 100 characters)')}
+            />
+          }
           placeholder="Description..."
           maxLength={1000}
           disabled={waitingForStoredIssuer}
@@ -67,7 +82,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       <Box gridColumn={['span 1', 'span 2']}>
         <Text>Links</Text>
       </Box>
-      <Field name="executiveSummary" validate={validate.executiveSummary}>
+      <Field name="executiveSummary" validate={!isTestEnv && validate.executiveSummary}>
         {({ field, meta, form }: FieldProps) => (
           <FileUpload
             file={field.value}
@@ -76,7 +91,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
               form.setFieldValue('executiveSummary', file)
             }}
             accept="application/pdf"
-            label="Executive summary PDF*"
+            label={createLabel('Executive summary PDF')}
             placeholder="Choose file"
             errorMessage={meta.touched && meta.error ? meta.error : undefined}
           />
@@ -85,9 +100,9 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
       <FieldWithErrorMessage
         name="website"
         as={TextInput}
-        label="Website*"
+        label={createLabel('Website')}
         placeholder="https://..."
-        validate={validate.website}
+        validate={!isTestEnv && validate.website}
       />
       <FieldWithErrorMessage
         name="forum"
@@ -96,7 +111,13 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
         placeholder="https://..."
         validate={validate.forum}
       />
-      <FieldWithErrorMessage name="email" as={TextInput} label="Email*" placeholder="" validate={validate.email} />
+      <FieldWithErrorMessage
+        name="email"
+        as={TextInput}
+        label={createLabel('Email')}
+        placeholder=""
+        validate={!isTestEnv && validate.email}
+      />
 
       <Box gridColumn={['span 1', 'span 2']}>
         <CustomDetails />

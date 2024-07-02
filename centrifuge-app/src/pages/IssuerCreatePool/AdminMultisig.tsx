@@ -14,7 +14,7 @@ export function AdminMultisigSection() {
 
   return (
     <PageSection
-      title="Pool Managers"
+      title="Pool managers"
       headerRight={
         adminMultisigEnabled ? (
           <Button variant="secondary" small onClick={() => form.setFieldValue('adminMultisigEnabled', false)}>

@@ -18,7 +18,7 @@ import { TokenPrice } from './TokenPrice'
 
 export type TableDataRow = {
   name: string
-  value: (string | number | Decimal)[]
+  value: (string | number | JSX.Element | Decimal | undefined)[]
   heading?: boolean
 }
 

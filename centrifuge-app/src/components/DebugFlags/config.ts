@@ -47,7 +47,6 @@ export type Key =
   | 'convertAddress'
   | 'showTestNets'
   | 'showSwaps'
-  | 'showOracle'
   | 'poolCreationType'
   | 'showTokenYields'
   | 'showOracleTx'
@@ -121,10 +120,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   showSwaps: {
-    default: false,
-    type: 'checkbox',
-  },
-  showOracle: {
     default: false,
     type: 'checkbox',
   },
