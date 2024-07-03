@@ -1,9 +1,9 @@
 import { addressToHex, CurrencyBalance, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useAddress, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
-import { useHistory, useLocation, useParams } from 'react-router'
+import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router'
 import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin } from '../../utils/usePermissions'
@@ -26,6 +26,7 @@ type Row = {
   poolCurrency?: string
   index: number
   feePosition: 'Top'
+  category: string
 }
 
 type PoolFeeChange = {
@@ -49,6 +50,8 @@ type PoolFeeChange = {
 
 export function PoolFees() {
   const { pid: poolId } = useParams<{ pid: string }>()
+  const match = useRouteMatch<{ path: string }>(`/:path`)
+  const basePath = `/${match?.params.path ?? 'pools'}/${poolId}`
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
@@ -72,6 +75,13 @@ export function PoolFees() {
   }
 
   const columns = [
+    {
+      align: 'left',
+      header: 'Category',
+      cell: (row: Row) => {
+        return <Text variant="body3">{row.category}</Text>
+      },
+    },
     {
       align: 'left',
       header: 'Name',
@@ -169,6 +179,7 @@ export function PoolFees() {
             pendingFees: feeChainData?.amounts.pending,
             receivingAddress: feeChainData?.destination,
             feePosition: feeMetadata?.feePosition || 'Top of waterfall',
+            category: feeMetadata?.category || ('root' in feeChainData.editor ? 'Protocol' : ''),
             action:
               (isAllowedToCharge || poolAdmin) && !fixedFee ? (
                 <RouterLinkButton
@@ -195,9 +206,11 @@ export function PoolFees() {
       return [
         ...activeFees,
         ...changes.map(({ change, hash }, index) => {
+          const feeMetadata = poolMetadata?.pool?.poolFees?.find((f) => f.id === change.feeId)
           return {
             index: activeFees.length + index,
-            name: poolMetadata?.pool?.poolFees?.find((f) => f.id === change.feeId)?.name,
+            name: feeMetadata?.name,
+            category: feeMetadata?.category,
             feePosition: change.feePosition,
             type: change.type,
             percentOfNav: change.amounts.percentOfNav,
@@ -247,6 +260,10 @@ export function PoolFees() {
         2
       ),
     },
+    {
+      label: <Tooltips type="totalPaidFees" />,
+      value: formatBalance(pool.fees.totalPaid, pool.currency.symbol, 2),
+    },
   ]
 
   return (
@@ -266,6 +283,14 @@ export function PoolFees() {
         }}
       />
       <PageSummary data={pageSummaryData} />
+      <PageSection title="Fee transactions">
+        <Stack gap={2} alignItems="flex-start">
+          <Text color="textSecondary" variant="body2">
+            Find a full overview of all pending and executed fee transactions.
+          </Text>
+          <RouterLinkButton to={`${basePath}/reporting/fee-tx`}>View all transactions</RouterLinkButton>
+        </Stack>
+      </PageSection>
       <PageSection
         title="Fee structure"
         headerRight={
@@ -278,7 +303,9 @@ export function PoolFees() {
         subtitle="Fees are settled using available liquidity before investments or redemptions, prioritizing and paying the highest fees first"
       >
         {data?.length ? (
-          <DataTable data={data || []} columns={columns} />
+          <Box overflow="auto" width="100%" borderWidth="0 1px" borderStyle="solid" borderColor="borderPrimary">
+            <DataTable data={data || []} columns={columns} />
+          </Box>
         ) : (
           <Shelf borderRadius="4px" backgroundColor="backgroundSecondary" justifyContent="center" p="10px">
             <Text color="textSecondary" variant="body2">

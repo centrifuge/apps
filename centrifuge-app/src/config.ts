@@ -258,3 +258,5 @@ export const evmChains: EvmChains = {
     isTestnet: true,
   },
 }
+
+export const feeCategories = ['Trading', 'Fund admin', 'Custodian', 'Investor onboarding', 'Auditor']

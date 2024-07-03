@@ -2,7 +2,7 @@ import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, DateInput, SearchInput, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useHistory, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../../schemas'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
@@ -17,6 +17,9 @@ type ReportFilterProps = {
 }
 
 export function ReportFilter({ pool }: ReportFilterProps) {
+  const match = useRouteMatch<{ path: string }>(`/:path`)
+  const basePath = `/${match?.params.path ?? 'pools'}`
+
   const {
     csvData,
     setStartDate,
@@ -79,7 +82,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         value={report}
         onChange={(event) => {
           if (event.target.value) {
-            history.push(`/pools/${pool.id}/reporting/${event.target.value}`)
+            history.push(`${basePath}/${pool.id}/reporting/${event.target.value}`)
           }
         }}
       />
