@@ -77,6 +77,21 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function updateTokenPrice(
+    args: [poolId: string, trancheId: string, currency: CurrencyKey, evmChainId: number],
+    options?: TransactionOptions
+  ) {
+    const [poolId, trancheId, currency, evmChainId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const tx = api.tx.liquidityPools.updateTokenPrice(poolId, trancheId, currency, { EVM: evmChainId })
+        return inst.wrapSignAndSend(api, tx, options)
+      })
+    )
+  }
+
   function deployTranche(
     args: [poolManager: string, poolId: string, trancheId: string],
     options: TransactionRequest = {}
@@ -567,6 +582,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     withdraw,
     approveForCurrency,
     signPermit,
+    updateTokenPrice,
     getDomainRouters,
     getManagerFromRouter,
     getPool,
