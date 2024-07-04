@@ -51,9 +51,9 @@ const walletsList: { [key: string]: string } = {
 
 const getAdjustedInstallUrl = (wallet: { extensionName: string; installUrl: string }): string => {
   const browser = getSupportedBrowser()
-  const { extensionName, installUrl } = wallet
+  const { installUrl } = wallet
   if (browser === 'firefox') {
-    return `https://addons.mozilla.org/en-US/firefox/addon/${walletsList[extensionName]}/`
+    return `https://addons.mozilla.org/en-US/firefox/addon/${walletsList['extensionName' in wallet ? wallet.extensionName : 'metamask']}/`
   } else {
     return installUrl
   }
