@@ -11,7 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, nonNegativeNumber, required, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
 import { useWithdraw } from './FinanceForm'
 
 type FinanceValues = {
@@ -79,8 +79,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
     return null
   }
 
-  const maturityDatePassed =
-    loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+  const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
 
   return (
     <Stack as={Card} gap={2} p={2}>
@@ -146,7 +145,7 @@ export function ExternalFinanceFields({
         name="price"
         validate={combine(
           required(),
-          settlementPrice(),
+          positiveNumber(),
           validate ??
             ((val) => {
               const financeAmount = Dec(val).mul(form.values.quantity || 1)

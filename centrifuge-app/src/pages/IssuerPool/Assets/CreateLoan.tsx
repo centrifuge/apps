@@ -28,7 +28,7 @@ import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
-import { lastValueFrom, switchMap } from 'rxjs'
+import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
@@ -60,6 +60,7 @@ export type CreateLoanFormValues = {
   pricing: {
     valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'oracle' | 'cash'
     maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
+    maturity: 'fixed' | 'none' | 'fixedWithExtension'
     value: number | ''
     maturityDate: string
     maturityExtensionDays: number
@@ -69,8 +70,10 @@ export type CreateLoanFormValues = {
     lossGivenDefault: number | ''
     discountRate: number | ''
     maxBorrowQuantity: number | ''
-    Isin: string
+    isin: string
     notional: number | ''
+    withLinearPricing: boolean
+    oracleSource: 'isin' | 'assetSpecific'
   }
 }
 
@@ -225,8 +228,9 @@ function IssuerCreateLoan() {
       assetName: '',
       attributes: {},
       pricing: {
-        valuationMethod: 'outstandingDebt',
+        valuationMethod: 'oracle',
         maxBorrowAmount: 'upToTotalBorrowed',
+        maturity: 'fixed',
         value: '',
         maturityDate: '',
         maturityExtensionDays: 0,
@@ -236,14 +240,16 @@ function IssuerCreateLoan() {
         lossGivenDefault: '',
         discountRate: '',
         maxBorrowQuantity: '',
-        Isin: '',
+        isin: '',
         notional: 100,
+        withLinearPricing: false,
+        oracleSource: 'isin',
       },
     },
     onSubmit: async (values, { setSubmitting }) => {
       if (!collateralCollectionId || !account || !templateMetadata) return
       const { decimals } = pool.currency
-      let pricingInfo
+      let pricingInfo: LoanInfoInput
       if (values.pricing.valuationMethod === 'cash') {
         pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
@@ -251,25 +257,31 @@ function IssuerCreateLoan() {
           interestRate: Rate.fromPercent(0),
           value: new BN(2).pow(new BN(128)).subn(1), // max uint128
           maxBorrowAmount: 'upToOutstandingDebt' as const,
-          maturityDate: new Date(values.pricing.maturityDate),
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
         }
       } else if (values.pricing.valuationMethod === 'oracle') {
+        const loanId = await firstValueFrom(centrifuge.pools.getNextLoanId([pid]))
         pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
           maxPriceVariation: Rate.fromPercent(9999),
           maxBorrowAmount: values.pricing.maxBorrowQuantity ? Price.fromFloat(values.pricing.maxBorrowQuantity) : null,
-          Isin: values.pricing.Isin || '',
-          maturityDate: new Date(values.pricing.maturityDate),
+          priceId:
+            values.pricing.oracleSource === 'isin'
+              ? { isin: values.pricing.isin }
+              : { poolLoanId: [pid, loanId.toString()] satisfies [string, string] },
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
           interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
+          withLinearPricing: values.pricing.withLinearPricing,
         }
       } else {
         pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
           maxBorrowAmount: values.pricing.maxBorrowAmount,
           value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
-          maturityDate: new Date(values.pricing.maturityDate),
-          maturityExtensionDays: values.pricing.maturityExtensionDays,
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
+          maturityExtensionDays:
+            values.pricing.maturity === 'fixedWithExtension' ? values.pricing.maturityExtensionDays : null,
           advanceRate: Rate.fromPercent(values.pricing.advanceRate),
           interestRate: Rate.fromPercent(values.pricing.interestRate),
           probabilityOfDefault: Rate.fromPercent(values.pricing.probabilityOfDefault || 0),
@@ -312,6 +324,13 @@ function IssuerCreateLoan() {
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
+
+  React.useEffect(() => {
+    if (form.values.pricing.maturity === 'none' && form.values.pricing.valuationMethod === 'discountedCashFlow') {
+      form.setFieldValue('pricing.maturity', 'fixed', false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.values])
 
   if (redirect) {
     return <Redirect to={redirect} />

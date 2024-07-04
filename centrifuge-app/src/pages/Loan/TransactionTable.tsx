@@ -17,7 +17,7 @@ type Props = {
   loanType: 'external' | 'internal'
   pricing: PricingInfo
   poolType?: string
-  maturityDate: Date
+  maturityDate?: Date
   originationDate: Date | undefined
 }
 
@@ -30,6 +30,7 @@ type Row = {
   faceValue: Decimal | null
   position: Decimal
   yieldToMaturity: Decimal | null
+  realizedProfitFifo: CurrencyBalance | null
 }
 
 export const TransactionTable = ({
@@ -40,7 +41,6 @@ export const TransactionTable = ({
   pricing,
   poolType,
   maturityDate,
-  originationDate,
 }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
@@ -64,9 +64,11 @@ export const TransactionTable = ({
         return !transaction.amount?.isZero()
       })
       .map((transaction, index, array) => {
-        const termDays = transaction.timestamp
-          ? daysBetween(transaction.timestamp, maturityDate)
-          : daysBetween(new Date(), maturityDate)
+        const termDays = maturityDate
+          ? transaction.timestamp
+            ? daysBetween(transaction.timestamp, maturityDate)
+            : daysBetween(new Date(), maturityDate)
+          : 0
 
         const faceValue =
           transaction.quantity && (pricing as ExternalPricingInfo).notional
@@ -81,7 +83,7 @@ export const TransactionTable = ({
           quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
           transactionDate: transaction.timestamp,
           yieldToMaturity:
-            transaction.amount && faceValue && transaction.type !== 'REPAID' && termDays > 0
+            transaction.amount && maturityDate && faceValue && transaction.type !== 'REPAID' && termDays > 0
               ? faceValue
                   ?.sub(transaction.amount.toDecimal())
                   .div(transaction.amount.toDecimal())
@@ -117,6 +119,7 @@ export const TransactionTable = ({
             }
             return sum
           }, Dec(0)),
+          realizedProfitFifo: transaction.realizedProfitFifo,
         }
       })
   }, [transactions, decimals, pricing])
@@ -153,7 +156,7 @@ export const TransactionTable = ({
           </Tooltip>
         ),
       },
-      ...(poolType === 'publicCredit'
+      ...(poolType === 'Public credit'
         ? [
             {
               align: 'left',
@@ -188,6 +191,14 @@ export const TransactionTable = ({
               header: `Net cash flow (${currency})`,
               cell: (row: Row) =>
                 row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+            },
+            {
+              align: 'left',
+              header: `Realized P&L`,
+              cell: (row: Row) =>
+                row.realizedProfitFifo
+                  ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+                  : '-',
             },
             {
               align: 'left',

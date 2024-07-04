@@ -34,7 +34,6 @@ export function OracleFeeders({ poolId }: { poolId: string }) {
     (cent) => (args: [values: FormValues], options) => {
       const [values] = args
       const info = {
-        valueLifetime: 60 * 60 * 24,
         minFeeders: values.minFeeders,
         feeders: values.feeders.map((addr) => ({ system: { Signed: addr } })),
       }

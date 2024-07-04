@@ -29,7 +29,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
     endDate ? new Date(endDate) : undefined,
     'month'
   )
-  const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
+  const poolStates = groupBy === 'day' || groupBy === 'daily' ? dailyPoolStates : monthlyPoolStates
 
   const columns = React.useMemo(() => {
     if (!poolStates) {
@@ -83,7 +83,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
         .slice()
         .reverse()
         .map((token) => ({
-          name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
+          name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
           value:
             poolStates?.map((state) =>
               state.tranches[token.id]?.price ? state.tranches[token.id].price!.toFloat() : 1
@@ -100,7 +100,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
         .slice()
         .reverse()
         .map((token) => ({
-          name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
+          name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
           value: poolStates?.map((state) => state.tranches[token.id].tokenSupply.toFloat()) || [],
           heading: false,
           formatter: (v: any) => formatBalance(v, '', 2),
@@ -119,8 +119,68 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .slice()
             .reverse()
             .map((token) => ({
-              name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
               value: poolStates?.map((state) => state.tranches[token.id].yieldSinceInception.toFloat()) || [],
+              heading: false,
+              formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
+            }))
+        : []),
+      ...(!!showTokenYields
+        ? [
+            {
+              name: 'Yield MTD',
+              value: poolStates?.map(() => '' as any) || [],
+              heading: false,
+            },
+          ]
+        : []),
+      ...(!!showTokenYields
+        ? pool?.tranches
+            .slice()
+            .reverse()
+            .map((token) => ({
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
+              value: poolStates?.map((state) => state.tranches[token.id].yieldMTD.toFloat()) || [],
+              heading: false,
+              formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
+            }))
+        : []),
+      ...(!!showTokenYields
+        ? [
+            {
+              name: 'Yield QTD',
+              value: poolStates?.map(() => '' as any) || [],
+              heading: false,
+            },
+          ]
+        : []),
+      ...(!!showTokenYields
+        ? pool?.tranches
+            .slice()
+            .reverse()
+            .map((token) => ({
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
+              value: poolStates?.map((state) => state.tranches[token.id].yieldQTD.toFloat()) || [],
+              heading: false,
+              formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
+            }))
+        : []),
+      ...(!!showTokenYields
+        ? [
+            {
+              name: 'Yield YTD',
+              value: poolStates?.map(() => '' as any) || [],
+              heading: false,
+            },
+          ]
+        : []),
+      ...(!!showTokenYields
+        ? pool?.tranches
+            .slice()
+            .reverse()
+            .map((token) => ({
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
+              value: poolStates?.map((state) => state.tranches[token.id].yieldYTD.toFloat()) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
             }))
@@ -139,7 +199,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .slice()
             .reverse()
             .map((token) => ({
-              name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
               value: poolStates?.map((state) => state.tranches[token.id].yield30DaysAnnualized.toFloat()) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
@@ -159,7 +219,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
             .slice()
             .reverse()
             .map((token) => ({
-              name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
               value: poolStates?.map((state) => state.tranches[token.id].yield90DaysAnnualized.toFloat()) || [],
               heading: false,
               formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),

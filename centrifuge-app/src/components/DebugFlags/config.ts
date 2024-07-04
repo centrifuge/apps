@@ -48,9 +48,7 @@ export type Key =
   | 'convertAddress'
   | 'showTestNets'
   | 'showSwaps'
-  | 'showOracle'
   | 'poolCreationType'
-  | 'assetSnapshots'
   | 'showTokenYields'
   | 'showOracleTx'
   | 'createPool'
@@ -101,10 +99,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: '',
     type: 'text',
   },
-  assetSnapshots: {
-    type: 'checkbox',
-    default: false,
-  },
   persistDebugFlags: {
     alwaysShow: true,
     default: !!localStorage.getItem('debugFlags'),
@@ -134,10 +128,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
   },
   showSwaps: {
-    default: false,
-    type: 'checkbox',
-  },
-  showOracle: {
     default: false,
     type: 'checkbox',
   },

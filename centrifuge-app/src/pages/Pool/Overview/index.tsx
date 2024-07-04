@@ -1,9 +1,9 @@
 import { CurrencyBalance, Price, Rate } from '@centrifuge/centrifuge-js'
-import { Button, Card, Grid, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Button, Card, Grid, IconFileText, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
@@ -43,14 +43,35 @@ export type Token = {
   yield30DaysAnnualized?: string | null
 }
 
+const FullHeightLayoutBase = styled(LayoutBase)`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`
+
+const FullHeightStack = styled(Stack)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`
+
+const FullHeightLayoutSection = styled(LayoutSection)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`
+
 export function PoolDetailOverviewTab() {
   return (
-    <LayoutBase>
-      <PoolDetailHeader />
-      <LoadBoundary>
-        <PoolDetailOverview />
-      </LoadBoundary>
-    </LayoutBase>
+    <FullHeightLayoutBase>
+      <FullHeightStack>
+        <PoolDetailHeader />
+        <LoadBoundary>
+          <PoolDetailOverview />
+        </LoadBoundary>
+      </FullHeightStack>
+    </FullHeightLayoutBase>
   )
 }
 
@@ -107,7 +128,7 @@ export function PoolDetailOverview() {
     .reverse()
 
   return (
-    <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
+    <FullHeightLayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
       <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
         <React.Suspense fallback={<Spinner />}>
           <PoolPerformance />
@@ -132,11 +153,16 @@ export function PoolDetailOverview() {
         </React.Suspense>
       )}
       <React.Suspense fallback={<Spinner />}>
-        {metadata?.pool?.reports?.length ? (
+        {metadata?.pool?.reports?.length || !isTinlakePool ? (
           <Card p={3}>
             <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
               <Stack gap={2}>
-                <Text variant="heading2">Pool analysis</Text>
+                <Box display="flex" flexDirection="row" alignItems="center">
+                  <IconFileText />
+                  <Text style={{ marginLeft: 8 }} variant="heading2">
+                    Reports
+                  </Text>
+                </Box>
                 <ReportDetails metadata={metadata} />
               </Stack>
               <Stack gap={2}>
@@ -145,27 +171,20 @@ export function PoolDetailOverview() {
               </Stack>
             </Grid>
           </Card>
-        ) : isTinlakePool ? (
+        ) : null}
+        {isTinlakePool && (
           <Card p={3}>
             <Stack gap={2}>
               <Text variant="heading2">Issuer details</Text>
               <IssuerDetails metadata={metadata} />
             </Stack>
           </Card>
-        ) : null}
+        )}
       </React.Suspense>
       {!isTinlakePool && (
         <>
           <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '1fr 1fr']} gap={[2, 2, 3]}>
             <React.Suspense fallback={<Spinner />}>
-              {metadata?.pool?.reports?.length === 0 || !isTinlakePool ? (
-                <Card p={3}>
-                  <Stack gap={2}>
-                    <Text variant="heading2">Issuer details</Text>
-                    <IssuerDetails metadata={metadata} />
-                  </Stack>
-                </Card>
-              ) : null}
               <PoolStructure
                 numOfTranches={pool.tranches.length}
                 poolId={poolId}
@@ -199,7 +218,7 @@ export function PoolDetailOverview() {
           </React.Suspense>
         </>
       )}
-    </LayoutSection>
+    </FullHeightLayoutSection>
   )
 }
 

@@ -28,7 +28,7 @@ export function Menu() {
   const pools = usePoolsThatAnyConnectedAddressHasPermissionsFor() || []
   const isLarge = useIsAboveBreakpoint('L')
   const address = useAddress('substrate')
-  const { showSwaps, showOracle } = useDebugFlags()
+  const { showSwaps } = useDebugFlags()
   const transactions = useTransactionsByAddress(address)
 
   return (
@@ -116,7 +116,7 @@ export function Menu() {
         </PageLink>
       )}
 
-      {showOracle && <NavManagementMenu stacked={!isLarge} />}
+      <NavManagementMenu stacked={!isLarge} />
 
       {config.network !== 'centrifuge' && (
         <PageLink to="/nfts" stacked={!isLarge}>

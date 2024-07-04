@@ -19,6 +19,7 @@ import {
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
   SubqueryOracleTransaction,
+  SubqueryPoolFeeSnapshot,
   SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheBalances,
@@ -100,8 +101,8 @@ export type LoanInfoInput =
       valuationMethod: 'outstandingDebt'
       maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
       value: BN
-      maturityDate: Date
-      maturityExtensionDays: number
+      maturityDate: Date | null
+      maturityExtensionDays: number | null
       advanceRate: BN
       interestRate: BN
     }
@@ -109,7 +110,7 @@ export type LoanInfoInput =
       valuationMethod: 'cash'
       maxBorrowAmount: 'upToOutstandingDebt'
       value: BN
-      maturityDate: Date
+      maturityDate: Date | null
       advanceRate: BN
       interestRate: BN
     }
@@ -117,10 +118,11 @@ export type LoanInfoInput =
       valuationMethod: 'oracle'
       maxBorrowAmount: BN | null
       maxPriceVariation: BN
-      Isin: string
-      maturityDate: Date
+      priceId: { isin: string } | { poolLoanId: [string, string] }
+      maturityDate: Date | null
       interestRate: BN
       notional: BN
+      withLinearPricing: boolean
     }
   | {
       valuationMethod: 'discountedCashFlow'
@@ -138,8 +140,8 @@ export type LoanInfoInput =
 export type LoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
-    maturity: { fixed: { date: number; extension: number } }
-    interestPayments: 'None'
+    maturity: { fixed: { date: number; extension: number } } | { none: null }
+    interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
 
@@ -152,12 +154,11 @@ export type LoanInfoData = {
   pricing:
     | {
         external: {
-          priceId: {
-            isin: string
-          }
+          priceId: { isin: string } | { poolLoanId: [string, string] }
           maxBorrowAmount: { noLimit: null } | { quantity: string }
           notional: string
           maxPriceVariation: string
+          withLinearPricing: boolean
         }
       }
     | {
@@ -191,8 +192,8 @@ export type LoanInfoData = {
 export type ActiveLoanInfoData = {
   /// Specify the repayments schedule of the loan
   schedule: {
-    maturity: { fixed: { date: number; extension: number } }
-    interestPayments: 'None'
+    maturity: { fixed: { date: number; extension: number } } | { none: null }
+    interestPayments: 'OnceAtMaturity'
     payDownSchedule: 'None'
   }
 
@@ -203,12 +204,11 @@ export type ActiveLoanInfoData = {
     | {
         external: {
           info: {
-            priceId: {
-              isin: string
-            }
+            priceId: { isin: string } | { poolLoanId: [string, string] }
             maxBorrowAmount: { noLimit: null } | { quantity: string }
             notional: string
             maxPriceVariation: string
+            withLinearPricing: boolean
           }
           outstandingQuantity: string
           interest: {
@@ -411,8 +411,8 @@ export type InternalPricingInfo = {
   valuationMethod: 'discountedCashFlow' | 'outstandingDebt' | 'cash'
   maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
   value: CurrencyBalance
-  maturityDate: string
-  maturityExtensionDays: number
+  maturityDate: string | null
+  maturityExtensionDays: number | null
   advanceRate: Rate
   interestRate: Rate
   probabilityOfDefault?: Rate
@@ -425,9 +425,9 @@ export type ExternalPricingInfo = {
   maxBorrowAmount: CurrencyBalance | null
   maxPriceVariation: Rate
   outstandingQuantity: CurrencyBalance
-  Isin: string
-  maturityDate: string
-  maturityExtensionDays: number
+  priceId: { isin: string } | { poolLoanId: [string, string] }
+  maturityDate: string | null
+  maturityExtensionDays: number | null
   oracle: {
     value: CurrencyBalance
     timestamp: number
@@ -435,6 +435,7 @@ export type ExternalPricingInfo = {
   }[]
   notional: CurrencyBalance
   interestRate: Rate
+  withLinearPricing: boolean
 }
 
 type TinlakePricingInfo = {
@@ -566,7 +567,23 @@ export type DailyTrancheState = {
   yield30DaysAnnualized: Perquintill
   yield90DaysAnnualized: Perquintill
   yieldSinceInception: Perquintill
+  yieldMTD: Perquintill
+  yieldQTD: Perquintill
+  yieldYTD: Perquintill
   yieldSinceLastPeriod: Perquintill
+}
+
+export type DailyPoolFeesState = {
+  pendingAmount: CurrencyBalance
+  poolFee: { name: string }
+  poolFeeId: string
+  sumAccruedAmount: CurrencyBalance
+  sumChargedAmount: CurrencyBalance
+  sumPaidAmount: CurrencyBalance
+  sumAccruedAmountByPeriod: CurrencyBalance
+  sumChargedAmountByPeriod: CurrencyBalance
+  sumPaidAmountByPeriod: CurrencyBalance
+  timestamp: string
 }
 
 export type DailyPoolState = {
@@ -579,21 +596,34 @@ export type DailyPoolState = {
     sumBorrowedAmountByPeriod: CurrencyBalance
     sumRepaidAmountByPeriod: CurrencyBalance
     sumPoolFeesChargedAmountByPeriod: CurrencyBalance
+    sumPoolFeesAccruedAmountByPeriod: CurrencyBalance
+    sumPoolFeesPaidAmountByPeriod: CurrencyBalance
     sumPrincipalRepaidAmountByPeriod: CurrencyBalance
     sumInterestRepaidAmountByPeriod: CurrencyBalance
     sumUnscheduledRepaidAmountByPeriod: CurrencyBalance
     sumInvestedAmountByPeriod: CurrencyBalance
     sumRedeemedAmountByPeriod: CurrencyBalance
+    sumDebtWrittenOffByPeriod: CurrencyBalance
+    sumInterestAccruedByPeriod: CurrencyBalance
+    sumRealizedProfitFifoByPeriod: CurrencyBalance
+    sumUnrealizedProfitAtMarketPrice: CurrencyBalance
+    sumUnrealizedProfitAtNotional: CurrencyBalance
+    sumUnrealizedProfitByPeriod: CurrencyBalance
   }
   poolValue: CurrencyBalance
   timestamp: string
   tranches: { [trancheId: string]: DailyTrancheState }
   sumPoolFeesChargedAmountByPeriod: string | null
   sumPoolFeesAccruedAmountByPeriod: string | null
+  sumPoolFeesPaidAmountByPeriod: string | null
   sumBorrowedAmountByPeriod: string
   sumPrincipalRepaidAmountByPeriod: string
   sumInterestRepaidAmountByPeriod: string
   sumUnscheduledRepaidAmountByPeriod: string
+  sumRealizedProfitFifoByPeriod: string
+  sumUnrealizedProfitAtMarketPrice: string
+  sumUnrealizedProfitAtNotional: string
+  sumUnrealizedProfitByPeriod: string
   sumRepaidAmountByPeriod: string
   sumInvestedAmountByPeriod: string
   sumRedeemedAmountByPeriod: string
@@ -705,7 +735,6 @@ export type PoolMetadata = {
     details?: IssuerDetail[]
     status: PoolStatus
     listed: boolean
-    assetOriginators?: Record<string, { name?: string; withdrawAddresses: WithdrawAddress[] }>
     reports?: PoolReport[]
   }
   pod?: {
@@ -787,6 +816,7 @@ export type AssetTransaction = {
   principalAmount: CurrencyBalance | undefined
   interestAmount: CurrencyBalance | undefined
   hash: string
+  realizedProfitFifo: CurrencyBalance | undefined
   asset: {
     id: string
     metadata: string
@@ -813,6 +843,7 @@ export type AssetSnapshot = {
     type: AssetType
   }
   presentValue: CurrencyBalance | undefined
+  currentPrice: CurrencyBalance | undefined
   outstandingPrincipal: CurrencyBalance | undefined
   outstandingInterest: CurrencyBalance | undefined
   outstandingDebt: CurrencyBalance | undefined
@@ -957,7 +988,7 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         : 'Residual',
       metadata: {
-        tokenName: `${metadata.poolName} ${metadata.tranches[i].tokenName}`,
+        tokenName: metadata.tranches[i].tokenName,
         tokenSymbol: metadata.tranches[i].symbolName,
       },
     }))
@@ -1568,12 +1599,13 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  async function getNextLoanId(args: [poolId: string]) {
+  function getNextLoanId(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
-
-    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId(poolId))))
-    return id
+    return $api.pipe(
+      switchMap((api) => combineLatest([api.query.loans.lastLoanId(poolId)])),
+      map((feeId) => parseInt(feeId[0].toHuman() as string, 10) + 1)
+    )
   }
 
   function createLoan(
@@ -1586,13 +1618,16 @@ export function getPoolsModule(inst: Centrifuge) {
     const info: LoanInfoData = {
       /// Specify the repayments schedule of the loan
       schedule: {
-        maturity: {
-          fixed: {
-            date: Math.round(infoInput.maturityDate.getTime() / 1000),
-            extension: 'maturityExtensionDays' in infoInput ? infoInput.maturityExtensionDays * SEC_PER_DAY : 0,
-          },
-        },
-        interestPayments: 'None',
+        maturity: infoInput.maturityDate
+          ? {
+              fixed: {
+                date: Math.round(infoInput.maturityDate.getTime() / 1000),
+                extension:
+                  'maturityExtensionDays' in infoInput ? (infoInput.maturityExtensionDays ?? 0) * SEC_PER_DAY : 0,
+              },
+            }
+          : ('none' as any),
+        interestPayments: 'OnceAtMaturity',
         payDownSchedule: 'None',
       },
 
@@ -1606,15 +1641,14 @@ export function getPoolsModule(inst: Centrifuge) {
         infoInput.valuationMethod === 'oracle'
           ? {
               external: {
-                priceId: {
-                  isin: infoInput.Isin,
-                },
+                priceId: infoInput.priceId,
                 maxBorrowAmount:
                   infoInput.maxBorrowAmount === null
                     ? { noLimit: null }
                     : { quantity: infoInput.maxBorrowAmount.toString() },
                 maxPriceVariation: infoInput.maxPriceVariation!.toString(),
                 notional: infoInput.notional.toString(),
+                withLinearPricing: infoInput.withLinearPricing,
               },
             }
           : {
@@ -2244,6 +2278,7 @@ export function getPoolsModule(inst: Centrifuge) {
           blockNumber
           sumPoolFeesChargedAmountByPeriod
           sumPoolFeesAccruedAmountByPeriod
+          sumPoolFeesPaidAmountByPeriod
           sumPoolFeesPendingAmount
           sumBorrowedAmountByPeriod
           sumRepaidAmountByPeriod
@@ -2252,6 +2287,12 @@ export function getPoolsModule(inst: Centrifuge) {
           sumPrincipalRepaidAmountByPeriod
           sumInterestRepaidAmountByPeriod
           sumUnscheduledRepaidAmountByPeriod
+          sumInterestAccruedByPeriod
+          sumDebtWrittenOffByPeriod
+          sumRealizedProfitFifoByPeriod
+          sumUnrealizedProfitAtMarketPrice
+          sumUnrealizedProfitAtNotional
+          sumUnrealizedProfitByPeriod
         }
         pageInfo {
           hasNextPage
@@ -2311,6 +2352,9 @@ export function getPoolsModule(inst: Centrifuge) {
             yield30DaysAnnualized
             yield90DaysAnnualized
             yieldSinceInception
+            yieldMTD
+            yieldQTD
+            yieldYTD
             yieldSinceLastPeriod
           }
           pageInfo {
@@ -2443,6 +2487,10 @@ export function getPoolsModule(inst: Centrifuge) {
                   state.sumPoolFeesAccruedAmountByPeriod ?? 0,
                   poolCurrency.decimals
                 ),
+                sumPoolFeesPaidAmountByPeriod: new CurrencyBalance(
+                  state.sumPoolFeesPaidAmountByPeriod ?? 0,
+                  poolCurrency.decimals
+                ),
                 sumBorrowedAmountByPeriod: new CurrencyBalance(state.sumBorrowedAmountByPeriod, poolCurrency.decimals),
                 sumPrincipalRepaidAmountByPeriod: new CurrencyBalance(
                   state.sumPrincipalRepaidAmountByPeriod,
@@ -2460,6 +2508,27 @@ export function getPoolsModule(inst: Centrifuge) {
                 sumInvestedAmountByPeriod: new CurrencyBalance(state.sumInvestedAmountByPeriod, poolCurrency.decimals),
                 sumRedeemedAmountByPeriod: new CurrencyBalance(state.sumRedeemedAmountByPeriod, poolCurrency.decimals),
                 sumPoolFeesPendingAmount: new CurrencyBalance(state.sumPoolFeesPendingAmount, poolCurrency.decimals),
+                sumDebtWrittenOffByPeriod: new CurrencyBalance(state.sumDebtWrittenOffByPeriod, poolCurrency.decimals),
+                sumInterestAccruedByPeriod: new CurrencyBalance(
+                  state.sumInterestAccruedByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumRealizedProfitFifoByPeriod: new CurrencyBalance(
+                  state.sumRealizedProfitFifoByPeriod,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitAtMarketPrice: new CurrencyBalance(
+                  state.sumUnrealizedProfitAtMarketPrice,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitAtNotional: new CurrencyBalance(
+                  state.sumUnrealizedProfitAtNotional,
+                  poolCurrency.decimals
+                ),
+                sumUnrealizedProfitByPeriod: new CurrencyBalance(
+                  state.sumUnrealizedProfitByPeriod,
+                  poolCurrency.decimals
+                ),
               }
               const poolValue = new CurrencyBalance(new BN(state?.netAssetValue || '0'), poolCurrency.decimals)
 
@@ -2498,6 +2567,9 @@ export function getPoolsModule(inst: Centrifuge) {
                   yieldSinceInception: tranche.yieldSinceInception
                     ? new Perquintill(hexToBN(tranche.yieldSinceInception))
                     : new Perquintill(0),
+                  yieldMTD: tranche.yieldMTD ? new Perquintill(hexToBN(tranche.yieldMTD)) : new Perquintill(0),
+                  yieldQTD: tranche.yieldQTD ? new Perquintill(hexToBN(tranche.yieldQTD)) : new Perquintill(0),
+                  yieldYTD: tranche.yieldYTD ? new Perquintill(hexToBN(tranche.yieldYTD)) : new Perquintill(0),
                   yieldSinceLastPeriod: tranche.yieldSinceLastPeriod
                     ? new Perquintill(hexToBN(tranche.yieldSinceLastPeriod))
                     : new Perquintill(0),
@@ -2564,6 +2636,155 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+      })
+    )
+  }
+
+  function getDailyPoolFeeStates(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+    return inst
+      .getSubqueryObservable<{
+        poolFeeSnapshots: { nodes: SubqueryPoolFeeSnapshot[] }
+      }>(
+        `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        poolFeeSnapshots(
+          orderBy: BLOCK_NUMBER_ASC, 
+          filter: {
+            poolFeeId: { includes: $poolId }, 
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }
+        ) {
+          nodes {
+            id
+            poolFeeId
+            timestamp
+            sumPaidAmount
+            sumChargedAmount
+            sumAccruedAmount
+            sumPaidAmount
+            pendingAmount
+            sumAccruedAmountByPeriod
+            sumPaidAmountByPeriod
+            sumChargedAmountByPeriod
+            poolFee {
+              name
+            }
+          }
+        }
+      }
+    `,
+        {
+          poolId,
+          from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+          to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+        }
+      )
+      .pipe(
+        map((response) => {
+          const poolFeeSnapshots = response?.poolFeeSnapshots || { nodes: [] }
+          const poolFeesGroupedByFeeId = poolFeeSnapshots?.nodes.reduce((acc, snapshot) => {
+            const feeId = snapshot.poolFeeId.split('-')[1]
+            if (!acc[feeId]) {
+              acc[feeId] = []
+            }
+            acc[feeId].push(snapshot)
+            return acc
+          }, {} as { [feeId: string]: SubqueryPoolFeeSnapshot[] })
+          return poolFeesGroupedByFeeId
+        }),
+        combineLatestWith(getPoolCurrency([poolId])),
+        map(([poolFeesGroupedByFeeId, poolCurrency]) => {
+          const poolFeeStates: Record<string, DailyPoolFeesState[]> = {}
+          Object.entries(poolFeesGroupedByFeeId).forEach(([feeId, snapshots]) => {
+            poolFeeStates[feeId] = snapshots.map((snapshot) => ({
+              timestamp: snapshot.timestamp,
+              pendingAmount: new CurrencyBalance(snapshot.pendingAmount, poolCurrency.decimals),
+              poolFee: {
+                name: snapshot.poolFee.name,
+              },
+              poolFeeId: snapshot.poolFeeId,
+              sumAccruedAmount: new CurrencyBalance(snapshot.sumAccruedAmount, poolCurrency.decimals),
+              sumChargedAmount: new CurrencyBalance(snapshot.sumChargedAmount, poolCurrency.decimals),
+              sumPaidAmount: new CurrencyBalance(snapshot.sumPaidAmount, poolCurrency.decimals),
+              sumAccruedAmountByPeriod: new CurrencyBalance(snapshot.sumAccruedAmountByPeriod, poolCurrency.decimals),
+              sumChargedAmountByPeriod: new CurrencyBalance(snapshot.sumChargedAmountByPeriod, poolCurrency.decimals),
+              sumPaidAmountByPeriod: new CurrencyBalance(snapshot.sumPaidAmountByPeriod, poolCurrency.decimals),
+            }))
+          })
+          return poolFeeStates
+        })
+      )
+  }
+
+  function getPoolFeeStatesByGroup(args: [poolId: string, from?: Date, to?: Date], groupBy: GroupBy = 'month') {
+    return getDailyPoolFeeStates(args).pipe(
+      map((poolFees) => {
+        return Object.entries(poolFees).map(([feeId, feeStates]) => {
+          if (!feeStates.length) return []
+          const poolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+
+          feeStates.forEach((feeState) => {
+            const date = new Date(feeState.timestamp)
+            const period = getGroupByPeriod(date, groupBy)
+            if (!poolStatesByGroup[period] || new Date(poolStatesByGroup[period].timestamp) < date) {
+              poolStatesByGroup[period] = feeState
+            }
+          })
+
+          return { [feeId]: Object.values(poolStatesByGroup) }
+        })
+      })
+    )
+  }
+
+  function getAggregatedPoolFeeStatesByGroup(
+    args: [poolId: string, from?: Date, to?: Date],
+    groupBy: GroupBy = 'month'
+  ) {
+    return combineLatest([getDailyPoolFeeStates(args), getPoolCurrency([args[0]])]).pipe(
+      map(([poolFeeStates, poolCurrency]) => {
+        return Object.entries(poolFeeStates).map(([feeId, feeStates]) => {
+          if (!feeStates.length) return []
+          const feeStatesByGroup: { [period: string]: DailyPoolFeesState[] } = {}
+
+          feeStates.forEach((poolState) => {
+            const date = new Date(poolState.timestamp)
+            const period = getGroupByPeriod(date, groupBy)
+            if (!feeStatesByGroup[period]) {
+              feeStatesByGroup[period] = []
+            }
+
+            feeStatesByGroup[period].push(poolState)
+          })
+
+          const aggregatedPoolStatesByGroup: { [period: string]: DailyPoolFeesState } = {}
+
+          for (const period in feeStatesByGroup) {
+            const feeStates = feeStatesByGroup[period]
+
+            const feeStateKeys = Object.keys(feeStates.map((fee) => fee)[0]).filter(
+              (key) => key !== 'poolFeeId' && key !== 'poolFee' && key !== 'timestamp'
+            ) as Omit<keyof DailyPoolFeesState, 'poolFee' | 'poolFeeId' | 'timestamp'>[]
+
+            const aggregates = feeStateKeys.reduce((total, key) => {
+              const sum = feeStates.reduce((sum, feeState) => {
+                return sum.add(Dec((feeState[key as keyof DailyPoolFeesState] as CurrencyBalance).toDecimal()))
+              }, Dec(0))
+              return {
+                [key as keyof DailyPoolFeesState]: CurrencyBalance.fromFloat(sum.toString(), poolCurrency.decimals),
+                ...total,
+              }
+            }, {} as Record<keyof DailyPoolFeesState, any>)
+
+            aggregatedPoolStatesByGroup[period] = {
+              ...aggregates,
+              timestamp: feeStates.reverse()[0].timestamp,
+              poolFee: { name: feeStates.reverse()[0].poolFee.name },
+            }
+          }
+
+          return { [feeId]: Object.values(aggregatedPoolStatesByGroup) }
+        })
       })
     )
   }
@@ -2785,6 +3006,7 @@ export function getPoolsModule(inst: Centrifuge) {
             settlementPrice
             quantity
             hash
+            realizedProfitFifo
             asset {
               id
               metadata
@@ -2823,6 +3045,9 @@ export function getPoolsModule(inst: Centrifuge) {
           amount: tx.amount ? new CurrencyBalance(tx.amount, currency.decimals) : undefined,
           principalAmount: tx.principalAmount ? new CurrencyBalance(tx.principalAmount, currency.decimals) : undefined,
           interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
+          realizedProfitFifo: tx.realizedProfitFifo
+            ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
+            : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) satisfies AssetTransaction[]
       })
@@ -2943,6 +3168,7 @@ export function getPoolsModule(inst: Centrifuge) {
             assetId
             timestamp
             presentValue
+            currentPrice
             outstandingPrincipal
             outstandingInterest
             outstandingDebt
@@ -2969,6 +3195,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data!.assetSnapshots.nodes.map((tx) => ({
           ...tx,
           presentValue: tx.presentValue ? new CurrencyBalance(tx.presentValue, currency.decimals) : undefined,
+          currentPrice: tx.currentPrice ? new CurrencyBalance(tx.currentPrice, currency.decimals) : undefined,
           outstandingPrincipal: tx.outstandingPrincipal
             ? new CurrencyBalance(tx.outstandingPrincipal, currency.decimals)
             : undefined,
@@ -3389,7 +3616,7 @@ export function getPoolsModule(inst: Centrifuge) {
         oracles.forEach((oracle) => {
           const [value, timestamp] = oracle[1].toPrimitive() as any
           const keys = oracle[0].toHuman() as any
-          const isin = keys[1].Isin
+          const isin = keys[1]?.Isin
           const account = keys[0].system?.Signed
           if (!isin || !account) return
           const entry = {
@@ -3469,10 +3696,18 @@ export function getPoolsModule(inst: Centrifuge) {
                       'noLimit' in pricingInfo.maxBorrowAmount
                         ? null
                         : new CurrencyBalance(pricingInfo.maxBorrowAmount.quantity, 18),
-                    Isin: pricingInfo.priceId.isin,
-                    maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
-                    maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
-                    oracle: oraclePrices[pricingInfo.priceId.isin] || [
+                    maturityDate: !('none' in info.schedule.maturity)
+                      ? new Date(info.schedule.maturity.fixed.date * 1000).toISOString()
+                      : null,
+                    maturityExtensionDays: !('none' in info.schedule.maturity)
+                      ? info.schedule.maturity.fixed.extension / SEC_PER_DAY
+                      : null,
+                    priceId: pricingInfo.priceId,
+                    oracle: oraclePrices[
+                      'isin' in pricingInfo.priceId
+                        ? pricingInfo.priceId?.isin
+                        : pricingInfo.priceId?.poolLoanId.join('-')
+                    ] || [
                       {
                         value: new CurrencyBalance(0, 18),
                         timestamp: 0,
@@ -3486,6 +3721,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     interestRate: new Rate(interestRate),
                     notional: new CurrencyBalance(pricingInfo.notional, currency.decimals),
                     maxPriceVariation: new Rate(pricingInfo.maxPriceVariation),
+                    withLinearPricing: pricingInfo.withLinearPricing,
                   }
                 : {
                     valuationMethod:
@@ -3503,8 +3739,12 @@ export function getPoolsModule(inst: Centrifuge) {
                       ? new Rate(discount.discountRate.fixed.ratePerYear)
                       : undefined,
                     interestRate: new Rate(interestRate),
-                    maturityDate: new Date(info.schedule.maturity.fixed.date * 1000).toISOString(),
-                    maturityExtensionDays: info.schedule.maturity.fixed.extension / SEC_PER_DAY,
+                    maturityDate: !('none' in info.schedule.maturity)
+                      ? new Date(info.schedule.maturity.fixed.date * 1000).toISOString()
+                      : null,
+                    maturityExtensionDays: !('none' in info.schedule.maturity)
+                      ? info.schedule.maturity.fixed.extension / SEC_PER_DAY
+                      : null,
                   },
           }
         }
@@ -4024,6 +4264,8 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyPoolStates,
     getPoolStatesByGroup,
     getAggregatedPoolStatesByGroup,
+    getAggregatedPoolFeeStatesByGroup,
+    getPoolFeeStatesByGroup,
     getInvestorTransactions,
     getAssetTransactions,
     getFeeTransactions,

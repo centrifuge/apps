@@ -1,4 +1,4 @@
-import {
+import Centrifuge, {
   AccountCurrencyBalance,
   CurrencyBalance,
   CurrencyMetadata,
@@ -120,8 +120,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   }
 
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
-  const maturityDatePassed =
-    loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+  const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
 
   return (
@@ -293,11 +292,11 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   const isLocalAsset = typeof pool.currency.key !== 'string' && 'LocalAsset' in pool.currency.key
   const access = usePoolAccess(poolId)
   const muxBalances = useBalances(TOKENMUX_PALLET_ACCOUNTID)
-  const cent = useCentrifuge()
+  const cent: Centrifuge = useCentrifuge()
   const api = useCentrifugeApi()
 
   const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
-  const withdrawAddresses = ao?.transferAllowlist.map((l) => l.meta) ?? []
+  const withdrawAddresses = ao?.transferAllowlist ?? []
 
   if (!isLocalAsset) {
     if (!withdrawAddresses.length)

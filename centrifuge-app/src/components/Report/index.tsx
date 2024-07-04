@@ -12,12 +12,13 @@ import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
 import { OracleTransactions } from './OracleTransactions'
 import { PoolBalance } from './PoolBalance'
+import { ProfitAndLoss } from './ProfitAndLoss'
 import { ReportContext } from './ReportContext'
 import { TokenPrice } from './TokenPrice'
 
 export type TableDataRow = {
   name: string
-  value: (string | number | Decimal)[]
+  value: (string | number | JSX.Element | Decimal | undefined)[]
   heading?: boolean
 }
 
@@ -53,6 +54,7 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'balance-sheet' && <BalanceSheet pool={pool} />}
         {report === 'cash-flow-statement' && <CashflowStatement pool={pool} />}
         {report === 'oracle-tx' && <OracleTransactions pool={pool} />}
+        {report === 'profit-and-loss' && <ProfitAndLoss pool={pool} />}
       </Box>
     </Box>
   )

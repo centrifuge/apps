@@ -4,7 +4,6 @@ import { Box, Card, Grid, IconExternalLink, Shelf, Stack, Text, Tooltip } from '
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { evmChains } from '../../config'
-import { daysBetween } from '../../utils/date'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { usePool } from '../../utils/usePools'
 import { Spinner } from '../Spinner'
@@ -18,8 +17,20 @@ type Props = {
 
 export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props) => {
   const isTinlakePool = poolId.startsWith('0x')
+
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+    return pricing && typeof pricing.valuationMethod === 'string'
+  }
+
   const ongoingAssetCount =
-    loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
+    loans &&
+    [...loans].filter(
+      (loan) =>
+        loan.status === 'Active' &&
+        hasValuationMethod(loan.pricing) &&
+        loan.pricing.valuationMethod !== 'cash' &&
+        !loan.outstandingDebt.isZero()
+    ).length
 
   const writtenOffAssetCount =
     loans && [...loans].filter((loan) => loan.status === 'Active' && (loan as ActiveLoan).writeOffStatus).length
@@ -29,8 +40,12 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
     [...loans].filter((loan) => {
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
-      const days = daysBetween(today, loan.pricing.maturityDate)
-      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0 && !loan.outstandingDebt.isZero()
+      return (
+        loan.status === 'Active' &&
+        loan.pricing.maturityDate &&
+        new Date(loan.pricing.maturityDate).getTime() < Date.now() &&
+        !loan.outstandingDebt.isZero()
+      )
     }).length
 
   const isBT3BT4 =
@@ -52,7 +67,9 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         ]),
     {
       metric: 'Total assets',
-      value: loans?.length || 0,
+      value:
+        loans?.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash').length ||
+        0,
     },
     {
       metric: 'Ongoing assets',
