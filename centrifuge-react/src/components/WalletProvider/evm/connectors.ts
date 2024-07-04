@@ -26,6 +26,7 @@ export type EvmConnectorMeta = {
   id: string
   title: string
   installUrl: string
+  extensionName: string
   logo: {
     src: string
     alt: string
@@ -128,6 +129,7 @@ export function getEvmConnectors(
       get shown() {
         return !isMobile() || this.installed
       },
+      extensionName: 'metamask'
     },
     walletConnect && {
       id: 'walletconnect',

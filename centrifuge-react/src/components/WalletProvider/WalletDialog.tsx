@@ -1,3 +1,4 @@
+import { getSupportedBrowser } from '@centrifuge/centrifuge-app/src/utils/getSupportedBrowser'
 import {
   Button,
   Card,
@@ -38,6 +39,24 @@ const title = {
   networks: 'Connect wallet',
   wallets: 'Connect wallet',
   accounts: 'Choose account',
+}
+
+const walletsList: { [key: string]: string } = {
+  talisman: 'talisman-wallet-extension',
+  'subwallet-js': 'subwallet',
+  'polkadot-js': 'polkadot-js-extension',
+  'fearless-wallet': 'fearless-wallet',
+  metamask: 'ether-metamask',
+}
+
+const getAdjustedInstallUrl = (wallet: { extensionName: string; installUrl: string }): string => {
+  const browser = getSupportedBrowser()
+  const { extensionName, installUrl } = wallet
+  if (browser === 'firefox') {
+    return `https://addons.mozilla.org/en-US/firefox/addon/${walletsList[extensionName]}/`
+  } else {
+    return installUrl
+  }
 }
 
 export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, showTestNets, showFinoa }: Props) {
@@ -198,8 +217,8 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
               }
             >
               <Grid minColumnWidth={120} mt={3} gap={1}>
-                {shownWallets.map((wallet) =>
-                  wallet.installed ? (
+                {shownWallets.map((wallet) => {
+                  return wallet.installed ? (
                     <SelectButton
                       key={wallet.title}
                       logo={<Logo icon={wallet.logo.src} />}
@@ -221,7 +240,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                   ) : (
                     <SelectAnchor
                       key={wallet.title}
-                      href={wallet.installUrl}
+                      href={getAdjustedInstallUrl(wallet)}
                       logo={<Logo icon={wallet.logo.src} />}
                       iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
                       muted={isMuted(selectedNetwork!)}
@@ -229,7 +248,7 @@ export function WalletDialog({ evmChains: allEvmChains, showAdvancedAccounts, sh
                       {wallet.title}
                     </SelectAnchor>
                   )
-                )}
+                })}
               </Grid>
             </SelectionStep>
           </>
