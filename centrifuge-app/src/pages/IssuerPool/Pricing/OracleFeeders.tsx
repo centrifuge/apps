@@ -11,7 +11,7 @@ import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { usePoolAdmin } from '../../../utils/usePermissions'
 import { positiveNumber } from '../../../utils/validation'
-import ChangeThreshold from '../Access/ChangeTreshold'
+import { ChangeThreshold } from '../Access/ChangeTreshold'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { WriteOffGroups } from '../Configuration/WriteOffGroups'
 

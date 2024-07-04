@@ -5,7 +5,7 @@ import * as React from 'react'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
-import ChangeThreshold from './ChangeTreshold'
+import { ChangeThreshold } from './ChangeTreshold'
 import type { PoolManagersInput } from './PoolManagers'
 
 type Row = { address: string; index: number }

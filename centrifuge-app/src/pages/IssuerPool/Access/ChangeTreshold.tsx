@@ -1,5 +1,5 @@
 import { Box, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { ErrorMessage, Field, FieldProps, useFormikContext } from 'formik'
+import { ErrorMessage, Field, FieldProps, getIn, useFormikContext } from 'formik'
 import { min } from '../../../utils/validation'
 
 type ChangeThresholdProps = {
@@ -14,11 +14,7 @@ type ChangeThresholdProps = {
   type: string
 }
 
-const getNestedValue = (obj: any, path: string) => {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj)
-}
-
-const ChangeThreshold = ({
+export const ChangeThreshold = ({
   primaryText,
   secondaryText,
   isEditing,
@@ -30,8 +26,9 @@ const ChangeThreshold = ({
   type,
 }: ChangeThresholdProps) => {
   const form = useFormikContext<any>()
-  const threshold = getNestedValue(form.values, fieldName)
-  const signers = getNestedValue(form.values, signersFieldName)
+  const threshold = getIn(form.values, fieldName)
+  const signers = getIn(form.values, signersFieldName)
+
   return (
     <Stack gap={2}>
       <Text as="h3" variant="heading3">
@@ -44,10 +41,7 @@ const ChangeThreshold = ({
       <Shelf gap={2}>
         {isEditing && (
           <Box maxWidth={150}>
-            <Field
-              name={fieldName}
-              validate={validate ?? min(minThreshold, `Multisig needs at least ${minThreshold} signers`)}
-            >
+            <Field name={fieldName} validate={validate ?? min(minThreshold, `Needs at least ${minThreshold} ${type}`)}>
               {({ field, form }: FieldProps) => (
                 <Select
                   name={fieldName}
@@ -76,5 +70,3 @@ const ChangeThreshold = ({
     </Stack>
   )
 }
-
-export default ChangeThreshold
