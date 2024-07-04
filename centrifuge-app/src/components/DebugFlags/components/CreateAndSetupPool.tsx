@@ -3,6 +3,7 @@ import {
   LoanInfoInput,
   PoolMetadata,
   PoolMetadataInput,
+  Price,
   Rate,
   computeTrancheId,
   evmToSubstrateAddress,
@@ -69,7 +70,7 @@ export function CreateAndSetupPool() {
   }, [evmChainId])
 
   const { execute, isLoading } = useCentrifugeTransaction('Create pool', () => ([txId]: [string], options) => {
-    async function doTransactions(useEvm = true) {
+    async function doTransactions(useEvm = false) {
       if (!evmChainId) throw new Error('No evm chain id')
 
       const poolId = makeId()
@@ -328,8 +329,8 @@ export function CreateAndSetupPool() {
         valuationMethod: 'oracle',
         maxPriceVariation: Rate.fromPercent(9999),
         maxBorrowAmount: null,
-        Isin: isin1,
-        // priceId: {isin: isin1,}
+        withLinearPricing: false,
+        priceId: { isin: isin1 },
         maturityDate: new Date('2025-12-31'),
         interestRate: Rate.fromPercent(0),
         notional: CurrencyBalance.fromFloat(100, 6),
@@ -370,19 +371,7 @@ export function CreateAndSetupPool() {
             ),
           ])
         ),
-        api.tx.proxy.proxy(
-          aoProxy,
-          'Borrow',
-          api.tx.utility.batchAll([
-            createLoanTx1,
-            createLoanTx2,
-            // api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18)),
-            // api.tx.oraclePriceCollection.updateCollection(poolId),
-            // api.tx.loans.updatePortfolioValuation(poolId),
-            // api.tx.poolSystem.closeEpoch(poolId),
-            // api.tx.investments.collectInvestmentsFor(investorCentAddress, [poolId, juniorTranche]),
-          ])
-        ),
+        api.tx.proxy.proxy(aoProxy, 'Borrow', api.tx.utility.batchAll([createLoanTx1, createLoanTx2])),
       ])
 
       await lastValueFrom(
@@ -392,19 +381,19 @@ export function CreateAndSetupPool() {
 
       // return res
 
-      // updateTransaction(txId, {
-      //   title: 'Feed oracle values',
-      //   status: 'pending',
-      // })
+      updateTransaction(txId, {
+        title: 'Feed oracle values',
+        status: 'pending',
+      })
 
-      // // Feed oracle values
-      // const navBatch = api.tx.utility.batchAll([
-      //   api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18)),
-      //   api.tx.oraclePriceCollection.updateCollection(poolId),
-      //   api.tx.loans.updatePortfolioValuation(poolId),
-      // ])
+      // Feed oracle values
+      const navBatch = api.tx.utility.batchAll([
+        api.tx.oraclePriceFeed.feed({ Isin: isin1 }, CurrencyBalance.fromFloat(100.1, 18)),
+        api.tx.oraclePriceCollection.updateCollection(poolId),
+        api.tx.loans.updatePortfolioValuation(poolId),
+      ])
 
-      // await lastValueFrom(navManagerCent.wrapSignAndSend(api, navBatch))
+      await lastValueFrom(navManagerCent.wrapSignAndSend(api, navBatch))
 
       // await lastValueFrom(
       //   navManagerCent.wrapSignAndSend(
@@ -430,26 +419,34 @@ export function CreateAndSetupPool() {
       //   status: 'pending',
       // })
 
-      // // Close epoch and borrow
-      // const epochBatch = api.tx.proxy.proxy(
-      //   aoProxy,
-      //   'Borrow',
-      //   api.tx.utility.batchAll([
-      //     api.tx.loans.updatePortfolioValuation(poolId),
-      //     api.tx.poolSystem.closeEpoch(poolId),
-      //     api.tx.investments.collectInvestmentsFor(investorCentAddress, [poolId, juniorTranche]),
-      //     // api.tx.loans.borrow(poolId, 2, {
-      //     //   external: { quantity: Price.fromFloat(10), settlementPrice: CurrencyBalance.fromFloat(100.1, 6) },
-      //     // }),
-      //   ])
-      // )
+      // Close epoch and borrow
+      const epochBatch = api.tx.proxy.proxy(
+        adminProxy,
+        undefined,
+        api.tx.utility.batchAll([
+          api.tx.poolSystem.closeEpoch(poolId),
+          api.tx.investments.collectInvestmentsFor(investorCentAddress, [poolId, juniorTranche]),
+        ])
+      )
 
-      // const lastResult = await lastValueFrom(
-      //   // borrowerCent.wrapSignAndSend(api, epochBatch)
-      //   borrowerCent.wrapSignAndSend(api, epochBatch, { onStatusChange: options?.onStatusChange })
-      // )
+      await lastValueFrom(poolManagerCent.wrapSignAndSend(api, epochBatch))
 
-      // return lastResult
+      const borrowBatch = api.tx.proxy.proxy(
+        aoProxy,
+        'Borrow',
+        api.tx.utility.batchAll([
+          api.tx.loans.borrow(poolId, 2, {
+            external: { quantity: Price.fromFloat(10), settlementPrice: CurrencyBalance.fromFloat(100.1, 6) },
+          }),
+        ])
+      )
+
+      const lastResult = await lastValueFrom(
+        // borrowerCent.wrapSignAndSend(api, epochBatch)
+        borrowerCent.wrapSignAndSend(api, borrowBatch, { onStatusChange: options?.onStatusChange })
+      )
+
+      return lastResult
     }
 
     return of(doTransactions())
