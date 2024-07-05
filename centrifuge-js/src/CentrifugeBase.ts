@@ -413,7 +413,9 @@ export class CentrifugeBase {
 
       if (options?.signOnly) {
         return $checkBalance.pipe(
-          switchMap(() => actualSubmittable.signAsync(signingAddress, { signer, era: options?.era }))
+          switchMap(() =>
+            actualSubmittable.signAsync(signingAddress, { signer, era: options?.era, withSignedTransaction: true })
+          )
         )
       }
 
@@ -421,7 +423,13 @@ export class CentrifugeBase {
         options?.sendOnly
           ? actualSubmittable.send()
           : $checkBalance.pipe(
-              switchMap(() => actualSubmittable.signAndSend(signingAddress, { signer, era: options?.era }))
+              switchMap(() =>
+                actualSubmittable.signAndSend(signingAddress, {
+                  signer,
+                  era: options?.era,
+                  withSignedTransaction: true,
+                })
+              )
             )
       ).pipe(
         map((result) => {
