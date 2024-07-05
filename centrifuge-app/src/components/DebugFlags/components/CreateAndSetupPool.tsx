@@ -419,6 +419,11 @@ export function CreateAndSetupPool() {
       //   status: 'pending',
       // })
 
+      updateTransaction(txId, {
+        title: 'Close epoch',
+        status: 'pending',
+      })
+
       // Close epoch and borrow
       const epochBatch = api.tx.proxy.proxy(
         adminProxy,
@@ -430,6 +435,11 @@ export function CreateAndSetupPool() {
       )
 
       await lastValueFrom(poolManagerCent.wrapSignAndSend(api, epochBatch))
+
+      updateTransaction(txId, {
+        title: 'Borrow',
+        status: 'pending',
+      })
 
       const borrowBatch = api.tx.proxy.proxy(
         aoProxy,
