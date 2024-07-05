@@ -183,7 +183,6 @@ export function WriteOffGroups() {
               )}
             </Shelf>
           }
-          subtitle="At least one write-off activity is required"
           headerRight={
             <>
               {isEditing ? (

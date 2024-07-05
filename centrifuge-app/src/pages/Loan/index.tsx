@@ -16,7 +16,7 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
@@ -49,14 +49,28 @@ import { TransactionTable } from './TransactionTable'
 import { TransferDebtForm } from './TransferDebtForm'
 import { formatNftAttribute } from './utils'
 
+const FullHeightLayoutBase = styled(LayoutBase)`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`
+
+const FullHeightStack = styled(Stack)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`
+
 export default function LoanPage() {
   return (
-    <LayoutBase>
-      <Loan />
-    </LayoutBase>
+    <FullHeightLayoutBase>
+      <FullHeightStack>
+        <Loan />
+      </FullHeightStack>
+    </FullHeightLayoutBase>
   )
 }
-
 function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
   return loan.poolId.startsWith('0x')
 }
@@ -132,7 +146,7 @@ function Loan() {
   const originationDate = loan && 'originationDate' in loan ? new Date(loan?.originationDate).toISOString() : undefined
 
   return (
-    <Stack>
+    <FullHeightStack>
       <Box mt={2} ml={2}>
         <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
           {poolMetadata?.pool?.name ?? 'Pool assets'}
@@ -179,7 +193,7 @@ function Loan() {
       {loan &&
         pool &&
         (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
-          <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
+          <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4} flex={1}>
             <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr 34fr']} gap={[2, 2]}>
               <React.Suspense fallback={<Spinner />}>
                 <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
@@ -307,6 +321,6 @@ function Loan() {
           </Shelf>
         </PageSection>
       ) : null}
-    </Stack>
+    </FullHeightStack>
   )
 }
