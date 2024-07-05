@@ -309,7 +309,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               {
                 target: poolManager,
                 call: [
-                  'function undeployedTranches(uint64,bytes16) view returns (uint8,string,string,uint8)',
+                  'function undeployedTranches(uint64,bytes16) view returns (uint8,string,string,address)',
                   poolId,
                   trancheId,
                 ],
@@ -317,7 +317,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               },
               {
                 target: poolManager,
-                call: ['function getTrancheToken(uint64,bytes16) view returns (address)', poolId, trancheId],
+                call: ['function getTranche(uint64,bytes16) view returns (address)', poolId, trancheId],
                 returns: [[`trancheTokens[${trancheId}]`, (addr) => (addr !== NULL_ADDRESS ? addr : null)]],
               },
               ...(currencies.flatMap((currency) => ({
