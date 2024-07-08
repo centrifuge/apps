@@ -1,18 +1,19 @@
 import { addressToHex } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, IconMinusCircle, NumberInput, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconMinusCircle, Stack, Text } from '@centrifuge/fabric'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import { FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { map } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
-import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { usePoolAdmin } from '../../../utils/usePermissions'
 import { positiveNumber } from '../../../utils/validation'
+import { ChangeThreshold } from '../Access/ChangeTreshold'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
+import { WriteOffGroups } from '../Configuration/WriteOffGroups'
 
 type FormValues = {
   feeders: string[]
@@ -30,7 +31,7 @@ export function OracleFeeders({ poolId }: { poolId: string }) {
 
   const api = useCentrifugeApi()
   const { execute, isLoading } = useCentrifugeTransaction(
-    'Set oracle prices',
+    'Set oracle providers',
     (cent) => (args: [values: FormValues], options) => {
       const [values] = args
       const info = {
@@ -85,91 +86,108 @@ export function OracleFeeders({ poolId }: { poolId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, isEditing])
 
+  // Use useEffect to update threshold value when signers array changes
+  React.useEffect(() => {
+    if (form.values.feeders.length > 0 && form.values.minFeeders === 0) {
+      form.setFieldValue('minFeeders', 1)
+    }
+  }, [form.values.feeders, form.values.minFeeders, form.setFieldValue])
+
   const rows = React.useMemo(() => form.values.feeders.map((a, i) => ({ address: a, index: i })), [form.values.feeders])
 
   return (
-    <FormikProvider value={form}>
-      <Form>
-        <PageSection
-          title="Oracle feeders"
-          headerRight={
-            isEditing ? (
-              <ButtonGroup variant="small">
-                <Button variant="secondary" onClick={() => setIsEditing(false)} small>
-                  Cancel
+    <Box>
+      <FormikProvider value={form}>
+        <Form>
+          <PageSection
+            title="Oracle providers"
+            headerRight={
+              isEditing ? (
+                <ButtonGroup variant="small">
+                  <Button variant="secondary" onClick={() => setIsEditing(false)} small>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    small
+                    loading={isLoading}
+                    loadingMessage={isLoading ? 'Pending...' : undefined}
+                    key="done"
+                    disabled={!admin}
+                  >
+                    Done
+                  </Button>
+                </ButtonGroup>
+              ) : (
+                <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
+                  Edit
                 </Button>
-                <Button
-                  type="submit"
-                  small
-                  loading={isLoading}
-                  loadingMessage={isLoading ? 'Pending...' : undefined}
-                  key="done"
-                  disabled={!admin}
-                >
-                  Done
-                </Button>
-              </ButtonGroup>
-            ) : (
-              <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
-                Edit
-              </Button>
-            )
-          }
-        >
-          <Stack gap={2}>
-            <Box width={200}>
-              <FieldWithErrorMessage
-                as={NumberInput}
-                label="Minimum feeders"
-                name="minFeeders"
-                validate={positiveNumber()}
-                disabled={!isEditing}
-              />
-            </Box>
-            <FieldArray name="feeders">
-              {(fldArr) => (
-                <Stack gap={3}>
-                  <DataTable
-                    data={rows}
-                    columns={[
-                      {
-                        align: 'left',
-                        header: 'Address(es)',
-                        cell: (row: Row) => (
-                          <Text variant="body2">
-                            <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
-                          </Text>
-                        ),
-                      },
-                      {
-                        header: '',
-                        cell: (row: Row) =>
-                          isEditing && (
-                            <Button
-                              variant="tertiary"
-                              icon={IconMinusCircle}
-                              onClick={() => fldArr.remove(row.index)}
-                              disabled={isLoading}
-                            />
+              )
+            }
+          >
+            <Stack gap={2}>
+              <Text as="p" variant="body2" color="textSecondary">
+                Add or remove addresses that can provide oracle updates for the onchain NAV.
+              </Text>
+              <FieldArray name="feeders">
+                {(fldArr) => (
+                  <Stack gap={3}>
+                    <DataTable
+                      data={rows}
+                      columns={[
+                        {
+                          align: 'left',
+                          header: 'Address(es)',
+                          cell: (row: Row) => (
+                            <Text variant="body2">
+                              <Identity address={row.address} clickToCopy showIcon labelForConnectedAddress={false} />
+                            </Text>
                           ),
-                        width: '72px',
-                      },
-                    ]}
-                  />
-                  {isEditing && !isLoading && (
-                    <AddAddressInput
-                      existingAddresses={form.values.feeders}
-                      onAdd={(address) => {
-                        fldArr.push(addressToHex(address))
-                      }}
+                        },
+                        {
+                          header: '',
+                          cell: (row: Row) =>
+                            isEditing && (
+                              <Button
+                                variant="tertiary"
+                                icon={IconMinusCircle}
+                                onClick={() => fldArr.remove(row.index)}
+                                disabled={isLoading}
+                              />
+                            ),
+                          width: '72px',
+                        },
+                      ]}
                     />
-                  )}
-                </Stack>
-              )}
-            </FieldArray>
-          </Stack>
-        </PageSection>
-      </Form>
-    </FormikProvider>
+                    {isEditing && !isLoading && (
+                      <AddAddressInput
+                        existingAddresses={form.values.feeders}
+                        onAdd={(address) => {
+                          fldArr.push(addressToHex(address))
+                        }}
+                      />
+                    )}
+                  </Stack>
+                )}
+              </FieldArray>
+              <Box>
+                <ChangeThreshold
+                  primaryText="Oracle update threshold"
+                  secondaryText="Determine how many oracle providers are required before a pricing update is finalized and will become reflected in the NAV."
+                  isEditing={isEditing}
+                  fieldName="minFeeders"
+                  signersFieldName="feeders"
+                  validate={positiveNumber()}
+                  disabled={!isEditing}
+                  minThreshold={1}
+                  type="providers"
+                />
+              </Box>
+            </Stack>
+          </PageSection>
+        </Form>
+      </FormikProvider>
+      <WriteOffGroups />
+    </Box>
   )
 }
