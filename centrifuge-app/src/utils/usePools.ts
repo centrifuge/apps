@@ -40,10 +40,66 @@ export function useTokens() {
   return pools?.flatMap((p) => p.tranches)
 }
 
-export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
+export function usePoolStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
+) {
   const [result] = useCentrifugeQuery(
-    ['monthlyPoolStates', poolId, from, to],
-    (cent) => cent.pools.getMonthlyPoolStates([poolId, from, to]),
+    ['poolStatesByGroup', poolId, from, to, groupBy],
+    (cent) => cent.pools.getPoolStatesByGroup([poolId, from, to], groupBy),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
+export function useAggregatedPoolStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
+) {
+  const [result] = useCentrifugeQuery(
+    ['aggregatedPoolStates', poolId, from, to, groupBy],
+    (cent) => cent.pools.getAggregatedPoolStatesByGroup([poolId, from, to], groupBy),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
+export function usePoolFeeStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
+) {
+  const [result] = useCentrifugeQuery(
+    ['feeStatesByGroup', poolId, from, to, groupBy],
+    (cent) => cent.pools.getPoolFeeStatesByGroup([poolId, from, to], groupBy),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
+export function useAggregatedPoolFeeStatesByGroup(
+  poolId: string,
+  from?: Date,
+  to?: Date,
+  groupBy?: 'day' | 'month' | 'quarter' | 'year'
+) {
+  const [result] = useCentrifugeQuery(
+    ['aggregatedPoolFeeStates', poolId, from, to, groupBy],
+    (cent) => cent.pools.getAggregatedPoolFeeStatesByGroup([poolId, from, to], groupBy),
     {
       suspense: true,
     }
@@ -412,11 +468,4 @@ export function usePoolChanges(poolId: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [result, poolOrders, pool]
   )
-}
-
-export function usePodUrl(poolId: string) {
-  const pool = usePool(poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
-  const podUrl = poolMetadata?.pod?.node
-  return podUrl
 }

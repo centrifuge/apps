@@ -14,7 +14,7 @@ import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, positiveNumber, settlementPrice } from '../../utils/validation'
+import { combine, maxPriceVariance, positiveNumber } from '../../utils/validation'
 import { ExternalFinanceFields } from './ExternalFinanceForm'
 import { isExternalLoan } from './utils'
 
@@ -22,8 +22,8 @@ type FormValues = {
   targetLoan: string
   amount: number | '' | Decimal
   price: number | '' | Decimal
-  faceValue: number | ''
-  targetLoanFaceValue: number | '' | Decimal
+  quantity: number | ''
+  targetLoanQuantity: number | '' | Decimal
   targetLoanPrice: number | '' | Decimal
 }
 
@@ -54,9 +54,9 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       targetLoan: '',
       amount: '',
       price: '',
-      faceValue: '',
+      quantity: '',
       targetLoanPrice: '',
-      targetLoanFaceValue: '',
+      targetLoanQuantity: '',
     },
     onSubmit: (values, actions) => {
       if (!selectedLoan) return
@@ -66,7 +66,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       if (isExternalLoan(loan)) {
         borrow = {
           price: CurrencyBalance.fromFloat(values.price, pool.currency.decimals),
-          quantity: Price.fromFloat(Dec(values.faceValue).div(loan.pricing.notional.toDecimal())),
+          quantity: Price.fromFloat(values.quantity),
         }
         borrowAmount = borrow.quantity.mul(borrow.price).div(Price.fromFloat(1))
       } else if (isExternalLoan(selectedLoan)) {
@@ -87,9 +87,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       let repay: any = { principal, interest }
       if (isExternalLoan(selectedLoan)) {
         const repayPriceBN = CurrencyBalance.fromFloat(form.values.targetLoanPrice || 1, pool.currency.decimals)
-        const repayQuantityBN = Price.fromFloat(
-          Dec(values.targetLoanFaceValue || 0).div(selectedLoan.pricing.notional.toDecimal())
-        )
+        const repayQuantityBN = Price.fromFloat(Dec(values.targetLoanQuantity || 0))
         repay = { quantity: repayQuantityBN, price: repayPriceBN, interest }
       }
 
@@ -101,13 +99,9 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
     },
     validate(values) {
       const financeAmount = isExternalLoan(loan)
-        ? Dec(values.price || 0)
-            .mul(Dec(values.faceValue || 0))
-            .div(loan.pricing.notional.toDecimal())
+        ? Dec(values.price || 0).mul(Dec(values.quantity || 0))
         : selectedLoan && isExternalLoan(selectedLoan)
-        ? Dec(values.targetLoanPrice || 0)
-            .mul(Dec(values.targetLoanFaceValue || 0))
-            .div(selectedLoan.pricing.notional.toDecimal())
+        ? Dec(values.targetLoanPrice || 0).mul(Dec(values.targetLoanQuantity || 0))
         : Dec(values.amount || 0)
 
       let errors: any = {}
@@ -152,13 +146,9 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
   if (availableFinancing.lte(0) || maturityDatePassed || !loans?.length) return null
 
   const financeAmount = isExternalLoan(loan)
-    ? Dec(form.values.price || 0)
-        .mul(Dec(form.values.faceValue || 0))
-        .div(loan.pricing.notional.toDecimal())
+    ? Dec(form.values.price || 0).mul(Dec(form.values.quantity || 0))
     : selectedLoan && isExternalLoan(selectedLoan)
-    ? Dec(form.values.targetLoanPrice || 0)
-        .mul(Dec(form.values.targetLoanFaceValue || 0))
-        .div(selectedLoan.pricing.notional.toDecimal())
+    ? Dec(form.values.targetLoanPrice || 0).mul(Dec(form.values.targetLoanQuantity || 0))
     : Dec(form.values.amount || 0)
 
   return (
@@ -196,13 +186,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
               <ExternalFinanceFields
                 loan={loan}
                 pool={pool}
-                validate={(val) =>
-                  validate(
-                    Dec(val)
-                      .mul(form.values.faceValue || 1)
-                      .div(loan.pricing.notional.toDecimal())
-                  )
-                }
+                validate={(val) => validate(Dec(val).mul(form.values.quantity || 1))}
               />
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Total amount</Text>
@@ -231,15 +215,15 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
           ) : null}
           {selectedLoan && isExternalLoan(selectedLoan) && (
             <>
-              <Field validate={combine(positiveNumber())} name="targetLoanFaceValue">
+              <Field validate={combine(positiveNumber())} name="targetLoanQuantity">
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
                       {...field}
-                      label="Face value (settlement asset)"
+                      label="Quantity (settlement asset)"
                       errorMessage={meta.touched ? meta.error : undefined}
                       decimals={8}
-                      onChange={(value) => form.setFieldValue('targetLoanFaceValue', value)}
+                      onChange={(value) => form.setFieldValue('targetLoanQuantity', value)}
                       currency={pool.currency.symbol}
                     />
                   )
@@ -247,7 +231,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
               </Field>
               <Field
                 name="targetLoanPrice"
-                validate={combine(settlementPrice(), maxPriceVariance(selectedLoan.pricing))}
+                validate={combine(positiveNumber(), maxPriceVariance(selectedLoan.pricing))}
               >
                 {({ field, meta, form }: FieldProps) => {
                   return (

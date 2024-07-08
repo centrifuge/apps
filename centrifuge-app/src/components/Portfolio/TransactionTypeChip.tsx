@@ -28,6 +28,9 @@ const status = {
   CLOSED: 'default',
   PRICED: 'default',
   CASH_TRANSFER: 'default',
+  DEPOSIT_FROM_INVESTMENTS: 'default',
+  WITHDRAWAL_FOR_REDEMPTIONS: 'default',
+  WITHDRAWAL_FOR_FEES: 'default',
 } as const
 
 export function TransactionTypeChip(props: TransactionTypeProps) {

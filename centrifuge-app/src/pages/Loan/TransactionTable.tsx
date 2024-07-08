@@ -5,6 +5,7 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { useMemo } from 'react'
 import { Column, DataTable } from '../../components/DataTable'
+import { Tooltips } from '../../components/Tooltips'
 import { Dec } from '../../utils/Decimal'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
@@ -15,8 +16,8 @@ type Props = {
   decimals: number
   loanType: 'external' | 'internal'
   pricing: PricingInfo
-  poolType: 'publicCredit' | 'privateCredit' | undefined
-  maturityDate: Date
+  poolType?: string
+  maturityDate?: Date
   originationDate: Date | undefined
 }
 
@@ -29,6 +30,7 @@ type Row = {
   faceValue: Decimal | null
   position: Decimal
   yieldToMaturity: Decimal | null
+  realizedProfitFifo: CurrencyBalance | null
 }
 
 export const TransactionTable = ({
@@ -39,7 +41,6 @@ export const TransactionTable = ({
   pricing,
   poolType,
   maturityDate,
-  originationDate,
 }: Props) => {
   const assetTransactions = useMemo(() => {
     const sortedTransactions = transactions.sort((a, b) => {
@@ -63,10 +64,11 @@ export const TransactionTable = ({
         return !transaction.amount?.isZero()
       })
       .map((transaction, index, array) => {
-        const termDays = originationDate
-          ? daysBetween(originationDate, maturityDate)
-          : daysBetween(new Date(), maturityDate)
-        const yearsBetweenDates = termDays / 365
+        const termDays = maturityDate
+          ? transaction.timestamp
+            ? daysBetween(transaction.timestamp, maturityDate)
+            : daysBetween(new Date(), maturityDate)
+          : 0
 
         const faceValue =
           transaction.quantity && (pricing as ExternalPricingInfo).notional
@@ -81,10 +83,11 @@ export const TransactionTable = ({
           quantity: transaction.quantity ? new CurrencyBalance(transaction.quantity, 18) : null,
           transactionDate: transaction.timestamp,
           yieldToMaturity:
-            transaction.amount && faceValue && transaction.type !== 'REPAID'
-              ? Dec(2)
-                  .mul(faceValue?.sub(transaction.amount.toDecimal()))
-                  .div(Dec(yearsBetweenDates).mul(faceValue.add(transaction.amount.toDecimal())))
+            transaction.amount && maturityDate && faceValue && transaction.type !== 'REPAID' && termDays > 0
+              ? faceValue
+                  ?.sub(transaction.amount.toDecimal())
+                  .div(transaction.amount.toDecimal())
+                  .mul(Dec(365).div(Dec(termDays)))
                   .mul(100)
               : null,
           settlePrice: transaction.settlementPrice
@@ -116,6 +119,7 @@ export const TransactionTable = ({
             }
             return sum
           }, Dec(0)),
+          realizedProfitFifo: transaction.realizedProfitFifo,
         }
       })
   }, [transactions, decimals, pricing])
@@ -152,7 +156,7 @@ export const TransactionTable = ({
           </Tooltip>
         ),
       },
-      ...(poolType === 'publicCredit'
+      ...(poolType === 'Public credit'
         ? [
             {
               align: 'left',
@@ -176,7 +180,7 @@ export const TransactionTable = ({
               ? [
                   {
                     align: 'left',
-                    header: `YTM`,
+                    header: <Tooltips type="ytm" />,
                     cell: (row: Row) =>
                       !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
                   },
@@ -187,6 +191,14 @@ export const TransactionTable = ({
               header: `Net cash flow (${currency})`,
               cell: (row: Row) =>
                 row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+            },
+            {
+              align: 'left',
+              header: `Realized P&L`,
+              cell: (row: Row) =>
+                row.realizedProfitFifo
+                  ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+                  : '-',
             },
             {
               align: 'left',

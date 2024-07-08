@@ -1,6 +1,7 @@
 import { PoolFeeTransactionType } from '@centrifuge/centrifuge-js'
 import { AssetTransactionType, InvestorTransactionType } from '@centrifuge/centrifuge-js/dist/types/subquery'
 import { Text } from '@centrifuge/fabric'
+import React from 'react'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { truncate } from '../../utils/web3'
 
@@ -78,6 +79,9 @@ const assetTransactionTypes: {
   REPAID: 'Repaid',
   CLOSED: 'Closed',
   CASH_TRANSFER: 'Cash transfer',
+  DEPOSIT_FROM_INVESTMENTS: 'Deposit from investments',
+  WITHDRAWAL_FOR_REDEMPTIONS: 'Withdrawal for redemptions',
+  WITHDRAWAL_FOR_FEES: 'Withdrawal for fees',
 }
 
 export function formatAssetTransactionType(type: AssetTransactionType) {
@@ -128,5 +132,24 @@ export function copyable(text: string) {
     >
       {truncate(text)}
     </Text>
+  )
+}
+
+export function convertCSV(values: any[], columnConfig: any[]) {
+  return Object.fromEntries(
+    columnConfig.map((col, index) => {
+      const currentValue = values[index]
+
+      // Check if the value is a React element
+      if (React.isValidElement(currentValue)) {
+        const element = currentValue as React.ReactElement
+        const textValue = element.props?.children[1]?.props?.children[1] ?? 'Default Text'
+        return [col.header, `"${textValue}"`]
+      } else {
+        // For non-React element types, directly return the value
+        // Ensure the value is converted to a string if it's not already
+        return [col.header, `"${String(currentValue)}"`]
+      }
+    })
   )
 }

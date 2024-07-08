@@ -1,20 +1,24 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
 import { AssetTransactions } from './AssetTransactions'
+import { BalanceSheet } from './BalanceSheet'
+import { CashflowStatement } from './CashflowStatement'
 import { FeeTransactions } from './FeeTransactions'
 import { InvestorList } from './InvestorList'
 import { InvestorTransactions } from './InvestorTransactions'
 import { OracleTransactions } from './OracleTransactions'
 import { PoolBalance } from './PoolBalance'
+import { ProfitAndLoss } from './ProfitAndLoss'
 import { ReportContext } from './ReportContext'
 import { TokenPrice } from './TokenPrice'
 
 export type TableDataRow = {
   name: string
-  value: (string | number)[]
+  value: (string | number | JSX.Element | Decimal | undefined)[]
   heading?: boolean
 }
 
@@ -47,7 +51,10 @@ export function ReportComponent({ pool }: { pool: Pool }) {
         {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
         {report === 'asset-tx' && <AssetTransactions pool={pool} />}
         {report === 'fee-tx' && <FeeTransactions pool={pool} />}
+        {report === 'balance-sheet' && <BalanceSheet pool={pool} />}
+        {report === 'cash-flow-statement' && <CashflowStatement pool={pool} />}
         {report === 'oracle-tx' && <OracleTransactions pool={pool} />}
+        {report === 'profit-and-loss' && <ProfitAndLoss pool={pool} />}
       </Box>
     </Box>
   )

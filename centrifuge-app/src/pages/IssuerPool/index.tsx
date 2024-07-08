@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Route, Switch, useParams, useRouteMatch } from 'react-router'
 import { PoolChangesBanner } from '../../components/PoolChangesBanner'
 import { IssuerPoolAccessPage } from './Access'
@@ -27,6 +26,7 @@ export default function IssuerPoolPage() {
         <Route path={`${path}/access`} component={IssuerPoolAccessPage} />
         <Route path={`${path}/assets`} component={IssuerPoolAssetPage} />
         <Route path={`${path}/liquidity`} component={IssuerPoolLiquidityPage} />
+        <Route path={`${path}/reporting/:report`} component={IssuerPoolReportingPage} />
         <Route path={`${path}/reporting`} component={IssuerPoolReportingPage} />
         <Route path={`${path}/pricing`} component={IssuerPoolPricingPage} />
         <Route path={`${path}/fees`} component={IssuerPoolFeesPage} />

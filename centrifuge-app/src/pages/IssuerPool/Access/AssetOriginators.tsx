@@ -34,7 +34,6 @@ import * as React from 'react'
 import { combineLatest, of, switchMap } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { DataTable } from '../../../components/DataTable'
-import { useDebugFlags } from '../../../components/DebugFlags'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
@@ -44,18 +43,14 @@ import { useIdentity } from '../../../utils/useIdentity'
 import { useDomainRouters } from '../../../utils/useLiquidityPools'
 import { getKeyForReceiver, usePoolAccess, useSuitableAccounts, WithdrawKey } from '../../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
-import { address, required } from '../../../utils/validation'
+import { address } from '../../../utils/validation'
 import { AddAddressInput } from '../Configuration/AddAddressInput'
 import { diffPermissions } from '../Configuration/Admins'
-import { CreatePodAccount } from './CreatePodAccount'
 
 type AOFormValues = {
-  withdrawAddresses: { key?: any; meta?: WithdrawAddress }[]
+  withdrawAddresses: WithdrawAddress[]
   name?: string
   delegates: string[]
-  p2pKey: string
-  documentKey: string
-  podOperator: string
 }
 
 export function AssetOriginators({ poolId }: { poolId: string }) {
@@ -77,7 +72,7 @@ export function AssetOriginators({ poolId }: { poolId: string }) {
         switchMap(([api, createTx, permissionTx]) => {
           const tx = api.tx.utility.batchAll([
             ...permissionTx.method.args[0],
-            api.tx.balances.transfer(account.actingAddress, proxyDepositBase.add(proxyDepositFactor)),
+            api.tx.balances.transferKeepAlive(account.actingAddress, proxyDepositBase.add(proxyDepositFactor)),
             createTx,
           ])
           return cent.wrapSignAndSend(api, tx, options)
@@ -154,13 +149,10 @@ function AOForm({
       ),
   ]
 
-  const { showPodAccountCreation } = useDebugFlags()
   const cent = useCentrifuge()
   const {
     proxy: { proxyDepositFactor },
     uniques: { collectionDeposit },
-    loans: { loanDeposit },
-    keystore: { keyDeposit },
     transferAllowlist: { receiverDeposit },
   } = useCentrifugeConsts()
 
@@ -168,16 +160,10 @@ function AOForm({
     () => ({
       name: identity?.display,
       withdrawAddresses: [
-        ...ao.transferAllowlist.map((l) => ({
-          ...l,
-          meta: { ...l.meta, address: l.meta?.address && utils.formatAddress(l.meta.address) },
-        })),
+        ...ao.transferAllowlist.map((allowList) => ({ ...allowList, address: utils.formatAddress(allowList.address) })),
         ...new Array(3).fill({}),
       ].slice(0, 3),
       delegates: ao.delegates.map((d) => d.delegatee),
-      p2pKey: '',
-      documentKey: '',
-      podOperator: '',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ao, identity]
@@ -199,11 +185,6 @@ function AOForm({
           addedPermissions?: ReturnType<typeof diffPermissions>['add'],
           addedAddresses?: string[],
           removedAddresses?: string[],
-          keys?: {
-            p2pKey: string
-            documentKey: string
-          },
-          podOperator?: string,
           collectionId?: string
         ],
         options
@@ -215,8 +196,6 @@ function AOForm({
           addedPermissions = [],
           addedAddresses = [],
           removedAddresses = [],
-          keys,
-          podOperator,
           collectionId,
         ] = args
 
@@ -230,15 +209,12 @@ function AOForm({
             const numProxyTypesPerHotWallet = 4
             const deposit = proxyDepositFactor
               .mul(new BN(Math.max(addedAddresses.length - removedAddresses.length, 0) * numProxyTypesPerHotWallet))
-              .add(podOperator ? proxyDepositFactor : new BN(0))
               .add(collectionId ? collectionDeposit : new BN(0))
               .add(
                 receiverDeposit.mul(
                   new BN(Math.max(addedWithdrawAddresses.length - removedWithdrawAddresses.length, 0))
                 )
               )
-              // When setting up the AO, also add enough funds to create 100 loans
-              .add(keys ? keyDeposit.mul(new BN(2)).add(loanDeposit.mul(new BN(100))) : new BN(0))
 
             // doing the proxy and multisig transactions manually, because both the Pool Admin and the AO need to call extrinsics
             let tx = api.tx.proxy.proxy(
@@ -260,23 +236,17 @@ function AOForm({
                               .map((addr) => [
                                 api.tx.proxy.removeProxy(addr, 'Borrow', 0),
                                 api.tx.proxy.removeProxy(addr, 'Invest', 0),
-                                api.tx.proxy.removeProxy(addr, 'PodAuth', 0),
                                 api.tx.proxy.removeProxy(addr, 'Transfer', 0),
+                                api.tx.proxy.removeProxy(addr, 'PodOperation', 0),
                               ])
                               .flat()
                           ),
                         addedAddresses.map((addr) => [
                           api.tx.proxy.addProxy(addr, 'Borrow', 0),
                           api.tx.proxy.addProxy(addr, 'Invest', 0),
-                          api.tx.proxy.addProxy(addr, 'PodAuth', 0),
                           api.tx.proxy.addProxy(addr, 'Transfer', 0),
+                          api.tx.proxy.addProxy(addr, 'PodOperation', 0),
                         ]),
-                        podOperator && api.tx.proxy.addProxy(podOperator, 'PodOperation', 0),
-                        keys &&
-                          api.tx.keystore.addKeys([
-                            [keys.p2pKey, 'P2PDiscovery', 'ECDSA'],
-                            [keys.documentKey, 'P2PDocumentSigning', 'ECDSA'],
-                          ]),
                         collectionId && [api.tx.uniques.create(collectionId, ao.address)],
                         addedWithdrawAddresses.map((w) => api.tx.transferAllowList.addTransferAllowance('All', w)),
                         removedWithdrawAddresses.map((w) => api.tx.transferAllowList.removeTransferAllowance('All', w)),
@@ -299,7 +269,7 @@ function AOForm({
 
             if (!deposit.isZero()) {
               tx = api.tx.utility.batchAll([
-                !deposit.isZero() && api.tx.balances.transfer(account.proxies![1].delegator, deposit),
+                !deposit.isZero() && api.tx.balances.transferKeepAlive(account.proxies![1].delegator, deposit),
                 tx,
               ])
             }
@@ -339,40 +309,14 @@ function AOForm({
           { TrancheInvestor: [junTranche, Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)] } as any,
         ])
       }
-
-      const hasMetadataChanges =
-        form.values.name !== initialValues.name || addedWithdraw.length || removedWithdraw.length
-      const newMetadata: PoolMetadata = {
-        ...(metadata as any),
-        pool: {
-          ...(metadata.pool as any),
-          assetOriginators: {
-            ...metadata.pool?.assetOriginators,
-            [ao.address]: {
-              name: values.name,
-              withdrawAddresses: values.withdrawAddresses
-                .filter((w) => !!w.meta?.address)
-                .map((w) => ({
-                  location: w.meta!.location,
-                  address:
-                    typeof w.meta!.location !== 'string' && 'evm' in w.meta!.location
-                      ? w.meta!.address.toLowerCase()
-                      : addressToHex(w.meta!.address),
-                })),
-            },
-          },
-        },
-      }
       execute(
         [
-          addedWithdraw.map((w) => getKeyForReceiver(api, w.meta!)),
-          removedWithdraw.map((w) => w.key!),
-          hasMetadataChanges ? newMetadata : null,
+          addedWithdraw.map((w) => getKeyForReceiver(api, w)),
+          removedWithdraw.map((w) => getKeyForReceiver(api, w)),
+          null,
           addedPermissions,
           addedDelegates,
           removedDelegates,
-          values.p2pKey && values.documentKey ? { p2pKey: values.p2pKey, documentKey: values.documentKey } : undefined,
-          values.podOperator,
           !ao.collateralCollections.length ? await cent.nfts.getAvailableCollectionId() : undefined,
         ],
         { account }
@@ -381,16 +325,16 @@ function AOForm({
     validate: (values) => {
       let errors: FormikErrors<AOFormValues> = {}
       values.withdrawAddresses.forEach((value, index) => {
-        if (value.meta?.address) {
-          if (!value.meta.location) {
-            errors = setIn(errors, `withdrawAddresses.${index}.meta.location`, 'Select a destination')
+        if (value.address) {
+          if (!value.location) {
+            errors = setIn(errors, `withdrawAddresses.${index}.location`, 'Select a destination')
           } else {
-            if (typeof value.meta.location !== 'string' && 'evm' in value.meta.location) {
-              if (!isEvmAddress(value.meta.address)) {
-                errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid EVM address')
+            if (typeof value.location !== 'string' && 'evm' in value.location) {
+              if (!isEvmAddress(value.address)) {
+                errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Not a valid EVM address')
               }
-            } else if (!isSubstrateAddress(value.meta.address) || isEvmAddress(value.meta.address)) {
-              errors = setIn(errors, `withdrawAddresses.${index}.meta.address`, 'Not a valid Substrate address')
+            } else if (!isSubstrateAddress(value.address) || isEvmAddress(value.address)) {
+              errors = setIn(errors, `withdrawAddresses.${index}.address`, 'Not a valid Substrate address')
             }
           }
         }
@@ -412,12 +356,11 @@ function AOForm({
   )
 
   const { add: addedWithdraw, remove: removedWithdraw } = diffWithdrawAddresses(
-    initialValues.withdrawAddresses,
-    form.values.withdrawAddresses
+    initialValues.withdrawAddresses.filter((w) => !!w.location),
+    form.values.withdrawAddresses.filter((w) => !!w.location)
   )
 
   const hasChanges =
-    (!!form.values.documentKey && !!form.values.p2pKey) ||
     form.values.name !== initialValues.name ||
     form.values.delegates.length !== initialValues.delegates.length ||
     !form.values.delegates.every((s) => initialValues.delegates.includes(s)) ||
@@ -454,52 +397,6 @@ function AOForm({
           }
         >
           <Stack gap={4}>
-            {!ao.isSetUp && isEditing && (
-              <Stack gap={2}>
-                <Text as="h3" variant="heading4">
-                  POD Setup
-                </Text>
-                {showPodAccountCreation && (
-                  <CreatePodAccount
-                    poolId={poolId}
-                    address={ao.address}
-                    onSuccess={(res) => {
-                      form.setFieldValue('p2pKey', res.p2pDiscoveryKey, false)
-                      form.setFieldValue('documentKey', res.documentSigningKey, false)
-                      form.setFieldValue('podOperator', res.operatorAccountId, false)
-                    }}
-                  />
-                )}
-                <Text as="p" variant="body2" color="textSecondary">
-                  Values that need to be set in order to be able to authenticate with the POD and create assets
-                </Text>
-                <FieldWithErrorMessage
-                  validate={required()}
-                  name="documentKey"
-                  as={TextInput}
-                  label="Document Signing Key"
-                  placeholder="0x..."
-                  maxLength={66}
-                />
-                <FieldWithErrorMessage
-                  validate={required()}
-                  name="p2pKey"
-                  as={TextInput}
-                  label="P2P Discovery Key"
-                  placeholder="0x..."
-                  maxLength={66}
-                />
-                <FieldWithErrorMessage
-                  validate={required()}
-                  name="podOperator"
-                  as={TextInput}
-                  label="Pod Operator Account ID"
-                  placeholder="0x..."
-                  maxLength={66}
-                />
-              </Stack>
-            )}
-
             <Stack gap={2}>
               <Text as="h3" variant="heading4">
                 Delegates
@@ -561,32 +458,29 @@ function AOForm({
               <Stack gap={1}>
                 {form.values.withdrawAddresses.map((value, index) => (
                   <FieldWithErrorMessage
-                    name={`withdrawAddresses.${index}.meta.address`}
+                    name={`withdrawAddresses.${index}.address`}
                     validate={address()}
                     label="Address"
                     disabled={!isEditing}
                     as={TextInput}
                     onChange={(event: any) => {
                       form.setFieldValue(`withdrawAddresses.${index}.key`, undefined, false)
-                      form.setFieldValue(`withdrawAddresses.${index}.meta.address`, event.target.value)
+                      form.setFieldValue(`withdrawAddresses.${index}.address`, event.target.value)
                     }}
-                    placeholder={value.key && !value.meta?.address ? '[Unknown address]' : ''}
+                    placeholder={''}
                     secondaryLabel={
                       <ErrorMessage
-                        name={`withdrawAddresses.${index}.meta.location`}
+                        name={`withdrawAddresses.${index}.location`}
                         render={(error) => error && <InputErrorMessage>{error}</InputErrorMessage>}
                       />
                     }
                     symbol={
-                      <Field name={`withdrawAddresses.${index}.meta.location`}>
+                      <Field name={`withdrawAddresses.${index}.location`}>
                         {({ field, form }: FieldProps) => (
                           <SelectInner
-                            name={`withdrawAddresses.${index}.meta.location`}
+                            name={`withdrawAddresses.${index}.location`}
                             onChange={(event) =>
-                              form.setFieldValue(
-                                `withdrawAddresses.${index}.meta.location`,
-                                JSON.parse(event.target.value)
-                              )
+                              form.setFieldValue(`withdrawAddresses.${index}.location`, JSON.parse(event.target.value))
                             }
                             onBlur={field.onBlur}
                             value={field.value ? JSON.stringify(field.value) : ''}
@@ -626,21 +520,15 @@ export function diffWithdrawAddresses(
   storedValues.forEach((stored) => {
     if (
       !formValues.find(
-        (value) =>
-          (value.meta?.address &&
-            value.meta.address === stored.meta?.address &&
-            value.meta?.location === stored.meta?.location) ||
-          value.key === stored.key
+        (value) => value?.address && value.address === stored?.address && value?.location === stored?.location
       )
     )
       remove.push(stored)
   })
   formValues.forEach((value) => {
     if (
-      value.meta?.address &&
-      !storedValues.find(
-        (stored) => value.meta?.address === stored.meta?.address && value.meta?.location === stored.meta?.location
-      )
+      value?.address &&
+      !storedValues.find((stored) => value?.address === stored?.address && value?.location === stored?.location)
     )
       add.push(value)
   })

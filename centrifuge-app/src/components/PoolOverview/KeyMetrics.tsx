@@ -4,7 +4,6 @@ import { Box, Card, Grid, IconExternalLink, Shelf, Stack, Text, Tooltip } from '
 import capitalize from 'lodash/capitalize'
 import startCase from 'lodash/startCase'
 import { evmChains } from '../../config'
-import { daysBetween } from '../../utils/date'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { usePool } from '../../utils/usePools'
 import { Spinner } from '../Spinner'
@@ -17,9 +16,21 @@ type Props = {
 }
 
 export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props) => {
-  const pool = usePool(poolId)
+  const isTinlakePool = poolId.startsWith('0x')
+
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+    return pricing && typeof pricing.valuationMethod === 'string'
+  }
+
   const ongoingAssetCount =
-    loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
+    loans &&
+    [...loans].filter(
+      (loan) =>
+        loan.status === 'Active' &&
+        hasValuationMethod(loan.pricing) &&
+        loan.pricing.valuationMethod !== 'cash' &&
+        !loan.outstandingDebt.isZero()
+    ).length
 
   const writtenOffAssetCount =
     loans && [...loans].filter((loan) => loan.status === 'Active' && (loan as ActiveLoan).writeOffStatus).length
@@ -29,11 +40,13 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
     [...loans].filter((loan) => {
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
-      const days = daysBetween(today, loan.pricing.maturityDate)
-      return loan.status === 'Active' && loan.pricing.maturityDate && days < 0 && !loan.outstandingDebt.isZero()
+      return (
+        loan.status === 'Active' &&
+        loan.pricing.maturityDate &&
+        new Date(loan.pricing.maturityDate).getTime() < Date.now() &&
+        !loan.outstandingDebt.isZero()
+      )
     }).length
-
-  const activeDomains = useActiveDomains(poolId)
 
   const isBT3BT4 =
     poolId.toLowerCase() === '0x90040f96ab8f291b6d43a8972806e977631affde' ||
@@ -42,9 +55,7 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
   const metrics = [
     {
       metric: 'Asset class',
-      value: `${capitalize(startCase(assetType?.class)).replace(/^Us /, 'US ')} - ${capitalize(
-        startCase(assetType?.subClass)
-      ).replace(/^Us /, 'US ')}`,
+      value: `${capitalize(startCase(assetType?.class))} - ${assetType?.subClass}`,
     },
     ...(isBT3BT4
       ? []
@@ -56,7 +67,9 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         ]),
     {
       metric: 'Total assets',
-      value: loans?.length || 0,
+      value:
+        loans?.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash').length ||
+        0,
     },
     {
       metric: 'Ongoing assets',
@@ -79,99 +92,14 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         ]
       : []),
 
-    {
-      metric: 'Available networks',
-      value: (
-        <Shelf gap={1}>
-          {activeDomains.data?.length || import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('development') ? (
-            <Tooltip
-              bodyWidth="maxContent"
-              bodyPadding={0}
-              delay={300}
-              body={
-                <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
-                  <Text variant="heading4">Centrifuge</Text>
-                  {pool.tranches.length > 1 ? (
-                    pool.tranches.map((tranche) => (
-                      <a target="_blank" rel="noopener noreferrer" href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}>
-                        <Shelf gap={1} alignItems="center">
-                          <Text variant="body2" color="black">
-                            View {tranche.currency.name.split(' ').at(-1)}
-                          </Text>{' '}
-                          <IconExternalLink color="black" size="iconSmall" />
-                        </Shelf>
-                      </a>
-                    ))
-                  ) : (
-                    <a target="_blank" rel="noopener noreferrer" href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}>
-                      <Shelf gap={1} alignItems="center">
-                        <Text variant="body2" color="black">
-                          View transactions
-                        </Text>{' '}
-                        <IconExternalLink color="black" size="iconSmall" />
-                      </Shelf>
-                    </a>
-                  )}
-                </Stack>
-              }
-            >
-              <NetworkIcon size="iconSmall" network={'centrifuge'} />
-            </Tooltip>
-          ) : (
-            <Spinner size="iconSmall" />
-          )}
-          {activeDomains.data?.length &&
-            activeDomains.data
-              .filter((domain) => domain.isActive)
-              .map((domain) => {
-                const chain = (evmChains as any)[domain.chainId]
-                return (
-                  <Tooltip
-                    delay={300}
-                    bodyWidth="maxContent"
-                    bodyPadding={0}
-                    body={
-                      <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
-                        <Text variant="heading4">{chain.name}</Text>
-                        {pool.tranches.length > 1 ? (
-                          pool.tranches.map((tranche) => (
-                            <a
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[tranche.id]}`}
-                            >
-                              <Shelf gap={1} alignItems="center">
-                                <Text variant="body2" color="black">
-                                  View {tranche.currency.name.split(' ').at(-1)}
-                                </Text>{' '}
-                                <IconExternalLink color="black" size="iconSmall" />
-                              </Shelf>
-                            </a>
-                          ))
-                        ) : (
-                          <a
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[pool.tranches[0].id]}`}
-                          >
-                            <Shelf gap={1} alignItems="center">
-                              <Text variant="body2" color="black">
-                                View transactions
-                              </Text>{' '}
-                              <IconExternalLink color="black" size="iconSmall" />
-                            </Shelf>
-                          </a>
-                        )}
-                      </Stack>
-                    }
-                  >
-                    <NetworkIcon size="iconSmall" network={domain.chainId} />
-                  </Tooltip>
-                )
-              })}
-        </Shelf>
-      ),
-    },
+    ...(!isTinlakePool
+      ? [
+          {
+            metric: 'Available networks',
+            value: <AvailableNetworks poolId={poolId} />,
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -205,5 +133,100 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         </Box>
       </Stack>
     </Card>
+  )
+}
+
+const AvailableNetworks = ({ poolId }: { poolId: string }) => {
+  const activeDomains = useActiveDomains(poolId)
+  const pool = usePool(poolId)
+  return (
+    <Shelf gap={1}>
+      {activeDomains.data?.length || import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('development') ? (
+        <Tooltip
+          bodyWidth="maxContent"
+          bodyPadding={0}
+          delay={300}
+          body={
+            <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
+              <Text variant="heading4">Centrifuge</Text>
+              {pool.tranches.length > 1 ? (
+                pool.tranches.map((tranche) => (
+                  <a target="_blank" rel="noopener noreferrer" href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}>
+                    <Shelf gap={1} alignItems="center">
+                      <Text variant="body2" color="black">
+                        View {tranche.currency.name.split(' ').at(-1)}
+                      </Text>{' '}
+                      <IconExternalLink color="black" size="iconSmall" />
+                    </Shelf>
+                  </a>
+                ))
+              ) : (
+                <a target="_blank" rel="noopener noreferrer" href={`${import.meta.env.REACT_APP_SUBSCAN_URL}`}>
+                  <Shelf gap={1} alignItems="center">
+                    <Text variant="body2" color="black">
+                      View transactions
+                    </Text>{' '}
+                    <IconExternalLink color="black" size="iconSmall" />
+                  </Shelf>
+                </a>
+              )}
+            </Stack>
+          }
+        >
+          <NetworkIcon size="iconSmall" network={'centrifuge'} />
+        </Tooltip>
+      ) : (
+        <Spinner size="iconSmall" />
+      )}
+      {activeDomains.data?.length &&
+        activeDomains.data
+          .filter((domain) => domain.isActive)
+          .map((domain) => {
+            const chain = (evmChains as any)[domain.chainId]
+            return (
+              <Tooltip
+                delay={300}
+                bodyWidth="maxContent"
+                bodyPadding={0}
+                body={
+                  <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
+                    <Text variant="heading4">{chain.name}</Text>
+                    {pool.tranches.length > 1 ? (
+                      pool.tranches.map((tranche) => (
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[tranche.id]}`}
+                        >
+                          <Shelf gap={1} alignItems="center">
+                            <Text variant="body2" color="black">
+                              View {tranche.currency.name.split(' ').at(-1)}
+                            </Text>{' '}
+                            <IconExternalLink color="black" size="iconSmall" />
+                          </Shelf>
+                        </a>
+                      ))
+                    ) : (
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[pool.tranches[0].id]}`}
+                      >
+                        <Shelf gap={1} alignItems="center">
+                          <Text variant="body2" color="black">
+                            View transactions
+                          </Text>{' '}
+                          <IconExternalLink color="black" size="iconSmall" />
+                        </Shelf>
+                      </a>
+                    )}
+                  </Stack>
+                }
+              >
+                <NetworkIcon size="iconSmall" network={domain.chainId} />
+              </Tooltip>
+            )
+          })}
+    </Shelf>
   )
 }

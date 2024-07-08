@@ -250,7 +250,7 @@ const parachainRuntimeApi: DefinitionsCall = {
           type: 'Result<Balance, DispatchError>',
         },
       },
-      version: 2,
+      version: 3,
     },
   ],
   AccountConversionApi: [
@@ -325,7 +325,10 @@ export class CentrifugeBase {
     let transferTx
     if (options?.transferToActingAccount && (options?.multisig || proxies)) {
       const multi = options?.multisig && computeMultisig(options.multisig)
-      transferTx = api.tx.balances.transfer(proxies?.at(-1)?.[0] || multi?.address, options.transferToActingAccount)
+      transferTx = api.tx.balances.transferKeepAlive(
+        proxies?.at(-1)?.[0] || multi?.address,
+        options.transferToActingAccount
+      )
     }
 
     if (proxies && !options?.sendOnly) {
@@ -410,7 +413,9 @@ export class CentrifugeBase {
 
       if (options?.signOnly) {
         return $checkBalance.pipe(
-          switchMap(() => actualSubmittable.signAsync(signingAddress, { signer, era: options?.era }))
+          switchMap(() =>
+            actualSubmittable.signAsync(signingAddress, { signer, era: options?.era, withSignedTransaction: true })
+          )
         )
       }
 
@@ -418,7 +423,13 @@ export class CentrifugeBase {
         options?.sendOnly
           ? actualSubmittable.send()
           : $checkBalance.pipe(
-              switchMap(() => actualSubmittable.signAndSend(signingAddress, { signer, era: options?.era }))
+              switchMap(() =>
+                actualSubmittable.signAndSend(signingAddress, {
+                  signer,
+                  era: options?.era,
+                  withSignedTransaction: true,
+                })
+              )
             )
       ).pipe(
         map((result) => {

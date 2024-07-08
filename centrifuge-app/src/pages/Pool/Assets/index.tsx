@@ -11,7 +11,6 @@ import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
 import { Tooltips } from '../../../components/Tooltips'
-import { config } from '../../../config'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance } from '../../../utils/formatting'
 import { useLoans } from '../../../utils/useLoans'
@@ -47,11 +46,23 @@ export function PoolDetailAssets() {
     )
   }
 
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+    return pricing && typeof pricing.valuationMethod === 'string'
+  }
+
   const ongoingAssets = (loans &&
-    [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero())) as ActiveLoan[]
+    [...loans].filter(
+      (loan) =>
+        loan.status === 'Active' &&
+        hasValuationMethod(loan.pricing) &&
+        loan.pricing.valuationMethod !== 'cash' &&
+        !loan.outstandingDebt.isZero()
+    )) as ActiveLoan[]
 
   const offchainAssets = !isTinlakePool
-    ? loans.filter((loan) => (loan as Loan).pricing.valuationMethod === 'cash')
+    ? loans.filter(
+        (loan) => hasValuationMethod((loan as Loan).pricing) && (loan as Loan).pricing.valuationMethod === 'cash'
+      )
     : null
   const offchainReserve = offchainAssets?.reduce<any>(
     (curr, prev) => curr.add(prev.status === 'Active' ? prev.outstandingDebt.toDecimal() : Dec(0)),
@@ -62,6 +73,7 @@ export function PoolDetailAssets() {
     (loan) =>
       loan.status === 'Active' &&
       loan.outstandingDebt.gtn(0) &&
+      loan.pricing.maturityDate &&
       new Date(loan.pricing.maturityDate).getTime() < Date.now()
   )
 
@@ -92,7 +104,8 @@ export function PoolDetailAssets() {
           },
           {
             label: 'Total assets',
-            value: loans.length,
+            value: loans.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash')
+              .length,
           },
           { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets.length || 0 },
           {
@@ -116,9 +129,9 @@ export function PoolDetailAssets() {
 }
 
 function CreateAssetButton({ poolId }: { poolId: string }) {
-  const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['PodAuth'] }).length > 0
+  const canCreateAssets = useSuitableAccounts({ poolId, poolRole: ['Borrower'], proxyType: ['Borrow'] }).length > 0
 
-  return canCreateAssets && config.useDocumentNfts ? (
+  return canCreateAssets ? (
     <RouterLinkButton to={`/issuer/${poolId}/assets/create`} small>
       Create asset
     </RouterLinkButton>

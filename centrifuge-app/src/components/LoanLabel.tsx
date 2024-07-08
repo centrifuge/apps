@@ -1,6 +1,5 @@
 import { ActiveLoan, Loan, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { StatusChip } from '@centrifuge/fabric'
-import * as React from 'react'
 import { daysBetween } from '../utils/date'
 
 type LabelStatus = 'default' | 'info' | 'ok' | 'warning' | 'critical' | ''
@@ -9,11 +8,14 @@ interface Props {
   loan: Loan | TinlakeLoan
 }
 
-export function getLoanLabelStatus(l: Loan | TinlakeLoan, isExternalAssetRepaid?: boolean): [LabelStatus, string] {
+export function getLoanLabelStatus(l: Loan | TinlakeLoan): [LabelStatus, string] {
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
   if (!l.status) return ['', '']
   if (l.status === 'Active' && (l as ActiveLoan).writeOffStatus) return ['critical', 'Write-off']
+
+  const isExternalAssetRepaid =
+    l.status === 'Active' && 'outstandingQuantity' in l.pricing && 'presentValue' in l && l.presentValue.isZero()
   if (l.status === 'Closed' || isExternalAssetRepaid) return ['ok', 'Repaid']
   if (
     l.status === 'Active' &&
@@ -24,7 +26,7 @@ export function getLoanLabelStatus(l: Loan | TinlakeLoan, isExternalAssetRepaid?
     return ['default', 'Ready']
   if (l.status === 'Created') return ['default', 'Created']
 
-  if (l.status === 'Active' && 'maturityDate' in l.pricing && l.pricing.maturityDate) {
+  if (l.status === 'Active' && l.pricing.maturityDate) {
     const isTinlakeLoan = 'riskGroup' in l
     if (isTinlakeLoan) return ['info', 'Ongoing']
 
@@ -38,17 +40,9 @@ export function getLoanLabelStatus(l: Loan | TinlakeLoan, isExternalAssetRepaid?
   return ['info', 'Ongoing']
 }
 
-const LoanLabel: React.FC<Props> = ({ loan }) => {
-  const currentFace =
-    loan.pricing && 'outstandingQuantity' in loan.pricing
-      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
-      : null
-
-  const isExternalAssetRepaid = currentFace?.isZero() && loan.status === 'Active'
+export function LoanLabel({ loan }: Props) {
+  const [status, text] = getLoanLabelStatus(loan)
   const isCashAsset = 'valuationMethod' in loan.pricing && loan.pricing?.valuationMethod === 'cash'
-  const [status, text] = getLoanLabelStatus(loan, isExternalAssetRepaid)
   if (!status || isCashAsset) return null
   return <StatusChip status={status}>{text}</StatusChip>
 }
-
-export default LoanLabel

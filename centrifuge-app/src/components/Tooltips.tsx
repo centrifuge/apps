@@ -270,6 +270,10 @@ export const tooltipText = {
     label: 'Total pending fees',
     body: 'The total pending fees represent the sum of all added fees.',
   },
+  totalPaidFees: {
+    label: 'Total paid fees',
+    body: 'The total paid fees represent the sum of all paid fees since the inception of the fee system.',
+  },
   feeType: {
     label: 'Fee type',
     body: 'The protocol fee is mandatory and will be charged every epoch automatically. The fee amount is dependent on the asset class.',
@@ -289,6 +293,26 @@ export const tooltipText = {
   offchainCash: {
     label: 'Offchain cash',
     body: 'Offchain cash represents funds held in a traditional bank account or custody account.',
+  },
+  averageYtm: {
+    label: 'Average purchase YTM',
+    body: 'Weighted average YTM (Yield to Maturity) at time of asset purchases',
+  },
+  currentYtm: {
+    label: 'Current YTM',
+    body: 'YTM (Yield to Maturity) based on latest available price',
+  },
+  ytm: {
+    label: 'YTM',
+    body: 'YTM (Yield to Maturity) at time of purchase based on settlement price',
+  },
+  nav: {
+    label: 'NAV',
+    body: 'The Net Asset Value (NAV) reflects the combined present value of assets, cash held in the onchain reserve of the pool, and cash in the bank account designated as offchain cash.',
+  },
+  singleTrancheTokenPrice: {
+    label: 'Token price',
+    body: 'The token price is equal to the NAV divided by the outstanding supply of tokens.',
   },
 }
 

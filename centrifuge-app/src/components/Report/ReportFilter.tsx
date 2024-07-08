@@ -2,6 +2,7 @@ import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, DateInput, SearchInput, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useHistory, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../../schemas'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
@@ -16,6 +17,9 @@ type ReportFilterProps = {
 }
 
 export function ReportFilter({ pool }: ReportFilterProps) {
+  const match = useRouteMatch<{ path: string }>(`/:path`)
+  const basePath = `/${match?.params.path ?? 'pools'}`
+
   const {
     csvData,
     setStartDate,
@@ -23,7 +27,6 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     endDate,
     setEndDate,
     report,
-    setReport,
     loanStatus,
     setLoanStatus,
     txType,
@@ -39,6 +42,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     loan,
     setLoan,
   } = React.useContext(ReportContext)
+  const history = useHistory()
+
   const { data: domains } = useActiveDomains(pool.id)
   const getNetworkName = useGetNetworkName()
   const loans = useLoans(pool.id) as Loan[] | undefined
@@ -46,11 +51,14 @@ export function ReportFilter({ pool }: ReportFilterProps) {
   const { showOracleTx } = useDebugFlags()
 
   const reportOptions: { label: string; value: Report }[] = [
+    { label: 'Balance sheet', value: 'balance-sheet' },
+    { label: 'Profit & loss', value: 'profit-and-loss' },
+    { label: 'Cash flow statement', value: 'cash-flow-statement' },
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
     ...(showOracleTx == true ? [{ label: 'Oracle transactions', value: 'oracle-tx' as Report }] : []),
-    { label: 'Pool balance', value: 'pool-balance' },
+    // { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },
     { label: 'Investor list', value: 'investor-list' },
@@ -74,12 +82,12 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         value={report}
         onChange={(event) => {
           if (event.target.value) {
-            setReport(event.target.value as Report)
+            history.push(`${basePath}/${pool.id}/reporting/${event.target.value}`)
           }
         }}
       />
 
-      {!['investor-list', 'asset-list'].includes(report) && (
+      {!['investor-list', 'asset-list', 'balance-sheet', 'cash-flow-statement', 'profit-and-loss'].includes(report) && (
         <>
           <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
           <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
@@ -175,6 +183,35 @@ export function ReportFilter({ pool }: ReportFilterProps) {
             ...(loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []),
           ]}
         />
+      )}
+
+      {['balance-sheet', 'cash-flow-statement', 'profit-and-loss'].includes(report) && (
+        <>
+          <Select
+            name="balanceSheetGroupBy"
+            label="Group by"
+            onChange={(event) => {
+              setGroupBy(event.target.value as GroupBy)
+            }}
+            value={groupBy}
+            options={[
+              { label: 'Day', value: 'day' },
+              { label: 'Daily', value: 'daily' },
+              { label: 'Monthly', value: 'month' },
+              { label: 'Quarterly', value: 'quarter' },
+              { label: 'Yearly', value: 'year' },
+            ]}
+          />
+          {groupBy === 'day' && (
+            <DateInput label="Day" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          )}
+          {groupBy === 'month' || groupBy === 'daily' ? (
+            <>
+              <DateInput label="From" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
+              <DateInput label="To" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)} />
+            </>
+          ) : null}
+        </>
       )}
 
       {['investor-tx', 'asset-tx', 'fee-tx'].includes(report) && (

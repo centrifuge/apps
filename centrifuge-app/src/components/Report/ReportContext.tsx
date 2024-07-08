@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { useParams } from 'react-router'
 
-export type GroupBy = 'day' | 'month'
+export type GroupBy = 'day' | 'month' | 'quarter' | 'year' | 'daily'
 
 export type Report =
   | 'pool-balance'
@@ -11,6 +12,9 @@ export type Report =
   | 'fee-tx'
   | 'oracle-tx'
   | 'investor-list'
+  | 'balance-sheet'
+  | 'cash-flow-statement'
+  | 'profit-and-loss'
 
 export type ReportContextType = {
   csvData?: CsvDataProps
@@ -23,7 +27,6 @@ export type ReportContextType = {
   setEndDate: (date: string) => void
 
   report: Report
-  setReport: (report: Report) => void
 
   groupBy: GroupBy
   setGroupBy: (groupBy: GroupBy) => void
@@ -58,11 +61,14 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
   const [csvData, setCsvData] = React.useState<CsvDataProps | undefined>(undefined)
 
   // Global filters
+  const { report: reportParam } = useParams<{ report: Report }>()
+
+  const report = reportParam || 'balance-sheet'
+
   const [startDate, setStartDate] = React.useState(
     new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10)
   )
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
-  const [report, setReport] = React.useState<Report>('investor-tx')
 
   // Custom filters for specific reports
   const [loanStatus, setLoanStatus] = React.useState('all')
@@ -83,7 +89,6 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
         endDate,
         setEndDate,
         report,
-        setReport,
         loanStatus,
         setLoanStatus,
         txType,

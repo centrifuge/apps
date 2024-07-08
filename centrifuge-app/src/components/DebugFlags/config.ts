@@ -44,14 +44,10 @@ export type Key =
   | 'editPoolVisibility'
   | 'showAdvancedAccounts'
   | 'editAdminConfig'
-  | 'showPodAccountCreation'
   | 'convertAddress'
   | 'showTestNets'
   | 'showSwaps'
-  | 'showOracle'
   | 'poolCreationType'
-  | 'podAdminSeed'
-  | 'assetSnapshots'
   | 'showTokenYields'
   | 'showOracleTx'
 
@@ -95,18 +91,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: '',
     type: 'text',
   },
-  assetSnapshots: {
-    type: 'checkbox',
-    default: false,
-  },
   persistDebugFlags: {
     alwaysShow: true,
     default: !!localStorage.getItem('debugFlags'),
     type: 'checkbox',
-  },
-  podAdminSeed: {
-    default: '//Eve',
-    type: 'text',
   },
   poolCreationType: {
     default: config.poolCreationType || 'immediate',
@@ -131,15 +119,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     type: 'checkbox',
   },
-  showPodAccountCreation: {
-    default: false,
-    type: 'checkbox',
-  },
   showSwaps: {
-    default: false,
-    type: 'checkbox',
-  },
-  showOracle: {
     default: false,
     type: 'checkbox',
   },

@@ -1,5 +1,5 @@
 import { AssetTransactionType, InvestorTransactionType, Pool, Token, TokenBalance } from '@centrifuge/centrifuge-js'
-import { formatBalance } from '@centrifuge/centrifuge-react'
+import { Network, formatBalance, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -38,9 +38,11 @@ type Row = {
   pool?: Pool
   poolId: string
   trancheId: string
+  network: Network
 }
 
 export function Transactions({ onlyMostRecent, narrow, txTypes, address, trancheId }: TransactionsProps) {
+  const explorer = useGetExplorerUrl()
   const columns = [
     {
       align: 'left',
@@ -103,11 +105,11 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
     !narrow && {
       align: 'center',
       header: 'View transaction',
-      cell: ({ hash }: Row) => {
+      cell: ({ hash, network }: Row) => {
         return (
           <Stack
             as="a"
-            href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
+            href={explorer.tx(hash, network)}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Transaction on Subscan.io"
@@ -137,6 +139,9 @@ export function Transactions({ onlyMostRecent, narrow, txTypes, address, tranche
           amount: ['INVEST_ORDER_UPDATE', 'INVEST_ORDER_CANCEL', 'INVEST_EXECUTION', 'REDEEM_COLLECT'].includes(tx.type)
             ? tx.currencyAmount
             : tx.tokenAmount,
+          network: ['TRANSFER_IN', 'TRANSFER_OUT', 'INVEST_LP_COLLECT', 'REDEEM_LP_COLLECT'].includes(tx.type)
+            ? Number(tx.account.chainId)
+            : 'centrifuge',
           hash: tx.hash,
           poolId: tx.poolId,
           pool,

@@ -1,68 +1,79 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Accordion, AnchorButton, Box, Card, Grid, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Accordion, AnchorButton, Box, IconExternalLink, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useLocation } from 'react-router'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
 import { PillButton } from './PillButton'
-import { AnchorTextLink } from './TextLink'
+import { AnchorTextLink, RouterTextLink } from './TextLink'
 
 type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
 }
 
-export function IssuerSection({ metadata }: IssuerSectionProps) {
-  const report = metadata?.pool?.reports?.[0]
-
-  return (
-    <Card p={3}>
-      <Grid columns={[1, 2]} equalColumns gap={9} rowGap={3}>
-        {report && (
-          <Stack gap={2}>
-            <Text variant="heading2">Pool analysis</Text>
-            <ReportDetails metadata={metadata} />
-          </Stack>
-        )}
-        <Stack gap={2}>
-          <Text variant="heading2">Issuer details</Text>
-          <IssuerDetails metadata={metadata} />
-        </Stack>
-      </Grid>
-    </Card>
-  )
-}
+const reportLinks = [
+  { label: 'Balance sheet', href: '/balance-sheet' },
+  { label: 'Profit & loss', href: '/profit-and-loss' },
+  { label: 'Cashflow statement', href: '/cash-flow-statement' },
+  { label: 'View all', href: '/' },
+]
 
 export function ReportDetails({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
+  const { pathname } = useLocation()
   const report = metadata?.pool?.reports?.[0]
+
   return (
-    report && (
-      <>
-        <Shelf gap={1}>
-          {report.author.avatar?.uri && (
-            <Box
-              as="img"
-              height={40}
-              borderRadius={30}
-              src={cent.metadata.parseMetadataUrl(report.author.avatar.uri)}
-              alt=""
-            />
-          )}
-          <Text variant="body2">
-            Reviewer: {report.author.name}
-            <br />
-            {report.author.title}
+    <Shelf flexDirection="column" alignItems="flex-start">
+      <Shelf marginBottom={30}>
+        <LabelValueStack
+          label=""
+          value={
+            <Text variant="body1">
+              <Shelf flexWrap="wrap" gap={2} alignItems="flex-start">
+                {reportLinks.map((link, i) => (
+                  <RouterTextLink to={`${pathname}/reporting${link.href}`} key={`${link.label}-${i}`}>
+                    {link.label}
+                  </RouterTextLink>
+                ))}
+              </Shelf>
+            </Text>
+          }
+        />
+      </Shelf>
+      {report && (
+        <>
+          <Text style={{ marginBottom: 8 }} variant="heading2">
+            Pool analysis
           </Text>
-        </Shelf>
-        <div>
-          <AnchorButton href={report.uri} target="_blank" variant="secondary" icon={IconExternalLink}>
-            View full report
-          </AnchorButton>
-        </div>
-      </>
-    )
+          <Shelf gap={1}>
+            {report.author.avatar?.uri && (
+              <Box
+                as="img"
+                height={40}
+                borderRadius={30}
+                src={cent.metadata.parseMetadataUrl(report.author.avatar.uri)}
+                alt=""
+              />
+            )}
+            <Text variant="body2">
+              Reviewer: {report.author.name}
+              <br />
+              {report.author.title}
+            </Text>
+          </Shelf>
+          <Shelf marginTop={20}>
+            <AnchorButton href={report.uri} target="_blank" variant="secondary" icon={IconExternalLink}>
+              View full report
+            </AnchorButton>
+          </Shelf>
+        </>
+      )}
+    </Shelf>
   )
 }
+
 export function IssuerDetails({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)

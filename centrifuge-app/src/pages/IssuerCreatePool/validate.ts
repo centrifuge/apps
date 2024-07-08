@@ -29,7 +29,6 @@ export const validate = {
   assetClass: required(),
   subAssetClass: required(),
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
-  podEndpoint: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
   poolType: required(),
 
   epochHours: combine(required(), nonNegativeNumber(), integer(), max(24 * 7 /* 1 week */)),
@@ -65,7 +64,7 @@ export const validate = {
   discountRate: combine(required(), nonNegativeNumber(), max(100)),
   lossGivenDefault: combine(required(), nonNegativeNumber(), max(100)),
   maxBorrowQuantity: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
-  Isin: combine(required(), minLength(12), maxLength(12), isin()),
+  isin: combine(required(), minLength(12), maxLength(12), isin()),
   maturityExtensionDays: combine(required(), nonNegativeNumber(), max(365 * 2 /* 2 years */)),
 
   // write-off groups
