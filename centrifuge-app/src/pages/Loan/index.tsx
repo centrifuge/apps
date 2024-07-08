@@ -250,7 +250,10 @@ function Loan() {
                               const attribute = templateData.attributes?.[key]!
                               const value = publicData[key]
                               const formatted = value ? formatNftAttribute(value, attribute) : '-'
-                              return { label: attribute.label, value: formatted }
+                              return {
+                                label: attribute.label,
+                                value: formatted,
+                              }
                             })}
                         />
                       </Stack>
