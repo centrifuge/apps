@@ -5,6 +5,7 @@ import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
+import { feeCategories } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 
 const MAX_FEES = 5
@@ -45,11 +46,19 @@ export const PoolFeeSection: React.FC = () => {
   const address = useAddress()
 
   React.useEffect(() => {
-    fmk.setFieldValue(`poolFees.0.name`, DEFAULT_FEE[values.poolType][values.assetClass].name)
-    fmk.setFieldValue(`poolFees.0.feeType`, 'fixed')
-    fmk.setFieldValue(`poolFees.0.walletAddress`, import.meta.env.REACT_APP_TREASURY)
-    fmk.setFieldValue(`poolFees.0.percentOfNav`, DEFAULT_FEE[values.poolType][values.assetClass].fee)
-    fmk.setFieldValue(`poolFees.0.feePosition`, 'Top of waterfall')
+    fmk.setFieldValue(
+      `poolFees.0`,
+      {
+        name: DEFAULT_FEE[values.poolType][values.assetClass].name,
+        feeType: 'fixed',
+        walletAddress: import.meta.env.REACT_APP_TREASURY,
+        percentOfNav: DEFAULT_FEE[values.poolType][values.assetClass].fee,
+        feePosition: 'Top of waterfall',
+        category: 'Protocol',
+      },
+      false
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.assetClass, values.poolType, address])
 
   return (
@@ -90,7 +99,7 @@ export const PoolFeeInput: React.FC = () => {
   return (
     <FieldArray name="poolFees">
       {(fldArr) => (
-        <Grid gridTemplateColumns={'1fr 1fr 1fr 1fr 1fr 40px'} gap={2} rowGap={3}>
+        <Grid gridTemplateColumns={'1fr 1fr 1fr 1fr 1fr 1fr 40px'} gap={2} rowGap={3}>
           {values.poolFees.map((s, index) => (
             <React.Fragment key={index}>
               <FieldWithErrorMessage
@@ -100,6 +109,29 @@ export const PoolFeeInput: React.FC = () => {
                 name={`poolFees.${index}.name`}
                 disabled={index < 1}
               />
+              <Field name={`poolFees.${index}.category`}>
+                {({ field, form, meta }: FieldProps) =>
+                  field.value === 'Protocol' ? (
+                    <FieldWithErrorMessage
+                      as={TextInput}
+                      label="Category"
+                      name={`poolFees.${index}.category`}
+                      disabled
+                    />
+                  ) : (
+                    <Select
+                      name="category"
+                      label="Category"
+                      onChange={(event) => form.setFieldValue(`poolFees.${index}.category`, event.target.value)}
+                      onBlur={field.onBlur}
+                      disabled={index < 1}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
+                    />
+                  )
+                }
+              </Field>
               <Field name={`poolFees.${index}.feePosition`}>
                 {({ field, meta }: FieldProps) => {
                   return (

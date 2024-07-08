@@ -113,6 +113,7 @@ export type CreatePoolValues = Omit<
     percentOfNav: number | ''
     walletAddress: string
     feePosition: 'Top of waterfall'
+    category: string
   }[]
   poolType: 'open' | 'closed'
 }

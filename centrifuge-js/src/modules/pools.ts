@@ -354,6 +354,9 @@ export type Pool = {
     total: CurrencyBalance
     aum: CurrencyBalance
   }
+  fees: {
+    totalPaid: CurrencyBalance
+  }
   parameters: {
     minEpochTime: number
     challengeTime: number
@@ -693,7 +696,7 @@ export interface PoolMetadataInput {
     threshold: number
   }
 
-  poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; feeType: FeeTypes }[]
+  poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; category?: string; feeType: FeeTypes }[]
 
   poolType: 'open' | 'closed'
 }
@@ -718,6 +721,7 @@ export type PoolMetadata = {
       id: number
       name: string
       feePosition: 'Top of waterfall'
+      category?: string
     }[]
     newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
@@ -954,6 +958,7 @@ export type AddFee = {
     name: string
     amount: Rate
     account?: string
+    category?: string
     feePosition: 'Top of waterfall'
   }
   poolId: string
@@ -1910,12 +1915,15 @@ export function getPoolsModule(inst: Centrifuge) {
       })
     )
 
-    const $query = inst.getSubqueryObservable<{ pools: { nodes: { id: string; createdAt: string }[] } }>(
+    const $query = inst.getSubqueryObservable<{
+      pools: { nodes: { id: string; createdAt: string; sumPoolFeesPaidAmount: string }[] }
+    }>(
       `query {
           pools {
             nodes {
               id
               createdAt
+              sumPoolFeesPaidAmount
             }
           }
         }`,
@@ -2048,7 +2056,7 @@ export function getPoolsModule(inst: Centrifuge) {
               // @ts-expect-error
               const rawNav = rawNavs && rawNavs[poolIndex]?.toJSON()
 
-              const mappedPool: Pool = {
+              const mappedPool: Omit<Pool, 'fees'> = {
                 id: poolId,
                 createdAt: null,
                 metadata,
@@ -2154,6 +2162,9 @@ export function getPoolsModule(inst: Centrifuge) {
           const poolWithGqlData: Pool = {
             ...pool,
             createdAt: gqlPool?.createdAt ?? null,
+            fees: {
+              totalPaid: new CurrencyBalance(gqlPool?.sumPoolFeesPaidAmount ?? 0, pool.currency.decimals),
+            },
           }
           return poolWithGqlData
         })
@@ -4130,6 +4141,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   id: parseInt(lastFeeId.toHuman() as string, 10) + index + 1,
                   name: metadata.fee.name,
                   feePosition: metadata.fee.feePosition,
+                  category: metadata.fee.category,
                 }
               }),
             ],
@@ -4408,7 +4420,6 @@ function getGroupByPeriod(date: Date, groupBy: GroupBy) {
     return `Q${quarter}-${date.getFullYear()}`
   } else if (groupBy === 'year') {
     return `${date.getFullYear()}`
-  } else {
-    throw new Error(`Unsupported groupBy: ${groupBy}`)
   }
+  throw new Error(`Unsupported groupBy: ${groupBy}`)
 }
