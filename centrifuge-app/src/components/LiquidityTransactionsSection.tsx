@@ -62,26 +62,32 @@ export default function LiquidityTransactionsSection({
     return getCSVDownloadUrl(formatted)
   }, [dailyPoolStates, dataKeys, dataNames, pool.currency.symbol])
 
-  const chartData: StackedBarChartProps['data'] = React.useMemo(() => {
-    return (
-      dailyPoolStates?.map((entry) => {
+  const chartData = React.useMemo(() => {
+    return (dailyPoolStates
+      ?.map((entry) => {
         // subquery data is saved at end of the day
         // data timestamp is off for 24h
         const date = new Date(entry.timestamp)
         date.setDate(date.getDate() - 1)
+        const top = entry[dataKeys[0]]
+          ? new CurrencyBalance(entry[dataKeys[0]]!, pool.currency.decimals).toDecimal().toNumber()
+          : 0
 
+        const bottom = entry[dataKeys[1]]
+          ? new CurrencyBalance(entry[dataKeys[1]]!, pool.currency.decimals).toDecimal().toNumber()
+          : 0
+
+        if (!top && !bottom) {
+          return undefined
+        }
         return {
           xAxis: date.getTime(),
-          top: entry[dataKeys[0]]
-            ? new CurrencyBalance(entry[dataKeys[0]]!, pool.currency.decimals).toDecimal().toNumber()
-            : 0,
-          bottom: entry[dataKeys[1]]
-            ? new CurrencyBalance(entry[dataKeys[1]]!, pool.currency.decimals).toDecimal().toNumber()
-            : 0,
+          top,
+          bottom,
           date: date.toISOString(),
         }
-      }) || []
-    )
+      })
+      .filter(Boolean) || []) as StackedBarChartProps['data']
   }, [dailyPoolStates, dataKeys])
 
   const legend: LegendProps['data'] = React.useMemo(() => {
@@ -123,7 +129,7 @@ export default function LiquidityTransactionsSection({
             icon={IconDownload}
             small
           >
-            Data
+            Download
           </AnchorButton>
         )
       }
