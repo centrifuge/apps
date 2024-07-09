@@ -1,20 +1,35 @@
 import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
-import { AnchorButton, IconDownload } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { formatDate } from '../utils/date'
+import styled from 'styled-components'
+import { daysBetween, formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { getCSVDownloadUrl } from '../utils/getCSVDownloadUrl'
 import { useDailyPoolStates } from '../utils/usePools'
 import { Legend, LegendProps } from './Charts/Legend'
 import { StackedBarChart, StackedBarChartProps } from './Charts/StackedBarChart'
+import { getRangeNumber } from './Charts/utils'
 import { PageSection } from './PageSection'
 import { TooltipsProps } from './Tooltips'
+
+const rangeFilters = [
+  { value: '30d', label: '30 days' },
+  { value: '90d', label: '90 days' },
+  { value: 'ytd', label: 'Year to date' },
+  { value: 'all', label: 'All' },
+] as const
 
 type DataKeyType =
   | 'sumBorrowedAmountByPeriod'
   | 'sumRepaidAmountByPeriod'
   | 'sumInvestedAmountByPeriod'
   | 'sumRedeemedAmountByPeriod'
+
+const RangeFilterButton = styled(Stack)`
+  &:hover {
+    cursor: pointer;
+  }
+`
 
 type LiquidityTransactionsSectionProps = {
   pool: Pool
@@ -33,9 +48,10 @@ export default function LiquidityTransactionsSection({
   dataColors,
   tooltips,
 }: LiquidityTransactionsSectionProps) {
-  const to = new Date(pool.epoch.lastClosed)
-  const from = pool.createdAt ? new Date(pool.createdAt) : new Date(to.getDate() - 10)
-  const { poolStates: dailyPoolStates } = useDailyPoolStates(pool.id, from, to) || {}
+  const { poolStates: dailyPoolStates } = useDailyPoolStates(pool.id) || {}
+  const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'all', label: 'All' })
+  const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
+  const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const dataUrl: any = React.useMemo(() => {
     if (!dailyPoolStates || !dailyPoolStates?.length) {
@@ -87,8 +103,9 @@ export default function LiquidityTransactionsSection({
           date: date.toISOString(),
         }
       })
+      .slice(-rangeNumber)
       .filter(Boolean) || []) as StackedBarChartProps['data']
-  }, [dailyPoolStates, dataKeys])
+  }, [dailyPoolStates, dataKeys, rangeNumber])
 
   const legend: LegendProps['data'] = React.useMemo(() => {
     const topTotal = chartData.map(({ top }) => top).reduce((a, b) => a + b, 0)
@@ -134,7 +151,30 @@ export default function LiquidityTransactionsSection({
         )
       }
     >
-      {!!legend && !!legend.length && <Legend data={legend} />}
+      <Shelf bg="backgroundPage" width="100%" gap="2">
+        {!!legend && !!legend.length && <Legend data={legend} />}
+        <Shelf justifyContent="flex-end">
+          {chartData.length > 0 &&
+            rangeFilters.map((rangeFilter, index) => (
+              <React.Fragment key={rangeFilter.label}>
+                <RangeFilterButton gap={1} onClick={() => setRange(rangeFilter)}>
+                  <Text variant="body3" whiteSpace="nowrap">
+                    <Text variant={rangeFilter.value === range.value && 'emphasized'}>{rangeFilter.label}</Text>
+                  </Text>
+                  <Box
+                    width="100%"
+                    backgroundColor={rangeFilter.value === range.value ? '#000000' : '#E0E0E0'}
+                    height="2px"
+                  />
+                </RangeFilterButton>
+                {index !== rangeFilters.length - 1 && (
+                  <Box width="24px" backgroundColor="#E0E0E0" height="2px" alignSelf="flex-end" />
+                )}
+              </React.Fragment>
+            ))}
+        </Shelf>
+      </Shelf>
+
       {!!chartData && !!chartData.length && (
         <StackedBarChart data={chartData} names={dataNames} colors={dataColors} currency={pool.currency.symbol} />
       )}
