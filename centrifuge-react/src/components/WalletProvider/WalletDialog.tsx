@@ -35,6 +35,11 @@ type Props = {
   showFinoa?: boolean
 }
 
+type WalletFn = {
+  installUrl: string
+  extensionName?: string
+}
+
 const title = {
   networks: 'Connect wallet',
   wallets: 'Connect wallet',
@@ -49,11 +54,12 @@ const walletsList: { [key: string]: string } = {
   metamask: 'ether-metamask',
 }
 
-const getAdjustedInstallUrl = (wallet: { extensionName: string; installUrl: string }): string => {
+const getAdjustedInstallUrl = (wallet: WalletFn): string => {
   const browser = getSupportedBrowser()
   const { installUrl } = wallet
   if (browser === 'firefox') {
-    return `https://addons.mozilla.org/en-US/firefox/addon/${walletsList['extensionName' in wallet ? wallet.extensionName : 'metamask']}/`
+    const extensionName = wallet.extensionName ?? 'metamask'
+    return `https://addons.mozilla.org/en-US/firefox/addon/${walletsList[extensionName]}/`
   } else {
     return installUrl
   }
