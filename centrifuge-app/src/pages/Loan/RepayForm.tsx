@@ -10,9 +10,11 @@ import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { ExternalRepayForm } from './ExternalRepayForm'
+import { SourceSelect } from './SourceSelect'
+import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
 
 type RepayValues = {
@@ -20,14 +22,33 @@ type RepayValues = {
 }
 
 export function RepayForm({ loan }: { loan: ActiveLoan }) {
-  return isExternalLoan(loan) ? <ExternalRepayForm loan={loan} /> : <InternalRepayForm loan={loan} />
+  const [source, setSource] = React.useState<string>('reserve')
+  const pool = usePool(loan.poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
+
+  const title = poolMetadata?.pool?.asset.class === 'Private credit' ? 'Repay' : 'Sell'
+
+  return (
+    <Stack gap={2}>
+      <Stack as={Card} gap={2} p={2}>
+        <Text variant="heading2">{title}</Text>
+        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} />
+        {source === 'reserve' && isExternalLoan(loan) ? (
+          <ExternalRepayForm loan={loan} />
+        ) : source === 'reserve' && !isExternalLoan(loan) ? (
+          <InternalRepayForm loan={loan} />
+        ) : (
+          <TransferDebtForm loan={loan} />
+        )}
+      </Stack>
+    </Stack>
+  )
 }
 
 function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
-  if (!account) throw new Error('No borrower')
-  const balances = useBalances(account.actingAddress)
+  const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const { debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
 
@@ -95,7 +116,7 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
   const canRepayAll = debtWithMargin?.lte(balance)
 
   return (
-    <Stack as={Card} gap={2} p={2}>
+    <>
       <Stack>
         <Shelf justifyContent="space-between">
           <Text variant="heading3">Outstanding</Text>
@@ -165,6 +186,6 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
           Close
         </Button>
       )}
-    </Stack>
+    </>
   )
 }

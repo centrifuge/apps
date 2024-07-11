@@ -1,6 +1,6 @@
 import { CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -20,8 +20,7 @@ type RepayValues = {
 export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
-  if (!account) throw new Error('No borrower')
-  const balances = useBalances(account.actingAddress)
+  const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
@@ -71,7 +70,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
 
   return (
-    <Stack as={Card} gap={2} p={2}>
+    <>
       <Box paddingY={1}>
         <Text variant="heading4">To repay the asset, enter quantity and settlement price of the transaction.</Text>
       </Box>
@@ -169,6 +168,6 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
             Close
           </Button>
         ))}
-    </Stack>
+    </>
   )
 }

@@ -44,7 +44,7 @@ import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
 import { SourceSelect } from './SourceSelect'
@@ -61,32 +61,39 @@ type FinanceValues = {
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
   const [source, setSource] = React.useState<string>('reserve')
+  const pool = usePool(loan.poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const Select = <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} />
+  const title = poolMetadata?.pool?.asset.class === 'Private credit' ? 'Finance' : 'Purchase'
+
   return (
     <Stack gap={2}>
-      {source === 'reserve' && isExternalLoan(loan) ? (
-        <ExternalFinanceForm loan={loan as ExternalLoan} sourceSelect={Select} />
-      ) : source === 'reserve' && !isExternalLoan(loan) ? (
-        <InternalFinanceForm loan={loan} sourceSelect={Select} />
-      ) : (
-        <TransferDebtForm loan={loan} sourceSelect={Select} />
-      )}
+      <Stack as={Card} gap={2} p={2}>
+        <Text variant="heading2">{title}</Text>
+        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} />
+        {source === 'reserve' && isExternalLoan(loan) ? (
+          <ExternalFinanceForm loan={loan as ExternalLoan} />
+        ) : source === 'reserve' && !isExternalLoan(loan) ? (
+          <InternalFinanceForm loan={loan} />
+        ) : (
+          <TransferDebtForm loan={loan} />
+        )}
+      </Stack>
     </Stack>
   )
 }
 
-function InternalFinanceForm({ loan, sourceSelect }: { loan: LoanType; sourceSelect: JSX.Element }) {
+function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  if (!account) throw new Error('No borrower')
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
 
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => (args: [poolId: string, loanId: string, amount: BN], options) => {
+      if (!account) throw new Error('No borrower')
       const [poolId, loanId, amount] = args
       return combineLatest([
         cent.pools.financeLoan([poolId, loanId, amount], { batch: true }),
@@ -124,7 +131,7 @@ function InternalFinanceForm({ loan, sourceSelect }: { loan: LoanType; sourceSel
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const withdraw = useWithdraw(loan.poolId, account, Dec(financeForm.values.amount || 0))
+  const withdraw = useWithdraw(loan.poolId, account!, Dec(financeForm.values.amount || 0))
 
   if (loan.status === 'Closed') {
     return null
@@ -135,8 +142,7 @@ function InternalFinanceForm({ loan, sourceSelect }: { loan: LoanType; sourceSel
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
 
   return (
-    <Stack as={Card} gap={2} p={2}>
-      {sourceSelect}
+    <>
       <Stack>
         {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
           <Shelf justifyContent="space-between">
@@ -194,7 +200,7 @@ function InternalFinanceForm({ loan, sourceSelect }: { loan: LoanType; sourceSel
           </Stack>
         </FormikProvider>
       )}
-    </Stack>
+    </>
   )
 }
 

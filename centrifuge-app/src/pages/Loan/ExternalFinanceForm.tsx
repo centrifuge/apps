@@ -1,6 +1,6 @@
 import { CurrencyBalance, ExternalLoan, Pool, Price, WithdrawAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
@@ -20,15 +20,15 @@ type FinanceValues = {
   withdraw: undefined | WithdrawAddress
 }
 
-export function ExternalFinanceForm({ loan, sourceSelect }: { loan: ExternalLoan; sourceSelect: JSX.Element }) {
+export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  if (!account) throw new Error('No borrower')
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => (args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance], options) => {
+      if (!account) throw new Error('No borrower')
       const [poolId, loanId, quantity, price] = args
       return combineLatest([
         cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true }),
@@ -73,7 +73,7 @@ export function ExternalFinanceForm({ loan, sourceSelect }: { loan: ExternalLoan
 
   const amountDec = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
 
-  const withdraw = useWithdraw(loan.poolId, account, amountDec)
+  const withdraw = useWithdraw(loan.poolId, account!, amountDec)
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
@@ -82,8 +82,7 @@ export function ExternalFinanceForm({ loan, sourceSelect }: { loan: ExternalLoan
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
 
   return (
-    <Stack as={Card} gap={2} p={2}>
-      {sourceSelect}
+    <>
       <Box paddingY={1}>
         <Text variant="heading4">To finance the asset, enter quantity and settlement price of the transaction.</Text>
       </Box>
@@ -110,7 +109,7 @@ export function ExternalFinanceForm({ loan, sourceSelect }: { loan: ExternalLoan
           </Stack>
         </FormikProvider>
       )}
-    </Stack>
+    </>
   )
 }
 

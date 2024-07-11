@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, Loan, Loan as LoanType, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, setIn, useFormik } from 'formik'
@@ -27,11 +27,10 @@ type FormValues = {
   targetLoanPrice: number | '' | Decimal
 }
 
-export function TransferDebtForm({ loan, sourceSelect }: { loan: LoanType; sourceSelect: JSX.Element }) {
+export function TransferDebtForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
 
-  if (!account) throw new Error('No borrower')
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const unfilteredLoans = useLoans(loan.poolId)
 
@@ -152,8 +151,7 @@ export function TransferDebtForm({ loan, sourceSelect }: { loan: LoanType; sourc
     : Dec(form.values.amount || 0)
 
   return (
-    <Stack as={Card} gap={2} p={2}>
-      {sourceSelect}
+    <>
       <Text variant="heading4">
         To receive funds from another asset, choose the asset, enter new face value and settlement price. This will
         trigger a repay of the settlement asset and a borrow transaction for this asset.
@@ -260,7 +258,7 @@ export function TransferDebtForm({ loan, sourceSelect }: { loan: LoanType; sourc
           </Stack>
         </Stack>
       </FormikProvider>
-    </Stack>
+    </>
   )
 }
 
