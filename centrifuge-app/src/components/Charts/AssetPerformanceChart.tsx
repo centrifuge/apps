@@ -137,8 +137,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     return [min, max]
   }, [data])
 
+  const isChartEmpty = React.useMemo(() =>  !data.length || assetSnapshots?.length < 1, [data, assetSnapshots])
+
   if (!assetSnapshots) return <Spinner style={{ margin: 'auto' }} />
-  if (assetSnapshots?.length < 1) return null
 
   return (
     <Card p={3}>
@@ -149,7 +150,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
               ? 'Asset performance'
               : 'Cash balance'}
           </Text>
-          <AnchorButton
+          {!isChartEmpty && <AnchorButton
             href={dataUrl}
             download={`asset-${loanId}-timeseries.csv`}
             variant="secondary"
@@ -157,8 +158,10 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
             small
           >
             Download
-          </AnchorButton>
+          </AnchorButton>}
         </Shelf>
+
+        {isChartEmpty && <Text variant="label1">No data yet</Text>}
 
         {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
           <Stack>
