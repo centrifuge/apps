@@ -27,7 +27,7 @@ type FormValues = {
   targetLoanPrice: number | '' | Decimal
 }
 
-export function TransferDebtForm({ loan }: { loan: LoanType }) {
+export function TransferDebtForm({ loan, sourceSelect }: { loan: LoanType; sourceSelect: JSX.Element }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
 
@@ -126,8 +126,8 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
     return null
   }
 
-  const maturityDatePassed =
-    loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+  const hasMaturityDate = 'maturityDate' in loan.pricing && loan.pricing.maturityDate
+  const maturityDatePassed = hasMaturityDate ? new Date() > new Date(loan.pricing.maturityDate!) : false
   const selectedLoan = loans?.find((l) => l.id === form.values.targetLoan) as ActiveLoan | undefined
 
   function validate(financeAmount: Decimal) {
@@ -153,6 +153,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
 
   return (
     <Stack as={Card} gap={2} p={2}>
+      {sourceSelect}
       <Text variant="heading4">
         To receive funds from another asset, choose the asset, enter new face value and settlement price. This will
         trigger a repay of the settlement asset and a borrow transaction for this asset.

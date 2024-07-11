@@ -47,6 +47,8 @@ import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
+import { SourceSelect } from './SourceSelect'
+import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
 
 const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000000000000000000000000'
@@ -58,14 +60,23 @@ type FinanceValues = {
 }
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
-  return isExternalLoan(loan) ? (
-    <ExternalFinanceForm loan={loan as ExternalLoan} />
-  ) : (
-    <InternalFinanceForm loan={loan} />
+  const [source, setSource] = React.useState<string>('reserve')
+
+  const Select = <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} />
+  return (
+    <Stack gap={2}>
+      {source === 'reserve' && isExternalLoan(loan) ? (
+        <ExternalFinanceForm loan={loan as ExternalLoan} sourceSelect={Select} />
+      ) : source === 'reserve' && !isExternalLoan(loan) ? (
+        <InternalFinanceForm loan={loan} sourceSelect={Select} />
+      ) : (
+        <TransferDebtForm loan={loan} sourceSelect={Select} />
+      )}
+    </Stack>
   )
 }
 
-function InternalFinanceForm({ loan }: { loan: LoanType }) {
+function InternalFinanceForm({ loan, sourceSelect }: { loan: LoanType; sourceSelect: JSX.Element }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
@@ -125,6 +136,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   return (
     <Stack as={Card} gap={2} p={2}>
+      {sourceSelect}
       <Stack>
         {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
           <Shelf justifyContent="space-between">

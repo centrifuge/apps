@@ -46,7 +46,6 @@ import { MetricsTable } from './MetricsTable'
 import { PricingValues } from './PricingValues'
 import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
-import { TransferDebtForm } from './TransferDebtForm'
 import { formatNftAttribute } from './utils'
 
 const FullHeightLayoutBase = styled(LayoutBase)`
@@ -84,7 +83,6 @@ function LoanDrawerContent({ loan }: { loan: LoanType }) {
     <Stack gap={2}>
       <FinanceForm loan={loan} />
       {loan.status === 'Active' && <RepayForm loan={loan} />}
-      <TransferDebtForm loan={loan} />
     </Stack>
   )
 }
@@ -190,118 +188,116 @@ function Loan() {
           </PageSection>
         </>
       )}
-      {loan &&
-        pool &&
-        (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
-          <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4} flex={1}>
-            <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr 34fr']} gap={[2, 2]}>
+      {loan && pool && (
+        <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4} flex={1}>
+          <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr 34fr']} gap={[2, 2]}>
+            <React.Suspense fallback={<Spinner />}>
+              <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
+            </React.Suspense>
+            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
               <React.Suspense fallback={<Spinner />}>
-                <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
+                <KeyMetrics pool={pool} loan={loan} />
               </React.Suspense>
-              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+            )}
+          </Grid>
+
+          <Grid
+            height="fit-content"
+            gridTemplateColumns={['1fr', '33fr 33fr 34fr']}
+            gridAutoRows="minContent"
+            gap={[2, 2, 2]}
+          >
+            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
+              <React.Suspense fallback={<Spinner />}>
+                <HoldingsValues
+                  pool={pool as Pool}
+                  transactions={borrowerAssetTransactions}
+                  currentFace={currentFace}
+                  pricing={loan.pricing}
+                />
+              </React.Suspense>
+            )}
+
+            {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
+              <React.Suspense fallback={<Spinner />}>
+                <PricingValues loan={loan} pool={pool} />
+              </React.Suspense>
+            )}
+
+            {templateData?.sections?.map((section, i) => {
+              const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
+              if (!isPublic) return null
+              return (
                 <React.Suspense fallback={<Spinner />}>
-                  <KeyMetrics pool={pool} loan={loan} />
-                </React.Suspense>
-              )}
-            </Grid>
-
-            <Grid
-              height="fit-content"
-              gridTemplateColumns={['1fr', '33fr 33fr 34fr']}
-              gridAutoRows="minContent"
-              gap={[2, 2, 2]}
-            >
-              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle' && (
-                <React.Suspense fallback={<Spinner />}>
-                  <HoldingsValues
-                    pool={pool as Pool}
-                    transactions={borrowerAssetTransactions}
-                    currentFace={currentFace}
-                    pricing={loan.pricing}
-                  />
-                </React.Suspense>
-              )}
-
-              {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
-                <React.Suspense fallback={<Spinner />}>
-                  <PricingValues loan={loan} pool={pool} />
-                </React.Suspense>
-              )}
-
-              {templateData?.sections?.map((section, i) => {
-                const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
-                if (!isPublic) return null
-                return (
-                  <React.Suspense fallback={<Spinner />}>
-                    <Card p={3}>
-                      <Stack gap={2}>
-                        <Text fontSize="18px" fontWeight="500">
-                          {section.name}
-                        </Text>
-                        <MetricsTable
-                          metrics={section.attributes
-                            .filter(
-                              (key) =>
-                                !!templateData.attributes?.[key] &&
-                                (!templateMetadata?.keyAttributes ||
-                                  !Object.values(templateMetadata?.keyAttributes).includes(key))
-                            )
-                            .map((key) => {
-                              const attribute = templateData.attributes?.[key]!
-                              const value = publicData[key]
-                              const formatted = value ? formatNftAttribute(value, attribute) : '-'
-                              return {
-                                label: attribute.label,
-                                value: formatted,
-                              }
-                            })}
-                        />
-                      </Stack>
-                    </Card>
-                  </React.Suspense>
-                )
-              })}
-            </Grid>
-
-            {borrowerAssetTransactions?.length ? (
-              'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
-                <Card p={3}>
-                  <TransactionHistoryTable
-                    transactions={borrowerAssetTransactions ?? []}
-                    poolId={poolId}
-                    preview={false}
-                    activeAssetId={loanId}
-                  />
-                </Card>
-              ) : (
-                <Grid height="fit-content" gridTemplateColumns={['1fr']} gap={[2, 2, 3]}>
                   <Card p={3}>
                     <Stack gap={2}>
                       <Text fontSize="18px" fontWeight="500">
-                        Transaction history
+                        {section.name}
                       </Text>
-
-                      <TransactionTable
-                        transactions={borrowerAssetTransactions}
-                        currency={pool.currency.symbol}
-                        loanType={
-                          'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                            ? 'external'
-                            : 'internal'
-                        }
-                        poolType={poolMetadata?.pool?.asset.class}
-                        decimals={pool.currency.decimals}
-                        pricing={loan.pricing as PricingInfo}
-                        maturityDate={new Date(loan.pricing.maturityDate)}
-                        originationDate={originationDate ? new Date(originationDate) : undefined}
+                      <MetricsTable
+                        metrics={section.attributes
+                          .filter(
+                            (key) =>
+                              !!templateData.attributes?.[key] &&
+                              (!templateMetadata?.keyAttributes ||
+                                !Object.values(templateMetadata?.keyAttributes).includes(key))
+                          )
+                          .map((key) => {
+                            const attribute = templateData.attributes?.[key]!
+                            const value = publicData[key]
+                            const formatted = value ? formatNftAttribute(value, attribute) : '-'
+                            return {
+                              label: attribute.label,
+                              value: formatted,
+                            }
+                          })}
                       />
                     </Stack>
                   </Card>
-                </Grid>
+                </React.Suspense>
               )
-            ) : null}
-          </LayoutSection>
-        )}
+            })}
+          </Grid>
+
+          {borrowerAssetTransactions?.length ? (
+            'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'cash' ? (
+              <Card p={3}>
+                <TransactionHistoryTable
+                  transactions={borrowerAssetTransactions ?? []}
+                  poolId={poolId}
+                  preview={false}
+                  activeAssetId={loanId}
+                />
+              </Card>
+            ) : (
+              <Grid height="fit-content" gridTemplateColumns={['1fr']} gap={[2, 2, 3]}>
+                <Card p={3}>
+                  <Stack gap={2}>
+                    <Text fontSize="18px" fontWeight="500">
+                      Transaction history
+                    </Text>
+
+                    <TransactionTable
+                      transactions={borrowerAssetTransactions}
+                      currency={pool.currency.symbol}
+                      loanType={
+                        'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
+                          ? 'external'
+                          : 'internal'
+                      }
+                      poolType={poolMetadata?.pool?.asset.class}
+                      decimals={pool.currency.decimals}
+                      pricing={loan.pricing as PricingInfo}
+                      maturityDate={new Date(loan.pricing.maturityDate)}
+                      originationDate={originationDate ? new Date(originationDate) : undefined}
+                    />
+                  </Stack>
+                </Card>
+              </Grid>
+            )
+          ) : null}
+        </LayoutSection>
+      )}
       {isTinlakePool && loan && 'owner' in loan ? (
         <PageSection title={<Box>NFT</Box>}>
           <Shelf gap={6}>

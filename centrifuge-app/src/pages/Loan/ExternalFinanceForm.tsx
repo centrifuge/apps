@@ -20,7 +20,7 @@ type FinanceValues = {
   withdraw: undefined | WithdrawAddress
 }
 
-export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
+export function ExternalFinanceForm({ loan, sourceSelect }: { loan: ExternalLoan; sourceSelect: JSX.Element }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
@@ -83,6 +83,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
 
   return (
     <Stack as={Card} gap={2} p={2}>
+      {sourceSelect}
       <Box paddingY={1}>
         <Text variant="heading4">To finance the asset, enter quantity and settlement price of the transaction.</Text>
       </Box>
