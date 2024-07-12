@@ -1,7 +1,7 @@
 import { useEventCallback } from '@centrifuge/fabric'
 import get from 'lodash/get'
 import * as React from 'react'
-import { useHistory, useLocation } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
 export type PaginationProps<T = any> = {
   key?: string // In case more than one table on the page uses search params for filters
@@ -10,7 +10,7 @@ export type PaginationProps<T = any> = {
 }
 
 export function useFilters<T>({ key: prefix = 'f_', data = [], useSearchParams = true }: PaginationProps<T> = {}) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { search } = useLocation()
   const [params, setParams] = React.useState(() => new URLSearchParams(useSearchParams ? search : undefined))
   const state: Record<string, Set<string>> = {}
@@ -50,8 +50,8 @@ export function useFilters<T>({ key: prefix = 'f_', data = [], useSearchParams =
   const filtered = data.filter((entry) => entries.every(([key, set]) => set.has(String(get(entry, key)))))
 
   React.useEffect(() => {
-    history.replace({ search: params.toString() })
-  }, [params, history])
+    navigate({ search: params.toString() }, { replace: true });
+  }, [params, navigate]);
 
   return {
     setFilter,

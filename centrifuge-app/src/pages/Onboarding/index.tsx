@@ -1,7 +1,7 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Step, Stepper } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Container, Header, Layout, PoolBranding } from '../../components/Onboarding'
 import { useOnboardingAuth } from '../../components/OnboardingAuthProvider'
 import { useOnboarding } from '../../components/OnboardingProvider'
@@ -15,10 +15,10 @@ import { InvestorType } from './InvestorType'
 import { KnowYourBusiness } from './KnowYourBusiness'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
-import { useGlobalOnboardingStatus } from './queries/useGlobalOnboardingStatus'
-import { useSignedAgreement } from './queries/useSignedAgreement'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 import { UltimateBeneficialOwners } from './UltimateBeneficialOwners'
+import { useGlobalOnboardingStatus } from './queries/useGlobalOnboardingStatus'
+import { useSignedAgreement } from './queries/useSignedAgreement'
 
 export default function OnboardingPage() {
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
@@ -41,7 +41,7 @@ export default function OnboardingPage() {
 
   const { data: globalOnboardingStatus, isFetching: isFetchingGlobalOnboardingStatus } = useGlobalOnboardingStatus()
 
-  const history = useHistory()
+  const navigate = useNavigate()
   const poolDetails = usePool(poolId || '', false)
   const { data: metadata } = usePoolMetadata(poolDetails)
 
@@ -66,7 +66,7 @@ export default function OnboardingPage() {
 
     if (!poolId || !trancheId || (isTinlakePool && !canOnboard)) {
       setPool(null)
-      return history.push('/onboarding')
+      return navigate('/onboarding')
     }
 
     const trancheDetails = poolDetails?.tranches.find((tranche) => tranche.id === trancheId)
@@ -81,17 +81,17 @@ export default function OnboardingPage() {
     }
 
     setPool(null)
-    return history.push('/onboarding')
+    return navigate('/onboarding')
   }, [
     poolId,
     setPool,
     trancheId,
-    history,
     poolDetails,
     metadata,
     disconnect,
     setIsOnboardingExternally,
     externalSignature,
+    navigate
   ])
 
   const { data: signedAgreementData } = useSignedAgreement()

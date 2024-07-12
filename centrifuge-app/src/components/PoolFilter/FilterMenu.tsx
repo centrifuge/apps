@@ -1,6 +1,6 @@
 import { Box, Checkbox, Divider, IconFilter, Menu, Popover, Stack, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { FilterButton } from '../FilterButton'
 import { QuickAction } from '../QuickAction'
 import { SearchKeys } from './types'
@@ -14,7 +14,7 @@ export type FilterMenuProps = {
 }
 
 export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuProps) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { pathname, search } = useLocation()
 
   const form = React.useRef<HTMLFormElement>(null)
@@ -35,14 +35,14 @@ export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuPro
     const entries = formData.getAll(searchKey) as string[]
     const searchParams = new URLSearchParams(entries.map((entry) => [searchKey, entry]))
 
-    history.push({
+    navigate({
       pathname,
       search: `?${searchParams}${restSearchParams.size > 0 ? `&${restSearchParams}` : ''}`,
     })
   }
 
   function deselectAll() {
-    history.push({
+    navigate({
       pathname,
       search: restSearchParams.size > 0 ? `?${restSearchParams}` : '',
     })
@@ -51,7 +51,7 @@ export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuPro
   function selectAll() {
     const searchParams = new URLSearchParams(options.map((option) => [searchKey, toKebabCase(option)]))
 
-    history.push({
+    navigate({
       pathname,
       search: `?${searchParams}${restSearchParams.size > 0 ? `&${restSearchParams}` : ''}`,
     })

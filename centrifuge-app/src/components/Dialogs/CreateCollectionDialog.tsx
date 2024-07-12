@@ -19,13 +19,13 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Redirect } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
 import { Dec } from '../../utils/Decimal'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { ButtonGroup } from '../ButtonGroup'
+import { Navigate } from 'react-router'
 
 // TODO: replace with better fee estimate
 const CREATE_FEE_ESTIMATE = 2
@@ -116,7 +116,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const disabled = !isConnected || !name.trim() || !description.trim() || balanceLow || isTxPending
 
   if (redirect) {
-    return <Redirect to={redirect} />
+    return <Navigate to={redirect} />
   }
 
   const confirmDisabled = !termsAccepted

@@ -1,8 +1,8 @@
 import { CurrencyMetadata, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
+import { useBasePath } from '../utils/useBasePath'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { Eththumbnail } from './EthThumbnail'
@@ -80,8 +80,7 @@ const columns: Column[] = [
 ]
 
 export const TokenList: React.FC<Props> = ({ tokens }) => {
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
-
+  const basePath = useBasePath()
   return (
     <DataTable
       data={tokens}

@@ -1,6 +1,6 @@
 import { Box, IconChevronDown, IconChevronRight, IconUser } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
+import { useMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { Toggle } from './Toggle'
 
@@ -11,7 +11,7 @@ type IssuerMenuProps = {
 }
 
 export function IssuerMenu({ defaultOpen = false, stacked, children }: IssuerMenuProps) {
-  const match = useRouteMatch<{ pid: string }>('/issuer/:pid')
+  const match = useMatch('/issuer/*')
   const isActive = !!match
   const [open, setOpen] = React.useState(defaultOpen)
   const { space } = useTheme()

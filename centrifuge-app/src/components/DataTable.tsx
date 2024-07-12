@@ -141,7 +141,7 @@ export const DataTable = <T extends Record<string, any>>({
         <DataRow
           hoverable={hoverable}
           as={onRowClicked ? Link : 'div'}
-          to={onRowClicked && (() => onRowClicked(row))}
+          to={onRowClicked ? onRowClicked(row) : undefined}
           key={keyField ? row[keyField] : i}
           tabIndex={onRowClicked ? 0 : undefined}
         >
@@ -157,7 +157,7 @@ export const DataTable = <T extends Record<string, any>>({
           data-testId={`data-table-row-${i}-${groupIndex ?? 0}`}
           hoverable={hoverable}
           as={onRowClicked ? Link : 'div'}
-          to={onRowClicked && (() => onRowClicked(row))}
+          to={onRowClicked ? onRowClicked(row) : undefined}
           key={keyField ? row[keyField] : i}
           tabIndex={onRowClicked ? 0 : undefined}
         >

@@ -13,7 +13,7 @@ import {
 } from '@centrifuge/fabric'
 import get from 'lodash/get'
 import * as React from 'react'
-import { useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import currencyDollar from '../assets/images/currency-dollar.svg'
 import daiLogo from '../assets/images/dai-logo.svg'
 import usdcLogo from '../assets/images/usdc-logo.svg'
@@ -22,6 +22,7 @@ import { nftMetadataSchema } from '../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
+import { useBasePath } from '../utils/useBasePath'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
@@ -55,9 +56,9 @@ const getLoanStatus = (loan: Loan | TinlakeLoan) => {
 
 export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
-  const isTinlakePool = poolId.startsWith('0x')
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const pool = usePool(`${poolId}`)
+  const isTinlakePool = poolId?.startsWith('0x')
+  const basePath = useBasePath()
 
   const { data: poolMetadata } = usePoolMetadata(pool)
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
