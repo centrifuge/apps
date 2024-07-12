@@ -140,6 +140,7 @@ export const DataTable = <T extends Record<string, any>>({
       {pinnedData?.map((row, i) => (
         <DataRow
           hoverable={hoverable}
+          // TODO: the onRowClicked should be change to getRowLink to match the behavior
           as={onRowClicked ? Link : 'div'}
           to={onRowClicked ? onRowClicked(row) : undefined}
           key={keyField ? row[keyField] : i}

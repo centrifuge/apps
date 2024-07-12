@@ -19,7 +19,6 @@ export function IssuerPoolPricingPage() {
 
 function IssuerPoolPricing() {
   const { pid: poolId } = useParams<{ pid: string }>()
-
   return (
     <Stack>
       {!!usePoolAdmin(poolId) && (

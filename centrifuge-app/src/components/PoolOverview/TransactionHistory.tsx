@@ -49,7 +49,7 @@ export const columns = [
       return fromAssetId && toAssetId && activeAssetId == fromAssetId.split('-')[1] ? (
         <Text as="span" variant="body3">
           {fromAssetName} &rarr;{' '}
-          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
+          <AnchorTextLink target="_self" href={`#/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
             {toAssetName}
           </AnchorTextLink>
         </Text>
@@ -57,7 +57,7 @@ export const columns = [
         <Text as="span" variant="body3">
           <AnchorTextLink
             target="_self"
-            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
+            href={`#/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
           >
             {fromAssetName}
           </AnchorTextLink>{' '}
@@ -67,18 +67,18 @@ export const columns = [
         <Text as="span" variant="body3">
           <AnchorTextLink
             target="_self"
-            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
+            href={`#/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
           >
             {fromAssetName}
           </AnchorTextLink>{' '}
           &rarr;{' '}
-          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
+          <AnchorTextLink target="_self" href={`#/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
             {toAssetName}
           </AnchorTextLink>
         </Text>
       ) : activeAssetId != assetId?.split('-')[1] ? (
         <Text as="span" variant="body3">
-          <AnchorTextLink target="_self" href={`/pools/${assetId?.split('-')[0]}/assets/${assetId?.split('-')[1]}`}>
+          <AnchorTextLink target="_self" href={`#/pools/${assetId?.split('-')[0]}/assets/${assetId?.split('-')[1]}`}>
             {assetName || `Asset ${assetId?.split('-')[1]}`}
           </AnchorTextLink>
         </Text>

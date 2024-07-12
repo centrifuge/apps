@@ -22,7 +22,7 @@ import { nftMetadataSchema } from '../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
-import { useBasePath } from '../utils/useBasePath'
+import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
@@ -56,7 +56,7 @@ const getLoanStatus = (loan: Loan | TinlakeLoan) => {
 
 export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(`${poolId}`)
+  const pool = usePool(poolId)
   const isTinlakePool = poolId?.startsWith('0x')
   const basePath = useBasePath()
 
