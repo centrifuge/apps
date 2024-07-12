@@ -26,7 +26,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const feeIndex = params.get('charge')
   const feeMetadata = feeIndex ? poolMetadata?.pool?.poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
   const feeChainData = feeIndex ? poolFees?.find((f) => f.id.toString() === feeIndex) : undefined
-  const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.aum.toDecimal()).div(100)
+  const maxCharge = feeChainData?.amounts.percentOfNav.toDecimal().mul(pool.nav.aum.toDecimal())
   const [updateCharge, setUpdateCharge] = React.useState(false)
   const address = useAddress()
   const isAllowedToCharge = feeChainData?.destination && addressToHex(feeChainData.destination) === address
@@ -144,7 +144,7 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                           secondaryLabel={`Maximum charge ${formatBalance(
                             maxCharge || 0,
                             pool.currency.symbol
-                          )} (${formatPercentage(feeChainData?.amounts.percentOfNav.toDecimal() || 0)} NAV)`}
+                          )} (${formatPercentage(feeChainData?.amounts.percentOfNav.toString() || 0)} NAV)`}
                           onChange={(value) => form.setFieldValue('amount', value)}
                         />
                       )
