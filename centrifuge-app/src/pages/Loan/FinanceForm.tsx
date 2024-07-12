@@ -89,7 +89,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  const poolFees = useChargePoolFees(loan.poolId)
+  const poolFees = useChargePoolFees(loan.poolId, loan.id)
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
 
@@ -418,7 +418,7 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   }
 }
 
-export function useChargePoolFees(poolId: string) {
+export function useChargePoolFees(poolId: string, loanId: string) {
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const cent: Centrifuge = useCentrifuge()
@@ -428,16 +428,19 @@ export function useChargePoolFees(poolId: string) {
     render: () => <FeesFields pool={pool as Pool} />,
     isValid: true,
     getBatch: ({ values }: { values: Pick<FinanceValues, 'fees'> }) => {
+      // TODO: fix submitting these txs
       if (!values.fees.length) return of([])
-      return values.fees.map((fee) => {
+      const chargeFees = values.fees.map((fee) => {
         if (!fee.amount) throw new Error('Charge amount not provided')
         if (!account) throw new Error('No account')
         const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
         const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
-        return cent.pools
-          .chargePoolFee([fee.id, feeAmount, pendingFee], { batch: true })
-          .pipe(map((tx) => wrapProxyCallsForAccount(api, tx, account, 'Transfer')))
+        return cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee])
       })
+      const remarks = chargeFees.map((chargeTx) => {
+        return api.tx.remarks.remark([{ Loan: [poolId, loanId] }], chargeTx)
+      })
+      return [...chargeFees, ...remarks]
     },
   }
 }

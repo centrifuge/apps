@@ -24,7 +24,7 @@ export type FinanceValues = {
 export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
-  const poolFees = useChargePoolFees(loan.poolId)
+  const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const api = useCentrifugeApi()
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
