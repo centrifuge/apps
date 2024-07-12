@@ -12,37 +12,49 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
-import { useWithdraw } from './FinanceForm'
+import { useChargePoolFees, useWithdraw } from './FinanceForm'
 
-type FinanceValues = {
+export type FinanceValues = {
   price: number | '' | Decimal
   quantity: number | ''
   withdraw: undefined | WithdrawAddress
+  fees: { id: string; amount: '' | number | Decimal }[]
 }
 
 export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
+  const poolFees = useChargePoolFees(loan.poolId)
   const api = useCentrifugeApi()
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    (cent) => (args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance], options) => {
-      if (!account) throw new Error('No borrower')
-      const [poolId, loanId, quantity, price] = args
-      return combineLatest([
-        cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true }),
-        withdraw.getBatch(financeForm),
-      ]).pipe(
-        switchMap(([loanTx, batch]) => {
-          let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
-          if (batch.length) {
-            tx = api.tx.utility.batchAll([tx, ...batch])
-          }
-          return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
-        })
-      )
-    },
+    (cent) =>
+      (
+        args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance, fees: FinanceValues['fees']],
+        options
+      ) => {
+        if (!account) throw new Error('No borrower')
+        const [poolId, loanId, quantity, price] = args
+
+        return combineLatest([
+          cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true }),
+          withdraw.getBatch(financeForm),
+        ]).pipe(
+          switchMap(([loanTx, withdrawBatch]) => {
+            let batch = []
+            let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
+            if (withdrawBatch.length) {
+              batch.push(...withdrawBatch)
+            }
+            batch.push(poolFees.getBatch(financeForm))
+            if (batch.length) {
+              tx = api.tx.utility.batchAll([tx, ...batch])
+            }
+            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
+          })
+        )
+      },
     {
       onSuccess: () => {
         financeForm.resetForm()
@@ -55,12 +67,13 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
       price: '',
       quantity: '',
       withdraw: undefined,
+      fees: [],
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity)
 
-      doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
+      doFinanceTransaction([loan.poolId, loan.id, quantity, price, values.fees], {
         account,
       })
       actions.setSubmitting(false)
@@ -71,7 +84,14 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const amountDec = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
+  const fees = financeForm.values.fees
+    .filter((fee) => fee.amount !== '' && Dec(fee.amount).gt(0))
+    .reduce((acc, fee) => {
+      return acc.add(fee.amount)
+    }, Dec(0))
+  const amountDec = Dec(financeForm.values.price || 0)
+    .mul(Dec(financeForm.values.quantity || 0))
+    .sub(fees)
 
   const withdraw = useWithdraw(loan.poolId, account!, amountDec)
 
@@ -91,6 +111,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <ExternalFinanceFields loan={loan} pool={pool} />
             {withdraw.render()}
+            {poolFees.render()}
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Total amount</Text>

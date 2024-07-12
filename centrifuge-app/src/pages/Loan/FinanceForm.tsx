@@ -43,10 +43,11 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
-import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { useBorrower, usePoolAccess, useSuitableAccounts } from '../../utils/usePermissions'
+import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
+import { FeesFields } from './FeeFields'
 import { SourceSelect } from './SourceSelect'
 import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
@@ -57,6 +58,7 @@ type Key = `${'parachain' | 'evm'}:${number}`
 type FinanceValues = {
   amount: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
+  fees: { id: string; amount: '' | number | Decimal }[]
 }
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
@@ -87,6 +89,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
+  const poolFees = useChargePoolFees(loan.poolId)
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
 
@@ -99,8 +102,13 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
         cent.pools.financeLoan([poolId, loanId, amount], { batch: true }),
         withdraw.getBatch(financeForm),
       ]).pipe(
-        switchMap(([loanTx, batch]) => {
+        switchMap(([loanTx, withDrawBatch]) => {
+          let batch = []
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
+          if (withDrawBatch.length) {
+            batch.push(...withDrawBatch)
+          }
+          batch.push(poolFees.getBatch(financeForm))
           if (batch.length) {
             tx = api.tx.utility.batchAll([tx, ...batch])
           }
@@ -119,6 +127,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
     initialValues: {
       amount: '',
       withdraw: undefined,
+      fees: [],
     },
     onSubmit: (values, actions) => {
       const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
@@ -186,6 +195,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
               }}
             </Field>
             {withdraw.render()}
+            {poolFees.render()}
             {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
               <InlineFeedback>
                 The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
@@ -404,6 +414,30 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
           ]
         })
       )
+    },
+  }
+}
+
+export function useChargePoolFees(poolId: string) {
+  const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
+  const cent: Centrifuge = useCentrifuge()
+  const api = useCentrifugeApi()
+  const [account] = useSuitableAccounts({ poolId: poolId })
+  return {
+    render: () => <FeesFields pool={pool as Pool} />,
+    isValid: true,
+    getBatch: ({ values }: { values: Pick<FinanceValues, 'fees'> }) => {
+      if (!values.fees.length) return of([])
+      return values.fees.map((fee) => {
+        if (!fee.amount) throw new Error('Charge amount not provided')
+        if (!account) throw new Error('No account')
+        const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
+        const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
+        return cent.pools
+          .chargePoolFee([fee.id, feeAmount, pendingFee], { batch: true })
+          .pipe(map((tx) => wrapProxyCallsForAccount(api, tx, account, 'Transfer')))
+      })
     },
   }
 }
