@@ -1,10 +1,10 @@
-import { ActiveLoan, CurrencyBalance, Rate, findBalance } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { combineLatest, switchMap } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -13,12 +13,16 @@ import { useBorrower } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { ExternalRepayForm } from './ExternalRepayForm'
+import { useChargePoolFees } from './FeeFields'
 import { SourceSelect } from './SourceSelect'
 import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
 
-type RepayValues = {
+export type RepayValues = {
   amount: number | '' | Decimal
+  amountAdditional: number | '' | Decimal
+  interest: number | '' | Decimal
+  fees: { id: string; amount: number | '' | Decimal }[]
 }
 
 export function RepayForm({ loan }: { loan: ActiveLoan }) {
@@ -38,7 +42,7 @@ export function RepayForm({ loan }: { loan: ActiveLoan }) {
         ) : source === 'reserve' && !isExternalLoan(loan) ? (
           <InternalRepayForm loan={loan} />
         ) : (
-          <TransferDebtForm loan={loan} />
+          <TransferDebtForm loan={loan} source={source} />
         )}
       </Stack>
     </Stack>
@@ -51,10 +55,32 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
   const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const { debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
+  const poolFees = useChargePoolFees(loan.poolId, loan.id)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
-    (cent) => cent.pools.repayLoanPartially,
+    (cent) =>
+      (
+        args: [
+          loanId: string,
+          poolId: string,
+          amount: CurrencyBalance,
+          interest: CurrencyBalance,
+          additionalAmount: CurrencyBalance
+        ],
+        options
+      ) => {
+        const [loanId, poolId, amount, interest, additionalAmount] = args
+        return combineLatest([
+          cent.getApi(),
+          cent.pools.repayLoanPartially([loanId, poolId, amount, interest, additionalAmount], { batch: true }),
+          poolFees.getBatch(repayForm),
+        ]).pipe(
+          switchMap(([api, tx]) => {
+            return cent.wrapSignAndSend(api, tx, options)
+          })
+        )
+      },
     {
       onSuccess: () => {
         repayForm.resetForm()
@@ -82,27 +108,19 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
   const repayForm = useFormik<RepayValues>({
     initialValues: {
       amount: '',
+      amountAdditional: '',
+      interest: '',
+      fees: [],
     },
     onSubmit: (values, actions) => {
-      // Pay the interest with a small margin first, then the principal
-      let interest: BN = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      let principal = new BN(0)
+      let interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
+      let additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional, pool.currency.decimals)
+      let amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
 
-      // Calculate interest from the time the loan was fetched until now
-      const time = Date.now() - loan.fetchedAt.getTime()
-      const margin = CurrencyBalance.fromFloat(
-        loan.outstandingPrincipal
-          .toDecimal()
-          .mul(Rate.fractionFromApr(loan.pricing.interestRate.toDecimal()).toDecimal())
-          .mul(time),
-        pool.currency.decimals
-      )
-      const interestWithMargin = loan.outstandingInterest.add(margin)
-      if (interest.gt(interestWithMargin)) {
-        principal = interest.sub(interestWithMargin)
-        interest = interestWithMargin
-      }
-      doRepayTransaction([loan.poolId, loan.id, principal, interest, new BN(0)], { account, forceProxyType: 'Borrow' })
+      doRepayTransaction([loan.poolId, loan.id, amount, interest, additionalAmount], {
+        account,
+        forceProxyType: 'Borrow',
+      })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -156,6 +174,45 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
                 )
               }}
             </Field>
+            {loan.outstandingInterest.toDecimal().gt(0) && (
+              <Field validate={combine(positiveNumber())} name="interest">
+                {({ field, meta, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                      label="Interest"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      secondaryLabel={`${formatBalance(
+                        loan.outstandingInterest,
+                        pool?.currency.symbol,
+                        2
+                      )} interest accrued`}
+                      disabled={isRepayLoading || isRepayAllLoading}
+                      currency={pool?.currency.symbol}
+                      onChange={(value) => form.setFieldValue('interest', value)}
+                      onSetMax={() => form.setFieldValue('interest', loan.outstandingInterest.toDecimal())}
+                    />
+                  )
+                }}
+              </Field>
+            )}
+            <Field name="amountAdditional">
+              {({ field, meta, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                    label="Additional amount"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    disabled={isRepayLoading || isRepayAllLoading}
+                    currency={pool?.currency.symbol}
+                    onChange={(value) => form.setFieldValue('amountAdditional', value)}
+                  />
+                )
+              }}
+            </Field>
+            {poolFees.render()}
             {balance.lessThan(debt) && (
               <InlineFeedback>
                 Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than the

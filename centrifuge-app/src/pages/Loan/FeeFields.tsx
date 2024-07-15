@@ -1,11 +1,14 @@
-import { Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance } from '@centrifuge/centrifuge-react'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
 import { CurrencyInput, IconButton, IconMinusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { combineLatest, of } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { formatPercentage } from '../../utils/formatting'
-import { usePoolFees, usePoolMetadata } from '../../utils/usePools'
+import { useSuitableAccounts } from '../../utils/usePermissions'
+import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { FinanceValues } from './ExternalFinanceForm'
+import { RepayValues } from './RepayForm'
 
 export const FeesFields = ({ pool }: { pool: Pool }) => {
   const form = useFormikContext<FinanceValues>()
@@ -95,4 +98,34 @@ export const FeesFields = ({ pool }: { pool: Pool }) => {
       </FieldArray>
     </Stack>
   )
+}
+
+export function useChargePoolFees(poolId: string, loanId: string) {
+  const pool = usePool(poolId)
+  const poolFees = usePoolFees(poolId)
+  const cent = useCentrifuge()
+  const [account] = useSuitableAccounts({ poolId: poolId })
+  return {
+    render: () => <FeesFields pool={pool as Pool} />,
+    isValid: true,
+    getBatch: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
+      // TODO: fix submitting these txs
+      if (!values.fees.length) return of([])
+      const chargeFees = values.fees
+        .map((fee) => {
+          if (!fee.amount) throw new Error('Charge amount not provided')
+          if (!account) throw new Error('No account')
+          const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
+          const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
+          return [
+            cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee]),
+            cent.remark.remarkFeeTransaction([poolId, loanId, feeAmount]),
+          ]
+        })
+        .flat()
+      console.log('🚀 ~ chargeFees:', chargeFees)
+
+      return combineLatest(chargeFees)
+    },
+  }
 }

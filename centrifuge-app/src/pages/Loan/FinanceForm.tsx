@@ -43,11 +43,11 @@ import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
-import { useBorrower, usePoolAccess, useSuitableAccounts } from '../../utils/usePermissions'
-import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
+import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
-import { FeesFields } from './FeeFields'
+import { useChargePoolFees } from './FeeFields'
 import { SourceSelect } from './SourceSelect'
 import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
@@ -78,7 +78,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
         ) : source === 'reserve' && !isExternalLoan(loan) ? (
           <InternalFinanceForm loan={loan} />
         ) : (
-          <TransferDebtForm loan={loan} />
+          <TransferDebtForm loan={loan} source={source} />
         )}
       </Stack>
     </Stack>
@@ -101,17 +101,21 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
       return combineLatest([
         cent.pools.financeLoan([poolId, loanId, amount], { batch: true }),
         withdraw.getBatch(financeForm),
+        poolFees.getBatch(financeForm),
       ]).pipe(
-        switchMap(([loanTx, withDrawBatch]) => {
-          let batch = []
+        switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
+          let batch: any = []
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
-          if (withDrawBatch.length) {
-            batch.push(...withDrawBatch)
+          if (withdrawBatch.length) {
+            batch.push(...withdrawBatch)
           }
-          batch.push(poolFees.getBatch(financeForm))
+          if (poolFeesBatch.length) {
+            batch.push(...poolFeesBatch)
+          }
           if (batch.length) {
-            tx = api.tx.utility.batchAll([tx, ...batch])
+            tx = api.tx.utility.batchAll([tx])
           }
+          // TODO: fix submitting
           return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
         })
       )
@@ -414,33 +418,6 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
           ]
         })
       )
-    },
-  }
-}
-
-export function useChargePoolFees(poolId: string, loanId: string) {
-  const pool = usePool(poolId)
-  const poolFees = usePoolFees(poolId)
-  const cent: Centrifuge = useCentrifuge()
-  const api = useCentrifugeApi()
-  const [account] = useSuitableAccounts({ poolId: poolId })
-  return {
-    render: () => <FeesFields pool={pool as Pool} />,
-    isValid: true,
-    getBatch: ({ values }: { values: Pick<FinanceValues, 'fees'> }) => {
-      // TODO: fix submitting these txs
-      if (!values.fees.length) return of([])
-      const chargeFees = values.fees.map((fee) => {
-        if (!fee.amount) throw new Error('Charge amount not provided')
-        if (!account) throw new Error('No account')
-        const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
-        const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
-        return cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee])
-      })
-      const remarks = chargeFees.map((chargeTx) => {
-        return api.tx.remarks.remark([{ Loan: [poolId, loanId] }], chargeTx)
-      })
-      return [...chargeFees, ...remarks]
     },
   }
 }

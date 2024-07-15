@@ -12,7 +12,8 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
-import { useChargePoolFees, useWithdraw } from './FinanceForm'
+import { useChargePoolFees } from './FeeFields'
+import { useWithdraw } from './FinanceForm'
 
 export type FinanceValues = {
   price: number | '' | Decimal
@@ -84,14 +85,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const fees = financeForm.values.fees
-    .filter((fee) => fee.amount !== '' && Dec(fee.amount).gt(0))
-    .reduce((acc, fee) => {
-      return acc.add(fee.amount)
-    }, Dec(0))
-  const amountDec = Dec(financeForm.values.price || 0)
-    .mul(Dec(financeForm.values.quantity || 0))
-    .sub(fees)
+  const amountDec = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
 
   const withdraw = useWithdraw(loan.poolId, account!, amountDec)
 

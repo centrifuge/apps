@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, Loan, Loan as LoanType, Pool, Price } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, setIn, useFormik } from 'formik'
@@ -27,7 +27,7 @@ type FormValues = {
   targetLoanPrice: number | '' | Decimal
 }
 
-export function TransferDebtForm({ loan }: { loan: LoanType }) {
+export function TransferDebtForm({ loan, source }: { loan: LoanType; source: string }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
 
@@ -50,7 +50,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
 
   const form = useFormik<FormValues>({
     initialValues: {
-      targetLoan: '',
+      targetLoan: source,
       amount: '',
       price: '',
       quantity: '',
@@ -165,21 +165,6 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
               <Text variant="label2">{formatBalance(selectedLoan.outstandingDebt, pool.currency.symbol, 2, 2)}</Text>
             </Shelf>
           ) : null}
-          <Field name="targetLoan">
-            {({ field, meta, form }: FieldProps) => (
-              <Select
-                name="targetLoan"
-                label="Settlement asset"
-                onChange={(event) => {
-                  form.setFieldValue('targetLoan', event.target.value)
-                }}
-                onBlur={field.onBlur}
-                value={field.value}
-                options={loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []}
-                placeholder="Select..."
-              />
-            )}
-          </Field>
           {isExternalLoan(loan) ? (
             <>
               <ExternalFinanceFields
