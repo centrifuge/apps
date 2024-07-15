@@ -12,27 +12,24 @@ type Liquidity = {
   sumOfLockedInvestments: Decimal
   sumOfExecutableRedemptions: Decimal
   sumOfLockedRedemptions: Decimal
+  ordersFullyExecutable: boolean
+  ordersPartiallyExecutable: boolean
+  noOrdersExecutable: boolean
 }
 
-export const useLiquidity = (poolId: string) => {
+export function useLiquidity(poolId: string) {
   const pool = usePool(poolId)
-
   const poolOrders = usePoolOrders(poolId)
 
   const [solution] = useCentrifugeQuery(
-    [
-      'solution',
-      poolId,
-      poolOrders?.map((tranche) => ({
-        invest: tranche.inProcessingInvest.toString(),
-        redeem: tranche.inProcessingRedeem.toString(),
-      })),
-    ],
+    ['solution', poolId],
     (cent) => cent.pools.submitSolution([poolId], { dryRun: true }),
     {
-      enabled: !!poolId && !!poolOrders,
+      enabled: !!poolId,
     }
   )
+
+  console.log('solution', solution)
 
   const { investments, sumOfExecutableInvestments, sumOfLockedInvestments } = React.useMemo(() => {
     const investments =
@@ -102,6 +99,15 @@ export const useLiquidity = (poolId: string) => {
     }
   }, [pool, solution, poolOrders])
 
+  const ordersFullyExecutable =
+    sumOfLockedInvestments.equals(sumOfExecutableInvestments) &&
+    sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+  const ordersPartiallyExecutable =
+    (sumOfExecutableInvestments.gt(0) && sumOfExecutableInvestments.lt(sumOfLockedInvestments)) ||
+    (sumOfExecutableRedemptions.gt(0) && sumOfExecutableRedemptions.lt(sumOfLockedRedemptions))
+  const noOrdersExecutable =
+    !ordersFullyExecutable && sumOfExecutableInvestments.eq(0) && sumOfExecutableRedemptions.eq(0)
+
   return {
     investments,
     redemptions,
@@ -109,5 +115,8 @@ export const useLiquidity = (poolId: string) => {
     sumOfExecutableInvestments,
     sumOfLockedRedemptions,
     sumOfExecutableRedemptions,
-  } as Liquidity
+    ordersFullyExecutable,
+    ordersPartiallyExecutable,
+    noOrdersExecutable,
+  } satisfies Liquidity
 }
