@@ -6,7 +6,7 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { Dec } from '../../utils/Decimal'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
-import { formatPercentage } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrowerAssetTransactions, usePoolMetadata } from '../../utils/usePools'
@@ -92,6 +92,16 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
     }
   }, [weightedYTM, borrowerAssetTransactions])
 
+  const sumRealizedProfitFifo = borrowerAssetTransactions?.reduce(
+    (sum, tx) => sum.add(tx.realizedProfitFifo?.toDecimal() ?? Dec(0)),
+    Dec(0)
+  )
+
+  const unrealizedProfitAtMarketPrice = borrowerAssetTransactions?.reduce(
+    (sum, tx) => sum.add(tx.unrealizedProfitByPeriod?.toDecimal() ?? Dec(0)),
+    Dec(0)
+  )
+
   const metrics = [
     ...('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash'
       ? templateMetadata?.keyAttributes
@@ -110,6 +120,21 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
             value: formatDate(loan.pricing.maturityDate),
           },
         ]
+      : []),
+    ...(loan.pricing.maturityDate &&
+    'valuationMethod' in loan.pricing &&
+    loan.pricing.valuationMethod === 'oracle' &&
+    loan.pricing.notional.gtn(0)
+      ? [
+          sumRealizedProfitFifo && {
+            label: 'Realized P&L',
+            value: formatBalance(sumRealizedProfitFifo, pool.currency.symbol),
+          },
+          unrealizedProfitAtMarketPrice && {
+            label: 'Unrealized P&L',
+            value: formatBalance(unrealizedProfitAtMarketPrice, pool.currency.symbol),
+          },
+        ].filter(Boolean)
       : []),
     ...(loan.pricing.maturityDate &&
     'valuationMethod' in loan.pricing &&
