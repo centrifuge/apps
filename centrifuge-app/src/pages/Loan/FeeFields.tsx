@@ -23,7 +23,7 @@ export const FeesFields = ({ pool }: { pool: Pool }) => {
             <Stack gap={2}>
               <Select
                 options={[
-                  { label: 'Select fees', value: '', disabled: true },
+                  { label: 'Select fees', value: '' },
                   ...(chargableFees || []).map((fee) => {
                     const feeName =
                       poolMetadata?.pool?.poolFees?.find((feeMeta) => feeMeta.id === fee.id)?.name || 'Unknown Fee'
@@ -36,6 +36,7 @@ export const FeesFields = ({ pool }: { pool: Pool }) => {
                 defaultValue={''}
                 label="Fees"
                 onChange={(e) => {
+                  if (e.target.value === '') return
                   push({ id: e.target.value, amount: '' })
                 }}
               />
