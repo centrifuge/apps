@@ -351,6 +351,7 @@ export type Pool = {
   }
   nav: {
     lastUpdated: string
+    fees: CurrencyBalance
     total: CurrencyBalance
     aum: CurrencyBalance
   }
@@ -1349,10 +1350,10 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function submitSolution(args: [poolId: string], options?: TransactionOptions) {
     const [poolId] = args
-    const $pool = getPool([poolId]).pipe(take(1))
-    const $poolOrders = getPoolOrders([poolId]).pipe(take(1))
     const $api = inst.getApi()
-    return combineLatest([$pool, $poolOrders]).pipe(
+
+    return combineLatest([getPool([poolId]), getPoolOrders([poolId])]).pipe(
+      take(options?.dryRun ? Infinity : 1),
       switchMap(([pool, poolOrders]) => {
         const solutionTranches = pool.tranches.map((tranche) => ({
           ratio: tranche.ratio,
@@ -1909,7 +1910,10 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.poolSystem.EpochExecuted.is(event) ||
             api.events.poolSystem.SolutionSubmitted.is(event) ||
             api.events.investments.InvestOrderUpdated.is(event) ||
-            api.events.investments.RedeemOrderUpdated.is(event)
+            api.events.investments.RedeemOrderUpdated.is(event) ||
+            api.events.loans.Borrowed.is(event) ||
+            api.events.loans.Repaid.is(event) ||
+            api.events.loans.DebtTransferred.is(event)
         )
         return !!event
       })
@@ -2136,16 +2140,11 @@ export function getPoolsModule(inst: Centrifuge) {
                 },
                 nav: {
                   lastUpdated: lastUpdatedNav,
-                  total: rawNav?.total
-                    ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)
-                    : new CurrencyBalance(0, currency.decimals),
-                  aum: rawNav?.navAum
-                    ? new CurrencyBalance(hexToBN(rawNav.navAum), currency.decimals)
-                    : new CurrencyBalance(0, currency.decimals),
+                  fees: new CurrencyBalance(hexToBN(rawNav?.navFees), currency.decimals),
+                  total: new CurrencyBalance(hexToBN(rawNav?.total), currency.decimals),
+                  aum: new CurrencyBalance(hexToBN(rawNav?.navAum), currency.decimals),
                 },
-                value: rawNav?.total
-                  ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)
-                  : new CurrencyBalance(0, currency.decimals),
+                value: new CurrencyBalance(hexToBN(rawNav?.total), currency.decimals),
               }
 
               return mappedPool
@@ -3514,6 +3513,18 @@ export function getPoolsModule(inst: Centrifuge) {
   function getPoolOrders(args: [poolId: string]) {
     const [poolId] = args
 
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) =>
+            api.events.poolSystem.EpochClosed.is(event) ||
+            api.events.poolSystem.EpochExecuted.is(event) ||
+            api.events.investments.InvestOrderUpdated.is(event) ||
+            api.events.investments.RedeemOrderUpdated.is(event)
+        )
+        return !!event
+      })
+    )
     return inst.getApi().pipe(
       switchMap(
         (api) => api.query.poolSystem.pool(poolId),
@@ -3569,7 +3580,8 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         return tranches
-      })
+      }),
+      repeatWhen(() => $events)
     )
   }
 
@@ -4256,7 +4268,6 @@ export function getPoolsModule(inst: Centrifuge) {
     repayAndCloseLoan,
     closeLoan,
     transferLoanDebt,
-    getPool,
     getPools,
     getBalances,
     getOrder,
@@ -4292,8 +4303,8 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 }
 
-function hexToBN(value: string | number) {
-  if (typeof value === 'number') return new BN(value)
+function hexToBN(value?: string | number | null) {
+  if (typeof value === 'number' || value == null) return new BN(value ?? 0)
   return new BN(value.toString().substring(2), 'hex')
 }
 

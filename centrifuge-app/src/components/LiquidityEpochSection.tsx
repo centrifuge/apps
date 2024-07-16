@@ -65,8 +65,7 @@ export function LiquidityEpochSection({ pool }: LiquidityEpochSectionProps) {
 const MAX_COLLECT = 100
 
 function EpochStatusOngoing({ pool }: { pool: Pool }) {
-  const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
-    useLiquidity(pool.id)
+  const { sumOfLockedInvestments, sumOfLockedRedemptions, ordersFullyExecutable } = useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
   const [account] = useSuitableAccounts({
     poolId: pool.id,
@@ -120,14 +119,6 @@ function EpochStatusOngoing({ pool }: { pool: Pool }) {
   }
 
   const ordersLocked = !epochTimeRemaining && sumOfLockedInvestments.add(sumOfLockedRedemptions).gt(0)
-  // const ordersPartiallyExecutable =
-  //   (sumOfExecutableInvestments.gt(0) && sumOfExecutableInvestments.lt(sumOfLockedInvestments)) ||
-  //   (sumOfExecutableRedemptions.gt(0) && sumOfExecutableRedemptions.lt(sumOfLockedRedemptions))
-  const ordersFullyExecutable =
-    sumOfLockedInvestments.equals(sumOfExecutableInvestments) &&
-    sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
-  // const noOrdersExecutable =
-  //   !ordersFullyExecutable && sumOfExecutableInvestments.eq(0) && sumOfExecutableRedemptions.eq(0)
   return (
     <PageSection
       title="Order overview"
