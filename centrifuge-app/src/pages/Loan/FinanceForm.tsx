@@ -46,8 +46,8 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
+import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
-import { useChargePoolFees } from './FeeFields'
 import { SourceSelect } from './SourceSelect'
 import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
@@ -104,18 +104,11 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
         poolFees.getBatch(financeForm),
       ]).pipe(
         switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
-          let batch: any = []
+          let batch = [...withdrawBatch, ...poolFeesBatch]
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
-          if (withdrawBatch.length) {
-            batch.push(...withdrawBatch)
-          }
-          if (poolFeesBatch.length) {
-            batch.push(...poolFeesBatch)
-          }
           if (batch.length) {
-            tx = api.tx.utility.batchAll([tx])
+            tx = api.tx.utility.batchAll([tx, ...batch])
           }
-          // TODO: fix submitting
           return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
         })
       )

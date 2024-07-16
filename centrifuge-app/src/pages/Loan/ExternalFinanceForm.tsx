@@ -12,7 +12,7 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
-import { useChargePoolFees } from './FeeFields'
+import { useChargePoolFees } from './ChargeFeesFields'
 import { useWithdraw } from './FinanceForm'
 
 export type FinanceValues = {
@@ -41,14 +41,11 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
         return combineLatest([
           cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true }),
           withdraw.getBatch(financeForm),
+          poolFees.getBatch(financeForm),
         ]).pipe(
-          switchMap(([loanTx, withdrawBatch]) => {
-            let batch = []
+          switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
+            let batch = [...withdrawBatch, ...poolFeesBatch]
             let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
-            if (withdrawBatch.length) {
-              batch.push(...withdrawBatch)
-            }
-            batch.push(poolFees.getBatch(financeForm))
             if (batch.length) {
               tx = api.tx.utility.batchAll([tx, ...batch])
             }

@@ -44,9 +44,12 @@ export function getRemarkModule(inst: CentrifugeBase) {
     const $api = inst.getApi()
     const [poolId, loanId, chargeFee] = args
     return $api.pipe(
-      switchMap((api) =>
-        inst.wrapSignAndSend(api, api.tx.remarks.remark({ Loan: [poolId, loanId], chargeFee }), options)
-      )
+      switchMap((api) => {
+        const chargeFeeTx = api.tx.system.remark(
+          `Fee charged for loan ${loanId} in pool ${poolId}. Amount: ${chargeFee.toString()}`
+        )
+        return inst.wrapSignAndSend(api, api.tx.remarks.remark([{ Loan: [poolId, loanId] }], chargeFeeTx), options)
+      })
     )
   }
 

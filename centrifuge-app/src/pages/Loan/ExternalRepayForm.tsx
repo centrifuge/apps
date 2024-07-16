@@ -11,7 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, positiveNumber, required } from '../../utils/validation'
-import { useChargePoolFees } from './FeeFields'
+import { useChargePoolFees } from './ChargeFeesFields'
 
 type RepayValues = {
   price: number | '' | Decimal
@@ -50,8 +50,11 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
           }),
           poolFees.getBatch(repayForm),
         ]).pipe(
-          switchMap(([api, tx]) => {
-            return cent.wrapSignAndSend(api, tx, options)
+          switchMap(([api, repayTx, batch]) => {
+            if (batch.length) {
+              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch], options))
+            }
+            return cent.wrapSignAndSend(api, repayTx, options)
           })
         )
       },

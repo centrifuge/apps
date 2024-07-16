@@ -12,8 +12,8 @@ import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
+import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalRepayForm } from './ExternalRepayForm'
-import { useChargePoolFees } from './FeeFields'
 import { SourceSelect } from './SourceSelect'
 import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
@@ -76,8 +76,11 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
           cent.pools.repayLoanPartially([loanId, poolId, amount, interest, additionalAmount], { batch: true }),
           poolFees.getBatch(repayForm),
         ]).pipe(
-          switchMap(([api, tx]) => {
-            return cent.wrapSignAndSend(api, tx, options)
+          switchMap(([api, repayTx, batch]) => {
+            if (batch.length) {
+              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch], options))
+            }
+            return cent.wrapSignAndSend(api, repayTx, options)
           })
         )
       },

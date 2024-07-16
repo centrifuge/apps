@@ -10,7 +10,7 @@ import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { FinanceValues } from './ExternalFinanceForm'
 import { RepayValues } from './RepayForm'
 
-export const FeesFields = ({ pool }: { pool: Pool }) => {
+export const ChargeFeesFields = ({ pool }: { pool: Pool }) => {
   const form = useFormikContext<FinanceValues>()
   const { data: poolMetadata } = usePoolMetadata(pool)
   const poolFees = usePoolFees(pool.id)
@@ -107,26 +107,21 @@ export function useChargePoolFees(poolId: string, loanId: string) {
   const cent = useCentrifuge()
   const [account] = useSuitableAccounts({ poolId: poolId })
   return {
-    render: () => <FeesFields pool={pool as Pool} />,
+    render: () => <ChargeFeesFields pool={pool as Pool} />,
     isValid: true,
     getBatch: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
-      // TODO: fix submitting these txs
       if (!values.fees.length) return of([])
-      const chargeFees = values.fees
-        .map((fee) => {
-          if (!fee.amount) throw new Error('Charge amount not provided')
-          if (!account) throw new Error('No account')
-          const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
-          const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
-          return [
-            cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee]),
-            cent.remark.remarkFeeTransaction([poolId, loanId, feeAmount]),
-          ]
-        })
-        .flat()
-      console.log('🚀 ~ chargeFees:', chargeFees)
-
-      return combineLatest(chargeFees)
+      const fees = values.fees.flatMap((fee) => {
+        if (!fee.amount) throw new Error('Charge amount not provided')
+        if (!account) throw new Error('No account')
+        const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
+        const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
+        return [
+          cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee], { batch: true }),
+          cent.remark.remarkFeeTransaction([poolId, loanId, feeAmount], { batch: true }),
+        ]
+      })
+      return combineLatest(fees)
     },
   }
 }
