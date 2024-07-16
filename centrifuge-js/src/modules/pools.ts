@@ -3022,6 +3022,8 @@ export function getPoolsModule(inst: Centrifuge) {
               metadata
               name
               type
+              unrealizedProfitByPeriod
+              sumRealizedProfitFifo
             }
             fromAsset {
               id
@@ -3057,6 +3059,12 @@ export function getPoolsModule(inst: Centrifuge) {
           interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
           realizedProfitFifo: tx.realizedProfitFifo
             ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
+            : undefined,
+          sumRealizedProfitFifo: tx.asset.sumRealizedProfitFifo
+            ? new CurrencyBalance(tx.asset.sumRealizedProfitFifo, currency.decimals)
+            : undefined,
+          unrealizedProfitByPeriod: tx.asset.unrealizedProfitByPeriod
+            ? new CurrencyBalance(tx.asset.unrealizedProfitByPeriod, currency.decimals)
             : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) satisfies AssetTransaction[]
