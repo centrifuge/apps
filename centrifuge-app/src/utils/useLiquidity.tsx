@@ -29,8 +29,6 @@ export function useLiquidity(poolId: string) {
     }
   )
 
-  console.log('solution', solution)
-
   const { investments, sumOfExecutableInvestments, sumOfLockedInvestments } = React.useMemo(() => {
     const investments =
       (pool?.tranches.map((tranche, index) => {

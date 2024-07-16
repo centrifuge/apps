@@ -91,7 +91,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const { ordersFullyExecutable } = useLiquidity(poolId)
 
   const { execute, isLoading } = useCentrifugeTransaction(
-    'Set oracle prices',
+    'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
       return cent.pools.closeEpoch([poolId, false], { batch: true }).pipe(
         switchMap((closeTx) => {
