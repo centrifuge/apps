@@ -1,3 +1,4 @@
+import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { CurrencyBalance, Loan, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
@@ -22,7 +23,6 @@ import { nftMetadataSchema } from '../schemas'
 import { LoanTemplate, LoanTemplateAttribute } from '../types'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
-import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { useFilters } from '../utils/useFilters'
 import { useMetadata } from '../utils/useMetadata'
 import { useCentNFT } from '../utils/useNFTs'
@@ -56,6 +56,8 @@ const getLoanStatus = (loan: Loan | TinlakeLoan) => {
 
 export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const isTinlakePool = poolId?.startsWith('0x')
   const basePath = useBasePath()

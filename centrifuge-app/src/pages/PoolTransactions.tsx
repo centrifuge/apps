@@ -7,6 +7,8 @@ import { usePool, usePoolMetadata } from '../utils/usePools'
 
 const PoolTransactions = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
 

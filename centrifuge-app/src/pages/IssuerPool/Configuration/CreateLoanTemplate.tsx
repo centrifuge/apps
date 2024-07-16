@@ -121,6 +121,9 @@ export function IssuerPoolCreateLoanTemplatePage() {
 
 export function CreateLoanTemplate() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const navigate = useNavigate()
@@ -195,7 +198,7 @@ export function CreateLoanTemplate() {
   const isUpdating = !!poolMetadata.loanTemplates?.[0]
 
   if (redirect) {
-    <Navigate to={redirect} />
+    ;<Navigate to={redirect} />
   }
 
   return (

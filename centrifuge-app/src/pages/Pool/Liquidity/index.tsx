@@ -29,6 +29,9 @@ export function PoolDetailLiquidityTab() {
 
 export function PoolDetailLiquidity() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { colors } = useTheme()
   const [showReserveForm, setShowReserveForm] = React.useState(false)

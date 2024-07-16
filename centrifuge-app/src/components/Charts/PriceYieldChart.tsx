@@ -25,6 +25,9 @@ function PriceYieldChart({
 }) {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { trancheStates: tranches } = useDailyPoolStates(poolId, undefined, undefined, false) || {}
   const trancheStates = tranches?.[trancheId]
   const pool = usePool(poolId)

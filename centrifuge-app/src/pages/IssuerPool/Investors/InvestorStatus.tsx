@@ -39,6 +39,9 @@ export function InvestorStatus() {
     substrate: { evmChainId: substrateEvmChainId },
   } = useWallet()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const [address, setAddress] = React.useState('')
   const [chain, setChain] = React.useState<number | ''>('')
   const validator = chain ? isEvmAddress : isAddress

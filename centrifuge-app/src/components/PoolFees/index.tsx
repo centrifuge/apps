@@ -50,8 +50,10 @@ type PoolFeeChange = {
 
 export function PoolFees() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const { path } = useParams<{ path: string }>();
-  const basePath = `/${path ?? 'pools'}/${poolId}`;
+  if (!poolId) throw new Error('Pool not found')
+
+  const { path } = useParams<{ path: string }>()
+  const basePath = `/${path ?? 'pools'}/${poolId}`
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)

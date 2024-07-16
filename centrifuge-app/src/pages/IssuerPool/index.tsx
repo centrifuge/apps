@@ -14,6 +14,9 @@ import { IssuerPoolReportingPage } from './Reporting'
 
 export default function IssuerPoolPage() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   return (
     <>
       <Routes>

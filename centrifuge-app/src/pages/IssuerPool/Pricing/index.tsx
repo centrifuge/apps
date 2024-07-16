@@ -19,6 +19,9 @@ export function IssuerPoolPricingPage() {
 
 function IssuerPoolPricing() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   return (
     <Stack>
       {!!usePoolAdmin(poolId) && (
