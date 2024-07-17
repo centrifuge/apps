@@ -5,10 +5,10 @@
 // source: src/data_protocol.v1.proto
 
 /* eslint-disable */
-import Long from "long";
-import _m0 from "protobufjs/minimal.js";
+import Long from 'long'
+import _m0 from 'protobufjs/minimal.js'
 
-export const protobufPackage = "api.v1.data_protocol";
+export const protobufPackage = 'api.v1.data_protocol'
 
 export enum ErrorCode {
   ERROR_CODE_UNSPECIFIED = 0,
@@ -20,32 +20,32 @@ export enum ErrorCode {
 export function errorCodeFromJSON(object: any): ErrorCode {
   switch (object) {
     case 0:
-    case "ERROR_CODE_UNSPECIFIED":
-      return ErrorCode.ERROR_CODE_UNSPECIFIED;
+    case 'ERROR_CODE_UNSPECIFIED':
+      return ErrorCode.ERROR_CODE_UNSPECIFIED
     case 1:
-    case "ERROR_CODE_DOCUMENT_CREATION_ERROR":
-      return ErrorCode.ERROR_CODE_DOCUMENT_CREATION_ERROR;
+    case 'ERROR_CODE_DOCUMENT_CREATION_ERROR':
+      return ErrorCode.ERROR_CODE_DOCUMENT_CREATION_ERROR
     case 2:
-    case "ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR":
-      return ErrorCode.ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR;
+    case 'ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR':
+      return ErrorCode.ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
-      return ErrorCode.UNRECOGNIZED;
+      return ErrorCode.UNRECOGNIZED
   }
 }
 
 export function errorCodeToJSON(object: ErrorCode): string {
   switch (object) {
     case ErrorCode.ERROR_CODE_UNSPECIFIED:
-      return "ERROR_CODE_UNSPECIFIED";
+      return 'ERROR_CODE_UNSPECIFIED'
     case ErrorCode.ERROR_CODE_DOCUMENT_CREATION_ERROR:
-      return "ERROR_CODE_DOCUMENT_CREATION_ERROR";
+      return 'ERROR_CODE_DOCUMENT_CREATION_ERROR'
     case ErrorCode.ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR:
-      return "ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR";
+      return 'ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR'
     case ErrorCode.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED'
   }
 }
 
@@ -53,229 +53,206 @@ export interface BeepRequest {}
 
 export interface CreateDocumentRequest {
   /** Document in JSON format. */
-  payload: Uint8Array;
+  payload: Uint8Array
 }
 
 export interface BatchCreateDocumentRequest {
   /** List of create document requests. */
-  requests: CreateDocumentRequest[];
+  requests: CreateDocumentRequest[]
 }
 
 export interface GetDocumentRequest {
   /** Scale encoded document ID. */
-  documentId: Uint8Array;
+  documentId: Uint8Array
   /** OPTIONAL - Document version. If none is provided, the latest document will be retrieved. */
-  documentVersion?: number | undefined;
+  documentVersion?: number | undefined
 }
 
 export interface BatchGetDocumentRequest {
   /** List of get document requests. */
-  requests: BatchCreateDocumentRequest[];
+  requests: BatchCreateDocumentRequest[]
 }
 
 export interface DataProtocolRequest {
-  createDocumentRequest?: CreateDocumentRequest | undefined;
-  batchCreateDocumentRequest?: BatchCreateDocumentRequest | undefined;
-  getDocumentRequest?: GetDocumentRequest | undefined;
-  batchGetDocumentRequest?: BatchGetDocumentRequest | undefined;
+  createDocumentRequest?: CreateDocumentRequest | undefined
+  batchCreateDocumentRequest?: BatchCreateDocumentRequest | undefined
+  getDocumentRequest?: GetDocumentRequest | undefined
+  batchGetDocumentRequest?: BatchGetDocumentRequest | undefined
   /** TODO: Remove */
-  beepRequest?: BeepRequest | undefined;
+  beepRequest?: BeepRequest | undefined
 }
 
 export interface BeepResponse {}
 
 export interface CreateDocumentResponse {
   /** Document in JSON format. */
-  payload?: Uint8Array | undefined;
-  error?: DataProtocolError | undefined;
+  payload?: Uint8Array | undefined
+  error?: DataProtocolError | undefined
 }
 
 export interface BatchCreateDocumentResponse {
-  responses: CreateDocumentResponse[];
+  responses: CreateDocumentResponse[]
 }
 
 export interface GetDocumentResponse {
   /** Document in JSON format. */
-  payload?: Uint8Array | undefined;
-  error?: DataProtocolError | undefined;
+  payload?: Uint8Array | undefined
+  error?: DataProtocolError | undefined
 }
 
 export interface BatchGetDocumentResponse {
-  responses: GetDocumentResponse[];
+  responses: GetDocumentResponse[]
 }
 
 export interface DataProtocolResponse {
-  createDocumentResponse?: CreateDocumentResponse | undefined;
-  batchCreateDocumentResponse?: BatchCreateDocumentResponse | undefined;
-  getDocumentResponse?: GetDocumentResponse | undefined;
-  batchGetDocumentResponse?: BatchGetDocumentResponse | undefined;
+  createDocumentResponse?: CreateDocumentResponse | undefined
+  batchCreateDocumentResponse?: BatchCreateDocumentResponse | undefined
+  getDocumentResponse?: GetDocumentResponse | undefined
+  batchGetDocumentResponse?: BatchGetDocumentResponse | undefined
   /** TODO: Remove */
-  beepResponse?: BeepResponse | undefined;
+  beepResponse?: BeepResponse | undefined
 }
 
 export interface DataProtocolError {
-  error: string;
-  code: ErrorCode;
+  error: string
+  code: ErrorCode
 }
 
 function createBaseBeepRequest(): BeepRequest {
-  return {};
+  return {}
 }
 
 export const BeepRequest = {
   encode(_: BeepRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    return writer;
+    return writer
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): BeepRequest {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseBeepRequest();
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseBeepRequest()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(_: any): BeepRequest {
-    return {};
+    return {}
   },
 
   toJSON(_: BeepRequest): unknown {
-    const obj: any = {};
-    return obj;
+    const obj: any = {}
+    return obj
   },
 
   create<I extends Exact<DeepPartial<BeepRequest>, I>>(base?: I): BeepRequest {
-    return BeepRequest.fromPartial(base ?? ({} as any));
+    return BeepRequest.fromPartial(base ?? ({} as any))
   },
   fromPartial<I extends Exact<DeepPartial<BeepRequest>, I>>(_: I): BeepRequest {
-    const message = createBaseBeepRequest();
-    return message;
+    const message = createBaseBeepRequest()
+    return message
   },
-};
+}
 
 function createBaseCreateDocumentRequest(): CreateDocumentRequest {
-  return { payload: new Uint8Array(0) };
+  return { payload: new Uint8Array(0) }
 }
 
 export const CreateDocumentRequest = {
-  encode(
-    message: CreateDocumentRequest,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: CreateDocumentRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.payload.length !== 0) {
-      writer.uint32(10).bytes(message.payload);
+      writer.uint32(10).bytes(message.payload)
     }
-    return writer;
+    return writer
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): CreateDocumentRequest {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCreateDocumentRequest();
+  decode(input: _m0.Reader | Uint8Array, length?: number): CreateDocumentRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseCreateDocumentRequest()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.payload = reader.bytes();
-          continue;
+          message.payload = reader.bytes()
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): CreateDocumentRequest {
     return {
-      payload: isSet(object.payload)
-        ? bytesFromBase64(object.payload)
-        : new Uint8Array(0),
-    };
+      payload: isSet(object.payload) ? bytesFromBase64(object.payload) : new Uint8Array(0),
+    }
   },
 
   toJSON(message: CreateDocumentRequest): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.payload.length !== 0) {
-      obj.payload = base64FromBytes(message.payload);
+      obj.payload = base64FromBytes(message.payload)
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<CreateDocumentRequest>, I>>(
-    base?: I
-  ): CreateDocumentRequest {
-    return CreateDocumentRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<CreateDocumentRequest>, I>>(base?: I): CreateDocumentRequest {
+    return CreateDocumentRequest.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<CreateDocumentRequest>, I>>(
-    object: I
-  ): CreateDocumentRequest {
-    const message = createBaseCreateDocumentRequest();
-    message.payload = object.payload ?? new Uint8Array(0);
-    return message;
+  fromPartial<I extends Exact<DeepPartial<CreateDocumentRequest>, I>>(object: I): CreateDocumentRequest {
+    const message = createBaseCreateDocumentRequest()
+    message.payload = object.payload ?? new Uint8Array(0)
+    return message
   },
-};
+}
 
 function createBaseBatchCreateDocumentRequest(): BatchCreateDocumentRequest {
-  return { requests: [] };
+  return { requests: [] }
 }
 
 export const BatchCreateDocumentRequest = {
-  encode(
-    message: BatchCreateDocumentRequest,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: BatchCreateDocumentRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.requests) {
-      CreateDocumentRequest.encode(v!, writer.uint32(10).fork()).ldelim();
+      CreateDocumentRequest.encode(v!, writer.uint32(10).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): BatchCreateDocumentRequest {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseBatchCreateDocumentRequest();
+  decode(input: _m0.Reader | Uint8Array, length?: number): BatchCreateDocumentRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseBatchCreateDocumentRequest()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.requests.push(
-            CreateDocumentRequest.decode(reader, reader.uint32())
-          );
-          continue;
+          message.requests.push(CreateDocumentRequest.decode(reader, reader.uint32()))
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): BatchCreateDocumentRequest {
@@ -283,199 +260,161 @@ export const BatchCreateDocumentRequest = {
       requests: globalThis.Array.isArray(object?.requests)
         ? object.requests.map((e: any) => CreateDocumentRequest.fromJSON(e))
         : [],
-    };
+    }
   },
 
   toJSON(message: BatchCreateDocumentRequest): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.requests?.length) {
-      obj.requests = message.requests.map((e) =>
-        CreateDocumentRequest.toJSON(e)
-      );
+      obj.requests = message.requests.map((e) => CreateDocumentRequest.toJSON(e))
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<BatchCreateDocumentRequest>, I>>(
-    base?: I
-  ): BatchCreateDocumentRequest {
-    return BatchCreateDocumentRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<BatchCreateDocumentRequest>, I>>(base?: I): BatchCreateDocumentRequest {
+    return BatchCreateDocumentRequest.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<BatchCreateDocumentRequest>, I>>(
-    object: I
-  ): BatchCreateDocumentRequest {
-    const message = createBaseBatchCreateDocumentRequest();
-    message.requests =
-      object.requests?.map((e) => CreateDocumentRequest.fromPartial(e)) || [];
-    return message;
+  fromPartial<I extends Exact<DeepPartial<BatchCreateDocumentRequest>, I>>(object: I): BatchCreateDocumentRequest {
+    const message = createBaseBatchCreateDocumentRequest()
+    message.requests = object.requests?.map((e) => CreateDocumentRequest.fromPartial(e)) || []
+    return message
   },
-};
+}
 
 function createBaseGetDocumentRequest(): GetDocumentRequest {
-  return { documentId: new Uint8Array(0), documentVersion: undefined };
+  return { documentId: new Uint8Array(0), documentVersion: undefined }
 }
 
 export const GetDocumentRequest = {
-  encode(
-    message: GetDocumentRequest,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: GetDocumentRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.documentId.length !== 0) {
-      writer.uint32(10).bytes(message.documentId);
+      writer.uint32(10).bytes(message.documentId)
     }
     if (message.documentVersion !== undefined) {
-      writer.uint32(16).uint64(message.documentVersion);
+      writer.uint32(16).uint64(message.documentVersion)
     }
-    return writer;
+    return writer
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): GetDocumentRequest {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetDocumentRequest();
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseGetDocumentRequest()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.documentId = reader.bytes();
-          continue;
+          message.documentId = reader.bytes()
+          continue
         case 2:
           if (tag !== 16) {
-            break;
+            break
           }
 
-          message.documentVersion = longToNumber(reader.uint64() as Long);
-          continue;
+          message.documentVersion = longToNumber(reader.uint64() as Long)
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): GetDocumentRequest {
     return {
-      documentId: isSet(object.documentId)
-        ? bytesFromBase64(object.documentId)
-        : new Uint8Array(0),
-      documentVersion: isSet(object.documentVersion)
-        ? globalThis.Number(object.documentVersion)
-        : undefined,
-    };
+      documentId: isSet(object.documentId) ? bytesFromBase64(object.documentId) : new Uint8Array(0),
+      documentVersion: isSet(object.documentVersion) ? globalThis.Number(object.documentVersion) : undefined,
+    }
   },
 
   toJSON(message: GetDocumentRequest): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.documentId.length !== 0) {
-      obj.documentId = base64FromBytes(message.documentId);
+      obj.documentId = base64FromBytes(message.documentId)
     }
     if (message.documentVersion !== undefined) {
-      obj.documentVersion = Math.round(message.documentVersion);
+      obj.documentVersion = Math.round(message.documentVersion)
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<GetDocumentRequest>, I>>(
-    base?: I
-  ): GetDocumentRequest {
-    return GetDocumentRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<GetDocumentRequest>, I>>(base?: I): GetDocumentRequest {
+    return GetDocumentRequest.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<GetDocumentRequest>, I>>(
-    object: I
-  ): GetDocumentRequest {
-    const message = createBaseGetDocumentRequest();
-    message.documentId = object.documentId ?? new Uint8Array(0);
-    message.documentVersion = object.documentVersion ?? undefined;
-    return message;
+  fromPartial<I extends Exact<DeepPartial<GetDocumentRequest>, I>>(object: I): GetDocumentRequest {
+    const message = createBaseGetDocumentRequest()
+    message.documentId = object.documentId ?? new Uint8Array(0)
+    message.documentVersion = object.documentVersion ?? undefined
+    return message
   },
-};
+}
 
 function createBaseBatchGetDocumentRequest(): BatchGetDocumentRequest {
-  return { requests: [] };
+  return { requests: [] }
 }
 
 export const BatchGetDocumentRequest = {
-  encode(
-    message: BatchGetDocumentRequest,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: BatchGetDocumentRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.requests) {
-      BatchCreateDocumentRequest.encode(v!, writer.uint32(10).fork()).ldelim();
+      BatchCreateDocumentRequest.encode(v!, writer.uint32(10).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): BatchGetDocumentRequest {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseBatchGetDocumentRequest();
+  decode(input: _m0.Reader | Uint8Array, length?: number): BatchGetDocumentRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseBatchGetDocumentRequest()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.requests.push(
-            BatchCreateDocumentRequest.decode(reader, reader.uint32())
-          );
-          continue;
+          message.requests.push(BatchCreateDocumentRequest.decode(reader, reader.uint32()))
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): BatchGetDocumentRequest {
     return {
       requests: globalThis.Array.isArray(object?.requests)
-        ? object.requests.map((e: any) =>
-            BatchCreateDocumentRequest.fromJSON(e)
-          )
+        ? object.requests.map((e: any) => BatchCreateDocumentRequest.fromJSON(e))
         : [],
-    };
+    }
   },
 
   toJSON(message: BatchGetDocumentRequest): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.requests?.length) {
-      obj.requests = message.requests.map((e) =>
-        BatchCreateDocumentRequest.toJSON(e)
-      );
+      obj.requests = message.requests.map((e) => BatchCreateDocumentRequest.toJSON(e))
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<BatchGetDocumentRequest>, I>>(
-    base?: I
-  ): BatchGetDocumentRequest {
-    return BatchGetDocumentRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<BatchGetDocumentRequest>, I>>(base?: I): BatchGetDocumentRequest {
+    return BatchGetDocumentRequest.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<BatchGetDocumentRequest>, I>>(
-    object: I
-  ): BatchGetDocumentRequest {
-    const message = createBaseBatchGetDocumentRequest();
-    message.requests =
-      object.requests?.map((e) => BatchCreateDocumentRequest.fromPartial(e)) ||
-      [];
-    return message;
+  fromPartial<I extends Exact<DeepPartial<BatchGetDocumentRequest>, I>>(object: I): BatchGetDocumentRequest {
+    const message = createBaseBatchGetDocumentRequest()
+    message.requests = object.requests?.map((e) => BatchCreateDocumentRequest.fromPartial(e)) || []
+    return message
   },
-};
+}
 
 function createBaseDataProtocolRequest(): DataProtocolRequest {
   return {
@@ -484,107 +423,78 @@ function createBaseDataProtocolRequest(): DataProtocolRequest {
     getDocumentRequest: undefined,
     batchGetDocumentRequest: undefined,
     beepRequest: undefined,
-  };
+  }
 }
 
 export const DataProtocolRequest = {
-  encode(
-    message: DataProtocolRequest,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: DataProtocolRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.createDocumentRequest !== undefined) {
-      CreateDocumentRequest.encode(
-        message.createDocumentRequest,
-        writer.uint32(10).fork()
-      ).ldelim();
+      CreateDocumentRequest.encode(message.createDocumentRequest, writer.uint32(10).fork()).ldelim()
     }
     if (message.batchCreateDocumentRequest !== undefined) {
-      BatchCreateDocumentRequest.encode(
-        message.batchCreateDocumentRequest,
-        writer.uint32(18).fork()
-      ).ldelim();
+      BatchCreateDocumentRequest.encode(message.batchCreateDocumentRequest, writer.uint32(18).fork()).ldelim()
     }
     if (message.getDocumentRequest !== undefined) {
-      GetDocumentRequest.encode(
-        message.getDocumentRequest,
-        writer.uint32(26).fork()
-      ).ldelim();
+      GetDocumentRequest.encode(message.getDocumentRequest, writer.uint32(26).fork()).ldelim()
     }
     if (message.batchGetDocumentRequest !== undefined) {
-      BatchGetDocumentRequest.encode(
-        message.batchGetDocumentRequest,
-        writer.uint32(34).fork()
-      ).ldelim();
+      BatchGetDocumentRequest.encode(message.batchGetDocumentRequest, writer.uint32(34).fork()).ldelim()
     }
     if (message.beepRequest !== undefined) {
-      BeepRequest.encode(
-        message.beepRequest,
-        writer.uint32(82).fork()
-      ).ldelim();
+      BeepRequest.encode(message.beepRequest, writer.uint32(82).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): DataProtocolRequest {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseDataProtocolRequest();
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseDataProtocolRequest()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.createDocumentRequest = CreateDocumentRequest.decode(
-            reader,
-            reader.uint32()
-          );
-          continue;
+          message.createDocumentRequest = CreateDocumentRequest.decode(reader, reader.uint32())
+          continue
         case 2:
           if (tag !== 18) {
-            break;
+            break
           }
 
-          message.batchCreateDocumentRequest =
-            BatchCreateDocumentRequest.decode(reader, reader.uint32());
-          continue;
+          message.batchCreateDocumentRequest = BatchCreateDocumentRequest.decode(reader, reader.uint32())
+          continue
         case 3:
           if (tag !== 26) {
-            break;
+            break
           }
 
-          message.getDocumentRequest = GetDocumentRequest.decode(
-            reader,
-            reader.uint32()
-          );
-          continue;
+          message.getDocumentRequest = GetDocumentRequest.decode(reader, reader.uint32())
+          continue
         case 4:
           if (tag !== 34) {
-            break;
+            break
           }
 
-          message.batchGetDocumentRequest = BatchGetDocumentRequest.decode(
-            reader,
-            reader.uint32()
-          );
-          continue;
+          message.batchGetDocumentRequest = BatchGetDocumentRequest.decode(reader, reader.uint32())
+          continue
         case 10:
           if (tag !== 82) {
-            break;
+            break
           }
 
-          message.beepRequest = BeepRequest.decode(reader, reader.uint32());
-          continue;
+          message.beepRequest = BeepRequest.decode(reader, reader.uint32())
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): DataProtocolRequest {
@@ -601,267 +511,210 @@ export const DataProtocolRequest = {
       batchGetDocumentRequest: isSet(object.batchGetDocumentRequest)
         ? BatchGetDocumentRequest.fromJSON(object.batchGetDocumentRequest)
         : undefined,
-      beepRequest: isSet(object.beepRequest)
-        ? BeepRequest.fromJSON(object.beepRequest)
-        : undefined,
-    };
+      beepRequest: isSet(object.beepRequest) ? BeepRequest.fromJSON(object.beepRequest) : undefined,
+    }
   },
 
   toJSON(message: DataProtocolRequest): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.createDocumentRequest !== undefined) {
-      obj.createDocumentRequest = CreateDocumentRequest.toJSON(
-        message.createDocumentRequest
-      );
+      obj.createDocumentRequest = CreateDocumentRequest.toJSON(message.createDocumentRequest)
     }
     if (message.batchCreateDocumentRequest !== undefined) {
-      obj.batchCreateDocumentRequest = BatchCreateDocumentRequest.toJSON(
-        message.batchCreateDocumentRequest
-      );
+      obj.batchCreateDocumentRequest = BatchCreateDocumentRequest.toJSON(message.batchCreateDocumentRequest)
     }
     if (message.getDocumentRequest !== undefined) {
-      obj.getDocumentRequest = GetDocumentRequest.toJSON(
-        message.getDocumentRequest
-      );
+      obj.getDocumentRequest = GetDocumentRequest.toJSON(message.getDocumentRequest)
     }
     if (message.batchGetDocumentRequest !== undefined) {
-      obj.batchGetDocumentRequest = BatchGetDocumentRequest.toJSON(
-        message.batchGetDocumentRequest
-      );
+      obj.batchGetDocumentRequest = BatchGetDocumentRequest.toJSON(message.batchGetDocumentRequest)
     }
     if (message.beepRequest !== undefined) {
-      obj.beepRequest = BeepRequest.toJSON(message.beepRequest);
+      obj.beepRequest = BeepRequest.toJSON(message.beepRequest)
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<DataProtocolRequest>, I>>(
-    base?: I
-  ): DataProtocolRequest {
-    return DataProtocolRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<DataProtocolRequest>, I>>(base?: I): DataProtocolRequest {
+    return DataProtocolRequest.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<DataProtocolRequest>, I>>(
-    object: I
-  ): DataProtocolRequest {
-    const message = createBaseDataProtocolRequest();
+  fromPartial<I extends Exact<DeepPartial<DataProtocolRequest>, I>>(object: I): DataProtocolRequest {
+    const message = createBaseDataProtocolRequest()
     message.createDocumentRequest =
-      object.createDocumentRequest !== undefined &&
-      object.createDocumentRequest !== null
+      object.createDocumentRequest !== undefined && object.createDocumentRequest !== null
         ? CreateDocumentRequest.fromPartial(object.createDocumentRequest)
-        : undefined;
+        : undefined
     message.batchCreateDocumentRequest =
-      object.batchCreateDocumentRequest !== undefined &&
-      object.batchCreateDocumentRequest !== null
-        ? BatchCreateDocumentRequest.fromPartial(
-            object.batchCreateDocumentRequest
-          )
-        : undefined;
+      object.batchCreateDocumentRequest !== undefined && object.batchCreateDocumentRequest !== null
+        ? BatchCreateDocumentRequest.fromPartial(object.batchCreateDocumentRequest)
+        : undefined
     message.getDocumentRequest =
-      object.getDocumentRequest !== undefined &&
-      object.getDocumentRequest !== null
+      object.getDocumentRequest !== undefined && object.getDocumentRequest !== null
         ? GetDocumentRequest.fromPartial(object.getDocumentRequest)
-        : undefined;
+        : undefined
     message.batchGetDocumentRequest =
-      object.batchGetDocumentRequest !== undefined &&
-      object.batchGetDocumentRequest !== null
+      object.batchGetDocumentRequest !== undefined && object.batchGetDocumentRequest !== null
         ? BatchGetDocumentRequest.fromPartial(object.batchGetDocumentRequest)
-        : undefined;
+        : undefined
     message.beepRequest =
       object.beepRequest !== undefined && object.beepRequest !== null
         ? BeepRequest.fromPartial(object.beepRequest)
-        : undefined;
-    return message;
+        : undefined
+    return message
   },
-};
+}
 
 function createBaseBeepResponse(): BeepResponse {
-  return {};
+  return {}
 }
 
 export const BeepResponse = {
-  encode(
-    _: BeepResponse,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
-    return writer;
+  encode(_: BeepResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): BeepResponse {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseBeepResponse();
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseBeepResponse()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(_: any): BeepResponse {
-    return {};
+    return {}
   },
 
   toJSON(_: BeepResponse): unknown {
-    const obj: any = {};
-    return obj;
+    const obj: any = {}
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<BeepResponse>, I>>(
-    base?: I
-  ): BeepResponse {
-    return BeepResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<BeepResponse>, I>>(base?: I): BeepResponse {
+    return BeepResponse.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<BeepResponse>, I>>(
-    _: I
-  ): BeepResponse {
-    const message = createBaseBeepResponse();
-    return message;
+  fromPartial<I extends Exact<DeepPartial<BeepResponse>, I>>(_: I): BeepResponse {
+    const message = createBaseBeepResponse()
+    return message
   },
-};
+}
 
 function createBaseCreateDocumentResponse(): CreateDocumentResponse {
-  return { payload: undefined, error: undefined };
+  return { payload: undefined, error: undefined }
 }
 
 export const CreateDocumentResponse = {
-  encode(
-    message: CreateDocumentResponse,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: CreateDocumentResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.payload !== undefined) {
-      writer.uint32(10).bytes(message.payload);
+      writer.uint32(10).bytes(message.payload)
     }
     if (message.error !== undefined) {
-      DataProtocolError.encode(
-        message.error,
-        writer.uint32(18).fork()
-      ).ldelim();
+      DataProtocolError.encode(message.error, writer.uint32(18).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): CreateDocumentResponse {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCreateDocumentResponse();
+  decode(input: _m0.Reader | Uint8Array, length?: number): CreateDocumentResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseCreateDocumentResponse()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.payload = reader.bytes();
-          continue;
+          message.payload = reader.bytes()
+          continue
         case 2:
           if (tag !== 18) {
-            break;
+            break
           }
 
-          message.error = DataProtocolError.decode(reader, reader.uint32());
-          continue;
+          message.error = DataProtocolError.decode(reader, reader.uint32())
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): CreateDocumentResponse {
     return {
-      payload: isSet(object.payload)
-        ? bytesFromBase64(object.payload)
-        : undefined,
-      error: isSet(object.error)
-        ? DataProtocolError.fromJSON(object.error)
-        : undefined,
-    };
+      payload: isSet(object.payload) ? bytesFromBase64(object.payload) : undefined,
+      error: isSet(object.error) ? DataProtocolError.fromJSON(object.error) : undefined,
+    }
   },
 
   toJSON(message: CreateDocumentResponse): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.payload !== undefined) {
-      obj.payload = base64FromBytes(message.payload);
+      obj.payload = base64FromBytes(message.payload)
     }
     if (message.error !== undefined) {
-      obj.error = DataProtocolError.toJSON(message.error);
+      obj.error = DataProtocolError.toJSON(message.error)
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<CreateDocumentResponse>, I>>(
-    base?: I
-  ): CreateDocumentResponse {
-    return CreateDocumentResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<CreateDocumentResponse>, I>>(base?: I): CreateDocumentResponse {
+    return CreateDocumentResponse.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<CreateDocumentResponse>, I>>(
-    object: I
-  ): CreateDocumentResponse {
-    const message = createBaseCreateDocumentResponse();
-    message.payload = object.payload ?? undefined;
+  fromPartial<I extends Exact<DeepPartial<CreateDocumentResponse>, I>>(object: I): CreateDocumentResponse {
+    const message = createBaseCreateDocumentResponse()
+    message.payload = object.payload ?? undefined
     message.error =
-      object.error !== undefined && object.error !== null
-        ? DataProtocolError.fromPartial(object.error)
-        : undefined;
-    return message;
+      object.error !== undefined && object.error !== null ? DataProtocolError.fromPartial(object.error) : undefined
+    return message
   },
-};
+}
 
 function createBaseBatchCreateDocumentResponse(): BatchCreateDocumentResponse {
-  return { responses: [] };
+  return { responses: [] }
 }
 
 export const BatchCreateDocumentResponse = {
-  encode(
-    message: BatchCreateDocumentResponse,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: BatchCreateDocumentResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.responses) {
-      CreateDocumentResponse.encode(v!, writer.uint32(10).fork()).ldelim();
+      CreateDocumentResponse.encode(v!, writer.uint32(10).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): BatchCreateDocumentResponse {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseBatchCreateDocumentResponse();
+  decode(input: _m0.Reader | Uint8Array, length?: number): BatchCreateDocumentResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseBatchCreateDocumentResponse()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.responses.push(
-            CreateDocumentResponse.decode(reader, reader.uint32())
-          );
-          continue;
+          message.responses.push(CreateDocumentResponse.decode(reader, reader.uint32()))
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): BatchCreateDocumentResponse {
@@ -869,168 +722,135 @@ export const BatchCreateDocumentResponse = {
       responses: globalThis.Array.isArray(object?.responses)
         ? object.responses.map((e: any) => CreateDocumentResponse.fromJSON(e))
         : [],
-    };
+    }
   },
 
   toJSON(message: BatchCreateDocumentResponse): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.responses?.length) {
-      obj.responses = message.responses.map((e) =>
-        CreateDocumentResponse.toJSON(e)
-      );
+      obj.responses = message.responses.map((e) => CreateDocumentResponse.toJSON(e))
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<BatchCreateDocumentResponse>, I>>(
-    base?: I
-  ): BatchCreateDocumentResponse {
-    return BatchCreateDocumentResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<BatchCreateDocumentResponse>, I>>(base?: I): BatchCreateDocumentResponse {
+    return BatchCreateDocumentResponse.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<BatchCreateDocumentResponse>, I>>(
-    object: I
-  ): BatchCreateDocumentResponse {
-    const message = createBaseBatchCreateDocumentResponse();
-    message.responses =
-      object.responses?.map((e) => CreateDocumentResponse.fromPartial(e)) || [];
-    return message;
+  fromPartial<I extends Exact<DeepPartial<BatchCreateDocumentResponse>, I>>(object: I): BatchCreateDocumentResponse {
+    const message = createBaseBatchCreateDocumentResponse()
+    message.responses = object.responses?.map((e) => CreateDocumentResponse.fromPartial(e)) || []
+    return message
   },
-};
+}
 
 function createBaseGetDocumentResponse(): GetDocumentResponse {
-  return { payload: undefined, error: undefined };
+  return { payload: undefined, error: undefined }
 }
 
 export const GetDocumentResponse = {
-  encode(
-    message: GetDocumentResponse,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: GetDocumentResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.payload !== undefined) {
-      writer.uint32(10).bytes(message.payload);
+      writer.uint32(10).bytes(message.payload)
     }
     if (message.error !== undefined) {
-      DataProtocolError.encode(
-        message.error,
-        writer.uint32(18).fork()
-      ).ldelim();
+      DataProtocolError.encode(message.error, writer.uint32(18).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): GetDocumentResponse {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetDocumentResponse();
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseGetDocumentResponse()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.payload = reader.bytes();
-          continue;
+          message.payload = reader.bytes()
+          continue
         case 2:
           if (tag !== 18) {
-            break;
+            break
           }
 
-          message.error = DataProtocolError.decode(reader, reader.uint32());
-          continue;
+          message.error = DataProtocolError.decode(reader, reader.uint32())
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): GetDocumentResponse {
     return {
-      payload: isSet(object.payload)
-        ? bytesFromBase64(object.payload)
-        : undefined,
-      error: isSet(object.error)
-        ? DataProtocolError.fromJSON(object.error)
-        : undefined,
-    };
+      payload: isSet(object.payload) ? bytesFromBase64(object.payload) : undefined,
+      error: isSet(object.error) ? DataProtocolError.fromJSON(object.error) : undefined,
+    }
   },
 
   toJSON(message: GetDocumentResponse): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.payload !== undefined) {
-      obj.payload = base64FromBytes(message.payload);
+      obj.payload = base64FromBytes(message.payload)
     }
     if (message.error !== undefined) {
-      obj.error = DataProtocolError.toJSON(message.error);
+      obj.error = DataProtocolError.toJSON(message.error)
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<GetDocumentResponse>, I>>(
-    base?: I
-  ): GetDocumentResponse {
-    return GetDocumentResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<GetDocumentResponse>, I>>(base?: I): GetDocumentResponse {
+    return GetDocumentResponse.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<GetDocumentResponse>, I>>(
-    object: I
-  ): GetDocumentResponse {
-    const message = createBaseGetDocumentResponse();
-    message.payload = object.payload ?? undefined;
+  fromPartial<I extends Exact<DeepPartial<GetDocumentResponse>, I>>(object: I): GetDocumentResponse {
+    const message = createBaseGetDocumentResponse()
+    message.payload = object.payload ?? undefined
     message.error =
-      object.error !== undefined && object.error !== null
-        ? DataProtocolError.fromPartial(object.error)
-        : undefined;
-    return message;
+      object.error !== undefined && object.error !== null ? DataProtocolError.fromPartial(object.error) : undefined
+    return message
   },
-};
+}
 
 function createBaseBatchGetDocumentResponse(): BatchGetDocumentResponse {
-  return { responses: [] };
+  return { responses: [] }
 }
 
 export const BatchGetDocumentResponse = {
-  encode(
-    message: BatchGetDocumentResponse,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: BatchGetDocumentResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.responses) {
-      GetDocumentResponse.encode(v!, writer.uint32(10).fork()).ldelim();
+      GetDocumentResponse.encode(v!, writer.uint32(10).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): BatchGetDocumentResponse {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseBatchGetDocumentResponse();
+  decode(input: _m0.Reader | Uint8Array, length?: number): BatchGetDocumentResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseBatchGetDocumentResponse()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.responses.push(
-            GetDocumentResponse.decode(reader, reader.uint32())
-          );
-          continue;
+          message.responses.push(GetDocumentResponse.decode(reader, reader.uint32()))
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): BatchGetDocumentResponse {
@@ -1038,33 +858,26 @@ export const BatchGetDocumentResponse = {
       responses: globalThis.Array.isArray(object?.responses)
         ? object.responses.map((e: any) => GetDocumentResponse.fromJSON(e))
         : [],
-    };
+    }
   },
 
   toJSON(message: BatchGetDocumentResponse): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.responses?.length) {
-      obj.responses = message.responses.map((e) =>
-        GetDocumentResponse.toJSON(e)
-      );
+      obj.responses = message.responses.map((e) => GetDocumentResponse.toJSON(e))
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<BatchGetDocumentResponse>, I>>(
-    base?: I
-  ): BatchGetDocumentResponse {
-    return BatchGetDocumentResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<BatchGetDocumentResponse>, I>>(base?: I): BatchGetDocumentResponse {
+    return BatchGetDocumentResponse.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<BatchGetDocumentResponse>, I>>(
-    object: I
-  ): BatchGetDocumentResponse {
-    const message = createBaseBatchGetDocumentResponse();
-    message.responses =
-      object.responses?.map((e) => GetDocumentResponse.fromPartial(e)) || [];
-    return message;
+  fromPartial<I extends Exact<DeepPartial<BatchGetDocumentResponse>, I>>(object: I): BatchGetDocumentResponse {
+    const message = createBaseBatchGetDocumentResponse()
+    message.responses = object.responses?.map((e) => GetDocumentResponse.fromPartial(e)) || []
+    return message
   },
-};
+}
 
 function createBaseDataProtocolResponse(): DataProtocolResponse {
   return {
@@ -1073,110 +886,78 @@ function createBaseDataProtocolResponse(): DataProtocolResponse {
     getDocumentResponse: undefined,
     batchGetDocumentResponse: undefined,
     beepResponse: undefined,
-  };
+  }
 }
 
 export const DataProtocolResponse = {
-  encode(
-    message: DataProtocolResponse,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: DataProtocolResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.createDocumentResponse !== undefined) {
-      CreateDocumentResponse.encode(
-        message.createDocumentResponse,
-        writer.uint32(10).fork()
-      ).ldelim();
+      CreateDocumentResponse.encode(message.createDocumentResponse, writer.uint32(10).fork()).ldelim()
     }
     if (message.batchCreateDocumentResponse !== undefined) {
-      BatchCreateDocumentResponse.encode(
-        message.batchCreateDocumentResponse,
-        writer.uint32(18).fork()
-      ).ldelim();
+      BatchCreateDocumentResponse.encode(message.batchCreateDocumentResponse, writer.uint32(18).fork()).ldelim()
     }
     if (message.getDocumentResponse !== undefined) {
-      GetDocumentResponse.encode(
-        message.getDocumentResponse,
-        writer.uint32(26).fork()
-      ).ldelim();
+      GetDocumentResponse.encode(message.getDocumentResponse, writer.uint32(26).fork()).ldelim()
     }
     if (message.batchGetDocumentResponse !== undefined) {
-      BatchGetDocumentResponse.encode(
-        message.batchGetDocumentResponse,
-        writer.uint32(34).fork()
-      ).ldelim();
+      BatchGetDocumentResponse.encode(message.batchGetDocumentResponse, writer.uint32(34).fork()).ldelim()
     }
     if (message.beepResponse !== undefined) {
-      BeepResponse.encode(
-        message.beepResponse,
-        writer.uint32(82).fork()
-      ).ldelim();
+      BeepResponse.encode(message.beepResponse, writer.uint32(82).fork()).ldelim()
     }
-    return writer;
+    return writer
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): DataProtocolResponse {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseDataProtocolResponse();
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataProtocolResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseDataProtocolResponse()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.createDocumentResponse = CreateDocumentResponse.decode(
-            reader,
-            reader.uint32()
-          );
-          continue;
+          message.createDocumentResponse = CreateDocumentResponse.decode(reader, reader.uint32())
+          continue
         case 2:
           if (tag !== 18) {
-            break;
+            break
           }
 
-          message.batchCreateDocumentResponse =
-            BatchCreateDocumentResponse.decode(reader, reader.uint32());
-          continue;
+          message.batchCreateDocumentResponse = BatchCreateDocumentResponse.decode(reader, reader.uint32())
+          continue
         case 3:
           if (tag !== 26) {
-            break;
+            break
           }
 
-          message.getDocumentResponse = GetDocumentResponse.decode(
-            reader,
-            reader.uint32()
-          );
-          continue;
+          message.getDocumentResponse = GetDocumentResponse.decode(reader, reader.uint32())
+          continue
         case 4:
           if (tag !== 34) {
-            break;
+            break
           }
 
-          message.batchGetDocumentResponse = BatchGetDocumentResponse.decode(
-            reader,
-            reader.uint32()
-          );
-          continue;
+          message.batchGetDocumentResponse = BatchGetDocumentResponse.decode(reader, reader.uint32())
+          continue
         case 10:
           if (tag !== 82) {
-            break;
+            break
           }
 
-          message.beepResponse = BeepResponse.decode(reader, reader.uint32());
-          continue;
+          message.beepResponse = BeepResponse.decode(reader, reader.uint32())
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): DataProtocolResponse {
@@ -1185,9 +966,7 @@ export const DataProtocolResponse = {
         ? CreateDocumentResponse.fromJSON(object.createDocumentResponse)
         : undefined,
       batchCreateDocumentResponse: isSet(object.batchCreateDocumentResponse)
-        ? BatchCreateDocumentResponse.fromJSON(
-            object.batchCreateDocumentResponse
-          )
+        ? BatchCreateDocumentResponse.fromJSON(object.batchCreateDocumentResponse)
         : undefined,
       getDocumentResponse: isSet(object.getDocumentResponse)
         ? GetDocumentResponse.fromJSON(object.getDocumentResponse)
@@ -1195,194 +974,159 @@ export const DataProtocolResponse = {
       batchGetDocumentResponse: isSet(object.batchGetDocumentResponse)
         ? BatchGetDocumentResponse.fromJSON(object.batchGetDocumentResponse)
         : undefined,
-      beepResponse: isSet(object.beepResponse)
-        ? BeepResponse.fromJSON(object.beepResponse)
-        : undefined,
-    };
+      beepResponse: isSet(object.beepResponse) ? BeepResponse.fromJSON(object.beepResponse) : undefined,
+    }
   },
 
   toJSON(message: DataProtocolResponse): unknown {
-    const obj: any = {};
+    const obj: any = {}
     if (message.createDocumentResponse !== undefined) {
-      obj.createDocumentResponse = CreateDocumentResponse.toJSON(
-        message.createDocumentResponse
-      );
+      obj.createDocumentResponse = CreateDocumentResponse.toJSON(message.createDocumentResponse)
     }
     if (message.batchCreateDocumentResponse !== undefined) {
-      obj.batchCreateDocumentResponse = BatchCreateDocumentResponse.toJSON(
-        message.batchCreateDocumentResponse
-      );
+      obj.batchCreateDocumentResponse = BatchCreateDocumentResponse.toJSON(message.batchCreateDocumentResponse)
     }
     if (message.getDocumentResponse !== undefined) {
-      obj.getDocumentResponse = GetDocumentResponse.toJSON(
-        message.getDocumentResponse
-      );
+      obj.getDocumentResponse = GetDocumentResponse.toJSON(message.getDocumentResponse)
     }
     if (message.batchGetDocumentResponse !== undefined) {
-      obj.batchGetDocumentResponse = BatchGetDocumentResponse.toJSON(
-        message.batchGetDocumentResponse
-      );
+      obj.batchGetDocumentResponse = BatchGetDocumentResponse.toJSON(message.batchGetDocumentResponse)
     }
     if (message.beepResponse !== undefined) {
-      obj.beepResponse = BeepResponse.toJSON(message.beepResponse);
+      obj.beepResponse = BeepResponse.toJSON(message.beepResponse)
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<DataProtocolResponse>, I>>(
-    base?: I
-  ): DataProtocolResponse {
-    return DataProtocolResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<DataProtocolResponse>, I>>(base?: I): DataProtocolResponse {
+    return DataProtocolResponse.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<DataProtocolResponse>, I>>(
-    object: I
-  ): DataProtocolResponse {
-    const message = createBaseDataProtocolResponse();
+  fromPartial<I extends Exact<DeepPartial<DataProtocolResponse>, I>>(object: I): DataProtocolResponse {
+    const message = createBaseDataProtocolResponse()
     message.createDocumentResponse =
-      object.createDocumentResponse !== undefined &&
-      object.createDocumentResponse !== null
+      object.createDocumentResponse !== undefined && object.createDocumentResponse !== null
         ? CreateDocumentResponse.fromPartial(object.createDocumentResponse)
-        : undefined;
+        : undefined
     message.batchCreateDocumentResponse =
-      object.batchCreateDocumentResponse !== undefined &&
-      object.batchCreateDocumentResponse !== null
-        ? BatchCreateDocumentResponse.fromPartial(
-            object.batchCreateDocumentResponse
-          )
-        : undefined;
+      object.batchCreateDocumentResponse !== undefined && object.batchCreateDocumentResponse !== null
+        ? BatchCreateDocumentResponse.fromPartial(object.batchCreateDocumentResponse)
+        : undefined
     message.getDocumentResponse =
-      object.getDocumentResponse !== undefined &&
-      object.getDocumentResponse !== null
+      object.getDocumentResponse !== undefined && object.getDocumentResponse !== null
         ? GetDocumentResponse.fromPartial(object.getDocumentResponse)
-        : undefined;
+        : undefined
     message.batchGetDocumentResponse =
-      object.batchGetDocumentResponse !== undefined &&
-      object.batchGetDocumentResponse !== null
+      object.batchGetDocumentResponse !== undefined && object.batchGetDocumentResponse !== null
         ? BatchGetDocumentResponse.fromPartial(object.batchGetDocumentResponse)
-        : undefined;
+        : undefined
     message.beepResponse =
       object.beepResponse !== undefined && object.beepResponse !== null
         ? BeepResponse.fromPartial(object.beepResponse)
-        : undefined;
-    return message;
+        : undefined
+    return message
   },
-};
+}
 
 function createBaseDataProtocolError(): DataProtocolError {
-  return { error: "", code: 0 };
+  return { error: '', code: 0 }
 }
 
 export const DataProtocolError = {
-  encode(
-    message: DataProtocolError,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
-    if (message.error !== "") {
-      writer.uint32(10).string(message.error);
+  encode(message: DataProtocolError, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.error !== '') {
+      writer.uint32(10).string(message.error)
     }
     if (message.code !== 0) {
-      writer.uint32(16).int32(message.code);
+      writer.uint32(16).int32(message.code)
     }
-    return writer;
+    return writer
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): DataProtocolError {
-    const reader =
-      input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseDataProtocolError();
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseDataProtocolError()
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      const tag = reader.uint32()
       switch (tag >>> 3) {
         case 1:
           if (tag !== 10) {
-            break;
+            break
           }
 
-          message.error = reader.string();
-          continue;
+          message.error = reader.string()
+          continue
         case 2:
           if (tag !== 16) {
-            break;
+            break
           }
 
-          message.code = reader.int32() as any;
-          continue;
+          message.code = reader.int32() as any
+          continue
       }
       if ((tag & 7) === 4 || tag === 0) {
-        break;
+        break
       }
-      reader.skipType(tag & 7);
+      reader.skipType(tag & 7)
     }
-    return message;
+    return message
   },
 
   fromJSON(object: any): DataProtocolError {
     return {
-      error: isSet(object.error) ? globalThis.String(object.error) : "",
+      error: isSet(object.error) ? globalThis.String(object.error) : '',
       code: isSet(object.code) ? errorCodeFromJSON(object.code) : 0,
-    };
+    }
   },
 
   toJSON(message: DataProtocolError): unknown {
-    const obj: any = {};
-    if (message.error !== "") {
-      obj.error = message.error;
+    const obj: any = {}
+    if (message.error !== '') {
+      obj.error = message.error
     }
     if (message.code !== 0) {
-      obj.code = errorCodeToJSON(message.code);
+      obj.code = errorCodeToJSON(message.code)
     }
-    return obj;
+    return obj
   },
 
-  create<I extends Exact<DeepPartial<DataProtocolError>, I>>(
-    base?: I
-  ): DataProtocolError {
-    return DataProtocolError.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<DataProtocolError>, I>>(base?: I): DataProtocolError {
+    return DataProtocolError.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<DataProtocolError>, I>>(
-    object: I
-  ): DataProtocolError {
-    const message = createBaseDataProtocolError();
-    message.error = object.error ?? "";
-    message.code = object.code ?? 0;
-    return message;
+  fromPartial<I extends Exact<DeepPartial<DataProtocolError>, I>>(object: I): DataProtocolError {
+    const message = createBaseDataProtocolError()
+    message.error = object.error ?? ''
+    message.code = object.code ?? 0
+    return message
   },
-};
+}
 
 function bytesFromBase64(b64: string): Uint8Array {
   if ((globalThis as any).Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    return Uint8Array.from(globalThis.Buffer.from(b64, 'base64'))
   } else {
-    const bin = globalThis.atob(b64);
-    const arr = new Uint8Array(bin.length);
+    const bin = globalThis.atob(b64)
+    const arr = new Uint8Array(bin.length)
     for (let i = 0; i < bin.length; ++i) {
-      arr[i] = bin.charCodeAt(i);
+      arr[i] = bin.charCodeAt(i)
     }
-    return arr;
+    return arr
   }
 }
 
 function base64FromBytes(arr: Uint8Array): string {
   if ((globalThis as any).Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
+    return globalThis.Buffer.from(arr).toString('base64')
   } else {
-    const bin: string[] = [];
+    const bin: string[] = []
     arr.forEach((byte) => {
-      bin.push(globalThis.String.fromCharCode(byte));
-    });
-    return globalThis.btoa(bin.join(""));
+      bin.push(globalThis.String.fromCharCode(byte))
+    })
+    return globalThis.btoa(bin.join(''))
   }
 }
 
-type Builtin =
-  | Date
-  | Function
-  | Uint8Array
-  | string
-  | number
-  | boolean
-  | undefined;
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined
 
 export type DeepPartial<T> = T extends Builtin
   ? T
@@ -1392,30 +1136,30 @@ export type DeepPartial<T> = T extends Builtin
   ? ReadonlyArray<DeepPartial<U>>
   : T extends {}
   ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
+  : Partial<T>
 
-type KeysOfUnion<T> = T extends T ? keyof T : never;
+type KeysOfUnion<T> = T extends T ? keyof T : never
 export type Exact<P, I extends P> = P extends Builtin
   ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & {
-      [K in Exclude<keyof I, KeysOfUnion<P>>]: never;
-    };
+      [K in Exclude<keyof I, KeysOfUnion<P>>]: never
+    }
 
 function longToNumber(long: Long): number {
   if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+    throw new globalThis.Error('Value is larger than Number.MAX_SAFE_INTEGER')
   }
   if (long.lt(globalThis.Number.MIN_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+    throw new globalThis.Error('Value is smaller than Number.MIN_SAFE_INTEGER')
   }
-  return long.toNumber();
+  return long.toNumber()
 }
 
 if (_m0.util.Long !== Long) {
-  _m0.util.Long = Long as any;
-  _m0.configure();
+  _m0.util.Long = Long as any
+  _m0.configure()
 }
 
 function isSet(value: any): boolean {
-  return value !== null && value !== undefined;
+  return value !== null && value !== undefined
 }

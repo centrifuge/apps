@@ -14,7 +14,7 @@ import { pipe } from 'it-pipe'
 import { createLibp2p } from 'libp2p'
 // import path from "path";
 // import { fileURLToPath } from "url";
-import { BeepRequest, DataProtocolRequest, DataProtocolResponse } from './data_protocol.v1.js'
+import { CreateDocumentRequest, DataProtocolRequest, DataProtocolResponse } from './data_protocol.v1.js'
 // Cosmin: 12D3KooWDnScZfemMmJ5efz9ZkYZ7kW6d8Ezi62ADy57N2VFLUtD
 // JP:     12D3KooWCWV4hXqS28dB7ybxDTAn78MsQmPMfTGi6aTGqffMhfFs
 
@@ -100,21 +100,25 @@ async function run() {
   // 	pub data: Vec<u8>,
   // }
 
-  const message = DataProtocolRequest.create({
-    // beepRequest: BeepRequest,
-    beepRequest: BeepRequest.create(),
-  })
-
   // const message = DataProtocolRequest.create({
-  //   createDocumentRequest: CreateDocumentRequest.create({
-  //     id: 8,
-  //     version: 9,
-  //     pool_id: 10,
-  //     loan_id: 11,
-  //     users: [],
-  //     data: [],
-  //   }),
-  // });
+  //   // beepRequest: BeepRequest,
+  //   beepRequest: BeepRequest.create(),
+  // })
+  const encoder = new TextEncoder()
+  const message = DataProtocolRequest.create({
+    createDocumentRequest: CreateDocumentRequest.create({
+      payload: encoder.encode(
+        JSON.stringify({
+          id: 10,
+          version: 9,
+          pool_id: 10,
+          loan_id: 11,
+          users: [],
+          data: [],
+        })
+      ),
+    }),
+  })
 
   // const buffer = DataProtocolRequest.encode(payload).finish();
 
@@ -132,6 +136,14 @@ async function run() {
       for await (const msg of source) {
         console.log('response')
         console.log(msg)
+        const decoder = new TextDecoder()
+        if (msg.createDocumentResponse?.payload) {
+          try {
+            console.log(JSON.parse(decoder.decode(msg.createDocumentResponse.payload)))
+          } catch (e) {
+            console.error(e)
+          }
+        }
       }
     }
   )
