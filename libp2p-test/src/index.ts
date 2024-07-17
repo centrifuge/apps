@@ -22,8 +22,8 @@ const privateKeyHex =
   '08011240eeea72dfbb24f56a520e938e5998fea348d30d68917697d3f38d52472b9d23d427fe673e89ba79f6689320f436aa19e3f8a61db012a865a26d0ddd59154d5c76'
 const publicKeyHex = '0801122027fe673e89ba79f6689320f436aa19e3f8a61db012a865a26d0ddd59154d5c76'
 
-const privateKey = Uint8Array.from(Buffer.from(privateKeyHex, 'hex'))
-const publicKey = Uint8Array.from(Buffer.from(publicKeyHex, 'hex'))
+const privateKey = hexToUint8Array(privateKeyHex)
+const publicKey = hexToUint8Array(publicKeyHex)
 
 async function run() {
   const peerId = await peerIdFromKeys(publicKey, privateKey)
@@ -138,3 +138,17 @@ async function run() {
 }
 
 run()
+
+function hexToUint8Array(hexStr: string): Uint8Array {
+  if (hexStr.length % 2 !== 0) {
+    throw new Error('Invalid hex string length.')
+  }
+
+  const result = new Uint8Array(hexStr.length / 2)
+
+  for (let i = 0, j = 0; i < hexStr.length; i += 2, j++) {
+    result[j] = parseInt(hexStr.slice(i, i + 2), 16)
+  }
+
+  return result
+}
