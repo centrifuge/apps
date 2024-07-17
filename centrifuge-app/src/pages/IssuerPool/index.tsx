@@ -1,5 +1,6 @@
 import { Route, Routes, useParams } from 'react-router-dom'
 import { PoolChangesBanner } from '../../components/PoolChangesBanner'
+import LoanPage from '../Loan'
 import { IssuerPoolAccessPage } from './Access'
 import { IssuerPoolAssetPage } from './Assets'
 import { IssuerPoolConfigurationPage } from './Configuration'
@@ -26,6 +27,7 @@ export default function IssuerPoolPage() {
         <Route path="configuration" element={<IssuerPoolConfigurationPage />} />
         <Route path="investors" element={<IssuerPoolInvestorsPage />} />
         <Route path="access" element={<IssuerPoolAccessPage />} />
+        <Route path="assets/:aid" element={<LoanPage />} />
         <Route path="assets" element={<IssuerPoolAssetPage />} />
         <Route path="liquidity" element={<IssuerPoolLiquidityPage />} />
         <Route path="reporting" element={<IssuerPoolReportingPage />} />
