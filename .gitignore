@@ -10,7 +10,6 @@ dist
 
 
 # Yarn
-yarn.lock
 yarn-error.log
 .yarn
 !.yarn/releases
