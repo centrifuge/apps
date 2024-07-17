@@ -91,7 +91,7 @@ export default function OnboardingPage() {
     disconnect,
     setIsOnboardingExternally,
     externalSignature,
-    navigate
+    navigate,
   ])
 
   const { data: signedAgreementData } = useSignedAgreement()

@@ -4,6 +4,7 @@ import { AnchorButton, Box, DateInput, SearchInput, Select, Shelf } from '@centr
 import * as React from 'react'
 import { useNavigate } from 'react-router'
 import { nftMetadataSchema } from '../../schemas'
+import { useBasePath } from '../../utils/useBasePath'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -11,7 +12,6 @@ import { useCentNFT } from '../../utils/useNFTs'
 import { useDebugFlags } from '../DebugFlags'
 import { GroupBy, Report, ReportContext } from './ReportContext'
 import { formatPoolFeeTransactionType } from './utils'
-import { useBasePath } from '../../utils/useBasePath'
 
 type ReportFilterProps = {
   pool: Pool

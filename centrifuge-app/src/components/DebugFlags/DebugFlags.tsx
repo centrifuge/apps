@@ -1,7 +1,7 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
-import { flagsConfig, Key } from './config'
+import { Key, flagsConfig } from './config'
 import { DebugFlagsContext, FlagsState, initialFlagsState, useDebugFlags } from './context'
 
 function DebugFlagsImpl({

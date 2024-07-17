@@ -1,5 +1,4 @@
 import { StatusChip, StatusChipProps } from '@centrifuge/fabric'
-import * as React from 'react'
 
 export type PoolStatusKey = 'Maker Pool' | 'Open for investments' | 'Closed' | 'Upcoming' | 'Archived'
 

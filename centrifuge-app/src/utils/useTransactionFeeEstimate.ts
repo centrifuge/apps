@@ -2,7 +2,7 @@ import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useEvmProvider, useWallet } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
-import { lastValueFrom, Observable } from 'rxjs'
+import { Observable, lastValueFrom } from 'rxjs'
 import { useAddress } from './useAddress'
 
 type TxOptions = Pick<TransactionOptions, 'paymentInfo'>

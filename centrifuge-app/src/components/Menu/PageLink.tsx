@@ -1,5 +1,5 @@
 import { Text } from '@centrifuge/fabric'
-import { useLocation, Link, LinkProps } from 'react-router-dom'
+import { Link, LinkProps, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { prefetchRoute } from '../Root'

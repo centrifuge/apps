@@ -50,8 +50,8 @@ export function useFilters<T>({ key: prefix = 'f_', data = [], useSearchParams =
   const filtered = data.filter((entry) => entries.every(([key, set]) => set.has(String(get(entry, key)))))
 
   React.useEffect(() => {
-    navigate({ search: params.toString() }, { replace: true });
-  }, [params, navigate]);
+    navigate({ search: params.toString() }, { replace: true })
+  }, [params, navigate])
 
   return {
     setFilter,
