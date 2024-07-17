@@ -20,6 +20,8 @@ export const ChargeFeesFields = ({
   const form = useFormikContext<FinanceValues>()
   const { data: poolMetadata } = usePoolMetadata(pool)
   const poolFees = usePoolFees(pool.id)
+  // fees can only be charged by the destination address
+  // fees destination must be set to the AO Proxy address
   const chargableFees = poolFees?.filter(
     (fee) => fee.type !== 'fixed' && borrower && addressToHex(fee.destination) === borrower.actingAddress
   )
