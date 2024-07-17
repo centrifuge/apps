@@ -1,8 +1,9 @@
 {
   "type": "module",
   "scripts": {
-    "start": "nodemon --esm --transpile-only ./src/index.ts",
-    "run": "node --loader ts-node/esm ./src/index.ts",
+    "start": "nodemon ./dist/index.js",
+    "build": "tsc --watch",
+    "develop": "run-p build start",
     "debug": "DEBUG=* node ./src/index.js",
     "gen": "protoc --plugin=node_modules/ts-proto/protoc-gen-ts_proto ./src/data_protocol.v1.proto -I. --ts_proto_out=. --ts_proto_opt=esModuleInterop=true"
   },
@@ -22,6 +23,7 @@
     "it-pipe": "^3.0.1",
     "libp2p": "^1.5.1",
     "nodemon": "^3.1.4",
+    "npm-run-all": "^4.1.5",
     "protobufjs": "7.2.5",
     "ts-node": "^10.9.2",
     "ts-proto": "^1.181.1",
