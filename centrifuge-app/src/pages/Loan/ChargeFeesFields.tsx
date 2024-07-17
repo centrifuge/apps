@@ -1,20 +1,28 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
-import { formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
+import { CurrencyBalance, Pool, addressToHex } from '@centrifuge/centrifuge-js'
+import { CombinedSubstrateAccount, formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { combineLatest, of } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { formatPercentage } from '../../utils/formatting'
-import { useSuitableAccounts } from '../../utils/usePermissions'
+import { useBorrower, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { FinanceValues } from './ExternalFinanceForm'
 import { RepayValues } from './RepayForm'
 
-export const ChargeFeesFields = ({ pool }: { pool: Pool }) => {
+export const ChargeFeesFields = ({
+  pool,
+  borrower,
+}: {
+  pool: Pool
+  borrower: CombinedSubstrateAccount | undefined
+}) => {
   const form = useFormikContext<FinanceValues>()
   const { data: poolMetadata } = usePoolMetadata(pool)
   const poolFees = usePoolFees(pool.id)
-  const chargableFees = poolFees?.filter((fee) => fee.type !== 'fixed')
+  const chargableFees = poolFees?.filter(
+    (fee) => fee.type !== 'fixed' && borrower && addressToHex(fee.destination) === borrower.actingAddress
+  )
   return (
     <Stack gap={2}>
       <FieldArray name="fees">
@@ -102,8 +110,8 @@ export const ChargeFeesFields = ({ pool }: { pool: Pool }) => {
                     <Button
                       icon={<IconPlusCircle size="20px" />}
                       variant="tertiary"
-                      disabled={!chargableFees?.length}
                       onClick={() => push({ id: '', amount: '' })}
+                      style={{ padding: 0 }}
                     >
                       Add fees
                     </Button>
@@ -123,8 +131,9 @@ export function useChargePoolFees(poolId: string, loanId: string) {
   const poolFees = usePoolFees(poolId)
   const cent = useCentrifuge()
   const [account] = useSuitableAccounts({ poolId: poolId })
+  const borrower = useBorrower(poolId, loanId)
   return {
-    render: () => <ChargeFeesFields pool={pool as Pool} />,
+    render: () => <ChargeFeesFields pool={pool as Pool} borrower={borrower} />,
     isValid: true,
     getBatch: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
       if (!values.fees.length) return of([])
