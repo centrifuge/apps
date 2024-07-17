@@ -1,4 +1,4 @@
-import { Route, Switch, useParams, useRouteMatch } from 'react-router'
+import { Route, Routes, useParams } from 'react-router-dom'
 import { PoolChangesBanner } from '../../components/PoolChangesBanner'
 import { IssuerPoolAccessPage } from './Access'
 import { IssuerPoolAssetPage } from './Assets'
@@ -13,25 +13,26 @@ import { IssuerPoolPricingPage } from './Pricing'
 import { IssuerPoolReportingPage } from './Reporting'
 
 export default function IssuerPoolPage() {
-  const { path } = useRouteMatch()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
 
   return (
     <>
-      <Switch>
-        <Route path={`${path}/configuration/view-asset-template/:sid`} component={IssuerPoolViewLoanTemplatePage} />
-        <Route path={`${path}/configuration/create-asset-template`} component={IssuerPoolCreateLoanTemplatePage} />
-        <Route path={`${path}/configuration`} component={IssuerPoolConfigurationPage} />
-        <Route path={`${path}/investors`} component={IssuerPoolInvestorsPage} />
-        <Route path={`${path}/access`} component={IssuerPoolAccessPage} />
-        <Route path={`${path}/assets`} component={IssuerPoolAssetPage} />
-        <Route path={`${path}/liquidity`} component={IssuerPoolLiquidityPage} />
-        <Route path={`${path}/reporting/:report`} component={IssuerPoolReportingPage} />
-        <Route path={`${path}/reporting`} component={IssuerPoolReportingPage} />
-        <Route path={`${path}/pricing`} component={IssuerPoolPricingPage} />
-        <Route path={`${path}/fees`} component={IssuerPoolFeesPage} />
-        <Route path={path} component={IssuerPoolOverviewPage} />
-      </Switch>
+      <Routes>
+        <Route path="/" element={<IssuerPoolOverviewPage />} />
+        <Route path="configuration/view-asset-template/:sid" element={<IssuerPoolViewLoanTemplatePage />} />
+        <Route path="configuration/create-asset-template" element={<IssuerPoolCreateLoanTemplatePage />} />
+        <Route path="configuration" element={<IssuerPoolConfigurationPage />} />
+        <Route path="investors" element={<IssuerPoolInvestorsPage />} />
+        <Route path="access" element={<IssuerPoolAccessPage />} />
+        <Route path="assets" element={<IssuerPoolAssetPage />} />
+        <Route path="liquidity" element={<IssuerPoolLiquidityPage />} />
+        <Route path="reporting" element={<IssuerPoolReportingPage />} />
+        <Route path="reporting/:report" element={<IssuerPoolReportingPage />} />
+        <Route path="pricing" element={<IssuerPoolPricingPage />} />
+        <Route path="fees" element={<IssuerPoolFeesPage />} />
+      </Routes>
       <PoolChangesBanner poolId={poolId} />
     </>
   )

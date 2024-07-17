@@ -13,7 +13,7 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { useDebugFlags } from '../components/DebugFlags'
@@ -63,7 +63,7 @@ const MintNFT: React.FC = () => {
   const balances = useBalances(collection.owner)
   const cent = useCentrifuge()
   const [version, setNextVersion] = React.useReducer((s) => s + 1, 0)
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const [nftName, setNftName] = React.useState('')
   const [nftAmount, setNftAmount] = React.useState(1)
@@ -86,7 +86,7 @@ const MintNFT: React.FC = () => {
       reset()
 
       if (isPageUnchanged()) {
-        history.push(`/nfts/collection/${collectionId}/object/${nftId}`)
+        navigate(`/nfts/collection/${collectionId}/object/${nftId}`)
       }
     },
   })

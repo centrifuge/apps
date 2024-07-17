@@ -1,7 +1,7 @@
 import { Grid, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
 import { config } from '../config'
+import { useBasePath } from '../utils/useBasePath'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { CardTotalValueLocked } from './CardTotalValueLocked'
 import { LayoutSection } from './LayoutBase/LayoutSection'
@@ -15,7 +15,7 @@ type PoolsTokensSharedProps = {
 }
 
 export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const basePath = useBasePath()
   const isMedium = useIsAboveBreakpoint('M')
 
   const links = [

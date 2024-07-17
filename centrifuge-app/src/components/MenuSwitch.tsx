@@ -1,5 +1,4 @@
 import { SideNavigationContainer, SideNavigationItem } from '@centrifuge/fabric'
-import * as React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 export function MenuSwitch({ links }: { links: { to: string; label: string }[] }) {

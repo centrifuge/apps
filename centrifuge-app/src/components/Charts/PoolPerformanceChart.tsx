@@ -34,6 +34,9 @@ function PoolPerformanceChart() {
   const theme = useTheme()
   const chartColor = theme.colors.accentPrimary
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0

@@ -1,6 +1,5 @@
 import { Text } from '@centrifuge/fabric'
-import { useRouteMatch } from 'react-router'
-import { Link, LinkProps } from 'react-router-dom'
+import { Link, LinkProps, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 import { prefetchRoute } from '../Root'
@@ -10,6 +9,7 @@ const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   ${baseButton}
   ${primaryButton}
   grid-template-columns: ${({ stacked, theme }) => (stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr`)};
+  color: ${({ isActive }) => (isActive ? 'blue' : 'black')}; /* Example styling */
 `
 
 type PageLinkProps = LinkProps & {
@@ -17,15 +17,17 @@ type PageLinkProps = LinkProps & {
 }
 
 export function PageLink({ stacked = false, to, children }: PageLinkProps) {
-  const match = useRouteMatch(to as string)
+  const location = useLocation()
   const isMedium = useIsAboveBreakpoint('M')
+
+  const isActive = location.pathname.startsWith(to as string)
 
   return (
     <Root
-      forwardedAs={Link}
+      as={Link}
       to={to}
       variant="interactive1"
-      isActive={Boolean(match)}
+      isActive={isActive}
       stacked={stacked}
       onMouseOver={() => prefetchRoute(to)}
       isMedium={isMedium}

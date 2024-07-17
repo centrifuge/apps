@@ -2,8 +2,9 @@ import { Loan, Pool } from '@centrifuge/centrifuge-js'
 import { useGetNetworkName } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, DateInput, SearchInput, Select, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useRouteMatch } from 'react-router'
+import { useNavigate } from 'react-router'
 import { nftMetadataSchema } from '../../schemas'
+import { useBasePath } from '../../utils/useBasePath'
 import { useActiveDomains } from '../../utils/useLiquidityPools'
 import { useLoans } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -17,9 +18,6 @@ type ReportFilterProps = {
 }
 
 export function ReportFilter({ pool }: ReportFilterProps) {
-  const match = useRouteMatch<{ path: string }>(`/:path`)
-  const basePath = `/${match?.params.path ?? 'pools'}`
-
   const {
     csvData,
     setStartDate,
@@ -42,7 +40,8 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     loan,
     setLoan,
   } = React.useContext(ReportContext)
-  const history = useHistory()
+  const navigate = useNavigate()
+  const basePath = useBasePath()
 
   const { data: domains } = useActiveDomains(pool.id)
   const getNetworkName = useGetNetworkName()
@@ -80,9 +79,9 @@ export function ReportFilter({ pool }: ReportFilterProps) {
         label="Report"
         options={reportOptions}
         value={report}
-        onChange={(event) => {
+        onChange={(event: { target: { value: any } }) => {
           if (event.target.value) {
-            history.push(`${basePath}/${pool.id}/reporting/${event.target.value}`)
+            navigate(`${basePath}/${pool.id}/reporting/${event.target.value}`)
           }
         }}
       />

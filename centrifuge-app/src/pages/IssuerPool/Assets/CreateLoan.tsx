@@ -27,7 +27,7 @@ import {
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { Redirect, useHistory, useParams } from 'react-router'
+import { Navigate, useNavigate, useParams } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LayoutBase } from '../../../components/LayoutBase'
@@ -167,7 +167,7 @@ function IssuerCreateLoan() {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
-  const history = useHistory()
+  const navigate = useNavigate()
   const centrifuge = useCentrifuge()
 
   const {
@@ -333,7 +333,7 @@ function IssuerCreateLoan() {
   }, [form.values])
 
   if (redirect) {
-    return <Redirect to={redirect} />
+    return <Navigate to={redirect} />
   }
 
   const isPending = isTxLoading || form.isSubmitting
@@ -455,7 +455,7 @@ function IssuerCreateLoan() {
           <PageSection>
             <Shelf gap={1} justifyContent="end">
               {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
-              <Button variant="secondary" onClick={() => history.goBack()}>
+              <Button variant="secondary" onClick={() => navigate(-1)}>
                 Cancel
               </Button>
               <Button

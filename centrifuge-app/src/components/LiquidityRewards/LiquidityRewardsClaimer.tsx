@@ -1,9 +1,8 @@
 import { Box, Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
-import { useClaimCountdown } from './hooks'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
+import { useClaimCountdown } from './hooks'
 
 export function LiquidityRewardsClaimer() {
   const {

@@ -1,5 +1,4 @@
 import { Box, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'

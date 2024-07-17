@@ -19,7 +19,7 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Redirect } from 'react-router'
+import { Navigate } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
 import { Dec } from '../../utils/Decimal'
@@ -116,7 +116,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const disabled = !isConnected || !name.trim() || !description.trim() || balanceLow || isTxPending
 
   if (redirect) {
-    return <Redirect to={redirect} />
+    return <Navigate to={redirect} />
   }
 
   const confirmDisabled = !termsAccepted

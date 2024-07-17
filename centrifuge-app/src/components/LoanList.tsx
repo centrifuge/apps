@@ -1,3 +1,4 @@
+import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { CurrencyBalance, Loan, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
@@ -13,7 +14,7 @@ import {
 } from '@centrifuge/fabric'
 import get from 'lodash/get'
 import * as React from 'react'
-import { useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import currencyDollar from '../assets/images/currency-dollar.svg'
 import daiLogo from '../assets/images/dai-logo.svg'
 import usdcLogo from '../assets/images/usdc-logo.svg'
@@ -55,9 +56,11 @@ const getLoanStatus = (loan: Loan | TinlakeLoan) => {
 
 export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
-  const isTinlakePool = poolId.startsWith('0x')
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const isTinlakePool = poolId?.startsWith('0x')
+  const basePath = useBasePath()
 
   const { data: poolMetadata } = usePoolMetadata(pool)
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []

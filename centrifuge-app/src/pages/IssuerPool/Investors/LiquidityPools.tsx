@@ -31,6 +31,9 @@ function getDomainStatus(domain: Domain) {
 
 export function LiquidityPools() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { data: domains, refetch } = useActiveDomains(poolId)
   const getName = useGetNetworkName()
 

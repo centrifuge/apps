@@ -1,6 +1,6 @@
 import { Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { FilterButton } from '../FilterButton'
 import { SortChevrons } from '../SortChevrons'
 import { SEARCH_KEYS } from './config'
@@ -19,7 +19,7 @@ type Sorting = {
 }
 
 export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: SortButtonProps) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { pathname, search } = useLocation()
 
   const sorting: Sorting = React.useMemo(() => {
@@ -41,7 +41,7 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
       [SEARCH_KEYS.SORT]: sorting.direction === 'asc' ? 'desc' : 'asc',
     })
 
-    history.push({
+    navigate({
       pathname,
       search: `?${searchParams}${restSearchParams.size > 0 ? `&${restSearchParams}` : ''}`,
     })

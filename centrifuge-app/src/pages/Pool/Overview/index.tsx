@@ -82,6 +82,9 @@ function AverageMaturity({ poolId }: { poolId: string }) {
 export function PoolDetailOverview() {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)

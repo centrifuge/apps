@@ -1,12 +1,13 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useLocation, useParams, useRouteMatch } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { Eththumbnail } from '../../components/EthThumbnail'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
+import { useBasePath } from '../../utils/useBasePath'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
 
 export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const { pid } = useParams<{ pid: string }>()
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const basePath = useBasePath()
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
@@ -61,7 +62,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
         }}
         color="textSelected"
       >
-        <NavigationTabs basePath={`${basePath}/${pid}`}>
+        <NavigationTabs>
           <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>

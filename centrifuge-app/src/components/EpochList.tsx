@@ -157,6 +157,9 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
 
 const LockedRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   return (
     <>{React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked as Decimal, pool.currency.symbol)}</>
