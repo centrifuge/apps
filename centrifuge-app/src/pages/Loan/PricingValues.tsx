@@ -4,6 +4,7 @@ import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getLatestPrice } from '../../utils/getLatestPrice'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
+import { useAvailableFinancing } from '../../utils/useLoans'
 import { useAssetTransactions } from '../../utils/usePools'
 import { MetricsTable } from './MetricsTable'
 
@@ -16,6 +17,7 @@ export function PricingValues({ loan, pool }: Props) {
   const { pricing } = loan
 
   const assetTransactions = useAssetTransactions(loan.poolId)
+  const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
 
   const isOutstandingDebtOrDiscountedCashFlow =
     'valuationMethod' in pricing &&
@@ -67,6 +69,15 @@ export function PricingValues({ loan, pool }: Props) {
         </Text>
         <MetricsTable
           metrics={[
+            ...('valuationMethod' in pricing && pricing.valuationMethod !== 'cash'
+              ? [
+                  { label: 'Available financing', value: formatBalance(availableFinancing, pool.currency.displayName) },
+                  {
+                    label: 'Total financed',
+                    value: formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2),
+                  },
+                ]
+              : []),
             ...(pricing.maturityDate ? [{ label: 'Maturity date', value: formatDate(pricing.maturityDate) }] : []),
             ...('maturityExtensionDays' in pricing && pricing.valuationMethod !== 'cash'
               ? [{ label: 'Extension period', value: `${pricing.maturityExtensionDays} days` }]

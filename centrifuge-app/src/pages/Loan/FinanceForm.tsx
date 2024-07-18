@@ -151,19 +151,6 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   return (
     <>
-      <Stack>
-        {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
-          <Shelf justifyContent="space-between">
-            <Text variant="heading3">Available financing</Text>
-            {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}</Text>
-          </Shelf>
-        )}
-        <Shelf justifyContent="space-between">
-          <Text variant="label1">Total financed</Text>
-          <Text variant="label1">{formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}</Text>
-        </Shelf>
-      </Stack>
       {availableFinancing.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
@@ -203,7 +190,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
             )}
             <Stack px={1}>
               <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
-                Finance asset
+                Purchase
               </Button>
             </Stack>
           </Stack>

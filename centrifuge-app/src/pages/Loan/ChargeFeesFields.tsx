@@ -108,12 +108,12 @@ export const ChargeFeesFields = ({
                   })}
                 </Stack>
                 {chargableFees?.length && form.values.fees.length < chargableFees.length ? (
-                  <Box>
+                  <Box p={0}>
                     <Button
                       icon={<IconPlusCircle size="20px" />}
                       variant="tertiary"
                       onClick={() => push({ id: '', amount: '' })}
-                      style={{ padding: 0 }}
+                      small
                     >
                       Add fees
                     </Button>
