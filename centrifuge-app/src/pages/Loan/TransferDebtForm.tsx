@@ -152,11 +152,6 @@ export function TransferDebtForm({ loan, source }: { loan: LoanType; source: str
 
   return (
     <>
-      <Text variant="heading4">
-        To receive funds from another asset, choose the asset, enter new face value and settlement price. This will
-        trigger a repay of the settlement asset and a borrow transaction for this asset.
-      </Text>
-
       <FormikProvider value={form}>
         <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
           {selectedLoan ? (

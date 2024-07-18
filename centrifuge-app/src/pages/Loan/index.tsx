@@ -74,34 +74,34 @@ function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
   return loan.poolId.startsWith('0x')
 }
 
-function LoanDrawerContent({ loan }: { loan: LoanType }) {
-  const canBorrow = useCanBorrowAsset(loan.poolId, loan.id)
-
-  if (!loan || loan.status === 'Closed' || !canBorrow || isTinlakeLoan(loan)) return null
-
-  return (
-    <Stack gap={2}>
-      <FinanceForm loan={loan} />
-      {loan.status === 'Active' && <RepayForm loan={loan} />}
-    </Stack>
-  )
-}
-
-function FinanceButton({ loan }: { loan: LoanType }) {
+function ActionButtons({ loan }: { loan: LoanType }) {
   const canBorrow = useCanBorrowAsset(loan.poolId, loan.id)
   const [financeShown, setFinanceShown] = React.useState(false)
-  if (!canBorrow || loan.status === 'Closed') return null
+  const [repayShown, setRepayShown] = React.useState(false)
+  if (!loan || !canBorrow || isTinlakeLoan(loan) || !canBorrow || loan.status === 'Closed') return null
   return (
     <>
       <Drawer isOpen={financeShown} onClose={() => setFinanceShown(false)}>
         <LoadBoundary>
-          <LoanDrawerContent loan={loan} />
+          <FinanceForm loan={loan} />
+        </LoadBoundary>
+      </Drawer>
+      <Drawer isOpen={repayShown} onClose={() => setRepayShown(false)}>
+        <LoadBoundary>
+          <Stack gap={2}>{loan.status === 'Active' && <RepayForm loan={loan} />}</Stack>
         </LoadBoundary>
       </Drawer>
 
-      <Button onClick={() => setFinanceShown(true)} small>
-        Finance
-      </Button>
+      <Shelf gap={2}>
+        <Button onClick={() => setFinanceShown(true)} small>
+          Finance
+        </Button>
+        {loan.status === 'Active' && (
+          <Button onClick={() => setRepayShown(true)} small>
+            Repay
+          </Button>
+        )}
+      </Shelf>
     </>
   )
 }
@@ -166,7 +166,7 @@ function Loan() {
             {loan && <LoanLabel loan={loan} />}
           </Shelf>
         }
-        subtitle={loan && !isTinlakeLoan(loan) && <FinanceButton loan={loan} />}
+        subtitle={loan && !isTinlakeLoan(loan) && <ActionButtons loan={loan} />}
       />
       {loanId === '0' && (
         <>

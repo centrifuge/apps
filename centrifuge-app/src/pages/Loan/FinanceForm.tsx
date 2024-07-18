@@ -72,7 +72,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
     <Stack gap={2}>
       <Stack as={Card} gap={2} p={2}>
         <Text variant="heading2">{title}</Text>
-        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} />
+        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="finance" />
         {source === 'reserve' && isExternalLoan(loan) ? (
           <ExternalFinanceForm loan={loan as ExternalLoan} />
         ) : source === 'reserve' && !isExternalLoan(loan) ? (
@@ -104,7 +104,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
         poolFees.getBatch(financeForm),
       ]).pipe(
         switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
-          let batch = [...withdrawBatch, ...poolFeesBatch]
+          const batch = [...withdrawBatch, ...poolFeesBatch]
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
           if (batch.length) {
             tx = api.tx.utility.batchAll([tx, ...batch])
@@ -145,7 +145,9 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
-  const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
+  const maxBorrow = (poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing).sub(
+    financeForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
+  )
 
   return (
     <>

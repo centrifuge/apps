@@ -1,6 +1,6 @@
 import { CurrencyBalance, ExternalLoan, Pool, Price, WithdrawAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
@@ -94,9 +94,6 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
 
   return (
     <>
-      <Box paddingY={1}>
-        <Text variant="heading4">To finance the asset, enter quantity and settlement price of the transaction.</Text>
-      </Box>
       {availableFinancing.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
@@ -137,7 +134,9 @@ export function ExternalFinanceFields({
   const form = useFormikContext<FinanceValues>()
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
-  const maxBorrow = min(poolReserve, availableFinancing)
+  const maxBorrow = min(poolReserve, availableFinancing).sub(
+    form.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
+  )
   return (
     <>
       <Field name="quantity" validate={combine(nonNegativeNumber())}>

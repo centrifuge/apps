@@ -1,6 +1,6 @@
 import { CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -108,10 +108,6 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
 
   return (
     <>
-      <Box paddingY={1}>
-        <Text variant="heading4">To repay the asset, enter quantity and settlement price of the transaction.</Text>
-      </Box>
-
       {currentFace ? (
         <Stack>
           <Shelf justifyContent="space-between">
@@ -220,7 +216,11 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                   <Text variant="emphasized">
                     {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                       ? formatBalance(
-                          Dec(repayForm.values.price || 0).mul(Dec(repayForm.values.quantity || 0)),
+                          Dec(repayForm.values.price || 0)
+                            .mul(Dec(repayForm.values.quantity || 0))
+                            .sub(
+                              repayForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
+                            ),
                           pool?.currency.symbol,
                           2
                         )

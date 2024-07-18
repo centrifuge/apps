@@ -36,7 +36,7 @@ export function RepayForm({ loan }: { loan: ActiveLoan }) {
     <Stack gap={2}>
       <Stack as={Card} gap={2} p={2}>
         <Text variant="heading2">{title}</Text>
-        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} />
+        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="repay" />
         {source === 'reserve' && isExternalLoan(loan) ? (
           <ExternalRepayForm loan={loan} />
         ) : source === 'reserve' && !isExternalLoan(loan) ? (
@@ -133,7 +133,9 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
   useFocusInvalidInput(repayForm, repayFormRef)
 
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
-  const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
+  const maxRepay = (
+    balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
+  ).sub(repayForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString())
   const canRepayAll = debtWithMargin?.lte(balance)
 
   return (
