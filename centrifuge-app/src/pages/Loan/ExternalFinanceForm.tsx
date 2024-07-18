@@ -82,7 +82,9 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const amountDec = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
+  const amountDec = Dec(financeForm.values.price || 0)
+    .mul(Dec(financeForm.values.quantity || 0))
+    .add(financeForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)))
 
   const withdraw = useWithdraw(loan.poolId, account!, amountDec)
 

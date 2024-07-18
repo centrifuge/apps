@@ -78,6 +78,18 @@ export function PricingValues({ loan, pool }: Props) {
                   },
                 ]
               : []),
+            ...(loan.status === 'Active'
+              ? [
+                  {
+                    label: 'Outstanding',
+                    value: formatBalance(loan.outstandingDebt?.toDecimal() ?? 0, pool?.currency.symbol, 2),
+                  },
+                  {
+                    label: 'Total repaid',
+                    value: formatBalance(loan.totalRepaid?.toDecimal() ?? 0, pool?.currency.symbol, 2),
+                  },
+                ]
+              : []),
             ...(pricing.maturityDate ? [{ label: 'Maturity date', value: formatDate(pricing.maturityDate) }] : []),
             ...('maturityExtensionDays' in pricing && pricing.valuationMethod !== 'cash'
               ? [{ label: 'Extension period', value: `${pricing.maturityExtensionDays} days` }]

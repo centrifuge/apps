@@ -56,7 +56,7 @@ const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000
 
 type Key = `${'parachain' | 'evm'}:${number}`
 type FinanceValues = {
-  amount: number | '' | Decimal
+  principal: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
   fees: { id: string; amount: '' | number | Decimal }[]
 }
@@ -122,13 +122,13 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
-      amount: '',
+      principal: '',
       withdraw: undefined,
       fees: [],
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
+      const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
+      doFinanceTransaction([loan.poolId, loan.id, principal], { account, forceProxyType: 'Borrow' })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -137,7 +137,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const withdraw = useWithdraw(loan.poolId, account!, Dec(financeForm.values.amount || 0))
+  const withdraw = useWithdraw(loan.poolId, account!, Dec(financeForm.values.principal || 0))
 
   if (loan.status === 'Closed') {
     return null
@@ -148,6 +148,9 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const maxBorrow = (poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing).sub(
     financeForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
   )
+  const totalAmount = financeForm.values.fees
+    .reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))
+    .add(financeForm.values.principal || 0)
 
   return (
     <>
@@ -158,10 +161,10 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
               name="amount"
               validate={combine(
                 positiveNumber(),
-                max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
+                max(availableFinancing.toNumber(), 'Principal exceeds available financing'),
                 max(
                   maxBorrow.toNumber(),
-                  `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
+                  `Principal exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
                 )
               )}
             >
@@ -170,12 +173,12 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Amount"
+                    label="Principal"
                     errorMessage={meta.touched ? meta.error : undefined}
                     secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
                     currency={pool?.currency.symbol}
-                    onChange={(value) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', maxBorrow)}
+                    onChange={(value) => form.setFieldValue('principal', value)}
+                    onSetMax={() => form.setFieldValue('principal', maxBorrow)}
                   />
                 )
               }}
@@ -188,7 +191,11 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
                 the available financing
               </InlineFeedback>
             )}
-            <Stack px={1}>
+            <Shelf justifyContent="space-between">
+              <Text variant="emphasized">Total amount</Text>
+              <Text variant="emphasized">{formatBalance(totalAmount, pool?.currency.symbol, 2)}</Text>
+            </Shelf>
+            <Stack>
               <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
                 Purchase
               </Button>

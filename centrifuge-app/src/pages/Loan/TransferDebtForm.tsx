@@ -5,13 +5,10 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
-import { nftMetadataSchema } from '../../schemas'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
-import { useMetadata } from '../../utils/useMetadata'
-import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, positiveNumber } from '../../utils/validation'
@@ -238,16 +235,6 @@ export function TransferDebtForm({ loan, source }: { loan: LoanType; source: str
           </Stack>
         </Stack>
       </FormikProvider>
-    </>
-  )
-}
-
-function LoanOption({ loan }: { loan: Loan }) {
-  const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, false)
-  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  return (
-    <>
-      {loan.id} - {metadata?.name}
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, InlineFeedback, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -19,7 +19,7 @@ import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
 
 export type RepayValues = {
-  amount: number | '' | Decimal
+  principal: number | '' | Decimal
   amountAdditional: number | '' | Decimal
   interest: number | '' | Decimal
   fees: { id: string; amount: number | '' | Decimal }[]
@@ -64,16 +64,16 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
         args: [
           loanId: string,
           poolId: string,
-          amount: CurrencyBalance,
+          principal: CurrencyBalance,
           interest: CurrencyBalance,
           additionalAmount: CurrencyBalance
         ],
         options
       ) => {
-        const [loanId, poolId, amount, interest, additionalAmount] = args
+        const [loanId, poolId, principal, interest, additionalAmount] = args
         return combineLatest([
           cent.getApi(),
-          cent.pools.repayLoanPartially([loanId, poolId, amount, interest, additionalAmount], { batch: true }),
+          cent.pools.repayLoanPartially([loanId, poolId, principal, interest, additionalAmount], { batch: true }),
           poolFees.getBatch(repayForm),
         ]).pipe(
           switchMap(([api, repayTx, batch]) => {
@@ -110,7 +110,7 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
 
   const repayForm = useFormik<RepayValues>({
     initialValues: {
-      amount: '',
+      principal: '',
       amountAdditional: '',
       interest: '',
       fees: [],
@@ -118,9 +118,9 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
     onSubmit: (values, actions) => {
       let interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
       let additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional, pool.currency.decimals)
-      let amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
+      let principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
 
-      doRepayTransaction([loan.poolId, loan.id, amount, interest, additionalAmount], {
+      doRepayTransaction([loan.poolId, loan.id, principal, interest, additionalAmount], {
         account,
         forceProxyType: 'Borrow',
       })
@@ -140,41 +140,29 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
 
   return (
     <>
-      <Stack>
-        <Shelf justifyContent="space-between">
-          <Text variant="heading3">Outstanding</Text>
-          {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-          <Text variant="heading3">{formatBalance(roundDown(debt), pool?.currency.symbol, 2)}</Text>
-        </Shelf>
-        <Shelf justifyContent="space-between">
-          <Text variant="label1">Total repaid</Text>
-          <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency.symbol, 2)}</Text>
-        </Shelf>
-      </Stack>
-
       {debt.gt(0) ? (
         <FormikProvider value={repayForm}>
           <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
             <Field
               validate={combine(
                 positiveNumber(),
-                max(balance.toNumber(), 'Amount exceeds balance'),
-                max(debt.toNumber(), 'Amount exceeds outstanding')
+                max(balance.toNumber(), 'Principal exceeds balance'),
+                max(debt.toNumber(), 'Principal exceeds outstanding')
               )}
-              name="amount"
+              name="principal"
             >
               {({ field, meta, form }: FieldProps) => {
                 return (
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Amount"
+                    label="Principal"
                     errorMessage={meta.touched ? meta.error : undefined}
                     secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency.symbol, 2)} available`}
                     disabled={isRepayLoading || isRepayAllLoading}
                     currency={pool?.currency.symbol}
-                    onChange={(value) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', maxRepay)}
+                    onChange={(value) => form.setFieldValue('principal', value)}
+                    onSetMax={() => form.setFieldValue('principal', maxRepay)}
                   />
                 )
               }}
