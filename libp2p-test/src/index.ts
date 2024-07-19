@@ -13,10 +13,6 @@ import * as lp from 'it-length-prefixed'
 import map from 'it-map'
 import { pipe } from 'it-pipe'
 import { createLibp2p } from 'libp2p'
-// import path from "path";
-import { pushable } from 'it-pushable'
-// import path from "path";
-// import { fileURLToPath } from "url";
 
 import {
   BeepRequest,
@@ -26,7 +22,6 @@ import {
   GetDocumentRequest,
 } from './data_protocol.v1.js'
 
-// import { fileURLToPath } from "url";
 // Cosmin: 12D3KooWDnScZfemMmJ5efz9ZkYZ7kW6d8Ezi62ADy57N2VFLUtD
 // JP:     12D3KooWCWV4hXqS28dB7ybxDTAn78MsQmPMfTGi6aTGqffMhfFs
 
@@ -64,18 +59,18 @@ async function run() {
 
   await node.start()
 
-  node.addEventListener('peer:connect', (event) => {
-    console.log('peer connect', event.detail.toString())
-  })
-  node.addEventListener('peer:disconnect', (event) => {
-    console.log('peer disconnect', event.detail.toString())
-  })
-  node.addEventListener('connection:close', (event) => {
-    console.log('connection close', event.detail.id, node.getConnections().length)
-  })
-  node.addEventListener('connection:open', (event) => {
-    console.log('connection open', event.detail.id, node.getConnections().length)
-  })
+  // node.addEventListener('peer:connect', (event) => {
+  //   console.log('peer connect', event.detail.toString())
+  // })
+  // node.addEventListener('peer:disconnect', (event) => {
+  //   console.log('peer disconnect', event.detail.toString())
+  // })
+  // node.addEventListener('connection:close', (event) => {
+  //   console.log('connection close', event.detail.id, node.getConnections().length)
+  // })
+  // node.addEventListener('connection:open', (event) => {
+  //   console.log('connection open', event.detail.id, node.getConnections().length)
+  // })
 
   const ma = multiaddr('/ip4/34.159.117.205/tcp/30333/ws/p2p/12D3KooWMspZo4aMEXWBH4UXm3gfiVkeu1AE68Y2JDdVzU723QPc')
 
@@ -89,7 +84,8 @@ async function run() {
   console.log('peerInfo.id', peerInfo.id, peerInfo)
 
   console.log(
-    'components.connectionManager.getDialQueue()',
+    'multiaddress',
+    // @ts-expect-error
     await node.components.connectionManager.dialQueue.calculateMultiaddrs(peerInfo.id)
   )
 
@@ -177,7 +173,7 @@ async function run() {
   const buffer2 = DataProtocolRequest.encode(message2).finish()
   const buffer3 = DataProtocolRequest.encode(message3).finish()
 
-  const outgoing = pushable()
+  // const outgoing = pushable()
 
   setTimeout(async () => {
     console.log('push1', buffer)
