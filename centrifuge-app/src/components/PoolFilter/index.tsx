@@ -11,7 +11,7 @@ type PoolFilterProps = {
   pools?: PoolCardProps[]
 }
 
-const defaultPoolStatus: PoolStatusKey[] = ['Open for investments', 'Upcoming', 'Maker Pool', 'Closed']
+const defaultPoolStatus: PoolStatusKey[] = ['Open for investments', 'Upcoming', 'Closed']
 
 export function PoolFilter({ pools }: PoolFilterProps) {
   const isMedium = useIsAboveBreakpoint('M')

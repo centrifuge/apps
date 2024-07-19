@@ -173,7 +173,7 @@ export function poolsToPoolCardProps(
         tinlakePool && tinlakePool.tinlakeMetadata.isArchived
           ? 'Archived'
           : tinlakePool && tinlakePool.addresses.CLERK !== undefined && tinlakePool.tinlakeMetadata.maker?.ilk
-          ? 'Maker Pool'
+          ? 'Closed'
           : pool.tranches.at(0)?.capacity.toFloat() // pool is displayed as "open for investments" if the most junior tranche has a capacity
           ? 'Open for investments'
           : ('Closed' as PoolStatusKey),
