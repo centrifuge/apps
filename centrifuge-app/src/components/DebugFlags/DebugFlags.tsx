@@ -120,7 +120,7 @@ const Panel: React.FC<{
             }
 
             return visible ? (
-              <Shelf as="label" justifyContent="space-between" key={key}>
+              <Shelf as={obj.type === 'component' ? 'div' : 'label'} justifyContent="space-between" key={key}>
                 <Text
                   fontSize="inherit"
                   fontFamily="inherit"
