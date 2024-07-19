@@ -128,7 +128,6 @@ const PoolDetailPage = React.lazy(() => import('../pages/Pool'))
 const SwapsPage = React.lazy(() => import('../pages/Swaps'))
 const PortfolioPage = React.lazy(() => import('../pages/Portfolio'))
 const TransactionHistoryPage = React.lazy(() => import('../pages/Portfolio/TransactionHistory'))
-const TokenOverviewPage = React.lazy(() => import('../pages/Tokens'))
 const PrimePage = React.lazy(() => import('../pages/Prime'))
 const PrimeDetailPage = React.lazy(() => import('../pages/Prime/Detail'))
 const NavManagementPage = React.lazy(() => import('../pages/NavManagement'))
@@ -157,7 +156,6 @@ const routes = [
   { path: '/issuer/create-pool', element: <IssuerCreatePoolPage /> },
   { path: '/history/:address', element: <TransactionHistoryPage /> },
   { path: '/history', element: <TransactionHistoryPage /> },
-  { path: '/pools/tokens', element: <TokenOverviewPage /> },
   { path: '/pools/:pid/assets/:aid', element: <LoanPage /> },
   { path: '/pools/:pid/transactions', element: <PoolTransactionsPage /> },
   { path: '/issuer/:pid/assets/create', element: <IssuerCreateLoanPage /> },
