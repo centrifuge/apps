@@ -1,23 +1,17 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
-import { Key, flagsConfig } from './config'
-import { DebugFlagsContext, FlagsState, initialFlagsState, useDebugFlags } from './context'
+import { Key, genericFlagsConfig } from './config'
+import { DebugFlagsContext, Flags, initialFlagsState, useDebugFlags } from './context'
 
-function DebugFlagsImpl({
-  children,
-  onChange,
-}: {
-  children?: React.ReactNode
-  onChange?: (state: FlagsState) => void
-}) {
+function DebugFlagsImpl({ children, onChange }: { children?: React.ReactNode; onChange?: (state: Flags) => void }) {
   const [state, setState] = React.useState(initialFlagsState)
   const [tracked, setTracked] = React.useState({})
 
   const ctx = React.useMemo(
     () => ({
       flags: Object.entries(state).reduce((obj, [key, value]) => {
-        const conf = flagsConfig[key as Key]
+        const conf = genericFlagsConfig[key as Key]
         obj[key] = 'options' in conf ? conf.options[value as string] : value
         return obj
       }, {} as any),
@@ -57,7 +51,7 @@ function DebugFlagsImpl({
 }
 
 const Panel: React.FC<{
-  state: FlagsState
+  state: Flags
   usedKeys: Set<any>
   onChange: (key: Key, val: any) => void
 }> = ({ state, usedKeys, onChange }) => {
@@ -81,7 +75,7 @@ const Panel: React.FC<{
       </Shelf>
       {open && (
         <StyledOpenPanel width={400} gap="1">
-          {Object.entries(flagsConfig).map(([key, obj]) => {
+          {Object.entries(genericFlagsConfig).map(([key, obj]) => {
             const used = usedKeys.has(key) || obj.alwaysShow
             const value = state[key as Key]
             const visible = used || !!showUnusedFlags

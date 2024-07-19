@@ -81,13 +81,16 @@ export function InvestorStatus() {
     const domains = chain ? [[chain, validAddress]] : undefined
 
     if (isAllowed) {
-      execute([poolId, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
+      execute([poolId!, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
         account,
       })
     } else {
-      execute([poolId, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []], {
-        account,
-      })
+      execute(
+        [poolId!, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []],
+        {
+          account,
+        }
+      )
     }
     setPendingTrancheId(trancheId)
   }

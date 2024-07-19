@@ -26,8 +26,9 @@ export default function NFTPage() {
   )
 }
 
-const NFT: React.FC = () => {
+function NFT() {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
+  if (!collectionId || !nftId) throw new Error('NFT not found')
   const address = useAddress('substrate')
   const nft = useCentNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)

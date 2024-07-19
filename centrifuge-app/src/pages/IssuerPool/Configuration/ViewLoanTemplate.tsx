@@ -15,6 +15,7 @@ export function IssuerPoolViewLoanTemplatePage() {
 
 export function ViewLoanTemplate() {
   const { pid: poolId, sid: templateId } = useParams<{ pid: string; sid: string }>()
+  if (!poolId || !templateId) throw new Error('Template not found')
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const { data: templateData } = useMetadata(`ipfs://${templateId}`)

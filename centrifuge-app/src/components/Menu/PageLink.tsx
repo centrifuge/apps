@@ -24,7 +24,7 @@ export function PageLink({ stacked = false, to, children }: PageLinkProps) {
 
   return (
     <Root
-      as={Link}
+      as={Link as any}
       to={to}
       variant="interactive1"
       isActive={isActive}

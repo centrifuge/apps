@@ -14,6 +14,7 @@ import { NavManagementAssetTable } from './NavManagementAssetTable'
 
 export default function NavManagementOverviewPage() {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   return (
     <LayoutBase>
       <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
