@@ -47,7 +47,6 @@ export type Key =
   | 'showTestNets'
   | 'showSwaps'
   | 'poolCreationType'
-  | 'poolCreationType2'
   | 'showTokenYields'
   | 'showOracleTx'
 
@@ -98,15 +97,6 @@ export const flagsConfig = {
       immediate: 'immediate',
       notePreimage: 'notePreimage',
       propose: 'propose',
-    },
-    type: 'select',
-  },
-  poolCreationType2: {
-    default: 'baz',
-    options: {
-      foo: 'foo',
-      bar: 'bar',
-      baz: 'baz',
     },
     type: 'select',
   },
