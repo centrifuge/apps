@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, InlineFeedback, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -10,7 +10,7 @@ import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalRepayForm } from './ExternalRepayForm'
@@ -27,10 +27,8 @@ export type RepayValues = {
 
 export function RepayForm({ loan }: { loan: ActiveLoan }) {
   const [source, setSource] = React.useState<string>('reserve')
-  const pool = usePool(loan.poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const title = poolMetadata?.pool?.asset.class === 'Private credit' ? 'Repay' : 'Sell'
+  const title = ['oracle', 'cash'].includes(loan.pricing.valuationMethod) ? 'Sell' : 'Repay'
 
   return (
     <Stack gap={2}>
@@ -133,10 +131,12 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
   useFocusInvalidInput(repayForm, repayFormRef)
 
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
-  const maxRepay = (
-    balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
-  ).sub(repayForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString())
+  const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
   const canRepayAll = debtWithMargin?.lte(balance)
+  const totalRepay = Dec(repayForm.values.principal || 0)
+    .add(Dec(repayForm.values.interest || 0))
+    .add(Dec(repayForm.values.amountAdditional || 0))
+    .add(Dec(repayForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))))
 
   return (
     <>
@@ -212,6 +212,10 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
                 outstanding balance.
               </InlineFeedback>
             )}
+            <Shelf justifyContent="space-between">
+              <Text variant="emphasized">Total amount</Text>
+              <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
+            </Shelf>
             <Stack gap={1} px={1}>
               <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
                 Repay asset

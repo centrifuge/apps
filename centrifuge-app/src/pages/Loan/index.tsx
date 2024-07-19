@@ -94,11 +94,11 @@ function ActionButtons({ loan }: { loan: LoanType }) {
 
       <Shelf gap={2}>
         <Button onClick={() => setFinanceShown(true)} small>
-          Finance
+          {['oracle', 'cash'].includes(loan.pricing.valuationMethod) ? 'Purchase' : 'Finance'}
         </Button>
         {loan.status === 'Active' && (
           <Button onClick={() => setRepayShown(true)} small>
-            Repay
+            {['oracle', 'cash'].includes(loan.pricing.valuationMethod) ? 'Sell' : 'Repay'}
           </Button>
         )}
       </Shelf>

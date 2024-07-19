@@ -230,7 +230,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
               </Stack>
               <Stack gap={1} px={1}>
                 <Button type="submit" disabled={isRepayLoading} loading={isRepayLoading}>
-                  Repay asset
+                  Sell asset
                 </Button>
               </Stack>
             </Stack>

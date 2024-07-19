@@ -29,7 +29,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
   const api = useCentrifugeApi()
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
-    'Finance asset',
+    'Purchase asset',
     (cent) =>
       (
         args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance, fees: FinanceValues['fees']],
@@ -114,7 +114,7 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
             </Stack>
             <Stack px={1}>
               <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
-                Finance asset
+                Purchase
               </Button>
             </Stack>
           </Stack>

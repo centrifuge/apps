@@ -44,7 +44,7 @@ import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
@@ -63,10 +63,8 @@ type FinanceValues = {
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
   const [source, setSource] = React.useState<string>('reserve')
-  const pool = usePool(loan.poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const title = poolMetadata?.pool?.asset.class === 'Private credit' ? 'Finance' : 'Purchase'
+  const title = ['oracle', 'cash'].includes(loan.pricing.valuationMethod) ? 'Purchase' : 'Finance'
 
   return (
     <Stack gap={2}>
@@ -197,7 +195,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
             </Shelf>
             <Stack>
               <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
-                Purchase
+                Finance
               </Button>
             </Stack>
           </Stack>
