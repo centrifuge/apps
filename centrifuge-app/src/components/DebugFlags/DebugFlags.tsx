@@ -50,11 +50,15 @@ function DebugFlagsImpl({ children, onChange }: { children?: React.ReactNode; on
   )
 }
 
-const Panel: React.FC<{
+function Panel({
+  state,
+  usedKeys,
+  onChange,
+}: {
   state: Flags
   usedKeys: Set<any>
   onChange: (key: Key, val: any) => void
-}> = ({ state, usedKeys, onChange }) => {
+}) {
   const [open, setOpen] = React.useState(false)
   const { showUnusedFlags } = useDebugFlags()
 

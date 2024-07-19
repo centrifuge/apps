@@ -154,7 +154,7 @@ const initialValues: CreatePoolValues = {
   poolType: 'open',
 }
 
-const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
+function PoolIcon({ icon, children }: { icon?: File | null; children: string }) {
   const [uri, setUri] = React.useState('')
   React.useEffect(() => {
     ;(async () => {

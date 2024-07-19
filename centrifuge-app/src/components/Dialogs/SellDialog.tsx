@@ -17,7 +17,7 @@ type Props = {
 // TODO: replace with better fee estimate
 const TRANSFER_FEE_ESTIMATE = 0.1
 
-export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
+export function SellDialog({ open, onClose, collectionId, nftId }: Props) {
   const [price, setPrice] = React.useState<number | ''>('')
   const [touched, setTouched] = React.useState(false)
   const address = useAddress('substrate')

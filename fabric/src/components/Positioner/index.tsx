@@ -12,14 +12,14 @@ type PositionerProps = {
   render: (props: React.HTMLAttributes<Element> & { pointer: PlacementAxis }) => React.ReactElement
 }
 
-const PositionerInner: React.FC<PositionerProps> = ({
+function PositionerInner({
   isShown,
   targetRef,
   overlayRef,
   placement = 'bottom',
   offset = 1,
   render,
-}) => {
+}: PositionerProps) {
   const theme = useTheme()
   const { overlayProps, ...restProps } = useOverlayPosition({
     targetRef,
@@ -32,7 +32,7 @@ const PositionerInner: React.FC<PositionerProps> = ({
   return render({ ...overlayProps, pointer: restProps.placement })
 }
 
-export const Positioner: React.FC<PositionerProps> = (props) => {
+export function Positioner(props: PositionerProps) {
   return props.isShown ? (
     <OverlayContainer>
       <TextContext.Provider value={false}>

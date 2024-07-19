@@ -40,7 +40,7 @@ const DEFAULT_FEE = {
   },
 }
 
-export const PoolFeeSection: React.FC = () => {
+export function PoolFeeSection() {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
   const address = useAddress()
@@ -92,7 +92,7 @@ export const PoolFeeSection: React.FC = () => {
   )
 }
 
-export const PoolFeeInput: React.FC = () => {
+export function PoolFeeInput() {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
 

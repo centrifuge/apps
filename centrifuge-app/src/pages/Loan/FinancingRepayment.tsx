@@ -1,15 +1,6 @@
-import * as React from 'react'
 import { LabelValueStack } from '../../components/LabelValueStack'
 
-export const FinancingRepayment: React.FC<{
-  drawDownDate: string | null
-  closingDate: string | null
-  outstandingPrincipal: string
-  outstandingInterest: string
-  repaidPrincipal: string
-  repaidInterest: string
-  repaidUnscheduled: string | null
-}> = ({
+export function FinancingRepayment({
   drawDownDate,
   closingDate,
   outstandingPrincipal,
@@ -17,7 +8,15 @@ export const FinancingRepayment: React.FC<{
   repaidPrincipal,
   repaidInterest,
   repaidUnscheduled,
-}) => {
+}: {
+  drawDownDate: string | null
+  closingDate: string | null
+  outstandingPrincipal: string
+  outstandingInterest: string
+  repaidPrincipal: string
+  repaidInterest: string
+  repaidUnscheduled: string | null
+}) {
   return (
     <>
       {!!drawDownDate && <LabelValueStack label="1st drawdown date" value={drawDownDate} />}
