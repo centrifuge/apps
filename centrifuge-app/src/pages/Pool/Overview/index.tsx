@@ -133,9 +133,7 @@ export function PoolDetailOverview() {
   return (
     <FullHeightLayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
       <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
-        <React.Suspense fallback={<Spinner />}>
-          <PoolPerformance />
-        </React.Suspense>
+        <PoolPerformance />
         <React.Suspense fallback={<Spinner />}>
           <KeyMetrics
             assetType={metadata?.pool?.asset}
