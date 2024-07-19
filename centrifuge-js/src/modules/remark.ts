@@ -1,7 +1,6 @@
 import { of, switchMap } from 'rxjs'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
-import { CurrencyBalance } from '../utils/BN'
 
 export function getRemarkModule(inst: CentrifugeBase) {
   function remarkWithEvent(args: [message: string], options?: TransactionOptions) {
@@ -37,18 +36,12 @@ export function getRemarkModule(inst: CentrifugeBase) {
     )
   }
 
-  function remarkFeeTransaction(
-    args: [poolId: string, loanId: string, chargeFee: CurrencyBalance],
-    options?: TransactionOptions
-  ) {
+  function remarkFeeTransaction(args: [poolId: string, loanId: string, feeTx: any], options?: TransactionOptions) {
     const $api = inst.getApi()
-    const [poolId, loanId, chargeFee] = args
+    const [poolId, loanId, feeTx] = args
     return $api.pipe(
       switchMap((api) => {
-        const chargeFeeTx = api.tx.system.remark(
-          `Fee charged for loan ${loanId} in pool ${poolId}. Amount: ${chargeFee.toString()}`
-        )
-        return inst.wrapSignAndSend(api, api.tx.remarks.remark([{ Loan: [poolId, loanId] }], chargeFeeTx), options)
+        return inst.wrapSignAndSend(api, api.tx.remarks.remark([{ Loan: [poolId, loanId] }], feeTx), options)
       })
     )
   }

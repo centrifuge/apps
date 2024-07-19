@@ -1,5 +1,11 @@
 import { CurrencyBalance, Pool, addressToHex } from '@centrifuge/centrifuge-js'
-import { CombinedSubstrateAccount, formatBalance, useCentrifuge } from '@centrifuge/centrifuge-react'
+import {
+  CombinedSubstrateAccount,
+  formatBalance,
+  useCentrifuge,
+  useCentrifugeApi,
+  wrapProxyCallsForAccount,
+} from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import { combineLatest, of } from 'rxjs'
@@ -134,6 +140,7 @@ export function useChargePoolFees(poolId: string, loanId: string) {
   const cent = useCentrifuge()
   const [account] = useSuitableAccounts({ poolId: poolId })
   const borrower = useBorrower(poolId, loanId)
+  const api = useCentrifugeApi()
   return {
     render: () => <ChargeFeesFields pool={pool as Pool} borrower={borrower} />,
     isValid: true,
@@ -141,13 +148,17 @@ export function useChargePoolFees(poolId: string, loanId: string) {
       if (!values.fees.length) return of([])
       const fees = values.fees.flatMap((fee) => {
         if (!fee.amount) throw new Error('Charge amount not provided')
+        if (!borrower) throw new Error('No borrower')
         if (!account) throw new Error('No account')
         const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
         const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
-        return [
-          cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee], { batch: true }),
-          cent.remark.remarkFeeTransaction([poolId, loanId, feeAmount], { batch: true }),
-        ]
+        const feeTx = cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee])
+        return wrapProxyCallsForAccount(
+          api,
+          cent.remark.remarkFeeTransaction([poolId, loanId, feeTx], { batch: true }),
+          borrower,
+          'Transfer'
+        )
       })
       return combineLatest(fees)
     },
