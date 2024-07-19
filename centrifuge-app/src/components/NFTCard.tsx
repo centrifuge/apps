@@ -73,11 +73,6 @@ export function NFTCard({ nft }: Props) {
                 </Text>
               </Box>
             )}
-            {nft.sellPrice !== null && (
-              <Box flexBasis="auto">
-                <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
-              </Box>
-            )}
           </Shelf>
         </Stack>
       </Stack>

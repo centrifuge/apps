@@ -2,9 +2,6 @@ import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconArrowRight, IconNft, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
-import { BuyDialog } from '../components/BuyDialog'
-import { RemoveListingDialog } from '../components/Dialogs/RemoveListingDialog'
-import { SellDialog } from '../components/Dialogs/SellDialog'
 import { TransferDialog } from '../components/Dialogs/TransferDialog'
 import { Identity } from '../components/Identity'
 import { LayoutBase } from '../components/LayoutBase'
@@ -133,13 +130,6 @@ function NFT() {
                     <Identity address={nft.owner} clickToCopy />
                   </Text>
                 </Stack>
-
-                {nft.sellPrice !== null && (
-                  <Stack gap={1}>
-                    <Text variant="label1">Price</Text>
-                    <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
-                  </Stack>
-                )}
               </>
             )}
 
@@ -148,22 +138,7 @@ function NFT() {
                 address &&
                 (isSameAddress(nft.owner, address) ? (
                   <>
-                    {nft.sellPrice !== null ? (
-                      <Button onClick={() => setUnlistOpen(true)} small variant="secondary">
-                        Remove listing
-                      </Button>
-                    ) : (
-                      <Button onClick={() => setSellOpen(true)} small variant="secondary">
-                        Sell
-                      </Button>
-                    )}
-                    <Button
-                      onClick={() => setTransferOpen(true)}
-                      icon={IconArrowRight}
-                      small
-                      variant="secondary"
-                      disabled={nft.sellPrice !== null}
-                    >
+                    <Button onClick={() => setTransferOpen(true)} icon={IconArrowRight} small variant="secondary">
                       Transfer
                     </Button>
                     <TransferDialog
@@ -172,40 +147,8 @@ function NFT() {
                       open={transferOpen}
                       onClose={() => setTransferOpen(false)}
                     />
-                    <SellDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={sellOpen}
-                      onClose={() => setSellOpen(false)}
-                    />
-                    <BuyDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={buyOpen}
-                      onClose={() => setBuyOpen(false)}
-                    />
-                    <RemoveListingDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={unlistOpen}
-                      onClose={() => setUnlistOpen(false)}
-                    />
                   </>
-                ) : (
-                  <>
-                    {nft.sellPrice !== null && (
-                      <Button onClick={() => setBuyOpen(true)} small>
-                        Buy
-                      </Button>
-                    )}
-                    <BuyDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={buyOpen}
-                      onClose={() => setBuyOpen(false)}
-                    />
-                  </>
-                ))}
+                ) : null)}
             </Stack>
           </Stack>
         </Shelf>
