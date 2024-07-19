@@ -102,7 +102,7 @@ export function NavOverviewCard({ poolId }: { poolId: string }) {
     return lastUpdatedSumBorrowedAmountByPeriod && todaySumBorrowedAmountByPeriod
       ? new BN(todaySumBorrowedAmountByPeriod).sub(new BN(lastUpdatedSumBorrowedAmountByPeriod))
       : new BN(0)
-  }, [dailyPoolStates])
+  }, [dailyPoolStates, pool?.nav.lastUpdated])
 
   return (
     <VisualNavCard

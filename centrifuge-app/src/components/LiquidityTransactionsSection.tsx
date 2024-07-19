@@ -76,7 +76,7 @@ export default function LiquidityTransactionsSection({
     }))
 
     return getCSVDownloadUrl(formatted)
-  }, [dailyPoolStates, dataKeys, dataNames, pool.currency.symbol])
+  }, [dailyPoolStates, dataKeys, dataNames, pool.currency.decimals, pool.currency.symbol])
 
   const chartData = React.useMemo(() => {
     return (dailyPoolStates
@@ -105,7 +105,7 @@ export default function LiquidityTransactionsSection({
       })
       .slice(-rangeNumber)
       .filter(Boolean) || []) as StackedBarChartProps['data']
-  }, [dailyPoolStates, dataKeys, rangeNumber])
+  }, [dailyPoolStates, dataKeys, pool.currency.decimals, rangeNumber])
 
   const legend: LegendProps['data'] = React.useMemo(() => {
     const topTotal = chartData.map(({ top }) => top).reduce((a, b) => a + b, 0)

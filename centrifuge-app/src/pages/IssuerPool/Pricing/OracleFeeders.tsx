@@ -91,6 +91,7 @@ export function OracleFeeders({ poolId }: { poolId: string }) {
     if (form.values.feeders.length > 0 && form.values.minFeeders === 0) {
       form.setFieldValue('minFeeders', 1)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values.feeders, form.values.minFeeders, form.setFieldValue])
 
   const rows = React.useMemo(() => form.values.feeders.map((a, i) => ({ address: a, index: i })), [form.values.feeders])

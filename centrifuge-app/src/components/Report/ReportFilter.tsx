@@ -56,7 +56,7 @@ export function ReportFilter({ pool }: ReportFilterProps) {
     { label: 'Investor transactions', value: 'investor-tx' },
     { label: 'Asset transactions', value: 'asset-tx' },
     { label: 'Fee transactions', value: 'fee-tx' },
-    ...(showOracleTx == true ? [{ label: 'Oracle transactions', value: 'oracle-tx' as Report }] : []),
+    ...(showOracleTx === true ? [{ label: 'Oracle transactions', value: 'oracle-tx' as Report }] : []),
     // { label: 'Pool balance', value: 'pool-balance' },
     { label: 'Token price', value: 'token-price' },
     { label: 'Asset list', value: 'asset-list' },

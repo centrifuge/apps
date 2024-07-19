@@ -549,6 +549,7 @@ function CreatePoolForm() {
     if (form.values.poolName) {
       form.setFieldValue('tranches', [createEmptyTranche(form.values.poolName)])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values.poolName])
 
   return (
