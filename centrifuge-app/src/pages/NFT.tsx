@@ -32,9 +32,6 @@ function NFT() {
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
-  const [sellOpen, setSellOpen] = React.useState(false)
-  const [buyOpen, setBuyOpen] = React.useState(false)
-  const [unlistOpen, setUnlistOpen] = React.useState(false)
   const centrifuge = useCentrifuge()
 
   const imageUrl = nftMetadata?.image ? centrifuge.metadata.parseMetadataUrl(nftMetadata.image) : ''
