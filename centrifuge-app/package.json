@@ -29,6 +29,7 @@
     "@centrifuge/centrifuge-js": "workspace:*",
     "@centrifuge/centrifuge-react": "workspace:*",
     "@centrifuge/fabric": "workspace:*",
+    "@centrifuge/libp2p-test": "workspace:*",
     "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/contracts": "^5.6.0",
     "@ethersproject/providers": "^5.6.0",

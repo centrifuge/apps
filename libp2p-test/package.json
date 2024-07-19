@@ -1,5 +1,8 @@
 {
   "type": "module",
+  "name": "@centrifuge/libp2p-test",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "nodemon ./dist/index.js",
     "build": "tsc --watch",
