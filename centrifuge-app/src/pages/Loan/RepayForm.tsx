@@ -1,6 +1,7 @@
-import { ActiveLoan, CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, Price, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -8,14 +9,13 @@ import { combineLatest, switchMap } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { useAvailableFinancing } from '../../utils/useLoans'
+import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalRepayForm } from './ExternalRepayForm'
 import { SourceSelect } from './SourceSelect'
-import { TransferDebtForm } from './TransferDebtForm'
 import { isExternalLoan } from './utils'
 
 export type RepayValues = {
@@ -23,35 +23,41 @@ export type RepayValues = {
   amountAdditional: number | '' | Decimal
   interest: number | '' | Decimal
   fees: { id: string; amount: number | '' | Decimal }[]
+  quantity: number | '' | Decimal
+  price: number | '' | Decimal
 }
 
 export function RepayForm({ loan }: { loan: ActiveLoan }) {
-  const [source, setSource] = React.useState<string>('reserve')
+  const [destination, setDestination] = React.useState<string>('reserve')
 
   return (
     <Stack gap={2}>
       <Stack as={Card} gap={2} p={2}>
         <Text variant="heading2">{isExternalLoan(loan) ? 'Sell' : 'Repay'}</Text>
-        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="repay" />
-        {source === 'reserve' && isExternalLoan(loan) ? (
-          <ExternalRepayForm loan={loan} />
-        ) : source === 'reserve' && !isExternalLoan(loan) ? (
-          <InternalRepayForm loan={loan} />
+        <SourceSelect
+          loan={loan}
+          value={destination}
+          onChange={(newSource) => setDestination(newSource)}
+          type="repay"
+        />
+        {isExternalLoan(loan) ? (
+          <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} />
         ) : (
-          <TransferDebtForm loan={loan} source={source} />
+          <InternalRepayForm loan={loan} destination={destination} />
         )}
       </Stack>
     </Stack>
   )
 }
 
-function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
+function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destination: string }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const { debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
+  const loans = useLoans(loan.poolId)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
@@ -62,16 +68,27 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
           poolId: string,
           principal: CurrencyBalance,
           interest: CurrencyBalance,
-          additionalAmount: CurrencyBalance
+          amountAdditional: CurrencyBalance,
+          price: Price,
+          quantity: BN
         ],
         options
       ) => {
-        const [loanId, poolId, principal, interest, additionalAmount] = args
-        return combineLatest([
-          cent.getApi(),
-          cent.pools.repayLoanPartially([loanId, poolId, principal, interest, additionalAmount], { batch: true }),
-          poolFees.getBatch(repayForm),
-        ]).pipe(
+        const [loanId, poolId, principal, interest, amountAdditional, price, quantity] = args
+        let repayTx
+        if (destination === 'reserve') {
+          repayTx = cent.pools.repayLoanPartially([loanId, poolId, principal, interest, amountAdditional], {
+            batch: true,
+          })
+        } else {
+          const toLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
+          if (!toLoan) throw new Error('toLoan not found')
+          const repay = { quantity, price, interest }
+
+          let borrow = { amount: principal }
+          repayTx = cent.pools.transferLoanDebt([poolId, loan.id, toLoan.id, repay, borrow], { batch: true })
+        }
+        return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
             if (batch.length) {
               return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch], options))
@@ -110,13 +127,17 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
       amountAdditional: '',
       interest: '',
       fees: [],
+      price: '',
+      quantity: '',
     },
     onSubmit: (values, actions) => {
-      let interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
-      let additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional, pool.currency.decimals)
-      let principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
+      const interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
+      const additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional, pool.currency.decimals)
+      const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
+      const price = Price.fromFloat(values.price)
+      const quantity = new BN(values.quantity.toString())
 
-      doRepayTransaction([loan.poolId, loan.id, principal, interest, additionalAmount], {
+      doRepayTransaction([loan.poolId, loan.id, principal, interest, additionalAmount, price, quantity], {
         account,
         forceProxyType: 'Borrow',
       })
@@ -211,7 +232,9 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
               </InlineFeedback>
             )}
             <Shelf justifyContent="space-between">
-              <Text variant="emphasized">Total amount</Text>
+              <Text variant="emphasized">
+                Total amount {repayForm.values.fees.find((fee) => fee.amount) ? '(incl. fees)' : null}
+              </Text>
               <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
             </Shelf>
             <Stack gap={1} px={1}>

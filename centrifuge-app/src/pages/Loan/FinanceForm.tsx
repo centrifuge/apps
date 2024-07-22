@@ -5,9 +5,9 @@ import Centrifuge, {
   CurrencyBalance,
   CurrencyMetadata,
   ExternalLoan,
-  ExternalPricingInfo,
   Loan as LoanType,
   Pool,
+  Price,
   WithdrawAddress,
   getCurrencyLocation,
 } from '@centrifuge/centrifuge-js'
@@ -31,7 +31,6 @@ import {
   Grid,
   GridRow,
   InlineFeedback,
-  NumberInput,
   Select,
   Shelf,
   Stack,
@@ -49,9 +48,10 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
 import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, max, maxPriceVariance, positiveNumber } from '../../utils/validation'
+import { combine, max, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
+import { FinanceTransferDebtFields } from './FinanceTransferDebt'
 import { SourceSelect } from './SourceSelect'
 import { isExternalLoan } from './utils'
 
@@ -62,8 +62,8 @@ type FinanceValues = {
   principal: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
   fees: { id: string; amount: '' | number | Decimal }[]
-  transferPrice: number | '' | Decimal
-  transferQuantity: number | '' | Decimal
+  price: number | '' | Decimal
+  quantity: number | '' | Decimal
 }
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
@@ -75,7 +75,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
         <Text variant="heading2">{isExternalLoan(loan) ? 'Purchase' : 'Finance'}</Text>
         <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="finance" />
         {isExternalLoan(loan) ? (
-          <ExternalFinanceForm loan={loan as ExternalLoan} />
+          <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
         ) : (
           <InternalFinanceForm loan={loan} source={source} />
         )}
@@ -95,15 +95,25 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    (cent) => (args: [poolId: string, loanId: string, principal: BN], options) => {
-      if (!account) throw new Error('No borrower')
-      const [poolId, loanId, principal] = args
-      if (source === 'reserve') {
-        return combineLatest([
-          cent.pools.financeLoan([poolId, loanId, principal], { batch: true }),
-          withdraw.getBatch(financeForm),
-          poolFees.getBatch(financeForm),
-        ]).pipe(
+    (cent) =>
+      (
+        args: [poolId: string, loanId: string, principal: BN, price: Price, quantity: BN, interest: CurrencyBalance],
+        options
+      ) => {
+        if (!account) throw new Error('No borrower')
+        const [poolId, loanId, principal, price, quantity, interest] = args
+        let financeTx
+        if (source === 'reserve') {
+          financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
+        } else {
+          const fromLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
+          if (!fromLoan) throw new Error('Target loan not found')
+          const repay = { quantity, price, interest }
+
+          let borrow = { amount: principal } // TODO:1 figure out what amount needs to be passed
+          financeTx = cent.pools.transferLoanDebt([poolId, fromLoan.id, loan.id, repay, borrow], { batch: true })
+        }
+        return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
           switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
             const batch = [...withdrawBatch, ...poolFeesBatch]
             let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
@@ -113,23 +123,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
             return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
           })
         )
-      } else {
-        const targetLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
-        if (!targetLoan) throw new Error('Target loan not found')
-        const price = CurrencyBalance.fromFloat(financeForm.values.transferPrice, pool.currency.decimals)
-        const interest = new BN(0)
-        const repay = { quantity: new BN(financeForm.values.transferQuantity.toString()), price, interest }
-
-        let borrow = { amount: principal }
-
-        return cent.pools.transferLoanDebt([poolId, targetLoan.id, loan.id, repay, borrow], { batch: true }).pipe(
-          switchMap(([transferTx]) => {
-            let tx = wrapProxyCallsForAccount(api, transferTx, account, 'Borrow')
-            return cent.wrapSignAndSend(api, tx, options)
-          })
-        )
-      }
-    },
+      },
     {
       onSuccess: () => {
         financeForm.resetForm()
@@ -142,12 +136,18 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       principal: '',
       withdraw: undefined,
       fees: [],
-      transferPrice: '',
-      transferQuantity: '',
+      price: '',
+      quantity: '',
     },
     onSubmit: (values, actions) => {
       const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
-      doFinanceTransaction([loan.poolId, loan.id, principal], { account, forceProxyType: 'Borrow' })
+      const price = Price.fromFloat(financeForm.values.price)
+      const interest = new CurrencyBalance(0, pool.currency.decimals)
+      const quantity = new BN(financeForm.values.quantity.toString())
+      doFinanceTransaction([loan.poolId, loan.id, principal, price, quantity, interest], {
+        account,
+        forceProxyType: 'Borrow',
+      })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -174,7 +174,10 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
           .add(financeForm.values.principal || 0)
       : financeForm.values.fees
           .reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))
-          .add(Dec(financeForm.values.transferQuantity || 0).mul(financeForm.values.transferPrice || 0))
+          .add(Dec(financeForm.values.quantity || 0).mul(financeForm.values.price || 0))
+
+  const isButtonDisabled =
+    source === 'reserve' ? !financeForm.values.principal : !financeForm.values.price || !financeForm.values.quantity
 
   return (
     <>
@@ -209,44 +212,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                 }}
               </Field>
             ) : (
-              <Shelf gap={2}>
-                <Box flex={1}>
-                  <Field validate={combine(positiveNumber())} name="transferQuantity">
-                    {({ field, meta }: FieldProps) => {
-                      return (
-                        <NumberInput
-                          {...field}
-                          label="Quantity"
-                          placeholder="0"
-                          errorMessage={meta.touched ? meta.error : undefined}
-                        />
-                      )
-                    }}
-                  </Field>
-                </Box>
-                <Box flex={2}>
-                  <Field
-                    name="transferPrice"
-                    validate={combine(
-                      positiveNumber(),
-                      maxPriceVariance(loans!.find((l) => l.id === source)!.pricing as ExternalPricingInfo)
-                    )}
-                  >
-                    {({ field, meta, form }: FieldProps) => {
-                      return (
-                        <CurrencyInput
-                          {...field}
-                          label="Settlement price"
-                          errorMessage={meta.touched ? meta.error : undefined}
-                          currency={pool.currency.symbol}
-                          onChange={(value) => form.setFieldValue('transferPrice', value)}
-                          decimals={8}
-                        />
-                      )
-                    }}
-                  </Field>
-                </Box>
-              </Shelf>
+              <FinanceTransferDebtFields poolId={loan.poolId} source={source} />
             )}
             {source === 'reserve' && withdraw.render()}
             {poolFees.render()}
@@ -257,14 +223,16 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               </InlineFeedback>
             )}
             <Shelf justifyContent="space-between">
-              <Text variant="emphasized">Total amount</Text>
+              <Text variant="emphasized">
+                Total amount {financeForm.values.fees.find((fee) => fee.amount) ? '(incl. fees)' : null}
+              </Text>
               <Text variant="emphasized">{formatBalance(totalAmount, pool?.currency.symbol, 2)}</Text>
             </Shelf>
             <Stack>
               <Button
                 type="submit"
                 loading={isFinanceLoading}
-                disabled={!withdraw.isValid || !poolFees.isValid(financeForm) || !financeForm.values.principal}
+                disabled={isButtonDisabled || !withdraw.isValid || !poolFees.isValid(financeForm)}
               >
                 Finance
               </Button>

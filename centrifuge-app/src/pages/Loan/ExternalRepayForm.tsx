@@ -1,10 +1,11 @@
-import { CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
+import { useLoans } from 'src/utils/useLoans'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -21,12 +22,13 @@ type RepayValues = {
   fees: { id: string; amount: number | '' | Decimal }[]
 }
 
-export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
+export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; destination: string }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
+  const loans = useLoans(loan.poolId)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
@@ -43,13 +45,24 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
         options
       ) => {
         const [loanId, poolId, quantity, interest, amountAdditional, price] = args
-        return combineLatest([
-          cent.getApi(),
-          cent.pools.repayExternalLoanPartially([poolId, loanId, quantity, interest, amountAdditional, price], {
-            batch: true,
-          }),
-          poolFees.getBatch(repayForm),
-        ]).pipe(
+        const principal = quantity.mul(price)
+        let repayTx
+        if (destination === 'reserve') {
+          repayTx = cent.pools.repayExternalLoanPartially(
+            [poolId, loanId, quantity, interest, amountAdditional, price],
+            {
+              batch: true,
+            }
+          )
+        } else {
+          const toLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
+          if (!toLoan) throw new Error('toLoan not found')
+          const repay = { quantity, price, interest }
+
+          let borrow = { amount: principal }
+          repayTx = cent.pools.transferLoanDebt([poolId, loan.id, toLoan.id, repay, borrow], { batch: true })
+        }
+        return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
             if (batch.length) {
               return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch], options))
@@ -194,25 +207,29 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                   }}
                 </Field>
               )}
-              <Field name="amountAdditional" validate={nonNegativeNumber()}>
-                {({ field, meta, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                      label="Additional amount"
-                      errorMessage={meta.touched ? meta.error : undefined}
-                      disabled={isRepayLoading}
-                      currency={pool?.currency.symbol}
-                      onChange={(value) => form.setFieldValue('amountAdditional', value)}
-                    />
-                  )
-                }}
-              </Field>
+              {destination === 'reserve' && (
+                <Field name="amountAdditional" validate={nonNegativeNumber()}>
+                  {({ field, meta, form }: FieldProps) => {
+                    return (
+                      <CurrencyInput
+                        {...field}
+                        value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                        label="Additional amount"
+                        errorMessage={meta.touched ? meta.error : undefined}
+                        disabled={isRepayLoading}
+                        currency={pool?.currency.symbol}
+                        onChange={(value) => form.setFieldValue('amountAdditional', value)}
+                      />
+                    )
+                  }}
+                </Field>
+              )}
               {poolFees.render()}
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
-                  <Text variant="emphasized">Total amount</Text>
+                  <Text variant="emphasized">
+                    Total amount {repayForm.values.fees.find((fee) => fee.amount) ? '(incl. fees)' : null}
+                  </Text>
                   <Text variant="emphasized">
                     {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                       ? formatBalance(
@@ -235,7 +252,8 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                     isRepayLoading ||
                     !poolFees.isValid(repayForm) ||
                     !repayForm.values.price ||
-                    !repayForm.values.quantity
+                    !repayForm.values.quantity ||
+                    Object.keys(repayForm.errors).length > 0
                   }
                   loading={isRepayLoading}
                 >
