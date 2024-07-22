@@ -1,4 +1,4 @@
-import { Stack, Text } from '@centrifuge/fabric'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { config } from '../config'
 import { useBasePath } from '../utils/useBasePath'
@@ -39,11 +39,11 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
             {`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
           </Text>
         </Stack>
-
-        <LoadBoundary>
-          <CardTotalValueLocked />
-        </LoadBoundary>
-
+        <Shelf width="50%">
+          <LoadBoundary>
+            <CardTotalValueLocked />
+          </LoadBoundary>
+        </Shelf>
         {isMedium && (
           <Stack alignItems="end">
             <MenuSwitch links={links} />
