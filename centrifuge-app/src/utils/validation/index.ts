@@ -38,6 +38,7 @@ export const positiveNumber = (err?: CustomError) => (val?: any) => {
 const maxVariationFraction = Dec(99.99) // 9999%
 
 export const maxPriceVariance = (pricing: ExternalPricingInfo, err?: CustomError) => (val?: any) => {
+  if (!pricing?.oracle.length) return ''
   let latestOraclePrice = pricing.oracle[0]
   pricing.oracle.forEach((price) => {
     if (price.timestamp > latestOraclePrice.timestamp) {
