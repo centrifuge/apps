@@ -1,6 +1,5 @@
 import { Box, FileUpload, Grid, ImageUpload, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps } from 'formik'
-import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Tooltips } from '../../components/Tooltips'
 import { isTestEnv } from '../../config'
@@ -13,7 +12,7 @@ type Props = {
 
 const createLabel = (label: string) => `${label}${isTestEnv ? '' : '*'}`
 
-export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false }) => {
+export function IssuerInput({ waitingForStoredIssuer = false }: Props) {
   return (
     <Grid columns={[1, 2]} equalColumns gap={2} rowGap={3}>
       <Box gridColumn={['span 1', 'span 2']}>

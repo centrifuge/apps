@@ -12,7 +12,14 @@ import { Tooltips } from '../../../components/Tooltips'
 import { usePoolPermissions, useSuitableAccounts } from '../../../utils/usePermissions'
 import { AddAddressInput } from './AddAddressInput'
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'InvestorAdmin' | 'LoanAdmin' | "PODReadAccess"
+type AdminRole =
+  | 'PoolAdmin'
+  | 'Borrower'
+  | 'PricingAdmin'
+  | 'LiquidityAdmin'
+  | 'InvestorAdmin'
+  | 'LoanAdmin'
+  | 'PODReadAccess'
 
 type Admin = {
   address: string
@@ -188,7 +195,7 @@ export function Admins({ poolId }: { poolId: string }) {
                     },
                     {
                       align: 'center',
-                      header: "Investor access",
+                      header: 'Investor access',
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.PODReadAccess`}

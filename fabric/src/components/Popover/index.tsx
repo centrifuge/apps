@@ -18,7 +18,7 @@ type PopoverProps = {
   placement?: AriaPositionProps['placement']
 }
 
-export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent, placement }) => {
+export function Popover({ renderTrigger, renderContent, placement }: PopoverProps) {
   const state = useOverlayTriggerState({})
   const overlayRef = React.useRef<HTMLDivElement>(null)
   const triggerRef = React.useRef<HTMLDivElement>(null)

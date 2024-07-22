@@ -6,7 +6,7 @@ import { formatBalance, formatPercentage } from '../../utils/formatting'
 
 type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string; precision?: number }
 
-export const CustomizedTooltip: React.FC<CustomizedTooltipProps> = ({ payload, currency, precision }) => {
+export function CustomizedTooltip({ payload, currency, precision }: CustomizedTooltipProps) {
   if (payload && payload?.length > 0) {
     return (
       <TooltipContainer>

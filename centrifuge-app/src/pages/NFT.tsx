@@ -2,9 +2,6 @@ import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconArrowRight, IconNft, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
-import { BuyDialog } from '../components/BuyDialog'
-import { RemoveListingDialog } from '../components/Dialogs/RemoveListingDialog'
-import { SellDialog } from '../components/Dialogs/SellDialog'
 import { TransferDialog } from '../components/Dialogs/TransferDialog'
 import { Identity } from '../components/Identity'
 import { LayoutBase } from '../components/LayoutBase'
@@ -26,17 +23,15 @@ export default function NFTPage() {
   )
 }
 
-const NFT: React.FC = () => {
+function NFT() {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
+  if (!collectionId || !nftId) throw new Error('NFT not found')
   const address = useAddress('substrate')
   const nft = useCentNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
-  const [sellOpen, setSellOpen] = React.useState(false)
-  const [buyOpen, setBuyOpen] = React.useState(false)
-  const [unlistOpen, setUnlistOpen] = React.useState(false)
   const centrifuge = useCentrifuge()
 
   const imageUrl = nftMetadata?.image ? centrifuge.metadata.parseMetadataUrl(nftMetadata.image) : ''
@@ -132,13 +127,6 @@ const NFT: React.FC = () => {
                     <Identity address={nft.owner} clickToCopy />
                   </Text>
                 </Stack>
-
-                {nft.sellPrice !== null && (
-                  <Stack gap={1}>
-                    <Text variant="label1">Price</Text>
-                    <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
-                  </Stack>
-                )}
               </>
             )}
 
@@ -147,22 +135,7 @@ const NFT: React.FC = () => {
                 address &&
                 (isSameAddress(nft.owner, address) ? (
                   <>
-                    {nft.sellPrice !== null ? (
-                      <Button onClick={() => setUnlistOpen(true)} small variant="secondary">
-                        Remove listing
-                      </Button>
-                    ) : (
-                      <Button onClick={() => setSellOpen(true)} small variant="secondary">
-                        Sell
-                      </Button>
-                    )}
-                    <Button
-                      onClick={() => setTransferOpen(true)}
-                      icon={IconArrowRight}
-                      small
-                      variant="secondary"
-                      disabled={nft.sellPrice !== null}
-                    >
+                    <Button onClick={() => setTransferOpen(true)} icon={IconArrowRight} small variant="secondary">
                       Transfer
                     </Button>
                     <TransferDialog
@@ -171,40 +144,8 @@ const NFT: React.FC = () => {
                       open={transferOpen}
                       onClose={() => setTransferOpen(false)}
                     />
-                    <SellDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={sellOpen}
-                      onClose={() => setSellOpen(false)}
-                    />
-                    <BuyDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={buyOpen}
-                      onClose={() => setBuyOpen(false)}
-                    />
-                    <RemoveListingDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={unlistOpen}
-                      onClose={() => setUnlistOpen(false)}
-                    />
                   </>
-                ) : (
-                  <>
-                    {nft.sellPrice !== null && (
-                      <Button onClick={() => setBuyOpen(true)} small>
-                        Buy
-                      </Button>
-                    )}
-                    <BuyDialog
-                      collectionId={collectionId}
-                      nftId={nftId}
-                      open={buyOpen}
-                      onClose={() => setBuyOpen(false)}
-                    />
-                  </>
-                ))}
+                ) : null)}
             </Stack>
           </Stack>
         </Shelf>

@@ -1,6 +1,6 @@
 import { AnchorButton, Box, Button, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Content, ContentHeader } from '../../components/Onboarding'
 import { OnboardingPool, useOnboarding } from '../../components/OnboardingProvider'
 import { OnboardingUser } from '../../types'
@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding<
     NonNullable<OnboardingUser>,
     NonNullable<OnboardingPool>
@@ -53,7 +53,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
             View subscription agreement
           </AnchorButton>
-          <Button onClick={() => history.push(`/pools/${poolId}`)}>Invest</Button>
+          <Button onClick={() => navigate(`/pools/${poolId}`)}>Invest</Button>
         </Shelf>
       </Content>
     )

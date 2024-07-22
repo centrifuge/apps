@@ -20,6 +20,7 @@ import {
 import { Field, FieldArray, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import React from 'react'
 import { useParams } from 'react-router'
+import { feeCategories } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatPercentage } from '../../utils/formatting'
@@ -37,6 +38,7 @@ type FormValues = {
   poolFees: {
     feeName: string
     percentOfNav: number | ''
+    category: string
     receivingAddress: string
     feeId: number | undefined
     type: 'fixed' | 'chargedUpTo'
@@ -45,6 +47,8 @@ type FormValues = {
 
 export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const { data: poolMetadata, isLoading } = usePoolMetadata(pool)
@@ -59,6 +63,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
         return {
           percentOfNav: feeChainData?.amounts.percentOfNav.toPercent().toNumber() ?? undefined,
           feeName: feeMetadata?.name || '',
+          category: feeMetadata?.category || '',
           receivingAddress: feeChainData?.destination || '',
           feeId: feeChainData.id || 0,
           type: feeChainData.type,
@@ -66,17 +71,11 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       })
   }, [poolFees, poolMetadata?.pool?.poolFees])
 
-  React.useEffect(() => {
-    if (!isLoading && isOpen) {
-      form.setValues({ poolFees: initialFormData || [] })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, initialFormData, isOpen])
-
-  const { execute: updateFeesTx, isLoading: updateFeeTxLoading } = useCentrifugeTransaction(
-    'Update fees',
-    (cent) => cent.pools.updateFees
-  )
+  const {
+    execute: updateFeesTx,
+    isLoading: updateFeeTxLoading,
+    reset,
+  } = useCentrifugeTransaction('Update fees', (cent) => cent.pools.updateFees)
 
   const form = useFormik<FormValues>({
     initialValues: {
@@ -125,6 +124,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
               amount: Rate.fromPercent(Dec(fee?.percentOfNav || 0)),
               feeId: fee.feeId,
               feeType: fee.type,
+              category: fee.category,
               limit: 'ShareOfPortfolioValuation',
               account: account.actingAddress,
               feePosition: 'Top of waterfall',
@@ -134,6 +134,14 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
       updateFeesTx([add, remove, poolId, poolMetadata as PoolMetadata], { account })
     },
   })
+
+  React.useEffect(() => {
+    if (!isLoading && isOpen) {
+      form.setValues({ poolFees: initialFormData || [] })
+      reset()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, initialFormData, isOpen])
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} px={0}>
@@ -191,20 +199,42 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                 borderBottomStyle="solid"
                               >
                                 <Stack gap={2} pb={3}>
-                                  <Field name={`poolFees.${index}.feeName`} validate={required()}>
-                                    {({ field, meta }: FieldProps) => {
-                                      return (
-                                        <TextInput
-                                          {...field}
-                                          label="Name"
-                                          disabled={!poolAdmin || updateFeeTxLoading}
-                                          errorMessage={(meta.touched && meta.error) || ''}
-                                        />
-                                      )
-                                    }}
-                                  </Field>
                                   <Shelf gap={2} alignItems="flex-start">
                                     <Stack flex="0 1 50%">
+                                      <Field name={`poolFees.${index}.feeName`} validate={required()}>
+                                        {({ field, meta }: FieldProps) => {
+                                          return (
+                                            <TextInput
+                                              {...field}
+                                              label="Name"
+                                              disabled={!poolAdmin || updateFeeTxLoading}
+                                              errorMessage={(meta.touched && meta.error) || ''}
+                                            />
+                                          )
+                                        }}
+                                      </Field>
+                                    </Stack>
+                                    <Stack flex="0 1 50%">
+                                      <Field name={`poolFees.${index}.category`}>
+                                        {({ field, form, meta }: FieldProps) => (
+                                          <Select
+                                            name="category"
+                                            label="Category"
+                                            onChange={(event) =>
+                                              form.setFieldValue(`poolFees.${index}.category`, event.target.value)
+                                            }
+                                            onBlur={field.onBlur}
+                                            disabled={!poolAdmin || updateFeeTxLoading}
+                                            errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                                            value={field.value}
+                                            options={feeCategories.map((cat) => ({ label: cat, value: cat }))}
+                                          />
+                                        )}
+                                      </Field>
+                                    </Stack>
+                                  </Shelf>
+                                  <Shelf gap={2} alignItems="flex-start">
+                                    <Stack flex="1 1 50%">
                                       <Field name={`poolFees.${index}.type`}>
                                         {({ field, form, meta }: FieldProps) => (
                                           <Select

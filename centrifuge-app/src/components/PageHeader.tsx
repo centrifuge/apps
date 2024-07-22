@@ -23,7 +23,7 @@ type Props = {
   children?: React.ReactNode
 }
 
-export const PageHeader: React.FC<Props> = ({
+export function PageHeader({
   title,
   titleAddition,
   subtitle,
@@ -34,7 +34,7 @@ export const PageHeader: React.FC<Props> = ({
   border = true,
   parent,
   children,
-}) => {
+}: Props) {
   const theme = useTheme()
 
   return (

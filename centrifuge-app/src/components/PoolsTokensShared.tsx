@@ -1,13 +1,12 @@
-import { Grid, Stack, Text } from '@centrifuge/fabric'
+import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
 import { config } from '../config'
+import { useBasePath } from '../utils/useBasePath'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { CardTotalValueLocked } from './CardTotalValueLocked'
 import { LayoutSection } from './LayoutBase/LayoutSection'
 import { LoadBoundary } from './LoadBoundary'
 import { MenuSwitch } from './MenuSwitch'
-import { PortfolioCta } from './PortfolioCta'
 
 type PoolsTokensSharedProps = {
   title: string
@@ -15,7 +14,7 @@ type PoolsTokensSharedProps = {
 }
 
 export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const basePath = useBasePath()
   const isMedium = useIsAboveBreakpoint('M')
 
   const links = [
@@ -41,14 +40,9 @@ export function PoolsTokensShared({ title, children }: PoolsTokensSharedProps) {
           </Text>
         </Stack>
 
-        <Grid gridTemplateColumns={['1fr', '1fr', '1fr', 'repeat(2, minmax(0, 1fr))']} gap={[2, 2, 2, 4]}>
-          <LoadBoundary>
-            <CardTotalValueLocked />
-          </LoadBoundary>
-          <LoadBoundary>
-            <PortfolioCta />
-          </LoadBoundary>
-        </Grid>
+        <LoadBoundary>
+          <CardTotalValueLocked />
+        </LoadBoundary>
 
         {isMedium && (
           <Stack alignItems="end">

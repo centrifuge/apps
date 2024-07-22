@@ -3,7 +3,7 @@ import { Dec } from './Decimal'
 import { useTinlakeLoans } from './tinlake/useTinlakePools'
 
 export function useLoans(poolId: string) {
-  const isTinlakePool = poolId.startsWith('0x')
+  const isTinlakePool = poolId?.startsWith('0x')
   const [centLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     suspense: true,
     enabled: !isTinlakePool,
@@ -14,10 +14,9 @@ export function useLoans(poolId: string) {
   return isTinlakePool ? tinlakeLoans : centLoans
 }
 
-export function useLoan(poolId: string, assetId: string) {
-  const loans = useLoans(poolId)
-
-  return loans && [...loans].find((loan) => loan.id === assetId)
+export function useLoan(poolId: string, assetId: string | undefined) {
+  const loans = useLoans(poolId || '')
+  return loans?.find((loan) => loan.id === assetId)
 }
 
 export function useAvailableFinancing(poolId: string, assetId: string) {

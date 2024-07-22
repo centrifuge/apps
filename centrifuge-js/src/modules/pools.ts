@@ -131,8 +131,8 @@ export type LoanInfoInput =
       discountRate: BN
       maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
       value: BN
-      maturityDate: Date
-      maturityExtensionDays: number
+      maturityDate: Date | null
+      maturityExtensionDays: number | null
       advanceRate: BN
       interestRate: BN
     }
@@ -351,8 +351,12 @@ export type Pool = {
   }
   nav: {
     lastUpdated: string
+    fees: CurrencyBalance
     total: CurrencyBalance
     aum: CurrencyBalance
+  }
+  fees: {
+    totalPaid: CurrencyBalance
   }
   parameters: {
     minEpochTime: number
@@ -693,7 +697,7 @@ export interface PoolMetadataInput {
     threshold: number
   }
 
-  poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; feeType: FeeTypes }[]
+  poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; category?: string; feeType: FeeTypes }[]
 
   poolType: 'open' | 'closed'
 }
@@ -718,6 +722,7 @@ export type PoolMetadata = {
       id: number
       name: string
       feePosition: 'Top of waterfall'
+      category?: string
     }[]
     newInvestmentsStatus?: Record<string, 'closed' | 'request' | 'open'>
     issuer: {
@@ -954,6 +959,7 @@ export type AddFee = {
     name: string
     amount: Rate
     account?: string
+    category?: string
     feePosition: 'Top of waterfall'
   }
   poolId: string
@@ -1344,10 +1350,10 @@ export function getPoolsModule(inst: Centrifuge) {
 
   function submitSolution(args: [poolId: string], options?: TransactionOptions) {
     const [poolId] = args
-    const $pool = getPool([poolId]).pipe(take(1))
-    const $poolOrders = getPoolOrders([poolId]).pipe(take(1))
     const $api = inst.getApi()
-    return combineLatest([$pool, $poolOrders]).pipe(
+
+    return combineLatest([getPool([poolId]), getPoolOrders([poolId])]).pipe(
+      take(options?.dryRun ? Infinity : 1),
       switchMap(([pool, poolOrders]) => {
         const solutionTranches = pool.tranches.map((tranche) => ({
           ratio: tranche.ratio,
@@ -1904,18 +1910,24 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.poolSystem.EpochExecuted.is(event) ||
             api.events.poolSystem.SolutionSubmitted.is(event) ||
             api.events.investments.InvestOrderUpdated.is(event) ||
-            api.events.investments.RedeemOrderUpdated.is(event)
+            api.events.investments.RedeemOrderUpdated.is(event) ||
+            api.events.loans.Borrowed.is(event) ||
+            api.events.loans.Repaid.is(event) ||
+            api.events.loans.DebtTransferred.is(event)
         )
         return !!event
       })
     )
 
-    const $query = inst.getSubqueryObservable<{ pools: { nodes: { id: string; createdAt: string }[] } }>(
+    const $query = inst.getSubqueryObservable<{
+      pools: { nodes: { id: string; createdAt: string; sumPoolFeesPaidAmount: string }[] }
+    }>(
       `query {
           pools {
             nodes {
               id
               createdAt
+              sumPoolFeesPaidAmount
             }
           }
         }`,
@@ -2048,7 +2060,7 @@ export function getPoolsModule(inst: Centrifuge) {
               // @ts-expect-error
               const rawNav = rawNavs && rawNavs[poolIndex]?.toJSON()
 
-              const mappedPool: Pool = {
+              const mappedPool: Omit<Pool, 'fees'> = {
                 id: poolId,
                 createdAt: null,
                 metadata,
@@ -2128,16 +2140,11 @@ export function getPoolsModule(inst: Centrifuge) {
                 },
                 nav: {
                   lastUpdated: lastUpdatedNav,
-                  total: rawNav?.total
-                    ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)
-                    : new CurrencyBalance(0, currency.decimals),
-                  aum: rawNav?.navAum
-                    ? new CurrencyBalance(hexToBN(rawNav.navAum), currency.decimals)
-                    : new CurrencyBalance(0, currency.decimals),
+                  fees: new CurrencyBalance(hexToBN(rawNav?.navFees), currency.decimals),
+                  total: new CurrencyBalance(hexToBN(rawNav?.total), currency.decimals),
+                  aum: new CurrencyBalance(hexToBN(rawNav?.navAum), currency.decimals),
                 },
-                value: rawNav?.total
-                  ? new CurrencyBalance(hexToBN(rawNav.total).add(hexToBN(rawNav.navFees)), currency.decimals)
-                  : new CurrencyBalance(0, currency.decimals),
+                value: new CurrencyBalance(hexToBN(rawNav?.total), currency.decimals),
               }
 
               return mappedPool
@@ -2154,6 +2161,9 @@ export function getPoolsModule(inst: Centrifuge) {
           const poolWithGqlData: Pool = {
             ...pool,
             createdAt: gqlPool?.createdAt ?? null,
+            fees: {
+              totalPaid: new CurrencyBalance(gqlPool?.sumPoolFeesPaidAmount ?? 0, pool.currency.decimals),
+            },
           }
           return poolWithGqlData
         })
@@ -3012,6 +3022,8 @@ export function getPoolsModule(inst: Centrifuge) {
               metadata
               name
               type
+              unrealizedProfitByPeriod
+              sumRealizedProfitFifo
             }
             fromAsset {
               id
@@ -3047,6 +3059,12 @@ export function getPoolsModule(inst: Centrifuge) {
           interestAmount: tx.interestAmount ? new CurrencyBalance(tx.interestAmount, currency.decimals) : undefined,
           realizedProfitFifo: tx.realizedProfitFifo
             ? new CurrencyBalance(tx.realizedProfitFifo, currency.decimals)
+            : undefined,
+          sumRealizedProfitFifo: tx.asset.sumRealizedProfitFifo
+            ? new CurrencyBalance(tx.asset.sumRealizedProfitFifo, currency.decimals)
+            : undefined,
+          unrealizedProfitByPeriod: tx.asset.unrealizedProfitByPeriod
+            ? new CurrencyBalance(tx.asset.unrealizedProfitByPeriod, currency.decimals)
             : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) satisfies AssetTransaction[]
@@ -3503,6 +3521,18 @@ export function getPoolsModule(inst: Centrifuge) {
   function getPoolOrders(args: [poolId: string]) {
     const [poolId] = args
 
+    const $events = inst.getEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) =>
+            api.events.poolSystem.EpochClosed.is(event) ||
+            api.events.poolSystem.EpochExecuted.is(event) ||
+            api.events.investments.InvestOrderUpdated.is(event) ||
+            api.events.investments.RedeemOrderUpdated.is(event)
+        )
+        return !!event
+      })
+    )
     return inst.getApi().pipe(
       switchMap(
         (api) => api.query.poolSystem.pool(poolId),
@@ -3558,7 +3588,8 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         return tranches
-      })
+      }),
+      repeatWhen(() => $events)
     )
   }
 
@@ -4130,6 +4161,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   id: parseInt(lastFeeId.toHuman() as string, 10) + index + 1,
                   name: metadata.fee.name,
                   feePosition: metadata.fee.feePosition,
+                  category: metadata.fee.category,
                 }
               }),
             ],
@@ -4244,7 +4276,6 @@ export function getPoolsModule(inst: Centrifuge) {
     repayAndCloseLoan,
     closeLoan,
     transferLoanDebt,
-    getPool,
     getPools,
     getBalances,
     getOrder,
@@ -4280,8 +4311,8 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 }
 
-function hexToBN(value: string | number) {
-  if (typeof value === 'number') return new BN(value)
+function hexToBN(value?: string | number | null) {
+  if (typeof value === 'number' || value == null) return new BN(value ?? 0)
   return new BN(value.toString().substring(2), 'hex')
 }
 
@@ -4408,7 +4439,6 @@ function getGroupByPeriod(date: Date, groupBy: GroupBy) {
     return `Q${quarter}-${date.getFullYear()}`
   } else if (groupBy === 'year') {
     return `${date.getFullYear()}`
-  } else {
-    throw new Error(`Unsupported groupBy: ${groupBy}`)
   }
+  throw new Error(`Unsupported groupBy: ${groupBy}`)
 }

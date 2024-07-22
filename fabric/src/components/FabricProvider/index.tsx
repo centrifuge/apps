@@ -6,7 +6,7 @@ type Props = React.PropsWithChildren<{
   theme: DefaultTheme
 }>
 
-export const FabricProvider: React.FC<Props> = ({ theme, children }) => {
+export function FabricProvider({ theme, children }: Props) {
   return (
     <ThemeProvider theme={theme}>
       <OverlayProvider>{children}</OverlayProvider>

@@ -1,5 +1,4 @@
 import { Box, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
@@ -16,6 +15,7 @@ export function IssuerPoolViewLoanTemplatePage() {
 
 export function ViewLoanTemplate() {
   const { pid: poolId, sid: templateId } = useParams<{ pid: string; sid: string }>()
+  if (!poolId || !templateId) throw new Error('Template not found')
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const { data: templateData } = useMetadata(`ipfs://${templateId}`)

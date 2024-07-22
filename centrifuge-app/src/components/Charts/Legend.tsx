@@ -1,5 +1,4 @@
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { Tooltips, TooltipsProps } from '../Tooltips'
 
 export type LegendProps = {

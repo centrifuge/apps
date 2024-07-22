@@ -124,6 +124,8 @@ export type SubqueryAssetTransaction = {
     metadata: string
     name: string
     type: AssetType
+    sumRealizedProfitFifo: string
+    unrealizedProfitByPeriod: string
   }
   fromAsset?: {
     id: string

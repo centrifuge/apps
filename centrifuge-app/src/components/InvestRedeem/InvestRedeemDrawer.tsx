@@ -88,7 +88,7 @@ const TokenPriceChart = React.memo(function TokenPriceChart({
       })
     }
     return tokenData
-  }, [dailyPoolStates, filter, trancheId])
+  }, [dailyPoolStates, pool?.tranches, trancheId])
 
   return (
     <PriceChart

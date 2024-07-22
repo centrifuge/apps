@@ -15,13 +15,7 @@ const StyledRangeInput = styled.input`
   margin: 0;
 `
 
-export const RangeInput: React.FC<RangeInputProps> = ({
-  label,
-  secondaryLabel,
-  disabled,
-  errorMessage,
-  ...inputProps
-}) => {
+export function RangeInput({ label, secondaryLabel, disabled, errorMessage, ...inputProps }: RangeInputProps) {
   return (
     <Stack gap={1} width="100%">
       <Shelf gap={1} alignItems="baseline">

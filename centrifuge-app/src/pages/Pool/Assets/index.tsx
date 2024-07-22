@@ -31,6 +31,9 @@ export function PoolDetailAssetsTab() {
 
 export function PoolDetailAssets() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
   const isTinlakePool = poolId.startsWith('0x')

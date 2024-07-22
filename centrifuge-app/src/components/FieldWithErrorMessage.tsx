@@ -5,7 +5,7 @@ type Props = FieldAttributes<any> & {
   label?: string | React.ReactElement
 }
 
-export const FieldWithErrorMessage: React.FC<Props> = (props) => {
+export function FieldWithErrorMessage(props: Props) {
   const [, meta] = useField(props)
   return <Field errorMessage={meta.touched ? meta.error : undefined} {...props} />
 }

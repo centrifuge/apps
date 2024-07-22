@@ -20,7 +20,7 @@ import { validate } from './validate'
 
 const MAX_TRANCHES = 3
 
-export const TrancheSection: React.FC = () => {
+export function TrancheSection() {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values, setFieldValue } = fmk
 
@@ -74,11 +74,7 @@ export const TrancheSection: React.FC = () => {
   )
 }
 
-export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; isUpdating?: boolean }> = ({
-  canRemove,
-  currency,
-  isUpdating,
-}) => {
+export function TrancheInput({ canRemove, isUpdating }: { canRemove?: boolean; isUpdating?: boolean }) {
   const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
 

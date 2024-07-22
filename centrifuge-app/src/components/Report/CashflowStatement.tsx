@@ -55,7 +55,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
       to.setHours(0, 0, 0, 0)
       return [new Date(startDate), to]
     }
-  }, [groupBy, startDate, endDate])
+  }, [groupBy, startDate, endDate, pool.createdAt])
 
   const poolStates = useAggregatedPoolStatesByGroup(
     pool.id,
@@ -140,7 +140,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool, poolFeeStates])
+  }, [poolStates, groupBy])
 
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
@@ -198,7 +198,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates])
+  }, [pool.currency.displayName, poolMetadata?.pool?.asset.class, poolStates])
 
   const netCashflowRecords: Row[] = React.useMemo(() => {
     return [
@@ -306,7 +306,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStatesNotAggregated, pool])
+  }, [poolStates, poolStatesNotAggregated, pool.currency.displayName])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 

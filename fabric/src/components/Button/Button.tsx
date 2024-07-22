@@ -16,7 +16,7 @@ const StyledButton = styled.button(
   })
 )
 
-export const Button: React.FC<ButtonProps> = ({
+export function Button({
   variant,
   small,
   icon,
@@ -28,7 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
   active,
   type = 'button',
   ...buttonProps
-}) => {
+}: ButtonProps) {
   return (
     <StyledButton type={type} disabled={loading || disabled} {...buttonProps}>
       <VisualButton
