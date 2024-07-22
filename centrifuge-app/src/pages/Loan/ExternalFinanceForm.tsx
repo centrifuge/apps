@@ -113,7 +113,16 @@ export function ExternalFinanceForm({ loan }: { loan: ExternalLoan }) {
               </Shelf>
             </Stack>
             <Stack px={1}>
-              <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
+              <Button
+                type="submit"
+                loading={isFinanceLoading}
+                disabled={
+                  !withdraw.isValid ||
+                  !poolFees.isValid(financeForm) ||
+                  !financeForm.values.price ||
+                  !financeForm.values.quantity
+                }
+              >
                 Purchase
               </Button>
             </Stack>

@@ -28,12 +28,10 @@ export type RepayValues = {
 export function RepayForm({ loan }: { loan: ActiveLoan }) {
   const [source, setSource] = React.useState<string>('reserve')
 
-  const title = ['oracle', 'cash'].includes(loan.pricing.valuationMethod) ? 'Sell' : 'Repay'
-
   return (
     <Stack gap={2}>
       <Stack as={Card} gap={2} p={2}>
-        <Text variant="heading2">{title}</Text>
+        <Text variant="heading2">{isExternalLoan(loan) ? 'Sell' : 'Repay'}</Text>
         <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="repay" />
         {source === 'reserve' && isExternalLoan(loan) ? (
           <ExternalRepayForm loan={loan} />
@@ -217,7 +215,16 @@ function InternalRepayForm({ loan }: { loan: ActiveLoan }) {
               <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
             </Shelf>
             <Stack gap={1} px={1}>
-              <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
+              <Button
+                type="submit"
+                disabled={
+                  isRepayAllLoading ||
+                  !poolFees.isValid(repayForm) ||
+                  !repayForm.values.principal ||
+                  !repayForm.values.interest
+                }
+                loading={isRepayLoading}
+              >
                 Repay asset
               </Button>
               <Button

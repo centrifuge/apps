@@ -143,7 +143,7 @@ export function useChargePoolFees(poolId: string, loanId: string) {
   return {
     render: () => <ChargeFeesFields pool={pool as Pool} borrower={borrower} />,
     isValid: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
-      return values.fees.every((fee) => !!fee.id && !!fee)
+      return values.fees.every((fee) => !!fee.id && !!fee && !!fee.amount)
     },
     getBatch: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
       if (!values.fees.length) return of([])

@@ -229,7 +229,17 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                 </Shelf>
               </Stack>
               <Stack gap={1} px={1}>
-                <Button type="submit" disabled={isRepayLoading} loading={isRepayLoading}>
+                <Button
+                  type="submit"
+                  disabled={
+                    isRepayLoading ||
+                    !poolFees.isValid(repayForm) ||
+                    !repayForm.values.interest ||
+                    !repayForm.values.price ||
+                    !repayForm.values.quantity
+                  }
+                  loading={isRepayLoading}
+                >
                   Sell asset
                 </Button>
               </Stack>

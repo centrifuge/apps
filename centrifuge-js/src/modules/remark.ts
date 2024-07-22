@@ -1,4 +1,4 @@
-import { of, switchMap } from 'rxjs'
+import { Observable, of, switchMap } from 'rxjs'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 
@@ -36,7 +36,10 @@ export function getRemarkModule(inst: CentrifugeBase) {
     )
   }
 
-  function remarkFeeTransaction(args: [poolId: string, loanId: string, feeTx: any], options?: TransactionOptions) {
+  function remarkFeeTransaction(
+    args: [poolId: string, loanId: string, feeTx: Observable<any>],
+    options?: TransactionOptions
+  ) {
     const $api = inst.getApi()
     const [poolId, loanId, feeTx] = args
     return $api.pipe(

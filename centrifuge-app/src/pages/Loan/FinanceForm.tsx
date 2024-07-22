@@ -212,7 +212,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               <Shelf gap={2}>
                 <Box flex={1}>
                   <Field validate={combine(positiveNumber())} name="transferQuantity">
-                    {({ field, meta, form }: FieldProps) => {
+                    {({ field, meta }: FieldProps) => {
                       return (
                         <NumberInput
                           {...field}
@@ -261,7 +261,11 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               <Text variant="emphasized">{formatBalance(totalAmount, pool?.currency.symbol, 2)}</Text>
             </Shelf>
             <Stack>
-              <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
+              <Button
+                type="submit"
+                loading={isFinanceLoading}
+                disabled={!withdraw.isValid || !poolFees.isValid(financeForm) || !financeForm.values.principal}
+              >
                 Finance
               </Button>
             </Stack>
