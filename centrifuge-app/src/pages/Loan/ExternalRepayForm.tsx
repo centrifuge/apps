@@ -5,10 +5,10 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
-import { useLoans } from 'src/utils/useLoans'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
+import { useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
@@ -237,7 +237,9 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                             .mul(Dec(repayForm.values.quantity || 0))
                             .sub(
                               repayForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
-                            ),
+                            )
+                            .add(repayForm.values.interest || 0)
+                            .add(repayForm.values.amountAdditional || 0),
                           pool?.currency.symbol,
                           2
                         )

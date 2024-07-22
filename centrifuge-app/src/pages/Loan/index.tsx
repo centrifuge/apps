@@ -235,7 +235,7 @@ function Loan() {
                         {section.name}
                       </Text>
 
-                      <TransactionTable
+                      {/* TODO: what is this doing here? <TransactionTable
                         transactions={borrowerAssetTransactions}
                         currency={pool.currency.symbol}
                         loanType={
@@ -248,7 +248,7 @@ function Loan() {
                         pricing={loan.pricing as PricingInfo}
                         maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
                         originationDate={originationDate ? new Date(originationDate) : undefined}
-                      />
+                      /> */}
                     </Stack>
                   </Card>
                 </React.Suspense>
