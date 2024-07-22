@@ -31,8 +31,8 @@ export default function PoolsPage() {
             <CardTotalValueLocked />
           </LoadBoundary>
         </Stack>
+        <PoolList />
       </LayoutSection>
-      <PoolList />
     </LayoutBase>
   )
 }
