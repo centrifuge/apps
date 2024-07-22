@@ -7,7 +7,7 @@ const SVG = styled.svg`
   height: auto;
 `
 
-export const LogoAltair: React.FC<Omit<React.SVGProps<SVGSVGElement>, 'ref'>> = (props) => {
+export function LogoAltair(props: Omit<React.SVGProps<SVGSVGElement>, 'ref'>) {
   return (
     <SVG viewBox="0 0 247 244" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path
@@ -91,7 +91,7 @@ export const LogoAltair: React.FC<Omit<React.SVGProps<SVGSVGElement>, 'ref'>> = 
   )
 }
 
-export const LogoAltairText: React.FC<Omit<React.SVGProps<SVGSVGElement>, 'ref'>> = (props) => {
+export function LogoAltairText() {
   return (
     <SVG width="124" height="80" viewBox="0 0 124 80" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g>

@@ -65,7 +65,7 @@ export const TransferTokensDrawer = ({ address, onClose, isOpen }: TransferToken
       }
     }
     return centBalances?.currencies.find((token) => token.currency.symbol === transferCurrencySymbol)
-  }, [centBalances, transferCurrencySymbol])
+  }, [centBalances, isNativeTransfer, transferCurrencySymbol])
 
   const tokenPrice = isNativeTransfer ? CFGPrice : 1
 
@@ -299,10 +299,7 @@ const SendToken = ({ address, currency, isNativeTransfer }: SendReceiveProps) =>
 const ReceiveToken = ({ address }: SendReceiveProps) => {
   const utils = useCentrifugeUtils()
   const [copied, setCopied] = React.useState(false)
-  const centAddress = useMemo(
-    () => (address && address.startsWith('0x') ? utils.formatAddress(address) : address),
-    [address]
-  )
+  const centAddress = address && address.startsWith('0x') ? utils.formatAddress(address) : address
 
   return (
     <Stack gap={2} px={1} py={2} backgroundColor="backgroundSecondary">
@@ -365,7 +362,7 @@ const CFGPriceChart = React.memo(function CFGPriceChart() {
       })
     }
     return tokenData
-  }, [tokenDayData, filter])
+  }, [tokenDayData?.data?.tokenDayDatas, currentCFGPrice])
 
   return <PriceChart data={data} currency="CFG" filter={filter} setFilter={setFilter} />
 })

@@ -13,7 +13,7 @@ type Props = {
   loan?: Loan | TinlakeLoan
 }
 
-export const AssetSummary: React.FC<Props> = ({ data, children, loan }) => {
+export function AssetSummary({ data, children, loan }: Props) {
   const theme = useTheme()
   return (
     <Stack bg={theme.colors.backgroundSecondary} pl={3}>

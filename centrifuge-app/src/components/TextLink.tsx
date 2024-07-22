@@ -39,6 +39,6 @@ ButtonTextLink.defaultProps = {
   type: 'button',
 }
 
-export const AnchorTextLink: React.FC<React.ComponentPropsWithoutRef<'a'>> = (props) => {
+export function AnchorTextLink(props: React.ComponentPropsWithoutRef<'a'>) {
   return <TextLink as="a" target="_blank" rel="noopener noreferrer" {...props} />
 }

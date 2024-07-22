@@ -82,9 +82,9 @@ export function Root() {
                 evmChains={evmChains}
                 subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
                 walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
-                showAdvancedAccounts={debugState.showAdvancedAccounts as any}
-                showTestNets={debugState.showTestNets as any}
-                showFinoa={debugState.showFinoa as any}
+                showAdvancedAccounts={debugState.showAdvancedAccounts}
+                showTestNets={debugState.showTestNets}
+                showFinoa={debugState.showFinoa}
               >
                 <SupportedBrowserBanner />
                 <OnboardingAuthProvider>
@@ -186,7 +186,7 @@ export function prefetchRoute(to: string | NavLinkProps['to']) {
   const route = pathname ? findRoute(pathname) : null
   const Comp = route?.route.element
   try {
-    if (Comp && '_init' in Comp && '_payload' in Comp) Comp._init(Comp._payload)
+    if (Comp && '_init' in Comp && '_payload' in Comp) (Comp as any)._init(Comp._payload)
   } catch (error) {
     console.error('Error prefetching route:', error)
   }

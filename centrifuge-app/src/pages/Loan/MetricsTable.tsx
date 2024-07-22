@@ -2,8 +2,8 @@ import { AnchorTextLink } from '@centrifuge/centrifuge-app/src/components/TextLi
 import { Box, Grid, Text } from '@centrifuge/fabric'
 
 type Metric = {
-  label: string
-  value: string
+  label: React.ReactNode
+  value: string | undefined
 }
 
 type Props = {

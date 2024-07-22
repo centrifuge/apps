@@ -31,7 +31,7 @@ export default function CollectionPage() {
 
 const COUNT_PER_PAGE = 16
 
-const Collection: React.FC = () => {
+function Collection() {
   const { cid: collectionId } = useParams<Params>()
   const collection = useCollection(collectionId)
 

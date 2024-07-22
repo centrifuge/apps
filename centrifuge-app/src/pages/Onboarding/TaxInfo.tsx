@@ -24,6 +24,7 @@ export const TaxInfo = ({ value, setValue, touched, error }: TaxInfoProps) => {
     if (uploadNewFile) {
       setValue(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploadNewFile, taxInfoData])
 
   const isCompleted = !!onboardingUser.taxDocument

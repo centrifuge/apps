@@ -1,8 +1,6 @@
 import { VisualButton, VisualButtonProps } from '@centrifuge/fabric'
-import * as React from 'react'
 import { NavLink, NavLinkProps } from 'react-router-dom'
 import styled from 'styled-components'
-import { useLinkIsActive } from '../utils/useLinkIsActive'
 import { prefetchRoute } from './Root'
 
 export type RouterLinkButtonProps = VisualButtonProps & NavLinkProps & { showActive?: boolean }
@@ -16,7 +14,7 @@ const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
   (props) => props.$disabled && { pointerEvents: 'none' }
 )
 
-export const RouterLinkButton: React.FC<RouterLinkButtonProps> = ({
+export function RouterLinkButton({
   variant,
   small,
   icon,
@@ -25,11 +23,8 @@ export const RouterLinkButton: React.FC<RouterLinkButtonProps> = ({
   loading,
   loadingMessage,
   children,
-  showActive = false,
   ...routeProps
-}) => {
-  const isActive = useLinkIsActive(routeProps)
-
+}: RouterLinkButtonProps) {
   return (
     <StyledLink $disabled={loading || disabled} {...routeProps} onMouseOver={() => prefetchRoute(routeProps.to)}>
       <VisualButton
@@ -40,7 +35,6 @@ export const RouterLinkButton: React.FC<RouterLinkButtonProps> = ({
         disabled={disabled}
         loading={loading}
         loadingMessage={loadingMessage}
-        active={showActive && isActive}
       >
         {children}
       </VisualButton>

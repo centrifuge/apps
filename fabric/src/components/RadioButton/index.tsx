@@ -11,7 +11,7 @@ export type RadioButtonProps = React.InputHTMLAttributes<HTMLInputElement> & {
   textStyle?: string
 }
 
-export const RadioButton: React.VFC<RadioButtonProps> = ({ label, errorMessage, textStyle, ...radioProps }) => {
+export function RadioButton({ label, errorMessage, textStyle, ...radioProps }: RadioButtonProps) {
   return (
     <label>
       <Shelf as={Text} gap={1} alignItems="baseline">

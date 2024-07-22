@@ -44,6 +44,7 @@ export function useTransactionFeeEstimate<T extends Array<any>>(
       const signer = selectedAccount?.signer || provider
       await doTransaction(address, signer, args, options)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [doTransaction, selectedAccount, address]
   )
 

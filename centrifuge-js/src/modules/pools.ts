@@ -131,8 +131,8 @@ export type LoanInfoInput =
       discountRate: BN
       maxBorrowAmount: 'upToTotalBorrowed' | 'upToOutstandingDebt'
       value: BN
-      maturityDate: Date
-      maturityExtensionDays: number
+      maturityDate: Date | null
+      maturityExtensionDays: number | null
       advanceRate: BN
       interestRate: BN
     }

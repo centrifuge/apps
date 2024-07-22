@@ -95,7 +95,7 @@ export function useDailyPortfolioValue(address: string, rangeValue?: number) {
           )
         })
     }
-  }, [dailyTrancheStatesByTrancheId, rangeValue, transactionsByTrancheId])
+  }, [dailyTrancheStatesByTrancheId, daysSinceFirstTx, rangeDays, rangeValue, transactionsByTrancheId])
 }
 
 const getPriceAtDate = (

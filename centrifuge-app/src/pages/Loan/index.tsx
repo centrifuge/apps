@@ -112,6 +112,7 @@ function FinanceButton({ loan }: { loan: LoanType }) {
 function Loan() {
   const theme = useTheme()
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
+  if (!poolId || !loanId) throw new Error('Loan no found')
   const isTinlakePool = poolId?.startsWith('0x')
   const basePath = useBasePath()
   const pool = usePool(poolId)
@@ -293,7 +294,7 @@ function Loan() {
                         poolType={poolMetadata?.pool?.asset.class}
                         decimals={pool.currency.decimals}
                         pricing={loan.pricing as PricingInfo}
-                        maturityDate={new Date(loan.pricing.maturityDate)}
+                        maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
                         originationDate={originationDate ? new Date(originationDate) : undefined}
                       />
                     </Stack>

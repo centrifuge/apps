@@ -1,10 +1,6 @@
 import { Box, Button, Dialog, IconInfo, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 
-export const InvestmentDisclaimerDialog: React.FC<{
-  open: boolean
-  onClose: () => void
-}> = ({ open, onClose }) => {
+export function InvestmentDisclaimerDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Dialog
       title="Investment disclaimer"

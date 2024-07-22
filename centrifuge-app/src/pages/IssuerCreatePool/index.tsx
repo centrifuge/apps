@@ -154,7 +154,7 @@ const initialValues: CreatePoolValues = {
   poolType: 'open',
 }
 
-const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
+function PoolIcon({ icon, children }: { icon?: File | null; children: string }) {
   const [uri, setUri] = React.useState('')
   React.useEffect(() => {
     ;(async () => {
@@ -549,6 +549,7 @@ function CreatePoolForm() {
     if (form.values.poolName) {
       form.setFieldValue('tranches', [createEmptyTranche(form.values.poolName)])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values.poolName])
 
   return (

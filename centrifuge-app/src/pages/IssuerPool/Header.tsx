@@ -16,6 +16,7 @@ type Props = {
 
 export function IssuerHeader({ actions, children }: Props) {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const cent = useCentrifuge()
@@ -65,6 +66,7 @@ export function IssuerHeader({ actions, children }: Props) {
 
 export function IssuerPoolHeader({ actions }: Props) {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
   const basePath = useBasePath()
   const isTinlakePool = pool.id.startsWith('0x')

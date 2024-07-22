@@ -13,7 +13,6 @@ import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
-const CashDragChart = React.lazy(() => import('../../../components/Charts/CashDragChart'))
 const LiquidityTransactionsSection = React.lazy(() => import('../../../components/LiquidityTransactionsSection'))
 
 export function PoolDetailLiquidityTab() {

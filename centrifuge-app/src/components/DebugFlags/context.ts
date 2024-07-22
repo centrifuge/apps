@@ -1,13 +1,12 @@
 import * as React from 'react'
-import { debug, flagsConfig, Key } from './config'
+import { debug, flagsConfig, genericFlagsConfig, Key } from './config'
 
 export type Flags = {
-  [T in Key]: (typeof flagsConfig)[T] extends { options: { [key: string]: infer Y } }
-    ? Y
+  [T in Key]: (typeof flagsConfig)[T] extends { options: { [key: string]: string } }
+    ? string
+    : (typeof flagsConfig)[T]['default'] extends boolean
+    ? boolean
     : (typeof flagsConfig)[T]['default']
-}
-export type FlagsState = {
-  [T in Key]: (typeof flagsConfig)[T]['default']
 }
 
 interface Context {
@@ -16,20 +15,20 @@ interface Context {
   unregister: (id: number) => void
 }
 
-export const defaultFlags: Flags = Object.entries(flagsConfig).reduce((obj, [k, v]) => {
-  obj[k] = 'options' in v ? v.options[v.default as string] : v.default
+export const defaultFlags: Flags = Object.entries(genericFlagsConfig).reduce((obj, [k, v]) => {
+  obj[k] = 'options' in v ? v.options[v.default] : v.default
   return obj
 }, {} as any)
 
-let persistedState: FlagsState | null = null
+let persistedState: Flags | null = null
 try {
   const stored = localStorage.getItem('debugFlags') ?? ''
-  persistedState = JSON.parse(stored[0] === '{' ? stored : '') as FlagsState
+  persistedState = JSON.parse(stored[0] === '{' ? stored : '') as Flags
 } catch (e) {
   //
 }
 const flagKeys = Object.keys(flagsConfig)
-export const initialFlagsState: FlagsState = persistedState
+export const initialFlagsState: Flags = persistedState
   ? Object.entries(persistedState)
       .filter(([k]) => flagKeys.includes(k))
       .reduce((obj, [k, v]) => {

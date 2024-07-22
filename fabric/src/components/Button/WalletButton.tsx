@@ -38,7 +38,7 @@ const IdenticonWrapper = styled(Flex)({
   pointerEvents: 'none',
 })
 
-export const WalletButton: React.VFC<WalletButtonProps> = ({
+export function WalletButton({
   icon = 'polkadot',
   small = true,
   disabled,
@@ -51,7 +51,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
   alias,
   balance,
   ...buttonProps
-}) => {
+}: WalletButtonProps) {
   return (
     <StyledButton type="button" disabled={loading || disabled} {...buttonProps}>
       <VisualButton

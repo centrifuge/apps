@@ -46,14 +46,14 @@ export const columns = [
     align: 'left',
     header: 'Asset',
     cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
-      return fromAssetId && toAssetId && activeAssetId == fromAssetId.split('-')[1] ? (
+      return fromAssetId && toAssetId && activeAssetId === fromAssetId.split('-')[1] ? (
         <Text as="span" variant="body3">
           {fromAssetName} &rarr;{' '}
           <RouterTextLink target="_self" to={`assets/${toAssetId?.split('-')[1]}`}>
             {toAssetName}
           </RouterTextLink>
         </Text>
-      ) : fromAssetId && toAssetId && activeAssetId == toAssetId.split('-')[1] ? (
+      ) : fromAssetId && toAssetId && activeAssetId === toAssetId.split('-')[1] ? (
         <Text as="span" variant="body3">
           <RouterTextLink target="_self" to={`assets/${fromAssetId?.split('-')[1]}`}>
             {fromAssetName}
@@ -70,7 +70,7 @@ export const columns = [
             {toAssetName}
           </RouterTextLink>
         </Text>
-      ) : activeAssetId != assetId?.split('-')[1] ? (
+      ) : activeAssetId !== assetId?.split('-')[1] ? (
         <Text as="span" variant="body3">
           <RouterTextLink target="_self" to={`assets/${assetId?.split('-')[1]}`}>
             {assetName || `Asset ${assetId?.split('-')[1]}`}
