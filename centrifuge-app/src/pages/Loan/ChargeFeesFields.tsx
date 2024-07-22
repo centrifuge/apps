@@ -55,7 +55,6 @@ export const ChargeFeesFields = ({
                                 return {
                                   label: `${feeName} - ${f.amounts.percentOfNav.toPercent().toString()}%`,
                                   value: f.id.toString(),
-                                  disabled: form.values.fees.some((fee) => fee.id === f.id.toString()),
                                 }
                               }),
                             ]}
@@ -113,7 +112,7 @@ export const ChargeFeesFields = ({
                     )
                   })}
                 </Stack>
-                {chargableFees?.length && form.values.fees.length < chargableFees.length ? (
+                {chargableFees?.length ? (
                   <Box p={0}>
                     <Button
                       icon={<IconPlusCircle size="20px" />}
@@ -143,7 +142,9 @@ export function useChargePoolFees(poolId: string, loanId: string) {
   const api = useCentrifugeApi()
   return {
     render: () => <ChargeFeesFields pool={pool as Pool} borrower={borrower} />,
-    isValid: true,
+    isValid: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
+      return values.fees.every((fee) => !!fee.id && !!fee)
+    },
     getBatch: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
       if (!values.fees.length) return of([])
       const fees = values.fees.flatMap((fee) => {
@@ -152,13 +153,18 @@ export function useChargePoolFees(poolId: string, loanId: string) {
         if (!account) throw new Error('No account')
         const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
         const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
-        const feeTx = cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee])
-        return wrapProxyCallsForAccount(
-          api,
-          cent.remark.remarkFeeTransaction([poolId, loanId, feeTx], { batch: true }),
-          borrower,
-          'Transfer'
-        )
+        const feeTx = cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee], { batch: true })
+        // can't decode value [Object object] of type object
+        return [
+          of(
+            wrapProxyCallsForAccount(
+              api,
+              api.tx.remarks.remark([{ Loan: [poolId, loanId] }], feeTx),
+              borrower,
+              'Transfer'
+            )
+          ),
+        ]
       })
       return combineLatest(fees)
     },
