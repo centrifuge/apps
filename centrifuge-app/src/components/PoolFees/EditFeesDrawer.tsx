@@ -47,6 +47,8 @@ type FormValues = {
 
 export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const { data: poolMetadata, isLoading } = usePoolMetadata(pool)

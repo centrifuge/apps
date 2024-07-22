@@ -15,7 +15,7 @@ import {
   TextWithPlaceholder,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ethConfig } from '../../config'
 import { formatBalance } from '../../utils/formatting'
@@ -221,7 +221,7 @@ function OnboardingButton() {
   const pool = usePool(state.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const trancheName = state.trancheId.split('-')[1] === '0' ? 'junior' : 'senior'
   const centPoolInvestStatus = metadata?.onboarding?.tranches?.[state?.trancheId]?.openForOnboarding ? 'open' : 'closed'
@@ -253,7 +253,7 @@ function OnboardingButton() {
     } else if (metadata?.onboarding?.externalOnboardingUrl) {
       window.open(metadata.onboarding.externalOnboardingUrl)
     } else {
-      history.push(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
+      navigate(`/onboarding?poolId=${state.poolId}&trancheId=${state.trancheId}`)
     }
   }
 

@@ -6,7 +6,7 @@ import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
-import { AnchorTextLink } from '../TextLink'
+import { RouterTextLink } from '../TextLink'
 
 type Row = {
   type: string
@@ -46,41 +46,35 @@ export const columns = [
     align: 'left',
     header: 'Asset',
     cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
-      return fromAssetId && toAssetId && activeAssetId == fromAssetId.split('-')[1] ? (
+      return fromAssetId && toAssetId && activeAssetId === fromAssetId.split('-')[1] ? (
         <Text as="span" variant="body3">
           {fromAssetName} &rarr;{' '}
-          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
+          <RouterTextLink target="_self" to={`assets/${toAssetId?.split('-')[1]}`}>
             {toAssetName}
-          </AnchorTextLink>
+          </RouterTextLink>
         </Text>
-      ) : fromAssetId && toAssetId && activeAssetId == toAssetId.split('-')[1] ? (
+      ) : fromAssetId && toAssetId && activeAssetId === toAssetId.split('-')[1] ? (
         <Text as="span" variant="body3">
-          <AnchorTextLink
-            target="_self"
-            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
-          >
+          <RouterTextLink target="_self" to={`assets/${fromAssetId?.split('-')[1]}`}>
             {fromAssetName}
-          </AnchorTextLink>{' '}
+          </RouterTextLink>{' '}
           &rarr; {toAssetName}
         </Text>
       ) : fromAssetId && toAssetId ? (
         <Text as="span" variant="body3">
-          <AnchorTextLink
-            target="_self"
-            href={`/pools/${fromAssetId?.split('-')[0]}/assets/${fromAssetId?.split('-')[1]}`}
-          >
+          <RouterTextLink target="_self" to={`assets/${fromAssetId?.split('-')[1]}`}>
             {fromAssetName}
-          </AnchorTextLink>{' '}
+          </RouterTextLink>{' '}
           &rarr;{' '}
-          <AnchorTextLink target="_self" href={`/pools/${toAssetId?.split('-')[0]}/assets/${toAssetId?.split('-')[1]}`}>
+          <RouterTextLink target="_self" to={`assets/${toAssetId?.split('-')[1]}`}>
             {toAssetName}
-          </AnchorTextLink>
+          </RouterTextLink>
         </Text>
-      ) : activeAssetId != assetId?.split('-')[1] ? (
+      ) : activeAssetId !== assetId?.split('-')[1] ? (
         <Text as="span" variant="body3">
-          <AnchorTextLink target="_self" href={`/pools/${assetId?.split('-')[0]}/assets/${assetId?.split('-')[1]}`}>
+          <RouterTextLink target="_self" to={`assets/${assetId?.split('-')[1]}`}>
             {assetName || `Asset ${assetId?.split('-')[1]}`}
-          </AnchorTextLink>
+          </RouterTextLink>
         </Text>
       ) : (
         <Text as="span" variant="body3">
@@ -295,7 +289,7 @@ export const TransactionHistoryTable = ({
       <DataTable data={tableData} columns={columns} />
       {transactions?.length! > 8 && preview && (
         <Text variant="body2" color="textSecondary">
-          <AnchorTextLink href={`/pools/${poolId}/transactions`}>View all</AnchorTextLink>
+          <RouterTextLink to={`/pools/${poolId}/transactions`}>View all</RouterTextLink>
         </Text>
       )}
     </Stack>

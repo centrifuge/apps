@@ -13,7 +13,6 @@ import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
-const CashDragChart = React.lazy(() => import('../../../components/Charts/CashDragChart'))
 const LiquidityTransactionsSection = React.lazy(() => import('../../../components/LiquidityTransactionsSection'))
 
 export function PoolDetailLiquidityTab() {
@@ -29,6 +28,9 @@ export function PoolDetailLiquidityTab() {
 
 export function PoolDetailLiquidity() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const { colors } = useTheme()
   const [showReserveForm, setShowReserveForm] = React.useState(false)

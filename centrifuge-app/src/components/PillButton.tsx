@@ -42,7 +42,7 @@ const Pill = styled.button<{ variant?: 'small' | 'regular' }>(
 
 type PillProps = PropsOf<typeof Pill> & { variant?: 'small' | 'regular' }
 
-export const PillButton: React.FC<PillProps> = ({ children, variant = 'regular', ...rest }) => {
+export function PillButton({ children, variant = 'regular', ...rest }: PillProps) {
   return (
     <Pill {...rest} variant={variant}>
       <Text variant="interactive2" fontSize={variant === 'regular' ? '14px' : '12px'} color="inherit">
@@ -52,8 +52,6 @@ export const PillButton: React.FC<PillProps> = ({ children, variant = 'regular',
   )
 }
 
-export const AnchorPillButton: React.FC<React.ComponentPropsWithoutRef<'a'> & { variant?: 'small' | 'regular' }> = (
-  props
-) => {
+export function AnchorPillButton(props: React.ComponentPropsWithoutRef<'a'> & { variant?: 'small' | 'regular' }) {
   return <PillButton as="a" target="_blank" rel="noopener noreferrer" {...props} />
 }

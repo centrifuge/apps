@@ -5,8 +5,8 @@ import { Tooltips } from '../../components/Tooltips'
 import { formatBalance } from '../../utils/formatting'
 import { useDailyPoolStates, usePool, usePoolFees } from '../../utils/usePools'
 
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Box, Divider, IconClockForward, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { CurrencyBalance, CurrencyMetadata } from '@centrifuge/centrifuge-js'
+import { Divider, IconClockForward, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import React from 'react'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
@@ -14,6 +14,7 @@ import { NavManagementAssetTable } from './NavManagementAssetTable'
 
 export default function NavManagementOverviewPage() {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   return (
     <LayoutBase>
       <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
@@ -24,13 +25,15 @@ export default function NavManagementOverviewPage() {
         </Stack>
       </LayoutSection>
       <NavManagementPageSummary poolId={pid} />
-      <NavOverviewCard poolId={pid} />
+      <LayoutSection pt={3}>
+        <NavOverviewCard poolId={pid} />
+      </LayoutSection>
       <NavManagementAssetTable key={pid} poolId={pid} />
     </LayoutBase>
   )
 }
 
-export const NavManagementPageSummary = ({ poolId }: { poolId: string }) => {
+export function NavManagementPageSummary({ poolId }: { poolId: string }) {
   const pool = usePool(poolId)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -75,7 +78,7 @@ export const NavManagementPageSummary = ({ poolId }: { poolId: string }) => {
   )
 }
 
-export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
+export function NavOverviewCard({ poolId }: { poolId: string }) {
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const today = new Date()
@@ -99,62 +102,71 @@ export const NavOverviewCard = ({ poolId }: { poolId: string }) => {
     return lastUpdatedSumBorrowedAmountByPeriod && todaySumBorrowedAmountByPeriod
       ? new BN(todaySumBorrowedAmountByPeriod).sub(new BN(lastUpdatedSumBorrowedAmountByPeriod))
       : new BN(0)
-  }, [dailyPoolStates])
+  }, [dailyPoolStates, pool?.nav.lastUpdated])
 
-  const pendingNav = React.useMemo(() => {
-    return dailyPoolStates && dailyPoolStates?.length
-      ? new BN(dailyPoolStates.reverse()[0].portfolioValuation).add(pool.reserve.total)
-      : new BN(0)
-  }, [dailyPoolStates, pool.reserve.total])
   return (
-    <Box>
-      <Stack
-        m="22px"
-        p="16px"
-        borderRadius="6px"
-        maxWidth="444px"
-        style={{ background: 'linear-gradient(0deg, #FEFEFE 0%, #FAFAFA 100%)' }}
-      >
-        <Shelf justifyContent="space-between" my={2}>
-          <Text variant="body2" color="textPrimary">
-            Current NAV
-          </Text>
-          <Text variant="body2">{formatBalance(pool?.nav.total, pool.currency.displayName, 2)}</Text>
-        </Shelf>
-        <Divider borderColor="statusInfoBg" />
-        <Shelf justifyContent="space-between" mt={2} mb={1}>
+    <VisualNavCard
+      currency={pool.currency}
+      current={pool.nav.total.toFloat()}
+      change={changeInValuation ? new CurrencyBalance(changeInValuation, pool.currency.decimals).toFloat() : 0}
+      pendingFees={pendingFees.toFloat()}
+      pendingNav={pool.nav.total.toFloat() - pendingFees.toFloat()}
+    />
+  )
+}
+
+export function VisualNavCard({
+  currency,
+  current,
+  change,
+  pendingFees,
+  pendingNav,
+}: {
+  currency: Pick<CurrencyMetadata, 'displayName' | 'decimals'>
+  current: number
+  change: number
+  pendingFees: number
+  pendingNav: number
+}) {
+  return (
+    <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+      <Shelf justifyContent="space-between">
+        <Text variant="body2" color="textPrimary">
+          Current NAV
+        </Text>
+        <Text variant="body2">{formatBalance(current, currency.displayName, 2)}</Text>
+      </Shelf>
+      <Divider borderColor="statusInfoBg" />
+      <Stack gap={1}>
+        <Shelf justifyContent="space-between">
           <Text variant="body2" color="textPrimary">
             Change in asset valuation
           </Text>
-          <Text variant="body2" color="statusOk">
-            {formatBalance(
-              changeInValuation ? new CurrencyBalance(changeInValuation, pool.currency.decimals) : 0,
-              pool.currency.displayName,
-              2
-            )}
+          <Text variant="body2" color={change >= 0 ? 'statusOk' : 'statusCritical'}>
+            {formatBalance(change, currency.displayName, 2)}
           </Text>
         </Shelf>
-        <Shelf justifyContent="space-between" mb={2}>
+        <Shelf justifyContent="space-between">
           <Text variant="body2" color="textPrimary">
             Pending fees
           </Text>
           <Text variant="body2" color="statusCritical">
-            -{formatBalance(pendingFees, pool.currency.displayName, 2)}
-          </Text>
-        </Shelf>
-        <Divider borderColor="statusInfoBg" />
-        <Shelf justifyContent="space-between" my={2}>
-          <Shelf gap={1}>
-            <IconClockForward color="textSelected" size="iconSmall" />
-            <Text variant="body2" color="textSelected">
-              Pending NAV
-            </Text>
-          </Shelf>
-          <Text variant="body2" color="textSelected">
-            {formatBalance(new CurrencyBalance(pendingNav, pool.currency.decimals), pool.currency.displayName, 2)}
+            -{formatBalance(pendingFees, currency.displayName, 2)}
           </Text>
         </Shelf>
       </Stack>
-    </Box>
+      <Divider borderColor="statusInfoBg" />
+      <Shelf justifyContent="space-between">
+        <Shelf gap={1}>
+          <IconClockForward color="textSelected" size="iconSmall" />
+          <Text variant="body2" color="textSelected">
+            Pending NAV
+          </Text>
+        </Shelf>
+        <Text variant="body2" color="textSelected">
+          {formatBalance(pendingNav, currency.displayName, 2)}
+        </Text>
+      </Shelf>
+    </Stack>
   )
 }

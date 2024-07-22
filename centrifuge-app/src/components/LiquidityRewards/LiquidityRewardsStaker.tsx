@@ -3,8 +3,8 @@ import * as React from 'react'
 import { millisecondsToDays } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { LightButton } from '../InvestRedeem/LightButton'
-import { useActiveEpochData } from './hooks'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
+import { useActiveEpochData } from './hooks'
 
 export function LiquidityRewardsStaker() {
   const activeEpochData = useActiveEpochData()

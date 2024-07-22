@@ -1,4 +1,4 @@
-import { Route, Switch, useRouteMatch } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { PoolDetailAssetsTab } from './Assets'
 import { PoolDetailLiquidityTab } from './Liquidity'
 import { PoolDetailOverviewTab } from './Overview'
@@ -6,15 +6,14 @@ import { PoolFeesTab } from './PoolFees'
 import { PoolDetailReportingTab } from './Reporting'
 
 export default function PoolDetailPage() {
-  const { path } = useRouteMatch()
   return (
-    <Switch>
-      <Route path={`${path}/reporting/:report`} component={PoolDetailReportingTab} />
-      <Route path={`${path}/reporting`} component={PoolDetailReportingTab} />
-      <Route path={`${path}/liquidity`} component={PoolDetailLiquidityTab} />
-      <Route path={`${path}/assets`} component={PoolDetailAssetsTab} />
-      <Route path={`${path}/fees`} component={PoolFeesTab} />
-      <Route path={path} component={PoolDetailOverviewTab} />
-    </Switch>
+    <Routes>
+      <Route path="reporting/:report" element={<PoolDetailReportingTab />} />
+      <Route path="reporting" element={<PoolDetailReportingTab />} />
+      <Route path="liquidity" element={<PoolDetailLiquidityTab />} />
+      <Route path="assets" element={<PoolDetailAssetsTab />} />
+      <Route path="fees" element={<PoolFeesTab />} />
+      <Route path="/" element={<PoolDetailOverviewTab />} />
+    </Routes>
   )
 }

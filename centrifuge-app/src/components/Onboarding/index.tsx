@@ -25,6 +25,6 @@ export {
   Legend,
   Notification,
   NotificationBar,
-  ValidEmailTooltip,
   PoolBranding,
+  ValidEmailTooltip,
 }

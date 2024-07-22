@@ -9,7 +9,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { TransactionRequest, TransactionResponse } from '@ethersproject/providers'
 import * as React from 'react'
-import { lastValueFrom, Observable, tap } from 'rxjs'
+import { Observable, lastValueFrom, tap } from 'rxjs'
 
 export function useEvmTransaction<T extends Array<any>>(
   title: string,

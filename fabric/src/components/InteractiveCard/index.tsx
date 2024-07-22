@@ -25,7 +25,7 @@ type OwnProps = {
 
 export type InteractiveCardProps = OwnProps & Omit<CardProps, 'variant'>
 
-export const InteractiveCard: React.FC<InteractiveCardProps> = (props) => {
+export function InteractiveCard(props: InteractiveCardProps) {
   const {
     variant = 'default',
     icon,

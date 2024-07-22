@@ -356,7 +356,7 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
   const withdrawAddresses = ao?.transferAllowlist ?? []
 
-  if (!isLocalAsset) {
+  if (!isLocalAsset || !withdrawAddresses.length) {
     if (!withdrawAddresses.length)
       return {
         render: () => null,

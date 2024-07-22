@@ -9,7 +9,7 @@ export default {
   title: 'Components/Dialog',
 }
 
-export const Default: React.FC = () => {
+export function Default() {
   const [open, setOpen] = React.useState(false)
   return (
     <>

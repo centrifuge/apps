@@ -1,6 +1,6 @@
 import { Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { FilterButton } from '../FilterButton'
 import { SortChevrons } from '../SortChevrons'
 import { SEARCH_KEYS } from './config'
@@ -19,7 +19,7 @@ type Sorting = {
 }
 
 export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: SortButtonProps) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { pathname, search } = useLocation()
 
   const sorting: Sorting = React.useMemo(() => {
@@ -29,7 +29,7 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
       isActive: searchParams.get(SEARCH_KEYS.SORT_BY) === searchKey,
       direction: searchParams.get(SEARCH_KEYS.SORT),
     }
-  }, [search])
+  }, [search, searchKey])
 
   function handleClick() {
     const restSearchParams = new URLSearchParams(search)
@@ -41,7 +41,7 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
       [SEARCH_KEYS.SORT]: sorting.direction === 'asc' ? 'desc' : 'asc',
     })
 
-    history.push({
+    navigate({
       pathname,
       search: `?${searchParams}${restSearchParams.size > 0 ? `&${restSearchParams}` : ''}`,
     })
@@ -59,7 +59,6 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
             ? `Sort ${label} descending`
             : `Sort ${label} ascending`
         }
-        aria-live
         style={{ justifySelf }}
       >
         <FilterButton forwardedAs="span" variant="body3">
@@ -83,7 +82,6 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
           ? `Sort ${label} descending`
           : `Sort ${label} ascending`
       }
-      aria-live
       style={{ justifySelf }}
     >
       {label}

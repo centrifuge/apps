@@ -1,5 +1,4 @@
 import { Box, IconCheckCircle, Shelf, Spinner } from '@centrifuge/fabric'
-import React from 'react'
 import { Container, Content, ContentHeader, Header, Layout } from '../../components/Onboarding'
 import { config } from '../../config'
 import { useVerifyEmail } from './queries/useVerifyEmail'

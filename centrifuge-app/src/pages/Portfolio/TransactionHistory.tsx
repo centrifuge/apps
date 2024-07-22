@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useParams } from 'react-router'
 import { LayoutBase } from '../../components/LayoutBase'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'

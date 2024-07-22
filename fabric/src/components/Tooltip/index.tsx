@@ -70,7 +70,7 @@ const Container = styled(Stack)<{ pointer: PlacementAxis }>`
   }
 `
 
-export const Tooltip: React.FC<TooltipProps> = ({
+export function Tooltip({
   title,
   body,
   children,
@@ -79,7 +79,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   bodyWidth,
   bodyPadding,
   ...textProps
-}) => {
+}: TooltipProps) {
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const overlayRef = React.useRef<HTMLDivElement>(null)
 

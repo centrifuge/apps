@@ -11,7 +11,7 @@ export type TabsProps = {
   children: (React.ReactElement<TabsItemProps> | string | boolean | null | undefined)[]
 }
 
-export const Tabs: React.FC<TabsProps> = ({ selectedIndex, onChange, children }) => {
+export function Tabs({ selectedIndex, onChange, children }: TabsProps) {
   return (
     <Shelf role="tablist">
       {React.Children.map(children, (child, index) =>
@@ -67,13 +67,7 @@ type TabsItemPrivateProps = TabsItemProps & {
   ariaLabel?: string
 }
 
-export const TabsItem: React.FC<TabsItemProps> = ({
-  children,
-  active,
-  onClick,
-  ariaLabel,
-  ...rest
-}: TabsItemPrivateProps) => {
+export function TabsItem({ children, active, onClick, ariaLabel, ...rest }: TabsItemPrivateProps) {
   return (
     <StyledTabsItem onClick={onClick} $active={active} role="tab" aria-label={ariaLabel} {...rest}>
       <Text variant="interactive1" color="inherit">

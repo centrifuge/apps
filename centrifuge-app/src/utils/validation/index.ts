@@ -144,7 +144,7 @@ const calcISINCheck = (code: string) => {
   }
   // group by odd and even, multiply digits from group containing rightmost character by 2
   for (let i = 0; i < conv.length; i++) {
-    digits += (parseInt(conv[i]) * (i % 2 == (conv.length % 2 != 0 ? 0 : 1) ? 2 : 1)).toString()
+    digits += (parseInt(conv[i]) * (i % 2 === (conv.length % 2 !== 0 ? 0 : 1) ? 2 : 1)).toString()
   }
   // sum all digits
   for (let i = 0; i < digits.length; i++) {

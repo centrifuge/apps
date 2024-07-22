@@ -23,6 +23,9 @@ export function IssuerPoolAccessPage() {
 
 function IssuerPoolAccess() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { editAdminConfig } = useDebugFlags()
 
   return (

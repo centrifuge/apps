@@ -10,6 +10,8 @@ import { CashflowsChart } from '../Charts/CashflowsChart'
 
 export const Cashflows = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
   const loans = useLoans(poolId)

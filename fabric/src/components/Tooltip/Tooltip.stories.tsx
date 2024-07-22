@@ -6,7 +6,7 @@ export default {
   title: 'Components/Tooltip',
 }
 
-export const Default: React.FC = () => {
+export function Default() {
   return (
     <Shelf gap={2} pt={8}>
       <Tooltip title="Optional tooltip title" body="Tooltip body">

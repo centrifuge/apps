@@ -3,7 +3,7 @@ import { useAddress, useCentrifugeQuery, useCentrifugeTransaction } from '@centr
 import { Box, Button, IconCheckInCircle, IconSwitch, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
-import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
 import { CopyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { usePoolAdmin } from '../../utils/usePermissions'
@@ -50,13 +50,15 @@ type PoolFeeChange = {
 
 export function PoolFees() {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const match = useRouteMatch<{ path: string }>(`/:path`)
-  const basePath = `/${match?.params.path ?? 'pools'}/${poolId}`
+  if (!poolId) throw new Error('Pool not found')
+
+  const { path } = useParams<{ path: string }>()
+  const basePath = `/${path ?? 'pools'}/${poolId}`
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const { search, pathname } = useLocation()
-  const { push } = useHistory()
+  const navigate = useNavigate()
   const params = new URLSearchParams(search)
   const [isChargeDrawerOpen, setIsChargeDrawerOpen] = React.useState(false)
   const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false)
@@ -272,14 +274,14 @@ export function PoolFees() {
         isOpen={isChargeDrawerOpen}
         onClose={() => {
           setIsChargeDrawerOpen(false)
-          push(pathname)
+          navigate(pathname)
         }}
       />
       <EditFeesDrawer
         isOpen={isEditDrawerOpen}
         onClose={() => {
           setIsEditDrawerOpen(false)
-          push(pathname)
+          navigate(pathname)
         }}
       />
       <PageSummary data={pageSummaryData} />

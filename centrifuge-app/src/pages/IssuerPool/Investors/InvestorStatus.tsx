@@ -39,6 +39,9 @@ export function InvestorStatus() {
     substrate: { evmChainId: substrateEvmChainId },
   } = useWallet()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const [address, setAddress] = React.useState('')
   const [chain, setChain] = React.useState<number | ''>('')
   const validator = chain ? isEvmAddress : isAddress
@@ -78,13 +81,16 @@ export function InvestorStatus() {
     const domains = chain ? [[chain, validAddress]] : undefined
 
     if (isAllowed) {
-      execute([poolId, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
+      execute([poolId!, [], [[centAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow, domains as any] }]]], {
         account,
       })
     } else {
-      execute([poolId, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []], {
-        account,
-      })
+      execute(
+        [poolId!, [[centAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow, domains as any] }]], []],
+        {
+          account,
+        }
+      )
     }
     setPendingTrancheId(trancheId)
   }
@@ -188,11 +194,7 @@ export function InvestorStatus() {
   )
 }
 
-const InvestedCell: React.FC<{ address: string; poolId: string; trancheId: string }> = ({
-  poolId,
-  trancheId,
-  address,
-}) => {
+function InvestedCell({ address, poolId, trancheId }: { address: string; poolId: string; trancheId: string }) {
   const order = useOrder(poolId, trancheId, address)
   const balances = useBalances(address)
   const hasBalance = balances && findBalance(balances.tranches, { Tranche: [poolId, trancheId] })

@@ -1,11 +1,11 @@
 import { Button } from '@centrifuge/fabric'
 import React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 
 export const GlobalStatus = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { onboardingUser, refetchOnboardingUser, isOnboardingExternally } = useOnboarding()
 
   const onFocus = () => {
@@ -68,7 +68,7 @@ export const GlobalStatus = () => {
         <ActionBar>
           <Button
             onClick={() => {
-              history.push('/pools')
+              navigate('/pools')
             }}
           >
             View Pools

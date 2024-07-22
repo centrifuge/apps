@@ -1,7 +1,6 @@
+import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { CurrencyMetadata, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
-import * as React from 'react'
-import { useRouteMatch } from 'react-router'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
@@ -79,9 +78,8 @@ const columns: Column[] = [
   },
 ]
 
-export const TokenList: React.FC<Props> = ({ tokens }) => {
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
-
+export function TokenList({ tokens }: Props) {
+  const basePath = useBasePath()
   return (
     <DataTable
       data={tokens}
@@ -95,7 +93,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
   )
 }
 
-const TokenName: React.VFC<RowProps> = ({ token }) => {
+function TokenName({ token }: RowProps) {
   return (
     <Shelf gap="2" width="100%">
       <Eththumbnail show={token.poolId.startsWith('0x')} size="small">
@@ -108,7 +106,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
   )
 }
 
-const AssetClass: React.VFC<RowProps> = ({ token }) => {
+function AssetClass({ token }: RowProps) {
   const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
     <TextWithPlaceholder isLoading={isLoading} variant="body2">

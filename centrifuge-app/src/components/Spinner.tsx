@@ -1,6 +1,5 @@
 import { Shelf, ShelfProps } from '@centrifuge/fabric'
 import { ThemeSize } from '@centrifuge/fabric/dist/utils/types'
-import * as React from 'react'
 import styled, { keyframes, useTheme } from 'styled-components'
 
 const rotate = keyframes`

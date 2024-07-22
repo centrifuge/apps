@@ -35,7 +35,6 @@ export type Key =
   | 'showOrderExecution'
   | 'address'
   | 'evmAddress'
-  | 'batchMintNFTs'
   | 'persistDebugFlags'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
@@ -51,7 +50,7 @@ export type Key =
   | 'showTokenYields'
   | 'showOracleTx'
 
-export const flagsConfig: Record<Key, DebugFlagConfig> = {
+export const flagsConfig = {
   address: {
     default: '',
     type: 'text',
@@ -62,10 +61,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   },
   alternativeTheme: {
     alwaysShow: true,
-    default: false,
-    type: 'checkbox',
-  },
-  batchMintNFTs: {
     default: false,
     type: 'checkbox',
   },
@@ -140,4 +135,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     type: 'checkbox',
   },
-}
+} satisfies Record<Key, DebugFlagConfig>
+
+export const genericFlagsConfig = flagsConfig as Record<string, DebugFlagConfig>
