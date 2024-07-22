@@ -11,7 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
+import { combine, maxPriceVariance, positiveNumber, required } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { useWithdraw } from './FinanceForm'
 
@@ -150,7 +150,7 @@ export function ExternalFinanceFields({
   )
   return (
     <>
-      <Field name="quantity" validate={combine(nonNegativeNumber())}>
+      <Field name="quantity" validate={combine(required(), positiveNumber())}>
         {({ field, meta, form }: FieldProps) => {
           return (
             <CurrencyInput

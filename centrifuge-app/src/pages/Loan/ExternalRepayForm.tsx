@@ -10,7 +10,7 @@ import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, positiveNumber, required } from '../../utils/validation'
+import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 
 type RepayValues = {
@@ -85,8 +85,8 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
-      const interest = CurrencyBalance.fromFloat(values.interest, pool.currency.decimals)
-      const amountAdditional = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
+      const interest = CurrencyBalance.fromFloat(values?.interest || 0, pool.currency.decimals)
+      const amountAdditional = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity || 0)
 
       doRepayTransaction([loan.poolId, loan.id, quantity, interest, amountAdditional, price], {
@@ -121,7 +121,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
         (debt.gt(0) ? (
           <FormikProvider value={repayForm}>
             <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-              <Field validate={combine(positiveNumber())} name="quantity">
+              <Field validate={combine(required(), positiveNumber())} name="quantity">
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
@@ -139,7 +139,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
               <Field
                 validate={combine(
                   required(),
-                  positiveNumber(),
+                  nonNegativeNumber(),
                   (val) => {
                     const num = val instanceof Decimal ? val.toNumber() : val
                     const repayAmount = Dec(num).mul(repayForm.values.quantity)
@@ -172,7 +172,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                 }}
               </Field>
               {loan.outstandingInterest.toDecimal().gt(0) && (
-                <Field validate={combine(positiveNumber())} name="interest">
+                <Field validate={nonNegativeNumber()} name="interest">
                   {({ field, meta, form }: FieldProps) => {
                     return (
                       <CurrencyInput
@@ -194,7 +194,7 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                   }}
                 </Field>
               )}
-              <Field name="amountAdditional">
+              <Field name="amountAdditional" validate={nonNegativeNumber()}>
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
@@ -234,13 +234,12 @@ export function ExternalRepayForm({ loan }: { loan: ExternalLoan }) {
                   disabled={
                     isRepayLoading ||
                     !poolFees.isValid(repayForm) ||
-                    !repayForm.values.interest ||
                     !repayForm.values.price ||
                     !repayForm.values.quantity
                   }
                   loading={isRepayLoading}
                 >
-                  Sell asset
+                  Sell
                 </Button>
               </Stack>
             </Stack>
