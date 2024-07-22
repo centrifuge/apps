@@ -49,7 +49,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
       to.setHours(0, 0, 0, 0)
       return [new Date(startDate), to]
     }
-  }, [groupBy, startDate, endDate])
+  }, [groupBy, startDate, endDate, pool.createdAt])
 
   const poolStates = usePoolStatesByGroup(
     pool.id,
@@ -96,7 +96,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool])
+  }, [poolStates])
 
   const assetValuationRecords: Row[] = React.useMemo(() => {
     return [
@@ -137,7 +137,7 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates])
+  }, [pool.currency.displayName, poolStates])
 
   const trancheRecords: Row[] = React.useMemo(() => {
     return [

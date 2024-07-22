@@ -29,7 +29,7 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
       isActive: searchParams.get(SEARCH_KEYS.SORT_BY) === searchKey,
       direction: searchParams.get(SEARCH_KEYS.SORT),
     }
-  }, [search])
+  }, [search, searchKey])
 
   function handleClick() {
     const restSearchParams = new URLSearchParams(search)
@@ -59,7 +59,6 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
             ? `Sort ${label} descending`
             : `Sort ${label} ascending`
         }
-        aria-live
         style={{ justifySelf }}
       >
         <FilterButton forwardedAs="span" variant="body3">
@@ -83,7 +82,6 @@ export function SortButton({ label, searchKey, tooltip, justifySelf = 'end' }: S
           ? `Sort ${label} descending`
           : `Sort ${label} ascending`
       }
-      aria-live
       style={{ justifySelf }}
     >
       {label}

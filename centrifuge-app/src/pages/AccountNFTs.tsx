@@ -21,7 +21,7 @@ export default function AccountNFTsPage() {
 
 const COUNT_PER_PAGE = 16
 
-const AccountNFTs: React.FC = () => {
+function AccountNFTs() {
   const address = useAddress('substrate')
   const nfts = useAccountNfts(address)
   const collections = useCollections()

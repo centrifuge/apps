@@ -1,10 +1,7 @@
 import { Rate } from '@centrifuge/centrifuge-js'
-import { getChainInfo, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Card, Grid, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import capitalize from 'lodash/capitalize'
 import { formatPercentage } from '../../utils/formatting'
-import { useActiveDomains } from '../../utils/useLiquidityPools'
-import { useInvestorTransactions } from '../../utils/usePools'
 
 type Props = {
   numOfTranches: number
@@ -17,23 +14,7 @@ type Props = {
   }[]
 }
 
-export const PoolStructure = ({ numOfTranches, poolId, poolStatus, poolFees }: Props) => {
-  const investorTransactions = useInvestorTransactions(poolId)
-  const { data: domains } = useActiveDomains(poolId)
-  const {
-    evm: { chains },
-  } = useWallet()
-
-  const firstInvestment = investorTransactions?.find(
-    (investorTransaction) => investorTransaction.type === 'INVEST_EXECUTION'
-  )?.timestamp
-  const deployedLpChains =
-    domains
-      ?.filter((domain) => domain.isActive === true)
-      .map((domain) => {
-        return getChainInfo(chains, domain.chainId).name
-      }) ?? []
-
+export const PoolStructure = ({ numOfTranches, poolStatus, poolFees }: Props) => {
   const metrics = [
     {
       metric: 'Pool type',
@@ -47,10 +28,6 @@ export const PoolStructure = ({ numOfTranches, poolId, poolStatus, poolFees }: P
       metric: 'Tranche structure',
       value: numOfTranches === 1 ? 'Unitranche' : `${numOfTranches} tranches`,
     },
-    // {
-    //   metric: 'First investment',
-    //   value: firstInvestment ? formatDate(firstInvestment) : '-',
-    // },
     ...poolFees.map((fee) => {
       return {
         metric: fee.name,

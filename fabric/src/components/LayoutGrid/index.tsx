@@ -6,7 +6,7 @@ import { Grid, GridProps } from '../Grid'
 
 export type LayoutGridProps = Omit<GridProps, 'columns' | 'equalColumns' | 'gap'>
 
-export const LayoutGrid: React.FC<LayoutGridProps> = ({ children, ...rest }) => {
+export function LayoutGrid({ children, ...rest }: LayoutGridProps) {
   return (
     <Grid columns={[4, 4, 8, 12]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']} {...rest}>
       {children}
@@ -19,7 +19,7 @@ type ItemProps = BoxProps & {
   push?: ResponsiveValue<number>
 }
 
-export const LayoutGridItem: React.FC<ItemProps> = ({ span, push, children, ...rest }) => {
+export function LayoutGridItem({ span, push, children, ...rest }: ItemProps) {
   return (
     <>
       {push && (

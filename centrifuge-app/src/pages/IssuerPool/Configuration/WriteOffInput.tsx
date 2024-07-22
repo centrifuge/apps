@@ -5,7 +5,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { validate } from '../../IssuerCreatePool/validate'
 import { WriteOffGroupValues } from './WriteOffGroups'
 
-export const WriteOffInput: React.FC = () => {
+export function WriteOffInput() {
   const fmk = useFormikContext<WriteOffGroupValues>()
   const { values } = fmk
 

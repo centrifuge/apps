@@ -165,6 +165,7 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
 
 function IssuerCreateLoan() {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
   const navigate = useNavigate()
@@ -273,6 +274,17 @@ function IssuerCreateLoan() {
           interestRate: Rate.fromPercent(values.pricing.notional === 0 ? 0 : values.pricing.interestRate),
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
           withLinearPricing: values.pricing.withLinearPricing,
+        }
+      } else if (values.pricing.valuationMethod === 'outstandingDebt') {
+        pricingInfo = {
+          valuationMethod: values.pricing.valuationMethod,
+          maxBorrowAmount: values.pricing.maxBorrowAmount,
+          value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
+          maturityExtensionDays:
+            values.pricing.maturity === 'fixedWithExtension' ? values.pricing.maturityExtensionDays : null,
+          advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+          interestRate: Rate.fromPercent(values.pricing.interestRate),
         }
       } else {
         pricingInfo = {

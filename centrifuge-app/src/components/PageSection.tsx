@@ -32,7 +32,7 @@ const CollapseButton = styled(Shelf)`
   }
 `
 
-export const PageSection: React.FC<Props> = ({
+export function PageSection({
   title,
   titleAddition,
   subtitle,
@@ -40,7 +40,7 @@ export const PageSection: React.FC<Props> = ({
   collapsible,
   defaultOpen = false,
   children,
-}) => {
+}: Props) {
   const [open, setOpen] = React.useState(defaultOpen)
   return (
     <Stack

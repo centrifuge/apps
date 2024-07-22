@@ -14,6 +14,7 @@ import { NavManagementAssetTable } from './NavManagementAssetTable'
 
 export default function NavManagementOverviewPage() {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   return (
     <LayoutBase>
       <LayoutSection backgroundColor="backgroundSecondary" pt={5} pb={3}>
@@ -101,7 +102,7 @@ export function NavOverviewCard({ poolId }: { poolId: string }) {
     return lastUpdatedSumBorrowedAmountByPeriod && todaySumBorrowedAmountByPeriod
       ? new BN(todaySumBorrowedAmountByPeriod).sub(new BN(lastUpdatedSumBorrowedAmountByPeriod))
       : new BN(0)
-  }, [dailyPoolStates])
+  }, [dailyPoolStates, pool?.nav.lastUpdated])
 
   return (
     <VisualNavCard

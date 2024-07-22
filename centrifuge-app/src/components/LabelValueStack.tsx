@@ -10,7 +10,7 @@ type Props = {
   }
 }
 
-export const LabelValueStack: React.FC<Props> = ({ label, value, renderAs }) => {
+export function LabelValueStack({ label, value, renderAs }: Props) {
   return (
     <Stack gap="4px">
       <Text as={renderAs?.label} variant="label2">

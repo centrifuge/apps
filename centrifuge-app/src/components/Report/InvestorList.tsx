@@ -136,6 +136,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
         const addressValue = row.value[1] as string
         return isAddress(address) && isSameAddress(address, addressValue)
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [investors, network, pool, address])
 
   const dataUrl = React.useMemo(() => {

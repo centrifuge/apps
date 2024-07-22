@@ -7,6 +7,7 @@ import { LoanTemplate } from '../../types'
 import { Dec } from '../../utils/Decimal'
 import { daysBetween, formatDate, isValidDate } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrowerAssetTransactions, usePoolMetadata } from '../../utils/usePools'
@@ -17,7 +18,7 @@ type Props = {
   loan: Loan | TinlakeLoan
 }
 
-export const KeyMetrics = ({ pool, loan }: Props) => {
+export function KeyMetrics({ pool, loan }: Props) {
   const { data: poolMetadata } = usePoolMetadata(pool)
   const borrowerAssetTransactions = useBorrowerAssetTransactions(pool.id, loan.id)
 
@@ -26,7 +27,7 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
   const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
 
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
-  const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -126,14 +127,18 @@ export const KeyMetrics = ({ pool, loan }: Props) => {
     loan.pricing.valuationMethod === 'oracle' &&
     loan.pricing.notional.gtn(0)
       ? [
-          sumRealizedProfitFifo && {
-            label: 'Realized P&L',
-            value: formatBalance(sumRealizedProfitFifo, pool.currency.symbol),
-          },
-          unrealizedProfitAtMarketPrice && {
-            label: 'Unrealized P&L',
-            value: formatBalance(unrealizedProfitAtMarketPrice, pool.currency.symbol),
-          },
+          sumRealizedProfitFifo
+            ? {
+                label: 'Realized P&L',
+                value: formatBalance(sumRealizedProfitFifo, pool.currency.symbol),
+              }
+            : (null as never),
+          unrealizedProfitAtMarketPrice
+            ? {
+                label: 'Unrealized P&L',
+                value: formatBalance(unrealizedProfitAtMarketPrice, pool.currency.symbol),
+              }
+            : (null as never),
         ].filter(Boolean)
       : []),
     ...(loan.pricing.maturityDate &&

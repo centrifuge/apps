@@ -56,7 +56,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     }
 
     return getCSVDownloadUrl(assetSnapshots as any)
-  }, [assetSnapshots, pool.currency.symbol])
+  }, [assetSnapshots])
 
   const data: ChartData[] = React.useMemo(() => {
     if (!asset || !assetSnapshots) return []
@@ -79,7 +79,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     const today = new Date()
     today.setDate(today.getDate() + 1)
     const maturity = new Date(asset.pricing.maturityDate ?? '')
-    if (today.getTime() >= maturity.getTime() || assetSnapshots.length == 0) return historic
+    if (today.getTime() >= maturity.getTime() || assetSnapshots.length === 0) return historic
 
     const days = Math.floor((maturity.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)) + 2
 
@@ -116,7 +116,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
         }
       }),
     ]
-  }, [asset, assetSnapshots, activeFilter])
+  }, [asset, assetSnapshots])
 
   const priceRange = React.useMemo(() => {
     if (!data) return [0, 100]

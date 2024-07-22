@@ -1,13 +1,17 @@
 import { Box, Dialog, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 
-export const FaucetConfirmationDialog: React.FC<{
+export function FaucetConfirmationDialog({
+  hash,
+  open,
+  onClose,
+  error,
+}: {
   hash: string
   open: boolean
-  error?: string
   onClose: () => void
-}> = ({ hash, open, onClose, error }) => {
+  error?: string
+}) {
   return (
     <Dialog isOpen={open} onClose={onClose} width="684px" title="Claim submitted">
       <Box display="flex">

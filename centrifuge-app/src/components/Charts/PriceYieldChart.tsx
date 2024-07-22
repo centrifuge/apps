@@ -88,10 +88,7 @@ function PriceYieldChart({
   ) : null
 }
 
-const CustomLegend: React.VFC<{
-  data: ChartData
-  poolId: string
-}> = ({ data, poolId }) => {
+function CustomLegend({ data, poolId }: { data: ChartData; poolId: string }) {
   const theme = useTheme()
   const pool = usePool(poolId)
 

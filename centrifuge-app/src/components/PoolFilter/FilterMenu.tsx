@@ -19,16 +19,11 @@ export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuPro
 
   const form = React.useRef<HTMLFormElement>(null)
 
-  const restSearchParams = React.useMemo(() => {
-    const searchParams = new URLSearchParams(search)
-    searchParams.delete(searchKey)
-    return searchParams
-  }, [search])
+  const restSearchParams = new URLSearchParams(search)
+  restSearchParams.delete(searchKey)
 
-  const selectedOptions = React.useMemo(() => {
-    const searchParams = new URLSearchParams(search)
-    return searchParams.getAll(searchKey)
-  }, [search])
+  const searchParams = new URLSearchParams(search)
+  const selectedOptions = searchParams.getAll(searchKey)
 
   function handleChange() {
     const formData = new FormData(form.current ?? undefined)
@@ -61,7 +56,7 @@ export function FilterMenu({ label, options, searchKey, tooltip }: FilterMenuPro
     <Box position="relative">
       <Popover
         placement="bottom left"
-        renderTrigger={(props, ref, state) => {
+        renderTrigger={(props, ref) => {
           return (
             <Box ref={ref}>
               <Tooltip body={tooltip} {...props} style={{ display: 'block' }}>

@@ -14,10 +14,11 @@ type Props = {
   actions?: React.ReactNode
 }
 
-export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
+export function PoolDetailHeader({ actions }: Props) {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not foud')
   const basePath = useBasePath()
-  const { state } = useLocation<{ token: string }>()
+  const { state } = useLocation()
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const isTinlakePool = pool.id.startsWith('0x')

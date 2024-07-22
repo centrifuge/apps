@@ -1,5 +1,4 @@
 import { Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import { useLocation } from 'react-router'
 import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
@@ -13,7 +12,7 @@ export default function NotFoundPag() {
   )
 }
 
-const Pools: React.FC = () => {
+function Pools() {
   const location = useLocation()
 
   return (

@@ -11,7 +11,7 @@ type Props = {
   }
 }
 
-export const ContextActions: React.FC<Props> = ({ actions, parent }) => {
+export function ContextActions({ actions, parent }: Props) {
   return (
     <ButtonGroup variant="small">
       {actions && (
