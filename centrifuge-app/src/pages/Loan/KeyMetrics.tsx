@@ -99,7 +99,7 @@ export function KeyMetrics({ pool, loan }: Props) {
   )
 
   const unrealizedProfitAtMarketPrice = borrowerAssetTransactions?.reduce(
-    (sum, tx) => sum.add(tx.unrealizedProfitByPeriod?.toDecimal() ?? Dec(0)),
+    (sum, tx) => sum.add(tx.unrealizedProfitAtMarketPrice?.toDecimal() ?? Dec(0)),
     Dec(0)
   )
 
