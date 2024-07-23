@@ -187,7 +187,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     0
   )
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
-  const newNav = newNavExternal + newNavCash + poolReserve
+  const newNav = newNavExternal + newNavCash + poolReserve - pendingFees.toFloat()
   // Only for single tranche pools
   const newPrice = newNav / pool.tranches[0].totalIssuance.toFloat()
   const isTinlakePool = poolId.startsWith('0x')
@@ -300,7 +300,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 current={pool.nav.total.toFloat()}
                 change={newNav - pool.nav.total.toFloat()}
                 pendingFees={pendingFees.toFloat()}
-                pendingNav={newNav - pendingFees.toFloat()}
+                pendingNav={newNav}
               />
             </Stack>
             {pool.tranches.length === 1 && (
