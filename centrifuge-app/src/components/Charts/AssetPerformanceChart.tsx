@@ -139,13 +139,6 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
 
   const isChartEmpty = React.useMemo(() => !data.length || assetSnapshots?.length < 1, [data, assetSnapshots])
 
-  const aggregatedData = data.reduce((acc, cur, index) => {
-    if (index % 2 === 0) {
-      acc.push(cur)
-    }
-    return acc
-  }, [])
-
   if (!assetSnapshots) return <Spinner style={{ margin: 'auto', height: 350 }} />
 
   return (
@@ -198,9 +191,9 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
         )}
 
         <Shelf gap={4} width="100%" color="textSecondary">
-          {aggregatedData?.length ? (
+          {data?.length ? (
             <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
-              <LineChart data={aggregatedData} margin={{ left: -36 }}>
+              <LineChart data={data} margin={{ left: -36 }}>
                 <defs>
                   <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={chartColor} stopOpacity={0.4} />
