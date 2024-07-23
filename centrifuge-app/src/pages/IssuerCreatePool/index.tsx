@@ -219,6 +219,7 @@ function CreatePoolForm() {
     (cent) =>
       (
         args: [
+          values: CreatePoolValues,
           transferToMultisig: BN,
           aoProxy: string,
           adminProxy: string,
@@ -231,15 +232,17 @@ function CreatePoolForm() {
         ],
         options
       ) => {
-        const [transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig }] = args
+        const [values, transferToMultisig, aoProxy, adminProxy, , , , , { adminMultisig }] = args
         const multisigAddr = adminMultisig && createKeyMulti(adminMultisig.signers, adminMultisig.threshold)
-        const poolArgs = args.slice(2) as any
+        const poolArgs = args.slice(3) as any
         return combineLatest([
           cent.getApi(),
           cent.pools.createPool(poolArgs, { createType: options?.createType, batch: true }),
         ]).pipe(
           switchMap(([api, poolSubmittable]) => {
-            const adminProxyDelegate = multisigAddr ?? address
+            const adminProxyDelegates = multisigAddr
+              ? [multisigAddr]
+              : values.adminMultisig?.signers?.filter((addr) => addr !== address) ?? []
             const otherMultisigSigners =
               multisigAddr && sortAddresses(adminMultisig.signers.filter((addr) => !isSameAddress(addr, address!)))
             const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
@@ -250,14 +253,16 @@ function CreatePoolForm() {
                   aoProxy,
                   consts.proxy.proxyDepositFactor.add(consts.uniques.collectionDeposit)
                 ),
-                adminProxyDelegate !== address &&
+                adminProxyDelegates.length > 0 &&
                   api.tx.proxy.proxy(
                     adminProxy,
                     undefined,
-                    api.tx.utility.batchAll([
-                      api.tx.proxy.addProxy(adminProxyDelegate, 'Any', 0),
-                      api.tx.proxy.removeProxy(address, 'Any', 0),
-                    ])
+                    api.tx.utility.batchAll(
+                      [
+                        ...adminProxyDelegates.map((addr) => api.tx.proxy.addProxy(addr, 'Any', 0)),
+                        multisigAddr ? api.tx.proxy.removeProxy(address, 'Any', 0) : null,
+                      ].filter(Boolean)
+                    )
                   ),
                 api.tx.proxy.proxy(
                   aoProxy,
@@ -279,7 +284,7 @@ function CreatePoolForm() {
       },
     {
       onSuccess: (args) => {
-        if (form.values.adminMultisigEnabled) setIsMultisigDialogOpen(true)
+        if (form.values.adminMultisigEnabled && form.values.adminMultisig.threshold > 1) setIsMultisigDialogOpen(true)
         const [, , , poolId] = args
         if (createType === 'immediate') {
           setCreatedPoolId(poolId)
@@ -384,12 +389,13 @@ function CreatePoolForm() {
 
       const metadataValues: PoolMetadataInput = { ...values } as any
 
-      metadataValues.adminMultisig = values.adminMultisigEnabled
-        ? {
-            ...values.adminMultisig,
-            signers: sortAddresses(values.adminMultisig.signers),
-          }
-        : undefined
+      metadataValues.adminMultisig =
+        values.adminMultisigEnabled && values.adminMultisig.threshold > 1
+          ? {
+              ...values.adminMultisig,
+              signers: sortAddresses(values.adminMultisig.signers),
+            }
+          : undefined
 
       const currency = currencies.find((c) => c.symbol === values.currency)!
 
@@ -468,7 +474,7 @@ function CreatePoolForm() {
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
-      if (metadataValues.adminMultisig) {
+      if (metadataValues.adminMultisig && metadataValues.adminMultisig.threshold > 1) {
         addMultisig(metadataValues.adminMultisig)
       }
 
@@ -476,6 +482,7 @@ function CreatePoolForm() {
         (aoProxy, adminProxy) => {
           createPoolTx(
             [
+              values,
               CurrencyBalance.fromFloat(createDeposit, chainDecimals),
               aoProxy,
               adminProxy,

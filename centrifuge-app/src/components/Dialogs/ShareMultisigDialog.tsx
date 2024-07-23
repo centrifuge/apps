@@ -59,7 +59,7 @@ export function getMultisigShareUrl({
     threshold: multisig.threshold.toString(),
     data: callData || '',
   })
-  const url = new URL(`/multisig-approval`, window.location.origin)
+  const url = new URL(`/#/multisig-approval`, window.location.origin)
   url.search = params as any
   const shareUrl = url.toString()
   return shareUrl
