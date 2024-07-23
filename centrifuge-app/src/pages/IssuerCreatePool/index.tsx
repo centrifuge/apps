@@ -242,7 +242,7 @@ function CreatePoolForm() {
           switchMap(([api, poolSubmittable]) => {
             const adminProxyDelegates = multisigAddr
               ? [multisigAddr]
-              : values.adminMultisig?.signers?.filter((addr) => addr !== address) ?? []
+              : (adminMultisig && values.adminMultisig?.signers?.filter((addr) => addr !== address)) ?? []
             const otherMultisigSigners =
               multisigAddr && sortAddresses(adminMultisig.signers.filter((addr) => !isSameAddress(addr, address!)))
             const proxiedPoolCreate = api.tx.proxy.proxy(adminProxy, undefined, poolSubmittable)
