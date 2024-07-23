@@ -128,6 +128,7 @@ export function computeTrancheId(trancheIndex: number, poolId: string) {
 
 // Computes multisig address and sorts signers
 export function computeMultisig(multisig: Multisig): ComputedMultisig {
+  if (multisig.threshold < 2) throw new Error('Threshold must be at least 2')
   const address = u8aToHex(createKeyMulti(multisig.signers, multisig.threshold))
   return {
     address,
