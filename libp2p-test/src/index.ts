@@ -143,13 +143,13 @@ async function run() {
   const message = DataProtocolRequest.create({
     beepRequest: BeepRequest.create(),
   })
-
+  const docId = Math.round(Math.random() * 1000000)
   const encoder = new TextEncoder()
   const message2 = DataProtocolRequest.create({
     createDocumentRequest: CreateDocumentRequest.create({
       payload: encoder.encode(
         JSON.stringify({
-          id: Math.round(Math.random() * 1000000),
+          id: docId,
           version: 9,
           pool_id: 10,
           loan_id: 11,
@@ -162,7 +162,7 @@ async function run() {
 
   const message3 = DataProtocolRequest.create({
     getDocumentRequest: GetDocumentRequest.create({
-      documentId: encoder.encode('10'),
+      documentId: encoder.encode(docId.toString()),
       documentVersion: 9,
     }),
   })
