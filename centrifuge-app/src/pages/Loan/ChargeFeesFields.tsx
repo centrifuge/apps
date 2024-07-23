@@ -8,6 +8,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import React from 'react'
 import { combineLatest, of } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { formatPercentage } from '../../utils/formatting'
@@ -28,9 +29,20 @@ export const ChargeFeesFields = ({
   const poolFees = usePoolFees(pool.id)
   // fees can only be charged by the destination address
   // fees destination must be set to the AO Proxy address
-  const chargableFees = poolFees?.filter(
-    (fee) => fee.type !== 'fixed' && borrower && addressToHex(fee.destination) === borrower.actingAddress
+  const chargableFees = React.useMemo(
+    () =>
+      poolFees?.filter(
+        (fee) => fee.type !== 'fixed' && borrower && addressToHex(fee.destination) === borrower.actingAddress
+      ),
+    [poolFees, borrower]
   )
+
+  React.useEffect(() => {
+    if (form.values.fees.length > 1 && chargableFees?.length === 1) {
+      form.setFieldValue('fees', [...form.values.fees, { id: chargableFees[0].id, amount: '' }])
+    }
+  }, [chargableFees, poolMetadata])
+
   return (
     <Stack gap={2}>
       <FieldArray name="fees">
@@ -47,7 +59,7 @@ export const ChargeFeesFields = ({
                         <Box flex={1}>
                           <Select
                             options={[
-                              { label: 'Select Fee', value: '' },
+                              { label: 'Select fee', value: '' },
                               ...(chargableFees || []).map((f) => {
                                 const feeName =
                                   poolMetadata?.pool?.poolFees?.find((feeMeta) => feeMeta.id === f.id)?.name ||
@@ -58,8 +70,9 @@ export const ChargeFeesFields = ({
                                 }
                               }),
                             ]}
-                            defaultValue={''}
-                            label="Fees"
+                            // disabled={chargableFees?.length === 1}
+                            defaultValue={chargableFees?.length === 1 ? chargableFees[0].id.toString() : ''}
+                            label="Fee"
                             onChange={(e) => {
                               form.setFieldValue(`fees.${index}.id`, e.target.value)
                             }}
@@ -120,7 +133,7 @@ export const ChargeFeesFields = ({
                       onClick={() => push({ id: '', amount: '' })}
                       small
                     >
-                      Add fees
+                      Add fee
                     </Button>
                   </Box>
                 ) : null}

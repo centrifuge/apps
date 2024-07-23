@@ -1,6 +1,6 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, Price, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Card, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -31,21 +31,14 @@ export function RepayForm({ loan }: { loan: ActiveLoan }) {
   const [destination, setDestination] = React.useState<string>('reserve')
 
   return (
-    <Stack gap={2}>
-      <Stack as={Card} gap={2} p={2}>
-        <Text variant="heading2">{isExternalLoan(loan) ? 'Sell' : 'Repay'}</Text>
-        <SourceSelect
-          loan={loan}
-          value={destination}
-          onChange={(newSource) => setDestination(newSource)}
-          type="repay"
-        />
-        {isExternalLoan(loan) ? (
-          <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} />
-        ) : (
-          <InternalRepayForm loan={loan} destination={destination} />
-        )}
-      </Stack>
+    <Stack gap={2} p={1}>
+      <Text variant="heading2">{isExternalLoan(loan) ? 'Sell' : 'Repay'}</Text>
+      <SourceSelect loan={loan} value={destination} onChange={(newSource) => setDestination(newSource)} type="repay" />
+      {isExternalLoan(loan) ? (
+        <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} />
+      ) : (
+        <InternalRepayForm loan={loan} destination={destination} />
+      )}
     </Stack>
   )
 }

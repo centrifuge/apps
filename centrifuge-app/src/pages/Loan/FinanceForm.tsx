@@ -26,7 +26,6 @@ import {
 import {
   Box,
   Button,
-  Card,
   CurrencyInput,
   Grid,
   GridRow,
@@ -70,16 +69,14 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
   const [source, setSource] = React.useState<string>('reserve')
 
   return (
-    <Stack gap={2}>
-      <Stack as={Card} gap={2} p={2}>
-        <Text variant="heading2">{isExternalLoan(loan) ? 'Purchase' : 'Finance'}</Text>
-        <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="finance" />
-        {isExternalLoan(loan) ? (
-          <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
-        ) : (
-          <InternalFinanceForm loan={loan} source={source} />
-        )}
-      </Stack>
+    <Stack gap={2} p={1}>
+      <Text variant="heading2">{isExternalLoan(loan) ? 'Purchase' : 'Finance'}</Text>
+      <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="finance" />
+      {isExternalLoan(loan) ? (
+        <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
+      ) : (
+        <InternalFinanceForm loan={loan} source={source} />
+      )}
     </Stack>
   )
 }
@@ -314,7 +311,7 @@ function Mux({
           const address = withdrawAddressesByDomain[locationKey][0]
           return (
             <GridRow>
-              <Text variant="body3">{formatBalance(amount, currency.symbol)}</Text>
+              <Text variant="body3">{formatBalance(amount, currency.displayName)}</Text>
               <Text variant="body3">{truncateAddress(utils.formatAddress(address.address))}</Text>
               <Text variant="body3">
                 <Shelf gap="4px">
