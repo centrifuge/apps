@@ -5,7 +5,6 @@ import { useLoans } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useBorrower } from '../../utils/usePermissions'
-import { isExternalLoan } from './utils'
 
 type SourceSelectProps = {
   loan: Loan
@@ -23,7 +22,8 @@ export function SourceSelect({ loan, value, onChange, type }: SourceSelectProps)
       l.id !== loan.id &&
       l.status === 'Active' &&
       (l as ActiveLoan).borrower === account?.actingAddress &&
-      (isExternalLoan(loan) ? !isExternalLoan(l as Loan) : true)
+      'valuationMethod' in l.pricing &&
+      l.pricing.valuationMethod === 'cash'
   ) as Loan[] | undefined
 
   return (
