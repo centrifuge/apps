@@ -10,7 +10,7 @@ import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
-import { usePool } from '../../utils/usePools'
+import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalRepayForm } from './ExternalRepayForm'
@@ -48,6 +48,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const { debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const loans = useLoans(loan.poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
@@ -138,7 +139,6 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const totalRepay = Dec(repayForm.values.principal || 0)
     .add(Dec(repayForm.values.interest || 0))
     .add(Dec(repayForm.values.amountAdditional || 0))
-    .add(Dec(repayForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))))
 
   return (
     <>
@@ -224,12 +224,14 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                 outstanding balance.
               </InlineFeedback>
             )}
-            <Shelf justifyContent="space-between">
-              <Text variant="emphasized">
-                Total amount {repayForm.values.fees.find((fee) => fee.amount) ? '(incl. fees)' : null}
-              </Text>
-              <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
-            </Shelf>
+            <Stack gap={1}>
+              <Shelf justifyContent="space-between">
+                <Text variant="emphasized">Total amount</Text>
+                <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
+              </Shelf>
+
+              {poolFees.renderSummary()}
+            </Stack>
             <Stack gap={1} px={1}>
               <Button
                 type="submit"

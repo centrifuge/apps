@@ -96,9 +96,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const amountDec = Dec(financeForm.values.price || 0)
-    .mul(Dec(financeForm.values.quantity || 0))
-    .add(financeForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)))
+  const amountDec = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
 
   const withdraw = useWithdraw(loan.poolId, account!, amountDec)
 
@@ -128,15 +126,14 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
             {poolFees.render()}
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
-                <Text variant="emphasized">
-                  Total amount {financeForm.values.fees.find((fee) => fee.amount) ? '(incl. fees)' : null}
-                </Text>
+                <Text variant="emphasized">Total amount</Text>
                 <Text variant="emphasized">
                   {amountDec.gt(0)
                     ? formatBalance(amountDec, pool?.currency.symbol, 2)
                     : `0.00 ${pool.currency.symbol}`}
                 </Text>
               </Shelf>
+              {poolFees.renderSummary()}
             </Stack>
             <Stack px={1}>
               <Button

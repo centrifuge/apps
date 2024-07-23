@@ -150,9 +150,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   const maxBorrow = (poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing).sub(
     financeForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
   )
-  const totalAmount = financeForm.values.fees
-    .reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))
-    .add(financeForm.values.principal || 0)
+  const totalAmount = Dec(financeForm.values.principal || 0)
 
   return (
     <>
@@ -204,11 +202,10 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               </InlineFeedback>
             )}
             <Shelf justifyContent="space-between">
-              <Text variant="emphasized">
-                Total amount {financeForm.values.fees.find((fee) => fee.amount) ? '(incl. fees)' : null}
-              </Text>
+              <Text variant="emphasized">Total amount</Text>
               <Text variant="emphasized">{formatBalance(totalAmount, pool?.currency.symbol, 2)}</Text>
             </Shelf>
+            {poolFees.renderSummary()}
             <Stack>
               <Button
                 type="submit"

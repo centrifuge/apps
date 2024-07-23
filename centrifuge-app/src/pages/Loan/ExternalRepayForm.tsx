@@ -233,17 +233,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               {poolFees.render()}
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
-                  <Text variant="emphasized">
-                    Total amount {repayForm.values.fees.find((fee) => fee.amount) ? '(incl. fees)' : null}
-                  </Text>
+                  <Text variant="emphasized">Total amount</Text>
                   <Text variant="emphasized">
                     {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
                       ? formatBalance(
                           Dec(repayForm.values.price || 0)
                             .mul(Dec(repayForm.values.quantity || 0))
-                            .sub(
-                              repayForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
-                            )
                             .add(repayForm.values.interest || 0)
                             .add(repayForm.values.amountAdditional || 0),
                           pool?.currency.symbol,
@@ -252,6 +247,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                       : `0.00 ${pool.currency.symbol}`}
                   </Text>
                 </Shelf>
+                {poolFees.renderSummary()}
               </Stack>
               <Stack gap={1} px={1}>
                 <Button

@@ -6,7 +6,17 @@ import {
   useCentrifugeApi,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  IconMinusCircle,
+  IconPlusCircle,
+  Select,
+  Shelf,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
 import { combineLatest, of } from 'rxjs'
@@ -145,6 +155,27 @@ export const ChargeFeesFields = ({
   )
 }
 
+function ChargePoolFeeSummary({ poolId }: { poolId: string }) {
+  const form = useFormikContext<FinanceValues | RepayValues>()
+  const pool = usePool(poolId)
+  const { data: poolMetadata } = usePoolMetadata(pool)
+
+  return (
+    <Stack gap={1}>
+      {form.values.fees.map((fee) => {
+        const feeName =
+          poolMetadata?.pool?.poolFees?.find((feeMeta) => feeMeta.id.toString() === fee.id)?.name || 'Unknown Fee'
+        return (
+          <Shelf justifyContent="space-between">
+            <Text variant="label2">{feeName}</Text>
+            <Text variant="label2">{formatBalance(Dec(fee?.amount || 0), pool.currency.symbol, 2)}</Text>
+          </Shelf>
+        )
+      })}
+    </Stack>
+  )
+}
+
 export function useChargePoolFees(poolId: string, loanId: string) {
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
@@ -154,6 +185,7 @@ export function useChargePoolFees(poolId: string, loanId: string) {
   const api = useCentrifugeApi()
   return {
     render: () => <ChargeFeesFields pool={pool as Pool} borrower={borrower} />,
+    renderSummary: () => <ChargePoolFeeSummary poolId={poolId} />,
     isValid: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
       return values.fees.every((fee) => !!fee.id && !!fee && !!fee.amount)
     },
