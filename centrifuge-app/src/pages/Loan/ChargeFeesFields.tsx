@@ -6,17 +6,7 @@ import {
   useCentrifugeApi,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  CurrencyInput,
-  IconMinusCircle,
-  IconPlusCircle,
-  Select,
-  Shelf,
-  Stack,
-  Text,
-} from '@centrifuge/fabric'
+import { Box, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
 import { combineLatest, of } from 'rxjs'
@@ -130,21 +120,24 @@ export const ChargeFeesFields = ({
                   })}
                 </Stack>
                 {chargableFees?.length ? (
-                  <Box p={0}>
-                    <Button
-                      icon={<IconPlusCircle size="20px" />}
-                      variant="tertiary"
-                      onClick={() => {
-                        if (chargableFees.length === 1) {
-                          return push({ id: chargableFees[0].id.toString(), amount: '' })
-                        }
-                        return push({ id: '', amount: '' })
-                      }}
-                      small
-                    >
+                  <Shelf
+                    gap={1}
+                    alignItems="center"
+                    as="button"
+                    style={{ cursor: 'pointer', background: 'none', border: 'none' }}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (chargableFees.length === 1) {
+                        return push({ id: chargableFees[0].id.toString(), amount: '' })
+                      }
+                      return push({ id: '', amount: '' })
+                    }}
+                  >
+                    <IconPlusCircle size="20px" color="textButtonTertiary" />
+                    <Text variant="label1" color="textButtonTertiary">
                       Add fee
-                    </Button>
-                  </Box>
+                    </Text>
+                  </Shelf>
                 ) : null}
               </Stack>
             </>
