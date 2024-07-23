@@ -186,6 +186,16 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               }}
             </Field>
             {source === 'reserve' && withdraw.render()}
+            {source === 'reserve' ? (
+              <InlineFeedback>
+                Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks.
+                Expect a delay until the transfer is complete.
+              </InlineFeedback>
+            ) : (
+              <InlineFeedback>
+                Virtual accounting process. No onchain stable-coin transfers are expected.
+              </InlineFeedback>
+            )}
             {poolFees.render()}
             {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
               <InlineFeedback>

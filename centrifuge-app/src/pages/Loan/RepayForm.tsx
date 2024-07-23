@@ -208,6 +208,16 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
               }}
             </Field>
             {poolFees.render()}
+            {destination === 'reserve' ? (
+              <InlineFeedback>
+                Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks.
+                Expect a delay until the transfer is complete.
+              </InlineFeedback>
+            ) : (
+              <InlineFeedback>
+                Virtual accounting process. No onchain stable-coin transfers are expected.
+              </InlineFeedback>
+            )}
             {balance.lessThan(debt) && (
               <InlineFeedback>
                 Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than the

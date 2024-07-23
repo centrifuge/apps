@@ -1,6 +1,6 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -220,6 +220,16 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   )
                 }}
               </Field>
+              {destination === 'reserve' ? (
+                <InlineFeedback>
+                  Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks.
+                  Expect a delay until the transfer is complete.
+                </InlineFeedback>
+              ) : (
+                <InlineFeedback>
+                  Virtual accounting process. No onchain stable-coin transfers are expected.
+                </InlineFeedback>
+              )}
               {poolFees.render()}
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
