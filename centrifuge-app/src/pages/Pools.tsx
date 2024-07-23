@@ -1,4 +1,4 @@
-import { Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CardTotalValueLocked } from '../components/CardTotalValueLocked'
 import { LayoutBase } from '../components/LayoutBase'
@@ -27,11 +27,11 @@ export default function PoolsPage() {
               }`}
             </Text>
           </Stack>
-          <Shelf width="50%">
+          <Box width="50%">
             <LoadBoundary>
               <CardTotalValueLocked />
             </LoadBoundary>
-          </Shelf>
+          </Box>
         </Stack>
         <PoolList />
       </LayoutSection>
