@@ -37,10 +37,17 @@ export const ChargeFeesFields = ({
     [poolFees, borrower]
   )
 
-  React.useEffect(() => {
-    if (form.values.fees.length > 1 && chargableFees?.length === 1) {
-      form.setFieldValue('fees', [...form.values.fees, { id: chargableFees[0].id, amount: '' }])
-    }
+  const getOptions = React.useCallback(() => {
+    const chargableOptions = (chargableFees || []).map((f) => {
+      const feeName = poolMetadata?.pool?.poolFees?.find((feeMeta) => feeMeta.id === f.id)?.name || 'Unknown Fee'
+      return {
+        label: `${feeName} - ${f.amounts.percentOfNav.toPercent().toString()}%`,
+        value: f.id.toString(),
+      }
+    })
+    return chargableFees && chargableFees.length > 1
+      ? [{ label: 'Select fee', value: '' }, ...chargableOptions]
+      : chargableOptions
   }, [chargableFees, poolMetadata])
 
   return (
@@ -55,23 +62,10 @@ export const ChargeFeesFields = ({
                     const poolFee = poolFees?.find((poolFee) => poolFee.id.toString() === fee.id)
                     const maxCharge = poolFee?.amounts.percentOfNav.toPercent().mul(pool.nav.aum.toDecimal())
                     return (
-                      <Shelf gap={1} alignItems="flex-start">
+                      <Shelf key={`${fee.id}-${index}`} gap={1} alignItems="flex-start">
                         <Box flex={1}>
                           <Select
-                            options={[
-                              { label: 'Select fee', value: '' },
-                              ...(chargableFees || []).map((f) => {
-                                const feeName =
-                                  poolMetadata?.pool?.poolFees?.find((feeMeta) => feeMeta.id === f.id)?.name ||
-                                  'Unknown Fee'
-                                return {
-                                  label: `${feeName} - ${f.amounts.percentOfNav.toPercent().toString()}%`,
-                                  value: f.id.toString(),
-                                }
-                              }),
-                            ]}
-                            // disabled={chargableFees?.length === 1}
-                            defaultValue={chargableFees?.length === 1 ? chargableFees[0].id.toString() : ''}
+                            options={getOptions()}
                             label="Fee"
                             onChange={(e) => {
                               form.setFieldValue(`fees.${index}.id`, e.target.value)
@@ -130,7 +124,12 @@ export const ChargeFeesFields = ({
                     <Button
                       icon={<IconPlusCircle size="20px" />}
                       variant="tertiary"
-                      onClick={() => push({ id: '', amount: '' })}
+                      onClick={() => {
+                        if (chargableFees.length === 1) {
+                          return push({ id: chargableFees[0].id.toString(), amount: '' })
+                        }
+                        return push({ id: '', amount: '' })
+                      }}
                       small
                     >
                       Add fee
