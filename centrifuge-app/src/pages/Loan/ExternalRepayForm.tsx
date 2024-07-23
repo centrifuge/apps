@@ -45,7 +45,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         options
       ) => {
         const [loanId, poolId, quantity, interest, amountAdditional, price] = args
-        const principal = quantity.mul(price)
         let repayTx
         if (destination === 'reserve') {
           repayTx = cent.pools.repayExternalLoanPartially(
@@ -58,8 +57,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
           const toLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
           if (!toLoan) throw new Error('toLoan not found')
           const repay = { quantity, price, interest }
-
-          let borrow = { amount: principal }
+          let borrow = { quantity, price }
           repayTx = cent.pools.transferLoanDebt([poolId, loan.id, toLoan.id, repay, borrow], { batch: true })
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
@@ -207,23 +205,21 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   }}
                 </Field>
               )}
-              {destination === 'reserve' && (
-                <Field name="amountAdditional" validate={nonNegativeNumber()}>
-                  {({ field, meta, form }: FieldProps) => {
-                    return (
-                      <CurrencyInput
-                        {...field}
-                        value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                        label="Additional amount"
-                        errorMessage={meta.touched ? meta.error : undefined}
-                        disabled={isRepayLoading}
-                        currency={pool?.currency.symbol}
-                        onChange={(value) => form.setFieldValue('amountAdditional', value)}
-                      />
-                    )
-                  }}
-                </Field>
-              )}
+              <Field name="amountAdditional" validate={nonNegativeNumber()}>
+                {({ field, meta, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                      label="Additional amount"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      disabled={isRepayLoading}
+                      currency={pool?.currency.symbol}
+                      onChange={(value) => form.setFieldValue('amountAdditional', value)}
+                    />
+                  )
+                }}
+              </Field>
               {poolFees.render()}
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">

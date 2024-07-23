@@ -1,7 +1,6 @@
-import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, Price, findBalance } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, findBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -23,8 +22,6 @@ export type RepayValues = {
   amountAdditional: number | '' | Decimal
   interest: number | '' | Decimal
   fees: { id: string; amount: number | '' | Decimal }[]
-  quantity: number | '' | Decimal
-  price: number | '' | Decimal
 }
 
 export function RepayForm({ loan }: { loan: ActiveLoan }) {
@@ -61,13 +58,11 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
           poolId: string,
           principal: CurrencyBalance,
           interest: CurrencyBalance,
-          amountAdditional: CurrencyBalance,
-          price: Price,
-          quantity: BN
+          amountAdditional: CurrencyBalance
         ],
         options
       ) => {
-        const [loanId, poolId, principal, interest, amountAdditional, price, quantity] = args
+        const [loanId, poolId, principal, interest, amountAdditional] = args
         let repayTx
         if (destination === 'reserve') {
           repayTx = cent.pools.repayLoanPartially([loanId, poolId, principal, interest, amountAdditional], {
@@ -76,8 +71,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
         } else {
           const toLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
           if (!toLoan) throw new Error('toLoan not found')
-          const repay = { quantity, price, interest }
-
+          const repay = { principal, interest }
           let borrow = { amount: principal }
           repayTx = cent.pools.transferLoanDebt([poolId, loan.id, toLoan.id, repay, borrow], { batch: true })
         }
@@ -120,17 +114,13 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
       amountAdditional: '',
       interest: '',
       fees: [],
-      price: '',
-      quantity: '',
     },
     onSubmit: (values, actions) => {
       const interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
       const additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional, pool.currency.decimals)
       const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
-      const price = Price.fromFloat(values.price)
-      const quantity = new BN(values.quantity.toString())
 
-      doRepayTransaction([loan.poolId, loan.id, principal, interest, additionalAmount, price, quantity], {
+      doRepayTransaction([loan.poolId, loan.id, principal, interest, additionalAmount], {
         account,
         forceProxyType: 'Borrow',
       })

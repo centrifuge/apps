@@ -7,7 +7,6 @@ import Centrifuge, {
   ExternalLoan,
   Loan as LoanType,
   Pool,
-  Price,
   WithdrawAddress,
   getCurrencyLocation,
 } from '@centrifuge/centrifuge-js'
@@ -50,7 +49,6 @@ import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
-import { FinanceTransferDebtFields } from './FinanceTransferDebt'
 import { SourceSelect } from './SourceSelect'
 import { isExternalLoan } from './utils'
 
@@ -61,8 +59,6 @@ type FinanceValues = {
   principal: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
   fees: { id: string; amount: '' | number | Decimal }[]
-  price: number | '' | Decimal
-  quantity: number | '' | Decimal
 }
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
@@ -92,35 +88,30 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    (cent) =>
-      (
-        args: [poolId: string, loanId: string, principal: BN, price: Price, quantity: BN, interest: CurrencyBalance],
-        options
-      ) => {
-        if (!account) throw new Error('No borrower')
-        const [poolId, loanId, principal, price, quantity, interest] = args
-        let financeTx
-        if (source === 'reserve') {
-          financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
-        } else {
-          const fromLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
-          if (!fromLoan) throw new Error('Target loan not found')
-          const repay = { quantity, price, interest }
-
-          let borrow = { amount: principal } // TODO:1 figure out what amount needs to be passed
-          financeTx = cent.pools.transferLoanDebt([poolId, fromLoan.id, loan.id, repay, borrow], { batch: true })
-        }
-        return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
-          switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
-            const batch = [...withdrawBatch, ...poolFeesBatch]
-            let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
-            if (batch.length) {
-              tx = api.tx.utility.batchAll([tx, ...batch])
-            }
-            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
-          })
-        )
-      },
+    (cent) => (args: [poolId: string, loanId: string, principal: BN], options) => {
+      if (!account) throw new Error('No borrower')
+      const [poolId, loanId, principal] = args
+      let financeTx
+      if (source === 'reserve') {
+        financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
+      } else {
+        const fromLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
+        if (!fromLoan) throw new Error('Target loan not found')
+        const repay = { principal, interest: new BN(0) } // TODO:1 calculate interest?
+        let borrow = { amount: principal }
+        financeTx = cent.pools.transferLoanDebt([poolId, fromLoan.id, loan.id, repay, borrow], { batch: true })
+      }
+      return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
+        switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
+          const batch = [...withdrawBatch, ...poolFeesBatch]
+          let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
+          if (batch.length) {
+            tx = api.tx.utility.batchAll([tx, ...batch])
+          }
+          return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
+        })
+      )
+    },
     {
       onSuccess: () => {
         financeForm.resetForm()
@@ -133,15 +124,10 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       principal: '',
       withdraw: undefined,
       fees: [],
-      price: '',
-      quantity: '',
     },
     onSubmit: (values, actions) => {
       const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
-      const price = Price.fromFloat(financeForm.values.price)
-      const interest = new CurrencyBalance(0, pool.currency.decimals)
-      const quantity = new BN(financeForm.values.quantity.toString())
-      doFinanceTransaction([loan.poolId, loan.id, principal, price, quantity, interest], {
+      doFinanceTransaction([loan.poolId, loan.id, principal], {
         account,
         forceProxyType: 'Borrow',
       })
@@ -164,53 +150,41 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   const maxBorrow = (poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing).sub(
     financeForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
   )
-  const totalAmount =
-    source === 'reserve'
-      ? financeForm.values.fees
-          .reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))
-          .add(financeForm.values.principal || 0)
-      : financeForm.values.fees
-          .reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))
-          .add(Dec(financeForm.values.quantity || 0).mul(financeForm.values.price || 0))
-
-  const isButtonDisabled =
-    source === 'reserve' ? !financeForm.values.principal : !financeForm.values.price || !financeForm.values.quantity
+  const totalAmount = financeForm.values.fees
+    .reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0))
+    .add(financeForm.values.principal || 0)
 
   return (
     <>
       {availableFinancing.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-            {source === 'reserve' ? (
-              <Field
-                name="principal"
-                validate={combine(
-                  positiveNumber(),
-                  max(availableFinancing.toNumber(), 'Principal exceeds available financing'),
-                  max(
-                    maxBorrow.toNumber(),
-                    `Principal exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
-                  )
-                )}
-              >
-                {({ field, meta, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                      label="Principal"
-                      errorMessage={meta.touched ? meta.error : undefined}
-                      secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
-                      currency={pool?.currency.symbol}
-                      onChange={(value) => form.setFieldValue('principal', value)}
-                      onSetMax={() => form.setFieldValue('principal', maxBorrow)}
-                    />
-                  )
-                }}
-              </Field>
-            ) : (
-              <FinanceTransferDebtFields poolId={loan.poolId} source={source} />
-            )}
+            <Field
+              name="principal"
+              validate={combine(
+                positiveNumber(),
+                max(availableFinancing.toNumber(), 'Principal exceeds available financing'),
+                max(
+                  maxBorrow.toNumber(),
+                  `Principal exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
+                )
+              )}
+            >
+              {({ field, meta, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
+                    label="Principal"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
+                    currency={pool?.currency.symbol}
+                    onChange={(value) => form.setFieldValue('principal', value)}
+                    onSetMax={() => form.setFieldValue('principal', maxBorrow)}
+                  />
+                )
+              }}
+            </Field>
             {source === 'reserve' && withdraw.render()}
             {poolFees.render()}
             {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
@@ -229,7 +203,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               <Button
                 type="submit"
                 loading={isFinanceLoading}
-                disabled={isButtonDisabled || !withdraw.isValid || !poolFees.isValid(financeForm)}
+                disabled={!financeForm.values.principal || !withdraw.isValid || !poolFees.isValid(financeForm)}
               >
                 Finance
               </Button>

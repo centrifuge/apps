@@ -9,7 +9,6 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
@@ -23,7 +22,6 @@ import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, positiveNumber, required } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { useWithdraw } from './FinanceForm'
-import { FinanceTransferDebtFields } from './FinanceTransferDebt'
 
 export type FinanceValues = {
   price: number | '' | Decimal
@@ -49,16 +47,14 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
         if (!account) throw new Error('No borrower')
         const [poolId, loanId, quantity, price, interest] = args
         let financeTx
-
         if (source === 'reserve') {
           financeTx = cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true })
         } else {
-          const targetLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
-          if (!targetLoan) throw new Error('Target loan not found')
-          const repay = { quantity: new BN(financeForm.values.quantity.toString()), price, interest }
-
-          let borrow = { amount: price.mul(new BN(financeForm.values.quantity.toString())) } // TODO:1 figure out what amount needs to be passed
-          financeTx = cent.pools.transferLoanDebt([poolId, targetLoan.id, loan.id, repay, borrow], { batch: true })
+          const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
+          if (!sourceLoan) throw new Error('Target loan not found')
+          const repay = { quantity, price, interest }
+          let borrow = { quantity: quantity, price }
+          financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
         }
         return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
           switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
@@ -111,18 +107,13 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
   }
 
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
-  const isButtonDisabled = !financeForm.values.price || !financeForm.values.quantity
 
   return (
     <>
       {availableFinancing.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-            {source === 'reserve' ? (
-              <ExternalFinanceFields loan={loan} pool={pool} />
-            ) : (
-              <FinanceTransferDebtFields poolId={loan.poolId} source={source} />
-            )}
+            <ExternalFinanceFields loan={loan} pool={pool} />
             {withdraw.render()}
             {poolFees.render()}
             <Stack gap={1}>
@@ -141,7 +132,12 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               <Button
                 type="submit"
                 loading={isFinanceLoading}
-                disabled={isButtonDisabled || !withdraw.isValid || !poolFees.isValid(financeForm)}
+                disabled={
+                  !financeForm.values.price ||
+                  !financeForm.values.quantity ||
+                  !withdraw.isValid ||
+                  !poolFees.isValid(financeForm)
+                }
               >
                 Purchase
               </Button>
