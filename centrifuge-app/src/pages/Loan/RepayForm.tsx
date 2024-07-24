@@ -10,7 +10,7 @@ import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { usePool } from '../../utils/usePools'
 import { combine, max, nonNegativeNumber, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalRepayForm } from './ExternalRepayForm'
@@ -48,7 +48,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const { debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const loans = useLoans(loan.poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const toLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
@@ -70,8 +70,6 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
             batch: true,
           })
         } else {
-          const toLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
-          if (!toLoan) throw new Error('toLoan not found')
           const repay = { principal, interest }
           let borrow = { amount: principal }
           repayTx = cent.pools.transferLoanDebt([poolId, loan.id, toLoan.id, repay, borrow], { batch: true })
@@ -133,7 +131,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
+  const debt = destination !== 'reserve' ? loan.outstandingDebt?.toDecimal() : toLoan.outstandingDebt.toDecimal()
   const maxPrincipal =
     destination !== 'reserve'
       ? loan.outstandingDebt.toDecimal()
@@ -156,7 +154,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const totalRepay = Dec(repayForm.values.principal || 0)
     .add(Dec(repayForm.values.interest || 0))
     .add(Dec(repayForm.values.amountAdditional || 0))
-  const maxAvailable = min(debt, balance)
+  const maxAvailable = debt
 
   return (
     <>
