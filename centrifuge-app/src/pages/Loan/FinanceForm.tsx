@@ -186,8 +186,8 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
             {source === 'reserve' && withdraw.render()}
             {source === 'reserve' ? (
               <InlineFeedback>
-                Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks.
-                Expect a delay until the transfer is complete.
+                Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
+                delay until the transfer is completed is to be expected.
               </InlineFeedback>
             ) : (
               <InlineFeedback>

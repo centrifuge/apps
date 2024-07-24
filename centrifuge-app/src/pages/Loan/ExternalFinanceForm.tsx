@@ -112,11 +112,11 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <ExternalFinanceFields loan={loan} pool={pool} />
-            {withdraw.render()}
+            {source === 'reserve' && withdraw.render()}
             {source === 'reserve' ? (
               <InlineFeedback>
-                Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks.
-                Expect a delay until the transfer is complete.
+                Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
+                delay until the transfer is completed is to be expected.
               </InlineFeedback>
             ) : (
               <InlineFeedback>

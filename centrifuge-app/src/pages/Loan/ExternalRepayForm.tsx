@@ -221,10 +221,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                 }}
               </Field>
               {destination === 'reserve' ? (
-                <InlineFeedback>
-                  Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks.
-                  Expect a delay until the transfer is complete.
-                </InlineFeedback>
+                <InlineFeedback>Stable-coins will be transferred to the onchain reserve.</InlineFeedback>
               ) : (
                 <InlineFeedback>
                   Virtual accounting process. No onchain stable-coin transfers are expected.
