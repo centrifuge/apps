@@ -111,6 +111,7 @@ export const ChargeFeesFields = ({
                           border="none"
                           as="button"
                           mt={4}
+                          style={{ cursor: 'pointer' }}
                           onClick={() => remove(index)}
                         >
                           <IconMinusCircle size="20px" />

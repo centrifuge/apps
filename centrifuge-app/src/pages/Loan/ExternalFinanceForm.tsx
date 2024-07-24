@@ -8,15 +8,15 @@ import {
   WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
-import { Dec, min } from '../../utils/Decimal'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
+import { useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, positiveNumber, required } from '../../utils/validation'
@@ -36,7 +36,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const api = useCentrifugeApi()
   const loans = useLoans(loan.poolId)
-  const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
+  const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Purchase asset',
     (cent) =>
@@ -50,8 +50,6 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
         if (source === 'reserve') {
           financeTx = cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true })
         } else {
-          const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
-          if (!sourceLoan) throw new Error('Target loan not found')
           const repay = { quantity, price, interest }
           let borrow = { quantity: quantity, price }
           financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
@@ -96,9 +94,11 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const amountDec = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
+  const totalFinance = Dec(financeForm.values.price || 0).mul(Dec(financeForm.values.quantity || 0))
+  const maxAvailable =
+    source === 'reserve' ? pool.reserve.available.toDecimal() : sourceLoan.outstandingDebt.toDecimal()
 
-  const withdraw = useWithdraw(loan.poolId, account!, amountDec)
+  const withdraw = useWithdraw(loan.poolId, account!, totalFinance)
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
@@ -108,33 +108,91 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
 
   return (
     <>
-      {availableFinancing.greaterThan(0) && !maturityDatePassed && (
+      {maxAvailable.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-            <ExternalFinanceFields loan={loan} pool={pool} />
+            <Field name="quantity" validate={combine(required(), positiveNumber())}>
+              {({ field, meta, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Quantity"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    decimals={8}
+                    onChange={(value) => form.setFieldValue('quantity', value)}
+                  />
+                )
+              }}
+            </Field>
+            <Field
+              name="price"
+              validate={combine(
+                required(),
+                positiveNumber(),
+                (val) => {
+                  const financeAmount = Dec(val).mul(financeForm.values.quantity || 1)
+                  return financeAmount.gt(maxAvailable)
+                    ? `Amount exceeds available (${formatBalance(maxAvailable, pool.currency.symbol, 2)})`
+                    : ''
+                },
+                maxPriceVariance(loan.pricing)
+              )}
+            >
+              {({ field, meta, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Settlement price"
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    currency={pool.currency.symbol}
+                    onChange={(value) => form.setFieldValue('price', value)}
+                    decimals={8}
+                  />
+                )
+              }}
+            </Field>
             {source === 'reserve' && withdraw.render()}
-            {source === 'reserve' ? (
-              <InlineFeedback>
-                Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
-                delay until the transfer is completed is to be expected.
-              </InlineFeedback>
-            ) : (
-              <InlineFeedback>
-                Virtual accounting process. No onchain stable-coin transfers are expected.
-              </InlineFeedback>
-            )}
+            <Box bg="statusDefaultBg" p={1}>
+              {source === 'reserve' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
+                    delay until the transfer is completed is to be expected.
+                  </Text>
+                </InlineFeedback>
+              ) : (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stable-coin transfers are expected.
+                  </Text>
+                </InlineFeedback>
+              )}
+            </Box>
             {poolFees.render()}
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Total amount</Text>
-                <Text variant="emphasized">
-                  {amountDec.gt(0)
-                    ? formatBalance(amountDec, pool?.currency.symbol, 2)
-                    : `0.00 ${pool.currency.symbol}`}
-                </Text>
+                <Text variant="emphasized">{formatBalance(totalFinance, pool?.currency.symbol, 2)}</Text>
               </Shelf>
+
               {poolFees.renderSummary()}
+
+              <Shelf justifyContent="space-between">
+                <Text variant="emphasized">Available</Text>
+                <Text variant="emphasized">{formatBalance(maxAvailable, pool?.currency.symbol, 2)}</Text>
+              </Shelf>
             </Stack>
+
+            {totalFinance.gt(0) && totalFinance.gt(maxAvailable) && (
+              <Box bg="statusCriticalBg" p={1}>
+                <InlineFeedback status="critical">
+                  <Text color="statusCritical">
+                    Available financing ({formatBalance(maxAvailable, pool?.currency.symbol, 2)}) is smaller than the
+                    total principal ({formatBalance(totalFinance, pool.currency.symbol)}).
+                  </Text>
+                </InlineFeedback>
+              </Box>
+            )}
             <Stack px={1}>
               <Button
                 type="submit"
@@ -143,7 +201,8 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                   !financeForm.values.price ||
                   !financeForm.values.quantity ||
                   !withdraw.isValid ||
-                  !poolFees.isValid(financeForm)
+                  !poolFees.isValid(financeForm) ||
+                  !financeForm.isValid
                 }
               >
                 Purchase
@@ -152,69 +211,6 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
           </Stack>
         </FormikProvider>
       )}
-    </>
-  )
-}
-
-export function ExternalFinanceFields({
-  loan,
-  pool,
-  validate,
-}: {
-  loan: ExternalLoan
-  pool: Pool
-  validate?: (val: any) => string
-}) {
-  const form = useFormikContext<FinanceValues>()
-  const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
-  const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
-  const maxBorrow = min(poolReserve, availableFinancing).sub(
-    form.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
-  )
-  return (
-    <>
-      <Field name="quantity" validate={combine(required(), positiveNumber())}>
-        {({ field, meta, form }: FieldProps) => {
-          return (
-            <CurrencyInput
-              {...field}
-              label="Quantity"
-              errorMessage={meta.touched ? meta.error : undefined}
-              decimals={8}
-              onChange={(value) => form.setFieldValue('quantity', value)}
-            />
-          )
-        }}
-      </Field>
-      <Field
-        name="price"
-        validate={combine(
-          required(),
-          positiveNumber(),
-          validate ??
-            ((val) => {
-              const financeAmount = Dec(val).mul(form.values.quantity || 1)
-
-              return financeAmount.gt(maxBorrow)
-                ? `Amount exceeds max borrow (${formatBalance(maxBorrow, pool.currency.symbol, 2)})`
-                : ''
-            }),
-          maxPriceVariance(loan.pricing)
-        )}
-      >
-        {({ field, meta, form }: FieldProps) => {
-          return (
-            <CurrencyInput
-              {...field}
-              label="Settlement price"
-              errorMessage={meta.touched ? meta.error : undefined}
-              currency={pool.currency.symbol}
-              onChange={(value) => form.setFieldValue('price', value)}
-              decimals={8}
-            />
-          )
-        }}
-      </Field>
     </>
   )
 }

@@ -156,6 +156,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const totalRepay = Dec(repayForm.values.principal || 0)
     .add(Dec(repayForm.values.interest || 0))
     .add(Dec(repayForm.values.amountAdditional || 0))
+  const maxAvailable = min(debt, balance)
 
   return (
     <>
@@ -245,13 +246,19 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
               }}
             </Field>
             {poolFees.render()}
-            {destination === 'reserve' ? (
-              <InlineFeedback>Stable-coins will be transferred to the onchain reserve.</InlineFeedback>
-            ) : (
-              <InlineFeedback>
-                Virtual accounting process. No onchain stable-coin transfers are expected.
-              </InlineFeedback>
-            )}
+            <Box bg="statusDefaultBg" p={1}>
+              {destination === 'reserve' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">Stable-coins will be transferred to the onchain reserve.</Text>
+                </InlineFeedback>
+              ) : (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stable-coin transfers are expected.
+                  </Text>
+                </InlineFeedback>
+              )}
+            </Box>
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Total amount</Text>
@@ -261,10 +268,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
               {poolFees.renderSummary()}
 
               <Shelf justifyContent="space-between">
-                <Text variant="emphasized">Available {pool.currency.symbol}</Text>
-                <Text variant="emphasized">
-                  {destination === 'reserve' ? formatBalance(balance, pool?.currency.symbol, 2) : 'No limit'}
-                </Text>
+                <Text variant="emphasized">Available</Text>
+                <Text variant="emphasized">{formatBalance(maxAvailable, pool?.currency.symbol, 2)}</Text>
               </Shelf>
             </Stack>
             {balance.lessThan(debt) && destination === 'reserve' && (
@@ -295,7 +300,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                   !poolFees.isValid(repayForm) ||
                   !repayForm.values.principal ||
                   !repayForm.values.interest ||
-                  balance.lessThan(totalRepay)
+                  balance.lessThan(totalRepay) ||
+                  !repayForm.isValid
                 }
                 loading={isRepayLoading}
               >

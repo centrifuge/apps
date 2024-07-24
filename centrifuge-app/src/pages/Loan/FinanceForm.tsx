@@ -85,7 +85,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   const loans = useLoans(loan.poolId)
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
-
+  const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => (args: [poolId: string, loanId: string, principal: BN], options) => {
@@ -95,11 +95,9 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       if (source === 'reserve') {
         financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
       } else {
-        const fromLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
-        if (!fromLoan) throw new Error('Target loan not found')
         const repay = { principal, interest: new BN(0) } // TODO:1 calculate interest?
         let borrow = { amount: principal }
-        financeTx = cent.pools.transferLoanDebt([poolId, fromLoan.id, loan.id, repay, borrow], { batch: true })
+        financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
       }
       return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
         switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
@@ -147,14 +145,13 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
-  const maxBorrow = (poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing).sub(
-    financeForm.values.fees.reduce((acc, fee) => acc.add(fee?.amount || 0), Dec(0)).toString()
-  )
   const totalAmount = Dec(financeForm.values.principal || 0)
+
+  const maxPrincipal = source === 'reserve' ? poolReserve : sourceLoan.outstandingDebt.toDecimal()
 
   return (
     <>
-      {availableFinancing.greaterThan(0) && !maturityDatePassed && (
+      {maxPrincipal.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Field
@@ -163,8 +160,8 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                 positiveNumber(),
                 max(availableFinancing.toNumber(), 'Principal exceeds available financing'),
                 max(
-                  maxBorrow.toNumber(),
-                  `Principal exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
+                  maxPrincipal.toNumber(),
+                  `Principal exceeds available reserve (${formatBalance(maxPrincipal, pool?.currency.symbol, 2)})`
                 )
               )}
             >
@@ -175,42 +172,67 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Principal"
                     errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
+                    secondaryLabel={`${formatBalance(
+                      roundDown(maxPrincipal.toNumber()),
+                      pool?.currency.symbol,
+                      2
+                    )} available`}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
-                    onSetMax={() => form.setFieldValue('principal', maxBorrow)}
+                    onSetMax={() => form.setFieldValue('principal', maxPrincipal)}
                   />
                 )
               }}
             </Field>
             {source === 'reserve' && withdraw.render()}
-            {source === 'reserve' ? (
-              <InlineFeedback>
-                Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
-                delay until the transfer is completed is to be expected.
-              </InlineFeedback>
-            ) : (
-              <InlineFeedback>
-                Virtual accounting process. No onchain stable-coin transfers are expected.
-              </InlineFeedback>
-            )}
+            <Box bg="statusDefaultBg" p={1}>
+              {source === 'reserve' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
+                    delay until the transfer is completed is to be expected.
+                  </Text>
+                </InlineFeedback>
+              ) : (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stable-coin transfers are expected.
+                  </Text>
+                </InlineFeedback>
+              )}
+            </Box>
             {poolFees.render()}
             {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
-              <InlineFeedback>
-                The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
-                the available financing
-              </InlineFeedback>
+              <Box bg="statusWarningBg">
+                <InlineFeedback status="warning">
+                  <Text color="statusWarning">
+                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
+                    than the available financing
+                  </Text>
+                </InlineFeedback>
+              </Box>
             )}
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Total amount</Text>
               <Text variant="emphasized">{formatBalance(totalAmount, pool?.currency.symbol, 2)}</Text>
             </Shelf>
+
             {poolFees.renderSummary()}
+
+            <Shelf justifyContent="space-between">
+              <Text variant="emphasized">Available</Text>
+              <Text variant="emphasized">{formatBalance(maxPrincipal, pool?.currency.symbol, 2)}</Text>
+            </Shelf>
             <Stack>
               <Button
                 type="submit"
                 loading={isFinanceLoading}
-                disabled={!financeForm.values.principal || !withdraw.isValid || !poolFees.isValid(financeForm)}
+                disabled={
+                  !financeForm.values.principal ||
+                  !withdraw.isValid ||
+                  !poolFees.isValid(financeForm) ||
+                  !financeForm.isValid
+                }
               >
                 Finance
               </Button>

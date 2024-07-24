@@ -1,17 +1,17 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
-import { Dec } from '../../utils/Decimal'
+import { Dec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, nonNegativeNumber, positiveNumber, required } from '../../utils/validation'
+import { combine, maxPriceVariance, nonNegativeNumber, required } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 
 type RepayValues = {
@@ -116,6 +116,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   }
 
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
+  const totalRepay = Dec(repayForm.values.price || 0)
+    .mul(Dec(repayForm.values.quantity || 0))
+    .add(repayForm.values.interest || 0)
+    .add(repayForm.values.amountAdditional || 0)
+
+  const available = min(debt, balance)
 
   return (
     <>
@@ -132,7 +138,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         (debt.gt(0) ? (
           <FormikProvider value={repayForm}>
             <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-              <Field validate={combine(required(), positiveNumber())} name="quantity">
+              <Field validate={combine(required(), nonNegativeNumber())} name="quantity">
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
@@ -153,15 +159,14 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   nonNegativeNumber(),
                   (val) => {
                     const num = val instanceof Decimal ? val.toNumber() : val
-                    const repayAmount = Dec(num).mul(repayForm.values.quantity)
+                    const repayAmount = Dec(num)
+                      .mul(repayForm.values.quantity)
+                      .add(repayForm.values.interest)
+                      .add(repayForm.values.amountAdditional)
 
                     return repayAmount.gt(balance)
-                      ? `Your wallet balance (${formatBalance(
-                          roundDown(balance),
-                          pool?.currency.symbol,
-                          2
-                        )}) is smaller than
-                    the outstanding balance.`
+                      ? `Available (${formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is less than
+                    the outstanding amount`
                       : ''
                   },
                   maxPriceVariance(loan.pricing)
@@ -220,32 +225,53 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   )
                 }}
               </Field>
-              {destination === 'reserve' ? (
-                <InlineFeedback>Stable-coins will be transferred to the onchain reserve.</InlineFeedback>
-              ) : (
-                <InlineFeedback>
-                  Virtual accounting process. No onchain stable-coin transfers are expected.
-                </InlineFeedback>
-              )}
+              <Box bg="statusDefaultBg" p={1}>
+                {destination === 'reserve' ? (
+                  <InlineFeedback status="default">
+                    <Text color="statusDefault">Stable-coins will be transferred to the onchain reserve.</Text>
+                  </InlineFeedback>
+                ) : (
+                  <InlineFeedback status="default">
+                    <Text color="statusDefault">
+                      Virtual accounting process. No onchain stable-coin transfers are expected.
+                    </Text>
+                  </InlineFeedback>
+                )}
+              </Box>
               {poolFees.render()}
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Text variant="emphasized">Total amount</Text>
-                  <Text variant="emphasized">
-                    {repayForm.values.price && !Number.isNaN(repayForm.values.price as number)
-                      ? formatBalance(
-                          Dec(repayForm.values.price || 0)
-                            .mul(Dec(repayForm.values.quantity || 0))
-                            .add(repayForm.values.interest || 0)
-                            .add(repayForm.values.amountAdditional || 0),
-                          pool?.currency.symbol,
-                          2
-                        )
-                      : `0.00 ${pool.currency.symbol}`}
-                  </Text>
+                  <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
                 </Shelf>
+
                 {poolFees.renderSummary()}
+
+                <Shelf justifyContent="space-between">
+                  <Text variant="emphasized">Available</Text>
+                  <Text variant="emphasized">{formatBalance(available, pool?.currency.symbol, 2)}</Text>
+                </Shelf>
               </Stack>
+              {balance.lessThan(debt) && destination === 'reserve' && (
+                <Box bg="statusWarningBg" p={1}>
+                  <InlineFeedback status="warning">
+                    <Text color="statusWarning">
+                      Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller
+                      than the outstanding balance({formatBalance(debt, pool.currency.symbol)}).
+                    </Text>
+                  </InlineFeedback>
+                </Box>
+              )}
+              {totalRepay.gt(0) && balance.lessThan(totalRepay) && (
+                <Box bg="statusCriticalBg" p={1}>
+                  <InlineFeedback status="critical">
+                    <Text color="statusCritical">
+                      Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller
+                      than the total principal ({formatBalance(totalRepay, pool.currency.symbol)}).
+                    </Text>
+                  </InlineFeedback>
+                </Box>
+              )}
               <Stack gap={1} px={1}>
                 <Button
                   type="submit"
@@ -254,7 +280,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                     !poolFees.isValid(repayForm) ||
                     !repayForm.values.price ||
                     !repayForm.values.quantity ||
-                    Object.keys(repayForm.errors).length > 0
+                    !repayForm.isValid ||
+                    balance.lessThan(totalRepay)
                   }
                   loading={isRepayLoading}
                 >
