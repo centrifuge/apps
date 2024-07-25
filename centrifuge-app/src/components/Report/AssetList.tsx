@@ -1,10 +1,10 @@
-import { Loan, Pool } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
-import * as React from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { formatDate } from '../../utils/date'
-import { formatBalance, formatPercentage } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useLoans } from '../../utils/useLoans'
+import { useAllPoolAssetSnapshots, usePoolMetadata } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
@@ -16,155 +16,214 @@ const valuationLabels = {
   discountedCashFlow: 'Non-fungible asset - DCF',
   outstandingDebt: 'Non-fungible asset - at par',
   oracle: 'Fungible asset - external pricing',
-  cash: 'Cash',
+}
+
+function getColumnConfig(poolCreditType: string, symbol: string) {
+  if (poolCreditType === 'privateCredit') {
+    return [
+      {
+        header: 'ID',
+        align: 'left',
+        csvOnly: false,
+        formatter: noop,
+      },
+      { header: 'Name', align: 'left', csvOnly: false, formatter: noop },
+      {
+        header: 'Value',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Principal outstanding',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Interest outstanding',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Principal repaid',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Interest repaid',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Additional repaid',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      { header: 'Origination date', align: 'left', csvOnly: false, sortable: true, formatter: formatDate },
+      { header: 'Maturity date', align: 'left', csvOnly: false, sortable: true, formatter: formatDate },
+      { header: 'Valuation method', align: 'left', csvOnly: false, formatter: (v: any) => formatBalance(v, symbol, 2) },
+      { header: 'Advance rate', align: 'left', csvOnly: false, formatter: (v: any) => formatBalance(v, symbol, 2) },
+      { header: 'Collateral value', align: 'left', csvOnly: false, formatter: (v: any) => formatBalance(v, symbol, 2) },
+      {
+        header: 'Probability of default (PD)',
+        align: 'left',
+        csvOnly: false,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Loss given default (LGD)',
+        align: 'left',
+        csvOnly: false,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      { header: 'Discount rate', align: 'left', csvOnly: false, formatter: (v: any) => formatBalance(v, symbol, 2) },
+    ]
+  } else {
+    return [
+      {
+        header: 'ID',
+        align: 'left',
+        csvOnly: false,
+        formatter: noop,
+      },
+      { header: 'Name', align: 'left', csvOnly: false, formatter: noop },
+      {
+        header: 'Market value',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Face value',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Quantity',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Market price',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      { header: 'Maturity date', align: 'left', csvOnly: false, sortable: true, formatter: formatDate },
+      {
+        header: 'Unrealized profit',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+      {
+        header: 'Realized profit',
+        align: 'right',
+        csvOnly: false,
+        sortable: true,
+        formatter: (v: any) => formatBalance(v, symbol, 2),
+      },
+    ]
+  }
 }
 
 export function AssetList({ pool }: { pool: Pool }) {
-  const loans = useLoans(pool.id) as Loan[]
-  const { setCsvData, loanStatus } = React.useContext(ReportContext)
+  const { loanStatus, startDate, setCsvData } = useContext(ReportContext)
+  const { data: poolMetadata } = usePoolMetadata(pool)
+  const poolCreditType = useMemo(() => poolMetadata?.pool?.asset.class || 'privateCredit', [poolMetadata])
   const { symbol } = pool.currency
 
-  const columnConfig = [
-    {
-      header: 'ID',
-      align: 'left',
-      csvOnly: false,
-      formatter: noop,
-    },
-    {
-      header: 'Status',
-      align: 'left',
-      csvOnly: false,
-      formatter: noop,
-    },
-    {
-      header: 'Value',
-      align: 'right',
-      csvOnly: false,
-      sortable: true,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
-    },
-    {
-      header: 'Value currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
-    },
-    {
-      header: 'Outstanding',
-      align: 'right',
-      csvOnly: false,
-      sortable: true,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
-    },
-    {
-      header: 'Outstanding currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
-    },
-    {
-      header: 'Total financed',
-      align: 'right',
-      csvOnly: false,
-      sortable: true,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
-    },
-    {
-      header: 'Total financed currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
-    },
-    {
-      header: 'Total repaid',
-      align: 'right',
-      sortable: true,
-      csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatBalance(v, symbol, 2) : '-'),
-    },
-    {
-      header: 'Total repaid currency',
-      align: 'left',
-      csvOnly: true,
-      formatter: noop,
-    },
-    {
-      header: 'Financing date',
-      align: 'left',
-      sortable: true,
-      csvOnly: false,
-      formatter: (v: any) => (v !== '-' ? formatDate(v) : v),
-    },
-    {
-      header: 'Maturity date',
-      align: 'left',
-      csvOnly: false,
-      sortable: true,
-      formatter: formatDate,
-    },
-    {
-      header: 'Interest rate',
-      align: 'left',
-      csvOnly: false,
-      formatter: (v: any) => (typeof v === 'number' ? formatPercentage(v, true, undefined, 2) : '-'),
-    },
-    {
-      header: 'Valuation method',
-      align: 'left',
-      csvOnly: false,
-      formatter: noop,
-    },
-  ]
+  const snapshots = useAllPoolAssetSnapshots(pool.id, startDate)
+  const columnConfig = useMemo(() => getColumnConfig(poolCreditType, symbol), [poolCreditType, symbol])
 
-  const columns = columnConfig
-    .map((col, index) => ({
-      align: col.align,
-      header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
-      sortKey: col.sortable ? `value[${index}]` : undefined,
-      cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
-      csvOnly: col.csvOnly,
-    }))
-    .filter((col) => !col.csvOnly)
+  const columns = useMemo(
+    () =>
+      columnConfig
+        .map((col, index) => ({
+          align: col.align,
+          header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
+          sortKey: col.sortable ? `value[${index}]` : undefined,
+          cell: (row: TableDataRow) => <Text variant="body3">{col.formatter((row.value as any)[index])}</Text>,
+          csvOnly: col.csvOnly,
+        }))
+        .filter((col) => !col.csvOnly),
+    [columnConfig]
+  )
 
-  const data: TableDataRow[] = React.useMemo(() => {
-    if (!loans) {
-      return []
-    }
+  const data = useMemo(() => {
+    if (!snapshots) return []
 
-    return loans
-      .filter((loan) => loan.status !== 'Created')
-      .map((loan) => ({
-        name: '',
-        value: [
-          loan.id,
-          loan.status === 'Closed'
-            ? 'Repaid'
-            : new Date() > new Date(loan.pricing.maturityDate)
-            ? loan.outstandingDebt.isZero()
-              ? 'Repaid'
-              : 'Overdue'
-            : 'Active',
-          'presentValue' in loan ? loan.presentValue.toFloat() : '-',
-          symbol,
-          'outstandingDebt' in loan ? loan.outstandingDebt.toFloat() : '-',
-          symbol,
-          'totalBorrowed' in loan ? loan.totalBorrowed.toFloat() : '-',
-          symbol,
-          'totalRepaid' in loan ? loan.totalRepaid.toFloat() : '-',
-          symbol,
-          'originationDate' in loan ? loan.originationDate : '-',
-          loan.pricing.maturityDate,
-          'interestRate' in loan.pricing ? loan.pricing.interestRate.toPercent().toNumber() : '-',
-          valuationLabels[loan.pricing.valuationMethod],
-        ],
-        heading: false,
-      }))
-      .filter((row) => (loanStatus === 'all' || !loanStatus ? true : row.value[1] === loanStatus))
-  }, [loans, symbol, loanStatus])
+    return snapshots
+      .filter(
+        (snapshot) =>
+          snapshot?.status !== 'Created' &&
+          snapshot?.valuationMethod?.toLowerCase() !== 'cash' &&
+          (loanStatus === 'all' || !loanStatus || snapshot?.status === loanStatus)
+      )
+      .map((snapshot) => {
+        if (poolCreditType === 'privateCredit') {
+          return {
+            name: '',
+            value: [
+              snapshot.assetId,
+              snapshot?.name,
+              snapshot?.presentValue,
+              snapshot?.outstandingPrincipal,
+              snapshot?.outstandingInterest,
+              snapshot?.totalRepaidPrincipal,
+              snapshot?.totalRepaidInterest,
+              snapshot?.totalRepaidUnscheduled,
+              snapshot?.actualOriginationDate,
+              snapshot?.actualMaturityDate,
+              valuationLabels[snapshot?.valuationMethod] || snapshot?.valuationMethod,
+              snapshot?.advanceRate,
+              snapshot?.collateralValue,
+              snapshot?.probabilityOfDefault,
+              snapshot?.lossGivenDefault,
+              snapshot?.discountRate,
+            ],
+            heading: false,
+          }
+        } else {
+          return {
+            name: '',
+            value: [
+              snapshot?.assetId,
+              snapshot?.name,
+              snapshot?.presentValue,
+              snapshot.faceValue,
+              snapshot?.outstandingQuantity,
+              snapshot?.currentPrice,
+              snapshot?.actualMaturityDate,
+              snapshot?.unrealizedProfitAtMarketPrice,
+              snapshot?.sumRealizedProfitFifo,
+            ],
+            heading: false,
+          }
+        }
+      })
+  }, [snapshots, poolCreditType, symbol, loanStatus])
 
-  React.useEffect(() => {
-    if (!data.length) {
+  useEffect(() => {
+    if (!snapshots?.length) {
       return
     }
 
@@ -182,10 +241,9 @@ export function AssetList({ pool }: { pool: Pool }) {
       setCsvData(undefined)
       URL.revokeObjectURL(dataUrl)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data])
+  }, [snapshots])
 
-  if (!loans) {
+  if (!snapshots) {
     return <Spinner />
   }
 
