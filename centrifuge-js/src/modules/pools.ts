@@ -840,13 +840,27 @@ export type AssetTransaction = {
 }
 
 export type AssetSnapshot = {
-  timestamp: Date
   asset: {
+    actualOriginationDate: number
+    advanceRate: Rate
+    collateralValue: string
+    discountRate: Rate
+    faceValue: CurrencyBalance | undefined
     id: string
-    name: string
+    lossGivenDefault: Rate
+    actualMaturityDate: number
     metadata: string
+    name: string
+    probabilityOfDefault: Rate
+    status: string
+    sumRealizedProfitFifo: CurrencyBalance | undefined
     type: AssetType
+    unrealizedProfitAtMarketPrice: CurrencyBalance | undefined
+    valuationMethod: string
+    notional: CurrencyBalance | undefined
   }
+  timestamp: Date
+  assetId: string
   presentValue: CurrencyBalance | undefined
   currentPrice: CurrencyBalance | undefined
   outstandingPrincipal: CurrencyBalance | undefined
@@ -3240,6 +3254,100 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getAllPoolAssetSnapshots(args: [poolId: string, date: Date]) {
+    const [poolId, date] = args
+
+    const validDate = new Date(date)
+    const from = new Date(validDate.setUTCHours(0, 0, 0, 0))
+    const to = new Date(validDate.setUTCHours(23, 59, 59, 999))
+
+    const $query = inst.getSubqueryObservable<{
+      assetSnapshots: { nodes: SubqueryAssetSnapshot[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        assetSnapshots(
+          first: 1000,
+          orderBy: TIMESTAMP_ASC,
+          filter: {
+            asset: { poolId: { equalTo: $poolId } }
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }
+        ) {
+          nodes {
+            assetId
+            timestamp
+            totalRepaidUnscheduled
+            outstandingInterest
+            totalRepaidInterest
+            currentPrice
+            outstandingPrincipal
+            totalRepaidPrincipal
+            outstandingQuantity
+            presentValue
+            asset {
+              actualMaturityDate
+              actualOriginationDate
+              advanceRate
+              collateralValue
+              discountRate
+              lossGivenDefault
+              name
+              notional
+              probabilityOfDefault
+              status
+              sumRealizedProfitFifo
+              unrealizedProfitAtMarketPrice
+              valuationMethod
+            }
+          }
+        }
+      }
+      `,
+      {
+        poolId: `${poolId}`,
+        from,
+        to,
+      },
+      false
+    )
+
+    const transformVal = (value: any, currency: number) => {
+      if (!value) return undefined
+      else return new CurrencyBalance(value, currency)
+    }
+
+    return $query.pipe(
+      switchMap(() => combineLatest([$query, getPoolCurrency([poolId])])),
+      map(([data, currency]) => {
+        return data!.assetSnapshots.nodes.map((tx) => ({
+          ...tx,
+          totalRepaidUnscheduled: transformVal(tx.totalRepaidUnscheduled, currency.decimals),
+          advanceRate: tx.asset.advanceRate,
+          collateralValue: tx.asset.collateralValue,
+          discountRate: tx.asset.discountRate,
+          outstandingInterest: transformVal(tx.outstandingInterest, currency.decimals),
+          totalRepaidInterest: transformVal(tx.totalRepaidInterest, currency.decimals),
+          lossGivenDefault: tx.asset.lossGivenDefault,
+          currentPrice: transformVal(tx.currentPrice, currency.decimals),
+          actualMaturityDate: tx.asset.actualMaturityDate,
+          name: tx.asset.name,
+          actualOriginationDate: tx.asset.actualOriginationDate,
+          outstandingPrincipal: transformVal(tx.outstandingPrincipal, currency.decimals),
+          totalRepaidPrincipal: transformVal(tx.totalRepaidPrincipal, currency.decimals),
+          probabilityOfDefault: tx.asset.probabilityOfDefault,
+          outstandingQuantity: transformVal(tx.outstandingQuantity, currency.decimals),
+          sumRealizedProfitFifo: transformVal(tx.asset.sumRealizedProfitFifo, currency.decimals),
+          status: tx.asset.status,
+          timestamp: new Date(`${tx.timestamp}+00:00`),
+          unrealizedProfitAtMarketPrice: transformVal(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals),
+          valuationMethod: tx.asset.valuationMethod,
+          presentValue: transformVal(tx.presentValue, currency.decimals),
+          faceValue: transformVal(`${Number(tx.asset.notional) * Number(tx.outstandingQuantity)}`, currency.decimals),
+        })) satisfies AssetSnapshot[]
+      })
+    )
+  }
+
   function getInvestors(args: [poolId: string, trancheId?: string]) {
     const [poolId, trancheId] = args
     const $query = inst.getApi().pipe(
@@ -4308,6 +4416,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getTransactionsByAddress,
     getDailyTVL,
     getInvestors,
+    getAllPoolAssetSnapshots,
   }
 }
 
