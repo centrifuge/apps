@@ -126,8 +126,8 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
     return null
   }
 
-  const maturityDatePassed =
-    loan?.pricing && 'maturityDate' in loan.pricing && new Date() > new Date(loan.pricing.maturityDate)
+  const hasMaturityDate = loan.pricing.maturityDate
+  const maturityDatePassed = loan.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
   const selectedLoan = loans?.find((l) => l.id === form.values.targetLoan) as ActiveLoan | undefined
 
   function validate(financeAmount: Decimal) {
@@ -143,7 +143,7 @@ export function TransferDebtForm({ loan }: { loan: LoanType }) {
       : ''
   }
 
-  if (availableFinancing.lte(0) || maturityDatePassed || !loans?.length) return null
+  if (availableFinancing.lte(0) || (hasMaturityDate && maturityDatePassed) || !loans?.length) return null
 
   const financeAmount = isExternalLoan(loan)
     ? Dec(form.values.price || 0).mul(Dec(form.values.quantity || 0))
