@@ -117,32 +117,35 @@ export function ReportFilter({ pool }: ReportFilterProps) {
       )}
 
       {report === 'asset-list' && (
-        <Select
-          name="loanStatus"
-          label="Status"
-          options={[
-            {
-              label: 'All',
-              value: 'all',
-            },
-            {
-              label: 'Active',
-              value: 'Active',
-            },
-            {
-              label: 'Repaid',
-              value: 'Repaid',
-            },
-            {
-              label: 'Overdue',
-              value: 'Overdue',
-            },
-          ]}
-          value={loanStatus}
-          onChange={(event) => {
-            setLoanStatus(event.target.value)
-          }}
-        />
+        <>
+          <Select
+            name="loanStatus"
+            label="Status"
+            options={[
+              {
+                label: 'All',
+                value: 'all',
+              },
+              {
+                label: 'Active',
+                value: 'Active',
+              },
+              {
+                label: 'Repaid',
+                value: 'Repaid',
+              },
+              {
+                label: 'Overdue',
+                value: 'Overdue',
+              },
+            ]}
+            value={loanStatus}
+            onChange={(event) => {
+              setLoanStatus(event.target.value)
+            }}
+          />
+          <DateInput label="Day" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        </>
       )}
 
       {(report === 'investor-list' || report === 'investor-tx') && (
