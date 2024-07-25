@@ -2,7 +2,6 @@ import { CurrencyBalance, Pool, addressToHex } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
   formatBalance,
-  useCentrifuge,
   useCentrifugeApi,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
@@ -173,7 +172,6 @@ function ChargePoolFeeSummary({ poolId }: { poolId: string }) {
 export function useChargePoolFees(poolId: string, loanId: string) {
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
-  const cent = useCentrifuge()
   const [account] = useSuitableAccounts({ poolId: poolId })
   const borrower = useBorrower(poolId, loanId)
   const api = useCentrifugeApi()
@@ -191,15 +189,20 @@ export function useChargePoolFees(poolId: string, loanId: string) {
         if (!account) throw new Error('No account')
         const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
         const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
-        const feeTx = cent.pools.chargePoolFee([fee.id, feeAmount, pendingFee], { batch: true })
-        // can't decode value [Object object] of type object
+        let feeTx = api.tx.poolFees.chargeFee(fee.id, feeAmount.toString())
+        if (pendingFee?.gtn(0)) {
+          feeTx = api.tx.utility.batchAll([
+            api.tx.poolFees.unchargeFee(fee.id, pendingFee.toString()),
+            api.tx.poolFees.chargeFee(fee.id, feeAmount.toString()),
+          ])
+        }
         return [
           of(
             wrapProxyCallsForAccount(
               api,
               api.tx.remarks.remark([{ Loan: [poolId, loanId] }], feeTx),
               borrower,
-              'Transfer'
+              'Borrow'
             )
           ),
         ]

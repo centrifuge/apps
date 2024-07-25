@@ -1,4 +1,4 @@
-import { Observable, of, switchMap } from 'rxjs'
+import { of, switchMap } from 'rxjs'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 
@@ -36,22 +36,8 @@ export function getRemarkModule(inst: CentrifugeBase) {
     )
   }
 
-  function remarkFeeTransaction(
-    args: [poolId: string, loanId: string, feeTx: Observable<any>],
-    options?: TransactionOptions
-  ) {
-    const $api = inst.getApi()
-    const [poolId, loanId, feeTx] = args
-    return $api.pipe(
-      switchMap((api) => {
-        return inst.wrapSignAndSend(api, api.tx.remarks.remark([{ Loan: [poolId, loanId] }], feeTx), options)
-      })
-    )
-  }
-
   return {
     remarkWithEvent,
     validateRemark,
-    remarkFeeTransaction,
   }
 }
