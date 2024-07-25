@@ -1,4 +1,4 @@
-import { CurrencyBalance, Price } from '../utils/BN'
+import { CurrencyBalance, Price, Rate } from '../utils/BN'
 
 export type SubqueryPoolSnapshot = {
   id: string
@@ -144,22 +144,36 @@ export type SubqueryAssetTransaction = {
 export type SubqueryAssetSnapshot = {
   __typename?: 'AssetSnapshot'
   asset: {
+    actualOriginationDate: number
+    advanceRate: Rate
+    collateralValue: string
+    discountRate: Rate
+    faceValue: CurrencyBalance | undefined
     id: string
+    lossGivenDefault: Rate
+    actualMaturityDate: number
     metadata: string
     name: string
+    probabilityOfDefault: Rate
+    status: string
+    sumRealizedProfitFifo: CurrencyBalance | undefined
     type: AssetType
+    unrealizedProfitAtMarketPrice: CurrencyBalance | undefined
+    valuationMethod: string
+    notional: CurrencyBalance | undefined
   }
-  timestamp: string
-  presentValue: string
-  currentPrice: string
-  outstandingPrincipal: string
-  outstandingInterest: string
-  outstandingDebt: string
-  outstandingQuantity: string
-  totalBorrowed: string
-  totalRepaidPrincipal: string
-  totalRepaidInterest: string
-  totalRepaidUnscheduled: string
+  timestamp: Date
+  assetId: string
+  presentValue: CurrencyBalance | undefined
+  currentPrice: CurrencyBalance | undefined
+  outstandingPrincipal: CurrencyBalance | undefined
+  outstandingInterest: CurrencyBalance | undefined
+  outstandingDebt: CurrencyBalance | undefined
+  outstandingQuantity: CurrencyBalance | undefined
+  totalBorrowed: CurrencyBalance | undefined
+  totalRepaidPrincipal: CurrencyBalance | undefined
+  totalRepaidInterest: CurrencyBalance | undefined
+  totalRepaidUnscheduled: CurrencyBalance | undefined
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
