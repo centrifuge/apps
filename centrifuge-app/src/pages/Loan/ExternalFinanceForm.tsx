@@ -156,7 +156,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">
-                    Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
+                    Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks. A
                     delay until the transfer is completed is to be expected.
                   </Text>
                 </InlineFeedback>

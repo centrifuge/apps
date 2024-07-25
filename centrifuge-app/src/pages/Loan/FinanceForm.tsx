@@ -41,12 +41,12 @@ import * as React from 'react'
 import { combineLatest, map, of, switchMap } from 'rxjs'
 import { parachainIcons, parachainNames } from '../../config'
 import { Dec } from '../../utils/Decimal'
-import { formatBalance, roundDown } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
 import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, max, positiveNumber } from '../../utils/validation'
+import { combine, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
 import { SourceSelect } from './SourceSelect'
@@ -156,14 +156,17 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Field
               name="principal"
-              validate={combine(
-                positiveNumber(),
-                max(availableFinancing.toNumber(), 'Principal exceeds available financing'),
-                max(
-                  maxPrincipal.toNumber(),
-                  `Principal exceeds available reserve (${formatBalance(maxPrincipal, pool?.currency.symbol, 2)})`
-                )
-              )}
+              validate={combine(positiveNumber(), (val) => {
+                const principalValue = typeof val === 'number' ? Dec(val) : (val as Decimal)
+                if (principalValue.gt(maxPrincipal)) {
+                  return `Principal exceeds available reserve (${formatBalance(
+                    maxPrincipal,
+                    pool?.currency.symbol,
+                    2
+                  )})`
+                }
+                return ''
+              })}
             >
               {({ field, meta, form }: FieldProps) => {
                 return (
@@ -172,11 +175,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Principal"
                     errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(
-                      roundDown(maxPrincipal.toNumber()),
-                      pool?.currency.symbol,
-                      2
-                    )} available`}
+                    secondaryLabel={`${formatBalance(maxPrincipal.toNumber(), pool?.currency.symbol, 2)} available`}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
                     onSetMax={() => form.setFieldValue('principal', maxPrincipal)}
@@ -189,7 +188,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">
-                    Stable-coins will be transferred to the specified withdrawl addresses, on the specified networks. A
+                    Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks. A
                     delay until the transfer is completed is to be expected.
                   </Text>
                 </InlineFeedback>

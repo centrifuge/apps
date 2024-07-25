@@ -11,7 +11,15 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, maxPriceVariance, nonNegativeNumber, required } from '../../utils/validation'
+import {
+  combine,
+  max,
+  maxNotRequired,
+  maxPriceVariance,
+  nonNegativeNumber,
+  nonNegativeNumberNotRequired,
+  required,
+} from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 
 type RepayValues = {
@@ -29,6 +37,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const loans = useLoans(loan.poolId)
+  const destinationLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
@@ -54,11 +63,9 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             }
           )
         } else {
-          const toLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
-          if (!toLoan) throw new Error('toLoan not found')
           const repay = { quantity, price, interest }
           let borrow = { quantity, price }
-          repayTx = cent.pools.transferLoanDebt([poolId, loan.id, toLoan.id, repay, borrow], { batch: true })
+          repayTx = cent.pools.transferLoanDebt([poolId, loan.id, destinationLoan.id, repay, borrow], { batch: true })
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
@@ -116,12 +123,30 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   }
 
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
-  const totalRepay = Dec(repayForm.values.price || 0)
-    .mul(Dec(repayForm.values.quantity || 0))
-    .add(repayForm.values.interest || 0)
-    .add(repayForm.values.amountAdditional || 0)
+  const { availableDebt, maxInterest, currentInputsSum } = React.useMemo(() => {
+    const outstandingInterest = (loan as ActiveLoan).outstandingInterest.toDecimal() ?? Dec(0)
+    const currentInputsSum = Dec(repayForm.values.price || 0)
+      .mul(repayForm.values.quantity || 0)
+      .add(repayForm.values.interest || 0)
+      .add(repayForm.values.amountAdditional || 0)
+    if (destination === 'reserve') {
+      return {
+        availableDebt: min(balance, debt),
+        maxInterest: outstandingInterest.gt(currentInputsSum)
+          ? min(balance, outstandingInterest).sub(currentInputsSum)
+          : Dec(0),
+        currentInputsSum,
+      }
+    }
+    return {
+      availableDebt: destinationLoan.outstandingDebt?.toDecimal(),
+      maxInterest: outstandingInterest.gt(currentInputsSum) ? outstandingInterest.sub(currentInputsSum) : Dec(0),
+      currentInputsSum,
+    }
+  }, [loan, destinationLoan, balance, repayForm.values])
 
-  const available = min(debt, balance)
+  console.log('🚀 ~ maxInterest:', maxInterest.toString())
+  const totalRepay = currentInputsSum
 
   return (
     <>
@@ -157,18 +182,13 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                 validate={combine(
                   required(),
                   nonNegativeNumber(),
-                  (val) => {
-                    const num = val instanceof Decimal ? val.toNumber() : val
-                    const repayAmount = Dec(num)
-                      .mul(repayForm.values.quantity)
-                      .add(repayForm.values.interest)
-                      .add(repayForm.values.amountAdditional)
-
-                    return repayAmount.gt(balance)
-                      ? `Available (${formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is less than
-                    the outstanding amount`
-                      : ''
-                  },
+                  max(
+                    availableDebt.toNumber(),
+                    `Quantity x price (${formatBalance(
+                      Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0),
+                      pool.currency.symbol
+                    )}) exceeds available debt (${formatBalance(availableDebt, pool.currency.symbol)})`
+                  ),
                   maxPriceVariance(loan.pricing)
                 )}
                 name="price"
@@ -188,7 +208,10 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                 }}
               </Field>
               {loan.outstandingInterest.toDecimal().gt(0) && (
-                <Field validate={nonNegativeNumber()} name="interest">
+                <Field
+                  validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(maxInterest.toNumber()))}
+                  name="interest"
+                >
                   {({ field, meta, form }: FieldProps) => {
                     return (
                       <CurrencyInput
@@ -204,13 +227,16 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                         disabled={isRepayLoading}
                         currency={pool?.currency.symbol}
                         onChange={(value) => form.setFieldValue('interest', value)}
-                        onSetMax={() => form.setFieldValue('interest', loan.outstandingInterest.toDecimal())}
+                        onSetMax={() => form.setFieldValue('interest', maxInterest.toNumber())}
                       />
                     )
                   }}
                 </Field>
               )}
-              <Field name="amountAdditional" validate={nonNegativeNumber()}>
+              <Field
+                name="amountAdditional"
+                validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(availableDebt.toNumber()))}
+              >
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
@@ -249,7 +275,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
 
                 <Shelf justifyContent="space-between">
                   <Text variant="emphasized">Available</Text>
-                  <Text variant="emphasized">{formatBalance(available, pool?.currency.symbol, 2)}</Text>
+                  <Text variant="emphasized">{formatBalance(availableDebt, pool?.currency.symbol, 2)}</Text>
                 </Shelf>
               </Stack>
               {balance.lessThan(debt) && destination === 'reserve' && (
@@ -262,12 +288,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   </InlineFeedback>
                 </Box>
               )}
-              {totalRepay.gt(0) && balance.lessThan(totalRepay) && (
+              {totalRepay.gt(availableDebt) && (
                 <Box bg="statusCriticalBg" p={1}>
                   <InlineFeedback status="critical">
                     <Text color="statusCritical">
-                      Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller
-                      than the total principal ({formatBalance(totalRepay, pool.currency.symbol)}).
+                      The amount ({formatBalance(roundDown(totalRepay), pool?.currency.symbol, 2)}) is greater than the
+                      available debt ({formatBalance(availableDebt, pool.currency.symbol)}).
                     </Text>
                   </InlineFeedback>
                 </Box>
@@ -278,10 +304,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   disabled={
                     isRepayLoading ||
                     !poolFees.isValid(repayForm) ||
-                    !repayForm.values.price ||
-                    !repayForm.values.quantity ||
                     !repayForm.isValid ||
-                    balance.lessThan(totalRepay)
+                    !totalRepay.lessThan(availableDebt)
                   }
                   loading={isRepayLoading}
                 >
