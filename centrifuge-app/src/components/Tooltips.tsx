@@ -3,9 +3,9 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
 
-const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
+function ValueLockedTooltipBody({ poolId }: { poolId?: string }) {
   const { pid: poolIdParam } = useParams<{ pid: string }>()
-  const pool = usePool(poolId || poolIdParam)
+  const pool = usePool(poolId || poolIdParam || '', false)
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
@@ -323,13 +323,7 @@ export type TooltipsProps = {
   props?: any
 } & Partial<Pick<TextProps, 'style' | 'body'>>
 
-export const Tooltips: React.FC<TooltipsProps> = ({
-  type,
-  label: labelOverride,
-  variant = 'primary',
-  props,
-  ...textProps
-}) => {
+export function Tooltips({ type, label: labelOverride, variant = 'primary', props, ...textProps }: TooltipsProps) {
   const { label, body } = type ? tooltipText[type] : { label: labelOverride, body: textProps.body }
   const isPrimary = variant === 'primary'
   return (

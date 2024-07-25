@@ -18,6 +18,9 @@ export const Faucet = () => {
   const [isLoading, setIsLoading] = React.useState(false)
   const currencies = useCurrencies()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
   const balances = useBalances(useAddress('substrate'))
 

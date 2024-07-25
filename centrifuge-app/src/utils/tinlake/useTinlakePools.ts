@@ -713,6 +713,10 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         lastUpdated: new Date().toISOString(),
         total: data.netAssetValue,
         aum: data.netAssetValue,
+        fees: new CurrencyBalance(0, 18),
+      },
+      fees: {
+        totalPaid: new CurrencyBalance(0, 18),
       },
       createdAt: null,
       isInitialised: true,

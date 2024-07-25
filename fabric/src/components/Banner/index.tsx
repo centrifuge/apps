@@ -14,7 +14,7 @@ type BannerProps = {
   children?: React.ReactNode
 }
 
-export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => {
+export function Banner({ children, title, ...props }: BannerProps) {
   const theme = useTheme()
   const ref = React.useRef<HTMLDivElement>(null)
   const { overlayProps } = useOverlay({ ...props }, ref)

@@ -10,7 +10,7 @@ export default {
   component: Text,
 } as Meta<typeof Text>
 
-export const Variants: React.FC = () => {
+export function Variants() {
   const theme = useTheme()
   return (
     <Stack gap={2}>
@@ -23,7 +23,7 @@ export const Variants: React.FC = () => {
   )
 }
 
-export const Body: React.FC = () => {
+export function Body() {
   return (
     <Stack gap={3}>
       <Stack gap={1}>

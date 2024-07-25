@@ -24,6 +24,9 @@ export function IssuerPoolConfigurationPage() {
 
 function IssuerPoolConfiguration() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { editPoolConfig } = useDebugFlags()
   const isPoolAdmin = !!usePoolAdmin(poolId)
   const isBorrower = useCanBorrow(poolId)

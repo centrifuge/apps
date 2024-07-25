@@ -25,7 +25,7 @@ export default function CollectionsPage() {
 
 const COUNT_PER_PAGE = 12
 
-const Collections: React.FC = () => {
+function Collections() {
   const [createOpen, setCreateOpen] = React.useState(false)
   const address = useAddress('substrate')
   const collections = useCollections()

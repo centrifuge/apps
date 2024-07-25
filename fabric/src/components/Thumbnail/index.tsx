@@ -10,7 +10,7 @@ export type ThumbnailProps = {
   size?: 'small' | 'large'
 }
 
-export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
+export function Thumbnail({ label, ...props }: ThumbnailProps) {
   const theme = useTheme()
   return (
     <>

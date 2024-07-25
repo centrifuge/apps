@@ -7,7 +7,7 @@ const SVG = styled.svg`
   height: auto;
 `
 
-export const LogoCentrifugeText: React.FC<Omit<React.SVGProps<SVGSVGElement>, 'ref'>> = (props) => {
+export function LogoCentrifugeText(props: Omit<React.SVGProps<SVGSVGElement>, 'ref'>) {
   return (
     <SVG
       {...props}
@@ -79,7 +79,7 @@ export const LogoCentrifugeText: React.FC<Omit<React.SVGProps<SVGSVGElement>, 'r
   )
 }
 
-export const LogoCentrifuge: React.FC<Omit<React.SVGProps<SVGSVGElement>, 'ref'>> = (props) => {
+export function LogoCentrifuge(props: Omit<React.SVGProps<SVGSVGElement>, 'ref'>) {
   return (
     <SVG
       {...props}

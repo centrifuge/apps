@@ -48,6 +48,9 @@ export type WriteOffGroupValues = { writeOffGroups: WriteOffGroupInput[] }
 
 export function WriteOffGroups() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const [isEditing, setIsEditing] = React.useState(false)
   const consts = useCentrifugeConsts()
   const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })

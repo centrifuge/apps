@@ -30,7 +30,7 @@ import { createKeyMulti, sortAddresses } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router'
 import { combineLatest, firstValueFrom, lastValueFrom, switchMap, tap } from 'rxjs'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
@@ -154,7 +154,7 @@ const initialValues: CreatePoolValues = {
   poolType: 'open',
 }
 
-const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
+function PoolIcon({ icon, children }: { icon?: File | null; children: string }) {
   const [uri, setUri] = React.useState('')
   React.useEffect(() => {
     ;(async () => {
@@ -175,7 +175,7 @@ function CreatePoolForm() {
   const currencies = usePoolCurrencies()
   const { chainDecimals } = useCentrifugeConsts()
   const pools = usePools()
-  const history = useHistory()
+  const navigate = useNavigate()
   const balances = useBalances(address)
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
@@ -204,7 +204,7 @@ function CreatePoolForm() {
       // Redirecting only when we find the newly created pool in the data from usePools
       // Otherwise the Issue Overview page will throw an error when it can't find the pool
       // It can take a second for the new data to come in after creating the pool
-      history.push(`/issuer/${createdPoolId}`)
+      navigate(`/issuer/${createdPoolId}`)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pools, createdPoolId])
@@ -549,6 +549,7 @@ function CreatePoolForm() {
     if (form.values.poolName) {
       form.setFieldValue('tranches', [createEmptyTranche(form.values.poolName)])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values.poolName])
 
   return (
@@ -713,7 +714,7 @@ function CreatePoolForm() {
                 <Text variant="body3">
                   Deposit required: {formatBalance(deposit, balances?.native.currency.symbol, 1)}
                 </Text>
-                <Button variant="secondary" onClick={() => history.goBack()}>
+                <Button variant="secondary" onClick={() => navigate(-1)}>
                   Cancel
                 </Button>
                 <Button

@@ -1,6 +1,6 @@
 import type { Pool } from '@centrifuge/centrifuge-js'
 import { Text } from '@centrifuge/fabric'
-import { useRouteMatch } from 'react-router'
+import { useMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { usePoolMetadata } from '../../utils/usePools'
@@ -22,9 +22,10 @@ type PoolLinkProps = {
 }
 
 export function PoolLink({ pool, path = 'issuer' }: PoolLinkProps) {
-  const match = useRouteMatch<{ pid: string }>(`/${path}/:pid`)
+  const match = useMatch(`/${path}/:pid/*`)
   const { data: metadata } = usePoolMetadata(pool)
   const to = `/${path}/${pool.id}`
+
   return (
     <Root
       forwardedAs={Link}

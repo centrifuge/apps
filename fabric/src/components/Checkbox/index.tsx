@@ -12,7 +12,7 @@ type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   extendedClickArea?: boolean
 }
 
-export const Checkbox: React.VFC<CheckboxProps> = ({ label, errorMessage, extendedClickArea, ...checkboxProps }) => {
+export function Checkbox({ label, errorMessage, extendedClickArea, ...checkboxProps }: CheckboxProps) {
   return (
     <Box position="relative">
       <StyledLabel $extendedClickArea={!!extendedClickArea}>

@@ -15,7 +15,7 @@ import {
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
@@ -34,6 +34,7 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, truncateText } from '../../utils/formatting'
+import { useBasePath } from '../../utils/useBasePath'
 import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
@@ -111,15 +112,16 @@ function FinanceButton({ loan }: { loan: LoanType }) {
 function Loan() {
   const theme = useTheme()
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
-  const isTinlakePool = poolId.startsWith('0x')
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  if (!poolId || !loanId) throw new Error('Loan no found')
+  const isTinlakePool = poolId?.startsWith('0x')
+  const basePath = useBasePath()
   const pool = usePool(poolId)
   const loan = useLoan(poolId, loanId)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
-  const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
+  const borrowerAssetTransactions = useBorrowerAssetTransactions(`${poolId}`, `${loanId}`)
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -292,7 +294,7 @@ function Loan() {
                         poolType={poolMetadata?.pool?.asset.class}
                         decimals={pool.currency.decimals}
                         pricing={loan.pricing as PricingInfo}
-                        maturityDate={new Date(loan.pricing.maturityDate)}
+                        maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
                         originationDate={originationDate ? new Date(originationDate) : undefined}
                       />
                     </Stack>

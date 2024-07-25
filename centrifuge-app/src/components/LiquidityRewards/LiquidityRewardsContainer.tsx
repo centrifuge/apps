@@ -1,5 +1,4 @@
 import { Card, Stack } from '@centrifuge/fabric'
-import * as React from 'react'
 import { LiquidityRewardsClaimer } from './LiquidityRewardsClaimer'
 import { useLiquidityRewards } from './LiquidityRewardsContext'
 import { LiquidityRewardsStaker } from './LiquidityRewardsStaker'

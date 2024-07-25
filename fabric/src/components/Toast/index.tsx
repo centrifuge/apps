@@ -59,14 +59,7 @@ const statusColors = {
   critical: 'statusCritical',
 }
 
-export const Toast: React.FC<ToastProps> = ({
-  status = 'info',
-  label,
-  sublabel,
-  onDismiss,
-  onStatusChange,
-  action,
-}) => {
+export function Toast({ status = 'info', label, sublabel, onDismiss, onStatusChange, action }: ToastProps) {
   const Icon = statusIcons[status]
   React.useEffect(() => {
     onStatusChange && onStatusChange(status)

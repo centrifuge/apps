@@ -123,7 +123,11 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       remainingRedeemToken: disburse?.remainingRedeemToken || Dec(0),
     },
     collectAmount,
-    collectType: !disburse?.payoutCurrencyAmount.isZero() ? 'redeem' : !disburse?.payoutTokenAmount.isZero() ? 'invest' : null,
+    collectType: !disburse?.payoutCurrencyAmount.isZero()
+      ? 'redeem'
+      : !disburse?.payoutTokenAmount.isZero()
+      ? 'invest'
+      : null,
     needsToCollectBeforeOrder: !collectAmount.isZero(),
     needsPoolCurrencyApproval: () => !!trancheInvestment?.poolCurrencyAllowance.isZero(),
     needsTrancheTokenApproval: () => !!trancheInvestment?.tokenAllowance.isZero(),

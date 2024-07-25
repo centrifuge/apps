@@ -83,7 +83,7 @@ async function getTinlakePortfolio(ipfsPools: IpfsPools, address: string) {
 
   const tokenBalances = Object.entries(updatesPerToken).map(([tokenId, tokenResult]) => {
     let tranche = TinlakeTranche.senior
-    ipfsPools.active.flatMap((pool) => {
+    ipfsPools.active.forEach((pool) => {
       if (tokenId === pool.addresses.JUNIOR_TOKEN) {
         tranche = TinlakeTranche.junior
       }

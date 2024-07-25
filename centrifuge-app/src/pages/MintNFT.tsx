@@ -1,22 +1,10 @@
 import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import { useAsyncCallback, useBalances, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import {
-  Box,
-  Button,
-  Grid,
-  ImageUpload,
-  NumberInput,
-  Shelf,
-  Stack,
-  Text,
-  TextAreaInput,
-  TextInput,
-} from '@centrifuge/fabric'
+import { Box, Button, Grid, ImageUpload, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../components/ButtonGroup'
-import { useDebugFlags } from '../components/DebugFlags'
 import { LayoutBase } from '../components/LayoutBase'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
@@ -53,8 +41,9 @@ export default function MintNFTPage() {
   )
 }
 
-const MintNFT: React.FC = () => {
+function MintNFT() {
   const { cid: collectionId } = useParams<{ cid: string }>()
+  if (!collectionId) throw new Error('Collection not found')
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
 
@@ -63,10 +52,9 @@ const MintNFT: React.FC = () => {
   const balances = useBalances(collection.owner)
   const cent = useCentrifuge()
   const [version, setNextVersion] = React.useReducer((s) => s + 1, 0)
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const [nftName, setNftName] = React.useState('')
-  const [nftAmount, setNftAmount] = React.useState(1)
   const [nftDescription, setNftDescription] = React.useState('')
   const [fileDataUri, setFileDataUri] = React.useState('')
   const [file, setFile] = React.useState<File | null>(null)
@@ -86,7 +74,7 @@ const MintNFT: React.FC = () => {
       reset()
 
       if (isPageUnchanged()) {
-        history.push(`/nfts/collection/${collectionId}/object/${nftId}`)
+        navigate(`/nfts/collection/${collectionId}/object/${nftId}`)
       }
     },
   })
@@ -112,7 +100,7 @@ const MintNFT: React.FC = () => {
       description: descriptionValue,
       image: imageMetadataHash.uri,
     }
-    doTransaction([collectionId, nftId, collection.owner, metadataValues, nftAmount], { account })
+    doTransaction([collectionId, nftId, collection.owner, metadataValues], { account })
   })
 
   function reset() {
@@ -132,8 +120,6 @@ const MintNFT: React.FC = () => {
   const canMint = !!account
   const fieldDisabled = balanceLow || !canMint || isMinting
   const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
-
-  const batchMintNFTs = useDebugFlags().batchMintNFTs
 
   return (
     <form onSubmit={execute} action="">
@@ -184,21 +170,6 @@ const MintNFT: React.FC = () => {
                 }}
                 disabled={fieldDisabled}
               />
-              {batchMintNFTs && (
-                <Box mt={3}>
-                  <NumberInput
-                    value={nftAmount}
-                    label="Amount"
-                    type="number"
-                    min="1"
-                    max="1000"
-                    onChange={({ target }) => {
-                      setNftAmount(Number((target as HTMLInputElement).value))
-                    }}
-                    disabled={fieldDisabled}
-                  />
-                </Box>
-              )}
 
               <Stack gap={1} mt={3}>
                 <ButtonGroup>

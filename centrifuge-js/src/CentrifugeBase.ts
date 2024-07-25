@@ -261,7 +261,7 @@ const parachainRuntimeApi: DefinitionsCall = {
           params: [
             {
               name: 'location',
-              type: 'XcmV3MultiLocation',
+              type: 'StagingXcmV3MultiLocation',
             },
           ],
           type: 'Option<AccountId32>',

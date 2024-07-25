@@ -54,7 +54,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
       to.setHours(0, 0, 0, 0)
       return [new Date(startDate), to]
     }
-  }, [groupBy, startDate, endDate])
+  }, [groupBy, startDate, endDate, pool.createdAt])
 
   const poolStates = useAggregatedPoolStatesByGroup(
     pool.id,
@@ -132,7 +132,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool])
+  }, [poolStates, groupBy])
 
   const profitAndLossPublicRecords: Row[] = React.useMemo(() => {
     return [
@@ -175,7 +175,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates])
+  }, [pool.currency.displayName, poolStates])
 
   const profitAndLossPrivateRecords: Row[] = React.useMemo(() => {
     return [
@@ -224,7 +224,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates])
+  }, [pool.currency.displayName, poolStates])
 
   const profitAndLossRecords =
     poolMetadata?.pool?.asset.class === 'Private credit' ? profitAndLossPrivateRecords : profitAndLossPublicRecords
@@ -311,7 +311,7 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
         formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
       },
     ]
-  }, [poolStates, pool])
+  }, [poolStates, poolMetadata?.pool?.asset.class, pool.currency.displayName])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 

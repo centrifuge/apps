@@ -23,13 +23,7 @@ const IdenticonWrapper = styled(Flex)({
 })
 
 // TODO: Fix for when connected with a proxy
-export const Identity: React.FC<Props> = ({
-  showIcon,
-  address,
-  clickToCopy,
-  labelForConnectedAddress = true,
-  ...textProps
-}) => {
+export function Identity({ showIcon, address, clickToCopy, labelForConnectedAddress = true, ...textProps }: Props) {
   const identity = useIdentity(address)
   const myAddress = useAddress('substrate')
   const utils = useCentrifugeUtils()

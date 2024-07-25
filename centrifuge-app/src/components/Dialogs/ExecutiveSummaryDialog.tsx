@@ -1,13 +1,17 @@
 import { Box, Button, Dialog, IconInfo, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import styled from 'styled-components'
 
-export const ExecutiveSummaryDialog: React.FC<{
+export function ExecutiveSummaryDialog({
+  issuerName,
+  href,
+  open,
+  onClose,
+}: {
   issuerName: string
   href: string
   open: boolean
   onClose: () => void
-}> = ({ issuerName, href, open, onClose }) => {
+}) {
   return (
     <Dialog
       isOpen={open}

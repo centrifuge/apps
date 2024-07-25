@@ -1,5 +1,4 @@
 import { Box, IconX, Shelf, Text } from '@centrifuge/fabric'
-import * as React from 'react'
 import styled from 'styled-components'
 
 type AlertBusinessVerificationProps = {
