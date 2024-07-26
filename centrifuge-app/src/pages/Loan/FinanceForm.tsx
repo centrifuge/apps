@@ -145,7 +145,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
-  const totalAmount = Dec(financeForm.values.principal || 0)
+  const totalFinance = Dec(financeForm.values.principal || 0)
 
   const maxPrincipal = source === 'reserve' ? poolReserve : sourceLoan.outstandingDebt.toDecimal()
 
@@ -213,7 +213,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
             )}
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Total amount</Text>
-              <Text variant="emphasized">{formatBalance(totalAmount, pool?.currency.symbol, 2)}</Text>
+              <Text variant="emphasized">{formatBalance(totalFinance, pool?.currency.symbol, 2)}</Text>
             </Shelf>
 
             {poolFees.renderSummary()}
