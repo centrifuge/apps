@@ -117,7 +117,7 @@ function getColumnConfig(poolCreditType: string, symbol: string) {
         align: 'right',
         csvOnly: false,
         sortable: true,
-        formatter: (v: any) => formatBalance(v, symbol, 2),
+        formatter: (v: any) => formatBalance(v, '', 2),
       },
       {
         header: 'Market price',
@@ -247,5 +247,9 @@ export function AssetList({ pool }: { pool: Pool }) {
     return <Spinner />
   }
 
-  return data.length > 0 ? <DataTable data={data} columns={columns} hoverable /> : <UserFeedback reportType="Assets" />
+  return data.length > 0 ? (
+    <DataTable data={data} columns={columns} hoverable defaultSortKey="value[5]" defaultSortOrder={'desc'} />
+  ) : (
+    <UserFeedback reportType="Assets" />
+  )
 }
