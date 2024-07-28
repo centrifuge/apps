@@ -3339,14 +3339,20 @@ export function getPoolsModule(inst: Centrifuge) {
           outstandingPrincipal: transformVal(tx.outstandingPrincipal, currency.decimals),
           totalRepaidPrincipal: transformVal(tx.totalRepaidPrincipal, currency.decimals),
           probabilityOfDefault: tx.asset.probabilityOfDefault,
-          outstandingQuantity: transformVal(tx.outstandingQuantity, currency.decimals),
+          outstandingQuantity: transformVal(tx.outstandingQuantity, 18),
           sumRealizedProfitFifo: transformVal(tx.asset.sumRealizedProfitFifo, currency.decimals),
           status: tx.asset.status,
           timestamp: new Date(`${tx.timestamp}+00:00`),
           unrealizedProfitAtMarketPrice: transformVal(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals),
           valuationMethod: tx.asset.valuationMethod,
           presentValue: transformVal(tx.presentValue, currency.decimals),
-          faceValue: transformVal(`${Number(tx.asset.notional) * Number(tx.outstandingQuantity)}`, currency.decimals),
+          faceValue:
+            tx.asset.notional && tx.outstandingQuantity
+              ? transformVal(
+                  new BN(tx.asset.notional).mul(new BN(tx.outstandingQuantity)).div(new BN(10).pow(new BN(18))),
+                  currency.decimals
+                )
+              : new CurrencyBalance(0, currency.decimals),
         })) satisfies AssetSnapshot[]
       })
     )
