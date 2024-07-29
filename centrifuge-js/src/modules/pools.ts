@@ -3288,6 +3288,7 @@ export function getPoolsModule(inst: Centrifuge) {
             totalRepaidPrincipal
             outstandingQuantity
             presentValue
+            outstandingDebt
             asset {
               actualMaturityDate
               actualOriginationDate
@@ -3333,9 +3334,9 @@ export function getPoolsModule(inst: Centrifuge) {
           totalRepaidInterest: transformVal(tx.totalRepaidInterest, currency.decimals),
           lossGivenDefault: tx.asset.lossGivenDefault,
           currentPrice: transformVal(tx.currentPrice, currency.decimals),
-          actualMaturityDate: tx.asset.actualMaturityDate,
+          actualMaturityDate: tx.asset.actualMaturityDate || undefined,
           name: tx.asset.name,
-          actualOriginationDate: tx.asset.actualOriginationDate,
+          actualOriginationDate: tx.asset.actualOriginationDate || undefined,
           outstandingPrincipal: transformVal(tx.outstandingPrincipal, currency.decimals),
           totalRepaidPrincipal: transformVal(tx.totalRepaidPrincipal, currency.decimals),
           probabilityOfDefault: tx.asset.probabilityOfDefault,
@@ -3346,13 +3347,14 @@ export function getPoolsModule(inst: Centrifuge) {
           unrealizedProfitAtMarketPrice: transformVal(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals),
           valuationMethod: tx.asset.valuationMethod,
           presentValue: transformVal(tx.presentValue, currency.decimals),
+          outstandingDebt: transformVal(tx.outstandingDebt, currency.decimals),
           faceValue:
             tx.asset.notional && tx.outstandingQuantity
               ? transformVal(
                   new BN(tx.asset.notional).mul(new BN(tx.outstandingQuantity)).div(new BN(10).pow(new BN(18))),
                   currency.decimals
                 )
-              : new CurrencyBalance(0, currency.decimals),
+              : undefined,
         })) satisfies AssetSnapshot[]
       })
     )

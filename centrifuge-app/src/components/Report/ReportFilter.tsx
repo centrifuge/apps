@@ -127,16 +127,16 @@ export function ReportFilter({ pool }: ReportFilterProps) {
                 value: 'all',
               },
               {
-                label: 'Active',
-                value: 'Active',
+                label: 'Ongoing',
+                value: 'ongoing',
               },
               {
                 label: 'Repaid',
-                value: 'Repaid',
+                value: 'repaid',
               },
               {
                 label: 'Overdue',
-                value: 'Overdue',
+                value: 'overdue',
               },
             ]}
             value={loanStatus}
