@@ -137,6 +137,8 @@ export function computeMultisig(multisig: Multisig): ComputedMultisig {
 }
 
 export function evmToSubstrateAddress(address: string, chainId: number) {
+  if (!chainId) throw new Error('chainId is required')
+
   // Bytes EVM\0 as suffix
   const suffix = '45564d00'
   const chainHex = Number(chainId).toString(16).padStart(16, '0')
