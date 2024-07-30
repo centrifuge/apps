@@ -118,11 +118,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
-    return null
-  }
-
-  const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
+  const debt = ('outstandingDebt' in loan && loan.outstandingDebt?.toDecimal()) || Dec(0)
   const { maxAvailable, maxInterest, totalRepay } = React.useMemo(() => {
     const outstandingInterest = (loan as ActiveLoan).outstandingInterest.toDecimal() ?? Dec(0)
     const { quantity, interest, amountAdditional, price } = repayForm.values
@@ -145,6 +141,10 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       totalRepay,
     }
   }, [loan, destinationLoan, balance, repayForm.values])
+
+  if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
+    return null
+  }
 
   return (
     <>
