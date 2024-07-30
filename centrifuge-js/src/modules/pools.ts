@@ -4391,11 +4391,11 @@ function isPrimitive(val: any): val is boolean | string | number | null | undefi
 }
 
 export function getCurrencyLocation(currency: CurrencyMetadata) {
-  const chainId = currency.location?.v3?.interior?.x3?.[1]?.globalConsensus?.ethereum?.chainId
+  const chainId = currency.location?.v4?.interior?.x3?.[1]?.globalConsensus?.ethereum?.chainId
   if (chainId) {
     return { evm: Number(chainId) }
   }
-  const parachain = currency.location?.v3?.interior?.x3?.[0]?.parachain
+  const parachain = currency.location?.v4?.interior?.x3?.[0]?.parachain
   if (parachain) {
     return { parachain: Number(parachain) }
   }
@@ -4403,7 +4403,7 @@ export function getCurrencyLocation(currency: CurrencyMetadata) {
 }
 
 export function getCurrencyEvmAddress(currency: CurrencyMetadata) {
-  return currency.location?.v3?.interior?.x3?.[2]?.accountKey20?.key as string | undefined
+  return currency.location?.v4?.interior?.x3?.[2]?.accountKey20?.key as string | undefined
 }
 
 function getCurrency(api: ApiRx, currencyKey: RawCurrencyKey) {
