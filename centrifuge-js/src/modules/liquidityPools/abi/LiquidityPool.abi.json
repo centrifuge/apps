@@ -5,9 +5,9 @@
   "event CancelRedeemRequest(address indexed)",
   "function mint(uint256, address) public returns (uint256)",
   "function withdraw(uint256, address, address) public returns (uint256)",
-  "function requestDeposit(uint256, address, address, bytes) public",
-  "function requestRedeem(uint256, address, address, bytes) public",
+  "function requestDeposit(uint256, address, address) public",
+  "function requestRedeem(uint256, address, address) public",
   "function requestDepositWithPermit(uint256, address, bytes, uint256, uint8, bytes32, bytes32) public",
-  "function cancelDepositRequest() public",
-  "function cancelRedeemRequest() public"
+  "function cancelDepositRequest(uint256) public",
+  "function cancelRedeemRequest(uint256) public"
 ]

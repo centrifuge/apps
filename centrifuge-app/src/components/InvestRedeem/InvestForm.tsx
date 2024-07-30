@@ -107,7 +107,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
         <Stack gap={2}>
           <EpochBusy busy={state.isPoolBusy} />
           {state.statusMessage && <InlineFeedback>{state.statusMessage}</InlineFeedback>}
-          {!state.collectType || claimDismissed ? (
+          {(!state.collectType || claimDismissed) && (state.canChangeOrder || !hasPendingOrder) ? (
             <>
               <Field name="amount" validate={positiveNumber()}>
                 {({ field, meta }: FieldProps) => {
@@ -190,7 +190,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
               <Button onClick={form.submitForm} disabled={isCancelling || pool.epoch.status !== 'ongoing'}>
                 Change order
               </Button>
-            ) : !state.collectType || claimDismissed ? (
+            ) : (!state.collectType || claimDismissed) && (state.canChangeOrder || !hasPendingOrder) ? (
               <Button
                 type="submit"
                 loading={isInvesting}
@@ -210,9 +210,9 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                 onClick={() => actions.cancelInvest()}
                 loading={isCancelling}
                 disabled={pool.epoch.status !== 'ongoing'}
-                variant="secondary"
+                variant={state.canChangeOrder ? 'secondary' : 'primary'}
               >
-                Cancel
+                {state.canChangeOrder ? 'Cancel' : 'Cancel order'}
               </Button>
             )}
           </ButtonGroup>

@@ -152,17 +152,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, [], {
-        ...options,
-        gasLimit: 300000,
-      })
-    )
-  }
-
-  function decreaseInvestOrder(args: [lpAddress: string, assets: BN], options: TransactionRequest = {}) {
-    const [lpAddress, assets] = args
-    return pending(
-      contract(lpAddress, ABI.LiquidityPool).decreaseDepositRequest(assets.toString(), {
+      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, {
         ...options,
         gasLimit: 300000,
       })
@@ -173,35 +163,36 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [lpAddress, order] = args
     const user = inst.getSignerAddress('evm')
     return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, [], {
+      contract(lpAddress, ABI.LiquidityPool).requestRedeem(order.toString(), user, user, {
         ...options,
         gasLimit: 300000,
       })
     )
   }
 
-  function increaseInvestOrderWithPermit(
-    args: [lpAddress: string, order: BN, permit: Permit],
-    options: TransactionRequest = {}
-  ) {
-    const [lpAddress, order, { deadline, r, s, v }] = args
-    const user = inst.getSignerAddress('evm')
-    return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, [], deadline, v, r, s, {
-        ...options,
-        gasLimit: 300000,
-      })
-    )
-  }
+  // Disabled for now, will go through the router later
+  // function increaseInvestOrderWithPermit(
+  //   args: [lpAddress: string, order: BN, permit: Permit],
+  //   options: TransactionRequest = {}
+  // ) {
+  //   const [lpAddress, order, { deadline, r, s, v }] = args
+  //   const user = inst.getSignerAddress('evm')
+  //   return pending(
+  //     contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, [], deadline, v, r, s, {
+  //       ...options,
+  //       gasLimit: 300000,
+  //     })
+  //   )
+  // }
 
   function cancelRedeemOrder(args: [lpAddress: string], options: TransactionRequest = {}) {
     const [lpAddress] = args
-    return pending(contract(lpAddress, ABI.LiquidityPool).cancelRedeemRequest(options))
+    return pending(contract(lpAddress, ABI.LiquidityPool).cancelRedeemRequest(0, options))
   }
 
   function cancelInvestOrder(args: [lpAddress: string], options: TransactionRequest = {}) {
     const [lpAddress] = args
-    return pending(contract(lpAddress, ABI.LiquidityPool).cancelDepositRequest(options))
+    return pending(contract(lpAddress, ABI.LiquidityPool).cancelDepositRequest(0, options))
   }
 
   function mint(args: [lpAddress: string, mint: BN, receiver?: string], options: TransactionRequest = {}) {
@@ -353,6 +344,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         rpcProvider: getProvider(options)!,
       }
     )
+    poolData.undeployedTranches ??= {}
+    poolData.trancheTokens ??= {}
+    poolData.liquidityPools ??= {}
+    poolData.currencyNeedsAdding ??= {}
     trancheIds.forEach((tid) => {
       currencies.forEach((cur) => {
         set(poolData, `liquidityPools[${tid}][${cur.address}]`, poolData.liquidityPools?.[tid]?.[cur.address] || null)
@@ -401,7 +396,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             ({
               target: poolManager,
               call: [
-                'function getLiquidityPool(uint64, bytes16, address) view returns (address)',
+                'function getVault(uint64, bytes16, address) view returns (address)',
                 poolId,
                 trancheId,
                 currency.address,
@@ -497,7 +492,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         },
         {
           target: lp,
-          call: ['function decimals() view returns (uint8)'],
+          call: ['function shareDecimals() view returns (uint8)'],
           returns: [['trancheDecimals']],
         },
         {
@@ -580,9 +575,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     deployTranche,
     deployLiquidityPool,
     increaseInvestOrder,
-    decreaseInvestOrder,
     increaseRedeemOrder,
-    increaseInvestOrderWithPermit,
+    // increaseInvestOrderWithPermit,
     cancelInvestOrder,
     cancelRedeemOrder,
     mint,
