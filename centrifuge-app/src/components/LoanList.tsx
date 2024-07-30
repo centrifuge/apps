@@ -9,7 +9,6 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
-  Thumbnail,
   usePagination,
 } from '@centrifuge/fabric'
 import get from 'lodash/get'
@@ -308,7 +307,6 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
 
   return (
     <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
-      <Thumbnail type="asset" label={loan.id} />
       <TextWithPlaceholder
         isLoading={isLoading}
         width={12}
