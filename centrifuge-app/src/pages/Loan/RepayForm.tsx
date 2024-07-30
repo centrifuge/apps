@@ -171,7 +171,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
               validate={combine(positiveNumber(), max(maxAvailable.toNumber(), 'Principal exceeds available debt'))}
               name="principal"
             >
-              {({ field, meta, form }: FieldProps) => {
+              {({ field, form }: FieldProps) => {
                 return (
                   <CurrencyInput
                     {...field}
@@ -193,7 +193,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                 )}
                 name="interest"
               >
-                {({ field, meta, form }: FieldProps) => {
+                {({ field, form }: FieldProps) => {
                   return (
                     <CurrencyInput
                       {...field}
@@ -261,9 +261,9 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
               </Shelf>
             </Stack>
             {balance.lessThan(maxAvailable) && destination === 'reserve' && (
-              <Box bg="statusCriticalBg" p={1}>
-                <InlineFeedback status="critical">
-                  <Text color="statusCritical">
+              <Box bg="statusWarningBg" p={1}>
+                <InlineFeedback status="warning">
+                  <Text color="statusWarning">
                     Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than
                     the outstanding balance ({formatBalance(maxAvailable, pool.currency.symbol)}).
                   </Text>

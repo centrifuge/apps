@@ -1,11 +1,11 @@
-import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
-import { Dec, min } from '../../utils/Decimal'
+import { Dec, max as maxDec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
@@ -37,7 +37,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const loans = useLoans(loan.poolId)
-  const destinationLoan = loans?.find((l) => l.id === destination) as CreatedLoan | ActiveLoan
+  const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
@@ -123,30 +123,28 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   }
 
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
-  const { availableDebt, maxInterest, currentInputsSum } = React.useMemo(() => {
+  const { maxAvailable, maxInterest, totalRepay } = React.useMemo(() => {
     const outstandingInterest = (loan as ActiveLoan).outstandingInterest.toDecimal() ?? Dec(0)
-    const currentInputsSum = Dec(repayForm.values.price || 0)
-      .mul(repayForm.values.quantity || 0)
-      .add(repayForm.values.interest || 0)
-      .add(repayForm.values.amountAdditional || 0)
-    if (destination === 'reserve') {
-      return {
-        availableDebt: min(balance, debt),
-        maxInterest: outstandingInterest.gt(currentInputsSum)
-          ? min(balance, outstandingInterest).sub(currentInputsSum)
-          : Dec(0),
-        currentInputsSum,
-      }
+    const { quantity, interest, amountAdditional, price } = repayForm.values
+    const totalRepay = Dec(price || 0)
+      .mul(quantity || 0)
+      .add(interest || 0)
+      .add(amountAdditional || 0)
+    let maxAvailable = min(balance, debt)
+    let maxInterest = min(balance, outstandingInterest)
+    if (destination !== 'reserve') {
+      maxAvailable = destinationLoan.outstandingDebt?.toDecimal() || Dec(0)
+      maxInterest = destinationLoan.outstandingInterest.toDecimal() || Dec(0)
     }
     return {
-      availableDebt: destinationLoan.outstandingDebt?.toDecimal(),
-      maxInterest: outstandingInterest.gt(currentInputsSum) ? outstandingInterest.sub(currentInputsSum) : Dec(0),
-      currentInputsSum,
+      maxAvailable,
+      maxInterest: maxDec(
+        min(maxInterest, maxAvailable.sub(Dec(price || 0).mul(quantity || 0) || 0).sub(amountAdditional || 0)),
+        Dec(0)
+      ),
+      totalRepay,
     }
   }, [loan, destinationLoan, balance, repayForm.values])
-
-  console.log('🚀 ~ maxInterest:', maxInterest.toString())
-  const totalRepay = currentInputsSum
 
   return (
     <>
@@ -183,23 +181,22 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   required(),
                   nonNegativeNumber(),
                   max(
-                    availableDebt.toNumber(),
+                    maxAvailable.toNumber(),
                     `Quantity x price (${formatBalance(
                       Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0),
                       pool.currency.symbol
-                    )}) exceeds available debt (${formatBalance(availableDebt, pool.currency.symbol)})`
+                    )}) exceeds available debt (${formatBalance(maxAvailable, pool.currency.symbol)})`
                   ),
                   maxPriceVariance(loan.pricing)
                 )}
                 name="price"
               >
-                {({ field, meta, form }: FieldProps) => {
+                {({ field, form }: FieldProps) => {
                   return (
                     <CurrencyInput
                       {...field}
                       label="Settlement price"
                       disabled={isRepayLoading}
-                      errorMessage={meta.touched ? meta.error : undefined}
                       currency={pool.currency.symbol}
                       onChange={(value) => form.setFieldValue('price', value)}
                       decimals={8}
@@ -235,15 +232,14 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               )}
               <Field
                 name="amountAdditional"
-                validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(availableDebt.toNumber()))}
+                validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(maxAvailable.toNumber()))}
               >
-                {({ field, meta, form }: FieldProps) => {
+                {({ field, form }: FieldProps) => {
                   return (
                     <CurrencyInput
                       {...field}
                       value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                       label="Additional amount"
-                      errorMessage={meta.touched ? meta.error : undefined}
                       disabled={isRepayLoading}
                       currency={pool?.currency.symbol}
                       onChange={(value) => form.setFieldValue('amountAdditional', value)}
@@ -275,7 +271,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
 
                 <Shelf justifyContent="space-between">
                   <Text variant="emphasized">Available</Text>
-                  <Text variant="emphasized">{formatBalance(availableDebt, pool?.currency.symbol, 2)}</Text>
+                  <Text variant="emphasized">{formatBalance(maxAvailable, pool?.currency.symbol, 2)}</Text>
                 </Shelf>
               </Stack>
               {balance.lessThan(debt) && destination === 'reserve' && (
@@ -283,17 +279,17 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   <InlineFeedback status="warning">
                     <Text color="statusWarning">
                       Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller
-                      than the outstanding balance({formatBalance(debt, pool.currency.symbol)}).
+                      than the outstanding balance ({formatBalance(debt, pool.currency.symbol)}).
                     </Text>
                   </InlineFeedback>
                 </Box>
               )}
-              {totalRepay.gt(availableDebt) && (
+              {totalRepay.gt(maxAvailable) && (
                 <Box bg="statusCriticalBg" p={1}>
                   <InlineFeedback status="critical">
                     <Text color="statusCritical">
                       The amount ({formatBalance(roundDown(totalRepay), pool?.currency.symbol, 2)}) is greater than the
-                      available debt ({formatBalance(availableDebt, pool.currency.symbol)}).
+                      available debt ({formatBalance(maxAvailable, pool.currency.symbol)}).
                     </Text>
                   </InlineFeedback>
                 </Box>
@@ -305,7 +301,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                     isRepayLoading ||
                     !poolFees.isValid(repayForm) ||
                     !repayForm.isValid ||
-                    !totalRepay.lessThan(availableDebt)
+                    totalRepay.lessThan(maxAvailable)
                   }
                   loading={isRepayLoading}
                 >
