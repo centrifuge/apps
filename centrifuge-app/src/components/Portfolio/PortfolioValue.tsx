@@ -44,7 +44,7 @@ export function PortfolioValue({ rangeValue, address }: { rangeValue: string; ad
   }
 
   return (
-    <ResponsiveContainer>
+    <ResponsiveContainer height={300} maxHeight={300} minHeight={300}>
       <AreaChart
         margin={{
           top: 35,
