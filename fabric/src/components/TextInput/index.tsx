@@ -252,7 +252,10 @@ export function TextAreaInput({
 }
 
 export type AddressInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value'> &
-  Omit<InputUnitProps, 'inputElement'>
+  Omit<InputUnitProps, 'inputElement'> & {
+    value?: string
+    clearIcon?: boolean
+  }
 
 export function AddressInput({
   id,
@@ -262,6 +265,8 @@ export function AddressInput({
   errorMessage,
   onBlur,
   onChange,
+  value = '',
+  clearIcon,
   ...inputProps
 }: AddressInputProps) {
   const defaultId = React.useId()
@@ -269,18 +274,19 @@ export function AddressInput({
 
   const [network, setNetwork] = React.useState<'ethereum' | 'centrifuge' | 'loading' | null>(null)
 
-  function handleChange(e: React.FocusEvent<HTMLInputElement>) {
-    const address = e.target.value
-    if (isEvmAddress(address) && address.length > 3) {
+  React.useEffect(() => {
+    if (isEvmAddress(value) && value.length > 3) {
       setNetwork('ethereum')
-    } else if (isSubstrateAddress(address) && address.length > 3) {
+    } else if (isSubstrateAddress(value) && value.length > 3) {
       setNetwork('centrifuge')
-    } else if (address !== '') {
+    } else if (value !== '') {
       setNetwork('loading')
     } else {
       setNetwork(null)
     }
+  }, [value])
 
+  function handleChange(e: React.FocusEvent<HTMLInputElement>) {
     if (onChange) {
       onChange(e)
     }
@@ -288,7 +294,7 @@ export function AddressInput({
 
   function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
     const address = e.target.value
-    if (!(isSubstrateAddress(address) || isEvmAddress(address))) {
+    if (!(isSubstrateAddress(address) || isEvmAddress(address)) || clearIcon) {
       setNetwork(null)
     }
 
@@ -296,6 +302,7 @@ export function AddressInput({
       onBlur(e)
     }
   }
+
   return (
     <InputUnit
       label={label}
@@ -308,6 +315,7 @@ export function AddressInput({
           type="text"
           onChange={handleChange}
           onBlur={handleBlur}
+          value={value}
           action={
             network && (
               <Shelf

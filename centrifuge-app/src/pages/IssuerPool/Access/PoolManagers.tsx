@@ -1,6 +1,6 @@
 import { ComputedMultisig, computeMultisig, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Button, Text } from '@centrifuge/fabric'
+import { Button } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
@@ -12,7 +12,6 @@ import { diffPermissions } from '../Configuration/Admins'
 import { MultisigForm } from './MultisigForm'
 
 export type PoolManagersInput = {
-  enabled: boolean
   adminMultisig: {
     signers: string[]
     threshold: number
@@ -29,47 +28,81 @@ export function PoolManagers({ poolId }: { poolId: string }) {
 
   const initialValues: PoolManagersInput = React.useMemo(
     () => ({
-      enabled: !!access.multisig,
       adminMultisig: {
-        signers: access.multisig?.signers || [],
+        signers: access.multisig?.signers || access.adminDelegates?.map((d) => d.delegatee) || [],
         threshold: access.multisig?.threshold || 1,
       },
     }),
-    [access?.multisig]
+    [access?.multisig, access?.adminDelegates]
   )
 
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update pool managers',
-    (cent) =>
-      (
-        args: [
-          newMultisig: ComputedMultisig,
-          permissionChanges: ReturnType<typeof diffPermissions>,
-          newMetadata: PoolMetadata
-        ],
-        options
-      ) => {
-        const [newMultisig, permissionChanges, newMetadata] = args
+    (cent) => (args: [values: PoolManagersInput], options) => {
+      const [values] = args
+      const isMultisig = values.adminMultisig.threshold > 1
+      const wasMultisig = initialValues.adminMultisig.threshold > 1
+      let newMultisig: ComputedMultisig | null = null
+      let newPoolMetadata: PoolMetadata
+      let addedDelegates: string[] = []
+      let removedDelegates: string[] = []
 
-        return combineLatest([
-          cent.getApi(),
-          cent.pools.setMetadata([poolId, newMetadata as any], { batch: true }),
-          cent.pools.updatePoolRoles(
-            [poolId, [...access.missingAdminPermissions, ...permissionChanges.add], permissionChanges.remove],
-            { batch: true }
-          ),
-        ]).pipe(
-          switchMap(([api, metadataTx, permissionTx]) => {
-            const tx = api.tx.utility.batchAll([
-              metadataTx,
-              ...permissionTx.method.args[0],
-              api.tx.proxy.addProxy(newMultisig.address, 'Any', 0),
-              ...access.adminDelegates.map((proxy) => api.tx.proxy.removeProxy(proxy.delegatee, 'Any', 0)),
-            ])
-            return cent.wrapSignAndSend(api, tx, options)
-          })
-        )
-      },
+      if (isMultisig) {
+        newMultisig = computeMultisig(values.adminMultisig)
+        newPoolMetadata = {
+          ...(metadata as PoolMetadata),
+          adminMultisig: {
+            signers: newMultisig.signers,
+            threshold: newMultisig.threshold,
+          },
+        }
+        addedDelegates = [newMultisig.address]
+        removedDelegates = access.adminDelegates.map((p) => p.delegatee)
+      } else {
+        newMultisig = null
+        newPoolMetadata = {
+          ...(metadata as PoolMetadata),
+          adminMultisig: undefined,
+        }
+        if (wasMultisig) {
+          addedDelegates = values.adminMultisig.signers
+          removedDelegates = access.adminDelegates.map((p) => p.delegatee)
+        } else {
+          addedDelegates = values.adminMultisig.signers.filter((s) => !initialValues.adminMultisig.signers.includes(s))
+          removedDelegates = initialValues.adminMultisig.signers.filter(
+            (s) => !values.adminMultisig.signers.includes(s)
+          )
+        }
+      }
+      const { add: permissionsToAdd, remove: permissionsToRemove } = diffPermissions(
+        access.managerPermissions,
+        values.adminMultisig.signers.map((address) => ({
+          address,
+          roles: { InvestorAdmin: true, LiquidityAdmin: true },
+        })),
+        ['LiquidityAdmin', 'InvestorAdmin']
+      )
+
+      return combineLatest([
+        cent.getApi(),
+        cent.pools.setMetadata([poolId, newPoolMetadata], { batch: true }),
+        cent.pools.updatePoolRoles(
+          [poolId, [...access.missingAdminPermissions, ...permissionsToAdd], permissionsToRemove],
+          { batch: true }
+        ),
+      ]).pipe(
+        switchMap(([api, metadataTx, permissionTx]) => {
+          const tx = api.tx.utility.batchAll([
+            metadataTx,
+            ...permissionTx.method.args[0],
+            ...addedDelegates.map((addr) => api.tx.proxy.addProxy(addr, 'Any', 0)),
+            ...removedDelegates.map((addr) => api.tx.proxy.removeProxy(addr, 'Any', 0)),
+          ])
+
+          return cent.wrapSignAndSend(api, tx, options)
+        })
+      )
+    },
     {
       onSuccess: () => {
         setIsEditing(false)
@@ -82,31 +115,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
     onSubmit: (values, actions) => {
       if (!metadata || !poolPermissions) return
       actions.setSubmitting(false)
-      const newMultisig = computeMultisig(values.adminMultisig)
-
-      const newPoolMetadata: PoolMetadata = {
-        ...(metadata as PoolMetadata),
-        adminMultisig: {
-          signers: newMultisig.signers,
-          threshold: newMultisig.threshold,
-        },
-      }
-
-      execute(
-        [
-          newMultisig,
-          diffPermissions(
-            access.managerPermissions,
-            values.adminMultisig.signers.map((address) => ({
-              address,
-              roles: { InvestorAdmin: true, LiquidityAdmin: true },
-            })),
-            ['LiquidityAdmin', 'InvestorAdmin']
-          ),
-          newPoolMetadata,
-        ],
-        { account }
-      )
+      execute([values], { account })
     },
   })
 
@@ -129,19 +138,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
         <PageSection
           title="Pool managers"
           headerRight={
-            !form.values.enabled ? (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setIsEditing(true)
-                  form.setFieldValue('enabled', true, false)
-                }}
-                small
-                key="edit"
-              >
-                Enable
-              </Button>
-            ) : isEditing ? (
+            isEditing ? (
               <ButtonGroup variant="small">
                 <Button variant="secondary" onClick={() => setIsEditing(false)} small>
                   Cancel
@@ -164,11 +161,7 @@ export function PoolManagers({ poolId }: { poolId: string }) {
             )
           }
         >
-          {!form.values.enabled ? (
-            <Text>Pool managers not enabled</Text>
-          ) : (
-            <MultisigForm isEditing={isEditing} isLoading={isLoading} />
-          )}
+          <MultisigForm isEditing={isEditing} isLoading={isLoading} />
         </PageSection>
       </Form>
     </FormikProvider>

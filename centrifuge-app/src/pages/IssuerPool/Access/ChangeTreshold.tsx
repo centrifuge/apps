@@ -20,7 +20,7 @@ export const ChangeThreshold = ({
   isEditing,
   fieldName,
   signersFieldName,
-  minThreshold = 2,
+  minThreshold = 1,
   validate,
   disabled,
   type,

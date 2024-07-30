@@ -11,6 +11,7 @@ import { StackedBarChart, StackedBarChartProps } from './Charts/StackedBarChart'
 import { getRangeNumber } from './Charts/utils'
 import { PageSection } from './PageSection'
 import { TooltipsProps } from './Tooltips'
+import { LoadBoundary } from './LoadBoundary'
 
 const rangeFilters = [
   { value: '30d', label: '30 days' },
@@ -127,7 +128,10 @@ export default function LiquidityTransactionsSection({
       : []
   }, [chartData, dataColors, tooltips, pool.currency.symbol])
 
-  return chartData?.length ? (
+  if(!chartData?.length) return null
+
+  return(
+  <LoadBoundary>
     <PageSection
       title={title}
       titleAddition={
@@ -179,5 +183,5 @@ export default function LiquidityTransactionsSection({
         <StackedBarChart data={chartData} names={dataNames} colors={dataColors} currency={pool.currency.symbol} />
       )}
     </PageSection>
-  ) : null
+    </LoadBoundary>)
 }
