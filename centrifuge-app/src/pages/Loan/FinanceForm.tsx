@@ -40,7 +40,7 @@ import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormik
 import * as React from 'react'
 import { combineLatest, map, of, switchMap } from 'rxjs'
 import { parachainIcons, parachainNames } from '../../config'
-import { Dec } from '../../utils/Decimal'
+import { Dec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
@@ -147,38 +147,33 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
   const totalFinance = Dec(financeForm.values.principal || 0)
 
-  const maxPrincipal = source === 'reserve' ? poolReserve : sourceLoan.outstandingDebt.toDecimal()
+  const maxAvailable =
+    source === 'reserve' ? min(poolReserve, availableFinancing) : sourceLoan.outstandingDebt.toDecimal()
 
   return (
     <>
-      {maxPrincipal.greaterThan(0) && !maturityDatePassed && (
+      {maxAvailable.greaterThan(0) && !maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Field
               name="principal"
               validate={combine(positiveNumber(), (val) => {
                 const principalValue = typeof val === 'number' ? Dec(val) : (val as Decimal)
-                if (principalValue.gt(maxPrincipal)) {
-                  return `Principal exceeds available reserve (${formatBalance(
-                    maxPrincipal,
-                    pool?.currency.symbol,
-                    2
-                  )})`
+                if (principalValue.gt(maxAvailable)) {
+                  return `Principal exceeds available financing`
                 }
                 return ''
               })}
             >
-              {({ field, meta, form }: FieldProps) => {
+              {({ field, form }: FieldProps) => {
                 return (
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Principal"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(maxPrincipal.toNumber(), pool?.currency.symbol, 2)} available`}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
-                    onSetMax={() => form.setFieldValue('principal', maxPrincipal)}
+                    onSetMax={() => form.setFieldValue('principal', maxAvailable)}
                   />
                 )
               }}
@@ -220,8 +215,18 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Available</Text>
-              <Text variant="emphasized">{formatBalance(maxPrincipal, pool?.currency.symbol, 2)}</Text>
+              <Text variant="emphasized">{formatBalance(maxAvailable, pool?.currency.symbol, 2)}</Text>
             </Shelf>
+            {totalFinance.gt(0) && totalFinance.gt(maxAvailable) && (
+              <Box bg="statusCriticalBg" p={1}>
+                <InlineFeedback status="critical">
+                  <Text color="statusCritical">
+                    Available financing ({formatBalance(maxAvailable, pool?.currency.symbol, 2)}) is smaller than the
+                    total principal ({formatBalance(totalFinance, pool.currency.symbol)}).
+                  </Text>
+                </InlineFeedback>
+              </Box>
+            )}
             <Stack>
               <Button
                 type="submit"
