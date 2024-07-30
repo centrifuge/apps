@@ -26,17 +26,19 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
     async () => {
       console.log('routers', routers)
       const results = await Promise.allSettled(
-        routers!.map(async (r) => {
-          const rpcProvider = getProvider(r.chainId)
-          console.log(rpcProvider.network)
-          const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
-            rpcProvider,
+        routers!
+          .filter((r) => r.chainId === 11155111)
+          .map(async (r) => {
+            const rpcProvider = getProvider(r.chainId)
+            console.log(rpcProvider.network)
+            const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
+              rpcProvider,
+            })
+            console.log('manager', manager)
+            const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
+            console.log('pool', pool)
+            return [manager, pool] as const
           })
-          console.log('manager', manager)
-          const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
-          console.log('pool', pool)
-          return [manager, pool] as const
-        })
       )
       console.log(results)
       return results
