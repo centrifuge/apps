@@ -187,12 +187,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   function cancelRedeemOrder(args: [lpAddress: string], options: TransactionRequest = {}) {
     const [lpAddress] = args
-    return pending(contract(lpAddress, ABI.LiquidityPool).cancelRedeemRequest(0, options))
+    const user = inst.getSignerAddress('evm')
+    return pending(contract(lpAddress, ABI.LiquidityPool).cancelRedeemRequest(0, user, options))
   }
 
   function cancelInvestOrder(args: [lpAddress: string], options: TransactionRequest = {}) {
     const [lpAddress] = args
-    return pending(contract(lpAddress, ABI.LiquidityPool).cancelDepositRequest(0, options))
+    const user = inst.getSignerAddress('evm')
+    return pending(contract(lpAddress, ABI.LiquidityPool).cancelDepositRequest(0, user, options))
   }
 
   function mint(args: [lpAddress: string, mint: BN, receiver?: string], options: TransactionRequest = {}) {
