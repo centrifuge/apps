@@ -183,14 +183,14 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">
-                    Stable-coins will be transferred to the specified withdrawal addresses, on the specified networks. A
+                    Stablecoins will be transferred to the specified withdrawal addresses, on the specified networks. A
                     delay until the transfer is completed is to be expected.
                   </Text>
                 </InlineFeedback>
               ) : (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">
-                    Virtual accounting process. No onchain stable-coin transfers are expected.
+                    Virtual accounting process. No onchain stablecoin transfers are expected.
                   </Text>
                 </InlineFeedback>
               )}

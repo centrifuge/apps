@@ -250,12 +250,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               <Box bg="statusDefaultBg" p={1}>
                 {destination === 'reserve' ? (
                   <InlineFeedback status="default">
-                    <Text color="statusDefault">Stable-coins will be transferred to the onchain reserve.</Text>
+                    <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
                   </InlineFeedback>
                 ) : (
                   <InlineFeedback status="default">
                     <Text color="statusDefault">
-                      Virtual accounting process. No onchain stable-coin transfers are expected.
+                      Virtual accounting process. No onchain stablecoin transfers are expected.
                     </Text>
                   </InlineFeedback>
                 )}
