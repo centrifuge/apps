@@ -246,9 +246,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
-    console.log(router)
     const gatewayAddress = await contract(router, ABI.Router, options).gateway()
-    console.log(gatewayAddress)
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
   }
@@ -292,7 +290,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     const poolData = await multicall<{
       isActive: boolean
-      undeployedTranches: Record<string, boolean>
+      canTrancheBeDeployed: Record<string, boolean>
       trancheTokens: Record<string, string>
       liquidityPools: Record<string, Record<string, string | null>>
       currencyNeedsAdding: Record<string, boolean>
@@ -304,7 +302,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
               {
                 target: poolManager,
                 call: ['function canTrancheBeDeployed(uint64,bytes16) view returns (bool)', poolId, trancheId],
-                returns: [[`canTrancheBeDeployed[${trancheId}]`, (val) => val]],
+                returns: [[`canTrancheBeDeployed[${trancheId}]`]],
               },
               {
                 target: poolManager,
@@ -332,7 +330,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         {
           target: poolManager,
           call: ['function isPoolActive(uint64) view returns (bool)', poolId],
-          returns: [['isActive', (isActive) => isActive]],
+          returns: [['isActive']],
         },
         ...(currencies.flatMap((currency) => ({
           target: poolManager,
@@ -344,7 +342,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         rpcProvider: getProvider(options)!,
       }
     )
-    poolData.undeployedTranches ??= {}
+    poolData.canTrancheBeDeployed ??= {}
     poolData.trancheTokens ??= {}
     poolData.liquidityPools ??= {}
     poolData.currencyNeedsAdding ??= {}
