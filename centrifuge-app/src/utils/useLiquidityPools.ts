@@ -24,16 +24,21 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
   const query = useQuery(
     ['activeDomains', poolId, routers?.length],
     async () => {
+      console.log(routers)
       const results = await Promise.allSettled(
         routers!.map(async (r) => {
           const rpcProvider = getProvider(r.chainId)
+          if (r.chainId !== 11155111) return
+          console.log(rpcProvider.network)
           const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
             rpcProvider,
           })
+          console.log(manager)
           const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
           return [manager, pool] as const
         })
       )
+      console.log(results)
       return results
         .map((result, i) => {
           if (result.status === 'rejected') {

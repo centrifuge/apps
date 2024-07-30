@@ -246,7 +246,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   async function getManagerFromRouter(args: [router: string], options?: EvmQueryOptions) {
     const [router] = args
+    console.log(router)
     const gatewayAddress = await contract(router, ABI.Router, options).gateway()
+    console.log(gatewayAddress)
     const managerAddress = await contract(gatewayAddress, ABI.Gateway, options).investmentManager()
     return managerAddress as string
   }
@@ -301,12 +303,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             [
               {
                 target: poolManager,
-                call: [
-                  'function undeployedTranches(uint64,bytes16) view returns (uint8,string,string,address)',
-                  poolId,
-                  trancheId,
-                ],
-                returns: [[`undeployedTranches[${trancheId}]`, (dec) => !!dec]],
+                call: ['function canTrancheBeDeployed(uint64,bytes16) view returns (bool)', poolId, trancheId],
+                returns: [[`canTrancheBeDeployed[${trancheId}]`, (val) => val]],
               },
               {
                 target: poolManager,
@@ -333,8 +331,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         ),
         {
           target: poolManager,
-          call: ['function pools(uint64) view returns (uint256)', poolId],
-          returns: [['isActive', (createdAt: BigNumber) => !createdAt.isZero()]],
+          call: ['function isPoolActive(uint64) view returns (bool)', poolId],
+          returns: [['isActive', (isActive) => isActive]],
         },
         ...(currencies.flatMap((currency) => ({
           target: poolManager,
