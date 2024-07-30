@@ -279,19 +279,10 @@ async function getTinlakeLoans(poolId: string) {
     if (errors?.length) {
       throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Errors: ${errors}`)
     }
-    pools = data.pools
+    return data.loans
   } else {
     throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Status: ${response?.status}`)
   }
-
-  const loans = pools.reduce((assets: any[], pool: any) => {
-    if (pool.loans) {
-      assets.push(...pool.loans)
-    }
-    return assets
-  }, [])
-
-  return loans
 }
 
 export async function getWriteOffPercentages(pool: TinlakePool, loans: any[]) {
