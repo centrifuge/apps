@@ -10,6 +10,8 @@ const Root = styled(Text)<{ isActive?: boolean; stacked?: boolean }>`
   ${primaryButton}
   grid-template-columns: ${({ stacked, theme }) => (stacked ? '1fr' : `${theme.sizes.iconSmall}px 1fr`)};
   color: ${({ isActive }) => (isActive ? 'blue' : 'black')}; /* Example styling */
+  font-size: 14px;
+  font-weight: 500;
 `
 
 type PageLinkProps = LinkProps & {

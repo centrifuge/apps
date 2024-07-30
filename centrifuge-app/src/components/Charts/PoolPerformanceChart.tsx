@@ -139,7 +139,7 @@ function PoolPerformanceChart() {
 
       <Shelf gap={4} width="100%" color="textSecondary">
         {chartData?.length ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+          <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
             <ComposedChart data={chartData} margin={{ left: -36 }}>
               <defs>
                 <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">

@@ -63,7 +63,6 @@ export function PoolDetailLiquidity() {
       </PageSummary>
       {!('addresses' in pool) && (
         <>
-          <LoadBoundary>
             <LiquidityTransactionsSection
               pool={pool}
               title="Originations & repayments"
@@ -72,9 +71,7 @@ export function PoolDetailLiquidity() {
               dataColors={[colors.grayScale[500], colors.blueScale[500]]}
               tooltips={['repayment', 'origination']}
             />
-          </LoadBoundary>
 
-          <LoadBoundary>
             <LiquidityTransactionsSection
               pool={pool}
               title="Investments & redemptions"
@@ -83,7 +80,6 @@ export function PoolDetailLiquidity() {
               dataColors={[colors.statusOk, colors.statusCritical]}
               tooltips={['investment', 'redemption']}
             />
-          </LoadBoundary>
           {/* 
           <PageSection title="Cash drag">
             <Stack height="290px">
