@@ -28,7 +28,6 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
       const results = await Promise.allSettled(
         routers!.map(async (r) => {
           const rpcProvider = getProvider(r.chainId)
-          if (r.chainId !== 11155111) return
           console.log(rpcProvider.network)
           const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
             rpcProvider,
