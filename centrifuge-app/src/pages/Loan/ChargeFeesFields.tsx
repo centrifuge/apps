@@ -58,8 +58,11 @@ export const ChargeFeesFields = ({
               <Stack gap={2}>
                 <Stack gap={2}>
                   {form.values.fees.map((fee, index) => {
+                    const maxCharge = form.values.fees
+                      .filter((fee) => fee.id === fee.id)
+                      .reduce((acc, fee) => acc.add(Dec(fee.amount || 0)), Dec(0))
                     const poolFee = poolFees?.find((poolFee) => poolFee.id.toString() === fee.id)
-                    const maxCharge = poolFee?.amounts.percentOfNav.toPercent().mul(pool.nav.aum.toDecimal())
+                    const maxAvailable = poolFee?.amounts.percentOfNav.toPercent().mul(pool.nav.aum.toDecimal())
                     return (
                       <Shelf key={`${fee.id}-${index}`} gap={1} alignItems="flex-start">
                         <Box flex={1}>
@@ -80,8 +83,8 @@ export const ChargeFeesFields = ({
                               if (!value) {
                                 error = 'Enter an amount or remove the fee'
                               }
-                              if (value && Dec(value).gt(maxCharge || 0)) {
-                                error = `Amount cannot exceed ${formatBalance(maxCharge || 0, pool.currency.symbol)}`
+                              if (maxCharge?.greaterThan(maxAvailable || 0)) {
+                                error = `Amount cannot exceed available`
                               }
                               return error
                             }}
@@ -91,14 +94,16 @@ export const ChargeFeesFields = ({
                                 <CurrencyInput
                                   {...field}
                                   label="Amount"
-                                  errorMessage={(meta.touched && meta.error) || undefined}
+                                  errorMessage={meta.touched ? meta.error : undefined}
                                   currency={pool.currency.symbol}
                                   placeholder="0"
                                   onChange={(value) => form.setFieldValue(`fees.${index}.amount`, value)}
-                                  secondaryLabel={`Max ${formatBalance(
-                                    maxCharge || 0,
+                                  secondaryLabel={`${formatBalance(
+                                    maxAvailable || 0,
                                     pool.currency.symbol
-                                  )} (${formatPercentage(poolFee?.amounts.percentOfNav.toPercent() || 0)} NAV)`}
+                                  )} (${formatPercentage(
+                                    poolFee?.amounts.percentOfNav.toPercent() || 0
+                                  )} NAV) available`}
                                 />
                               )
                             }}
@@ -151,22 +156,16 @@ export const ChargeFeesFields = ({
 function ChargePoolFeeSummary({ poolId }: { poolId: string }) {
   const form = useFormikContext<FinanceValues | RepayValues>()
   const pool = usePool(poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const totalFees = form.values.fees.reduce((acc, fee) => acc.add(Dec(fee.amount || 0)), Dec(0))
 
-  return (
+  return form.values.fees.length > 0 ? (
     <Stack gap={1}>
-      {form.values.fees.map((fee) => {
-        const feeName =
-          poolMetadata?.pool?.poolFees?.find((feeMeta) => feeMeta.id.toString() === fee.id)?.name || 'Unknown Fee'
-        return (
-          <Shelf justifyContent="space-between">
-            <Text variant="label2">{feeName}</Text>
-            <Text variant="label2">{formatBalance(Dec(fee?.amount || 0), pool.currency.symbol, 2)}</Text>
-          </Shelf>
-        )
-      })}
+      <Shelf justifyContent="space-between">
+        <Text variant="label2">Fees</Text>
+        <Text variant="label2">{formatBalance(Dec(totalFees), pool.currency.symbol, 2)}</Text>
+      </Shelf>
     </Stack>
-  )
+  ) : null
 }
 
 export function useChargePoolFees(poolId: string, loanId: string) {
@@ -179,7 +178,7 @@ export function useChargePoolFees(poolId: string, loanId: string) {
     render: () => <ChargeFeesFields pool={pool as Pool} borrower={borrower} />,
     renderSummary: () => <ChargePoolFeeSummary poolId={poolId} />,
     isValid: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
-      return values.fees.every((fee) => !!fee.id && !!fee && !!fee.amount)
+      return values.fees.every((fee) => !!fee.id && !!fee.amount)
     },
     getBatch: ({ values }: { values: Pick<FinanceValues | RepayValues, 'fees'> }) => {
       if (!values.fees.length) return of([])
