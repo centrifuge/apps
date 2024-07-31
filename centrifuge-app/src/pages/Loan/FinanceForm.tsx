@@ -59,7 +59,7 @@ type FinanceValues = {
   principal: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
   fees: { id: string; amount: '' | number | Decimal }[]
-  category: 'interest' | 'misc' | undefined
+  category: 'interest' | 'miscellaneous' | undefined
 }
 
 const UNLIMITED = Dec(1000000000000000)
@@ -99,7 +99,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
-    'Finance asset',
+    isCashLoan(loan) ? 'Deposit funds' : 'Finance asset',
     (cent) => (args: [poolId: string, loanId: string, principal: BN], options) => {
       if (!account) throw new Error('No borrower')
       const [poolId, loanId, principal] = args
@@ -139,7 +139,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       principal: '',
       withdraw: undefined,
       fees: [],
-      category: undefined,
+      category: 'interest',
     },
     onSubmit: (values, actions) => {
       const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
@@ -204,15 +204,15 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
             </Field>
             {source === 'other' && (
               <Field name="category">
-                {({ field, form }: FieldProps) => {
+                {({ field }: FieldProps) => {
                   return (
                     <Select
                       options={[
                         { label: 'Interest', value: 'interest' },
-                        { label: 'Miscellaneous', value: 'misc' },
+                        { label: 'Miscellaneous', value: 'miscellaneous' },
                       ]}
-                      {...field}
                       label="Category"
+                      {...field}
                     />
                   )
                 }}

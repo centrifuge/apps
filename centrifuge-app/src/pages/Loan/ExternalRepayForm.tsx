@@ -22,9 +22,9 @@ type RepayValues = {
   fees: { id: string; amount: number | '' | Decimal }[]
 }
 /**
- * Repay form for loans with `valuationMethod === cash`
+ * Repay form for loans with `valuationMethod === oracle
  */
-export function WithdrawForm({ loan, destination }: { loan: ExternalLoan; destination: string }) {
+export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; destination: string }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account?.actingAddress)
