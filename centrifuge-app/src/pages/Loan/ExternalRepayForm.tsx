@@ -34,37 +34,41 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
-    'Repay asset',
+    'Sell asset',
     (cent) =>
       (
-        args: [
-          loanId: string,
-          poolId: string,
-          quantity: Price,
-          interest: CurrencyBalance,
-          amountAdditional: CurrencyBalance,
-          price: CurrencyBalance
-        ],
+        args: [quantity: Price, interest: CurrencyBalance, amountAdditional: CurrencyBalance, price: CurrencyBalance],
         options
       ) => {
-        const [loanId, poolId, quantity, interest, amountAdditional, price] = args
+        const [quantity, interest, amountAdditional, price] = args
         let repayTx
         if (destination === 'reserve') {
           repayTx = cent.pools.repayExternalLoanPartially(
-            [poolId, loanId, quantity, interest, amountAdditional, price],
+            [pool.id, loan.id, quantity, interest, amountAdditional, price],
             {
               batch: true,
             }
           )
         } else {
-          const repay = { quantity, price, interest }
-          let borrow = { quantity, price }
-          repayTx = cent.pools.transferLoanDebt([poolId, loan.id, destinationLoan.id, repay, borrow], { batch: true })
+          const repay = { quantity, price, interest, unscheduled: amountAdditional }
+          let borrow = {
+            amount: new CurrencyBalance(
+              quantity
+                .toDecimal()
+                .mul(price.toDecimal())
+                .add(interest.toDecimal())
+                .add(amountAdditional.toDecimal())
+                .toString(),
+              pool.currency.decimals
+            ),
+          }
+          // TODO: Fix TransferDebtAmountMismatched
+          repayTx = cent.pools.transferLoanDebt([pool.id, loan.id, destinationLoan.id, repay, borrow], { batch: true })
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
             if (batch.length) {
-              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch], options))
+              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch]), options)
             }
             return cent.wrapSignAndSend(api, repayTx, options)
           })
@@ -101,7 +105,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       const amountAdditional = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity || 0)
 
-      doRepayTransaction([loan.poolId, loan.id, quantity, interest, amountAdditional, price], {
+      doRepayTransaction([quantity, interest, amountAdditional, price], {
         account,
       })
       actions.setSubmitting(false)

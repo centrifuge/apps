@@ -9,6 +9,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -42,32 +43,38 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
   const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Purchase asset',
-    (cent) =>
-      (
-        args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance, interest: CurrencyBalance],
-        options
-      ) => {
-        if (!account) throw new Error('No borrower')
-        const [poolId, loanId, quantity, price, interest] = args
-        let financeTx
-        if (source === 'reserve') {
-          financeTx = cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true })
-        } else {
-          const repay = { quantity, price, interest }
-          let borrow = { quantity: quantity, price }
-          financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
-        }
-        return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
-          switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
-            let batch = [...withdrawBatch, ...poolFeesBatch]
-            let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
-            if (batch.length) {
-              tx = api.tx.utility.batchAll([tx, ...batch])
-            }
-            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
-          })
+    (cent) => (args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance], options) => {
+      if (!account) throw new Error('No borrower')
+      const [poolId, loanId, quantity, price] = args
+      let financeTx
+      if (source === 'reserve') {
+        financeTx = cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true })
+      } else {
+        const principal = new CurrencyBalance(
+          price.toDecimal().mul(quantity.toDecimal()).toString(),
+          pool.currency.decimals
         )
-      },
+        const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
+        const borrow = {
+          quantity,
+          price,
+          interest: new BN(0),
+          unscheduled: new BN(0),
+        }
+        // TODO: Fix TransferDebtAmountMismatched
+        financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
+      }
+      return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
+        switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
+          let batch = [...withdrawBatch, ...poolFeesBatch]
+          let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
+          if (batch.length) {
+            tx = api.tx.utility.batchAll([tx, ...batch])
+          }
+          return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
+        })
+      )
+    },
     {
       onSuccess: () => {
         financeForm.resetForm()
@@ -85,8 +92,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity)
-      const interest = new CurrencyBalance(0, pool.currency.decimals)
-      doFinanceTransaction([loan.poolId, loan.id, quantity, price, interest], {
+      doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
         account,
       })
       actions.setSubmitting(false)

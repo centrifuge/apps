@@ -69,31 +69,26 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     isCashLoan(loan) ? 'Withdraw funds' : 'Repay asset',
     (cent) =>
-      (
-        args: [
-          loanId: string,
-          poolId: string,
-          principal: CurrencyBalance,
-          interest: CurrencyBalance,
-          amountAdditional: CurrencyBalance
-        ],
-        options
-      ) => {
-        const [loanId, poolId, principal, interest, amountAdditional] = args
+      (args: [principal: CurrencyBalance, interest: CurrencyBalance, amountAdditional: CurrencyBalance], options) => {
+        const [principal, interest, amountAdditional] = args
         let repayTx
         if (destination === 'reserve') {
-          repayTx = cent.pools.repayLoanPartially([loanId, poolId, principal, interest, amountAdditional], {
+          repayTx = cent.pools.repayLoanPartially([pool.id, loan.id, principal, interest, amountAdditional], {
             batch: true,
           })
         } else if (destination === 'other') {
           if (!repayForm.values.category) throw new Error('No category selected')
-          const tx = api.tx.loans.decreaseDebt(poolId, loan.id, { internal: principal })
+          const tx = api.tx.loans.decreaseDebt(pool.id, loan.id, { internal: principal })
           const categoryHex = Buffer.from(repayForm.values.category).toString('hex')
           repayTx = cent.wrapSignAndSend(api, api.tx.remarks.remark([{ Named: categoryHex }], tx), { batch: true })
         } else {
-          const repay = { principal, interest }
-          let borrow = { amount: principal }
-          repayTx = cent.pools.transferLoanDebt([poolId, loan.id, destinationLoan.id, repay, borrow], { batch: true })
+          const repay = { principal, interest, unscheduled: amountAdditional }
+          const borrowAmount = new CurrencyBalance(
+            principal.add(interest).add(amountAdditional),
+            pool.currency.decimals
+          )
+          let borrow = { amount: borrowAmount }
+          repayTx = cent.pools.transferLoanDebt([pool.id, loan.id, destinationLoan.id, repay, borrow], { batch: true })
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
@@ -129,7 +124,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
       const additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const principal = CurrencyBalance.fromFloat(values.principal || 0, pool.currency.decimals)
 
-      doRepayTransaction([loan.poolId, loan.id, principal, interest, additionalAmount], {
+      doRepayTransaction([principal, interest, additionalAmount], {
         account,
         forceProxyType: 'Borrow',
       })

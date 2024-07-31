@@ -8,7 +8,7 @@ import { useBorrower } from '../../utils/usePermissions'
 
 type SourceSelectProps = {
   loan: Loan
-  value: string
+  value: 'reserve' | 'other' | string
   onChange: (option: string) => void
   action: 'repay' | 'finance'
 }

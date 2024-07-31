@@ -112,7 +112,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
         const categoryHex = Buffer.from(financeForm.values.category).toString('hex')
         financeTx = cent.wrapSignAndSend(api, api.tx.remarks.remark([{ Named: categoryHex }], tx), { batch: true })
       } else {
-        const repay = { principal, interest: new BN(0) }
+        const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
         let borrow = { amount: principal }
         financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
       }
