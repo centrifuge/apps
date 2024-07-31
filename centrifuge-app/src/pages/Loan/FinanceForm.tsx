@@ -48,9 +48,10 @@ import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
+import { DepositForm } from './DepositForm'
 import { PurchaseForm } from './PurchaseForm'
 import { SourceSelect } from './SourceSelect'
-import { isExternalLoan } from './utils'
+import { isCashLoan, isExternalLoan } from './utils'
 
 const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000000000000000000000000'
 
@@ -64,19 +65,38 @@ type FinanceValues = {
 export function FinanceForm({ loan }: { loan: LoanType }) {
   const [source, setSource] = React.useState<string>('reserve')
 
+  if (isCashLoan(loan)) {
+    return (
+      <Stack gap={2} p={1}>
+        <Text variant="heading2">Deposit</Text>
+        <SourceSelect loan={loan} value={source} onChange={setSource} type="finance" />
+        <DepositForm loan={loan as ExternalLoan} source={source} />
+      </Stack>
+    )
+  }
+
+  if (isExternalLoan(loan)) {
+    return (
+      <Stack gap={2} p={1}>
+        <Text variant="heading2">Purchase</Text>
+        <SourceSelect loan={loan} value={source} onChange={setSource} type="finance" />
+        <PurchaseForm loan={loan as ExternalLoan} source={source} />
+      </Stack>
+    )
+  }
+
   return (
     <Stack gap={2} p={1}>
-      <Text variant="heading2">{isExternalLoan(loan) ? 'Purchase' : 'Finance'}</Text>
-      <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="finance" />
-      {isExternalLoan(loan) ? (
-        <PurchaseForm loan={loan as ExternalLoan} source={source} />
-      ) : (
-        <InternalFinanceForm loan={loan} source={source} />
-      )}
+      <Text variant="heading2">Finance</Text>
+      <SourceSelect loan={loan} value={source} onChange={setSource} type="finance" />
+      <InternalFinanceForm loan={loan} source={source} />
     </Stack>
   )
 }
 
+/**
+ * Finance form for loans with `valuationMethod === outstandingDebt || valuationMethod === discountedCashflow`
+ */
 function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)

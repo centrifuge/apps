@@ -46,6 +46,7 @@ import { KeyMetrics } from './KeyMetrics'
 import { PricingValues } from './PricingValues'
 import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
+import { isCashLoan, isExternalLoan } from './utils'
 
 const FullHeightLayoutBase = styled(LayoutBase)`
   height: 100vh;
@@ -93,11 +94,11 @@ function ActionButtons({ loan }: { loan: LoanType }) {
 
       <Shelf gap={2}>
         <Button onClick={() => setFinanceShown(true)} small>
-          {['oracle', 'cash'].includes(loan.pricing.valuationMethod) ? 'Purchase' : 'Finance'}
+          {isCashLoan(loan) ? 'Deposit' : isExternalLoan(loan) ? 'Purchase' : 'Finance'}
         </Button>
         {loan.status === 'Active' && (
           <Button onClick={() => setRepayShown(true)} small>
-            {['oracle', 'cash'].includes(loan.pricing.valuationMethod) ? 'Sell' : 'Repay'}
+            {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
           </Button>
         )}
       </Shelf>

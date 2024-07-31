@@ -20,7 +20,8 @@ import {
 import { useChargePoolFees } from './ChargeFeesFields'
 import { SellForm } from './SellForm'
 import { SourceSelect } from './SourceSelect'
-import { isExternalLoan } from './utils'
+import { WithdrawForm } from './WithdrawForm'
+import { isCashLoan, isExternalLoan } from './utils'
 
 export type RepayValues = {
   principal: number | '' | Decimal
@@ -32,15 +33,31 @@ export type RepayValues = {
 export function RepayForm({ loan }: { loan: ActiveLoan }) {
   const [destination, setDestination] = React.useState<string>('reserve')
 
+  if (isCashLoan(loan)) {
+    return (
+      <Stack gap={2} p={1}>
+        <Text variant="heading2">Withdraw</Text>
+        <SourceSelect loan={loan} value={destination} onChange={setDestination} type="repay" />
+        <WithdrawForm loan={loan as ExternalLoan} destination={destination} />
+      </Stack>
+    )
+  }
+
+  if (isExternalLoan(loan)) {
+    return (
+      <Stack gap={2} p={1}>
+        <Text variant="heading2">Sell</Text>
+        <SourceSelect loan={loan} value={destination} onChange={setDestination} type="repay" />
+        <SellForm loan={loan as ExternalLoan} destination={destination} />
+      </Stack>
+    )
+  }
+
   return (
     <Stack gap={2} p={1}>
       <Text variant="heading2">{isExternalLoan(loan) ? 'Sell' : 'Repay'}</Text>
-      <SourceSelect loan={loan} value={destination} onChange={(newSource) => setDestination(newSource)} type="repay" />
-      {isExternalLoan(loan) ? (
-        <SellForm loan={loan as ExternalLoan} destination={destination} />
-      ) : (
-        <InternalRepayForm loan={loan} destination={destination} />
-      )}
+      <SourceSelect loan={loan} value={destination} onChange={setDestination} type="repay" />
+      <InternalRepayForm loan={loan} destination={destination} />
     </Stack>
   )
 }
