@@ -33,7 +33,7 @@ export type FinanceValues = {
 /**
  * Finance form for loans with `valuationMethod === oracle`
  */
-export function PurchaseForm({ loan, source }: { loan: ExternalLoan; source: string }) {
+export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; source: string }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)

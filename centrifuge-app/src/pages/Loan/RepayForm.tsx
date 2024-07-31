@@ -37,7 +37,7 @@ export function RepayForm({ loan }: { loan: ActiveLoan }) {
     return (
       <Stack gap={2} p={1}>
         <Text variant="heading2">Withdraw</Text>
-        <SourceSelect loan={loan} value={destination} onChange={setDestination} type="repay" />
+        <SourceSelect loan={loan} value={destination} onChange={setDestination} action="repay" />
         <WithdrawForm loan={loan as ExternalLoan} destination={destination} />
       </Stack>
     )
@@ -47,7 +47,7 @@ export function RepayForm({ loan }: { loan: ActiveLoan }) {
     return (
       <Stack gap={2} p={1}>
         <Text variant="heading2">Sell</Text>
-        <SourceSelect loan={loan} value={destination} onChange={setDestination} type="repay" />
+        <SourceSelect loan={loan} value={destination} onChange={setDestination} action="repay" />
         <SellForm loan={loan as ExternalLoan} destination={destination} />
       </Stack>
     )
@@ -56,7 +56,7 @@ export function RepayForm({ loan }: { loan: ActiveLoan }) {
   return (
     <Stack gap={2} p={1}>
       <Text variant="heading2">{isExternalLoan(loan) ? 'Sell' : 'Repay'}</Text>
-      <SourceSelect loan={loan} value={destination} onChange={setDestination} type="repay" />
+      <SourceSelect loan={loan} value={destination} onChange={setDestination} action="repay" />
       <InternalRepayForm loan={loan} destination={destination} />
     </Stack>
   )

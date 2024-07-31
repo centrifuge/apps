@@ -13,7 +13,7 @@ import { Dec } from '../../utils/Decimal'
 import { formatPercentage } from '../../utils/formatting'
 import { useBorrower, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
-import { FinanceValues } from './PurchaseForm'
+import { FinanceValues } from './ExternalFinanceForm'
 import { RepayValues } from './RepayForm'
 
 export const ChargeFeesFields = ({

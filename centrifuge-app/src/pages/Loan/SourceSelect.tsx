@@ -10,13 +10,14 @@ type SourceSelectProps = {
   loan: Loan
   value: string
   onChange: (option: string) => void
-  type: 'repay' | 'finance'
+  action: 'repay' | 'finance'
 }
 
-export function SourceSelect({ loan, value, onChange, type }: SourceSelectProps) {
+export function SourceSelect({ loan, value, onChange, action }: SourceSelectProps) {
   const unfilteredLoans = useLoans(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
 
+  // acceptable options are active loans with cash valuation ONLY if connected account is the borrower
   const loans = unfilteredLoans?.filter(
     (l) =>
       l.id !== loan.id &&
@@ -26,13 +27,18 @@ export function SourceSelect({ loan, value, onChange, type }: SourceSelectProps)
       l.pricing.valuationMethod === 'cash'
   ) as Loan[] | undefined
 
+  const options = [
+    { label: 'Onchain reserve', value: 'reserve' },
+    ...(loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []),
+  ]
+  if (loan.pricing.valuationMethod === 'cash') {
+    options.push({ label: 'Other', value: 'other' })
+  }
+
   return (
     <Select
-      label={type === 'finance' ? 'Source' : 'Destination'}
-      options={[
-        { label: 'Onchain reserve', value: 'reserve' },
-        ...(loans?.map((l) => ({ value: l.id, label: <LoanOption loan={l as Loan} key={l.id} /> })) ?? []),
-      ]}
+      label={action === 'finance' ? 'Source' : 'Destination'}
+      options={options}
       value={value}
       onChange={(e) => onChange(e.target.value)}
     />

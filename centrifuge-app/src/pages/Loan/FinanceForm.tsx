@@ -48,8 +48,7 @@ import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
-import { DepositForm } from './DepositForm'
-import { PurchaseForm } from './PurchaseForm'
+import { ExternalFinanceForm } from './ExternalFinanceForm'
 import { SourceSelect } from './SourceSelect'
 import { isCashLoan, isExternalLoan } from './utils'
 
@@ -60,42 +59,35 @@ type FinanceValues = {
   principal: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
   fees: { id: string; amount: '' | number | Decimal }[]
+  category: 'interest' | 'misc' | undefined
 }
+
+const UNLIMITED = Dec(1000000000000000)
 
 export function FinanceForm({ loan }: { loan: LoanType }) {
   const [source, setSource] = React.useState<string>('reserve')
-
-  if (isCashLoan(loan)) {
-    return (
-      <Stack gap={2} p={1}>
-        <Text variant="heading2">Deposit</Text>
-        <SourceSelect loan={loan} value={source} onChange={setSource} type="finance" />
-        <DepositForm loan={loan as ExternalLoan} source={source} />
-      </Stack>
-    )
-  }
 
   if (isExternalLoan(loan)) {
     return (
       <Stack gap={2} p={1}>
         <Text variant="heading2">Purchase</Text>
-        <SourceSelect loan={loan} value={source} onChange={setSource} type="finance" />
-        <PurchaseForm loan={loan as ExternalLoan} source={source} />
+        <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
+        <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
       </Stack>
     )
   }
 
   return (
     <Stack gap={2} p={1}>
-      <Text variant="heading2">Finance</Text>
-      <SourceSelect loan={loan} value={source} onChange={setSource} type="finance" />
+      <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Finance'}</Text>
+      <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
       <InternalFinanceForm loan={loan} source={source} />
     </Stack>
   )
 }
 
 /**
- * Finance form for loans with `valuationMethod === outstandingDebt || valuationMethod === discountedCashflow`
+ * Finance form for loans with `valuationMethod: outstandingDebt, discountedCashflow, cash`
  */
 function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string }) {
   const pool = usePool(loan.poolId) as Pool
@@ -114,6 +106,11 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       let financeTx
       if (source === 'reserve') {
         financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
+      } else if (source === 'other') {
+        if (!financeForm.values.category) throw new Error('No category selected')
+        const tx = api.tx.loans.increaseDebt(poolId, loan.id, { internal: principal })
+        const categoryHex = Buffer.from(financeForm.values.category).toString('hex')
+        financeTx = cent.wrapSignAndSend(api, api.tx.remarks.remark([{ Named: categoryHex }], tx), { batch: true })
       } else {
         const repay = { principal, interest: new BN(0) }
         let borrow = { amount: principal }
@@ -142,6 +139,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       principal: '',
       withdraw: undefined,
       fees: [],
+      category: undefined,
     },
     onSubmit: (values, actions) => {
       const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
@@ -168,7 +166,11 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   const totalFinance = Dec(financeForm.values.principal || 0)
 
   const maxAvailable =
-    source === 'reserve' ? min(poolReserve, availableFinancing) : sourceLoan.outstandingDebt.toDecimal()
+    source === 'reserve'
+      ? min(poolReserve, availableFinancing)
+      : source === 'other'
+      ? UNLIMITED
+      : sourceLoan.outstandingDebt.toDecimal()
 
   return (
     <>
@@ -179,7 +181,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               name="principal"
               validate={combine(positiveNumber(), (val) => {
                 const principalValue = typeof val === 'number' ? Dec(val) : (val as Decimal)
-                if (principalValue.gt(maxAvailable)) {
+                if (maxAvailable !== UNLIMITED && principalValue.gt(maxAvailable)) {
                   return `Principal exceeds available financing`
                 }
                 return ''
@@ -193,12 +195,30 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                     label="Principal"
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
-                    onSetMax={() => form.setFieldValue('principal', maxAvailable)}
+                    onSetMax={
+                      maxAvailable !== UNLIMITED ? () => form.setFieldValue('principal', maxAvailable) : undefined
+                    }
                   />
                 )
               }}
             </Field>
-            {source === 'reserve' && withdraw.render()}
+            {source === 'other' && (
+              <Field name="category">
+                {({ field, form }: FieldProps) => {
+                  return (
+                    <Select
+                      options={[
+                        { label: 'Interest', value: 'interest' },
+                        { label: 'Miscellaneous', value: 'misc' },
+                      ]}
+                      {...field}
+                      label="Category"
+                    />
+                  )
+                }}
+              </Field>
+            )}
+            {source === 'reserve' && !isCashLoan(loan) && withdraw.render()}
             <Box bg="statusDefaultBg" p={1}>
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
@@ -235,9 +255,11 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Available</Text>
-              <Text variant="emphasized">{formatBalance(maxAvailable, pool?.currency.symbol, 2)}</Text>
+              <Text variant="emphasized">
+                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, pool?.currency.symbol, 2)}
+              </Text>
             </Shelf>
-            {totalFinance.gt(0) && totalFinance.gt(maxAvailable) && (
+            {totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable) && (
               <Box bg="statusCriticalBg" p={1}>
                 <InlineFeedback status="critical">
                   <Text color="statusCritical">
@@ -258,7 +280,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                   !financeForm.isValid
                 }
               >
-                Finance
+                {isCashLoan(loan) ? 'Deposit' : 'Finance'}
               </Button>
             </Stack>
           </Stack>
