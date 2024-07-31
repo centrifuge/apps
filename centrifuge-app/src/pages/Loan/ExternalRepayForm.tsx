@@ -11,15 +11,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import {
-  combine,
-  max,
-  maxNotRequired,
-  maxPriceVariance,
-  nonNegativeNumber,
-  nonNegativeNumberNotRequired,
-  required,
-} from '../../utils/validation'
+import { combine, maxNotRequired, nonNegativeNumberNotRequired } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
 
 type RepayValues = {
@@ -102,7 +94,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       amountAdditional: '',
     },
     onSubmit: (values, actions) => {
-      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
+      const price = CurrencyBalance.fromFloat(values.price || 0, pool.currency.decimals)
       const interest = CurrencyBalance.fromFloat(values?.interest || 0, pool.currency.decimals)
       const amountAdditional = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity || 0)
@@ -145,7 +137,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       totalRepay,
     }
   }, [loan, destinationLoan, balance, repayForm.values])
-
   return (
     <>
       {currentFace ? (
@@ -161,7 +152,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         (debt.gt(0) ? (
           <FormikProvider value={repayForm}>
             <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-              <Field validate={combine(required(), nonNegativeNumber())} name="quantity">
+              <Field validate={combine(nonNegativeNumberNotRequired())} name="quantity">
                 {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
@@ -178,16 +169,14 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               </Field>
               <Field
                 validate={combine(
-                  required(),
-                  nonNegativeNumber(),
-                  max(
+                  nonNegativeNumberNotRequired(),
+                  maxNotRequired(
                     maxAvailable.toNumber(),
                     `Quantity x price (${formatBalance(
                       Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0),
                       pool.currency.symbol
                     )}) exceeds available debt (${formatBalance(maxAvailable, pool.currency.symbol)})`
-                  ),
-                  maxPriceVariance(loan.pricing)
+                  )
                 )}
                 name="price"
               >
@@ -217,7 +206,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                         label="Interest"
                         errorMessage={meta.touched ? meta.error : undefined}
                         secondaryLabel={`${formatBalance(
-                          loan.outstandingInterest,
+                          destination === 'reserve' ? loan.outstandingInterest : destinationLoan.outstandingInterest,
                           pool?.currency.symbol,
                           2
                         )} interest accrued`}
@@ -301,7 +290,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                     isRepayLoading ||
                     !poolFees.isValid(repayForm) ||
                     !repayForm.isValid ||
-                    totalRepay.lessThan(maxAvailable)
+                    totalRepay.greaterThan(maxAvailable)
                   }
                   loading={isRepayLoading}
                 >

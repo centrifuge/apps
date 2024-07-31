@@ -13,10 +13,8 @@ import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import {
   combine,
-  max,
   maxNotRequired,
   nonNegativeNumberNotRequired,
-  positiveNumber,
   positiveNumberNotRequired,
 } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
@@ -98,22 +96,10 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
     }
   )
 
-  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
-    'Repay asset',
-    (cent) => cent.pools.repayAndCloseLoan
-  )
-
   const { execute: doCloseTransaction, isLoading: isCloseLoading } = useCentrifugeTransaction(
     'Close asset',
     (cent) => cent.pools.closeLoan
   )
-
-  function repayAll() {
-    doRepayAllTransaction([loan.poolId, loan.id, loan.totalBorrowed.sub(loan.repaid.principal)], {
-      account,
-      forceProxyType: 'Borrow',
-    })
-  }
 
   const repayForm = useFormik<RepayValues>({
     initialValues: {
@@ -124,8 +110,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
     },
     onSubmit: (values, actions) => {
       const interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
-      const additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional, pool.currency.decimals)
-      const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
+      const additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
+      const principal = CurrencyBalance.fromFloat(values.principal || 0, pool.currency.decimals)
 
       doRepayTransaction([loan.poolId, loan.id, principal, interest, additionalAmount], {
         account,
@@ -160,15 +146,16 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
     }
   }, [loan, destinationLoan, balance, repayForm.values])
 
-  const canRepayAll = debtWithMargin?.lte(balance)
-
   return (
     <>
       {maxAvailable.gt(0) ? (
         <FormikProvider value={repayForm}>
           <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
             <Field
-              validate={combine(positiveNumber(), max(maxAvailable.toNumber(), 'Principal exceeds available debt'))}
+              validate={combine(
+                positiveNumberNotRequired(),
+                maxNotRequired(maxAvailable.toNumber(), 'Principal exceeds available debt')
+              )}
               name="principal"
             >
               {({ field, form }: FieldProps) => {
@@ -177,7 +164,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Principal"
-                    disabled={isRepayLoading || isRepayAllLoading}
+                    disabled={isRepayLoading}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
                     onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
@@ -200,11 +187,11 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                       value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                       label="Interest"
                       secondaryLabel={`${formatBalance(
-                        loan.outstandingInterest,
+                        destination === 'reserve' ? loan.outstandingInterest : destinationLoan.outstandingInterest,
                         pool?.currency.symbol,
                         2
                       )} interest accrued`}
-                      disabled={isRepayLoading || isRepayAllLoading}
+                      disabled={isRepayLoading}
                       currency={pool?.currency.symbol}
                       onChange={(value) => form.setFieldValue('interest', value)}
                       onSetMax={() => form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)}
@@ -226,7 +213,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Additional amount"
-                    disabled={isRepayLoading || isRepayAllLoading}
+                    disabled={isRepayLoading}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('amountAdditional', value)}
                   />
@@ -283,20 +270,10 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
             <Stack gap={1} px={1}>
               <Button
                 type="submit"
-                disabled={
-                  isRepayAllLoading || !poolFees.isValid(repayForm) || !repayForm.isValid || totalRepay.gt(maxAvailable)
-                }
+                disabled={!poolFees.isValid(repayForm) || !repayForm.isValid || totalRepay.gt(maxAvailable)}
                 loading={isRepayLoading}
               >
                 Repay
-              </Button>
-              <Button
-                variant="secondary"
-                loading={isRepayAllLoading}
-                disabled={!canRepayAll || isRepayLoading}
-                onClick={() => repayAll()}
-              >
-                Repay all and close
               </Button>
             </Stack>
           </Stack>
