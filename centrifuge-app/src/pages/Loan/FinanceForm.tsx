@@ -48,7 +48,7 @@ import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
-import { ExternalFinanceForm } from './ExternalFinanceForm'
+import { PurchaseForm } from './PurchaseForm'
 import { SourceSelect } from './SourceSelect'
 import { isExternalLoan } from './utils'
 
@@ -69,7 +69,7 @@ export function FinanceForm({ loan }: { loan: LoanType }) {
       <Text variant="heading2">{isExternalLoan(loan) ? 'Purchase' : 'Finance'}</Text>
       <SourceSelect loan={loan} value={source} onChange={(newSource) => setSource(newSource)} type="finance" />
       {isExternalLoan(loan) ? (
-        <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
+        <PurchaseForm loan={loan as ExternalLoan} source={source} />
       ) : (
         <InternalFinanceForm loan={loan} source={source} />
       )}
@@ -95,7 +95,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       if (source === 'reserve') {
         financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
       } else {
-        const repay = { principal, interest: new BN(0) } // TODO:1 calculate interest?
+        const repay = { principal, interest: new BN(0) }
         let borrow = { amount: principal }
         financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
       }
