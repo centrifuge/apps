@@ -43,10 +43,11 @@ import { useBorrowerAssetTransactions, usePool, usePoolMetadata } from '../../ut
 import { FinanceForm } from './FinanceForm'
 import { HoldingsValues } from './HoldingsValues'
 import { KeyMetrics } from './KeyMetrics'
+import { MetricsTable } from './MetricsTable'
 import { PricingValues } from './PricingValues'
 import { RepayForm } from './RepayForm'
 import { TransactionTable } from './TransactionTable'
-import { isCashLoan, isExternalLoan } from './utils'
+import { formatNftAttribute, isCashLoan, isExternalLoan } from './utils'
 
 const FullHeightLayoutBase = styled(LayoutBase)`
   height: 100vh;
@@ -235,21 +236,24 @@ function Loan() {
                       <Text fontSize="18px" fontWeight="500">
                         {section.name}
                       </Text>
-
-                      {/* TODO: what is this doing here? <TransactionTable
-                        transactions={borrowerAssetTransactions}
-                        currency={pool.currency.symbol}
-                        loanType={
-                          'valuationMethod' in loan.pricing && loan.pricing.valuationMethod === 'oracle'
-                            ? 'external'
-                            : 'internal'
-                        }
-                        poolType={poolMetadata?.pool?.asset.class}
-                        decimals={pool.currency.decimals}
-                        pricing={loan.pricing as PricingInfo}
-                        maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
-                        originationDate={originationDate ? new Date(originationDate) : undefined}
-                      /> */}
+                      <MetricsTable
+                        metrics={section.attributes
+                          .filter(
+                            (key) =>
+                              !!templateData.attributes?.[key] &&
+                              (!templateMetadata?.keyAttributes ||
+                                !Object.values(templateMetadata?.keyAttributes).includes(key))
+                          )
+                          .map((key) => {
+                            const attribute = templateData.attributes?.[key]!
+                            const value = publicData[key]
+                            const formatted = value ? formatNftAttribute(value, attribute) : '-'
+                            return {
+                              label: attribute.label,
+                              value: formatted,
+                            }
+                          })}
+                      />
                     </Stack>
                   </Card>
                 </React.Suspense>
