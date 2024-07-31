@@ -8,7 +8,7 @@ import { combineLatest, switchMap } from 'rxjs'
 import { Dec, max as maxDec, min } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
+import { useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import {
@@ -18,7 +18,7 @@ import {
   positiveNumberNotRequired,
 } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
-import { ExternalRepayForm } from './ExternalRepayForm'
+import { SellForm } from './SellForm'
 import { SourceSelect } from './SourceSelect'
 import { isExternalLoan } from './utils'
 
@@ -37,7 +37,7 @@ export function RepayForm({ loan }: { loan: ActiveLoan }) {
       <Text variant="heading2">{isExternalLoan(loan) ? 'Sell' : 'Repay'}</Text>
       <SourceSelect loan={loan} value={destination} onChange={(newSource) => setDestination(newSource)} type="repay" />
       {isExternalLoan(loan) ? (
-        <ExternalRepayForm loan={loan as ExternalLoan} destination={destination} />
+        <SellForm loan={loan as ExternalLoan} destination={destination} />
       ) : (
         <InternalRepayForm loan={loan} destination={destination} />
       )}
@@ -50,8 +50,6 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account?.actingAddress)
   const balance = (balances && findBalance(balances.currencies, pool.currency.key)?.balance.toDecimal()) || Dec(0)
-  console.log('🚀 ~ balance:', balance.toString())
-  const { debtWithMargin } = useAvailableFinancing(loan.poolId, loan.id)
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const loans = useLoans(loan.poolId)
   const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
@@ -133,7 +131,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
     if (destination !== 'reserve') {
       maxAvailable = destinationLoan.outstandingDebt?.toDecimal()
       maxPrincipal = destinationLoan.outstandingDebt.toDecimal()
-      maxInterest = destinationLoan.outstandingInterest.toDecimal()
+      maxInterest = loan.outstandingInterest.toDecimal()
     }
     const totalRepay = Dec(principal || 0)
       .add(Dec(interest || 0))
@@ -187,7 +185,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                       value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                       label="Interest"
                       secondaryLabel={`${formatBalance(
-                        destination === 'reserve' ? loan.outstandingInterest : destinationLoan.outstandingInterest,
+                        loan.outstandingInterest,
                         pool?.currency.symbol,
                         2
                       )} interest accrued`}

@@ -21,8 +21,10 @@ type RepayValues = {
   quantity: number | ''
   fees: { id: string; amount: number | '' | Decimal }[]
 }
-
-export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; destination: string }) {
+/**
+ * Repay form for loans with `valuationMethod === oracle
+ */
+export function SellForm({ loan, destination }: { loan: ExternalLoan; destination: string }) {
   const pool = usePool(loan.poolId)
   const account = useBorrower(loan.poolId, loan.id)
   const balances = useBalances(account?.actingAddress)
@@ -122,7 +124,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
     let maxInterest = min(balance, outstandingInterest)
     if (destination !== 'reserve') {
       maxAvailable = destinationLoan.outstandingDebt?.toDecimal() || Dec(0)
-      maxInterest = destinationLoan.outstandingInterest.toDecimal() || Dec(0)
+      maxInterest = outstandingInterest || Dec(0)
     }
     return {
       maxAvailable,
@@ -207,7 +209,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                         label="Interest"
                         errorMessage={meta.touched ? meta.error : undefined}
                         secondaryLabel={`${formatBalance(
-                          destination === 'reserve' ? loan.outstandingInterest : destinationLoan.outstandingInterest,
+                          loan.outstandingInterest,
                           pool?.currency.symbol,
                           2
                         )} interest accrued`}
