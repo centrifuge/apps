@@ -3494,8 +3494,8 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) =>
         combineLatest([
           api.queryMulti([
-            [api.query.investments.investOrders, [address, { poolId, trancheId }]],
-            [api.query.investments.redeemOrders, [address, { poolId, trancheId }]],
+            [api.query.investments.investOrders, [address, [poolId, trancheId]]],
+            [api.query.investments.redeemOrders, [address, [poolId, trancheId]]],
           ]),
           getPoolCurrency([poolId]),
         ])
