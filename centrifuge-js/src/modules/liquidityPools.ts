@@ -400,6 +400,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 currency.address,
               ],
               returns: [[`lps[${i}]`]],
+              allowFailure: true,
             } as Call)
         ),
       ],
@@ -416,7 +417,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const lps = lpData.lps?.filter((lp) => lp !== NULL_ADDRESS)
     if (!lps?.length) return []
 
-    const assetData = await multicall<{ share: string }>(
+    const shareData = await multicall<{ share: string }>(
       [
         {
           target: lps[0],
@@ -449,12 +450,12 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             ] as Call[]
         ),
         {
-          target: assetData.share,
+          target: shareData.share,
           call: ['function symbol() view returns (string)'],
           returns: [['trancheTokenSymbol']],
         },
         {
-          target: assetData.share,
+          target: shareData.share,
           call: ['function decimals() view returns (uint8)'],
           returns: [['trancheTokenDecimals']],
         },
@@ -468,6 +469,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       lpAddress: addr,
       currency: currenciesByLpAddress[addr],
       managerAddress,
+      trancheTokenAddress: shareData.share,
       trancheTokenSymbol: currencyData.trancheTokenSymbol,
       trancheTokenDecimals: currencyData.trancheTokenDecimals,
       currencySupportsPermit: currencyData.currencies?.[i]?.currencySupportsPermit,
@@ -476,70 +478,62 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   async function getLiquidityPoolInvestment(
-    args: [user: string, managerAddress: string, lpAddress: string, currencyAddress: string],
+    args: [
+      user: string,
+      lp: {
+        managerAddress: string
+        lpAddress: string
+        currency: CurrencyMetadata & { address: string }
+        trancheTokenAddress: string
+        trancheTokenDecimals: number
+      }
+    ],
     options?: EvmQueryOptions
   ) {
-    const [user, manager, lp, currencyAddress] = args
+    const [user, lp] = args
 
-    const currency = await multicall<{ trancheDecimals: number; currencyDecimals: number; tokenAddress: string }>(
-      [
-        {
-          target: currencyAddress,
-          call: ['function decimals() view returns (uint8)'],
-          returns: [['currencyDecimals']],
-        },
-        {
-          target: lp,
-          call: ['function shareDecimals() view returns (uint8)'],
-          returns: [['trancheDecimals']],
-        },
-        {
-          target: lp,
-          call: ['function share() view returns (address)'],
-          returns: [['tokenAddress']],
-        },
-      ],
-      {
-        rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
-      }
-    )
+    const currencyBalanceTransform = toCurrencyBalance(lp.currency.decimals)
+    const tokenBalanceTransform = toTokenBalance(lp.currency.decimals)
 
     const calls: Call[] = [
       {
-        target: currency.tokenAddress,
+        target: lp.trancheTokenAddress,
         call: ['function checkTransferRestriction(address, address, uint) view returns (bool)', NULL_ADDRESS, user, 0],
         returns: [['isAllowedToInvest']],
       },
       {
-        target: currency.tokenAddress,
+        target: lp.trancheTokenAddress,
         call: ['function balanceOf(address) view returns (uint256)', user],
-        returns: [['tokenBalance', toTokenBalance(currency.trancheDecimals)]],
+        returns: [['tokenBalance', tokenBalanceTransform]],
       },
       {
-        target: currencyAddress,
+        target: lp.currency.address,
         call: ['function balanceOf(address) view returns (uint256)', user],
-        returns: [['currencyBalance', toCurrencyBalance(currency.currencyDecimals)]],
+        returns: [['currencyBalance', currencyBalanceTransform]],
       },
       {
-        target: currencyAddress,
-        call: ['function allowance(address, address) view returns (uint)', user, lp],
-        returns: [['lpCurrencyAllowance', toCurrencyBalance(currency.currencyDecimals)]],
+        target: lp.currency.address,
+        call: ['function allowance(address, address) view returns (uint)', user, lp.lpAddress],
+        returns: [['lpCurrencyAllowance', currencyBalanceTransform]],
       },
       {
-        target: manager,
+        target: lp.managerAddress,
         call: [
-          'function investments(address, address) view returns (uint128, uint256, uint128, uint256, uint128, uint128, bool)',
-          lp,
+          'function investments(address, address) view returns (uint128, uint128, uint256, uint256, uint128, uint128, uint128, uint128, bool, bool)',
+          lp.lpAddress,
           user,
         ],
         returns: [
-          ['maxMint', toCurrencyBalance(currency.currencyDecimals)],
+          ['maxMint', currencyBalanceTransform],
+          ['maxWithdraw', currencyBalanceTransform],
           [],
-          ['maxWithdraw', toCurrencyBalance(currency.currencyDecimals)],
           [],
-          ['pendingInvest', toCurrencyBalance(currency.currencyDecimals)],
-          ['pendingRedeem', toCurrencyBalance(currency.currencyDecimals)],
-          ['hasInvested'],
+          ['pendingInvest', currencyBalanceTransform],
+          ['pendingRedeem', currencyBalanceTransform],
+          [],
+          [],
+          [],
+          [],
         ],
       },
       {
@@ -551,13 +545,11 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
     const pool = await multicall<{
       isAllowedToInvest: boolean
-      hasInvested: boolean
       tokenBalance: TokenBalance
-      maxMint: TokenBalance
       currencyBalance: CurrencyBalance
-      maxWithdraw: CurrencyBalance
       lpCurrencyAllowance: CurrencyBalance
-      managerTrancheTokenAllowance: CurrencyBalance
+      maxMint: TokenBalance
+      maxWithdraw: CurrencyBalance
       pendingInvest: CurrencyBalance
       pendingRedeem: TokenBalance
       maxDeposit: CurrencyBalance

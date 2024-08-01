@@ -124,8 +124,6 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   } = useWallet()
   const address = useAddress('evm')
   const cent = useCentrifuge()
-  const { data: domains } = useActiveDomains(poolId)
-  const managerAddress = domains?.find((d) => d.chainId === chainId)?.managerAddress
 
   const { data: lps } = useLiquidityPools(poolId, trancheId)
   const lp = lps?.[lpIndex ?? 0]
@@ -133,15 +131,11 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   const query = useQuery(
     ['lpInvestment', chainId, lp?.lpAddress, address],
     async () => ({
-      ...(await cent.liquidityPools.getLiquidityPoolInvestment(
-        [address!, managerAddress!, lp!.lpAddress, lp!.currency.address],
-        {
-          rpcProvider: getProvider(chainId!),
-        }
-      )),
+      ...(await cent.liquidityPools.getLiquidityPoolInvestment([address!, lp!], {
+        rpcProvider: getProvider(chainId!),
+      })),
       ...lp!,
     }),
-
     {
       enabled: !!lp && !!address,
     }
