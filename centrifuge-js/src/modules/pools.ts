@@ -3022,8 +3022,8 @@ export function getPoolsModule(inst: Centrifuge) {
               metadata
               name
               type
-              unrealizedProfitByPeriod
               sumRealizedProfitFifo
+              unrealizedProfitAtMarketPrice
             }
             fromAsset {
               id
@@ -3063,8 +3063,8 @@ export function getPoolsModule(inst: Centrifuge) {
           sumRealizedProfitFifo: tx.asset.sumRealizedProfitFifo
             ? new CurrencyBalance(tx.asset.sumRealizedProfitFifo, currency.decimals)
             : undefined,
-          unrealizedProfitByPeriod: tx.asset.unrealizedProfitByPeriod
-            ? new CurrencyBalance(tx.asset.unrealizedProfitByPeriod, currency.decimals)
+          unrealizedProfitAtMarketPrice: tx.asset.unrealizedProfitAtMarketPrice
+            ? new CurrencyBalance(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals)
             : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
         })) satisfies AssetTransaction[]
@@ -3494,8 +3494,8 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap((api) =>
         combineLatest([
           api.queryMulti([
-            [api.query.investments.investOrders, [address, { poolId, trancheId }]],
-            [api.query.investments.redeemOrders, [address, { poolId, trancheId }]],
+            [api.query.investments.investOrders, [address, [poolId, trancheId]]],
+            [api.query.investments.redeemOrders, [address, [poolId, trancheId]]],
           ]),
           getPoolCurrency([poolId]),
         ])
