@@ -93,7 +93,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
             if (batch.length) {
-              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch], options))
+              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch]), options)
             }
             return cent.wrapSignAndSend(api, repayTx, options)
           })
@@ -183,7 +183,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Principal"
+                    label={isCashLoan(loan) ? 'Amount' : 'Principal'}
                     disabled={isRepayLoading}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
