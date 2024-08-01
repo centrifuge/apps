@@ -108,9 +108,9 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
         financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
       } else if (source === 'other') {
         if (!financeForm.values.category) throw new Error('No category selected')
-        const tx = api.tx.loans.increaseDebt(poolId, loan.id, { internal: principal })
+        const increaseDebtTx = api.tx.loans.increaseDebt(poolId, loan.id, { internal: principal })
         const categoryHex = Buffer.from(financeForm.values.category).toString('hex')
-        financeTx = cent.wrapSignAndSend(api, api.tx.remarks.remark([{ Named: categoryHex }], tx), { batch: true })
+        financeTx = cent.remark.remark([[{ Named: categoryHex }], increaseDebtTx], { batch: true })
       } else {
         const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
         let borrow = { amount: principal }
@@ -556,3 +556,9 @@ function divideBetweenCurrencies(
 
   return divideBetweenCurrencies(remainder, rest, withdrawAddresses, combinedResult)
 }
+
+const stringToHex = (str: string) =>
+  str
+    .split('')
+    .map((char) => ('00' + char.charCodeAt(0).toString(16)).slice(-2))
+    .join('')

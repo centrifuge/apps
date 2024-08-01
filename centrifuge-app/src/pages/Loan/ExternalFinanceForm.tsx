@@ -89,7 +89,6 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
       fees: [],
     },
     onSubmit: (values, actions) => {
-      console.log('🚀 ~ values:', values.price)
       const price = CurrencyBalance.fromFloat(values.price.toString(), pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity)
       doFinanceTransaction([loan.poolId, loan.id, quantity, price], {

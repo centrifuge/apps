@@ -1,9 +1,15 @@
 import { CurrencyBalance, Pool, addressToHex } from '@centrifuge/centrifuge-js'
-import { CombinedSubstrateAccount, formatBalance, useCentrifugeApi } from '@centrifuge/centrifuge-react'
+import {
+  CombinedSubstrateAccount,
+  formatBalance,
+  useCentrifuge,
+  useCentrifugeApi,
+  wrapProxyCallsForAccount,
+} from '@centrifuge/centrifuge-react'
 import { Box, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
-import { combineLatest, of } from 'rxjs'
+import { combineLatest, of, switchMap } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
@@ -158,6 +164,7 @@ export function useChargePoolFees(poolId: string, loanId: string) {
   const pool = usePool(poolId)
   const borrower = useBorrower(poolId, loanId)
   const api = useCentrifugeApi()
+  const cent = useCentrifuge()
   return {
     render: () => <ChargeFeesFields pool={pool as Pool} borrower={borrower} />,
     renderSummary: () => <ChargePoolFeeSummary poolId={poolId} />,
@@ -171,7 +178,9 @@ export function useChargePoolFees(poolId: string, loanId: string) {
         if (!borrower) throw new Error('No borrower')
         const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
         let feeTx = api.tx.poolFees.chargeFee(fee.id, feeAmount.toString())
-        return [of(api.tx.remarks.remark([{ Loan: [poolId, loanId] }], feeTx))]
+        return cent.remark
+          .remark([[{ Loan: [poolId, loanId] }], feeTx], { batch: true })
+          .pipe(switchMap((tx) => [wrapProxyCallsForAccount(api, tx, borrower, 'Borrow')]))
       })
       return combineLatest(fees)
     },

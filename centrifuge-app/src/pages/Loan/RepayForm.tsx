@@ -84,9 +84,9 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
           })
         } else if (destination === 'other') {
           if (!repayForm.values.category) throw new Error('No category selected')
-          const tx = api.tx.loans.decreaseDebt(pool.id, loan.id, { internal: principal })
+          const decreaseDebtTx = api.tx.loans.decreaseDebt(pool.id, loan.id, { internal: principal })
           const categoryHex = Buffer.from(repayForm.values.category).toString('hex')
-          repayTx = cent.wrapSignAndSend(api, api.tx.remarks.remark([{ Named: categoryHex }], tx), { batch: true })
+          repayTx = cent.remark.remark([[{ Named: categoryHex }], decreaseDebtTx], { batch: true })
         } else {
           const repay = { principal, interest, unscheduled: amountAdditional }
           const borrowAmount = new CurrencyBalance(
@@ -96,14 +96,13 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
           let borrow = { amount: borrowAmount }
           repayTx = cent.pools.transferLoanDebt([pool.id, loan.id, destinationLoan.id, repay, borrow], { batch: true })
         }
-        return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
-          switchMap(([api, repayTx, batch]) => {
+        return combineLatest([repayTx, poolFees.getBatch(repayForm)]).pipe(
+          switchMap(([repayTx, batch]) => {
+            let tx = wrapProxyCallsForAccount(api, repayTx, account, 'Borrow')
             if (batch.length) {
-              const tx = wrapProxyCallsForAccount(api, api.tx.utility.batchAll([repayTx, ...batch]), account, 'Borrow')
-              return cent.wrapSignAndSend(api, tx, options)
+              tx = api.tx.utility.batchAll([tx, ...batch])
             }
-            const tx = wrapProxyCallsForAccount(api, repayTx, account, 'Borrow')
-            return cent.wrapSignAndSend(api, tx, options)
+            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
           })
         )
       },

@@ -1,5 +1,10 @@
 import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
-import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  roundDown,
+  useBalances,
+  useCentrifugeTransaction,
+  wrapProxyCallsForAccount,
+} from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
@@ -42,6 +47,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         options
       ) => {
         const [quantity, interest, amountAdditional, price] = args
+        if (!account) throw new Error('No borrower')
         let repayTx
         if (destination === 'reserve') {
           repayTx = cent.pools.repayExternalLoanPartially(
@@ -66,10 +72,11 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
+            let tx = wrapProxyCallsForAccount(api, repayTx, account, 'Borrow')
             if (batch.length) {
-              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch]), options)
+              tx = api.tx.utility.batchAll([tx, ...batch])
             }
-            return cent.wrapSignAndSend(api, repayTx, options)
+            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
           })
         )
       },

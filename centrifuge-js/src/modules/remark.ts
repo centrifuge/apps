@@ -1,6 +1,20 @@
+import { SubmittableExtrinsic } from '@polkadot/api/types'
+import { ISubmittableResult } from '@polkadot/types/types'
 import { of, switchMap } from 'rxjs'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
+
+type IpfsHashRemark = {
+  IpfsHash: string // hex
+}
+
+type NamedRemark = {
+  Named: string // hex
+}
+
+type LoanRemark = { Loan: [poolId: string, loanId: string] }
+
+type Remark = IpfsHashRemark | NamedRemark | LoanRemark
 
 export function getRemarkModule(inst: CentrifugeBase) {
   function remarkWithEvent(args: [message: string], options?: TransactionOptions) {
@@ -36,8 +50,22 @@ export function getRemarkModule(inst: CentrifugeBase) {
     )
   }
 
+  function remark(
+    args: [remark: [Remark], transaction: SubmittableExtrinsic<'rxjs', ISubmittableResult>],
+    options?: TransactionOptions
+  ) {
+    const [remark, tx] = args
+    const $api = inst.getApi()
+    return $api.pipe(
+      switchMap((api) => {
+        return inst.wrapSignAndSend(api, api.tx.remarks.remark(remark, tx), options)
+      })
+    )
+  }
+
   return {
     remarkWithEvent,
     validateRemark,
+    remark,
   }
 }
