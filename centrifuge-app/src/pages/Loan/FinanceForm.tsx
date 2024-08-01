@@ -192,7 +192,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Principal"
+                    label={isCashLoan(loan) ? 'Amount' : 'Principal'}
                     currency={pool?.currency.symbol}
                     onChange={(value) => form.setFieldValue('principal', value)}
                     onSetMax={
@@ -218,7 +218,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                 }}
               </Field>
             )}
-            {source === 'reserve' && !isCashLoan(loan) && withdraw.render()}
+            {source === 'reserve' && withdraw.render()}
             <Box bg="statusDefaultBg" p={1}>
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
