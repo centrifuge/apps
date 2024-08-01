@@ -1,5 +1,10 @@
 import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeApi, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import {
+  useBalances,
+  useCentrifugeApi,
+  useCentrifugeTransaction,
+  wrapProxyCallsForAccount,
+} from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -71,6 +76,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
     (cent) =>
       (args: [principal: CurrencyBalance, interest: CurrencyBalance, amountAdditional: CurrencyBalance], options) => {
         const [principal, interest, amountAdditional] = args
+        if (!account) throw new Error('No borrower')
         let repayTx
         if (destination === 'reserve') {
           repayTx = cent.pools.repayLoanPartially([pool.id, loan.id, principal, interest, amountAdditional], {
@@ -92,10 +98,11 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
+            let tx = wrapProxyCallsForAccount(api, api.tx.utility.batchAll([repayTx, ...batch]), account, 'Borrow')
             if (batch.length) {
-              return cent.wrapSignAndSend(api, api.tx.utility.batchAll([repayTx, ...batch]), options)
+              return cent.wrapSignAndSend(api, tx, options)
             }
-            return cent.wrapSignAndSend(api, repayTx, options)
+            return cent.wrapSignAndSend(api, tx, options)
           })
         )
       },

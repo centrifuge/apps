@@ -1,16 +1,11 @@
 import { CurrencyBalance, Pool, addressToHex } from '@centrifuge/centrifuge-js'
-import {
-  CombinedSubstrateAccount,
-  formatBalance,
-  useCentrifugeApi,
-  wrapProxyCallsForAccount,
-} from '@centrifuge/centrifuge-react'
+import { CombinedSubstrateAccount, formatBalance, useCentrifugeApi } from '@centrifuge/centrifuge-react'
 import { Box, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
 import { combineLatest, of } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
-import { useBorrower, useSuitableAccounts } from '../../utils/usePermissions'
+import { useBorrower } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { FinanceValues } from './ExternalFinanceForm'
 import { RepayValues } from './RepayForm'
@@ -161,7 +156,6 @@ function ChargePoolFeeSummary({ poolId }: { poolId: string }) {
 
 export function useChargePoolFees(poolId: string, loanId: string) {
   const pool = usePool(poolId)
-  const [account] = useSuitableAccounts({ poolId: poolId })
   const borrower = useBorrower(poolId, loanId)
   const api = useCentrifugeApi()
   return {
@@ -175,19 +169,9 @@ export function useChargePoolFees(poolId: string, loanId: string) {
       const fees = values.fees.flatMap((fee) => {
         if (!fee.amount) throw new Error('Charge amount not provided')
         if (!borrower) throw new Error('No borrower')
-        if (!account) throw new Error('No account')
         const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
         let feeTx = api.tx.poolFees.chargeFee(fee.id, feeAmount.toString())
-        return [
-          of(
-            wrapProxyCallsForAccount(
-              api,
-              api.tx.remarks.remark([{ Loan: [poolId, loanId] }], feeTx),
-              borrower,
-              'Borrow'
-            )
-          ),
-        ]
+        return [of(api.tx.remarks.remark([{ Loan: [poolId, loanId] }], feeTx))]
       })
       return combineLatest(fees)
     },
