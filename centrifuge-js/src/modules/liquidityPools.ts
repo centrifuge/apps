@@ -28,6 +28,29 @@ export type Permit = {
 const toCurrencyBalance = (decimals: number) => (val: BigNumber) => new CurrencyBalance(val.toString(), decimals)
 const toTokenBalance = (decimals: number) => (val: BigNumber) => new TokenBalance(val.toString(), decimals)
 
+type LPConfig = {
+  centrifugeRouter: string
+}
+const config: Record<number, LPConfig> = {
+  // Testnet
+  11155111: {
+    centrifugeRouter: '0xe10D49F8e75DFd329E470585E81eC79C13e8B8a0',
+  },
+  // Mainnet
+  1: {
+    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+  },
+  42161: {
+    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+  },
+  8453: {
+    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+  },
+  42220: {
+    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+  },
+}
+
 export function getLiquidityPoolsModule(inst: Centrifuge) {
   function contract(contractAddress: string, abi: ContractInterface, options?: EvmQueryOptions) {
     const provider = inst.config.evmSigner ?? options?.rpcProvider
@@ -237,6 +260,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
             return {
               chainId,
               router,
+              centrifugeRouter: config[chainId]?.centrifugeRouter,
             }
           })
           .filter(Boolean)
@@ -536,11 +560,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           [],
         ],
       },
-      {
-        target: lp,
-        call: ['function maxDeposit(address) view returns (uint256)', user],
-        returns: [['maxDeposit', toCurrencyBalance(currency.currencyDecimals)]],
-      },
     ]
 
     const pool = await multicall<{
@@ -552,7 +571,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       maxWithdraw: CurrencyBalance
       pendingInvest: CurrencyBalance
       pendingRedeem: TokenBalance
-      maxDeposit: CurrencyBalance
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
