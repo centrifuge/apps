@@ -20,8 +20,8 @@ const valuationLabels = {
   oracle: 'Fungible asset - external pricing',
 }
 
-function getColumnConfig(poolCreditType: string, symbol: string) {
-  if (poolCreditType === 'privateCredit') {
+function getColumnConfig(isPrivate: boolean, symbol: string) {
+  if (isPrivate) {
     return [
       { header: 'Name', align: 'left', csvOnly: false, formatter: noop },
       {
@@ -177,7 +177,11 @@ export function AssetList({ pool }: { pool: Pool }) {
   const { symbol } = pool.currency
 
   const snapshots = useAllPoolAssetSnapshots(pool.id, startDate)
-  const columnConfig = useMemo(() => getColumnConfig(poolCreditType, symbol), [poolCreditType, symbol])
+  const isPrivate = useMemo(
+    () => poolCreditType === 'Private credit' || poolCreditType === 'privateCredit',
+    [poolCreditType]
+  )
+  const columnConfig = useMemo(() => getColumnConfig(isPrivate, symbol), [poolCreditType, symbol])
 
   const columns = useMemo(
     () =>
@@ -230,7 +234,7 @@ export function AssetList({ pool }: { pool: Pool }) {
         return dateB - dateA
       })
       .map((snapshot) => {
-        if (poolCreditType === 'Private credit') {
+        if (isPrivate) {
           return {
             name: '',
             value: [
@@ -265,14 +269,13 @@ export function AssetList({ pool }: { pool: Pool }) {
               snapshot?.actualMaturityDate,
               snapshot?.unrealizedProfitAtMarketPrice,
               snapshot?.sumRealizedProfitFifo,
-              snapshot?.assetId,
             ],
             heading: false,
             id: snapshot?.assetId,
           }
         }
       })
-  }, [snapshots, poolCreditType, symbol, loanStatus])
+  }, [snapshots, isPrivate, symbol, loanStatus])
 
   useEffect(() => {
     if (!snapshots?.length) {
