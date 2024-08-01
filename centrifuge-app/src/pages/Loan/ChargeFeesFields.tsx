@@ -1,4 +1,4 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool, addressToHex } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
   formatBalance,
@@ -10,7 +10,6 @@ import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
 import { combineLatest, of } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
-import { formatPercentage } from '../../utils/formatting'
 import { useBorrower, useSuitableAccounts } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
 import { FinanceValues } from './ExternalFinanceForm'
@@ -26,7 +25,15 @@ export const ChargeFeesFields = ({
   const form = useFormikContext<FinanceValues>()
   const { data: poolMetadata } = usePoolMetadata(pool)
   const poolFees = usePoolFees(pool.id)
-  const chargableFees = React.useMemo(() => poolFees?.filter((fee) => fee.type !== 'fixed'), [poolFees, borrower])
+  // fees can only be charged by the destination address
+  // fees destination must be set to the AO Proxy address
+  const chargableFees = React.useMemo(
+    () =>
+      poolFees?.filter(
+        (fee) => fee.type !== 'fixed' && borrower && addressToHex(fee.destination) === borrower.actingAddress
+      ),
+    [poolFees, borrower]
+  )
 
   const getOptions = React.useCallback(() => {
     const chargableOptions = (chargableFees || []).map((f) => {
@@ -76,9 +83,6 @@ export const ChargeFeesFields = ({
                               if (!value) {
                                 error = 'Enter an amount or remove the fee'
                               }
-                              if (maxCharge?.greaterThan(maxAvailable || 0)) {
-                                error = `Amount cannot exceed available`
-                              }
                               return error
                             }}
                           >
@@ -91,12 +95,6 @@ export const ChargeFeesFields = ({
                                   currency={pool.currency.symbol}
                                   placeholder="0"
                                   onChange={(value) => form.setFieldValue(`fees.${index}.amount`, value)}
-                                  secondaryLabel={`${formatBalance(
-                                    maxAvailable || 0,
-                                    pool.currency.symbol
-                                  )} (${formatPercentage(
-                                    poolFee?.amounts.percentOfNav.toPercent() || 0
-                                  )} NAV) available`}
                                 />
                               )
                             }}
@@ -163,7 +161,6 @@ function ChargePoolFeeSummary({ poolId }: { poolId: string }) {
 
 export function useChargePoolFees(poolId: string, loanId: string) {
   const pool = usePool(poolId)
-  const poolFees = usePoolFees(poolId)
   const [account] = useSuitableAccounts({ poolId: poolId })
   const borrower = useBorrower(poolId, loanId)
   const api = useCentrifugeApi()
@@ -180,14 +177,7 @@ export function useChargePoolFees(poolId: string, loanId: string) {
         if (!borrower) throw new Error('No borrower')
         if (!account) throw new Error('No account')
         const feeAmount = CurrencyBalance.fromFloat(fee.amount, pool.currency.decimals)
-        const pendingFee = poolFees?.find((f) => f.id.toString() === fee.id)?.amounts.pending
         let feeTx = api.tx.poolFees.chargeFee(fee.id, feeAmount.toString())
-        if (pendingFee?.gtn(0)) {
-          feeTx = api.tx.utility.batchAll([
-            api.tx.poolFees.unchargeFee(fee.id, pendingFee.toString()),
-            api.tx.poolFees.chargeFee(fee.id, feeAmount.toString()),
-          ])
-        }
         return [
           of(
             wrapProxyCallsForAccount(
