@@ -1,6 +1,7 @@
 import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { roundDown, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -51,18 +52,16 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
           )
         } else {
           const repay = { quantity, price, interest, unscheduled: amountAdditional }
+          const principal = new CurrencyBalance(
+            price.mul(new BN(quantity.toDecimal().toString())),
+            pool.currency.decimals
+          )
           let borrow = {
             amount: new CurrencyBalance(
-              quantity
-                .toDecimal()
-                .mul(price.toDecimal())
-                .add(interest.toDecimal())
-                .add(amountAdditional.toDecimal())
-                .toString(),
+              principal.add(interest).add(amountAdditional).toString(),
               pool.currency.decimals
             ),
           }
-          // TODO: Fix TransferDebtAmountMismatched
           repayTx = cent.pools.transferLoanDebt([pool.id, loan.id, destinationLoan.id, repay, borrow], { batch: true })
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(

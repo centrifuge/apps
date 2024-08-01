@@ -51,7 +51,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
         financeTx = cent.pools.financeExternalLoan([poolId, loanId, quantity, price], { batch: true })
       } else {
         const principal = new CurrencyBalance(
-          price.toDecimal().mul(quantity.toDecimal()).toString(),
+          price.mul(new BN(quantity.toDecimal().toString())),
           pool.currency.decimals
         )
         const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
@@ -61,7 +61,6 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
           interest: new BN(0),
           unscheduled: new BN(0),
         }
-        // TODO: Fix TransferDebtAmountMismatched
         financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
       }
       return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
@@ -90,7 +89,8 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
       fees: [],
     },
     onSubmit: (values, actions) => {
-      const price = CurrencyBalance.fromFloat(values.price, pool.currency.decimals)
+      console.log('🚀 ~ values:', values.price)
+      const price = CurrencyBalance.fromFloat(values.price.toString(), pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity)
       doFinanceTransaction([loan.poolId, loan.id, quantity, price], {
         account,
