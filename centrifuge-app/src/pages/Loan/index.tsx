@@ -15,7 +15,7 @@ import {
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import styled, { useTheme } from 'styled-components'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
@@ -111,6 +111,7 @@ function FinanceButton({ loan }: { loan: LoanType }) {
 
 function Loan() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
   if (!poolId || !loanId) throw new Error('Loan no found')
   const isTinlakePool = poolId?.startsWith('0x')
@@ -150,7 +151,7 @@ function Loan() {
   return (
     <FullHeightStack>
       <Box mt={2} ml={2}>
-        <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
+        <RouterLinkButton goBack small icon={IconChevronLeft} variant="tertiary">
           {poolMetadata?.pool?.name ?? 'Pool assets'}
         </RouterLinkButton>
       </Box>
