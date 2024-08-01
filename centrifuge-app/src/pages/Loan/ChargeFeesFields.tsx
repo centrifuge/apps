@@ -1,4 +1,4 @@
-import { CurrencyBalance, Pool, addressToHex } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import {
   CombinedSubstrateAccount,
   formatBalance,
@@ -26,15 +26,7 @@ export const ChargeFeesFields = ({
   const form = useFormikContext<FinanceValues>()
   const { data: poolMetadata } = usePoolMetadata(pool)
   const poolFees = usePoolFees(pool.id)
-  // fees can only be charged by the destination address
-  // fees destination must be set to the AO Proxy address
-  const chargableFees = React.useMemo(
-    () =>
-      poolFees?.filter(
-        (fee) => fee.type !== 'fixed' && borrower && addressToHex(fee.destination) === borrower.actingAddress
-      ),
-    [poolFees, borrower]
-  )
+  const chargableFees = React.useMemo(() => poolFees?.filter((fee) => fee.type !== 'fixed'), [poolFees, borrower])
 
   const getOptions = React.useCallback(() => {
     const chargableOptions = (chargableFees || []).map((f) => {
@@ -72,6 +64,7 @@ export const ChargeFeesFields = ({
                             onChange={(e) => {
                               form.setFieldValue(`fees.${index}.id`, e.target.value)
                             }}
+                            value={form.values.fees[index].id}
                           />
                         </Box>
                         <Box flex={1}>
