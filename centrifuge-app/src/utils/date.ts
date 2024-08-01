@@ -3,6 +3,7 @@ export function formatDate(timestamp: number | string | Date, options?: Intl.Dat
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: 'UTC',
     ...options,
   })
 }
