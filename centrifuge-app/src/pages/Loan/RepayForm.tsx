@@ -98,10 +98,11 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan; destinatio
         }
         return combineLatest([cent.getApi(), repayTx, poolFees.getBatch(repayForm)]).pipe(
           switchMap(([api, repayTx, batch]) => {
-            let tx = wrapProxyCallsForAccount(api, api.tx.utility.batchAll([repayTx, ...batch]), account, 'Borrow')
             if (batch.length) {
+              const tx = wrapProxyCallsForAccount(api, api.tx.utility.batchAll([repayTx, ...batch]), account, 'Borrow')
               return cent.wrapSignAndSend(api, tx, options)
             }
+            const tx = wrapProxyCallsForAccount(api, repayTx, account, 'Borrow')
             return cent.wrapSignAndSend(api, tx, options)
           })
         )
