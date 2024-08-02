@@ -279,7 +279,8 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                   !financeForm.values.principal ||
                   !withdraw.isValid ||
                   !poolFees.isValid(financeForm) ||
-                  !financeForm.isValid
+                  !financeForm.isValid ||
+                  maxAvailable.eq(0)
                 }
               >
                 {isCashLoan(loan) ? 'Deposit' : 'Finance'}

@@ -206,11 +206,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                 type="submit"
                 loading={isFinanceLoading}
                 disabled={
-                  !financeForm.values.price ||
-                  !financeForm.values.quantity ||
-                  !withdraw.isValid ||
-                  !poolFees.isValid(financeForm) ||
-                  !financeForm.isValid
+                  !withdraw.isValid || !poolFees.isValid(financeForm) || !financeForm.isValid || maxAvailable.eq(0)
                 }
               >
                 Purchase

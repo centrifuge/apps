@@ -21,7 +21,7 @@ export function SourceSelect({ loan, value, onChange, action }: SourceSelectProp
   const loans = unfilteredLoans?.filter(
     (l) =>
       l.id !== loan.id &&
-      l.status === 'Active' &&
+      l.status !== 'Closed' &&
       (l as ActiveLoan).borrower === account?.actingAddress &&
       'valuationMethod' in l.pricing &&
       l.pricing.valuationMethod === 'cash'
