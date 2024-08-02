@@ -40,7 +40,7 @@ export const ChargeFeesFields = ({
     const chargableOptions = (chargableFees || []).map((f) => {
       const feeName = poolMetadata?.pool?.poolFees?.find((feeMeta) => feeMeta.id === f.id)?.name || 'Unknown Fee'
       return {
-        label: `${feeName} - ${f.amounts.percentOfNav.toPercent().toString()}%`,
+        label: `${feeName}`,
         value: f.id.toString(),
       }
     })
@@ -58,11 +58,6 @@ export const ChargeFeesFields = ({
               <Stack gap={2}>
                 <Stack gap={2}>
                   {form.values.fees.map((fee, index) => {
-                    const maxCharge = form.values.fees
-                      .filter((fee) => fee.id === fee.id)
-                      .reduce((acc, fee) => acc.add(Dec(fee.amount || 0)), Dec(0))
-                    const poolFee = poolFees?.find((poolFee) => poolFee.id.toString() === fee.id)
-                    const maxAvailable = poolFee?.amounts.percentOfNav.toPercent().mul(pool.nav.aum.toDecimal())
                     return (
                       <Shelf key={`${fee.id}-${index}`} gap={1} alignItems="flex-start">
                         <Box flex={1}>
