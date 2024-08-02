@@ -1,7 +1,9 @@
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
+import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
+import { ISubmittableResult } from '@polkadot/types/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
@@ -4116,14 +4118,17 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
+        let submittable: SubmittableExtrinsic<'rxjs', ISubmittableResult>
         if (pendingFee?.gtn(0)) {
-          const submittable = api.tx.utility.batchAll([
-            api.tx.poolFees.unchargeFee(feeId, pendingFee.toString()),
-            api.tx.poolFees.chargeFee(feeId, amount.toString()),
-          ])
-          return inst.wrapSignAndSend(api, submittable, options)
+          const diff = amount.sub(pendingFee)
+          if (diff.ltn(0)) {
+            submittable = api.tx.poolFees.unchargeFee(feeId, diff.abs().toString())
+          } else {
+            submittable = api.tx.poolFees.chargeFee(feeId, diff.toString())
+          }
+        } else {
+          submittable = api.tx.poolFees.chargeFee(feeId, amount.toString())
         }
-        const submittable = api.tx.poolFees.chargeFee(feeId, amount.toString())
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
