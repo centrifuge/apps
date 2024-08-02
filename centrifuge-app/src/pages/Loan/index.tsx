@@ -89,7 +89,9 @@ function ActionButtons({ loan }: { loan: LoanType }) {
       </Drawer>
       <Drawer isOpen={repayShown} onClose={() => setRepayShown(false)}>
         <LoadBoundary>
-          <Stack gap={2}>{loan.status === 'Active' && <RepayForm loan={loan} />}</Stack>
+          <Stack gap={2}>
+            <RepayForm loan={loan} />
+          </Stack>
         </LoadBoundary>
       </Drawer>
 
@@ -97,11 +99,9 @@ function ActionButtons({ loan }: { loan: LoanType }) {
         <Button onClick={() => setFinanceShown(true)} small>
           {isCashLoan(loan) ? 'Deposit' : isExternalLoan(loan) ? 'Purchase' : 'Finance'}
         </Button>
-        {loan.status === 'Active' && (
-          <Button onClick={() => setRepayShown(true)} small>
-            {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
-          </Button>
-        )}
+        <Button onClick={() => setRepayShown(true)} small>
+          {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
+        </Button>
       </Shelf>
     </>
   )

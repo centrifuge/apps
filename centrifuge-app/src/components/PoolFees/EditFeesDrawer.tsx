@@ -322,6 +322,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                 receivingAddress: '',
                                 feeId: undefined,
                                 type: 'chargedUpTo',
+                                category: feeCategories[0],
                               })
                             }
                           >
