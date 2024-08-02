@@ -548,7 +548,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           user,
         ],
         returns: [
-          ['maxMint', currencyBalanceTransform],
+          ['maxMint', tokenBalanceTransform],
           ['maxWithdraw', currencyBalanceTransform],
           [],
           [],
@@ -560,6 +560,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           [],
         ],
       },
+      {
+        target: lp.lpAddress,
+        call: ['function maxDeposit(address) view returns (uint256)', user],
+        returns: [['maxDeposit', tokenBalanceTransform]],
+      },
+      {
+        target: lp.lpAddress,
+        call: ['function maxRedeem(address) view returns (uint256)', user],
+        returns: [['maxRedeem', currencyBalanceTransform]],
+      },
     ]
 
     const pool = await multicall<{
@@ -568,7 +578,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       currencyBalance: CurrencyBalance
       lpCurrencyAllowance: CurrencyBalance
       maxMint: TokenBalance
-      maxWithdraw: CurrencyBalance
+      maxDeposit: CurrencyBalance
+      maxWithdraw: TokenBalance
+      maxRedeem: CurrencyBalance
       pendingInvest: CurrencyBalance
       pendingRedeem: TokenBalance
     }>(calls, {

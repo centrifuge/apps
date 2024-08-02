@@ -42,6 +42,8 @@ export type InvestRedeemState = {
     redeemToken: Decimal
     payoutCurrencyAmount: Decimal
     payoutTokenAmount: Decimal
+    investClaimableCurrencyAmount: Decimal
+    redeemClaimableTokenAmount: Decimal
     remainingInvestCurrency: Decimal
     remainingRedeemToken: Decimal
   } | null

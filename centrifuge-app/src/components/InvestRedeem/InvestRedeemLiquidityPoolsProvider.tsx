@@ -177,6 +177,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
           redeemToken: lpInvest.pendingRedeem.toDecimal(),
           payoutCurrencyAmount: lpInvest.maxWithdraw.toDecimal(),
           payoutTokenAmount: lpInvest.maxMint.toDecimal(),
+          investClaimableCurrencyAmount: lpInvest.maxDeposit.toDecimal(),
+          redeemClaimableTokenAmount: lpInvest.maxWithdraw.toDecimal(),
           remainingInvestCurrency: lpInvest.pendingInvest.toDecimal(),
           remainingRedeemToken: lpInvest.pendingRedeem.toDecimal(),
         }
