@@ -9,7 +9,6 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
-  Thumbnail,
   usePagination,
 } from '@centrifuge/fabric'
 import get from 'lodash/get'
@@ -104,7 +103,7 @@ export function LoanList({ loans }: Props) {
       header: <SortableTableHeader label="Asset" />,
       cell: (l: Row) => <AssetName loan={l} />,
       sortKey: 'idSortKey',
-      width: 'minmax(150px, 1fr)',
+      width: 'minmax(300px, 1fr)',
     },
     isTinlakePool && {
       align: 'left',
@@ -153,6 +152,7 @@ export function LoanList({ loans }: Props) {
         />
       ),
       cell: (l: Row) => <LoanLabel loan={l} />,
+      width: '100px',
     },
     {
       header: '',
@@ -228,11 +228,11 @@ export function LoanList({ loans }: Props) {
             <DataTable
               data={rows}
               columns={columns}
-              pinnedData={pinnedData}
-              defaultSortOrder="desc"
+              defaultSortKey="maturityDate"
               onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
               pageSize={20}
               page={pagination.page}
+              pinnedData={pinnedData}
             />
           </Box>
         </LoadBoundary>
@@ -307,7 +307,6 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
 
   return (
     <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
-      <Thumbnail type="asset" label={loan.id} />
       <TextWithPlaceholder
         isLoading={isLoading}
         width={12}
@@ -344,7 +343,7 @@ function Amount({ loan }: { loan: Row }) {
         return formatBalance(pool.reserve.total, pool?.currency.symbol)
 
       default:
-        return ''
+        return `0 ${pool?.currency.symbol}`
     }
   }
 
