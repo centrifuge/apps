@@ -16,6 +16,7 @@ export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   label?: string | React.ReactElement
   placeholder?: string
   errorMessage?: string
+  small?: boolean
 }
 
 const StyledSelect = styled.select`
@@ -40,20 +41,28 @@ const StyledSelect = styled.select`
   }
 `
 
-const Chevron = styled(IconChevronDown)`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  margin-top: auto;
-  margin-bottom: auto;
-  pointer-events: none;
-`
-
-export function SelectInner({ options, placeholder, disabled, ...rest }: Omit<SelectProps, 'label' | 'errorMessage'>) {
+export function SelectInner({
+  options,
+  placeholder,
+  disabled,
+  small,
+  ...rest
+}: Omit<SelectProps, 'label' | 'errorMessage'>) {
   return (
     <Flex position="relative" width="100%">
-      <Chevron color={disabled ? 'textSecondary' : 'textPrimary'} />
+      <IconChevronDown
+        color={disabled ? 'textSecondary' : 'textPrimary'}
+        size={small ? 'iconSmall' : 'iconMedium'}
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          marginTop: 'auto',
+          marginBottom: 'auto',
+          pointerEvents: 'none',
+        }}
+      />
       <StyledSelect disabled={disabled} {...rest}>
         {placeholder && (
           <option value="" disabled>

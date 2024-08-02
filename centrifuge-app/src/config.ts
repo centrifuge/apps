@@ -151,11 +151,13 @@ export const ethConfig = {
 
 export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : CENTRIFUGE
 
+const assetHubChainId = import.meta.env.REACT_APP_IS_DEMO ? 1001 : 1000
+
 export const parachainNames: Record<number, string> = {
-  1000: 'Asset Hub',
+  [assetHubChainId]: 'Asset Hub',
 }
 export const parachainIcons: Record<number, string> = {
-  1000: assetHubLogo,
+  [assetHubChainId]: assetHubLogo,
 }
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
