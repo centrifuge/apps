@@ -116,7 +116,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
 
   return (
     <>
-      {maxAvailable.greaterThan(0) && !maturityDatePassed && (
+      {!maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Field name="quantity" validate={combine(required(), positiveNumber())}>

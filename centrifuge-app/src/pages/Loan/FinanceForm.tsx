@@ -174,7 +174,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
   return (
     <>
-      {maxAvailable.greaterThan(0) && !maturityDatePassed && (
+      {!maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Field
