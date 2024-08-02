@@ -125,7 +125,7 @@ export type SubqueryAssetTransaction = {
     name: string
     type: AssetType
     sumRealizedProfitFifo: string
-    unrealizedProfitByPeriod: string
+    unrealizedProfitAtMarketPrice: string
   }
   fromAsset?: {
     id: string

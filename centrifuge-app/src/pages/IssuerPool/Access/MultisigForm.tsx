@@ -11,9 +11,8 @@ import { ChangeThreshold } from './ChangeTreshold'
 import type { PoolManagersInput } from './PoolManagers'
 
 type Row = { address: string; index: number }
-type Props = { isEditing?: boolean; isLoading?: boolean; canRemoveFirst?: boolean }
-
-export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoading }: Props) {
+type Props = { isEditing?: boolean; isLoading?: boolean; canRemoveFirst?: boolean; minThreshold?: number }
+export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoading, minThreshold = 1 }: Props) {
   const chainId = useCentEvmChainId()
   const form = useFormikContext<PoolManagersInput>()
   const { adminMultisig } = form.values
@@ -67,8 +66,8 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
               <AddAddressInput
                 existingAddresses={adminMultisig.signers}
                 onAdd={(address) => {
-                  if (adminMultisig.signers.length === 1) {
-                    form.setFieldValue('adminMultisig.threshold', 2, false)
+                  if (adminMultisig.signers.length < minThreshold) {
+                    form.setFieldValue('adminMultisig.threshold', minThreshold, false)
                   }
                   fldArr.push(isEvmAddress(address) ? evmToSubstrateAddress(address, chainId ?? 0) : address)
                 }}
@@ -77,8 +76,8 @@ export function MultisigForm({ isEditing = true, canRemoveFirst = true, isLoadin
           </Stack>
           <Stack gap={2}>
             <ChangeThreshold
-              secondaryText=" For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
-        requires multiple signers. Any such change will require the confirmation of:"
+              secondaryText="For additional security, changing the pool configuration (e.g. the tranche structure or write-off policy)
+        can require multiple signers. Any such change will require the confirmation of:"
               primaryText="Configuration change threshold"
               isEditing={isEditing}
               fieldName="adminMultisig.threshold"

@@ -63,6 +63,7 @@ export function CardPortfolioValue({
         p={2}
         style={{
           boxShadow: `0px 3px 2px -2px ${colors.borderPrimary}`,
+          height: 450,
         }}
         background={colors.backgroundPage}
       >
@@ -113,7 +114,13 @@ export function CardPortfolioValue({
 
             <Box width="100%" height="300px">
               <LoadBoundary>
-                <PortfolioValue rangeValue={range.value} address={centAddress} />
+                {transactions?.investorTransactions.length ? (
+                  <PortfolioValue rangeValue={range.value} address={centAddress} />
+                ) : (
+                  <Box width="100%" height="100%" display="flex" alignItems="center" justifyContent="center">
+                    <Text>No data available</Text>
+                  </Box>
+                )}
               </LoadBoundary>
             </Box>
           </>
