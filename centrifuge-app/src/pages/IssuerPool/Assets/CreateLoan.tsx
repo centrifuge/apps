@@ -393,7 +393,13 @@ function IssuerCreateLoan() {
                   <Select
                     {...field}
                     label="Asset type"
-                    onChange={(event) => form.setFieldValue('pricing.valuationMethod', event.target.value, false)}
+                    onChange={(event) => {
+                      const val = event.target.value
+                      form.setFieldValue('pricing.valuationMethod', val, false)
+                      if (val === 'cash') {
+                        form.setFieldValue('pricing.maturity', 'none')
+                      }
+                    }}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     options={[
                       { value: 'discountedCashFlow', label: 'Non-fungible asset - DCF' },
@@ -407,9 +413,11 @@ function IssuerCreateLoan() {
               </Field>
             </Grid>
           </PageSection>
-          <PageSection title="Pricing">
-            <PricingInput poolId={pid} />
-          </PageSection>
+          {form.values.pricing.valuationMethod === 'cash' ? null : (
+            <PageSection title="Pricing">
+              <PricingInput poolId={pid} />
+            </PageSection>
+          )}
           {form.values.pricing.valuationMethod !== 'cash' &&
             templateMetadata?.sections?.map((section) => (
               <PageSection
