@@ -146,13 +146,11 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
   const { maxAvailable, maxPrincipal, maxInterest, totalRepay } = React.useMemo(() => {
     const { interest, principal, amountAdditional } = repayForm.values
     const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
-    const destinationOutstandingDebt =
-      destinationLoan && 'outstandingDebt' in destinationLoan ? destinationLoan.outstandingDebt.toDecimal() : Dec(0)
     let maxAvailable
     let maxPrincipal
     let maxInterest
     if (destination === 'reserve') {
-      maxAvailable = min(balance, loan?.outstandingDebt.toDecimal() || Dec(0))
+      maxAvailable = min(balance, loan.outstandingDebt.toDecimal())
       maxPrincipal = min(balance, loan.outstandingDebt.toDecimal())
       maxInterest = min(balance, outstandingInterest)
     } else if (destination === 'other') {
@@ -160,8 +158,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       maxPrincipal = min(balance, loan.outstandingDebt.toDecimal())
       maxInterest = Dec(0)
     } else {
-      maxAvailable = destinationOutstandingDebt
-      maxPrincipal = destinationOutstandingDebt
+      maxAvailable = loan.outstandingDebt.toDecimal()
+      maxPrincipal = loan.outstandingDebt.toDecimal()
       maxInterest = outstandingInterest
     }
     const totalRepay = Dec(principal || 0)
@@ -173,7 +171,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       maxInterest: maxDec(min(maxInterest, maxAvailable.sub(principal || 0).sub(amountAdditional || 0)), Dec(0)),
       totalRepay,
     }
-  }, [loan, destinationLoan, balance, repayForm.values])
+  }, [loan, balance, repayForm.values])
 
   return (
     <>
