@@ -243,7 +243,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               <Box bg="statusWarningBg">
                 <InlineFeedback status="warning">
                   <Text color="statusWarning">
-                    The pool&apos;s available reserve ({formatBalance(poolReserve, displayCurrency)}) is smaller than
+                    The pool&apos;s available reserve ({formatBalance(poolReserve, displayCurrency, 2)}) is smaller than
                     the available financing
                   </Text>
                 </InlineFeedback>
@@ -267,7 +267,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                 <InlineFeedback status="critical">
                   <Text color="statusCritical">
                     Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
-                    principal ({formatBalance(totalFinance, displayCurrency)}).
+                    principal ({formatBalance(totalFinance, displayCurrency, 2)}).
                   </Text>
                 </InlineFeedback>
               </Box>

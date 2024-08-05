@@ -197,7 +197,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                 <InlineFeedback status="critical">
                   <Text color="statusCritical">
                     Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
-                    principal ({formatBalance(totalFinance, displayCurrency)}).
+                    principal ({formatBalance(totalFinance, displayCurrency, 2)}).
                   </Text>
                 </InlineFeedback>
               </Box>

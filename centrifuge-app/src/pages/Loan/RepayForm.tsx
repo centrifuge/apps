@@ -291,7 +291,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               <InlineFeedback status="warning">
                 <Text color="statusWarning">
                   Your wallet balance ({formatBalance(roundDown(balance), displayCurrency, 2)}) is smaller than the
-                  outstanding balance ({formatBalance(maxAvailable, displayCurrency)}).
+                  outstanding balance ({formatBalance(maxAvailable, displayCurrency, 2)}).
                 </Text>
               </InlineFeedback>
             </Box>
@@ -301,7 +301,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               <InlineFeedback status="critical">
                 <Text color="statusCritical">
                   Available debt ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total amount (
-                  {formatBalance(totalRepay, displayCurrency)}).
+                  {formatBalance(totalRepay, displayCurrency, 2)}).
                 </Text>
               </InlineFeedback>
             </Box>

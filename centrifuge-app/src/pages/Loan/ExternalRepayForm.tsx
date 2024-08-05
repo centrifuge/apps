@@ -262,7 +262,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             <InlineFeedback status="warning">
               <Text color="statusWarning">
                 Your wallet balance ({formatBalance(roundDown(balance), displayCurrency, 2)}) is smaller than the
-                outstanding balance ({formatBalance(debt, displayCurrency)}).
+                outstanding balance ({formatBalance(debt, displayCurrency, 2)}).
               </Text>
             </InlineFeedback>
           </Box>
@@ -272,7 +272,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             <InlineFeedback status="critical">
               <Text color="statusCritical">
                 The amount ({formatBalance(roundDown(totalRepay), displayCurrency, 2)}) is greater than the available
-                debt ({formatBalance(maxAvailable, displayCurrency)}).
+                debt ({formatBalance(maxAvailable, displayCurrency, 2)}).
               </Text>
             </InlineFeedback>
           </Box>
