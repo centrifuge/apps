@@ -25,10 +25,12 @@ import {
   Button,
   Card,
   CurrencyInput,
+  Flex,
   Grid,
   GridRow,
   InlineFeedback,
   Select,
+  SelectInner,
   Shelf,
   Stack,
   Text,
@@ -51,7 +53,7 @@ import { isExternalLoan } from './utils'
 
 const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000000000000000000000000'
 
-type Key = `${'parachain' | 'evm'}:${number}`
+type Key = `${'parachain' | 'evm'}:${number}` | 'centrifuge'
 type FinanceValues = {
   amount: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
@@ -226,18 +228,19 @@ function WithdrawSelect({ withdrawAddresses }: { withdrawAddresses: WithdrawAddr
 }
 
 function Mux({
-  withdrawAddressesByDomain,
   withdrawAmounts,
+  selectedAddressIndexByCurrency,
+  setSelectedAddressIndex,
 }: {
   amount: Decimal
   total: Decimal
-  withdrawAddressesByDomain: Record<string, WithdrawAddress[]>
   withdrawAmounts: WithdrawBucket[]
+  selectedAddressIndexByCurrency: Record<string, number>
+  setSelectedAddressIndex: (currency: string, index: number) => void
 }) {
   const utils = useCentrifugeUtils()
   const getName = useGetNetworkName()
   const getIcon = useGetNetworkIcon()
-
   return (
     <Stack gap={1}>
       <Text variant="body2">Transactions per network</Text>
@@ -252,32 +255,51 @@ function Mux({
             No suitable withdraw addresses
           </Text>
         )}
-        {withdrawAmounts.map(({ currency, amount, locationKey }) => {
-          const address = withdrawAddressesByDomain[locationKey][0]
+        {withdrawAmounts.map(({ currency, amount, addresses, currencyKey }) => {
+          const index = selectedAddressIndexByCurrency[currencyKey] ?? 0
+          const address = addresses.at(index >>> 0) // undefined when index is -1
           return (
             <GridRow>
               <Text variant="body3">{formatBalance(amount, currency.symbol)}</Text>
-              <Text variant="body3">{truncateAddress(utils.formatAddress(address.address))}</Text>
               <Text variant="body3">
-                <Shelf gap="4px">
-                  <Box
-                    as="img"
-                    src={
-                      typeof address.location !== 'string' && 'parachain' in address.location
-                        ? parachainIcons[address.location.parachain]
-                        : getIcon(typeof address.location === 'string' ? address.location : address.location.evm)
-                    }
-                    alt=""
-                    width="iconSmall"
-                    height="iconSmall"
-                    style={{ objectFit: 'contain' }}
+                <Flex pr={1}>
+                  <SelectInner
+                    options={[
+                      { label: 'Ignore', value: '-1' },
+                      ...addresses.map((addr, index) => ({
+                        label: truncateAddress(utils.formatAddress(addr.address)),
+                        value: index.toString(),
+                      })),
+                    ]}
+                    value={index.toString()}
+                    onChange={(event) => setSelectedAddressIndex(currencyKey, parseInt(event.target.value))}
+                    small
                   />
-                  {typeof address.location === 'string'
-                    ? getName(address.location as any)
-                    : 'parachain' in address.location
-                    ? parachainNames[address.location.parachain]
-                    : getName(address.location.evm)}
-                </Shelf>
+                </Flex>
+              </Text>
+              <Text variant="body3">
+                {address && (
+                  <Shelf gap="4px">
+                    <Box
+                      as="img"
+                      src={
+                        typeof address.location !== 'string' && 'parachain' in address.location
+                          ? parachainIcons[address.location.parachain]
+                          : getIcon(typeof address.location === 'string' ? address.location : address.location.evm)
+                      }
+                      alt=""
+                      width="iconSmall"
+                      height="iconSmall"
+                      style={{ objectFit: 'contain' }}
+                      bleedY="4px"
+                    />
+                    {typeof address.location === 'string'
+                      ? getName(address.location as any)
+                      : 'parachain' in address.location
+                      ? parachainNames[address.location.parachain]
+                      : getName(address.location.evm)}
+                  </Shelf>
+                )}
               </Text>
             </GridRow>
           )
@@ -294,11 +316,12 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   const muxBalances = useBalances(TOKENMUX_PALLET_ACCOUNTID)
   const cent: Centrifuge = useCentrifuge()
   const api = useCentrifugeApi()
+  const [selectedAddressIndexByCurrency, setSelectedAddressIndexByCurrency] = React.useState<Record<string, number>>({})
 
   const ao = access.assetOriginators.find((a) => a.address === borrower.actingAddress)
   const withdrawAddresses = ao?.transferAllowlist ?? []
 
-  if (!isLocalAsset) {
+  if (!isLocalAsset || !withdrawAddresses.length) {
     if (!withdrawAddresses.length)
       return {
         render: () => null,
@@ -330,25 +353,26 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
   }
 
   const sortedBalances = sortBalances(muxBalances?.currencies || [], pool.currency)
-  const withdrawAmounts = muxBalances?.currencies
-    ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses)
-    : []
-  const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
-  const withdrawAddressesByDomain: Record<string, WithdrawAddress[]> = {}
-  withdrawAddresses.forEach((addr) => {
-    const key = locationToKey(addr.location)
-    if (withdrawAddressesByDomain[key]) {
-      withdrawAddressesByDomain[key].push(addr)
-    } else {
-      withdrawAddressesByDomain[key] = [addr]
-    }
+  const ignoredCurrencies = Object.entries(selectedAddressIndexByCurrency).flatMap(([key, index]) => {
+    return index === -1 ? [key] : []
   })
+  const { buckets: withdrawAmounts } = muxBalances?.currencies
+    ? divideBetweenCurrencies(amount, sortedBalances, withdrawAddresses, ignoredCurrencies)
+    : { buckets: [] }
+
+  const totalAvailable = withdrawAmounts.reduce((acc, cur) => acc.add(cur.amount), Dec(0))
 
   return {
     render: () => (
       <Mux
-        withdrawAddressesByDomain={withdrawAddressesByDomain}
         withdrawAmounts={withdrawAmounts}
+        selectedAddressIndexByCurrency={selectedAddressIndexByCurrency}
+        setSelectedAddressIndex={(currencyKey, index) => {
+          setSelectedAddressIndexByCurrency((prev) => ({
+            ...prev,
+            [currencyToString(currencyKey)]: index,
+          }))
+        }}
         total={totalAvailable}
         amount={amount}
       />
@@ -357,8 +381,8 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
     getBatch: () => {
       return combineLatest(
         withdrawAmounts.flatMap((bucket) => {
-          // TODO: Select specific withdraw address for a domain if there's multiple
-          const withdraw = withdrawAddressesByDomain[bucket.locationKey][0]
+          const index = selectedAddressIndexByCurrency[bucket.currencyKey] ?? 0
+          const withdraw = bucket.addresses[index]
           if (bucket.amount.isZero()) return []
           return [
             of(
@@ -394,6 +418,8 @@ export function useWithdraw(poolId: string, borrower: CombinedSubstrateAccount, 
 const order: Record<string, number> = {
   'evm:8453': 5,
   'evm:84531': 5,
+  'parachain:1000': 4,
+  'parachain:1001': 4,
   'parachain:2000': 4,
   'evm:42220': 3,
   'evm:44787': 3,
@@ -418,37 +444,70 @@ function sortBalances(balances: AccountCurrencyBalance[], localPoolCurrency: Cur
 }
 
 function locationToKey(location: WithdrawAddress['location']) {
-  return Object.entries(location)[0].join(':') as Key
+  return typeof location === 'string' ? location : (Object.entries(location)[0].join(':') as Key)
 }
 
-type WithdrawBucket = { currency: CurrencyMetadata; amount: Decimal; locationKey: Key }
+function currencyToString(currencyKey: CurrencyMetadata['key']) {
+  return JSON.stringify(currencyKey).replace(/"/g, '')
+}
+
+type WithdrawBucket = {
+  currency: CurrencyMetadata
+  amount: Decimal
+  locationKey: Key
+  currencyKey: string
+  addresses: WithdrawAddress[]
+}
 function divideBetweenCurrencies(
   amount: Decimal,
   balances: AccountCurrencyBalance[],
   withdrawAddresses: WithdrawAddress[],
+  ignoredCurrencies: string[],
   result: WithdrawBucket[] = []
 ) {
   const [next, ...rest] = balances
 
-  if (!next) return result
+  if (!next) {
+    return {
+      buckets: result,
+      remainder: amount,
+    }
+  }
 
-  const hasAddress = !!withdrawAddresses.find(
-    (addr) => locationToKey(addr.location) === locationToKey(getCurrencyLocation(next.currency))
+  const addresses = withdrawAddresses.filter((addr) =>
+    [locationToKey(getCurrencyLocation(next.currency)), 'centrifuge'].includes(locationToKey(addr.location))
   )
   const key = locationToKey(getCurrencyLocation(next.currency))
 
   let combinedResult = [...result]
   let remainder = amount
-  if (hasAddress) {
+  if (addresses.length) {
     const balanceDec = next.balance.toDecimal()
-    if (remainder.lte(balanceDec)) {
-      combinedResult.push({ amount: remainder, currency: next.currency, locationKey: key })
+    let obj = {
+      currency: next.currency,
+      locationKey: key,
+      addresses,
+      currencyKey: currencyToString(next.currency.key),
+    }
+    if (ignoredCurrencies.includes(obj.currencyKey)) {
+      combinedResult.push({
+        amount: Dec(0),
+        ...obj,
+      })
+    } else if (remainder.lte(balanceDec)) {
+      combinedResult.push({
+        amount: remainder,
+        ...obj,
+      })
       remainder = Dec(0)
     } else {
       remainder = remainder.sub(balanceDec)
-      combinedResult.push({ amount: balanceDec, currency: next.currency, locationKey: key })
+      combinedResult.push({
+        amount: balanceDec,
+        ...obj,
+      })
     }
   }
 
-  return divideBetweenCurrencies(remainder, rest, withdrawAddresses, combinedResult)
+  return divideBetweenCurrencies(remainder, rest, withdrawAddresses, ignoredCurrencies, combinedResult)
 }

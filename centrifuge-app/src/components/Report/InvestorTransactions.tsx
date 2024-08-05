@@ -1,7 +1,7 @@
 import { isSameAddress } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { useCentrifugeUtils, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
-import { IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
+import { NetworkIcon, useCentrifugeUtils, useGetExplorerUrl } from '@centrifuge/centrifuge-react'
+import { Box, IconAnchor, IconExternalLink, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { evmChains } from '../../config'
@@ -14,7 +14,7 @@ import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
-import { copyable, formatInvestorTransactionsType } from './utils'
+import { convertCSV, copyable, formatInvestorTransactionsType } from './utils'
 
 const noop = (v: any) => v
 
@@ -193,7 +193,10 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
           name: '',
           value: [
             token.currency.name,
-            (evmChains as any)[tx.chainId]?.name || 'Centrifuge',
+            <Box display={'flex'}>
+              <NetworkIcon size="iconSmall" network={tx.chainId || 'centrifuge'} />
+              <Text style={{ marginLeft: 4 }}> {(evmChains as any)[tx.chainId]?.name || 'Centrifuge'}</Text>
+            </Box>,
             utils.formatAddress(tx.evmAddress || tx.accountId),
             tx.epochNumber ? tx.epochNumber.toString() : '-',
             tx.timestamp.toISOString(),
@@ -216,7 +219,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       })
       .filter((row) => {
         if (!address) return true
-        return isAddress(address) && isSameAddress(address, row.value[2])
+        const addressValue = row.value[2] as string
+        return isAddress(address) && isSameAddress(address, addressValue)
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactions, pool.currency, pool.tranches, txType, address, network])
@@ -226,9 +230,8 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       return
     }
 
-    const formatted = data.map(({ value: values }) =>
-      Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
-    )
+    const formatted = data.map(({ value: values }) => convertCSV(values, columnConfig))
+
     const dataUrl = getCSVDownloadUrl(formatted)
 
     setCsvData({

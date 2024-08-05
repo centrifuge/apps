@@ -34,6 +34,9 @@ function PoolPerformanceChart() {
   const theme = useTheme()
   const chartColor = theme.colors.accentPrimary
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { poolStates } = useDailyPoolStates(poolId) || {}
   const pool = usePool(poolId)
   const poolAge = pool.createdAt ? daysBetween(pool.createdAt, new Date()) : 0
@@ -136,7 +139,7 @@ function PoolPerformanceChart() {
 
       <Shelf gap={4} width="100%" color="textSecondary">
         {chartData?.length ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+          <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
             <ComposedChart data={chartData} margin={{ left: -36 }}>
               <defs>
                 <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
@@ -234,20 +237,12 @@ function CustomLegend({
           borderLeftColor={theme.colors.accentPrimary}
           gap="4px"
         >
-          <Tooltips type={'nav'}>
-            <Text variant="body3" color="textSecondary">
-              NAV
-            </Text>
-          </Tooltips>
+          <Tooltips type="nav" />
           <Text variant="body1">{formatBalance(data.nav, 'USD')}</Text>
         </Stack>
         {data.price && (
           <Stack borderLeftWidth="3px" pl={1} borderLeftStyle="solid" borderLeftColor="#FFC012" gap="4px">
-            <Tooltips type={'singleTrancheTokenPrice'}>
-              <Text variant="body3" color="textSecondary">
-                Token price
-              </Text>
-            </Tooltips>
+            <Tooltips type="singleTrancheTokenPrice" />
             <Text variant="body1">{data.price ? formatBalance(data.price, 'USD', 6) : '-'}</Text>
           </Stack>
         )}

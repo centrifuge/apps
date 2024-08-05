@@ -8,22 +8,24 @@ export default {
   title: 'Icons',
 } as Meta<React.FC>
 
-export const Icons: React.FC = () => (
-  <Table>
-    {Object.entries(icons)
-      .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
-      .map(([iconName, IconComponent]) => (
-        <tr key={iconName}>
-          <td>
-            <Text>{iconName}</Text>
-          </td>
-          <td>
-            <IconComponent color="textPrimary" />
-          </td>
-        </tr>
-      ))}
-  </Table>
-)
+export function Icons() {
+  return (
+    <Table>
+      {Object.entries(icons)
+        .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
+        .map(([iconName, IconComponent]) => (
+          <tr key={iconName}>
+            <td>
+              <Text>{iconName}</Text>
+            </td>
+            <td>
+              <IconComponent color="textPrimary" />
+            </td>
+          </tr>
+        ))}
+    </Table>
+  )
+}
 
 const Table = styled.table`
   font-family: sans-serif;

@@ -6,7 +6,6 @@ import { Footer } from '../Footer'
 import { LoadBoundary } from '../LoadBoundary'
 import { LogoLink } from '../LogoLink'
 import { Menu } from '../Menu'
-import { OnboardingStatus } from '../OnboardingStatus'
 import { BasePadding } from './BasePadding'
 import {
   FooterContainer,
@@ -41,7 +40,7 @@ export function LayoutBase({ children, gap }: LayoutBaseProps) {
         <WalletContainer px={[2, 2, 3, 3, 5]}>
           <WalletPositioner>
             <WalletInner minWidth={[200, 264]}>
-              <WalletMenu menuItems={[<OnboardingStatus />]} />
+              <WalletMenu />
             </WalletInner>
           </WalletPositioner>
         </WalletContainer>

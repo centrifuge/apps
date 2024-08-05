@@ -35,7 +35,6 @@ export type Key =
   | 'showOrderExecution'
   | 'address'
   | 'evmAddress'
-  | 'batchMintNFTs'
   | 'persistDebugFlags'
   | 'showUnusedFlags'
   | 'allowInvestBelowMin'
@@ -47,12 +46,11 @@ export type Key =
   | 'convertAddress'
   | 'showTestNets'
   | 'showSwaps'
-  | 'showOracle'
   | 'poolCreationType'
   | 'showTokenYields'
   | 'showOracleTx'
 
-export const flagsConfig: Record<Key, DebugFlagConfig> = {
+export const flagsConfig = {
   address: {
     default: '',
     type: 'text',
@@ -63,10 +61,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   },
   alternativeTheme: {
     alwaysShow: true,
-    default: false,
-    type: 'checkbox',
-  },
-  batchMintNFTs: {
     default: false,
     type: 'checkbox',
   },
@@ -124,10 +118,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     type: 'checkbox',
   },
-  showOracle: {
-    default: false,
-    type: 'checkbox',
-  },
   showTestNets: {
     alwaysShow: true,
     default: isTestEnv,
@@ -145,4 +135,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
     type: 'checkbox',
   },
-}
+} satisfies Record<Key, DebugFlagConfig>
+
+export const genericFlagsConfig = flagsConfig as Record<string, DebugFlagConfig>

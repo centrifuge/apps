@@ -2,14 +2,13 @@ import pool from '../data/pool.json'
 
 describe('Invest flows', () => {
   before(() => {
-    cy.renameMetamaskAccount('Pool Admin') // rename account to Pool Admin
+    cy.renameMetamaskAccount('Pool Admin')
     cy.switchMetamaskAccount('Account 1')
-    cy.renameMetamaskAccount('Investor') // rename account to Investor
+    cy.renameMetamaskAccount('Investor')
   })
   it('Pool Admin: Transfer DEVEL (fund investor)', () => {
     cy.visit('/portfolio', { failOnStatusCode: false })
     cy.connectWallet({ init: true }) // init true to accept metamask connection, only required in first test case
-    cy.switchMetamaskAccount('Investor') // switch to investor account to grab address
     cy.get('a[href="/portfolio?send=DEVEL"]').click()
     cy.getMetamaskWalletAddress().then((address) => {
       cy.get('input[name="recipientAddress"]').type(address)
@@ -34,19 +33,16 @@ describe('Invest flows', () => {
     cy.confirmTransaction()
   })
   it('Pool Admin: Whitelist an investor wallet', () => {
-    cy.switchMetamaskAccount('Pool Admin')
     cy.visit('/pools', { failOnStatusCode: false })
     cy.connectWallet()
     cy.contains(pool.name).click() // issuer pool link
     cy.contains('Investors').click()
     cy.switchMetamaskAccount('Investor') // switch to investor account to grab address
     cy.getMetamaskWalletAddress().then((address) => {
-      cy.switchMetamaskAccount('Pool Admin')
       cy.get('input[name="investorStatus"]').type(address)
     })
-    cy.switchMetamaskAccount('Pool Admin') // switch back to pool admin account
-    cy.contains(pool.poolAdmin).should('not.be.true')
     cy.switchMetamaskAccount('Pool Admin')
+    cy.contains(pool.poolAdmin).should('not.be.true')
     cy.get(`button[aria-label='Add ${pool.tranches[0].id} to memberlist']`).click()
     cy.confirmTransaction()
   })
@@ -88,7 +84,6 @@ describe('Invest flows', () => {
   })
   it('Investor: Redeem investment', () => {
     cy.visit('/pools', { failOnStatusCode: false })
-    cy.switchMetamaskAccount('Investor')
     cy.connectWallet()
     cy.get(`a[aria-label="Go to ${pool.name} details"]`).click() // investor pool link
     cy.get(`button[aria-label="Invest in ${pool.tranches[0].id}"]`).click()

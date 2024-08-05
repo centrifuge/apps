@@ -13,7 +13,7 @@ type Props = {
   nft: NFT
 }
 
-export const NFTCard: React.FC<Props> = ({ nft }) => {
+export function NFTCard({ nft }: Props) {
   const [visible, setVisible] = React.useState(false)
   const ref = React.useRef<HTMLAnchorElement>(null)
 
@@ -71,11 +71,6 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
                     <Identity address={collection.owner} />
                   </Shelf>
                 </Text>
-              </Box>
-            )}
-            {nft.sellPrice !== null && (
-              <Box flexBasis="auto">
-                <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
               </Box>
             )}
           </Shelf>

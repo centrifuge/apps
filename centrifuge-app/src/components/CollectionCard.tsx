@@ -14,7 +14,7 @@ type Props = {
   collection: Collection
 }
 
-export const CollectionCard: React.FC<Props> = ({ collection }) => {
+export function CollectionCard({ collection }: Props) {
   const [visible, setVisible] = React.useState(false)
   const ref = React.useRef<HTMLAnchorElement>(null)
 

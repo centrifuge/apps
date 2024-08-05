@@ -56,7 +56,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     }
 
     return getCSVDownloadUrl(assetSnapshots as any)
-  }, [assetSnapshots, pool.currency.symbol])
+  }, [assetSnapshots])
 
   const data: ChartData[] = React.useMemo(() => {
     if (!asset || !assetSnapshots) return []
@@ -79,7 +79,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     const today = new Date()
     today.setDate(today.getDate() + 1)
     const maturity = new Date(asset.pricing.maturityDate ?? '')
-    if (today.getTime() >= maturity.getTime() || assetSnapshots.length == 0) return historic
+    if (today.getTime() >= maturity.getTime() || assetSnapshots.length === 0) return historic
 
     const days = Math.floor((maturity.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)) + 2
 
@@ -116,7 +116,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
         }
       }),
     ]
-  }, [asset, assetSnapshots, activeFilter])
+  }, [asset, assetSnapshots])
 
   const priceRange = React.useMemo(() => {
     if (!data) return [0, 100]
@@ -137,11 +137,12 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     return [min, max]
   }, [data])
 
-  if (!assetSnapshots) return <Spinner style={{ margin: 'auto' }} />
-  if (assetSnapshots?.length < 1) return null
+  const isChartEmpty = React.useMemo(() => !data.length || assetSnapshots?.length < 1, [data, assetSnapshots])
+
+  if (!assetSnapshots) return <Spinner style={{ margin: 'auto', height: 350 }} />
 
   return (
-    <Card p={3}>
+    <Card p={3} height={350}>
       <Stack gap={2}>
         <Shelf justifyContent="space-between">
           <Text fontSize="18px" fontWeight="500">
@@ -149,16 +150,20 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
               ? 'Asset performance'
               : 'Cash balance'}
           </Text>
-          <AnchorButton
-            href={dataUrl}
-            download={`asset-${loanId}-timeseries.csv`}
-            variant="secondary"
-            icon={IconDownload}
-            small
-          >
-            Download
-          </AnchorButton>
+          {!isChartEmpty && (
+            <AnchorButton
+              href={dataUrl}
+              download={`asset-${loanId}-timeseries.csv`}
+              variant="secondary"
+              icon={IconDownload}
+              small
+            >
+              Download
+            </AnchorButton>
+          )}
         </Shelf>
+
+        {isChartEmpty && <Text variant="label1">No data yet</Text>}
 
         {!(assetSnapshots && assetSnapshots[0]?.currentPrice?.toString() === '0') && (
           <Stack>
@@ -187,7 +192,7 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
 
         <Shelf gap={4} width="100%" color="textSecondary">
           {data?.length ? (
-            <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+            <ResponsiveContainer width="100%" height={200} minHeight={200} maxHeight={200}>
               <LineChart data={data} margin={{ left: -36 }}>
                 <defs>
                   <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
@@ -202,9 +207,11 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
                   tickFormatter={(tick: number) => {
                     return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
                   }}
-                  style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+                  style={{ fontSize: 8, fill: theme.colors.textSecondary, letterSpacing: '-0.7px' }}
                   dy={4}
                   interval={10}
+                  angle={-40}
+                  textAnchor="end"
                 />
                 <YAxis
                   stroke="none"

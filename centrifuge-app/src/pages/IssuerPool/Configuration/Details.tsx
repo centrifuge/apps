@@ -29,9 +29,13 @@ const ASSET_CLASSES = Object.keys(config.assetClasses).map((key) => ({
   value: key,
 }))
 
+const isDemo = import.meta.env.REACT_APP_IS_DEMO
+
 export function Details() {
-  const isDemo = import.meta.env.REACT_APP_IS_DEMO
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)

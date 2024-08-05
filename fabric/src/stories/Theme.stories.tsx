@@ -7,7 +7,7 @@ export default {
   title: 'Theme',
 } as Meta<React.FC>
 
-export const Breakpoints: React.FC = () => {
+export function Breakpoints() {
   const theme = useTheme()
   const bpAliases = Object.entries(theme.breakpoints).reduce((acc, [key, value]) => {
     if (!acc[value]) {
@@ -33,7 +33,7 @@ export const Breakpoints: React.FC = () => {
   )
 }
 
-export const Colors: React.FC = () => {
+export function Colors() {
   const theme = useTheme()
   return (
     <Table>
@@ -54,7 +54,7 @@ export const Colors: React.FC = () => {
   )
 }
 
-export const Spacing: React.FC = () => {
+export function Spacing() {
   const theme = useTheme()
   return (
     <Table>

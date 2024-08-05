@@ -2,7 +2,8 @@ import { Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconDownload, IconMinus, IconPlus, IconSend, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { useHistory, useLocation, useRouteMatch } from 'react-router-dom'
+import { useMatch, useNavigate } from 'react-router'
+import { useLocation } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import ethLogo from '../../assets/images/ethereum.svg'
@@ -117,8 +118,8 @@ export function useHoldings(address?: string, chainId?: number, showActions = tr
   const centAddress = address && chainId && isEvmAddress(address) ? evmToSubstrateAddress(address, chainId) : address
   const { data: tinlakeBalances } = useTinlakeBalances(address && isEvmAddress(address) ? address : undefined)
   const centBalances = useBalances(centAddress)
-  const match = useRouteMatch<{ address: string }>('/portfolio')
-  const isPortfolioPage = match?.isExact
+  const match = useMatch('/portfolio')
+  const isPortfolioPage = Boolean(match)
 
   const wallet = useWallet()
   const tinlakePools = useTinlakePools()
@@ -216,7 +217,7 @@ export function Holdings({
   chainId?: number
 }) {
   const { search, pathname } = useLocation()
-  const history = useHistory()
+  const navigate = useNavigate()
   const params = new URLSearchParams(search)
   const openSendDrawer = params.get('send')
   const openReceiveDrawer = params.get('receive')
@@ -234,13 +235,13 @@ export function Holdings({
         poolId={investPoolId || redeemPoolId || ''}
         trancheId={investTrancheId || redeemTrancheId || ''}
         open={!!(openRedeemDrawer || openInvestDrawer)}
-        onClose={() => history.replace(pathname)}
+        onClose={() => navigate(pathname, { replace: true })}
         defaultView={openRedeemDrawer ? 'redeem' : 'invest'}
       />
       <TransferTokensDrawer
         address={address}
         isOpen={!!(openSendDrawer || openReceiveDrawer)}
-        onClose={() => history.replace(pathname)}
+        onClose={() => navigate(pathname, { replace: true })}
       />
       <DataTable columns={columns} data={tokens} defaultSortKey="position" />
     </>

@@ -11,7 +11,7 @@ import { Text } from '../Text'
 
 export type MenuProps = Omit<CardProps, 'variant'>
 
-export const Menu: React.FC<MenuProps> = ({ children, ...cardProps }) => {
+export function Menu({ children, ...cardProps }: MenuProps) {
   return (
     <Card {...cardProps} variant="overlay">
       <ScrollContainer borderRadius="card">{children}</ScrollContainer>
@@ -27,7 +27,7 @@ const ScrollContainer = styled(Stack)`
   }
 `
 
-export const MenuItemGroup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function MenuItemGroup({ children }: { children: React.ReactNode }) {
   return (
     <>
       <MenuDivider borderColor="borderPrimary" />
@@ -55,14 +55,14 @@ export type MenuItemProps = {
 } & PropsOf<typeof MenuItemButton> &
   React.HTMLAttributes<HTMLButtonElement>
 
-export const MenuItem: React.FC<MenuItemProps> = ({
+export function MenuItem({
   label,
   sublabel,
   icon: IconComp,
   iconRight: IconRightComp,
   minHeight = '48px',
   ...buttonProps
-}) => {
+}: MenuItemProps) {
   return (
     <MenuItemButton {...buttonProps}>
       <Shelf gap={1} px={2} py={1} minHeight={minHeight}>

@@ -70,7 +70,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool])
+  }, [poolStates, groupBy])
 
   const priceRecords: Row[] = React.useMemo(() => {
     return [

@@ -6,7 +6,7 @@ export default {
   title: 'Components/LayoutGrid',
 }
 
-export const Default: React.FC = () => {
+export function Default() {
   return (
     <LayoutGrid>
       <LayoutGridItem span={[4, 8, 12]}>

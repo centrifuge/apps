@@ -22,7 +22,7 @@ const lightColors = {
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
-  backgroundTertiary: grayScale[100],
+  backgroundTertiary: grayScale[50],
   backgroundAccentPrimary: blueScale[100],
   backgroundAccentSecondary: '#e9eff2',
   backgroundPage: 'white',

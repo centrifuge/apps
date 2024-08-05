@@ -10,11 +10,11 @@ type Props = {
   children?: React.ReactNode
 }
 
-export const PageSummary: React.FC<Props> = ({ data, children }) => {
+export function PageSummary({ data, children }: Props) {
   const theme = useTheme()
   return (
     <Shelf
-      bg={theme.colors.backgroundSecondary}
+      bg={theme.colors.backgroundPrimary}
       gap="6"
       pl={[2, 6]}
       py="3"

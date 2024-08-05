@@ -11,10 +11,10 @@ import { PDFViewer } from '../../components/PDFViewer'
 import { ValidationToast } from '../../components/ValidationToast'
 import { OnboardingUser } from '../../types'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
+import { TaxInfo } from './TaxInfo'
 import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
 import { useSignRemark } from './queries/useSignRemark'
 import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
-import { TaxInfo } from './TaxInfo'
 
 type Props = {
   signedAgreementUrl: string | undefined

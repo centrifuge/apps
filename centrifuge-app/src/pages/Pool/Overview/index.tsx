@@ -3,7 +3,7 @@ import { Box, Button, Card, Grid, IconFileText, Stack, Text, TextWithPlaceholder
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { InvestRedeemProps } from '../../../components/InvestRedeem/InvestRedeem'
 import { InvestRedeemDrawer } from '../../../components/InvestRedeem/InvestRedeemDrawer'
 import { IssuerDetails, ReportDetails } from '../../../components/IssuerSection'
@@ -43,14 +43,35 @@ export type Token = {
   yield30DaysAnnualized?: string | null
 }
 
+const FullHeightLayoutBase = styled(LayoutBase)`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`
+
+const FullHeightStack = styled(Stack)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`
+
+const FullHeightLayoutSection = styled(LayoutSection)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`
+
 export function PoolDetailOverviewTab() {
   return (
-    <LayoutBase>
-      <PoolDetailHeader />
-      <LoadBoundary>
-        <PoolDetailOverview />
-      </LoadBoundary>
-    </LayoutBase>
+    <FullHeightLayoutBase>
+      <FullHeightStack>
+        <PoolDetailHeader />
+        <LoadBoundary>
+          <PoolDetailOverview />
+        </LoadBoundary>
+      </FullHeightStack>
+    </FullHeightLayoutBase>
   )
 }
 
@@ -61,6 +82,9 @@ function AverageMaturity({ poolId }: { poolId: string }) {
 export function PoolDetailOverview() {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId)
   const poolFees = usePoolFees(poolId)
@@ -107,11 +131,9 @@ export function PoolDetailOverview() {
     .reverse()
 
   return (
-    <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
+    <FullHeightLayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
       <Grid height="fit-content" gridTemplateColumns={['1fr', '1fr', '66fr minmax(275px, 33fr)']} gap={[2, 2, 3]}>
-        <React.Suspense fallback={<Spinner />}>
-          <PoolPerformance />
-        </React.Suspense>
+        <PoolPerformance />
         <React.Suspense fallback={<Spinner />}>
           <KeyMetrics
             assetType={metadata?.pool?.asset}
@@ -197,7 +219,7 @@ export function PoolDetailOverview() {
           </React.Suspense>
         </>
       )}
-    </LayoutSection>
+    </FullHeightLayoutSection>
   )
 }
 

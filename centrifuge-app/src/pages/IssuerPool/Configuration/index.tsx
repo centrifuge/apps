@@ -10,7 +10,6 @@ import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
 import { LoanTemplates } from './LoanTemplates'
 import { PoolConfig } from './PoolConfig'
-import { WriteOffGroups } from './WriteOffGroups'
 
 export function IssuerPoolConfigurationPage() {
   return (
@@ -25,6 +24,9 @@ export function IssuerPoolConfigurationPage() {
 
 function IssuerPoolConfiguration() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { editPoolConfig } = useDebugFlags()
   const isPoolAdmin = !!usePoolAdmin(poolId)
   const isBorrower = useCanBorrow(poolId)
@@ -36,7 +38,6 @@ function IssuerPoolConfiguration() {
           <Details />
           <Issuer />
           <EpochAndTranches />
-          <WriteOffGroups />
           <LoanTemplates />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>

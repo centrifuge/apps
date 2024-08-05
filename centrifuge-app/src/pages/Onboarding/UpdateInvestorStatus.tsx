@@ -1,5 +1,4 @@
 import { AnchorButton, Box, IconArrowUpRight, Shelf, Spinner } from '@centrifuge/fabric'
-import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { Container, Content, ContentHeader, Header, Layout } from '../../components/Onboarding'
 import { ethConfig } from '../../config'

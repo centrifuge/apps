@@ -1,10 +1,16 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { formatBalance } from '@centrifuge/centrifuge-react'
 import { Text, Tooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatDate } from '../../utils/date'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
-import { useAggregatedPoolStatesByGroup, usePoolMetadata, usePoolStatesByGroup } from '../../utils/usePools'
+import {
+  useAggregatedPoolStatesByGroup,
+  usePoolFeeStatesByGroup,
+  usePoolMetadata,
+  usePoolStatesByGroup,
+} from '../../utils/usePools'
 import { DataTable } from '../DataTable'
 import { DataTableGroup } from '../DataTableGroup'
 import { Spinner } from '../Spinner'
@@ -49,7 +55,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
       to.setHours(0, 0, 0, 0)
       return [new Date(startDate), to]
     }
-  }, [groupBy, startDate, endDate])
+  }, [groupBy, startDate, endDate, pool.createdAt])
 
   const poolStates = useAggregatedPoolStatesByGroup(
     pool.id,
@@ -59,6 +65,13 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
   )
 
   const poolStatesNotAggregated = usePoolStatesByGroup(
+    pool.id,
+    adjustedStartDate,
+    adjustedEndDate,
+    groupBy === 'daily' ? 'day' : groupBy
+  )
+
+  const poolFeeStates = usePoolFeeStatesByGroup(
     pool.id,
     adjustedStartDate,
     adjustedEndDate,
@@ -127,12 +140,12 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         cell: () => <span />,
         width: '1fr',
       })
-  }, [poolStates, groupBy, pool])
+  }, [poolStates, groupBy])
 
   const grossCashflowRecords: Row[] = React.useMemo(() => {
     return [
       {
-        name: 'Principal repayments',
+        name: 'Principal payments',
         value:
           poolStates?.map(({ poolState }) =>
             poolState?.sumPrincipalRepaidAmountByPeriod
@@ -185,16 +198,41 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStates])
+  }, [pool.currency.displayName, poolMetadata?.pool?.asset.class, poolStates])
 
   const netCashflowRecords: Row[] = React.useMemo(() => {
     return [
-      {
-        name: 'Fees paid',
-        value: poolStates?.map(({ poolState }) => poolState.sumPoolFeesPaidAmountByPeriod.toDecimal().neg()) || [],
-        heading: false,
-        formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
-      },
+      ...(poolFeeStates
+        ?.map((poolFeeStateByPeriod) => {
+          return Object.values(poolFeeStateByPeriod)
+            ?.map((feeState) => {
+              // some fee data may be incomplete since fees may have been added sometime after pool creation
+              // this fill the nonexistant fee data with zero values
+              let missingStates: {
+                timestamp: string
+                sumPaidAmountByPeriod: CurrencyBalance
+              }[] = []
+              if (feeState.length !== poolStates?.length) {
+                const missingTimestamps = poolStates
+                  ?.map((state) => state.timestamp)
+                  .filter((timestamp) => !feeState.find((state) => state.timestamp === timestamp))
+                missingStates =
+                  missingTimestamps?.map((timestamp) => {
+                    return {
+                      timestamp,
+                      sumPaidAmountByPeriod: CurrencyBalance.fromFloat(0, pool.currency.decimals),
+                    }
+                  }) || []
+              }
+              return {
+                name: feeState[0].poolFee.name,
+                value: [...missingStates, ...feeState].map((state) => state.sumPaidAmountByPeriod.toDecimal().neg()),
+                formatter: (v: any) => `${formatBalance(v, pool.currency.displayName, 2)}`,
+              }
+            })
+            .flat()
+        })
+        .flat() || []),
       {
         name: 'Net cash flow after fees',
         value:
@@ -211,7 +249,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         bold: true,
       },
     ]
-  }, [poolStates, pool])
+  }, [poolStates, pool, poolFeeStates])
 
   const investRedeemRecords: Row[] = React.useMemo(() => {
     return [
@@ -268,7 +306,7 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
         formatter: (v: any) => (v ? formatBalance(v, pool.currency.displayName, 2) : ''),
       },
     ]
-  }, [poolStatesNotAggregated, pool])
+  }, [poolStates, poolStatesNotAggregated, pool.currency.displayName])
 
   const headers = columns.slice(0, -1).map(({ header }) => header)
 

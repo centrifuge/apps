@@ -21,11 +21,11 @@ export function usePool<T extends boolean = true>(
   id: string,
   required?: T
 ): T extends true ? Pool | TinlakePool : Pool | TinlakePool | undefined {
-  const isTinlakePool = id.startsWith('0x')
+  const isTinlakePool = id?.startsWith('0x')
   const tinlakePools = useTinlakePools(isTinlakePool)
   const pools = usePools()
   const pool = isTinlakePool
-    ? tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === id.toLowerCase())
+    ? tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === id?.toLowerCase())
     : pools?.find((p) => p.id === id)
 
   if (!pool && required !== false) {

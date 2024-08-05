@@ -1,6 +1,6 @@
 import { Box, IconChevronDown, IconChevronRight, IconMonitor, Menu, MenuItemGroup, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
+import { useMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
 import { PoolLink } from './PoolLink'
@@ -11,7 +11,7 @@ type NavManagementMenuProps = {
 }
 // TODO: deduplicate some code between this and the IssuerMenu
 export function NavManagementMenu({ stacked }: NavManagementMenuProps) {
-  const match = useRouteMatch<{ pid: string }>('/nav-management/:pid')
+  const match = useMatch('/nav-management/*')
   const isActive = !!match
   const [open, setOpen] = React.useState(isActive)
   const { space } = useTheme()

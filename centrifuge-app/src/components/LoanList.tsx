@@ -1,3 +1,4 @@
+import { useBasePath } from '@centrifuge/centrifuge-app/src/utils/useBasePath'
 import { CurrencyBalance, Loan, Rate, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import {
   Box,
@@ -8,12 +9,11 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
-  Thumbnail,
   usePagination,
 } from '@centrifuge/fabric'
 import get from 'lodash/get'
 import * as React from 'react'
-import { useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import currencyDollar from '../assets/images/currency-dollar.svg'
 import daiLogo from '../assets/images/dai-logo.svg'
 import usdcLogo from '../assets/images/usdc-logo.svg'
@@ -55,9 +55,11 @@ const getLoanStatus = (loan: Loan | TinlakeLoan) => {
 
 export function LoanList({ loans }: Props) {
   const { pid: poolId } = useParams<{ pid: string }>()
+  if (!poolId) throw new Error('Pool not found')
+
   const pool = usePool(poolId)
-  const isTinlakePool = poolId.startsWith('0x')
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const isTinlakePool = poolId?.startsWith('0x')
+  const basePath = useBasePath()
 
   const { data: poolMetadata } = usePoolMetadata(pool)
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
@@ -101,7 +103,7 @@ export function LoanList({ loans }: Props) {
       header: <SortableTableHeader label="Asset" />,
       cell: (l: Row) => <AssetName loan={l} />,
       sortKey: 'idSortKey',
-      width: 'minmax(150px, 1fr)',
+      width: 'minmax(300px, 1fr)',
     },
     isTinlakePool && {
       align: 'left',
@@ -150,6 +152,7 @@ export function LoanList({ loans }: Props) {
         />
       ),
       cell: (l: Row) => <LoanLabel loan={l} />,
+      width: '100px',
     },
     {
       header: '',
@@ -225,11 +228,11 @@ export function LoanList({ loans }: Props) {
             <DataTable
               data={rows}
               columns={columns}
-              pinnedData={pinnedData}
-              defaultSortOrder="desc"
+              defaultSortKey="maturityDate"
               onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
               pageSize={20}
               page={pagination.page}
+              pinnedData={pinnedData}
             />
           </Box>
         </LoadBoundary>
@@ -304,7 +307,6 @@ export function AssetName({ loan }: { loan: Pick<Row, 'id' | 'poolId' | 'asset' 
 
   return (
     <Shelf gap="1" alignItems="center" justifyContent="center" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
-      <Thumbnail type="asset" label={loan.id} />
       <TextWithPlaceholder
         isLoading={isLoading}
         width={12}
@@ -341,7 +343,7 @@ function Amount({ loan }: { loan: Row }) {
         return formatBalance(pool.reserve.total, pool?.currency.symbol)
 
       default:
-        return ''
+        return `0 ${pool?.currency.symbol}`
     }
   }
 

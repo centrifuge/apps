@@ -243,10 +243,6 @@ function getTinlakeLoanStatus(loan: TinlakeLoanData, writeOffPercentage: Rate) {
 
 // TODO: refactor to use multicall instead of subgraph
 async function getTinlakeLoans(poolId: string) {
-  let pools: {
-    loans: unknown[]
-  }[] = []
-
   const response = await fetch(import.meta.env.REACT_APP_TINLAKE_SUBGRAPH_URL, {
     method: 'POST',
     headers: {
@@ -255,25 +251,20 @@ async function getTinlakeLoans(poolId: string) {
     body: JSON.stringify({
       query: `
         query GetLoansByPoolId($poolId: String!) {
-          pools (where: { id_in: [$poolId]}) {
-            loans (first: 1000) {
-              nftId
-              id
-              index
-              financingDate
-              debt
-              pool {
-                id
-              }
-              maturityDate
-              interestRatePerSecond
-              borrowsAggregatedAmount
-              repaysAggregatedAmount
-              ceiling
-              closed
-              riskGroup
-              owner
-            }
+          loans (where: { pool_: { id: $poolId } }, first: 1000) {
+            nftId
+            id
+            index
+            financingDate
+            debt
+            maturityDate
+            interestRatePerSecond
+            borrowsAggregatedAmount
+            repaysAggregatedAmount
+            ceiling
+            closed
+            riskGroup
+            owner
           }
         }
       `,
@@ -288,19 +279,10 @@ async function getTinlakeLoans(poolId: string) {
     if (errors?.length) {
       throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Errors: ${errors}`)
     }
-    pools = data.pools
+    return data.loans
   } else {
     throw new Error(`Issue fetching loans for Tinlake pool ${poolId}. Status: ${response?.status}`)
   }
-
-  const loans = pools.reduce((assets: any[], pool: any) => {
-    if (pool.loans) {
-      assets.push(...pool.loans)
-    }
-    return assets
-  }, [])
-
-  return loans
 }
 
 export async function getWriteOffPercentages(pool: TinlakePool, loans: any[]) {
@@ -713,6 +695,10 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         lastUpdated: new Date().toISOString(),
         total: data.netAssetValue,
         aum: data.netAssetValue,
+        fees: new CurrencyBalance(0, 18),
+      },
+      fees: {
+        totalPaid: new CurrencyBalance(0, 18),
       },
       createdAt: null,
       isInitialised: true,

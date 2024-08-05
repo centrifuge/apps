@@ -17,8 +17,20 @@ type Props = {
 
 export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props) => {
   const isTinlakePool = poolId.startsWith('0x')
+
+  function hasValuationMethod(pricing: any): pricing is { valuationMethod: string } {
+    return pricing && typeof pricing.valuationMethod === 'string'
+  }
+
   const ongoingAssetCount =
-    loans && [...loans].filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()).length
+    loans &&
+    [...loans].filter(
+      (loan) =>
+        loan.status === 'Active' &&
+        hasValuationMethod(loan.pricing) &&
+        loan.pricing.valuationMethod !== 'cash' &&
+        !loan.outstandingDebt.isZero()
+    ).length
 
   const writtenOffAssetCount =
     loans && [...loans].filter((loan) => loan.status === 'Active' && (loan as ActiveLoan).writeOffStatus).length
@@ -55,7 +67,9 @@ export const KeyMetrics = ({ assetType, averageMaturity, loans, poolId }: Props)
         ]),
     {
       metric: 'Total assets',
-      value: loans?.length || 0,
+      value:
+        loans?.filter((loan) => hasValuationMethod(loan.pricing) && loan.pricing.valuationMethod !== 'cash').length ||
+        0,
     },
     {
       metric: 'Ongoing assets',
@@ -164,55 +178,54 @@ const AvailableNetworks = ({ poolId }: { poolId: string }) => {
       ) : (
         <Spinner size="iconSmall" />
       )}
-      {activeDomains.data?.length &&
-        activeDomains.data
-          .filter((domain) => domain.isActive)
-          .map((domain) => {
-            const chain = (evmChains as any)[domain.chainId]
-            return (
-              <Tooltip
-                delay={300}
-                bodyWidth="maxContent"
-                bodyPadding={0}
-                body={
-                  <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
-                    <Text variant="heading4">{chain.name}</Text>
-                    {pool.tranches.length > 1 ? (
-                      pool.tranches.map((tranche) => (
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[tranche.id]}`}
-                        >
-                          <Shelf gap={1} alignItems="center">
-                            <Text variant="body2" color="black">
-                              View {tranche.currency.name.split(' ').at(-1)}
-                            </Text>{' '}
-                            <IconExternalLink color="black" size="iconSmall" />
-                          </Shelf>
-                        </a>
-                      ))
-                    ) : (
+      {activeDomains.data
+        ?.filter((domain) => domain.isActive)
+        .map((domain) => {
+          const chain = (evmChains as any)[domain.chainId]
+          return (
+            <Tooltip
+              delay={300}
+              bodyWidth="maxContent"
+              bodyPadding={0}
+              body={
+                <Stack p={1} gap={1} backgroundColor="backgroundSecondary">
+                  <Text variant="heading4">{chain.name}</Text>
+                  {pool.tranches.length > 1 ? (
+                    pool.tranches.map((tranche) => (
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[pool.tranches[0].id]}`}
+                        href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[tranche.id]}`}
                       >
                         <Shelf gap={1} alignItems="center">
                           <Text variant="body2" color="black">
-                            View transactions
+                            View {tranche.currency.name.split(' ').at(-1)}
                           </Text>{' '}
                           <IconExternalLink color="black" size="iconSmall" />
                         </Shelf>
                       </a>
-                    )}
-                  </Stack>
-                }
-              >
-                <NetworkIcon size="iconSmall" network={domain.chainId} />
-              </Tooltip>
-            )
-          })}
+                    ))
+                  ) : (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={`${chain.blockExplorerUrl}token/${domain.trancheTokens[pool.tranches[0].id]}`}
+                    >
+                      <Shelf gap={1} alignItems="center">
+                        <Text variant="body2" color="black">
+                          View transactions
+                        </Text>{' '}
+                        <IconExternalLink color="black" size="iconSmall" />
+                      </Shelf>
+                    </a>
+                  )}
+                </Stack>
+              }
+            >
+              <NetworkIcon size="iconSmall" network={domain.chainId} />
+            </Tooltip>
+          )
+        })}
     </Shelf>
   )
 }

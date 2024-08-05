@@ -128,6 +128,7 @@ export function computeTrancheId(trancheIndex: number, poolId: string) {
 
 // Computes multisig address and sorts signers
 export function computeMultisig(multisig: Multisig): ComputedMultisig {
+  if (multisig.threshold < 2) throw new Error('Threshold must be at least 2')
   const address = u8aToHex(createKeyMulti(multisig.signers, multisig.threshold))
   return {
     address,
@@ -137,6 +138,8 @@ export function computeMultisig(multisig: Multisig): ComputedMultisig {
 }
 
 export function evmToSubstrateAddress(address: string, chainId: number) {
+  if (!chainId) throw new Error('chainId is required')
+
   // Bytes EVM\0 as suffix
   const suffix = '45564d00'
   const chainHex = Number(chainId).toString(16).padStart(16, '0')

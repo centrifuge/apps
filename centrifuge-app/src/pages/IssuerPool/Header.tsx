@@ -1,12 +1,12 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../components/DebugFlags'
 import { BASE_PADDING } from '../../components/LayoutBase/BasePadding'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
+import { useBasePath } from '../../utils/useBasePath'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -16,6 +16,7 @@ type Props = {
 
 export function IssuerHeader({ actions, children }: Props) {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const cent = useCentrifuge()
@@ -65,14 +66,14 @@ export function IssuerHeader({ actions, children }: Props) {
 
 export function IssuerPoolHeader({ actions }: Props) {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  const basePath = useBasePath()
   const isTinlakePool = pool.id.startsWith('0x')
-  const { showOracle } = useDebugFlags()
 
   return (
     <IssuerHeader>
-      <NavigationTabs basePath={`${basePath}/${pid}`}>
+      <NavigationTabs>
         <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
@@ -80,7 +81,7 @@ export function IssuerPoolHeader({ actions }: Props) {
         <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
         <NavigationTabsItem to={`${basePath}/${pid}/access`}>Access</NavigationTabsItem>
-        {showOracle && <NavigationTabsItem to={`${basePath}/${pid}/pricing`}>Pricing</NavigationTabsItem>}
+        {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/pricing`}>Pricing</NavigationTabsItem>}
         {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/fees`}>Fees</NavigationTabsItem>}
       </NavigationTabs>
     </IssuerHeader>

@@ -225,7 +225,7 @@ export function usePoolAccess(poolId: string) {
                     if ('EVM' in key.Address)
                       return {
                         address: key.Address.EVM[1].toLowerCase(),
-                        location: { evm: key.Address.EVM[0].replace(/\D/g, '') },
+                        location: { evm: Number(key.Address.EVM[0].replace(/\D/g, '')) },
                       }
                   } else if ('Xcm' in key) {
                     if (!key.Xcm?.V3?.interior?.X2?.[1]?.AccountId32?.id) {

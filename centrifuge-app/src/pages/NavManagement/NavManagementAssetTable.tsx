@@ -1,8 +1,21 @@
 import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeQuery, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, Drawer, IconDownload, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  Drawer,
+  IconArrowRight,
+  IconDownload,
+  Shelf,
+  Stack,
+  Text,
+  Thumbnail,
+} from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import { Field, FieldProps, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { switchMap } from 'rxjs'
 import daiLogo from '../../assets/images/dai-logo.svg'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { ButtonGroup } from '../../components/ButtonGroup'
@@ -11,10 +24,13 @@ import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
-import { usePool } from '../../utils/usePools'
+import { useLiquidity } from '../../utils/useLiquidity'
+import { useSuitableAccounts } from '../../utils/usePermissions'
+import { usePool, usePoolAccountOrders, usePoolFees } from '../../utils/usePools'
 import { usePoolsForWhichAccountIsFeeder } from '../../utils/usePoolsForWhichAccountIsFeeder'
 import { positiveNumber } from '../../utils/validation'
 import { isCashLoan, isExternalLoan } from '../Loan/utils'
+import { VisualNavCard } from './Overview'
 
 type FormValues = {
   feed: {
@@ -28,23 +44,30 @@ type FormValues = {
     currentPrice: number
     withLinearPricing: boolean
   }[]
-  closeEpoch: boolean
 }
 type Row = FormValues['feed'][0] | ActiveLoan | CreatedLoan
+
+const MAX_COLLECT = 100 // maximum number of transactions to collect in one batch
 
 export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const allowedPools = usePoolsForWhichAccountIsFeeder()
   const isFeeder = !!allowedPools?.find((p) => p.id === poolId)
   const [isEditing, setIsEditing] = React.useState(false)
   const [isConfirming, setIsConfirming] = React.useState(false)
-
-  const pool = usePool(poolId, false)
+  const orders = usePoolAccountOrders(poolId)
+  const [liquidityAdminAccount] = useSuitableAccounts({ poolId, poolRole: ['LiquidityAdmin'] })
+  const pool = usePool(poolId)
   const [allLoans] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     enabled: !!poolId && !!pool,
   })
+  const poolFees = usePoolFees(poolId)
 
   const externalLoans = React.useMemo(
-    () => (allLoans?.filter((l) => isExternalLoan(l) && l.status !== 'Closed') as ExternalLoan[]) ?? [],
+    () =>
+      (allLoans?.filter(
+        // Keep external loans, except ones that are fully repaid
+        (l) => isExternalLoan(l) && l.status !== 'Closed' && (!('presentValue' in l) || l.presentValue.isZero())
+      ) as ExternalLoan[]) ?? [],
     [allLoans]
   )
 
@@ -55,35 +78,58 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
   const reserveRow = [
     {
       id: 'reserve',
-      isin: 'Reserve',
+      isin: 'Onchain reserve',
       quantity: 1,
       currentPrice: 0,
-      value: pool?.reserve.total.toDecimal().toNumber(),
+      value: pool.reserve.total.toFloat(),
       formIndex: -1,
       maturity: '',
       oldValue: '',
     },
   ]
 
+  const { ordersFullyExecutable } = useLiquidity(poolId)
+
   const { execute, isLoading } = useCentrifugeTransaction(
-    'Set oracle prices',
+    'Update NAV',
     (cent) => (args: [values: FormValues], options) => {
-      const [values] = args
-      const batch = [
-        ...values.feed
-          .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
-          .map((f) => {
-            const feed = f.isin ? { Isin: f.isin } : { poolloanid: [poolId, f.id] }
-            return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
-          }),
-        api.tx.oraclePriceCollection.updateCollection(poolId),
-        api.tx.loans.updatePortfolioValuation(poolId),
-      ]
-      if (values.closeEpoch) {
-        batch.push(api.tx.poolSystem.closeEpoch(poolId))
-      }
-      const tx = api.tx.utility.batchAll(batch)
-      return cent.wrapSignAndSend(api, tx, options)
+      return cent.pools.closeEpoch([poolId, false], { batch: true }).pipe(
+        switchMap((closeTx) => {
+          const [values] = args
+          const batch = [
+            ...values.feed
+              .filter((f) => typeof f.value === 'number' && !Number.isNaN(f.value))
+              .map((f) => {
+                const feed = f.isin ? { Isin: f.isin } : { poolloanid: [poolId, f.id] }
+                return api.tx.oraclePriceFeed.feed(feed, CurrencyBalance.fromFloat(f.value, 18))
+              }),
+            api.tx.oraclePriceCollection.updateCollection(poolId),
+            api.tx.loans.updatePortfolioValuation(poolId),
+          ]
+
+          if (liquidityAdminAccount && orders?.length) {
+            batch.push(
+              ...closeTx.method.args[0],
+              ...orders
+                .slice(0, ordersFullyExecutable ? MAX_COLLECT : 0)
+                .map((order) =>
+                  api.tx.investments[order.type === 'invest' ? 'collectInvestmentsFor' : 'collectRedemptionsFor'](
+                    order.accountId,
+                    [poolId, order.trancheId]
+                  )
+                )
+            )
+          }
+
+          const tx = api.tx.utility.batchAll(batch)
+          return cent.wrapSignAndSend(api, tx, options)
+        })
+      )
+    },
+    {
+      onSuccess: () => {
+        setIsEditing(false)
+      },
     }
   )
 
@@ -104,12 +150,11 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             value: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
             isin: 'isin' in l.pricing.priceId ? l.pricing.priceId.isin : '',
             quantity: l.pricing.outstandingQuantity.toFloat(),
-            maturity: formatDate(l.pricing.maturityDate),
+            maturity: formatDate(l.pricing?.maturityDate ?? ''),
             withLinearPricing: l.pricing.withLinearPricing,
             currentPrice: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
           }
         }) ?? [],
-      closeEpoch: false,
     }),
     [externalLoans]
   )
@@ -129,13 +174,22 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, isEditing, isLoading])
 
-  const poolReserve = pool?.reserve.total.toDecimal().toNumber() || 0
+  const pendingFees = React.useMemo(() => {
+    return new CurrencyBalance(
+      poolFees?.map((f) => f.amounts.pending).reduce((acc, f) => acc.add(f), new BN(0)) ?? new BN(0),
+      pool.currency.decimals
+    )
+  }, [poolFees, pool.currency.decimals])
+
+  const poolReserve = pool.reserve.total.toDecimal().toNumber() || 0
   const newNavExternal = form.values.feed.reduce(
     (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
     0
   )
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
-  const newNav = newNavExternal + newNavCash + poolReserve
+  const newNav = newNavExternal + newNavCash + poolReserve - pendingFees.toFloat()
+  // Only for single tranche pools
+  const newPrice = newNav / pool.tranches[0].totalIssuance.toFloat()
   const isTinlakePool = poolId.startsWith('0x')
 
   const columns = [
@@ -183,7 +237,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       align: 'right',
       header: 'Asset price',
       cell: (row: Row) =>
-        row.id !== 'reserve' ? formatBalance('oldValue' in row ? row.oldValue : 1, pool?.currency.displayName, 8) : '',
+        row.id !== 'reserve'
+          ? formatBalance(
+              'currentPrice' in row && typeof row.currentPrice === 'number' ? row.currentPrice : 0,
+              pool.currency.displayName,
+              8
+            )
+          : '',
     },
     {
       align: 'right',
@@ -196,7 +256,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 {...field}
                 placeholder={row.oldValue.toString()}
                 errorMessage={meta.touched ? meta.error : undefined}
-                currency={pool?.currency.displayName}
+                currency={pool.currency.displayName}
                 onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
                 value={field.value}
                 onClick={(e) => e.preventDefault()}
@@ -212,13 +272,14 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       align: 'right',
       header: 'Value',
       cell: (row: Row) => {
+        if (row.id === 'reserve' && 'value' in row) return formatBalance(row.value || 0, pool.currency.symbol)
         const newValue =
           'value' in row && !Number.isNaN(row.value) && typeof row.value === 'number' && isEditing
             ? row.value
             : undefined
         return 'oldValue' in row
-          ? formatBalance(row.quantity * (newValue ?? row.oldValue), pool?.currency.symbol)
-          : formatBalance(row.outstandingDebt, pool?.currency.symbol)
+          ? formatBalance(row.quantity * (newValue ?? row.oldValue), pool.currency.symbol)
+          : formatBalance(row.outstandingDebt, pool.currency.symbol)
       },
     },
   ]
@@ -231,19 +292,52 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     <Stack pb={8}>
       <FormikProvider value={form}>
         <Drawer isOpen={isConfirming} onClose={() => setIsConfirming(false)}>
-          <ButtonGroup>
-            <Button
-              onClick={() => {
-                form.submitForm()
-                setIsConfirming(false)
-              }}
-            >
-              Confirm NAV
-            </Button>
-            <Button variant="secondary" onClick={() => setIsConfirming(false)}>
-              Cancel
-            </Button>
-          </ButtonGroup>
+          <Stack gap={2}>
+            <Stack gap={2}>
+              <Text variant="heading3">Confirm NAV</Text>
+              <VisualNavCard
+                currency={pool.currency}
+                current={pool.nav.total.toFloat()}
+                change={newNav - pool.nav.total.toFloat()}
+                pendingFees={pendingFees.toFloat()}
+                pendingNav={newNav}
+              />
+            </Stack>
+            {pool.tranches.length === 1 && (
+              <Stack gap={2}>
+                <Text variant="heading3">Token price update</Text>
+                <Shelf bg="backgroundSecondary" p={1} gap={1}>
+                  <Text variant="body2">
+                    {pool.tranches[0].currency.symbol} price:{' '}
+                    {formatBalance(pool.tranches[0].tokenPrice ?? 0, pool.currency.symbol, 5)}
+                  </Text>
+                  <IconArrowRight size={16} />{' '}
+                  <Text variant="body2" color="accentPrimary">
+                    {pool.tranches[0].currency.symbol} price: {formatBalance(newPrice ?? 0, pool.currency.symbol, 5)}
+                  </Text>
+                </Shelf>
+              </Stack>
+            )}
+            <ButtonGroup>
+              <Button
+                onClick={() => {
+                  form.submitForm()
+                  setIsConfirming(false)
+                }}
+              >
+                Update NAV
+              </Button>
+              <Button variant="secondary" onClick={() => setIsConfirming(false)}>
+                Cancel
+              </Button>
+            </ButtonGroup>
+
+            {liquidityAdminAccount && orders?.length ? (
+              <Text variant="body3">
+                There are open investment or redemption orders, updating the NAV will trigger the execution of orders.
+              </Text>
+            ) : null}
+          </Stack>
         </Drawer>
         <LayoutSection
           title="Assets"
@@ -280,7 +374,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             data={[...reserveRow, ...cashLoans, ...form.values.feed]}
             columns={columns}
             onRowClicked={(row) =>
-              row.id !== 'reserve' ? `/issuer/${pool?.id}/assets/${row.id}` : `/nav-management/${pool?.id}`
+              row.id !== 'reserve' ? `/issuer/${pool.id}/assets/${row.id}` : `/nav-management/${pool.id}`
             }
             footer={
               <DataRow>
@@ -296,7 +390,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 {isEditing && <DataCol />}
                 <DataCol>
                   <Text color="accentPrimary" variant="body2">
-                    {formatBalance(newNav, pool?.currency.symbol)}
+                    {formatBalance(newNav, pool.currency.symbol)}
                   </Text>
                 </DataCol>
               </DataRow>

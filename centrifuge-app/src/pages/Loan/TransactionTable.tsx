@@ -122,7 +122,7 @@ export const TransactionTable = ({
           realizedProfitFifo: transaction.realizedProfitFifo,
         }
       })
-  }, [transactions, decimals, pricing])
+  }, [transactions, maturityDate, pricing, decimals])
 
   const getStatusChipType = (type: AssetTransactionType) => {
     if (type === 'BORROWED' || type === 'CREATED' || type === 'PRICED') return 'info'
@@ -137,93 +137,89 @@ export const TransactionTable = ({
     return `${type[0]}${type.slice(1).toLowerCase()}`
   }
 
-  const columns = useMemo(() => {
-    return [
-      {
-        align: 'left',
-        header: 'Type',
-        cell: (row: Row) => <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>,
-      },
-      {
-        align: 'left',
-        header: 'Transaction date',
-        cell: (row: Row) => (
-          <Tooltip
-            title="Transaction date"
-            body={formatDate(row.transactionDate, { hour: 'numeric', minute: 'numeric', second: 'numeric' })}
-          >
-            {formatDate(row.transactionDate)}
-          </Tooltip>
-        ),
-      },
-      ...(poolType === 'Public credit'
-        ? [
-            {
-              align: 'left',
-              header: `Face value (${currency})`,
-              cell: (row: Row) =>
-                row.faceValue
-                  ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceValue, undefined, 2, 2)}`
-                  : '-',
-            },
-            {
-              align: 'left',
-              header: 'Quantity',
-              cell: (row: Row) => (row.quantity ? formatBalance(row.quantity, undefined, 2, 0) : '-'),
-            },
-            {
-              align: 'left',
-              header: `Settle price (${currency})`,
-              cell: (row: Row) => (row.settlePrice ? formatBalance(row.settlePrice, undefined, 6, 2) : '-'),
-            },
-            ...(loanType === 'external' && (pricing as ExternalPricingInfo).notional.gtn(0)
-              ? [
-                  {
-                    align: 'left',
-                    header: <Tooltips type="ytm" />,
-                    cell: (row: Row) =>
-                      !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
-                  },
-                ]
-              : []),
-            {
-              align: 'left',
-              header: `Net cash flow (${currency})`,
-              cell: (row: Row) =>
-                row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
-            },
-            {
-              align: 'left',
-              header: `Realized P&L`,
-              cell: (row: Row) =>
-                row.realizedProfitFifo
-                  ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
-                  : '-',
-            },
-            {
-              align: 'left',
-              header: `Position (${currency})`,
-              cell: (row: Row) => (row.type === 'CREATED' ? '-' : formatBalance(row.position, undefined, 2, 2)),
-            },
-          ]
-        : [
-            {
-              align: 'left',
-              header: `Amount (${currency})`,
-              cell: (row: Row) =>
-                row.amount ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
-            },
-            {
-              align: 'left',
-              header: `Principal (${currency})`,
-              cell: (row: Row) =>
-                row.position
-                  ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}`
-                  : '-',
-            },
-          ]),
-    ] as Column[]
-  }, [])
+  const columns = [
+    {
+      align: 'left',
+      header: 'Type',
+      cell: (row: Row) => <StatusChip status={getStatusChipType(row.type)}>{getStatusText(row.type)}</StatusChip>,
+    },
+    {
+      align: 'left',
+      header: 'Transaction date',
+      cell: (row: Row) => (
+        <Tooltip
+          title="Transaction date"
+          body={formatDate(row.transactionDate, { hour: 'numeric', minute: 'numeric', second: 'numeric' })}
+        >
+          {formatDate(row.transactionDate)}
+        </Tooltip>
+      ),
+    },
+    ...(poolType === 'Public credit'
+      ? [
+          {
+            align: 'left',
+            header: `Face value (${currency})`,
+            cell: (row: Row) =>
+              row.faceValue
+                ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.faceValue, undefined, 2, 2)}`
+                : '-',
+          },
+          {
+            align: 'left',
+            header: 'Quantity',
+            cell: (row: Row) => (row.quantity ? formatBalance(row.quantity, undefined, 2, 0) : '-'),
+          },
+          {
+            align: 'left',
+            header: `Settle price (${currency})`,
+            cell: (row: Row) => (row.settlePrice ? formatBalance(row.settlePrice, undefined, 6, 2) : '-'),
+          },
+          ...(loanType === 'external' && (pricing as ExternalPricingInfo).notional.gtn(0)
+            ? [
+                {
+                  align: 'left',
+                  header: <Tooltips type="ytm" />,
+                  cell: (row: Row) =>
+                    !row.yieldToMaturity || row.yieldToMaturity?.lt(0) ? '-' : formatPercentage(row.yieldToMaturity),
+                },
+              ]
+            : []),
+          {
+            align: 'left',
+            header: `Net cash flow (${currency})`,
+            cell: (row: Row) =>
+              row.amount ? `${row.type === 'BORROWED' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+          },
+          {
+            align: 'left',
+            header: `Realized P&L`,
+            cell: (row: Row) =>
+              row.realizedProfitFifo
+                ? `${row.type !== 'REPAID' ? '-' : ''}${formatBalance(row.realizedProfitFifo, undefined, 2, 2)}`
+                : '-',
+          },
+          {
+            align: 'left',
+            header: `Position (${currency})`,
+            cell: (row: Row) => (row.type === 'CREATED' ? '-' : formatBalance(row.position, undefined, 2, 2)),
+          },
+        ]
+      : [
+          {
+            align: 'left',
+            header: `Amount (${currency})`,
+            cell: (row: Row) =>
+              row.amount ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+          },
+          {
+            align: 'left',
+            header: `Principal (${currency})`,
+            cell: (row: Row) =>
+              row.position ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}` : '-',
+          },
+        ]),
+  ] as Column[]
 
   return <DataTable data={assetTransactions.reverse()} columns={columns} />
 }

@@ -15,8 +15,8 @@ import {
   truncate,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams, useRouteMatch } from 'react-router'
-import { useTheme } from 'styled-components'
+import { useParams } from 'react-router'
+import styled, { useTheme } from 'styled-components'
 import usdcLogo from '../../assets/images/usdc-logo.svg'
 import { AssetSummary } from '../../components/AssetSummary'
 import AssetPerformanceChart from '../../components/Charts/AssetPerformanceChart'
@@ -34,6 +34,7 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, truncateText } from '../../utils/formatting'
+import { useBasePath } from '../../utils/useBasePath'
 import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
@@ -49,14 +50,28 @@ import { TransactionTable } from './TransactionTable'
 import { TransferDebtForm } from './TransferDebtForm'
 import { formatNftAttribute } from './utils'
 
+const FullHeightLayoutBase = styled(LayoutBase)`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`
+
+const FullHeightStack = styled(Stack)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`
+
 export default function LoanPage() {
   return (
-    <LayoutBase>
-      <Loan />
-    </LayoutBase>
+    <FullHeightLayoutBase>
+      <FullHeightStack>
+        <Loan />
+      </FullHeightStack>
+    </FullHeightLayoutBase>
   )
 }
-
 function isTinlakeLoan(loan: LoanType | TinlakeLoan): loan is TinlakeLoan {
   return loan.poolId.startsWith('0x')
 }
@@ -97,15 +112,16 @@ function FinanceButton({ loan }: { loan: LoanType }) {
 function Loan() {
   const theme = useTheme()
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
-  const isTinlakePool = poolId.startsWith('0x')
-  const basePath = useRouteMatch(['/pools', '/issuer'])?.path || ''
+  if (!poolId || !loanId) throw new Error('Loan no found')
+  const isTinlakePool = poolId?.startsWith('0x')
+  const basePath = useBasePath()
   const pool = usePool(poolId)
   const loan = useLoan(poolId, loanId)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useCentNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
-  const borrowerAssetTransactions = useBorrowerAssetTransactions(poolId, loanId)
+  const borrowerAssetTransactions = useBorrowerAssetTransactions(`${poolId}`, `${loanId}`)
 
   const currentFace =
     loan?.pricing && 'outstandingQuantity' in loan.pricing
@@ -132,7 +148,7 @@ function Loan() {
   const originationDate = loan && 'originationDate' in loan ? new Date(loan?.originationDate).toISOString() : undefined
 
   return (
-    <Stack>
+    <FullHeightStack>
       <Box mt={2} ml={2}>
         <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
           {poolMetadata?.pool?.name ?? 'Pool assets'}
@@ -179,7 +195,7 @@ function Loan() {
       {loan &&
         pool &&
         (loan.pricing.maturityDate || templateMetadata?.keyAttributes?.length || 'oracle' in loan.pricing) && (
-          <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4}>
+          <LayoutSection bg={theme.colors.backgroundSecondary} pt={2} pb={4} flex={1}>
             <Grid height="fit-content" gridTemplateColumns={['1fr', '66fr 34fr']} gap={[2, 2]}>
               <React.Suspense fallback={<Spinner />}>
                 <AssetPerformanceChart pool={pool} poolId={poolId} loanId={loanId} />
@@ -236,7 +252,10 @@ function Loan() {
                               const attribute = templateData.attributes?.[key]!
                               const value = publicData[key]
                               const formatted = value ? formatNftAttribute(value, attribute) : '-'
-                              return { label: attribute.label, value: formatted }
+                              return {
+                                label: attribute.label,
+                                value: formatted,
+                              }
                             })}
                         />
                       </Stack>
@@ -275,7 +294,7 @@ function Loan() {
                         poolType={poolMetadata?.pool?.asset.class}
                         decimals={pool.currency.decimals}
                         pricing={loan.pricing as PricingInfo}
-                        maturityDate={new Date(loan.pricing.maturityDate)}
+                        maturityDate={loan.pricing.maturityDate ? new Date(loan.pricing.maturityDate) : undefined}
                         originationDate={originationDate ? new Date(originationDate) : undefined}
                       />
                     </Stack>
@@ -307,6 +326,6 @@ function Loan() {
           </Shelf>
         </PageSection>
       ) : null}
-    </Stack>
+    </FullHeightStack>
   )
 }

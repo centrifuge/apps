@@ -1,6 +1,6 @@
 import { CurrencyBalance, Pool, isSameAddress } from '@centrifuge/centrifuge-js'
-import { useCentrifugeUtils } from '@centrifuge/centrifuge-react'
-import { Text } from '@centrifuge/fabric'
+import { NetworkIcon, useCentrifugeUtils } from '@centrifuge/centrifuge-react'
+import { Box, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -13,7 +13,7 @@ import { Spinner } from '../Spinner'
 import { ReportContext } from './ReportContext'
 import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
-import { copyable } from './utils'
+import { convertCSV, copyable } from './utils'
 
 const noop = (v: any) => v
 
@@ -114,7 +114,10 @@ export function InvestorList({ pool }: { pool: Pool }) {
         return {
           name: '',
           value: [
-            (evmChains as any)[investor.chainId]?.name || 'Centrifuge',
+            <Box display={'flex'}>
+              <NetworkIcon size="iconSmall" network={investor.chainId || 'centrifuge'} />
+              <Text style={{ marginLeft: 4 }}> {(evmChains as any)[investor.chainId]?.name || 'Centrifuge'}</Text>
+            </Box>,
             investor.evmAddress || utils.formatAddress(investor.accountId),
             investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat(),
             (investor.balance.toFloat() + investor.claimableTrancheTokens.toFloat()) / totalPositions,
@@ -130,7 +133,8 @@ export function InvestorList({ pool }: { pool: Pool }) {
       })
       .filter((row) => {
         if (!address) return true
-        return isAddress(address) && isSameAddress(address, row.value[1])
+        const addressValue = row.value[1] as string
+        return isAddress(address) && isSameAddress(address, addressValue)
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [investors, network, pool, address])
@@ -140,9 +144,7 @@ export function InvestorList({ pool }: { pool: Pool }) {
       return
     }
 
-    const formatted = data
-      .map(({ value }) => value as string[])
-      .map((values) => Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`])))
+    const formatted = data.map(({ value: values }) => convertCSV(values, columnConfig))
 
     return getCSVDownloadUrl(formatted)
     // eslint-disable-next-line react-hooks/exhaustive-deps

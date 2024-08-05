@@ -1,5 +1,7 @@
+import { CurrencyKey } from '@centrifuge/centrifuge-js'
 import {
   ConnectionGuard,
+  useCentrifugeApi,
   useCentrifugeTransaction,
   useGetExplorerUrl,
   useGetNetworkName,
@@ -8,12 +10,13 @@ import {
 import { Accordion, Button, IconExternalLink, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useParams } from 'react-router'
+import { combineLatest, switchMap } from 'rxjs'
 import { PageSection } from '../../../components/PageSection'
 import { AnchorTextLink } from '../../../components/TextLink'
 import { find } from '../../../utils/helpers'
 import { useEvmTransaction } from '../../../utils/tinlake/useEvmTransaction'
 import { Domain, useActiveDomains } from '../../../utils/useLiquidityPools'
-import { useSuitableAccounts } from '../../../utils/usePermissions'
+import { usePoolAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 
 function getDomainStatus(domain: Domain) {
@@ -28,6 +31,9 @@ function getDomainStatus(domain: Domain) {
 
 export function LiquidityPools() {
   const { pid: poolId } = useParams<{ pid: string }>()
+
+  if (!poolId) throw new Error('Pool not found')
+
   const { data: domains, refetch } = useActiveDomains(poolId)
   const getName = useGetNetworkName()
 
@@ -60,13 +66,39 @@ export function LiquidityPools() {
 
 function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domain; refetch: () => void }) {
   const pool = usePool(poolId)
+  const poolAdmin = usePoolAdmin(poolId)
   const getName = useGetNetworkName()
   const explorer = useGetExplorerUrl(domain.chainId)
+  const api = useCentrifugeApi()
 
   const status = getDomainStatus(domain)
 
+  const { execute, isLoading } = useCentrifugeTransaction(
+    `Update token prices`,
+    (cent) => (entries: [string, CurrencyKey][], options) => {
+      return combineLatest(
+        entries.map(([tid, curKey]) =>
+          cent.liquidityPools.updateTokenPrice([poolId, tid, curKey, domain.chainId], { batch: true })
+        )
+      ).pipe(
+        switchMap((txs) => {
+          return cent.wrapSignAndSend(api, txs.length > 1 ? api.tx.utility.batchAll(txs) : txs[0], options)
+        })
+      )
+    }
+  )
+
+  function updateTokenPrices() {
+    const entries = Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
+      return domain.currencies
+        .filter((cur) => !!poolsByCurrency[cur.address])
+        .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+    })
+    execute(entries, { account: poolAdmin })
+  }
+
   return (
-    <Stack>
+    <Stack gap={1}>
       {status === 'inactive' ? (
         <EnableButton poolId={poolId} domain={domain} />
       ) : status === 'deploying' ? (
@@ -103,6 +135,11 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
             </Shelf>
           </AnchorTextLink>
         ))
+      )}
+      {domain.hasDeployedLp && (
+        <Button onClick={updateTokenPrices} loading={isLoading} small>
+          Update token prices
+        </Button>
       )}
     </Stack>
   )
@@ -166,7 +203,7 @@ function DeployLPButton({
 }
 
 function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
-  const [account] = useSuitableAccounts({ poolId, poolRole: ['PoolAdmin'] })
+  const poolAdmin = usePoolAdmin(poolId)
   const name = useNetworkName(domain.chainId)
   const { execute, isLoading } = useCentrifugeTransaction(
     `Enable ${name}`,
@@ -178,7 +215,11 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
     .map((cur) => cur.key)
 
   return (
-    <Button loading={isLoading} onClick={() => execute([poolId, domain.chainId, currenciesToAdd], { account })} small>
+    <Button
+      loading={isLoading}
+      onClick={() => execute([poolId, domain.chainId, currenciesToAdd], { account: poolAdmin })}
+      small
+    >
       Enable
     </Button>
   )

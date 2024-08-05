@@ -1,4 +1,5 @@
 export const grayScale = {
+  50: '#fbfbfb',
   100: '#f5f5f5',
   300: '#e0e0e0',
   500: '#9e9e9e',

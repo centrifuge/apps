@@ -27,7 +27,7 @@ import {
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { Redirect, useHistory, useParams } from 'react-router'
+import { Navigate, useNavigate, useParams } from 'react-router'
 import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LayoutBase } from '../../../components/LayoutBase'
@@ -165,9 +165,10 @@ function TemplateField({ label, name, input }: TemplateFieldProps) {
 
 function IssuerCreateLoan() {
   const { pid } = useParams<{ pid: string }>()
+  if (!pid) throw new Error('Pool not found')
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
-  const history = useHistory()
+  const navigate = useNavigate()
   const centrifuge = useCentrifuge()
 
   const {
@@ -274,6 +275,17 @@ function IssuerCreateLoan() {
           notional: CurrencyBalance.fromFloat(values.pricing.notional, decimals),
           withLinearPricing: values.pricing.withLinearPricing,
         }
+      } else if (values.pricing.valuationMethod === 'outstandingDebt') {
+        pricingInfo = {
+          valuationMethod: values.pricing.valuationMethod,
+          maxBorrowAmount: values.pricing.maxBorrowAmount,
+          value: CurrencyBalance.fromFloat(values.pricing.value, decimals),
+          maturityDate: values.pricing.maturity !== 'none' ? new Date(values.pricing.maturityDate) : null,
+          maturityExtensionDays:
+            values.pricing.maturity === 'fixedWithExtension' ? values.pricing.maturityExtensionDays : null,
+          advanceRate: Rate.fromPercent(values.pricing.advanceRate),
+          interestRate: Rate.fromPercent(values.pricing.interestRate),
+        }
       } else {
         pricingInfo = {
           valuationMethod: values.pricing.valuationMethod,
@@ -333,7 +345,7 @@ function IssuerCreateLoan() {
   }, [form.values])
 
   if (redirect) {
-    return <Redirect to={redirect} />
+    return <Navigate to={redirect} />
   }
 
   const isPending = isTxLoading || form.isSubmitting
@@ -455,7 +467,7 @@ function IssuerCreateLoan() {
           <PageSection>
             <Shelf gap={1} justifyContent="end">
               {errorMessage && <Text color="criticalPrimary">{errorMessage}</Text>}
-              <Button variant="secondary" onClick={() => history.goBack()}>
+              <Button variant="secondary" onClick={() => navigate(-1)}>
                 Cancel
               </Button>
               <Button

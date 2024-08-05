@@ -19,7 +19,7 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Redirect } from 'react-router'
+import { Navigate } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
 import { Dec } from '../../utils/Decimal'
@@ -33,7 +33,7 @@ const CREATE_FEE_ESTIMATE = 2
 const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
-export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+export function CreateCollectionDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [name, setName] = React.useState<string>('')
   const [description, setDescription] = React.useState<string>('')
   const [logo, setLogo] = React.useState<File | null>(null)
@@ -116,7 +116,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const disabled = !isConnected || !name.trim() || !description.trim() || balanceLow || isTxPending
 
   if (redirect) {
-    return <Redirect to={redirect} />
+    return <Navigate to={redirect} />
   }
 
   const confirmDisabled = !termsAccepted
