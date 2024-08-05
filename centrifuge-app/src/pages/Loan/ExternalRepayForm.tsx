@@ -150,47 +150,52 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   return (
     <FormikProvider value={repayForm}>
       <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-        <Field validate={combine(nonNegativeNumberNotRequired())} name="quantity">
-          {({ field, meta, form }: FieldProps) => {
-            return (
-              <CurrencyInput
-                {...field}
-                label="Quantity"
-                disabled={isRepayLoading}
-                errorMessage={meta.touched ? meta.error : undefined}
-                decimals={8}
-                onChange={(value) => form.setFieldValue('quantity', value)}
-                currency={displayCurrency}
-              />
-            )
-          }}
-        </Field>
-        <Field
-          validate={combine(
-            nonNegativeNumberNotRequired(),
-            maxNotRequired(
-              maxAvailable.toNumber(),
-              `Quantity x price (${formatBalance(
-                Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0),
-                displayCurrency
-              )}) exceeds available debt (${formatBalance(maxAvailable, displayCurrency)})`
-            )
-          )}
-          name="price"
-        >
-          {({ field, form }: FieldProps) => {
-            return (
-              <CurrencyInput
-                {...field}
-                label="Settlement price"
-                disabled={isRepayLoading}
-                currency={displayCurrency}
-                onChange={(value) => form.setFieldValue('price', value)}
-                decimals={8}
-              />
-            )
-          }}
-        </Field>
+        <Shelf gap={1}>
+          <Field validate={combine(nonNegativeNumberNotRequired())} name="quantity">
+            {({ field, form }: FieldProps) => {
+              return (
+                <CurrencyInput
+                  {...field}
+                  label="Quantity"
+                  disabled={isRepayLoading}
+                  decimals={8}
+                  onChange={(value) => form.setFieldValue('quantity', value)}
+                  onSetMax={() =>
+                    form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
+                  }
+                  secondaryLabel={`${loan.pricing.outstandingQuantity.toDecimal().toFixed(2).toString()} outstanding`}
+                />
+              )
+            }}
+          </Field>
+          <Field
+            validate={combine(
+              nonNegativeNumberNotRequired(),
+              maxNotRequired(
+                maxAvailable.toNumber(),
+                `Quantity x price (${formatBalance(
+                  Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0),
+                  displayCurrency
+                )}) exceeds available debt (${formatBalance(maxAvailable, displayCurrency)})`
+              )
+            )}
+            name="price"
+          >
+            {({ field, form }: FieldProps) => {
+              return (
+                <CurrencyInput
+                  {...field}
+                  label="Settlement price"
+                  disabled={isRepayLoading}
+                  currency={displayCurrency}
+                  onChange={(value) => form.setFieldValue('price', value)}
+                  decimals={8}
+                  secondaryLabel={'\u200B'} // zero width space
+                />
+              )
+            }}
+          </Field>
+        </Shelf>
         {'outstandingInterest' in loan && loan.outstandingInterest.toDecimal().gt(0) && (
           <Field
             validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(maxInterest.toNumber()))}
@@ -202,7 +207,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   {...field}
                   value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                   label="Interest"
-                  errorMessage={meta.touched ? meta.error : undefined}
                   secondaryLabel={`${formatBalance(loan.outstandingInterest, displayCurrency, 2)} interest accrued`}
                   disabled={isRepayLoading}
                   currency={displayCurrency}
@@ -277,7 +281,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             </InlineFeedback>
           </Box>
         )}
-        <Stack gap={1} px={1}>
+        <Stack gap={1}>
           <Button
             type="submit"
             disabled={

@@ -190,6 +190,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('principal', value)}
                   onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
+                  secondaryLabel={`${formatBalance(maxAvailable, displayCurrency)} outstanding`}
                 />
               )
             }}
@@ -306,7 +307,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               </InlineFeedback>
             </Box>
           )}
-          <Stack gap={1} px={1}>
+          <Stack gap={1}>
             <Button
               type="submit"
               disabled={!poolFees.isValid(repayForm) || !repayForm.isValid || maxAvailable.eq(0)}

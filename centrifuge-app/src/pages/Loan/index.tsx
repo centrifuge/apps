@@ -82,12 +82,12 @@ function ActionButtons({ loan }: { loan: LoanType }) {
   if (!loan || !canBorrow || isTinlakeLoan(loan) || !canBorrow || loan.status === 'Closed') return null
   return (
     <>
-      <Drawer isOpen={financeShown} onClose={() => setFinanceShown(false)}>
+      <Drawer isOpen={financeShown} onClose={() => setFinanceShown(false)} innerPaddingTop={2}>
         <LoadBoundary>
           <FinanceForm loan={loan} />
         </LoadBoundary>
       </Drawer>
-      <Drawer isOpen={repayShown} onClose={() => setRepayShown(false)}>
+      <Drawer isOpen={repayShown} onClose={() => setRepayShown(false)} innerPaddingTop={2}>
         <LoadBoundary>
           <Stack gap={2}>
             <RepayForm loan={loan} />
@@ -96,12 +96,17 @@ function ActionButtons({ loan }: { loan: LoanType }) {
       </Drawer>
 
       <Shelf gap={2}>
-        <Button onClick={() => setFinanceShown(true)} small>
-          {isCashLoan(loan) ? 'Deposit' : isExternalLoan(loan) ? 'Purchase' : 'Finance'}
-        </Button>
-        <Button onClick={() => setRepayShown(true)} small>
-          {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
-        </Button>
+        {!(loan.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)) ||
+        !loan.pricing.maturityDate ? (
+          <Button onClick={() => setFinanceShown(true)} small>
+            {isCashLoan(loan) ? 'Deposit' : isExternalLoan(loan) ? 'Purchase' : 'Finance'}
+          </Button>
+        ) : null}
+        {loan.outstandingDebt.gtn(0) && (
+          <Button onClick={() => setRepayShown(true)} small>
+            {isCashLoan(loan) ? 'Withdraw' : isExternalLoan(loan) ? 'Sell' : 'Repay'}
+          </Button>
+        )}
       </Shelf>
     </>
   )

@@ -113,53 +113,51 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
     return null
   }
 
-  const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
-
   return (
     <>
-      {!maturityDatePassed && (
+      {
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-            <Field name="quantity" validate={combine(required(), positiveNumber())}>
-              {({ field, meta, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    label="Quantity"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    decimals={8}
-                    onChange={(value) => form.setFieldValue('quantity', value)}
-                  />
-                )
-              }}
-            </Field>
-            <Field
-              name="price"
-              validate={combine(
-                required(),
-                positiveNumber(),
-                (val) => {
-                  const financeAmount = Dec(val).mul(financeForm.values.quantity || 1)
-                  return financeAmount.gt(maxAvailable)
-                    ? `Amount exceeds available (${formatBalance(maxAvailable, displayCurrency, 2)})`
-                    : ''
-                },
-                maxPriceVariance(loan.pricing)
-              )}
-            >
-              {({ field, meta, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    label="Settlement price"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    currency={displayCurrency}
-                    onChange={(value) => form.setFieldValue('price', value)}
-                    decimals={8}
-                  />
-                )
-              }}
-            </Field>
+            <Shelf gap={1}>
+              <Field name="quantity" validate={combine(required(), positiveNumber())}>
+                {({ field, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Quantity"
+                      decimals={8}
+                      onChange={(value) => form.setFieldValue('quantity', value)}
+                    />
+                  )
+                }}
+              </Field>
+              <Field
+                name="price"
+                validate={combine(
+                  required(),
+                  positiveNumber(),
+                  (val) => {
+                    const financeAmount = Dec(val).mul(financeForm.values.quantity || 1)
+                    return financeAmount.gt(maxAvailable)
+                      ? `Amount exceeds available (${formatBalance(maxAvailable, displayCurrency, 2)})`
+                      : ''
+                  },
+                  maxPriceVariance(loan.pricing)
+                )}
+              >
+                {({ field, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Settlement price"
+                      currency={displayCurrency}
+                      onChange={(value) => form.setFieldValue('price', value)}
+                      decimals={8}
+                    />
+                  )
+                }}
+              </Field>
+            </Shelf>
             {source === 'reserve' && withdraw.render()}
             <Box bg="statusDefaultBg" p={1}>
               {source === 'reserve' ? (
@@ -202,7 +200,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                 </InlineFeedback>
               </Box>
             )}
-            <Stack px={1}>
+            <Stack>
               <Button
                 type="submit"
                 loading={isFinanceLoading}
@@ -215,7 +213,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
             </Stack>
           </Stack>
         </FormikProvider>
-      )}
+      }
     </>
   )
 }
