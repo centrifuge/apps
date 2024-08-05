@@ -5,7 +5,7 @@ import { Codec } from '@polkadot/types-codec/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
-import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
+import { combineLatestWith, filter, last, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -2671,20 +2671,24 @@ export function getPoolsModule(inst: Centrifuge) {
         })
       )
       .pipe(
+        last(),
         map(({ snapshotPeriods }) => {
           if (!snapshotPeriods) {
             return []
           }
-          return snapshotPeriods.map(
+          return snapshotPeriods.flatMap(
             ({
               timestamp,
               poolSnapshots: {
                 aggregates: { sum },
               },
-            }) => ({
-              dateInMilliseconds: new Date(timestamp).getTime(),
-              tvl: new CurrencyBalance(sum.normalizedNAV || '0', 18).toDecimal(),
-            })
+            }) =>
+              sum.normalizedNAV === '0'
+                ? []
+                : {
+                    dateInMilliseconds: new Date(timestamp).getTime(),
+                    tvl: new CurrencyBalance(sum.normalizedNAV, 18).toDecimal(),
+                  }
           )
         })
       )
