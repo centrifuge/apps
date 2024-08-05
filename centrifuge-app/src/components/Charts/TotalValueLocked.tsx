@@ -24,7 +24,7 @@ export default function TotalValueLocked({ chainTVL, setHovered }: TotalValueLoc
 
     const currentTVL = chainTVL
       ? {
-          dateInMilliseconds: new Date().setHours(0, 0, 0, 0),
+          dateInMilliseconds: new Date().setUTCHours(0, 0, 0, 0),
           tvl: chainTVL,
         }
       : undefined

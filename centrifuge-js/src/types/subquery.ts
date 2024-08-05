@@ -26,7 +26,6 @@ export type SubqueryPoolSnapshot = {
   sumUnrealizedProfitAtMarketPrice: string
   sumUnrealizedProfitAtNotional: string
   sumUnrealizedProfitByPeriod: string
-  periodStart: string
   pool: {
     currency: {
       decimals: number

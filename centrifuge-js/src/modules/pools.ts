@@ -2265,43 +2265,44 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getPoolSnapshotGroupedAggregatesWithCursor(
-    poolId: string,
-    endCursor: string | null,
-    options?: { from?: Date; to?: Date; orderBy?: 'BLOCK_NUMBER_ASC' | 'PERIOD_START_ASC' }
-  ) {
+  function getTVLSnapshotsWithCursor(afterCursor: string | null) {
     return inst.getSubqueryObservable<{
-      poolSnapshots: {
-        groupedAggregates: { keys: string[]; sum: { normalizedNAV: string } }[]
+      snapshotPeriods: {
+        nodes: {
+          timestamp: string
+          poolSnapshots: {
+            aggregates: {
+              sum: {
+                normalizedNAV: string
+              }
+            }
+          }
+        }[]
         pageInfo: { hasNextPage: boolean; endCursor: string }
       }
     }>(
-      `query($poolId: String!, $from: Datetime!, $to: Datetime!, $poolCursor: Cursor) {
-        poolSnapshots(
-          filter: {
-            id: { startsWith: $poolId },
-            timestamp: { greaterThan: $from, lessThan: $to }
-          }
-          after: $poolCursor
-        ) {
-          groupedAggregates(groupBy: [TIMESTAMP]) {
-            keys
-            sum {
-              normalizedNAV
+      `query($afterCursor: Cursor) {
+        snapshotPeriods(orderBy: START_ASC, after: $afterCursor, first: 1000) {
+          nodes {
+            timestamp: id
+            poolSnapshots {
+              aggregates {
+                sum {
+                  normalizedNAV
+                }
+              }
             }
           }
           pageInfo {
-            hasNextPage
             endCursor
+            hasNextPage
           }
         }
       }`,
       {
-        poolId,
-        from: options?.from ? options.from.toISOString() : getDateYearsFromNow(-10).toISOString(),
-        to: options?.to ? options.to.toISOString() : getDateYearsFromNow(10).toISOString(),
-        poolCursor: endCursor,
-      }
+        afterCursor,
+      },
+      false
     )
   }
 
@@ -2347,7 +2348,6 @@ export function getPoolsModule(inst: Centrifuge) {
           sumUnrealizedProfitAtMarketPrice
           sumUnrealizedProfitAtNotional
           sumUnrealizedProfitByPeriod
-          periodStart
           pool {
             currency {
               decimals
@@ -2367,7 +2367,8 @@ export function getPoolsModule(inst: Centrifuge) {
         to: options?.to ? options.to.toISOString() : getDateYearsFromNow(10).toISOString(),
         poolCursor: endCursor,
         orderBy: options?.orderBy || null,
-      }
+      },
+      false
     )
   }
 
@@ -2484,27 +2485,18 @@ export function getPoolsModule(inst: Centrifuge) {
         expand(({ poolSnapshots, endCursor, hasNextPage }) => {
           if (!hasNextPage) return EMPTY
           return getPoolSnapshotsWithCursor(poolId, endCursor, { from, to, orderBy: 'BLOCK_NUMBER_ASC' }).pipe(
-            map(
-              (
-                response: {
-                  poolSnapshots: {
-                    nodes: SubqueryPoolSnapshot[]
-                    pageInfo: { hasNextPage: boolean; endCursor: string }
-                  }
-                } | null
-              ) => {
-                if (response?.poolSnapshots) {
-                  const { endCursor, hasNextPage } = response.poolSnapshots.pageInfo
+            map((response) => {
+              if (response?.poolSnapshots) {
+                const { endCursor, hasNextPage } = response.poolSnapshots.pageInfo
 
-                  return {
-                    endCursor,
-                    hasNextPage,
-                    poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.nodes],
-                  }
+                return {
+                  endCursor,
+                  hasNextPage,
+                  poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.nodes],
                 }
-                return {}
               }
-            )
+              return {} as never
+            })
           )
         })
       ),
@@ -2533,16 +2525,20 @@ export function getPoolsModule(inst: Centrifuge) {
         const trancheStates: Record<string, { timestamp: string; tokenPrice: Price }[]> = {}
         trancheSnapshots?.forEach((state) => {
           const tid = state.tranche.trancheId
-          const entry = { timestamp: state.timestamp, tokenPrice: new Price(state.tokenPrice) }
+          const entry = { timestamp: state.timestamp.slice(0, 10), tokenPrice: new Price(state.tokenPrice) }
           if (trancheStates[tid]) {
             trancheStates[tid].push(entry)
           } else {
             trancheStates[tid] = [entry]
           }
         })
+        const poolSeenDay = new Set<string>()
         return {
           poolStates:
-            poolSnapshots?.map((state) => {
+            poolSnapshots?.flatMap((state) => {
+              if (poolSeenDay.has(state.timestamp.slice(0, 10))) return []
+              poolSeenDay.add(state.timestamp.slice(0, 10))
+
               const poolState = {
                 id: state.id,
                 netAssetValue: new CurrencyBalance(state.netAssetValue, poolCurrency.decimals),
@@ -2604,7 +2600,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
               // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
               const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp === state.timestamp)
-
+              if (!trancheSnapshotsToday?.length) return []
               const tranches: { [trancheId: string]: DailyTrancheState } = {}
               trancheSnapshotsToday?.forEach((tranche) => {
                 const tid = tranche.tranche.trancheId
@@ -2655,59 +2651,41 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function getDailyTVL() {
-    return of({ poolSnapshots: [], endCursor: null, hasNextPage: true })
+    return of({ snapshotPeriods: [], endCursor: null, hasNextPage: true })
       .pipe(
-        expand(({ poolSnapshots, endCursor, hasNextPage }) => {
+        expand(({ snapshotPeriods, endCursor, hasNextPage }) => {
           if (!hasNextPage) return EMPTY
-          return getPoolSnapshotGroupedAggregatesWithCursor('', endCursor, { orderBy: 'PERIOD_START_ASC' }).pipe(
-            map(
-              (
-                response: {
-                  poolSnapshots: {
-                    pageInfo: { hasNextPage: boolean; endCursor: string }
-                    groupedAggregates: { keys: string[]; sum: { normalizedNAV: string } }[]
-                  }
-                } | null
-              ) => {
-                if (response?.poolSnapshots) {
-                  const { endCursor, hasNextPage } = response.poolSnapshots.pageInfo
-
-                  return {
-                    endCursor,
-                    hasNextPage,
-                    poolSnapshots: [...poolSnapshots, ...response.poolSnapshots.groupedAggregates],
-                  }
+          return getTVLSnapshotsWithCursor(endCursor).pipe(
+            map((response) => {
+              if (response?.snapshotPeriods) {
+                const { endCursor, hasNextPage } = response.snapshotPeriods.pageInfo
+                return {
+                  endCursor,
+                  hasNextPage,
+                  snapshotPeriods: [...snapshotPeriods, ...response.snapshotPeriods.nodes],
                 }
-                return {}
               }
-            )
+              return {} as never
+            })
           )
         })
       )
       .pipe(
-        map(({ poolSnapshots }) => {
-          if (!poolSnapshots) {
+        map(({ snapshotPeriods }) => {
+          if (!snapshotPeriods) {
             return []
           }
-
-          const mergedMap = new Map()
-          const formatted = poolSnapshots
-            .map(({ keys, sum }) => ({
-              dateInMilliseconds: new Date(keys[0]).getTime(),
+          return snapshotPeriods.map(
+            ({
+              timestamp,
+              poolSnapshots: {
+                aggregates: { sum },
+              },
+            }) => ({
+              dateInMilliseconds: new Date(timestamp).getTime(),
               tvl: new CurrencyBalance(sum.normalizedNAV || '0', 18).toDecimal(),
-              // tvl: sum.normalizedNAV,
-            }))
-            .sort((a, b) => a.dateInMilliseconds - b.dateInMilliseconds)
-          formatted.forEach((entry) => {
-            const { dateInMilliseconds, tvl } = entry
-
-            if (mergedMap.has(dateInMilliseconds)) {
-              mergedMap.set(dateInMilliseconds, mergedMap.get(dateInMilliseconds).add(tvl))
-            } else {
-              mergedMap.set(dateInMilliseconds, tvl)
-            }
-          })
-          return Array.from(mergedMap, ([dateInMilliseconds, tvl]) => ({ dateInMilliseconds, tvl }))
+            })
+          )
         })
       )
   }
