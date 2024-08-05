@@ -97,6 +97,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
   const api = useCentrifugeApi()
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const loans = useLoans(loan.poolId)
+  const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
   const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
@@ -195,7 +196,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label={isCashLoan(loan) ? 'Amount' : 'Principal'}
-                    currency={pool?.currency.symbol}
+                    currency={displayCurrency}
                     onChange={(value) => form.setFieldValue('principal', value)}
                     onSetMax={
                       maxAvailable !== UNLIMITED ? () => form.setFieldValue('principal', maxAvailable) : undefined
@@ -242,15 +243,15 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               <Box bg="statusWarningBg">
                 <InlineFeedback status="warning">
                   <Text color="statusWarning">
-                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
-                    than the available financing
+                    The pool&apos;s available reserve ({formatBalance(poolReserve, displayCurrency)}) is smaller than
+                    the available financing
                   </Text>
                 </InlineFeedback>
               </Box>
             )}
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Total amount</Text>
-              <Text variant="emphasized">{formatBalance(totalFinance, pool?.currency.symbol, 2)}</Text>
+              <Text variant="emphasized">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
             </Shelf>
 
             {poolFees.renderSummary()}
@@ -258,15 +259,15 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Available</Text>
               <Text variant="emphasized">
-                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, pool?.currency.symbol, 2)}
+                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
               </Text>
             </Shelf>
             {totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable) && (
               <Box bg="statusCriticalBg" p={1}>
                 <InlineFeedback status="critical">
                   <Text color="statusCritical">
-                    Available financing ({formatBalance(maxAvailable, pool?.currency.symbol, 2)}) is smaller than the
-                    total principal ({formatBalance(totalFinance, pool.currency.symbol)}).
+                    Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
+                    principal ({formatBalance(totalFinance, displayCurrency)}).
                   </Text>
                 </InlineFeedback>
               </Box>

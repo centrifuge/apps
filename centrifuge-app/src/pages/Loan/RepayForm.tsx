@@ -32,7 +32,7 @@ export type RepayValues = {
   amountAdditional: number | '' | Decimal
   interest: number | '' | Decimal
   fees: { id: string; amount: number | '' | Decimal }[]
-  category: 'correction' | 'miscellaneous' | undefined
+  category: 'correction' | 'miscellaneous' | 'tax' | undefined
 }
 
 const UNLIMITED = Dec(1000000000000000)
@@ -70,6 +70,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
   const loans = useLoans(loan.poolId)
   const api = useCentrifugeApi()
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
+  const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     isCashLoan(loan) ? 'Withdraw funds' : 'Repay asset',
@@ -186,7 +187,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                   label={isCashLoan(loan) ? 'Amount' : 'Principal'}
                   disabled={isRepayLoading}
-                  currency={pool?.currency.symbol}
+                  currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('principal', value)}
                   onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
                 />
@@ -207,13 +208,9 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Interest"
-                    secondaryLabel={`${formatBalance(
-                      loan.outstandingInterest,
-                      pool?.currency.symbol,
-                      2
-                    )} interest accrued`}
+                    secondaryLabel={`${formatBalance(loan.outstandingInterest, displayCurrency, 2)} interest accrued`}
                     disabled={isRepayLoading}
-                    currency={pool?.currency.symbol}
+                    currency={displayCurrency}
                     onChange={(value) => form.setFieldValue('interest', value)}
                     onSetMax={() => form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)}
                   />
@@ -236,7 +233,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                     label="Additional amount"
                     disabled={isRepayLoading}
-                    currency={pool?.currency.symbol}
+                    currency={displayCurrency}
                     onChange={(value) => form.setFieldValue('amountAdditional', value)}
                   />
                 )
@@ -251,6 +248,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                     options={[
                       { label: 'Correction', value: 'correction' },
                       { label: 'Miscellaneous', value: 'miscellaneous' },
+                      { label: 'Tax', value: 'tax' },
                     ]}
                     label="Category"
                     {...field}
@@ -276,7 +274,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
           <Stack gap={1}>
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Total amount</Text>
-              <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
+              <Text variant="emphasized">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
             </Shelf>
 
             {poolFees.renderSummary()}
@@ -284,7 +282,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             <Shelf justifyContent="space-between">
               <Text variant="emphasized">Available</Text>
               <Text variant="emphasized">
-                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, pool?.currency.symbol, 2)}
+                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
               </Text>
             </Shelf>
           </Stack>
@@ -292,8 +290,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             <Box bg="statusWarningBg" p={1}>
               <InlineFeedback status="warning">
                 <Text color="statusWarning">
-                  Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than
-                  the outstanding balance ({formatBalance(maxAvailable, pool.currency.symbol)}).
+                  Your wallet balance ({formatBalance(roundDown(balance), displayCurrency, 2)}) is smaller than the
+                  outstanding balance ({formatBalance(maxAvailable, displayCurrency)}).
                 </Text>
               </InlineFeedback>
             </Box>
@@ -302,8 +300,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             <Box bg="statusCriticalBg" p={1}>
               <InlineFeedback status="critical">
                 <Text color="statusCritical">
-                  Available debt ({formatBalance(maxAvailable, pool?.currency.symbol, 2)}) is smaller than the total
-                  amount ({formatBalance(totalRepay, pool.currency.symbol)}).
+                  Available debt ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total amount (
+                  {formatBalance(totalRepay, displayCurrency)}).
                 </Text>
               </InlineFeedback>
             </Box>

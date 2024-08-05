@@ -41,6 +41,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
   const api = useCentrifugeApi()
   const loans = useLoans(loan.poolId)
   const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
+  const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Purchase asset',
     (cent) => (args: [poolId: string, loanId: string, quantity: Price, price: CurrencyBalance], options) => {
@@ -140,7 +141,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                 (val) => {
                   const financeAmount = Dec(val).mul(financeForm.values.quantity || 1)
                   return financeAmount.gt(maxAvailable)
-                    ? `Amount exceeds available (${formatBalance(maxAvailable, pool.currency.symbol, 2)})`
+                    ? `Amount exceeds available (${formatBalance(maxAvailable, displayCurrency, 2)})`
                     : ''
                 },
                 maxPriceVariance(loan.pricing)
@@ -152,7 +153,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                     {...field}
                     label="Settlement price"
                     errorMessage={meta.touched ? meta.error : undefined}
-                    currency={pool.currency.symbol}
+                    currency={displayCurrency}
                     onChange={(value) => form.setFieldValue('price', value)}
                     decimals={8}
                   />
@@ -180,14 +181,14 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Total amount</Text>
-                <Text variant="emphasized">{formatBalance(totalFinance, pool?.currency.symbol, 2)}</Text>
+                <Text variant="emphasized">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
               </Shelf>
 
               {poolFees.renderSummary()}
 
               <Shelf justifyContent="space-between">
                 <Text variant="emphasized">Available</Text>
-                <Text variant="emphasized">{formatBalance(maxAvailable, pool?.currency.symbol, 2)}</Text>
+                <Text variant="emphasized">{formatBalance(maxAvailable, displayCurrency, 2)}</Text>
               </Shelf>
             </Stack>
 
@@ -195,8 +196,8 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               <Box bg="statusCriticalBg" p={1}>
                 <InlineFeedback status="critical">
                   <Text color="statusCritical">
-                    Available financing ({formatBalance(maxAvailable, pool?.currency.symbol, 2)}) is smaller than the
-                    total principal ({formatBalance(totalFinance, pool.currency.symbol)}).
+                    Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
+                    principal ({formatBalance(totalFinance, displayCurrency)}).
                   </Text>
                 </InlineFeedback>
               </Box>

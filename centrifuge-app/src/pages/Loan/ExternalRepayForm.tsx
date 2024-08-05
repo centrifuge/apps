@@ -38,6 +38,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const poolFees = useChargePoolFees(loan.poolId, loan.id)
   const loans = useLoans(loan.poolId)
   const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
+  const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Sell asset',
@@ -159,7 +160,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                 errorMessage={meta.touched ? meta.error : undefined}
                 decimals={8}
                 onChange={(value) => form.setFieldValue('quantity', value)}
-                currency={pool.currency.symbol}
+                currency={displayCurrency}
               />
             )
           }}
@@ -171,8 +172,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               maxAvailable.toNumber(),
               `Quantity x price (${formatBalance(
                 Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0),
-                pool.currency.symbol
-              )}) exceeds available debt (${formatBalance(maxAvailable, pool.currency.symbol)})`
+                displayCurrency
+              )}) exceeds available debt (${formatBalance(maxAvailable, displayCurrency)})`
             )
           )}
           name="price"
@@ -183,7 +184,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                 {...field}
                 label="Settlement price"
                 disabled={isRepayLoading}
-                currency={pool.currency.symbol}
+                currency={displayCurrency}
                 onChange={(value) => form.setFieldValue('price', value)}
                 decimals={8}
               />
@@ -202,13 +203,9 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                   label="Interest"
                   errorMessage={meta.touched ? meta.error : undefined}
-                  secondaryLabel={`${formatBalance(
-                    loan.outstandingInterest,
-                    pool?.currency.symbol,
-                    2
-                  )} interest accrued`}
+                  secondaryLabel={`${formatBalance(loan.outstandingInterest, displayCurrency, 2)} interest accrued`}
                   disabled={isRepayLoading}
-                  currency={pool?.currency.symbol}
+                  currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('interest', value)}
                   onSetMax={() => form.setFieldValue('interest', maxInterest.toNumber())}
                 />
@@ -227,7 +224,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                 value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
                 label="Additional amount"
                 disabled={isRepayLoading}
-                currency={pool?.currency.symbol}
+                currency={displayCurrency}
                 onChange={(value) => form.setFieldValue('amountAdditional', value)}
               />
             )
@@ -250,22 +247,22 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         <Stack gap={1}>
           <Shelf justifyContent="space-between">
             <Text variant="emphasized">Total amount</Text>
-            <Text variant="emphasized">{formatBalance(totalRepay, pool?.currency.symbol, 2)}</Text>
+            <Text variant="emphasized">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
           </Shelf>
 
           {poolFees.renderSummary()}
 
           <Shelf justifyContent="space-between">
             <Text variant="emphasized">Available</Text>
-            <Text variant="emphasized">{formatBalance(maxAvailable, pool?.currency.symbol, 2)}</Text>
+            <Text variant="emphasized">{formatBalance(maxAvailable, displayCurrency, 2)}</Text>
           </Shelf>
         </Stack>
         {balance.lessThan(debt) && destination === 'reserve' && (
           <Box bg="statusWarningBg" p={1}>
             <InlineFeedback status="warning">
               <Text color="statusWarning">
-                Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than the
-                outstanding balance ({formatBalance(debt, pool.currency.symbol)}).
+                Your wallet balance ({formatBalance(roundDown(balance), displayCurrency, 2)}) is smaller than the
+                outstanding balance ({formatBalance(debt, displayCurrency)}).
               </Text>
             </InlineFeedback>
           </Box>
@@ -274,8 +271,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
               <Text color="statusCritical">
-                The amount ({formatBalance(roundDown(totalRepay), pool?.currency.symbol, 2)}) is greater than the
-                available debt ({formatBalance(maxAvailable, pool.currency.symbol)}).
+                The amount ({formatBalance(roundDown(totalRepay), displayCurrency, 2)}) is greater than the available
+                debt ({formatBalance(maxAvailable, displayCurrency)}).
               </Text>
             </InlineFeedback>
           </Box>
