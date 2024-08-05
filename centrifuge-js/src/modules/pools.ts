@@ -19,6 +19,7 @@ import {
   SubqueryCurrencyBalances,
   SubqueryInvestorTransaction,
   SubqueryOracleTransaction,
+  SubqueryPoolAssetSnapshot,
   SubqueryPoolFeeSnapshot,
   SubqueryPoolFeeTransaction,
   SubqueryPoolSnapshot,
@@ -849,7 +850,6 @@ export type AssetSnapshot = {
     id: string
     lossGivenDefault: Rate
     actualMaturityDate: number
-    metadata: string
     name: string
     probabilityOfDefault: Rate
     status: string
@@ -867,7 +867,20 @@ export type AssetSnapshot = {
   outstandingInterest: CurrencyBalance | undefined
   outstandingDebt: CurrencyBalance | undefined
   outstandingQuantity: CurrencyBalance | undefined
-  totalBorrowed: CurrencyBalance | undefined
+  totalRepaidPrincipal: CurrencyBalance | undefined
+  totalRepaidInterest: CurrencyBalance | undefined
+  totalRepaidUnscheduled: CurrencyBalance | undefined
+}
+
+export type AssetPoolSnapshot = {
+  timestamp: Date
+  assetId: string
+  presentValue: CurrencyBalance | undefined
+  currentPrice: CurrencyBalance | undefined
+  outstandingPrincipal: CurrencyBalance | undefined
+  outstandingInterest: CurrencyBalance | undefined
+  outstandingDebt: CurrencyBalance | undefined
+  outstandingQuantity: CurrencyBalance | undefined
   totalRepaidPrincipal: CurrencyBalance | undefined
   totalRepaidInterest: CurrencyBalance | undefined
   totalRepaidUnscheduled: CurrencyBalance | undefined
@@ -3189,7 +3202,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const [poolId, loanId, from, to] = args
 
     const $query = inst.getSubqueryObservable<{
-      assetSnapshots: { nodes: SubqueryAssetSnapshot[] }
+      assetSnapshots: { nodes: SubqueryPoolAssetSnapshot[] }
     }>(
       `query($assetId: String!, $from: Datetime!, $to: Datetime!) {
         assetSnapshots(
@@ -3253,7 +3266,7 @@ export function getPoolsModule(inst: Centrifuge) {
             ? new CurrencyBalance(tx.totalRepaidUnscheduled, currency.decimals)
             : undefined,
           timestamp: new Date(`${tx.timestamp}+00:00`),
-        })) satisfies AssetSnapshot[]
+        })) satisfies AssetPoolSnapshot[]
       })
     )
   }

@@ -142,7 +142,7 @@ export type SubqueryAssetTransaction = {
 }
 
 export type SubqueryAssetSnapshot = {
-  __typename?: 'AssetSnapshot'
+  __typename?: 'allAssetSnapshots'
   asset: {
     actualOriginationDate: number
     advanceRate: Rate
@@ -152,7 +152,6 @@ export type SubqueryAssetSnapshot = {
     id: string
     lossGivenDefault: Rate
     actualMaturityDate: number
-    metadata: string
     name: string
     probabilityOfDefault: Rate
     status: string
@@ -162,6 +161,21 @@ export type SubqueryAssetSnapshot = {
     valuationMethod: string
     notional: CurrencyBalance | undefined
   }
+  timestamp: Date
+  assetId: string
+  presentValue: CurrencyBalance | undefined
+  currentPrice: CurrencyBalance | undefined
+  outstandingPrincipal: CurrencyBalance | undefined
+  outstandingInterest: CurrencyBalance | undefined
+  outstandingDebt: CurrencyBalance | undefined
+  outstandingQuantity: CurrencyBalance | undefined
+  totalRepaidPrincipal: CurrencyBalance | undefined
+  totalRepaidInterest: CurrencyBalance | undefined
+  totalRepaidUnscheduled: CurrencyBalance | undefined
+}
+
+export type SubqueryPoolAssetSnapshot = {
+  __typename?: 'AssetSnapshot'
   timestamp: Date
   assetId: string
   presentValue: CurrencyBalance | undefined

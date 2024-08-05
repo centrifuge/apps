@@ -163,7 +163,7 @@ export function useAssetSnapshots(poolId: string, loanId: string, from?: Date, t
 export function useAllPoolAssetSnapshots(poolId: string, date: string) {
   const [result] = useCentrifugeQuery(
     ['allAssetSnapshots', poolId, date],
-    (cent) => cent.pools.getAllPoolAssetSnapshots([poolId, date]),
+    (cent) => cent.pools.getAllPoolAssetSnapshots([poolId, new Date(date)]),
     {
       enabled: !poolId.startsWith('0x'),
     }

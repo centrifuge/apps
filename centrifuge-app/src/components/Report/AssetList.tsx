@@ -14,6 +14,7 @@ import { UserFeedback } from './UserFeedback'
 import type { TableDataRow } from './index'
 
 const noop = (v: any) => v
+
 const valuationLabels = {
   discountedCashFlow: 'Non-fungible asset - DCF',
   outstandingDebt: 'Non-fungible asset - at par',
@@ -173,15 +174,11 @@ export function AssetList({ pool }: { pool: Pool }) {
   const basePath = useBasePath()
   const { loanStatus, startDate, setCsvData } = useContext(ReportContext)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const poolCreditType = useMemo(() => poolMetadata?.pool?.asset.class || 'privateCredit', [poolMetadata])
   const { symbol } = pool.currency
-
+  const poolCreditType = poolMetadata?.pool?.asset.class || 'privateCredit'
   const snapshots = useAllPoolAssetSnapshots(pool.id, startDate)
-  const isPrivate = useMemo(
-    () => poolCreditType === 'Private credit' || poolCreditType === 'privateCredit',
-    [poolCreditType]
-  )
-  const columnConfig = useMemo(() => getColumnConfig(isPrivate, symbol), [poolCreditType, symbol])
+  const isPrivate = poolCreditType === 'Private credit' || poolCreditType === 'privateCredit'
+  const columnConfig = getColumnConfig(isPrivate, symbol)
 
   const columns = useMemo(
     () =>
@@ -205,16 +202,17 @@ export function AssetList({ pool }: { pool: Pool }) {
           csvOnly: col.csvOnly,
         }))
         .filter((col) => !col.csvOnly),
-    [columnConfig]
+    [columnConfig, basePath, pool.id]
   )
-
-  const data = useMemo(() => {
+  const data = useMemo((): any[] => {
     if (!snapshots) return []
 
     return snapshots
       .filter((snapshot) => snapshot?.valuationMethod?.toLowerCase() !== 'cash')
       .filter((snapshot) => {
-        const isMaturityDatePassed = new Date() > new Date(snapshot?.actualMaturityDate)
+        const isMaturityDatePassed = snapshot?.actualMaturityDate
+          ? new Date() > new Date(snapshot.actualMaturityDate)
+          : false
         const isDebtZero = snapshot?.outstandingDebt?.isZero()
 
         if (loanStatus === 'ongoing') {
@@ -234,6 +232,7 @@ export function AssetList({ pool }: { pool: Pool }) {
         return dateB - dateA
       })
       .map((snapshot) => {
+        const valuationMethod = snapshot?.valuationMethod as keyof typeof valuationLabels
         if (isPrivate) {
           return {
             name: '',
@@ -247,7 +246,7 @@ export function AssetList({ pool }: { pool: Pool }) {
               snapshot?.totalRepaidUnscheduled,
               snapshot?.actualOriginationDate,
               snapshot?.actualMaturityDate,
-              valuationLabels[snapshot?.valuationMethod] || snapshot?.valuationMethod,
+              valuationMethod || snapshot?.valuationMethod,
               snapshot?.advanceRate,
               snapshot?.collateralValue,
               snapshot?.probabilityOfDefault,
@@ -275,10 +274,10 @@ export function AssetList({ pool }: { pool: Pool }) {
           }
         }
       })
-  }, [snapshots, isPrivate, symbol, loanStatus])
+  }, [snapshots, isPrivate, loanStatus])
 
   useEffect(() => {
-    if (!snapshots?.length) {
+    if (!data?.length) {
       return
     }
 
@@ -288,15 +287,18 @@ export function AssetList({ pool }: { pool: Pool }) {
     const dataUrl = getCSVDownloadUrl(formatted)
 
     setCsvData({
-      dataUrl,
+      dataUrl: dataUrl ?? 'default-data-url',
       fileName: `${pool.id}-asset-list-${loanStatus.toLowerCase()}.csv`,
     })
 
     return () => {
       setCsvData(undefined)
-      URL.revokeObjectURL(dataUrl)
+      if (dataUrl) {
+        URL.revokeObjectURL(dataUrl)
+      }
     }
-  }, [snapshots])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
 
   if (!snapshots) {
     return <Spinner />
