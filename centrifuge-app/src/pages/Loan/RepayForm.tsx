@@ -113,11 +113,6 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
     }
   )
 
-  const { execute: doCloseTransaction, isLoading: isCloseLoading } = useCentrifugeTransaction(
-    'Close asset',
-    (cent) => cent.pools.closeLoan
-  )
-
   const repayForm = useFormik<RepayValues>({
     initialValues: {
       principal: '',
