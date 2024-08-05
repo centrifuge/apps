@@ -92,7 +92,7 @@ export function PricingValues({ loan, pool }: Props) {
               : []),
             ...(pricing.maturityDate ? [{ label: 'Maturity date', value: formatDate(pricing.maturityDate) }] : []),
             ...('maturityExtensionDays' in pricing && pricing.valuationMethod !== 'cash'
-              ? [{ label: 'Extension period', value: `${pricing.maturityExtensionDays} days` }]
+              ? [{ label: 'Extension period', value: `${pricing.maturityExtensionDays ?? 0} days` }]
               : []),
             ...(isOutstandingDebtOrDiscountedCashFlow
               ? [
