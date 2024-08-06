@@ -248,8 +248,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   <Select
                     options={[
                       { label: 'Correction', value: 'correction' },
-                      { label: 'Miscellaneous', value: 'miscellaneous' },
                       { label: 'Tax', value: 'tax' },
+                      { label: 'Miscellaneous', value: 'miscellaneous' },
                     ]}
                     label="Category"
                     {...field}
