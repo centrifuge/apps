@@ -121,7 +121,10 @@ export function LoanList({ loans }: Props) {
             header: <SortableTableHeader label="Financing date" />,
             cell: (l: Row) => {
               // @ts-expect-error value only exists on Tinlake loans and on active Centrifuge loans
-              return l.originationDate && (l.poolId.startsWith('0x') || l.status === 'Active')
+              return l.originationDate &&
+                (l.poolId.startsWith('0x') || l.status === 'Active') &&
+                'valuationMethod' in l.pricing &&
+                l.pricing.valuationMethod !== 'cash'
                 ? // @ts-expect-error
                   formatDate(l.originationDate)
                 : '-'
