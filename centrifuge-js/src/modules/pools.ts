@@ -841,35 +841,30 @@ export type AssetTransaction = {
 }
 
 export type AssetSnapshot = {
-  asset: {
-    actualOriginationDate: number
-    advanceRate: Rate
-    collateralValue: string
-    discountRate: Rate
-    faceValue: CurrencyBalance | undefined
-    id: string
-    lossGivenDefault: Rate
-    actualMaturityDate: number
-    name: string
-    probabilityOfDefault: Rate
-    status: string
-    sumRealizedProfitFifo: CurrencyBalance | undefined
-    type: AssetType
-    unrealizedProfitAtMarketPrice: CurrencyBalance | undefined
-    valuationMethod: string
-    notional: CurrencyBalance | undefined
-  }
-  timestamp: Date
+  actualMaturityDate: string | undefined
+  actualOriginationDate: number | undefined
+  advanceRate: string | undefined
   assetId: string
-  presentValue: CurrencyBalance | undefined
+  collateralValue: string | undefined
   currentPrice: CurrencyBalance | undefined
-  outstandingPrincipal: CurrencyBalance | undefined
-  outstandingInterest: CurrencyBalance | undefined
+  discountRate: string | undefined
+  faceValue: CurrencyBalance | undefined
+  lossGivenDefault: string | undefined
+  name: string
   outstandingDebt: CurrencyBalance | undefined
+  outstandingInterest: CurrencyBalance | undefined
+  outstandingPrincipal: CurrencyBalance | undefined
   outstandingQuantity: CurrencyBalance | undefined
-  totalRepaidPrincipal: CurrencyBalance | undefined
+  presentValue: CurrencyBalance | undefined
+  probabilityOfDefault: string | undefined
+  status: string
+  sumRealizedProfitFifo: CurrencyBalance | undefined
+  timestamp: Date
   totalRepaidInterest: CurrencyBalance | undefined
+  totalRepaidPrincipal: CurrencyBalance | undefined
   totalRepaidUnscheduled: CurrencyBalance | undefined
+  unrealizedProfitAtMarketPrice: CurrencyBalance | undefined
+  valuationMethod: string | undefined
 }
 
 export type AssetPoolSnapshot = {
@@ -3319,8 +3314,7 @@ export function getPoolsModule(inst: Centrifuge) {
             }
           }
         }
-      }
-      `,
+      }`,
       {
         poolId: `${poolId}`,
         from,
@@ -3329,9 +3323,9 @@ export function getPoolsModule(inst: Centrifuge) {
       false
     )
 
-    const transformVal = (value: any, currency: number) => {
+    const transformVal = (value: string | undefined | BN, currency: number): CurrencyBalance | undefined => {
       if (!value) return undefined
-      else return new CurrencyBalance(value, currency)
+      return new CurrencyBalance(value, currency)
     }
 
     return $query.pipe(
@@ -3339,28 +3333,13 @@ export function getPoolsModule(inst: Centrifuge) {
       map(([data, currency]) => {
         return data!.assetSnapshots.nodes.map((tx) => ({
           ...tx,
-          totalRepaidUnscheduled: transformVal(tx.totalRepaidUnscheduled, currency.decimals),
+          assetId: tx.assetId,
+          actualMaturityDate: tx.asset.actualMaturityDate || undefined,
+          actualOriginationDate: tx.asset.actualOriginationDate || undefined,
           advanceRate: tx.asset.advanceRate,
           collateralValue: tx.asset.collateralValue,
-          discountRate: tx.asset.discountRate,
-          outstandingInterest: transformVal(tx.outstandingInterest, currency.decimals),
-          totalRepaidInterest: transformVal(tx.totalRepaidInterest, currency.decimals),
-          lossGivenDefault: tx.asset.lossGivenDefault,
           currentPrice: transformVal(tx.currentPrice, currency.decimals),
-          actualMaturityDate: tx.asset.actualMaturityDate || undefined,
-          name: tx.asset.name,
-          actualOriginationDate: tx.asset.actualOriginationDate || undefined,
-          outstandingPrincipal: transformVal(tx.outstandingPrincipal, currency.decimals),
-          totalRepaidPrincipal: transformVal(tx.totalRepaidPrincipal, currency.decimals),
-          probabilityOfDefault: tx.asset.probabilityOfDefault,
-          outstandingQuantity: transformVal(tx.outstandingQuantity, 18),
-          sumRealizedProfitFifo: transformVal(tx.asset.sumRealizedProfitFifo, currency.decimals),
-          status: tx.asset.status,
-          timestamp: new Date(`${tx.timestamp}+00:00`),
-          unrealizedProfitAtMarketPrice: transformVal(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals),
-          valuationMethod: tx.asset.valuationMethod,
-          presentValue: transformVal(tx.presentValue, currency.decimals),
-          outstandingDebt: transformVal(tx.outstandingDebt, currency.decimals),
+          discountRate: tx.asset.discountRate,
           faceValue:
             tx.asset.notional && tx.outstandingQuantity
               ? transformVal(
@@ -3368,6 +3347,22 @@ export function getPoolsModule(inst: Centrifuge) {
                   currency.decimals
                 )
               : undefined,
+          lossGivenDefault: tx.asset.lossGivenDefault,
+          name: tx.asset.name,
+          outstandingDebt: transformVal(tx.outstandingDebt, currency.decimals),
+          outstandingInterest: transformVal(tx.outstandingInterest, currency.decimals),
+          outstandingPrincipal: transformVal(tx.outstandingPrincipal, currency.decimals),
+          outstandingQuantity: transformVal(tx.outstandingQuantity, 18),
+          presentValue: transformVal(tx.presentValue, currency.decimals),
+          probabilityOfDefault: tx.asset.probabilityOfDefault,
+          status: tx.asset.status,
+          sumRealizedProfitFifo: transformVal(tx.asset.sumRealizedProfitFifo, currency.decimals),
+          timestamp: new Date(`${tx.timestamp}+00:00`),
+          totalRepaidInterest: transformVal(tx.totalRepaidInterest, currency.decimals),
+          totalRepaidPrincipal: transformVal(tx.totalRepaidPrincipal, currency.decimals),
+          totalRepaidUnscheduled: transformVal(tx.totalRepaidUnscheduled, currency.decimals),
+          unrealizedProfitAtMarketPrice: transformVal(tx.asset.unrealizedProfitAtMarketPrice, currency.decimals),
+          valuationMethod: tx.asset.valuationMethod,
         })) satisfies AssetSnapshot[]
       })
     )

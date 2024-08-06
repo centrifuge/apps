@@ -221,9 +221,7 @@ export function AssetList({ pool }: { pool: Pool }) {
           return isMaturityDatePassed && isDebtZero
         } else if (loanStatus === 'overdue') {
           return isMaturityDatePassed && !isDebtZero
-        } else if (loanStatus === 'all') {
-          return true
-        }
+        } else return true
       })
       .sort((a, b) => {
         // Sort by actualMaturityDate in descending order

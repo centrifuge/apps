@@ -1,4 +1,4 @@
-import { CurrencyBalance, Price, Rate } from '../utils/BN'
+import { CurrencyBalance, Price } from '../utils/BN'
 
 export type SubqueryPoolSnapshot = {
   id: string
@@ -145,49 +145,47 @@ export type SubqueryAssetSnapshot = {
   __typename?: 'allAssetSnapshots'
   asset: {
     actualOriginationDate: number
-    advanceRate: Rate
-    collateralValue: string
-    discountRate: Rate
-    faceValue: CurrencyBalance | undefined
+    advanceRate: string | undefined
+    collateralValue: string | undefined
+    discountRate: string | undefined
     id: string
-    lossGivenDefault: Rate
-    actualMaturityDate: number
+    lossGivenDefault: string | undefined
+    actualMaturityDate: string | undefined
     name: string
-    probabilityOfDefault: Rate
+    probabilityOfDefault: string | undefined
     status: string
-    sumRealizedProfitFifo: CurrencyBalance | undefined
-    type: AssetType
-    unrealizedProfitAtMarketPrice: CurrencyBalance | undefined
+    sumRealizedProfitFifo: string | undefined
+    unrealizedProfitAtMarketPrice: string | undefined
     valuationMethod: string
-    notional: CurrencyBalance | undefined
+    notional: string | undefined
   }
-  timestamp: Date
+  timestamp: string
   assetId: string
-  presentValue: CurrencyBalance | undefined
-  currentPrice: CurrencyBalance | undefined
-  outstandingPrincipal: CurrencyBalance | undefined
-  outstandingInterest: CurrencyBalance | undefined
-  outstandingDebt: CurrencyBalance | undefined
-  outstandingQuantity: CurrencyBalance | undefined
-  totalRepaidPrincipal: CurrencyBalance | undefined
-  totalRepaidInterest: CurrencyBalance | undefined
-  totalRepaidUnscheduled: CurrencyBalance | undefined
+  presentValue: string | undefined
+  currentPrice: string | undefined
+  outstandingPrincipal: string | undefined
+  outstandingInterest: string | undefined
+  outstandingDebt: string | undefined
+  outstandingQuantity: string | undefined
+  totalRepaidPrincipal: string | undefined
+  totalRepaidInterest: string | undefined
+  totalRepaidUnscheduled: string | undefined
 }
 
 export type SubqueryPoolAssetSnapshot = {
   __typename?: 'AssetSnapshot'
-  timestamp: Date
+  timestamp: string | undefined
   assetId: string
-  presentValue: CurrencyBalance | undefined
-  currentPrice: CurrencyBalance | undefined
-  outstandingPrincipal: CurrencyBalance | undefined
-  outstandingInterest: CurrencyBalance | undefined
-  outstandingDebt: CurrencyBalance | undefined
-  outstandingQuantity: CurrencyBalance | undefined
-  totalBorrowed: CurrencyBalance | undefined
-  totalRepaidPrincipal: CurrencyBalance | undefined
-  totalRepaidInterest: CurrencyBalance | undefined
-  totalRepaidUnscheduled: CurrencyBalance | undefined
+  presentValue: string | undefined
+  currentPrice: string | undefined
+  outstandingPrincipal: string | undefined
+  outstandingInterest: string | undefined
+  outstandingDebt: string | undefined
+  outstandingQuantity: string | undefined
+  totalBorrowed: string | undefined
+  totalRepaidPrincipal: string | undefined
+  totalRepaidInterest: string | undefined
+  totalRepaidUnscheduled: string | undefined
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'
