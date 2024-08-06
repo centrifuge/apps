@@ -22,6 +22,7 @@ import { ButtonGroup } from '../../components/ButtonGroup'
 import { DataCol, DataRow, DataTable } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
+import { RouterTextLink } from '../../components/TextLink'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { useLiquidity } from '../../utils/useLiquidity'
@@ -212,7 +213,12 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               <Thumbnail type="asset" label={row.id} />
             )}
             <Text variant="body2" fontWeight={600}>
-              {row.isin || row.id}
+              <RouterTextLink
+                to={row.id !== 'reserve' ? `/issuer/${pool.id}/assets/${row.id}` : `/nav-management/${pool.id}`}
+                target="_blank"
+              >
+                {row.isin || row.id}
+              </RouterTextLink>
             </Text>
           </Shelf>
         ) : (
@@ -264,7 +270,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 currency={pool.currency.displayName}
                 onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
                 value={field.value}
-                onClick={(e) => e.preventDefault()}
               />
             )}
           </Field>
@@ -378,9 +383,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           <DataTable
             data={[...reserveRow, ...cashLoans, ...form.values.feed]}
             columns={columns}
-            onRowClicked={(row) =>
-              row.id !== 'reserve' ? `/issuer/${pool.id}/assets/${row.id}` : `/nav-management/${pool.id}`
-            }
             footer={
               <DataRow>
                 <DataCol align="left">
