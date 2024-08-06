@@ -186,8 +186,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
     0
   )
+  const newNavInternal =
+    allLoans?.reduce(
+      (acc, cur) => acc + (!isExternalLoan(cur) && 'presentValue' in cur ? cur.presentValue.toFloat() : 0),
+      0
+    ) || 0
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
-  const newNav = newNavExternal + newNavCash + poolReserve - pendingFees.toFloat()
+  const newNav = newNavExternal + newNavInternal + newNavCash + poolReserve - pendingFees.toFloat()
   // Only for single tranche pools
   const newPrice = newNav / pool.tranches[0].totalIssuance.toFloat()
   const isTinlakePool = poolId.startsWith('0x')
