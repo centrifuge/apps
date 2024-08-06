@@ -2473,16 +2473,20 @@ export function getPoolsModule(inst: Centrifuge) {
         const trancheStates: Record<string, { timestamp: string; tokenPrice: Price }[]> = {}
         trancheSnapshots?.forEach((state) => {
           const tid = state.tranche.trancheId
-          const entry = { timestamp: state.timestamp, tokenPrice: new Price(state.tokenPrice) }
+          const entry = { timestamp: state.timestamp.slice(0, 10), tokenPrice: new Price(state.tokenPrice) }
           if (trancheStates[tid]) {
             trancheStates[tid].push(entry)
           } else {
             trancheStates[tid] = [entry]
           }
         })
+        const poolSeenDay = new Set<string>()
         return {
           poolStates:
-            poolSnapshots?.map((state) => {
+            poolSnapshots?.flatMap((state) => {
+              const timestamp = state.timestamp.slice(0, 10)
+              if (poolSeenDay.has(timestamp)) return []
+              poolSeenDay.add(timestamp)
               const poolState = {
                 id: state.id,
                 netAssetValue: new CurrencyBalance(state.netAssetValue, poolCurrency.decimals),
@@ -2543,8 +2547,8 @@ export function getPoolsModule(inst: Centrifuge) {
               const poolValue = new CurrencyBalance(new BN(state?.netAssetValue || '0'), poolCurrency.decimals)
 
               // TODO: This is inefficient, would be better to construct a map indexed by the timestamp
-              const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp === state.timestamp)
-
+              const trancheSnapshotsToday = trancheSnapshots?.filter((t) => t.timestamp.slice(0, 10) === timestamp)
+              if (!trancheSnapshotsToday?.length) return []
               const tranches: { [trancheId: string]: DailyTrancheState } = {}
               trancheSnapshotsToday?.forEach((tranche) => {
                 const tid = tranche.tranche.trancheId
@@ -2599,7 +2603,7 @@ export function getPoolsModule(inst: Centrifuge) {
       poolSnapshots: {
         nodes: {
           netAssetValue: string
-          periodStart: string
+          periodId: string
           pool: {
             currency: {
               decimals: number
@@ -2612,7 +2616,7 @@ export function getPoolsModule(inst: Centrifuge) {
         poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
           nodes {
             netAssetValue
-            periodStart
+            periodId
             pool {
               currency {
                 decimals
@@ -2630,8 +2634,8 @@ export function getPoolsModule(inst: Centrifuge) {
         }
 
         const mergedMap = new Map()
-        const formatted = data.poolSnapshots.nodes.map(({ netAssetValue, periodStart, pool }) => ({
-          dateInMilliseconds: new Date(periodStart).getTime(),
+        const formatted = data.poolSnapshots.nodes.map(({ netAssetValue, periodId, pool }) => ({
+          dateInMilliseconds: new Date(periodId).getTime(),
           tvl: new CurrencyBalance(new BN(netAssetValue || '0'), pool.currency.decimals).toDecimal(),
         }))
 
