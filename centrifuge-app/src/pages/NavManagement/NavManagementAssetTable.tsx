@@ -66,7 +66,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     () =>
       (allLoans?.filter(
         // Keep external loans, except ones that are fully repaid
-        (l) => isExternalLoan(l) && l.status !== 'Closed' && (!('presentValue' in l) || l.presentValue.isZero())
+        (l) => isExternalLoan(l) && l.status !== 'Closed' && (!('presentValue' in l) || !l.presentValue.isZero())
       ) as ExternalLoan[]) ?? [],
     [allLoans]
   )
