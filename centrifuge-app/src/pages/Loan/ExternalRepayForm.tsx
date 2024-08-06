@@ -158,12 +158,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   {...field}
                   label="Quantity"
                   disabled={isRepayLoading}
-                  decimals={8}
                   onChange={(value) => form.setFieldValue('quantity', value)}
+                  placeholder="0"
                   onSetMax={() =>
                     form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
                   }
-                  secondaryLabel={`${loan.pricing.outstandingQuantity.toDecimal().toFixed(2).toString()} outstanding`}
+                  secondaryLabel={`${loan.pricing.outstandingQuantity.toDecimal().toString()} outstanding`}
                 />
               )
             }}

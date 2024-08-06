@@ -125,7 +125,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                     <CurrencyInput
                       {...field}
                       label="Quantity"
-                      decimals={8}
+                      placeholder="0"
                       onChange={(value) => form.setFieldValue('quantity', value)}
                     />
                   )
