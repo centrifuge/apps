@@ -9,5 +9,7 @@
   "function requestRedeem(uint256, address, address) public",
   "function requestDepositWithPermit(uint256, address, bytes, uint256, uint8, bytes32, bytes32) public",
   "function cancelDepositRequest(uint256, address) public",
-  "function cancelRedeemRequest(uint256, address) public"
+  "function cancelRedeemRequest(uint256, address) public",
+  "function claimCancelDepositRequest(uint256, address, address) public",
+  "function claimCancelRedeemRequest(uint256, address, address) public"
 ]

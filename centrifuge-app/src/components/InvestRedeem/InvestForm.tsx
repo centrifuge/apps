@@ -205,7 +205,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
             {state.collectType && !claimDismissed ? (
               <Claim type="invest" onDismiss={() => setClaimDismissed(true)} />
             ) : null}
-            {state.canCancelOrder && !state.collectType && (
+            {state.canCancelOrder && !state.collectType && hasPendingOrder && (
               <Button
                 onClick={() => actions.cancelInvest()}
                 loading={isCancelling}

@@ -220,6 +220,18 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return pending(contract(lpAddress, ABI.LiquidityPool).cancelDepositRequest(0, user, options))
   }
 
+  function claimCancelDeposit(args: [lpAddress: string], options: TransactionRequest = {}) {
+    const [lpAddress] = args
+    const user = inst.getSignerAddress('evm')
+    return pending(contract(lpAddress, ABI.LiquidityPool).claimCancelDepositRequest(0, user, user, options))
+  }
+
+  function claimCancelRedeem(args: [lpAddress: string], options: TransactionRequest = {}) {
+    const [lpAddress] = args
+    const user = inst.getSignerAddress('evm')
+    return pending(contract(lpAddress, ABI.LiquidityPool).claimCancelRedeemRequest(0, user, user, options))
+  }
+
   function mint(args: [lpAddress: string, mint: BN, receiver?: string], options: TransactionRequest = {}) {
     const [lpAddress, mint, receiver] = args
     const user = inst.getSignerAddress('evm')
@@ -517,7 +529,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     const [user, lp] = args
 
     const currencyBalanceTransform = toCurrencyBalance(lp.currency.decimals)
-    const tokenBalanceTransform = toTokenBalance(lp.currency.decimals)
+    const tokenBalanceTransform = toTokenBalance(lp.trancheTokenDecimals)
 
     const calls: Call[] = [
       {
@@ -554,10 +566,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           [],
           ['pendingInvest', currencyBalanceTransform],
           ['pendingRedeem', currencyBalanceTransform],
-          [],
-          [],
-          [],
-          [],
+          ['claimableCancelDepositRequest', currencyBalanceTransform],
+          ['claimableCancelRedeemRequest', tokenBalanceTransform],
+          ['pendingCancelDepositRequest'],
+          ['pendingCancelRedeemRequest'],
         ],
       },
       {
@@ -583,6 +595,10 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       maxRedeem: CurrencyBalance
       pendingInvest: CurrencyBalance
       pendingRedeem: TokenBalance
+      claimableCancelDepositRequest: CurrencyBalance
+      claimableCancelRedeemRequest: TokenBalance
+      pendingCancelDepositRequest: boolean
+      pendingCancelRedeemRequest: boolean
     }>(calls, {
       rpcProvider: options?.rpcProvider ?? inst.config.evmSigner?.provider!,
     })
@@ -601,6 +617,8 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     cancelRedeemOrder,
     mint,
     withdraw,
+    claimCancelDeposit,
+    claimCancelRedeem,
     approveForCurrency,
     signPermit,
     updateTokenPrice,

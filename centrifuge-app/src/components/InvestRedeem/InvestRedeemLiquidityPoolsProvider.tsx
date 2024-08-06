@@ -13,7 +13,7 @@ import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useEvmTransaction } from '../../utils/tinlake/useEvmTransaction'
 import { useAddress } from '../../utils/useAddress'
-import { useLPEvents, useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
+import { useLiquidityPoolInvestment, useLiquidityPools } from '../../utils/useLiquidityPools'
 import { usePendingCollect, usePool, usePoolMetadata } from '../../utils/usePools'
 import { InvestRedeemContext } from './InvestRedeemProvider'
 import { InvestRedeemAction, InvestRedeemActions, InvestRedeemState, InvestRedeemProviderProps as Props } from './types'
@@ -44,7 +44,6 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   } = useLiquidityPoolInvestment(poolId, trancheId, lpIndex)
   const provider = useEvmProvider()
 
-  const { data: lpEvents } = useLPEvents(poolId, trancheId, lpInvest?.lpAddress)
   const isAllowedToInvest = lpInvest?.isAllowedToInvest
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
@@ -65,7 +64,15 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const isCalculatingOrders = pool.epoch.status !== 'ongoing'
 
-  const collectType = currencyToCollect.gt(0) ? 'redeem' : investToCollect.gt(0) ? 'invest' : null
+  const collectType = currencyToCollect.gt(0)
+    ? 'redeem'
+    : investToCollect.gt(0)
+    ? 'invest'
+    : lpInvest?.claimableCancelDepositRequest.gtn(0)
+    ? 'cancelInvest'
+    : lpInvest?.claimableCancelRedeemRequest.gtn(0)
+    ? 'cancelRedeem'
+    : null
 
   const minOrder = consts.orderBook.minFulfillment.toDecimal()
 
@@ -77,12 +84,23 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelRedeemOrder)
+  const collectCancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.claimCancelDeposit)
+  const collectCancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.claimCancelRedeem)
 
   const txActions = {
     invest,
     // investWithPermit,
     redeem,
-    collect: collectType === 'invest' ? collectInvest : collectRedeem,
+    collect:
+      collectType === 'invest'
+        ? collectInvest
+        : collectType === 'redeem'
+        ? collectRedeem
+        : collectType === 'cancelInvest'
+        ? collectCancelInvest
+        : collectType === 'cancelRedeem'
+        ? collectCancelRedeem
+        : undefined,
     approvePoolCurrency: approve,
     approveTrancheToken: approve,
     cancelInvest,
@@ -93,17 +111,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
     : (pendingActionState as InvestRedeemAction | undefined)
   const pendingTransaction = pendingActionState && txActions[pendingActionState]?.lastCreatedTransaction
   let statusMessage
-  if (
-    lpInvest?.pendingInvest &&
-    !lpInvest.pendingInvest.isZero() &&
-    lpEvents?.find((e) => e.event === 'CancelDepositRequest')
-  ) {
-    statusMessage = 'Order cancellation is currently being bridged and will show up soon'
-  } else if (
-    lpInvest?.pendingRedeem &&
-    !lpInvest.pendingRedeem.isZero() &&
-    lpEvents?.find((e) => e.event === 'CancelRedeemRequest')
-  ) {
+  if (lpInvest?.pendingCancelDepositRequest || lpInvest?.pendingCancelRedeemRequest) {
     statusMessage = 'Order cancellation is currently being bridged and will show up soon'
   }
 
@@ -183,14 +191,22 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
           remainingRedeemToken: lpInvest.pendingRedeem.toDecimal(),
         }
       : null,
-    collectAmount: investToCollect.gt(0) ? investToCollect : currencyToCollect,
+    collectAmount: investToCollect.gt(0)
+      ? investToCollect
+      : currencyToCollect.gt(0)
+      ? currencyToCollect
+      : lpInvest?.claimableCancelDepositRequest.gtn(0)
+      ? lpInvest.claimableCancelDepositRequest.toDecimal()
+      : lpInvest?.claimableCancelRedeemRequest.gtn(0)
+      ? lpInvest.claimableCancelRedeemRequest.toDecimal()
+      : Dec(0),
     collectType,
     needsToCollectBeforeOrder: true,
     needsPoolCurrencyApproval: (amount) =>
       lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
     needsTrancheTokenApproval: () => false,
     canChangeOrder,
-    canCancelOrder: false, // LP contracts don't support canceling orders yet
+    canCancelOrder: !(lpInvest?.pendingCancelDepositRequest || lpInvest?.pendingCancelRedeemRequest),
     pendingAction,
     pendingTransaction,
     statusMessage,
