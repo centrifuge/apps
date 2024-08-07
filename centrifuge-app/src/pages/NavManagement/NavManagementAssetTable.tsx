@@ -22,6 +22,7 @@ import { ButtonGroup } from '../../components/ButtonGroup'
 import { DataCol, DataRow, DataTable } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
+import { RouterTextLink } from '../../components/TextLink'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { useLiquidity } from '../../utils/useLiquidity'
@@ -66,7 +67,7 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     () =>
       (allLoans?.filter(
         // Keep external loans, except ones that are fully repaid
-        (l) => isExternalLoan(l) && l.status !== 'Closed' && (!('presentValue' in l) || l.presentValue.isZero())
+        (l) => isExternalLoan(l) && l.status !== 'Closed' && (!('presentValue' in l) || !l.presentValue.isZero())
       ) as ExternalLoan[]) ?? [],
     [allLoans]
   )
@@ -186,8 +187,13 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
     (acc, cur) => acc + cur.quantity * (isEditing && cur.value ? cur.value : cur.oldValue),
     0
   )
+  const newNavInternal =
+    allLoans?.reduce(
+      (acc, cur) => acc + (!isExternalLoan(cur) && 'presentValue' in cur ? cur.presentValue.toFloat() : 0),
+      0
+    ) || 0
   const newNavCash = cashLoans.reduce((acc, cur) => acc + cur.outstandingDebt.toFloat(), 0)
-  const newNav = newNavExternal + newNavCash + poolReserve - pendingFees.toFloat()
+  const newNav = newNavExternal + newNavInternal + newNavCash + poolReserve - pendingFees.toFloat()
   // Only for single tranche pools
   const newPrice = newNav / pool.tranches[0].totalIssuance.toFloat()
   const isTinlakePool = poolId.startsWith('0x')
@@ -207,7 +213,12 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
               <Thumbnail type="asset" label={row.id} />
             )}
             <Text variant="body2" fontWeight={600}>
-              {row.isin || row.id}
+              <RouterTextLink
+                to={row.id !== 'reserve' ? `/issuer/${pool.id}/assets/${row.id}` : `/nav-management/${pool.id}`}
+                target="_blank"
+              >
+                {row.isin || row.id}
+              </RouterTextLink>
             </Text>
           </Shelf>
         ) : (
@@ -259,7 +270,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
                 currency={pool.currency.displayName}
                 onChange={(value) => form.setFieldValue(`feed.${row.formIndex}.value`, value)}
                 value={field.value}
-                onClick={(e) => e.preventDefault()}
               />
             )}
           </Field>
@@ -373,9 +383,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
           <DataTable
             data={[...reserveRow, ...cashLoans, ...form.values.feed]}
             columns={columns}
-            onRowClicked={(row) =>
-              row.id !== 'reserve' ? `/issuer/${pool.id}/assets/${row.id}` : `/nav-management/${pool.id}`
-            }
             footer={
               <DataRow>
                 <DataCol align="left">
