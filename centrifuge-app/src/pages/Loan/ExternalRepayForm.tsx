@@ -1,10 +1,5 @@
 import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
-import {
-  roundDown,
-  useBalances,
-  useCentrifugeTransaction,
-  wrapProxyCallsForAccount,
-} from '@centrifuge/centrifuge-react'
+import { useBalances, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
@@ -13,7 +8,7 @@ import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { copyable } from '../../components/Report/utils'
 import { Tooltips } from '../../components/Tooltips'
-import { Dec, max as maxDec, min } from '../../utils/Decimal'
+import { Dec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
@@ -90,11 +85,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
     }
   )
 
-  const currentFace =
-    loan?.pricing && 'outstandingQuantity' in loan.pricing
-      ? loan.pricing.outstandingQuantity.toDecimal().mul(loan.pricing.notional.toDecimal())
-      : null
-
   const repayForm = useFormik<RepayValues>({
     initialValues: {
       price: '',
@@ -124,11 +114,10 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const { maxAvailable, maxInterest, totalRepay } = React.useMemo(() => {
     const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
     const outstandingDebt = 'outstandingDebt' in loan ? loan.outstandingDebt.toDecimal() : Dec(0)
-    const { quantity, interest, amountAdditional, price } = repayForm.values
+    const { quantity, interest, price } = repayForm.values
     const totalRepay = Dec(price || 0)
       .mul(quantity || 0)
       .add(interest || 0)
-      .add(amountAdditional || 0)
     let maxAvailable = min(balance, debt)
     let maxInterest = min(balance, outstandingInterest)
     if (destination !== 'reserve') {
@@ -137,10 +126,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
     }
     return {
       maxAvailable,
-      maxInterest: maxDec(
-        min(maxInterest, maxAvailable.sub(Dec(price || 0).mul(quantity || 0) || 0).sub(amountAdditional || 0)),
-        Dec(0)
-      ),
+      maxInterest,
       totalRepay,
     }
   }, [loan, balance, repayForm.values])
@@ -274,12 +260,29 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             </InlineFeedback>
           </Box>
         )}
-        {totalRepay.gt(maxAvailable) && (
+        {Dec(repayForm.values.price || 0)
+          .mul(repayForm.values.quantity || 0)
+          .gt(maxAvailable) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
               <Text color="statusCritical">
-                The amount ({formatBalance(roundDown(totalRepay), displayCurrency, 2)}) is greater than the available
-                debt ({formatBalance(maxAvailable, displayCurrency, 2)}).
+                Principal (
+                {formatBalance(
+                  Dec(Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0)),
+                  displayCurrency,
+                  2
+                )}
+                ) is greater than the outstanding principal ({formatBalance(maxAvailable, displayCurrency, 2)}).
+              </Text>
+            </InlineFeedback>
+          </Box>
+        )}
+        {Dec(repayForm.values.interest || 0).gt(maxInterest) && (
+          <Box bg="statusCriticalBg" p={1}>
+            <InlineFeedback status="critical">
+              <Text color="statusCritical">
+                Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than the
+                outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
               </Text>
             </InlineFeedback>
           </Box>

@@ -11,7 +11,7 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { Tooltips } from '../../components/Tooltips'
-import { Dec, max as maxDec, min } from '../../utils/Decimal'
+import { Dec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
@@ -148,15 +148,15 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
     let maxInterest
     if (destination === 'reserve') {
       maxAvailable = min(balance, loan.outstandingDebt.toDecimal())
-      maxPrincipal = min(balance, loan.outstandingDebt.toDecimal())
+      maxPrincipal = min(balance, loan.outstandingDebt.toDecimal().sub(outstandingInterest))
       maxInterest = min(balance, outstandingInterest)
     } else if (destination === 'other') {
       maxAvailable = min(balance, loan.outstandingDebt.toDecimal())
-      maxPrincipal = min(balance, loan.outstandingDebt.toDecimal())
+      maxPrincipal = min(balance, loan.outstandingDebt.toDecimal().sub(outstandingInterest))
       maxInterest = Dec(0)
     } else {
       maxAvailable = loan.outstandingDebt.toDecimal()
-      maxPrincipal = loan.outstandingDebt.toDecimal()
+      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
       maxInterest = outstandingInterest
     }
     const totalRepay = Dec(principal || 0)
@@ -164,8 +164,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       .add(Dec(amountAdditional || 0))
     return {
       maxAvailable,
-      maxPrincipal: maxDec(min(maxPrincipal, maxAvailable.sub(interest || 0).sub(amountAdditional || 0)), Dec(0)),
-      maxInterest: maxDec(min(maxInterest, maxAvailable.sub(principal || 0).sub(amountAdditional || 0)), Dec(0)),
+      maxPrincipal,
+      maxInterest,
       totalRepay,
     }
   }, [loan, balance, repayForm.values])
@@ -191,7 +191,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('principal', value)}
                   onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
-                  secondaryLabel={`${formatBalance(maxAvailable, displayCurrency)} outstanding`}
+                  secondaryLabel={`${formatBalance(maxPrincipal, displayCurrency)} outstanding`}
                 />
               )
             }}
@@ -295,12 +295,23 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               </Text>
             </Shelf>
           </Stack>
-          {totalRepay.gt(maxAvailable) && maxAvailable !== UNLIMITED && (
+
+          {Dec(repayForm.values.principal || 0).gt(maxPrincipal) && maxAvailable !== UNLIMITED && (
             <Box bg="statusCriticalBg" p={1}>
               <InlineFeedback status="critical">
                 <Text color="statusCritical">
-                  Available debt ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total amount (
-                  {formatBalance(totalRepay, displayCurrency, 2)}).
+                  Principal ({formatBalance(Dec(repayForm.values.principal || 0), displayCurrency, 2)}) is greater than
+                  the outstanding principal ({formatBalance(maxPrincipal, displayCurrency, 2)}).
+                </Text>
+              </InlineFeedback>
+            </Box>
+          )}
+          {Dec(repayForm.values.interest || 0).gt(maxInterest) && maxAvailable !== UNLIMITED && (
+            <Box bg="statusCriticalBg" p={1}>
+              <InlineFeedback status="critical">
+                <Text color="statusCritical">
+                  Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than
+                  the outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
                 </Text>
               </InlineFeedback>
             </Box>
