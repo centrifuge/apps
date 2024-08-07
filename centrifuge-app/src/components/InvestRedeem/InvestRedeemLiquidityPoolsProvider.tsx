@@ -84,8 +84,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelRedeemOrder)
-  const collectCancelInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.claimCancelDeposit)
-  const collectCancelRedeem = useEvmTransaction('Collect', (cent) => cent.liquidityPools.claimCancelRedeem)
+  const collectCancelInvest = useEvmTransaction('Claim', (cent) => cent.liquidityPools.claimCancelDeposit)
+  const collectCancelRedeem = useEvmTransaction('Claim', (cent) => cent.liquidityPools.claimCancelRedeem)
 
   const txActions = {
     invest,
