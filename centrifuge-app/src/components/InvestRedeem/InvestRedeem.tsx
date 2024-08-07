@@ -49,7 +49,7 @@ export function InvestRedeem({ poolId, trancheId, ...rest }: InvestRedeemProps) 
 
   const { data: domains } = useActiveDomains(poolId, isLiquidityPools)
   const domainsWithAtLeastOneLP =
-    domains && domains.filter((domain) => Object.values(domain.liquidityPools[trancheId]).some((p) => !!p))
+    domains && domains.filter((domain) => Object.values(domain.liquidityPools[trancheId] ?? {}).some((p) => !!p))
 
   const networks: Network[] = poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']
   if (domainsWithAtLeastOneLP) {

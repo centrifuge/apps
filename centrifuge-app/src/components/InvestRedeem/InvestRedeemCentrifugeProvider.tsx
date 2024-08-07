@@ -111,6 +111,8 @@ export function InvestRedeemCentrifugeProvider({ poolId, trancheId, children }: 
           redeemToken: order.redeemToken.toDecimal(),
           payoutCurrencyAmount: order.payoutCurrencyAmount.toDecimal(),
           payoutTokenAmount: order.payoutTokenAmount.toDecimal(),
+          investClaimableCurrencyAmount: order.payoutTokenAmount.toDecimal().mul(price),
+          redeemClaimableTokenAmount: order.payoutCurrencyAmount.toDecimal().div(price),
           remainingInvestCurrency: order.remainingInvestCurrency.toDecimal(),
           remainingRedeemToken: order.remainingRedeemToken.toDecimal(),
         }
