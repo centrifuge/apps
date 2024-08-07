@@ -38,8 +38,6 @@ export const ChargeFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
     return cent.pools.chargePoolFee
   })
 
-  console.log(maxFee)
-
   const form = useFormik<{ amount?: Decimal }>({
     initialValues: {
       amount: undefined,
