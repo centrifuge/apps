@@ -3672,10 +3672,10 @@ export function getPoolsModule(inst: Centrifuge) {
         return combineLatest([
           api.queryMulti(
             trancheIds.flatMap((trancheId) => [
-              [api.query.investments.activeInvestOrders, { poolId, trancheId }],
-              [api.query.investments.activeRedeemOrders, { poolId, trancheId }],
-              [api.query.investments.inProcessingInvestOrders, { poolId, trancheId }],
-              [api.query.investments.inProcessingRedeemOrders, { poolId, trancheId }],
+              [api.query.investments.activeInvestOrders, [poolId, trancheId]],
+              [api.query.investments.activeRedeemOrders, [poolId, trancheId]],
+              [api.query.investments.inProcessingInvestOrders, [poolId, trancheId]],
+              [api.query.investments.inProcessingRedeemOrders, [poolId, trancheId]],
             ])
           ),
           getPoolCurrency([poolId]),
