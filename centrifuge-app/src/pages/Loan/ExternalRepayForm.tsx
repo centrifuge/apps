@@ -11,6 +11,8 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
+import { copyable } from '../../components/Report/utils'
+import { Tooltips } from '../../components/Tooltips'
 import { Dec, max as maxDec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -226,7 +228,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               <CurrencyInput
                 {...field}
                 value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                label="Additional amount"
+                label={<Tooltips type="additionalAmountInput" />}
                 disabled={isRepayLoading}
                 currency={displayCurrency}
                 onChange={(value) => form.setFieldValue('amountAdditional', value)}
@@ -261,6 +263,17 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             <Text variant="emphasized">{formatBalance(maxAvailable, displayCurrency, 2)}</Text>
           </Shelf>
         </Stack>
+        {destination === 'reserve' && totalRepay.gt(balance) && destination === 'reserve' && (
+          <Box bg="statusCriticalBg" p={1}>
+            <InlineFeedback status="critical">
+              <Text color="statusCritical">
+                The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
+                insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
+                {copyable(account?.actingAddress || '')} on Centrifuge.
+              </Text>
+            </InlineFeedback>
+          </Box>
+        )}
         {totalRepay.gt(maxAvailable) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">

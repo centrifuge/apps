@@ -28,7 +28,7 @@ export function InlineFeedback({ status = 'default', children }: InlineFeedbackP
         <StyledIconWrapper minWidth="iconSmall" height="iconSmall" flex="0 0 auto">
           <StyledIcon as={icons[status]} size="iconSmall" color={`status${capitalizeFirstLetter(status)}`} />
         </StyledIconWrapper>
-        <Text>{children}</Text>
+        <TextWrapper>{children}</TextWrapper>
       </Shelf>
     </Text>
   )
@@ -41,6 +41,15 @@ const StyledIconWrapper = styled(Flex)`
     align-self: center;
     visibility: hidden;
   }
+`
+
+const TextWrapper = styled(Text)`
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 `
 
 const StyledIcon = styled.div`

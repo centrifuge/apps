@@ -230,6 +230,13 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                     delay until the transfer is completed is to be expected.
                   </Text>
                 </InlineFeedback>
+              ) : source === 'other' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to
+                    an increase in the NAV of the pool.
+                  </Text>
+                </InlineFeedback>
               ) : (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">

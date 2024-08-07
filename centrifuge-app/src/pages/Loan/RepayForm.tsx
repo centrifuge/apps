@@ -10,6 +10,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
+import { Tooltips } from '../../components/Tooltips'
 import { Dec, max as maxDec, min } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -232,7 +233,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Additional amount"
+                    label={<Tooltips type="additionalAmountInput" />}
                     disabled={isRepayLoading}
                     currency={displayCurrency}
                     onChange={(value) => form.setFieldValue('amountAdditional', value)}
@@ -263,6 +264,13 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             {destination === 'reserve' ? (
               <InlineFeedback status="default">
                 <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
+              </InlineFeedback>
+            ) : destination === 'other' ? (
+              <InlineFeedback status="default">
+                <Text color="statusDefault">
+                  Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to a
+                  decrease in the NAV of the pool.
+                </Text>
               </InlineFeedback>
             ) : (
               <InlineFeedback status="default">
