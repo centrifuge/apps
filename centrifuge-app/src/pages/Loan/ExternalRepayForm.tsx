@@ -8,7 +8,7 @@ import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { copyable } from '../../components/Report/utils'
 import { Tooltips } from '../../components/Tooltips'
-import { Dec, min } from '../../utils/Decimal'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
@@ -24,6 +24,9 @@ type RepayValues = {
   quantity: number | ''
   fees: { id: string; amount: number | '' | Decimal }[]
 }
+
+const UNLIMITED = Dec(1000000000000000)
+
 /**
  * Repay form for loans with `valuationMethod === oracle
  */
@@ -110,23 +113,30 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const debt = ('outstandingDebt' in loan && loan.outstandingDebt?.toDecimal()) || Dec(0)
-  const { maxAvailable, maxInterest, totalRepay } = React.useMemo(() => {
+  const { maxAvailable, maxInterest, totalRepay, maxPrincipal } = React.useMemo(() => {
     const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
     const outstandingDebt = 'outstandingDebt' in loan ? loan.outstandingDebt.toDecimal() : Dec(0)
-    const { quantity, interest, price } = repayForm.values
+    const { quantity, interest, price, amountAdditional } = repayForm.values
     const totalRepay = Dec(price || 0)
       .mul(quantity || 0)
       .add(interest || 0)
-    let maxAvailable = min(balance, debt)
-    let maxInterest = min(balance, outstandingInterest)
-    if (destination !== 'reserve') {
-      maxAvailable = outstandingDebt
-      maxInterest = outstandingInterest
+      .add(amountAdditional || 0)
+
+    const maxInterest = outstandingInterest
+    let maxPrincipal
+    let maxAvailable
+    if (destination === 'reserve') {
+      maxAvailable = balance
+      maxPrincipal = outstandingDebt.sub(outstandingInterest)
+    } else {
+      maxAvailable = UNLIMITED
+      maxPrincipal = UNLIMITED
     }
+
     return {
       maxAvailable,
       maxInterest,
+      maxPrincipal,
       totalRepay,
     }
   }, [loan, balance, repayForm.values])
@@ -139,7 +149,16 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
     <FormikProvider value={repayForm}>
       <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
         <Shelf gap={1}>
-          <Field validate={combine(nonNegativeNumberNotRequired())} name="quantity">
+          <Field
+            validate={combine(nonNegativeNumberNotRequired(), (val) => {
+              const principal = Dec(val || 0).mul(repayForm.values.price || 0)
+              if (principal.gt(maxPrincipal)) {
+                return `Principal exeeds max (${formatBalance(maxPrincipal, displayCurrency, 2)})`
+              }
+              return ''
+            })}
+            name="quantity"
+          >
             {({ field, form }: FieldProps) => {
               return (
                 <CurrencyInput
@@ -157,16 +176,13 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             }}
           </Field>
           <Field
-            validate={combine(
-              nonNegativeNumberNotRequired(),
-              maxNotRequired(
-                maxAvailable.toNumber(),
-                `Quantity x price (${formatBalance(
-                  Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0),
-                  displayCurrency
-                )}) exceeds available debt (${formatBalance(maxAvailable, displayCurrency)})`
-              )
-            )}
+            validate={combine(nonNegativeNumberNotRequired(), (val) => {
+              const principal = Dec(val || 0).mul(repayForm.values.quantity || 0)
+              if (principal.gt(maxPrincipal)) {
+                return `Principal exeeds max (${formatBalance(maxPrincipal, displayCurrency, 2)})`
+              }
+              return ''
+            })}
             name="price"
           >
             {({ field, form }: FieldProps) => {
@@ -189,7 +205,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(maxInterest.toNumber()))}
             name="interest"
           >
-            {({ field, meta, form }: FieldProps) => {
+            {({ field, form }: FieldProps) => {
               return (
                 <CurrencyInput
                   {...field}
@@ -246,10 +262,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
 
           <Shelf justifyContent="space-between">
             <Text variant="emphasized">Available</Text>
-            <Text variant="emphasized">{formatBalance(maxAvailable, displayCurrency, 2)}</Text>
+            <Text variant="emphasized">
+              {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+            </Text>
           </Shelf>
         </Stack>
-        {destination === 'reserve' && totalRepay.gt(balance) && destination === 'reserve' && (
+        {destination === 'reserve' && totalRepay.gt(balance) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
               <Text color="statusCritical">
@@ -262,7 +280,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         )}
         {Dec(repayForm.values.price || 0)
           .mul(repayForm.values.quantity || 0)
-          .gt(maxAvailable) && (
+          .gt(maxPrincipal) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
               <Text color="statusCritical">
@@ -272,7 +290,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   displayCurrency,
                   2
                 )}
-                ) is greater than the outstanding principal ({formatBalance(maxAvailable, displayCurrency, 2)}).
+                ) is greater than the outstanding principal ({formatBalance(maxPrincipal, displayCurrency, 2)}).
               </Text>
             </InlineFeedback>
           </Box>
@@ -295,7 +313,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               !poolFees.isValid(repayForm) ||
               !repayForm.isValid ||
               totalRepay.greaterThan(maxAvailable) ||
-              maxAvailable.eq(0)
+              maxAvailable.eq(0) ||
+              (destination === 'reserve' && balance.lt(totalRepay))
             }
             loading={isRepayLoading}
           >

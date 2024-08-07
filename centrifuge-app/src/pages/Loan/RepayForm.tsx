@@ -10,8 +10,9 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
+import { copyable } from '../../components/Report/utils'
 import { Tooltips } from '../../components/Tooltips'
-import { Dec, min } from '../../utils/Decimal'
+import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
@@ -147,16 +148,16 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
     let maxPrincipal
     let maxInterest
     if (destination === 'reserve') {
-      maxAvailable = min(balance, loan.outstandingDebt.toDecimal())
-      maxPrincipal = min(balance, loan.outstandingDebt.toDecimal().sub(outstandingInterest))
-      maxInterest = min(balance, outstandingInterest)
+      maxAvailable = balance
+      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
+      maxInterest = outstandingInterest
     } else if (destination === 'other') {
-      maxAvailable = min(balance, loan.outstandingDebt.toDecimal())
-      maxPrincipal = min(balance, loan.outstandingDebt.toDecimal().sub(outstandingInterest))
+      maxAvailable = balance
+      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
       maxInterest = Dec(0)
     } else {
-      maxAvailable = loan.outstandingDebt.toDecimal()
-      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
+      maxAvailable = UNLIMITED
+      maxPrincipal = UNLIMITED
       maxInterest = outstandingInterest
     }
     const totalRepay = Dec(principal || 0)
@@ -177,7 +178,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
           <Field
             validate={combine(
               positiveNumberNotRequired(),
-              maxNotRequired(maxAvailable.toNumber(), 'Principal exceeds available debt')
+              maxNotRequired(maxPrincipal.toNumber(), 'Principal exceeds available debt')
             )}
             name="principal"
           >
@@ -190,8 +191,14 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   disabled={isRepayLoading}
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('principal', value)}
-                  onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
-                  secondaryLabel={`${formatBalance(maxPrincipal, displayCurrency)} outstanding`}
+                  onSetMax={
+                    destination === 'reserve'
+                      ? () => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)
+                      : undefined
+                  }
+                  secondaryLabel={
+                    destination === 'reserve' ? `${formatBalance(maxPrincipal, displayCurrency)} outstanding` : ''
+                  }
                 />
               )
             }}
@@ -296,7 +303,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             </Shelf>
           </Stack>
 
-          {Dec(repayForm.values.principal || 0).gt(maxPrincipal) && maxAvailable !== UNLIMITED && (
+          {Dec(repayForm.values.principal || 0).gt(maxPrincipal) && (
             <Box bg="statusCriticalBg" p={1}>
               <InlineFeedback status="critical">
                 <Text color="statusCritical">
@@ -306,7 +313,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               </InlineFeedback>
             </Box>
           )}
-          {Dec(repayForm.values.interest || 0).gt(maxInterest) && maxAvailable !== UNLIMITED && (
+          {Dec(repayForm.values.interest || 0).gt(maxInterest) && (
             <Box bg="statusCriticalBg" p={1}>
               <InlineFeedback status="critical">
                 <Text color="statusCritical">
@@ -316,10 +323,26 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               </InlineFeedback>
             </Box>
           )}
+          {destination === 'reserve' && totalRepay.gt(balance) && (
+            <Box bg="statusCriticalBg" p={1}>
+              <InlineFeedback status="critical">
+                <Text color="statusCritical">
+                  The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
+                  insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
+                  {copyable(account?.actingAddress || '')} on Centrifuge.
+                </Text>
+              </InlineFeedback>
+            </Box>
+          )}
           <Stack gap={1}>
             <Button
               type="submit"
-              disabled={!poolFees.isValid(repayForm) || !repayForm.isValid || maxAvailable.eq(0)}
+              disabled={
+                !poolFees.isValid(repayForm) ||
+                !repayForm.isValid ||
+                maxAvailable.eq(0) ||
+                (destination === 'reserve' && balance.lt(totalRepay))
+              }
               loading={isRepayLoading}
             >
               {isCashLoan(loan) ? 'Withdraw' : 'Repay'}
