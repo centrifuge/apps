@@ -54,6 +54,14 @@ export function PricingValues({ loan, pool }: Props) {
                 value: latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-',
               },
               { label: 'Price last updated', value: days === '0' ? `${days} ago` : `Today` },
+              ...(pricing.interestRate
+                ? [
+                    {
+                      label: 'Interest rate',
+                      value: pricing.interestRate && formatPercentage(pricing.interestRate.toPercent()),
+                    },
+                  ]
+                : []),
             ]}
           />
         </Stack>
