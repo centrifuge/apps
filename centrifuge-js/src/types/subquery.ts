@@ -142,24 +142,50 @@ export type SubqueryAssetTransaction = {
 }
 
 export type SubqueryAssetSnapshot = {
-  __typename?: 'AssetSnapshot'
+  __typename?: 'allAssetSnapshots'
   asset: {
+    actualOriginationDate: number
+    advanceRate: string | undefined
+    collateralValue: string | undefined
+    discountRate: string | undefined
     id: string
-    metadata: string
+    lossGivenDefault: string | undefined
+    actualMaturityDate: string | undefined
     name: string
-    type: AssetType
+    probabilityOfDefault: string | undefined
+    status: string
+    sumRealizedProfitFifo: string | undefined
+    unrealizedProfitAtMarketPrice: string | undefined
+    valuationMethod: string
+    notional: string | undefined
   }
   timestamp: string
-  presentValue: string
-  currentPrice: string
-  outstandingPrincipal: string
-  outstandingInterest: string
-  outstandingDebt: string
-  outstandingQuantity: string
-  totalBorrowed: string
-  totalRepaidPrincipal: string
-  totalRepaidInterest: string
-  totalRepaidUnscheduled: string
+  assetId: string
+  presentValue: string | undefined
+  currentPrice: string | undefined
+  outstandingPrincipal: string | undefined
+  outstandingInterest: string | undefined
+  outstandingDebt: string | undefined
+  outstandingQuantity: string | undefined
+  totalRepaidPrincipal: string | undefined
+  totalRepaidInterest: string | undefined
+  totalRepaidUnscheduled: string | undefined
+}
+
+export type SubqueryPoolAssetSnapshot = {
+  __typename?: 'AssetSnapshot'
+  timestamp: string | undefined
+  assetId: string
+  presentValue: string | undefined
+  currentPrice: string | undefined
+  outstandingPrincipal: string | undefined
+  outstandingInterest: string | undefined
+  outstandingDebt: string | undefined
+  outstandingQuantity: string | undefined
+  totalBorrowed: string | undefined
+  totalRepaidPrincipal: string | undefined
+  totalRepaidInterest: string | undefined
+  totalRepaidUnscheduled: string | undefined
 }
 
 export type PoolFeeTransactionType = 'PROPOSED' | 'ADDED' | 'REMOVED' | 'CHARGED' | 'UNCHARGED' | 'PAID' | 'ACCRUED'

@@ -1,9 +1,14 @@
 import { VisualButton, VisualButtonProps } from '@centrifuge/fabric'
-import { NavLink, NavLinkProps } from 'react-router-dom'
+import { NavLink, NavLinkProps, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { prefetchRoute } from './Root'
 
-export type RouterLinkButtonProps = VisualButtonProps & NavLinkProps & { showActive?: boolean }
+export type RouterLinkButtonProps = VisualButtonProps &
+  Omit<NavLinkProps, 'to'> & {
+    showActive?: boolean
+    goBack?: boolean
+    to?: string
+  }
 
 const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
   {
@@ -22,11 +27,30 @@ export function RouterLinkButton({
   disabled,
   loading,
   loadingMessage,
+  goBack,
+  to,
   children,
   ...routeProps
 }: RouterLinkButtonProps) {
+  const navigate = useNavigate()
+
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault()
+    if (goBack) {
+      navigate(-1)
+    } else if (to) {
+      navigate(to)
+    }
+  }
+
   return (
-    <StyledLink $disabled={loading || disabled} {...routeProps} onMouseOver={() => prefetchRoute(routeProps.to)}>
+    <StyledLink
+      $disabled={loading || disabled}
+      to={to || ''}
+      {...routeProps}
+      onMouseOver={() => to && !goBack && prefetchRoute(to)}
+      onClick={handleClick}
+    >
       <VisualButton
         variant={variant}
         small={small}
