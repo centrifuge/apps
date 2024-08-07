@@ -65,7 +65,8 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       .filter((day) => {
         return (
           asset &&
-          day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate ?? '').getTime() &&
+          (!asset?.pricing.maturityDate ||
+            day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate ?? '').getTime()) &&
           !day.presentValue?.isZero()
         )
       })
@@ -75,6 +76,8 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
 
         return { day: new Date(day.timestamp), historicPV, futurePV: null, historicPrice, futurePrice: null }
       })
+
+    if (!asset.pricing.maturityDate) return historic
 
     const today = new Date()
     today.setDate(today.getDate() + 1)
@@ -137,7 +140,10 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     return [min, max]
   }, [data])
 
-  const isChartEmpty = React.useMemo(() => !data.length || assetSnapshots?.length < 1, [data, assetSnapshots])
+  const isChartEmpty = React.useMemo(
+    () => !data.length || !assetSnapshots || assetSnapshots.length < 1,
+    [data, assetSnapshots]
+  )
 
   if (!assetSnapshots) return <Spinner style={{ margin: 'auto', height: 350 }} />
 
