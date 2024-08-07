@@ -38,16 +38,16 @@ const config: Record<number, LPConfig> = {
   },
   // Mainnet
   1: {
-    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+    centrifugeRouter: '0x2F445BA946044C5F508a63eEaF7EAb673c69a1F4',
   },
   42161: {
-    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+    centrifugeRouter: '0x2F445BA946044C5F508a63eEaF7EAb673c69a1F4',
   },
   8453: {
-    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+    centrifugeRouter: '0xF35501E7fC4a076E744dbAFA883CED74CCF5009d',
   },
   42220: {
-    centrifugeRouter: '0x0000000000000000000000000000000000000000',
+    centrifugeRouter: '0x5a00C4fF931f37202aD4Be1FDB297E9EDc1CBb33',
   },
 }
 
