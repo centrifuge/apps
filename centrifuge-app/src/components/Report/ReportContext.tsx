@@ -65,19 +65,27 @@ export function ReportContextProvider({ children }: { children: React.ReactNode 
 
   const report = reportParam || 'balance-sheet'
 
-  const [startDate, setStartDate] = React.useState(
-    new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10)
-  )
+  const [startDate, setStartDate] = React.useState<string>('')
   const [endDate, setEndDate] = React.useState(new Date().toISOString().slice(0, 10))
 
   // Custom filters for specific reports
-  const [loanStatus, setLoanStatus] = React.useState('all')
+  const [loanStatus, setLoanStatus] = React.useState<string>('')
   const [groupBy, setGroupBy] = React.useState<GroupBy>('month')
   const [activeTranche, setActiveTranche] = React.useState('all')
   const [txType, setTxType] = React.useState('all')
   const [address, setAddress] = React.useState('')
   const [network, setNetwork] = React.useState<string | number>('all')
   const [loan, setLoan] = React.useState('all')
+
+  React.useEffect(() => {
+    if (reportParam === 'asset-list') {
+      setStartDate(new Date().toISOString().slice(0, 10))
+      setLoanStatus('ongoing')
+    } else {
+      setStartDate(new Date(new Date().getFullYear(), 0, 1, 1).toISOString().slice(0, 10))
+      setLoanStatus('all')
+    }
+  }, [reportParam, setLoanStatus, setStartDate])
 
   return (
     <ReportContext.Provider
