@@ -210,7 +210,7 @@ export function InvestForm({ autoFocus, investLabel = 'Invest' }: InvestFormProp
                 onClick={() => actions.cancelInvest()}
                 loading={isCancelling}
                 disabled={pool.epoch.status !== 'ongoing'}
-                variant={state.canChangeOrder ? 'secondary' : 'primary'}
+                variant="secondary"
               >
                 {state.canChangeOrder ? 'Cancel' : 'Cancel order'}
               </Button>

@@ -34,6 +34,7 @@ import { nftMetadataSchema } from '../../schemas'
 import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, truncateText } from '../../utils/formatting'
+import { useBasePath } from '../../utils/useBasePath'
 import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
@@ -112,6 +113,7 @@ function Loan() {
   const theme = useTheme()
   const { pid: poolId, aid: loanId } = useParams<{ pid: string; aid: string }>()
   if (!poolId || !loanId) throw new Error('Loan no found')
+  const basePath = useBasePath()
   const isTinlakePool = poolId?.startsWith('0x')
   const pool = usePool(poolId)
   const loan = useLoan(poolId, loanId)
@@ -148,7 +150,7 @@ function Loan() {
   return (
     <FullHeightStack>
       <Box mt={2} ml={2}>
-        <RouterLinkButton goBack small icon={IconChevronLeft} variant="tertiary">
+        <RouterLinkButton to={`${basePath}/${poolId}/assets`} small icon={IconChevronLeft} variant="tertiary">
           {poolMetadata?.pool?.name ?? 'Pool assets'}
         </RouterLinkButton>
       </Box>
