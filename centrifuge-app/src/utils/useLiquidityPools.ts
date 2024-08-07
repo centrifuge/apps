@@ -24,23 +24,19 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
   const query = useQuery(
     ['activeDomains', poolId, routers?.length],
     async () => {
-      console.log('routers', routers)
       const results = await Promise.allSettled(
-        routers!
-          .filter((r) => r.chainId === 11155111)
-          .map(async (r) => {
+        routers!.map((r) => {
+          async function getManager() {
             const rpcProvider = getProvider(r.chainId)
-            console.log(rpcProvider.network)
             const manager = await cent.liquidityPools.getManagerFromRouter([r.router], {
               rpcProvider,
             })
-            console.log('manager', manager)
             const pool = await cent.liquidityPools.getPool([r.chainId, manager, poolId], { rpcProvider })
-            console.log('pool', pool)
             return [manager, pool] as const
-          })
+          }
+          return withTimeout(getManager(), 15000)
+        })
       )
-      console.log(results)
       return results
         .map((result, i) => {
           if (result.status === 'rejected') {
@@ -49,7 +45,6 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
           }
           const [manager, pool] = result.value
           const router = routers![i]
-          console.log(router)
           const domain: Domain = {
             ...pool,
             chainId: router.chainId,
@@ -58,7 +53,6 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
               pool.liquidityPools &&
               Object.values(pool.liquidityPools).some((tranche) => !!Object.values(tranche).some((p) => !!p)),
           }
-          console.log(domain)
           return domain
         })
         .filter(Boolean)
@@ -120,4 +114,11 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   )
 
   return query
+}
+
+function timeout(ms: number): Promise<never> {
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('Operation timed out')), ms))
+}
+function withTimeout<T>(promise: Promise<T>, ms: number) {
+  return Promise.race([promise, timeout(ms)])
 }
