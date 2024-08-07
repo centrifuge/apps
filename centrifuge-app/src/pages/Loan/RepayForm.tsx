@@ -11,7 +11,7 @@ import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
 import { Dec, max as maxDec, min } from '../../utils/Decimal'
-import { formatBalance, roundDown } from '../../utils/formatting'
+import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useLoans } from '../../utils/useLoans'
 import { useBorrower } from '../../utils/usePermissions'
@@ -287,16 +287,6 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               </Text>
             </Shelf>
           </Stack>
-          {balance.lessThan(maxAvailable) && destination === 'reserve' && (
-            <Box bg="statusWarningBg" p={1}>
-              <InlineFeedback status="warning">
-                <Text color="statusWarning">
-                  Your wallet balance ({formatBalance(roundDown(balance), displayCurrency, 2)}) is smaller than the
-                  outstanding balance ({formatBalance(maxAvailable, displayCurrency, 2)}).
-                </Text>
-              </InlineFeedback>
-            </Box>
-          )}
           {totalRepay.gt(maxAvailable) && maxAvailable !== UNLIMITED && (
             <Box bg="statusCriticalBg" p={1}>
               <InlineFeedback status="critical">

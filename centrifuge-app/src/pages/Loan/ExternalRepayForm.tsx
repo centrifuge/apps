@@ -261,16 +261,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             <Text variant="emphasized">{formatBalance(maxAvailable, displayCurrency, 2)}</Text>
           </Shelf>
         </Stack>
-        {balance.lessThan(debt) && destination === 'reserve' && (
-          <Box bg="statusWarningBg" p={1}>
-            <InlineFeedback status="warning">
-              <Text color="statusWarning">
-                Your wallet balance ({formatBalance(roundDown(balance), displayCurrency, 2)}) is smaller than the
-                outstanding balance ({formatBalance(debt, displayCurrency, 2)}).
-              </Text>
-            </InlineFeedback>
-          </Box>
-        )}
         {totalRepay.gt(maxAvailable) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
