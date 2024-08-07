@@ -191,7 +191,7 @@ export const evmChains: EvmChains = {
     name: 'Ethereum Sepolia',
     nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
     blockExplorerUrl: 'https://sepolia.etherscan.io/',
-    urls: [`https://eth-sepolia.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://rpc.sepolia.org	`],
     iconUrl: sepoliaLogo,
     isTestnet: true,
   },

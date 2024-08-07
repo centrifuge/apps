@@ -105,7 +105,7 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
         <ConnectionGuard networks={[domain.chainId]} body="Connect to the right network to continue" variant="plain">
           {pool.tranches.map((t) => (
             <React.Fragment key={t.id}>
-              {domain.undeployedTranches[t.id] && (
+              {domain.canTrancheBeDeployed[t.id] && (
                 <DeployTrancheButton poolId={poolId} trancheId={t.id} domain={domain} onSuccess={refetch} />
               )}
               {domain.currencies.map((currency, i) => (
