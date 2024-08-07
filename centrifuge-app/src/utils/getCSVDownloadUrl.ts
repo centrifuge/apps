@@ -1,4 +1,5 @@
 export function getCSVDownloadUrl(data: { [key: string]: string | number }[]) {
+  if (!data.length) return null
   const csvContent = [
     Object.keys(data[0]), // column headers
     ...data.map((entry) => Object.values(entry)), // columns

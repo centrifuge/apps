@@ -60,15 +60,16 @@ function PoolPerformanceChart() {
   const [range, setRange] = React.useState<(typeof rangeFilters)[number]>({ value: 'all', label: 'All' })
   const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
+  const isSingleTranche = pool?.tranches.length === 1
   const data: ChartData[] = React.useMemo(
     () =>
       truncatedPoolStates?.map((day) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
-        const price = Object.values(day.tranches).length === 1 ? Object.values(day.tranches)[0].price!.toFloat() : null
+        const price = (isSingleTranche && Object.values(day.tranches)[0].price?.toFloat()) || null
 
         return { day: new Date(day.timestamp), nav, price }
       }) || [],
-    [truncatedPoolStates]
+    [isSingleTranche, truncatedPoolStates]
   )
 
   const chartData = data.slice(-rangeNumber)
