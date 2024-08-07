@@ -4,6 +4,7 @@ import BN from 'bn.js'
 import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
+import { useBasePath } from '../../utils/useBasePath'
 import { useAssetTransactions } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
 import { RouterTextLink } from '../TextLink'
@@ -25,92 +26,6 @@ type Row = {
 const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
   return 'default'
 }
-
-export const columns = [
-  {
-    align: 'left',
-    header: 'Type',
-    cell: ({ type }: Row) => <StatusChip status={getTransactionTypeStatus(type)}>{type}</StatusChip>,
-  },
-  {
-    align: 'left',
-    header: <SortableTableHeader label="Transaction date" />,
-    cell: ({ transactionDate }: Row) => (
-      <Text as="span" variant="body3">
-        {formatDate(transactionDate)}
-      </Text>
-    ),
-    sortKey: 'transactionDate',
-  },
-  {
-    align: 'left',
-    header: 'Asset',
-    cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
-      return fromAssetId && toAssetId && activeAssetId === fromAssetId.split('-')[1] ? (
-        <Text as="span" variant="body3">
-          {fromAssetName} &rarr;{' '}
-          <RouterTextLink target="_self" to={`assets/${toAssetId?.split('-')[1]}`}>
-            {toAssetName}
-          </RouterTextLink>
-        </Text>
-      ) : fromAssetId && toAssetId && activeAssetId === toAssetId.split('-')[1] ? (
-        <Text as="span" variant="body3">
-          <RouterTextLink target="_self" to={`assets/${fromAssetId?.split('-')[1]}`}>
-            {fromAssetName}
-          </RouterTextLink>{' '}
-          &rarr; {toAssetName}
-        </Text>
-      ) : fromAssetId && toAssetId ? (
-        <Text as="span" variant="body3">
-          <RouterTextLink target="_self" to={`assets/${fromAssetId?.split('-')[1]}`}>
-            {fromAssetName}
-          </RouterTextLink>{' '}
-          &rarr;{' '}
-          <RouterTextLink target="_self" to={`assets/${toAssetId?.split('-')[1]}`}>
-            {toAssetName}
-          </RouterTextLink>
-        </Text>
-      ) : activeAssetId !== assetId?.split('-')[1] ? (
-        <Text as="span" variant="body3">
-          <RouterTextLink target="_self" to={`assets/${assetId?.split('-')[1]}`}>
-            {assetName || `Asset ${assetId?.split('-')[1]}`}
-          </RouterTextLink>
-        </Text>
-      ) : (
-        <Text as="span" variant="body3">
-          {assetName || `Asset ${assetId?.split('-')[1]}`}
-        </Text>
-      )
-    },
-  },
-  {
-    align: 'right',
-    header: <SortableTableHeader label="Amount" />,
-    cell: ({ amount }: Row) => (
-      <Text as="span" variant="body3">
-        {amount ? formatBalance(amount, 'USD', 2, 2) : ''}
-      </Text>
-    ),
-    sortKey: 'amount',
-  },
-  {
-    align: 'right',
-    header: 'View transaction',
-    cell: ({ hash }: Row) => {
-      return (
-        <Stack
-          as="a"
-          href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Transaction on Subscan.io"
-        >
-          <IconExternalLink size="iconSmall" color="textPrimary" />
-        </Stack>
-      )
-    },
-  },
-]
 
 export const TransactionHistory = ({
   poolId,
@@ -143,6 +58,7 @@ export const TransactionHistoryTable = ({
   activeAssetId?: string
   preview?: boolean
 }) => {
+  const basePath = useBasePath('/pools')
   const getLabelAndAmount = (transaction: AssetTransaction) => {
     if (transaction.type === 'CASH_TRANSFER') {
       return {
@@ -247,7 +163,7 @@ export const TransactionHistoryTable = ({
     }
   })
 
-  const csvUrl = csvData?.length ? getCSVDownloadUrl(csvData) : ''
+  const csvUrl = (csvData?.length && getCSVDownloadUrl(csvData)) || ''
 
   const tableData =
     transformedTransactions.slice(0, preview ? 8 : Infinity).map((transaction) => {
@@ -266,6 +182,84 @@ export const TransactionHistoryTable = ({
         hash: transaction.hash,
       }
     }) || []
+
+  const columns = [
+    {
+      align: 'left',
+      header: 'Type',
+      cell: ({ type }: Row) => <StatusChip status={getTransactionTypeStatus(type)}>{type}</StatusChip>,
+    },
+    {
+      align: 'left',
+      header: <SortableTableHeader label="Transaction date" />,
+      cell: ({ transactionDate }: Row) => (
+        <Text as="span" variant="body3">
+          {formatDate(transactionDate)}
+        </Text>
+      ),
+      sortKey: 'transactionDate',
+    },
+    {
+      align: 'left',
+      header: 'Asset',
+      cell: ({ activeAssetId, assetId, assetName, fromAssetId, fromAssetName, toAssetId, toAssetName }: Row) => {
+        const base = `${basePath}/${poolId}/assets/`
+        return fromAssetId && toAssetId && activeAssetId === fromAssetId.split('-')[1] ? (
+          <Text as="span" variant="body3">
+            {fromAssetName} &rarr;{' '}
+            <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}>{toAssetName}</RouterTextLink>
+          </Text>
+        ) : fromAssetId && toAssetId && activeAssetId === toAssetId.split('-')[1] ? (
+          <Text as="span" variant="body3">
+            <RouterTextLink to={`${base}${fromAssetId?.split('-')[1]}`}>{fromAssetName}</RouterTextLink> &rarr;{' '}
+            {toAssetName}
+          </Text>
+        ) : fromAssetId && toAssetId ? (
+          <Text as="span" variant="body3">
+            <RouterTextLink to={`${base}${fromAssetId?.split('-')[1]}`}>{fromAssetName}</RouterTextLink> &rarr;{' '}
+            <RouterTextLink to={`${base}${toAssetId?.split('-')[1]}`}>{toAssetName}</RouterTextLink>
+          </Text>
+        ) : activeAssetId !== assetId?.split('-')[1] ? (
+          <Text as="span" variant="body3">
+            <RouterTextLink to={`${base}${assetId?.split('-')[1]}`}>
+              {assetName || `Asset ${assetId?.split('-')[1]}`}
+            </RouterTextLink>
+          </Text>
+        ) : (
+          <Text as="span" variant="body3">
+            {assetName || `Asset ${assetId?.split('-')[1]}`}
+          </Text>
+        )
+      },
+    },
+    {
+      align: 'right',
+      header: <SortableTableHeader label="Amount" />,
+      cell: ({ amount }: Row) => (
+        <Text as="span" variant="body3">
+          {amount ? formatBalance(amount, 'USD', 2, 2) : ''}
+        </Text>
+      ),
+      sortKey: 'amount',
+    },
+    {
+      align: 'right',
+      header: 'View transaction',
+      cell: ({ hash }: Row) => {
+        return (
+          <Stack
+            as="a"
+            href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${hash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Transaction on Subscan.io"
+          >
+            <IconExternalLink size="iconSmall" color="textPrimary" />
+          </Stack>
+        )
+      },
+    },
+  ]
 
   return (
     <Stack gap={2}>

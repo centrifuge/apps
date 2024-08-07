@@ -84,8 +84,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const approve = useEvmTransaction('Approve', (cent) => cent.liquidityPools.approveForCurrency)
   const cancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelInvestOrder)
   const cancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.cancelRedeemOrder)
-  const collectCancelInvest = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.claimCancelDeposit)
-  const collectCancelRedeem = useEvmTransaction('Cancel order', (cent) => cent.liquidityPools.claimCancelRedeem)
+  const collectCancelInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.claimCancelDeposit)
+  const collectCancelRedeem = useEvmTransaction('Collect', (cent) => cent.liquidityPools.claimCancelRedeem)
 
   const txActions = {
     invest,
@@ -112,7 +112,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const pendingTransaction = pendingActionState && txActions[pendingActionState]?.lastCreatedTransaction
   let statusMessage
   if (lpInvest?.pendingCancelDepositRequest || lpInvest?.pendingCancelRedeemRequest) {
-    statusMessage = 'Order cancellation is currently being bridged and will show up soon'
+    statusMessage = 'Order cancellation is currently being processed and will show up soon'
   }
 
   function doAction<T = any>(
