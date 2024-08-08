@@ -35,6 +35,7 @@ import {
   Shelf,
   Stack,
   Text,
+  Tooltip,
 } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
@@ -222,7 +223,52 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               </Field>
             )}
             {source === 'reserve' && withdraw.render()}
-            <Box bg="statusDefaultBg" p={1}>
+
+            {poolFees.render()}
+
+            {totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable) && (
+              <Box bg="statusCriticalBg" p={1}>
+                <InlineFeedback status="critical">
+                  <Text color="statusCritical">
+                    {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
+                    {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
+                    {formatBalance(maxAvailable, displayCurrency, 2)}).
+                  </Text>
+                </InlineFeedback>
+              </Box>
+            )}
+
+            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+              <Text variant="heading4">Transaction summary</Text>
+              <Shelf justifyContent="space-between">
+                <Text variant="label2" color="textPrimary">
+                  Available balance
+                </Text>
+                <Text variant="label2">
+                  <Tooltip
+                    body={
+                      maxAvailable === UNLIMITED
+                        ? 'Unlimited because this is a virtual accounting process.'
+                        : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
+                    }
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+                  </Tooltip>
+                </Text>
+              </Shelf>
+
+              <Stack gap={1}>
+                <Shelf justifyContent="space-between">
+                  <Text variant="label2" color="textPrimary">
+                    {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'}
+                  </Text>
+                  <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                </Shelf>
+              </Stack>
+
+              {poolFees.renderSummary()}
+
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">
@@ -244,41 +290,8 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                   </Text>
                 </InlineFeedback>
               )}
-            </Box>
-            {poolFees.render()}
-            {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
-              <Box bg="statusWarningBg">
-                <InlineFeedback status="warning">
-                  <Text color="statusWarning">
-                    The pool&apos;s available reserve ({formatBalance(poolReserve, displayCurrency, 2)}) is smaller than
-                    the available financing
-                  </Text>
-                </InlineFeedback>
-              </Box>
-            )}
-            <Shelf justifyContent="space-between">
-              <Text variant="emphasized">Total amount</Text>
-              <Text variant="emphasized">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
-            </Shelf>
+            </Stack>
 
-            {poolFees.renderSummary()}
-
-            <Shelf justifyContent="space-between">
-              <Text variant="emphasized">Available</Text>
-              <Text variant="emphasized">
-                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-              </Text>
-            </Shelf>
-            {totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable) && (
-              <Box bg="statusCriticalBg" p={1}>
-                <InlineFeedback status="critical">
-                  <Text color="statusCritical">
-                    Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
-                    principal ({formatBalance(totalFinance, displayCurrency, 2)}).
-                  </Text>
-                </InlineFeedback>
-              </Box>
-            )}
             <Stack>
               <Button
                 type="submit"

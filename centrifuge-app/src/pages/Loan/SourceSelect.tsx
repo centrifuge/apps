@@ -48,9 +48,5 @@ export function SourceSelect({ loan, value, onChange, action }: SourceSelectProp
 function LoanOption({ loan }: { loan: Loan }) {
   const nft = useCentNFT(loan.asset.collectionId, loan.asset.nftId, false, false)
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  return (
-    <>
-      {loan.id} - {metadata?.name}
-    </>
-  )
+  return <>{metadata?.name}</>
 }

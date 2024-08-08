@@ -6,6 +6,7 @@ import { Codec } from '@polkadot/types-codec/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
@@ -845,9 +846,9 @@ export type AssetTransaction = {
 export type AssetSnapshot = {
   actualMaturityDate: string | undefined
   actualOriginationDate: number | undefined
-  advanceRate: string | undefined
+  advanceRate: Decimal | undefined
   assetId: string
-  collateralValue: string | undefined
+  collateralValue: CurrencyBalance | undefined
   currentPrice: CurrencyBalance | undefined
   discountRate: string | undefined
   faceValue: CurrencyBalance | undefined
@@ -3340,8 +3341,8 @@ export function getPoolsModule(inst: Centrifuge) {
           assetId: tx.assetId,
           actualMaturityDate: tx.asset.actualMaturityDate || undefined,
           actualOriginationDate: tx.asset.actualOriginationDate || undefined,
-          advanceRate: tx.asset.advanceRate,
-          collateralValue: tx.asset.collateralValue,
+          advanceRate: new Rate(tx.asset.advanceRate || '0').toPercent(),
+          collateralValue: transformVal(tx.asset.collateralValue, currency.decimals),
           currentPrice: transformVal(tx.currentPrice, currency.decimals),
           discountRate: tx.asset.discountRate,
           faceValue:

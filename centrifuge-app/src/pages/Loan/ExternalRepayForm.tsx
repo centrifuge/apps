@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -113,31 +113,31 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const { maxAvailable, maxInterest, totalRepay, maxPrincipal } = React.useMemo(() => {
+  const { maxAvailable, maxInterest, totalRepay, maxQuantity, principalAmount } = React.useMemo(() => {
     const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
-    const outstandingDebt = 'outstandingDebt' in loan ? loan.outstandingDebt.toDecimal() : Dec(0)
     const { quantity, interest, price, amountAdditional } = repayForm.values
     const totalRepay = Dec(price || 0)
       .mul(quantity || 0)
       .add(interest || 0)
       .add(amountAdditional || 0)
 
+    const principalAmount = Dec(price || 0).mul(quantity || 0)
+
     const maxInterest = outstandingInterest
-    let maxPrincipal
+    let maxQuantity = loan.pricing.outstandingQuantity
     let maxAvailable
     if (destination === 'reserve') {
       maxAvailable = balance
-      maxPrincipal = outstandingDebt.sub(outstandingInterest)
     } else {
       maxAvailable = UNLIMITED
-      maxPrincipal = UNLIMITED
     }
 
     return {
       maxAvailable,
       maxInterest,
-      maxPrincipal,
+      maxQuantity,
       totalRepay,
+      principalAmount,
     }
   }, [loan, balance, repayForm.values])
 
@@ -147,59 +147,57 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
 
   return (
     <FormikProvider value={repayForm}>
-      <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-        <Shelf gap={1}>
-          <Field
-            validate={combine(nonNegativeNumberNotRequired(), (val) => {
-              const principal = Dec(val || 0).mul(repayForm.values.price || 0)
-              if (principal.gt(maxPrincipal)) {
-                return `Principal exeeds max (${formatBalance(maxPrincipal, displayCurrency, 2)})`
-              }
-              return ''
-            })}
-            name="quantity"
-          >
-            {({ field, form }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  label="Quantity"
-                  disabled={isRepayLoading}
-                  onChange={(value) => form.setFieldValue('quantity', value)}
-                  placeholder="0"
-                  onSetMax={() =>
-                    form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
-                  }
-                  secondaryLabel={`${loan.pricing.outstandingQuantity.toDecimal().toString()} outstanding`}
-                />
-              )
-            }}
-          </Field>
-          <Field
-            validate={combine(nonNegativeNumberNotRequired(), (val) => {
-              const principal = Dec(val || 0).mul(repayForm.values.quantity || 0)
-              if (principal.gt(maxPrincipal)) {
-                return `Principal exeeds max (${formatBalance(maxPrincipal, displayCurrency, 2)})`
-              }
-              return ''
-            })}
-            name="price"
-          >
-            {({ field, form }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  label="Settlement price"
-                  disabled={isRepayLoading}
-                  currency={displayCurrency}
-                  onChange={(value) => form.setFieldValue('price', value)}
-                  decimals={8}
-                  secondaryLabel={'\u200B'} // zero width space
-                />
-              )
-            }}
-          </Field>
-        </Shelf>
+      <Stack as={Form} gap={3} noValidate ref={repayFormRef}>
+        <Stack gap={1}>
+          <Shelf gap={1}>
+            <Field
+              validate={combine(nonNegativeNumberNotRequired(), (val) => {
+                if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
+                  return `Quantity exeeds max (${maxQuantity.toString()})`
+                }
+                return ''
+              })}
+              name="quantity"
+            >
+              {({ field, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Quantity"
+                    disabled={isRepayLoading}
+                    onChange={(value) => form.setFieldValue('quantity', value)}
+                    placeholder="0"
+                    onSetMax={() =>
+                      form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
+                    }
+                  />
+                )
+              }}
+            </Field>
+            <Field name="price">
+              {({ field, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Settlement price"
+                    disabled={isRepayLoading}
+                    currency={displayCurrency}
+                    onChange={(value) => form.setFieldValue('price', value)}
+                    decimals={8}
+                  />
+                )
+              }}
+            </Field>
+          </Shelf>
+
+          <Shelf justifyContent="space-between">
+            <Text variant="label2"> Principal</Text>
+            <Text variant="label2" color="textPrimary">
+              = {formatBalance(principalAmount, displayCurrency, 2)}
+            </Text>
+          </Shelf>
+        </Stack>
+
         {'outstandingInterest' in loan && loan.outstandingInterest.toDecimal().gt(0) && (
           <Field
             validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(maxInterest.toNumber()))}
@@ -238,35 +236,9 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             )
           }}
         </Field>
-        <Box bg="statusDefaultBg" p={1}>
-          {destination === 'reserve' ? (
-            <InlineFeedback status="default">
-              <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
-            </InlineFeedback>
-          ) : (
-            <InlineFeedback status="default">
-              <Text color="statusDefault">
-                Virtual accounting process. No onchain stablecoin transfers are expected.
-              </Text>
-            </InlineFeedback>
-          )}
-        </Box>
+
         {poolFees.render()}
-        <Stack gap={1}>
-          <Shelf justifyContent="space-between">
-            <Text variant="emphasized">Total amount</Text>
-            <Text variant="emphasized">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
-          </Shelf>
 
-          {poolFees.renderSummary()}
-
-          <Shelf justifyContent="space-between">
-            <Text variant="emphasized">Available</Text>
-            <Text variant="emphasized">
-              {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-            </Text>
-          </Shelf>
-        </Stack>
         {destination === 'reserve' && totalRepay.gt(balance) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
@@ -278,19 +250,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             </InlineFeedback>
           </Box>
         )}
-        {Dec(repayForm.values.price || 0)
-          .mul(repayForm.values.quantity || 0)
-          .gt(maxPrincipal) && (
+        {Dec(repayForm.values.quantity || 0).gt(maxQuantity.toDecimal()) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
               <Text color="statusCritical">
-                Principal (
-                {formatBalance(
-                  Dec(Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0)),
-                  displayCurrency,
-                  2
-                )}
-                ) is greater than the outstanding principal ({formatBalance(maxPrincipal, displayCurrency, 2)}).
+                Quantity ({repayForm.values.quantity}) is greater than the outstanding quantity (
+                {maxQuantity.toDecimal().toString()}).
               </Text>
             </InlineFeedback>
           </Box>
@@ -305,6 +270,51 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             </InlineFeedback>
           </Box>
         )}
+
+        <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+          <Text variant="heading4">Transaction summary</Text>
+          <Shelf justifyContent="space-between">
+            <Text variant="label2" color="textPrimary">
+              Available balance
+            </Text>
+            <Text variant="label2">
+              <Tooltip
+                body={
+                  maxAvailable === UNLIMITED
+                    ? 'Unlimited because this is a virtual accounting process.'
+                    : 'Balance of the asset originator account on Centrifuge'
+                }
+                style={{ pointerEvents: 'auto' }}
+              >
+                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+              </Tooltip>
+            </Text>
+          </Shelf>
+
+          <Stack gap={1}>
+            <Shelf justifyContent="space-between">
+              <Text variant="label2" color="textPrimary">
+                Sale amount
+              </Text>
+              <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
+            </Shelf>
+          </Stack>
+
+          {poolFees.renderSummary()}
+
+          {destination === 'reserve' ? (
+            <InlineFeedback status="default">
+              <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
+            </InlineFeedback>
+          ) : (
+            <InlineFeedback status="default">
+              <Text color="statusDefault">
+                Virtual accounting process. No onchain stablecoin transfers are expected.
+              </Text>
+            </InlineFeedback>
+          )}
+        </Stack>
+
         <Stack gap={1}>
           <Button
             type="submit"
