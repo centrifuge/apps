@@ -8,7 +8,7 @@ import {
   WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -159,6 +159,44 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               </Field>
             </Shelf>
             {source === 'reserve' && withdraw.render()}
+
+            {poolFees.render()}
+
+            {totalFinance.gt(0) && totalFinance.gt(maxAvailable) && (
+              <Box bg="statusCriticalBg" p={1}>
+                <InlineFeedback status="critical">
+                  <Text color="statusCritical">
+                    Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
+                    principal ({formatBalance(totalFinance, displayCurrency, 2)}).
+                  </Text>
+                </InlineFeedback>
+              </Box>
+            )}
+
+            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+              <Shelf justifyContent="space-between">
+                <Text variant="label2" color="textPrimary">
+                  Available balance
+                </Text>
+                <Text variant="label2">
+                  <Tooltip body={'Balance of the source asset'} style={{ pointerEvents: 'auto' }}>
+                    {formatBalance(maxAvailable, displayCurrency, 2)}
+                  </Tooltip>
+                </Text>
+              </Shelf>
+
+              <Stack gap={1}>
+                <Shelf justifyContent="space-between">
+                  <Text variant="label2" color="textPrimary">
+                    Purchase amount
+                  </Text>
+                  <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                </Shelf>
+              </Stack>
+
+              {poolFees.renderSummary()}
+            </Stack>
+
             <Box bg="statusDefaultBg" p={1}>
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
@@ -175,31 +213,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                 </InlineFeedback>
               )}
             </Box>
-            {poolFees.render()}
-            <Stack gap={1}>
-              <Shelf justifyContent="space-between">
-                <Text variant="emphasized">Total amount</Text>
-                <Text variant="emphasized">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
-              </Shelf>
 
-              {poolFees.renderSummary()}
-
-              <Shelf justifyContent="space-between">
-                <Text variant="emphasized">Available</Text>
-                <Text variant="emphasized">{formatBalance(maxAvailable, displayCurrency, 2)}</Text>
-              </Shelf>
-            </Stack>
-
-            {totalFinance.gt(0) && totalFinance.gt(maxAvailable) && (
-              <Box bg="statusCriticalBg" p={1}>
-                <InlineFeedback status="critical">
-                  <Text color="statusCritical">
-                    Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
-                    principal ({formatBalance(totalFinance, displayCurrency, 2)}).
-                  </Text>
-                </InlineFeedback>
-              </Box>
-            )}
             <Stack>
               <Button
                 type="submit"
