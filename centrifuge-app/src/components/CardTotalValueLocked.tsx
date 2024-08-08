@@ -87,7 +87,11 @@ export function CardTotalValueLocked() {
         borderBottomRightRadius="card"
         borderBottomLeftRadius="card"
       >
-        <TotalValueLocked setHovered={setHovered} chainTVL={totalValueLocked} />
+        <Box height={chartHeight}>
+          <React.Suspense fallback={<div style={{ height: chartHeight }} />}>
+            <TotalValueLocked setHovered={setHovered} chainTVL={totalValueLocked} />
+          </React.Suspense>
+        </Box>
       </Box>
     </Box>
   )
