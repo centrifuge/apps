@@ -113,7 +113,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const { maxAvailable, maxInterest, totalRepay, maxPrincipal } = React.useMemo(() => {
+  const { maxAvailable, maxInterest, totalRepay, maxQuantity } = React.useMemo(() => {
     const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
     const outstandingDebt = 'outstandingDebt' in loan ? loan.outstandingDebt.toDecimal() : Dec(0)
     const { quantity, interest, price, amountAdditional } = repayForm.values
@@ -123,20 +123,18 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       .add(amountAdditional || 0)
 
     const maxInterest = outstandingInterest
-    let maxPrincipal
+    let maxQuantity = loan.pricing.outstandingQuantity
     let maxAvailable
     if (destination === 'reserve') {
       maxAvailable = balance
-      maxPrincipal = outstandingDebt.sub(outstandingInterest)
     } else {
       maxAvailable = UNLIMITED
-      maxPrincipal = UNLIMITED
     }
 
     return {
       maxAvailable,
       maxInterest,
-      maxPrincipal,
+      maxQuantity,
       totalRepay,
     }
   }, [loan, balance, repayForm.values])
@@ -151,9 +149,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         <Shelf gap={1}>
           <Field
             validate={combine(nonNegativeNumberNotRequired(), (val) => {
-              const principal = Dec(val || 0).mul(repayForm.values.price || 0)
-              if (principal.gt(maxPrincipal)) {
-                return `Principal exeeds max (${formatBalance(maxPrincipal, displayCurrency, 2)})`
+              if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
+                return `Quantity exeeds max (${maxQuantity.toString()})`
               }
               return ''
             })}
@@ -175,16 +172,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               )
             }}
           </Field>
-          <Field
-            validate={combine(nonNegativeNumberNotRequired(), (val) => {
-              const principal = Dec(val || 0).mul(repayForm.values.quantity || 0)
-              if (principal.gt(maxPrincipal)) {
-                return `Principal exeeds max (${formatBalance(maxPrincipal, displayCurrency, 2)})`
-              }
-              return ''
-            })}
-            name="price"
-          >
+          <Field name="price">
             {({ field, form }: FieldProps) => {
               return (
                 <CurrencyInput
@@ -278,19 +266,12 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             </InlineFeedback>
           </Box>
         )}
-        {Dec(repayForm.values.price || 0)
-          .mul(repayForm.values.quantity || 0)
-          .gt(maxPrincipal) && (
+        {Dec(repayForm.values.quantity || 0).gt(maxQuantity.toDecimal()) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
               <Text color="statusCritical">
-                Principal (
-                {formatBalance(
-                  Dec(Dec(repayForm.values.price || 0).mul(repayForm.values.quantity || 0)),
-                  displayCurrency,
-                  2
-                )}
-                ) is greater than the outstanding principal ({formatBalance(maxPrincipal, displayCurrency, 2)}).
+                Quantity ({repayForm.values.quantity}) is greater than the outstanding quantity (
+                {maxQuantity.toDecimal().toString()}).
               </Text>
             </InlineFeedback>
           </Box>

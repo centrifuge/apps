@@ -157,7 +157,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       maxInterest = Dec(0)
     } else {
       maxAvailable = UNLIMITED
-      maxPrincipal = UNLIMITED
+      maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
       maxInterest = outstandingInterest
     }
     const totalRepay = Dec(principal || 0)
@@ -191,11 +191,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   disabled={isRepayLoading}
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('principal', value)}
-                  onSetMax={
-                    destination === 'reserve'
-                      ? () => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)
-                      : undefined
-                  }
+                  onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
                   secondaryLabel={
                     destination === 'reserve' ? `${formatBalance(maxPrincipal, displayCurrency)} outstanding` : ''
                   }
