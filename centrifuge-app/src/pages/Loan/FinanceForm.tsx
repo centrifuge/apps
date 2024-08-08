@@ -213,6 +213,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                     <Select
                       options={[
                         { label: 'Interest', value: 'interest' },
+                        { label: 'Correction', value: 'correction' },
                         { label: 'Miscellaneous', value: 'miscellaneous' },
                       ]}
                       label="Category"

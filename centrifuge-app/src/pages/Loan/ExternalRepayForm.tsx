@@ -1,5 +1,10 @@
 import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
+import {
+  useBalances,
+  useCentrifugeTransaction,
+  useCentrifugeUtils,
+  wrapProxyCallsForAccount,
+} from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
@@ -39,6 +44,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const loans = useLoans(loan.poolId)
   const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
+  const utils = useCentrifugeUtils()
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Sell asset',
@@ -150,51 +156,55 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       <Stack as={Form} gap={3} noValidate ref={repayFormRef}>
         <Stack gap={1}>
           <Shelf gap={1}>
-            <Field
-              validate={combine(nonNegativeNumberNotRequired(), (val) => {
-                if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
-                  return `Quantity exeeds max (${maxQuantity.toString()})`
-                }
-                return ''
-              })}
-              name="quantity"
-            >
-              {({ field, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    label="Quantity"
-                    disabled={isRepayLoading}
-                    onChange={(value) => form.setFieldValue('quantity', value)}
-                    placeholder="0"
-                    onSetMax={() =>
-                      form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
-                    }
-                  />
-                )
-              }}
-            </Field>
-            <Field name="price">
-              {({ field, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    label="Settlement price"
-                    disabled={isRepayLoading}
-                    currency={displayCurrency}
-                    onChange={(value) => form.setFieldValue('price', value)}
-                    decimals={8}
-                  />
-                )
-              }}
-            </Field>
-          </Shelf>
-
-          <Shelf justifyContent="space-between">
-            <Text variant="label2"> Principal</Text>
-            <Text variant="label2" color="textPrimary">
-              = {formatBalance(principalAmount, displayCurrency, 2)}
-            </Text>
+            <Box flex={4}>
+              <Field
+                validate={combine(nonNegativeNumberNotRequired(), (val) => {
+                  if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
+                    return `Quantity exeeds max (${maxQuantity.toString()})`
+                  }
+                  return ''
+                })}
+                name="quantity"
+              >
+                {({ field, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Quantity"
+                      disabled={isRepayLoading}
+                      onChange={(value) => form.setFieldValue('quantity', value)}
+                      placeholder="0"
+                      onSetMax={() =>
+                        form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
+                      }
+                    />
+                  )
+                }}
+              </Field>
+            </Box>
+            <Box flex={2}>
+              <Field name="price">
+                {({ field, form }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...field}
+                      label="Price"
+                      disabled={isRepayLoading}
+                      onChange={(value) => form.setFieldValue('price', value)}
+                      decimals={8}
+                    />
+                  )
+                }}
+              </Field>
+            </Box>
+            <Box flex={5}>
+              <CurrencyInput
+                label="Principal"
+                disabled={true}
+                currency={displayCurrency}
+                value={principalAmount.toNumber()}
+              />
+            </Box>
           </Shelf>
         </Stack>
 
@@ -245,7 +255,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               <Text color="statusCritical">
                 The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
                 insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
-                {copyable(account?.actingAddress || '')} on Centrifuge.
+                {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
               </Text>
             </InlineFeedback>
           </Box>

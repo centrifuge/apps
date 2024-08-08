@@ -3,6 +3,7 @@ import {
   useBalances,
   useCentrifugeApi,
   useCentrifugeTransaction,
+  useCentrifugeUtils,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
 import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
@@ -73,6 +74,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
   const api = useCentrifugeApi()
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
+  const utils = useCentrifugeUtils()
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     isCashLoan(loan) ? 'Withdraw funds' : 'Repay asset',
@@ -290,7 +292,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                 <Text color="statusCritical">
                   The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
                   insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
-                  {copyable(account?.actingAddress || '')} on Centrifuge.
+                  {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
                 </Text>
               </InlineFeedback>
             </Box>
