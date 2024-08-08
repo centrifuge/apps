@@ -113,14 +113,15 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const { maxAvailable, maxInterest, totalRepay, maxQuantity } = React.useMemo(() => {
+  const { maxAvailable, maxInterest, totalRepay, maxQuantity, principalAmount } = React.useMemo(() => {
     const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
-    const outstandingDebt = 'outstandingDebt' in loan ? loan.outstandingDebt.toDecimal() : Dec(0)
     const { quantity, interest, price, amountAdditional } = repayForm.values
     const totalRepay = Dec(price || 0)
       .mul(quantity || 0)
       .add(interest || 0)
       .add(amountAdditional || 0)
+
+    const principalAmount = Dec(price || 0).mul(quantity || 0)
 
     const maxInterest = outstandingInterest
     let maxQuantity = loan.pricing.outstandingQuantity
@@ -136,6 +137,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       maxInterest,
       maxQuantity,
       totalRepay,
+      principalAmount,
     }
   }, [loan, balance, repayForm.values])
 
@@ -188,6 +190,14 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             }}
           </Field>
         </Shelf>
+
+        <Shelf justifyContent="space-between">
+          <Text variant="label2" color="textPrimary">
+            Principal amount
+          </Text>
+          <Text variant="label2">{formatBalance(principalAmount, displayCurrency, 2)}</Text>
+        </Shelf>
+
         {'outstandingInterest' in loan && loan.outstandingInterest.toDecimal().gt(0) && (
           <Field
             validate={combine(nonNegativeNumberNotRequired(), maxNotRequired(maxInterest.toNumber()))}
@@ -284,7 +294,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
           <Stack gap={1}>
             <Shelf justifyContent="space-between">
               <Text variant="label2" color="textPrimary">
-                Repayment amount
+                Sale amount
               </Text>
               <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
             </Shelf>
