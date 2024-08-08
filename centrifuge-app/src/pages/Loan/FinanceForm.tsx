@@ -230,8 +230,9 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               <Box bg="statusCriticalBg" p={1}>
                 <InlineFeedback status="critical">
                   <Text color="statusCritical">
-                    Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
-                    principal ({formatBalance(totalFinance, displayCurrency, 2)}).
+                    {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
+                    {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
+                    {formatBalance(maxAvailable, displayCurrency, 2)}).
                   </Text>
                 </InlineFeedback>
               </Box>
@@ -259,7 +260,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Text variant="label2" color="textPrimary">
-                    Financing amount
+                    {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'}
                   </Text>
                   <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
                 </Shelf>

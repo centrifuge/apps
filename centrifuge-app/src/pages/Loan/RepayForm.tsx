@@ -152,7 +152,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
       maxInterest = outstandingInterest
     } else if (destination === 'other') {
-      maxAvailable = balance
+      maxAvailable = UNLIMITED
       maxPrincipal = loan.outstandingDebt.toDecimal().sub(outstandingInterest)
       maxInterest = Dec(0)
     } else {
@@ -192,9 +192,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('principal', value)}
                   onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
-                  secondaryLabel={
-                    destination === 'reserve' ? `${formatBalance(maxPrincipal, displayCurrency)} outstanding` : ''
-                  }
+                  secondaryLabel={`${formatBalance(maxPrincipal, displayCurrency)} outstanding`}
                 />
               )
             }}
@@ -268,8 +266,10 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             <Box bg="statusCriticalBg" p={1}>
               <InlineFeedback status="critical">
                 <Text color="statusCritical">
-                  Principal ({formatBalance(Dec(repayForm.values.principal || 0), displayCurrency, 2)}) is greater than
-                  the outstanding principal ({formatBalance(maxPrincipal, displayCurrency, 2)}).
+                  {isCashLoan(loan) ? 'Amount' : 'Principal'} (
+                  {formatBalance(Dec(repayForm.values.principal || 0), displayCurrency, 2)}) is greater than the
+                  outstanding {isCashLoan(loan) ? 'balance' : 'principal'} (
+                  {formatBalance(maxPrincipal, displayCurrency, 2)}).
                 </Text>
               </InlineFeedback>
             </Box>
@@ -318,7 +318,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
                 <Text variant="label2" color="textPrimary">
-                  Repayment amount
+                  {isCashLoan(loan) ? 'Withdrawal amount' : 'Repayment amount'}
                 </Text>
                 <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
               </Shelf>

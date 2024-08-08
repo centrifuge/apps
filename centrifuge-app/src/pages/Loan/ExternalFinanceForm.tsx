@@ -166,8 +166,8 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               <Box bg="statusCriticalBg" p={1}>
                 <InlineFeedback status="critical">
                   <Text color="statusCritical">
-                    Available financing ({formatBalance(maxAvailable, displayCurrency, 2)}) is smaller than the total
-                    principal ({formatBalance(totalFinance, displayCurrency, 2)}).
+                    Principal amount ({formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available
+                    balance ({formatBalance(maxAvailable, displayCurrency, 2)}).
                   </Text>
                 </InlineFeedback>
               </Box>
@@ -188,7 +188,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Text variant="label2" color="textPrimary">
-                    Purchase amount
+                    Principal amount
                   </Text>
                   <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
                 </Shelf>
