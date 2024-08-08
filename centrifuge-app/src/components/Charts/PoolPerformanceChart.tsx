@@ -62,16 +62,30 @@ function PoolPerformanceChart() {
   const rangeNumber = getRangeNumber(range.value, poolAge) ?? 100
 
   const isSingleTranche = pool?.tranches.length === 1
+
+  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
+  const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
+  const todayPrice = pool?.tranches
+    ? formatBalance(pool?.tranches[pool.tranches.length - 1].tokenPrice || 0, undefined, 5, 5)
+    : null
+
   const data: ChartData[] = React.useMemo(
     () =>
       truncatedPoolStates?.map((day) => {
         const nav = day.poolState.netAssetValue.toDecimal().toNumber()
         const price = (isSingleTranche && Object.values(day.tranches)[0].price?.toFloat()) || null
-
+        if (day.timestamp && new Date(day.timestamp).toDateString() === new Date().toDateString()) {
+          return { day: new Date(day.timestamp), nav: todayAssetValue, price: Number(todayPrice) }
+        }
         return { day: new Date(day.timestamp), nav, price }
       }) || [],
     [isSingleTranche, truncatedPoolStates]
   )
+
+  const today = {
+    nav: todayAssetValue,
+    price: todayPrice,
+  }
 
   const chartData = data.slice(-rangeNumber)
 
@@ -100,15 +114,6 @@ function PoolPerformanceChart() {
 
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
-
-  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
-  const todayAssetValue = pool?.nav.total.toDecimal().toNumber() || 0
-  const todayPrice = data.length > 0 ? data[data.length - 1].price : null
-
-  const today = {
-    nav: todayAssetValue,
-    price: todayPrice,
-  }
 
   const getXAxisInterval = () => {
     if (rangeNumber <= 30) return 5
@@ -216,9 +221,9 @@ function PoolPerformanceChart() {
                             </Text>
                             <Text variant="label2">
                               {name === 'nav' && typeof value === 'number'
-                                ? formatBalance(value, 'USD' || '')
+                                ? formatBalance(value, 'USD')
                                 : typeof value === 'number'
-                                ? formatBalance(value, 'USD' || '', 6)
+                                ? formatBalance(value, 'USD', 6)
                                 : '-'}
                             </Text>
                           </Shelf>
