@@ -848,7 +848,7 @@ export type AssetSnapshot = {
   actualOriginationDate: number | undefined
   advanceRate: Decimal | undefined
   assetId: string
-  collateralValue: string | undefined
+  collateralValue: CurrencyBalance | undefined
   currentPrice: CurrencyBalance | undefined
   discountRate: string | undefined
   faceValue: CurrencyBalance | undefined
