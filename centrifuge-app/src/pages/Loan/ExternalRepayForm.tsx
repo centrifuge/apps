@@ -5,7 +5,7 @@ import {
   useCentrifugeUtils,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -282,35 +282,28 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         )}
 
         <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
-          <Text variant="heading4">Transaction summary</Text>
-          <Shelf justifyContent="space-between">
-            <Text variant="label2" color="textPrimary">
-              Available balance
-            </Text>
-            <Text variant="label2">
-              <Tooltip
-                body={
-                  maxAvailable === UNLIMITED
-                    ? 'Unlimited because this is a virtual accounting process.'
-                    : 'Balance of the asset originator account on Centrifuge'
-                }
-                style={{ pointerEvents: 'auto' }}
-              >
-                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-              </Tooltip>
-            </Text>
-          </Shelf>
-
           <Stack gap={1}>
+            <Text variant="heading4">Transaction summary</Text>
             <Shelf justifyContent="space-between">
-              <Text variant="label2" color="textPrimary">
-                Sale amount
+              <Tooltips
+                type={maxAvailable === UNLIMITED ? 'repayFormAvailableBalanceUnlimited' : 'repayFormAvailableBalance'}
+              />
+              <Text variant="label2">
+                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
               </Text>
-              <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
             </Shelf>
-          </Stack>
 
-          {poolFees.renderSummary()}
+            <Stack gap={1}>
+              <Shelf justifyContent="space-between">
+                <Text variant="label2" color="textPrimary">
+                  Sale amount
+                </Text>
+                <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
+              </Shelf>
+            </Stack>
+
+            {poolFees.renderSummary()}
+          </Stack>
 
           {destination === 'reserve' ? (
             <InlineFeedback status="default">

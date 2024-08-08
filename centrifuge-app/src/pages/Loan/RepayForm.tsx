@@ -1,4 +1,12 @@
-import { ActiveLoan, CreatedLoan, CurrencyBalance, ExternalLoan, findBalance, Loan } from '@centrifuge/centrifuge-js'
+import {
+  ActiveLoan,
+  CreatedLoan,
+  CurrencyBalance,
+  ExternalLoan,
+  findBalance,
+  Loan,
+  Rate,
+} from '@centrifuge/centrifuge-js'
 import {
   useBalances,
   useCentrifugeApi,
@@ -6,7 +14,7 @@ import {
   useCentrifugeUtils,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -75,6 +83,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
   const utils = useCentrifugeUtils()
+  const [usedMaxInterest, setUsedMaxInterest] = React.useState(false)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     isCashLoan(loan) ? 'Withdraw funds' : 'Repay asset',
@@ -127,9 +136,36 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       category: 'correction',
     },
     onSubmit: (values, actions) => {
-      const interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
+      let interest = CurrencyBalance.fromFloat(values.interest || 0, pool.currency.decimals)
       const additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const principal = CurrencyBalance.fromFloat(values.principal || 0, pool.currency.decimals)
+
+      if (usedMaxInterest) {
+        const time = Date.now() - loan.fetchedAt.getTime()
+        const outstandingInterest =
+          'outstandingInterest' in loan
+            ? loan.outstandingInterest
+            : CurrencyBalance.fromFloat(0, pool.currency.decimals)
+        const outstandingPrincipal = new CurrencyBalance(
+          loan.outstandingDebt.sub(outstandingInterest),
+          pool.currency.decimals
+        )
+
+        // TODO: this number is way too small, after repaying we still end up with interest outstanding
+        const mostUpToDateInterest = CurrencyBalance.fromFloat(
+          outstandingPrincipal
+            .toDecimal()
+            .mul(Rate.fractionFromAprPercent(loan.pricing.interestRate.toDecimal().mul(100)).toDecimal())
+            .mul(time / (60 * 60 * 24 * 365))
+            .add(outstandingInterest.toDecimal()),
+          pool.currency.decimals
+        )
+        interest = mostUpToDateInterest
+        console.log(
+          `Repaying with the most up to date outstanding interest: ${mostUpToDateInterest.toDecimal()} instead of ${outstandingInterest.toDecimal()}`,
+          loan.pricing.interestRate.toDecimal().toString()
+        )
+      }
 
       doRepayTransaction([principal, interest, additionalAmount], {
         account,
@@ -193,7 +229,9 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                   disabled={isRepayLoading}
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('principal', value)}
-                  onSetMax={() => form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)}
+                  onSetMax={() => {
+                    form.setFieldValue('principal', maxPrincipal.gte(0) ? maxPrincipal : 0)
+                  }}
                   secondaryLabel={`${formatBalance(maxPrincipal, displayCurrency)} outstanding`}
                 />
               )
@@ -217,7 +255,10 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                     disabled={isRepayLoading}
                     currency={displayCurrency}
                     onChange={(value) => form.setFieldValue('interest', value)}
-                    onSetMax={() => form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)}
+                    onSetMax={() => {
+                      setUsedMaxInterest(true)
+                      form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)
+                    }}
                   />
                 )
               }}
@@ -300,34 +341,27 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
 
           <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
             <Text variant="heading4">Transaction summary</Text>
-            <Shelf justifyContent="space-between">
-              <Text variant="label2" color="textPrimary">
-                Available balance
-              </Text>
-              <Text variant="label2">
-                <Tooltip
-                  body={
-                    maxAvailable === UNLIMITED
-                      ? 'Unlimited because this is a virtual accounting process.'
-                      : 'Balance of the asset originator account on Centrifuge'
-                  }
-                  style={{ pointerEvents: 'auto' }}
-                >
-                  {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-                </Tooltip>
-              </Text>
-            </Shelf>
-
             <Stack gap={1}>
               <Shelf justifyContent="space-between">
-                <Text variant="label2" color="textPrimary">
-                  {isCashLoan(loan) ? 'Withdrawal amount' : 'Repayment amount'}
+                <Tooltips
+                  type={maxAvailable === UNLIMITED ? 'repayFormAvailableBalanceUnlimited' : 'repayFormAvailableBalance'}
+                />
+                <Text variant="label2">
+                  {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
                 </Text>
-                <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
               </Shelf>
-            </Stack>
 
-            {poolFees.renderSummary()}
+              <Stack gap={1}>
+                <Shelf justifyContent="space-between">
+                  <Text variant="label2" color="textPrimary">
+                    {isCashLoan(loan) ? 'Withdrawal amount' : 'Repayment amount'}
+                  </Text>
+                  <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
+                </Shelf>
+              </Stack>
+
+              {poolFees.renderSummary()}
+            </Stack>
 
             {destination === 'reserve' ? (
               <InlineFeedback status="default">
