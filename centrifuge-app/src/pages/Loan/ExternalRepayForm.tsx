@@ -147,54 +147,56 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
 
   return (
     <FormikProvider value={repayForm}>
-      <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-        <Shelf gap={1}>
-          <Field
-            validate={combine(nonNegativeNumberNotRequired(), (val) => {
-              if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
-                return `Quantity exeeds max (${maxQuantity.toString()})`
-              }
-              return ''
-            })}
-            name="quantity"
-          >
-            {({ field, form }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  label="Quantity"
-                  disabled={isRepayLoading}
-                  onChange={(value) => form.setFieldValue('quantity', value)}
-                  placeholder="0"
-                  onSetMax={() =>
-                    form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
-                  }
-                />
-              )
-            }}
-          </Field>
-          <Field name="price">
-            {({ field, form }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  label="Settlement price"
-                  disabled={isRepayLoading}
-                  currency={displayCurrency}
-                  onChange={(value) => form.setFieldValue('price', value)}
-                  decimals={8}
-                />
-              )
-            }}
-          </Field>
-        </Shelf>
+      <Stack as={Form} gap={3} noValidate ref={repayFormRef}>
+        <Stack gap={1}>
+          <Shelf gap={1}>
+            <Field
+              validate={combine(nonNegativeNumberNotRequired(), (val) => {
+                if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
+                  return `Quantity exeeds max (${maxQuantity.toString()})`
+                }
+                return ''
+              })}
+              name="quantity"
+            >
+              {({ field, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Quantity"
+                    disabled={isRepayLoading}
+                    onChange={(value) => form.setFieldValue('quantity', value)}
+                    placeholder="0"
+                    onSetMax={() =>
+                      form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
+                    }
+                  />
+                )
+              }}
+            </Field>
+            <Field name="price">
+              {({ field, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Settlement price"
+                    disabled={isRepayLoading}
+                    currency={displayCurrency}
+                    onChange={(value) => form.setFieldValue('price', value)}
+                    decimals={8}
+                  />
+                )
+              }}
+            </Field>
+          </Shelf>
 
-        <Shelf justifyContent="space-between">
-          <Text variant="label2">Principal</Text>
-          <Text variant="label2" color="textPrimary">
-            {formatBalance(principalAmount, displayCurrency, 2)}
-          </Text>
-        </Shelf>
+          <Shelf justifyContent="space-between">
+            <Text variant="label2"> Principal</Text>
+            <Text variant="label2" color="textPrimary">
+              = {formatBalance(principalAmount, displayCurrency, 2)}
+            </Text>
+          </Shelf>
+        </Stack>
 
         {'outstandingInterest' in loan && loan.outstandingInterest.toDecimal().gt(0) && (
           <Field
