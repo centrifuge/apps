@@ -23,7 +23,6 @@ import { DataCol, DataRow, DataTable } from '../../components/DataTable'
 import { LayoutSection } from '../../components/LayoutBase/LayoutSection'
 import { AssetName } from '../../components/LoanList'
 import { RouterTextLink } from '../../components/TextLink'
-import { formatDate } from '../../utils/date'
 import { formatBalance } from '../../utils/formatting'
 import { useLiquidity } from '../../utils/useLiquidity'
 import { useSuitableAccounts } from '../../utils/usePermissions'
@@ -41,7 +40,6 @@ type FormValues = {
     value: number | ''
     isin: string
     quantity: number
-    maturity: string
     currentPrice: number
     withLinearPricing: boolean
   }[]
@@ -84,7 +82,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
       currentPrice: 0,
       value: pool.reserve.total.toFloat(),
       formIndex: -1,
-      maturity: '',
       oldValue: '',
     },
   ]
@@ -151,7 +148,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             value: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
             isin: 'isin' in l.pricing.priceId ? l.pricing.priceId.isin : '',
             quantity: l.pricing.outstandingQuantity.toFloat(),
-            maturity: formatDate(l.pricing?.maturityDate ?? ''),
             withLinearPricing: l.pricing.withLinearPricing,
             currentPrice: l.status === 'Active' ? l?.currentPrice.toDecimal().toNumber() : 0,
           }
@@ -226,11 +222,6 @@ export function NavManagementAssetTable({ poolId }: { poolId: string }) {
             <AssetName loan={row} />
           </Shelf>
         ),
-    },
-    {
-      align: 'left',
-      header: 'Maturity date',
-      cell: (row: Row) => ('oldValue' in row ? row.maturity : ''),
     },
     {
       align: 'left',
