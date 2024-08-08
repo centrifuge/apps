@@ -249,7 +249,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                     body={
                       maxAvailable === UNLIMITED
                         ? 'Unlimited because this is a virtual accounting process.'
-                        : 'Balance of the source asset'
+                        : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
                     }
                     style={{ pointerEvents: 'auto' }}
                   >
