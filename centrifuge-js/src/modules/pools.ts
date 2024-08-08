@@ -3340,8 +3340,8 @@ export function getPoolsModule(inst: Centrifuge) {
           assetId: tx.assetId,
           actualMaturityDate: tx.asset.actualMaturityDate || undefined,
           actualOriginationDate: tx.asset.actualOriginationDate || undefined,
-          advanceRate: tx.asset.advanceRate,
-          collateralValue: tx.asset.collateralValue,
+          advanceRate: new Rate(tx.asset.advanceRate || '0').toPercent(),
+          collateralValue: transformVal(tx.asset.collateralValue, currency.decimals),
           currentPrice: transformVal(tx.currentPrice, currency.decimals),
           discountRate: tx.asset.discountRate,
           faceValue:
