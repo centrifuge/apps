@@ -296,7 +296,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             </Box>
           )}
 
-          <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+          <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+            <Text variant="heading4">Transaction summary</Text>
             <Shelf justifyContent="space-between">
               <Text variant="label2" color="textPrimary">
                 Available balance
@@ -325,9 +326,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             </Stack>
 
             {poolFees.renderSummary()}
-          </Stack>
 
-          <Box bg="statusDefaultBg" p={1}>
             {destination === 'reserve' ? (
               <InlineFeedback status="default">
                 <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
@@ -346,7 +345,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                 </Text>
               </InlineFeedback>
             )}
-          </Box>
+          </Stack>
 
           <Stack gap={1}>
             <Button

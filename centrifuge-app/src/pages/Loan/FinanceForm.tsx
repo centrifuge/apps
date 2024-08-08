@@ -238,7 +238,8 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               </Box>
             )}
 
-            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+              <Text variant="heading4">Transaction summary</Text>
               <Shelf justifyContent="space-between">
                 <Text variant="label2" color="textPrimary">
                   Available balance
@@ -267,9 +268,7 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
               </Stack>
 
               {poolFees.renderSummary()}
-            </Stack>
 
-            <Box bg="statusDefaultBg" p={1}>
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">
@@ -291,7 +290,8 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
                   </Text>
                 </InlineFeedback>
               )}
-            </Box>
+            </Stack>
+
             <Stack>
               <Button
                 type="submit"

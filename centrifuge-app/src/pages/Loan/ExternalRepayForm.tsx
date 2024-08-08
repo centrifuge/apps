@@ -261,7 +261,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
           </Box>
         )}
 
-        <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+        <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+          <Text variant="heading4">Transaction summary</Text>
           <Shelf justifyContent="space-between">
             <Text variant="label2" color="textPrimary">
               Available balance
@@ -290,9 +291,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
           </Stack>
 
           {poolFees.renderSummary()}
-        </Stack>
 
-        <Box bg="statusDefaultBg" p={1}>
           {destination === 'reserve' ? (
             <InlineFeedback status="default">
               <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
@@ -304,7 +303,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
               </Text>
             </InlineFeedback>
           )}
-        </Box>
+        </Stack>
 
         <Stack gap={1}>
           <Button

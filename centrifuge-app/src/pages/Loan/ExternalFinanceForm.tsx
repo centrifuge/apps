@@ -173,7 +173,8 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               </Box>
             )}
 
-            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+              <Text variant="heading4">Transaction summary</Text>
               <Shelf justifyContent="space-between">
                 <Text variant="label2" color="textPrimary">
                   Available balance
@@ -195,9 +196,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
               </Stack>
 
               {poolFees.renderSummary()}
-            </Stack>
 
-            <Box bg="statusDefaultBg" p={1}>
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
                   <Text color="statusDefault">
@@ -212,7 +211,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                   </Text>
                 </InlineFeedback>
               )}
-            </Box>
+            </Stack>
 
             <Stack>
               <Button
