@@ -6,6 +6,7 @@ import { Codec } from '@polkadot/types-codec/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
@@ -845,7 +846,7 @@ export type AssetTransaction = {
 export type AssetSnapshot = {
   actualMaturityDate: string | undefined
   actualOriginationDate: number | undefined
-  advanceRate: string | undefined
+  advanceRate: Decimal | undefined
   assetId: string
   collateralValue: string | undefined
   currentPrice: CurrencyBalance | undefined
