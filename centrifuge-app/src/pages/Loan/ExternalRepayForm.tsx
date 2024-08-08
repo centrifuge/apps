@@ -1,6 +1,6 @@
 import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -226,35 +226,9 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             )
           }}
         </Field>
-        <Box bg="statusDefaultBg" p={1}>
-          {destination === 'reserve' ? (
-            <InlineFeedback status="default">
-              <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
-            </InlineFeedback>
-          ) : (
-            <InlineFeedback status="default">
-              <Text color="statusDefault">
-                Virtual accounting process. No onchain stablecoin transfers are expected.
-              </Text>
-            </InlineFeedback>
-          )}
-        </Box>
+
         {poolFees.render()}
-        <Stack gap={1}>
-          <Shelf justifyContent="space-between">
-            <Text variant="emphasized">Total amount</Text>
-            <Text variant="emphasized">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
-          </Shelf>
 
-          {poolFees.renderSummary()}
-
-          <Shelf justifyContent="space-between">
-            <Text variant="emphasized">Available</Text>
-            <Text variant="emphasized">
-              {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-            </Text>
-          </Shelf>
-        </Stack>
         {destination === 'reserve' && totalRepay.gt(balance) && (
           <Box bg="statusCriticalBg" p={1}>
             <InlineFeedback status="critical">
@@ -286,6 +260,52 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             </InlineFeedback>
           </Box>
         )}
+
+        <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+          <Shelf justifyContent="space-between">
+            <Text variant="label2" color="textPrimary">
+              Available balance
+            </Text>
+            <Text variant="label2">
+              <Tooltip
+                body={
+                  maxAvailable === UNLIMITED
+                    ? 'Unlimited because this is a virtual accounting process.'
+                    : 'Balance of the asset originator account on Centrifuge'
+                }
+                style={{ pointerEvents: 'auto' }}
+              >
+                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+              </Tooltip>
+            </Text>
+          </Shelf>
+
+          <Stack gap={1}>
+            <Shelf justifyContent="space-between">
+              <Text variant="label2" color="textPrimary">
+                Repayment amount
+              </Text>
+              <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
+            </Shelf>
+          </Stack>
+
+          {poolFees.renderSummary()}
+        </Stack>
+
+        <Box bg="statusDefaultBg" p={1}>
+          {destination === 'reserve' ? (
+            <InlineFeedback status="default">
+              <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
+            </InlineFeedback>
+          ) : (
+            <InlineFeedback status="default">
+              <Text color="statusDefault">
+                Virtual accounting process. No onchain stablecoin transfers are expected.
+              </Text>
+            </InlineFeedback>
+          )}
+        </Box>
+
         <Stack gap={1}>
           <Button
             type="submit"
