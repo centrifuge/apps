@@ -169,7 +169,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   onSetMax={() =>
                     form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
                   }
-                  secondaryLabel={`${loan.pricing.outstandingQuantity.toDecimal().toString()} outstanding`}
                 />
               )
             }}
@@ -184,7 +183,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('price', value)}
                   decimals={8}
-                  secondaryLabel={'\u200B'} // zero width space
                 />
               )
             }}
@@ -192,10 +190,10 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         </Shelf>
 
         <Shelf justifyContent="space-between">
+          <Text variant="label2">Principal</Text>
           <Text variant="label2" color="textPrimary">
-            Principal amount
+            {formatBalance(principalAmount, displayCurrency, 2)}
           </Text>
-          <Text variant="label2">{formatBalance(principalAmount, displayCurrency, 2)}</Text>
         </Shelf>
 
         {'outstandingInterest' in loan && loan.outstandingInterest.toDecimal().gt(0) && (
