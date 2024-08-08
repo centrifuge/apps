@@ -5,7 +5,7 @@ import {
   useCentrifugeTransaction,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -263,41 +263,6 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             </Field>
           )}
           {poolFees.render()}
-          <Box bg="statusDefaultBg" p={1}>
-            {destination === 'reserve' ? (
-              <InlineFeedback status="default">
-                <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
-              </InlineFeedback>
-            ) : destination === 'other' ? (
-              <InlineFeedback status="default">
-                <Text color="statusDefault">
-                  Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to a
-                  decrease in the NAV of the pool.
-                </Text>
-              </InlineFeedback>
-            ) : (
-              <InlineFeedback status="default">
-                <Text color="statusDefault">
-                  Virtual accounting process. No onchain stablecoin transfers are expected.
-                </Text>
-              </InlineFeedback>
-            )}
-          </Box>
-          <Stack gap={1}>
-            <Shelf justifyContent="space-between">
-              <Text variant="emphasized">Total amount</Text>
-              <Text variant="emphasized">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
-            </Shelf>
-
-            {poolFees.renderSummary()}
-
-            <Shelf justifyContent="space-between">
-              <Text variant="emphasized">Available</Text>
-              <Text variant="emphasized">
-                {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-              </Text>
-            </Shelf>
-          </Stack>
 
           {Dec(repayForm.values.principal || 0).gt(maxPrincipal) && (
             <Box bg="statusCriticalBg" p={1}>
@@ -330,6 +295,59 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
               </InlineFeedback>
             </Box>
           )}
+
+          <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2}>
+            <Shelf justifyContent="space-between">
+              <Text variant="label2" color="textPrimary">
+                Available balance
+              </Text>
+              <Text variant="label2">
+                <Tooltip
+                  body={
+                    maxAvailable === UNLIMITED
+                      ? 'Unlimited because this is a virtual accounting process.'
+                      : 'Balance of the asset originator account on Centrifuge'
+                  }
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+                </Tooltip>
+              </Text>
+            </Shelf>
+
+            <Stack gap={1}>
+              <Shelf justifyContent="space-between">
+                <Text variant="label2" color="textPrimary">
+                  Repayment amount
+                </Text>
+                <Text variant="label2">{formatBalance(totalRepay, displayCurrency, 2)}</Text>
+              </Shelf>
+            </Stack>
+
+            {poolFees.renderSummary()}
+          </Stack>
+
+          <Box bg="statusDefaultBg" p={1}>
+            {destination === 'reserve' ? (
+              <InlineFeedback status="default">
+                <Text color="statusDefault">Stablecoins will be transferred to the onchain reserve.</Text>
+              </InlineFeedback>
+            ) : destination === 'other' ? (
+              <InlineFeedback status="default">
+                <Text color="statusDefault">
+                  Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to a
+                  decrease in the NAV of the pool.
+                </Text>
+              </InlineFeedback>
+            ) : (
+              <InlineFeedback status="default">
+                <Text color="statusDefault">
+                  Virtual accounting process. No onchain stablecoin transfers are expected.
+                </Text>
+              </InlineFeedback>
+            )}
+          </Box>
+
           <Stack gap={1}>
             <Button
               type="submit"
