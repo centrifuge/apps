@@ -152,7 +152,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             ? loan.outstandingPrincipal
             : CurrencyBalance.fromFloat(0, pool.currency.decimals)
 
-        const fiveMinuteBuffer = 5 * 60 * 1000
+        const fiveMinuteBuffer = 5 * 60
         const time = Date.now() + fiveMinuteBuffer - loan.fetchedAt.getTime()
         const mostUpToDateInterest = CurrencyBalance.fromFloat(
           outstandingPrincipal
