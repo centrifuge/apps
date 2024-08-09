@@ -183,55 +183,49 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       <Stack as={Form} gap={3} noValidate ref={repayFormRef}>
         <Stack gap={1}>
           <Shelf gap={1}>
-            <Box flex={4}>
-              <Field
-                validate={combine(nonNegativeNumberNotRequired(), (val) => {
-                  if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
-                    return `Quantity exeeds max (${maxQuantity.toString()})`
-                  }
-                  return ''
-                })}
-                name="quantity"
-              >
-                {({ field, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      label="Quantity"
-                      disabled={isRepayLoading}
-                      onChange={(value) => form.setFieldValue('quantity', value)}
-                      placeholder="0"
-                      onSetMax={() =>
-                        form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
-                      }
-                    />
-                  )
-                }}
-              </Field>
-            </Box>
-            <Box flex={2}>
-              <Field name="price">
-                {({ field, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      label="Price"
-                      disabled={isRepayLoading}
-                      onChange={(value) => form.setFieldValue('price', value)}
-                      decimals={8}
-                    />
-                  )
-                }}
-              </Field>
-            </Box>
-            <Box flex={5}>
-              <CurrencyInput
-                label="Principal"
-                disabled={true}
-                currency={displayCurrency}
-                value={principal.toNumber()}
-              />
-            </Box>
+            <Field
+              validate={combine(nonNegativeNumberNotRequired(), (val) => {
+                if (Dec(val || 0).gt(maxQuantity.toDecimal())) {
+                  return `Quantity exeeds max (${maxQuantity.toString()})`
+                }
+                return ''
+              })}
+              name="quantity"
+            >
+              {({ field, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Quantity"
+                    disabled={isRepayLoading}
+                    onChange={(value) => form.setFieldValue('quantity', value)}
+                    placeholder="0"
+                    onSetMax={() =>
+                      form.setFieldValue('quantity', loan.pricing.outstandingQuantity.toDecimal().toNumber())
+                    }
+                  />
+                )
+              }}
+            </Field>
+            <Field name="price">
+              {({ field, form }: FieldProps) => {
+                return (
+                  <CurrencyInput
+                    {...field}
+                    label="Price"
+                    disabled={isRepayLoading}
+                    onChange={(value) => form.setFieldValue('price', value)}
+                    decimals={8}
+                    currency={displayCurrency}
+                  />
+                )
+              }}
+            </Field>
+          </Shelf>
+          <Shelf justifyContent="space-between">
+            <Text variant="label2" color="textPrimary">
+              = {formatBalance(principal, displayCurrency, 2)} principal
+            </Text>
           </Shelf>
         </Stack>
 
