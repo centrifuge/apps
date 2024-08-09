@@ -34,8 +34,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const centOrder = usePendingCollect(poolId, trancheId, centAddress)
   const pool = usePool(poolId) as Pool
   const cent = useCentrifuge()
-  const [pendingActionState, setPendingAction] = React.useState<InvestRedeemAction>()
-  // | 'investWithPermit'
+  const [pendingActionState, setPendingAction] = React.useState<InvestRedeemAction | 'investWithPermit'>()
   const { isLoading: isLpsLoading, data: lps } = useLiquidityPools(poolId, trancheId)
   const {
     data: lpInvest,
@@ -78,7 +77,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const minOrder = consts.orderBook.minFulfillment.toDecimal()
 
   const invest = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrder)
-  // const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrderWithPermit)
+  const investWithPermit = useEvmTransaction('Invest', (cent) => cent.liquidityPools.increaseInvestOrderWithPermit)
   const redeem = useEvmTransaction('Redeem', (cent) => cent.liquidityPools.increaseRedeemOrder)
   const collectInvest = useEvmTransaction('Collect', (cent) => cent.liquidityPools.mint)
   const collectRedeem = useEvmTransaction('Withdraw', (cent) => cent.liquidityPools.withdraw)
@@ -90,7 +89,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
 
   const txActions = {
     invest,
-    // investWithPermit,
+    investWithPermit,
     redeem,
     collect:
       collectType === 'invest'
@@ -236,8 +235,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
           assets,
         ])
         console.log('permit', permit)
-        // investWithPermit.execute([lpInvest.lpAddress, assets, permit])
-        // setPendingAction('investWithPermit')
+        investWithPermit.execute([lpInvest.lpAddress, assets, lpInvest?.currency.address, permit, chainId])
+        setPendingAction('investWithPermit')
       } else {
         invest.execute([lpInvest.lpAddress, assets, chainId])
         setPendingAction('invest')

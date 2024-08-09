@@ -235,28 +235,36 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  // function increaseInvestOrderWithPermit(
-  //   args: [lpAddress: string, order: BN, permit: Permit],
-  //   options: TransactionRequest = {}
-  // ) {
-  //   const [lpAddress, order, { deadline, r, s, v }] = args
-  //   const user = inst.getSignerAddress('evm')
-  //   return pending(
-  //     contract(lpAddress, ABI.CentrifugeRouter).requestDepositWithPermit(
-  //       order.toString(),
-  //       user,
-  //       [],
-  //       deadline,
-  //       v,
-  //       r,
-  //       s,
-  //       {
-  //         ...options,
-  //         gasLimit: 300000,
-  //       }
-  //     )
-  //   )
-  // }
+  function increaseInvestOrderWithPermit(
+    args: [lpAddress: string, order: BN, currencyAddress: string, permit: Permit, chainId: number],
+    options: TransactionRequest = {}
+  ) {
+    const [lpAddress, order, currencyAddress, { deadline, r, s, v }, chainId] = args
+    const user = inst.getSignerAddress('evm')
+    return from(getEstimate(chainId)).pipe(
+      switchMap((estimate) => {
+        const centrifugeRouter = config[chainId].centrifugeRouter
+        const iface = new Interface(ABI.CentrifugeRouter)
+        const requestDeposit = iface.encodeFunctionData('requestDeposit', [
+          lpAddress,
+          order.toString(),
+          user,
+          user,
+          estimate,
+        ])
+        const enable = iface.encodeFunctionData('enable', [lpAddress])
+        const permit = iface.encodeFunctionData('permit', [currencyAddress, user, deadline, v, r, s])
+
+        return pending(
+          contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([enable, permit, requestDeposit], {
+            ...options,
+            gasLimit: 300000,
+            value: estimate,
+          })
+        )
+      })
+    )
+  }
 
   function cancelRedeemOrder(args: [lpAddress: string, chainId: number], options: TransactionRequest = {}) {
     const [lpAddress, chainId] = args
@@ -565,7 +573,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       }
     )
 
-    console.log('🚀 ~ lpData:', lpData)
     const currenciesByLpAddress: Record<string, CurrencyMetadata & { address: string }> = {}
     lpData.lps?.forEach((lp, i) => {
       currenciesByLpAddress[lp] = currencies[i]
@@ -733,7 +740,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     deployLiquidityPool,
     increaseInvestOrder,
     increaseRedeemOrder,
-    // increaseInvestOrderWithPermit,
+    increaseInvestOrderWithPermit,
     cancelInvestOrder,
     cancelRedeemOrder,
     mint,
