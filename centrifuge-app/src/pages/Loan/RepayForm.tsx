@@ -83,7 +83,6 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
   const destinationLoan = loans?.find((l) => l.id === destination) as Loan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
   const utils = useCentrifugeUtils()
-  const [usedMaxInterest, setUsedMaxInterest] = React.useState(false)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     isCashLoan(loan) ? 'Withdraw funds' : 'Repay asset',
@@ -143,8 +142,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       const additionalAmount = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const principal = CurrencyBalance.fromFloat(values.principal || 0, pool.currency.decimals)
 
-      if (usedMaxInterest) {
-        const time = Date.now() - loan.fetchedAt.getTime()
+      if (interest.toDecimal().eq(maxInterest) && principal.toDecimal().eq(maxPrincipal)) {
         const outstandingInterest =
           'outstandingInterest' in loan
             ? loan.outstandingInterest
@@ -154,6 +152,8 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
             ? loan.outstandingPrincipal
             : CurrencyBalance.fromFloat(0, pool.currency.decimals)
 
+        const fiveMinuteBuffer = 5 * 60 * 1000
+        const time = Date.now() + fiveMinuteBuffer - loan.fetchedAt.getTime()
         const mostUpToDateInterest = CurrencyBalance.fromFloat(
           outstandingPrincipal
             .toDecimal()
@@ -164,7 +164,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
         )
         interest = mostUpToDateInterest
         console.log(
-          `Repaying with the most up to date outstanding interest: ${mostUpToDateInterest.toDecimal()} instead of ${outstandingInterest.toDecimal()}`,
+          `Repaying with interest including buffer ${mostUpToDateInterest.toDecimal()} instead of ${outstandingInterest.toDecimal()}`,
           loan.pricing.interestRate.toDecimal().toString()
         )
       }
@@ -257,10 +257,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
                     disabled={isRepayLoading}
                     currency={displayCurrency}
                     onChange={(value) => form.setFieldValue('interest', value)}
-                    onSetMax={() => {
-                      setUsedMaxInterest(true)
-                      form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)
-                    }}
+                    onSetMax={() => form.setFieldValue('interest', maxInterest.gte(0) ? maxInterest : 0)}
                   />
                 )
               }}

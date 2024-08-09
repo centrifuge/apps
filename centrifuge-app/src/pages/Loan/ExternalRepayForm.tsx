@@ -45,7 +45,6 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
   const utils = useCentrifugeUtils()
-  const [usedMaxInterest, setUsedMaxInterest] = React.useState(false)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Sell asset',
@@ -109,8 +108,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       const amountAdditional = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity || 0)
 
-      if (usedMaxInterest) {
-        const time = Date.now() - loan.fetchedAt.getTime()
+      if (interest.toDecimal().eq(maxInterest) && quantity.toDecimal().eq(maxQuantity.toDecimal())) {
         const outstandingInterest =
           'outstandingInterest' in loan
             ? loan.outstandingInterest
@@ -120,6 +118,8 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
             ? loan.outstandingPrincipal
             : CurrencyBalance.fromFloat(0, pool.currency.decimals)
 
+        const fiveMinuteBuffer = 5 * 60 * 1000
+        const time = Date.now() + fiveMinuteBuffer - loan.fetchedAt.getTime()
         const mostUpToDateInterest = CurrencyBalance.fromFloat(
           outstandingPrincipal
             .toDecimal()
@@ -130,7 +130,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
         )
         interest = mostUpToDateInterest
         console.log(
-          `Repaying with the most up to date outstanding interest: ${mostUpToDateInterest.toDecimal()} instead of ${outstandingInterest.toDecimal()}`,
+          `Repaying with interest including buffer ${mostUpToDateInterest.toDecimal()} instead of ${outstandingInterest.toDecimal()}`,
           loan.pricing.interestRate.toDecimal().toString()
         )
       }
@@ -146,7 +146,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const { maxAvailable, maxInterest, totalRepay, maxQuantity, principalAmount } = React.useMemo(() => {
+  const { maxAvailable, maxInterest, totalRepay, maxQuantity, principal } = React.useMemo(() => {
     const outstandingInterest = 'outstandingInterest' in loan ? loan.outstandingInterest.toDecimal() : Dec(0)
     const { quantity, interest, price, amountAdditional } = repayForm.values
     const totalRepay = Dec(price || 0)
@@ -154,7 +154,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       .add(interest || 0)
       .add(amountAdditional || 0)
 
-    const principalAmount = Dec(price || 0).mul(quantity || 0)
+    const principal = Dec(price || 0).mul(quantity || 0)
 
     const maxInterest = outstandingInterest
     let maxQuantity = loan.pricing.outstandingQuantity
@@ -170,7 +170,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       maxInterest,
       maxQuantity,
       totalRepay,
-      principalAmount,
+      principal,
     }
   }, [loan, balance, repayForm.values, destination])
 
@@ -229,7 +229,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                 label="Principal"
                 disabled={true}
                 currency={displayCurrency}
-                value={principalAmount.toNumber()}
+                value={principal.toNumber()}
               />
             </Box>
           </Shelf>
@@ -250,10 +250,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   disabled={isRepayLoading}
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('interest', value)}
-                  onSetMax={() => {
-                    setUsedMaxInterest(true)
-                    form.setFieldValue('interest', maxInterest.toNumber())
-                  }}
+                  onSetMax={() => form.setFieldValue('interest', maxInterest.toNumber())}
                 />
               )
             }}
