@@ -9,7 +9,7 @@ import {
 import { Box, CurrencyInput, IconMinusCircle, IconPlusCircle, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
-import { combineLatest, of, switchMap } from 'rxjs'
+import { combineLatest, map, of } from 'rxjs'
 import { Dec } from '../../utils/Decimal'
 import { useBorrower } from '../../utils/usePermissions'
 import { usePool, usePoolFees, usePoolMetadata } from '../../utils/usePools'
@@ -175,7 +175,7 @@ export function useChargePoolFees(poolId: string, loanId: string) {
         let feeTx = api.tx.poolFees.chargeFee(fee.id, feeAmount.toString())
         return cent.remark
           .remark([[{ Loan: [poolId, loanId] }], feeTx], { batch: true })
-          .pipe(switchMap((tx) => [wrapProxyCallsForAccount(api, tx, borrower, 'Borrow')]))
+          .pipe(map((tx) => wrapProxyCallsForAccount(api, tx, borrower, 'Borrow')))
       })
       return combineLatest(fees)
     },

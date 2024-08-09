@@ -99,7 +99,10 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
         } else if (destination === 'other') {
           if (!repayForm.values.category) throw new Error('No category selected')
           const decreaseDebtTx = api.tx.loans.decreaseDebt(pool.id, loan.id, { internal: principal })
-          const categoryHex = Buffer.from(repayForm.values.category).toString('hex')
+          const encoded = new TextEncoder().encode(repayForm.values.category)
+          const categoryHex = Array.from(encoded)
+            .map((byte) => byte.toString(16).padStart(2, '0'))
+            .join('')
           repayTx = cent.remark.remark([[{ Named: categoryHex }], decreaseDebtTx], { batch: true })
         } else {
           const repay = { principal, interest, unscheduled: amountAdditional }

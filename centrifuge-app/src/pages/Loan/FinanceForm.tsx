@@ -113,7 +113,10 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
       } else if (source === 'other') {
         if (!financeForm.values.category) throw new Error('No category selected')
         const increaseDebtTx = api.tx.loans.increaseDebt(poolId, loan.id, { internal: principal })
-        const categoryHex = Buffer.from(financeForm.values.category).toString('hex')
+        const encoded = new TextEncoder().encode(financeForm.values.category)
+        const categoryHex = Array.from(encoded)
+          .map((byte) => byte.toString(16).padStart(2, '0'))
+          .join('')
         financeTx = cent.remark.remark([[{ Named: categoryHex }], increaseDebtTx], { batch: true })
       } else {
         const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
@@ -241,34 +244,36 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
             <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
               <Text variant="heading4">Transaction summary</Text>
-              <Shelf justifyContent="space-between">
-                <Text variant="label2" color="textPrimary">
-                  Available balance
-                </Text>
-                <Text variant="label2">
-                  <Tooltip
-                    body={
-                      maxAvailable === UNLIMITED
-                        ? 'Unlimited because this is a virtual accounting process.'
-                        : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
-                    }
-                    style={{ pointerEvents: 'auto' }}
-                  >
-                    {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
-                  </Tooltip>
-                </Text>
-              </Shelf>
-
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Text variant="label2" color="textPrimary">
-                    {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'}
+                    Available balance
                   </Text>
-                  <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                  <Text variant="label2">
+                    <Tooltip
+                      body={
+                        maxAvailable === UNLIMITED
+                          ? 'Unlimited because this is a virtual accounting process.'
+                          : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
+                      }
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+                    </Tooltip>
+                  </Text>
                 </Shelf>
-              </Stack>
 
-              {poolFees.renderSummary()}
+                <Stack gap={1}>
+                  <Shelf justifyContent="space-between">
+                    <Text variant="label2" color="textPrimary">
+                      {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'}
+                    </Text>
+                    <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                  </Shelf>
+                </Stack>
+
+                {poolFees.renderSummary()}
+              </Stack>
 
               {source === 'reserve' ? (
                 <InlineFeedback status="default">
@@ -638,9 +643,3 @@ function divideBetweenCurrencies(
 
   return divideBetweenCurrencies(remainder, rest, withdrawAddresses, ignoredCurrencies, combinedResult)
 }
-
-const stringToHex = (str: string) =>
-  str
-    .split('')
-    .map((char) => ('00' + char.charCodeAt(0).toString(16)).slice(-2))
-    .join('')

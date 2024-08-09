@@ -175,27 +175,29 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
 
             <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
               <Text variant="heading4">Transaction summary</Text>
-              <Shelf justifyContent="space-between">
-                <Text variant="label2" color="textPrimary">
-                  Available balance
-                </Text>
-                <Text variant="label2">
-                  <Tooltip body={'Balance of the source asset'} style={{ pointerEvents: 'auto' }}>
-                    {formatBalance(maxAvailable, displayCurrency, 2)}
-                  </Tooltip>
-                </Text>
-              </Shelf>
-
               <Stack gap={1}>
                 <Shelf justifyContent="space-between">
                   <Text variant="label2" color="textPrimary">
-                    Principal amount
+                    Available balance
                   </Text>
-                  <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                  <Text variant="label2">
+                    <Tooltip body={'Balance of the source asset'} style={{ pointerEvents: 'auto' }}>
+                      {formatBalance(maxAvailable, displayCurrency, 2)}
+                    </Tooltip>
+                  </Text>
                 </Shelf>
-              </Stack>
 
-              {poolFees.renderSummary()}
+                <Stack gap={1}>
+                  <Shelf justifyContent="space-between">
+                    <Text variant="label2" color="textPrimary">
+                      Principal amount
+                    </Text>
+                    <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                  </Shelf>
+                </Stack>
+
+                {poolFees.renderSummary()}
+              </Stack>
 
               {source === 'reserve' ? (
                 <InlineFeedback status="default">

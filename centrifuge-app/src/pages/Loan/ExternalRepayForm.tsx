@@ -172,7 +172,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
       totalRepay,
       principalAmount,
     }
-  }, [loan, balance, repayForm.values])
+  }, [loan, balance, repayForm.values, destination])
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
