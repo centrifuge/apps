@@ -48,6 +48,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
   const tranche = pool.tranches.find((t) => t.id === trancheId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = metadata?.tranches?.[trancheId]
+  const chainId = provider?.network.chainId || 1
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
@@ -238,17 +239,19 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         // investWithPermit.execute([lpInvest.lpAddress, assets, permit])
         // setPendingAction('investWithPermit')
       } else {
-        invest.execute([lpInvest.lpAddress, assets])
+        invest.execute([lpInvest.lpAddress, assets, chainId])
         setPendingAction('invest')
       }
     },
     redeem: async (newOrder: BN) => {
       if (!lpInvest) return
-      redeem.execute([lpInvest.lpAddress, newOrder])
+      redeem.execute([lpInvest.lpAddress, newOrder, chainId])
       setPendingAction('redeem')
     },
     collect: doAction('collect', () =>
-      collectType === 'invest' ? [lpInvest?.lpAddress, lpInvest?.maxMint] : [lpInvest?.lpAddress, lpInvest?.maxWithdraw]
+      collectType === 'invest'
+        ? [lpInvest?.lpAddress, lpInvest?.maxMint, chainId]
+        : [lpInvest?.lpAddress, lpInvest?.maxWithdraw, chainId]
     ),
     approvePoolCurrency: doAction('approvePoolCurrency', (amount) => [
       lpInvest?.lpAddress,
@@ -256,8 +259,8 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       amount.toString(),
     ]),
     approveTrancheToken: () => {},
-    cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress]),
-    cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress]),
+    cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, chainId]),
+    cancelRedeem: doAction('cancelRedeem', () => [lpInvest?.lpAddress, chainId]),
     selectPoolCurrency(symbol) {
       setLpIndex(lps!.findIndex((lp) => lp.currency.symbol === symbol))
     },
