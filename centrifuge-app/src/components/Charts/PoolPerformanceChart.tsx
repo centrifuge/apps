@@ -1,8 +1,9 @@
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Grid, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import styled, { useTheme } from 'styled-components'
+import { getCSVDownloadUrl } from '../../../src/utils/getCSVDownloadUrl'
 import { daysBetween, formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { useLoans } from '../../utils/useLoans'
@@ -74,6 +75,14 @@ function PoolPerformanceChart() {
 
   const chartData = data.slice(-rangeNumber)
 
+  const dataUrl: any = React.useMemo(() => {
+    if (!chartData || !chartData?.length) {
+      return undefined
+    }
+
+    return getCSVDownloadUrl(chartData as any)
+  }, [chartData])
+
   const priceRange = React.useMemo(() => {
     if (!chartData) return [0, 100]
 
@@ -114,6 +123,20 @@ function PoolPerformanceChart() {
 
   return (
     <Stack gap={2}>
+      <Stack flexDirection="row" justifyContent="space-between">
+        <Text fontSize="18px" fontWeight="500">
+          Pool performance
+        </Text>
+        <AnchorButton
+          download={`pool-${poolId}-timeseries.csv`}
+          href={dataUrl}
+          variant="secondary"
+          icon={IconDownload}
+          small
+        >
+          Download
+        </AnchorButton>
+      </Stack>
       <Stack>
         <CustomLegend data={today} />
         <Shelf justifyContent="flex-end">
