@@ -120,46 +120,59 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
       {
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-            <Shelf gap={1}>
-              <Field name="quantity" validate={combine(required(), positiveNumber())}>
-                {({ field, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      label="Quantity"
-                      placeholder="0"
-                      onChange={(value) => form.setFieldValue('quantity', value)}
-                    />
-                  )
-                }}
-              </Field>
-              <Field
-                name="price"
-                validate={combine(
-                  required(),
-                  positiveNumber(),
-                  (val) => {
-                    const financeAmount = Dec(val).mul(financeForm.values.quantity || 1)
-                    return financeAmount.gt(maxAvailable)
-                      ? `Amount exceeds available (${formatBalance(maxAvailable, displayCurrency, 2)})`
-                      : ''
-                  },
-                  maxPriceVariance(loan.pricing)
-                )}
-              >
-                {({ field, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      label="Settlement price"
-                      currency={displayCurrency}
-                      onChange={(value) => form.setFieldValue('price', value)}
-                      decimals={8}
-                    />
-                  )
-                }}
-              </Field>
-            </Shelf>
+            <Stack>
+              <Shelf gap={1}>
+                <Field name="quantity" validate={combine(required(), positiveNumber())}>
+                  {({ field, form }: FieldProps) => {
+                    return (
+                      <CurrencyInput
+                        {...field}
+                        label="Quantity"
+                        placeholder="0"
+                        onChange={(value) => form.setFieldValue('quantity', value)}
+                      />
+                    )
+                  }}
+                </Field>
+                <Field
+                  name="price"
+                  validate={combine(
+                    required(),
+                    positiveNumber(),
+                    (val) => {
+                      const financeAmount = Dec(val).mul(financeForm.values.quantity || 1)
+                      return financeAmount.gt(maxAvailable)
+                        ? `Amount exceeds available (${formatBalance(maxAvailable, displayCurrency, 2)})`
+                        : ''
+                    },
+                    maxPriceVariance(loan.pricing)
+                  )}
+                >
+                  {({ field, form }: FieldProps) => {
+                    return (
+                      <CurrencyInput
+                        {...field}
+                        label="Price"
+                        currency={displayCurrency}
+                        onChange={(value) => form.setFieldValue('price', value)}
+                        decimals={8}
+                      />
+                    )
+                  }}
+                </Field>
+              </Shelf>
+              <Shelf justifyContent="space-between">
+                <Text variant="label2" color="textPrimary">
+                  ={' '}
+                  {formatBalance(
+                    Dec(financeForm.values.price || 0).mul(financeForm.values.quantity || 0),
+                    displayCurrency,
+                    2
+                  )}{' '}
+                  principal
+                </Text>
+              </Shelf>
+            </Stack>
             {source === 'reserve' && withdraw.render()}
 
             {poolFees.render()}
