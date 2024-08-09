@@ -700,6 +700,8 @@ export interface PoolMetadataInput {
   poolFees: { id: number; name: string; feePosition: 'Top of waterfall'; category?: string; feeType: FeeTypes }[]
 
   poolType: 'open' | 'closed'
+
+  podPeerId?: string
 }
 export type WithdrawAddress = {
   name?: string
@@ -743,6 +745,7 @@ export type PoolMetadata = {
     reports?: PoolReport[]
   }
   pod?: {
+    peerId?: string | null
     indexer?: string | null
   }
   tranches: Record<
@@ -1106,7 +1109,9 @@ export function getPoolsModule(inst: Centrifuge) {
             ]
           : undefined,
       },
-      pod: {},
+      pod: {
+        peerId: metadata.podPeerId ?? null,
+      },
       tranches: tranchesById,
       adminMultisig: metadata.adminMultisig,
     }
