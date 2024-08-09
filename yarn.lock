@@ -1932,14 +1932,18 @@ __metadata:
   dependencies:
     "@chainsafe/libp2p-noise": ^15.0.0
     "@chainsafe/libp2p-yamux": ^6.0.2
+    "@libp2p/crypto": ^4.1.6
     "@libp2p/identify": ^2.0.0
+    "@libp2p/interface": ^1.6.2
     "@libp2p/kad-dht": ^12.0.15
     "@libp2p/peer-id": ^4.1.1
     "@libp2p/ping": ^1.0.17
-    "@libp2p/tcp": ^9.0.24
     "@libp2p/websockets": ^8.0.22
     "@multiformats/multiaddr": ^12.2.1
     "@protobuf-ts/protoc": ^2.9.4
+    "@typescript-eslint/eslint-plugin": ^4.32.0
+    "@typescript-eslint/parser": ^4.32.0
+    eslint: ^7.32.0
     it-length-prefixed: ^9.0.4
     it-map: ^3.1.0
     it-pipe: ^3.0.1
@@ -1950,7 +1954,6 @@ __metadata:
     ts-node: ^10.9.2
     ts-proto: ^1.181.1
     typescript: ^5.5.3
-    uint8arrays: ^5.0.3
   languageName: unknown
   linkType: soft
 
@@ -4056,6 +4059,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@libp2p/interface@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "@libp2p/interface@npm:1.6.2"
+  dependencies:
+    "@multiformats/multiaddr": ^12.2.3
+    it-pushable: ^3.2.3
+    it-stream-types: ^2.0.1
+    multiformats: ^13.1.0
+    progress-events: ^1.0.0
+    uint8arraylist: ^2.4.8
+  checksum: e2ccf372ec1cd194527c18afafaf305e412bff35e55dfac2c65f98cb292a42fa241e25942b99d36caba1c59c18f2883092b49e4a2a942c471e0e2d35cd05ac01
+  languageName: node
+  linkType: hard
+
 "@libp2p/kad-dht@npm:^12.0.15":
   version: 12.1.2
   resolution: "@libp2p/kad-dht@npm:12.1.2"
@@ -4220,21 +4237,6 @@ __metadata:
     uint8arraylist: ^2.4.8
     uint8arrays: ^5.1.0
   checksum: 411a4187463f1910915e621ee7043bf3505610a5a6f01aa5fec2ce07084d70cfbfd71d5f03a6ca5aa422f54dd77f87c29f334d07870f07e07834817ccf7dc8b4
-  languageName: node
-  linkType: hard
-
-"@libp2p/tcp@npm:^9.0.24":
-  version: 9.1.2
-  resolution: "@libp2p/tcp@npm:9.1.2"
-  dependencies:
-    "@libp2p/interface": ^1.6.1
-    "@libp2p/utils": ^5.4.6
-    "@multiformats/mafmt": ^12.1.6
-    "@multiformats/multiaddr": ^12.2.3
-    "@types/sinon": ^17.0.3
-    progress-events: ^1.0.0
-    stream-to-it: ^1.0.1
-  checksum: 68ec8e69b55ea187486bfe0e4a118f512a0bafe633b2dc1095c660f064f51f886869673997313f52872b6ee1493fc80af9bcaa39a5440b8db036da1b6cdfbe6f
   languageName: node
   linkType: hard
 
@@ -10293,22 +10295,6 @@ __metadata:
     "@types/mime": "*"
     "@types/node": "*"
   checksum: 0ff4b3703cf20ba89c9f9e345bc38417860a88e85863c8d6fe274a543220ab7f5f647d307c60a71bb57dc9559f0890a661e8dc771a6ec5ef195d91c8afc4a893
-  languageName: node
-  linkType: hard
-
-"@types/sinon@npm:^17.0.3":
-  version: 17.0.3
-  resolution: "@types/sinon@npm:17.0.3"
-  dependencies:
-    "@types/sinonjs__fake-timers": "*"
-  checksum: c8e9956d9c90fe1ec1cc43085ae48897f93f9ea86e909ab47f255ea71f5229651faa070393950fb6923aef426c84e92b375503f9f8886ef44668b82a8ee49e9a
-  languageName: node
-  linkType: hard
-
-"@types/sinonjs__fake-timers@npm:*":
-  version: 8.1.5
-  resolution: "@types/sinonjs__fake-timers@npm:8.1.5"
-  checksum: 7e3c08f6c13df44f3ea7d9a5155ddf77e3f7314c156fa1c5a829a4f3763bafe2f75b1283b887f06e6b4296996a2f299b70f64ff82625f9af5885436e2524d10c
   languageName: node
   linkType: hard
 
@@ -27153,15 +27139,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stream-to-it@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "stream-to-it@npm:1.0.1"
-  dependencies:
-    it-stream-types: ^2.0.1
-  checksum: ef62b9a850b374d2bf426e96f2782fabe0ad9d513cb65f37bdd386b5669704c8d58aa7194c88d890c8fa4d000eebf3be331fcf79da9f40288cc5d5ea6d7fe47f
-  languageName: node
-  linkType: hard
-
 "streamsearch@npm:^1.1.0":
   version: 1.1.0
   resolution: "streamsearch@npm:1.1.0"
@@ -28525,7 +28502,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uint8arrays@npm:^5.0.0, uint8arrays@npm:^5.0.1, uint8arrays@npm:^5.0.2, uint8arrays@npm:^5.0.3, uint8arrays@npm:^5.1.0":
+"uint8arrays@npm:^5.0.0, uint8arrays@npm:^5.0.1, uint8arrays@npm:^5.0.2, uint8arrays@npm:^5.1.0":
   version: 5.1.0
   resolution: "uint8arrays@npm:5.1.0"
   dependencies:
