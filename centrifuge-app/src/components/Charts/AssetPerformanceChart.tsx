@@ -1,4 +1,4 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, Card, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -55,7 +55,19 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       return undefined
     }
 
-    return getCSVDownloadUrl(assetSnapshots as any)
+    const formatted = assetSnapshots.map((assetObject: Record<string, any>) => {
+      const keys = Object.keys(assetObject)
+      const newObj: Record<string, any> = {}
+
+      keys.forEach((assetKey) => {
+        newObj[assetKey] =
+          assetObject[assetKey] instanceof CurrencyBalance ? assetObject[assetKey].toFloat() : assetObject[assetKey]
+      })
+
+      return newObj
+    })
+
+    return getCSVDownloadUrl(formatted as any)
   }, [assetSnapshots])
 
   const data: ChartData[] = React.useMemo(() => {
