@@ -1,13 +1,14 @@
 import { CurrencyBalance, LoanInfoInput, Price, Rate } from '@centrifuge/centrifuge-js'
 import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import {
+  DataProtocolAuthGuard,
   formatBalance,
   useBalances,
   useCentrifuge,
   useCentrifugeApi,
   useCentrifugeConsts,
   useCentrifugeTransaction,
-  wrapProxyCallsForAccount,
+  useDataProtocol,
 } from '@centrifuge/centrifuge-react'
 import {
   Box,
@@ -27,8 +28,9 @@ import {
 import BN from 'bn.js'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { useMutation } from 'react-query'
 import { Navigate, useNavigate, useParams } from 'react-router'
-import { firstValueFrom, lastValueFrom, switchMap } from 'rxjs'
+import { combineLatest, firstValueFrom, from, lastValueFrom, switchMap } from 'rxjs'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LayoutBase } from '../../../components/LayoutBase'
 import { PageHeader } from '../../../components/PageHeader'
@@ -47,7 +49,9 @@ import { PricingInput } from './PricingInput'
 export default function IssuerCreateLoanPage() {
   return (
     <LayoutBase>
-      <IssuerCreateLoan />
+      <DataProtocolAuthGuard>
+        <IssuerCreateLoan />
+      </DataProtocolAuthGuard>
     </LayoutBase>
   )
 }
@@ -170,6 +174,10 @@ function IssuerCreateLoan() {
   const [redirect, setRedirect] = React.useState<string>()
   const navigate = useNavigate()
   const centrifuge = useCentrifuge()
+  const { session, initSessionAndAddKey } = useDataProtocol()
+  const { data: poolMetadata } = usePoolMetadata(pool)
+
+  const peerId = poolMetadata?.pod?.peerId
 
   const {
     loans: { loanDeposit },
@@ -181,35 +189,54 @@ function IssuerCreateLoan() {
   const collateralCollectionId = assetOriginators.find((ao) => ao.address === account?.actingAddress)
     ?.collateralCollections[0]?.id
   const balances = useBalances(account?.actingAddress)
-
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const { mutateAsync } = useMutation(
+    async (args: [documentId: string, documentVersion: number, properties: object]) => {
+      const [documentId, documentVersion, properties] = args
+      if (!session) throw new Error('No session')
+      session.storeDocumentAtPeer(peerId!, documentId, documentVersion, properties)
+    }
+  )
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
     (cent) =>
       (
-        [collectionId, nftId, owner, metadataUri, pricingInfo]: [string, string, string, string, LoanInfoInput],
+        [collectionId, nftId, owner, metadataUri, pricingInfo, documentId, documentVersion, documentHash]: [
+          string,
+          string,
+          string,
+          string,
+          LoanInfoInput,
+          string | undefined,
+          number | undefined,
+          string | undefined,
+          any
+        ],
         options
       ) => {
-        return centrifuge.pools.createLoan([pid, collectionId, nftId, pricingInfo], { batch: true }).pipe(
-          switchMap((createTx) => {
-            const tx = api.tx.utility.batchAll([
-              wrapProxyCallsForAccount(api, api.tx.uniques.mint(collectionId, nftId, owner), account, 'PodOperation'),
-              wrapProxyCallsForAccount(
-                api,
-                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
-                account,
-                'PodOperation'
-              ),
-              wrapProxyCallsForAccount(api, createTx, account, 'Borrow'),
-            ])
-            return cent.wrapSignAndSend(api, tx, { ...options, proxies: undefined })
+        return combineLatest([
+          centrifuge.pools.createLoan([pid, collectionId, nftId, pricingInfo], { batch: true }),
+          centrifuge.nfts.mintNft(
+            [collectionId, nftId, owner, metadataUri, documentId, documentVersion, documentHash],
+            { batch: true }
+          ),
+          from(initSessionAndAddKey(true)),
+        ]).pipe(
+          switchMap(([createTx, mintBatch, addKeyTx]) => {
+            const tx = api.tx.utility.batchAll([...mintBatch.method.args[0], createTx, addKeyTx].filter(Boolean))
+            return cent.wrapSignAndSend(api, tx, options)
           })
         )
       },
     {
-      onSuccess: (_, result) => {
+      onSuccess: async (args, result) => {
+        const [, , , , , documentId, documentVersion, , properties] = args
         const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
+
+        if (documentId && documentVersion) {
+          await mutateAsync([documentId, documentVersion, properties])
+        }
+
         if (event) {
           const eventData = event.toHuman() as any
           const loanId = eventData.event.data.loanId.replace(/\D/g, '')
@@ -301,16 +328,24 @@ function IssuerCreateLoan() {
           discountRate: Rate.fromPercent(values.pricing.discountRate || 0),
         }
       }
-
       const properties =
         values.pricing.valuationMethod === 'cash'
           ? {}
-          : { ...(valuesToNftProperties(values.attributes, templateMetadata as any) as any), _template: templateId }
+          : { ...valuesToProperties(values.attributes, templateMetadata as any), _template: templateId! }
+      const publicAttributes = new Set(
+        Object.entries(templateMetadata.attributes!)
+          .filter(([, attr]) => attr.public)
+          .map(([key]) => key)
+      )
+      publicAttributes.add('_template')
+      const publicProperties = Object.fromEntries(
+        Object.entries(properties).filter(([key]) => publicAttributes.has(key))
+      ) as Record<string, string>
 
       const metadataValues: NFTMetadataInput = {
         name: values.assetName,
         description: values.description,
-        properties,
+        properties: publicProperties,
       }
 
       if (values.image) {
@@ -322,17 +357,37 @@ function IssuerCreateLoan() {
       const metadataHash = await lastValueFrom(centrifuge.metadata.pinJson(metadataValues))
       const nftId = await centrifuge.nfts.getAvailableNftId(collateralCollectionId)
 
-      doTransaction([collateralCollectionId, nftId, account.actingAddress, metadataHash.uri, pricingInfo], {
-        account,
-        forceProxyType: 'Borrow',
-      })
+      let docId, docHash
+      if (peerId) {
+        docId = await firstValueFrom(centrifuge.nfts.getAvailableDocumentId())
+        docHash = await centrifuge.dataProtocol.hashDocument(properties)
+      }
+      console.log('docId', docId, docHash)
+
+      doTransaction(
+        [
+          collateralCollectionId,
+          nftId,
+          account.actingAddress,
+          metadataHash.uri,
+          pricingInfo,
+          docId,
+          1,
+          docHash,
+          properties,
+        ],
+        {
+          account,
+          forceProxyType: 'Borrow',
+        }
+      )
       setSubmitting(false)
     },
   })
 
   const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateId = templateIds.at(-1)
-  const { data: templateMetadata } = useMetadata<LoanTemplate>(templateId)
+  const templateMetadata = useMetadata<LoanTemplate>(templateId).data
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
@@ -485,33 +540,31 @@ function IssuerCreateLoan() {
   )
 }
 
-function valuesToNftProperties(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
+function valuesToProperties(values: CreateLoanFormValues['attributes'], template: LoanTemplate) {
   return Object.fromEntries(
     template.sections.flatMap((section) =>
-      section.attributes
-        .map((key) => {
-          const attr = template.attributes[key]
-          if (!attr.public) return undefined as never
-          const value = values[key]
-          switch (attr.input.type) {
-            case 'date':
-              return [key, new Date(value).toISOString()]
-            case 'currency': {
-              return [
-                key,
-                attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
-              ]
-            }
-            case 'number':
-              return [
-                key,
-                attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
-              ]
-            default:
-              return [key, String(value)]
+      section.attributes.map((key) => {
+        const attr = template.attributes[key]
+        // if (!attr.public) return undefined as never
+        const value = values[key]
+        switch (attr.input.type) {
+          case 'date':
+            return [key, new Date(value).toISOString()]
+          case 'currency': {
+            return [
+              key,
+              attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
+            ]
           }
-        })
-        .filter(Boolean)
+          case 'number':
+            return [
+              key,
+              attr.input.decimals ? CurrencyBalance.fromFloat(value, attr.input.decimals).toString() : String(value),
+            ]
+          default:
+            return [key, String(value)]
+        }
+      })
     )
   )
 }

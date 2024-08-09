@@ -178,6 +178,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     execute,
     lastCreatedTransaction,
     reset: () => setLastId(undefined),
+    isSuccess: lastCreatedTransaction ? lastCreatedTransaction.status === 'succeeded' : false,
     isLoading: lastCreatedTransaction
       ? ['creating', 'unconfirmed', 'pending'].includes(lastCreatedTransaction.status)
       : false,

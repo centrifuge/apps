@@ -12,6 +12,7 @@ export const DataProtocolContext = React.createContext<{
   session: DataProtocolSession | null
   isAuthed: boolean
   isLoading: boolean
+  isFetching: boolean
   initSession: () => Promise<DataProtocolSession>
   initSessionAndAddKey: (batch: boolean) => Promise<null | SubmittableExtrinsic<'rxjs', any>>
 }>({} as any)
@@ -30,7 +31,12 @@ function storeKey(key: string) {
 
 export function DataProtocolProvider({ children }: DataProtocolProviderProps) {
   const cent = useCentrifuge()
-  const { mutateAsync, data, ...rest } = useMutation(async () => {
+  const {
+    mutateAsync,
+    data,
+    isLoading: isInitializing,
+    ...rest
+  } = useMutation(async () => {
     const key = getStoredKey()
     if (key) {
       return cent.dataProtocol.createSession({ key })
@@ -41,20 +47,18 @@ export function DataProtocolProvider({ children }: DataProtocolProviderProps) {
   })
 
   const address = useAddress('substrate')
-  const [keys] = useCentrifugeQuery(['keys', address], (cent) => cent.dataProtocol.getKeys([address!]), {
+  const [chainPublicKeys] = useCentrifugeQuery(['keys', address], (cent) => cent.dataProtocol.getKeys([address!]), {
     enabled: !!address,
   })
-  const { execute, isLoading, lastCreatedTransaction } = useCentrifugeTransaction(
-    'Add key',
-    (cent) => cent.dataProtocol.addKey
-  )
+  const { execute, isLoading } = useCentrifugeTransaction('Add key', (cent) => cent.dataProtocol.addKey)
 
   console.log('useMutation data', data, rest)
   const ctx = React.useMemo(() => {
     return {
       session: data ?? null,
-      isAuthed: keys?.includes(data?.publicKeyHex ?? '') ?? false,
-      isLoading: isLoading,
+      isAuthed: chainPublicKeys?.includes(data?.publicKeyHex ?? '') ?? false,
+      isLoading: isLoading || isInitializing,
+      isFetching: !chainPublicKeys,
       initSession: async () => {
         if (data) return data
         return mutateAsync()
@@ -63,7 +67,7 @@ export function DataProtocolProvider({ children }: DataProtocolProviderProps) {
         const sesh = data ?? (await mutateAsync())
         const { publicKeyHex } = sesh
         console.log('sesh', sesh, publicKeyHex)
-        if (keys?.includes(publicKeyHex)) {
+        if (chainPublicKeys?.includes(publicKeyHex)) {
           if (batch) return null
         }
         if (batch) return firstValueFrom(cent.dataProtocol.addKey([publicKeyHex], { batch: true }))
