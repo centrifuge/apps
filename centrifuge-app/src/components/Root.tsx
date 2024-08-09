@@ -1,6 +1,7 @@
 import { UserProvidedConfig } from '@centrifuge/centrifuge-js'
 import {
   CentrifugeProvider,
+  DataProtocolProvider,
   TransactionProvider,
   TransactionToasts,
   WalletProvider,
@@ -76,32 +77,34 @@ export function Root() {
           <GlobalStyle />
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
-            <HashRouter>
-              <DemoBanner />
-              <WalletProvider
-                evmChains={evmChains}
-                subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
-                walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
-                showAdvancedAccounts={debugState.showAdvancedAccounts}
-                showTestNets={debugState.showTestNets}
-                showFinoa={debugState.showFinoa}
-              >
-                <SupportedBrowserBanner />
-                <OnboardingAuthProvider>
-                  <OnboardingProvider>
-                    <DebugFlags onChange={(state) => setDebugState(state)}>
-                      <ExpiringCFGRewardsBanner />
-                      <TransactionProvider>
-                        <TransactionToasts />
-                        <LoadBoundary>
-                          <AppRoutes />
-                        </LoadBoundary>
-                      </TransactionProvider>
-                    </DebugFlags>
-                  </OnboardingProvider>
-                </OnboardingAuthProvider>
-              </WalletProvider>
-            </HashRouter>
+            <DataProtocolProvider>
+              <HashRouter>
+                <DemoBanner />
+                <WalletProvider
+                  evmChains={evmChains}
+                  subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}
+                  walletConnectId={import.meta.env.REACT_APP_WALLETCONNECT_ID}
+                  showAdvancedAccounts={debugState.showAdvancedAccounts}
+                  showTestNets={debugState.showTestNets}
+                  showFinoa={debugState.showFinoa}
+                >
+                  <SupportedBrowserBanner />
+                  <OnboardingAuthProvider>
+                    <OnboardingProvider>
+                      <DebugFlags onChange={(state) => setDebugState(state)}>
+                        <ExpiringCFGRewardsBanner />
+                        <TransactionProvider>
+                          <TransactionToasts />
+                          <LoadBoundary>
+                            <AppRoutes />
+                          </LoadBoundary>
+                        </TransactionProvider>
+                      </DebugFlags>
+                    </OnboardingProvider>
+                  </OnboardingAuthProvider>
+                </WalletProvider>
+              </HashRouter>
+            </DataProtocolProvider>
           </CentrifugeProvider>
         </FabricProvider>
       </QueryClientProvider>

@@ -1,6 +1,6 @@
 import { StorageKey, u32 } from '@polkadot/types'
-import { EMPTY, combineLatest, firstValueFrom } from 'rxjs'
-import { expand, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { EMPTY, combineLatest, firstValueFrom, of } from 'rxjs'
+import { expand, filter, first, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { addressToHex, getRandomUint, isSameAddress } from '../utils'
@@ -282,29 +282,84 @@ export function getNftsModule(inst: Centrifuge) {
   }
 
   function mintNft(
-    args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput],
+    args: [
+      collectionId: string,
+      nftId: string,
+      owner: string,
+      metadata: NFTMetadataInput | string,
+      documentId?: string,
+      documentVersion?: number,
+      documentHash?: string
+    ],
     options?: TransactionOptions
   ) {
     const $api = inst.getApi()
-    const [collectionId, nftId, owner, metadata] = args
+    const [collectionId, nftId, owner, metadata, documentId, documentVersion, documentHash] = args
 
-    const $pinnedMetadata = inst.metadata.pinJson({
-      image: metadata.image,
-      name: metadata.name,
-      description: metadata.description,
-      properties: metadata.properties || {},
-    })
+    const $pinnedMetadata =
+      typeof metadata === 'string'
+        ? of(null)
+        : inst.metadata.pinJson({
+            image: metadata.image,
+            name: metadata.name,
+            description: metadata.description,
+            properties: metadata.properties || {},
+          })
     return combineLatest([$api, $pinnedMetadata]).pipe(
       map(([api, pinnedMetadata]) => {
         return {
           api,
           submittable: api.tx.utility.batchAll([
             api.tx.uniques.mint(collectionId, nftId, owner),
-            api.tx.uniques.setMetadata(collectionId, nftId, pinnedMetadata.uri, true),
+            api.tx.uniques.setMetadata(collectionId, nftId, pinnedMetadata?.uri ?? metadata, false),
+            ...(documentId && documentVersion && documentHash
+              ? [
+                  api.tx.uniques.setAttribute(collectionId, nftId, 'document_id', documentId),
+                  api.tx.uniques.setAttribute(collectionId, nftId, 'document_version', documentVersion),
+                  api.tx.anchorsV2.setAnchor(documentId, documentVersion, documentHash),
+                ]
+              : []),
           ]),
         }
       }),
       switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
+    )
+  }
+
+  function getNftDocumentId(args: [collectionId: string, nftId: string]) {
+    const [collectionId, nftId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => api.query.uniques.attribute(collectionId, nftId, 'document_id')),
+      map((attributeValue) => {
+        const attribute = attributeValue.toJSON() as any
+        if (!attribute) return null
+        return attribute[0]
+      })
+    )
+  }
+
+  function getAvailableDocumentId() {
+    return inst.getApi().pipe(
+      map((api) => ({
+        api,
+        id: null,
+        triesLeft: MAX_ATTEMPTS,
+      })),
+      expand(({ api, triesLeft }) => {
+        if (triesLeft <= 0) return EMPTY
+
+        const id = String(getRandomUint())
+
+        return api.query.anchorsV2.anchors([id, 1]).pipe(
+          first(),
+          map((res) => ({ api, id: res.isEmpty ? id : null, triesLeft: triesLeft - 1 }))
+        )
+      }),
+      filter(({ id }) => !!id),
+      first(),
+      map(({ id }) => id as string)
     )
   }
 
@@ -375,6 +430,8 @@ export function getNftsModule(inst: Centrifuge) {
     getNft,
     getAvailableCollectionId,
     getAvailableNftId,
+    getAvailableDocumentId,
+    getNftDocumentId,
     createCollection,
     mintNft,
     transferNft,

@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package api.v1.data_protocol;
+
+// Requests
+
+message BeepRequest {}
+
+message CreateDocumentRequest {
+    // Document in JSON format.
+    bytes payload = 1;
+}
+
+message BatchCreateDocumentRequest {
+    // List of create document requests.
+    repeated CreateDocumentRequest requests = 1;
+}
+
+message GetDocumentRequest {
+    // Scale encoded document ID.
+    bytes document_id = 1;
+
+    // OPTIONAL - Document version. If none is provided, the latest document will be retrieved.
+    optional uint64 document_version = 2;
+}
+
+message BatchGetDocumentRequest {
+    // List of get document requests.
+    repeated BatchCreateDocumentRequest requests = 1;
+}
+
+message DataProtocolRequest {
+    oneof request {
+        CreateDocumentRequest create_document_request = 1;
+        BatchCreateDocumentRequest batch_create_document_request = 2;
+        GetDocumentRequest get_document_request = 3;
+        BatchGetDocumentRequest batch_get_document_request = 4;
+        BeepRequest beep_request = 10; // TODO: Remove
+    }
+}
+
+// Responses
+
+message BeepResponse {}
+
+message CreateDocumentResponse {
+    oneof result {
+        // Document in JSON format.
+        bytes payload = 1;
+
+        DataProtocolError error = 2;
+    }
+}
+
+message BatchCreateDocumentResponse {
+    repeated CreateDocumentResponse responses = 1;
+}
+
+message GetDocumentResponse {
+    oneof result {
+        // Document in JSON format.
+        bytes payload = 1;
+
+        DataProtocolError error = 2;
+    }
+}
+
+message BatchGetDocumentResponse {
+    repeated GetDocumentResponse responses = 1;
+}
+
+message DataProtocolResponse {
+    oneof response {
+        CreateDocumentResponse create_document_response = 1;
+        BatchCreateDocumentResponse batch_create_document_response = 2;
+        GetDocumentResponse get_document_response = 3;
+        BatchGetDocumentResponse batch_get_document_response = 4;
+        BeepResponse beep_response = 10; // TODO: Remove
+    }
+}
+
+// Errors
+
+enum ErrorCode {
+    ERROR_CODE_UNSPECIFIED = 0;
+    ERROR_CODE_DOCUMENT_CREATION_ERROR = 1;
+    ERROR_CODE_DOCUMENT_RETRIEVAL_ERROR = 2;
+}
+
+message DataProtocolError {
+    string error = 1;
+    ErrorCode code = 2;
+}

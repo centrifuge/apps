@@ -1,0 +1,41 @@
+{
+  "type": "module",
+  "name": "@centrifuge/libp2p-test",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "start": "nodemon ./dist/index.js",
+    "build": "tsc --watch",
+    "develop": "run-p build start",
+    "debug": "DEBUG=* node ./src/index.js",
+    "gen": "protoc --plugin=node_modules/ts-proto/protoc-gen-ts_proto ./src/data_protocol.v1.proto -I. --ts_proto_out=. --ts_proto_opt=esModuleInterop=true"
+  },
+  "dependencies": {
+    "@chainsafe/libp2p-noise": "^15.0.0",
+    "@chainsafe/libp2p-yamux": "^6.0.2",
+    "@libp2p/crypto": "^4.1.6",
+    "@libp2p/identify": "^2.0.0",
+    "@libp2p/interface": "^1.6.2",
+    "@libp2p/kad-dht": "^12.0.15",
+    "@libp2p/peer-id": "^4.1.1",
+    "@libp2p/ping": "^1.0.17",
+    "@libp2p/websockets": "^8.0.22",
+    "@multiformats/multiaddr": "^12.2.1",
+    "@protobuf-ts/protoc": "^2.9.4",
+    "it-length-prefixed": "^9.0.4",
+    "it-map": "^3.1.0",
+    "it-pipe": "^3.0.1",
+    "libp2p": "^1.5.1",
+    "protobufjs": "7.2.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "eslint": "^7.32.0",
+    "nodemon": "^3.1.4",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.9.2",
+    "ts-proto": "^1.181.1",
+    "typescript": "^5.5.3"
+  }
+}

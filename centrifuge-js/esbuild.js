@@ -19,7 +19,7 @@ Promise.all([
       : undefined,
     external: Object.keys(pkg.dependencies),
     format: 'esm',
-    target: ['es6'],
+    target: ['es2022'],
   }),
   esbuild.build({
     entryPoints: ['src/index.ts'],
@@ -29,6 +29,6 @@ Promise.all([
     watch,
     external: Object.keys(pkg.dependencies),
     platform: 'node',
-    target: ['node14'],
+    target: ['node20'],
   }),
 ]).catch(() => process.exit(1))
