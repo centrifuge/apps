@@ -146,17 +146,16 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
           'outstandingInterest' in loan
             ? loan.outstandingInterest
             : CurrencyBalance.fromFloat(0, pool.currency.decimals)
-        const outstandingPrincipal = new CurrencyBalance(
-          loan.outstandingDebt.sub(outstandingInterest),
-          pool.currency.decimals
-        )
+        const outstandingPrincipal =
+          'outstandingPrincipal' in loan
+            ? loan.outstandingPrincipal
+            : CurrencyBalance.fromFloat(0, pool.currency.decimals)
 
-        // TODO: this number is way too small, after repaying we still end up with interest outstanding
         const mostUpToDateInterest = CurrencyBalance.fromFloat(
           outstandingPrincipal
             .toDecimal()
-            .mul(Rate.fractionFromAprPercent(loan.pricing.interestRate.toDecimal().mul(100)).toDecimal())
-            .mul(time / (60 * 60 * 24 * 365))
+            .mul(Rate.fractionFromAprPercent(loan.pricing.interestRate.toDecimal()).toDecimal())
+            .mul(time)
             .add(outstandingInterest.toDecimal()),
           pool.currency.decimals
         )
@@ -207,7 +206,7 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
       maxInterest,
       totalRepay,
     }
-  }, [loan, balance, repayForm.values])
+  }, [loan, balance, repayForm.values, destination])
 
   return (
     <>

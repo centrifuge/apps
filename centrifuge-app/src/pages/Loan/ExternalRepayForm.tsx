@@ -1,4 +1,4 @@
-import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price } from '@centrifuge/centrifuge-js'
+import { ActiveLoan, CurrencyBalance, ExternalLoan, findBalance, Price, Rate } from '@centrifuge/centrifuge-js'
 import {
   useBalances,
   useCentrifugeTransaction,
@@ -45,6 +45,7 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
   const destinationLoan = loans?.find((l) => l.id === destination) as ActiveLoan
   const displayCurrency = destination === 'reserve' ? pool.currency.symbol : 'USD'
   const utils = useCentrifugeUtils()
+  const [usedMaxInterest, setUsedMaxInterest] = React.useState(false)
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Sell asset',
@@ -104,9 +105,35 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
     },
     onSubmit: (values, actions) => {
       const price = CurrencyBalance.fromFloat(values.price || 0, pool.currency.decimals)
-      const interest = CurrencyBalance.fromFloat(values?.interest || 0, pool.currency.decimals)
+      let interest = CurrencyBalance.fromFloat(values?.interest || 0, pool.currency.decimals)
       const amountAdditional = CurrencyBalance.fromFloat(values.amountAdditional || 0, pool.currency.decimals)
       const quantity = Price.fromFloat(values.quantity || 0)
+
+      if (usedMaxInterest) {
+        const time = Date.now() - loan.fetchedAt.getTime()
+        const outstandingInterest =
+          'outstandingInterest' in loan
+            ? loan.outstandingInterest
+            : CurrencyBalance.fromFloat(0, pool.currency.decimals)
+        const outstandingPrincipal =
+          'outstandingPrincipal' in loan
+            ? loan.outstandingPrincipal
+            : CurrencyBalance.fromFloat(0, pool.currency.decimals)
+
+        const mostUpToDateInterest = CurrencyBalance.fromFloat(
+          outstandingPrincipal
+            .toDecimal()
+            .mul(Rate.fractionFromAprPercent(loan.pricing.interestRate.toDecimal()).toDecimal())
+            .mul(time)
+            .add(outstandingInterest.toDecimal()),
+          pool.currency.decimals
+        )
+        interest = mostUpToDateInterest
+        console.log(
+          `Repaying with the most up to date outstanding interest: ${mostUpToDateInterest.toDecimal()} instead of ${outstandingInterest.toDecimal()}`,
+          loan.pricing.interestRate.toDecimal().toString()
+        )
+      }
 
       doRepayTransaction([quantity, interest, amountAdditional, price], {
         account,
@@ -223,7 +250,10 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
                   disabled={isRepayLoading}
                   currency={displayCurrency}
                   onChange={(value) => form.setFieldValue('interest', value)}
-                  onSetMax={() => form.setFieldValue('interest', maxInterest.toNumber())}
+                  onSetMax={() => {
+                    setUsedMaxInterest(true)
+                    form.setFieldValue('interest', maxInterest.toNumber())
+                  }}
                 />
               )
             }}
