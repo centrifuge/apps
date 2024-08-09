@@ -1,6 +1,8 @@
+import { Interface } from '@ethersproject/abi'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract, ContractInterface } from '@ethersproject/contracts'
 import type { JsonRpcProvider, TransactionRequest, TransactionResponse } from '@ethersproject/providers'
+import { parseEther } from '@ethersproject/units'
 import BN from 'bn.js'
 import { signERC2612Permit } from 'eth-permit'
 import set from 'lodash/set'
@@ -171,13 +173,39 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return permit as Permit
   }
 
-  function increaseInvestOrder(args: [lpAddress: string, order: BN], options: TransactionRequest = {}) {
-    const [lpAddress, order] = args
+  async function getEstimate(chainId: number) {
+    const centrifugeRouter = config[chainId].centrifugeRouter
+    const estimate = await contract(centrifugeRouter, ABI.CentrifugeRouter).estimate([1, 2, 4])
+    return estimate
+  }
+
+  function increaseInvestOrder(
+    args: [lpAddress: string, order: BN, chainId: number],
+    options: TransactionRequest = {}
+  ) {
+    const [lpAddress, order, chainId] = args
     const user = inst.getSignerAddress('evm')
-    return pending(
-      contract(lpAddress, ABI.LiquidityPool).requestDeposit(order.toString(), user, user, {
-        ...options,
-        gasLimit: 300000,
+    if (!inst.config.evmSigner) throw new Error('EVM signer not set')
+    return from(getEstimate(chainId)).pipe(
+      switchMap((est) => {
+        console.log('🚀 ~ est:', est)
+
+        const centrifugeRouter = config[chainId].centrifugeRouter
+        const iface = new Interface(ABI.CentrifugeRouter)
+        const requestDeposit = iface.encodeFunctionData('requestDeposit', [
+          lpAddress,
+          order.toString(),
+          user,
+          user,
+          parseEther('0.05'), // TODO: replace this with estimate
+        ])
+        const enable = iface.encodeFunctionData('enable', [lpAddress])
+        return pending(
+          contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([enable, requestDeposit], {
+            ...options,
+            gasLimit: 300000,
+          })
+        )
       })
     )
   }
@@ -193,7 +221,6 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
-  // Disabled for now, will go through the router later
   // function increaseInvestOrderWithPermit(
   //   args: [lpAddress: string, order: BN, permit: Permit],
   //   options: TransactionRequest = {}
@@ -201,10 +228,19 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   //   const [lpAddress, order, { deadline, r, s, v }] = args
   //   const user = inst.getSignerAddress('evm')
   //   return pending(
-  //     contract(lpAddress, ABI.LiquidityPool).requestDepositWithPermit(order.toString(), user, [], deadline, v, r, s, {
-  //       ...options,
-  //       gasLimit: 300000,
-  //     })
+  //     contract(lpAddress, ABI.CentrifugeRouter).requestDepositWithPermit(
+  //       order.toString(),
+  //       user,
+  //       [],
+  //       deadline,
+  //       v,
+  //       r,
+  //       s,
+  //       {
+  //         ...options,
+  //         gasLimit: 300000,
+  //       }
+  //     )
   //   )
   // }
 
