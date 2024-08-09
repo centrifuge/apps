@@ -52,6 +52,7 @@ import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, positiveNumber } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
+import { ErrorMessage } from './ErrorMessage'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
 import { SourceSelect } from './SourceSelect'
 import { isCashLoan, isExternalLoan } from './utils'
@@ -231,33 +232,29 @@ function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string 
 
             {poolFees.render()}
 
-            {totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable) && (
-              <Box bg="statusCriticalBg" p={1}>
-                <InlineFeedback status="critical">
-                  <Text color="statusCritical">
-                    {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
-                    {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
-                    {formatBalance(maxAvailable, displayCurrency, 2)}).
-                  </Text>
-                </InlineFeedback>
-              </Box>
-            )}
+            <ErrorMessage
+              type="critical"
+              condition={totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable)}
+            >
+              {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
+              {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
+              {formatBalance(maxAvailable, displayCurrency, 2)}).
+            </ErrorMessage>
 
-            {source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available) && (
-              <Box bg="statusDefaultBg" p={1}>
-                <InlineFeedback status="default">
-                  <Text color="statusDefault">
-                    There is an additional{' '}
-                    {formatBalance(
-                      new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
-                      displayCurrency
-                    )}{' '}
-                    available from repayments or deposits. This requires first executing the orders on the{' '}
-                    <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
-                  </Text>
-                </InlineFeedback>
-              </Box>
-            )}
+            <ErrorMessage
+              type="default"
+              condition={
+                source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available)
+              }
+            >
+              There is an additional{' '}
+              {formatBalance(
+                new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
+                displayCurrency
+              )}{' '}
+              available from repayments or deposits. This requires first executing the orders on the{' '}
+              <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
+            </ErrorMessage>
 
             <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
               <Text variant="heading4">Transaction summary</Text>

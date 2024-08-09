@@ -14,7 +14,7 @@ import {
   useCentrifugeUtils,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, InlineFeedback, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -34,6 +34,7 @@ import {
   positiveNumberNotRequired,
 } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
+import { ErrorMessage } from './ErrorMessage'
 import { ExternalRepayForm } from './ExternalRepayForm'
 import { SourceSelect } from './SourceSelect'
 import { isCashLoan, isExternalLoan } from './utils'
@@ -304,39 +305,22 @@ function InternalRepayForm({ loan, destination }: { loan: ActiveLoan | CreatedLo
           )}
           {poolFees.render()}
 
-          {Dec(repayForm.values.principal || 0).gt(maxPrincipal) && (
-            <Box bg="statusCriticalBg" p={1}>
-              <InlineFeedback status="critical">
-                <Text color="statusCritical">
-                  {isCashLoan(loan) ? 'Amount' : 'Principal'} (
-                  {formatBalance(Dec(repayForm.values.principal || 0), displayCurrency, 2)}) is greater than the
-                  outstanding {isCashLoan(loan) ? 'balance' : 'principal'} (
-                  {formatBalance(maxPrincipal, displayCurrency, 2)}).
-                </Text>
-              </InlineFeedback>
-            </Box>
-          )}
-          {Dec(repayForm.values.interest || 0).gt(maxInterest) && (
-            <Box bg="statusCriticalBg" p={1}>
-              <InlineFeedback status="critical">
-                <Text color="statusCritical">
-                  Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than
-                  the outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
-                </Text>
-              </InlineFeedback>
-            </Box>
-          )}
-          {destination === 'reserve' && totalRepay.gt(balance) && (
-            <Box bg="statusCriticalBg" p={1}>
-              <InlineFeedback status="critical">
-                <Text color="statusCritical">
-                  The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
-                  insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
-                  {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
-                </Text>
-              </InlineFeedback>
-            </Box>
-          )}
+          <ErrorMessage type="critical" condition={Dec(repayForm.values.principal || 0).gt(maxPrincipal)}>
+            {isCashLoan(loan) ? 'Amount' : 'Principal'} (
+            {formatBalance(Dec(repayForm.values.principal || 0), displayCurrency, 2)}) is greater than the outstanding{' '}
+            {isCashLoan(loan) ? 'balance' : 'principal'} ({formatBalance(maxPrincipal, displayCurrency, 2)}).
+          </ErrorMessage>
+
+          <ErrorMessage type="critical" condition={Dec(repayForm.values.interest || 0).gt(maxInterest)}>
+            Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than the
+            outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
+          </ErrorMessage>
+
+          <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(balance)}>
+            The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is insufficient.
+            Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
+            {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
+          </ErrorMessage>
 
           <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
             <Text variant="heading4">Transaction summary</Text>

@@ -8,7 +8,7 @@ import {
   WithdrawAddress,
 } from '@centrifuge/centrifuge-js'
 import { useCentrifugeApi, useCentrifugeTransaction, wrapProxyCallsForAccount } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
+import { Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text, Tooltip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -23,6 +23,7 @@ import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxPriceVariance, positiveNumber, required } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
+import { ErrorMessage } from './ErrorMessage'
 import { useWithdraw } from './FinanceForm'
 
 export type FinanceValues = {
@@ -163,32 +164,25 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
 
             {poolFees.render()}
 
-            {totalFinance.gt(0) && totalFinance.gt(maxAvailable) && (
-              <Box bg="statusCriticalBg" p={1}>
-                <InlineFeedback status="critical">
-                  <Text color="statusCritical">
-                    Principal amount ({formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available
-                    balance ({formatBalance(maxAvailable, displayCurrency, 2)}).
-                  </Text>
-                </InlineFeedback>
-              </Box>
-            )}
+            <ErrorMessage type="critical" condition={totalFinance.gt(0) && totalFinance.gt(maxAvailable)}>
+              Principal amount ({formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance
+              ({formatBalance(maxAvailable, displayCurrency, 2)}).
+            </ErrorMessage>
 
-            {source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available) && (
-              <Box bg="statusDefaultBg" p={1}>
-                <InlineFeedback status="default">
-                  <Text color="statusDefault">
-                    There is an additional{' '}
-                    {formatBalance(
-                      new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
-                      displayCurrency
-                    )}{' '}
-                    available from repayments or deposits. This requires first executing the orders on the{' '}
-                    <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
-                  </Text>
-                </InlineFeedback>
-              </Box>
-            )}
+            <ErrorMessage
+              type="default"
+              condition={
+                source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available)
+              }
+            >
+              There is an additional{' '}
+              {formatBalance(
+                new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
+                displayCurrency
+              )}{' '}
+              available from repayments or deposits. This requires first executing the orders on the{' '}
+              <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
+            </ErrorMessage>
 
             <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
               <Text variant="heading4">Transaction summary</Text>

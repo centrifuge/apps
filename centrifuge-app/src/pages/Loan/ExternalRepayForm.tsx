@@ -5,7 +5,7 @@ import {
   useCentrifugeUtils,
   wrapProxyCallsForAccount,
 } from '@centrifuge/centrifuge-react'
-import { Box, Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
@@ -21,6 +21,7 @@ import { useBorrower } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
 import { combine, maxNotRequired, nonNegativeNumberNotRequired } from '../../utils/validation'
 import { useChargePoolFees } from './ChargeFeesFields'
+import { ErrorMessage } from './ErrorMessage'
 
 type RepayValues = {
   price: number | '' | Decimal
@@ -270,37 +271,21 @@ export function ExternalRepayForm({ loan, destination }: { loan: ExternalLoan; d
 
         {poolFees.render()}
 
-        {destination === 'reserve' && totalRepay.gt(balance) && (
-          <Box bg="statusCriticalBg" p={1}>
-            <InlineFeedback status="critical">
-              <Text color="statusCritical">
-                The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is
-                insufficient. Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
-                {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
-              </Text>
-            </InlineFeedback>
-          </Box>
-        )}
-        {Dec(repayForm.values.quantity || 0).gt(maxQuantity.toDecimal()) && (
-          <Box bg="statusCriticalBg" p={1}>
-            <InlineFeedback status="critical">
-              <Text color="statusCritical">
-                Quantity ({repayForm.values.quantity}) is greater than the outstanding quantity (
-                {maxQuantity.toDecimal().toString()}).
-              </Text>
-            </InlineFeedback>
-          </Box>
-        )}
-        {Dec(repayForm.values.interest || 0).gt(maxInterest) && (
-          <Box bg="statusCriticalBg" p={1}>
-            <InlineFeedback status="critical">
-              <Text color="statusCritical">
-                Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than the
-                outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
-              </Text>
-            </InlineFeedback>
-          </Box>
-        )}
+        <ErrorMessage type="critical" condition={destination === 'reserve' && totalRepay.gt(balance)}>
+          The balance of the asset originator account ({formatBalance(balance, displayCurrency, 2)}) is insufficient.
+          Transfer {formatBalance(totalRepay.sub(balance), displayCurrency, 2)} to{' '}
+          {copyable(utils.formatAddress(account?.actingAddress || ''))} on Centrifuge.
+        </ErrorMessage>
+
+        <ErrorMessage type="critical" condition={Dec(repayForm.values.quantity || 0).gt(maxQuantity.toDecimal())}>
+          Quantity ({repayForm.values.quantity}) is greater than the outstanding quantity (
+          {maxQuantity.toDecimal().toString()}).
+        </ErrorMessage>
+
+        <ErrorMessage type="critical" condition={Dec(repayForm.values.interest || 0).gt(maxInterest)}>
+          Interest ({formatBalance(Dec(repayForm.values.interest || 0), displayCurrency, 2)}) is greater than the
+          outstanding interest ({formatBalance(maxInterest, displayCurrency, 2)}).
+        </ErrorMessage>
 
         <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
           <Stack gap={1}>
