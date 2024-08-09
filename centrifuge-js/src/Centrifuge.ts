@@ -3,6 +3,7 @@ import { AddressOrPair } from '@polkadot/api/types'
 import { Signer } from '@polkadot/types/types'
 import { CentrifugeBase, UserProvidedConfig } from './CentrifugeBase'
 import { getAuthModule } from './modules/auth'
+import { getDataProtocolModule } from './modules/dataProtocol'
 import { getLiquidityPoolsModule } from './modules/liquidityPools'
 import { getMetadataModule } from './modules/metadata'
 import { getMultisigModule } from './modules/multisig'
@@ -28,6 +29,7 @@ export class Centrifuge extends CentrifugeBase {
   multisig = getMultisigModule(this)
   remark = getRemarkModule(this)
   rewards = getRewardsModule(this)
+  dataProtocol = getDataProtocolModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)
