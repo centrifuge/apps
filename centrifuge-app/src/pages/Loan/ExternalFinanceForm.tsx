@@ -120,7 +120,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
       {
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-            <Stack>
+            <Stack gap={1}>
               <Shelf gap={1}>
                 <Field name="quantity" validate={combine(required(), positiveNumber())}>
                   {({ field, form }: FieldProps) => {
