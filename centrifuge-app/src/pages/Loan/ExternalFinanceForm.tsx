@@ -14,6 +14,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { combineLatest, switchMap } from 'rxjs'
+import { AnchorTextLink } from '../../components/TextLink'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -168,6 +169,22 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
                   <Text color="statusCritical">
                     Principal amount ({formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available
                     balance ({formatBalance(maxAvailable, displayCurrency, 2)}).
+                  </Text>
+                </InlineFeedback>
+              </Box>
+            )}
+
+            {source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available) && (
+              <Box bg="statusDefaultBg" p={1}>
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    There is an additional{' '}
+                    {formatBalance(
+                      new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
+                      displayCurrency
+                    )}{' '}
+                    available from repayments or deposits. This requires first executing the orders on the{' '}
+                    <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
                   </Text>
                 </InlineFeedback>
               </Box>
