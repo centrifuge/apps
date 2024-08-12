@@ -72,7 +72,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
 
   function centrifugeRouter(chainId: number) {
     const centrifugeRouter = config[chainId].centrifugeRouter
-    const getEstimate = from(contract(centrifugeRouter, ABI.CentrifugeRouter).estimate([1, 2, 4]))
+    const getEstimate = from(contract(centrifugeRouter, ABI.CentrifugeRouter).estimate([0]))
     return from(getEstimate).pipe(
       switchMap((estimate) => {
         return of({ estimate, centrifugeRouter })
@@ -192,14 +192,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         const iface = new Interface(ABI.CentrifugeRouter)
-        const requestDeposit = iface.encodeFunctionData('requestDeposit', [
-          lpAddress,
-          order.toString(),
-          user,
-          user,
-          estimate,
-        ])
-        const enable = iface.encodeFunctionData('enable', [lpAddress])
+        // const requestDeposit = iface.encodeFunctionData('requestDeposit', [
+        //   lpAddress,
+        //   order.toString(),
+        //   user,
+        //   user,
+        //   estimate,
+        // ])
+        // const enable = iface.encodeFunctionData('enable', [lpAddress])
+        const enable = iface.encodeFunctionData('enableLockDepositRequest', [lpAddress, order.toString()])
+        const requestDeposit = iface.encodeFunctionData('executeLockedDepositRequest', [lpAddress, user, estimate])
         return pending(
           contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([enable, requestDeposit], {
             ...options,
