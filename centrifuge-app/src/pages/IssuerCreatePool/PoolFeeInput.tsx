@@ -76,6 +76,7 @@ export function PoolFeeSection() {
                   percentOfNav: '',
                   walletAddress: '',
                   feePosition: 'Top of waterfall',
+                  category: feeCategories[0],
                 })
               }}
               small

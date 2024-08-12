@@ -1,5 +1,7 @@
 import Centrifuge, {
   AccountCurrencyBalance,
+  ActiveLoan,
+  CreatedLoan,
   CurrencyBalance,
   CurrencyMetadata,
   ExternalLoan,
@@ -23,7 +25,6 @@ import {
 import {
   Box,
   Button,
-  Card,
   CurrencyInput,
   Flex,
   Grid,
@@ -34,56 +35,99 @@ import {
   Shelf,
   Stack,
   Text,
+  Tooltip,
 } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useField, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
 import { combineLatest, map, of, switchMap } from 'rxjs'
+import { AnchorTextLink } from '../../components/TextLink'
 import { parachainIcons, parachainNames } from '../../config'
-import { Dec } from '../../utils/Decimal'
-import { formatBalance, roundDown } from '../../utils/formatting'
+import { Dec, min } from '../../utils/Decimal'
+import { formatBalance } from '../../utils/formatting'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
-import { useAvailableFinancing } from '../../utils/useLoans'
+import { useAvailableFinancing, useLoans } from '../../utils/useLoans'
 import { useBorrower, usePoolAccess } from '../../utils/usePermissions'
 import { usePool } from '../../utils/usePools'
-import { combine, max, positiveNumber } from '../../utils/validation'
+import { combine, positiveNumber } from '../../utils/validation'
+import { useChargePoolFees } from './ChargeFeesFields'
+import { ErrorMessage } from './ErrorMessage'
 import { ExternalFinanceForm } from './ExternalFinanceForm'
-import { isExternalLoan } from './utils'
+import { SourceSelect } from './SourceSelect'
+import { isCashLoan, isExternalLoan } from './utils'
 
 const TOKENMUX_PALLET_ACCOUNTID = '0x6d6f646c6366672f746d75780000000000000000000000000000000000000000'
 
 type Key = `${'parachain' | 'evm'}:${number}` | 'centrifuge'
 type FinanceValues = {
-  amount: number | '' | Decimal
+  principal: number | '' | Decimal
   withdraw: undefined | WithdrawAddress
+  fees: { id: string; amount: '' | number | Decimal }[]
+  category: 'interest' | 'miscellaneous' | undefined
 }
 
+const UNLIMITED = Dec(1000000000000000)
+
 export function FinanceForm({ loan }: { loan: LoanType }) {
-  return isExternalLoan(loan) ? (
-    <ExternalFinanceForm loan={loan as ExternalLoan} />
-  ) : (
-    <InternalFinanceForm loan={loan} />
+  const [source, setSource] = React.useState<string>('reserve')
+
+  if (isExternalLoan(loan)) {
+    return (
+      <Stack gap={2} p={1}>
+        <Text variant="heading2">Purchase</Text>
+        <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
+        <ExternalFinanceForm loan={loan as ExternalLoan} source={source} />
+      </Stack>
+    )
+  }
+
+  return (
+    <Stack gap={2} p={1}>
+      <Text variant="heading2">{isCashLoan(loan) ? 'Deposit' : 'Finance'}</Text>
+      <SourceSelect loan={loan} value={source} onChange={setSource} action="finance" />
+      <InternalFinanceForm loan={loan} source={source} />
+    </Stack>
   )
 }
 
-function InternalFinanceForm({ loan }: { loan: LoanType }) {
+/**
+ * Finance form for loans with `valuationMethod: outstandingDebt, discountedCashflow, cash`
+ */
+function InternalFinanceForm({ loan, source }: { loan: LoanType; source: string }) {
   const pool = usePool(loan.poolId) as Pool
   const account = useBorrower(loan.poolId, loan.id)
   const api = useCentrifugeApi()
-  if (!account) throw new Error('No borrower')
+  const poolFees = useChargePoolFees(loan.poolId, loan.id)
+  const loans = useLoans(loan.poolId)
+  const displayCurrency = source === 'reserve' ? pool.currency.symbol : 'USD'
 
   const { current: availableFinancing } = useAvailableFinancing(loan.poolId, loan.id)
-
+  const sourceLoan = loans?.find((l) => l.id === source) as CreatedLoan | ActiveLoan
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
-    'Finance asset',
-    (cent) => (args: [poolId: string, loanId: string, amount: BN], options) => {
-      const [poolId, loanId, amount] = args
-      return combineLatest([
-        cent.pools.financeLoan([poolId, loanId, amount], { batch: true }),
-        withdraw.getBatch(financeForm),
-      ]).pipe(
-        switchMap(([loanTx, batch]) => {
+    isCashLoan(loan) ? 'Deposit funds' : 'Finance asset',
+    (cent) => (args: [poolId: string, loanId: string, principal: BN], options) => {
+      if (!account) throw new Error('No borrower')
+      const [poolId, loanId, principal] = args
+      let financeTx
+      if (source === 'reserve') {
+        financeTx = cent.pools.financeLoan([poolId, loanId, principal], { batch: true })
+      } else if (source === 'other') {
+        if (!financeForm.values.category) throw new Error('No category selected')
+        const increaseDebtTx = api.tx.loans.increaseDebt(poolId, loan.id, { internal: principal })
+        const encoded = new TextEncoder().encode(financeForm.values.category)
+        const categoryHex = Array.from(encoded)
+          .map((byte) => byte.toString(16).padStart(2, '0'))
+          .join('')
+        financeTx = cent.remark.remark([[{ Named: categoryHex }], increaseDebtTx], { batch: true })
+      } else {
+        const repay = { principal, interest: new BN(0), unscheduled: new BN(0) }
+        let borrow = { amount: principal }
+        financeTx = cent.pools.transferLoanDebt([poolId, sourceLoan.id, loan.id, repay, borrow], { batch: true })
+      }
+      return combineLatest([financeTx, withdraw.getBatch(financeForm), poolFees.getBatch(financeForm)]).pipe(
+        switchMap(([loanTx, withdrawBatch, poolFeesBatch]) => {
+          const batch = [...withdrawBatch, ...poolFeesBatch]
           let tx = wrapProxyCallsForAccount(api, loanTx, account, 'Borrow')
           if (batch.length) {
             tx = api.tx.utility.batchAll([tx, ...batch])
@@ -101,12 +145,17 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
-      amount: '',
+      principal: '',
       withdraw: undefined,
+      fees: [],
+      category: 'interest',
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
-      doFinanceTransaction([loan.poolId, loan.id, amount], { account, forceProxyType: 'Borrow' })
+      const principal = CurrencyBalance.fromFloat(values.principal, pool.currency.decimals)
+      doFinanceTransaction([loan.poolId, loan.id, principal], {
+        account,
+        forceProxyType: 'Borrow',
+      })
       actions.setSubmitting(false)
     },
     validateOnMount: true,
@@ -115,7 +164,7 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
   const financeFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(financeForm, financeFormRef)
 
-  const withdraw = useWithdraw(loan.poolId, account, Dec(financeForm.values.amount || 0))
+  const withdraw = useWithdraw(loan.poolId, account!, Dec(financeForm.values.principal || 0))
 
   if (loan.status === 'Closed') {
     return null
@@ -123,68 +172,165 @@ function InternalFinanceForm({ loan }: { loan: LoanType }) {
 
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maturityDatePassed = loan?.pricing.maturityDate && new Date() > new Date(loan.pricing.maturityDate)
-  const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
+  const totalFinance = Dec(financeForm.values.principal || 0)
+
+  const maxAvailable =
+    source === 'reserve'
+      ? min(poolReserve, availableFinancing)
+      : source === 'other'
+      ? UNLIMITED
+      : sourceLoan.outstandingDebt.toDecimal()
 
   return (
-    <Stack as={Card} gap={2} p={2}>
-      <Stack>
-        {'valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'cash' && (
-          <Shelf justifyContent="space-between">
-            <Text variant="heading3">Available financing</Text>
-            {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}</Text>
-          </Shelf>
-        )}
-        <Shelf justifyContent="space-between">
-          <Text variant="label1">Total financed</Text>
-          <Text variant="label1">{formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}</Text>
-        </Shelf>
-      </Stack>
-      {availableFinancing.greaterThan(0) && !maturityDatePassed && (
+    <>
+      {!maturityDatePassed && (
         <FormikProvider value={financeForm}>
           <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
             <Field
-              name="amount"
-              validate={combine(
-                positiveNumber(),
-                max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
-                max(
-                  maxBorrow.toNumber(),
-                  `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
-                )
-              )}
+              name="principal"
+              validate={combine(positiveNumber(), (val) => {
+                const principalValue = typeof val === 'number' ? Dec(val) : (val as Decimal)
+                if (maxAvailable !== UNLIMITED && principalValue.gt(maxAvailable)) {
+                  return `Principal exceeds available financing`
+                }
+                return ''
+              })}
             >
-              {({ field, meta, form }: FieldProps) => {
+              {({ field, form }: FieldProps) => {
                 return (
                   <CurrencyInput
                     {...field}
                     value={field.value instanceof Decimal ? field.value.toNumber() : field.value}
-                    label="Amount"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
-                    currency={pool?.currency.symbol}
-                    onChange={(value) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', maxBorrow)}
+                    label={isCashLoan(loan) ? 'Amount' : 'Principal'}
+                    currency={displayCurrency}
+                    onChange={(value) => form.setFieldValue('principal', value)}
+                    onSetMax={
+                      maxAvailable !== UNLIMITED ? () => form.setFieldValue('principal', maxAvailable) : undefined
+                    }
                   />
                 )
               }}
             </Field>
-            {withdraw.render()}
-            {poolReserve.lessThan(availableFinancing) && loan.pricing.valuationMethod !== 'cash' && (
-              <InlineFeedback>
-                The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller than
-                the available financing
-              </InlineFeedback>
+            {source === 'other' && (
+              <Field name="category">
+                {({ field }: FieldProps) => {
+                  return (
+                    <Select
+                      options={[
+                        { label: 'Interest', value: 'interest' },
+                        { label: 'Correction', value: 'correction' },
+                        { label: 'Miscellaneous', value: 'miscellaneous' },
+                      ]}
+                      label="Category"
+                      {...field}
+                    />
+                  )
+                }}
+              </Field>
             )}
-            <Stack px={1}>
-              <Button type="submit" loading={isFinanceLoading} disabled={!withdraw.isValid}>
-                Finance asset
+            {source === 'reserve' && withdraw.render()}
+
+            {poolFees.render()}
+
+            <ErrorMessage
+              type="critical"
+              condition={totalFinance.gt(0) && maxAvailable !== UNLIMITED && totalFinance.gt(maxAvailable)}
+            >
+              {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'} (
+              {formatBalance(totalFinance, displayCurrency, 2)}) is greater than the available balance (
+              {formatBalance(maxAvailable, displayCurrency, 2)}).
+            </ErrorMessage>
+
+            <ErrorMessage
+              type="default"
+              condition={
+                source === 'reserve' && totalFinance.gt(maxAvailable) && pool.reserve.total.gt(pool.reserve.available)
+              }
+            >
+              There is an additional{' '}
+              {formatBalance(
+                new CurrencyBalance(pool.reserve.total.sub(pool.reserve.available), pool.currency.decimals),
+                displayCurrency
+              )}{' '}
+              available from repayments or deposits. This requires first executing the orders on the{' '}
+              <AnchorTextLink href={`#/pools/${pool.id}/liquidity`}>Liquidity tab</AnchorTextLink>.
+            </ErrorMessage>
+
+            <Stack p={2} maxWidth="444px" bg="backgroundTertiary" gap={2} mt={2}>
+              <Text variant="heading4">Transaction summary</Text>
+              <Stack gap={1}>
+                <Shelf justifyContent="space-between">
+                  <Text variant="label2" color="textPrimary">
+                    Available balance
+                  </Text>
+                  <Text variant="label2">
+                    <Tooltip
+                      body={
+                        maxAvailable === UNLIMITED
+                          ? 'Unlimited because this is a virtual accounting process.'
+                          : `Balance of the ${source === 'reserve' ? 'onchain reserve' : 'source asset'}.`
+                      }
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      {maxAvailable === UNLIMITED ? 'No limit' : formatBalance(maxAvailable, displayCurrency, 2)}
+                    </Tooltip>
+                  </Text>
+                </Shelf>
+
+                <Stack gap={1}>
+                  <Shelf justifyContent="space-between">
+                    <Text variant="label2" color="textPrimary">
+                      {isCashLoan(loan) ? 'Deposit amount' : 'Financing amount'}
+                    </Text>
+                    <Text variant="label2">{formatBalance(totalFinance, displayCurrency, 2)}</Text>
+                  </Shelf>
+                </Stack>
+
+                {poolFees.renderSummary()}
+              </Stack>
+
+              {source === 'reserve' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Stablecoins will be transferred to the specified withdrawal addresses, on the specified networks. A
+                    delay until the transfer is completed is to be expected.
+                  </Text>
+                </InlineFeedback>
+              ) : source === 'other' ? (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stablecoin transfers are expected. This action will lead to
+                    an increase in the NAV of the pool.
+                  </Text>
+                </InlineFeedback>
+              ) : (
+                <InlineFeedback status="default">
+                  <Text color="statusDefault">
+                    Virtual accounting process. No onchain stablecoin transfers are expected.
+                  </Text>
+                </InlineFeedback>
+              )}
+            </Stack>
+
+            <Stack>
+              <Button
+                type="submit"
+                loading={isFinanceLoading}
+                disabled={
+                  !financeForm.values.principal ||
+                  !withdraw.isValid ||
+                  !poolFees.isValid(financeForm) ||
+                  !financeForm.isValid ||
+                  maxAvailable.eq(0)
+                }
+              >
+                {isCashLoan(loan) ? 'Deposit' : 'Finance'}
               </Button>
             </Stack>
           </Stack>
         </FormikProvider>
       )}
-    </Stack>
+    </>
   )
 }
 

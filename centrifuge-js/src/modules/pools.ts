@@ -1,9 +1,12 @@
 import { isAddress as isEvmAddress } from '@ethersproject/address'
 import { ApiRx } from '@polkadot/api'
+import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { StorageKey, u32 } from '@polkadot/types'
 import { Codec } from '@polkadot/types-codec/types'
+import { ISubmittableResult } from '@polkadot/types/types'
 import { blake2AsHex } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { EMPTY, Observable, combineLatest, expand, firstValueFrom, forkJoin, from, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take, takeLast } from 'rxjs/operators'
 import { SolverResult, calculateOptimalSolution } from '..'
@@ -843,9 +846,9 @@ export type AssetTransaction = {
 export type AssetSnapshot = {
   actualMaturityDate: string | undefined
   actualOriginationDate: number | undefined
-  advanceRate: string | undefined
+  advanceRate: Decimal | undefined
   assetId: string
-  collateralValue: string | undefined
+  collateralValue: CurrencyBalance | undefined
   currentPrice: CurrencyBalance | undefined
   discountRate: string | undefined
   faceValue: CurrencyBalance | undefined
@@ -1866,7 +1869,9 @@ export function getPoolsModule(inst: Centrifuge) {
       poolId: string,
       fromLoanId: string,
       toLoanId: string,
-      repay: { principal: BN; interest: BN } | { quantity: BN; price: BN; interest: BN },
+      repay:
+        | { principal: BN; interest: BN; unscheduled: BN }
+        | { quantity: BN; price: BN; interest: BN; unscheduled: BN },
       borrow: { quantity: BN; price: BN } | { amount: BN }
     ],
     options?: TransactionOptions
@@ -1885,7 +1890,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 ? { external: { quantity: repay.quantity.toString(), settlementPrice: repay.price.toString() } }
                 : { internal: repay.principal.toString() },
             interest: repay.interest.toString(),
-            unscheduled: '0',
+            unscheduled: repay.unscheduled.toString(),
           },
           'amount' in borrow
             ? { internal: borrow.amount.toString() }
@@ -3336,8 +3341,8 @@ export function getPoolsModule(inst: Centrifuge) {
           assetId: tx.assetId,
           actualMaturityDate: tx.asset.actualMaturityDate || undefined,
           actualOriginationDate: tx.asset.actualOriginationDate || undefined,
-          advanceRate: tx.asset.advanceRate,
-          collateralValue: tx.asset.collateralValue,
+          advanceRate: new Rate(tx.asset.advanceRate || '0').toPercent(),
+          collateralValue: transformVal(tx.asset.collateralValue, currency.decimals),
           currentPrice: transformVal(tx.currentPrice, currency.decimals),
           discountRate: tx.asset.discountRate,
           faceValue:
@@ -4242,14 +4247,17 @@ export function getPoolsModule(inst: Centrifuge) {
 
     return $api.pipe(
       switchMap((api) => {
+        let submittable: SubmittableExtrinsic<'rxjs', ISubmittableResult>
         if (pendingFee?.gtn(0)) {
-          const submittable = api.tx.utility.batchAll([
-            api.tx.poolFees.unchargeFee(feeId, pendingFee.toString()),
-            api.tx.poolFees.chargeFee(feeId, amount.toString()),
-          ])
-          return inst.wrapSignAndSend(api, submittable, options)
+          const diff = amount.sub(pendingFee)
+          if (diff.ltn(0)) {
+            submittable = api.tx.poolFees.unchargeFee(feeId, diff.abs().toString())
+          } else {
+            submittable = api.tx.poolFees.chargeFee(feeId, diff.toString())
+          }
+        } else {
+          submittable = api.tx.poolFees.chargeFee(feeId, amount.toString())
         }
-        const submittable = api.tx.poolFees.chargeFee(feeId, amount.toString())
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
