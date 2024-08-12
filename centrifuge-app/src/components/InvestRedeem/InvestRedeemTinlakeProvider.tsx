@@ -119,6 +119,8 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
       redeemToken: order?.redeemToken || Dec(0),
       payoutCurrencyAmount: disburse?.payoutCurrencyAmount || Dec(0),
       payoutTokenAmount: disburse?.payoutTokenAmount || Dec(0),
+      investClaimableCurrencyAmount: (disburse?.payoutTokenAmount || Dec(0)).mul(price),
+      redeemClaimableTokenAmount: (disburse?.payoutCurrencyAmount || Dec(0)).div(price),
       remainingInvestCurrency: disburse?.remainingInvestCurrency || Dec(0),
       remainingRedeemToken: disburse?.remainingRedeemToken || Dec(0),
     },

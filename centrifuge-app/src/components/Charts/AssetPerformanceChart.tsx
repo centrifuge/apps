@@ -1,4 +1,4 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Box, Card, IconDownload, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -55,7 +55,19 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       return undefined
     }
 
-    return getCSVDownloadUrl(assetSnapshots as any)
+    const formatted = assetSnapshots.map((assetObject: Record<string, any>) => {
+      const keys = Object.keys(assetObject)
+      const newObj: Record<string, any> = {}
+
+      keys.forEach((assetKey) => {
+        newObj[assetKey] =
+          assetObject[assetKey] instanceof CurrencyBalance ? assetObject[assetKey].toFloat() : assetObject[assetKey]
+      })
+
+      return newObj
+    })
+
+    return getCSVDownloadUrl(formatted as any)
   }, [assetSnapshots])
 
   const data: ChartData[] = React.useMemo(() => {
@@ -65,7 +77,8 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
       .filter((day) => {
         return (
           asset &&
-          day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate ?? '').getTime() &&
+          (!asset?.pricing.maturityDate ||
+            day.timestamp.getTime() <= new Date(asset?.pricing.maturityDate ?? '').getTime()) &&
           !day.presentValue?.isZero()
         )
       })
@@ -75,6 +88,8 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
 
         return { day: new Date(day.timestamp), historicPV, futurePV: null, historicPrice, futurePrice: null }
       })
+
+    if (!asset.pricing.maturityDate) return historic
 
     const today = new Date()
     today.setDate(today.getDate() + 1)
@@ -137,7 +152,10 @@ function AssetPerformanceChart({ pool, poolId, loanId }: Props) {
     return [min, max]
   }, [data])
 
-  const isChartEmpty = React.useMemo(() => !data.length || assetSnapshots?.length < 1, [data, assetSnapshots])
+  const isChartEmpty = React.useMemo(
+    () => !data.length || !assetSnapshots || assetSnapshots.length < 1,
+    [data, assetSnapshots]
+  )
 
   if (!assetSnapshots) return <Spinner style={{ margin: 'auto', height: 350 }} />
 
