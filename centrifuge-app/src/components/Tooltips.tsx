@@ -314,6 +314,18 @@ export const tooltipText = {
     label: 'Token price',
     body: 'The token price is equal to the NAV divided by the outstanding supply of tokens.',
   },
+  additionalAmountInput: {
+    label: 'Additional amount',
+    body: 'This can be used to repay an additional amount beyond the outstanding principal and interest of the asset. This will lead to an increase in the NAV of the pool.',
+  },
+  repayFormAvailableBalance: {
+    label: 'Available balance',
+    body: 'Balance of the asset originator account on Centrifuge.',
+  },
+  repayFormAvailableBalanceUnlimited: {
+    label: 'Available balance',
+    body: 'Unlimited because this is a virtual accounting process.',
+  },
 }
 
 export type TooltipsProps = {

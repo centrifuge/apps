@@ -3,7 +3,7 @@ import { Text } from '@centrifuge/fabric'
 import { useContext, useEffect, useMemo } from 'react'
 import { useBasePath } from '../../../src/utils/useBasePath'
 import { formatDate } from '../../utils/date'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getCSVDownloadUrl } from '../../utils/getCSVDownloadUrl'
 import { useAllPoolAssetSnapshots, usePoolMetadata } from '../../utils/usePools'
 import { DataTable, SortableTableHeader } from '../DataTable'
@@ -82,12 +82,17 @@ function getColumnConfig(isPrivate: boolean, symbol: string) {
         formatter: (v: any) => (v ? formatDate(v) : 'Open-end'),
         sortKey: 'maturity-date',
       },
-      { header: 'Valuation method', align: 'left', csvOnly: false, formatter: noop },
+      {
+        header: 'Valuation method',
+        align: 'left',
+        csvOnly: false,
+        formatter: (v: any) => (v === 'OutstandingDebt' ? 'At par' : v),
+      },
       {
         header: 'Advance rate',
         align: 'left',
         csvOnly: false,
-        formatter: (v: any) => (v ? formatBalance(v, symbol, 2) : '-'),
+        formatter: (v: any) => (v ? formatPercentage(v, true, {}, 2) : '-'),
       },
       {
         header: 'Collateral value',

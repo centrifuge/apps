@@ -52,7 +52,7 @@ export function formatPercentage(
   precision?: number
 ) {
   const formattedAmount = (
-    amount instanceof Perquintill
+    amount instanceof Rate || amount instanceof Perquintill
       ? amount.toPercent().toNumber()
       : amount instanceof Decimal
       ? amount.toNumber()
