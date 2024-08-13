@@ -1741,8 +1741,6 @@ __metadata:
     "@makerdao/multicall": ^0.12.0
     "@polkadot/react-identicon": ~3.1.4
     "@styled-system/css": ^5.1.5
-    "@styled-system/should-forward-prop": ^5.1.5
-    "@subwallet/wallet-connect": ^0.2.6
     "@synthetixio/synpress": ^3.7.3
     "@types/react": ^18.0.27
     "@types/react-dom": ^18.0.10
@@ -1757,7 +1755,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 5.30.5
     "@typescript-eslint/parser": 5.30.5
     "@vitejs/plugin-react": ^4.2.1
-    "@web3modal/standalone": ^2.4.2
     babel-plugin-styled-components: ^2.1.4
     bn.js: ^5.2.1
     esbuild-darwin-64: ^0.14.49
@@ -3997,25 +3994,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/providers@npm:^11.1.1":
-  version: 11.1.2
-  resolution: "@metamask/providers@npm:11.1.2"
-  dependencies:
-    "@metamask/object-multiplex": ^1.1.0
-    "@metamask/safe-event-emitter": ^3.0.0
-    detect-browser: ^5.2.0
-    eth-rpc-errors: ^4.0.2
-    extension-port-stream: ^2.1.1
-    fast-deep-equal: ^3.1.3
-    is-stream: ^2.0.0
-    json-rpc-engine: ^6.1.0
-    json-rpc-middleware-stream: ^4.2.1
-    pump: ^3.0.0
-    webextension-polyfill: ^0.10.0
-  checksum: f406f79750e7705b5e843e2c17a407e5952e946ccb2c036786251118b27ec8948743ac7bb3b11ce3cec897f101ca9c59c28b0b2e3343e3f75c526b6396d9c118
-  languageName: node
-  linkType: hard
-
 "@metamask/providers@npm:^8.1.1":
   version: 8.1.1
   resolution: "@metamask/providers@npm:8.1.1"
@@ -4734,7 +4712,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/api@npm:10.12.2, @polkadot/api@npm:^10.1.4, @polkadot/api@npm:^10.12.2":
+"@polkadot/api@npm:10.12.2, @polkadot/api@npm:^10.1.4":
   version: 10.12.2
   resolution: "@polkadot/api@npm:10.12.2"
   dependencies:
@@ -4800,22 +4778,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-dapp@npm:^0.46.5":
-  version: 0.46.8
-  resolution: "@polkadot/extension-dapp@npm:0.46.8"
-  dependencies:
-    "@polkadot/extension-inject": 0.46.8
-    "@polkadot/util": ^12.6.2
-    "@polkadot/util-crypto": ^12.6.2
-    tslib: ^2.6.2
-  peerDependencies:
-    "@polkadot/api": "*"
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-  checksum: e0a4a538a69425f62289ade1226e8cbf73b0fcaa50b46bfd8ec8218498983d3685fb80f1989d09fc890a13462f78f970be032f5f20d98f84e786fa15dc3f401e
-  languageName: node
-  linkType: hard
-
 "@polkadot/extension-dapp@npm:~0.45.5":
   version: 0.45.5
   resolution: "@polkadot/extension-dapp@npm:0.45.5"
@@ -4829,24 +4791,6 @@ __metadata:
     "@polkadot/util": "*"
     "@polkadot/util-crypto": "*"
   checksum: 1f6a763a98a7d20d2daf4ac0193c985237bb9b0c5d08a79a1da4eee00982af1917adcf1fa51a38f71a3b2a7a0d4a142d7e413b466740895035a1213a896326ae
-  languageName: node
-  linkType: hard
-
-"@polkadot/extension-inject@npm:0.46.8, @polkadot/extension-inject@npm:^0.46.5":
-  version: 0.46.8
-  resolution: "@polkadot/extension-inject@npm:0.46.8"
-  dependencies:
-    "@polkadot/api": ^10.12.2
-    "@polkadot/rpc-provider": ^10.12.2
-    "@polkadot/types": ^10.12.2
-    "@polkadot/util": ^12.6.2
-    "@polkadot/util-crypto": ^12.6.2
-    "@polkadot/x-global": ^12.6.2
-    tslib: ^2.6.2
-  peerDependencies:
-    "@polkadot/api": "*"
-    "@polkadot/util": "*"
-  checksum: 7b38ca2ea28ec52b3e7887dd185d95fc20e1b43c636c51bcc4c042bb9d37d8086962a5c0d653992c63b5c5dbdf1a3d17670fa38593db9d4b5535b386964e0bf2
   languageName: node
   linkType: hard
 
@@ -5075,7 +5019,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/rpc-provider@npm:10.12.2, @polkadot/rpc-provider@npm:^10.12.2, @polkadot/rpc-provider@npm:^10.2.2":
+"@polkadot/rpc-provider@npm:10.12.2, @polkadot/rpc-provider@npm:^10.2.2":
   version: 10.12.2
   resolution: "@polkadot/rpc-provider@npm:10.12.2"
   dependencies:
@@ -5304,7 +5248,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/types@npm:10.12.2, @polkadot/types@npm:^10.12.2, @polkadot/types@npm:^10.2.2, @polkadot/types@npm:^10.9.1":
+"@polkadot/types@npm:10.12.2, @polkadot/types@npm:^10.2.2":
   version: 10.12.2
   resolution: "@polkadot/types@npm:10.12.2"
   dependencies:
@@ -5492,7 +5436,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/util@npm:10.4.2, @polkadot/util@npm:^10.1.1, @polkadot/util@npm:^10.1.11, @polkadot/util@npm:^10.2.1, @polkadot/util@npm:^10.4.2":
+"@polkadot/util@npm:10.4.2, @polkadot/util@npm:^10.1.1, @polkadot/util@npm:^10.1.11, @polkadot/util@npm:^10.4.2":
   version: 10.4.2
   resolution: "@polkadot/util@npm:10.4.2"
   dependencies:
@@ -8607,21 +8551,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/wallet-connect@npm:^0.2.6":
-  version: 0.2.7
-  resolution: "@subwallet/wallet-connect@npm:0.2.7"
-  dependencies:
-    "@babel/runtime": ^7.16.7
-    "@metamask/providers": ^11.1.1
-    "@metamask/types": ^1.1.0
-    "@polkadot/extension-dapp": ^0.46.5
-    "@polkadot/extension-inject": ^0.46.5
-    "@polkadot/types": ^10.9.1
-    "@polkadot/util": ^10.2.1
-  checksum: 49e618bb2d14312117ba205906084f733dc238dfefd0744109ebd9f2420dd6c83f56140919b9aea1715e9522c980885a570bbaf84ffb9cfdeb3a3a6d1b7ff7bb
-  languageName: node
-  linkType: hard
-
 "@svgr/babel-plugin-add-jsx-attribute@npm:^5.4.0":
   version: 5.4.0
   resolution: "@svgr/babel-plugin-add-jsx-attribute@npm:5.4.0"
@@ -10983,38 +10912,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3modal/core@npm:2.4.3":
-  version: 2.4.3
-  resolution: "@web3modal/core@npm:2.4.3"
-  dependencies:
-    buffer: 6.0.3
-    valtio: 1.10.5
-  checksum: af18f7c44266ed767830091e542eac69726a6f6c535024ad1b050bf5f406169bbea4a7f5e5e10f3415b08b4937e5a10f48d7c7f9f3e98742b84493753dfbc5b9
-  languageName: node
-  linkType: hard
-
-"@web3modal/standalone@npm:^2.4.2":
-  version: 2.4.3
-  resolution: "@web3modal/standalone@npm:2.4.3"
-  dependencies:
-    "@web3modal/core": 2.4.3
-    "@web3modal/ui": 2.4.3
-  checksum: 3a5c6b93522f9c888979141f785f760aa27511be7b1a2de30bf3be5a4ee934dd0273b9e161aca5c4e10d6fe47c43cb66ef391a370e5bce7530ef1014867e4bb8
-  languageName: node
-  linkType: hard
-
-"@web3modal/ui@npm:2.4.3":
-  version: 2.4.3
-  resolution: "@web3modal/ui@npm:2.4.3"
-  dependencies:
-    "@web3modal/core": 2.4.3
-    lit: 2.7.5
-    motion: 10.16.2
-    qrcode: 1.5.3
-  checksum: 2198229f88b4242b5346ce0b2d3806e74c8014e21416f50ef4d7dc17a9d91485fd2146610dba7f9ff507b7b590342b66eddc70915a4b49a646d7bcab0e9b7859
-  languageName: node
-  linkType: hard
-
 "@yarnpkg/esbuild-plugin-pnp@npm:^3.0.0-rc.10":
   version: 3.0.0-rc.15
   resolution: "@yarnpkg/esbuild-plugin-pnp@npm:3.0.0-rc.15"
@@ -12580,16 +12477,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"buffer@npm:6.0.3, buffer@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "buffer@npm:6.0.3"
-  dependencies:
-    base64-js: ^1.3.1
-    ieee754: ^1.2.1
-  checksum: 5ad23293d9a731e4318e420025800b42bf0d264004c0286c8cc010af7a270c7a0f6522e84f54b9ad65cbd6db20b8badbfd8d2ebf4f80fa03dab093b89e68c3f9
-  languageName: node
-  linkType: hard
-
 "buffer@npm:^5.2.1, buffer@npm:^5.5.0, buffer@npm:^5.6.0, buffer@npm:^5.7.1":
   version: 5.7.1
   resolution: "buffer@npm:5.7.1"
@@ -12597,6 +12484,16 @@ __metadata:
     base64-js: ^1.3.1
     ieee754: ^1.1.13
   checksum: e2cf8429e1c4c7b8cbd30834ac09bd61da46ce35f5c22a78e6c2f04497d6d25541b16881e30a019c6fd3154150650ccee27a308eff3e26229d788bbdeb08ab84
+  languageName: node
+  linkType: hard
+
+"buffer@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "buffer@npm:6.0.3"
+  dependencies:
+    base64-js: ^1.3.1
+    ieee754: ^1.2.1
+  checksum: 5ad23293d9a731e4318e420025800b42bf0d264004c0286c8cc010af7a270c7a0f6522e84f54b9ad65cbd6db20b8badbfd8d2ebf4f80fa03dab093b89e68c3f9
   languageName: node
   linkType: hard
 
@@ -16888,7 +16785,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"extension-port-stream@npm:^2.0.1, extension-port-stream@npm:^2.1.1":
+"extension-port-stream@npm:^2.0.1":
   version: 2.1.1
   resolution: "extension-port-stream@npm:2.1.1"
   dependencies:
@@ -20591,17 +20488,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json-rpc-middleware-stream@npm:^4.2.1":
-  version: 4.2.3
-  resolution: "json-rpc-middleware-stream@npm:4.2.3"
-  dependencies:
-    "@metamask/safe-event-emitter": ^3.0.0
-    json-rpc-engine: ^6.1.0
-    readable-stream: ^2.3.3
-  checksum: 0907d34935a8b58c3c67626e344272758f684c13175b2e7de2bac37309c3211fca7a129bce042d50faed605615f51fbba01e173bdc2ae6c14d95aefb9bfb4e09
-  languageName: node
-  linkType: hard
-
 "json-rpc-random-id@npm:^1.0.0, json-rpc-random-id@npm:^1.0.1":
   version: 1.0.1
   resolution: "json-rpc-random-id@npm:1.0.1"
@@ -21008,23 +20894,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lit-html@npm:^2.7.0, lit-html@npm:^2.8.0":
+"lit-html@npm:^2.8.0":
   version: 2.8.0
   resolution: "lit-html@npm:2.8.0"
   dependencies:
     "@types/trusted-types": ^2.0.2
   checksum: 2d70df07248bcb2f502a3afb1e91d260735024fa669669ffb1417575aa39c3092779725ac1b90f5f39e4ce78c63f431f51176bc67f532389f0285a6991573255
-  languageName: node
-  linkType: hard
-
-"lit@npm:2.7.5":
-  version: 2.7.5
-  resolution: "lit@npm:2.7.5"
-  dependencies:
-    "@lit/reactive-element": ^1.6.0
-    lit-element: ^3.3.0
-    lit-html: ^2.7.0
-  checksum: 61a3f87c57136618f47a30b36cdfb592fcba42dcfbdb104d2b5ca291148c2d9a32fcb713bb91090bd08d6897a00e73f8425da6e3626aa080eaf410a32397ae69
   languageName: node
   linkType: hard
 
@@ -27926,21 +27801,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"valtio@npm:1.10.5":
-  version: 1.10.5
-  resolution: "valtio@npm:1.10.5"
-  dependencies:
-    proxy-compare: 2.5.1
-    use-sync-external-store: 1.2.0
-  peerDependencies:
-    react: ">=16.8"
-  peerDependenciesMeta:
-    react:
-      optional: true
-  checksum: a01d7cca44b3ff60213aa40470c42083f7522d8e2c2f2d9f696b0aa3eec4c3dba7393831d5ff47db1ad025904860d2788ce4d9654963ff3555481deb25376851
-  languageName: node
-  linkType: hard
-
 "valtio@npm:1.11.2":
   version: 1.11.2
   resolution: "valtio@npm:1.11.2"
@@ -28246,7 +28106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webextension-polyfill@npm:>=0.10.0 <1.0, webextension-polyfill@npm:^0.10.0":
+"webextension-polyfill@npm:>=0.10.0 <1.0":
   version: 0.10.0
   resolution: "webextension-polyfill@npm:0.10.0"
   checksum: 4a59036bda571360c2c0b2fb03fe1dc244f233946bcf9a6766f677956c40fd14d270aaa69cdba95e4ac521014afbe4008bfa5959d0ac39f91c990eb206587f91

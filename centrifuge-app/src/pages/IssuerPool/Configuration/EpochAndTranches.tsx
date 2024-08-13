@@ -295,11 +295,7 @@ export function EpochAndTranches() {
             <Stack gap={2}>
               <Text variant="heading3">Tranches</Text>
 
-              {isEditing ? (
-                <TrancheInput currency={pool?.currency.symbol} isUpdating />
-              ) : (
-                <DataTable data={trancheData} columns={columns} />
-              )}
+              {isEditing ? <TrancheInput isUpdating /> : <DataTable data={trancheData} columns={columns} />}
             </Stack>
           </Stack>
         </PageSection>

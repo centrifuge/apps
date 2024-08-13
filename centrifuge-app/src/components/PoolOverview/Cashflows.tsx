@@ -77,16 +77,18 @@ export const Cashflows = () => {
         <Text fontSize="18px" fontWeight="500">
           Cashflows
         </Text>
-        <AnchorButton
-          href={csvUrl}
-          download={`pool-cashflow-data-${poolId}.csv`}
-          variant="secondary"
-          icon={IconDownload}
-          small
-          target="_blank"
-        >
-          Download
-        </AnchorButton>
+        {csvUrl && (
+          <AnchorButton
+            href={csvUrl}
+            download={`pool-cashflow-data-${poolId}.csv`}
+            variant="secondary"
+            icon={IconDownload}
+            small
+            target="_blank"
+          >
+            Download
+          </AnchorButton>
+        )}
       </Shelf>
       <CashflowsChart poolStates={truncatedPoolStates} pool={pool} />
     </Stack>

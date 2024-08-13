@@ -150,7 +150,7 @@ export function useTinlakeLoans(poolId: string) {
       const loans = await getTinlakeLoans(poolId)
       const writeOffPercentages = await getWriteOffPercentages(pool!, loans)
 
-      return loans.map((loan, i) => ({
+      return (loans as any[]).map((loan, i) => ({
         asset: {
           nftId: loan.nftId,
           collectionId: poolId,

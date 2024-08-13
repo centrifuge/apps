@@ -125,6 +125,9 @@ export function AssetTransactions({ pool }: { pool: Pool }) {
       Object.fromEntries(columnConfig.map((col, index) => [col.header, `"${values[index]}"`]))
     )
     const dataUrl = getCSVDownloadUrl(formatted)
+    if (!dataUrl) {
+      throw new Error('Failed to generate CSV')
+    }
 
     setCsvData({
       dataUrl,

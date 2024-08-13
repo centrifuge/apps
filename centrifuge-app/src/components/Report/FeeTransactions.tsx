@@ -92,6 +92,10 @@ export function FeeTransactions({ pool }: { pool: Pool }) {
     )
     const dataUrl = getCSVDownloadUrl(formatted)
 
+    if (!dataUrl) {
+      throw new Error('Failed to generate CSV')
+    }
+
     setCsvData({
       dataUrl,
       fileName: `${pool.id}-fee-transactions-${formatDate(startDate, {

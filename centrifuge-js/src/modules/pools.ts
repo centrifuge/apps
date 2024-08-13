@@ -2640,7 +2640,7 @@ export function getPoolsModule(inst: Centrifuge) {
       }
     }>(
       `query {
-        poolSnapshots(first: 1000, orderBy: PERIOD_START_ASC) {
+        poolSnapshots(first: 1000, orderBy: PERIOD_ID_ASC) {
           nodes {
             netAssetValue
             periodId
