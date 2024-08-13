@@ -16,4 +16,5 @@ interface ImportMetaEnv {
   REACT_APP_INFURA_KEY: string
   REACT_APP_ONFINALITY_KEY: string
   REACT_APP_WALLETCONNECT_ID: string
+  REACT_APP_PRIME_IPFS_HASH: string
 }
