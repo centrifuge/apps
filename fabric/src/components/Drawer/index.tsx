@@ -13,6 +13,7 @@ export type DrawerProps = React.PropsWithChildren<{
   isOpen: boolean
   onClose: () => void
   width?: string | number
+  innerPaddingTop?: number
 }> &
   BoxProps
 
@@ -95,7 +96,7 @@ function DrawerInner({ children, isOpen, onClose, width = 'drawer', ...props }: 
         <DrawerCard
           position="relative"
           px={3}
-          pt={6}
+          pt={props.innerPaddingTop ?? 6}
           pb={4}
           width={width}
           maxWidth="100%"
