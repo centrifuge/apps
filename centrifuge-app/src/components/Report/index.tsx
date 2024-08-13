@@ -20,7 +20,6 @@ export type TableDataRow = {
   name: string
   value: (string | number | JSX.Element | Decimal | undefined)[]
   heading?: boolean
-  id: string | undefined
 }
 
 export function ReportComponent({ pool }: { pool: Pool }) {

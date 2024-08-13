@@ -192,7 +192,7 @@ export function AssetList({ pool }: { pool: Pool }) {
           align: col.align,
           header: col.sortable ? <SortableTableHeader label={col.header} /> : col.header,
           sortKey: col.sortable ? `value[${index}]` : undefined,
-          cell: (row: TableDataRow) => {
+          cell: (row: TableDataRow & { id: string }) => {
             const assetId = row?.id?.split('-')[1]
             return col.header === 'Name' ? (
               <Text as="span" variant="body3">

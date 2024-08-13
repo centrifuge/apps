@@ -242,6 +242,10 @@ export function TokenPrice({ pool }: { pool: Pool }) {
 
     const dataUrl = getCSVDownloadUrl(formatted)
 
+    if (!dataUrl) {
+      throw new Error('Failed to create CSV')
+    }
+
     setCsvData({
       dataUrl,
       fileName: `${pool.id}-token-price-${formatDate(startDate, {
@@ -259,7 +263,7 @@ export function TokenPrice({ pool }: { pool: Pool }) {
 
     return () => {
       setCsvData(undefined)
-      URL.revokeObjectURL(dataUrl)
+      URL.revokeObjectURL(dataUrl || '')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [priceRecords])
