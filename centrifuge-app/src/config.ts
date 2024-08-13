@@ -123,10 +123,10 @@ const CENTRIFUGE: EnvironmentConfig = {
 }
 
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
-const onfinalityKey = import.meta.env.REACT_APP_ONFINALITY_KEY
+const alchemyKey = import.meta.env.REACT_APP_ALCHEMY_KEY
 
 const goerliConfig = {
-  rpcUrl: `https://eth-goerli.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
+  rpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`,
   chainId: 5,
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
@@ -134,7 +134,7 @@ const goerliConfig = {
   blockExplorerUrl: 'https://goerli.etherscan.io',
 }
 const mainnetConfig = {
-  rpcUrl: `https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`,
+  rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
   chainId: 1,
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
@@ -171,7 +171,7 @@ export const evmChains: EvmChains = {
       decimals: 18,
     },
     blockExplorerUrl: 'https://etherscan.io/',
-    urls: [`https://eth.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://eth-mainnet.g.alchemy.com/v2/${yourAlchemyAPIKey}`],
     iconUrl: ethereumLogo,
     isTestnet: false,
   },
@@ -183,7 +183,7 @@ export const evmChains: EvmChains = {
       decimals: 18,
     },
     blockExplorerUrl: 'https://goerli.etherscan.io/',
-    urls: [`https://eth-goerli.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://eth-sepolia.g.alchemy.com/v2/${yourAlchemyAPIKey}`],
     iconUrl: goerliLogo,
     isTestnet: true,
   },
@@ -191,7 +191,7 @@ export const evmChains: EvmChains = {
     name: 'Ethereum Sepolia',
     nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
     blockExplorerUrl: 'https://sepolia.etherscan.io/',
-    urls: [`https://eth-sepolia.api.onfinality.io/rpc?apikey=${onfinalityKey}`],
+    urls: [`https://eth-sepolia.g.alchemy.com/v2/${yourAlchemyAPIKey}`],
     iconUrl: sepoliaLogo,
     isTestnet: true,
   },
