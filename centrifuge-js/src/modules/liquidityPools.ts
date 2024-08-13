@@ -71,13 +71,17 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   function centrifugeRouter(chainId: number) {
-    const centrifugeRouter = config[chainId].centrifugeRouter
+    const centrifugeRouter = getCentrifugeRouterAddress(chainId)
     const getEstimate = from(contract(centrifugeRouter, ABI.CentrifugeRouter).estimate([0]))
     return from(getEstimate).pipe(
       switchMap((estimate) => {
         return of({ estimate, centrifugeRouter })
       })
     )
+  }
+
+  function getCentrifugeRouterAddress(chainId: number) {
+    return config[chainId].centrifugeRouter
   }
 
   function getProvider(options?: EvmQueryOptions) {
@@ -151,11 +155,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   function approveForCurrency(
-    args: [address: string, currencyAddress: string, amount: BN],
+    args: [currencyAddress: string, amount: BN, chainId: number],
     options: TransactionRequest = {}
   ) {
-    const [address, currencyAddress, amount] = args
-    return pending(contract(currencyAddress, ABI.Currency).approve(address, amount, options))
+    const [currencyAddress, amount, chainId] = args
+    const centrifugeRouterAddress = getCentrifugeRouterAddress(chainId)
+
+    return pending(contract(currencyAddress, ABI.Currency).approve(centrifugeRouterAddress, amount, options))
   }
 
   async function signPermit(args: [spender: string, currencyAddress: string, amount: BN]) {
@@ -646,11 +652,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         currency: CurrencyMetadata & { address: string }
         trancheTokenAddress: string
         trancheTokenDecimals: number
-      }
+      },
+      chainId: number
     ],
     options?: EvmQueryOptions
   ) {
-    const [user, lp] = args
+    const [user, lp, chainId] = args
+    const centrifugeRouterAddress = getCentrifugeRouterAddress(chainId)
 
     const currencyBalanceTransform = toCurrencyBalance(lp.currency.decimals)
     const tokenBalanceTransform = toTokenBalance(lp.trancheTokenDecimals)
@@ -673,14 +681,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
       },
       {
         target: lp.currency.address,
-        call: ['function allowance(address, address) view returns (uint)', user, lp.lpAddress],
+        call: ['function allowance(address, address) view returns (uint)', user, centrifugeRouterAddress],
         returns: [['lpCurrencyAllowance', currencyBalanceTransform]],
       },
       {
         target: lp.managerAddress,
         call: [
           'function investments(address, address) view returns (uint128, uint128, uint256, uint256, uint128, uint128, uint128, uint128, bool, bool)',
-          lp.lpAddress,
+          centrifugeRouterAddress,
           user,
         ],
         returns: [

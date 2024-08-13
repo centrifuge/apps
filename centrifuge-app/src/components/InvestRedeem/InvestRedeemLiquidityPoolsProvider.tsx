@@ -202,8 +202,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       : Dec(0),
     collectType,
     needsToCollectBeforeOrder: true,
-    needsPoolCurrencyApproval: (amount) =>
-      lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false,
+    needsPoolCurrencyApproval: (amount) => {
+      return lpInvest ? lpInvest.lpCurrencyAllowance.toFloat() < amount && !supportsPermits : false
+    },
     needsTrancheTokenApproval: () => false,
     canChangeOrder,
     canCancelOrder: !(lpInvest?.pendingCancelDepositRequest || lpInvest?.pendingCancelRedeemRequest),
@@ -253,9 +254,9 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
         : [lpInvest?.lpAddress, lpInvest?.maxWithdraw, chainId]
     ),
     approvePoolCurrency: doAction('approvePoolCurrency', (amount) => [
-      lpInvest?.lpAddress,
       lpInvest?.currency.address,
       amount.toString(),
+      chainId,
     ]),
     approveTrancheToken: () => {},
     cancelInvest: doAction('cancelInvest', () => [lpInvest?.lpAddress, chainId]),
