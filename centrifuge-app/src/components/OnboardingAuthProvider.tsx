@@ -3,7 +3,8 @@ import { useCentrifuge, useCentrifugeUtils, useEvmProvider, useWallet } from '@c
 import { BigNumber } from '@ethersproject/bignumber'
 import { Signer } from '@polkadot/types/types'
 import { encodeAddress } from '@polkadot/util-crypto'
-import { ethers, utils } from 'ethers'
+import Safe, { SigningMethod } from '@safe-global/protocol-kit'
+import { ethers } from 'ethers'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 
@@ -63,9 +64,9 @@ export function OnboardingAuthProvider({ children }: { children: React.ReactNode
       if (selectedAccount?.address && selectedWallet?.signer) {
         await loginWithSubstrate(selectedAccount?.address, selectedWallet.signer as Signer, cent, proxy)
       } else if (isEvmOnSubstrate && selectedAddress && provider?.getSigner()) {
-        await loginWithEvm(selectedAddress, provider.getSigner(), evmChainId, isEvmOnSubstrate)
+        await loginWithEvm(selectedAddress, provider, evmChainId, isEvmOnSubstrate)
       } else if (selectedAddress && provider?.getSigner()) {
-        await loginWithEvm(selectedAddress, provider.getSigner(), evm.chainId)
+        await loginWithEvm(selectedAddress, provider, evm.chainId)
       }
       throw new Error('network not supported')
     } catch {
@@ -211,20 +212,22 @@ const loginWithSubstrate = async (hexAddress: string, signer: Signer, cent: Cent
   }
 }
 
-const loginWithEvm = async (address: string, signer: any, evmChainId?: number, isEvmOnSubstrate?: boolean) => {
-  const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({ address }),
-  })
-  const { nonce } = await nonceRes.json()
-  const domain = window.location.host
-  const origin = window.location.origin
+const loginWithEvm = async (address: string, provider: any, evmChainId?: number, isEvmOnSubstrate?: boolean) => {
+  try {
+    const signer = provider?.getSigner()
+    const nonceRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/nonce`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ address }),
+    })
+    const { nonce } = await nonceRes.json()
+    const domain = window.location.host
+    const origin = window.location.origin
 
-  const message = `${domain} wants you to sign in with your Ethereum account:
+    const message = `${domain} wants you to sign in with your Ethereum account:
 ${address}
 
 Please sign to authenticate your wallet
@@ -235,55 +238,69 @@ Chain ID: ${evmChainId || 1}
 Nonce: ${nonce}
 Issued At: ${new Date().toISOString()}`
 
-  const signedMessage = await signer?.signMessage(message)
+    let body
 
-  let body
+    const isSafe = !!signer.provider.provider?.safe
+    const safeAddress = signer.provider.provider?.safe?.safeAddress
+    const safeOwner = signer.provider.provider?.safe.owners[0]
 
-  if (signedMessage === '0x') {
-    const messageHash = utils.hashMessage(message)
-
-    const isValid = await isValidSignature(signer, address, messageHash, evmChainId || 1)
-
-    if (isValid) {
-      body = JSON.stringify({
-        safeAddress: address,
-        messageHash,
-        evmChainId,
-        network: 'evmOnSafe',
-        nonce,
+    if (isSafe) {
+      let protocolKit = await Safe.init({
+        provider: provider.provider,
+        safeAddress,
       })
-    } else {
-      throw new Error('Invalid signature')
-    }
-  } else {
-    body = JSON.stringify({
-      message,
-      signature: signedMessage,
-      address,
-      nonce,
-      network: isEvmOnSubstrate ? 'evmOnSubstrate' : 'evm',
-      chainId: evmChainId || 1,
-    })
-  }
+      protocolKit.connect({ safeAddress, signer: safeOwner })
+      const messageHash = await protocolKit.createMessage(message)
+      // this doesn't work because protocol kit wants to owner to sign but the provider is connected to the safe
+      const signature = await protocolKit.signMessage(messageHash, SigningMethod.ETH_SIGN, safeAddress)
+      const safeSignature = signature.data.toString()
+      const isValid = await protocolKit.isValidSignature(message, safeSignature)
 
-  const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body,
-  })
-  if (tokenRes.status !== 200) {
-    throw new Error('Failed to authenticate wallet')
-  }
-  const token = await tokenRes.json()
-  if (token) {
-    sessionStorage.clear()
-    sessionStorage.setItem(
-      `centrifuge-onboarding-auth-${address}`,
-      JSON.stringify({ signed: token.token, payload: message })
-    )
+      if (isValid) {
+        body = JSON.stringify({
+          safeAddress: address,
+          messageHash,
+          evmChainId,
+          network: 'evmOnSafe',
+          nonce,
+        })
+      } else {
+        throw new Error('Invalid signature')
+      }
+    } else {
+      const signedMessage = await signer?.signMessage(message)
+      body = JSON.stringify({
+        message,
+        signature: signedMessage,
+        address,
+        nonce,
+        network: isEvmOnSubstrate ? 'evmOnSubstrate' : 'evm',
+        chainId: evmChainId || 1,
+      })
+    }
+
+    const tokenRes = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/authenticateWallet`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body,
+    })
+    if (tokenRes.status !== 200) {
+      throw new Error('Failed to authenticate wallet')
+    }
+    const token = await tokenRes.json()
+    if (token) {
+      sessionStorage.clear()
+      sessionStorage.setItem(
+        `centrifuge-onboarding-auth-${address}`,
+        JSON.stringify({ signed: token.token, payload: message })
+      )
+    }
+  } catch (e) {
+    console.error('🚀 ~ e:', e)
+    throw new Error('Failed to get safe message hash')
   }
 }
 
@@ -322,6 +339,7 @@ const isValidSignature = async (provider: any, safeAddress: string, messageHash:
 const TX_SERVICE_URLS: Record<string, string> = {
   '1': 'https://safe-transaction-mainnet.safe.global/api',
   '5': 'https://safe-transaction-goerli.safe.global/api',
+  '11155111': 'https://safe-transaction-sepolia.safe.global/api',
 }
 
 const fetchSafeMessage = async (safeMessageHash: string, chainId: number) => {
