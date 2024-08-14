@@ -60,15 +60,17 @@ export const TransactionHistoryTable = ({
 }) => {
   const basePath = useBasePath('/pools')
   const getLabelAndAmount = (transaction: AssetTransaction) => {
+    const netFlow = activeAssetId
+      ? activeAssetId === transaction.toAsset?.id.split('-')[1]
+        ? 'positive'
+        : 'negative'
+      : 'neutral'
+
     if (transaction.type === 'CASH_TRANSFER') {
       return {
         label: 'Cash transfer',
         amount: transaction.amount,
-        netFlow: activeAssetId
-          ? activeAssetId === transaction.toAsset?.id.split('-')[1]
-            ? 'positive'
-            : 'negative'
-          : 'neutral',
+        netFlow,
       }
     }
 
@@ -100,11 +102,7 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Purchase',
         amount: transaction.amount,
-        netFlow: activeAssetId
-          ? activeAssetId === transaction.toAsset?.id.split('-')[1]
-            ? 'positive'
-            : 'negative'
-          : 'neutral',
+        netFlow,
       }
     }
 
@@ -136,11 +134,7 @@ export const TransactionHistoryTable = ({
           new BN(transaction.principalAmount || 0).add(new BN(transaction.interestAmount || 0)),
           transaction.principalAmount!.decimals
         ),
-        netFlow: activeAssetId
-          ? activeAssetId === transaction.toAsset?.id.split('-')[1]
-            ? 'positive'
-            : 'negative'
-          : 'neutral',
+        netFlow,
       }
     }
 
@@ -152,22 +146,14 @@ export const TransactionHistoryTable = ({
       return {
         label: 'Interest payment',
         amount: transaction.interestAmount,
-        netFlow: activeAssetId
-          ? activeAssetId === transaction.toAsset?.id.split('-')[1]
-            ? 'positive'
-            : 'negative'
-          : 'neutral',
+        netFlow,
       }
     }
 
     return {
       label: 'Principal payment',
       amount: transaction.principalAmount,
-      netFlow: activeAssetId
-        ? activeAssetId === transaction.toAsset?.id.split('-')[1]
-          ? 'positive'
-          : 'negative'
-        : 'neutral',
+      netFlow,
     }
   }
 
