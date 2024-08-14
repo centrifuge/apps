@@ -188,6 +188,26 @@ export function TokenPrice({ pool }: { pool: Pool }) {
       ...(!!showTokenYields
         ? [
             {
+              name: '7d APY',
+              value: poolStates?.map(() => '' as any) || [],
+              heading: false,
+            },
+          ]
+        : []),
+      ...(!!showTokenYields
+        ? pool?.tranches
+            .slice()
+            .reverse()
+            .map((token) => ({
+              name: `\u00A0 \u00A0 ${token.currency.displayName} token`,
+              value: poolStates?.map((state) => state.tranches[token.id].yield7DaysAnnualized.toFloat()) || [],
+              heading: false,
+              formatter: (v: any) => formatPercentage(v * 100, true, {}, 2),
+            }))
+        : []),
+      ...(!!showTokenYields
+        ? [
+            {
               name: '30d APY',
               value: poolStates?.map(() => '' as any) || [],
               heading: false,
