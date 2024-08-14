@@ -4,6 +4,7 @@ import { Flex, Shelf, Text, TextProps } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled from 'styled-components'
+import { isEvmAddress } from '../../src/utils/address'
 import { copyToClipboard } from '../utils/copyToClipboard'
 import { useAddress } from '../utils/useAddress'
 import { useIdentity } from '../utils/useIdentity'
@@ -59,7 +60,7 @@ export function Identity({ showIcon, address, clickToCopy, labelForConnectedAddr
     return (
       <Shelf gap={2}>
         <IdenticonWrapper>
-          <Identicon value={address} size={24} theme="polkadot" />
+          <Identicon value={address} size={24} theme={isEvmAddress(address) ? 'ethereum' : 'polkadot'} />
         </IdenticonWrapper>
         {label}
       </Shelf>
