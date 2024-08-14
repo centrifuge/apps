@@ -1,10 +1,9 @@
-import { isSameAddress } from '@centrifuge/centrifuge-js'
+import { isEvm, isSameAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifugeUtils, useWallet } from '@centrifuge/centrifuge-react'
 import { Flex, Shelf, Text, TextProps } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled from 'styled-components'
-import { isEvmAddress } from '../../src/utils/address'
 import { copyToClipboard } from '../utils/copyToClipboard'
 import { useAddress } from '../utils/useAddress'
 import { useIdentity } from '../utils/useIdentity'
@@ -32,7 +31,7 @@ export function Identity({ showIcon, address, clickToCopy, labelForConnectedAddr
 
   const addr = utils.formatAddress(address)
   const isMe = React.useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
-  const truncated = truncate(utils.formatAddress(address))
+  const truncated = isEvm(address) ? truncate(address.substring(0, 42)) : truncate(utils.formatAddress(address))
   const display = identity?.display || truncated
   const meLabel =
     !isMe || !labelForConnectedAddress
@@ -60,7 +59,7 @@ export function Identity({ showIcon, address, clickToCopy, labelForConnectedAddr
     return (
       <Shelf gap={2}>
         <IdenticonWrapper>
-          <Identicon value={address} size={24} theme={isEvmAddress(address) ? 'ethereum' : 'polkadot'} />
+          <Identicon value={address} size={24} theme={isEvm(address) ? 'ethereum' : 'polkadot'} />
         </IdenticonWrapper>
         {label}
       </Shelf>
