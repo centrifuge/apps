@@ -31,6 +31,8 @@ const status = {
   DEPOSIT_FROM_INVESTMENTS: 'default',
   WITHDRAWAL_FOR_REDEMPTIONS: 'default',
   WITHDRAWAL_FOR_FEES: 'default',
+  INCREASE_DEBT: 'default',
+  DECREASE_DEBT: 'default',
 } as const
 
 export function TransactionTypeChip(props: TransactionTypeProps) {
