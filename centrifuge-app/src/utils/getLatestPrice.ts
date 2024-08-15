@@ -1,21 +1,21 @@
 import { AssetTransaction, CurrencyBalance } from '@centrifuge/centrifuge-js'
 
 export const getLatestPrice = (
-  oracleValue: CurrencyBalance,
+  oracleValue: { value: CurrencyBalance; timestamp: number },
   borrowerAssetTransactions: AssetTransaction[] | undefined,
   decimals: number
-) => {
-  if (!borrowerAssetTransactions) return null
+): { value: CurrencyBalance; timestamp: number } => {
+  if (!borrowerAssetTransactions) return { value: new CurrencyBalance(0, decimals), timestamp: 0 }
 
-  const latestSettlementPrice = borrowerAssetTransactions[borrowerAssetTransactions.length - 1]?.settlementPrice
+  const latestTx = borrowerAssetTransactions[borrowerAssetTransactions.length - 1]
 
-  if (latestSettlementPrice && oracleValue.isZero()) {
-    return new CurrencyBalance(latestSettlementPrice, decimals)
+  if (latestTx.settlementPrice && oracleValue.value.isZero()) {
+    return { value: new CurrencyBalance(latestTx.settlementPrice, decimals), timestamp: latestTx.timestamp.getTime() }
   }
 
-  if (oracleValue.isZero()) {
-    return null
+  if (oracleValue.value.isZero()) {
+    return { value: new CurrencyBalance(0, decimals), timestamp: 0 }
   }
 
-  return new CurrencyBalance(oracleValue, 18)
+  return oracleValue
 }
