@@ -44,6 +44,7 @@ export type SubqueryTrancheSnapshot = {
   sumOutstandingRedeemOrdersByPeriod: string
   sumFulfilledInvestOrdersByPeriod: string
   sumFulfilledRedeemOrdersByPeriod: string
+  yield7DaysAnnualized: string
   yield30DaysAnnualized: string
   yield90DaysAnnualized: string
   yieldSinceInception: string
@@ -97,6 +98,8 @@ export type AssetTransactionType =
   | 'DEPOSIT_FROM_INVESTMENTS'
   | 'WITHDRAWAL_FOR_REDEMPTIONS'
   | 'WITHDRAWAL_FOR_FEES'
+  | 'INCREASE_DEBT'
+  | 'DECREASE_DEBT'
 
 export enum AssetType {
   OnchainCash = 'OnchainCash',

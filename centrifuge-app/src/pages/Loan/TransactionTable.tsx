@@ -209,14 +209,12 @@ export const TransactionTable = ({
           {
             align: 'left',
             header: `Amount (${currency})`,
-            cell: (row: Row) =>
-              row.amount ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+            cell: (row: Row) => (row.amount ? `${formatBalance(row.amount, undefined, 2, 2)}` : '-'),
           },
           {
             align: 'left',
             header: `Principal (${currency})`,
-            cell: (row: Row) =>
-              row.position ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}` : '-',
+            cell: (row: Row) => (row.position ? `${formatBalance(row.position, undefined, 2, 2)}` : '-'),
           },
         ]),
   ] as Column[]
