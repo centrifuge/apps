@@ -6,7 +6,6 @@ import assetHubLogo from '@centrifuge/fabric/assets/logos/assethub.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
-import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import sepoliaLogo from '@centrifuge/fabric/assets/logos/sepolia.png'
 import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
@@ -175,18 +174,6 @@ export const evmChains: EvmChains = {
     iconUrl: ethereumLogo,
     isTestnet: false,
   },
-  5: {
-    name: 'Ethereum Goerli',
-    nativeCurrency: {
-      name: 'Görli Ether',
-      symbol: 'görETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.etherscan.io/',
-    urls: [`https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`],
-    iconUrl: goerliLogo,
-    isTestnet: true,
-  },
   11155111: {
     name: 'Ethereum Sepolia',
     nativeCurrency: { name: 'Sepolia Ether', symbol: 'sepETH', decimals: 18 },
@@ -202,14 +189,6 @@ export const evmChains: EvmChains = {
     urls: ['https://mainnet.base.org'],
     iconUrl: baseLogo,
     isTestnet: false,
-  },
-  84531: {
-    name: 'Base Goerli',
-    nativeCurrency: { name: 'Base Goerli Ether', symbol: 'gbETH', decimals: 18 },
-    blockExplorerUrl: 'https://goerli.basescan.org/',
-    urls: [`https://goerli.base.org`],
-    iconUrl: baseLogo,
-    isTestnet: true,
   },
   84532: {
     name: 'Base Sepolia',
@@ -230,18 +209,6 @@ export const evmChains: EvmChains = {
     urls: ['https://arb1.arbitrum.io/rpc'],
     iconUrl: arbitrumLogo,
     isTestnet: false,
-  },
-  421613: {
-    name: 'Arbitrum Goerli',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.arbiscan.io/',
-    urls: [`https://arbitrum-goerli.infura.io/v3/${infuraKey}`],
-    iconUrl: arbitrumLogo,
-    isTestnet: true,
   },
   42220: {
     name: 'Celo',
