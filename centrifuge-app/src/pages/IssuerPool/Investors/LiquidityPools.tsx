@@ -116,6 +116,12 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
 
   return (
     <Stack gap={1}>
+      {domain.hasDeployedLp && (
+        <Button onClick={updateTokenPrices} variant="primary" loading={isLoading} small>
+          Update token prices
+        </Button>
+      )}
+
       {status === 'inactive' ? (
         <EnableButton poolId={poolId} domain={domain} />
       ) : status === 'deploying' ? (
@@ -152,11 +158,6 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
             </Button>
           </a>
         ))
-      )}
-      {domain.hasDeployedLp && (
-        <Button onClick={updateTokenPrices} variant="secondary" loading={isLoading} small>
-          Update token prices
-        </Button>
       )}
     </Stack>
   )
