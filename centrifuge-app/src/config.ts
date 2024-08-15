@@ -120,32 +120,20 @@ const CENTRIFUGE: EnvironmentConfig = {
   },
   poolCreationType,
 }
-
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
+
 const alchemyKey = import.meta.env.REACT_APP_ALCHEMY_KEY
 
-const goerliConfig = {
-  rpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`,
-  chainId: 5,
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
-  tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
-  poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
-  blockExplorerUrl: 'https://goerli.etherscan.io',
-}
-const mainnetConfig = {
+export const ethConfig = {
   rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
   chainId: 1,
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+  poolRegistryAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
   poolsHash: 'QmaMA1VYSKuuYhBcQCyf5Ek4VoiiEG6oLGp3iGbsQPGpkS', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
-}
-
-export const ethConfig = {
   network: ethNetwork,
-  multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
+  multicallContractAddress: '0xcA11bde05977b3631167028862bE2a173976CA11', // Same for all networks
   remarkerAddress: '0x3E39db43035981c2C31F7Ffa4392f25231bE4477', // Same for all networks
-  ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),
 }
 
 export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : CENTRIFUGE
@@ -158,8 +146,6 @@ export const parachainNames: Record<number, string> = {
 export const parachainIcons: Record<number, string> = {
   [assetHubChainId]: assetHubLogo,
 }
-
-const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
 export const evmChains: EvmChains = {
   1: {

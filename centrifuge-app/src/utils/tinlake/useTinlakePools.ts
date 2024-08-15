@@ -133,6 +133,15 @@ export function useIpfsPools(suspense = false) {
 
 export function useTinlakePools(suspense = false) {
   const ipfsPools = useIpfsPools(suspense)
+
+  if (ethConfig.network !== 'mainnet') {
+    return useQuery(['tinlakePools', !!ipfsPools], () => [] as any as { pools: TinlakePool[] }, {
+      enabled: !!ipfsPools,
+      staleTime: Infinity,
+      suspense,
+    })
+  }
+
   return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), {
     enabled: !!ipfsPools,
     staleTime: Infinity,
