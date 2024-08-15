@@ -144,11 +144,9 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
       ) : (
         pool.tranches.map((tranche) => (
           <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank">
-            <Button variant="secondary" small>
+            <Button variant="secondary" small style={{ width: '100%' }}>
               <Shelf gap={1}>
-                <span>
-                  {tranche.currency.symbol} token on {getName(domain.chainId)}
-                </span>
+                <span>View {tranche.currency.symbol} token</span>
                 <IconExternalLink size="iconSmall" />
               </Shelf>
             </Button>
