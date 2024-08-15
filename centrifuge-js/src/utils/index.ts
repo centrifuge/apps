@@ -146,3 +146,8 @@ export function evmToSubstrateAddress(address: string, chainId: number) {
 
   return `0x${address.substring(2).toLowerCase()}${chainHex}${suffix}`
 }
+
+export function isEvm(address: string) {
+  const suffix = '45564d00'
+  return address.length === 66 && address.endsWith(suffix)
+}
