@@ -4,10 +4,11 @@ import {
   useCentrifugeApi,
   useCentrifugeTransaction,
   useGetExplorerUrl,
+  useGetNetworkIcon,
   useGetNetworkName,
   useNetworkName,
 } from '@centrifuge/centrifuge-react'
-import { Accordion, Button, Grid, IconExternalLink, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
+import { Accordion, Box, Button, Grid, IconExternalLink, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useParams } from 'react-router'
 import { combineLatest, switchMap } from 'rxjs'
@@ -35,12 +36,7 @@ export function LiquidityPools() {
 
   const { data: domains, refetch } = useActiveDomains(poolId)
   const getName = useGetNetworkName()
-
-  const titles = {
-    inactive: 'Not active',
-    deploying: 'Action needed',
-    deployed: 'Active',
-  }
+  const getIcon = useGetNetworkIcon()
 
   return (
     <PageSection
@@ -54,9 +50,21 @@ export function LiquidityPools() {
               items={[
                 {
                   title: (
-                    <>
-                      {getName(domain.chainId)} <Text fontWeight={400}>- {titles[getDomainStatus(domain)]}</Text>
-                    </>
+                    <Shelf gap="12px">
+                      <Box
+                        as="img"
+                        src={getIcon(domain.chainId)}
+                        alt=""
+                        width="iconSmall"
+                        height="iconSmall"
+                        style={{ objectFit: 'contain' }}
+                        bleedY="12px"
+                      />
+                      <Text>
+                        {getName(domain.chainId)}{' '}
+                        {getDomainStatus(domain) === 'deploying' && <Text fontWeight={400}>- Action needed</Text>}
+                      </Text>
+                    </Shelf>
                   ),
                   body: <PoolDomain poolId={poolId} domain={domain} refetch={refetch} />,
                 },
@@ -74,7 +82,6 @@ export function LiquidityPools() {
 function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domain; refetch: () => void }) {
   const pool = usePool(poolId)
   const poolAdmin = usePoolAdmin(poolId)
-  const getName = useGetNetworkName()
   const explorer = useGetExplorerUrl(domain.chainId)
   const api = useCentrifugeApi()
 
