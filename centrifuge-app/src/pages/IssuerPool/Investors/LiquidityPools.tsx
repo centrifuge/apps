@@ -8,7 +8,18 @@ import {
   useGetNetworkName,
   useNetworkName,
 } from '@centrifuge/centrifuge-react'
-import { Accordion, Box, Button, Grid, IconExternalLink, Shelf, Spinner, Stack, Text } from '@centrifuge/fabric'
+import {
+  Accordion,
+  Box,
+  Button,
+  Grid,
+  IconExternalLink,
+  InlineFeedback,
+  Shelf,
+  Spinner,
+  Stack,
+  Text,
+} from '@centrifuge/fabric'
 import React from 'react'
 import { useParams } from 'react-router'
 import { combineLatest, switchMap } from 'rxjs'
@@ -129,43 +140,51 @@ function PoolDomain({ poolId, domain, refetch }: { poolId: string; domain: Domai
         </Button>
       )}
 
-      {status === 'inactive' ? (
-        <EnableButton poolId={poolId} domain={domain} />
-      ) : status === 'deploying' ? (
-        <ConnectionGuard networks={[domain.chainId]} body="Connect to the right network to continue" variant="plain">
-          {pool.tranches.map((t) => (
-            <React.Fragment key={t.id}>
-              {domain.canTrancheBeDeployed[t.id] && (
-                <DeployTrancheButton poolId={poolId} trancheId={t.id} domain={domain} onSuccess={refetch} />
-              )}
-              {domain.currencies.map((currency, i) => (
-                <React.Fragment key={i}>
-                  {domain.trancheTokens[t.id] && !domain.liquidityPools[t.id][currency.address] && (
-                    <DeployLPButton
-                      poolId={poolId}
-                      trancheId={t.id}
-                      domain={domain}
-                      currencyIndex={i}
-                      onSuccess={refetch}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-            </React.Fragment>
-          ))}
-        </ConnectionGuard>
-      ) : (
-        pool.tranches.map((tranche) => (
-          <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank">
-            <Button variant="secondary" small style={{ width: '100%' }}>
-              <Shelf gap={1}>
-                <span>View {tranche.currency.symbol} token</span>
-                <IconExternalLink size="iconSmall" />
-              </Shelf>
-            </Button>
-          </a>
-        ))
+      {domain.currencies.length === 0 && (
+        <Box bg={'statusCriticalBg'} p={1}>
+          <InlineFeedback status="critical">
+            <Text color={'statusCritical'}>There is no assets setup yet for this chain.</Text>
+          </InlineFeedback>
+        </Box>
       )}
+      {domain.currencies.length > 0 &&
+        (status === 'inactive' ? (
+          <EnableButton poolId={poolId} domain={domain} />
+        ) : status === 'deploying' ? (
+          <ConnectionGuard networks={[domain.chainId]} body="Connect to the right network to continue" variant="plain">
+            {pool.tranches.map((t) => (
+              <React.Fragment key={t.id}>
+                {domain.canTrancheBeDeployed[t.id] && (
+                  <DeployTrancheButton poolId={poolId} trancheId={t.id} domain={domain} onSuccess={refetch} />
+                )}
+                {domain.currencies.map((currency, i) => (
+                  <React.Fragment key={i}>
+                    {domain.trancheTokens[t.id] && !domain.liquidityPools[t.id][currency.address] && (
+                      <DeployLPButton
+                        poolId={poolId}
+                        trancheId={t.id}
+                        domain={domain}
+                        currencyIndex={i}
+                        onSuccess={refetch}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </React.Fragment>
+            ))}
+          </ConnectionGuard>
+        ) : (
+          pool.tranches.map((tranche) => (
+            <a href={explorer.address(domain.trancheTokens[tranche.id])} target="_blank">
+              <Button variant="secondary" small style={{ width: '100%' }}>
+                <Shelf gap={1}>
+                  <span>View {tranche.currency.symbol} token</span>
+                  <IconExternalLink size="iconSmall" />
+                </Shelf>
+              </Button>
+            </a>
+          ))
+        ))}
     </Stack>
   )
 }

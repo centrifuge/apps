@@ -211,6 +211,14 @@ export const evmChains: EvmChains = {
     iconUrl: baseLogo,
     isTestnet: true,
   },
+  84532: {
+    name: 'Base Sepolia',
+    nativeCurrency: { name: 'Base Sepolia Ether', symbol: 'sbETH', decimals: 18 },
+    blockExplorerUrl: 'https://sepolia.basescan.org/',
+    urls: [`https://sepolia.base.org`],
+    iconUrl: baseLogo,
+    isTestnet: true,
+  },
   42161: {
     name: 'Arbitrum One',
     nativeCurrency: {
