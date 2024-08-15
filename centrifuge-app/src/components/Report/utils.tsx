@@ -82,6 +82,8 @@ const assetTransactionTypes: {
   DEPOSIT_FROM_INVESTMENTS: 'Deposit from investments',
   WITHDRAWAL_FOR_REDEMPTIONS: 'Withdrawal for redemptions',
   WITHDRAWAL_FOR_FEES: 'Withdrawal for fees',
+  INCREASE_DEBT: 'Correction (increase)',
+  DECREASE_DEBT: 'Correction (decrease)',
 }
 
 export function formatAssetTransactionType(type: AssetTransactionType) {
