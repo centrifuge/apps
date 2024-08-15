@@ -1,5 +1,6 @@
 import { Loan, Pool, TinlakeLoan } from '@centrifuge/centrifuge-js'
 import { Card, Stack, Text } from '@centrifuge/fabric'
+import { Tooltips } from '../../components/Tooltips'
 import { formatDate, getAge } from '../../utils/date'
 import { formatBalance, formatPercentage } from '../../utils/formatting'
 import { getLatestPrice } from '../../utils/getLatestPrice'
@@ -33,12 +34,14 @@ export function PricingValues({ loan, pool }: Props) {
       }
     })
 
-    const days = getAge(new Date(latestOraclePrice.timestamp).toISOString())
-
     const borrowerAssetTransactions = assetTransactions?.filter(
       (assetTransaction) => assetTransaction.asset.id === `${loan.poolId}-${loan.id}`
     )
-    const latestPrice = getLatestPrice(latestOraclePrice.value, borrowerAssetTransactions, pool.currency.decimals)
+    const latestPrice = getLatestPrice(latestOraclePrice, borrowerAssetTransactions, pool.currency.decimals)
+
+    const days = latestPrice.timestamp > 0 ? getAge(new Date(latestPrice.timestamp).toISOString()) : undefined
+
+    const accruedPrice = 'currentPrice' in loan && loan.currentPrice
 
     return (
       <Card p={3}>
@@ -50,11 +53,21 @@ export function PricingValues({ loan, pool }: Props) {
             metrics={[
               ...('isin' in pricing.priceId ? [{ label: 'ISIN', value: pricing.priceId.isin }] : []),
               {
-                label: `Latest price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
-                value: latestPrice ? `${formatBalance(latestPrice, pool.currency.symbol, 6, 2)}` : '-',
+                label: `Current price${latestOraclePrice.value.isZero() && latestPrice ? ' (settlement)' : ''}`,
+                value: accruedPrice
+                  ? `${formatBalance(accruedPrice || latestPrice, pool.currency.symbol, 6, 2)}`
+                  : latestPrice
+                  ? `${formatBalance(latestPrice.value, pool.currency.symbol, 6, 2)}`
+                  : '-',
               },
-              { label: 'Price last updated', value: days === '0' ? `${days} ago` : `Today` },
-              ...(pricing.interestRate
+              {
+                label: <Tooltips type="linearAccrual" />,
+                value: pricing.withLinearPricing ? 'Enabled' : 'Disabled',
+              },
+              ...(!pricing.withLinearPricing
+                ? [{ label: 'Price last updated', value: days ? `${days} ago` : `Today` }]
+                : [{ label: 'Last manual price update', value: days ? `${days} ago` : `Today` }]),
+              ...(pricing.interestRate.gtn(0)
                 ? [
                     {
                       label: 'Interest rate',

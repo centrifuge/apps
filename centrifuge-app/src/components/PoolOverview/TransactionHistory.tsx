@@ -21,6 +21,7 @@ type Row = {
   toAssetName?: string
   amount: CurrencyBalance | undefined
   hash: string
+  netFlow?: 'positive' | 'negative' | 'neutral'
 }
 
 const getTransactionTypeStatus = (type: string): 'default' | 'info' | 'ok' | 'warning' | 'critical' => {
