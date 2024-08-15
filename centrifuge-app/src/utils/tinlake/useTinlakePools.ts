@@ -134,19 +134,21 @@ export function useIpfsPools(suspense = false) {
 export function useTinlakePools(suspense = false) {
   const ipfsPools = useIpfsPools(suspense)
 
-  if (ethConfig.network !== 'mainnet') {
-    return useQuery(['tinlakePools', !!ipfsPools], () => [] as any as { pools: TinlakePool[] }, {
+  return useQuery(
+    ['tinlakePools', !!ipfsPools],
+    () => {
+      if (ethConfig.network !== 'mainnet') {
+        return [] as any as { pools: TinlakePool[] }
+      }
+
+      return getPools(ipfsPools!)
+    },
+    {
       enabled: !!ipfsPools,
       staleTime: Infinity,
       suspense,
-    })
-  }
-
-  return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), {
-    enabled: !!ipfsPools,
-    staleTime: Infinity,
-    suspense,
-  })
+    }
+  )
 }
 export function useTinlakeLoans(poolId: string) {
   const tinlakePools = useTinlakePools(poolId.startsWith('0x'))
