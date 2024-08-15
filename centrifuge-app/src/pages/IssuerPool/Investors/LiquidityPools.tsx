@@ -208,7 +208,7 @@ function DeployTrancheButton({
 
   return (
     <Button loading={isLoading} onClick={() => execute([domain.poolManager, poolId, trancheId])} small>
-      Deploy ERC20 token: {tranche.currency.name}
+      Deploy {tranche.currency.symbol} token
     </Button>
   )
 }
@@ -239,7 +239,7 @@ function DeployLPButton({
       onClick={() => execute([domain.poolManager, poolId, trancheId, domain.currencies[currencyIndex].address])}
       small
     >
-      Deploy ERC7540 vault: {tranche.currency.symbol} / {domain.currencies[currencyIndex].symbol}
+      Deploy {tranche.currency.symbol} / {domain.currencies[currencyIndex].symbol} vault
     </Button>
   )
 }
