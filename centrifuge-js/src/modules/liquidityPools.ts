@@ -89,10 +89,16 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
   }
 
   function enablePoolOnDomain(
-    args: [poolId: string, chainId: number, currencyKeysToAdd: CurrencyKey[]],
+    args: [
+      poolId: string,
+      chainId: number,
+      currencyKeysToAdd: CurrencyKey[],
+      tokenPricesToUpdate: [string, CurrencyKey][],
+      domainChainId: number
+    ],
     options?: TransactionOptions
   ) {
-    const [poolId, chainId, currencyKeysToAdd] = args
+    const [poolId, chainId, currencyKeysToAdd, tokenPricesToUpdate, domainChainId] = args
     const $api = inst.getApi()
 
     return getDomainCurrencies([chainId]).pipe(
@@ -109,6 +115,9 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
                 api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
               ]),
               ...currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key)),
+              ...tokenPricesToUpdate.map(([tid, curKey]) =>
+                inst.liquidityPools.updateTokenPrice([poolId, tid, curKey, domainChainId], { batch: true })
+              ),
               api.tx.liquidityPoolsGateway.endBatchMessage({ EVM: chainId }),
             ])
             return inst.wrapSignAndSend(api, tx, options)

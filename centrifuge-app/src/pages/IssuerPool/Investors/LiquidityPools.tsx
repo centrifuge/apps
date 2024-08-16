@@ -252,6 +252,12 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
     (cent) => cent.liquidityPools.enablePoolOnDomain
   )
 
+  const tokenPricesToUpdate = Object.entries(domain.liquidityPools).flatMap(([tid, poolsByCurrency]) => {
+    return domain.currencies
+      .filter((cur) => !!poolsByCurrency[cur.address])
+      .map((cur) => [tid, cur.key] satisfies [string, CurrencyKey])
+  })
+
   const currenciesToAdd = domain.currencies
     .filter((cur) => domain.currencyNeedsAdding[cur.address])
     .map((cur) => cur.key)
@@ -259,7 +265,11 @@ function EnableButton({ poolId, domain }: { poolId: string; domain: Domain }) {
   return (
     <Button
       loading={isLoading}
-      onClick={() => execute([poolId, domain.chainId, currenciesToAdd], { account: poolAdmin })}
+      onClick={() =>
+        execute([poolId, domain.chainId, currenciesToAdd, tokenPricesToUpdate, domain.chainId], {
+          account: poolAdmin,
+        })
+      }
       small
     >
       Enable
