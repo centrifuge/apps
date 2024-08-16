@@ -200,6 +200,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         const iface = new Interface(ABI.CentrifugeRouter)
+        // TODO: add these back after contract upgrade that allows to call the enable function
         // const requestDeposit = iface.encodeFunctionData('requestDeposit', [
         //   lpAddress,
         //   order.toString(),
@@ -213,7 +214,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         return pending(
           contract(centrifugeRouter, ABI.CentrifugeRouter).multicall([enable, requestDeposit], {
             ...options,
-            gasLimit: 300000,
+            gasLimit: 500000,
             value: estimate,
           })
         )
@@ -292,13 +293,13 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     )
   }
 
+  /** After cancelDepositRequest is executed (gas paid on Axelar) one more message (fulfilledCancelDepositRequest) has to be paid for manually on Axelar */
   function cancelInvestOrder(args: [lpAddress: string, chainId: number], options: TransactionRequest = {}) {
     const [lpAddress, chainId] = args
-    const user = inst.getSignerAddress('evm')
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).cancelDepositRequest(lpAddress, user, estimate, {
+          contract(centrifugeRouter, ABI.CentrifugeRouter).cancelDepositRequest(lpAddress, estimate, {
             ...options,
             value: estimate,
           })
@@ -313,7 +314,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
     return centrifugeRouter(chainId).pipe(
       switchMap(({ estimate, centrifugeRouter }) => {
         return pending(
-          contract(centrifugeRouter, ABI.CentrifugeRouter).claimCancelDepositRequest(lpAddress, user, user, estimate, {
+          contract(centrifugeRouter, ABI.CentrifugeRouter).claimCancelDepositRequest(lpAddress, user, user, {
             ...options,
             value: estimate,
           })
@@ -690,7 +691,7 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
         target: lp.managerAddress,
         call: [
           'function investments(address, address) view returns (uint128, uint128, uint256, uint256, uint128, uint128, uint128, uint128, bool, bool)',
-          centrifugeRouterAddress,
+          lp.lpAddress,
           user,
         ],
         returns: [

@@ -103,7 +103,7 @@ export function useLiquidityPoolInvestment(poolId: string, trancheId: string, lp
   const query = useQuery(
     ['lpInvestment', chainId, lp?.lpAddress, address],
     async () => ({
-      ...(await cent.liquidityPools.getLiquidityPoolInvestment([address!, lp!, chainId], {
+      ...(await cent.liquidityPools.getLiquidityPoolInvestment([address!, lp!, chainId || 1], {
         rpcProvider: getProvider(chainId!),
       })),
       ...lp!,

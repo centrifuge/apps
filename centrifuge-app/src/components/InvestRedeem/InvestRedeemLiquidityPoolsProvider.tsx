@@ -249,9 +249,7 @@ export function InvestRedeemLiquidityPoolsProvider({ poolId, trancheId, children
       setPendingAction('redeem')
     },
     collect: doAction('collect', () =>
-      collectType === 'invest'
-        ? [lpInvest?.lpAddress, lpInvest?.maxMint, chainId]
-        : [lpInvest?.lpAddress, lpInvest?.maxWithdraw, chainId]
+      collectType === 'invest' ? [lpInvest?.lpAddress, chainId] : [lpInvest?.lpAddress, chainId]
     ),
     approvePoolCurrency: doAction('approvePoolCurrency', (amount) => [
       lpInvest?.currency.address,
