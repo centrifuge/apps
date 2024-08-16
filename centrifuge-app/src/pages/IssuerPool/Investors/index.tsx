@@ -5,7 +5,6 @@ import { useSuitableAccounts } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { InvestorStatus } from './InvestorStatus'
 import { LiquidityPools } from './LiquidityPools'
-import { OnboardingSettings } from './OnboardingSettings'
 
 export function IssuerPoolInvestorsPage() {
   return (
@@ -30,7 +29,6 @@ function IssuerPoolInvestors() {
     <>
       {canEditInvestors && <InvestorStatus />}
       {isPoolAdmin && <LiquidityPools />}
-      {isPoolAdmin && <OnboardingSettings />}
     </>
   )
 }
