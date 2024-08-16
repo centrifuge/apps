@@ -133,11 +133,22 @@ export function useIpfsPools(suspense = false) {
 
 export function useTinlakePools(suspense = false) {
   const ipfsPools = useIpfsPools(suspense)
-  return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), {
-    enabled: !!ipfsPools,
-    staleTime: Infinity,
-    suspense,
-  })
+
+  return useQuery(
+    ['tinlakePools', !!ipfsPools],
+    () => {
+      if (ethConfig.network !== 'mainnet') {
+        return [] as any as { pools: TinlakePool[] }
+      }
+
+      return getPools(ipfsPools!)
+    },
+    {
+      enabled: !!ipfsPools,
+      staleTime: Infinity,
+      suspense,
+    }
+  )
 }
 export function useTinlakeLoans(poolId: string) {
   const tinlakePools = useTinlakePools(poolId.startsWith('0x'))
@@ -150,7 +161,7 @@ export function useTinlakeLoans(poolId: string) {
       const loans = await getTinlakeLoans(poolId)
       const writeOffPercentages = await getWriteOffPercentages(pool!, loans)
 
-      return loans.map((loan, i) => ({
+      return (loans as any[]).map((loan, i) => ({
         asset: {
           nftId: loan.nftId,
           collectionId: poolId,

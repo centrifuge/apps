@@ -102,12 +102,14 @@ export function getLiquidityPoolsModule(inst: Centrifuge) {
           switchMap((rawPool) => {
             const pool = rawPool.toPrimitive() as any
             const tx = api.tx.utility.batchAll([
+              api.tx.liquidityPoolsGateway.startBatchMessage({ EVM: chainId }),
               ...(currencyKeysToAdd?.map((key) => api.tx.liquidityPools.addCurrency(key)) ?? []),
               api.tx.liquidityPools.addPool(poolId, { EVM: chainId }),
               ...pool.tranches.ids.flatMap((trancheId: string) => [
                 api.tx.liquidityPools.addTranche(poolId, trancheId, { EVM: chainId }),
               ]),
               ...currencies.map((cur) => api.tx.liquidityPools.allowInvestmentCurrency(poolId, cur.key)),
+              api.tx.liquidityPoolsGateway.endBatchMessage({ EVM: chainId }),
             ])
             return inst.wrapSignAndSend(api, tx, options)
           })

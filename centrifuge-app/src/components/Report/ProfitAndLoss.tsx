@@ -330,6 +330,10 @@ export function ProfitAndLoss({ pool }: { pool: Pool }) {
 
     const dataUrl = getCSVDownloadUrl(formatted)
 
+    if (!dataUrl) {
+      throw new Error('Failed to create CSV')
+    }
+
     setCsvData({
       dataUrl,
       fileName: `${pool.id}-profit-and-loss-${formatDate(startDate, {

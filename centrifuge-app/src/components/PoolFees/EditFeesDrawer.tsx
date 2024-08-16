@@ -117,7 +117,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
         })
         .map((fee) => {
           const destination = isEvmAddress(fee.receivingAddress)
-            ? evmToSubstrateAddress(fee.receivingAddress, chainId)
+            ? evmToSubstrateAddress(fee.receivingAddress, chainId!)
             : fee.receivingAddress
           return {
             poolId,
@@ -322,6 +322,7 @@ export const EditFeesDrawer = ({ onClose, isOpen }: ChargeFeesProps) => {
                                 receivingAddress: '',
                                 feeId: undefined,
                                 type: 'chargedUpTo',
+                                category: feeCategories[0],
                               })
                             }
                           >

@@ -1,6 +1,6 @@
-import { Network } from '@centrifuge/centrifuge-react'
+import { Network, useCentrifuge } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
-import { isTestEnv } from '../config'
+import { lastValueFrom } from 'rxjs'
 
 export type DAO = {
   name: string
@@ -20,27 +20,11 @@ export type Resolution = {
 }
 
 export const useDAOConfig = () => {
+  const cent = useCentrifuge()
   const query = useQuery(
     'daoData',
     async () => {
-      const res = await fetch(
-        `https://api.github.com/repos/centrifuge/prime-data/contents/data${isTestEnv ? '-dev' : ''}.json`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        }
-      )
-
-      if (!res.ok) {
-        throw new Error('Network response was not ok')
-      }
-
-      const json = await res.json()
-      const content = atob(json.content)
-
-      const data = JSON.parse(content)
+      const data = await lastValueFrom(cent.metadata.getMetadata(import.meta.env.REACT_APP_PRIME_IPFS_HASH))
       return Object.values(data) as DAO[]
     },
     {

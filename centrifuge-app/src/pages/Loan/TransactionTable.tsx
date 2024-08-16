@@ -43,7 +43,7 @@ export const TransactionTable = ({
   maturityDate,
 }: Props) => {
   const assetTransactions = useMemo(() => {
-    const sortedTransactions = transactions.sort((a, b) => {
+    const sortedTransactions = transactions?.sort((a, b) => {
       if (a.timestamp > b.timestamp) {
         return 1
       }
@@ -60,10 +60,10 @@ export const TransactionTable = ({
     })
 
     return sortedTransactions
-      .filter((transaction) => {
+      ?.filter((transaction) => {
         return !transaction.amount?.isZero()
       })
-      .map((transaction, index, array) => {
+      ?.map((transaction, index, array) => {
         const termDays = maturityDate
           ? transaction.timestamp
             ? daysBetween(transaction.timestamp, maturityDate)
@@ -209,14 +209,12 @@ export const TransactionTable = ({
           {
             align: 'left',
             header: `Amount (${currency})`,
-            cell: (row: Row) =>
-              row.amount ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.amount, undefined, 2, 2)}` : '-',
+            cell: (row: Row) => (row.amount ? `${formatBalance(row.amount, undefined, 2, 2)}` : '-'),
           },
           {
             align: 'left',
             header: `Principal (${currency})`,
-            cell: (row: Row) =>
-              row.position ? `${row.type === 'REPAID' ? '-' : ''}${formatBalance(row.position, undefined, 2, 2)}` : '-',
+            cell: (row: Row) => (row.position ? `${formatBalance(row.position, undefined, 2, 2)}` : '-'),
           },
         ]),
   ] as Column[]

@@ -11,19 +11,14 @@ export const useAverageMaturity = (poolId: string) => {
     const assets = (loans && [...loans].filter((asset) => asset.status === 'Active')) as ActiveLoan[]
     const maturityPerAsset = assets.reduce((sum, asset) => {
       if ('maturityDate' in asset.pricing && asset.pricing.maturityDate && asset.pricing.valuationMethod !== 'cash') {
-        return sum.add(
-          Dec(daysBetween(asset.originationDate, asset.pricing.maturityDate)).mul(asset.outstandingDebt.toDecimal())
-        )
+        return sum.add(Dec(daysBetween(new Date(), asset.pricing.maturityDate)).mul(asset.presentValue.toDecimal()))
       }
       return sum
     }, Dec(0))
 
-    const totalOutstandingDebt = assets.reduce(
-      (sum, asset) => sum.add(asset.outstandingDebt?.toDecimal() || Dec(0)),
-      Dec(0)
-    )
+    const totalPresentValue = assets.reduce((sum, asset) => sum.add(asset.presentValue?.toDecimal() || Dec(0)), Dec(0))
 
-    return maturityPerAsset.div(totalOutstandingDebt).toNumber()
+    return maturityPerAsset.div(totalPresentValue).toNumber()
   }, [loans])
 
   return formatAge(avgMaturity)

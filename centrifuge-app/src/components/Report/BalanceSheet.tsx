@@ -213,6 +213,10 @@ export function BalanceSheet({ pool }: { pool: Pool }) {
 
     const dataUrl = getCSVDownloadUrl(formatted)
 
+    if (!dataUrl) {
+      throw new Error('Failed to generate CSV')
+    }
+
     setCsvData({
       dataUrl,
       fileName: `${pool.id}-balance-sheet-${formatDate(startDate, {

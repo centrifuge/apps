@@ -325,6 +325,10 @@ export function CashflowStatement({ pool }: { pool: Pool }) {
 
     const dataUrl = getCSVDownloadUrl(formatted)
 
+    if (!dataUrl) {
+      throw new Error('Failed to generate CSV')
+    }
+
     setCsvData({
       dataUrl,
       fileName: `${pool.id}-cash-flow-statement-${formatDate(startDate, {
