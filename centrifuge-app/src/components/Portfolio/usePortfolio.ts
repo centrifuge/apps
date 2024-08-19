@@ -147,6 +147,7 @@ export function usePortfolio(substrateAddress?: string) {
           sumClaimedTrancheTokens
           trancheId
           poolId
+          unrealizedProfit
           tranche {
             tokenPrice
           }
@@ -176,6 +177,12 @@ export function usePortfolio(substrateAddress?: string) {
           trancheId
         }
       }
+      investorTransactions {
+          nodes {
+            realizedProfitFifo
+            trancheId
+          }
+      }
     }
   }`,
     {
@@ -187,7 +194,12 @@ export function usePortfolio(substrateAddress?: string) {
   )
 
   const data = useMemo(() => {
-    const trancheBalances: Record<string, { totalTrancheTokens: TokenBalance; tokenPrice: Price }> = {}
+    const trancheBalances: Record<
+      string,
+      { totalTrancheTokens: TokenBalance; tokenPrice: Price; unrealizedProfit: CurrencyBalance | undefined }
+    > = {}
+
+    console.log('sub', subData)
 
     subData?.account?.investorPositions.nodes.forEach((position: any) => {
       const pool = pools?.find((p) => p.id === position.poolId)
@@ -196,12 +208,24 @@ export function usePortfolio(substrateAddress?: string) {
       const tokenPrice = pool?.tranches.find((t) => trancheId === t.id)?.tokenPrice ?? Price.fromFloat(1)
       const balance = new TokenBalance(position.holdingQuantity, decimals)
       const existing = trancheBalances[trancheId]
+
+      const unrealizedProfit = subData?.account?.trancheBalances?.nodes.find(
+        (tb: any) => tb.trancheId === position.trancheId
+      )
+
       if (existing) {
         existing.totalTrancheTokens.iadd(balance)
       } else {
-        trancheBalances[trancheId] = { totalTrancheTokens: balance, tokenPrice }
+        trancheBalances[trancheId] = {
+          totalTrancheTokens: balance,
+          tokenPrice,
+          unrealizedProfit: unrealizedProfit
+            ? new CurrencyBalance(unrealizedProfit.unrealizedProfit, decimals)
+            : undefined,
+        }
       }
     })
+
     // return (
     //   (subData?.account as undefined | {}) &&
     //   (Object.fromEntries(
@@ -265,6 +289,7 @@ export function usePortfolio(substrateAddress?: string) {
     //     }
     //   >)
     // )
+
     return trancheBalances
   }, [subData, pools])
 
@@ -278,6 +303,7 @@ type PortfolioToken = {
   trancheId: string
   poolId: string
   currency: Token['currency']
+  unrealizedProfit: CurrencyBalance | undefined
 }
 
 export function usePortfolioTokens(address?: string) {
@@ -310,6 +336,7 @@ export function usePortfolioTokens(address?: string) {
         trancheId: trancheId,
         poolId: trancheTokenPrices[trancheId].poolId,
         currency: trancheTokenPrices[trancheId].currency,
+        unrealizedProfit: tranche.unrealizedProfit,
       }
     }, [] as PortfolioToken[])
   }

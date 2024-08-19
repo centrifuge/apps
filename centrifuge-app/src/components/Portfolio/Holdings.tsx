@@ -1,4 +1,4 @@
-import { Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Token, evmToSubstrateAddress } from '@centrifuge/centrifuge-js'
 import { formatBalance, useBalances, useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Grid, IconDownload, IconMinus, IconPlus, IconSend, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -36,6 +36,8 @@ type Row = {
   showActions?: boolean
   address?: string
   connectedNetwork?: string | null
+  realizedProfit?: CurrencyBalance | undefined
+  unrealizedProfit?: CurrencyBalance | undefined
 }
 
 const columns: Column[] = [
@@ -79,6 +81,30 @@ const columns: Column[] = [
       )
     },
     sortKey: 'marketValue',
+    align: 'left',
+  },
+  {
+    header: <Tooltips type="realizedPL" label="Realized P&L" />,
+    cell: ({ currency, unrealizedProfit }: Row) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {unrealizedProfit ? formatBalanceAbbreviated(unrealizedProfit, currency?.symbol, 2) : '-'}
+        </Text>
+      )
+    },
+    sortKey: 'realizedProfit',
+    align: 'left',
+  },
+  {
+    header: <Tooltips type="unrealizedPL" label="Unrealized P&L" />,
+    cell: ({ currency, unrealizedProfit }: Row) => {
+      return (
+        <Text textOverflow="ellipsis" variant="body3">
+          {unrealizedProfit ? formatBalanceAbbreviated(unrealizedProfit, currency?.symbol, 2) : '-'}
+        </Text>
+      )
+    },
+    sortKey: 'unrealizedProfit',
     align: 'left',
   },
   {
