@@ -326,9 +326,8 @@
   },
   {
     "inputs": [
+      { "internalType": "address", "name": "transferProxy", "type": "address" },
       { "internalType": "address", "name": "asset", "type": "address" },
-      { "internalType": "bytes32", "name": "recipient", "type": "bytes32" },
-      { "internalType": "uint128", "name": "amount", "type": "uint128" },
       { "internalType": "uint256", "name": "topUpAmount", "type": "uint256" }
     ],
     "name": "transferAssets",
@@ -338,11 +337,12 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "transferProxy", "type": "address" },
       { "internalType": "address", "name": "asset", "type": "address" },
+      { "internalType": "bytes32", "name": "recipient", "type": "bytes32" },
+      { "internalType": "uint128", "name": "amount", "type": "uint128" },
       { "internalType": "uint256", "name": "topUpAmount", "type": "uint256" }
     ],
-    "name": "transferAssetsFromProxy",
+    "name": "transferAssets",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
