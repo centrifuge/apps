@@ -1,5 +1,5 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
-import { JsonRpcProvider } from '@ethersproject/providers'
+import { BaseProvider, getDefaultProvider, Networkish } from '@ethersproject/providers'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -63,7 +63,7 @@ export type WalletContextType = {
     selectedWallet: EvmConnectorMeta | null
     isSmartContractWallet: boolean
     selectedAddress: string | null
-    getProvider(chainId: number): JsonRpcProvider
+    getProvider(chainId: number): BaseProvider
   }
 }
 
@@ -129,10 +129,12 @@ type WalletProviderProps = {
   showAdvancedAccounts?: boolean
   showTestNets?: boolean
   showFinoa?: boolean
+  alchemyKey?: string
+  infuraKey?: string
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
-const cachedProviders: Record<number, JsonRpcProvider> = {}
+const cachedProviders = new Map<Networkish, BaseProvider>()
 
 export function WalletProvider({
   children,
@@ -148,12 +150,15 @@ export function WalletProvider({
   showAdvancedAccounts,
   showTestNets,
   showFinoa,
+  alchemyKey,
+  infuraKey,
 }: WalletProviderProps) {
   if (!evmChainsProp[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
 
   const cent = useCentrifuge()
   const consts = useCentrifugeConsts()
   const centEvmChainId = useCentEvmChainId()
+  console.log('🚀 ~ centEvmChainId:', centEvmChainId)
 
   const evmChains = React.useMemo(() => {
     const centUrl = new URL(cent.parachainUrl)
@@ -240,11 +245,25 @@ export function WalletProvider({
 
   const [proxies] = useCentrifugeQuery(['allProxies'], (cent) => cent.proxies.getAllProxies())
 
-  function getProvider(chainId: number) {
-    return (
-      cachedProviders[chainId] ||
-      (cachedProviders[chainId] = new JsonRpcProvider((evmChains as any)[chainId].urls[0], chainId))
-    )
+  function getProvider(networkish: Networkish) {
+    let network = networkish
+    if (networkish === 2090) {
+      network = 'https://fullnode.demo.k-f.dev/'
+    }
+    if (networkish === 84532) {
+      network = 'https://sepolia.base.org'
+    }
+    const cachedProvider = cachedProviders.get(network)
+    if (cachedProvider) {
+      return cachedProvider
+    } else {
+      const provider = getDefaultProvider(network, {
+        alchemy: alchemyKey,
+        infura: infuraKey,
+      })
+      cachedProviders.set(network, provider)
+      return provider
+    }
   }
 
   function setFilteredAccounts(accounts: SubstrateAccount[]) {

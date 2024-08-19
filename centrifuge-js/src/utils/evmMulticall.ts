@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi'
 import { Contract } from '@ethersproject/contracts'
-import { JsonRpcProvider } from '@ethersproject/providers'
+import { BaseProvider } from '@ethersproject/providers'
 import set from 'lodash/set'
 
 const MULTICALL_ABI = [
@@ -25,7 +25,7 @@ const MULTICALL_ABI = [
 const MULTICALL_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11'
 
 type AggregateOptions = {
-  rpcProvider: JsonRpcProvider
+  rpcProvider: BaseProvider
   allowFailure?: boolean
 }
 
@@ -41,7 +41,7 @@ export type Call = {
 }
 
 const identity = (v: any) => v
-const multicallContracts = new WeakMap<JsonRpcProvider, Contract>()
+const multicallContracts = new WeakMap<BaseProvider, Contract>()
 
 export async function multicall<T = Record<string, any>>(calls: Call[], options: AggregateOptions) {
   let contract = multicallContracts.get(options.rpcProvider)

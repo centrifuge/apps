@@ -85,6 +85,8 @@ export function Root() {
                 showAdvancedAccounts={debugState.showAdvancedAccounts}
                 showTestNets={debugState.showTestNets}
                 showFinoa={debugState.showFinoa}
+                alchemyKey={import.meta.env.REACT_APP_ALCHEMY_KEY}
+                infuraKey={import.meta.env.REACT_APP_INFURA_KEY}
               >
                 <SupportedBrowserBanner />
                 <OnboardingAuthProvider>

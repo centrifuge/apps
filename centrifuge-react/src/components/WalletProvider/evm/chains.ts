@@ -47,11 +47,6 @@ const chainExtendedInfo = {
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     blockExplorerUrl: 'https://etherscan.io/',
   },
-  5: {
-    name: 'Ethereum Görli',
-    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
-    blockExplorerUrl: 'https://goerli.etherscan.io/',
-  },
 }
 
 export function getChainInfo(chains: EvmChains, chainId: number): ExtendedChainInformation {
