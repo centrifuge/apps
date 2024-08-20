@@ -115,15 +115,21 @@ function PoolPerformanceChart() {
   if (truncatedPoolStates && truncatedPoolStates?.length < 1 && poolAge > 0)
     return <Text variant="body2">No data available</Text>
 
-  const getXAxisInterval = () => {
-    if (rangeNumber <= 30) return 5
-    if (rangeNumber > 30 && rangeNumber <= 90) {
-      return 14
-    }
-    if (rangeNumber > 90 && rangeNumber <= 180) {
-      return 30
-    }
-    return 45
+  const getOneDayPerMonth = (): any[] => {
+    const seenMonths = new Set<string>()
+    const result: any[] = []
+
+    chartData.forEach((item) => {
+      const date = new Date(item.day)
+      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' })
+
+      if (!seenMonths.has(monthYear)) {
+        seenMonths.add(monthYear)
+        result.push(item.day)
+      }
+    })
+
+    return result
   }
 
   return (
@@ -178,12 +184,13 @@ function PoolPerformanceChart() {
               </defs>
               <XAxis
                 dataKey="day"
+                dy={4}
+                interval={0}
+                minTickGap={100000}
                 tickLine={false}
                 type="category"
-                tickFormatter={(tick: number) => new Date(tick).toLocaleString('en-US', { month: 'short' })}
-                style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
-                dy={4}
-                interval={getXAxisInterval()}
+                tick={<CustomTick tickCount={getOneDayPerMonth().length} />}
+                ticks={getOneDayPerMonth()}
               />
               <YAxis
                 stroke="none"
@@ -272,6 +279,23 @@ function CustomLegend({
         )}
       </Grid>
     </Shelf>
+  )
+}
+
+const CustomTick = ({ x, y, payload }: any) => {
+  const theme = useTheme()
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
+        x={0}
+        y={0}
+        dy={16}
+        textAnchor="middle"
+      >
+        {new Date(payload.value).toLocaleString('en-US', { month: 'short' })}
+      </text>
+    </g>
   )
 }
 
