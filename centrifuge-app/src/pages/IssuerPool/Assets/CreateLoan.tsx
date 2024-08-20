@@ -197,7 +197,7 @@ function IssuerCreateLoan() {
               wrapProxyCallsForAccount(api, api.tx.uniques.mint(collectionId, nftId, owner), account, 'PodOperation'),
               wrapProxyCallsForAccount(
                 api,
-                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+                api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, false),
                 account,
                 'PodOperation'
               ),
