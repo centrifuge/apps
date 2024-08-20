@@ -109,7 +109,7 @@ export function ExternalFinanceForm({ loan, source }: { loan: ExternalLoan; sour
   const maxAvailable =
     source === 'reserve' ? pool.reserve.available.toDecimal() : sourceLoan.outstandingDebt.toDecimal()
 
-  const withdraw = useWithdraw(loan.poolId, account!, totalFinance)
+  const withdraw = useWithdraw(loan.poolId, account!, totalFinance, source)
 
   if (loan.status === 'Closed' || ('valuationMethod' in loan.pricing && loan.pricing.valuationMethod !== 'oracle')) {
     return null
