@@ -69,3 +69,15 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   }
   return { current: ceiling, initial: initialCeiling, debtWithMargin }
 }
+
+export function useNftDocumentMetadata(collectionId?: string, nftId?: string) {
+  const [result] = useCentrifugeQuery(
+    ['docMeta', collectionId, nftId],
+    (cent) => cent.nfts.getNftDocumentMetadata([collectionId!, nftId!]),
+    {
+      enabled: !!collectionId && !!nftId,
+    }
+  )
+
+  return result
+}

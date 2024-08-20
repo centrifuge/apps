@@ -190,8 +190,9 @@ function IssuerCreateLoan() {
     ?.collateralCollections[0]?.id
   const balances = useBalances(account?.actingAddress)
   const { mutateAsync } = useMutation(
-    async (args: [documentId: string, documentVersion: number, properties: object]) => {
+    async (args: [documentId: number, documentVersion: number, properties: object]) => {
       const [documentId, documentVersion, properties] = args
+      console.log('store doc mutate, session', session)
       if (!session) throw new Error('No session')
       session.storeDocumentAtPeer(peerId!, documentId, documentVersion, properties)
     }
@@ -207,7 +208,7 @@ function IssuerCreateLoan() {
           string,
           string,
           LoanInfoInput,
-          string | undefined,
+          number | undefined,
           number | undefined,
           string | undefined,
           any
@@ -232,7 +233,7 @@ function IssuerCreateLoan() {
       onSuccess: async (args, result) => {
         const [, , , , , documentId, documentVersion, , properties] = args
         const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
-
+        console.log('documentId', documentId, documentVersion, properties)
         if (documentId && documentVersion) {
           await mutateAsync([documentId, documentVersion, properties])
         }
@@ -362,7 +363,7 @@ function IssuerCreateLoan() {
         docId = await firstValueFrom(centrifuge.nfts.getAvailableDocumentId())
         docHash = await centrifuge.dataProtocol.hashDocument(properties)
       }
-      console.log('docId', docId, docHash)
+      console.log('docId', docId, docHash, peerId)
 
       doTransaction(
         [
@@ -371,7 +372,7 @@ function IssuerCreateLoan() {
           account.actingAddress,
           metadataHash.uri,
           pricingInfo,
-          docId,
+          docId ?? undefined,
           1,
           docHash,
           properties,

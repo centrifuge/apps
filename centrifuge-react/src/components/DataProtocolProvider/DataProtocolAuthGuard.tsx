@@ -4,7 +4,7 @@ import { useWallet } from '../WalletProvider'
 import { useDataProtocol } from './DataProtocolProvider'
 
 type Props = {
-  children: React.ReactNode
+  children?: React.ReactNode
   body?: string
   variant?: 'card' | 'plain'
 }
@@ -12,7 +12,15 @@ type Props = {
 export function DataProtocolAuthGuard({ children, variant = 'plain', body = 'Connect to the Data Protocol' }: Props) {
   const { connectedNetwork, showNetworks } = useWallet()
   const { initSessionAndAddKey, isAuthed, isLoading, isFetching } = useDataProtocol()
+  console.log(
+    'authgaurd, isAuthed isLoading isFetching',
+    isAuthed,
+    isLoading,
 
+    isFetching
+  )
+
+  console.log('connectedNetwork', connectedNetwork)
   if (isAuthed) {
     return <>{children}</>
   }
@@ -34,7 +42,7 @@ export function DataProtocolAuthGuard({ children, variant = 'plain', body = 'Con
             initSessionAndAddKey(false)
           }}
           loading={isLoading}
-          disabled={!isFetching}
+          disabled={isFetching}
         >
           Connect to node and add keys or whatever
         </Button>

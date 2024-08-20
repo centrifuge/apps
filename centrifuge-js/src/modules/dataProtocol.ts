@@ -14,12 +14,8 @@ export function getDataProtocolModule(inst: Centrifuge) {
     return `0x${hashHex}`
   }
 
-  function getModule() {
-    return import('@centrifuge/libp2p-test')
-  }
-
   async function createSession(possiblyPrivateKey?: Libp2pPrivateKey | { key: string; password?: string }) {
-    const { DataProtocolSession } = await getModule()
+    const { DataProtocolSession } = await import('@centrifuge/libp2p-test')
     let privateKey
     if (!possiblyPrivateKey) {
       privateKey = await DataProtocolSession.generatePrivateKey()
@@ -33,7 +29,8 @@ export function getDataProtocolModule(inst: Centrifuge) {
     return session
   }
 
-  // Use the current keystore pallet as a placeholder
+  // Using the current keystore pallet as a placeholder
+  // TODO: update when the new keystore pallet is available
   function getKeys(args: [address: string]) {
     const [address] = args
     const $api = inst.getApi()

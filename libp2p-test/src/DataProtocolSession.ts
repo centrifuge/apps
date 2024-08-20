@@ -39,7 +39,7 @@ export class DataProtocolSession {
 
   constructor(public privateKey: PrivateKey) {
     this.ready = this.init().then(() => {
-      console.log('DATAPROTOCOL SESSIONS INITED')
+      console.log('DataProtocolSession ready')
     })
   }
 
@@ -117,7 +117,7 @@ export class DataProtocolSession {
     return connection
   }
 
-  async storeDocumentAtPeer(peerId: string, documentId: string, documentVersion: number, properties: object) {
+  async storeDocumentAtPeer(peerId: string, documentId: number, documentVersion: number, properties: object) {
     const connection = await this.connectToPeer(peerId)
 
     const encoder = new TextEncoder()
@@ -136,16 +136,18 @@ export class DataProtocolSession {
         ),
       }),
     })
-    await send(connection, message)
+    const res = await send(connection, message)
+    console.log('store doc res', res, documentId, documentVersion)
   }
 
-  async requestDocumentFromPeer(peerId: string, documentId: string, documentVersion: number) {
+  async requestDocumentFromPeer(peerId: string, documentId: number, documentVersion: number) {
+    console.log('requestDocumentFromPeer', peerId, documentId, documentVersion)
     const connection = await this.connectToPeer(peerId)
 
     const encoder = new TextEncoder()
     const message = DataProtocolRequest.create({
       getDocumentRequest: GetDocumentRequest.create({
-        documentId: encoder.encode(documentId),
+        documentId: encoder.encode(String(documentId)),
         documentVersion,
       }),
     })

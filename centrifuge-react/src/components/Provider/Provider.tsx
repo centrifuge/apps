@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { CentrifugeProvider, CentrifugeProviderProps } from '../CentrifugeProvider'
+import { DataProtocolProvider } from '../DataProtocolProvider'
 import { TransactionProvider, TransactionToasts, TransactionToastsProps } from '../Transactions'
 import { EvmChains, EvmConnectorMeta, WalletProvider } from '../WalletProvider'
 
@@ -41,8 +42,10 @@ export function Provider({
           subscanUrl={subscanUrl}
         >
           <TransactionProvider>
-            <TransactionToasts positionProps={transactionToastPositionProps} />
-            {children}
+            <DataProtocolProvider>
+              <TransactionToasts positionProps={transactionToastPositionProps} />
+              {children}
+            </DataProtocolProvider>
           </TransactionProvider>
         </WalletProvider>
       </CentrifugeProvider>

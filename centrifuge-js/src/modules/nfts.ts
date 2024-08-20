@@ -287,7 +287,7 @@ export function getNftsModule(inst: Centrifuge) {
       nftId: string,
       owner: string,
       metadata: NFTMetadataInput | string,
-      documentId?: string,
+      documentId?: number,
       documentVersion?: number,
       documentHash?: string
     ],
@@ -326,16 +326,31 @@ export function getNftsModule(inst: Centrifuge) {
     )
   }
 
-  function getNftDocumentId(args: [collectionId: string, nftId: string]) {
+  function getNftDocumentMetadata(args: [collectionId: string, nftId: string]) {
     const [collectionId, nftId] = args
     const $api = inst.getApi()
 
     return $api.pipe(
-      switchMap((api) => api.query.uniques.attribute(collectionId, nftId, 'document_id')),
-      map((attributeValue) => {
-        const attribute = attributeValue.toJSON() as any
-        if (!attribute) return null
-        return attribute[0]
+      switchMap((api) =>
+        combineLatest([
+          api.query.uniques.attribute(collectionId, nftId, 'document_id'),
+          api.query.uniques.attribute(collectionId, nftId, 'document_version'),
+        ])
+      ),
+      map(([idValue, versionValue]) => {
+        const id = idValue.toPrimitive() as any
+        const version = versionValue.toPrimitive() as any
+        console.log('id', collectionId, nftId, id, version)
+        if (!id || !version) {
+          return {
+            documentId: null,
+            documentVersion: null,
+          }
+        }
+        return {
+          documentId: Number(id[0]),
+          documentVersion: Number(version[0]),
+        }
       })
     )
   }
@@ -350,16 +365,16 @@ export function getNftsModule(inst: Centrifuge) {
       expand(({ api, triesLeft }) => {
         if (triesLeft <= 0) return EMPTY
 
-        const id = String(getRandomUint())
+        const id = getRandomUint()
 
-        return api.query.anchorsV2.anchors([id, 1]).pipe(
+        return api.query.anchorsV2.anchors([String(id), 1]).pipe(
           first(),
           map((res) => ({ api, id: res.isEmpty ? id : null, triesLeft: triesLeft - 1 }))
         )
       }),
       filter(({ id }) => !!id),
       first(),
-      map(({ id }) => id as string)
+      map(({ id }) => id)
     )
   }
 
@@ -431,7 +446,7 @@ export function getNftsModule(inst: Centrifuge) {
     getAvailableCollectionId,
     getAvailableNftId,
     getAvailableDocumentId,
-    getNftDocumentId,
+    getNftDocumentMetadata,
     createCollection,
     mintNft,
     transferNft,

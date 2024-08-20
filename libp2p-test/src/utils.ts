@@ -21,7 +21,7 @@ export function toHex(buffer: Uint8Array) {
     .join('')}`
 }
 
-export async function send(connection: any, message: DataProtocolRequest, options: { signal?: AbortSignal } = {}) {
+export async function send(connection: any, message: DataProtocolRequest, _: { signal?: AbortSignal } = {}) {
   const stream = await connection.newStream('/centrifuge-data-extension/1')
   try {
     const buffer = DataProtocolRequest.encode(message).finish()
@@ -33,19 +33,18 @@ export async function send(connection: any, message: DataProtocolRequest, option
       (source) => map(source, (buf) => DataProtocolResponse.decode(buf.subarray())),
       async (source) => first(source)
     )
-    console.log('response')
+    console.log('response', msg)
     if (!msg) return
-    console.log(msg)
     const decoder = new TextDecoder()
     try {
       if (msg.createDocumentResponse?.payload) {
         const res = JSON.parse(decoder.decode(msg.createDocumentResponse.payload))
-        console.log(res)
+        console.log('res', res)
         return res
       }
       if (msg.getDocumentResponse?.payload) {
         const res = JSON.parse(decoder.decode(msg.getDocumentResponse.payload))
-        console.log(res)
+        console.log('res', res)
         return res
       }
     } catch (e) {

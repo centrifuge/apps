@@ -1,4 +1,5 @@
 import { Loan as LoanType, Pool, PricingInfo, TinlakeLoan } from '@centrifuge/centrifuge-js'
+import { DataProtocolAuthGuard, useDataProtocolDocument } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -35,7 +36,7 @@ import { LoanTemplate } from '../../types'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalance, truncateText } from '../../utils/formatting'
 import { useBasePath } from '../../utils/useBasePath'
-import { useLoan } from '../../utils/useLoans'
+import { useLoan, useNftDocumentMetadata } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useCentNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset } from '../../utils/usePermissions'
@@ -147,6 +148,14 @@ function Loan() {
 
   const originationDate = loan && 'originationDate' in loan ? new Date(loan?.originationDate).toISOString() : undefined
 
+  const docMeta = useNftDocumentMetadata(nft?.collectionId, nft?.id)
+  const document = useDataProtocolDocument(poolMetadata?.pod?.peerId, docMeta?.documentId, docMeta?.documentVersion)
+  console.log('document', document)
+
+  const privateData = document?.properties
+    ? Object.fromEntries(Object.entries(document.properties).map(([key, obj]: any) => [key, obj.value]))
+    : {}
+
   return (
     <FullHeightStack>
       <Box mt={2} ml={2}>
@@ -232,7 +241,6 @@ function Loan() {
 
               {templateData?.sections?.map((section, i) => {
                 const isPublic = section.attributes.every((key) => templateData.attributes?.[key]?.public)
-                if (!isPublic) return null
                 return (
                   <React.Suspense fallback={<Spinner />}>
                     <Card p={3}>
@@ -240,24 +248,28 @@ function Loan() {
                         <Text fontSize="18px" fontWeight="500">
                           {section.name}
                         </Text>
-                        <MetricsTable
-                          metrics={section.attributes
-                            .filter(
-                              (key) =>
-                                !!templateData.attributes?.[key] &&
-                                (!templateMetadata?.keyAttributes ||
-                                  !Object.values(templateMetadata?.keyAttributes).includes(key))
-                            )
-                            .map((key) => {
-                              const attribute = templateData.attributes?.[key]!
-                              const value = publicData[key]
-                              const formatted = value ? formatNftAttribute(value, attribute) : '-'
-                              return {
-                                label: attribute.label,
-                                value: formatted,
-                              }
-                            })}
-                        />
+                        {isPublic || document ? (
+                          <MetricsTable
+                            metrics={section.attributes
+                              .filter(
+                                (key) =>
+                                  !!templateData.attributes?.[key] &&
+                                  (!templateMetadata?.keyAttributes ||
+                                    !Object.values(templateMetadata?.keyAttributes).includes(key))
+                              )
+                              .map((key) => {
+                                const attribute = templateData.attributes?.[key]!
+                                const value = publicData[key] ?? privateData[key]
+                                const formatted = value ? formatNftAttribute(value, attribute) : '-'
+                                return {
+                                  label: attribute.label,
+                                  value: formatted,
+                                }
+                              })}
+                          />
+                        ) : !isPublic ? (
+                          <DataProtocolAuthGuard variant="plain" body="Connect to Data Protocol to view private data" />
+                        ) : null}
                       </Stack>
                     </Card>
                   </React.Suspense>

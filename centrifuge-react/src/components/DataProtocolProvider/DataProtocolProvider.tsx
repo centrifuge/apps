@@ -1,7 +1,7 @@
 import type { DataProtocolSession } from '@centrifuge/libp2p-test'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import * as React from 'react'
-import { useMutation } from 'react-query'
+import { useMutation, useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
 import { useCentrifugeQuery } from '../../hooks/useCentrifugeQuery'
 import { useCentrifugeTransaction } from '../../hooks/useCentrifugeTransaction'
@@ -52,6 +52,7 @@ export function DataProtocolProvider({ children }: DataProtocolProviderProps) {
   })
   const { execute, isLoading } = useCentrifugeTransaction('Add key', (cent) => cent.dataProtocol.addKey)
 
+  console.log('chainPublicKeys', chainPublicKeys, data?.publicKeyHex)
   console.log('useMutation data', data, rest)
   const ctx = React.useMemo(() => {
     return {
@@ -66,15 +67,18 @@ export function DataProtocolProvider({ children }: DataProtocolProviderProps) {
       initSessionAndAddKey: async (batch = false) => {
         const sesh = data ?? (await mutateAsync())
         const { publicKeyHex } = sesh
-        console.log('sesh', sesh, publicKeyHex)
+        console.log('sesh', sesh, publicKeyHex, chainPublicKeys, data)
         if (chainPublicKeys?.includes(publicKeyHex)) {
           if (batch) return null
+          return
         }
         if (batch) return firstValueFrom(cent.dataProtocol.addKey([publicKeyHex], { batch: true }))
         else execute([publicKeyHex])
       },
     }
-  }, [])
+  }, [chainPublicKeys, data, isInitializing, isLoading])
+
+  console.log('ctx', ctx)
 
   return <DataProtocolContext.Provider value={ctx}>{children}</DataProtocolContext.Provider>
 }
@@ -83,4 +87,26 @@ export function useDataProtocol() {
   const ctx = React.useContext(DataProtocolContext)
   if (!ctx) throw new Error('useDataProtocol must be used within Provider')
   return ctx
+}
+
+export function useDataProtocolDocument(
+  peerId?: string | null,
+  documentId?: number | null,
+  documentVersion?: number | null
+) {
+  const { session, isAuthed } = useDataProtocol()
+
+  const { data } = useQuery(
+    ['document', peerId, documentId, documentId],
+    () => {
+      return session!.requestDocumentFromPeer(peerId!, documentId!, documentVersion!)
+    },
+    {
+      enabled: !!session && !!isAuthed && !!peerId && !!documentId && !!documentVersion,
+    }
+  )
+
+  console.log('data prod doc', data)
+
+  return data
 }
