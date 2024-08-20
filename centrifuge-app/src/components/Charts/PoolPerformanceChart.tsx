@@ -77,7 +77,7 @@ function PoolPerformanceChart() {
         if (day.timestamp && new Date(day.timestamp).toDateString() === new Date().toDateString()) {
           return { day: new Date(day.timestamp), nav: todayAssetValue, price: Number(todayPrice) }
         }
-        return { day: new Date(day.timestamp), nav, price }
+        return { day: new Date(day.timestamp), nav: Number(nav), price: Number(price) }
       }) || [],
     [isSingleTranche, truncatedPoolStates]
   )
@@ -180,12 +180,7 @@ function PoolPerformanceChart() {
                 dataKey="day"
                 tickLine={false}
                 type="category"
-                tickFormatter={(tick: number) => {
-                  if (data.length > 180) {
-                    return new Date(tick).toLocaleString('en-US', { month: 'short' })
-                  }
-                  return new Date(tick).toLocaleString('en-US', { day: 'numeric', month: 'short' })
-                }}
+                tickFormatter={(tick: number) => new Date(tick).toLocaleString('en-US', { month: 'short' })}
                 style={{ fontSize: '10px', fill: theme.colors.textSecondary, letterSpacing: '-0.5px' }}
                 dy={4}
                 interval={getXAxisInterval()}
