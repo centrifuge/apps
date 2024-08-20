@@ -27,8 +27,7 @@ export function useActiveDomains(poolId: string, suspense?: boolean) {
       const results = await Promise.allSettled(
         routers!
           // remove all goerli networks since providers don't support goerli anymore
-          .filter((r) => r.chainId !== 5)
-          .filter((r) => r.chainId !== 84531)
+          .filter((r) => r.chainId !== 5 && r.chainId !== 84531)
           .map((r) => {
             async function getManager() {
               const rpcProvider = getProvider(r.chainId)
