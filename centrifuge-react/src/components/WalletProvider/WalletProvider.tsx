@@ -1,5 +1,5 @@
 import { addressToHex, ComputedMultisig, evmToSubstrateAddress, Multisig } from '@centrifuge/centrifuge-js'
-import { BaseProvider, getDefaultProvider, Networkish } from '@ethersproject/providers'
+import { BaseProvider, getDefaultProvider, JsonRpcProvider, Networkish } from '@ethersproject/providers'
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet } from '@subwallet/wallet-connect/types'
@@ -158,7 +158,6 @@ export function WalletProvider({
   const cent = useCentrifuge()
   const consts = useCentrifugeConsts()
   const centEvmChainId = useCentEvmChainId()
-  console.log('🚀 ~ centEvmChainId:', centEvmChainId)
 
   const evmChains = React.useMemo(() => {
     const centUrl = new URL(cent.parachainUrl)
@@ -247,22 +246,25 @@ export function WalletProvider({
 
   function getProvider(networkish: Networkish) {
     let network = networkish
-    if (networkish === 2090) {
-      network = 'https://fullnode.demo.k-f.dev/'
-    }
-    if (networkish === 84532) {
-      network = 'https://sepolia.base.org'
-    }
     const cachedProvider = cachedProviders.get(network)
     if (cachedProvider) {
       return cachedProvider
     } else {
-      const provider = getDefaultProvider(network, {
-        alchemy: alchemyKey,
-        infura: infuraKey,
-      })
-      cachedProviders.set(network, provider)
-      return provider
+      try {
+        const provider = getDefaultProvider(network, {
+          alchemy: alchemyKey,
+          infura: infuraKey,
+        })
+        cachedProviders.set(network, provider)
+        return provider
+      } catch (error) {
+        if (typeof network === 'number') {
+          const provider = new JsonRpcProvider((evmChains as any)[network].urls[0], network)
+          cachedProviders.set(network, provider)
+          return provider
+        }
+        throw error
+      }
     }
   }
 

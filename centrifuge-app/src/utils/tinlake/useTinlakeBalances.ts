@@ -8,7 +8,7 @@ import {
 } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { BigNumber } from '@ethersproject/bignumber'
-import { JsonRpcProvider } from '@ethersproject/providers'
+import { BaseProvider } from '@ethersproject/providers'
 import { useQuery } from 'react-query'
 import { ethConfig } from '../../config'
 import { currencies } from './currencies'
@@ -31,7 +31,7 @@ export function useTinlakeBalances(address?: string) {
 
 const WCFG_ADDRESS = '0xc221b7e65ffc80de234bbb6667abdd46593d34f0'
 
-async function getBalances(pools: TinlakePool[], address: string, provider: JsonRpcProvider) {
+async function getBalances(pools: TinlakePool[], address: string, provider: BaseProvider) {
   const calls: EvmMulticallCall[] = []
   const toTokenBalance = (val: BigNumber) => new TokenBalance(val.toString(), 18)
   const toCurrencyBalance = (val: BigNumber) => new CurrencyBalance(val.toString(), 18)

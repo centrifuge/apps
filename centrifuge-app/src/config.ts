@@ -156,7 +156,7 @@ export const evmChains: EvmChains = {
       decimals: 18,
     },
     blockExplorerUrl: 'https://etherscan.io/',
-    urls: [`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`],
+    urls: [`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`], // the urls[] is used just for external connectors
     iconUrl: ethereumLogo,
     isTestnet: false,
   },
