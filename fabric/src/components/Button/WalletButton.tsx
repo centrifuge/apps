@@ -92,7 +92,12 @@ export function WalletButton({
             </Shelf>
           </Box>
         ) : (
-          <StyledBodyText fontSize={small ? 14 : 16} color="textInteractive" fontWeight={500}>
+          <StyledBodyText
+            margin={address ? 0 : 'auto'}
+            fontSize={small ? 14 : 16}
+            color="textInteractive"
+            fontWeight={500}
+          >
             {displayAddress ? truncate(displayAddress) : connectLabel}
           </StyledBodyText>
         )}
