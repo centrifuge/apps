@@ -31,10 +31,9 @@ export const TextLink = styled.span`
     }
   }
 `
+export const RouterTextLink = (props: any) => <TextLink as={Link} {...props} />
+export const ButtonTextLink = (props: any) => <TextLink as="button" {...props} />
 
-export const RouterTextLink = TextLink.withComponent(Link)
-
-export const ButtonTextLink = TextLink.withComponent('button')
 ButtonTextLink.defaultProps = {
   type: 'button',
 }

@@ -27,10 +27,10 @@ const Chip = styled(Text)((props) =>
   css({
     display: 'inline-block',
     px: 1,
-    bg: `${props.backgroundColor}Bg`,
+    bg: `${String(props.backgroundColor)}Bg`,
     borderRadius: 'chip',
     whiteSpace: 'nowrap',
-    color: `${props.color}`,
+    color: `${String(props.color)}`,
   })
 )
 

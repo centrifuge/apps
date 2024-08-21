@@ -13,7 +13,7 @@ export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement
     decimals?: number
   }
 
-const StyledMaxButton = styled(Box)`
+const StyledMaxButton = styled(Box).attrs({ as: 'button' })`
   padding: 0 8px;
   border: 0;
   border-radius: 12px;
@@ -29,7 +29,7 @@ const StyledMaxButton = styled(Box)`
   &:focus-visible {
     box-shadow: ${({ theme }) => theme.shadows.buttonPrimary};
   }
-`.withComponent('button')
+`
 
 StyledMaxButton.defaultProps = {
   type: 'button',

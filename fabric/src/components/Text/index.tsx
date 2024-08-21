@@ -50,6 +50,7 @@ interface TextProps extends StyledTextProps {
   textOverflow?: 'ellipsis'
   as?: keyof JSX.IntrinsicElements | React.ComponentType<any>
   children?: React.ReactNode
+  htmlFor?: string
 }
 const Text = React.forwardRef<HTMLDivElement | HTMLSpanElement, TextProps>((props, ref) => {
   const isInText = useTextContext()

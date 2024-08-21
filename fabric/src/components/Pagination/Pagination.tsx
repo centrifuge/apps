@@ -8,6 +8,10 @@ import { Text } from '../Text'
 import { usePaginationContext } from './PaginationContainer'
 import { PaginationState } from './usePagination'
 
+const StyledText = styled(Text)`
+  user-select: none;
+`
+
 const StyledButton = styled.button<{
   $active?: boolean
 }>(
@@ -96,11 +100,7 @@ export function Pagination({ pagination }: { pagination?: PaginationState }) {
           <IconChevronLeft />
         </Flex>
       </StyledButton>
-      {firstShown > 1 && (
-        <Text variant="interactive1" style={{ userSelect: 'none' }}>
-          …
-        </Text>
-      )}
+      {firstShown > 1 && <StyledText variant="interactive1">…</StyledText>}
       {pages.map((n) => (
         <StyledButton
           key={`pagr-nr-${n}`}
@@ -113,11 +113,7 @@ export function Pagination({ pagination }: { pagination?: PaginationState }) {
           </Text>
         </StyledButton>
       ))}
-      {lastShown < pageCount && (
-        <Text variant="interactive1" style={{ userSelect: 'none' }}>
-          …
-        </Text>
-      )}
+      {lastShown < pageCount && <StyledText variant="interactive1">…</StyledText>}
       <StyledButton onClick={() => goToNext()} disabled={!canNextPage} aria-label="next page">
         <Flex bleedX={1} bleedY={1}>
           <IconChevronRight />

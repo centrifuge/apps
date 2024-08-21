@@ -8,6 +8,20 @@ import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 import { VisualButton, VisualButtonProps } from './VisualButton'
 
+const StyledInteractiveText = styled(Text)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+`
+
+const StyledText = styled(Text)`
+  marginleft: auto;
+`
+
+const StyledBodyText = styled(Text)<{ margin?: string | number }>`
+  margin-left: auto;
+  ${({ margin }) => margin && `margin: ${margin};`}
+`
+
 export type WalletButtonProps = Omit<
   VisualButtonProps & React.ComponentPropsWithoutRef<'button'>,
   'variant' | 'iconRight' | 'type' | 'children' | 'icon'
@@ -72,33 +86,20 @@ export function WalletButton({
         {address && alias ? (
           <Box position="relative" flex="1 1 auto">
             <Shelf position="absolute" top="0" bottom="0" left="0" width="100%" m="auto" height="30px">
-              <Text
-                fontSize={small ? 14 : 16}
-                color="textInteractive"
-                fontWeight={500}
-                style={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
+              <StyledInteractiveText fontSize={small ? 14 : 16} color="textInteractive" fontWeight={500}>
                 {alias}
-              </Text>
+              </StyledInteractiveText>
             </Shelf>
           </Box>
         ) : (
-          <Text
-            fontSize={small ? 14 : 16}
-            color="textInteractive"
-            fontWeight={500}
-            style={{ margin: address ? 0 : 'auto' }}
-          >
+          <StyledBodyText fontSize={small ? 14 : 16} color="textInteractive" fontWeight={500}>
             {displayAddress ? truncate(displayAddress) : connectLabel}
-          </Text>
+          </StyledBodyText>
         )}
         {address && balance && (
-          <Text variant="body3" color="textInteractive" style={{ marginLeft: 'auto' }}>
+          <StyledText variant="body3" color="textInteractive">
             {balance}
-          </Text>
+          </StyledText>
         )}
       </VisualButton>
     </StyledButton>
