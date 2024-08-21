@@ -43,7 +43,7 @@
     "react-dom": "^18.2.0",
     "standard-version": "^9.3.2",
     "storybook": "^7.6.10",
-    "styled-components": "^5.3.6",
+    "styled-components": "6.1.12",
     "typescript": "~5.3.3"
   },
   "peerDependencies": {
