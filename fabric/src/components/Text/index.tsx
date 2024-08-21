@@ -3,15 +3,14 @@ import * as CSS from 'csstype'
 import * as React from 'react'
 import styled, { DefaultTheme, useTheme } from 'styled-components'
 import {
-  color,
   ColorProps,
-  compose,
   ResponsiveValue,
+  TypographyProps as TypographySystemProps,
+  color,
+  compose,
   system,
   typography as typographySystem,
-  TypographyProps as TypographySystemProps,
 } from 'styled-system'
-import { PropsOf } from '../../utils/types'
 
 interface TypographyProps {
   textTransform?: ResponsiveValue<CSS.Property.TextTransform>
@@ -33,8 +32,9 @@ const typography = system({
 
 interface SystemProps extends TypographySystemProps, ColorProps, TypographyProps {}
 
-interface StyledTextProps extends SystemProps {}
-
+interface StyledTextProps extends SystemProps {
+  as?: keyof JSX.IntrinsicElements | React.ComponentType<any>
+}
 const StyledText = styled('span').withConfig({
   shouldForwardProp: (prop) => shouldForwardProp(prop),
 })<StyledTextProps>({ margin: 0 }, compose(typographySystem, typography, color))
@@ -45,12 +45,13 @@ function useTextContext(): React.ContextType<typeof TextContext> {
   return React.useContext(TextContext)
 }
 
-type TextProps = PropsOf<typeof StyledText> & {
+interface TextProps extends StyledTextProps {
   variant?: keyof DefaultTheme['typography']
   textOverflow?: 'ellipsis'
+  as?: keyof JSX.IntrinsicElements | React.ComponentType<any>
+  children?: React.ReactNode
 }
-
-const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
+const Text = React.forwardRef<HTMLDivElement | HTMLSpanElement, TextProps>((props, ref) => {
   const isInText = useTextContext()
   const theme = useTheme()
 
@@ -60,7 +61,6 @@ const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
   }
 
   const {
-    // variant,
     children,
     as = isInText ? 'span' : 'div',
     color = isInText ? 'inherit' : 'textPrimary',
@@ -77,13 +77,13 @@ const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
     <TextContext.Provider value>
       <StyledText
         as={as}
+        ref={ref as React.Ref<HTMLDivElement | HTMLSpanElement>}
         color={color}
         fontSize={fontSize}
         fontWeight={fontWeight}
         lineHeight={lineHeight}
         fontFamily={fontFamily}
         style={{ ...overflow }}
-        ref={ref}
         {...rest}
       >
         {children}
@@ -92,4 +92,4 @@ const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
   )
 })
 
-export { Text, TextProps, useTextContext, TextContext }
+export { Text, TextContext, TextProps, useTextContext }

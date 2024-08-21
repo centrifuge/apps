@@ -47,7 +47,12 @@ export function TextWithPlaceholder({
 }: TextWithPlaceholderProps) {
   const [rand] = React.useState(() => Math.random())
   return (
-    <Text {...textProps} textOverflow="ellipsis" textDecoration={isLoading ? 'none' : textProps.textDecoration}>
+    <Text
+      as="span"
+      {...textProps}
+      textOverflow="ellipsis"
+      textDecoration={isLoading ? 'none' : textProps.textDecoration}
+    >
       {isLoading ? (
         <LoadingWrapper $lines={maxLines} $isLoading={isLoading}>
           {Array.from({ length: words }, (_, i) => (
