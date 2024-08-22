@@ -29,7 +29,6 @@ import {
   Flex,
   Grid,
   GridRow,
-  IconAnchor,
   InlineFeedback,
   Select,
   SelectInner,
@@ -361,10 +360,12 @@ function WithdrawSelect({ withdrawAddresses, poolId }: { withdrawAddresses: With
 
   if (!withdrawAddresses.length)
     return (
-      <Text variant="body2" color="textSecondary">
-        <IconAnchor />
-        <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
-      </Text>
+      <ErrorMessage type="warning" condition={!withdrawAddresses.length}>
+        <Stack gap={1}>
+          To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
+          <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+        </Stack>
+      </ErrorMessage>
     )
 
   return (
@@ -400,9 +401,12 @@ function Mux({
   return (
     <Stack gap={1}>
       {!withdrawAmounts.length ? (
-        <Text variant="body2" color="textSecondary">
-          <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
-        </Text>
+        <ErrorMessage type="warning" condition={!withdrawAmounts.length}>
+          <Stack gap={1}>
+            To purchase/finance this asset, the pool must set trusted withdrawal addresses to which funds will be sent.
+            <AnchorTextLink href={`#/issuer/${poolId}/access`}>Add trusted addresses</AnchorTextLink>
+          </Stack>
+        </ErrorMessage>
       ) : (
         <>
           <Text variant="body2">Transactions per network</Text>
