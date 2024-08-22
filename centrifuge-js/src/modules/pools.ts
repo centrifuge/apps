@@ -572,6 +572,7 @@ export type DailyTrancheState = {
   fulfilledRedeemOrders: CurrencyBalance
   outstandingInvestOrders: CurrencyBalance
   outstandingRedeemOrders: CurrencyBalance
+  yield7DaysAnnualized: Perquintill
   yield30DaysAnnualized: Perquintill
   yield90DaysAnnualized: Perquintill
   yieldSinceInception: Perquintill
@@ -2386,6 +2387,7 @@ export function getPoolsModule(inst: Centrifuge) {
             sumOutstandingRedeemOrdersByPeriod
             sumFulfilledInvestOrdersByPeriod
             sumFulfilledRedeemOrdersByPeriod
+            yield7DaysAnnualized
             yield30DaysAnnualized
             yield90DaysAnnualized
             yieldSinceInception
@@ -2599,6 +2601,9 @@ export function getPoolsModule(inst: Centrifuge) {
                     tranche.sumOutstandingRedeemOrdersByPeriod,
                     poolCurrency.decimals
                   ),
+                  yield7DaysAnnualized: tranche.yield7DaysAnnualized
+                    ? new Perquintill(hexToBN(tranche.yield7DaysAnnualized))
+                    : new Perquintill(0),
                   yield30DaysAnnualized: tranche.yield30DaysAnnualized
                     ? new Perquintill(hexToBN(tranche.yield30DaysAnnualized))
                     : new Perquintill(0),

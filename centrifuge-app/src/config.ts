@@ -6,7 +6,6 @@ import assetHubLogo from '@centrifuge/fabric/assets/logos/assethub.svg'
 import baseLogo from '@centrifuge/fabric/assets/logos/base.svg'
 import celoLogo from '@centrifuge/fabric/assets/logos/celo.svg'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
-import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import sepoliaLogo from '@centrifuge/fabric/assets/logos/sepolia.png'
 import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
@@ -121,32 +120,20 @@ const CENTRIFUGE: EnvironmentConfig = {
   },
   poolCreationType,
 }
-
 const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
+
 const alchemyKey = import.meta.env.REACT_APP_ALCHEMY_KEY
 
-const goerliConfig = {
-  rpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`,
-  chainId: 5,
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
-  tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
-  poolsHash: 'QmQe9NTiVJnVcb4srw6sBpHefhYieubR7v3J8ZriULQ8vB', // TODO: add registry to config and fetch poolHash
-  blockExplorerUrl: 'https://goerli.etherscan.io',
-}
-const mainnetConfig = {
+export const ethConfig = {
   rpcUrl: `https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`,
   chainId: 1,
-  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+  poolRegistryAddress: '0xcA11bde05977b3631167028862bE2a173976CA11',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
   poolsHash: 'QmaMA1VYSKuuYhBcQCyf5Ek4VoiiEG6oLGp3iGbsQPGpkS', // TODO: add registry to config and fetch poolHash
   blockExplorerUrl: 'https://etherscan.io',
-}
-
-export const ethConfig = {
   network: ethNetwork,
-  multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
+  multicallContractAddress: '0xcA11bde05977b3631167028862bE2a173976CA11', // Same for all networks
   remarkerAddress: '0x3E39db43035981c2C31F7Ffa4392f25231bE4477', // Same for all networks
-  ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),
 }
 
 export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : CENTRIFUGE
@@ -160,8 +147,6 @@ export const parachainIcons: Record<number, string> = {
   [assetHubChainId]: assetHubLogo,
 }
 
-const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
-
 export const evmChains: EvmChains = {
   1: {
     name: 'Ethereum',
@@ -174,18 +159,6 @@ export const evmChains: EvmChains = {
     urls: [`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`],
     iconUrl: ethereumLogo,
     isTestnet: false,
-  },
-  5: {
-    name: 'Ethereum Goerli',
-    nativeCurrency: {
-      name: 'Görli Ether',
-      symbol: 'görETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.etherscan.io/',
-    urls: [`https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`],
-    iconUrl: goerliLogo,
-    isTestnet: true,
   },
   11155111: {
     name: 'Ethereum Sepolia',
@@ -203,11 +176,11 @@ export const evmChains: EvmChains = {
     iconUrl: baseLogo,
     isTestnet: false,
   },
-  84531: {
-    name: 'Base Goerli',
-    nativeCurrency: { name: 'Base Goerli Ether', symbol: 'gbETH', decimals: 18 },
-    blockExplorerUrl: 'https://goerli.basescan.org/',
-    urls: [`https://goerli.base.org`],
+  84532: {
+    name: 'Base Sepolia',
+    nativeCurrency: { name: 'Base Sepolia Ether', symbol: 'sbETH', decimals: 18 },
+    blockExplorerUrl: 'https://sepolia.basescan.org/',
+    urls: [`https://sepolia.base.org`],
     iconUrl: baseLogo,
     isTestnet: true,
   },
@@ -222,18 +195,6 @@ export const evmChains: EvmChains = {
     urls: ['https://arb1.arbitrum.io/rpc'],
     iconUrl: arbitrumLogo,
     isTestnet: false,
-  },
-  421613: {
-    name: 'Arbitrum Goerli',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrl: 'https://goerli.arbiscan.io/',
-    urls: [`https://arbitrum-goerli.infura.io/v3/${infuraKey}`],
-    iconUrl: arbitrumLogo,
-    isTestnet: true,
   },
   42220: {
     name: 'Celo',
